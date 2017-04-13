@@ -3,7 +3,6 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.Argument;
 import net.jbock.CommandLineArguments;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -34,7 +33,8 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
-    return Stream.of(Argument.class, CommandLineArguments.class)
+    return Stream.of(
+        CommandLineArguments.class)
         .map(Class::getName)
         .collect(toSet());
   }

@@ -17,9 +17,9 @@ public class ProcessorTest {
     List<String> sourceLines = Arrays.asList(
         "package test;",
         "import net.jbock.CommandLineArguments;",
-        "import net.jbock.Argument;",
+        "import net.jbock.LongName;",
         "class JJob {",
-        "  @CommandLineArguments JJob(@Argument(\"x\") String a, String b) {}",
+        "  @CommandLineArguments JJob(@LongName(\"x\") String a, String b) {}",
         "}");
     JavaFileObject expected =
         forSourceLines("test.JJobParser",
