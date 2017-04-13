@@ -24,7 +24,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 import static javax.tools.Diagnostic.Kind.ERROR;
-import static net.jbock.compiler.Analyser.analyse;
 import static net.jbock.compiler.LessElements.asType;
 
 public final class Processor extends AbstractProcessor {
@@ -50,18 +49,19 @@ public final class Processor extends AbstractProcessor {
     Set<ExecutableElement> constructors =
         constructorsIn(env.getElementsAnnotatedWith(CommandLineArguments.class));
     validate(constructors);
-    for (ExecutableElement enclosingElement : constructors) {
+    for (ExecutableElement constructor : constructors) {
       try {
-        if (!done.add(enclosingElement)) {
+        if (!done.add(constructor)) {
           continue;
         }
-        TypeSpec typeSpec = analyse(enclosingElement);
-        ClassName generatedClass = peer(ClassName.get(asType(enclosingElement.getEnclosingElement())), SUFFIX);
+        ClassName generatedClass = peer(ClassName.get(asType(constructor.getEnclosingElement())), SUFFIX);
+        Analyser analyser = new Analyser(constructor, generatedClass);
+        TypeSpec typeSpec = analyser.analyse();
         write(generatedClass, typeSpec);
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
-        handleException(enclosingElement, e);
+        handleException(constructor, e);
         return false;
       }
     }
