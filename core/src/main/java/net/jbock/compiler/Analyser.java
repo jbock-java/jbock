@@ -10,6 +10,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.Description;
 import net.jbock.Flag;
 import net.jbock.LongName;
 import net.jbock.ShortName;
@@ -17,8 +18,6 @@ import net.jbock.ShortName;
 import javax.annotation.Generated;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
-import javax.tools.Diagnostic;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -36,15 +35,13 @@ import static net.jbock.compiler.LessElements.asType;
 
 final class Analyser {
 
-  private static final ClassName STRING = ClassName.get(String.class);
+  static final ClassName STRING = ClassName.get(String.class);
   private static final ParameterizedTypeName STRING_MAP = ParameterizedTypeName.get(
       ClassName.get(Map.class), STRING, STRING);
   private static final ParameterizedTypeName STRING_SET = ParameterizedTypeName.get(
       ClassName.get(Set.class), STRING);
   private static final TypeName STRING_ARRAY = ArrayTypeName.of(STRING);
   private static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
-  private static final TypeName LIST_OF_ENTRIES = ParameterizedTypeName.get(ClassName.get(List.class),
-      ParameterizedTypeName.get(ClassName.get(Map.Entry.class), STRING, STRING));
   private static final ParameterSpec ARGS = ParameterSpec.builder(STRING_ARRAY, "args")
       .build();
 
@@ -57,10 +54,12 @@ final class Analyser {
 
   private static final FieldSpec shortNames = FieldSpec.builder(STRING_MAP, "shortNames", PRIVATE, FINAL)
       .build();
+  private final ClassName argumentInfo;
 
   Analyser(ExecutableElement constructor, ClassName generatedClass) {
     this.constructor = constructor;
     this.generatedClass = generatedClass;
+    this.argumentInfo = generatedClass.nestedClass("Argument");
     ParameterSpec ln = ParameterSpec.builder(STRING, "ln").build();
     ParameterSpec sn = ParameterSpec.builder(STRING, "sn").build();
     ParameterSpec lv = ParameterSpec.builder(STRING, "lv").build();
@@ -88,8 +87,8 @@ final class Analyser {
   }
 
   TypeSpec analyse() {
-    staticChecks();
     return TypeSpec.classBuilder(generatedClass)
+        .addType(ArgumentInfo.define(argumentInfo))
         .addAnnotation(AnnotationSpec.builder(Generated.class)
             .addMember("value", "$S", Processor.class.getName())
             .build())
@@ -101,7 +100,7 @@ final class Analyser {
         .addMethod(getParam)
         .addMethod(MethodSpec.methodBuilder("help")
             .addCode(help())
-            .returns(LIST_OF_ENTRIES)
+            .returns(ParameterizedTypeName.get(ClassName.get(List.class), argumentInfo))
             .addModifiers(PUBLIC)
             .build())
         .addModifiers(PUBLIC, FINAL)
@@ -115,19 +114,6 @@ final class Analyser {
             .addModifiers(PUBLIC, STATIC)
             .build())
         .build();
-  }
-
-  private CodeBlock help() {
-    CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec entries = ParameterSpec.builder(LIST_OF_ENTRIES, "entries").build();
-    builder.addStatement("$T $N = new $T<>($L)", entries.type,
-        entries, ArrayList.class, constructor.getParameters().size());
-    for (VariableElement variableElement : constructor.getParameters()) {
-      builder.addStatement("$N.add(new $T<>($S, $S))", entries, AbstractMap.SimpleImmutableEntry.class,
-          longName(variableElement), "Description goes here");
-    }
-    builder.addStatement("return $N", entries);
-    return builder.build();
   }
 
   private CodeBlock initMaps() {
@@ -243,43 +229,24 @@ final class Analyser {
     return builder.build();
   }
 
-  private void staticChecks() {
-    List<? extends VariableElement> parameters = constructor.getParameters();
-    Set<String> checkShort = new HashSet<>();
-    Set<String> checkLong = new HashSet<>();
-    parameters.forEach(p -> {
-      if (!TypeName.get(p.asType()).equals(STRING)) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
-            "Argument must be String: " + p.getSimpleName().toString(), p);
-      }
-      String ln = longName(p);
-      if (!checkLong.add(ln)) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
-            "Duplicate longName: " + ln, p);
-      }
-      String sn = shortName(p);
-      if (!checkShort.add(sn)) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
-            "Duplicate shortName: " + sn, p);
-      }
-    });
-  }
-
-  private static String longName(VariableElement parameter) {
-    LongName annotation = parameter.getAnnotation(LongName.class);
-    if (annotation != null) {
-      return annotation.value();
-    } else {
-      return parameter.getSimpleName().toString();
+  private CodeBlock help() {
+    CodeBlock.Builder builder = CodeBlock.builder();
+    ParameterSpec entries = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class), argumentInfo),
+        "arguments").build();
+    builder.addStatement("$T $N = new $T<>($L)", entries.type,
+        entries, ArrayList.class, constructor.getParameters().size());
+    for (VariableElement variableElement : constructor.getParameters()) {
+      LongName longName = variableElement.getAnnotation(LongName.class);
+      ShortName shortName = variableElement.getAnnotation(ShortName.class);
+      boolean flag = variableElement.getAnnotation(Flag.class) != null;
+      Description description = variableElement.getAnnotation(Description.class);
+      String ln = longName == null ? variableElement.getSimpleName().toString() : longName.value();
+      String sn = shortName == null ? variableElement.getSimpleName().toString() : shortName.value();
+      String desc = description == null ? "" : description.value();
+      builder.addStatement("$N.add(new $T($S, $S, $L, $S, $N($S, $S)))", entries,
+          argumentInfo, ln, sn, flag, desc, getParam, ln, sn);
     }
-  }
-
-  private static String shortName(VariableElement parameter) {
-    ShortName annotation = parameter.getAnnotation(ShortName.class);
-    if (annotation != null) {
-      return annotation.value();
-    } else {
-      return parameter.getSimpleName().toString();
-    }
+    builder.addStatement("return $N", entries);
+    return builder.build();
   }
 }
