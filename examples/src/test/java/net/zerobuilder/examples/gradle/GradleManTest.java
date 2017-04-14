@@ -1,9 +1,17 @@
 package net.zerobuilder.examples.gradle;
 
 import net.zerobuilder.examples.gradle.GradleManParser.Argument;
+import net.zerobuilder.examples.gradle.GradleManParser.Option;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -24,6 +32,7 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"-m", "hello"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.message, is("hello"));
+    assertThat(parser.trash.size(), is(0));
   }
 
   @Test
@@ -31,6 +40,7 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"--message", "hello"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.message, is("hello"));
+    assertThat(parser.trash.size(), is(0));
   }
 
   @Test
@@ -38,20 +48,18 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"-f", "file"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.file, is("file"));
+    assertThat(parser.trash.size(), is(0));
   }
 
   @Test
   public void testLongFile() {
+    // --file is invalid
     GradleManParser parser = GradleManParser.init(new String[]{"--file", "file"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.file, is(nullValue()));
-  }
-
-  @Test
-  public void testShortDir() {
-    GradleManParser parser = GradleManParser.init(new String[]{"-dir", "dir"});
-    GradleMan gradleMan = parser.parse();
-    assertThat(gradleMan.dir, is(nullValue()));
+    assertThat(parser.trash.size(), is(2));
+    assertThat(parser.trash.get(0), is("--file"));
+    assertThat(parser.trash.get(1), is("file"));
   }
 
   @Test
@@ -59,25 +67,71 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"--dir", "dir"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.dir, is("dir"));
+    assertThat(parser.trash.size(), is(0));
   }
 
   @Test
   public void testFlagTrue() {
+    // -c is a flag; last token goes in the trash
     GradleManParser parser = GradleManParser.init(new String[]{"-c", "hello"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.cmos, is(true));
+    assertThat(parser.trash.size(), is(1));
+    assertThat(parser.trash.get(0), is("hello"));
+  }
+
+  @Test
+  public void testNonsense() {
+    // bogus options
+    GradleManParser parser = GradleManParser.init(new String[]{"hello", "goodbye"});
+    assertThat(parser.trash.size(), is(2));
   }
 
   @Test
   public void testFlagFalse() {
+    // -dir is invalid
     GradleManParser parser = GradleManParser.init(new String[]{"-dir", "foo"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.cmos, is(false));
+    assertThat(parser.trash.size(), is(2));
+    assertThat(parser.trash.get(0), is("-dir"));
+    assertThat(parser.trash.get(1), is("foo"));
   }
 
   @Test
-  public void testPrint() {
-    GradleManParser parser = GradleManParser.init(new String[]{"-dir", "foo"});
-    parser.summary().stream().map(Argument::describe).forEach(System.out::println);
+  public void testOptions() {
+    List<Option> options = GradleManParser.options();
+    assertThat(options.size(), is(4));
+    assertThat(options.stream()
+            .filter(o -> !o.flag)
+            .map(o -> o.longName)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet()),
+        is(new HashSet<>(asList("message", "dir"))));
+    assertThat(options.stream()
+            .filter(o -> !o.flag)
+            .map(o -> o.shortName)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet()),
+        is(new HashSet<>(asList("f", "m"))));
+    assertThat(options.stream()
+            .filter(o -> o.flag)
+            .map(o -> o.shortName)
+            .filter(Objects::nonNull)
+            .collect(Collectors.toSet()),
+        is(new HashSet<>(singletonList("c"))));
+  }
+
+  @Test
+  public void testTrash() {
+    // --dir is valid, but there's nothing after it
+    GradleManParser parser = GradleManParser.init(new String[]{"--dir"});
+    List<Argument> arguments = parser.arguments();
+    assertThat(arguments.size(), is(4));
+    assertThat(arguments.stream()
+        .filter(argument -> argument.value == null)
+        .count(), is(4L));
+    assertThat(parser.trash.size(), is(1));
+    assertThat(parser.trash.get(0), is("--dir"));
   }
 }
