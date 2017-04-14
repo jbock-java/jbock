@@ -81,12 +81,12 @@
         <artifactId>maven-shade-plugin</artifactId>
         <version>3.0.0</version>
         <configuration>
-          <minimizeJar>false</minimizeJar>
-              <relocations>
-                <relocation>
-                  <pattern>com.squareup.javapoet</pattern>
-                  <shadedPattern>io.jpapst.com.squareup.javapoet</shadedPattern>
-                </relocation>
+          <minimizeJar>true</minimizeJar>
+          <relocations>
+            <relocation>
+              <pattern>com.squareup.javapoet</pattern>
+              <shadedPattern>net.jbock.com.squareup.javapoet</shadedPattern>
+            </relocation>
           </relocations>
         </configuration>
         <executions>
