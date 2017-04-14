@@ -49,12 +49,26 @@ final class Analyser {
 
   private final ExecutableElement constructor;
   private final ClassName generatedClass;
-  private final MethodSpec getParam;
+  private final MethodSpec getParam = getParam();
 
-  private static final FieldSpec longNames = FieldSpec.builder(STRING_MAP, "longNames", PUBLIC, FINAL)
+  private static final FieldSpec SHORT_FLAGS = FieldSpec.builder(STRING_SET, "SHORT_FLAGS")
+      .addModifiers(PRIVATE, STATIC, FINAL)
+      .build();
+  private static final FieldSpec LONG_FLAGS = FieldSpec.builder(STRING_SET, "LONG_FLAGS")
+      .addModifiers(PRIVATE, STATIC, FINAL)
+      .build();
+  private static final FieldSpec LONG_NAMES = FieldSpec.builder(STRING_SET, "LONG_NAMES")
+      .addModifiers(PRIVATE, STATIC, FINAL)
+      .build();
+  private static final FieldSpec SHORT_NAMES = FieldSpec.builder(STRING_SET, "SHORT_NAMES")
+      .addModifiers(PRIVATE, STATIC, FINAL)
       .build();
 
-  private static final FieldSpec shortNames = FieldSpec.builder(STRING_MAP, "shortNames", PUBLIC, FINAL)
+
+  private static final FieldSpec longNames = FieldSpec.builder(STRING_MAP, "longOptions", PUBLIC, FINAL)
+      .build();
+
+  private static final FieldSpec shortNames = FieldSpec.builder(STRING_MAP, "shortOptions", PUBLIC, FINAL)
       .build();
 
   private final ClassName argumentInfo;
@@ -80,7 +94,27 @@ final class Analyser {
         .addStatement("throw new $T($S + $N + $S + $N)", IllegalArgumentException.class,
             "Competing arguments: --", ln, " versus -", sn)
         .endControlFlow();
-    this.getParam = MethodSpec.methodBuilder("param")
+  }
+
+  private static MethodSpec getParam() {
+    ParameterSpec ln = ParameterSpec.builder(STRING, "ln").build();
+    ParameterSpec sn = ParameterSpec.builder(STRING, "sn").build();
+    ParameterSpec lv = ParameterSpec.builder(STRING, "lv").build();
+    ParameterSpec sv = ParameterSpec.builder(STRING, "sv").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+    builder.addStatement("$T $N = this.$N.get($N)", STRING, lv, longNames, ln);
+    builder.addStatement("$T $N = this.$N.get($N)", STRING, sv, shortNames, sn);
+    builder.beginControlFlow("if ($N == null)", lv)
+        .addStatement("return $N", sv)
+        .endControlFlow();
+    builder.beginControlFlow("else if ($N == null)", sv)
+        .addStatement("return $N", lv)
+        .endControlFlow();
+    builder.beginControlFlow("else")
+        .addStatement("throw new $T($S + $N + $S + $N)", IllegalArgumentException.class,
+            "Competing arguments: --", ln, " versus -", sn)
+        .endControlFlow();
+    return MethodSpec.methodBuilder("param")
         .addParameter(ln)
         .addParameter(sn)
         .addCode(builder.build())
@@ -91,6 +125,7 @@ final class Analyser {
 
   TypeSpec analyse() {
     return TypeSpec.classBuilder(generatedClass)
+        .addStaticBlock(initSets(constructor))
         .addType(ArgumentInfo.define(argumentInfo))
         .addAnnotation(AnnotationSpec.builder(Generated.class)
             .addMember("value", "$S", Processor.class.getName())
@@ -102,12 +137,13 @@ final class Analyser {
             .build())
         .addMethod(getParam)
         .addMethod(ADD_NEXT)
-        .addMethod(MethodSpec.methodBuilder("help")
-            .addCode(help())
+        .addMethod(MethodSpec.methodBuilder("summary")
+            .addCode(summary())
             .returns(ParameterizedTypeName.get(ClassName.get(List.class), argumentInfo))
             .addModifiers(PUBLIC)
             .build())
         .addModifiers(PUBLIC, FINAL)
+        .addFields(Arrays.asList(LONG_FLAGS, SHORT_FLAGS, LONG_NAMES, SHORT_NAMES))
         .addField(longNames)
         .addField(shortNames)
         .addMethod(privateConstructor())
@@ -120,53 +156,62 @@ final class Analyser {
         .build();
   }
 
+  private static CodeBlock initSets(ExecutableElement constructor) {
+    CodeBlock.Builder builder = CodeBlock.builder();
+    ParameterSpec shortFlags = ParameterSpec.builder(STRING_SET, "shortFlags")
+        .build();
+    ParameterSpec longFlags = ParameterSpec.builder(STRING_SET, "longFlags")
+        .build();
+    ParameterSpec longNames = ParameterSpec.builder(STRING_SET, "longNames")
+        .build();
+    ParameterSpec shortNames = ParameterSpec.builder(STRING_SET, "shortNames")
+        .build();
+    builder.addStatement("$T $N = new $T<>()", longFlags.type, longFlags, HashSet.class);
+    builder.addStatement("$T $N = new $T<>()", shortFlags.type, shortFlags, HashSet.class);
+    builder.addStatement("$T $N = new $T<>()", longNames.type, longNames, HashSet.class);
+    builder.addStatement("$T $N = new $T<>()", shortNames.type, shortNames, HashSet.class);
+    for (VariableElement variableElement : constructor.getParameters()) {
+      LongName longName = variableElement.getAnnotation(LongName.class);
+      ShortName shortName = variableElement.getAnnotation(ShortName.class);
+      if (variableElement.getAnnotation(Flag.class) != null) {
+        if (longName != null) {
+          builder.addStatement("$N.add($S)", longFlags, longName.value());
+        } else {
+          builder.addStatement("$N.add($S)", longFlags, variableElement.getSimpleName().toString());
+        }
+        if (shortName != null) {
+          builder.addStatement("$N.add($S)", shortFlags, shortName.value());
+        }
+      } else {
+        if (longName != null) {
+          builder.addStatement("$N.add($S)", longNames, longName.value());
+        } else {
+          builder.addStatement("$N.add($S)", longNames, variableElement.getSimpleName().toString());
+        }
+        if (shortName != null) {
+          builder.addStatement("$N.add($S)", shortNames, shortName.value());
+        }
+      }
+    }
+    builder.addStatement("$N = $T.unmodifiableSet($N)", LONG_FLAGS, Collections.class, longFlags);
+    builder.addStatement("$N = $T.unmodifiableSet($N)", SHORT_FLAGS, Collections.class, shortFlags);
+    builder.addStatement("$N = $T.unmodifiableSet($N)", LONG_NAMES, Collections.class, longNames);
+    builder.addStatement("$N = $T.unmodifiableSet($N)", SHORT_NAMES, Collections.class, shortNames);
+    return builder.build();
+  }
+
   private CodeBlock initMaps() {
     CodeBlock.Builder builder = CodeBlock.builder();
     ParameterSpec ln = ParameterSpec.builder(STRING_MAP, longNames.name)
         .build();
     ParameterSpec sn = ParameterSpec.builder(STRING_MAP, shortNames.name)
         .build();
-    ParameterSpec sf = ParameterSpec.builder(STRING_SET, "shortFlags")
-        .build();
-    ParameterSpec lf = ParameterSpec.builder(STRING_SET, "longFlags")
-        .build();
-    ParameterSpec ls = ParameterSpec.builder(STRING_SET, "longs")
-        .build();
-    ParameterSpec ss = ParameterSpec.builder(STRING_SET, "shorts")
-        .build();
 
     // init maps
     builder.addStatement("$T $N = new $T<>()", ln.type, ln, HashMap.class);
     builder.addStatement("$T $N = new $T<>()", sn.type, sn, HashMap.class);
-    builder.addStatement("$T $N = new $T<>()", lf.type, lf, HashSet.class);
-    builder.addStatement("$T $N = new $T<>()", sf.type, sf, HashSet.class);
-    builder.addStatement("$T $N = new $T<>()", ls.type, ls, HashSet.class);
-    builder.addStatement("$T $N = new $T<>()", ss.type, ss, HashSet.class);
 
     // init flag sets
-    for (VariableElement variableElement : constructor.getParameters()) {
-      LongName longName = variableElement.getAnnotation(LongName.class);
-      ShortName shortName = variableElement.getAnnotation(ShortName.class);
-      if (variableElement.getAnnotation(Flag.class) != null) {
-        if (longName != null) {
-          builder.addStatement("$N.add($S)", lf, longName.value());
-        } else {
-          builder.addStatement("$N.add($S)", lf, variableElement.getSimpleName().toString());
-        }
-        if (shortName != null) {
-          builder.addStatement("$N.add($S)", sf, shortName.value());
-        }
-      } else {
-        if (longName != null) {
-          builder.addStatement("$N.add($S)", ls, longName.value());
-        } else {
-          builder.addStatement("$N.add($S)", ls, variableElement.getSimpleName().toString());
-        }
-        if (shortName != null) {
-          builder.addStatement("$N.add($S)", ss, shortName.value());
-        }
-      }
-    }
 
     // read args
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it")
@@ -182,24 +227,20 @@ final class Analyser {
               "Argument may not start with '---': ", s)
           .endControlFlow()
         .beginControlFlow("else if ($N.startsWith($S))", s, "--")
-          .beginControlFlow("if ($N.contains($N.substring(2)))", lf, s)
+          .beginControlFlow("if ($N.contains($N.substring(2)))", LONG_FLAGS, s)
             .addStatement("$N.put($N.substring(2), $S)", ln, s, Boolean.TRUE.toString())
             .endControlFlow()
           .beginControlFlow("else")
-            .addStatement("$N($N, $N, $N.substring(2), $N)", ADD_NEXT, ls, ln, s, it)
+            .addStatement("$N($N, $N, $N.substring(2), $N)", ADD_NEXT, LONG_NAMES, ln, s, it)
             .endControlFlow()
           .endControlFlow()
         .beginControlFlow("else if ($N.startsWith($S))", s, "-")
-          .beginControlFlow("if ($N.contains($N.substring(1)))", sf, s)
+          .beginControlFlow("if ($N.contains($N.substring(1)))", SHORT_FLAGS, s)
             .addStatement("$N.put($N.substring(1), $S)", sn, s, Boolean.TRUE.toString())
             .endControlFlow()
           .beginControlFlow("else")
-            .addStatement("$N($N, $N, $N.substring(2), $N)", ADD_NEXT, ss, sn, s, it)
+            .addStatement("$N($N, $N, $N.substring(1), $N)", ADD_NEXT, SHORT_NAMES, sn, s, it)
             .endControlFlow()
-          .endControlFlow()
-        .beginControlFlow("else")
-          .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-              "Expecting an argument that starts with '-' or '--': ", s)
           .endControlFlow()
      .endControlFlow();
     //@formatter:on
@@ -234,15 +275,6 @@ final class Analyser {
         .addModifiers(STATIC, PRIVATE)
         .build();
   }
-/*
-  (ParameterSpec set, ParameterSpec m, ParameterSpec s, ParameterSpec it) {
-    return CodeBlock.builder()
-        .beginControlFlow("if (!$N.contains($N))", it)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Expecting argument value: ", s)
-        .endControlFlow()
-        .build();
-  }
-*/
 
   private MethodSpec privateConstructor() {
     ParameterSpec ln = ParameterSpec.builder(STRING_MAP, longNames.name).build();
@@ -273,7 +305,7 @@ final class Analyser {
     return builder.build();
   }
 
-  private CodeBlock help() {
+  private CodeBlock summary() {
     CodeBlock.Builder builder = CodeBlock.builder();
     ParameterSpec entries = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class), argumentInfo),
         "arguments").build();

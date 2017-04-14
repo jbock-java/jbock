@@ -9,10 +9,8 @@ public class GradleManTest {
 
   @Test
   public void test() {
-    GradleManParser parser = GradleManParser.init(new String[]{"-message", "hello"});
+    GradleManParser parser = GradleManParser.init(new String[]{"-m", "hello"});
     GradleMan gradleMan = parser.parse();
-    System.out.println(parser.longNames);
-    System.out.println(parser.shortNames);
     assertThat(gradleMan.message, is("hello"));
   }
 }
