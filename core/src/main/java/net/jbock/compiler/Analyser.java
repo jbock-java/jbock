@@ -12,8 +12,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.Description;
 import net.jbock.Flag;
-import net.jbock.LongName;
-import net.jbock.ShortName;
 
 import javax.annotation.Generated;
 import javax.lang.model.element.ExecutableElement;
@@ -26,7 +24,9 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -97,26 +97,30 @@ final class Analyser {
   }
 
   private static MethodSpec getParam() {
-    ParameterSpec ln = ParameterSpec.builder(STRING, "ln").build();
-    ParameterSpec sn = ParameterSpec.builder(STRING, "sn").build();
-    ParameterSpec lv = ParameterSpec.builder(STRING, "lv").build();
-    ParameterSpec sv = ParameterSpec.builder(STRING, "sv").build();
+    ParameterSpec longName = ParameterSpec.builder(STRING, "longName").build();
+    ParameterSpec shortName = ParameterSpec.builder(STRING, "shortName").build();
+    ParameterSpec longValue = ParameterSpec.builder(STRING, "longValue").build();
+    ParameterSpec shortValue = ParameterSpec.builder(STRING, "shortValue").build();
     CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = this.$N.get($N)", STRING, lv, longNames, ln);
-    builder.addStatement("$T $N = this.$N.get($N)", STRING, sv, shortNames, sn);
-    builder.beginControlFlow("if ($N == null)", lv)
-        .addStatement("return $N", sv)
+    builder.addStatement("$T $N = null, $N = null", STRING, longValue, shortValue);
+    builder.beginControlFlow("if ($N != null)", longName)
+        .addStatement("$N = this.$N.get($N)", longValue, longNames, longName)
         .endControlFlow();
-    builder.beginControlFlow("else if ($N == null)", sv)
-        .addStatement("return $N", lv)
+    builder.beginControlFlow("if ($N != null)", shortName)
+        .addStatement("$N = this.$N.get($N)", shortValue, shortNames, shortName)
+        .endControlFlow();
+    builder.beginControlFlow("if ($N == null)", longValue)
+        .addStatement("return $N", shortValue)
+        .endControlFlow();
+    builder.beginControlFlow("else if ($N == null)", shortValue)
+        .addStatement("return $N", longValue)
         .endControlFlow();
     builder.beginControlFlow("else")
         .addStatement("throw new $T($S + $N + $S + $N)", IllegalArgumentException.class,
-            "Competing arguments: --", ln, " versus -", sn)
+            "Competing arguments: --", longName, " versus -", shortName)
         .endControlFlow();
     return MethodSpec.methodBuilder("param")
-        .addParameter(ln)
-        .addParameter(sn)
+        .addParameters(Arrays.asList(longName, shortName))
         .addCode(builder.build())
         .returns(STRING)
         .addModifiers(PRIVATE)
@@ -170,29 +174,30 @@ final class Analyser {
     builder.addStatement("$T $N = new $T<>()", shortFlags.type, shortFlags, HashSet.class);
     builder.addStatement("$T $N = new $T<>()", longNames.type, longNames, HashSet.class);
     builder.addStatement("$T $N = new $T<>()", shortNames.type, shortNames, HashSet.class);
-    for (VariableElement variableElement : constructor.getParameters()) {
-      LongName longName = variableElement.getAnnotation(LongName.class);
-      ShortName shortName = variableElement.getAnnotation(ShortName.class);
-      if (variableElement.getAnnotation(Flag.class) != null) {
-        if (longName != null) {
-          builder.addStatement("$N.add($S)", longFlags, longName.value());
-        } else {
-          builder.addStatement("$N.add($S)", longFlags, variableElement.getSimpleName().toString());
-        }
-        if (shortName != null) {
-          builder.addStatement("$N.add($S)", shortFlags, shortName.value());
-        }
-      } else {
-        if (longName != null) {
-          builder.addStatement("$N.add($S)", longNames, longName.value());
-        } else {
-          builder.addStatement("$N.add($S)", longNames, variableElement.getSimpleName().toString());
-        }
-        if (shortName != null) {
-          builder.addStatement("$N.add($S)", shortNames, shortName.value());
-        }
-      }
-    }
+    List<Names> names = constructor.getParameters()
+        .stream()
+        .map(Names::create)
+        .collect(Collectors.toList());
+    names.stream()
+        .filter(name -> name.flag)
+        .map(name -> name.shortName)
+        .filter(Objects::nonNull)
+        .forEach(name -> builder.addStatement("$N.add($S)", shortFlags, name));
+    names.stream()
+        .filter(name -> name.flag)
+        .map(name -> name.longName)
+        .filter(Objects::nonNull)
+        .forEach(name -> builder.addStatement("$N.add($S)", longFlags, name));
+    names.stream()
+        .filter(name -> !name.flag)
+        .map(name -> name.shortName)
+        .filter(Objects::nonNull)
+        .forEach(name -> builder.addStatement("$N.add($S)", shortNames, name));
+    names.stream()
+        .filter(name -> !name.flag)
+        .map(name -> name.longName)
+        .filter(Objects::nonNull)
+        .forEach(name -> builder.addStatement("$N.add($S)", longNames, name));
     builder.addStatement("$N = $T.unmodifiableSet($N)", LONG_FLAGS, Collections.class, longFlags);
     builder.addStatement("$N = $T.unmodifiableSet($N)", SHORT_FLAGS, Collections.class, shortFlags);
     builder.addStatement("$N = $T.unmodifiableSet($N)", LONG_NAMES, Collections.class, longNames);
@@ -202,16 +207,12 @@ final class Analyser {
 
   private CodeBlock initMaps() {
     CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec ln = ParameterSpec.builder(STRING_MAP, longNames.name)
-        .build();
-    ParameterSpec sn = ParameterSpec.builder(STRING_MAP, shortNames.name)
-        .build();
 
-    // init maps
-    builder.addStatement("$T $N = new $T<>()", ln.type, ln, HashMap.class);
-    builder.addStatement("$T $N = new $T<>()", sn.type, sn, HashMap.class);
+    ParameterSpec longOpts = ParameterSpec.builder(STRING_MAP, "longOpts").build();
+    ParameterSpec shortOpts = ParameterSpec.builder(STRING_MAP, "shortOpts").build();
 
-    // init flag sets
+    builder.addStatement("$T $N = new $T<>()", longOpts.type, longOpts, HashMap.class);
+    builder.addStatement("$T $N = new $T<>()", shortOpts.type, shortOpts, HashMap.class);
 
     // read args
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it")
@@ -222,29 +223,25 @@ final class Analyser {
     //@formatter:off
     builder.beginControlFlow("while ($N.hasNext())", it)
         .addStatement("$T $N = $N.next()", STRING, s, it)
-        .beginControlFlow("if ($N.startsWith($S))", s, "---")
-          .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-              "Argument may not start with '---': ", s)
-          .endControlFlow()
-        .beginControlFlow("else if ($N.startsWith($S))", s, "--")
+        .beginControlFlow("if ($N.startsWith($S))", s, "--")
           .beginControlFlow("if ($N.contains($N.substring(2)))", LONG_FLAGS, s)
-            .addStatement("$N.put($N.substring(2), $S)", ln, s, Boolean.TRUE.toString())
+            .addStatement("$N.put($N.substring(2), $S)", longOpts, s, Boolean.TRUE.toString())
             .endControlFlow()
           .beginControlFlow("else")
-            .addStatement("$N($N, $N, $N.substring(2), $N)", ADD_NEXT, LONG_NAMES, ln, s, it)
+            .addStatement("$N($N, $N, $N.substring(2), $N)", ADD_NEXT, LONG_NAMES, longOpts, s, it)
             .endControlFlow()
           .endControlFlow()
         .beginControlFlow("else if ($N.startsWith($S))", s, "-")
           .beginControlFlow("if ($N.contains($N.substring(1)))", SHORT_FLAGS, s)
-            .addStatement("$N.put($N.substring(1), $S)", sn, s, Boolean.TRUE.toString())
+            .addStatement("$N.put($N.substring(1), $S)", shortOpts, s, Boolean.TRUE.toString())
             .endControlFlow()
           .beginControlFlow("else")
-            .addStatement("$N($N, $N, $N.substring(1), $N)", ADD_NEXT, SHORT_NAMES, sn, s, it)
+            .addStatement("$N($N, $N, $N.substring(1), $N)", ADD_NEXT, SHORT_NAMES, shortOpts, s, it)
             .endControlFlow()
           .endControlFlow()
      .endControlFlow();
     //@formatter:on
-    builder.addStatement("return new $T($N, $N)", generatedClass, ln, sn);
+    builder.addStatement("return new $T($N, $N)", generatedClass, longOpts, shortOpts);
     return builder.build();
   }
 
@@ -254,10 +251,9 @@ final class Analyser {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
 
-//    , ParameterSpec m, ParameterSpec s, ParameterSpec it
+    //@formatter:off
     return MethodSpec.methodBuilder("addNext")
         .addParameters(Arrays.asList(set, m, s, it))
-        //@formatter:off
         .addCode(CodeBlock.builder()
             .beginControlFlow("if (!$N.contains($N))", set, s)
               .addStatement("return")
@@ -271,9 +267,9 @@ final class Analyser {
               .endControlFlow()
             .addStatement("$N.put($N, $N.next())", m, s, it)
             .build())
-        //@formatter:on
         .addModifiers(STATIC, PRIVATE)
         .build();
+    //@formatter:on
   }
 
   private MethodSpec privateConstructor() {
@@ -292,14 +288,11 @@ final class Analyser {
     builder.add("return new $T(\n    ", ClassName.get(constructor.getEnclosingElement().asType()));
     for (int j = 0; j < constructor.getParameters().size(); j++) {
       VariableElement variableElement = constructor.getParameters().get(j);
-      LongName longName = variableElement.getAnnotation(LongName.class);
-      ShortName shortName = variableElement.getAnnotation(ShortName.class);
-      String ln = longName == null ? variableElement.getSimpleName().toString() : longName.value();
-      String sn = shortName == null ? variableElement.getSimpleName().toString() : shortName.value();
+      Names names = Names.create(variableElement);
       if (j > 0) {
         builder.add(",\n    ");
       }
-      builder.add("$N($S, $S)", getParam, ln, sn);
+      builder.add("$N($S, $S)", getParam, names.longName, names.shortName);
     }
     builder.add(");\n");
     return builder.build();
@@ -312,15 +305,15 @@ final class Analyser {
     builder.addStatement("$T $N = new $T<>($L)", entries.type,
         entries, ArrayList.class, constructor.getParameters().size());
     for (VariableElement variableElement : constructor.getParameters()) {
-      LongName longName = variableElement.getAnnotation(LongName.class);
-      ShortName shortName = variableElement.getAnnotation(ShortName.class);
+      Names names = Names.create(variableElement);
       boolean flag = variableElement.getAnnotation(Flag.class) != null;
       Description description = variableElement.getAnnotation(Description.class);
-      String ln = longName == null ? variableElement.getSimpleName().toString() : longName.value();
-      String sn = shortName == null ? variableElement.getSimpleName().toString() : shortName.value();
       String desc = description == null ? "" : description.value();
       builder.addStatement("$N.add(new $T($S, $S, $L, $S, $N($S, $S)))", entries,
-          argumentInfo, ln, sn, flag, desc, getParam, ln, sn);
+          argumentInfo,
+          names.longName, names.shortName,
+          flag, desc, getParam,
+          names.longName, names.shortName);
     }
     builder.addStatement("return $N", entries);
     return builder.build();
