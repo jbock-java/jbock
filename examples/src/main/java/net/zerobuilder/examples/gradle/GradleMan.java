@@ -3,16 +3,15 @@ package net.zerobuilder.examples.gradle;
 
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
-import net.jbock.Flag;
 import net.jbock.LongName;
 import net.jbock.ShortName;
 
 final class GradleMan {
 
   final String message;
-  final String cmos;
   final String file;
   final String dir;
+  final boolean cmos;
 
   @CommandLineArguments
   GradleMan(@LongName("message")
@@ -25,11 +24,10 @@ final class GradleMan {
             @Description("The dir")
                 String dir,
             @ShortName("c")
-            @Description("Is it cmos?")
-            @Flag String cmos) {
+            @Description("Is it cmos?") boolean cmos) {
     this.message = message;
-    this.cmos = cmos;
     this.file = file;
     this.dir = dir;
+    this.cmos = cmos;
   }
 }

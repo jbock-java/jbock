@@ -65,14 +65,14 @@ public final class GradleManTest {
   public void testFlagTrue() {
     GradleManParser parser = GradleManParser.init(new String[]{"-c", "hello"});
     GradleMan gradleMan = parser.parse();
-    assertThat(gradleMan.cmos, is("true"));
+    assertThat(gradleMan.cmos, is(true));
   }
 
   @Test
   public void testFlagFalse() {
     GradleManParser parser = GradleManParser.init(new String[]{"-dir", "foo"});
     GradleMan gradleMan = parser.parse();
-    assertThat(gradleMan.cmos, is(nullValue()));
+    assertThat(gradleMan.cmos, is(false));
   }
 
   @Test

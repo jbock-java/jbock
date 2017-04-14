@@ -11,7 +11,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.Description;
-import net.jbock.Flag;
 
 import javax.annotation.Generated;
 import javax.lang.model.element.ExecutableElement;
@@ -50,6 +49,7 @@ final class Analyser {
   private final ExecutableElement constructor;
   private final ClassName generatedClass;
   private final MethodSpec getParam = getParam();
+  private final MethodSpec getBool = getBool();
 
   private static final FieldSpec SHORT_FLAGS = FieldSpec.builder(STRING_SET, "SHORT_FLAGS")
       .addModifiers(PRIVATE, STATIC, FINAL)
@@ -96,6 +96,19 @@ final class Analyser {
         .endControlFlow();
   }
 
+  private MethodSpec getBool() {
+    ParameterSpec longName = ParameterSpec.builder(STRING, "longName").build();
+    ParameterSpec shortName = ParameterSpec.builder(STRING, "shortName").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+    builder.addStatement("return $T.valueOf($N($N, $N))", Boolean.class, getParam, longName, shortName);
+    return MethodSpec.methodBuilder("getBool")
+        .addParameters(Arrays.asList(longName, shortName))
+        .addCode(builder.build())
+        .returns(TypeName.BOOLEAN)
+        .addModifiers(PRIVATE)
+        .build();
+  }
+
   private static MethodSpec getParam() {
     ParameterSpec longName = ParameterSpec.builder(STRING, "longName").build();
     ParameterSpec shortName = ParameterSpec.builder(STRING, "shortName").build();
@@ -140,6 +153,7 @@ final class Analyser {
             .returns(ClassName.get(asType(constructor.getEnclosingElement())))
             .build())
         .addMethod(getParam)
+        .addMethod(getBool)
         .addMethod(ADD_NEXT)
         .addMethod(MethodSpec.methodBuilder("summary")
             .addCode(summary())
@@ -292,7 +306,11 @@ final class Analyser {
       if (j > 0) {
         builder.add(",\n    ");
       }
-      builder.add("$N($S, $S)", getParam, names.longName, names.shortName);
+      if (names.flag) {
+        builder.add("$N($S, $S)", getBool, names.longName, names.shortName);
+      } else {
+        builder.add("$N($S, $S)", getParam, names.longName, names.shortName);
+      }
     }
     builder.add(");\n");
     return builder.build();
@@ -306,7 +324,7 @@ final class Analyser {
         entries, ArrayList.class, constructor.getParameters().size());
     for (VariableElement variableElement : constructor.getParameters()) {
       Names names = Names.create(variableElement);
-      boolean flag = variableElement.getAnnotation(Flag.class) != null;
+      boolean flag = Names.isFlag(variableElement);
       Description description = variableElement.getAnnotation(Description.class);
       String desc = description == null ? "" : description.value();
       builder.addStatement("$N.add(new $T($S, $S, $L, $S, $N($S, $S)))", entries,

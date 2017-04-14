@@ -2,11 +2,8 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.CommandLineArguments;
-import net.jbock.LongName;
-import net.jbock.ShortName;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -28,7 +25,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 import static javax.tools.Diagnostic.Kind.ERROR;
-import static net.jbock.compiler.Analyser.STRING;
 import static net.jbock.compiler.LessElements.asType;
 
 public final class Processor extends AbstractProcessor {
@@ -121,48 +117,15 @@ public final class Processor extends AbstractProcessor {
     Set<String> checkShort = new HashSet<>();
     Set<String> checkLong = new HashSet<>();
     parameters.forEach(p -> {
-      if (!TypeName.get(p.asType()).equals(STRING)) {
+      Names names = Names.create(p);
+      if (names.longName != null && !checkLong.add(names.longName)) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
-            "Argument must be String: " + p.getSimpleName().toString(), p);
+            "Duplicate longName: " + names.longName, p);
       }
-      String ln = longName(p);
-      if (!checkLong.add(ln)) {
+      if (names.shortName != null && !checkShort.add(names.shortName)) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
-            "Duplicate longName: " + ln, p);
-      }
-      String sn = shortName(p);
-      if (!checkShort.add(sn)) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
-            "Duplicate shortName: " + sn, p);
+            "Duplicate shortName: " + names.shortName, p);
       }
     });
-  }
-
-  private static String longName(VariableElement parameter) {
-    LongName annotation = parameter.getAnnotation(LongName.class);
-    if (annotation != null) {
-      return checkName(parameter, annotation.value());
-    } else {
-      return parameter.getSimpleName().toString();
-    }
-  }
-
-  private static String shortName(VariableElement parameter) {
-    ShortName annotation = parameter.getAnnotation(ShortName.class);
-    if (annotation != null) {
-      return checkName(parameter, annotation.value());
-    } else {
-      return parameter.getSimpleName().toString();
-    }
-  }
-
-  private static String checkName(VariableElement parameter, String name) {
-    if (name.isEmpty()) {
-      throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not be empty", parameter);
-    }
-    if (name.startsWith("-")) {
-      throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not start with '-'", parameter);
-    }
-    return name;
   }
 }
