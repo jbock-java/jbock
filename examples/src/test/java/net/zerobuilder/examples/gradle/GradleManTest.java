@@ -5,6 +5,7 @@ import net.zerobuilder.examples.gradle.GradleManParser.Option;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -154,5 +155,12 @@ public final class GradleManTest {
     assertThat(Option.CMOS.longName, is(nullValue()));
     assertThat(Option.CMOS.shortName, is("c"));
     assertThat(Option.CMOS.descriptionParameter, is(nullValue()));
+  }
+
+  @Test
+  public void testPrint() {
+    Arrays.asList(Option.values()).stream()
+        .map(o -> o.describe(4))
+        .forEach(System.out::println);
   }
 }

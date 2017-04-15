@@ -43,13 +43,29 @@ final class OptionInfo {
   private static final String CS = ", ";
   private static final String NL = "\n";
 
-  static TypeSpec define(ExecutableElement constructor, ClassName argumentInfo) {
+  private final ExecutableElement constructor;
+  private final ClassName argumentInfo;
+  private final MethodSpec describeNamesMethod;
+  private final MethodSpec descriptionBlockMethod;
+
+  private OptionInfo(ExecutableElement constructor, ClassName argumentInfo) {
+    this.constructor = constructor;
+    this.argumentInfo = argumentInfo;
+    this.describeNamesMethod = describeNamesMethod();
+    this.descriptionBlockMethod = descriptionBlockMethod();
+  }
+
+  static OptionInfo create(ExecutableElement constructor, ClassName argumentInfo) {
+    return new OptionInfo(constructor, argumentInfo);
+  }
+
+  TypeSpec define() {
     ClassName originalClass = (ClassName) TypeName.get(constructor.getEnclosingElement().asType());
     String originalClassName = originalClass.simpleName();
     TypeSpec.Builder builder = TypeSpec.enumBuilder(argumentInfo)
         .addJavadoc(String.format("Arguments of {@link %s#%s(\n  %s\n)}\n", originalClassName, originalClassName,
             constructor.getParameters().stream()
-                .map(variableElement1 -> TypeName.get(variableElement1.asType()).toString())
+                .map(variableElement -> TypeName.get(variableElement.asType()).toString())
                 .map(s -> s.replaceAll("^java.lang.", ""))
                 .collect(Collectors.joining(",\n  "))));
     boolean needsSuffix = constructor.getParameters().stream()
@@ -59,8 +75,9 @@ final class OptionInfo {
       VariableElement variableElement = constructor.getParameters().get(i);
       Names names = Names.create(variableElement);
       boolean flag = isFlag(variableElement);
-      String[] desc = getText(variableElement.getAnnotation(Description.class));
-      String argumentName = flag ? null : getArgumentName(variableElement.getAnnotation(Description.class));
+      Description description = variableElement.getAnnotation(Description.class);
+      String[] desc = getText(description);
+      String argumentName = flag ? null : getArgumentName(description);
       String suffix = needsSuffix ? String.format("_%d", i) : "";
       String enumConstant = upcase(variableElement) + suffix;
       String format = String.format("$S, $S, $L, $S, new $T[] {%s}",
@@ -78,21 +95,20 @@ final class OptionInfo {
     ParameterSpec isFlag = ParameterSpec.builder(IS_FLAG.type, IS_FLAG.name).build();
     ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), DESCRIPTION.name).build();
     ParameterSpec argumentName = ParameterSpec.builder(ARGUMENT_NAME.type, ARGUMENT_NAME.name).build();
+    //@formatter:off
     return builder.addModifiers(PUBLIC)
         .addFields(Arrays.asList(LONG_NAME, SHORT_NAME, IS_FLAG, ARGUMENT_NAME, DESCRIPTION))
-        .addMethod(MethodSpec.methodBuilder("describe")
-            .addModifiers(PUBLIC)
-            .returns(Analyser.STRING)
-            .addCode(describeMethod())
-            .build())
+        .addMethod(describeMethod())
+        .addMethod(describeNamesMethod)
+        .addMethod(descriptionBlockMethod)
         .addMethod(MethodSpec.constructorBuilder()
             .addParameters(Arrays.asList(longName, shortName, isFlag, argumentName, description))
             .beginControlFlow("if ($N == null && $N == null)", longName, shortName)
-            .addStatement("throw new $T($S)", NullPointerException.class, "both names are null")
-            .endControlFlow()
+              .addStatement("throw new $T($S)", NullPointerException.class, "both names are null")
+              .endControlFlow()
             .beginControlFlow("if ($N == null)", description)
-            .addStatement("throw new $T($S)", NullPointerException.class, "description")
-            .endControlFlow()
+              .addStatement("throw new $T($S)", NullPointerException.class, "description")
+              .endControlFlow()
             .addStatement("this.$N = $N", LONG_NAME, longName)
             .addStatement("this.$N = $N", SHORT_NAME, shortName)
             .addStatement("this.$N = $N", IS_FLAG, isFlag)
@@ -101,10 +117,12 @@ final class OptionInfo {
             .addStatement("this.$N = $N", ARGUMENT_NAME, argumentName)
             .build())
         .build();
+    //@formatter:on
   }
 
   private static String upcase(VariableElement variableElement) {
-    return variableElement.getSimpleName().toString().toUpperCase(Locale.ENGLISH);
+    return variableElement.getSimpleName().toString()
+        .toUpperCase(Locale.ENGLISH);
   }
 
   private static String[] getText(Description description) {
@@ -121,11 +139,47 @@ final class OptionInfo {
     return description.argumentName();
   }
 
-  private static CodeBlock describeMethod() {
+  private static MethodSpec descriptionBlockMethod() {
+    ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
+    ParameterSpec sIndent = ParameterSpec.builder(STRING, "indentString").build();
+    ParameterSpec aIndent = ParameterSpec.builder(ArrayTypeName.of(TypeName.CHAR), "a").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+    builder.addStatement("$T $N = new $T[$N]", aIndent.type, aIndent,
+        TypeName.CHAR, indent);
+    builder.addStatement("$T.fill($N, ' ')", Arrays.class, aIndent);
+    builder.addStatement("$T $N = new $T($N)", STRING, sIndent, STRING, aIndent);
+    builder.addStatement("return $N + $T.join('\\n' + $N, $N)", sIndent, STRING, sIndent, DESCRIPTION);
+    return MethodSpec.methodBuilder("descriptionBlock")
+        .addModifiers(PUBLIC)
+        .addParameter(indent)
+        .returns(Analyser.STRING)
+        .addCode(builder.build())
+        .build();
+  }
+
+
+  private MethodSpec describeMethod() {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
+    CodeBlock codeBlock = CodeBlock.builder()
+        .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
+        .addStatement("$N.append($N())", sb, describeNamesMethod)
+        .addStatement("$N.append($S)", sb, NL)
+        .addStatement("$N.append($N($N))", sb, descriptionBlockMethod, indent)
+        .addStatement("return $N.toString()", sb)
+        .build();
+    return MethodSpec.methodBuilder("describe")
+        .addModifiers(PUBLIC)
+        .returns(Analyser.STRING)
+        .addParameter(indent)
+        .addCode(codeBlock)
+        .build();
+  }
+
+  private static MethodSpec describeNamesMethod() {
+    ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     //@formatter:off
-    return CodeBlock.builder()
+    CodeBlock.Builder builder = CodeBlock.builder()
         .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
         .beginControlFlow("if ($N)", IS_FLAG)
           .beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
@@ -151,16 +205,13 @@ final class OptionInfo {
             .addStatement("$N.append('-').append($N).append(' ').append($N)", sb, SHORT_NAME, ARGUMENT_NAME)
             .endControlFlow()
         .endControlFlow()
-        .addStatement("$N.append($S)", sb, NL)
-        .beginControlFlow("for ($T $N : $N)", STRING, s, DESCRIPTION)
-          .addStatement("$N.append($S).append($N)", sb, DS, s)
-          .endControlFlow()
-        .addStatement("return $N.toString()", sb)
-        .build();
+        .addStatement("return $N.toString()", sb);
     //@formatter:on
-  }
+    return MethodSpec.methodBuilder("describeNames")
+        .addModifiers(PUBLIC)
+        .returns(Analyser.STRING)
+        .addCode(builder.build())
+        .build();
 
-  private OptionInfo() {
-    throw new UnsupportedOperationException();
   }
 }

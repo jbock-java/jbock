@@ -150,7 +150,7 @@ final class Analyser {
     return TypeSpec.classBuilder(generatedClass)
         .addStaticBlock(initSets(constructor))
         .addType(ArgumentInfo.create(optionInfo, argumentInfo).define())
-        .addType(OptionInfo.define(constructor, optionInfo))
+        .addType(OptionInfo.create(constructor, optionInfo).define())
         .addAnnotation(AnnotationSpec.builder(Generated.class)
             .addMember("value", "$S", Processor.class.getName())
             .build())
