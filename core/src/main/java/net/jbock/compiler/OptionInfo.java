@@ -22,6 +22,12 @@ final class OptionInfo {
   private static final FieldSpec IS_FLAG = FieldSpec.builder(TypeName.BOOLEAN, "flag", PUBLIC, FINAL).build();
   private static final FieldSpec DESCRIPTION = FieldSpec.builder(Analyser.STRING, "description", PUBLIC, FINAL).build();
 
+  private static final String VAL = "VAL";
+  private static final String DD = "--";
+  private static final String DS = "  ";
+  private static final String CS = ", ";
+  private static final String NL = "\n";
+
   static TypeSpec define(ClassName argumentInfo) {
     ParameterSpec longName = ParameterSpec.builder(LONG_NAME.type, LONG_NAME.name).build();
     ParameterSpec shortName = ParameterSpec.builder(SHORT_NAME.type, SHORT_NAME.name).build();
@@ -35,6 +41,11 @@ final class OptionInfo {
             .returns(Analyser.STRING)
             .addCode(describeMethod())
             .build())
+        .addMethod(MethodSpec.methodBuilder("name")
+            .addModifiers(PUBLIC)
+            .returns(Analyser.STRING)
+            .addCode(nameMethod())
+            .build())
         .addMethod(MethodSpec.constructorBuilder()
             .addModifiers(PRIVATE)
             .addParameters(Arrays.asList(longName, shortName, isFlag, description))
@@ -46,6 +57,19 @@ final class OptionInfo {
         .build();
   }
 
+  private static CodeBlock nameMethod() {
+    //@formatter:off
+    return CodeBlock.builder()
+        .beginControlFlow("if ($N != null)", LONG_NAME)
+          .addStatement("return $S + $N", DD, LONG_NAME)
+          .endControlFlow()
+        .beginControlFlow("else")
+          .addStatement("return '-' + $N", SHORT_NAME)
+          .endControlFlow()
+        .build();
+    //@formatter:on
+  }
+
   private static CodeBlock describeMethod() {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     //@formatter:off
@@ -54,10 +78,10 @@ final class OptionInfo {
         .beginControlFlow("if ($N)", IS_FLAG)
           .beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
             .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
-            .addStatement("$N.append(',').append(' ').append('-').append('-').append($N)", sb, LONG_NAME)
+            .addStatement("$N.append($S).append($S).append($N)", sb, CS, DD, LONG_NAME)
             .endControlFlow()
           .beginControlFlow("else if ($N != null)", LONG_NAME)
-            .addStatement("$N.append('-').append('-').append($N)", sb, LONG_NAME)
+            .addStatement("$N.append($S).append($N)", sb, DD, LONG_NAME)
             .endControlFlow()
           .beginControlFlow("else")
             .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
@@ -66,16 +90,16 @@ final class OptionInfo {
         .beginControlFlow("else")
           .beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
             .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
-            .addStatement("$N.append(',').append(' ').append('-').append('-').append($N).append(' ').append($S)", sb, LONG_NAME, "VAL")
+            .addStatement("$N.append($S).append($S).append($N).append(' ').append($S)", sb, CS, DD, LONG_NAME, VAL)
             .endControlFlow()
           .beginControlFlow("else if ($N != null)", LONG_NAME)
-            .addStatement("$N.append('-').append('-').append($N).append(' ').append($S)", sb, LONG_NAME, "VAL")
+            .addStatement("$N.append($S).append($N).append(' ').append($S)", sb, DD, LONG_NAME, VAL)
             .endControlFlow()
           .beginControlFlow("else")
-            .addStatement("$N.append('-').append($N).append(' ').append($S)", sb, SHORT_NAME, "VAL")
+            .addStatement("$N.append('-').append($N).append(' ').append($S)", sb, SHORT_NAME, VAL)
             .endControlFlow()
         .endControlFlow()
-        .addStatement("$N.append('\\n').append($S)", sb, "  ")
+        .addStatement("$N.append($S).append($S)", sb, NL, DS)
         .addStatement("$N.append($N)", sb, DESCRIPTION)
         .addStatement("return $N.toString()", sb)
         .build();
