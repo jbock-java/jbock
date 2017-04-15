@@ -32,7 +32,7 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"-m", "hello"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.message, is("hello"));
-    assertThat(parser.trash.size(), is(0));
+    assertThat(parser.trash().size(), is(0));
   }
 
   @Test
@@ -40,7 +40,7 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"--message", "hello"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.message, is("hello"));
-    assertThat(parser.trash.size(), is(0));
+    assertThat(parser.trash().size(), is(0));
   }
 
   @Test
@@ -48,7 +48,7 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"-f", "file"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.file, is("file"));
-    assertThat(parser.trash.size(), is(0));
+    assertThat(parser.trash().size(), is(0));
   }
 
   @Test
@@ -57,9 +57,9 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"--file", "file"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.file, is(nullValue()));
-    assertThat(parser.trash.size(), is(2));
-    assertThat(parser.trash.get(0), is("--file"));
-    assertThat(parser.trash.get(1), is("file"));
+    assertThat(parser.trash().size(), is(2));
+    assertThat(parser.trash().get(0), is("--file"));
+    assertThat(parser.trash().get(1), is("file"));
   }
 
   @Test
@@ -67,7 +67,7 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"--dir", "dir"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.dir, is("dir"));
-    assertThat(parser.trash.size(), is(0));
+    assertThat(parser.trash().size(), is(0));
   }
 
   @Test
@@ -76,15 +76,15 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"-c", "hello"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.cmos, is(true));
-    assertThat(parser.trash.size(), is(1));
-    assertThat(parser.trash.get(0), is("hello"));
+    assertThat(parser.trash().size(), is(1));
+    assertThat(parser.trash().get(0), is("hello"));
   }
 
   @Test
   public void testNonsense() {
     // bogus options
     GradleManParser parser = GradleManParser.init(new String[]{"hello", "goodbye"});
-    assertThat(parser.trash.size(), is(2));
+    assertThat(parser.trash().size(), is(2));
   }
 
   @Test
@@ -93,9 +93,9 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.init(new String[]{"-dir", "foo"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.cmos, is(false));
-    assertThat(parser.trash.size(), is(2));
-    assertThat(parser.trash.get(0), is("-dir"));
-    assertThat(parser.trash.get(1), is("foo"));
+    assertThat(parser.trash().size(), is(2));
+    assertThat(parser.trash().get(0), is("-dir"));
+    assertThat(parser.trash().get(1), is("foo"));
   }
 
   @Test
@@ -131,7 +131,7 @@ public final class GradleManTest {
     assertThat(arguments.stream()
         .filter(argument -> argument.value == null)
         .count(), is(4L));
-    assertThat(parser.trash.size(), is(1));
-    assertThat(parser.trash.get(0), is("--dir"));
+    assertThat(parser.trash().size(), is(1));
+    assertThat(parser.trash().get(0), is("--dir"));
   }
 }
