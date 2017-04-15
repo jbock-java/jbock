@@ -39,7 +39,6 @@ final class OptionInfo {
       Analyser.STRING, "descriptionParameter", PUBLIC, FINAL).build();
 
   private static final String DD = "--";
-  private static final String DS = "  ";
   private static final String CS = ", ";
   private static final String NL = "\n";
 
