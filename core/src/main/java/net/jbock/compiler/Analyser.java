@@ -40,10 +40,11 @@ final class Analyser {
   static final FieldSpec LONG_NAME = FieldSpec.builder(STRING, "longName", PUBLIC, FINAL).build();
   static final FieldSpec SHORT_NAME = FieldSpec.builder(STRING, "shortName", PUBLIC, FINAL).build();
 
+  static final ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(
+      ClassName.get(List.class), STRING);
+
   private static final ParameterizedTypeName STRING_MAP = ParameterizedTypeName.get(
       ClassName.get(Map.class), STRING, STRING);
-  private static final ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(
-      ClassName.get(List.class), STRING);
   private static final ParameterizedTypeName STRING_SET = ParameterizedTypeName.get(
       ClassName.get(Set.class), STRING);
   private static final TypeName STRING_ARRAY = ArrayTypeName.of(STRING);
