@@ -53,11 +53,11 @@ final class OptionInfo {
       Names names = Names.create(variableElement);
       boolean flag = isFlag(variableElement);
       String[] desc = getText(variableElement.getAnnotation(Description.class));
-      String argumentName = getArgumentName(variableElement.getAnnotation(Description.class));
+      String argumentName = flag ? null : getArgumentName(variableElement.getAnnotation(Description.class));
       String suffix = needsSuffix ? String.format("_%d", i) : "";
       String enumConstant = upcase(variableElement) + suffix;
-      String f = String.join(", ", Collections.nCopies(desc.length, "$S"));
-      String format = String.format("$S, $S, $L, $S, new $T[] {%s}", f);
+      String format = String.format("$S, $S, $L, $S, new $T[] {%s}",
+          String.join(", ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
           Arrays.asList(names.longName, names.shortName, flag, argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
@@ -85,9 +85,6 @@ final class OptionInfo {
             .endControlFlow()
             .beginControlFlow("if ($N == null)", description)
             .addStatement("throw new $T($S)", NullPointerException.class, "description")
-            .endControlFlow()
-            .beginControlFlow("if ($N == null)", argumentName)
-            .addStatement("throw new $T($S)", NullPointerException.class, "argumentName")
             .endControlFlow()
             .addStatement("this.$N = $N", LONG_NAME, longName)
             .addStatement("this.$N = $N", SHORT_NAME, shortName)

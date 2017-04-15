@@ -16,12 +16,12 @@ final class GradleMan {
   @CommandLineArguments
   GradleMan(@LongName("message")
             @ShortName("m")
-            @Description(lines = {"the message", "message goes here"})
+            @Description(lines = {"the message", "message goes here"}, argumentName = "MESSAGE")
                 String message,
             @ShortName("f")
-            @Description(lines = "the file")
+            @Description(lines = "the file", argumentName = "FILE")
                 String file,
-            @Description(lines = "the dir")
+            @Description(lines = "the dir", argumentName = "DIR")
                 String dir,
             @ShortName("c")
             @Description(lines = "cmos flag") boolean cmos) {

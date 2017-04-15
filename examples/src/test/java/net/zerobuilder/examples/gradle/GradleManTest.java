@@ -134,4 +134,25 @@ public final class GradleManTest {
     assertThat(parser.trash().size(), is(1));
     assertThat(parser.trash().get(0), is("--dir"));
   }
+
+  @Test
+  public void testMessageOption() {
+    assertThat(Option.MESSAGE.description.size(), is(2));
+    assertThat(Option.MESSAGE.description.get(0), is("the message"));
+    assertThat(Option.MESSAGE.description.get(1), is("message goes here"));
+    assertThat(Option.MESSAGE.flag, is(false));
+    assertThat(Option.MESSAGE.longName, is("message"));
+    assertThat(Option.MESSAGE.shortName, is("m"));
+    assertThat(Option.MESSAGE.descriptionParameter, is("MESSAGE"));
+  }
+
+  @Test
+  public void testCmosOption() {
+    assertThat(Option.CMOS.description.size(), is(1));
+    assertThat(Option.CMOS.description.get(0), is("cmos flag"));
+    assertThat(Option.CMOS.flag, is(true));
+    assertThat(Option.CMOS.longName, is(nullValue()));
+    assertThat(Option.CMOS.shortName, is("c"));
+    assertThat(Option.CMOS.descriptionParameter, is(nullValue()));
+  }
 }
