@@ -7,12 +7,15 @@ import net.jbock.ShortName;
 
 import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic;
+import java.util.regex.Pattern;
 
 final class Names {
 
   final String shortName;
   final String longName;
   final boolean flag;
+
+  private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
   private Names(String shortName, String longName, boolean flag) {
     this.shortName = shortName;
@@ -75,6 +78,9 @@ final class Names {
     }
     if (name.startsWith("-")) {
       throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not start with '-'", parameter);
+    }
+    if (WHITE_SPACE.matcher(name).matches()) {
+      throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not contain whitespace characters", parameter);
     }
   }
 }

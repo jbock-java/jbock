@@ -59,4 +59,20 @@ public class ProcessorTest {
         .failsToCompile()
         .withErrorContaining("Only String or boolean allowed: a");
   }
+
+  @Test
+  public void whitespace() throws Exception {
+    List<String> sourceLines = Arrays.asList(
+        "package test;",
+        "import net.jbock.CommandLineArguments;",
+        "import net.jbock.LongName;",
+        "class JJob {",
+        "  @CommandLineArguments JJob(@LongName(\"a b c\") String a) {}",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("The name may not contain whitespace characters");
+  }
 }
