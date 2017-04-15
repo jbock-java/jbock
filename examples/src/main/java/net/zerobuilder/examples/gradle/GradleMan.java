@@ -16,15 +16,15 @@ final class GradleMan {
   @CommandLineArguments
   GradleMan(@LongName("message")
             @ShortName("m")
-            @Description("The message")
+            @Description(lines = "The message")
                 String message,
             @ShortName("f")
-            @Description("The file")
+            @Description(lines = "The file")
                 String file,
-            @Description("The dir")
+            @Description(lines = "The dir")
                 String dir,
             @ShortName("c")
-            @Description("Is it cmos?") boolean cmos) {
+            @Description(lines = "Is it cmos?") boolean cmos) {
     this.message = message;
     this.file = file;
     this.dir = dir;

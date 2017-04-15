@@ -9,5 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface Description {
 
-  String value();
+  String[] lines();
+
+  String argumentName() default "VAL";
 }
