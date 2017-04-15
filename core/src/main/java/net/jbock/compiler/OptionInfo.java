@@ -44,7 +44,14 @@ final class OptionInfo {
   private static final String NL = "\n";
 
   static TypeSpec define(ExecutableElement constructor, ClassName argumentInfo) {
-    TypeSpec.Builder builder = TypeSpec.enumBuilder(argumentInfo);
+    ClassName originalClass = (ClassName) TypeName.get(constructor.getEnclosingElement().asType());
+    String originalClassName = originalClass.simpleName();
+    TypeSpec.Builder builder = TypeSpec.enumBuilder(argumentInfo)
+        .addJavadoc(String.format("Arguments of {@link %s#%s(\n  %s\n)}\n", originalClassName, originalClassName,
+            constructor.getParameters().stream()
+                .map(variableElement1 -> TypeName.get(variableElement1.asType()).toString())
+                .map(s -> s.replaceAll("^java.lang.", ""))
+                .collect(Collectors.joining(",\n  "))));
     boolean needsSuffix = constructor.getParameters().stream()
         .map(OptionInfo::upcase)
         .collect(Collectors.toSet()).size() < constructor.getParameters().size();
