@@ -11,7 +11,7 @@ import javax.lang.model.util.SimpleTypeVisitor6;
 
 import static net.jbock.compiler.LessElements.asType;
 
-public final class LessTypes {
+final class LessTypes {
 
   private static final TypeVisitor<Element, Void> AS_ELEMENT_VISITOR =
       new SimpleTypeVisitor6<Element, Void>() {
@@ -36,7 +36,7 @@ public final class LessTypes {
         }
       };
 
-  public static TypeElement asTypeElement(TypeMirror mirror) {
+  static TypeElement asTypeElement(TypeMirror mirror) {
     Element element = asElement(mirror);
     if (element == null) {
       throw new IllegalArgumentException("not an element: " + mirror);
@@ -47,16 +47,6 @@ public final class LessTypes {
   private static Element asElement(TypeMirror typeMirror) {
     return typeMirror.accept(AS_ELEMENT_VISITOR, null);
   }
-
-  public static boolean isDeclaredType(TypeMirror mirror) {
-    Element returnType = asElement(mirror);
-    if (returnType == null) {
-      return false;
-    }
-    return returnType.getKind().isClass() ||
-        returnType.getKind().isInterface();
-  }
-
 
   private LessTypes() {
     throw new UnsupportedOperationException("no instances");

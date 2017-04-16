@@ -83,7 +83,6 @@ final class Analyser {
 
   private final ClassName argumentInfo;
   private final ClassName optionInfo;
-  private final MethodSpec getOptions;
 
   Analyser(ExecutableElement constructor, ClassName generatedClass) {
     this.constructor = constructor;
@@ -92,16 +91,7 @@ final class Analyser {
     this.optionInfo = generatedClass.nestedClass("Option");
     this.getParam = getParam(optionInfo);
     this.getBool = getBool(optionInfo, getParam);
-    this.getOptions = getOptions(optionInfo);
     this.addNext = addNext();
-  }
-
-  private static MethodSpec getOptions(ClassName optionInfo) {
-    return MethodSpec.methodBuilder("options")
-        .addCode(options(optionInfo))
-        .returns(ParameterizedTypeName.get(ClassName.get(List.class), optionInfo))
-        .addModifiers(PUBLIC, STATIC)
-        .build();
   }
 
   private static MethodSpec getBool(ClassName optionInfo, MethodSpec getParam) {
@@ -112,7 +102,7 @@ final class Analyser {
         .addParameter(option)
         .addCode(builder.build())
         .returns(TypeName.BOOLEAN)
-        .addModifiers(PRIVATE)
+        .addModifiers(PUBLIC)
         .build();
   }
 
@@ -142,7 +132,7 @@ final class Analyser {
         .addParameter(option)
         .addCode(builder.build())
         .returns(STRING)
-        .addModifiers(PRIVATE)
+        .addModifiers(PUBLIC)
         .build();
   }
 
@@ -172,7 +162,6 @@ final class Analyser {
             .returns(trash.type)
             .addModifiers(PUBLIC)
             .build())
-        .addMethod(getOptions)
         .addModifiers(PUBLIC, FINAL)
         .addFields(Arrays.asList(LONG_FLAGS, SHORT_FLAGS, LONG_NAMES, SHORT_NAMES))
         .addFields(Arrays.asList(longOptions, shortOptions, trash))
@@ -333,10 +322,9 @@ final class Analyser {
 
   private CodeBlock bindingCall() {
     CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec options = ParameterSpec.builder(optionInfo, "options").build();
-    builder.addStatement("$T $N = $N()",
-        ParameterizedTypeName.get(ClassName.get(List.class), optionInfo),
-        options, getOptions);
+    ParameterSpec options = ParameterSpec.builder(ArrayTypeName.of(optionInfo), "options").build();
+    builder.addStatement("$T $N = $T.values()",
+        options.type, options, optionInfo);
     builder.add("return new $T(\n    ", ClassName.get(constructor.getEnclosingElement().asType()));
     for (int j = 0; j < constructor.getParameters().size(); j++) {
       VariableElement variableElement = constructor.getParameters().get(j);
@@ -344,7 +332,7 @@ final class Analyser {
         builder.add(",\n    ");
       }
       MethodSpec op = isFlag(variableElement) ? getBool : getParam;
-      builder.add("$N($N.get($L))", op, options, j);
+      builder.add("$N($N[$L])", op, options, j);
     }
     builder.add(");\n");
     return builder.build();
@@ -357,7 +345,7 @@ final class Analyser {
     builder.addStatement("$T $N = new $T<>($L)", entries.type,
         entries, ArrayList.class, constructor.getParameters().size());
     ParameterSpec option = ParameterSpec.builder(optionInfo, "option").build();
-    builder.beginControlFlow("for ($T $N : $N())", option.type, option, getOptions)
+    builder.beginControlFlow("for ($T $N : $T.values())", option.type, option, optionInfo)
         .addStatement("$N.add(new $T($N, $N($N)))", entries,
             argumentInfo, option, getParam, option)
         .endControlFlow();

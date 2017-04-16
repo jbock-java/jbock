@@ -10,6 +10,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic;
@@ -57,6 +58,7 @@ public final class Processor extends AbstractProcessor {
           continue;
         }
         staticChecks(constructor);
+        staticChecks(LessElements.asType(constructor.getEnclosingElement()));
         ClassName generatedClass = peer(ClassName.get(asType(constructor.getEnclosingElement())), SUFFIX);
         Analyser analyser = new Analyser(constructor, generatedClass);
         TypeSpec typeSpec = analyser.analyse();
@@ -112,7 +114,20 @@ public final class Processor extends AbstractProcessor {
     return type.topLevelClassName().peerClass(name);
   }
 
+  private void staticChecks(TypeElement enclosingElement) {
+    if (enclosingElement.getModifiers().contains(Modifier.PRIVATE)) {
+      throw new ValidationException(ERROR, "The class may not be private", enclosingElement);
+    }
+    if (enclosingElement.getNestingKind().isNested() &&
+        !enclosingElement.getModifiers().contains(Modifier.STATIC)) {
+      throw new ValidationException(ERROR, "The inner class must be static", enclosingElement);
+    }
+  }
+
   private void staticChecks(ExecutableElement constructor) {
+    if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
+      throw new ValidationException(ERROR, "The constructor may not be private", constructor);
+    }
     List<? extends VariableElement> parameters = constructor.getParameters();
     Set<String> checkShort = new HashSet<>();
     Set<String> checkLong = new HashSet<>();

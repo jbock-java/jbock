@@ -101,21 +101,21 @@ public final class GradleManTest {
 
   @Test
   public void testOptions() {
-    List<Option> options = GradleManParser.options();
-    assertThat(options.size(), is(4));
-    assertThat(options.stream()
+    Option[] options = Option.values();
+    assertThat(options.length, is(4));
+    assertThat(Arrays.stream(options)
             .filter(o -> !o.flag)
             .map(o -> o.longName)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
         is(new HashSet<>(asList("message", "dir"))));
-    assertThat(options.stream()
+    assertThat(Arrays.stream(options)
             .filter(o -> !o.flag)
             .map(o -> o.shortName)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
         is(new HashSet<>(asList("f", "m"))));
-    assertThat(options.stream()
+    assertThat(Arrays.stream(options)
             .filter(o -> o.flag)
             .map(o -> o.shortName)
             .filter(Objects::nonNull)
@@ -158,8 +158,15 @@ public final class GradleManTest {
   }
 
   @Test
+  public void testNesting() {
+    GradleMan_FooParser parser = GradleMan_FooParser.init(new String[]{"--bar", "4"});
+    GradleMan.Foo foo = parser.parse();
+    assertThat(foo.bar, is("4"));
+  }
+
+  @Test
   public void testPrint() {
-    Arrays.asList(Option.values()).stream()
+    Arrays.stream(Option.values())
         .map(o -> o.describe(4))
         .forEach(System.out::println);
   }

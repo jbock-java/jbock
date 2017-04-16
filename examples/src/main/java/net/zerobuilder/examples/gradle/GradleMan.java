@@ -13,6 +13,15 @@ final class GradleMan {
   final String dir;
   final boolean cmos;
 
+  static final class Foo {
+    final String bar;
+
+    @CommandLineArguments
+    Foo(String bar) {
+      this.bar = bar;
+    }
+  }
+
   @CommandLineArguments
   GradleMan(@LongName("message")
             @ShortName("m")
