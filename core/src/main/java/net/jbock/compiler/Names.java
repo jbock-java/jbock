@@ -13,14 +13,12 @@ final class Names {
 
   final String shortName;
   final String longName;
-  final boolean flag;
 
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
-  private Names(String shortName, String longName, boolean flag) {
+  private Names(String shortName, String longName) {
     this.shortName = shortName;
     this.longName = longName;
-    this.flag = flag;
   }
 
   static boolean isFlag(VariableElement variableElement) {
@@ -41,7 +39,7 @@ final class Names {
     boolean flag = isFlag(type);
     if (flag) {
       if (shortName != null) {
-        sn = shortName.value();
+        sn = Character.toString(shortName.value());
       }
       if (longName != null) {
         ln = longName.value();
@@ -54,7 +52,7 @@ final class Names {
         ln = longName.value();
       }
       if (shortName != null) {
-        sn = shortName.value();
+        sn = Character.toString(shortName.value());
       }
       if (shortName == null && longName == null) {
         ln = variableElement.getSimpleName().toString();
@@ -66,7 +64,7 @@ final class Names {
     }
     checkName(variableElement, sn);
     checkName(variableElement, ln);
-    return new Names(sn, ln, flag);
+    return new Names(sn, ln);
   }
 
   private static void checkName(VariableElement parameter, String name) {
@@ -78,6 +76,9 @@ final class Names {
     }
     if (name.startsWith("-")) {
       throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not start with '-'", parameter);
+    }
+    if (name.indexOf('=') >= 0) {
+      throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not contain '='", parameter);
     }
     if (WHITE_SPACE.matcher(name).matches()) {
       throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not contain whitespace characters", parameter);

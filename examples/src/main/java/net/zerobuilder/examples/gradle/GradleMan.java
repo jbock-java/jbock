@@ -24,15 +24,15 @@ final class GradleMan {
 
   @CommandLineArguments
   GradleMan(@LongName("message")
-            @ShortName("m")
+            @ShortName('m')
             @Description(lines = {"the message", "message goes here"}, argumentName = "MESSAGE")
                 String message,
-            @ShortName("f")
+            @ShortName('f')
             @Description(lines = "the file", argumentName = "FILE")
                 String file,
             @Description(lines = "the dir", argumentName = "DIR")
                 String dir,
-            @ShortName("c")
+            @ShortName('c')
             @Description(lines = "cmos flag") boolean cmos) {
     this.message = message;
     this.file = file;

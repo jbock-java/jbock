@@ -38,7 +38,7 @@ public final class GradleManTest {
 
   @Test
   public void testLongMessage() {
-    GradleManParser parser = GradleManParser.init(new String[]{"--message", "hello"});
+    GradleManParser parser = GradleManParser.init(new String[]{"--message=hello"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.message, is("hello"));
     assertThat(parser.trash().size(), is(0));
@@ -55,17 +55,16 @@ public final class GradleManTest {
   @Test
   public void testLongFile() {
     // --file is invalid
-    GradleManParser parser = GradleManParser.init(new String[]{"--file", "file"});
+    GradleManParser parser = GradleManParser.init(new String[]{"--file=file"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.file, is(nullValue()));
-    assertThat(parser.trash().size(), is(2));
-    assertThat(parser.trash().get(0), is("--file"));
-    assertThat(parser.trash().get(1), is("file"));
+    assertThat(parser.trash().size(), is(1));
+    assertThat(parser.trash().get(0), is("--file=file"));
   }
 
   @Test
   public void testLongDir() {
-    GradleManParser parser = GradleManParser.init(new String[]{"--dir", "dir"});
+    GradleManParser parser = GradleManParser.init(new String[]{"--dir=dir"});
     GradleMan gradleMan = parser.parse();
     assertThat(gradleMan.dir, is("dir"));
     assertThat(parser.trash().size(), is(0));
@@ -159,7 +158,7 @@ public final class GradleManTest {
 
   @Test
   public void testNesting() {
-    GradleMan_FooParser parser = GradleMan_FooParser.init(new String[]{"--bar", "4"});
+    GradleMan_FooParser parser = GradleMan_FooParser.init(new String[]{"--bar=4"});
     GradleMan.Foo foo = parser.parse();
     assertThat(foo.bar, is("4"));
   }
