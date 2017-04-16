@@ -22,15 +22,13 @@ import java.util.stream.Collectors;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static net.jbock.compiler.Analyser.IS_FLAG;
 import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
 import static net.jbock.compiler.Names.isFlag;
 
 final class OptionInfo {
-
-  private static final FieldSpec IS_FLAG = FieldSpec.builder(
-      TypeName.BOOLEAN, "flag", PUBLIC, FINAL).build();
 
   private static final FieldSpec DESCRIPTION = FieldSpec.builder(
       Analyser.STRING_LIST, "description", PUBLIC, FINAL).build();

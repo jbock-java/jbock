@@ -22,9 +22,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -39,6 +37,8 @@ final class Analyser {
 
   static final FieldSpec LONG_NAME = FieldSpec.builder(STRING, "longName", PUBLIC, FINAL).build();
   static final FieldSpec SHORT_NAME = FieldSpec.builder(STRING, "shortName", PUBLIC, FINAL).build();
+  static final FieldSpec IS_FLAG = FieldSpec.builder(TypeName.BOOLEAN, "flag", PUBLIC, FINAL).build();
+
 
   static final ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(
       ClassName.get(List.class), STRING);
@@ -51,6 +51,7 @@ final class Analyser {
   private static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
   private static final ParameterSpec ARGS = ParameterSpec.builder(STRING_ARRAY, "args")
       .build();
+  private static final ClassName LIST = ClassName.get(List.class);
 
   private final ExecutableElement constructor;
   private final ClassName generatedClass;
@@ -138,7 +139,7 @@ final class Analyser {
 
   TypeSpec analyse() {
     return TypeSpec.classBuilder(generatedClass)
-        .addStaticBlock(initSets(constructor))
+        .addStaticBlock(initializerBlock(optionInfo))
         .addType(ArgumentInfo.create(optionInfo, argumentInfo).define())
         .addType(OptionInfo.create(constructor, optionInfo).define())
         .addAnnotation(AnnotationSpec.builder(Generated.class)
@@ -154,7 +155,7 @@ final class Analyser {
         .addMethod(addNext)
         .addMethod(MethodSpec.methodBuilder("arguments")
             .addCode(arguments())
-            .returns(ParameterizedTypeName.get(ClassName.get(List.class), argumentInfo))
+            .returns(ParameterizedTypeName.get(LIST, argumentInfo))
             .addModifiers(PUBLIC)
             .build())
         .addMethod(MethodSpec.methodBuilder("trash")
@@ -175,7 +176,7 @@ final class Analyser {
         .build();
   }
 
-  private static CodeBlock initSets(ExecutableElement constructor) {
+  private static CodeBlock initializerBlock(ClassName optionInfo) {
     CodeBlock.Builder builder = CodeBlock.builder();
     ParameterSpec shortFlags = ParameterSpec.builder(STRING_SET, "shortFlags")
         .build();
@@ -185,34 +186,32 @@ final class Analyser {
         .build();
     ParameterSpec shortNames = ParameterSpec.builder(STRING_SET, "shortNames")
         .build();
+    ParameterSpec option = ParameterSpec.builder(optionInfo, "option")
+        .build();
     builder.addStatement("$T $N = new $T<>()", longFlags.type, longFlags, HashSet.class);
     builder.addStatement("$T $N = new $T<>()", shortFlags.type, shortFlags, HashSet.class);
     builder.addStatement("$T $N = new $T<>()", longNames.type, longNames, HashSet.class);
     builder.addStatement("$T $N = new $T<>()", shortNames.type, shortNames, HashSet.class);
-    List<Names> names = constructor.getParameters()
-        .stream()
-        .map(Names::create)
-        .collect(Collectors.toList());
-    names.stream()
-        .filter(name -> name.flag)
-        .map(name -> name.shortName)
-        .filter(Objects::nonNull)
-        .forEach(name -> builder.addStatement("$N.add($S)", shortFlags, name));
-    names.stream()
-        .filter(name -> name.flag)
-        .map(name -> name.longName)
-        .filter(Objects::nonNull)
-        .forEach(name -> builder.addStatement("$N.add($S)", longFlags, name));
-    names.stream()
-        .filter(name -> !name.flag)
-        .map(name -> name.shortName)
-        .filter(Objects::nonNull)
-        .forEach(name -> builder.addStatement("$N.add($S)", shortNames, name));
-    names.stream()
-        .filter(name -> !name.flag)
-        .map(name -> name.longName)
-        .filter(Objects::nonNull)
-        .forEach(name -> builder.addStatement("$N.add($S)", longNames, name));
+    //@formatter:off
+    builder.beginControlFlow("for ($T $N : $T.values())", optionInfo, option, optionInfo)
+          .beginControlFlow("if ($N.$N)", option, IS_FLAG)
+            .beginControlFlow("if ($N.$N != null)", option, SHORT_NAME)
+              .addStatement("$N.add($N.$N)", shortFlags, option, SHORT_NAME)
+              .endControlFlow()
+            .beginControlFlow("if ($N.$N != null)", option, LONG_NAME)
+              .addStatement("$N.add($N.$N)", longFlags, option, LONG_NAME)
+              .endControlFlow()
+            .endControlFlow()
+          .beginControlFlow("else")
+            .beginControlFlow("if ($N.$N != null)", option, SHORT_NAME)
+              .addStatement("$N.add($N.$N)", shortNames, option, SHORT_NAME)
+              .endControlFlow()
+            .beginControlFlow("if ($N.$N != null)", option, LONG_NAME)
+              .addStatement("$N.add($N.$N)", longNames, option, LONG_NAME)
+              .endControlFlow()
+            .endControlFlow()
+        .endControlFlow();
+    //@formatter:on
     builder.addStatement("$N = $T.unmodifiableSet($N)", LONG_FLAGS, Collections.class, longFlags);
     builder.addStatement("$N = $T.unmodifiableSet($N)", SHORT_FLAGS, Collections.class, shortFlags);
     builder.addStatement("$N = $T.unmodifiableSet($N)", LONG_NAMES, Collections.class, longNames);
