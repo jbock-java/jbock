@@ -28,7 +28,7 @@ import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
 import static net.jbock.compiler.Names.isFlag;
 
-final class OptionInfo {
+final class Option {
 
   private static final FieldSpec DESCRIPTION = FieldSpec.builder(
       Analyser.STRING_LIST, "description", PUBLIC, FINAL).build();
@@ -45,15 +45,15 @@ final class OptionInfo {
   private final MethodSpec describeNamesMethod;
   private final MethodSpec descriptionBlockMethod;
 
-  private OptionInfo(ExecutableElement constructor, ClassName argumentInfo) {
+  private Option(ExecutableElement constructor, ClassName argumentInfo) {
     this.constructor = constructor;
     this.argumentInfo = argumentInfo;
     this.describeNamesMethod = describeNamesMethod();
     this.descriptionBlockMethod = descriptionBlockMethod();
   }
 
-  static OptionInfo create(ExecutableElement constructor, ClassName argumentInfo) {
-    return new OptionInfo(constructor, argumentInfo);
+  static Option create(ExecutableElement constructor, ClassName argumentInfo) {
+    return new Option(constructor, argumentInfo);
   }
 
   TypeSpec define() {
@@ -66,7 +66,7 @@ final class OptionInfo {
                 .map(s -> s.replaceAll("^java.lang.", ""))
                 .collect(Collectors.joining(",\n  "))));
     boolean needsSuffix = constructor.getParameters().stream()
-        .map(OptionInfo::upcase)
+        .map(Option::upcase)
         .collect(Collectors.toSet()).size() < constructor.getParameters().size();
     for (int i = 0; i < constructor.getParameters().size(); i++) {
       VariableElement variableElement = constructor.getParameters().get(i);

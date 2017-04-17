@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.LongName;
 import net.jbock.ShortName;
@@ -27,8 +26,7 @@ final class Names {
   }
 
   static boolean isFlag(TypeName type) {
-    return type.equals(TypeName.BOOLEAN) ||
-        type.equals(ClassName.get(Boolean.class));
+    return type.equals(TypeName.BOOLEAN);
   }
 
   static Names create(VariableElement variableElement) {

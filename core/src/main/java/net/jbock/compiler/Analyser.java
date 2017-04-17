@@ -20,11 +20,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -42,126 +40,103 @@ final class Analyser {
   static final FieldSpec SHORT_NAME = FieldSpec.builder(STRING, "shortName", PUBLIC, FINAL).build();
   static final FieldSpec IS_FLAG = FieldSpec.builder(TypeName.BOOLEAN, "flag", PUBLIC, FINAL).build();
 
-
   static final ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(
       ClassName.get(List.class), STRING);
 
-  private static final ParameterizedTypeName STRING_MAP = ParameterizedTypeName.get(
-      ClassName.get(Map.class), STRING, STRING);
-  private static final ParameterizedTypeName STRING_SET = ParameterizedTypeName.get(
-      ClassName.get(Set.class), STRING);
   private static final TypeName STRING_ARRAY = ArrayTypeName.of(STRING);
   private static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
   private static final ParameterSpec ARGS = ParameterSpec.builder(STRING_ARRAY, "args")
       .build();
   private static final ClassName LIST = ClassName.get(List.class);
+  private static final FieldSpec trash = FieldSpec.builder(STRING_LIST, "trash", PRIVATE, FINAL)
+      .build();
 
   private final ExecutableElement constructor;
   private final ClassName generatedClass;
   private final MethodSpec getParam;
-  private final MethodSpec getBool;
-  private final MethodSpec addNextOm;
+  private final MethodSpec addNext;
   private final MethodSpec whichOption;
-  private final TypeName entryType;
+  private final MethodSpec checkConflict;
 
-  private final FieldSpec SHORT_FLAGS;
-  private final FieldSpec LONG_FLAGS;
-  private final FieldSpec LONG_NAMES;
-  private final FieldSpec SHORT_NAMES;
+  private final FieldSpec shortFlags;
+  private final FieldSpec longFlags;
+  private final FieldSpec longNames;
+  private final FieldSpec shortNames;
   private final FieldSpec optMap;
+  private final FieldSpec value;
+  private final FieldSpec token;
 
-//  private final MethodSpec addNext;
+  private final ClassName optionClass;
+  private final ClassName keysClass;
+  private final ClassName argumentClass;
 
-/*
-  private static final FieldSpec longOptions = FieldSpec.builder(STRING_MAP, "longOptions", PRIVATE, FINAL)
-      .build();
-
-  private static final FieldSpec shortOptions = FieldSpec.builder(STRING_MAP, "shortOptions", PRIVATE, FINAL)
-      .build();
-*/
-
-  private static final FieldSpec trash = FieldSpec.builder(STRING_LIST, "trash", PRIVATE, FINAL)
-      .build();
-
-  private final ClassName argumentInfo;
-  private final ClassName optionInfo;
-  private final TypeName omType;
-  private final TypeName moType;
+  private final TypeName osType;
 
   Analyser(ExecutableElement constructor, ClassName generatedClass) {
     this.constructor = constructor;
     this.generatedClass = generatedClass;
-    this.argumentInfo = generatedClass.nestedClass("Argument");
-    this.optionInfo = generatedClass.nestedClass("Option");
-    this.omType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        optionInfo, STRING);
-    this.optMap = FieldSpec.builder(omType, "optMap")
+    this.optionClass = generatedClass.nestedClass("Option");
+    this.keysClass = generatedClass.nestedClass("Keys");
+    this.argumentClass = generatedClass.nestedClass("Argument");
+    this.osType = ParameterizedTypeName.get(ClassName.get(Map.class),
+        optionClass, argumentClass);
+    TypeName soType = ParameterizedTypeName.get(ClassName.get(Map.class),
+        STRING, optionClass);
+    TypeName entryType = ParameterizedTypeName.get(
+        ClassName.get(AbstractMap.Entry.class), optionClass, STRING);
+    this.optMap = FieldSpec.builder(osType, "optMap")
         .addModifiers(PRIVATE, FINAL)
         .build();
-    this.moType = ParameterizedTypeName.get(ClassName.get(Map.class), STRING, optionInfo);
-    this.SHORT_FLAGS = FieldSpec.builder(moType, "SHORT_FLAGS")
-        .addModifiers(PRIVATE, STATIC, FINAL)
+    this.shortFlags = FieldSpec.builder(soType, "shortFlags")
+        .addModifiers(PRIVATE, FINAL)
         .build();
-    this.LONG_FLAGS = FieldSpec.builder(moType, "LONG_FLAGS")
-        .addModifiers(PRIVATE, STATIC, FINAL)
+    this.longFlags = FieldSpec.builder(soType, "longFlags")
+        .addModifiers(PRIVATE, FINAL)
         .build();
-    this.LONG_NAMES = FieldSpec.builder(moType, "LONG_NAMES")
-        .addModifiers(PRIVATE, STATIC, FINAL)
+    this.longNames = FieldSpec.builder(soType, "longNames")
+        .addModifiers(PRIVATE, FINAL)
         .build();
-    this.SHORT_NAMES = FieldSpec.builder(moType, "SHORT_NAMES")
-        .addModifiers(PRIVATE, STATIC, FINAL)
+    this.shortNames = FieldSpec.builder(soType, "shortNames")
+        .addModifiers(PRIVATE, FINAL)
         .build();
-//    this.addNext = addNext(LONG_FLAGS, SHORT_FLAGS, LONG_NAMES, SHORT_NAMES, moType);
-    this.entryType = ParameterizedTypeName.get(
-        ClassName.get(AbstractMap.Entry.class), optionInfo, STRING);
-    this.whichOption = whichOption(LONG_FLAGS, SHORT_FLAGS, LONG_NAMES, SHORT_NAMES, entryType);
-    this.addNextOm = addNextOm(whichOption, entryType, omType);
-    this.getParam = getParam(optMap, optionInfo);
-    this.getBool = getBool(optionInfo, getParam);
+    this.value = FieldSpec.builder(STRING, "value").addModifiers(PUBLIC, FINAL).build();
+    this.token = FieldSpec.builder(STRING, "token").addModifiers(PUBLIC, FINAL).build();
+    this.whichOption = whichOptionMethod(keysClass, longFlags, shortFlags, longNames, shortNames, entryType);
+    this.checkConflict = checkConflictMethod(osType, optionClass);
+    this.addNext = addNextMethod(keysClass, whichOption, entryType, osType, argumentClass, optionClass, checkConflict);
+    this.getParam = getParamMethod(optMap, optionClass, value);
   }
 
-  private static MethodSpec getBool(ClassName optionInfo, MethodSpec getParam) {
-    ParameterSpec option = ParameterSpec.builder(optionInfo, "option").build();
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("return $N($N) != null", getParam, option);
-    return MethodSpec.methodBuilder("getBool")
-        .addParameter(option)
-        .addCode(builder.build())
-        .returns(TypeName.BOOLEAN)
-        .addModifiers(PUBLIC)
+  private static MethodSpec checkConflictMethod(TypeName osType, ClassName optionClass) {
+    ParameterSpec om = ParameterSpec.builder(osType, "optionMap").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
+    CodeBlock block = CodeBlock.builder()
+        .beginControlFlow("if ($N.containsKey($N))", om, option)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Conflicting token: ", token)
+        .endControlFlow()
+        .build();
+    return MethodSpec.methodBuilder("checkConflict")
+        .addParameters(Arrays.asList(om, option, token))
+        .addCode(block)
+        .addModifiers(PRIVATE, STATIC)
         .build();
   }
 
-  private static MethodSpec getParam(FieldSpec optMap, ClassName optionInfo) {
-    ParameterSpec option = ParameterSpec.builder(optionInfo, "option").build();
-/*
-    ParameterSpec longValue = ParameterSpec.builder(STRING, "longValue").build();
-    ParameterSpec shortValue = ParameterSpec.builder(STRING, "shortValue").build();
-*/
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("return $N.get($N)", optMap, option);
-/*
-    builder.addStatement("$T $N = null, $N = null", STRING, longValue, shortValue);
-    builder.beginControlFlow("if ($N.$N != null)", option, LONG_NAME)
-        .addStatement("$N = this.$N.get($N.$N)", longValue, longOptions, option, LONG_NAME)
-        .endControlFlow();
-    builder.beginControlFlow("if ($N.$N != null)", option, SHORT_NAME)
-        .addStatement("$N = this.$N.get($N.$N)", shortValue, shortOptions, option, SHORT_NAME)
-        .endControlFlow();
-    builder.beginControlFlow("if ($N == null)", longValue)
-        .addStatement("return $N", shortValue)
-        .endControlFlow();
-    builder.beginControlFlow("else if ($N == null)", shortValue)
-        .addStatement("return $N", longValue)
-        .endControlFlow();
-    builder.beginControlFlow("else")
-        .addStatement("throw new $T($S + $N.$N + $S + $N.$N)", IllegalArgumentException.class,
-            "Competing arguments: --", option, LONG_NAME, " versus -", option, SHORT_NAME)
-        .endControlFlow();
-*/
+  private static MethodSpec getParamMethod(FieldSpec optMap, ClassName optionClass, FieldSpec value) {
+    ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
+    //@formatter:off
+    CodeBlock block = CodeBlock.builder()
+        .beginControlFlow("if (!$N.containsKey($N))", optMap, option)
+          .addStatement("return null")
+          .endControlFlow()
+        .addStatement("return $N.get($N).$N", optMap, option, value)
+        .build();
+    //@formatter:on
     return MethodSpec.methodBuilder("param")
         .addParameter(option)
-        .addCode(builder.build())
+        .addCode(block)
         .returns(STRING)
         .addModifiers(PUBLIC)
         .build();
@@ -169,119 +144,53 @@ final class Analyser {
 
   TypeSpec analyse() {
     return TypeSpec.classBuilder(generatedClass)
-        .addStaticBlock(initializerBlock(moType, optionInfo))
-        .addType(ArgumentInfo.create(optionInfo, argumentInfo).define())
-        .addType(OptionInfo.create(constructor, optionInfo).define())
-        .addAnnotation(AnnotationSpec.builder(Generated.class)
-            .addMember("value", "$S", Processor.class.getName())
-            .build())
-        .addMethod(MethodSpec.methodBuilder("parse")
-            .addCode(bindingCall())
-            .addModifiers(PUBLIC)
-            .returns(ClassName.get(asType(constructor.getEnclosingElement())))
-            .build())
-        .addMethod(getParam)
-        .addMethod(getBool)
-//        .addMethod(addNext)
-        .addMethod(addNextOm)
-        .addMethod(whichOption)
-        .addMethod(MethodSpec.methodBuilder("arguments")
-            .addCode(arguments())
-            .returns(ParameterizedTypeName.get(LIST, argumentInfo))
-            .addModifiers(PUBLIC)
-            .build())
-        .addMethod(MethodSpec.methodBuilder("trash")
-            .addStatement("return $N", trash)
-            .returns(trash.type)
-            .addModifiers(PUBLIC)
-            .build())
-        .addModifiers(PUBLIC, FINAL)
-        .addFields(Arrays.asList(LONG_FLAGS, SHORT_FLAGS, LONG_NAMES, SHORT_NAMES))
+        .addType(Keys.create(optionClass, keysClass, longFlags, shortFlags, longNames, shortNames).define())
+        .addType(Option.create(constructor, optionClass).define())
+        .addType(Argument.create(argumentClass, value, token).define())
+        .addAnnotation(generatedAnnotation())
         .addFields(Arrays.asList(trash, optMap))
         .addMethod(privateConstructor())
-        .addMethod(MethodSpec.methodBuilder("init")
-            .addParameter(ARGS)
-            .addCode(factoryMethodBody())
-            .returns(generatedClass)
-            .addModifiers(PUBLIC, STATIC)
-            .build())
+        .addMethod(bindMethod())
+        .addMethod(checkConflict)
+        .addMethod(getParam)
+        .addMethod(addNext)
+        .addMethod(whichOption)
+        .addMethod(argumentsMethod())
+        .addMethod(trashMethod())
+        .addMethod(parseMethod())
+        .addModifiers(PUBLIC, FINAL)
         .build();
   }
 
-  private CodeBlock initializerBlock(TypeName moType, ClassName optionInfo) {
+  private MethodSpec parseMethod() {
     CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec shortFlags = ParameterSpec.builder(moType, "shortFlags")
-        .build();
-    ParameterSpec longFlags = ParameterSpec.builder(moType, "longFlags")
-        .build();
-    ParameterSpec longNames = ParameterSpec.builder(moType, "longNames")
-        .build();
-    ParameterSpec shortNames = ParameterSpec.builder(moType, "shortNames")
-        .build();
-    ParameterSpec option = ParameterSpec.builder(optionInfo, "option")
-        .build();
-    builder.addStatement("$T $N = new $T<>()", longFlags.type, longFlags, HashMap.class);
-    builder.addStatement("$T $N = new $T<>()", shortFlags.type, shortFlags, HashMap.class);
-    builder.addStatement("$T $N = new $T<>()", longNames.type, longNames, HashMap.class);
-    builder.addStatement("$T $N = new $T<>()", shortNames.type, shortNames, HashMap.class);
-    //@formatter:off
-    builder.beginControlFlow("for ($T $N : $T.values())", optionInfo, option, optionInfo)
-          .beginControlFlow("if ($N.$N)", option, IS_FLAG)
-            .beginControlFlow("if ($N.$N != null)", option, SHORT_NAME)
-              .addStatement("$N.put($N.$N, $N)", shortFlags, option, SHORT_NAME, option)
-              .endControlFlow()
-            .beginControlFlow("if ($N.$N != null)", option, LONG_NAME)
-              .addStatement("$N.put($N.$N, $N)", longFlags, option, LONG_NAME, option)
-              .endControlFlow()
-            .endControlFlow()
-          .beginControlFlow("else")
-            .beginControlFlow("if ($N.$N != null)", option, SHORT_NAME)
-              .addStatement("$N.put($N.$N, $N)", shortNames, option, SHORT_NAME, option)
-              .endControlFlow()
-            .beginControlFlow("if ($N.$N != null)", option, LONG_NAME)
-              .addStatement("$N.put($N.$N, $N)", longNames, option, LONG_NAME, option)
-              .endControlFlow()
-            .endControlFlow()
-        .endControlFlow();
-    //@formatter:on
-    builder.addStatement("$N = $T.unmodifiableMap($N)", LONG_FLAGS, Collections.class, longFlags);
-    builder.addStatement("$N = $T.unmodifiableMap($N)", SHORT_FLAGS, Collections.class, shortFlags);
-    builder.addStatement("$N = $T.unmodifiableMap($N)", LONG_NAMES, Collections.class, longNames);
-    builder.addStatement("$N = $T.unmodifiableMap($N)", SHORT_NAMES, Collections.class, shortNames);
-    return builder.build();
-  }
-
-  private CodeBlock factoryMethodBody() {
-    CodeBlock.Builder builder = CodeBlock.builder();
-
-/*
-    ParameterSpec longOpts = ParameterSpec.builder(STRING_MAP, "longOpts").build();
-    ParameterSpec shortOpts = ParameterSpec.builder(STRING_MAP, "shortOpts").build();
-*/
     ParameterSpec trash = ParameterSpec.builder(STRING_LIST, "trash").build();
+    ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    ParameterSpec om = ParameterSpec.builder(omType, "optionMap").build();
-
-/*
-    builder.addStatement("$T $N = new $T<>()", longOpts.type, longOpts, HashMap.class);
-    builder.addStatement("$T $N = new $T<>()", shortOpts.type, shortOpts, HashMap.class);
-*/
+    ParameterSpec om = ParameterSpec.builder(osType, "optionMap").build();
     builder.addStatement("$T $N = new $T<>()", trash.type, trash, ArrayList.class);
-    builder.addStatement("$T $N = new $T<>($T.class)", om.type, om, EnumMap.class, optionInfo);
+    builder.addStatement("$T $N = new $T()", keys.type, keys, keysClass);
+    builder.addStatement("$T $N = new $T<>($T.class)", om.type, om, EnumMap.class, optionClass);
 
     // read args
     builder.addStatement("$T $N = $T.stream($N).iterator()", it.type, it, Arrays.class, ARGS);
     builder.beginControlFlow("while ($N.hasNext())", it)
-//        .addStatement("$N($N, $N, $N, $N)", addNextOm, longOpts, shortOpts, trash, it)
-        .addStatement("$N($N, $N, $N)", addNextOm, om, trash, it)
+        .addStatement("$N($N, $N, $N, $N)", addNext, keys, om, trash, it)
         .endControlFlow();
     builder.addStatement("return new $T($N, $N)", generatedClass, trash, om);
-    return builder.build();
+    return MethodSpec.methodBuilder("parse")
+        .addParameter(ARGS)
+        .addCode(builder.build())
+        .returns(generatedClass)
+        .addModifiers(PUBLIC, STATIC)
+        .build();
   }
 
-  private static MethodSpec whichOption(FieldSpec LONG_FLAGS, FieldSpec SHORT_FLAGS,
-                                        FieldSpec LONG_NAMES, FieldSpec SHORT_NAMES,
-                                        TypeName entryType) {
+  private static MethodSpec whichOptionMethod(ClassName keysClass,
+                                              FieldSpec longFlags, FieldSpec shortFlags,
+                                              FieldSpec longNames, FieldSpec shortNames,
+                                              TypeName entryType) {
+    ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
     ParameterSpec st = ParameterSpec.builder(STRING, "st").build();
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     ParameterSpec ie = ParameterSpec.builder(INT, "ie").build();
@@ -290,14 +199,14 @@ final class Analyser {
         .beginControlFlow("if ($N.startsWith($S))", s, "--")
           .addStatement("$T $N = $N.substring(2)", STRING, st, s)
           .addStatement("$T $N = $N.indexOf('=')", INT, ie, st)
-          .beginControlFlow("if ($N < 0 && $N.containsKey($N))", ie, LONG_FLAGS, st)
-            .addStatement("return new $T<>($N.get($N), $N)",
-                SimpleImmutableEntry.class, LONG_FLAGS, st, s)
+          .beginControlFlow("if ($N < 0 && $N.$N.containsKey($N))", ie, keys, longFlags, st)
+            .addStatement("return new $T<>($N.$N.get($N), $N)",
+                SimpleImmutableEntry.class, keys, longFlags, st, s)
             .endControlFlow()
-          .beginControlFlow("if ($N >= 0 && $N.containsKey($N.substring(0, $N)))",
-              ie, LONG_NAMES, st, ie)
-            .addStatement("return new $T<>($N.get($N.substring(0, $N)), $N)",
-                SimpleImmutableEntry.class, LONG_NAMES, st, ie, s)
+          .beginControlFlow("if ($N >= 0 && $N.$N.containsKey($N.substring(0, $N)))",
+              ie, keys, longNames, st, ie)
+            .addStatement("return new $T<>($N.$N.get($N.substring(0, $N)), $N)",
+                SimpleImmutableEntry.class, keys, longNames, st, ie, s)
             .endControlFlow()
           .addStatement("return null")
           .endControlFlow();
@@ -307,13 +216,13 @@ final class Analyser {
           .beginControlFlow("if ($N.isEmpty())", st)
             .addStatement("return null")
             .endControlFlow()
-          .beginControlFlow("if ($N.length() == 1 && $N.containsKey($N))", st, SHORT_FLAGS, st)
-            .addStatement("return new $T<>($N.get($N), $N)",
-                SimpleImmutableEntry.class, SHORT_FLAGS, st, s)
+          .beginControlFlow("if ($N.length() == 1 && $N.$N.containsKey($N))", st, keys, shortFlags, st)
+            .addStatement("return new $T<>($N.$N.get($N), $N)",
+                SimpleImmutableEntry.class, keys, shortFlags, st, s)
             .endControlFlow()
-          .beginControlFlow("if ($N.containsKey($N.substring(0, 1)))", SHORT_NAMES, st)
-            .addStatement("return new $T<>($N.get($N.substring(0, 1)), $N)",
-                SimpleImmutableEntry.class, SHORT_NAMES, st, s)
+          .beginControlFlow("if ($N.$N.containsKey($N.substring(0, 1)))", keys, shortNames, st)
+            .addStatement("return new $T<>($N.$N.get($N.substring(0, 1)), $N)",
+                SimpleImmutableEntry.class, keys, shortNames, st, s)
             .endControlFlow()
           .endControlFlow();
 
@@ -321,175 +230,118 @@ final class Analyser {
 
     //@formatter:on
     return MethodSpec.methodBuilder("whichOption")
-        .addParameter(s)
+        .addParameters(Arrays.asList(keys, s))
         .addModifiers(STATIC, PRIVATE)
         .returns(entryType)
         .addCode(builder.build())
         .build();
   }
 
-  private static MethodSpec addNextOm(MethodSpec whichOption, TypeName entryType, TypeName omType) {
-    ParameterSpec om = ParameterSpec.builder(omType, "optionMap").build();
+  private static MethodSpec addNextMethod(ClassName keysClass, MethodSpec whichOption,
+                                          TypeName entryType, TypeName osType,
+                                          ClassName argumentClass,
+                                          ClassName optionClass,
+                                          MethodSpec checkConflict) {
+    ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
+    ParameterSpec om = ParameterSpec.builder(osType, "optionMap").build();
     ParameterSpec trash = ParameterSpec.builder(STRING_LIST, "trash").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
 
-    ParameterSpec s = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec entry = ParameterSpec.builder(entryType, "e").build();
     ParameterSpec ie = ParameterSpec.builder(INT, "ie").build();
+    ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
     //@formatter:off
     CodeBlock block = CodeBlock.builder()
-        .addStatement("$T $N = $N.next()", STRING, s, it)
-        .addStatement("$T $N = $N($N)", entry.type, entry, whichOption, s)
+        .addStatement("$T $N = $N.next()", STRING, token, it)
+        .addStatement("$T $N = $N($N, $N)", entry.type, entry, whichOption, keys, token)
         .beginControlFlow("if ($N == null)", entry)
-          .addStatement("$N.add($N)", trash, s)
+          .addStatement("$N.add($N)", trash, token)
           .addStatement("return")
           .endControlFlow()
-        .beginControlFlow("if ($N.getKey().flag)", entry)
-          .addStatement("$N.put($N.getKey(), $N.getValue())", om, entry, entry)
+        .addStatement("$T $N = $N.getKey()", option.type, option, entry)
+        .beginControlFlow("if ($N.flag)", option)
+          .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
+          .addStatement("$N.put($N, new $T($S, $N))", om, option, argumentClass, "t", token)
           .addStatement("return")
           .endControlFlow()
         .addStatement("$T $N = $N.getValue().indexOf('=')", INT, ie, entry)
         .beginControlFlow("if ($N < 0)", ie)
           .beginControlFlow("if (!$N.hasNext())", it)
-            .addStatement("$N.add($N)", trash, s)
+            .addStatement("$N.add($N)", trash, token)
             .addStatement("return")
             .endControlFlow()
-          .addStatement("$N.put($N.getKey(), $N.next())", om, entry, it)
+          .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
+          .addStatement("$N.put($N, new $T($N.next(), $N))", om, option, argumentClass, it, token)
           .addStatement("return")
           .endControlFlow()
-        .addStatement("$N.put($N.getKey(), $N.getValue().substring($N + 1))", om, entry, entry, ie)
+        .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
+        .addStatement("$N.put($N, new $T($N.getValue().substring($N + 1), $N))",
+            om, option, argumentClass, entry, ie, token)
         .build();
     //@formatter:on
-    return MethodSpec.methodBuilder("addNextOm")
-        .addParameters(Arrays.asList(om, trash, it))
+    return MethodSpec.methodBuilder("addNext")
+        .addParameters(Arrays.asList(keys, om, trash, it))
         .addModifiers(STATIC, PRIVATE)
         .addCode(block)
         .build();
   }
 
-/*
-  private static MethodSpec addNext(FieldSpec LONG_FLAGS, FieldSpec SHORT_FLAGS,
-                                    FieldSpec LONG_NAMES, FieldSpec SHORT_NAMES,
-                                    TypeName moType) {
-    ParameterSpec longOpts = ParameterSpec.builder(STRING_MAP, "longOpts").build();
-    ParameterSpec shortOpts = ParameterSpec.builder(STRING_MAP, "shortOpts").build();
-    ParameterSpec trash = ParameterSpec.builder(STRING_LIST, "trash").build();
-    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-
-    ParameterSpec st = ParameterSpec.builder(STRING, "st").build();
-    ParameterSpec set = ParameterSpec.builder(moType, "set").build();
-    ParameterSpec m = ParameterSpec.builder(STRING_MAP, "m").build();
-
-    //@formatter:off
-    CodeBlock.Builder builder = CodeBlock.builder()
-        .addStatement("$T $N = $N.next()", STRING, s, it)
-        .addStatement("$T $N", st.type, st)
-        .addStatement("$T $N", set.type, set)
-        .addStatement("$T $N", m.type, m)
-        .beginControlFlow("if ($N.startsWith($S))", s, "--")
-          .addStatement("$N = $N.substring(2)", st, s)
-          .beginControlFlow("if ($N.containsKey($N))", LONG_FLAGS, st)
-            .addStatement("$N.put($N, $S)", longOpts, st, Boolean.TRUE.toString())
-            .addStatement("return")
-            .endControlFlow()
-          .beginControlFlow("else")
-            .addStatement("$N = $N", set, LONG_NAMES)
-            .addStatement("$N = $N", m, longOpts)
-            .endControlFlow()
-          .endControlFlow()
-        .beginControlFlow("else if ($N.startsWith($S))", s, "-")
-          .addStatement("$N = $N.substring(1)", st, s)
-          .beginControlFlow("if ($N.containsKey($N))", SHORT_FLAGS, st)
-            .addStatement("$N.put($N, $S)", shortOpts, st, Boolean.TRUE.toString())
-            .addStatement("return")
-            .endControlFlow()
-          .beginControlFlow("else")
-            .addStatement("$N = $N", set, SHORT_NAMES)
-            .addStatement("$N = $N", m, shortOpts)
-            .endControlFlow()
-          .endControlFlow()
-        .beginControlFlow("else")
-          .addStatement("$N.add($N)", trash, s)
-          .addStatement("return")
-          .endControlFlow();
-
-    return MethodSpec.methodBuilder("addNext")
-        .addParameters(Arrays.asList(longOpts, shortOpts, trash, it))
-        .addCode(builder
-            .beginControlFlow("if (!$N.containsKey($N))", set, st)
-              .addStatement("$N.add($N)", trash, s)
-              .addStatement("return")
-              .endControlFlow()
-            .beginControlFlow("if ($N.containsKey($N))", m, st)
-              .addStatement("throw new $T($S + $N)",
-                  IllegalArgumentException.class, "Duplicate argument: ", st)
-              .endControlFlow()
-            .beginControlFlow("if (!$N.hasNext())", it)
-              .addStatement("$N.add($N)", trash, s)
-              .addStatement("return")
-              .endControlFlow()
-            .addStatement("$N.put($N, $N.next())", m, st, it)
-            .build())
-        .addModifiers(STATIC, PRIVATE)
-        .build();
-    //@formatter:on
-  }
-*/
-
   private MethodSpec privateConstructor() {
-//    ParameterSpec ln = ParameterSpec.builder(STRING_MAP, longOptions.name).build();
-//    ParameterSpec sn = ParameterSpec.builder(STRING_MAP, shortOptions.name).build();
     ParameterSpec tr = ParameterSpec.builder(STRING_LIST, trash.name).build();
     ParameterSpec om = ParameterSpec.builder(optMap.type, optMap.name).build();
     return MethodSpec.constructorBuilder()
         .addParameters(Arrays.asList(tr, om))
-/*
-        .addStatement("this.$N = $T.unmodifiableMap($N)", longOptions, Collections.class, ln)
-        .addStatement("this.$N = $T.unmodifiableMap($N)", shortOptions, Collections.class, sn)
-*/
         .addStatement("this.$N = $T.unmodifiableList($N)", trash, Collections.class, tr)
         .addStatement("this.$N = $T.unmodifiableMap($N)", optMap, Collections.class, om)
         .addModifiers(PRIVATE)
         .build();
   }
 
-  private CodeBlock bindingCall() {
+  private MethodSpec bindMethod() {
     CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec options = ParameterSpec.builder(ArrayTypeName.of(optionInfo), "options").build();
+    ParameterSpec options = ParameterSpec.builder(ArrayTypeName.of(optionClass), "options").build();
     builder.addStatement("$T $N = $T.values()",
-        options.type, options, optionInfo);
+        options.type, options, optionClass);
     builder.add("return new $T(\n    ", ClassName.get(constructor.getEnclosingElement().asType()));
     for (int j = 0; j < constructor.getParameters().size(); j++) {
       VariableElement variableElement = constructor.getParameters().get(j);
       if (j > 0) {
         builder.add(",\n    ");
       }
-      MethodSpec op = isFlag(variableElement) ? getBool : getParam;
-      builder.add("$N($N[$L])", op, options, j);
+      if (isFlag(variableElement)) {
+        builder.add("$N.containsKey($N[$L])", optMap, options, j);
+      } else {
+        builder.add("$N($N[$L])", getParam, options, j);
+      }
     }
     builder.add(");\n");
-    return builder.build();
+    return MethodSpec.methodBuilder("bind")
+        .addCode(builder.build())
+        .addModifiers(PUBLIC)
+        .returns(ClassName.get(asType(constructor.getEnclosingElement())))
+        .build();
   }
 
-  private CodeBlock arguments() {
-    CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec entries = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class), argumentInfo),
-        "arguments").build();
-    builder.addStatement("$T $N = new $T<>($L)", entries.type,
-        entries, ArrayList.class, constructor.getParameters().size());
-    ParameterSpec option = ParameterSpec.builder(optionInfo, "option").build();
-    builder.beginControlFlow("for ($T $N : $T.values())", option.type, option, optionInfo)
-        .addStatement("$N.add(new $T($N, $N($N)))", entries,
-            argumentInfo, option, getParam, option)
-        .endControlFlow();
-    builder.addStatement("return $N", entries);
-    return builder.build();
+  private MethodSpec argumentsMethod() {
+    return MethodSpec.methodBuilder("arguments")
+        .addStatement("return $N", optMap)
+        .returns(optMap.type)
+        .addModifiers(PUBLIC)
+        .build();
   }
 
-  private static CodeBlock options(ClassName optionInfo) {
-    return CodeBlock.builder()
-        .addStatement("return $T.asList($T.values())", Arrays.class, optionInfo)
+  private MethodSpec trashMethod() {
+    return MethodSpec.methodBuilder("trash")
+        .addStatement("return $N", trash)
+        .returns(trash.type)
+        .addModifiers(PUBLIC)
+        .build();
+  }
+
+  private AnnotationSpec generatedAnnotation() {
+    return AnnotationSpec.builder(Generated.class)
+        .addMember("value", "$S", Processor.class.getName())
         .build();
   }
 }
