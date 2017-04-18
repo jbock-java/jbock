@@ -192,37 +192,37 @@ final class Analyser {
                                               TypeName entryType) {
     ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
     ParameterSpec st = ParameterSpec.builder(STRING, "st").build();
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec ie = ParameterSpec.builder(INT, "ie").build();
     //@formatter:off
     CodeBlock.Builder builder = CodeBlock.builder()
-        .beginControlFlow("if ($N.startsWith($S))", s, "--")
-          .addStatement("$T $N = $N.substring(2)", STRING, st, s)
+        .beginControlFlow("if ($N.startsWith($S))", token, "--")
+          .addStatement("$T $N = $N.substring(2)", STRING, st, token)
           .addStatement("$T $N = $N.indexOf('=')", INT, ie, st)
           .beginControlFlow("if ($N < 0 && $N.$N.containsKey($N))", ie, keys, longFlags, st)
             .addStatement("return new $T<>($N.$N.get($N), $N)",
-                SimpleImmutableEntry.class, keys, longFlags, st, s)
+                SimpleImmutableEntry.class, keys, longFlags, st, token)
             .endControlFlow()
           .beginControlFlow("if ($N >= 0 && $N.$N.containsKey($N.substring(0, $N)))",
               ie, keys, longNames, st, ie)
             .addStatement("return new $T<>($N.$N.get($N.substring(0, $N)), $N)",
-                SimpleImmutableEntry.class, keys, longNames, st, ie, s)
+                SimpleImmutableEntry.class, keys, longNames, st, ie, token)
             .endControlFlow()
           .addStatement("return null")
           .endControlFlow();
 
-        builder.beginControlFlow("if ($N.startsWith($S))", s, "-")
-          .addStatement("$T $N = $N.substring(1)", STRING, st, s)
+        builder.beginControlFlow("if ($N.startsWith($S))", token, "-")
+          .addStatement("$T $N = $N.substring(1)", STRING, st, token)
           .beginControlFlow("if ($N.isEmpty())", st)
             .addStatement("return null")
             .endControlFlow()
           .beginControlFlow("if ($N.length() == 1 && $N.$N.containsKey($N))", st, keys, shortFlags, st)
             .addStatement("return new $T<>($N.$N.get($N), $N)",
-                SimpleImmutableEntry.class, keys, shortFlags, st, s)
+                SimpleImmutableEntry.class, keys, shortFlags, st, token)
             .endControlFlow()
           .beginControlFlow("if ($N.$N.containsKey($N.substring(0, 1)))", keys, shortNames, st)
             .addStatement("return new $T<>($N.$N.get($N.substring(0, 1)), $N)",
-                SimpleImmutableEntry.class, keys, shortNames, st, s)
+                SimpleImmutableEntry.class, keys, shortNames, st, token)
             .endControlFlow()
           .endControlFlow();
 
@@ -230,7 +230,7 @@ final class Analyser {
 
     //@formatter:on
     return MethodSpec.methodBuilder("whichOption")
-        .addParameters(Arrays.asList(keys, s))
+        .addParameters(Arrays.asList(keys, token))
         .addModifiers(STATIC, PRIVATE)
         .returns(entryType)
         .addCode(builder.build())
@@ -262,22 +262,28 @@ final class Analyser {
         .addStatement("$T $N = $N.getKey()", option.type, option, entry)
         .beginControlFlow("if ($N.flag)", option)
           .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
-          .addStatement("$N.put($N, new $T($S, $N))", om, option, argumentClass, "t", token)
+          .addStatement("$N.put($N, new $T($S, $N, $L))", om, option, argumentClass, "t", token, true)
           .addStatement("return")
           .endControlFlow()
         .addStatement("$T $N = $N.getValue().indexOf('=')", INT, ie, entry)
         .beginControlFlow("if ($N < 0)", ie)
+          .beginControlFlow("if ($N.getValue().length() > 2)", entry)
+            .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
+            .addStatement("$N.put($N, new $T($N.getValue().substring(2), $N, $L))",
+                om, option, argumentClass, entry, token, true)
+            .addStatement("return")
+            .endControlFlow()
           .beginControlFlow("if (!$N.hasNext())", it)
             .addStatement("$N.add($N)", trash, token)
             .addStatement("return")
             .endControlFlow()
           .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
-          .addStatement("$N.put($N, new $T($N.next(), $N))", om, option, argumentClass, it, token)
+          .addStatement("$N.put($N, new $T($N.next(), $N, $L))", om, option, argumentClass, it, token, false)
           .addStatement("return")
           .endControlFlow()
         .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
-        .addStatement("$N.put($N, new $T($N.getValue().substring($N + 1), $N))",
-            om, option, argumentClass, entry, ie, token)
+        .addStatement("$N.put($N, new $T($N.getValue().substring($N + 1), $N, $L))",
+            om, option, argumentClass, entry, ie, token, true)
         .build();
     //@formatter:on
     return MethodSpec.methodBuilder("addNext")

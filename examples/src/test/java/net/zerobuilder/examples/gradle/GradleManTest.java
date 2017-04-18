@@ -23,39 +23,42 @@ public final class GradleManTest {
   public final ExpectedException exception = ExpectedException.none();
 
   @Test
-  public void testCompetingArguments() {
+  public void testShortLongConflict() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: --message=goodbye");
     GradleManParser.parse(new String[]{"-m", "hello", "--message=goodbye"});
   }
 
   @Test
-  public void testCompetingArguments2() {
-    // there's nothing after -m, so it is discarded
+  public void testNoConflict() {
+    // there's nothing after -m, so it goes in the trash, and there's no conflict
     GradleMan gradleMan = GradleManParser.parse(new String[]{"--message=hello", "-m"}).bind();
     assertThat(gradleMan.message, is("hello"));
   }
 
   @Test
-  public void testCompetingArguments3() {
+  public void testLongShortConflict() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: -m");
     GradleManParser.parse(new String[]{"--message=hello", "-m", "goodbye"});
   }
 
   @Test
-  public void testDuplicateArguments() {
+  public void testLongLongConflict() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: --message=goodbye");
     GradleManParser.parse(new String[]{"--message=hello", "--message=goodbye"});
   }
 
   @Test
-  public void testShortMessage() {
-    GradleManParser parser = GradleManParser.parse(new String[]{"-m", "hello"});
+  public void testShortNonAtomic() {
+    String[] args = {"-m", "hello"};
+    GradleManParser parser = GradleManParser.parse(args);
     GradleMan gradleMan = parser.bind();
     assertThat(gradleMan.message, is("hello"));
+    assertThat(gradleMan.cmos, is(false));
     assertThat(parser.arguments().size(), is(1));
+    assertThat(parser.arguments().get(Option.MESSAGE).reconstruct(), is(args));
     assertThat(parser.arguments().get(Option.MESSAGE).token, is("-m"));
     assertThat(parser.arguments().get(Option.MESSAGE).value, is("hello"));
     assertThat(parser.trash().size(), is(0));
@@ -66,6 +69,7 @@ public final class GradleManTest {
     GradleManParser parser = GradleManParser.parse(new String[]{"--message=hello"});
     GradleMan gradleMan = parser.bind();
     assertThat(gradleMan.message, is("hello"));
+    assertThat(gradleMan.cmos, is(false));
     assertThat(parser.arguments().size(), is(1));
     assertThat(parser.arguments().get(Option.MESSAGE).token, is("--message=hello"));
     assertThat(parser.arguments().get(Option.MESSAGE).value, is("hello"));
@@ -73,16 +77,27 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testShortFile() {
-    GradleManParser parser = GradleManParser.parse(new String[]{"-f", "file"});
+  public void testShortAtomic() {
+    GradleManParser parser = GradleManParser.parse(new String[]{"-fbar.txt"});
+    assertThat(parser.arguments().size(), is(1));
     GradleMan gradleMan = parser.bind();
-    assertThat(gradleMan.file, is("file"));
+    assertThat(gradleMan.file, is("bar.txt"));
     assertThat(parser.trash().size(), is(0));
   }
 
   @Test
-  public void testLongFile() {
-    // --file is invalid
+  public void testLongShortAtomic() {
+    GradleManParser parser = GradleManParser.parse(new String[]{"--message=hello", "-fbar.txt"});
+    assertThat(parser.arguments().size(), is(2));
+    GradleMan gradleMan = parser.bind();
+    assertThat(gradleMan.file, is("bar.txt"));
+    assertThat(gradleMan.message, is("hello"));
+    assertThat(parser.trash().size(), is(0));
+  }
+
+  @Test
+  public void testLongInvalid() {
+    // --file is not declared
     GradleManParser parser = GradleManParser.parse(new String[]{"--file=file"});
     GradleMan gradleMan = parser.bind();
     assertThat(gradleMan.file, is(nullValue()));
@@ -91,7 +106,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testLongDir() {
+  public void testLong() {
     GradleManParser parser = GradleManParser.parse(new String[]{"--dir=dir"});
     GradleMan gradleMan = parser.bind();
     assertThat(gradleMan.dir, is("dir"));
@@ -99,7 +114,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testFlagTrue() {
+  public void testFlag() {
     // -c is a flag; last token goes in the trash
     GradleManParser parser = GradleManParser.parse(new String[]{"-c", "hello"});
     GradleMan gradleMan = parser.bind();
@@ -113,17 +128,6 @@ public final class GradleManTest {
     // bogus options
     GradleManParser parser = GradleManParser.parse(new String[]{"hello", "goodbye"});
     assertThat(parser.trash().size(), is(2));
-  }
-
-  @Test
-  public void testFlagFalse() {
-    // -dir is invalid
-    GradleManParser parser = GradleManParser.parse(new String[]{"-dir", "foo"});
-    GradleMan gradleMan = parser.bind();
-    assertThat(gradleMan.cmos, is(false));
-    assertThat(parser.trash().size(), is(2));
-    assertThat(parser.trash().get(0), is("-dir"));
-    assertThat(parser.trash().get(1), is("foo"));
   }
 
   @Test
