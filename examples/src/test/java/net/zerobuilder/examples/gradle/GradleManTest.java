@@ -31,10 +31,11 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testNoConflict() {
-    // there's nothing after -m, so it goes in the trash, and there's no conflict
-    GradleMan gradleMan = GradleManParser.parse(new String[]{"--message=hello", "-m"}).bind();
-    assertThat(gradleMan.message, is("hello"));
+  public void testMissingValue() {
+    // there's nothing after -m
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Missing value: -m");
+    GradleManParser.parse(new String[]{"--message=hello", "-m"}).bind();
   }
 
   @Test

@@ -246,8 +246,8 @@ final class Analyser {
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec entry = ParameterSpec.builder(entryType, "e").build();
-    ParameterSpec ie = ParameterSpec.builder(INT, "ie").build();
+    ParameterSpec entry = ParameterSpec.builder(entryType, "entry").build();
+    ParameterSpec ie = ParameterSpec.builder(INT, "idx_eq").build();
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
     //@formatter:off
     CodeBlock block = CodeBlock.builder()
@@ -273,8 +273,7 @@ final class Analyser {
             .addStatement("return")
             .endControlFlow()
           .beginControlFlow("if (!$N.hasNext())", it)
-            .addStatement("$N.add($N)", trash, token)
-            .addStatement("return")
+            .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Missing value: ", token)
             .endControlFlow()
           .addStatement("$N($N, $N, $N)", checkConflict, optionMap, option, token)
           .addStatement("$N.computeIfAbsent($N, $N).add(new $T($N.next(), $N, $L))",
