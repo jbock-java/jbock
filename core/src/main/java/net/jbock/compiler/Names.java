@@ -1,11 +1,14 @@
 package net.jbock.compiler;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.LongName;
 import net.jbock.ShortName;
 
 import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic;
+import java.util.List;
 import java.util.regex.Pattern;
 
 final class Names {
@@ -26,7 +29,16 @@ final class Names {
   }
 
   static OptionType getOptionType(TypeName type) {
-    return type.equals(TypeName.BOOLEAN) ? OptionType.FLAG : OptionType.STRING;
+    if (type.equals(TypeName.BOOLEAN)) {
+      return OptionType.FLAG;
+    }
+    if (type.equals(Analyser.STRING)) {
+      return OptionType.STRING;
+    }
+    if (isList(type)) {
+      return OptionType.LIST;
+    }
+    return null;
   }
 
   static Names create(VariableElement variableElement) {
@@ -34,8 +46,13 @@ final class Names {
     ShortName shortName = variableElement.getAnnotation(ShortName.class);
     String ln = null, sn = null;
     TypeName type = TypeName.get(variableElement.asType());
-    OptionType flag = getOptionType(type);
-    if (flag == OptionType.FLAG) {
+    OptionType optionType = getOptionType(type);
+    if (optionType == null) {
+      throw new ValidationException(Diagnostic.Kind.ERROR,
+          "Only String, boolean or List<String> allowed: " + variableElement.getSimpleName().toString(),
+          variableElement);
+    }
+    if (optionType == OptionType.FLAG) {
       if (shortName != null) {
         sn = Character.toString(shortName.value());
       }
@@ -45,7 +62,7 @@ final class Names {
       if (shortName == null && longName == null) {
         sn = variableElement.getSimpleName().toString();
       }
-    } else if (type.equals(Analyser.STRING)) {
+    } else {
       if (longName != null) {
         ln = longName.value();
       }
@@ -55,14 +72,22 @@ final class Names {
       if (shortName == null && longName == null) {
         ln = variableElement.getSimpleName().toString();
       }
-    } else {
-      throw new ValidationException(Diagnostic.Kind.ERROR,
-          "Only String or boolean allowed: " + variableElement.getSimpleName().toString(),
-          variableElement);
     }
     checkName(variableElement, sn);
     checkName(variableElement, ln);
     return new Names(sn, ln);
+  }
+
+  private static boolean isList(TypeName type) {
+    if (!(type instanceof ParameterizedTypeName)) {
+      return false;
+    }
+    ParameterizedTypeName t = (ParameterizedTypeName) type;
+    if (t.rawType.equals(ClassName.get(List.class)) &&
+        t.typeArguments.size() == 1 && t.typeArguments.get(0).equals(Analyser.STRING)) {
+      return true;
+    }
+    return false;
   }
 
   private static void checkName(VariableElement parameter, String name) {

@@ -94,10 +94,13 @@ final class Binder {
       if (j > 0) {
         builder.add(",\n    ");
       }
-      if (Names.getOptionType(variableElement) == OptionType.FLAG) {
+      OptionType optionType = Names.getOptionType(variableElement);
+      if (optionType == OptionType.FLAG) {
         builder.add("$N.containsKey($N[$L])", optMap, options, j);
-      } else {
+      } else if (optionType == OptionType.STRING) {
         builder.add("$N($N[$L])", getParam, options, j);
+      } else {
+        builder.add("$N.getOrDefault($N[$L], $T.emptyList())", optMap, options, j, Collections.class);
       }
     }
     builder.add(");\n");

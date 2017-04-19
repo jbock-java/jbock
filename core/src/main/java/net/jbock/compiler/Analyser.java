@@ -123,19 +123,26 @@ final class Analyser {
     this.value = FieldSpec.builder(STRING, "value").addModifiers(PUBLIC, FINAL).build();
     this.token = FieldSpec.builder(STRING, "token").addModifiers(PUBLIC, FINAL).build();
     this.whichOption = whichOptionMethod(keysClass, longFlags, shortFlags, longNames, shortNames, entryType);
-    this.checkConflict = checkConflictMethod(optionMapType, optionClass);
+    this.checkConflict = checkConflictMethod(optionMapType, optionClass, optionTypeClass, optionType);
     this.addNext = addNextMethod(keysClass, whichOption, entryType, optionMapType, argumentClass,
         optionClass, checkConflict, listInitializer, optionType, optionTypeClass);
   }
 
-  private static MethodSpec checkConflictMethod(TypeName optionMapType, ClassName optionClass) {
+  private static MethodSpec checkConflictMethod(TypeName optionMapType, ClassName optionClass,
+                                                ClassName optionTypeClass, FieldSpec optionType) {
     ParameterSpec optionMap = ParameterSpec.builder(optionMapType, "optionMap").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
+    ParameterSpec message = ParameterSpec.builder(STRING, "message").build();
     CodeBlock block = CodeBlock.builder()
+        .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.LIST)
+        .addStatement("return")
+        .endControlFlow()
         .beginControlFlow("if ($N.containsKey($N))", optionMap, option)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Conflicting token: ", token)
+        .addStatement("$T $N = $N.$N == $T.$L ? $S : $S", STRING, message, option, optionType,
+            optionTypeClass, OptionType.FLAG, "Duplicate flag", "Conflicting token")
+        .addStatement("throw new $T($N + $S + $N)", IllegalArgumentException.class,
+            message, ": ", token)
         .endControlFlow()
         .build();
     return MethodSpec.methodBuilder("checkConflict")

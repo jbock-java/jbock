@@ -6,10 +6,12 @@ import net.jbock.Description;
 import net.jbock.LongName;
 import net.jbock.ShortName;
 
+import java.util.List;
+
 final class GradleMan {
 
   final String message;
-  final String file;
+  final List<String> file;
   final String dir;
   final boolean cmos;
 
@@ -28,8 +30,8 @@ final class GradleMan {
             @Description(lines = {"the message", "message goes here"}, argumentName = "MESSAGE")
                 String message,
             @ShortName('f')
-            @Description(lines = "the file", argumentName = "FILE")
-                String file,
+            @Description(lines = "the files", argumentName = "FILE")
+                List<String> file,
             @Description(lines = "the dir", argumentName = "DIR")
                 String dir,
             @ShortName('c')
