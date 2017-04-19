@@ -1,6 +1,7 @@
 package net.zerobuilder.examples.gradle;
 
 import net.zerobuilder.examples.gradle.GradleManParser.Option;
+import net.zerobuilder.examples.gradle.GradleManParser.OptionType;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -137,19 +138,19 @@ public final class GradleManTest {
     Option[] options = Option.values();
     assertThat(options.length, is(4));
     assertThat(Arrays.stream(options)
-            .filter(o -> !o.flag)
+            .filter(o -> o.type != OptionType.FLAG)
             .map(o -> o.longName)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
         is(new HashSet<>(asList("message", "dir"))));
     assertThat(Arrays.stream(options)
-            .filter(o -> !o.flag)
+            .filter(o -> o.type != OptionType.FLAG)
             .map(o -> o.shortName)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
         is(new HashSet<>(asList("f", "m"))));
     assertThat(Arrays.stream(options)
-            .filter(o -> o.flag)
+            .filter(o -> o.type == OptionType.FLAG)
             .map(o -> o.shortName)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
@@ -171,7 +172,7 @@ public final class GradleManTest {
     assertThat(Option.MESSAGE.description.size(), is(2));
     assertThat(Option.MESSAGE.description.get(0), is("the message"));
     assertThat(Option.MESSAGE.description.get(1), is("message goes here"));
-    assertThat(Option.MESSAGE.flag, is(false));
+    assertThat(Option.MESSAGE.type, is(OptionType.STRING));
     assertThat(Option.MESSAGE.longName, is("message"));
     assertThat(Option.MESSAGE.shortName, is("m"));
     assertThat(Option.MESSAGE.descriptionParameter, is("MESSAGE"));
@@ -181,7 +182,7 @@ public final class GradleManTest {
   public void testCmosOption() {
     assertThat(Option.CMOS.description.size(), is(1));
     assertThat(Option.CMOS.description.get(0), is("cmos flag"));
-    assertThat(Option.CMOS.flag, is(true));
+    assertThat(Option.CMOS.type, is(OptionType.FLAG));
     assertThat(Option.CMOS.longName, is(nullValue()));
     assertThat(Option.CMOS.shortName, is("c"));
     assertThat(Option.CMOS.descriptionParameter, is(nullValue()));

@@ -14,36 +14,42 @@ import java.util.HashMap;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Analyser.IS_FLAG;
 import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 
 final class Keys {
 
-  private final ClassName optionInfo;
+  private final ClassName optionClass;
+  private final ClassName optionTypeClass;
   private final ClassName keysClass;
   private final FieldSpec longFlags;
   private final FieldSpec shortFlags;
   private final FieldSpec longNames;
   private final FieldSpec shortNames;
+  private final FieldSpec optionType;
 
-  private Keys(ClassName optionInfo,
+  private Keys(ClassName optionClass,
+               ClassName optionTypeClass,
                ClassName keysClass,
                FieldSpec longFlags, FieldSpec shortFlags,
-               FieldSpec longNames, FieldSpec shortNames) {
-    this.optionInfo = optionInfo;
+               FieldSpec longNames, FieldSpec shortNames, FieldSpec optionType) {
+    this.optionClass = optionClass;
+    this.optionTypeClass = optionTypeClass;
     this.keysClass = keysClass;
     this.longFlags = longFlags;
     this.shortFlags = shortFlags;
     this.longNames = longNames;
     this.shortNames = shortNames;
+    this.optionType = optionType;
   }
 
-  static Keys create(ClassName optionInfo,
+  static Keys create(ClassName optionClass,
+                     ClassName optionTypeClass,
                      ClassName keysClass,
                      FieldSpec longFlags, FieldSpec shortFlags,
-                     FieldSpec longNames, FieldSpec shortNames) {
-    return new Keys(optionInfo, keysClass, longFlags, shortFlags, longNames, shortNames);
+                     FieldSpec longNames, FieldSpec shortNames,
+                     FieldSpec optionType) {
+    return new Keys(optionClass, optionTypeClass, keysClass, longFlags, shortFlags, longNames, shortNames, optionType);
   }
 
   TypeSpec define() {
@@ -64,15 +70,15 @@ final class Keys {
         .build();
     ParameterSpec shortNames = ParameterSpec.builder(this.shortNames.type, this.shortNames.name)
         .build();
-    ParameterSpec option = ParameterSpec.builder(optionInfo, "option")
+    ParameterSpec option = ParameterSpec.builder(optionClass, "option")
         .build();
     builder.addStatement("$T $N = new $T<>()", longFlags.type, longFlags, HashMap.class);
     builder.addStatement("$T $N = new $T<>()", shortFlags.type, shortFlags, HashMap.class);
     builder.addStatement("$T $N = new $T<>()", longNames.type, longNames, HashMap.class);
     builder.addStatement("$T $N = new $T<>()", shortNames.type, shortNames, HashMap.class);
     //@formatter:off
-    builder.beginControlFlow("for ($T $N : $T.values())", optionInfo, option, optionInfo)
-          .beginControlFlow("if ($N.$N)", option, IS_FLAG)
+    builder.beginControlFlow("for ($T $N : $T.values())", optionClass, option, optionClass)
+          .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.FLAG)
             .beginControlFlow("if ($N.$N != null)", option, SHORT_NAME)
               .addStatement("$N.put($N.$N, $N)", shortFlags, option, SHORT_NAME, option)
               .endControlFlow()

@@ -36,7 +36,7 @@ final class Analyser {
 
   static final FieldSpec LONG_NAME = FieldSpec.builder(STRING, "longName", PUBLIC, FINAL).build();
   static final FieldSpec SHORT_NAME = FieldSpec.builder(STRING, "shortName", PUBLIC, FINAL).build();
-  static final FieldSpec IS_FLAG = FieldSpec.builder(TypeName.BOOLEAN, "flag", PUBLIC, FINAL).build();
+  final FieldSpec optionType;
 
   static final ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(
       ClassName.get(List.class), STRING);
@@ -49,8 +49,14 @@ final class Analyser {
       .build();
 
   private final ExecutableElement constructor;
+
   private final ClassName generatedClass;
   private final ClassName binderClass;
+  private final ClassName optionClass;
+  private final ClassName optionTypeClass;
+  private final ClassName keysClass;
+  private final ClassName argumentClass;
+
   private final MethodSpec addNext;
   private final MethodSpec whichOption;
   private final MethodSpec checkConflict;
@@ -64,10 +70,6 @@ final class Analyser {
   private final FieldSpec token;
   private final FieldSpec listInitializer;
 
-  private final ClassName optionClass;
-  private final ClassName keysClass;
-  private final ClassName argumentClass;
-
   private final TypeName optionMapType;
 
   Analyser(ExecutableElement constructor, ClassName generatedClass) {
@@ -77,6 +79,7 @@ final class Analyser {
     this.keysClass = generatedClass.nestedClass("Keys");
     this.argumentClass = generatedClass.nestedClass("Argument");
     this.binderClass = generatedClass.nestedClass("Binder");
+    this.optionTypeClass = generatedClass.nestedClass("OptionType");
     ParameterizedTypeName listOfArgumentType = ParameterizedTypeName.get(
         ClassName.get(List.class), argumentClass);
     this.optionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
@@ -101,6 +104,7 @@ final class Analyser {
         STRING, optionClass);
     TypeName entryType = ParameterizedTypeName.get(
         ClassName.get(AbstractMap.Entry.class), optionClass, STRING);
+    this.optionType = FieldSpec.builder(optionTypeClass, "type", PUBLIC, FINAL).build();
     this.optMap = FieldSpec.builder(optionMapType, "optMap")
         .addModifiers(PRIVATE, FINAL)
         .build();
@@ -121,7 +125,7 @@ final class Analyser {
     this.whichOption = whichOptionMethod(keysClass, longFlags, shortFlags, longNames, shortNames, entryType);
     this.checkConflict = checkConflictMethod(optionMapType, optionClass);
     this.addNext = addNextMethod(keysClass, whichOption, entryType, optionMapType, argumentClass,
-        optionClass, checkConflict, listInitializer);
+        optionClass, checkConflict, listInitializer, optionType, optionTypeClass);
   }
 
   private static MethodSpec checkConflictMethod(TypeName optionMapType, ClassName optionClass) {
@@ -143,10 +147,12 @@ final class Analyser {
 
   TypeSpec analyse() {
     return TypeSpec.classBuilder(generatedClass)
-        .addType(Keys.create(optionClass, keysClass, longFlags, shortFlags, longNames, shortNames).define())
-        .addType(Option.create(constructor, optionClass).define())
+        .addType(Keys.create(optionClass, optionTypeClass, keysClass, longFlags,
+            shortFlags, longNames, shortNames, optionType).define())
+        .addType(Option.create(constructor, optionClass, optionTypeClass, optionType).define())
         .addType(Argument.create(argumentClass, value, token).define())
         .addType(Binder.create(binderClass, optionClass, optMap, trash, value, constructor).define())
+        .addType(OptionType.define(optionTypeClass))
         .addAnnotation(generatedAnnotation())
         .addFields(Arrays.asList(trash, optMap))
         .addField(listInitializer)
@@ -239,7 +245,9 @@ final class Analyser {
                                           ClassName argumentClass,
                                           ClassName optionClass,
                                           MethodSpec checkConflict,
-                                          FieldSpec listInitializer) {
+                                          FieldSpec listInitializer,
+                                          FieldSpec optionType,
+                                          ClassName optionTypeClass) {
     ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
     ParameterSpec optionMap = ParameterSpec.builder(optionMapType, "optionMap").build();
     ParameterSpec trash = ParameterSpec.builder(STRING_LIST, "trash").build();
@@ -258,7 +266,7 @@ final class Analyser {
           .addStatement("return")
           .endControlFlow()
         .addStatement("$T $N = $N.getKey()", option.type, option, entry)
-        .beginControlFlow("if ($N.flag)", option)
+        .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.FLAG)
           .addStatement("$N($N, $N, $N)", checkConflict, optionMap, option, token)
           .addStatement("$N.computeIfAbsent($N, $N).add(new $T($S, $N, $L))",
               optionMap, option, listInitializer, argumentClass, "t", token, true)

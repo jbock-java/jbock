@@ -22,11 +22,9 @@ import java.util.stream.Collectors;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static net.jbock.compiler.Analyser.IS_FLAG;
 import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
-import static net.jbock.compiler.Names.isFlag;
 
 final class Option {
 
@@ -41,25 +39,30 @@ final class Option {
   private static final String NL = "\n";
 
   private final ExecutableElement constructor;
-  private final ClassName argumentInfo;
+  private final ClassName optionClass;
+  private final ClassName optionTypeClass;
+
+  private final FieldSpec optionType;
   private final MethodSpec describeNamesMethod;
   private final MethodSpec descriptionBlockMethod;
 
-  private Option(ExecutableElement constructor, ClassName argumentInfo) {
+  private Option(ExecutableElement constructor, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
     this.constructor = constructor;
-    this.argumentInfo = argumentInfo;
-    this.describeNamesMethod = describeNamesMethod();
+    this.optionClass = optionClass;
+    this.optionTypeClass = optionTypeClass;
+    this.optionType = optionType;
+    this.describeNamesMethod = describeNamesMethod(optionType, optionTypeClass);
     this.descriptionBlockMethod = descriptionBlockMethod();
   }
 
-  static Option create(ExecutableElement constructor, ClassName argumentInfo) {
-    return new Option(constructor, argumentInfo);
+  static Option create(ExecutableElement constructor, ClassName argumentInfo, ClassName optionTypeClass, FieldSpec optionType) {
+    return new Option(constructor, argumentInfo, optionTypeClass, optionType);
   }
 
   TypeSpec define() {
     ClassName originalClass = (ClassName) TypeName.get(constructor.getEnclosingElement().asType());
     String originalClassName = originalClass.simpleName();
-    TypeSpec.Builder builder = TypeSpec.enumBuilder(argumentInfo)
+    TypeSpec.Builder builder = TypeSpec.enumBuilder(optionClass)
         .addJavadoc(String.format("Arguments of {@link %s#%s(\n  %s\n)}\n", originalClassName, originalClassName,
             constructor.getParameters().stream()
                 .map(variableElement -> TypeName.get(variableElement.asType()).toString())
@@ -71,53 +74,57 @@ final class Option {
     for (int i = 0; i < constructor.getParameters().size(); i++) {
       VariableElement variableElement = constructor.getParameters().get(i);
       Names names = Names.create(variableElement);
-      boolean flag = isFlag(variableElement);
+      OptionType optionType = Names.getOptionType(variableElement);
       Description description = variableElement.getAnnotation(Description.class);
       String[] desc = getText(description);
-      String argumentName = flag ? null : getArgumentName(description);
+      String argumentName = optionType == OptionType.FLAG ? null : getArgumentName(description);
       String suffix = needsSuffix ? String.format("_%d", i) : "";
       String enumConstant = upcase(variableElement) + suffix;
-      String format = String.format("$S, $S, $L, $S, new $T[] {%s}",
+      String format = String.format("$S, $S, $T.$L, $S, new $T[] {%s}",
           String.join(", ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
-          Arrays.asList(names.longName, names.shortName, flag, argumentName, STRING);
+          Arrays.asList(names.longName, names.shortName, optionTypeClass, optionType, argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
       args.addAll(fixArgs);
       args.addAll(Arrays.asList(desc));
       builder.addEnumConstant(enumConstant, anonymousClassBuilder(format,
           args.toArray()).build());
     }
-    ParameterSpec longName = ParameterSpec.builder(LONG_NAME.type, LONG_NAME.name).build();
-    ParameterSpec shortName = ParameterSpec.builder(SHORT_NAME.type, SHORT_NAME.name).build();
-    ParameterSpec isFlag = ParameterSpec.builder(IS_FLAG.type, IS_FLAG.name).build();
-    ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), DESCRIPTION.name).build();
-    ParameterSpec argumentName = ParameterSpec.builder(ARGUMENT_NAME.type, ARGUMENT_NAME.name).build();
     //@formatter:off
     return builder.addModifiers(PUBLIC)
-        .addFields(Arrays.asList(LONG_NAME, SHORT_NAME, IS_FLAG, ARGUMENT_NAME, DESCRIPTION))
+        .addFields(Arrays.asList(LONG_NAME, SHORT_NAME, optionType, ARGUMENT_NAME, DESCRIPTION))
         .addMethod(describeMethod())
         .addMethod(describeNamesMethod)
         .addMethod(descriptionBlockMethod)
-        .addMethod(MethodSpec.constructorBuilder()
-            .addParameters(Arrays.asList(longName, shortName, isFlag, argumentName, description))
-            .beginControlFlow("if ($N == null && $N == null)", longName, shortName)
-              .addStatement("throw new $T($S)", NullPointerException.class, "both names are null")
-              .endControlFlow()
-            .beginControlFlow("if ($N == null)", description)
-              .addStatement("throw new $T($S)", NullPointerException.class, "description")
-              .endControlFlow()
-            .beginControlFlow("if (!$N && $N == null)", isFlag, argumentName)
-              .addStatement("throw new $T($S)", NullPointerException.class, "argumentName")
-              .endControlFlow()
-            .addStatement("this.$N = $N", LONG_NAME, longName)
-            .addStatement("this.$N = $N", SHORT_NAME, shortName)
-            .addStatement("this.$N = $N", IS_FLAG, isFlag)
-            .addStatement("this.$N = $T.unmodifiableList($T.asList($N))", DESCRIPTION,
-                Collections.class, Arrays.class, description)
-            .addStatement("this.$N = $N", ARGUMENT_NAME, argumentName)
-            .build())
+        .addMethod(privateConstructor())
         .build();
     //@formatter:on
+  }
+
+  private MethodSpec privateConstructor() {
+    ParameterSpec longName = ParameterSpec.builder(LONG_NAME.type, LONG_NAME.name).build();
+    ParameterSpec shortName = ParameterSpec.builder(SHORT_NAME.type, SHORT_NAME.name).build();
+    ParameterSpec optionType = ParameterSpec.builder(this.optionType.type, this.optionType.name).build();
+    ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), DESCRIPTION.name).build();
+    ParameterSpec argumentName = ParameterSpec.builder(ARGUMENT_NAME.type, ARGUMENT_NAME.name).build();
+    return MethodSpec.constructorBuilder()
+        .addParameters(Arrays.asList(longName, shortName, optionType, argumentName, description))
+        .beginControlFlow("if ($N == null && $N == null)", longName, shortName)
+        .addStatement("throw new $T($S)", NullPointerException.class, "both names are null")
+        .endControlFlow()
+        .beginControlFlow("if ($N == null)", description)
+        .addStatement("throw new $T($S)", NullPointerException.class, "description")
+        .endControlFlow()
+        .beginControlFlow("if ($N != $T.$L && $N == null)", optionType, optionTypeClass, OptionType.FLAG, argumentName)
+        .addStatement("throw new $T($S)", NullPointerException.class, "argumentName")
+        .endControlFlow()
+        .addStatement("this.$N = $N", LONG_NAME, longName)
+        .addStatement("this.$N = $N", SHORT_NAME, shortName)
+        .addStatement("this.$N = $N", this.optionType, optionType)
+        .addStatement("this.$N = $T.unmodifiableList($T.asList($N))", DESCRIPTION,
+            Collections.class, Arrays.class, description)
+        .addStatement("this.$N = $N", ARGUMENT_NAME, argumentName)
+        .build();
   }
 
   private static String upcase(VariableElement variableElement) {
@@ -176,11 +183,11 @@ final class Option {
         .build();
   }
 
-  private static MethodSpec describeNamesMethod() {
+  private static MethodSpec describeNamesMethod(FieldSpec optionType, ClassName optionTypeClass) {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     //@formatter:off
     CodeBlock.Builder builder = CodeBlock.builder();
-    builder.beginControlFlow("if ($N)", IS_FLAG)
+    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.FLAG)
       .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
       .beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
         .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)

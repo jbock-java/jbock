@@ -20,13 +20,13 @@ final class Names {
     this.longName = longName;
   }
 
-  static boolean isFlag(VariableElement variableElement) {
+  static OptionType getOptionType(VariableElement variableElement) {
     TypeName type = TypeName.get(variableElement.asType());
-    return isFlag(type);
+    return getOptionType(type);
   }
 
-  static boolean isFlag(TypeName type) {
-    return type.equals(TypeName.BOOLEAN);
+  static OptionType getOptionType(TypeName type) {
+    return type.equals(TypeName.BOOLEAN) ? OptionType.FLAG : OptionType.STRING;
   }
 
   static Names create(VariableElement variableElement) {
@@ -34,8 +34,8 @@ final class Names {
     ShortName shortName = variableElement.getAnnotation(ShortName.class);
     String ln = null, sn = null;
     TypeName type = TypeName.get(variableElement.asType());
-    boolean flag = isFlag(type);
-    if (flag) {
+    OptionType flag = getOptionType(type);
+    if (flag == OptionType.FLAG) {
       if (shortName != null) {
         sn = Character.toString(shortName.value());
       }

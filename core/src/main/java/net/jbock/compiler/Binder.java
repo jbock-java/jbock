@@ -18,7 +18,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.LessElements.asType;
-import static net.jbock.compiler.Names.isFlag;
 
 final class Binder {
 
@@ -95,7 +94,7 @@ final class Binder {
       if (j > 0) {
         builder.add(",\n    ");
       }
-      if (isFlag(variableElement)) {
+      if (Names.getOptionType(variableElement) == OptionType.FLAG) {
         builder.add("$N.containsKey($N[$L])", optMap, options, j);
       } else {
         builder.add("$N($N[$L])", getParam, options, j);
