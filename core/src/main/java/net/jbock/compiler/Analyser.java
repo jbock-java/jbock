@@ -13,24 +13,22 @@ import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.Generated;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
 import java.util.AbstractMap;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 
 import static com.squareup.javapoet.TypeName.INT;
+import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.LessElements.asType;
-import static net.jbock.compiler.Names.isFlag;
 
 final class Analyser {
 
@@ -47,13 +45,12 @@ final class Analyser {
   private static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
   private static final ParameterSpec ARGS = ParameterSpec.builder(STRING_ARRAY, "args")
       .build();
-  private static final ClassName LIST = ClassName.get(List.class);
   private static final FieldSpec trash = FieldSpec.builder(STRING_LIST, "trash", PRIVATE, FINAL)
       .build();
 
   private final ExecutableElement constructor;
   private final ClassName generatedClass;
-  private final MethodSpec getParam;
+  private final ClassName binderClass;
   private final MethodSpec addNext;
   private final MethodSpec whichOption;
   private final MethodSpec checkConflict;
@@ -65,12 +62,13 @@ final class Analyser {
   private final FieldSpec optMap;
   private final FieldSpec value;
   private final FieldSpec token;
+  private final FieldSpec listInitializer;
 
   private final ClassName optionClass;
   private final ClassName keysClass;
   private final ClassName argumentClass;
 
-  private final TypeName osType;
+  private final TypeName optionMapType;
 
   Analyser(ExecutableElement constructor, ClassName generatedClass) {
     this.constructor = constructor;
@@ -78,13 +76,32 @@ final class Analyser {
     this.optionClass = generatedClass.nestedClass("Option");
     this.keysClass = generatedClass.nestedClass("Keys");
     this.argumentClass = generatedClass.nestedClass("Argument");
-    this.osType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        optionClass, argumentClass);
+    this.binderClass = generatedClass.nestedClass("Binder");
+    ParameterizedTypeName listOfArgumentType = ParameterizedTypeName.get(
+        ClassName.get(List.class), argumentClass);
+    this.optionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
+        optionClass, listOfArgumentType);
+    ParameterizedTypeName listInitType = ParameterizedTypeName.get(
+        ClassName.get(Function.class), optionClass, listOfArgumentType);
+    ParameterSpec o = ParameterSpec.builder(optionClass, "o").build();
+    this.listInitializer = FieldSpec.builder(listInitType, "NEW_LIST")
+        .initializer("$L", anonymousClassBuilder("")
+            .addSuperinterface(listInitType)
+            .addMethod(MethodSpec.methodBuilder("apply")
+                .addAnnotation(Override.class)
+                .addParameter(o)
+                .addModifiers(PUBLIC)
+                .returns(listOfArgumentType)
+                .addStatement("return new $T<>()", ArrayList.class)
+                .build())
+            .build())
+        .addModifiers(PRIVATE, STATIC, FINAL)
+        .build();
     TypeName soType = ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, optionClass);
     TypeName entryType = ParameterizedTypeName.get(
         ClassName.get(AbstractMap.Entry.class), optionClass, STRING);
-    this.optMap = FieldSpec.builder(osType, "optMap")
+    this.optMap = FieldSpec.builder(optionMapType, "optMap")
         .addModifiers(PRIVATE, FINAL)
         .build();
     this.shortFlags = FieldSpec.builder(soType, "shortFlags")
@@ -102,43 +119,25 @@ final class Analyser {
     this.value = FieldSpec.builder(STRING, "value").addModifiers(PUBLIC, FINAL).build();
     this.token = FieldSpec.builder(STRING, "token").addModifiers(PUBLIC, FINAL).build();
     this.whichOption = whichOptionMethod(keysClass, longFlags, shortFlags, longNames, shortNames, entryType);
-    this.checkConflict = checkConflictMethod(osType, optionClass);
-    this.addNext = addNextMethod(keysClass, whichOption, entryType, osType, argumentClass, optionClass, checkConflict);
-    this.getParam = getParamMethod(optMap, optionClass, value);
+    this.checkConflict = checkConflictMethod(optionMapType, optionClass);
+    this.addNext = addNextMethod(keysClass, whichOption, entryType, optionMapType, argumentClass,
+        optionClass, checkConflict, listInitializer);
   }
 
-  private static MethodSpec checkConflictMethod(TypeName osType, ClassName optionClass) {
-    ParameterSpec om = ParameterSpec.builder(osType, "optionMap").build();
+  private static MethodSpec checkConflictMethod(TypeName optionMapType, ClassName optionClass) {
+    ParameterSpec optionMap = ParameterSpec.builder(optionMapType, "optionMap").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
     CodeBlock block = CodeBlock.builder()
-        .beginControlFlow("if ($N.containsKey($N))", om, option)
+        .beginControlFlow("if ($N.containsKey($N))", optionMap, option)
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
             "Conflicting token: ", token)
         .endControlFlow()
         .build();
     return MethodSpec.methodBuilder("checkConflict")
-        .addParameters(Arrays.asList(om, option, token))
+        .addParameters(Arrays.asList(optionMap, option, token))
         .addCode(block)
         .addModifiers(PRIVATE, STATIC)
-        .build();
-  }
-
-  private static MethodSpec getParamMethod(FieldSpec optMap, ClassName optionClass, FieldSpec value) {
-    ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
-    //@formatter:off
-    CodeBlock block = CodeBlock.builder()
-        .beginControlFlow("if (!$N.containsKey($N))", optMap, option)
-          .addStatement("return null")
-          .endControlFlow()
-        .addStatement("return $N.get($N).$N", optMap, option, value)
-        .build();
-    //@formatter:on
-    return MethodSpec.methodBuilder("param")
-        .addParameter(option)
-        .addCode(block)
-        .returns(STRING)
-        .addModifiers(PUBLIC)
         .build();
   }
 
@@ -147,16 +146,14 @@ final class Analyser {
         .addType(Keys.create(optionClass, keysClass, longFlags, shortFlags, longNames, shortNames).define())
         .addType(Option.create(constructor, optionClass).define())
         .addType(Argument.create(argumentClass, value, token).define())
+        .addType(Binder.create(binderClass, optionClass, optMap, trash, value, constructor).define())
         .addAnnotation(generatedAnnotation())
         .addFields(Arrays.asList(trash, optMap))
+        .addField(listInitializer)
         .addMethod(privateConstructor())
-        .addMethod(bindMethod())
         .addMethod(checkConflict)
-        .addMethod(getParam)
         .addMethod(addNext)
         .addMethod(whichOption)
-        .addMethod(argumentsMethod())
-        .addMethod(trashMethod())
         .addMethod(parseMethod())
         .addModifiers(PUBLIC, FINAL)
         .build();
@@ -167,21 +164,21 @@ final class Analyser {
     ParameterSpec trash = ParameterSpec.builder(STRING_LIST, "trash").build();
     ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    ParameterSpec om = ParameterSpec.builder(osType, "optionMap").build();
+    ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optionMap").build();
     builder.addStatement("$T $N = new $T<>()", trash.type, trash, ArrayList.class);
     builder.addStatement("$T $N = new $T()", keys.type, keys, keysClass);
-    builder.addStatement("$T $N = new $T<>($T.class)", om.type, om, EnumMap.class, optionClass);
+    builder.addStatement("$T $N = new $T<>($T.class)", optMap.type, optMap, EnumMap.class, optionClass);
 
     // read args
     builder.addStatement("$T $N = $T.stream($N).iterator()", it.type, it, Arrays.class, ARGS);
     builder.beginControlFlow("while ($N.hasNext())", it)
-        .addStatement("$N($N, $N, $N, $N)", addNext, keys, om, trash, it)
+        .addStatement("$N($N, $N, $N, $N)", addNext, keys, optMap, trash, it)
         .endControlFlow();
-    builder.addStatement("return new $T($N, $N)", generatedClass, trash, om);
+    builder.addStatement("return new $T($N, $N)", binderClass, optMap, trash);
     return MethodSpec.methodBuilder("parse")
         .addParameter(ARGS)
         .addCode(builder.build())
-        .returns(generatedClass)
+        .returns(binderClass)
         .addModifiers(PUBLIC, STATIC)
         .build();
   }
@@ -238,12 +235,13 @@ final class Analyser {
   }
 
   private static MethodSpec addNextMethod(ClassName keysClass, MethodSpec whichOption,
-                                          TypeName entryType, TypeName osType,
+                                          TypeName entryType, TypeName optionMapType,
                                           ClassName argumentClass,
                                           ClassName optionClass,
-                                          MethodSpec checkConflict) {
+                                          MethodSpec checkConflict,
+                                          FieldSpec listInitializer) {
     ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
-    ParameterSpec om = ParameterSpec.builder(osType, "optionMap").build();
+    ParameterSpec optionMap = ParameterSpec.builder(optionMapType, "optionMap").build();
     ParameterSpec trash = ParameterSpec.builder(STRING_LIST, "trash").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
 
@@ -261,87 +259,44 @@ final class Analyser {
           .endControlFlow()
         .addStatement("$T $N = $N.getKey()", option.type, option, entry)
         .beginControlFlow("if ($N.flag)", option)
-          .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
-          .addStatement("$N.put($N, new $T($S, $N, $L))", om, option, argumentClass, "t", token, true)
+          .addStatement("$N($N, $N, $N)", checkConflict, optionMap, option, token)
+          .addStatement("$N.computeIfAbsent($N, $N).add(new $T($S, $N, $L))",
+              optionMap, option, listInitializer, argumentClass, "t", token, true)
           .addStatement("return")
           .endControlFlow()
         .addStatement("$T $N = $N.getValue().indexOf('=')", INT, ie, entry)
         .beginControlFlow("if ($N < 0)", ie)
           .beginControlFlow("if ($N.getValue().length() > 2)", entry)
-            .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
-            .addStatement("$N.put($N, new $T($N.getValue().substring(2), $N, $L))",
-                om, option, argumentClass, entry, token, true)
+            .addStatement("$N($N, $N, $N)", checkConflict, optionMap, option, token)
+            .addStatement("$N.computeIfAbsent($N, $N).add(new $T($N.getValue().substring(2), $N, $L))",
+                optionMap, option, listInitializer, argumentClass, entry, token, true)
             .addStatement("return")
             .endControlFlow()
           .beginControlFlow("if (!$N.hasNext())", it)
             .addStatement("$N.add($N)", trash, token)
             .addStatement("return")
             .endControlFlow()
-          .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
-          .addStatement("$N.put($N, new $T($N.next(), $N, $L))", om, option, argumentClass, it, token, false)
+          .addStatement("$N($N, $N, $N)", checkConflict, optionMap, option, token)
+          .addStatement("$N.computeIfAbsent($N, $N).add(new $T($N.next(), $N, $L))",
+              optionMap, option, listInitializer, argumentClass, it, token, false)
           .addStatement("return")
           .endControlFlow()
-        .addStatement("$N($N, $N, $N)", checkConflict, om, option, token)
-        .addStatement("$N.put($N, new $T($N.getValue().substring($N + 1), $N, $L))",
-            om, option, argumentClass, entry, ie, token, true)
+        .addStatement("$N($N, $N, $N)", checkConflict, optionMap, option, token)
+        .addStatement("$N.computeIfAbsent($N, $N).add(new $T($N.getValue().substring($N + 1), $N, $L))",
+            optionMap, option, listInitializer, argumentClass, entry, ie, token, true)
         .build();
     //@formatter:on
     return MethodSpec.methodBuilder("addNext")
-        .addParameters(Arrays.asList(keys, om, trash, it))
+        .addParameters(Arrays.asList(keys, optionMap, trash, it))
         .addModifiers(STATIC, PRIVATE)
         .addCode(block)
         .build();
   }
 
   private MethodSpec privateConstructor() {
-    ParameterSpec tr = ParameterSpec.builder(STRING_LIST, trash.name).build();
-    ParameterSpec om = ParameterSpec.builder(optMap.type, optMap.name).build();
     return MethodSpec.constructorBuilder()
-        .addParameters(Arrays.asList(tr, om))
-        .addStatement("this.$N = $T.unmodifiableList($N)", trash, Collections.class, tr)
-        .addStatement("this.$N = $T.unmodifiableMap($N)", optMap, Collections.class, om)
+        .addStatement("throw new $T()", UnsupportedOperationException.class)
         .addModifiers(PRIVATE)
-        .build();
-  }
-
-  private MethodSpec bindMethod() {
-    CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec options = ParameterSpec.builder(ArrayTypeName.of(optionClass), "options").build();
-    builder.addStatement("$T $N = $T.values()",
-        options.type, options, optionClass);
-    builder.add("return new $T(\n    ", ClassName.get(constructor.getEnclosingElement().asType()));
-    for (int j = 0; j < constructor.getParameters().size(); j++) {
-      VariableElement variableElement = constructor.getParameters().get(j);
-      if (j > 0) {
-        builder.add(",\n    ");
-      }
-      if (isFlag(variableElement)) {
-        builder.add("$N.containsKey($N[$L])", optMap, options, j);
-      } else {
-        builder.add("$N($N[$L])", getParam, options, j);
-      }
-    }
-    builder.add(");\n");
-    return MethodSpec.methodBuilder("bind")
-        .addCode(builder.build())
-        .addModifiers(PUBLIC)
-        .returns(ClassName.get(asType(constructor.getEnclosingElement())))
-        .build();
-  }
-
-  private MethodSpec argumentsMethod() {
-    return MethodSpec.methodBuilder("arguments")
-        .addStatement("return $N", optMap)
-        .returns(optMap.type)
-        .addModifiers(PUBLIC)
-        .build();
-  }
-
-  private MethodSpec trashMethod() {
-    return MethodSpec.methodBuilder("trash")
-        .addStatement("return $N", trash)
-        .returns(trash.type)
-        .addModifiers(PUBLIC)
         .build();
   }
 
