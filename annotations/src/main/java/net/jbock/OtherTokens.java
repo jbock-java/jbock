@@ -7,7 +7,5 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.SOURCE)
-public @interface Description {
-
-  String[] value();
+public @interface OtherTokens {
 }

@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.SOURCE)
-public @interface Description {
+public @interface ArgumentName {
 
-  String[] value();
+  String value() default "VAL";
 }

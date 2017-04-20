@@ -9,6 +9,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.ArgumentName;
 import net.jbock.Description;
 
 import javax.lang.model.element.ExecutableElement;
@@ -19,22 +20,25 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
+import static net.jbock.compiler.OptionType.OTHER_TOKENS;
 
 final class Option {
 
   private static final FieldSpec DESCRIPTION = FieldSpec.builder(
-      Analyser.STRING_LIST, "description", PUBLIC, FINAL).build();
+      Analyser.STRING_LIST, "description", PRIVATE, FINAL).build();
 
   private static final FieldSpec ARGUMENT_NAME = FieldSpec.builder(
-      Analyser.STRING, "descriptionParameter", PUBLIC, FINAL).build();
+      Analyser.STRING, "descriptionParameter", PRIVATE, FINAL).build();
 
   private static final String DD = "--";
   private static final String CS = ", ";
@@ -57,9 +61,10 @@ final class Option {
     this.optionType = optionType;
     this.describeNamesMethod = describeNamesMethod(optionType, optionTypeClass);
     this.descriptionBlockMethod = descriptionBlockMethod();
-    this.needsSuffix = constructor.getParameters().stream()
+    Set<String> uppercaseArgumentNames = constructor.getParameters().stream()
         .map(Option::upcase)
-        .collect(Collectors.toSet()).size() < constructor.getParameters().size();
+        .collect(Collectors.toSet());
+    this.needsSuffix = uppercaseArgumentNames.size() < constructor.getParameters().size();
   }
 
   static Option create(ExecutableElement constructor, ClassName argumentInfo, ClassName optionTypeClass, FieldSpec optionType) {
@@ -86,22 +91,21 @@ final class Option {
     for (int i = 0; i < constructor.getParameters().size(); i++) {
       VariableElement variableElement = constructor.getParameters().get(i);
       Names names = Names.create(variableElement);
-      OptionType optionType = Names.getOptionType(variableElement);
       Description description = variableElement.getAnnotation(Description.class);
+      ArgumentName argName = variableElement.getAnnotation(ArgumentName.class);
       String[] desc = getText(description);
-      String argumentName = optionType == OptionType.FLAG ? null : getArgumentName(description);
+      String argumentName = Processor.ARGLESS.contains(names.optionType) ? null : getArgumentName(argName);
       String enumConstant = enumConstant(i);
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {%s}",
           String.join(", ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
-          Arrays.asList(names.longName, names.shortName, optionTypeClass, optionType, argumentName, STRING);
+          Arrays.asList(names.longName, names.shortName, optionTypeClass, names.optionType, argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
       args.addAll(fixArgs);
       args.addAll(Arrays.asList(desc));
       builder.addEnumConstant(enumConstant, anonymousClassBuilder(format,
           args.toArray()).build());
     }
-    //@formatter:off
     return builder.addModifiers(PUBLIC)
         .addFields(Arrays.asList(LONG_NAME, SHORT_NAME, optionType, ARGUMENT_NAME, DESCRIPTION))
         .addMethod(describeMethod())
@@ -109,9 +113,11 @@ final class Option {
         .addMethod(descriptionBlockMethod)
         .addMethod(shortNameMethod())
         .addMethod(longNameMethod())
+        .addMethod(descriptionMethod())
+        .addMethod(descriptionParameterMethod())
+        .addMethod(typeMethod())
         .addMethod(privateConstructor())
         .build();
-    //@formatter:on
   }
 
   private MethodSpec privateConstructor() {
@@ -126,16 +132,21 @@ final class Option {
         .beginControlFlow("if ($N.length() != 1)", shortNameString)
           .addStatement("throw new $T()", AssertionError.class)
           .endControlFlow()
+        .beginControlFlow("if ($N != null && $N.length() < 1)", longName, longName)
+          .addStatement("throw new $T()", AssertionError.class)
+          .endControlFlow()
         .addStatement("$T $N = $N.equals($S) ? null : $N.charAt(0)",
             Character.class, shortName, shortNameString, " ", shortNameString)
-        .beginControlFlow("if ($N == null && $N == null)", longName, shortName)
+        .beginControlFlow("if ($N != $T.$L && $N == null && $N == null)",
+            optionType, optionTypeClass, OTHER_TOKENS,longName, shortName)
           .addStatement("throw new $T($S)", AssertionError.class, "both names are null")
           .endControlFlow()
         .beginControlFlow("if ($N == null)", description)
-          .addStatement("throw new $T($S)", AssertionError.class, "description")
+          .addStatement("throw new $T($S)", AssertionError.class, description.name)
           .endControlFlow()
-        .beginControlFlow("if ($N != $T.$L && $N == null)", optionType, optionTypeClass, OptionType.FLAG, argumentName)
-          .addStatement("throw new $T($S)", AssertionError.class, "argumentName")
+        .beginControlFlow("if ($N != $T.$L && $N != $T.$L && $N == null)",
+            optionType, optionTypeClass, OptionType.FLAG, optionType, optionTypeClass, OTHER_TOKENS, argumentName)
+          .addStatement("throw new $T($S)", AssertionError.class, argumentName.name)
           .endControlFlow()
         .addStatement("this.$N = $N", LONG_NAME, longName)
         .addStatement("this.$N = $N", SHORT_NAME, shortName)
@@ -151,7 +162,10 @@ final class Option {
   private static MethodSpec shortNameMethod() {
     return MethodSpec.methodBuilder(SHORT_NAME.name)
         .addStatement("return $T.toString($N, null)", Objects.class, SHORT_NAME)
-        .returns(Analyser.STRING)
+        .returns(STRING)
+        .addJavadoc("The short name is exactly one character in length, or null.\n" +
+            "\n" +
+            "@return short name, without the '-'; possibly null\n")
         .addModifiers(PUBLIC)
         .build();
   }
@@ -159,7 +173,37 @@ final class Option {
   private static MethodSpec longNameMethod() {
     return MethodSpec.methodBuilder(LONG_NAME.name)
         .addStatement("return $N", LONG_NAME)
-        .returns(Analyser.STRING)
+        .returns(LONG_NAME.type)
+        .addJavadoc("The long name is at least one character in length, or null.\n" +
+            "\n" +
+            "@return long name, without the '--'; possibly null\n")
+        .addModifiers(PUBLIC)
+        .build();
+  }
+
+  private MethodSpec descriptionMethod() {
+    return MethodSpec.methodBuilder(DESCRIPTION.name)
+        .addStatement("return $N", DESCRIPTION)
+        .returns(DESCRIPTION.type)
+        .addJavadoc("@return description lines\n")
+        .addModifiers(PUBLIC)
+        .build();
+  }
+
+  private static MethodSpec descriptionParameterMethod() {
+    return MethodSpec.methodBuilder(ARGUMENT_NAME.name)
+        .addStatement("return $N", ARGUMENT_NAME)
+        .addJavadoc("@return example parameter name, possibly null\n")
+        .returns(ARGUMENT_NAME.type)
+        .addModifiers(PUBLIC)
+        .build();
+  }
+
+  private MethodSpec typeMethod() {
+    return MethodSpec.methodBuilder(optionType.name)
+        .addStatement("return $N", optionType)
+        .addJavadoc("@return option type\n")
+        .returns(optionType.type)
         .addModifiers(PUBLIC)
         .build();
   }
@@ -173,26 +217,25 @@ final class Option {
     if (description == null) {
       return new String[]{"--- description goes here ---"};
     }
-    return description.lines();
+    return description.value();
   }
 
-  private static String getArgumentName(Description description) {
-    if (description == null) {
+  private static String getArgumentName(ArgumentName argumentName) {
+    if (argumentName == null) {
       return "VAL";
     }
-    return description.argumentName();
+    return argumentName.value();
   }
 
   private static MethodSpec descriptionBlockMethod() {
     ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
     ParameterSpec sIndent = ParameterSpec.builder(STRING, "indentString").build();
     ParameterSpec aIndent = ParameterSpec.builder(ArrayTypeName.of(TypeName.CHAR), "a").build();
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = new $T[$N]", aIndent.type, aIndent,
-        TypeName.CHAR, indent);
-    builder.addStatement("$T.fill($N, ' ')", Arrays.class, aIndent);
-    builder.addStatement("$T $N = new $T($N)", STRING, sIndent, STRING, aIndent);
-    builder.addStatement("return $N + $T.join('\\n' + $N, $N)", sIndent, STRING, sIndent, DESCRIPTION);
+    CodeBlock.Builder builder = CodeBlock.builder()
+        .addStatement("$T $N = new $T[$N]", aIndent.type, aIndent, TypeName.CHAR, indent)
+        .addStatement("$T.fill($N, ' ')", Arrays.class, aIndent)
+        .addStatement("$T $N = new $T($N)", STRING, sIndent, STRING, aIndent)
+        .addStatement("return $N + $T.join('\\n' + $N, $N)", sIndent, STRING, sIndent, DESCRIPTION);
     return MethodSpec.methodBuilder("descriptionBlock")
         .addModifiers(PUBLIC)
         .addParameter(indent)
@@ -216,7 +259,7 @@ final class Option {
         .addModifiers(PUBLIC)
         .returns(Analyser.STRING)
         .addParameter(indent)
-        .addJavadoc("Describes the argument in a human readable way.\n" +
+        .addJavadoc("Convenience method to get a formatted description of the argument.\n" +
             "\n" +
             "@param indent number of space characters to indent the description with\n" +
             "@return printable description\n")
@@ -227,32 +270,35 @@ final class Option {
   private static MethodSpec describeNamesMethod(FieldSpec optionType, ClassName optionTypeClass) {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     //@formatter:off
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.FLAG)
+    CodeBlock.Builder builder = CodeBlock.builder()
+      .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.OTHER_TOKENS)
+        .addStatement("return '[' + $N + ']'", LONG_NAME)
+        .endControlFlow()
+      .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.FLAG)
+        .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
+        .beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
+          .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
+          .addStatement("$N.append($S).append($S).append($N)", sb, CS, DD, LONG_NAME)
+          .endControlFlow()
+        .beginControlFlow("else if ($N != null)", LONG_NAME)
+          .addStatement("$N.append($S).append($N)", sb, DD, LONG_NAME)
+          .endControlFlow()
+        .beginControlFlow("else")
+          .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
+          .endControlFlow()
+        .addStatement("return $N.toString()", sb)
+        .endControlFlow()
       .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
       .beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
         .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
-        .addStatement("$N.append($S).append($S).append($N)", sb, CS, DD, LONG_NAME)
+        .addStatement("$N.append($S).append($S).append($N).append('=').append($N)", sb, CS, DD, LONG_NAME, ARGUMENT_NAME)
         .endControlFlow()
       .beginControlFlow("else if ($N != null)", LONG_NAME)
-        .addStatement("$N.append($S).append($N)", sb, DD, LONG_NAME)
+        .addStatement("$N.append($S).append($N).append(' ').append($N)", sb, DD, LONG_NAME, ARGUMENT_NAME)
         .endControlFlow()
       .beginControlFlow("else")
-        .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
+        .addStatement("$N.append('-').append($N).append(' ').append($N)", sb, SHORT_NAME, ARGUMENT_NAME)
         .endControlFlow()
-      .addStatement("return $N.toString()", sb)
-    .endControlFlow();
-    builder.addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
-        .beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
-          .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
-          .addStatement("$N.append($S).append($S).append($N).append('=').append($N)", sb, CS, DD, LONG_NAME, ARGUMENT_NAME)
-          .endControlFlow()
-        .beginControlFlow("else if ($N != null)", LONG_NAME)
-          .addStatement("$N.append($S).append($N).append(' ').append($N)", sb, DD, LONG_NAME, ARGUMENT_NAME)
-          .endControlFlow()
-        .beginControlFlow("else")
-          .addStatement("$N.append('-').append($N).append(' ').append($N)", sb, SHORT_NAME, ARGUMENT_NAME)
-          .endControlFlow()
       .addStatement("return $N.toString()", sb);
     //@formatter:on
     return MethodSpec.methodBuilder("describeNames")

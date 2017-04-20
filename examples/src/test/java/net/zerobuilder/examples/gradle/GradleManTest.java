@@ -90,7 +90,7 @@ public final class GradleManTest {
     assertThat(binder.arguments().get(Option.MESSAGE).get(0).reconstruct(), is(args));
     assertThat(binder.arguments().get(Option.MESSAGE).get(0).token, is("-m"));
     assertThat(binder.arguments().get(Option.MESSAGE).get(0).value, is("hello"));
-    assertThat(binder.trash().size(), is(0));
+    assertThat(binder.free().size(), is(0));
   }
 
   @Test
@@ -102,7 +102,7 @@ public final class GradleManTest {
     assertThat(binder.arguments().size(), is(1));
     assertThat(binder.arguments().get(Option.MESSAGE).get(0).token, is("--message=hello"));
     assertThat(binder.arguments().get(Option.MESSAGE).get(0).value, is("hello"));
-    assertThat(binder.trash().size(), is(0));
+    assertThat(binder.free().size(), is(0));
   }
 
   @Test
@@ -112,7 +112,7 @@ public final class GradleManTest {
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(1));
     assertThat(gradleMan.file.get(0), is("bar.txt"));
-    assertThat(binder.trash().size(), is(0));
+    assertThat(binder.free().size(), is(0));
   }
 
   @Test
@@ -123,7 +123,7 @@ public final class GradleManTest {
     assertThat(gradleMan.file.size(), is(1));
     assertThat(gradleMan.file.get(0), is("bar.txt"));
     assertThat(gradleMan.message, is("hello"));
-    assertThat(binder.trash().size(), is(0));
+    assertThat(binder.free().size(), is(0));
   }
 
   @Test
@@ -132,8 +132,8 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--file=file"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(0));
-    assertThat(binder.trash().size(), is(1));
-    assertThat(binder.trash().get(0), is("--file=file"));
+    assertThat(binder.free().size(), is(1));
+    assertThat(binder.free().get(0), is("--file=file"));
   }
 
   @Test
@@ -141,7 +141,7 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--dir=dir"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.dir, is("dir"));
-    assertThat(binder.trash().size(), is(0));
+    assertThat(binder.free().size(), is(0));
   }
 
   @Test
@@ -150,15 +150,15 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"-c", "hello"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.cmos, is(true));
-    assertThat(binder.trash().size(), is(1));
-    assertThat(binder.trash().get(0), is("hello"));
+    assertThat(binder.free().size(), is(1));
+    assertThat(binder.free().get(0), is("hello"));
   }
 
   @Test
   public void testNonsense() {
     // bogus options
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"hello", "goodbye"});
-    assertThat(binder.trash().size(), is(2));
+    assertThat(binder.free().size(), is(2));
   }
 
   @Test
@@ -166,20 +166,20 @@ public final class GradleManTest {
     Option[] options = Option.values();
     assertThat(options.length, is(4));
     assertThat(Arrays.stream(options)
-            .filter(o -> o.type != OptionType.FLAG)
-            .map(o -> o.longName())
+            .filter(o -> o.type() != OptionType.FLAG)
+            .map(Option::longName)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
         is(new HashSet<>(asList("message", "dir"))));
     assertThat(Arrays.stream(options)
-            .filter(o -> o.type != OptionType.FLAG)
-            .map(o -> o.shortName())
+            .filter(o -> o.type() != OptionType.FLAG)
+            .map(Option::shortName)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
         is(new HashSet<>(asList("f", "m"))));
     assertThat(Arrays.stream(options)
-            .filter(o -> o.type == OptionType.FLAG)
-            .map(o -> o.shortName())
+            .filter(o -> o.type() == OptionType.FLAG)
+            .map(Option::shortName)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
         is(new HashSet<>(singletonList("c"))));
@@ -187,23 +187,23 @@ public final class GradleManTest {
 
   @Test
   public void testMessageOption() {
-    assertThat(Option.MESSAGE.description.size(), is(2));
-    assertThat(Option.MESSAGE.description.get(0), is("the message"));
-    assertThat(Option.MESSAGE.description.get(1), is("message goes here"));
-    assertThat(Option.MESSAGE.type, is(OptionType.STRING));
+    assertThat(Option.MESSAGE.description().size(), is(2));
+    assertThat(Option.MESSAGE.description().get(0), is("the message"));
+    assertThat(Option.MESSAGE.description().get(1), is("message goes here"));
+    assertThat(Option.MESSAGE.type(), is(OptionType.STRING));
     assertThat(Option.MESSAGE.longName(), is("message"));
     assertThat(Option.MESSAGE.shortName(), is("m"));
-    assertThat(Option.MESSAGE.descriptionParameter, is("MESSAGE"));
+    assertThat(Option.MESSAGE.descriptionParameter(), is("MESSAGE"));
   }
 
   @Test
   public void testCmosOption() {
-    assertThat(Option.CMOS.description.size(), is(1));
-    assertThat(Option.CMOS.description.get(0), is("cmos flag"));
-    assertThat(Option.CMOS.type, is(OptionType.FLAG));
+    assertThat(Option.CMOS.description().size(), is(1));
+    assertThat(Option.CMOS.description().get(0), is("cmos flag"));
+    assertThat(Option.CMOS.type(), is(OptionType.FLAG));
     assertThat(Option.CMOS.longName(), is(nullValue()));
     assertThat(Option.CMOS.shortName(), is("c"));
-    assertThat(Option.CMOS.descriptionParameter, is(nullValue()));
+    assertThat(Option.CMOS.descriptionParameter(), is(nullValue()));
   }
 
   @Test

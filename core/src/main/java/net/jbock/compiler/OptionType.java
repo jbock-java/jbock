@@ -7,7 +7,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 
 enum OptionType {
 
-  FLAG, STRING, LIST;
+  FLAG, STRING, LIST, OTHER_TOKENS;
 
   static TypeSpec define(ClassName optionTypeClass) {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(optionTypeClass);

@@ -15,40 +15,46 @@ this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upl
 final class Curl {
 
   final List<String> headers;
-  final String url;
+  final List<String> urls;
+  final String method;
   final boolean verbose;
 
-  Curl (@ShortName('H') List<String> headers,
-        @LongName("url") String url,
-        @ShortName('v') boolean verbose) {
+  @CommandLineArguments
+  Curl(@ShortName('H') @Description("List<String> for arguments that appear multiple times")
+           List<String> headers,
+       @ShortName('v') @Description("boolean for flags")
+           boolean verbose,
+       @ShortName('X') @Description("String for regular arguments")
+           String method,
+       @OtherTokens @Description("Everything that isn't '-v' or follows '-H' or '-X'")
+           List<String> urls) {
     this.headers = headers;
-    this.url = Objects.requireNonNull(url, "url is required");
     this.verbose = verbose;
+    this.method = method == null ? "GET" : method;
+    this.urls = urls;
   }
 }
 ````
 
 ### Notes
 
-* Long option must always be passed `--key=VALUE` style.
+* Long options must always be passed `--key=VALUE` style.
 * Short options may be passed either `-k value` or `-kvalue` style.
 * Only arguments of type `String`, `List<String>` and `boolean` may be declared in the constructor.
 * Repeating keys are possible, if the corresponding constructor argument is of type `List<String>`.
-* `boolean` arguments are called "flags". They do <em>not</em> take arguments! If `-v` is a flag,
-  then `"-v false"` means that `-v` is <em>true</em>, and the unknown token `false` is ignored.
+* `boolean` arguments are called "flags". They do <em>not</em> take arguments. In the example above, 
+  `"-v false"` means that `verbose` is <em>true</em>, and `"false"` goes in `urls`.
 * Absent `String` arguments will be passed as `null` to the constructor.
 * There's no built-in concept of required options.
+  Consider performing null-checks in the constructor.
 * Class `CurlParser` will be generated in the same package, 
-  with a static method `Binder CurlParser.parse(String[])`.
-* `CurlParser.Option` is an `enum` of the constructor arguments.
-* `CurlParser#parse` will throw `IllegalArgumentException` if the input looks wrong.
-* `Binder#bind()` returns the `Curl` instance
-* `Binder#trash()` contains unknown / ignored tokens.
-  It is probably a good idea to check and even abort if this isn't empty.
-  An advanced use may read the `url` parameter from the trash.
-* `Binder#arguments()` returns the parse result for closer inspection, before invoking `bind()`.
+  with a static method `CurlParser.Binder CurlParser#parse(String[])`.
+* `CurlParse.Binder#bind()` invokes the constructor.
+* `CurlParser.Option` is a generated `enum` of the constructor arguments.
+* `CurlParser#parse` will throw `IllegalArgumentException` if the input is invalid, 
+  like `-XGET -XPOST`.
 * There's no built-in concept of converters. 
-  One possible place for conversions such as `Integer.parseInt` would be inside the constructor.
+  One possible place for conversions, such as `Integer.parseInt`, would be inside the constructor.
 * Each argument may have both a short and long name.
 * If neither `@ShortName` nor `@LongName` is specified,
   then the argument name becomes the default long name, and no short name is defined.

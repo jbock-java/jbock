@@ -42,7 +42,7 @@ final class Analyser {
   private static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
   private static final ParameterSpec ARGS = ParameterSpec.builder(STRING_ARRAY, "args")
       .build();
-  private static final FieldSpec trash = FieldSpec.builder(STRING_LIST, "trash", PRIVATE, FINAL)
+  private static final FieldSpec free = FieldSpec.builder(STRING_LIST, "free", PRIVATE, FINAL)
       .build();
 
   private final ExecutableElement constructor;
@@ -80,7 +80,7 @@ final class Analyser {
     this.optionTypeClass = generatedClass.nestedClass("OptionType");
     ParameterizedTypeName listOfArgumentType = ParameterizedTypeName.get(
         ClassName.get(List.class), argumentClass);
-    this.optionType = FieldSpec.builder(optionTypeClass, "type", PUBLIC, FINAL).build();
+    this.optionType = FieldSpec.builder(optionTypeClass, "type", PRIVATE, FINAL).build();
     this.option = Option.create(constructor, generatedClass.nestedClass("Option"), optionTypeClass, optionType);
     this.optionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
         option.optionClass, listOfArgumentType);
@@ -147,7 +147,7 @@ final class Analyser {
             shortFlags, longNames, shortNames, optionType).define())
         .addType(Option.create(constructor, option.optionClass, optionTypeClass, optionType).define())
         .addType(Argument.create(argumentClass, value, token).define())
-        .addType(Binder.create(binderClass, option, argumentClass, optMap, trash, value, constructor).define())
+        .addType(Binder.create(binderClass, option, argumentClass, optMap, free, value, constructor).define())
         .addType(OptionType.define(optionTypeClass))
         .addAnnotation(generatedAnnotation())
         .addMethod(privateConstructor())
@@ -162,7 +162,7 @@ final class Analyser {
   }
 
   private MethodSpec parseMethod() {
-    ParameterSpec trash = ParameterSpec.builder(STRING_LIST, "trash").build();
+    ParameterSpec trash = ParameterSpec.builder(STRING_LIST, "free").build();
     ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optionMap").build();
@@ -323,7 +323,7 @@ final class Analyser {
                                        MethodSpec checkConflict) {
     ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
     ParameterSpec optionMap = ParameterSpec.builder(optionMapType, "optionMap").build();
-    ParameterSpec trash = ParameterSpec.builder(STRING_LIST, "trash").build();
+    ParameterSpec trash = ParameterSpec.builder(STRING_LIST, "free").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();

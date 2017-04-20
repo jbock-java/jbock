@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import net.jbock.OtherTokens;
 import net.jbock.LongName;
 import net.jbock.ShortName;
 
@@ -15,20 +16,17 @@ final class Names {
 
   final char shortName;
   final String longName;
+  final OptionType optionType;
 
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
-  private Names(Character shortName, String longName) {
+  private Names(Character shortName, String longName, OptionType optionType) {
+    this.optionType = optionType;
     this.shortName = shortName == null ? ' ' : shortName;
     this.longName = longName;
   }
 
-  static OptionType getOptionType(VariableElement variableElement) {
-    TypeName type = TypeName.get(variableElement.asType());
-    return getOptionType(type);
-  }
-
-  static OptionType getOptionType(TypeName type) {
+  private static OptionType getOptionType(TypeName type) {
     if (type.equals(TypeName.BOOLEAN)) {
       return OptionType.FLAG;
     }
@@ -44,10 +42,26 @@ final class Names {
   static Names create(VariableElement variableElement) {
     LongName longName = variableElement.getAnnotation(LongName.class);
     ShortName shortName = variableElement.getAnnotation(ShortName.class);
+    OtherTokens otherTokens = variableElement.getAnnotation(OtherTokens.class);
+    TypeName type = TypeName.get(variableElement.asType());
+    if (otherTokens != null) {
+      if (shortName != null) {
+        throw new ValidationException(Diagnostic.Kind.ERROR,
+            "@OtherTokens may not be combined with @ShortName", variableElement);
+      }
+      if (longName != null) {
+        throw new ValidationException(Diagnostic.Kind.ERROR,
+            "@OtherTokens may not be combined with @LongName", variableElement);
+      }
+      if (!isList(type)) {
+        throw new ValidationException(Diagnostic.Kind.ERROR,
+            "@OtherTokens must be a java.util.List<String>", variableElement);
+      }
+      return new Names(null, variableElement.getSimpleName().toString(), OptionType.OTHER_TOKENS);
+    }
+    OptionType optionType = getOptionType(type);
     String ln = null;
     Character sn = null;
-    TypeName type = TypeName.get(variableElement.asType());
-    OptionType optionType = getOptionType(type);
     if (optionType == null) {
       throw new ValidationException(Diagnostic.Kind.ERROR,
           String.format("Only String, boolean or java.util.List<String> allowed, but parameter %s has type %s",
@@ -68,7 +82,7 @@ final class Names {
       checkName(variableElement, Character.toString(sn));
     }
     checkName(variableElement, ln);
-    return new Names(sn, ln);
+    return new Names(sn, ln, optionType);
   }
 
   private static boolean isList(TypeName type) {

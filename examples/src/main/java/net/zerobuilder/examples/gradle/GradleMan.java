@@ -1,6 +1,7 @@
 package net.zerobuilder.examples.gradle;
 
 
+import net.jbock.ArgumentName;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
 import net.jbock.LongName;
@@ -27,15 +28,20 @@ final class GradleMan {
   @CommandLineArguments
   GradleMan(@LongName("message")
             @ShortName('m')
-            @Description(lines = {"the message", "message goes here"}, argumentName = "MESSAGE")
+            @ArgumentName("MESSAGE")
+            @Description({"the message", "message goes here"})
                 String message,
             @ShortName('f')
-            @Description(lines = "the files", argumentName = "FILE")
+            @Description("the files")
+            @ArgumentName("FILE")
                 List<String> file,
-            @Description(lines = "the dir", argumentName = "DIR")
+            @Description("the dir")
+            @ArgumentName("DIR")
                 String dir,
             @ShortName('c')
-            @Description(lines = "cmos flag") boolean cmos) {
+            @Description("cmos flag")
+                boolean cmos) {
+
     this.message = message;
     this.file = file;
     this.dir = dir;

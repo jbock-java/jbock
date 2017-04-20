@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.ArgumentName;
 import net.jbock.CommandLineArguments;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -17,6 +18,7 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -27,6 +29,7 @@ import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static net.jbock.compiler.LessElements.asType;
+import static net.jbock.compiler.OptionType.OTHER_TOKENS;
 
 public final class Processor extends AbstractProcessor {
 
@@ -124,6 +127,8 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
+  static final Set<OptionType> ARGLESS = EnumSet.of(OptionType.FLAG, OTHER_TOKENS);
+
   private void staticChecks(ExecutableElement constructor) {
     if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
       throw new ValidationException(ERROR, "The constructor may not be private", constructor);
@@ -131,8 +136,13 @@ public final class Processor extends AbstractProcessor {
     List<? extends VariableElement> parameters = constructor.getParameters();
     Set<Character> checkShort = new HashSet<>();
     Set<String> checkLong = new HashSet<>();
+    boolean[] remainingFound = new boolean[1];
     parameters.forEach(p -> {
       Names names = Names.create(p);
+      if (ARGLESS.contains(names.optionType) && p.getAnnotation(ArgumentName.class) != null) {
+        throw new ValidationException(Diagnostic.Kind.ERROR,
+            "@ArgumentName not allowed here", p);
+      }
       if (names.longName != null && !checkLong.add(names.longName)) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
             "Duplicate longName: " + names.longName, p);
@@ -140,6 +150,13 @@ public final class Processor extends AbstractProcessor {
       if (names.shortName != ' ' && !checkShort.add(names.shortName)) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
             "Duplicate shortName: " + names.shortName, p);
+      }
+      if (names.optionType == OptionType.OTHER_TOKENS) {
+        if (remainingFound[0]) {
+          throw new ValidationException(Diagnostic.Kind.ERROR,
+              "Only one parameter may have @OtherTokens", p);
+        }
+        remainingFound[0] = true;
       }
     });
   }

@@ -26,7 +26,7 @@ final class Binder {
   private final Option option;
   private final ClassName argumentClass;
   private final FieldSpec optMap;
-  private final FieldSpec trash;
+  private final FieldSpec free;
   private final FieldSpec value;
   private final ExecutableElement constructor;
 
@@ -34,13 +34,13 @@ final class Binder {
                  Option option,
                  ClassName argumentClass,
                  FieldSpec optMap,
-                 FieldSpec trash,
+                 FieldSpec free,
                  FieldSpec value, ExecutableElement constructor) {
     this.binderClass = binderClass;
     this.option = option;
     this.argumentClass = argumentClass;
     this.optMap = optMap;
-    this.trash = trash;
+    this.free = free;
     this.value = value;
     this.constructor = constructor;
   }
@@ -49,23 +49,23 @@ final class Binder {
                        Option optionClass,
                        ClassName argumentClass,
                        FieldSpec optMap,
-                       FieldSpec trash,
+                       FieldSpec free,
                        FieldSpec value,
                        ExecutableElement constructor) {
     return new Binder(binderClass, optionClass,
         argumentClass,
-        optMap, trash, value, constructor);
+        optMap, free, value, constructor);
   }
 
   TypeSpec define() {
     TypeName originalClass = TypeName.get(constructor.getEnclosingElement().asType());
     return TypeSpec.classBuilder(binderClass)
-        .addFields(Arrays.asList(optMap, trash))
+        .addFields(Arrays.asList(optMap, free))
         .addModifiers(PUBLIC, STATIC, FINAL)
         .addMethod(privateConstructor())
         .addMethod(bindMethod())
         .addMethod(argumentsMethod())
-        .addMethod(trashMethod())
+        .addMethod(freeMethod())
         .addJavadoc("Parsed arguments, ready to be passed to the constructor.\n\n" +
                 "@see $T#$T($L)\n", originalClass, originalClass,
             Option.constructorArgumentsForJavadoc(constructor))
@@ -81,7 +81,7 @@ final class Binder {
       if (j > 0) {
         builder.add(",\n    ");
       }
-      OptionType optionType = Names.getOptionType(variableElement);
+      OptionType optionType = Names.create(variableElement).optionType;
       if (optionType == OptionType.FLAG) {
         builder.add("$N.containsKey($T.$N)", optMap, option.optionClass, option.enumConstant(j));
       } else if (optionType == OptionType.STRING) {
@@ -89,6 +89,8 @@ final class Binder {
             optMap, option.optionClass, option.enumConstant(j), Collections.class)
             .add("        .map($N -> $N.$N)\n", a, a, value)
             .add("        .findFirst().orElse(null)");
+      } else if (optionType == OptionType.OTHER_TOKENS) {
+        builder.add("$N", free);
       } else {
         builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
             optMap, option.optionClass, option.enumConstant(j), Collections.class)
@@ -101,9 +103,9 @@ final class Binder {
     return MethodSpec.methodBuilder("bind")
         .addCode(builder.build())
         .addModifiers(PUBLIC)
-        .addJavadoc("Invokes the constructor.\n\n" +
-            "@return an instance of {@link $T},\n        unless " +
-            "the constructor itself throws an exception\n", originalClass)
+        .addJavadoc("Invokes the constructor.\n" +
+            "\n" +
+            "@return an instance of {@link $T}\n", originalClass)
         .returns(ClassName.get(asType(constructor.getEnclosingElement())))
         .build();
   }
@@ -112,9 +114,9 @@ final class Binder {
     CodeBlock.Builder builder = CodeBlock.builder();
     ParameterSpec optMap = ParameterSpec.builder(this.optMap.type, this.optMap.name)
         .build();
-    ParameterSpec trash = ParameterSpec.builder(this.trash.type, this.trash.name)
+    ParameterSpec trash = ParameterSpec.builder(this.free.type, this.free.name)
         .build();
-    builder.addStatement("this.$N = $T.unmodifiableList($N)", this.trash, Collections.class, trash);
+    builder.addStatement("this.$N = $T.unmodifiableList($N)", this.free, Collections.class, trash);
     builder.addStatement("this.$N = $T.unmodifiableMap($N)", this.optMap, Collections.class, optMap);
     return MethodSpec.constructorBuilder()
         .addParameters(Arrays.asList(optMap, trash))
@@ -135,14 +137,13 @@ final class Binder {
         .build();
   }
 
-  private MethodSpec trashMethod() {
-    return MethodSpec.methodBuilder("trash")
-        .addStatement("return $N", trash)
-        .addJavadoc("Collection of tokens that the parser couldn't make any sense of.\n" +
-            "Something is probably wrong if the trash is not empty.\n" +
+  private MethodSpec freeMethod() {
+    return MethodSpec.methodBuilder("free")
+        .addStatement("return $N", free)
+        .addJavadoc("Collection of all unbound tokens.\n" +
             "\n" +
             "@return tokens that the parser ignored, an unmodifiable list\n")
-        .returns(trash.type)
+        .returns(free.type)
         .addModifiers(PUBLIC)
         .build();
   }
