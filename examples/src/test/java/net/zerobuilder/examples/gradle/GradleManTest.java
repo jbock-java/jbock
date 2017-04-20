@@ -34,7 +34,7 @@ public final class GradleManTest {
     // there's nothing after -m
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Missing value: -m");
-    GradleManParser.parse(new String[]{"--message=hello", "-m"}).bind();
+    GradleManParser.parse(new String[]{"-m"}).bind();
   }
 
   @Test
@@ -49,6 +49,13 @@ public final class GradleManTest {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: --message=goodbye");
     GradleManParser.parse(new String[]{"--message=hello", "--message=goodbye"});
+  }
+
+  @Test
+  public void testShortOptionConfusion() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("The argument to -m may not start with '-', use the long form instead: -f");
+    GradleManParser.parse(new String[]{"-m", "-f"});
   }
 
   @Test

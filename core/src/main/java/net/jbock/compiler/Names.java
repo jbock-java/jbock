@@ -49,7 +49,9 @@ final class Names {
     OptionType optionType = getOptionType(type);
     if (optionType == null) {
       throw new ValidationException(Diagnostic.Kind.ERROR,
-          "Only String, boolean or List<String> allowed: " + variableElement.getSimpleName().toString(),
+          String.format("Only String, boolean or java.util.List<String> allowed, but parameter %s has type %s",
+              variableElement.getSimpleName(),
+              TypeName.get(variableElement.asType())),
           variableElement);
     }
     if (optionType == OptionType.FLAG) {

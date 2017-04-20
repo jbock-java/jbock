@@ -6,6 +6,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.Description;
@@ -69,15 +70,18 @@ final class Option {
     return upcase(constructor.getParameters().get(i)) + suffix;
   }
 
+  static String constructorArgumentsForJavadoc(ExecutableElement constructor) {
+    return constructor.getParameters().stream()
+        .map(variableElement -> TypeName.get(variableElement.asType()))
+        .map(t -> t instanceof ParameterizedTypeName ? ((ParameterizedTypeName) t).rawType : t)
+        .map(TypeName::toString)
+        .map(s -> s.replaceAll("^java.lang.", ""))
+        .collect(Collectors.joining(",\n       "));
+  }
+
   TypeSpec define() {
-    ClassName originalClass = (ClassName) TypeName.get(constructor.getEnclosingElement().asType());
-    String originalClassName = originalClass.simpleName();
     TypeSpec.Builder builder = TypeSpec.enumBuilder(optionClass)
-        .addJavadoc(String.format("Arguments of {@link %s#%s(\n  %s\n)}\n", originalClassName, originalClassName,
-            constructor.getParameters().stream()
-                .map(variableElement -> TypeName.get(variableElement.asType()).toString())
-                .map(s -> s.replaceAll("^java.lang.", ""))
-                .collect(Collectors.joining(",\n  "))));
+        .addJavadoc("The enum constants correspond to the constructor arguments.\n");
     for (int i = 0; i < constructor.getParameters().size(); i++) {
       VariableElement variableElement = constructor.getParameters().get(i);
       Names names = Names.create(variableElement);
@@ -185,6 +189,10 @@ final class Option {
         .addModifiers(PUBLIC)
         .returns(Analyser.STRING)
         .addParameter(indent)
+        .addJavadoc("Describes the argument in a human readable way.\n" +
+            "\n" +
+            "@param indent number of space characters to indent the description with\n" +
+            "@return printable description\n")
         .addCode(codeBlock)
         .build();
   }

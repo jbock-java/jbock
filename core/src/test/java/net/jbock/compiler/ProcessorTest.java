@@ -57,7 +57,8 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Only String or boolean allowed: a");
+        .withErrorContaining("Only String, boolean or java.util.List<String> allowed, " +
+            "but parameter a has type int");
   }
 
   @Test
@@ -89,6 +90,7 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Only String or boolean allowed: a");
+        .withErrorContaining("Only String, boolean or java.util.List<String> allowed, but parameter a " +
+            "has type java.lang.Boolean");
   }
 }

@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import javax.lang.model.element.ExecutableElement;
@@ -24,7 +25,6 @@ final class Binder {
   private final ClassName binderClass;
   private final Option option;
   private final ClassName argumentClass;
-  private final MethodSpec getParam;
   private final FieldSpec optMap;
   private final FieldSpec trash;
   private final FieldSpec value;
@@ -32,14 +32,13 @@ final class Binder {
 
   private Binder(ClassName binderClass,
                  Option option,
-                 ClassName argumentClass, MethodSpec getParam,
+                 ClassName argumentClass,
                  FieldSpec optMap,
                  FieldSpec trash,
                  FieldSpec value, ExecutableElement constructor) {
     this.binderClass = binderClass;
     this.option = option;
     this.argumentClass = argumentClass;
-    this.getParam = getParam;
     this.optMap = optMap;
     this.trash = trash;
     this.value = value;
@@ -54,37 +53,22 @@ final class Binder {
                        FieldSpec value,
                        ExecutableElement constructor) {
     return new Binder(binderClass, optionClass,
-        argumentClass, getParamMethod(optMap, optionClass.optionClass, value),
+        argumentClass,
         optMap, trash, value, constructor);
   }
 
-  private static MethodSpec getParamMethod(FieldSpec optMap, ClassName optionClass, FieldSpec value) {
-    ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
-    //@formatter:off
-    CodeBlock block = CodeBlock.builder()
-        .beginControlFlow("if (!$N.containsKey($N))", optMap, option)
-          .addStatement("return null")
-          .endControlFlow()
-        .addStatement("return $N.get($N).get(0).$N", optMap, option, value)
-        .build();
-    //@formatter:on
-    return MethodSpec.methodBuilder("param")
-        .addParameter(option)
-        .addCode(block)
-        .returns(Analyser.STRING)
-        .addModifiers(PRIVATE)
-        .build();
-  }
-
   TypeSpec define() {
+    TypeName originalClass = TypeName.get(constructor.getEnclosingElement().asType());
     return TypeSpec.classBuilder(binderClass)
         .addFields(Arrays.asList(optMap, trash))
         .addModifiers(PUBLIC, STATIC, FINAL)
         .addMethod(privateConstructor())
-        .addMethod(getParam)
         .addMethod(bindMethod())
         .addMethod(argumentsMethod())
         .addMethod(trashMethod())
+        .addJavadoc("Parsed arguments, ready to be passed to the constructor.\n\n" +
+                "@see $T#$T($L)\n", originalClass, originalClass,
+            Option.constructorArgumentsForJavadoc(constructor))
         .build();
   }
 
@@ -113,9 +97,13 @@ final class Binder {
       }
     }
     builder.add(");\n");
+    TypeName originalClass = TypeName.get(constructor.getEnclosingElement().asType());
     return MethodSpec.methodBuilder("bind")
         .addCode(builder.build())
         .addModifiers(PUBLIC)
+        .addJavadoc("Invokes the constructor.\n\n" +
+            "@return an instance of {@link $T},\n        unless " +
+            "the constructor itself throws an exception\n", originalClass)
         .returns(ClassName.get(asType(constructor.getEnclosingElement())))
         .build();
   }
@@ -138,6 +126,10 @@ final class Binder {
   private MethodSpec argumentsMethod() {
     return MethodSpec.methodBuilder("arguments")
         .addStatement("return $N", optMap)
+        .addJavadoc("Early access to the parsing results,\n" +
+            "for manual inspection before invoking {@link this#bind()}\n" +
+            "\n" +
+            "@return an unmodifiable map\n")
         .returns(optMap.type)
         .addModifiers(PUBLIC)
         .build();
@@ -146,6 +138,10 @@ final class Binder {
   private MethodSpec trashMethod() {
     return MethodSpec.methodBuilder("trash")
         .addStatement("return $N", trash)
+        .addJavadoc("Collection of tokens that the parser couldn't make any sense of.\n" +
+            "Something is probably wrong if the trash is not empty.\n" +
+            "\n" +
+            "@return tokens that the parser ignored, an unmodifiable list\n")
         .returns(trash.type)
         .addModifiers(PUBLIC)
         .build();

@@ -20,7 +20,10 @@ import static net.jbock.compiler.Analyser.STRING;
 final class Argument {
 
   private static final FieldSpec ATOMIC = FieldSpec.builder(TypeName.BOOLEAN, "atomic")
-      .addModifiers(PUBLIC, FINAL).build();
+      .addJavadoc("false iff this argument was read in two separate tokens;\n" +
+          "which is only possible for non-flag arguments that were passed in 'short' style\n")
+      .addModifiers(PUBLIC, FINAL)
+      .build();
 
   private final ClassName valueClass;
   private final FieldSpec value;
