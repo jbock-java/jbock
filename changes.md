@@ -25,3 +25,8 @@
 * arguments() returns Map<Option, Argument>
 * rename init(String[]) -> parse(String[]), parse() -> bind()
 * allow atomic short, for example -n2
+
+### 2017-04-20 jBock 0.7 released
+
+* allow `List<String>`
+* various changes in generated code
