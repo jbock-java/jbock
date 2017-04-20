@@ -24,7 +24,6 @@ import java.util.Map;
 import java.util.function.Function;
 
 import static com.squareup.javapoet.TypeName.INT;
-import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -36,7 +35,6 @@ final class Analyser {
 
   static final FieldSpec LONG_NAME = FieldSpec.builder(STRING, "longName", PUBLIC, FINAL).build();
   static final FieldSpec SHORT_NAME = FieldSpec.builder(STRING, "shortName", PUBLIC, FINAL).build();
-  final FieldSpec optionType;
 
   static final ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(
       ClassName.get(List.class), STRING);
@@ -52,7 +50,7 @@ final class Analyser {
 
   private final ClassName generatedClass;
   private final ClassName binderClass;
-  private final ClassName optionClass;
+  private final Option option;
   private final ClassName optionTypeClass;
   private final ClassName keysClass;
   private final ClassName argumentClass;
@@ -69,42 +67,34 @@ final class Analyser {
   private final FieldSpec value;
   private final FieldSpec token;
   private final FieldSpec listInitializer;
+  private final FieldSpec optionType;
 
   private final TypeName optionMapType;
 
   Analyser(ExecutableElement constructor, ClassName generatedClass) {
     this.constructor = constructor;
     this.generatedClass = generatedClass;
-    this.optionClass = generatedClass.nestedClass("Option");
     this.keysClass = generatedClass.nestedClass("Keys");
     this.argumentClass = generatedClass.nestedClass("Argument");
     this.binderClass = generatedClass.nestedClass("Binder");
     this.optionTypeClass = generatedClass.nestedClass("OptionType");
     ParameterizedTypeName listOfArgumentType = ParameterizedTypeName.get(
         ClassName.get(List.class), argumentClass);
+    this.optionType = FieldSpec.builder(optionTypeClass, "type", PUBLIC, FINAL).build();
+    this.option = Option.create(constructor, generatedClass.nestedClass("Option"), optionTypeClass, optionType);
     this.optionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        optionClass, listOfArgumentType);
+        option.optionClass, listOfArgumentType);
     ParameterizedTypeName listInitType = ParameterizedTypeName.get(
-        ClassName.get(Function.class), optionClass, listOfArgumentType);
-    ParameterSpec o = ParameterSpec.builder(optionClass, "o").build();
+        ClassName.get(Function.class), option.optionClass, listOfArgumentType);
+    ParameterSpec o = ParameterSpec.builder(option.optionClass, "o").build();
     this.listInitializer = FieldSpec.builder(listInitType, "NEW_LIST")
-        .initializer("$L", anonymousClassBuilder("")
-            .addSuperinterface(listInitType)
-            .addMethod(MethodSpec.methodBuilder("apply")
-                .addAnnotation(Override.class)
-                .addParameter(o)
-                .addModifiers(PUBLIC)
-                .returns(listOfArgumentType)
-                .addStatement("return new $T<>()", ArrayList.class)
-                .build())
-            .build())
+        .initializer("$N -> new $T<>()", o, ArrayList.class)
         .addModifiers(PRIVATE, STATIC, FINAL)
         .build();
     TypeName soType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        STRING, optionClass);
+        STRING, option.optionClass);
     TypeName entryType = ParameterizedTypeName.get(
-        ClassName.get(AbstractMap.Entry.class), optionClass, STRING);
-    this.optionType = FieldSpec.builder(optionTypeClass, "type", PUBLIC, FINAL).build();
+        ClassName.get(AbstractMap.Entry.class), option.optionClass, STRING);
     this.optMap = FieldSpec.builder(optionMapType, "optMap")
         .addModifiers(PRIVATE, FINAL)
         .build();
@@ -123,9 +113,9 @@ final class Analyser {
     this.value = FieldSpec.builder(STRING, "value").addModifiers(PUBLIC, FINAL).build();
     this.token = FieldSpec.builder(STRING, "token").addModifiers(PUBLIC, FINAL).build();
     this.whichOption = whichOptionMethod(keysClass, longFlags, shortFlags, longNames, shortNames, entryType);
-    this.checkConflict = checkConflictMethod(optionMapType, optionClass, optionTypeClass, optionType);
+    this.checkConflict = checkConflictMethod(optionMapType, option.optionClass, optionTypeClass, optionType);
     this.addNext = addNextMethod(keysClass, whichOption, entryType, optionMapType, argumentClass,
-        optionClass, checkConflict, listInitializer, optionType, optionTypeClass);
+        option.optionClass, checkConflict, listInitializer, optionType, optionTypeClass);
   }
 
   private static MethodSpec checkConflictMethod(TypeName optionMapType, ClassName optionClass,
@@ -154,14 +144,13 @@ final class Analyser {
 
   TypeSpec analyse() {
     return TypeSpec.classBuilder(generatedClass)
-        .addType(Keys.create(optionClass, optionTypeClass, keysClass, longFlags,
+        .addType(Keys.create(option.optionClass, optionTypeClass, keysClass, longFlags,
             shortFlags, longNames, shortNames, optionType).define())
-        .addType(Option.create(constructor, optionClass, optionTypeClass, optionType).define())
+        .addType(Option.create(constructor, option.optionClass, optionTypeClass, optionType).define())
         .addType(Argument.create(argumentClass, value, token).define())
-        .addType(Binder.create(binderClass, optionClass, optMap, trash, value, constructor).define())
+        .addType(Binder.create(binderClass, option, argumentClass, optMap, trash, value, constructor).define())
         .addType(OptionType.define(optionTypeClass))
         .addAnnotation(generatedAnnotation())
-        .addFields(Arrays.asList(trash, optMap))
         .addField(listInitializer)
         .addMethod(privateConstructor())
         .addMethod(checkConflict)
@@ -180,7 +169,7 @@ final class Analyser {
     ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optionMap").build();
     builder.addStatement("$T $N = new $T<>()", trash.type, trash, ArrayList.class);
     builder.addStatement("$T $N = new $T()", keys.type, keys, keysClass);
-    builder.addStatement("$T $N = new $T<>($T.class)", optMap.type, optMap, EnumMap.class, optionClass);
+    builder.addStatement("$T $N = new $T<>($T.class)", optMap.type, optMap, EnumMap.class, option.optionClass);
 
     // read args
     builder.addStatement("$T $N = $T.stream($N).iterator()", it.type, it, Arrays.class, ARGS);
@@ -209,6 +198,10 @@ final class Analyser {
         .beginControlFlow("if ($N.startsWith($S))", token, "--")
           .addStatement("$T $N = $N.substring(2)", STRING, st, token)
           .addStatement("$T $N = $N.indexOf('=')", INT, ie, st)
+          .beginControlFlow("if ($N < 0 && $N.$N.containsKey($N))", ie, keys, longNames, st)
+            .addStatement("throw new $T($S + $N)",
+                IllegalArgumentException.class, "Missing '=' after ", token)
+            .endControlFlow()
           .beginControlFlow("if ($N < 0 && $N.$N.containsKey($N))", ie, keys, longFlags, st)
             .addStatement("return new $T<>($N.$N.get($N), $N)",
                 SimpleImmutableEntry.class, keys, longFlags, st, token)
@@ -299,6 +292,7 @@ final class Analyser {
         .addStatement("$N.computeIfAbsent($N, $N).add(new $T($N.getValue().substring($N + 1), $N, $L))",
             optionMap, option, listInitializer, argumentClass, entry, ie, token, true)
         .build();
+
     //@formatter:on
     return MethodSpec.methodBuilder("addNext")
         .addParameters(Arrays.asList(keys, optionMap, trash, it))

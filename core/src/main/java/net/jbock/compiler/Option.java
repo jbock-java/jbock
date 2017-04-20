@@ -38,9 +38,11 @@ final class Option {
   private static final String CS = ", ";
   private static final String NL = "\n";
 
+  final ClassName optionClass;
+
   private final ExecutableElement constructor;
-  private final ClassName optionClass;
   private final ClassName optionTypeClass;
+  private final boolean needsSuffix;
 
   private final FieldSpec optionType;
   private final MethodSpec describeNamesMethod;
@@ -53,10 +55,18 @@ final class Option {
     this.optionType = optionType;
     this.describeNamesMethod = describeNamesMethod(optionType, optionTypeClass);
     this.descriptionBlockMethod = descriptionBlockMethod();
+    this.needsSuffix = constructor.getParameters().stream()
+        .map(Option::upcase)
+        .collect(Collectors.toSet()).size() < constructor.getParameters().size();
   }
 
   static Option create(ExecutableElement constructor, ClassName argumentInfo, ClassName optionTypeClass, FieldSpec optionType) {
     return new Option(constructor, argumentInfo, optionTypeClass, optionType);
+  }
+
+  String enumConstant(int i) {
+    String suffix = needsSuffix ? String.format("_%d", i) : "";
+    return upcase(constructor.getParameters().get(i)) + suffix;
   }
 
   TypeSpec define() {
@@ -68,9 +78,6 @@ final class Option {
                 .map(variableElement -> TypeName.get(variableElement.asType()).toString())
                 .map(s -> s.replaceAll("^java.lang.", ""))
                 .collect(Collectors.joining(",\n  "))));
-    boolean needsSuffix = constructor.getParameters().stream()
-        .map(Option::upcase)
-        .collect(Collectors.toSet()).size() < constructor.getParameters().size();
     for (int i = 0; i < constructor.getParameters().size(); i++) {
       VariableElement variableElement = constructor.getParameters().get(i);
       Names names = Names.create(variableElement);
@@ -78,8 +85,7 @@ final class Option {
       Description description = variableElement.getAnnotation(Description.class);
       String[] desc = getText(description);
       String argumentName = optionType == OptionType.FLAG ? null : getArgumentName(description);
-      String suffix = needsSuffix ? String.format("_%d", i) : "";
-      String enumConstant = upcase(variableElement) + suffix;
+      String enumConstant = enumConstant(i);
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {%s}",
           String.join(", ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =

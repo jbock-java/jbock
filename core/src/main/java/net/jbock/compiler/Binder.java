@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -12,6 +11,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.VariableElement;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -22,35 +22,40 @@ import static net.jbock.compiler.LessElements.asType;
 final class Binder {
 
   private final ClassName binderClass;
-  private final ClassName optionClass;
+  private final Option option;
+  private final ClassName argumentClass;
   private final MethodSpec getParam;
   private final FieldSpec optMap;
   private final FieldSpec trash;
+  private final FieldSpec value;
   private final ExecutableElement constructor;
 
   private Binder(ClassName binderClass,
-                 ClassName optionClass,
-                 MethodSpec getParam,
+                 Option option,
+                 ClassName argumentClass, MethodSpec getParam,
                  FieldSpec optMap,
                  FieldSpec trash,
-                 ExecutableElement constructor) {
+                 FieldSpec value, ExecutableElement constructor) {
     this.binderClass = binderClass;
-    this.optionClass = optionClass;
+    this.option = option;
+    this.argumentClass = argumentClass;
     this.getParam = getParam;
     this.optMap = optMap;
     this.trash = trash;
+    this.value = value;
     this.constructor = constructor;
   }
 
   static Binder create(ClassName binderClass,
-                       ClassName optionClass,
+                       Option optionClass,
+                       ClassName argumentClass,
                        FieldSpec optMap,
                        FieldSpec trash,
                        FieldSpec value,
                        ExecutableElement constructor) {
     return new Binder(binderClass, optionClass,
-        getParamMethod(optMap, optionClass, value),
-        optMap, trash, constructor);
+        argumentClass, getParamMethod(optMap, optionClass.optionClass, value),
+        optMap, trash, value, constructor);
   }
 
   private static MethodSpec getParamMethod(FieldSpec optMap, ClassName optionClass, FieldSpec value) {
@@ -85,9 +90,7 @@ final class Binder {
 
   private MethodSpec bindMethod() {
     CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec options = ParameterSpec.builder(ArrayTypeName.of(optionClass), "options").build();
-    builder.addStatement("$T $N = $T.values()",
-        options.type, options, optionClass);
+    ParameterSpec a = ParameterSpec.builder(argumentClass, "a").build();
     builder.add("return new $T(\n    ", ClassName.get(constructor.getEnclosingElement().asType()));
     for (int j = 0; j < constructor.getParameters().size(); j++) {
       VariableElement variableElement = constructor.getParameters().get(j);
@@ -96,11 +99,17 @@ final class Binder {
       }
       OptionType optionType = Names.getOptionType(variableElement);
       if (optionType == OptionType.FLAG) {
-        builder.add("$N.containsKey($N[$L])", optMap, options, j);
+        builder.add("$N.containsKey($T.$N)", optMap, option.optionClass, option.enumConstant(j));
       } else if (optionType == OptionType.STRING) {
-        builder.add("$N($N[$L])", getParam, options, j);
+        builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
+            optMap, option.optionClass, option.enumConstant(j), Collections.class)
+            .add("        .map($N -> $N.$N)\n", a, a, value)
+            .add("        .findFirst().orElse(null)");
       } else {
-        builder.add("$N.getOrDefault($N[$L], $T.emptyList())", optMap, options, j, Collections.class);
+        builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
+            optMap, option.optionClass, option.enumConstant(j), Collections.class)
+            .add("        .map($N -> $N.$N)\n", a, a, value)
+            .add("        .collect($T.toList())", Collectors.class);
       }
     }
     builder.add(");\n");

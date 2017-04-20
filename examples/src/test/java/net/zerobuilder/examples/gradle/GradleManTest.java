@@ -8,8 +8,6 @@ import org.junit.rules.ExpectedException;
 
 import java.util.Arrays;
 import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -54,6 +52,27 @@ public final class GradleManTest {
   }
 
   @Test
+  public void testLongMissingEquals() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Missing '=' after --message");
+    GradleManParser.parse(new String[]{"--message", "hello"});
+  }
+
+  @Test
+  public void testLongMissingEqualsLastToken() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Missing '=' after --message");
+    GradleManParser.parse(new String[]{"--message"});
+  }
+
+  @Test
+  public void testLongEmptyString() {
+    GradleManParser.Binder parse = GradleManParser.parse(new String[]{"--message="});
+    GradleMan gradleMan = parse.bind();
+    assertThat(gradleMan.message, is(""));
+  }
+
+  @Test
   public void testShortNonAtomic() {
     String[] args = {"-m", "hello"};
     GradleManParser.Binder binder = GradleManParser.parse(args);
@@ -84,7 +103,8 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"-fbar.txt"});
     assertThat(binder.arguments().size(), is(1));
     GradleMan gradleMan = binder.bind();
-    assertThat(gradleMan.file, is("bar.txt"));
+    assertThat(gradleMan.file.size(), is(1));
+    assertThat(gradleMan.file.get(0), is("bar.txt"));
     assertThat(binder.trash().size(), is(0));
   }
 
@@ -93,7 +113,8 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--message=hello", "-fbar.txt"});
     assertThat(binder.arguments().size(), is(2));
     GradleMan gradleMan = binder.bind();
-    assertThat(gradleMan.file, is("bar.txt"));
+    assertThat(gradleMan.file.size(), is(1));
+    assertThat(gradleMan.file.get(0), is("bar.txt"));
     assertThat(gradleMan.message, is("hello"));
     assertThat(binder.trash().size(), is(0));
   }
@@ -103,7 +124,7 @@ public final class GradleManTest {
     // --file is not declared
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--file=file"});
     GradleMan gradleMan = binder.bind();
-    assertThat(gradleMan.file, is(nullValue()));
+    assertThat(gradleMan.file.size(), is(0));
     assertThat(binder.trash().size(), is(1));
     assertThat(binder.trash().get(0), is("--file=file"));
   }
@@ -158,16 +179,6 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testTrash() {
-    // --dir is valid, but there's nothing after it
-    GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--dir"});
-    Map<Option, List<GradleManParser.Argument>> arguments = binder.arguments();
-    assertThat(arguments.size(), is(0));
-    assertThat(binder.trash().size(), is(1));
-    assertThat(binder.trash().get(0), is("--dir"));
-  }
-
-  @Test
   public void testMessageOption() {
     assertThat(Option.MESSAGE.description.size(), is(2));
     assertThat(Option.MESSAGE.description.get(0), is("the message"));
@@ -189,7 +200,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testNesting() {
+  public void testParserForNestedClass() {
     GradleMan_FooParser.Binder binder = GradleMan_FooParser.parse(new String[]{"--bar=4"});
     GradleMan.Foo foo = binder.bind();
     assertThat(foo.bar, is("4"));
