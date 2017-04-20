@@ -31,8 +31,9 @@ final class Analyser {
 
   static final ClassName STRING = ClassName.get(String.class);
 
-  static final FieldSpec LONG_NAME = FieldSpec.builder(STRING, "longName", PUBLIC, FINAL).build();
-  static final FieldSpec SHORT_NAME = FieldSpec.builder(STRING, "shortName", PUBLIC, FINAL).build();
+  static final FieldSpec LONG_NAME = FieldSpec.builder(STRING, "longName", PRIVATE, FINAL).build();
+  static final FieldSpec SHORT_NAME = FieldSpec.builder(ClassName.get(Character.class),
+      "shortName", PRIVATE, FINAL).build();
 
   static final ParameterizedTypeName STRING_LIST = ParameterizedTypeName.get(
       ClassName.get(List.class), STRING);

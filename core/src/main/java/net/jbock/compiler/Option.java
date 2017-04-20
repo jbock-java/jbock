@@ -18,6 +18,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
@@ -106,6 +107,8 @@ final class Option {
         .addMethod(describeMethod())
         .addMethod(describeNamesMethod)
         .addMethod(descriptionBlockMethod)
+        .addMethod(shortNameMethod())
+        .addMethod(longNameMethod())
         .addMethod(privateConstructor())
         .build();
     //@formatter:on
@@ -113,27 +116,51 @@ final class Option {
 
   private MethodSpec privateConstructor() {
     ParameterSpec longName = ParameterSpec.builder(LONG_NAME.type, LONG_NAME.name).build();
-    ParameterSpec shortName = ParameterSpec.builder(SHORT_NAME.type, SHORT_NAME.name).build();
+    ParameterSpec shortName = ParameterSpec.builder(Character.class, SHORT_NAME.name).build();
+    ParameterSpec shortNameString = ParameterSpec.builder(Analyser.STRING, "shortNameString").build();
     ParameterSpec optionType = ParameterSpec.builder(this.optionType.type, this.optionType.name).build();
     ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), DESCRIPTION.name).build();
     ParameterSpec argumentName = ParameterSpec.builder(ARGUMENT_NAME.type, ARGUMENT_NAME.name).build();
+    //@formatter:off
     return MethodSpec.constructorBuilder()
-        .addParameters(Arrays.asList(longName, shortName, optionType, argumentName, description))
+        .beginControlFlow("if ($N.length() != 1)", shortNameString)
+          .addStatement("throw new $T()", AssertionError.class)
+          .endControlFlow()
+        .addStatement("$T $N = $N.equals($S) ? null : $N.charAt(0)",
+            Character.class, shortName, shortNameString, " ", shortNameString)
         .beginControlFlow("if ($N == null && $N == null)", longName, shortName)
-        .addStatement("throw new $T($S)", NullPointerException.class, "both names are null")
-        .endControlFlow()
+          .addStatement("throw new $T($S)", AssertionError.class, "both names are null")
+          .endControlFlow()
         .beginControlFlow("if ($N == null)", description)
-        .addStatement("throw new $T($S)", NullPointerException.class, "description")
-        .endControlFlow()
+          .addStatement("throw new $T($S)", AssertionError.class, "description")
+          .endControlFlow()
         .beginControlFlow("if ($N != $T.$L && $N == null)", optionType, optionTypeClass, OptionType.FLAG, argumentName)
-        .addStatement("throw new $T($S)", NullPointerException.class, "argumentName")
-        .endControlFlow()
+          .addStatement("throw new $T($S)", AssertionError.class, "argumentName")
+          .endControlFlow()
         .addStatement("this.$N = $N", LONG_NAME, longName)
         .addStatement("this.$N = $N", SHORT_NAME, shortName)
         .addStatement("this.$N = $N", this.optionType, optionType)
         .addStatement("this.$N = $T.unmodifiableList($T.asList($N))", DESCRIPTION,
             Collections.class, Arrays.class, description)
         .addStatement("this.$N = $N", ARGUMENT_NAME, argumentName)
+        .addParameters(Arrays.asList(longName, shortNameString, optionType, argumentName, description))
+        .build();
+    //@formatter:on
+  }
+
+  private static MethodSpec shortNameMethod() {
+    return MethodSpec.methodBuilder(SHORT_NAME.name)
+        .addStatement("return $T.toString($N, null)", Objects.class, SHORT_NAME)
+        .returns(Analyser.STRING)
+        .addModifiers(PUBLIC)
+        .build();
+  }
+
+  private static MethodSpec longNameMethod() {
+    return MethodSpec.methodBuilder(LONG_NAME.name)
+        .addStatement("return $N", LONG_NAME)
+        .returns(Analyser.STRING)
+        .addModifiers(PUBLIC)
         .build();
   }
 
@@ -233,6 +260,5 @@ final class Option {
         .returns(Analyser.STRING)
         .addCode(builder.build())
         .build();
-
   }
 }

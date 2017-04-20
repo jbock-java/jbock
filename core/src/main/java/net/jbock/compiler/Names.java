@@ -13,13 +13,13 @@ import java.util.regex.Pattern;
 
 final class Names {
 
-  final String shortName;
+  final char shortName;
   final String longName;
 
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
-  private Names(String shortName, String longName) {
-    this.shortName = shortName;
+  private Names(Character shortName, String longName) {
+    this.shortName = shortName == null ? ' ' : shortName;
     this.longName = longName;
   }
 
@@ -44,7 +44,8 @@ final class Names {
   static Names create(VariableElement variableElement) {
     LongName longName = variableElement.getAnnotation(LongName.class);
     ShortName shortName = variableElement.getAnnotation(ShortName.class);
-    String ln = null, sn = null;
+    String ln = null;
+    Character sn = null;
     TypeName type = TypeName.get(variableElement.asType());
     OptionType optionType = getOptionType(type);
     if (optionType == null) {
@@ -54,28 +55,18 @@ final class Names {
               TypeName.get(variableElement.asType())),
           variableElement);
     }
-    if (optionType == OptionType.FLAG) {
-      if (shortName != null) {
-        sn = Character.toString(shortName.value());
-      }
-      if (longName != null) {
-        ln = longName.value();
-      }
-      if (shortName == null && longName == null) {
-        sn = variableElement.getSimpleName().toString();
-      }
-    } else {
-      if (longName != null) {
-        ln = longName.value();
-      }
-      if (shortName != null) {
-        sn = Character.toString(shortName.value());
-      }
-      if (shortName == null && longName == null) {
-        ln = variableElement.getSimpleName().toString();
-      }
+    if (longName != null) {
+      ln = longName.value();
     }
-    checkName(variableElement, sn);
+    if (shortName != null) {
+      sn = shortName.value();
+    }
+    if (shortName == null && longName == null) {
+      ln = variableElement.getSimpleName().toString();
+    }
+    if (sn != null) {
+      checkName(variableElement, Character.toString(sn));
+    }
     checkName(variableElement, ln);
     return new Names(sn, ln);
   }

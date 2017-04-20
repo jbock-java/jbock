@@ -167,19 +167,19 @@ public final class GradleManTest {
     assertThat(options.length, is(4));
     assertThat(Arrays.stream(options)
             .filter(o -> o.type != OptionType.FLAG)
-            .map(o -> o.longName)
+            .map(o -> o.longName())
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
         is(new HashSet<>(asList("message", "dir"))));
     assertThat(Arrays.stream(options)
             .filter(o -> o.type != OptionType.FLAG)
-            .map(o -> o.shortName)
+            .map(o -> o.shortName())
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
         is(new HashSet<>(asList("f", "m"))));
     assertThat(Arrays.stream(options)
             .filter(o -> o.type == OptionType.FLAG)
-            .map(o -> o.shortName)
+            .map(o -> o.shortName())
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
         is(new HashSet<>(singletonList("c"))));
@@ -191,8 +191,8 @@ public final class GradleManTest {
     assertThat(Option.MESSAGE.description.get(0), is("the message"));
     assertThat(Option.MESSAGE.description.get(1), is("message goes here"));
     assertThat(Option.MESSAGE.type, is(OptionType.STRING));
-    assertThat(Option.MESSAGE.longName, is("message"));
-    assertThat(Option.MESSAGE.shortName, is("m"));
+    assertThat(Option.MESSAGE.longName(), is("message"));
+    assertThat(Option.MESSAGE.shortName(), is("m"));
     assertThat(Option.MESSAGE.descriptionParameter, is("MESSAGE"));
   }
 
@@ -201,8 +201,8 @@ public final class GradleManTest {
     assertThat(Option.CMOS.description.size(), is(1));
     assertThat(Option.CMOS.description.get(0), is("cmos flag"));
     assertThat(Option.CMOS.type, is(OptionType.FLAG));
-    assertThat(Option.CMOS.longName, is(nullValue()));
-    assertThat(Option.CMOS.shortName, is("c"));
+    assertThat(Option.CMOS.longName(), is(nullValue()));
+    assertThat(Option.CMOS.shortName(), is("c"));
     assertThat(Option.CMOS.descriptionParameter, is(nullValue()));
   }
 

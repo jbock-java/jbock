@@ -129,7 +129,7 @@ public final class Processor extends AbstractProcessor {
       throw new ValidationException(ERROR, "The constructor may not be private", constructor);
     }
     List<? extends VariableElement> parameters = constructor.getParameters();
-    Set<String> checkShort = new HashSet<>();
+    Set<Character> checkShort = new HashSet<>();
     Set<String> checkLong = new HashSet<>();
     parameters.forEach(p -> {
       Names names = Names.create(p);
@@ -137,7 +137,7 @@ public final class Processor extends AbstractProcessor {
         throw new ValidationException(Diagnostic.Kind.ERROR,
             "Duplicate longName: " + names.longName, p);
       }
-      if (names.shortName != null && !checkShort.add(names.shortName)) {
+      if (names.shortName != ' ' && !checkShort.add(names.shortName)) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
             "Duplicate shortName: " + names.shortName, p);
       }
