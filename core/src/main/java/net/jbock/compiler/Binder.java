@@ -8,8 +8,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.stream.Collectors;
@@ -18,7 +16,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.LessElements.asType;
 
 final class Binder {
 
@@ -28,14 +25,14 @@ final class Binder {
   private final FieldSpec optMap;
   private final FieldSpec free;
   private final FieldSpec value;
-  private final ExecutableElement constructor;
+  private final Processor.Constructor constructor;
 
   private Binder(ClassName binderClass,
                  Option option,
                  ClassName argumentClass,
                  FieldSpec optMap,
                  FieldSpec free,
-                 FieldSpec value, ExecutableElement constructor) {
+                 FieldSpec value, Processor.Constructor constructor) {
     this.binderClass = binderClass;
     this.option = option;
     this.argumentClass = argumentClass;
@@ -51,14 +48,14 @@ final class Binder {
                        FieldSpec optMap,
                        FieldSpec free,
                        FieldSpec value,
-                       ExecutableElement constructor) {
+                       Processor.Constructor constructor) {
     return new Binder(binderClass, optionClass,
         argumentClass,
         optMap, free, value, constructor);
   }
 
   TypeSpec define() {
-    TypeName originalClass = TypeName.get(constructor.getEnclosingElement().asType());
+    TypeName originalClass = constructor.enclosingType;
     return TypeSpec.classBuilder(binderClass)
         .addFields(Arrays.asList(optMap, free))
         .addModifiers(PUBLIC, STATIC, FINAL)
@@ -75,13 +72,12 @@ final class Binder {
   private MethodSpec bindMethod() {
     CodeBlock.Builder builder = CodeBlock.builder();
     ParameterSpec a = ParameterSpec.builder(argumentClass, "a").build();
-    builder.add("return new $T(\n    ", ClassName.get(constructor.getEnclosingElement().asType()));
-    for (int j = 0; j < constructor.getParameters().size(); j++) {
-      VariableElement variableElement = constructor.getParameters().get(j);
+    builder.add("return new $T(\n    ", constructor.enclosingType);
+    for (int j = 0; j < constructor.parameters.size(); j++) {
       if (j > 0) {
         builder.add(",\n    ");
       }
-      OptionType optionType = Names.create(variableElement).optionType;
+      OptionType optionType = constructor.parameters.get(j).optionType;
       if (optionType == OptionType.FLAG) {
         builder.add("$N.containsKey($T.$N)", optMap, option.optionClass, option.enumConstant(j));
       } else if (optionType == OptionType.STRING) {
@@ -99,14 +95,20 @@ final class Binder {
       }
     }
     builder.add(");\n");
-    TypeName originalClass = TypeName.get(constructor.getEnclosingElement().asType());
+    TypeName originalClass = constructor.enclosingType;
+    StringBuilder javadoc = new StringBuilder();
+    javadoc.append("Invokes the constructor.\n")
+        .append("\n");
+    for (TypeName thrownType : constructor.thrownTypes) {
+      javadoc.append("@throws ").append(thrownType.toString()).append("\n");
+    }
+    javadoc.append("@return an instance of {@link $T}\n");
     return MethodSpec.methodBuilder("bind")
         .addCode(builder.build())
+        .addExceptions(constructor.thrownTypes)
         .addModifiers(PUBLIC)
-        .addJavadoc("Invokes the constructor.\n" +
-            "\n" +
-            "@return an instance of {@link $T}\n", originalClass)
-        .returns(ClassName.get(asType(constructor.getEnclosingElement())))
+        .addJavadoc(javadoc.toString(), originalClass)
+        .returns(constructor.enclosingType)
         .build();
   }
 

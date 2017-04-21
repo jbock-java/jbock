@@ -6,6 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
@@ -23,14 +24,14 @@ public final class GradleManTest {
   public final ExpectedException exception = ExpectedException.none();
 
   @Test
-  public void testShortLongConflict() {
+  public void testShortLongConflict() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: --message=goodbye");
     GradleManParser.parse(new String[]{"-m", "hello", "--message=goodbye"});
   }
 
   @Test
-  public void testMissingValue() {
+  public void testMissingValue() throws Exception {
     // there's nothing after -m
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Missing value: -m");
@@ -38,49 +39,49 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testLongShortConflict() {
+  public void testLongShortConflict() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: -m");
     GradleManParser.parse(new String[]{"--message=hello", "-m", "goodbye"});
   }
 
   @Test
-  public void testLongLongConflict() {
+  public void testLongLongConflict() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: --message=goodbye");
     GradleManParser.parse(new String[]{"--message=hello", "--message=goodbye"});
   }
 
   @Test
-  public void testShortOptionConfusion() {
+  public void testShortOptionConfusion() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("The argument to -m may not start with '-', use the long form instead: -f");
     GradleManParser.parse(new String[]{"-m", "-f"});
   }
 
   @Test
-  public void testLongMissingEquals() {
+  public void testLongMissingEquals() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Missing '=' after --message");
     GradleManParser.parse(new String[]{"--message", "hello"});
   }
 
   @Test
-  public void testLongMissingEqualsLastToken() {
+  public void testLongMissingEqualsLastToken() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Missing '=' after --message");
     GradleManParser.parse(new String[]{"--message"});
   }
 
   @Test
-  public void testLongEmptyString() {
+  public void testLongEmptyString() throws Exception {
     GradleManParser.Binder parse = GradleManParser.parse(new String[]{"--message="});
     GradleMan gradleMan = parse.bind();
     assertThat(gradleMan.message, is(""));
   }
 
   @Test
-  public void testShortNonAtomic() {
+  public void testShortNonAtomic() throws Exception {
     String[] args = {"-m", "hello"};
     GradleManParser.Binder binder = GradleManParser.parse(args);
     GradleMan gradleMan = binder.bind();
@@ -94,7 +95,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testLongMessage() {
+  public void testLongMessage() throws Exception {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--message=hello"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.message, is("hello"));
@@ -106,7 +107,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testShortAtomic() {
+  public void testShortAtomic() throws Exception {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"-fbar.txt"});
     assertThat(binder.arguments().size(), is(1));
     GradleMan gradleMan = binder.bind();
@@ -116,7 +117,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testLongShortAtomic() {
+  public void testLongShortAtomic() throws Exception {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--message=hello", "-fbar.txt"});
     assertThat(binder.arguments().size(), is(2));
     GradleMan gradleMan = binder.bind();
@@ -127,7 +128,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testLongInvalid() {
+  public void testLongInvalid() throws Exception {
     // --file is not declared
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--file=file"});
     GradleMan gradleMan = binder.bind();
@@ -137,7 +138,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testLong() {
+  public void testLong() throws Exception {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--dir=dir"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.dir, is("dir"));
@@ -145,7 +146,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testFlag() {
+  public void testFlag() throws Exception {
     // -c is a flag; last token goes in the trash
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"-c", "hello"});
     GradleMan gradleMan = binder.bind();
@@ -155,14 +156,14 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testNonsense() {
+  public void testNonsense() throws Exception {
     // bogus options
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"hello", "goodbye"});
     assertThat(binder.free().size(), is(2));
   }
 
   @Test
-  public void testOptions() {
+  public void testOptions() throws Exception {
     Option[] options = Option.values();
     assertThat(options.length, is(4));
     assertThat(Arrays.stream(options)
@@ -186,7 +187,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testMessageOption() {
+  public void testMessageOption() throws Exception {
     assertThat(Option.MESSAGE.description().size(), is(2));
     assertThat(Option.MESSAGE.description().get(0), is("the message"));
     assertThat(Option.MESSAGE.description().get(1), is("message goes here"));
@@ -197,7 +198,7 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testCmosOption() {
+  public void testCmosOption() throws Exception {
     assertThat(Option.CMOS.description().size(), is(1));
     assertThat(Option.CMOS.description().get(0), is("cmos flag"));
     assertThat(Option.CMOS.type(), is(OptionType.FLAG));
@@ -207,14 +208,14 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testParserForNestedClass() {
+  public void testParserForNestedClass() throws Exception {
     GradleMan_FooParser.Binder binder = GradleMan_FooParser.parse(new String[]{"--bar=4"});
     GradleMan.Foo foo = binder.bind();
     assertThat(foo.bar, is("4"));
   }
 
   @Test
-  public void testPrint() {
+  public void testPrint() throws Exception {
     Arrays.stream(Option.values())
         .map(o -> o.describe(4))
         .forEach(System.out::println);

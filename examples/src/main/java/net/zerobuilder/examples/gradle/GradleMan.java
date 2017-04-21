@@ -7,6 +7,7 @@ import net.jbock.Description;
 import net.jbock.LongName;
 import net.jbock.ShortName;
 
+import java.io.IOException;
 import java.util.List;
 
 final class GradleMan {
@@ -40,8 +41,7 @@ final class GradleMan {
                 String dir,
             @ShortName('c')
             @Description("cmos flag")
-                boolean cmos) {
-
+                boolean cmos) throws IOException, NullPointerException {
     this.message = message;
     this.file = file;
     this.dir = dir;

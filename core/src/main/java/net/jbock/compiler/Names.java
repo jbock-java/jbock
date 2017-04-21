@@ -3,8 +3,10 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import net.jbock.OtherTokens;
+import net.jbock.ArgumentName;
+import net.jbock.Description;
 import net.jbock.LongName;
+import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 
 import javax.lang.model.element.VariableElement;
@@ -17,13 +19,25 @@ final class Names {
   final char shortName;
   final String longName;
   final OptionType optionType;
+  final String parameterName;
+
+  final Description description;
+  final ArgumentName argName;
 
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
-  private Names(Character shortName, String longName, OptionType optionType) {
+  private Names(Character shortName,
+                String longName,
+                OptionType optionType,
+                String parameterName,
+                Description description,
+                ArgumentName argName) {
     this.optionType = optionType;
     this.shortName = shortName == null ? ' ' : shortName;
     this.longName = longName;
+    this.parameterName = parameterName;
+    this.description = description;
+    this.argName = argName;
   }
 
   private static OptionType getOptionType(TypeName type) {
@@ -57,7 +71,10 @@ final class Names {
         throw new ValidationException(Diagnostic.Kind.ERROR,
             "@OtherTokens must be a java.util.List<String>", variableElement);
       }
-      return new Names(null, variableElement.getSimpleName().toString(), OptionType.OTHER_TOKENS);
+      return new Names(null, variableElement.getSimpleName().toString(), OptionType.OTHER_TOKENS,
+          variableElement.getSimpleName().toString(),
+          variableElement.getAnnotation(Description.class),
+          variableElement.getAnnotation(ArgumentName.class));
     }
     OptionType optionType = getOptionType(type);
     String ln = null;
@@ -82,7 +99,9 @@ final class Names {
       checkName(variableElement, Character.toString(sn));
     }
     checkName(variableElement, ln);
-    return new Names(sn, ln, optionType);
+    return new Names(sn, ln, optionType, variableElement.getSimpleName().toString(),
+        variableElement.getAnnotation(Description.class),
+        variableElement.getAnnotation(ArgumentName.class));
   }
 
   private static boolean isList(TypeName type) {

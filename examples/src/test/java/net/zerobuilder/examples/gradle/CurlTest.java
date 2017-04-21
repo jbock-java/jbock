@@ -10,7 +10,7 @@ import static org.junit.Assert.assertThat;
 public class CurlTest {
 
   @Test
-  public void testRemaining() {
+  public void testRemaining() throws Exception {
     CurlParser.Binder binder = CurlParser.parse(
         new String[]{"-H'Content-Type: application/json'", "-v", "http://localhost:8080"});
     Arrays.stream(CurlParser.Option.values())

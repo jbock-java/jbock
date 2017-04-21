@@ -6,14 +6,12 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.ArgumentName;
 import net.jbock.Description;
+import net.jbock.compiler.Processor.Constructor;
 
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -46,7 +44,7 @@ final class Option {
 
   final ClassName optionClass;
 
-  private final ExecutableElement constructor;
+  private final Constructor constructor;
   private final ClassName optionTypeClass;
   private final boolean needsSuffix;
 
@@ -54,47 +52,51 @@ final class Option {
   private final MethodSpec describeNamesMethod;
   private final MethodSpec descriptionBlockMethod;
 
-  private Option(ExecutableElement constructor, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
+  private Option(Constructor constructor, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
     this.constructor = constructor;
     this.optionClass = optionClass;
     this.optionTypeClass = optionTypeClass;
     this.optionType = optionType;
     this.describeNamesMethod = describeNamesMethod(optionType, optionTypeClass);
     this.descriptionBlockMethod = descriptionBlockMethod();
-    Set<String> uppercaseArgumentNames = constructor.getParameters().stream()
+    Set<String> uppercaseArgumentNames = constructor.parameters.stream()
         .map(Option::upcase)
         .collect(Collectors.toSet());
-    this.needsSuffix = uppercaseArgumentNames.size() < constructor.getParameters().size();
+    this.needsSuffix = uppercaseArgumentNames.size() < constructor.parameters.size();
   }
 
-  static Option create(ExecutableElement constructor, ClassName argumentInfo, ClassName optionTypeClass, FieldSpec optionType) {
+  static Option create(Constructor constructor, ClassName argumentInfo, ClassName optionTypeClass, FieldSpec optionType) {
     return new Option(constructor, argumentInfo, optionTypeClass, optionType);
   }
 
   String enumConstant(int i) {
     String suffix = needsSuffix ? String.format("_%d", i) : "";
-    return upcase(constructor.getParameters().get(i)) + suffix;
+    return upcase(constructor.parameters.get(i)) + suffix;
   }
 
-  static String constructorArgumentsForJavadoc(ExecutableElement constructor) {
-    return constructor.getParameters().stream()
-        .map(variableElement -> TypeName.get(variableElement.asType()))
-        .map(t -> t instanceof ParameterizedTypeName ? ((ParameterizedTypeName) t).rawType : t)
-        .map(TypeName::toString)
-        .map(s -> s.replaceAll("^java.lang.", ""))
+  static String constructorArgumentsForJavadoc(Constructor constructor) {
+    return constructor.parameters.stream()
+        .map(o -> o.optionType)
+        .map(type -> {
+          switch (type) {
+            case FLAG:
+              return "boolean";
+            case STRING:
+              return "String";
+            default:
+              return "java.util.List";
+          }
+        })
         .collect(Collectors.joining(",\n       "));
   }
 
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(optionClass)
         .addJavadoc("The enum constants correspond to the constructor arguments.\n");
-    for (int i = 0; i < constructor.getParameters().size(); i++) {
-      VariableElement variableElement = constructor.getParameters().get(i);
-      Names names = Names.create(variableElement);
-      Description description = variableElement.getAnnotation(Description.class);
-      ArgumentName argName = variableElement.getAnnotation(ArgumentName.class);
-      String[] desc = getText(description);
-      String argumentName = Processor.ARGLESS.contains(names.optionType) ? null : getArgumentName(argName);
+    for (int i = 0; i < constructor.parameters.size(); i++) {
+      Names names = constructor.parameters.get(i);
+      String[] desc = getText(names.description);
+      String argumentName = Processor.ARGLESS.contains(names.optionType) ? null : getArgumentName(names.argName);
       String enumConstant = enumConstant(i);
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {%s}",
           String.join(", ", Collections.nCopies(desc.length, "$S")));
@@ -208,8 +210,8 @@ final class Option {
         .build();
   }
 
-  private static String upcase(VariableElement variableElement) {
-    return variableElement.getSimpleName().toString()
+  private static String upcase(Names names) {
+    return names.parameterName
         .toUpperCase(Locale.ENGLISH);
   }
 

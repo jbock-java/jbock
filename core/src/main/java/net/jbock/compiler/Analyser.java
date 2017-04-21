@@ -10,9 +10,9 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.Processor.Constructor;
 
 import javax.annotation.Generated;
-import javax.lang.model.element.ExecutableElement;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
@@ -45,9 +45,8 @@ final class Analyser {
   private static final FieldSpec free = FieldSpec.builder(STRING_LIST, "free", PRIVATE, FINAL)
       .build();
 
-  private final ExecutableElement constructor;
+  private final Constructor constructor;
 
-  private final ClassName generatedClass;
   private final ClassName binderClass;
   private final Option option;
   private final ClassName optionTypeClass;
@@ -71,21 +70,26 @@ final class Analyser {
 
   private final TypeName optionMapType;
 
-  Analyser(ExecutableElement constructor, ClassName generatedClass) {
+  static Analyser create(Constructor constructor) {
+    return new Analyser(constructor);
+  }
+
+  Analyser(Constructor constructor) {
     this.constructor = constructor;
-    this.generatedClass = generatedClass;
-    this.keysClass = generatedClass.nestedClass("Keys");
-    this.argumentClass = generatedClass.nestedClass("Argument");
-    this.binderClass = generatedClass.nestedClass("Binder");
-    this.optionTypeClass = generatedClass.nestedClass("OptionType");
+    this.keysClass = constructor.generatedClass.nestedClass("Keys");
+    this.argumentClass = constructor.generatedClass.nestedClass("Argument");
+    this.binderClass = constructor.generatedClass.nestedClass("Binder");
+    this.optionTypeClass = constructor.generatedClass.nestedClass("OptionType");
     ParameterizedTypeName listOfArgumentType = ParameterizedTypeName.get(
         ClassName.get(List.class), argumentClass);
     this.optionType = FieldSpec.builder(optionTypeClass, "type", PRIVATE, FINAL).build();
-    this.option = Option.create(constructor, generatedClass.nestedClass("Option"), optionTypeClass, optionType);
+    this.option = Option.create(constructor,
+        constructor.generatedClass.nestedClass("Option"), optionTypeClass, optionType);
     this.optionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
         option.optionClass, listOfArgumentType);
     this.trimToken = trimTokenMethod();
-    this.readArgument = readArgumentMethod(argumentClass, option.optionClass, optionType, optionTypeClass, trimToken);
+    this.readArgument = readArgumentMethod(
+        argumentClass, option.optionClass, optionType, optionTypeClass, trimToken);
     TypeName soType = ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, option.optionClass);
     this.optMap = FieldSpec.builder(optionMapType, "optMap")
@@ -142,7 +146,7 @@ final class Analyser {
   }
 
   TypeSpec analyse() {
-    return TypeSpec.classBuilder(generatedClass)
+    return TypeSpec.classBuilder(constructor.generatedClass)
         .addType(Keys.create(option.optionClass, optionTypeClass, keysClass, longFlags,
             shortFlags, longNames, shortNames, optionType).define())
         .addType(Option.create(constructor, option.optionClass, optionTypeClass, optionType).define())
@@ -177,7 +181,7 @@ final class Analyser {
           .endControlFlow()
         .addStatement("return new $T($N, $N)", binderClass, optMap, trash);
     //@formatter:on
-    TypeName originalClass = TypeName.get(constructor.getEnclosingElement().asType());
+    TypeName originalClass = constructor.enclosingType;
     return MethodSpec.methodBuilder("parse")
         .addParameter(ARGS)
         .addCode(builder.build())
@@ -191,7 +195,7 @@ final class Analyser {
                 "\n" +
                 "@see $T#$T($L)\n",
             IllegalArgumentException.class,
-            TypeName.get(constructor.getEnclosingElement().asType()),
+            constructor.enclosingType,
             originalClass, originalClass, constructorArgumentsForJavadoc(constructor))
         .returns(binderClass)
         .addModifiers(PUBLIC, STATIC)

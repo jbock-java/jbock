@@ -2,6 +2,7 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.ArgumentName;
 import net.jbock.CommandLineArguments;
@@ -22,6 +23,7 @@ import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -35,7 +37,7 @@ public final class Processor extends AbstractProcessor {
 
   private static final String SUFFIX = "Parser";
 
-  private final Set<ExecutableElement> done = new HashSet<>();
+  private final Set<TypeName> done = new HashSet<>();
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
@@ -55,21 +57,20 @@ public final class Processor extends AbstractProcessor {
     Set<ExecutableElement> constructors =
         constructorsIn(env.getElementsAnnotatedWith(CommandLineArguments.class));
     validate(constructors);
-    for (ExecutableElement constructor : constructors) {
+    for (ExecutableElement c : constructors) {
       try {
-        if (!done.add(constructor)) {
+        staticChecks(c);
+        staticChecks(LessElements.asType(c.getEnclosingElement()));
+        Constructor constructor = Constructor.create(c);
+        if (!done.add(constructor.enclosingType)) {
           continue;
         }
-        staticChecks(constructor);
-        staticChecks(LessElements.asType(constructor.getEnclosingElement()));
-        ClassName generatedClass = peer(ClassName.get(asType(constructor.getEnclosingElement())), SUFFIX);
-        Analyser analyser = new Analyser(constructor, generatedClass);
-        TypeSpec typeSpec = analyser.analyse();
-        write(generatedClass, typeSpec);
+        TypeSpec typeSpec = Analyser.create(constructor).analyse();
+        write(constructor.generatedClass, typeSpec);
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
-        handleException(constructor, e);
+        handleException(c, e);
         return false;
       }
     }
@@ -159,5 +160,29 @@ public final class Processor extends AbstractProcessor {
         remainingFound[0] = true;
       }
     });
+  }
+
+  static final class Constructor {
+    final TypeName enclosingType;
+    final ClassName generatedClass;
+    final List<Names> parameters;
+    final List<TypeName> thrownTypes;
+
+    private Constructor(TypeName enclosingType, ClassName generatedClass, List<Names> parameters, List<TypeName> thrownTypes) {
+      this.enclosingType = enclosingType;
+      this.generatedClass = generatedClass;
+      this.parameters = parameters;
+      this.thrownTypes = thrownTypes;
+    }
+
+    private static Constructor create(ExecutableElement executableElement) {
+      List<TypeName> thrownTypes = executableElement.getThrownTypes().stream().map(TypeName::get).collect(toList());
+      TypeName enclosingType = TypeName.get(executableElement.getEnclosingElement().asType());
+      List<Names> parameters = executableElement.getParameters().stream()
+          .map(Names::create)
+          .collect(Collectors.toList());
+      ClassName generatedClass = peer(ClassName.get(asType(executableElement.getEnclosingElement())), SUFFIX);
+      return new Constructor(enclosingType, generatedClass, parameters, thrownTypes);
+    }
   }
 }
