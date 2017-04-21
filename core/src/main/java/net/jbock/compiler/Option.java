@@ -296,7 +296,7 @@ final class Option {
         .addStatement("$N.append($S).append($S).append($N).append('=').append($N)", sb, CS, DD, LONG_NAME, ARGUMENT_NAME)
         .endControlFlow()
       .beginControlFlow("else if ($N != null)", LONG_NAME)
-        .addStatement("$N.append($S).append($N).append(' ').append($N)", sb, DD, LONG_NAME, ARGUMENT_NAME)
+        .addStatement("$N.append($S).append($N).append('=').append($N)", sb, DD, LONG_NAME, ARGUMENT_NAME)
         .endControlFlow()
       .beginControlFlow("else")
         .addStatement("$N.append('-').append($N).append(' ').append($N)", sb, SHORT_NAME, ARGUMENT_NAME)
