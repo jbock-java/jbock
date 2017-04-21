@@ -41,7 +41,9 @@ final class Curl {
 * `@CommandLineArguments` triggers the code generation.
 * Class `CurlParser` will be generated in the same package,
   with a static method `CurlParser#parse(String[])` which returns a `CurlParser.Binder`.
-* Long options must always be passed `--key=VALUE` style.
+* Long options must always be passed `--key=VALUE` style. 
+  `--key` is invalid results in `IllegalArgumentException`. 
+  `--key=` binds an empty string.
 * Short options may be passed either `-k value` or `-kvalue` style.
 * Only `String`, `List<String>` and `boolean` arguments are allowed.
 * At most one argument may have the `@OtherOptions` annotation. 
@@ -49,7 +51,7 @@ final class Curl {
 * Repeating keys are possible, if the corresponding constructor argument is of type `List<String>`.
 * `boolean` arguments are called "flags". They do <em>not</em> take arguments. In the example above, 
   `-v false` would mean that `verbose` is <em>true</em>, and that `urls` contains the string <em>false</em>.
-* Absent `String` arguments will be passed as `null` to the constructor.
+* An absent `String` argument will be passed as `null`.
 * There's no built-in concept of required options.
   Consider performing null-checks in the constructor.
 * `CurlParser.Binder#bind()` invokes the constructor.
