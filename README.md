@@ -46,7 +46,7 @@ final class Curl {
   `--key=` binds an empty string.
 * Short options may be passed either `-k value` or `-kvalue` style.
 * Only `String`, `List<String>` and `boolean` arguments are allowed.
-* At most one argument may have the `@OtherOptions` annotation. 
+* At most one argument may have the `@OtherTokens` annotation. 
   Every command line token that didn't bind to another argument, will be included in this list.
 * Repeating keys are possible, if the corresponding constructor argument is of type `List<String>`.
 * `boolean` arguments are called "flags". They do <em>not</em> take arguments. In the example above, 
@@ -60,6 +60,6 @@ final class Curl {
   like `-XGET -XPOST`.
 * There's no built-in concept of converters. 
   One possible place for conversions, such as `Integer.parseInt`, would be inside the constructor.
-* Each argument, except the `@OtherOptions`, may have both a short and long name.
+* Each argument, except `@OtherTokens`, may have both a short and long name.
 * If neither `@ShortName` nor `@LongName` is specified,
   then the argument name becomes the long name by default.
