@@ -23,7 +23,7 @@ final class Binder {
   private final Option option;
   private final ClassName argumentClass;
   private final FieldSpec optMap;
-  private final FieldSpec free;
+  private final FieldSpec otherTokens;
   private final FieldSpec value;
   private final Processor.Constructor constructor;
 
@@ -31,13 +31,13 @@ final class Binder {
                  Option option,
                  ClassName argumentClass,
                  FieldSpec optMap,
-                 FieldSpec free,
+                 FieldSpec otherTokens,
                  FieldSpec value, Processor.Constructor constructor) {
     this.binderClass = binderClass;
     this.option = option;
     this.argumentClass = argumentClass;
     this.optMap = optMap;
-    this.free = free;
+    this.otherTokens = otherTokens;
     this.value = value;
     this.constructor = constructor;
   }
@@ -46,23 +46,23 @@ final class Binder {
                        Option optionClass,
                        ClassName argumentClass,
                        FieldSpec optMap,
-                       FieldSpec free,
+                       FieldSpec otherTokens,
                        FieldSpec value,
                        Processor.Constructor constructor) {
     return new Binder(binderClass, optionClass,
         argumentClass,
-        optMap, free, value, constructor);
+        optMap, otherTokens, value, constructor);
   }
 
   TypeSpec define() {
     TypeName originalClass = constructor.enclosingType;
     return TypeSpec.classBuilder(binderClass)
-        .addFields(Arrays.asList(optMap, free))
+        .addFields(Arrays.asList(optMap, otherTokens))
         .addModifiers(PUBLIC, STATIC, FINAL)
         .addMethod(privateConstructor())
         .addMethod(bindMethod())
         .addMethod(argumentsMethod())
-        .addMethod(freeMethod())
+        .addMethod(otherTokensMethod())
         .addJavadoc("Parsed arguments, ready to be passed to the constructor.\n\n" +
                 "@see $T#$T($L)\n", originalClass, originalClass,
             Option.constructorArgumentsForJavadoc(constructor))
@@ -86,7 +86,7 @@ final class Binder {
             .add("        .map($N -> $N.$N)\n", a, a, value)
             .add("        .findFirst().orElse(null)");
       } else if (optionType == OptionType.OTHER_TOKENS) {
-        builder.add("$N", free);
+        builder.add("$N", otherTokens);
       } else {
         builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
             optMap, option.optionClass, option.enumConstant(j), Collections.class)
@@ -116,12 +116,12 @@ final class Binder {
     CodeBlock.Builder builder = CodeBlock.builder();
     ParameterSpec optMap = ParameterSpec.builder(this.optMap.type, this.optMap.name)
         .build();
-    ParameterSpec trash = ParameterSpec.builder(this.free.type, this.free.name)
+    ParameterSpec otherTokens = ParameterSpec.builder(this.otherTokens.type, this.otherTokens.name)
         .build();
-    builder.addStatement("this.$N = $T.unmodifiableList($N)", this.free, Collections.class, trash);
+    builder.addStatement("this.$N = $T.unmodifiableList($N)", this.otherTokens, Collections.class, otherTokens);
     builder.addStatement("this.$N = $T.unmodifiableMap($N)", this.optMap, Collections.class, optMap);
     return MethodSpec.constructorBuilder()
-        .addParameters(Arrays.asList(optMap, trash))
+        .addParameters(Arrays.asList(optMap, otherTokens))
         .addCode(builder.build())
         .addModifiers(PRIVATE)
         .build();
@@ -139,13 +139,13 @@ final class Binder {
         .build();
   }
 
-  private MethodSpec freeMethod() {
-    return MethodSpec.methodBuilder("free")
-        .addStatement("return $N", free)
+  private MethodSpec otherTokensMethod() {
+    return MethodSpec.methodBuilder("otherTokens")
+        .addStatement("return $N", otherTokens)
         .addJavadoc("Collection of all unbound tokens.\n" +
             "\n" +
             "@return tokens that the parser ignored, an unmodifiable list\n")
-        .returns(free.type)
+        .returns(otherTokens.type)
         .addModifiers(PUBLIC)
         .build();
   }

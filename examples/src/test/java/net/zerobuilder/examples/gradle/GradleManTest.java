@@ -6,7 +6,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Objects;
@@ -91,7 +90,7 @@ public final class GradleManTest {
     assertThat(binder.arguments().get(Option.MESSAGE).get(0).reconstruct(), is(args));
     assertThat(binder.arguments().get(Option.MESSAGE).get(0).token, is("-m"));
     assertThat(binder.arguments().get(Option.MESSAGE).get(0).value, is("hello"));
-    assertThat(binder.free().size(), is(0));
+    assertThat(binder.otherTokens().size(), is(0));
   }
 
   @Test
@@ -103,7 +102,7 @@ public final class GradleManTest {
     assertThat(binder.arguments().size(), is(1));
     assertThat(binder.arguments().get(Option.MESSAGE).get(0).token, is("--message=hello"));
     assertThat(binder.arguments().get(Option.MESSAGE).get(0).value, is("hello"));
-    assertThat(binder.free().size(), is(0));
+    assertThat(binder.otherTokens().size(), is(0));
   }
 
   @Test
@@ -113,7 +112,7 @@ public final class GradleManTest {
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(1));
     assertThat(gradleMan.file.get(0), is("bar.txt"));
-    assertThat(binder.free().size(), is(0));
+    assertThat(binder.otherTokens().size(), is(0));
   }
 
   @Test
@@ -124,7 +123,7 @@ public final class GradleManTest {
     assertThat(gradleMan.file.size(), is(1));
     assertThat(gradleMan.file.get(0), is("bar.txt"));
     assertThat(gradleMan.message, is("hello"));
-    assertThat(binder.free().size(), is(0));
+    assertThat(binder.otherTokens().size(), is(0));
   }
 
   @Test
@@ -133,8 +132,8 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--file=file"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(0));
-    assertThat(binder.free().size(), is(1));
-    assertThat(binder.free().get(0), is("--file=file"));
+    assertThat(binder.otherTokens().size(), is(1));
+    assertThat(binder.otherTokens().get(0), is("--file=file"));
   }
 
   @Test
@@ -142,7 +141,7 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--dir=dir"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.dir, is("dir"));
-    assertThat(binder.free().size(), is(0));
+    assertThat(binder.otherTokens().size(), is(0));
   }
 
   @Test
@@ -151,15 +150,15 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"-c", "hello"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.cmos, is(true));
-    assertThat(binder.free().size(), is(1));
-    assertThat(binder.free().get(0), is("hello"));
+    assertThat(binder.otherTokens().size(), is(1));
+    assertThat(binder.otherTokens().get(0), is("hello"));
   }
 
   @Test
   public void testNonsense() throws Exception {
     // bogus options
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"hello", "goodbye"});
-    assertThat(binder.free().size(), is(2));
+    assertThat(binder.otherTokens().size(), is(2));
   }
 
   @Test

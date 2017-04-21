@@ -30,3 +30,9 @@
 
 * allow `List<String>`
 * various changes in generated code
+
+### 2017-04-21 jBock 0.8 released
+
+* add `OtherTokens` annotation
+* bind() declares constructor's exceptions
+* rename trash() -> free() (actually a mistake, it will be renamed to otherTokens() in the next release)
