@@ -38,23 +38,26 @@ final class Curl {
 
 ### Notes
 
+* `@CommandLineArguments` triggers the code generation.
+* Class `CurlParser` will be generated in the same package,
+  with a static method `CurlParser#parse(String[])` which returns a `CurlParser.Binder`.
 * Long options must always be passed `--key=VALUE` style.
 * Short options may be passed either `-k value` or `-kvalue` style.
-* Only arguments of type `String`, `List<String>` and `boolean` may be declared in the constructor.
+* Only `String`, `List<String>` and `boolean` arguments are allowed.
+* At most one argument may have the `@OtherOptions` annotation. 
+  Every command line token that didn't bind to another argument, will be included in this list.
 * Repeating keys are possible, if the corresponding constructor argument is of type `List<String>`.
 * `boolean` arguments are called "flags". They do <em>not</em> take arguments. In the example above, 
-  `"-v false"` means that `verbose` is <em>true</em>, and `"false"` goes in `urls`.
+  `-v false` would mean that `verbose` is <em>true</em>, and that `urls` contains the string <em>false</em>.
 * Absent `String` arguments will be passed as `null` to the constructor.
 * There's no built-in concept of required options.
   Consider performing null-checks in the constructor.
-* Class `CurlParser` will be generated in the same package, 
-  with a static method `CurlParser.Binder CurlParser#parse(String[])`.
-* `CurlParse.Binder#bind()` invokes the constructor.
+* `CurlParser.Binder#bind()` invokes the constructor.
 * `CurlParser.Option` is a generated `enum` of the constructor arguments.
 * `CurlParser#parse` will throw `IllegalArgumentException` if the input is invalid, 
   like `-XGET -XPOST`.
 * There's no built-in concept of converters. 
   One possible place for conversions, such as `Integer.parseInt`, would be inside the constructor.
-* Each argument may have both a short and long name.
+* Each argument, except the `@OtherOptions`, may have both a short and long name.
 * If neither `@ShortName` nor `@LongName` is specified,
-  then the argument name becomes the default long name, and no short name is defined.
+  then the argument name becomes the long name by default.
