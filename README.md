@@ -42,7 +42,7 @@ final class Curl {
 * Class `CurlParser` will be generated in the same package,
   with a static method `CurlParser#parse(String[])` which returns a `CurlParser.Binder`.
 * Long options must always be passed `--key=VALUE` style. 
-  `--key` is invalid results in `IllegalArgumentException`. 
+  `--key` is invalid and results in `IllegalArgumentException`. 
   `--key=` binds an empty string.
 * Short options may be passed either `-k value` or `-kvalue` style.
 * Only `String`, `List<String>` and `boolean` arguments are allowed.
