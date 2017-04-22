@@ -13,11 +13,12 @@ import net.jbock.ShortName;
 import javax.lang.model.element.VariableElement;
 import javax.tools.Diagnostic;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 final class Names {
 
-  final char shortName;
+  private final Character shortName;
   final String longName;
   final OptionType optionType;
   final String parameterName;
@@ -35,7 +36,7 @@ final class Names {
                 Description description,
                 ArgumentName argName, String everythingAfter) {
     this.optionType = optionType;
-    this.shortName = shortName == null ? ' ' : shortName;
+    this.shortName = shortName;
     this.longName = longName;
     this.parameterName = parameterName;
     this.description = description;
@@ -148,5 +149,9 @@ final class Names {
     if (WHITE_SPACE.matcher(name).matches()) {
       throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not contain whitespace characters", parameter);
     }
+  }
+
+  String shortName() {
+    return Objects.toString(shortName, null);
   }
 }

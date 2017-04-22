@@ -44,6 +44,7 @@ final class Analyser {
       .build();
   private static final FieldSpec otherTokens = FieldSpec.builder(STRING_LIST, "otherTokens", PRIVATE, FINAL)
       .build();
+  private final FieldSpec stopword;
 
   private final Constructor constructor;
 
@@ -80,18 +81,21 @@ final class Analyser {
     this.argumentClass = constructor.generatedClass.nestedClass("Argument");
     this.binderClass = constructor.generatedClass.nestedClass("Binder");
     this.optionTypeClass = constructor.generatedClass.nestedClass("OptionType");
-    ParameterizedTypeName listOfArgumentType = ParameterizedTypeName.get(
-        ClassName.get(List.class), argumentClass);
     this.optionType = FieldSpec.builder(optionTypeClass, "type", PRIVATE, FINAL).build();
     this.option = Option.create(constructor,
         constructor.generatedClass.nestedClass("Option"), optionTypeClass, optionType);
+    TypeName soType = ParameterizedTypeName.get(ClassName.get(Map.class),
+        STRING, option.optionClass);
+    ParameterizedTypeName listOfArgumentType = ParameterizedTypeName.get(
+        ClassName.get(List.class), argumentClass);
+    this.stopword = FieldSpec.builder(STRING, "stopWord", PRIVATE, FINAL)
+        .initializer("$S", constructor.everythingAfter)
+        .build();
     this.optionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
         option.optionClass, listOfArgumentType);
     this.trimToken = trimTokenMethod();
     this.readArgument = readArgumentMethod(
         argumentClass, option.optionClass, optionType, optionTypeClass, trimToken);
-    TypeName soType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        STRING, option.optionClass);
     this.optMap = FieldSpec.builder(optionMapType, "optMap")
         .addModifiers(PRIVATE, FINAL)
         .build();
@@ -147,6 +151,7 @@ final class Analyser {
 
   TypeSpec analyse() {
     return TypeSpec.classBuilder(constructor.generatedClass)
+        .addField(stopword)
         .addType(Keys.create(option.optionClass, optionTypeClass, keysClass, longFlags,
             shortFlags, longNames, shortNames, optionType).define())
         .addType(Option.create(constructor, option.optionClass, optionTypeClass, optionType).define())

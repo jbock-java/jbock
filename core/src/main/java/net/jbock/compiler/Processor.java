@@ -22,7 +22,6 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -30,6 +29,8 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
@@ -133,37 +134,33 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  static final Set<OptionType> NAMELESS = EnumSet.of(OptionType.EVERYTHING_AFTER, OTHER_TOKENS, OptionType.FLAG);
+  static final Set<OptionType> ARGNAME_LESS = EnumSet.of(OptionType.EVERYTHING_AFTER, OTHER_TOKENS, OptionType.FLAG);
+  private static final Set<OptionType> NAMELESS = EnumSet.of(OptionType.EVERYTHING_AFTER, OTHER_TOKENS);
 
   private String staticChecks(ExecutableElement constructor) {
     if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
       throw new ValidationException(ERROR, "The constructor may not be private", constructor);
     }
     List<? extends VariableElement> parameters = constructor.getParameters();
-    Set<Character> checkShort = new HashSet<>();
+    Set<String> checkShort = new HashSet<>();
     Set<String> checkLong = new HashSet<>();
     boolean[] otherTokensFound = new boolean[1];
     String[] everythingAfter = new String[1];
     parameters.forEach(p -> {
       Names names = Names.create(p);
       if (NAMELESS.contains(names.optionType)) {
-        for (Class<? extends Annotation> nameless : Arrays.asList(
-            ArgumentName.class,
-            LongName.class,
-            ShortName.class)) {
-          if (p.getAnnotation(nameless) != null) {
-            throw new ValidationException(Diagnostic.Kind.ERROR,
-                "@" + nameless.getSimpleName() + " not allowed here", p);
-          }
-        }
+        checkNotPresent(p, asList(LongName.class, ShortName.class));
+      }
+      if (ARGNAME_LESS.contains(names.optionType)) {
+        checkNotPresent(p, singletonList(ArgumentName.class));
       }
       if (names.longName != null && !checkLong.add(names.longName)) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
             "Duplicate longName: " + names.longName, p);
       }
-      if (names.shortName != ' ' && !checkShort.add(names.shortName)) {
+      if (names.shortName() != null && !checkShort.add(names.shortName())) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
-            "Duplicate shortName: " + names.shortName, p);
+            "Duplicate shortName: " + names.shortName(), p);
       }
       if (names.optionType == OTHER_TOKENS) {
         if (otherTokensFound[0]) {
@@ -181,6 +178,15 @@ public final class Processor extends AbstractProcessor {
       }
     });
     return everythingAfter[0];
+  }
+
+  private void checkNotPresent(VariableElement p, List<Class<? extends Annotation>> namelesss) {
+    for (Class<? extends Annotation> nameless : namelesss) {
+      if (p.getAnnotation(nameless) != null) {
+        throw new ValidationException(Diagnostic.Kind.ERROR,
+            "@" + nameless.getSimpleName() + " not allowed here", p);
+      }
+    }
   }
 
   static final class Constructor {

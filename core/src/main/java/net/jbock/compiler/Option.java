@@ -28,7 +28,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
-import static net.jbock.compiler.OptionType.OTHER_TOKENS;
 
 final class Option {
 
@@ -96,12 +95,12 @@ final class Option {
     for (int i = 0; i < constructor.parameters.size(); i++) {
       Names names = constructor.parameters.get(i);
       String[] desc = getText(names.description);
-      String argumentName = Processor.NAMELESS.contains(names.optionType) ? null : getArgumentName(names.argName);
+      String argumentName = Processor.ARGNAME_LESS.contains(names.optionType) ? null : getArgumentName(names.argName);
       String enumConstant = enumConstant(i);
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {%s}",
           String.join(", ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
-          Arrays.asList(names.longName, names.shortName, optionTypeClass, names.optionType, argumentName, STRING);
+          Arrays.asList(names.longName, names.shortName(), optionTypeClass, names.optionType, argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
       args.addAll(fixArgs);
       args.addAll(Arrays.asList(desc));
@@ -124,39 +123,28 @@ final class Option {
 
   private MethodSpec privateConstructor() {
     ParameterSpec longName = ParameterSpec.builder(LONG_NAME.type, LONG_NAME.name).build();
-    ParameterSpec shortName = ParameterSpec.builder(Character.class, SHORT_NAME.name).build();
-    ParameterSpec shortNameString = ParameterSpec.builder(Analyser.STRING, "shortNameString").build();
+    ParameterSpec shortName = ParameterSpec.builder(STRING, SHORT_NAME.name).build();
     ParameterSpec optionType = ParameterSpec.builder(this.optionType.type, this.optionType.name).build();
     ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), DESCRIPTION.name).build();
     ParameterSpec argumentName = ParameterSpec.builder(ARGUMENT_NAME.type, ARGUMENT_NAME.name).build();
     //@formatter:off
     return MethodSpec.constructorBuilder()
-        .beginControlFlow("if ($N.length() != 1)", shortNameString)
+        .beginControlFlow("if ($N != null && $N.length() != 1)", shortName, shortName)
           .addStatement("throw new $T()", AssertionError.class)
           .endControlFlow()
         .beginControlFlow("if ($N != null && $N.length() < 1)", longName, longName)
           .addStatement("throw new $T()", AssertionError.class)
           .endControlFlow()
-        .addStatement("$T $N = $N.equals($S) ? null : $N.charAt(0)",
-            Character.class, shortName, shortNameString, " ", shortNameString)
-        .beginControlFlow("if ($N != $T.$L && $N == null && $N == null)",
-            optionType, optionTypeClass, OTHER_TOKENS,longName, shortName)
-          .addStatement("throw new $T($S)", AssertionError.class, "both names are null")
-          .endControlFlow()
         .beginControlFlow("if ($N == null)", description)
           .addStatement("throw new $T($S)", AssertionError.class, description.name)
           .endControlFlow()
-        .beginControlFlow("if ($N != $T.$L && $N != $T.$L && $N == null)",
-            optionType, optionTypeClass, OptionType.FLAG, optionType, optionTypeClass, OTHER_TOKENS, argumentName)
-          .addStatement("throw new $T($S)", AssertionError.class, argumentName.name)
-          .endControlFlow()
         .addStatement("this.$N = $N", LONG_NAME, longName)
-        .addStatement("this.$N = $N", SHORT_NAME, shortName)
+        .addStatement("this.$N = $N == null ? null : $N.charAt(0)", SHORT_NAME, shortName, shortName)
         .addStatement("this.$N = $N", this.optionType, optionType)
         .addStatement("this.$N = $T.unmodifiableList($T.asList($N))", DESCRIPTION,
             Collections.class, Arrays.class, description)
         .addStatement("this.$N = $N", ARGUMENT_NAME, argumentName)
-        .addParameters(Arrays.asList(longName, shortNameString, optionType, argumentName, description))
+        .addParameters(Arrays.asList(longName, shortName, optionType, argumentName, description))
         .build();
     //@formatter:on
   }
