@@ -74,7 +74,7 @@ final class Analyser {
     return new Analyser(constructor);
   }
 
-  Analyser(Constructor constructor) {
+  private Analyser(Constructor constructor) {
     this.constructor = constructor;
     this.keysClass = constructor.generatedClass.nestedClass("Keys");
     this.argumentClass = constructor.generatedClass.nestedClass("Argument");

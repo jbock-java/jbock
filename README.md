@@ -2,7 +2,7 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-Annotation processor that allows binding of command line options to instance fields.
+Annotation processor that allows binding of command line options to instance fields. It also generates an `enum` of the options, along with a printable description.
 
 The goal is to easily define GNU-style command line interface, via annotations.
 

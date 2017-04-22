@@ -6,6 +6,8 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.ArgumentName;
 import net.jbock.CommandLineArguments;
+import net.jbock.LongName;
+import net.jbock.ShortName;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -19,6 +21,8 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -31,6 +35,7 @@ import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static net.jbock.compiler.LessElements.asType;
+import static net.jbock.compiler.OptionType.EVERYTHING_AFTER;
 import static net.jbock.compiler.OptionType.OTHER_TOKENS;
 
 public final class Processor extends AbstractProcessor {
@@ -59,9 +64,9 @@ public final class Processor extends AbstractProcessor {
     validate(constructors);
     for (ExecutableElement c : constructors) {
       try {
-        staticChecks(c);
+        String everythingAfter = staticChecks(c);
         staticChecks(LessElements.asType(c.getEnclosingElement()));
-        Constructor constructor = Constructor.create(c);
+        Constructor constructor = Constructor.create(c, everythingAfter);
         if (!done.add(constructor.enclosingType)) {
           continue;
         }
@@ -128,21 +133,29 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  static final Set<OptionType> ARGLESS = EnumSet.of(OptionType.FLAG, OTHER_TOKENS);
+  static final Set<OptionType> NAMELESS = EnumSet.of(OptionType.EVERYTHING_AFTER, OTHER_TOKENS, OptionType.FLAG);
 
-  private void staticChecks(ExecutableElement constructor) {
+  private String staticChecks(ExecutableElement constructor) {
     if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
       throw new ValidationException(ERROR, "The constructor may not be private", constructor);
     }
     List<? extends VariableElement> parameters = constructor.getParameters();
     Set<Character> checkShort = new HashSet<>();
     Set<String> checkLong = new HashSet<>();
-    boolean[] remainingFound = new boolean[1];
+    boolean[] otherTokensFound = new boolean[1];
+    String[] everythingAfter = new String[1];
     parameters.forEach(p -> {
       Names names = Names.create(p);
-      if (ARGLESS.contains(names.optionType) && p.getAnnotation(ArgumentName.class) != null) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
-            "@ArgumentName not allowed here", p);
+      if (NAMELESS.contains(names.optionType)) {
+        for (Class<? extends Annotation> nameless : Arrays.asList(
+            ArgumentName.class,
+            LongName.class,
+            ShortName.class)) {
+          if (p.getAnnotation(nameless) != null) {
+            throw new ValidationException(Diagnostic.Kind.ERROR,
+                "@" + nameless.getSimpleName() + " not allowed here", p);
+          }
+        }
       }
       if (names.longName != null && !checkLong.add(names.longName)) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
@@ -152,14 +165,22 @@ public final class Processor extends AbstractProcessor {
         throw new ValidationException(Diagnostic.Kind.ERROR,
             "Duplicate shortName: " + names.shortName, p);
       }
-      if (names.optionType == OptionType.OTHER_TOKENS) {
-        if (remainingFound[0]) {
+      if (names.optionType == OTHER_TOKENS) {
+        if (otherTokensFound[0]) {
           throw new ValidationException(Diagnostic.Kind.ERROR,
               "Only one parameter may have @OtherTokens", p);
         }
-        remainingFound[0] = true;
+        otherTokensFound[0] = true;
+      }
+      if (names.optionType == EVERYTHING_AFTER) {
+        if (everythingAfter[0] != null) {
+          throw new ValidationException(Diagnostic.Kind.ERROR,
+              "Only one parameter may have @EverythingAfter", p);
+        }
+        everythingAfter[0] = names.everythingAfter;
       }
     });
+    return everythingAfter[0];
   }
 
   static final class Constructor {
@@ -167,22 +188,27 @@ public final class Processor extends AbstractProcessor {
     final ClassName generatedClass;
     final List<Names> parameters;
     final List<TypeName> thrownTypes;
+    final String everythingAfter;
 
-    private Constructor(TypeName enclosingType, ClassName generatedClass, List<Names> parameters, List<TypeName> thrownTypes) {
+    private Constructor(TypeName enclosingType, ClassName generatedClass,
+                        List<Names> parameters, List<TypeName> thrownTypes,
+                        String everythingAfter) {
       this.enclosingType = enclosingType;
       this.generatedClass = generatedClass;
       this.parameters = parameters;
       this.thrownTypes = thrownTypes;
+      this.everythingAfter = everythingAfter;
     }
 
-    private static Constructor create(ExecutableElement executableElement) {
+    private static Constructor create(ExecutableElement executableElement,
+                                      String everythingAfter) {
       List<TypeName> thrownTypes = executableElement.getThrownTypes().stream().map(TypeName::get).collect(toList());
       TypeName enclosingType = TypeName.get(executableElement.getEnclosingElement().asType());
       List<Names> parameters = executableElement.getParameters().stream()
           .map(Names::create)
           .collect(Collectors.toList());
       ClassName generatedClass = peer(ClassName.get(asType(executableElement.getEnclosingElement())), SUFFIX);
-      return new Constructor(enclosingType, generatedClass, parameters, thrownTypes);
+      return new Constructor(enclosingType, generatedClass, parameters, thrownTypes, everythingAfter);
     }
   }
 }

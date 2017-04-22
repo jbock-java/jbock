@@ -96,7 +96,7 @@ final class Option {
     for (int i = 0; i < constructor.parameters.size(); i++) {
       Names names = constructor.parameters.get(i);
       String[] desc = getText(names.description);
-      String argumentName = Processor.ARGLESS.contains(names.optionType) ? null : getArgumentName(names.argName);
+      String argumentName = Processor.NAMELESS.contains(names.optionType) ? null : getArgumentName(names.argName);
       String enumConstant = enumConstant(i);
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {%s}",
           String.join(", ", Collections.nCopies(desc.length, "$S")));
