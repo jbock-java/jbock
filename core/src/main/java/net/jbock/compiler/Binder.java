@@ -16,6 +16,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Analyser.STRING_LIST;
 
 final class Binder {
 
@@ -24,6 +25,9 @@ final class Binder {
   private final ClassName argumentClass;
   private final FieldSpec optMap;
   private final FieldSpec otherTokens;
+  private final FieldSpec rest = FieldSpec.builder(STRING_LIST, "rest")
+      .addModifiers(PRIVATE, FINAL)
+      .build();
   private final FieldSpec value;
   private final Processor.Constructor constructor;
 
@@ -56,13 +60,17 @@ final class Binder {
 
   TypeSpec define() {
     TypeName originalClass = constructor.enclosingType;
-    return TypeSpec.classBuilder(binderClass)
-        .addFields(Arrays.asList(optMap, otherTokens))
+    TypeSpec.Builder builder = TypeSpec.classBuilder(binderClass)
+        .addFields(Arrays.asList(optMap, otherTokens, rest))
         .addModifiers(PUBLIC, STATIC, FINAL)
         .addMethod(privateConstructor())
         .addMethod(bindMethod())
         .addMethod(argumentsMethod())
-        .addMethod(otherTokensMethod())
+        .addMethod(otherTokensMethod());
+    if (constructor.stopword != null) {
+      builder.addMethod(restMethod());
+    }
+    return builder
         .addJavadoc("Parsed arguments, ready to be passed to the constructor.\n\n" +
                 "@see $T#$T($L)\n", originalClass, originalClass,
             Option.constructorArgumentsForJavadoc(constructor))
@@ -87,6 +95,8 @@ final class Binder {
             .add("        .findFirst().orElse(null)");
       } else if (optionType == OptionType.OTHER_TOKENS) {
         builder.add("$N", otherTokens);
+      } else if (optionType == OptionType.EVERYTHING_AFTER) {
+        builder.add("$N", rest);
       } else {
         builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
             optMap, option.optionClass, option.enumConstant(j), Collections.class)
@@ -118,10 +128,12 @@ final class Binder {
         .build();
     ParameterSpec otherTokens = ParameterSpec.builder(this.otherTokens.type, this.otherTokens.name)
         .build();
-    builder.addStatement("this.$N = $T.unmodifiableList($N)", this.otherTokens, Collections.class, otherTokens);
+    ParameterSpec esc = ParameterSpec.builder(this.rest.type, this.rest.name).build();
     builder.addStatement("this.$N = $T.unmodifiableMap($N)", this.optMap, Collections.class, optMap);
+    builder.addStatement("this.$N = $T.unmodifiableList($N)", this.otherTokens, Collections.class, otherTokens);
+    builder.addStatement("this.$N = $T.unmodifiableList($N)", this.rest, Collections.class, esc);
     return MethodSpec.constructorBuilder()
-        .addParameters(Arrays.asList(optMap, otherTokens))
+        .addParameters(Arrays.asList(optMap, otherTokens, esc))
         .addCode(builder.build())
         .addModifiers(PRIVATE)
         .build();
@@ -135,6 +147,17 @@ final class Binder {
             "\n" +
             "@return an unmodifiable map\n")
         .returns(optMap.type)
+        .addModifiers(PUBLIC)
+        .build();
+  }
+
+  private MethodSpec restMethod() {
+    return MethodSpec.methodBuilder("rest")
+        .addStatement("return $N", rest)
+        .addJavadoc("Remaining tokens after $S\n" +
+            "\n" +
+            "@return an unmodifiable list\n", constructor.stopword)
+        .returns(rest.type)
         .addModifiers(PUBLIC)
         .build();
   }

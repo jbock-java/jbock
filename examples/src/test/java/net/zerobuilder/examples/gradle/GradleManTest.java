@@ -66,6 +66,20 @@ public final class GradleManTest {
   }
 
   @Test
+  public void testInterestingTokens() throws Exception {
+    GradleManParser.Binder binder = GradleManParser.parse(
+        new String[]{"--message=hello", "-", "--", "->", "<=>", "", " "});
+    assertThat(binder.bind().message, is("hello"));
+    assertThat(binder.otherTokens().size(), is(6));
+    assertThat(binder.otherTokens().get(0), is("-"));
+    assertThat(binder.otherTokens().get(1), is("--"));
+    assertThat(binder.otherTokens().get(2), is("->"));
+    assertThat(binder.otherTokens().get(3), is("<=>"));
+    assertThat(binder.otherTokens().get(4), is(""));
+    assertThat(binder.otherTokens().get(5), is(" "));
+  }
+
+  @Test
   public void testLongMissingEqualsLastToken() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Missing '=' after --message");

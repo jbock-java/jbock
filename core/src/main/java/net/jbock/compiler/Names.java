@@ -22,7 +22,7 @@ final class Names {
   final String longName;
   final OptionType optionType;
   final String parameterName;
-  final String everythingAfter;
+  final String stopword;
 
   final Description description;
   final ArgumentName argName;
@@ -34,14 +34,14 @@ final class Names {
                 OptionType optionType,
                 String parameterName,
                 Description description,
-                ArgumentName argName, String everythingAfter) {
+                ArgumentName argName, String stopword) {
     this.optionType = optionType;
     this.shortName = shortName;
     this.longName = longName;
     this.parameterName = parameterName;
     this.description = description;
     this.argName = argName;
-    this.everythingAfter = everythingAfter;
+    this.stopword = stopword;
   }
 
   private static OptionType getOptionType(TypeName type) {
@@ -77,12 +77,13 @@ final class Names {
     }
     if (everythingAfter != null) {
       checkList(variableElement, type);
-      basicCheckName(variableElement, everythingAfter.value());
+      String stopword = everythingAfter.value();
+      basicCheckName(variableElement, stopword);
       return new Names(null, variableElement.getSimpleName().toString(), OptionType.EVERYTHING_AFTER,
           variableElement.getSimpleName().toString(),
           variableElement.getAnnotation(Description.class),
           variableElement.getAnnotation(ArgumentName.class),
-          everythingAfter.value());
+          stopword);
     }
     OptionType optionType = getOptionType(type);
     String ln = null;
@@ -143,6 +144,9 @@ final class Names {
   }
 
   private static void basicCheckName(VariableElement parameter, String name) {
+    if (name == null) {
+      throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not be null", parameter);
+    }
     if (name.isEmpty()) {
       throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not be empty", parameter);
     }

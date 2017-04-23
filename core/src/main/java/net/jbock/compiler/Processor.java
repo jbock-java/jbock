@@ -65,9 +65,9 @@ public final class Processor extends AbstractProcessor {
     validate(constructors);
     for (ExecutableElement c : constructors) {
       try {
-        String everythingAfter = staticChecks(c);
+        String stopword = staticChecks(c);
         staticChecks(LessElements.asType(c.getEnclosingElement()));
-        Constructor constructor = Constructor.create(c, everythingAfter);
+        Constructor constructor = Constructor.create(c, stopword);
         if (!done.add(constructor.enclosingType)) {
           continue;
         }
@@ -142,10 +142,10 @@ public final class Processor extends AbstractProcessor {
       throw new ValidationException(ERROR, "The constructor may not be private", constructor);
     }
     List<? extends VariableElement> parameters = constructor.getParameters();
-    Set<String> checkShort = new HashSet<>();
-    Set<String> checkLong = new HashSet<>();
+    Set<String> shortNames = new HashSet<>();
+    Set<String> longNames = new HashSet<>();
     boolean[] otherTokensFound = new boolean[1];
-    String[] everythingAfter = new String[1];
+    String[] stopword = new String[1];
     parameters.forEach(p -> {
       Names names = Names.create(p);
       if (NAMELESS.contains(names.optionType)) {
@@ -154,11 +154,11 @@ public final class Processor extends AbstractProcessor {
       if (ARGNAME_LESS.contains(names.optionType)) {
         checkNotPresent(p, singletonList(ArgumentName.class));
       }
-      if (names.longName != null && !checkLong.add(names.longName)) {
+      if (names.longName != null && !longNames.add(names.longName)) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
             "Duplicate longName: " + names.longName, p);
       }
-      if (names.shortName() != null && !checkShort.add(names.shortName())) {
+      if (names.shortName() != null && !shortNames.add(names.shortName())) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
             "Duplicate shortName: " + names.shortName(), p);
       }
@@ -170,14 +170,24 @@ public final class Processor extends AbstractProcessor {
         otherTokensFound[0] = true;
       }
       if (names.optionType == EVERYTHING_AFTER) {
-        if (everythingAfter[0] != null) {
+        if (stopword[0] != null) {
           throw new ValidationException(Diagnostic.Kind.ERROR,
               "Only one parameter may have @EverythingAfter", p);
         }
-        everythingAfter[0] = names.everythingAfter;
+        stopword[0] = names.stopword;
       }
     });
-    return everythingAfter[0];
+    if (stopword[0] != null && stopword[0].startsWith("-")) {
+      if (stopword[0].startsWith("--") && longNames.contains(stopword[0].substring(2))) {
+        throw new ValidationException(Diagnostic.Kind.ERROR,
+            "@EverythingAfter coincides with a long option", constructor);
+      }
+      if (shortNames.contains(stopword[0].substring(1))) {
+        throw new ValidationException(Diagnostic.Kind.ERROR,
+            "@EverythingAfter coincides with a short option", constructor);
+      }
+    }
+    return stopword[0];
   }
 
   private void checkNotPresent(VariableElement p, List<Class<? extends Annotation>> namelesss) {
@@ -194,27 +204,27 @@ public final class Processor extends AbstractProcessor {
     final ClassName generatedClass;
     final List<Names> parameters;
     final List<TypeName> thrownTypes;
-    final String everythingAfter;
+    final String stopword;
 
     private Constructor(TypeName enclosingType, ClassName generatedClass,
                         List<Names> parameters, List<TypeName> thrownTypes,
-                        String everythingAfter) {
+                        String stopword) {
       this.enclosingType = enclosingType;
       this.generatedClass = generatedClass;
       this.parameters = parameters;
       this.thrownTypes = thrownTypes;
-      this.everythingAfter = everythingAfter;
+      this.stopword = stopword;
     }
 
     private static Constructor create(ExecutableElement executableElement,
-                                      String everythingAfter) {
+                                      String stopword) {
       List<TypeName> thrownTypes = executableElement.getThrownTypes().stream().map(TypeName::get).collect(toList());
       TypeName enclosingType = TypeName.get(executableElement.getEnclosingElement().asType());
       List<Names> parameters = executableElement.getParameters().stream()
           .map(Names::create)
           .collect(Collectors.toList());
       ClassName generatedClass = peer(ClassName.get(asType(executableElement.getEnclosingElement())), SUFFIX);
-      return new Constructor(enclosingType, generatedClass, parameters, thrownTypes, everythingAfter);
+      return new Constructor(enclosingType, generatedClass, parameters, thrownTypes, stopword);
     }
   }
 }

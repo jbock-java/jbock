@@ -3,7 +3,6 @@ package net.zerobuilder.examples.gradle;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
 import net.jbock.EverythingAfter;
-import net.jbock.LongName;
 import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 
@@ -19,17 +18,16 @@ final class Rm {
   final List<String> filesToDelete;
 
   @CommandLineArguments
-  Rm(@ShortName('r') @LongName("recursive")
-         boolean recursive,
-     @ShortName('f') @LongName("force")
-         boolean force,
-     @OtherTokens @Description("redundant files")
-         List<String> goodFiles,
-     @EverythingAfter("--") @Description("files named '--force' etc")
-         List<String> badFiles) {
+  Rm(@ShortName('r') boolean recursive,
+     @ShortName('f') boolean force,
+     @OtherTokens List<String> fileNames,
+     @EverythingAfter("--") @Description({
+         "Last resort for problematic arguments",
+         "For example, when file name is '-r'"})
+         List<String> escapedFileNames) {
     this.recursive = recursive;
     this.force = force;
-    this.filesToDelete = Stream.of(goodFiles, badFiles)
+    this.filesToDelete = Stream.of(fileNames, escapedFileNames)
         .map(List::stream)
         .flatMap(Function.identity())
         .collect(Collectors.toList());

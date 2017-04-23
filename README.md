@@ -9,7 +9,7 @@ The goal is to easily define GNU-style command line interface, via annotations.
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
 this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload).
 
-### Example
+### Example: curl
 
 ````java
 final class Curl {
@@ -36,30 +36,55 @@ final class Curl {
 }
 ````
 
-### Notes
-
 * `@CommandLineArguments` triggers the code generation.
 * Class `CurlParser` will be generated in the same package,
   with a static method `CurlParser#parse(String[])` which returns a `CurlParser.Binder`.
-* Long options must always be passed `--key=VALUE` style. 
-  `--key` is invalid and results in `IllegalArgumentException`. 
+* Long options must always be passed `--key=VALUE` style.
+  `--key` is invalid and results in `IllegalArgumentException`.
   `--key=` binds an empty string.
 * Short options may be passed either `-k value` or `-kvalue` style.
 * Only `String`, `List<String>` and `boolean` arguments are allowed.
-* At most one argument may have the `@OtherTokens` annotation. 
+* At most one argument may have the `@OtherTokens` annotation.
   Every command line token that didn't bind to another argument, will be included in this list.
 * Repeating keys are possible, if the corresponding constructor argument is of type `List<String>`.
-* `boolean` arguments are called "flags". They do <em>not</em> take arguments. In the example above, 
+* `boolean` arguments are called "flags". They do <em>not</em> take arguments. In the example above,
   `-v false` would mean that `verbose` is <em>true</em>, and that `urls` contains the string <em>false</em>.
 * An absent `String` argument will be passed as `null`.
 * There's no built-in concept of required options.
   Consider performing null-checks in the constructor.
 * `CurlParser.Binder#bind()` invokes the constructor.
 * `CurlParser.Option` is a generated `enum` of the constructor arguments.
-* `CurlParser#parse` will throw `IllegalArgumentException` if the input is invalid, 
+* `CurlParser#parse` will throw `IllegalArgumentException` if the input is invalid,
   like `-XGET -XPOST`.
-* There's no built-in concept of converters. 
+* There's no built-in concept of converters.
   One possible place for conversions, such as `Integer.parseInt`, would be inside the constructor.
 * Each argument, except `@OtherTokens`, may have both a short and long name.
 * If neither `@ShortName` nor `@LongName` is specified,
   then the argument name becomes the long name by default.
+
+### Example: rm
+
+````java
+final class Rm {
+
+  final boolean recursive;
+  final boolean force;
+  final List<String> filesToDelete;
+
+  @CommandLineArguments
+  Rm(@ShortName('r') boolean recursive,
+     @ShortName('f') boolean force,
+     @OtherTokens List<String> fileNames,
+     @EverythingAfter("--") @Description({
+         "Last resort for problematic arguments",
+         "For example, when file name is '-r'"})
+         List<String> escapedFileNames) {
+    this.recursive = recursive;
+    this.force = force;
+    this.filesToDelete = Stream.of(fileNames, escapedFileNames)
+        .map(List::stream)
+        .flatMap(Function.identity())
+        .collect(Collectors.toList());
+  }
+}
+````

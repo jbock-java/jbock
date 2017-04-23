@@ -95,7 +95,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void badCombination() throws Exception {
+  public void otherTokensAndEverythingAfter() throws Exception {
     List<String> sourceLines = Arrays.asList(
         "package test;",
         "import net.jbock.CommandLineArguments;",
@@ -110,5 +110,22 @@ public class ProcessorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("One argument may not have both @OtherTokens and @EverythingAfter");
+  }
+
+  @Test
+  public void everythingAfterCollidesWithOption() throws Exception {
+    List<String> sourceLines = Arrays.asList(
+        "package test;",
+        "import net.jbock.CommandLineArguments;",
+        "import net.jbock.EverythingAfter;",
+        "import java.util.List;",
+        "class JJob {",
+        "  @CommandLineArguments JJob(String a, @EverythingAfter(\"--a\") List<String> b) {}",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("@EverythingAfter coincides with a long option");
   }
 }
