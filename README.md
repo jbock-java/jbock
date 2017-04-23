@@ -69,7 +69,7 @@ The `CurlParser.Binder binder` has several methods, but you'll probably need onl
 
 * `binder.bind()` invokes the constructor. It returns a `Curl` instance.
 
-Further musings...
+Further musings&#8230;
 
 * A lonely `--key=` token binds the empty string to `key`.
 * At most one argument may have the `@OtherTokens` annotation. Otherwise, compile error is what you get.
