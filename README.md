@@ -77,7 +77,7 @@ final class Rm {
      @OtherTokens List<String> fileNames,
      @EverythingAfter("--") @Description({
          "Last resort for problematic arguments",
-         "For example, when file name is '-r'"})
+         "For example, when file name is '-f'"})
          List<String> escapedFileNames) {
     this.recursive = recursive;
     this.force = force;
@@ -88,3 +88,7 @@ final class Rm {
   }
 }
 ````
+
+* If you're not familiar with `rm`'s `--`: try `echo >>-f` and delete the file it creates.
+* Like `@OtherTokens`, at most one argument can be `@EverythingAfter`
+* `@OtherTokens` and `@EverythingAfter` cannot appear on the same argument
