@@ -17,7 +17,7 @@ jBock is simple, `GNU` and `posix` compliant CLI tool.
 * Short options can be passed `head -n1` or `head -n 1` style
 * Long options must always be passed `--key=VALUE` style (actually not a feature, but hey)
 * Repeating keys: Declare a `List<String>`
-* Non-option arguments, e.g. `rm foo.txt`: Use `@OtherTokens`
+* Dashless arguments, like in `rm foo.txt`: Use `@OtherTokens`
 * `rm --` style escaping: Use `@EverythingAfter("--")`
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
