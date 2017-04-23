@@ -7,7 +7,7 @@ Annotation processor that allows binding of command line options to instance fie
 The goal is to easily define GNU-style command line interface, via annotations.
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
-this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload).
+this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload/blob/master/src/main/java/ich/bins/ArchiveMPU.java).
 
 ### Example: curl
 
