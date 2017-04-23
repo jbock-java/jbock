@@ -19,7 +19,7 @@ jBock is simple, `GNU` and `posix` compliant CLI tool.
 * Flags: Declare a `boolean`
 * Repeating keys: Declare a `List<String>`
 * Nameless arguments, like in `rm foo.txt`: Use `@OtherTokens`
-* `rm --` style escaping: Use `@EverythingAfter("--")`
+* `rm -- foo.txt` style escaping: Use `@EverythingAfter("--")`
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
 this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload/blob/master/src/main/java/ich/bins/ArchiveMPU.java).
