@@ -39,13 +39,13 @@ final class Curl {
            "List<String> for arguments that can appear multiple times")
            List<String> headers,
        @ShortName('v') @Description(
-           "boolean for flags")
+           "boolean for value-less arguments, a.k.a. flags")
            boolean verbose,
        @ShortName('X') @LongName("method") @Description(
-           "String for regular arguments")
+           "String for arguments that can appear at most once")
            String method,
        @OtherTokens @Description({
-           "@OtherTokens to capture everything else",
+           "@OtherTokens to capture everything else.",
            "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
            List<String> urls) {
     this.headers = headers;
