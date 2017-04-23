@@ -18,7 +18,7 @@ jBock is a simple annotation processor that generates `GNU` and `posix` complian
 * Long form must always be written `--key=VALUE` style (except flags, of course)
 * Flags: Declare a `boolean` parameter
 * Repeating keys: Declare a `List<String>`
-* Nameless arguments, like in `rm foo.txt`: Use `@OtherTokens`
+* Unnamed arguments, like in `rm foo.txt`: Use `@OtherTokens`
 * `rm -- foo.txt` style escaping: Use `@EverythingAfter("--")`
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
@@ -99,9 +99,9 @@ final class Rm {
      @ShortName('f') boolean force,
      @OtherTokens List<String> fileNames,
      @EverythingAfter("--") @Description({
-         "@EverythingAfter to create a last resort",
-         "for problematic @OtherTokens.",
-         "For example, when the file name is '-f'"})
+         "@EverythingAfter can be used as an 'escape mechanism'",
+         "for unnamed arguments, a.k.a. @OtherTokens.",
+         "For example, to specify a file named '-f'"})
          List<String> escapedFileNames) {
     this.recursive = recursive;
     this.force = force;
