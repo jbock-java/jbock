@@ -39,6 +39,7 @@ final class Curl {
 ````
 
 * `@CommandLineArguments` triggers the code generation.
+* The generated code requires Java 8.
 * Class `CurlParser` will be generated in the same package,
   with a static method `CurlParser#parse(String[])` which returns a `CurlParser.Binder`.
 * Long options must always be passed `--key=VALUE` style.
