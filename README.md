@@ -18,7 +18,7 @@ jBock is simple, `GNU` and `posix` compliant CLI tool.
 * Long form must always be written `--key=VALUE` style (except flags, of course)
 * Flags: Declare a `boolean`
 * Repeating keys: Declare a `List<String>`
-* Dashless arguments, like in `rm foo.txt`: Use `@OtherTokens`
+* Nameless arguments, like in `rm foo.txt`: Use `@OtherTokens`
 * `rm --` style escaping: Use `@EverythingAfter("--")`
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
