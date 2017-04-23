@@ -2,15 +2,15 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-jBock is simple, `GNU` and `posix` compliant CLI tool.
+jBock is a simple annotation processor that generates `GNU` and `posix` compliant CLI parsers.
 
 ### What sets it apart
 
-* No reflection. Purely static processor.
-* No runtime dependency. Generated code is self-contained.
+* No reflection, purely static analysis.
+* No runtime dependency. The generated code is self-contained.
 * Convenient, flexible property binding via constructor
 * Stupidly simple: `String` and `boolean` only. 
-* No <em>converters</em>, no <em>default values</em>, no <em>required</em>.
+  No <em>converters</em>, no <em>default values</em>, no <em>required</em>.
 
 ### Features
 
