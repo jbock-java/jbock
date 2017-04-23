@@ -2,9 +2,23 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-Annotation processor that allows binding of command line options to instance fields. It also generates an `enum` of the options, along with a printable description.
+jBock is simple, `GNU` and `posix` compliant CLI tool.
 
-The goal is to easily define GNU-style command line interface, via annotations.
+### What set it apart
+
+* No reflection. Purely static processor.
+* No runtime dependency. Generated code is self-contained.
+* Convenient, flexible property binding via constructor
+* Stupidly simple: `String` and `boolean` only. 
+* No <em>converters</em>, no <em>default values</em>, no <em>required</em>.
+
+### Features
+
+* Short options can be passed `head -n1` or `head -n 1` style
+* Long options must always be passed `--key=VALUE` style (actually not a feature, but hey)
+* Repeating keys: Declare a `List<String>`
+* Non-option arguments, e.g. `rm foo.txt`: Use `@OtherTokens`
+* `rm --` style escaping: Use `@EverythingAfter("--")`
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
 this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload/blob/master/src/main/java/ich/bins/ArchiveMPU.java).
@@ -25,6 +39,7 @@ final class Curl {
        @ShortName('v') @Description("boolean for flags")
            boolean verbose,
        @ShortName('X') @Description("String for regular arguments")
+       @LongName("method") 
            String method,
        @OtherTokens @Description({
            "@OtherTokens to capture everything else",
@@ -38,32 +53,34 @@ final class Curl {
 }
 ````
 
-* `@CommandLineArguments` triggers the code generation.
-* The generated code requires Java 8.
-* Class `CurlParser` will be generated in the same package,
-  with a static method `CurlParser#parse(String[])` which returns a `CurlParser.Binder`.
-* Long options must always be passed `--key=VALUE` style.
-  `--key` is invalid and results in `IllegalArgumentException`.
-  `--key=` binds an empty string.
-* Short options may be passed either `-k value` or `-kvalue` style.
-* Only `String`, `List<String>` and `boolean` arguments are allowed.
-* At most one argument may have the `@OtherTokens` annotation.
-  Every command line token that didn't bind to another argument, will be included in this list.
-* Repeating keys are possible, if the corresponding constructor argument is of type `List<String>`.
-* `boolean` arguments are called "flags". They do <em>not</em> take arguments. In the example above,
+* `@CommandLineArguments` triggers the code generation. The generated code requires Java 8.
+* Class `CurlParser` will be generated in the same package
+
+`CurlParser` has only one method, but there's also an `enum` to consider.
+
+* `enum CurlParser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
+  These have useful methods, like for generating printable documentation.
+* The static method `parse(String[] args)` is ready for invokin' from ye olde `public static void main`.
+* `parse` returns a `CurlParser.Binder`.
+* `parse` will throw `IllegalArgumentException` if it cannot make sense of the input.
+
+The `CurlParser.Binder binder` has several methods, but you'll need only one:
+
+* `binder.bind()` invokes the constructor. It returns a `Curl` instance.
+
+Further musings...
+
+* A lonely `--key=` token binds the empty string to `key`.
+* At most one argument may have the `@OtherTokens` annotation. Otherwise, compile error is what you get.
+* `boolean` flags do <em>not</em> take arguments. In the example above,
   `-v false` would mean that `verbose` is <em>true</em>, and that `urls` contains the string <em>false</em>.
-* An absent `String` argument will be passed as `null`.
-* There's no built-in concept of required options.
-  Consider performing null-checks in the constructor.
-* `CurlParser.Binder#bind()` invokes the constructor.
-* `CurlParser.Option` is a generated `enum` of the constructor arguments.
-* `CurlParser#parse` will throw `IllegalArgumentException` if the input is invalid,
-  like `-XGET -XPOST`.
-* There's no built-in concept of converters.
-  One possible place for conversions, such as `Integer.parseInt`, would be inside the constructor.
-* Each argument, except `@OtherTokens`, may have both a short and long name.
-* If neither `@ShortName` nor `@LongName` is specified,
-  then the argument name becomes the long name by default.
+* If `--method=SOMETHING` or `-XSOMETHING` token is absent, `method` will be `null`.
+* If both `-Xда` and `-XНет` tokens are present, `parse` will throw `IllegalArgumentException`
+* If neither `@ShortName` nor `@LongName` is specified, then there is no short name,
+  and the argument name becomes the long name by default.
+
+The next example shows how to use `@EverythingAfter`.
+This can be used to take care of some syntactic corner cases that arise with `@OtherTokens`
 
 ### Example: rm
 
@@ -97,7 +114,7 @@ final class Rm {
 * Like `@OtherTokens`, at most one argument can be `@EverythingAfter`
 * `@OtherTokens` and `@EverythingAfter` cannot appear on the same argument
 
-### deps
+### The boring side: Maven technicalities
 
 ````xml
 <dependency>
@@ -106,3 +123,9 @@ final class Rm {
   <version>1.1</version>
   <scope>provided</scope>
 </dependency>
+````
+
+The `jbock` artifact is not needed at run time.
+
+There's also a separate `jbock-annotations` jar
+if you want to go fancy and use gradle's `apt` plugin.
