@@ -66,6 +66,19 @@ public final class GradleManTest {
   }
 
   @Test
+  public void testNothing() throws Exception {
+    GradleMan gradleMan = GradleManParser.parse(new String[]{}).bind();
+    assertThat(gradleMan.message, is(nullValue()));
+  }
+
+  @Test
+  public void testNull() throws Exception {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("null token");
+    GradleManParser.parse(new String[]{null});
+  }
+
+  @Test
   public void testInterestingTokens() throws Exception {
     GradleManParser.Binder binder = GradleManParser.parse(
         new String[]{"--message=hello", "-", "--", "->", "<=>", "", " "});
