@@ -92,3 +92,13 @@ final class Rm {
 * If you're not familiar with `rm`'s `--`: try `echo >>-f` and delete the file it creates.
 * Like `@OtherTokens`, at most one argument can be `@EverythingAfter`
 * `@OtherTokens` and `@EverythingAfter` cannot appear on the same argument
+
+### deps
+
+````xml
+<dependency>
+  <groupId>com.github.h908714124</groupId>
+  <artifactId>jbock</artifactId>
+  <version>1.1</version>
+  <scope>provided</scope>
+</dependency>
