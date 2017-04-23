@@ -44,3 +44,7 @@
 ### 2017-04-21 jBock 1.0 released
 
 * bugfix where `Option.describe()` didn't show the correct long form
+
+### 2017-04-23 jBock 1.1 released
+
+* add EverythingAfter annotation
