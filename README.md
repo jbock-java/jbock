@@ -38,10 +38,11 @@ final class Curl {
   Curl(@ShortName('H') @Description(
            "List<String> for arguments that can appear multiple times")
            List<String> headers,
-       @ShortName('v') @Description("boolean for flags")
+       @ShortName('v') @Description(
+           "boolean for flags")
            boolean verbose,
-       @ShortName('X') @Description("String for regular arguments")
-       @LongName("method") 
+       @ShortName('X') @LongName("method") @Description(
+           "String for regular arguments")
            String method,
        @OtherTokens @Description({
            "@OtherTokens to capture everything else",
