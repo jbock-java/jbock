@@ -22,8 +22,9 @@ final class Rm {
      @ShortName('f') boolean force,
      @OtherTokens List<String> fileNames,
      @EverythingAfter("--") @Description({
-         "Last resort for problematic arguments",
-         "For example, when file name is '-r'"})
+         "@EverythingAfter to create a last resort",
+         "for problematic @OtherTokens.",
+         "For example, when the file name is '-f'"})
          List<String> escapedFileNames) {
     this.recursive = recursive;
     this.force = force;

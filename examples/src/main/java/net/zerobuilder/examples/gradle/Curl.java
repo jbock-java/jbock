@@ -21,7 +21,9 @@ final class Curl {
            boolean verbose,
        @ShortName('X') @Description("String for regular arguments")
            String method,
-       @OtherTokens @Description("Everything that isn't '-v' or follows '-H' or '-X'")
+       @OtherTokens @Description({
+           "@OtherTokens to capture everything else",
+           "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
            List<String> urls) {
     this.headers = headers;
     this.verbose = verbose;

@@ -26,7 +26,9 @@ final class Curl {
            boolean verbose,
        @ShortName('X') @Description("String for regular arguments")
            String method,
-       @OtherTokens @Description("Everything that isn't '-v' or follows '-H' or '-X'")
+       @OtherTokens @Description({
+           "@OtherTokens to capture everything else",
+           "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
            List<String> urls) {
     this.headers = headers;
     this.verbose = verbose;
@@ -76,8 +78,9 @@ final class Rm {
      @ShortName('f') boolean force,
      @OtherTokens List<String> fileNames,
      @EverythingAfter("--") @Description({
-         "Last resort for problematic arguments",
-         "For example, when file name is '-f'"})
+         "@EverythingAfter to create a last resort",
+         "for problematic @OtherTokens.",
+         "For example, when the file name is '-f'"})
          List<String> escapedFileNames) {
     this.recursive = recursive;
     this.force = force;
@@ -89,7 +92,7 @@ final class Rm {
 }
 ````
 
-* If you're not familiar with `rm`'s `--`: try `echo >>-f` and delete the file it creates.
+* If you're not familiar with `rm`'s `--` option, try `echo >>-f` and deleting the file it creates.
 * Like `@OtherTokens`, at most one argument can be `@EverythingAfter`
 * `@OtherTokens` and `@EverythingAfter` cannot appear on the same argument
 
