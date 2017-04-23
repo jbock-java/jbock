@@ -64,7 +64,7 @@ final class Curl {
 * `parse` returns a `CurlParser.Binder`.
 * `parse` will throw `IllegalArgumentException` if it cannot make sense of the input.
 
-The `CurlParser.Binder binder` has several methods, but you'll need only one:
+The `CurlParser.Binder binder` has several methods, but you'll probably need only one:
 
 * `binder.bind()` invokes the constructor. It returns a `Curl` instance.
 
