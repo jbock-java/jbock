@@ -35,7 +35,8 @@ final class Curl {
   final boolean verbose;
 
   @CommandLineArguments
-  Curl(@ShortName('H') @Description("List<String> for arguments that appear multiple times")
+  Curl(@ShortName('H') @Description(
+           "List<String> for arguments that can appear multiple times")
            List<String> headers,
        @ShortName('v') @Description("boolean for flags")
            boolean verbose,
@@ -73,7 +74,7 @@ Further musings&#8230;
 
 * A lonely `--key=` token binds the empty string to `key`.
 * At most one argument may have the `@OtherTokens` annotation. Otherwise, compile error is what you get.
-* `boolean` flags do <em>not</em> take arguments. In the example above,
+* Flags do <em>not</em> take arguments. In the example above,
   `-v false` would mean that `verbose` is <em>true</em>, and that `urls` contains the string <em>false</em>.
 * If `--method=SOMETHING` or `-XSOMETHING` token is absent, `method` will be `null`.
 * If both `-Xда` and `-XНет` tokens are present, `parse` will throw `IllegalArgumentException`
