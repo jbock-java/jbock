@@ -125,7 +125,7 @@ final class Rm {
 </dependency>
 ````
 
-The `jbock` artifact is not needed at run time.
+The `jbock` artifact is not needed at runtime.
 
 There's also a separate `jbock-annotations` jar
 if you want to go fancy and use gradle's `apt` plugin.
