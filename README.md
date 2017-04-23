@@ -102,10 +102,10 @@ final class Rm {
          "@EverythingAfter can be used as an 'escape mechanism'",
          "for unnamed arguments, a.k.a. @OtherTokens.",
          "For example, to specify a file named '-f'"})
-         List<String> escapedFileNames) {
+         List<String> moreFileNames) {
     this.recursive = recursive;
     this.force = force;
-    this.filesToDelete = Stream.of(fileNames, escapedFileNames)
+    this.filesToDelete = Stream.of(fileNames, moreFileNames)
         .map(List::stream)
         .flatMap(Function.identity())
         .collect(Collectors.toList());
