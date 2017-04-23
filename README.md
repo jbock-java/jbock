@@ -4,7 +4,7 @@
 
 jBock is simple, `GNU` and `posix` compliant CLI tool.
 
-### What set it apart
+### What sets it apart
 
 * No reflection. Purely static processor.
 * No runtime dependency. Generated code is self-contained.
