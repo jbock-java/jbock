@@ -112,7 +112,7 @@ final class Rm {
 ````
 
 * If you're not familiar with `rm`'s `--` option, try `echo >>-f` and deleting the file it creates.
-* Like `@OtherTokens`, at most one argument can be `@EverythingAfter`
+* Like `@OtherTokens`, at most one constructor argument can be `@EverythingAfter`
 * `@OtherTokens` and `@EverythingAfter` cannot appear on the same argument
 
 ### The boring side: Maven technicalities
