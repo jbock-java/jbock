@@ -82,14 +82,8 @@ public final class GradleManTest {
   public void testInterestingTokens() throws Exception {
     GradleManParser.Binder binder = GradleManParser.parse(
         new String[]{"--message=hello", "-", "--", "->", "<=>", "", " "});
-    assertThat(binder.bind().message, is("hello"));
-    assertThat(binder.otherTokens().size(), is(6));
-    assertThat(binder.otherTokens().get(0), is("-"));
-    assertThat(binder.otherTokens().get(1), is("--"));
-    assertThat(binder.otherTokens().get(2), is("->"));
-    assertThat(binder.otherTokens().get(3), is("<=>"));
-    assertThat(binder.otherTokens().get(4), is(""));
-    assertThat(binder.otherTokens().get(5), is(" "));
+    GradleMan gradleMan = binder.bind();
+    assertThat(gradleMan.message, is("hello"));
   }
 
   @Test
@@ -113,11 +107,6 @@ public final class GradleManTest {
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.message, is("hello"));
     assertThat(gradleMan.cmos, is(false));
-    assertThat(binder.arguments().size(), is(1));
-    assertThat(binder.arguments().get(Option.MESSAGE).get(0).reconstruct(), is(args));
-    assertThat(binder.arguments().get(Option.MESSAGE).get(0).token, is("-m"));
-    assertThat(binder.arguments().get(Option.MESSAGE).get(0).value, is("hello"));
-    assertThat(binder.otherTokens().size(), is(0));
   }
 
   @Test
@@ -126,31 +115,23 @@ public final class GradleManTest {
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.message, is("hello"));
     assertThat(gradleMan.cmos, is(false));
-    assertThat(binder.arguments().size(), is(1));
-    assertThat(binder.arguments().get(Option.MESSAGE).get(0).token, is("--message=hello"));
-    assertThat(binder.arguments().get(Option.MESSAGE).get(0).value, is("hello"));
-    assertThat(binder.otherTokens().size(), is(0));
   }
 
   @Test
   public void testShortAtomic() throws Exception {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"-fbar.txt"});
-    assertThat(binder.arguments().size(), is(1));
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(1));
     assertThat(gradleMan.file.get(0), is("bar.txt"));
-    assertThat(binder.otherTokens().size(), is(0));
   }
 
   @Test
   public void testLongShortAtomic() throws Exception {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--message=hello", "-fbar.txt"});
-    assertThat(binder.arguments().size(), is(2));
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(1));
     assertThat(gradleMan.file.get(0), is("bar.txt"));
     assertThat(gradleMan.message, is("hello"));
-    assertThat(binder.otherTokens().size(), is(0));
   }
 
   @Test
@@ -159,8 +140,6 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--file=file"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(0));
-    assertThat(binder.otherTokens().size(), is(1));
-    assertThat(binder.otherTokens().get(0), is("--file=file"));
   }
 
   @Test
@@ -168,7 +147,6 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--dir=dir"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.dir, is("dir"));
-    assertThat(binder.otherTokens().size(), is(0));
   }
 
   @Test
@@ -177,15 +155,12 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"-c", "hello"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.cmos, is(true));
-    assertThat(binder.otherTokens().size(), is(1));
-    assertThat(binder.otherTokens().get(0), is("hello"));
   }
 
   @Test
   public void testNonsense() throws Exception {
     // bogus options
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"hello", "goodbye"});
-    assertThat(binder.otherTokens().size(), is(2));
   }
 
   @Test

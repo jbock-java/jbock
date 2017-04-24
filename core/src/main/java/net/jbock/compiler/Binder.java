@@ -16,61 +16,48 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Analyser.STRING;
 import static net.jbock.compiler.Analyser.STRING_LIST;
 
 final class Binder {
 
   private final ClassName binderClass;
   private final Option option;
-  private final ClassName argumentClass;
   private final FieldSpec optMap;
   private final FieldSpec otherTokens;
   private final FieldSpec rest = FieldSpec.builder(STRING_LIST, "rest")
       .addModifiers(PRIVATE, FINAL)
       .build();
-  private final FieldSpec value;
   private final Processor.Constructor constructor;
 
   private Binder(ClassName binderClass,
                  Option option,
-                 ClassName argumentClass,
                  FieldSpec optMap,
                  FieldSpec otherTokens,
-                 FieldSpec value, Processor.Constructor constructor) {
+                 Processor.Constructor constructor) {
     this.binderClass = binderClass;
     this.option = option;
-    this.argumentClass = argumentClass;
     this.optMap = optMap;
     this.otherTokens = otherTokens;
-    this.value = value;
     this.constructor = constructor;
   }
 
   static Binder create(ClassName binderClass,
                        Option optionClass,
-                       ClassName argumentClass,
                        FieldSpec optMap,
                        FieldSpec otherTokens,
-                       FieldSpec value,
                        Processor.Constructor constructor) {
     return new Binder(binderClass, optionClass,
-        argumentClass,
-        optMap, otherTokens, value, constructor);
+        optMap, otherTokens, constructor);
   }
 
   TypeSpec define() {
     TypeName originalClass = constructor.enclosingType;
-    TypeSpec.Builder builder = TypeSpec.classBuilder(binderClass)
+    return TypeSpec.classBuilder(binderClass)
         .addFields(Arrays.asList(optMap, otherTokens, rest))
         .addModifiers(PUBLIC, STATIC, FINAL)
         .addMethod(privateConstructor())
         .addMethod(bindMethod())
-        .addMethod(argumentsMethod())
-        .addMethod(otherTokensMethod());
-    if (constructor.stopword != null) {
-      builder.addMethod(restMethod());
-    }
-    return builder
         .addJavadoc("Parsed arguments, ready to be passed to the constructor.\n\n" +
                 "@see $T#$T($L)\n", originalClass, originalClass,
             Option.constructorArgumentsForJavadoc(constructor))
@@ -79,7 +66,7 @@ final class Binder {
 
   private MethodSpec bindMethod() {
     CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec a = ParameterSpec.builder(argumentClass, "a").build();
+    ParameterSpec a = ParameterSpec.builder(STRING, "a").build();
     builder.add("return new $T(\n    ", constructor.enclosingType);
     for (int j = 0; j < constructor.parameters.size(); j++) {
       if (j > 0) {
@@ -91,7 +78,6 @@ final class Binder {
       } else if (optionType == OptionType.STRING) {
         builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
             optMap, option.optionClass, option.enumConstant(j), Collections.class)
-            .add("        .map($N -> $N.$N)\n", a, a, value)
             .add("        .findFirst().orElse(null)");
       } else if (optionType == OptionType.OTHER_TOKENS) {
         builder.add("$N", otherTokens);
@@ -100,7 +86,6 @@ final class Binder {
       } else {
         builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
             optMap, option.optionClass, option.enumConstant(j), Collections.class)
-            .add("        .map($N -> $N.$N)\n", a, a, value)
             .add("        .collect($T.toList())", Collectors.class);
       }
     }
@@ -136,40 +121,6 @@ final class Binder {
         .addParameters(Arrays.asList(optMap, otherTokens, esc))
         .addCode(builder.build())
         .addModifiers(PRIVATE)
-        .build();
-  }
-
-  private MethodSpec argumentsMethod() {
-    return MethodSpec.methodBuilder("arguments")
-        .addStatement("return $N", optMap)
-        .addJavadoc("Early access to the parsing results,\n" +
-            "for manual inspection before invoking {@link this#bind()}\n" +
-            "\n" +
-            "@return an unmodifiable map\n")
-        .returns(optMap.type)
-        .addModifiers(PUBLIC)
-        .build();
-  }
-
-  private MethodSpec restMethod() {
-    return MethodSpec.methodBuilder("rest")
-        .addStatement("return $N", rest)
-        .addJavadoc("Remaining tokens after $S\n" +
-            "\n" +
-            "@return an unmodifiable list\n", constructor.stopword)
-        .returns(rest.type)
-        .addModifiers(PUBLIC)
-        .build();
-  }
-
-  private MethodSpec otherTokensMethod() {
-    return MethodSpec.methodBuilder("otherTokens")
-        .addStatement("return $N", otherTokens)
-        .addJavadoc("Collection of all unbound tokens.\n" +
-            "\n" +
-            "@return tokens that the parser ignored, an unmodifiable list\n")
-        .returns(otherTokens.type)
-        .addModifiers(PUBLIC)
         .build();
   }
 }

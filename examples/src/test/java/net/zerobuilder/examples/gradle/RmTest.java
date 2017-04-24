@@ -10,8 +10,6 @@ public class RmTest {
   @Test
   public void testRest() {
     RmParser.Binder binder = RmParser.parse(new String[]{"-f", "a", "--", "-r", "--", "-f"});
-    assertThat(binder.otherTokens().size(), is(1));
-    assertThat(binder.rest().size(), is(3));
     Rm rm = binder.bind();
     assertThat(rm.force, is(true));
     assertThat(rm.recursive, is(false));

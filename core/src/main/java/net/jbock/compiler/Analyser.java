@@ -51,7 +51,6 @@ final class Analyser {
   private final Option option;
   private final ClassName optionTypeClass;
   private final ClassName keysClass;
-  private final ClassName argumentClass;
 
   private final MethodSpec read;
   private final MethodSpec whichOption;
@@ -64,8 +63,6 @@ final class Analyser {
   private final FieldSpec longNames;
   private final FieldSpec shortNames;
   private final FieldSpec optMap;
-  private final FieldSpec value;
-  private final FieldSpec token;
   private final FieldSpec optionType;
 
   private final TypeName optionMapType;
@@ -77,7 +74,6 @@ final class Analyser {
   private Analyser(Constructor constructor) {
     this.constructor = constructor;
     this.keysClass = constructor.generatedClass.nestedClass("Keys");
-    this.argumentClass = constructor.generatedClass.nestedClass("Argument");
     this.binderClass = constructor.generatedClass.nestedClass("Binder");
     this.optionTypeClass = constructor.generatedClass.nestedClass("OptionType");
     this.optionType = FieldSpec.builder(optionTypeClass, "type", PRIVATE, FINAL).build();
@@ -86,12 +82,11 @@ final class Analyser {
     TypeName soType = ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, option.optionClass);
     ParameterizedTypeName listOfArgumentType = ParameterizedTypeName.get(
-        ClassName.get(List.class), argumentClass);
+        ClassName.get(List.class), STRING);
     this.optionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
         option.optionClass, listOfArgumentType);
     this.trimToken = trimTokenMethod();
-    this.readArgument = readArgumentMethod(
-        argumentClass, option.optionClass, optionType, optionTypeClass, trimToken);
+    this.readArgument = readArgumentMethod(option.optionClass, optionType, optionTypeClass, trimToken);
     this.optMap = FieldSpec.builder(optionMapType, "optMap")
         .addModifiers(PRIVATE, FINAL)
         .build();
@@ -107,17 +102,9 @@ final class Analyser {
     this.shortNames = FieldSpec.builder(soType, "shortNames")
         .addModifiers(PRIVATE, FINAL)
         .build();
-    this.value = FieldSpec.builder(STRING, "value")
-        .addModifiers(PUBLIC, FINAL)
-        .addJavadoc("The value that will be passed to the constructor\n")
-        .build();
-    this.token = FieldSpec.builder(STRING, "token")
-        .addModifiers(PUBLIC, FINAL)
-        .addJavadoc("The token that the parser used to identify this argument\n")
-        .build();
     this.whichOption = whichOptionMethod(keysClass, longFlags, shortFlags, longNames, shortNames, option.optionClass);
     this.checkConflict = checkConflictMethod(optionMapType, option.optionClass, optionTypeClass, optionType);
-    this.read = readMethod(keysClass, whichOption, readArgument, optionMapType, argumentClass,
+    this.read = readMethod(keysClass, whichOption, readArgument, optionMapType,
         option.optionClass, checkConflict);
   }
 
@@ -150,9 +137,8 @@ final class Analyser {
         .addType(Keys.create(option.optionClass, optionTypeClass, keysClass, longFlags,
             shortFlags, longNames, shortNames, optionType).define())
         .addType(Option.create(constructor, option.optionClass, optionTypeClass, optionType).define())
-        .addType(Argument.create(argumentClass, value, token).define())
-        .addType(Binder.create(binderClass, option, argumentClass, optMap,
-            otherTokens, value, constructor).define())
+        .addType(Binder.create(binderClass, option, optMap,
+            otherTokens, constructor).define())
         .addType(OptionType.define(optionTypeClass))
         .addAnnotation(generatedAnnotation())
         .addMethod(privateConstructor())
@@ -294,8 +280,7 @@ final class Analyser {
         .build();
   }
 
-  private static MethodSpec readArgumentMethod(ClassName argumentClass,
-                                               ClassName optionClass,
+  private static MethodSpec readArgumentMethod(ClassName optionClass,
                                                FieldSpec optionType,
                                                ClassName optionTypeClass,
                                                MethodSpec trimToken) {
@@ -309,12 +294,12 @@ final class Analyser {
     CodeBlock.Builder builder = CodeBlock.builder()
         .addStatement("$T $N = $N($N)", STRING, st, trimToken, token)
         .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.FLAG)
-          .addStatement("return new $T($S, $N, $L)", argumentClass, "t", token, true)
+          .addStatement("return $S", "t")
           .endControlFlow()
         .addStatement("$T $N = $N.indexOf('=')", INT, ie, st)
         .beginControlFlow("if ($N < 0)", ie)
           .beginControlFlow("if ($N.length() > 1)", st)
-            .addStatement("return new $T($N.substring(1), $N, $L)", argumentClass, st, token, true)
+            .addStatement("return $N.substring(1)", st)
             .endControlFlow()
           .beginControlFlow("if (!$N.hasNext())", it)
             .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Missing value: ", token)
@@ -324,13 +309,13 @@ final class Analyser {
             .addStatement("throw new $T($S + $N +\n     $S + $N)", IllegalArgumentException.class,
                 "The argument to ", token, " may not start with '-', use the long form instead: ", next)
             .endControlFlow()
-          .addStatement("return new $T($N, $N, $L)", argumentClass, next, token, false)
+          .addStatement("return $N", next)
           .endControlFlow()
-        .addStatement("return new $T($N.substring($N + 1), $N, $L)", argumentClass, st, ie, token, true);
+        .addStatement("return $N.substring($N + 1)", st, ie);
     //@formatter:on
     return MethodSpec.methodBuilder("readArgument")
         .addParameters(Arrays.asList(option, token, it))
-        .returns(argumentClass)
+        .returns(STRING)
         .addCode(builder.build())
         .addModifiers(PRIVATE, STATIC)
         .build();
@@ -340,7 +325,6 @@ final class Analyser {
                                        MethodSpec whichOption,
                                        MethodSpec nextArgument,
                                        TypeName optionMapType,
-                                       ClassName argumentClass,
                                        ClassName optionClass,
                                        MethodSpec checkConflict) {
     ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
@@ -349,7 +333,7 @@ final class Analyser {
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec argument = ParameterSpec.builder(argumentClass, "argument").build();
+    ParameterSpec argument = ParameterSpec.builder(STRING, "argument").build();
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
     ParameterSpec ignore = ParameterSpec.builder(optionClass, "__").build();
     //@formatter:off
@@ -360,7 +344,7 @@ final class Analyser {
           .addStatement("return")
           .endControlFlow()
         .addStatement("$N($N, $N, $N)", checkConflict, optionMap, option, token)
-        .addStatement("$T $N = $N($N, $N, $N)", argumentClass, argument, nextArgument, option, token, it)
+        .addStatement("$T $N = $N($N, $N, $N)", STRING, argument, nextArgument, option, token, it)
         .addStatement("$N.computeIfAbsent($N, $N -> new $T<>()).add($N)",
               optionMap, option, ignore, ArrayList.class, argument);
     //@formatter:on

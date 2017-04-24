@@ -46,7 +46,8 @@ final class Curl {
            String method,
        @OtherTokens @Description({
            "@OtherTokens to capture everything else.",
-           "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
+           "In this case, everything that isn't a verbose flag,",
+           "a header or a HTTP method."})
            List<String> urls) {
     this.headers = headers;
     this.verbose = verbose;
