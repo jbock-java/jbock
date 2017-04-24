@@ -48,3 +48,8 @@
 ### 2017-04-23 jBock 1.1 released
 
 * add EverythingAfter annotation
+
+### 2017-04-24 jBock 1.2 released
+
+* restrict Binder api: stop generating `arguments()`, `otherTokens()` and `rest()` 
+  (some of these could have unexpected results under certain conditions)
