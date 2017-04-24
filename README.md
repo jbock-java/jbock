@@ -124,7 +124,7 @@ final class Rm {
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>1.1</version>
+  <version>1.2</version>
   <scope>provided</scope>
 </dependency>
 ````
