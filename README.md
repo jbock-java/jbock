@@ -1,8 +1,8 @@
-# jBock
+# jbock
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-jBock is a simple annotation processor that generates `GNU` and `posix` compliant CLI parsers.
+jbock is a simple annotation processor that generates `GNU` and `posix` compliant CLI parsers.
 
 ### What sets it apart
 
