@@ -84,7 +84,13 @@ public final class GradleManTest {
         new String[]{"--message=hello", "-", "--", "->", "<=>", "", " "});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.message, is("hello"));
-  }
+    assertThat(binder.otherTokens().size(), is(6));
+    assertThat(binder.otherTokens().get(0), is("-"));
+    assertThat(binder.otherTokens().get(1), is("--"));
+    assertThat(binder.otherTokens().get(2), is("->"));
+    assertThat(binder.otherTokens().get(3), is("<=>"));
+    assertThat(binder.otherTokens().get(4), is(""));
+    assertThat(binder.otherTokens().get(5), is(" "));  }
 
   @Test
   public void testLongMissingEqualsLastToken() throws Exception {
@@ -140,6 +146,8 @@ public final class GradleManTest {
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--file=file"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(0));
+    assertThat(binder.otherTokens().size(), is(1));
+    assertThat(binder.otherTokens().get(0), is("--file=file"));
   }
 
   @Test

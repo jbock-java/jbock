@@ -58,6 +58,7 @@ final class Binder {
         .addModifiers(PUBLIC, STATIC, FINAL)
         .addMethod(privateConstructor())
         .addMethod(bindMethod())
+        .addMethod(otherTokensMethod())
         .addJavadoc("Parsed arguments, ready to be passed to the constructor.\n\n" +
                 "@see $T#$T($L)\n", originalClass, originalClass,
             Option.constructorArgumentsForJavadoc(constructor))
@@ -104,6 +105,20 @@ final class Binder {
         .addModifiers(PUBLIC)
         .addJavadoc(javadoc.toString(), originalClass)
         .returns(constructor.enclosingType)
+        .build();
+  }
+
+  private MethodSpec otherTokensMethod() {
+    return MethodSpec.methodBuilder("otherTokens")
+        .addStatement("return $N", otherTokens)
+        .addJavadoc("Collection of all unbound tokens.\n" +
+            "Unless @OtherTokens is used in the constructor,\n" +
+            "a good practice is to verify that this list is empty\n" +
+            "before invoking {@link #bind()}.\n" +
+            "\n" +
+            "@return tokens that the parser ignored, an unmodifiable list\n")
+        .returns(otherTokens.type)
+        .addModifiers(PUBLIC)
         .build();
   }
 
