@@ -53,3 +53,8 @@
 
 * restrict Binder api: stop generating `arguments()`, `otherTokens()` and `rest()` 
   (some of these could have unexpected results under certain conditions)
+
+### 2017-04-25 jBock 1.3 released
+
+* reintroduce `binder.otherTokens()`
+* better OPTION_NAME for camelCase arguments

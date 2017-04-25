@@ -68,9 +68,11 @@ final class Curl {
 * `parse` returns a `CurlParser.Binder`.
 * `parse` will throw `IllegalArgumentException` if it cannot make sense of the input.
 
-The `CurlParser.Binder binder` has several methods, but you'll probably need only one:
+The `CurlParser.Binder binder` has two methods:
 
 * `binder.bind()` invokes the constructor. It returns a `Curl` instance.
+* Unless `@OtherTokens` are used in your constructor, `binder.otherTokens()` 
+  should be inspected before invoking `bind()`, to inform the user about a possible input error.
 
 Further musings&#8230;
 
@@ -124,7 +126,7 @@ final class Rm {
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>1.2</version>
+  <version>1.3</version>
   <scope>provided</scope>
 </dependency>
 ````
