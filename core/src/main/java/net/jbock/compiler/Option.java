@@ -16,10 +16,10 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -58,8 +58,8 @@ final class Option {
     this.optionType = optionType;
     this.describeNamesMethod = describeNamesMethod(optionType, optionTypeClass);
     this.descriptionBlockMethod = descriptionBlockMethod();
-    Set<String> uppercaseArgumentNames = constructor.parameters.stream()
-        .map(Option::upcase)
+    Set<String> uppercaseArgumentNames = IntStream.range(0, constructor.parameters.size())
+        .mapToObj(this::enumConstant)
         .collect(Collectors.toSet());
     this.needsSuffix = uppercaseArgumentNames.size() < constructor.parameters.size();
   }
@@ -70,7 +70,7 @@ final class Option {
 
   String enumConstant(int i) {
     String suffix = needsSuffix ? String.format("_%d", i) : "";
-    return upcase(constructor.parameters.get(i)) + suffix;
+    return upcase(constructor.parameters.get(i).parameterName) + suffix;
   }
 
   static String constructorArgumentsForJavadoc(Constructor constructor) {
@@ -198,9 +198,20 @@ final class Option {
         .build();
   }
 
-  private static String upcase(Names names) {
-    return names.parameterName
-        .toUpperCase(Locale.ENGLISH);
+  public static String upcase(String input) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < input.length(); i++) {
+      char c = input.charAt(i);
+      if (Character.isUpperCase(c)) {
+        if (i > 0) {
+          sb.append('_');
+        }
+        sb.append(c);
+      } else {
+        sb.append(Character.toUpperCase(c));
+      }
+    }
+    return sb.toString();
   }
 
   private static String[] getText(Description description) {

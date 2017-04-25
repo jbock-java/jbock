@@ -90,7 +90,8 @@ public final class GradleManTest {
     assertThat(binder.otherTokens().get(2), is("->"));
     assertThat(binder.otherTokens().get(3), is("<=>"));
     assertThat(binder.otherTokens().get(4), is(""));
-    assertThat(binder.otherTokens().get(5), is(" "));  }
+    assertThat(binder.otherTokens().get(5), is(" "));
+  }
 
   @Test
   public void testLongMissingEqualsLastToken() throws Exception {
@@ -169,6 +170,7 @@ public final class GradleManTest {
   public void testNonsense() throws Exception {
     // bogus options
     GradleManParser.Binder binder = GradleManParser.parse(new String[]{"hello", "goodbye"});
+    assertThat(binder.otherTokens().size(), is(2));
   }
 
   @Test
