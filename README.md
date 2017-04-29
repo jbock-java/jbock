@@ -9,8 +9,8 @@ CLI parser.
 
 * No reflection, purely static analysis.
 * No runtime dependency. The generated code is self-contained.
-* Convenient, flexible property binding via constructor
-* Stupidly simple: `String` and `boolean` only. 
+* Convenient, flexible property binding via constructor.
+* Deliberately simple: `String` and `boolean` only.
   No <em>converters</em>, no <em>default values</em>, no <em>required</em>.
 
 ### Features
