@@ -2,7 +2,8 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-jbock is a simple annotation processor that generates `GNU` and `posix` compliant CLI parsers.
+jbock is a simple annotation processor that generates a [getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired 
+CLI parser.
 
 ### What sets it apart
 
