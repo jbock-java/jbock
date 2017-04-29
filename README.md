@@ -18,7 +18,6 @@ CLI parser. The behaviour is not `POSIXLY_CORRECT`: non-options do not stop opti
 * Short arg can be written `-n1` or `-n 1` style.
 * Long arg can be written `--num=1` or `--num 1` style.
 * Long flag is written `--zap`, short flag is written `-z`.
-* A `List<String>` declares a repeatable argument.
 * "Non-options", like in `rm foo.txt`: Use `@OtherTokens`
 * "End of option scanning", like in `rm -- foo.txt`: Use `@EverythingAfter("--")`
 
