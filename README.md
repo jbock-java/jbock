@@ -14,12 +14,31 @@ jbock is a simple annotation processor that generates `GNU` and `posix` complian
 
 ### Features
 
-* Short form can be written attached `-n1` or detached `-n 1` style
-* Long form must always be written `--key=VALUE` style (except flags, of course)
-* Flags: Declare a `boolean` parameter
-* Repeating keys: Declare a `List<String>`
+* Short arg can be written `-n1` or `-n 1` style.
+* Long arg can be written `--num=1` or `--num 1` style.
+* Long flag is written `--zap`, short flag is written `-z`.
+* A `List<String>` declares a repeatable argument.
 * Unnamed arguments, like in `rm foo.txt`: Use `@OtherTokens`
 * `rm -- foo.txt` style escaping: Use `@EverythingAfter("--")`
+
+### Basic usage
+
+Annotate a constructor with `@CommandLineArguments`.
+In this constructor, only three types of parameters are allowed:
+
+* A `boolean` parameter declares a flag.
+* A `List<String>` parameter declares a repeatable argument.
+* A `String` parameter declares an argument that can appear at most once.
+
+The following additional rules apply:
+
+* At most one of the parameters can have the "special" annotation `@OtherTokens`.
+* At most one parameter can have the "special" annotation `@EverythingAfter`.
+* `@OtherTokens` and `@EverythingAfter` cannot appear on the same argument.
+* If a "special" parameter is present, it must be of type `List<String>`.
+* All "non-special" parameters can have the `@LongName` or `@ShortName` annotation, or both.
+* If a "non-special" parameter has neither `@LongName` nor `@ShortName`, 
+  then by default the parameter name becomes the long name, and it there is no short name.
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
 this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload/blob/master/src/main/java/ich/bins/ArchiveMPU.java).
@@ -58,7 +77,7 @@ final class Curl {
 ````
 
 * `@CommandLineArguments` triggers the code generation. The generated code requires Java 8.
-* Class `CurlParser` will be generated in the same package
+* Class `CurlParser` will be generated in the same package.
 
 `CurlParser` has only one method, but there's also an `enum` to consider.
 
@@ -74,10 +93,9 @@ The `CurlParser.Binder binder` has two methods:
 * Unless `@OtherTokens` are used in your constructor, `binder.otherTokens()` 
   should be inspected before invoking `bind()`, to inform the user about a possible input error.
 
-Further musings&#8230;
+The following points should be considered:
 
 * A lonely `--key=` token binds the empty string to `key`.
-* At most one argument may have the `@OtherTokens` annotation. Otherwise, compile error is what you get.
 * Flags do <em>not</em> take arguments. In the example above,
   `-v false` would mean that `verbose` is <em>true</em>, and that `urls` contains the string <em>false</em>.
 * If `--method=SOMETHING` or `-XSOMETHING` token is absent, `method` will be `null`.
@@ -116,9 +134,7 @@ final class Rm {
 }
 ````
 
-* If you're not familiar with `rm`'s `--` option, try `echo >>-f` and deleting the file it creates.
-* Like with `@OtherTokens`, at most one constructor argument can be `@EverythingAfter`
-* `@OtherTokens` and `@EverythingAfter` cannot appear on the same argument
+If you're not familiar with `rm`'s `--` option, try `echo >>-f` and deleting the file it creates.
 
 ### The boring side: Maven technicalities
 
@@ -126,7 +142,7 @@ final class Rm {
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>1.3</version>
+  <version>1.4</version>
   <scope>provided</scope>
 </dependency>
 ````

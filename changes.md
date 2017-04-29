@@ -58,3 +58,8 @@
 
 * reintroduce `binder.otherTokens()`
 * better OPTION_NAME for camelCase arguments
+
+### 2017-04-29 jBock 1.4 released
+
+* graceful error message if the user declares a private-class exception
+* GNU compliance: allow "detached" `--key VALUE` style long opt
