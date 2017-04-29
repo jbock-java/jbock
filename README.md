@@ -104,7 +104,8 @@ For example, if `args` is
 * `{--method}` or `{-X}`, then `parse` will throw `IllegalArgumentException`
 * `{-v, false}` then `verbose` is `true` and `urls` contains the string `false`.
 * `{}` (an empty array), then `method` is `null`, and `urls` is an empty list.
-* `{-Xда, -XНет}`, it's `IllegalArgumentException` again.
+* `{-Xда, -XНет}` is `IllegalArgumentException`.
+* `{-v, -v}` (repeated flag) is `IllegalArgumentException` as well.
 
 The next example shows how to use `@EverythingAfter`.
 This can be used to take care of some syntactic corner cases that may arise if `@OtherTokens` is used.

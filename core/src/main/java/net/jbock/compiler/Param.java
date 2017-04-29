@@ -49,10 +49,10 @@ final class Param {
       return OptionType.FLAG;
     }
     if (type.equals(Analyser.STRING)) {
-      return OptionType.STRING;
+      return OptionType.AT_MOST_ONCE;
     }
     if (isList(type)) {
-      return OptionType.LIST;
+      return OptionType.REPEATABLE;
     }
     return null;
   }

@@ -55,7 +55,6 @@ final class Analyser {
   private final MethodSpec read;
   private final MethodSpec readOption;
   private final MethodSpec checkConflict;
-  private final MethodSpec trimToken;
   private final MethodSpec readArgument;
 
   private final FieldSpec longNames;
@@ -83,8 +82,7 @@ final class Analyser {
         ClassName.get(List.class), STRING);
     this.optionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
         option.optionClass, listOfArgumentType);
-    this.trimToken = trimTokenMethod();
-    this.readArgument = readArgumentMethod(trimToken);
+    this.readArgument = readArgumentMethod();
     this.optMap = FieldSpec.builder(optionMapType, "optMap")
         .addModifiers(PRIVATE, FINAL)
         .build();
@@ -107,7 +105,7 @@ final class Analyser {
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
     ParameterSpec message = ParameterSpec.builder(STRING, "message").build();
     CodeBlock block = CodeBlock.builder()
-        .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.LIST)
+        .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.REPEATABLE)
         .addStatement("return")
         .endControlFlow()
         .beginControlFlow("if ($N.containsKey($N))", optionMap, option)
@@ -133,13 +131,11 @@ final class Analyser {
             otherTokens, constructor).define())
         .addType(OptionType.define(optionTypeClass))
         .addAnnotation(generatedAnnotation())
-        .addMethod(privateConstructor())
-        .addMethod(checkConflict)
+        .addMethod(parseMethod())
         .addMethod(read)
         .addMethod(readOption)
-        .addMethod(trimToken)
         .addMethod(readArgument)
-        .addMethod(parseMethod())
+        .addMethod(checkConflict)
         .addModifiers(PUBLIC, FINAL)
         .build();
   }
@@ -147,43 +143,46 @@ final class Analyser {
   private MethodSpec parseMethod() {
     ParameterSpec otherTokens = ParameterSpec.builder(STRING_LIST, "otherTokens").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
+    ParameterSpec names = ParameterSpec.builder(keysClass, "names").build();
     ParameterSpec rest = ParameterSpec.builder(STRING_LIST, "rest").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optionMap").build();
     ParameterSpec stop = ParameterSpec.builder(TypeName.BOOLEAN, "stop").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+    if (constructor.stopword != null) {
+      builder.addStatement("$T $N = $L", TypeName.BOOLEAN, stop, false);
+    }
     //@formatter:off
-    CodeBlock.Builder builder = CodeBlock.builder()
-        .addStatement("$T $N = $L", TypeName.BOOLEAN, stop, false)
-        .addStatement("$T $N = new $T<>()", otherTokens.type, otherTokens, ArrayList.class)
-        .addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class)
-        .addStatement("$T $N = new $T()", keys.type, keys, keysClass)
-        .addStatement("$T $N = new $T<>($T.class)", optMap.type, optMap, EnumMap.class, option.optionClass)
-        .addStatement("$T $N = $T.stream($N).iterator()", it.type, it, Arrays.class, ARGS)
-        .beginControlFlow("while ($N.hasNext())", it)
-          .addStatement("$T $N = $N.next()", STRING, token, it)
-          .beginControlFlow("if ($N == null)", token)
-            .addStatement("throw new $T($S)", IllegalArgumentException.class, "null token")
-            .endControlFlow()
-          .beginControlFlow("else if ($N)", stop)
-            .addStatement("$N.add($N)", rest, token)
-            .endControlFlow()
-          .beginControlFlow("else if ($N.equals($S))", token, constructor.stopword)
-            .addStatement("$N = $L", stop, true)
-            .endControlFlow()
-          .beginControlFlow("else")
-            .addStatement("$N($N, $N, $N, $N, $N)", read, token, keys, optMap, otherTokens, it)
-            .endControlFlow()
-          .endControlFlow()
-        .addStatement("return new $T($N, $N, $N)", binderClass, optMap, otherTokens, rest);
-    //@formatter:on
+    builder.addStatement("$T $N = new $T<>()", otherTokens.type, otherTokens, ArrayList.class)
+      .addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class)
+      .addStatement("$T $N = new $T()", names.type, names, keysClass)
+      .addStatement("$T $N = new $T<>($T.class)", optMap.type, optMap, EnumMap.class, option.optionClass)
+      .addStatement("$T $N = $T.stream($N).iterator()", it.type, it, Arrays.class, ARGS)
+      .beginControlFlow("while ($N.hasNext())", it)
+        .addStatement("$T $N = $N.next()", STRING, token, it)
+        .beginControlFlow("if ($N == null)", token)
+          .addStatement("throw new $T($S)", IllegalArgumentException.class, "null token")
+          .endControlFlow();
+    if (constructor.stopword != null) {
+      builder.beginControlFlow("if ($N)", stop)
+        .addStatement("$N.add($N)", rest, token)
+        .addStatement("continue")
+        .endControlFlow()
+      .beginControlFlow("if ($N.equals($S))", token, constructor.stopword)
+        .addStatement("$N = $L", stop, true)
+        .addStatement("continue")
+        .endControlFlow();
+    }
+    builder.addStatement("$N($N, $N, $N, $N, $N)",
+              read, token, names, optMap, otherTokens, it)
+        .endControlFlow()
+      .addStatement("return new $T($N, $N, $N)", binderClass, optMap, otherTokens, rest);
     TypeName originalClass = constructor.enclosingType;
     return MethodSpec.methodBuilder("parse")
         .addParameter(ARGS)
         .addCode(builder.build())
         .addException(IllegalArgumentException.class)
-        .addJavadoc("Parses the command line arguments and performs basic validation,\n" +
-                "depending on the constructor arguments and their annotations.\n" +
+        .addJavadoc("Parses the command line arguments and performs basic validation.\n" +
                 "\n" +
                 "@param args command line arguments\n" +
                 "@throws $T if the input is invalid or ambiguous\n" +
@@ -201,7 +200,7 @@ final class Analyser {
   private static MethodSpec readOptionMethod(ClassName keysClass,
                                              FieldSpec longNames, FieldSpec shortNames,
                                              ClassName optionClass) {
-    ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
+    ParameterSpec names = ParameterSpec.builder(keysClass, "names").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec idxe = ParameterSpec.builder(INT, "idxe").build();
     //@formatter:off
@@ -213,61 +212,42 @@ final class Analyser {
           .addStatement("$T $N = $N.indexOf('=')", INT, idxe, token)
           .beginControlFlow("if ($N < 0)", idxe)
             .addStatement("return $N.$N.get($N.substring(2))",
-                keys, longNames, token)
+                names, longNames, token)
             .endControlFlow()
           .addStatement("return $N.$N.get($N.substring(2, $N))",
-              keys, longNames, token, idxe)
+              names, longNames, token, idxe)
           .endControlFlow()
         .addStatement("return $N.$N.get($N.substring(1, 2))",
-            keys, shortNames, token);
+            names, shortNames, token);
 
     //@formatter:on
     return MethodSpec.methodBuilder("readOption")
-        .addParameters(Arrays.asList(keys, token))
+        .addParameters(Arrays.asList(names, token))
         .addModifiers(STATIC, PRIVATE)
         .returns(optionClass)
         .addCode(builder.build())
         .build();
   }
 
-
-  private static MethodSpec trimTokenMethod() {
+  private static MethodSpec readArgumentMethod() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    CodeBlock.Builder builder = CodeBlock.builder()
-        .beginControlFlow("if ($N.startsWith($S))", token, "--")
-        .addStatement("return $N.substring(2)", token)
-        .endControlFlow()
-        .beginControlFlow("if ($N.startsWith($S))", token, "-")
-        .addStatement("return $N.substring(1)", token)
-        .endControlFlow()
-        .addStatement("throw new $T($S)",
-            AssertionError.class, "invalid token");
-    return MethodSpec.methodBuilder("trimToken")
-        .addParameter(token)
-        .returns(STRING)
-        .addCode(builder.build())
-        .addModifiers(PRIVATE, STATIC)
-        .build();
-  }
-
-  private static MethodSpec readArgumentMethod(MethodSpec trimToken) {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec tt = ParameterSpec.builder(STRING, "tt").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec idxe = ParameterSpec.builder(INT, "idxe").build();
     ParameterSpec isLong = ParameterSpec.builder(TypeName.BOOLEAN, "isLong").build();
     //@formatter:off
     CodeBlock.Builder builder = CodeBlock.builder()
-        .addStatement("$T $N = $N($N)", STRING, tt, trimToken, token)
-        .addStatement("$T $N = $N.indexOf('=')", INT, idxe, tt)
-        .beginControlFlow("if ($N >= 0)", idxe)
-          .add("// long with equals\n")
-          .addStatement("return $N.substring($N + 1)", tt, idxe)
+        .beginControlFlow("if (!$N.startsWith($S))", token, "-")
+          .addStatement("throw new AssertionError($S)", "invalid token")
           .endControlFlow()
-        .addStatement("$T $N = $N.length() == $N.length() + 2", TypeName.BOOLEAN, isLong, token, tt)
-        .beginControlFlow("if (!$N && $N.length() > 1)", isLong, tt)
+        .addStatement("$T $N = $N.startsWith($S)", TypeName.BOOLEAN, isLong, token, "--")
+        .addStatement("$T $N = $N.indexOf('=')", INT, idxe, token)
+        .beginControlFlow("if ($N && $N >= 0)", isLong, idxe)
+          .add("// long with equals\n")
+          .addStatement("return $N.substring($N + 1)", token, idxe)
+          .endControlFlow()
+        .beginControlFlow("if (!$N && $N.length() > 2)", isLong, token)
           .add("// attached short\n")
-          .addStatement("return $N.substring(1)", tt)
+          .addStatement("return $N.substring(2)", token)
           .endControlFlow()
         .beginControlFlow("if (!$N.hasNext())", it)
           .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Missing value: ", token)
@@ -288,7 +268,7 @@ final class Analyser {
                                        TypeName optionMapType,
                                        ClassName optionClass,
                                        FieldSpec optionType, ClassName optionTypeClass, MethodSpec checkConflict) {
-    ParameterSpec keys = ParameterSpec.builder(keysClass, "keys").build();
+    ParameterSpec names = ParameterSpec.builder(keysClass, "names").build();
     ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optMap").build();
     ParameterSpec otherTokens = ParameterSpec.builder(STRING_LIST, "otherTokens").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
@@ -299,7 +279,7 @@ final class Analyser {
     ParameterSpec ignore = ParameterSpec.builder(optionClass, "__").build();
     //@formatter:off
     CodeBlock.Builder builder = CodeBlock.builder()
-        .addStatement("$T $N = $N($N, $N)", option.type, option, readOption, keys, token)
+        .addStatement("$T $N = $N($N, $N)", option.type, option, readOption, names, token)
         .beginControlFlow("if ($N == null)", option)
           .addStatement("$N.add($N)", otherTokens, token)
           .addStatement("return")
@@ -315,16 +295,9 @@ final class Analyser {
         .addStatement("$N.add($N($N, $N))", bucket, readArgument, token, it);
     //@formatter:on
     return MethodSpec.methodBuilder("read")
-        .addParameters(Arrays.asList(token, keys, optMap, otherTokens, it))
+        .addParameters(Arrays.asList(token, names, optMap, otherTokens, it))
         .addModifiers(STATIC, PRIVATE)
         .addCode(builder.build())
-        .build();
-  }
-
-  private MethodSpec privateConstructor() {
-    return MethodSpec.constructorBuilder()
-        .addStatement("throw new $T()", UnsupportedOperationException.class)
-        .addModifiers(PRIVATE)
         .build();
   }
 

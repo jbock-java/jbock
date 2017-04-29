@@ -188,7 +188,7 @@ public final class GradleManTest {
     assertThat(Option.MESSAGE.description().size(), is(2));
     assertThat(Option.MESSAGE.description().get(0), is("the message"));
     assertThat(Option.MESSAGE.description().get(1), is("message goes here"));
-    assertThat(Option.MESSAGE.type(), is(OptionType.STRING));
+    assertThat(Option.MESSAGE.type(), is(OptionType.AT_MOST_ONCE));
     assertThat(Option.MESSAGE.longName(), is("message"));
     assertThat(Option.MESSAGE.shortName(), is("m"));
     assertThat(Option.MESSAGE.descriptionParameter(), is("MESSAGE"));

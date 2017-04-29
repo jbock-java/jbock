@@ -80,7 +80,7 @@ final class Option {
           switch (type) {
             case FLAG:
               return "boolean";
-            case STRING:
+            case AT_MOST_ONCE:
               return "String";
             default:
               return "java.util.List";
@@ -97,8 +97,8 @@ final class Option {
       String[] desc = getText(param.description);
       String argumentName = Processor.ARGNAME_LESS.contains(param.optionType) ? null : getArgumentName(param.argName);
       String enumConstant = enumConstant(i);
-      String format = String.format("$S, $S, $T.$L, $S, new $T[] {%s}",
-          String.join(", ", Collections.nCopies(desc.length, "$S")));
+      String format = String.format("$S, $S, $T.$L, $S, new $T[] {\n    %s}",
+          String.join(",\n    ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
           Arrays.asList(param.longName, param.shortName(), optionTypeClass, param.optionType, argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
@@ -242,6 +242,10 @@ final class Option {
         .addParameter(indent)
         .returns(Analyser.STRING)
         .addCode(builder.build())
+        .addJavadoc("Get the argument description.\n" +
+            "\n" +
+            "@param indent number of space characters to indent the description with\n" +
+            "@return printable description\n")
         .build();
   }
 
@@ -306,6 +310,9 @@ final class Option {
         .addModifiers(PUBLIC)
         .returns(Analyser.STRING)
         .addCode(builder.build())
+        .addJavadoc("Get a basic description of the argument name and type.\n" +
+            "\n" +
+            "@return printable description\n")
         .build();
   }
 }

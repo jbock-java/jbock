@@ -7,13 +7,15 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 
 enum OptionType {
 
-  FLAG, STRING, LIST, OTHER_TOKENS, EVERYTHING_AFTER;
+  FLAG, AT_MOST_ONCE, REPEATABLE, OTHER_TOKENS, EVERYTHING_AFTER;
 
   static TypeSpec define(ClassName optionTypeClass) {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(optionTypeClass);
     for (OptionType optionType : values()) {
       builder.addEnumConstant(optionType.name());
     }
-    return builder.addModifiers(PUBLIC).build();
+    return builder.addModifiers(PUBLIC)
+        .addJavadoc("The possible option types.\n")
+        .build();
   }
 }
