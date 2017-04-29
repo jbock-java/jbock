@@ -156,34 +156,34 @@ public final class Processor extends AbstractProcessor {
     boolean[] otherTokensFound = new boolean[1];
     String[] stopword = new String[1];
     parameters.forEach(p -> {
-      Names names = Names.create(p);
-      if (NAMELESS.contains(names.optionType)) {
+      Param param = Param.create(p);
+      if (NAMELESS.contains(param.optionType)) {
         checkNotPresent(p, asList(LongName.class, ShortName.class));
       }
-      if (ARGNAME_LESS.contains(names.optionType)) {
+      if (ARGNAME_LESS.contains(param.optionType)) {
         checkNotPresent(p, singletonList(ArgumentName.class));
       }
-      if (names.longName != null && !longNames.add(names.longName)) {
+      if (param.longName != null && !longNames.add(param.longName)) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
-            "Duplicate longName: " + names.longName, p);
+            "Duplicate longName: " + param.longName, p);
       }
-      if (names.shortName() != null && !shortNames.add(names.shortName())) {
+      if (param.shortName() != null && !shortNames.add(param.shortName())) {
         throw new ValidationException(Diagnostic.Kind.ERROR,
-            "Duplicate shortName: " + names.shortName(), p);
+            "Duplicate shortName: " + param.shortName(), p);
       }
-      if (names.optionType == OTHER_TOKENS) {
+      if (param.optionType == OTHER_TOKENS) {
         if (otherTokensFound[0]) {
           throw new ValidationException(Diagnostic.Kind.ERROR,
               "Only one parameter may have @OtherTokens", p);
         }
         otherTokensFound[0] = true;
       }
-      if (names.optionType == EVERYTHING_AFTER) {
+      if (param.optionType == EVERYTHING_AFTER) {
         if (stopword[0] != null) {
           throw new ValidationException(Diagnostic.Kind.ERROR,
               "Only one parameter may have @EverythingAfter", p);
         }
-        stopword[0] = names.stopword;
+        stopword[0] = param.stopword;
       }
     });
     if (stopword[0] != null && stopword[0].startsWith("-")) {
@@ -211,12 +211,12 @@ public final class Processor extends AbstractProcessor {
   static final class Constructor {
     final TypeName enclosingType;
     final ClassName generatedClass;
-    final List<Names> parameters;
+    final List<Param> parameters;
     final List<TypeName> thrownTypes;
     final String stopword;
 
     private Constructor(TypeName enclosingType, ClassName generatedClass,
-                        List<Names> parameters, List<TypeName> thrownTypes,
+                        List<Param> parameters, List<TypeName> thrownTypes,
                         String stopword) {
       this.enclosingType = enclosingType;
       this.generatedClass = generatedClass;
@@ -229,8 +229,8 @@ public final class Processor extends AbstractProcessor {
                                       String stopword) {
       List<TypeName> thrownTypes = executableElement.getThrownTypes().stream().map(TypeName::get).collect(toList());
       TypeName enclosingType = TypeName.get(executableElement.getEnclosingElement().asType());
-      List<Names> parameters = executableElement.getParameters().stream()
-          .map(Names::create)
+      List<Param> parameters = executableElement.getParameters().stream()
+          .map(Param::create)
           .collect(Collectors.toList());
       ClassName generatedClass = peer(ClassName.get(asType(executableElement.getEnclosingElement())), SUFFIX);
       return new Constructor(enclosingType, generatedClass, parameters, thrownTypes, stopword);

@@ -52,17 +52,10 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testShortOptionConfusion() throws Exception {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("The argument to -m may not start with '-', use the long form instead: -f");
-    GradleManParser.parse(new String[]{"-m", "-f"});
-  }
-
-  @Test
-  public void testLongMissingEquals() throws Exception {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing '=' after --message");
-    GradleManParser.parse(new String[]{"--message", "hello"});
+  public void testDetachedLong() throws Exception {
+    GradleMan gradleMan = GradleManParser.parse(
+        new String[]{"--message", "hello"}).bind();
+    assertThat(gradleMan.message, is("hello"));
   }
 
   @Test
@@ -91,13 +84,6 @@ public final class GradleManTest {
     assertThat(binder.otherTokens().get(3), is("<=>"));
     assertThat(binder.otherTokens().get(4), is(""));
     assertThat(binder.otherTokens().get(5), is(" "));
-  }
-
-  @Test
-  public void testLongMissingEqualsLastToken() throws Exception {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing '=' after --message");
-    GradleManParser.parse(new String[]{"--message"});
   }
 
   @Test

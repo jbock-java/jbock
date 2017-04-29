@@ -93,14 +93,14 @@ final class Option {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(optionClass)
         .addJavadoc("The enum constants correspond to the constructor arguments.\n");
     for (int i = 0; i < constructor.parameters.size(); i++) {
-      Names names = constructor.parameters.get(i);
-      String[] desc = getText(names.description);
-      String argumentName = Processor.ARGNAME_LESS.contains(names.optionType) ? null : getArgumentName(names.argName);
+      Param param = constructor.parameters.get(i);
+      String[] desc = getText(param.description);
+      String argumentName = Processor.ARGNAME_LESS.contains(param.optionType) ? null : getArgumentName(param.argName);
       String enumConstant = enumConstant(i);
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {%s}",
           String.join(", ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
-          Arrays.asList(names.longName, names.shortName(), optionTypeClass, names.optionType, argumentName, STRING);
+          Arrays.asList(param.longName, param.shortName(), optionTypeClass, param.optionType, argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
       args.addAll(fixArgs);
       args.addAll(Arrays.asList(desc));
@@ -130,13 +130,13 @@ final class Option {
     //@formatter:off
     return MethodSpec.constructorBuilder()
         .beginControlFlow("if ($N != null && $N.length() != 1)", shortName, shortName)
-          .addStatement("throw new $T()", AssertionError.class)
+          .addStatement("throw new $T($S)", AssertionError.class, "invalid short")
           .endControlFlow()
-        .beginControlFlow("if ($N != null && $N.length() < 1)", longName, longName)
-          .addStatement("throw new $T()", AssertionError.class)
+        .beginControlFlow("if ($N != null && $N.isEmpty())", longName, longName)
+          .addStatement("throw new $T($S)", AssertionError.class, "empty long")
           .endControlFlow()
         .beginControlFlow("if ($N == null)", description)
-          .addStatement("throw new $T($S)", AssertionError.class, description.name)
+          .addStatement("throw new $T($S)", AssertionError.class, "mission description")
           .endControlFlow()
         .addStatement("this.$N = $N", LONG_NAME, longName)
         .addStatement("this.$N = $N == null ? null : $N.charAt(0)", SHORT_NAME, shortName, shortName)
