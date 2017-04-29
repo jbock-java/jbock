@@ -63,3 +63,11 @@
 
 * graceful error message if the user declares a private-class exception
 * GNU compliance: allow "detached" `--key VALUE` style long opt
+
+### 2017-04-29 jBock 1.5 released
+
+* simplified the generated parser
+* reordered the methods in gen code
+* improved formatting of gen code
+* renamed local variables in gen code
+* generate more javadoc
