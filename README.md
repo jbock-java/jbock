@@ -2,8 +2,11 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-jbock is a simple annotation processor that generates a [getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired 
-CLI parser. The behaviour is not `POSIXLY_CORRECT`: non-options do not stop option parsing.
+jbock is a simple annotation processor that generates a [getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired
+CLI parser. It can be used to define both short and long options.
+
+Just like the default behaviour of `getopt_long`, its behaviour is not `POSIXLY_CORRECT`:
+non-options do not stop option parsing, so options and non-options can be in any order.
 
 ### What sets it apart
 
