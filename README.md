@@ -15,9 +15,9 @@ CLI parser. The behaviour is not `POSIXLY_CORRECT`: non-options do not stop opti
 
 ### Features
 
-* Short arg can be written `-n1` or `-n 1` style.
-* Long arg can be written `--num=1` or `--num 1` style.
-* Long flag is written `--zap`, short flag is written `-z`.
+* Short args can be written `-n1` or `-n 1` style.
+* Long args can be written `--num=1` or `--num 1` style.
+* A long flag is written `--zap`, a short flag `-z`.
 * "Non-options", like in `rm foo.txt`: Use `@OtherTokens`
 * "End of option scanning", like in `rm -- foo.txt`: Use `@EverythingAfter("--")`
 
@@ -32,12 +32,14 @@ In this constructor, only three types of parameters are allowed:
 
 The following additional rules apply:
 
-* At most one of the parameters can have the "special" annotation `@OtherTokens`.
-* At most one parameter can have the "special" annotation `@EverythingAfter`.
-* `@OtherTokens` and `@EverythingAfter` cannot appear on the same argument.
-* If a "special" parameter is present, it must be of type `List<String>`.
-* All "non-special" parameters can have the `@LongName` or `@ShortName` annotation, or both.
-* If a "non-special" parameter has neither `@LongName` nor `@ShortName`, 
+* At most one of the parameters can have the annotation `@OtherTokens`.
+* At most one parameter can have the annotation `@EverythingAfter`. 
+  `@OtherTokens` and `@EverythingAfter` cannot appear on the same parameter.
+* Parameters that have the `@OtherTokens` or `@EverythingAfter` annotation are called "special". 
+  All others are called "regular".
+* Special parameters must be of type `List<String>`.
+* Regular parameters can have the `@LongName` or `@ShortName` annotation, or both.
+* If a regular parameter has neither `@LongName` nor `@ShortName`, 
   then by default the parameter name becomes the long name, and it there is no short name.
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
@@ -81,30 +83,31 @@ final class Curl {
 
 `CurlParser` has only one method, but there's also an `enum` to consider.
 
-* `enum CurlParser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
-  These have useful methods, like for generating printable documentation.
-* The static method `parse(String[] args)` is ready for invokin' from ye olde `public static void main`.
-* `parse` returns a `CurlParser.Binder`.
+* The generated enum `CurlParser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
+  These correspond to the constructor arguments, and have methods to <b>generate usage text</b>.
+* The generated static method `CurlParser.parse(String[] args)` 
+  takes the `args` argument from `public static void main(String[] args)`.
+* `parse` returns another generated class, `CurlParser.Binder`.
 * `parse` will throw `IllegalArgumentException` if it cannot make sense of the input.
 
-The `CurlParser.Binder binder` has two methods:
+The generated class `CurlParser.Binder` has two methods:
 
 * `binder.bind()` invokes the constructor. It returns a `Curl` instance.
-* Unless `@OtherTokens` are used in your constructor, `binder.otherTokens()` 
-  should be inspected before invoking `bind()`, to inform the user about a possible input error.
+* `binder.otherTokens()` returns a `List<String>`. Unless `@OtherTokens` are already used in your constructor,
+   should be inspected before invoking `bind()`, to inform the user about a possible input error.
 
-The following points should be considered:
+Let's see how `CurlParser.parse(String[] args)` handles some good old input.
+For example, if `args` is
 
-* A lonely `--key=` token binds the empty string to `key`.
-* Flags do <em>not</em> take arguments. In the example above,
-  `-v false` would mean that `verbose` is <em>true</em>, and that `urls` contains the string <em>false</em>.
-* If `--method=SOMETHING` or `-XSOMETHING` token is absent, `method` will be `null`.
-* If both `-Xда` and `-XНет` tokens are present, `parse` will throw `IllegalArgumentException`
-* If neither `@ShortName` nor `@LongName` is specified, then there is no short name,
-  and the argument name becomes the long name by default.
+* `{--method, --method}`, then `method` will be the string `--method`. 
+* `{--method=}`, then `method` will be the empty string.
+* `{--method}` or `{-X}`, then `parse` will throw `IllegalArgumentException`
+* `{-v, false}` then `verbose` is `true` and `urls` contains the string `false`.
+* `{}` (an empty array), then `method` is `null`, and `urls` is an empty list.
+* `{-Xда, -XНет}`, it's `IllegalArgumentException` again.
 
 The next example shows how to use `@EverythingAfter`.
-This can be used to take care of some syntactic corner cases that arise with `@OtherTokens`
+This can be used to take care of some syntactic corner cases that may arise if `@OtherTokens` is used.
 
 ### Example: rm
 
