@@ -141,6 +141,15 @@ public final class Processor extends AbstractProcessor {
     if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
       throw new ValidationException(ERROR, "The constructor may not be private", constructor);
     }
+    constructor.getThrownTypes()
+        .forEach(t -> {
+          TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(t.toString());
+          if (typeElement.getModifiers().contains(Modifier.PRIVATE)) {
+            throw new ValidationException(ERROR,
+                String.format("Class '%s' may not be private", typeElement.getSimpleName())
+                , constructor);
+          }
+        });
     List<? extends VariableElement> parameters = constructor.getParameters();
     Set<String> shortNames = new HashSet<>();
     Set<String> longNames = new HashSet<>();

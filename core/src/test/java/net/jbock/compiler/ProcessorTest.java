@@ -62,6 +62,23 @@ public class ProcessorTest {
   }
 
   @Test
+  public void privateException() throws Exception {
+    List<String> sourceLines = Arrays.asList(
+        "package test;",
+        "import net.jbock.CommandLineArguments;",
+        "import net.jbock.LongName;",
+        "class JJob {",
+        "  @CommandLineArguments JJob(String a) throws Hammer {}",
+        "  private static final class Hammer extends Exception {}",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Class 'Hammer' may not be private");
+  }
+
+  @Test
   public void whitespace() throws Exception {
     List<String> sourceLines = Arrays.asList(
         "package test;",
