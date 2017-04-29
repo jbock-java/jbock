@@ -3,7 +3,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
 jbock is a simple annotation processor that generates a [getopt](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired 
-CLI parser.
+CLI parser. The behaviour is not `POSIXLY_CORRECT`: non-options do not stop option parsing.
 
 ### What sets it apart
 
@@ -19,8 +19,8 @@ CLI parser.
 * Long arg can be written `--num=1` or `--num 1` style.
 * Long flag is written `--zap`, short flag is written `-z`.
 * A `List<String>` declares a repeatable argument.
-* Unnamed arguments, like in `rm foo.txt`: Use `@OtherTokens`
-* `rm -- foo.txt` style escaping: Use `@EverythingAfter("--")`
+* "Non-options", like in `rm foo.txt`: Use `@OtherTokens`
+* "End of option scanning", like in `rm -- foo.txt`: Use `@EverythingAfter("--")`
 
 ### Basic usage
 
