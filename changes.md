@@ -71,3 +71,7 @@
 * improved formatting of gen code
 * renamed local variables in gen code
 * generate more javadoc
+
+### 2017-04-29 jBock 1.6 released
+
+* add an underscore to gen class name, to make clear it's generated

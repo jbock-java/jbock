@@ -11,7 +11,7 @@ non-options do not stop option parsing, so options and non-options can be in any
 ### What sets it apart
 
 * No reflection, purely static analysis.
-* No runtime dependency. The generated `*Parser.java` is self-contained.
+* No runtime dependency. The generated `*_Parser.java` is self-contained.
 * Convenient, flexible property binding via constructor.
 * Deliberately simple: `String` and `boolean` only.
   No <em>converters</em>, no <em>default values</em>, no <em>required</em>.
@@ -82,24 +82,24 @@ final class Curl {
 ````
 
 * `@CommandLineArguments` triggers the code generation. The generated code requires Java 8.
-* Class `CurlParser` will be generated in the same package.
+* Class `Curl_Parser` will be generated in the same package.
 
-`CurlParser` has only one method, but there's also an `enum` to consider.
+`Curl_Parser` has only one method, but there's also an `enum` to consider.
 
-* The generated enum `CurlParser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
+* The generated enum `Curl_Parser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
   These correspond to the constructor arguments, and have methods to <b>generate usage text</b>.
-* The generated static method `CurlParser.parse(String[] args)` 
+* The generated static method `Curl_Parser.parse(String[] args)` 
   takes the `args` argument from `public static void main(String[] args)`.
-* `parse` returns another generated class, `CurlParser.Binder`.
+* `parse` returns another generated class, `Curl_Parser.Binder`.
 * `parse` will throw `IllegalArgumentException` if it cannot make sense of the input.
 
-The generated class `CurlParser.Binder` has two methods:
+The generated class `Curl_Parser.Binder` has two methods:
 
 * `binder.bind()` invokes the constructor. It returns a `Curl` instance.
 * `binder.otherTokens()` returns a `List<String>`. Unless `@OtherTokens` are already used in your constructor,
    should be inspected before invoking `bind()`, to inform the user about a possible input error.
 
-Let's see how `CurlParser.parse(String[] args)` handles some good old input.
+Let's see how `Curl_Parser.parse(String[] args)` handles some good old input.
 For example, if `args` is
 
 * `{--method, --method}`, then `method` will be the string `--method`. 
@@ -149,7 +149,7 @@ If you're not familiar with `rm`'s `--` option, try `echo >>-f` and deleting the
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>1.5</version>
+  <version>1.6</version>
   <scope>provided</scope>
 </dependency>
 ````
