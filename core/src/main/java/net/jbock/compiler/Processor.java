@@ -41,7 +41,7 @@ import static net.jbock.compiler.OptionType.OTHER_TOKENS;
 
 public final class Processor extends AbstractProcessor {
 
-  private static final String SUFFIX = "Parser";
+  private static final String SUFFIX = "_Parser";
 
   private final Set<TypeName> done = new HashSet<>();
 

@@ -1,7 +1,7 @@
 package net.zerobuilder.examples.gradle;
 
-import net.zerobuilder.examples.gradle.GradleManParser.Option;
-import net.zerobuilder.examples.gradle.GradleManParser.OptionType;
+import net.zerobuilder.examples.gradle.GradleMan_Parser.Option;
+import net.zerobuilder.examples.gradle.GradleMan_Parser.OptionType;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -26,7 +26,7 @@ public final class GradleManTest {
   public void testShortLongConflict() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: --message=goodbye");
-    GradleManParser.parse(new String[]{"-m", "hello", "--message=goodbye"});
+    GradleMan_Parser.parse(new String[]{"-m", "hello", "--message=goodbye"});
   }
 
   @Test
@@ -34,33 +34,33 @@ public final class GradleManTest {
     // there's nothing after -m
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Missing value: -m");
-    GradleManParser.parse(new String[]{"-m"}).bind();
+    GradleMan_Parser.parse(new String[]{"-m"}).bind();
   }
 
   @Test
   public void testLongShortConflict() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: -m");
-    GradleManParser.parse(new String[]{"--message=hello", "-m", "goodbye"});
+    GradleMan_Parser.parse(new String[]{"--message=hello", "-m", "goodbye"});
   }
 
   @Test
   public void testLongLongConflict() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: --message=goodbye");
-    GradleManParser.parse(new String[]{"--message=hello", "--message=goodbye"});
+    GradleMan_Parser.parse(new String[]{"--message=hello", "--message=goodbye"});
   }
 
   @Test
   public void testDetachedLong() throws Exception {
-    GradleMan gradleMan = GradleManParser.parse(
+    GradleMan gradleMan = GradleMan_Parser.parse(
         new String[]{"--message", "hello"}).bind();
     assertThat(gradleMan.message, is("hello"));
   }
 
   @Test
   public void testNothing() throws Exception {
-    GradleMan gradleMan = GradleManParser.parse(new String[]{}).bind();
+    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{}).bind();
     assertThat(gradleMan.message, is(nullValue()));
   }
 
@@ -68,12 +68,12 @@ public final class GradleManTest {
   public void testNull() throws Exception {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("null token");
-    GradleManParser.parse(new String[]{null});
+    GradleMan_Parser.parse(new String[]{null});
   }
 
   @Test
   public void testInterestingTokens() throws Exception {
-    GradleManParser.Binder binder = GradleManParser.parse(
+    GradleMan_Parser.Binder binder = GradleMan_Parser.parse(
         new String[]{"--message=hello", "-", "--", "->", "<=>", "", " "});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.message, is("hello"));
@@ -88,7 +88,7 @@ public final class GradleManTest {
 
   @Test
   public void testLongEmptyString() throws Exception {
-    GradleManParser.Binder parse = GradleManParser.parse(new String[]{"--message="});
+    GradleMan_Parser.Binder parse = GradleMan_Parser.parse(new String[]{"--message="});
     GradleMan gradleMan = parse.bind();
     assertThat(gradleMan.message, is(""));
   }
@@ -96,7 +96,7 @@ public final class GradleManTest {
   @Test
   public void testShortNonAtomic() throws Exception {
     String[] args = {"-m", "hello"};
-    GradleManParser.Binder binder = GradleManParser.parse(args);
+    GradleMan_Parser.Binder binder = GradleMan_Parser.parse(args);
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.message, is("hello"));
     assertThat(gradleMan.cmos, is(false));
@@ -104,7 +104,7 @@ public final class GradleManTest {
 
   @Test
   public void testLongMessage() throws Exception {
-    GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--message=hello"});
+    GradleMan_Parser.Binder binder = GradleMan_Parser.parse(new String[]{"--message=hello"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.message, is("hello"));
     assertThat(gradleMan.cmos, is(false));
@@ -112,7 +112,7 @@ public final class GradleManTest {
 
   @Test
   public void testShortAtomic() throws Exception {
-    GradleManParser.Binder binder = GradleManParser.parse(new String[]{"-fbar.txt"});
+    GradleMan_Parser.Binder binder = GradleMan_Parser.parse(new String[]{"-fbar.txt"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(1));
     assertThat(gradleMan.file.get(0), is("bar.txt"));
@@ -120,7 +120,7 @@ public final class GradleManTest {
 
   @Test
   public void testLongShortAtomic() throws Exception {
-    GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--message=hello", "-fbar.txt"});
+    GradleMan_Parser.Binder binder = GradleMan_Parser.parse(new String[]{"--message=hello", "-fbar.txt"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(1));
     assertThat(gradleMan.file.get(0), is("bar.txt"));
@@ -130,7 +130,7 @@ public final class GradleManTest {
   @Test
   public void testLongInvalid() throws Exception {
     // --file is not declared
-    GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--file=file"});
+    GradleMan_Parser.Binder binder = GradleMan_Parser.parse(new String[]{"--file=file"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.file.size(), is(0));
     assertThat(binder.otherTokens().size(), is(1));
@@ -139,7 +139,7 @@ public final class GradleManTest {
 
   @Test
   public void testLong() throws Exception {
-    GradleManParser.Binder binder = GradleManParser.parse(new String[]{"--dir=dir"});
+    GradleMan_Parser.Binder binder = GradleMan_Parser.parse(new String[]{"--dir=dir"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.dir, is("dir"));
   }
@@ -147,7 +147,7 @@ public final class GradleManTest {
   @Test
   public void testFlag() throws Exception {
     // -c is a flag; last token goes in the trash
-    GradleManParser.Binder binder = GradleManParser.parse(new String[]{"-c", "hello"});
+    GradleMan_Parser.Binder binder = GradleMan_Parser.parse(new String[]{"-c", "hello"});
     GradleMan gradleMan = binder.bind();
     assertThat(gradleMan.cmos, is(true));
   }
@@ -155,7 +155,7 @@ public final class GradleManTest {
   @Test
   public void testNonsense() throws Exception {
     // bogus options
-    GradleManParser.Binder binder = GradleManParser.parse(new String[]{"hello", "goodbye"});
+    GradleMan_Parser.Binder binder = GradleMan_Parser.parse(new String[]{"hello", "goodbye"});
     assertThat(binder.otherTokens().size(), is(2));
   }
 
@@ -206,7 +206,7 @@ public final class GradleManTest {
 
   @Test
   public void testParserForNestedClass() throws Exception {
-    GradleMan_FooParser.Binder binder = GradleMan_FooParser.parse(new String[]{"--bar=4"});
+    GradleMan_Foo_Parser.Binder binder = GradleMan_Foo_Parser.parse(new String[]{"--bar=4"});
     GradleMan.Foo foo = binder.bind();
     assertThat(foo.bar, is("4"));
   }

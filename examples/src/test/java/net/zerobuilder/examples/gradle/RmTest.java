@@ -9,7 +9,7 @@ public class RmTest {
 
   @Test
   public void testRest() {
-    RmParser.Binder binder = RmParser.parse(new String[]{"-f", "a", "--", "-r", "--", "-f"});
+    Rm_Parser.Binder binder = Rm_Parser.parse(new String[]{"-f", "a", "--", "-r", "--", "-f"});
     Rm rm = binder.bind();
     assertThat(rm.force, is(true));
     assertThat(rm.recursive, is(false));
