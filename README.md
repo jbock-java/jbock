@@ -21,7 +21,7 @@ non-options do not stop option parsing, so options and non-options can be in any
 * Short args can be written `-n1` or `-n 1` style.
 * Long args can be written `--num=1` or `--num 1` style.
 * A long flag is written `--zap`, a short flag `-z`.
-* Grouping is possible, as in 'tar -xzf d.tgz'.
+* Grouping is possible, as in `tar -xzf d.tgz`.
 * "Non-options", like in `rm foo.txt`: Use `@OtherTokens`
 * "End of option scanning", like in `rm -- foo.txt`: Use `@EverythingAfter("--")`
 
