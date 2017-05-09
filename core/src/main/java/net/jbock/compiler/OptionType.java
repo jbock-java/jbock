@@ -15,7 +15,6 @@ enum OptionType {
       builder.addEnumConstant(optionType.name());
     }
     return builder.addModifiers(PUBLIC)
-        .addJavadoc("The possible option types.\n")
         .build();
   }
 }

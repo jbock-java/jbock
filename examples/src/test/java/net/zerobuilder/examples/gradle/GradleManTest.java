@@ -12,7 +12,6 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.core.Is.is;
 import static org.junit.Assert.assertThat;
@@ -160,9 +159,38 @@ public final class GradleManTest {
   }
 
   @Test
+  public void testFlagWithTrailingGarbage() throws Exception {
+    exception.expect(IllegalArgumentException.class);
+    GradleMan_Parser.parse(new String[]{"-c1"});
+  }
+
+  @Test
+  public void testDoubleFlag() throws Exception {
+    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-cv"}).bind();
+    assertThat(gradleMan.cmos, is(true));
+    assertThat(gradleMan.verbose, is(true));
+  }
+
+  @Test
+  public void testDoubleFlagWithAttachedOption() throws Exception {
+    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-cvmhello"}).bind();
+    assertThat(gradleMan.cmos, is(true));
+    assertThat(gradleMan.verbose, is(true));
+    assertThat(gradleMan.message, is("hello"));
+  }
+
+  @Test
+  public void testDoubleFlagWithDetachedOption() throws Exception {
+    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-cvm", "hello"}).bind();
+    assertThat(gradleMan.cmos, is(true));
+    assertThat(gradleMan.verbose, is(true));
+    assertThat(gradleMan.message, is("hello"));
+  }
+
+  @Test
   public void testOptions() throws Exception {
     Option[] options = Option.values();
-    assertThat(options.length, is(4));
+    assertThat(options.length, is(5));
     assertThat(Arrays.stream(options)
             .filter(o -> o.type() != OptionType.FLAG)
             .map(Option::longName)
@@ -180,7 +208,7 @@ public final class GradleManTest {
             .map(Option::shortName)
             .filter(Objects::nonNull)
             .collect(Collectors.toSet()),
-        is(new HashSet<>(singletonList("c"))));
+        is(new HashSet<>(asList("c", "v"))));
   }
 
   @Test

@@ -59,9 +59,6 @@ final class Binder {
         .addMethod(privateConstructor())
         .addMethod(bindMethod())
         .addMethod(otherTokensMethod())
-        .addJavadoc("Parsed arguments, ready to be passed to the constructor.\n\n" +
-                "@see $T#$T($L)\n", originalClass, originalClass,
-            Option.constructorArgumentsForJavadoc(constructor))
         .build();
   }
 
@@ -91,19 +88,10 @@ final class Binder {
       }
     }
     builder.add(");\n");
-    TypeName originalClass = constructor.enclosingType;
-    StringBuilder javadoc = new StringBuilder();
-    javadoc.append("Invokes the constructor.\n")
-        .append("\n");
-    for (TypeName thrownType : constructor.thrownTypes) {
-      javadoc.append("@throws ").append(thrownType.toString()).append("\n");
-    }
-    javadoc.append("@return an instance of {@link $T}\n");
     return MethodSpec.methodBuilder("bind")
         .addCode(builder.build())
         .addExceptions(constructor.thrownTypes)
         .addModifiers(PUBLIC)
-        .addJavadoc(javadoc.toString(), originalClass)
         .returns(constructor.enclosingType)
         .build();
   }
@@ -111,12 +99,6 @@ final class Binder {
   private MethodSpec otherTokensMethod() {
     return MethodSpec.methodBuilder("otherTokens")
         .addStatement("return $N", otherTokens)
-        .addJavadoc("Collection of all unbound tokens.\n" +
-            "Unless @OtherTokens is used in the constructor,\n" +
-            "a good practice is to verify that this list is empty\n" +
-            "before invoking {@link #bind()}.\n" +
-            "\n" +
-            "@return tokens that the parser ignored, an unmodifiable list\n")
         .returns(otherTokens.type)
         .addModifiers(PUBLIC)
         .build();

@@ -90,8 +90,7 @@ final class Option {
   }
 
   TypeSpec define() {
-    TypeSpec.Builder builder = TypeSpec.enumBuilder(optionClass)
-        .addJavadoc("The enum constants correspond to the constructor arguments.\n");
+    TypeSpec.Builder builder = TypeSpec.enumBuilder(optionClass);
     for (int i = 0; i < constructor.parameters.size(); i++) {
       Param param = constructor.parameters.get(i);
       String[] desc = getText(param.description);
@@ -153,9 +152,6 @@ final class Option {
     return MethodSpec.methodBuilder(SHORT_NAME.name)
         .addStatement("return $T.toString($N, null)", Objects.class, SHORT_NAME)
         .returns(STRING)
-        .addJavadoc("The short name is exactly one character in length, or null.\n" +
-            "\n" +
-            "@return short name, without the '-'; possibly null\n")
         .addModifiers(PUBLIC)
         .build();
   }
@@ -164,9 +160,6 @@ final class Option {
     return MethodSpec.methodBuilder(LONG_NAME.name)
         .addStatement("return $N", LONG_NAME)
         .returns(LONG_NAME.type)
-        .addJavadoc("The long name is at least one character in length, or null.\n" +
-            "\n" +
-            "@return long name, without the '--'; possibly null\n")
         .addModifiers(PUBLIC)
         .build();
   }
@@ -175,7 +168,6 @@ final class Option {
     return MethodSpec.methodBuilder(DESCRIPTION.name)
         .addStatement("return $N", DESCRIPTION)
         .returns(DESCRIPTION.type)
-        .addJavadoc("@return description lines\n")
         .addModifiers(PUBLIC)
         .build();
   }
@@ -183,7 +175,6 @@ final class Option {
   private static MethodSpec descriptionParameterMethod() {
     return MethodSpec.methodBuilder(ARGUMENT_NAME.name)
         .addStatement("return $N", ARGUMENT_NAME)
-        .addJavadoc("@return example parameter name, possibly null\n")
         .returns(ARGUMENT_NAME.type)
         .addModifiers(PUBLIC)
         .build();
@@ -192,7 +183,6 @@ final class Option {
   private MethodSpec typeMethod() {
     return MethodSpec.methodBuilder(optionType.name)
         .addStatement("return $N", optionType)
-        .addJavadoc("@return option type\n")
         .returns(optionType.type)
         .addModifiers(PUBLIC)
         .build();
@@ -242,10 +232,6 @@ final class Option {
         .addParameter(indent)
         .returns(Analyser.STRING)
         .addCode(builder.build())
-        .addJavadoc("Get the argument description.\n" +
-            "\n" +
-            "@param indent number of space characters to indent the description with\n" +
-            "@return printable description\n")
         .build();
   }
 
@@ -264,10 +250,6 @@ final class Option {
         .addModifiers(PUBLIC)
         .returns(Analyser.STRING)
         .addParameter(indent)
-        .addJavadoc("Convenience method to get a formatted description of the argument.\n" +
-            "\n" +
-            "@param indent number of space characters to indent the description with\n" +
-            "@return printable description\n")
         .addCode(codeBlock)
         .build();
   }
@@ -310,9 +292,6 @@ final class Option {
         .addModifiers(PUBLIC)
         .returns(Analyser.STRING)
         .addCode(builder.build())
-        .addJavadoc("Get a basic description of the argument name and type.\n" +
-            "\n" +
-            "@return printable description\n")
         .build();
   }
 }

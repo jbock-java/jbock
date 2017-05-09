@@ -16,6 +16,7 @@ final class GradleMan {
   final List<String> file;
   final String dir;
   final boolean cmos;
+  final boolean verbose;
 
   static final class Foo {
     final String bar;
@@ -41,10 +42,13 @@ final class GradleMan {
                 String dir,
             @ShortName('c')
             @Description("cmos flag")
-                boolean cmos) throws IOException, NullPointerException {
+                boolean cmos,
+            @ShortName('v')
+                boolean verbose) throws IOException, NullPointerException {
     this.message = message;
     this.file = file;
     this.dir = dir;
     this.cmos = cmos;
+    this.verbose = verbose;
   }
 }

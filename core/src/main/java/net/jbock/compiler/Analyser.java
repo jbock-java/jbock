@@ -25,7 +25,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Option.constructorArgumentsForJavadoc;
 
 final class Analyser {
 
@@ -56,6 +55,7 @@ final class Analyser {
   private final MethodSpec readOption;
   private final MethodSpec checkConflict;
   private final MethodSpec readArgument;
+  private final MethodSpec removeFirstFlag;
 
   private final FieldSpec longNames;
   private final FieldSpec shortNames;
@@ -83,6 +83,7 @@ final class Analyser {
     this.optionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
         option.optionClass, listOfArgumentType);
     this.readArgument = readArgumentMethod();
+    this.removeFirstFlag = removeFirstFlagMethod();
     this.optMap = FieldSpec.builder(optionMapType, "optMap")
         .addModifiers(PRIVATE, FINAL)
         .build();
@@ -95,7 +96,21 @@ final class Analyser {
     this.readOption = readOptionMethod(keysClass, longNames, shortNames, option.optionClass);
     this.checkConflict = checkConflictMethod(optionMapType, option.optionClass, optionTypeClass, optionType);
     this.read = readMethod(keysClass, readOption, readArgument, optionMapType,
-        option.optionClass, optionType, optionTypeClass, checkConflict);
+        option.optionClass, optionType, optionTypeClass, checkConflict, removeFirstFlag);
+  }
+
+  private static MethodSpec removeFirstFlagMethod() {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    return MethodSpec.methodBuilder("removeFirstFlag")
+        .beginControlFlow("if ($N.length() <= 2 || $N.startsWith($S))",
+            token, token, "--")
+        .addStatement("return null")
+        .endControlFlow()
+        .addStatement("return $S + $N.substring(2)", "-", token)
+        .addParameter(token)
+        .addModifiers(PRIVATE, STATIC)
+        .returns(STRING)
+        .build();
   }
 
   private static MethodSpec checkConflictMethod(TypeName optionMapType, ClassName optionClass,
@@ -136,6 +151,7 @@ final class Analyser {
         .addMethod(readOption)
         .addMethod(readArgument)
         .addMethod(checkConflict)
+        .addMethod(removeFirstFlag)
         .addModifiers(PUBLIC, FINAL)
         .build();
   }
@@ -177,21 +193,10 @@ final class Analyser {
               read, token, names, optMap, otherTokens, it)
         .endControlFlow()
       .addStatement("return new $T($N, $N, $N)", binderClass, optMap, otherTokens, rest);
-    TypeName originalClass = constructor.enclosingType;
     return MethodSpec.methodBuilder("parse")
         .addParameter(ARGS)
         .addCode(builder.build())
         .addException(IllegalArgumentException.class)
-        .addJavadoc("Parses the command line arguments and performs basic validation.\n" +
-                "\n" +
-                "@param args command line arguments\n" +
-                "@throws $T if the input is invalid or ambiguous\n" +
-                "@return a binder for constructing {@link $T}\n" +
-                "\n" +
-                "@see $T#$T($L)\n",
-            IllegalArgumentException.class,
-            constructor.enclosingType,
-            originalClass, originalClass, constructorArgumentsForJavadoc(constructor))
         .returns(binderClass)
         .addModifiers(PUBLIC, STATIC)
         .build();
@@ -267,7 +272,10 @@ final class Analyser {
                                        MethodSpec readArgument,
                                        TypeName optionMapType,
                                        ClassName optionClass,
-                                       FieldSpec optionType, ClassName optionTypeClass, MethodSpec checkConflict) {
+                                       FieldSpec optionType,
+                                       ClassName optionTypeClass,
+                                       MethodSpec checkConflict,
+                                       MethodSpec removeFirstFlag) {
     ParameterSpec names = ParameterSpec.builder(keysClass, "names").build();
     ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optMap").build();
     ParameterSpec otherTokens = ParameterSpec.builder(STRING_LIST, "otherTokens").build();
@@ -287,12 +295,23 @@ final class Analyser {
         .addStatement("$N($N, $N, $N)", checkConflict, optMap, option, token)
         .addStatement("$T $N = $N.computeIfAbsent($N, $N -> new $T<>())",
             bucket.type, bucket, optMap, option, ignore, ArrayList.class)
-        .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.FLAG)
-          .add("// add some non-null string to represent the flag\n")
+        .beginControlFlow("while ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.FLAG)
           .addStatement("$N.add($S)", bucket, "t")
-          .addStatement("return")
+          .addStatement("$N = $N($N)", token, removeFirstFlag, token)
+          .beginControlFlow("if ($N == null)", token)
+            .addStatement("break")
+            .endControlFlow()
+          .addStatement("$N = $N($N, $N)", option, readOption, names, token)
+          .beginControlFlow("if ($N == null)", option)
+            .addStatement("throw new $T($S)", IllegalArgumentException.class,
+                "invalid token")
+            .endControlFlow()
+           .addStatement("$N = $N.computeIfAbsent($N, $N -> new $T<>())",
+             bucket, optMap, option, ignore, ArrayList.class)
           .endControlFlow()
-        .addStatement("$N.add($N($N, $N))", bucket, readArgument, token, it);
+        .beginControlFlow("if ($N.type != $T.$L)", option, optionTypeClass, OptionType.FLAG)
+          .addStatement("$N.add($N($N, $N))", bucket, readArgument, token, it)
+        .endControlFlow();
     //@formatter:on
     return MethodSpec.methodBuilder("read")
         .addParameters(Arrays.asList(token, names, optMap, otherTokens, it))
