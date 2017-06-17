@@ -19,8 +19,9 @@ public class ProcessorTest {
         "package test;",
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.LongName;",
+        "import java.util.Optional;",
         "class JJob {",
-        "  @CommandLineArguments JJob(@LongName(\"x\") String a, String b) {}",
+        "  @CommandLineArguments JJob(@LongName(\"x\") Optional<String> a, Optional<String> b) {}",
         "}");
     JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -34,8 +35,9 @@ public class ProcessorTest {
         "package test;",
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.LongName;",
+        "import java.util.Optional;",
         "class JJob {",
-        "  @CommandLineArguments JJob(@LongName(\"x\") String a, @LongName(\"x\") String b) {}",
+        "  @CommandLineArguments JJob(@LongName(\"x\") Optional<String> a, @LongName(\"x\") Optional<String> b) {}",
         "}");
     JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -57,8 +59,8 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining(
-            "Only String, Optional<String>, boolean or List<String> allowed, but parameter a has type int");
+        .withErrorContaining("Only Optional<String>, List<String> and boolean allowed, " +
+            "but parameter a has type int");
   }
 
   @Test
@@ -67,6 +69,7 @@ public class ProcessorTest {
         "package test;",
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.LongName;",
+        "import java.util.Optional;",
         "class JJob {",
         "  @CommandLineArguments JJob(String a) throws Hammer {}",
         "  private static final class Hammer extends Exception {}",
@@ -84,8 +87,9 @@ public class ProcessorTest {
         "package test;",
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.LongName;",
+        "import java.util.Optional;",
         "class JJob {",
-        "  @CommandLineArguments JJob(@LongName(\"a b c\") String a) {}",
+        "  @CommandLineArguments JJob(@LongName(\"a b c\") Optional<String> a) {}",
         "}");
     JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -107,9 +111,8 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining(
-            "Only String, Optional<String>, boolean or List<String> allowed, " +
-                "but parameter a has type java.lang.Boolean");
+        .withErrorContaining("Only Optional<String>, List<String> and boolean allowed, " +
+            "but parameter a has type java.lang.Boolean");
   }
 
   @Test
@@ -137,8 +140,9 @@ public class ProcessorTest {
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.EverythingAfter;",
         "import java.util.List;",
+        "import java.util.Optional;",
         "class JJob {",
-        "  @CommandLineArguments JJob(String a, @EverythingAfter(\"--a\") List<String> b) {}",
+        "  @CommandLineArguments JJob(Optional<String> a, @EverythingAfter(\"--a\") List<String> b) {}",
         "}");
     JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))

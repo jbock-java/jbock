@@ -9,6 +9,7 @@ import net.jbock.ShortName;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Optional;
 
 final class GradleMan {
 
@@ -22,8 +23,8 @@ final class GradleMan {
     final String bar;
 
     @CommandLineArguments
-    Foo(String bar) {
-      this.bar = bar;
+    Foo(Optional<String> bar) {
+      this.bar = bar.orElse(null);
     }
   }
 
@@ -32,22 +33,22 @@ final class GradleMan {
             @ShortName('m')
             @ArgumentName("MESSAGE")
             @Description({"the message", "message goes here"})
-                String message,
+                Optional<String> message,
             @ShortName('f')
             @Description("the files")
             @ArgumentName("FILE")
                 List<String> file,
             @Description("the dir")
             @ArgumentName("DIR")
-                String dir,
+                Optional<String> dir,
             @ShortName('c')
             @Description("cmos flag")
                 boolean cmos,
             @ShortName('v')
                 boolean verbose) throws IOException, NullPointerException {
-    this.message = message;
+    this.message = message.orElse(null);
     this.file = file;
-    this.dir = dir;
+    this.dir = dir.orElse(null);
     this.cmos = cmos;
     this.verbose = verbose;
   }

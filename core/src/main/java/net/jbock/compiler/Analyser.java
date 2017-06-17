@@ -25,6 +25,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.OptionType.REPEATABLE;
 
 final class Analyser {
 
@@ -112,26 +113,35 @@ final class Analyser {
         .build();
   }
 
-  private static MethodSpec checkConflictMethod(TypeName optionMapType, ClassName optionClass,
-                                                ClassName optionTypeClass, FieldSpec optionType) {
-    ParameterSpec optionMap = ParameterSpec.builder(optionMapType, "optionMap").build();
+  private static MethodSpec checkConflictMethod(
+      TypeName optionMapType,
+      ClassName optionClass,
+      ClassName optionTypeClass,
+      FieldSpec optionType) {
+    ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optionMap").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
     ParameterSpec message = ParameterSpec.builder(STRING, "message").build();
+    ParameterSpec bucket = ParameterSpec.builder(STRING_LIST, "bucket").build();
+    ParameterSpec ignore = ParameterSpec.builder(optionClass, "__").build();
     CodeBlock block = CodeBlock.builder()
-        .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.REPEATABLE)
-        .addStatement("return")
+        .addStatement("$T $N = $N.computeIfAbsent($N, $N -> new $T<>())",
+            bucket.type, bucket, optMap, option, ignore, ArrayList.class)
+        .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, REPEATABLE)
+        .addStatement("return $N", bucket)
         .endControlFlow()
-        .beginControlFlow("if ($N.containsKey($N))", optionMap, option)
-        .addStatement("$T $N = $N.$N == $T.$L ? $S : $S", STRING, message, option, optionType,
+        .beginControlFlow("if (!$N.isEmpty())", bucket)
+        .addStatement("$T $N = $N.$N == $T.$L ?\n  $S :\n  $S", STRING, message, option, optionType,
             optionTypeClass, OptionType.FLAG, "Duplicate flag", "Conflicting token")
         .addStatement("throw new $T($N + $S + $N)", IllegalArgumentException.class,
             message, ": ", token)
         .endControlFlow()
+        .addStatement("return $N", bucket)
         .build();
     return MethodSpec.methodBuilder("checkConflict")
-        .addParameters(Arrays.asList(optionMap, option, token))
+        .addParameters(Arrays.asList(optMap, option, token))
         .addCode(block)
+        .returns(STRING_LIST)
         .addModifiers(PRIVATE, STATIC)
         .build();
   }
@@ -200,9 +210,10 @@ final class Analyser {
         .build();
   }
 
-  private static MethodSpec readOptionMethod(ClassName keysClass,
-                                             FieldSpec longNames, FieldSpec shortNames,
-                                             ClassName optionClass) {
+  private static MethodSpec readOptionMethod(
+      ClassName keysClass,
+      FieldSpec longNames, FieldSpec shortNames,
+      ClassName optionClass) {
     ParameterSpec names = ParameterSpec.builder(keysClass, "names").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec idxe = ParameterSpec.builder(INT, "idxe").build();
@@ -211,18 +222,14 @@ final class Analyser {
         .beginControlFlow("if ($N.length() < 2 || !$N.startsWith($S))", token, token, "-")
           .addStatement("return null")
            .endControlFlow()
-        .beginControlFlow("if ($N.startsWith($S))", token, "--")
-          .addStatement("$T $N = $N.indexOf('=')", INT, idxe, token)
-          .beginControlFlow("if ($N < 0)", idxe)
-            .addStatement("return $N.$N.get($N.substring(2))",
-                names, longNames, token)
-            .endControlFlow()
-          .addStatement("return $N.$N.get($N.substring(2, $N))",
-              names, longNames, token, idxe)
+        .beginControlFlow("if (!$N.startsWith($S))", token, "--")
+          .addStatement("return $N.$N.get($N.substring(1, 2))", names, shortNames, token)
           .endControlFlow()
-        .addStatement("return $N.$N.get($N.substring(1, 2))",
-            names, shortNames, token);
-
+        .addStatement("$T $N = $N.indexOf('=')", INT, idxe, token)
+        .beginControlFlow("if ($N < 0)", idxe)
+          .addStatement("return $N.$N.get($N.substring(2))", names, longNames, token)
+          .endControlFlow()
+        .addStatement("return $N.$N.get($N.substring(2, $N))", names, longNames, token, idxe);
     //@formatter:on
     return MethodSpec.methodBuilder("readOption")
         .addParameters(Arrays.asList(names, token))
@@ -265,54 +272,52 @@ final class Analyser {
         .build();
   }
 
-  private static MethodSpec readMethod(ClassName keysClass,
-                                       MethodSpec readOption,
-                                       MethodSpec readArgument,
-                                       TypeName optionMapType,
-                                       ClassName optionClass,
-                                       FieldSpec optionType,
-                                       ClassName optionTypeClass,
-                                       MethodSpec checkConflict,
-                                       MethodSpec removeFirstFlag) {
+  private static MethodSpec readMethod(
+      ClassName keysClass,
+      MethodSpec readOption,
+      MethodSpec readArgument,
+      TypeName optionMapType,
+      ClassName optionClass,
+      FieldSpec optionType,
+      ClassName optionTypeClass,
+      MethodSpec checkConflict,
+      MethodSpec removeFirstFlag) {
     ParameterSpec names = ParameterSpec.builder(keysClass, "names").build();
     ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optMap").build();
     ParameterSpec otherTokens = ParameterSpec.builder(STRING_LIST, "otherTokens").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec bucket = ParameterSpec.builder(STRING_LIST, "bucket").build();
 
+    ParameterSpec originalToken = ParameterSpec.builder(STRING, "originalToken").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
     ParameterSpec ignore = ParameterSpec.builder(optionClass, "__").build();
     //@formatter:off
     CodeBlock.Builder builder = CodeBlock.builder()
+        .addStatement("$T $N = $N", STRING, token, originalToken)
         .addStatement("$T $N = $N($N, $N)", option.type, option, readOption, names, token)
         .beginControlFlow("if ($N == null)", option)
           .addStatement("$N.add($N)", otherTokens, token)
           .addStatement("return")
           .endControlFlow()
-        .addStatement("$N($N, $N, $N)", checkConflict, optMap, option, token)
-        .addStatement("$T $N = $N.computeIfAbsent($N, $N -> new $T<>())",
-            bucket.type, bucket, optMap, option, ignore, ArrayList.class)
         .beginControlFlow("while ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.FLAG)
+          .addStatement("$T $N = $N($N, $N, $N)", bucket.type, bucket, checkConflict, optMap, option, token)
           .addStatement("$N.add($S)", bucket, "t")
           .addStatement("$N = $N($N)", token, removeFirstFlag, token)
           .beginControlFlow("if ($N == null)", token)
-            .addStatement("break")
+            .addStatement("return")
             .endControlFlow()
           .addStatement("$N = $N($N, $N)", option, readOption, names, token)
           .beginControlFlow("if ($N == null)", option)
-            .addStatement("throw new $T($S)", IllegalArgumentException.class,
-                "invalid token")
+            .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+                "invalid token: ", originalToken)
             .endControlFlow()
-           .addStatement("$N = $N.computeIfAbsent($N, $N -> new $T<>())",
-             bucket, optMap, option, ignore, ArrayList.class)
           .endControlFlow()
-        .beginControlFlow("if ($N.type != $T.$L)", option, optionTypeClass, OptionType.FLAG)
-          .addStatement("$N.add($N($N, $N))", bucket, readArgument, token, it)
-        .endControlFlow();
+        .addStatement("$T $N = $N($N, $N, $N)", bucket.type, bucket, checkConflict, optMap, option, token)
+        .addStatement("$N.add($N($N, $N))", bucket, readArgument, token, it);
     //@formatter:on
     return MethodSpec.methodBuilder("read")
-        .addParameters(Arrays.asList(token, names, optMap, otherTokens, it))
+        .addParameters(Arrays.asList(originalToken, names, optMap, otherTokens, it))
         .addModifiers(STATIC, PRIVATE)
         .addCode(builder.build())
         .build();

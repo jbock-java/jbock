@@ -66,11 +66,7 @@ final class Binder {
       OptionType optionType = constructor.parameters.get(j).optionType;
       if (optionType == OptionType.FLAG) {
         builder.add("$N.containsKey($T.$N)", optMap, option.optionClass, option.enumConstant(j));
-      } else if (optionType == OptionType.AT_MOST_ONCE) {
-        builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
-            optMap, option.optionClass, option.enumConstant(j), Collections.class)
-            .add("        .findFirst().orElse(null)");
-      } else if (optionType == OptionType.AT_MOST_ONCE_OPTIONAL) {
+      } else if (optionType == OptionType.OPTIONAL) {
         builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
             optMap, option.optionClass, option.enumConstant(j), Collections.class)
             .add("        .findFirst()");

@@ -32,7 +32,7 @@ In this constructor, only three types of parameters are allowed:
 
 * A `boolean` parameter declares a flag.
 * A `List<String>` parameter declares a repeatable argument.
-* A `String` or `Optional<String>` parameter declares an argument that may appear at most once.
+* A `Optional<String>` parameter declares an argument that may appear at most once.
 
 The following additional rules apply:
 

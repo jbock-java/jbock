@@ -51,16 +51,13 @@ final class Param {
     if (type.getKind() == TypeKind.BOOLEAN) {
       return OptionType.FLAG;
     }
-    if (equalsType(type, "java.lang.String")) {
-      return OptionType.AT_MOST_ONCE;
-    }
     if (isListOfString(type)) {
       return OptionType.REPEATABLE;
     }
     if (isOptionalString(type)) {
-      return OptionType.AT_MOST_ONCE_OPTIONAL;
+      return OptionType.OPTIONAL;
     }
-    String message = "Only String, Optional<String>, boolean or List<String> allowed, " +
+    String message = "Only Optional<String>, List<String> and boolean allowed, " +
         String.format("but parameter %s has type %s", var.getSimpleName(), type);
     throw new ValidationException(message, var);
   }
