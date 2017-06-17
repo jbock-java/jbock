@@ -1,7 +1,5 @@
 # jbock
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
-
 jbock is a simple annotation processor that generates a [getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired
 CLI parser. It can be used to define both short and long options.
 
@@ -13,8 +11,9 @@ non-options do not stop option parsing, so options and non-options can be in any
 * No reflection, purely static analysis.
 * No runtime dependency. The generated `*_Parser.java` is self-contained.
 * Convenient, flexible property binding via constructor.
-* Deliberately simple: `String` and `boolean` only.
-  No <em>converters</em>, no <em>default values</em>, no <em>required</em>.
+* Using `Optional<String>` for regular properties
+* Deliberately simple: No <em>converters</em>, <em>default values</em> or <em>required checking</em>.
+  With java 8, it's easy to add this stuff by hand.
 
 ### Features
 
@@ -128,18 +127,15 @@ This can be used to take care of some syntactic corner cases that may arise if `
 
 If you're not familiar with `rm`'s `--` option, try `echo >>-f` and deleting the file it creates.
 
-### The boring side: Maven technicalities
+### The maven side
+
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
 ````xml
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>1.7</version>
+  <version>1.8</version>
   <scope>provided</scope>
 </dependency>
 ````
-
-The `jbock` artifact is not needed at runtime.
-
-There's also a separate `jbock-annotations` jar
-if you want to go fancy and use gradle's `apt` plugin.
