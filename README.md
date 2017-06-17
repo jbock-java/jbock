@@ -119,8 +119,7 @@ This can be used to take care of some syntactic corner cases that may arise if `
   this.recursive = recursive;
   this.force = force;
   this.filesToDelete = Stream.of(fileNames, escapedFileNames)
-      .map(List::stream)
-      .flatMap(Function.identity())
+      .flatMap(List::stream)
       .collect(Collectors.toList());
 }
 ````

@@ -29,8 +29,7 @@ final class Rm {
   this.recursive = recursive;
   this.force = force;
   this.filesToDelete = Stream.of(fileNames, escapedFileNames)
-      .map(List::stream)
-      .flatMap(Function.identity())
+      .flatMap(List::stream)
       .collect(Collectors.toList());
 }
 }
