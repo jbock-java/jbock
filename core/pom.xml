@@ -22,15 +22,9 @@
   <dependencies>
 
     <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>jbock-annotations</artifactId>
-      <version>${project.version}</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.squareup</groupId>
       <artifactId>javapoet</artifactId>
-      <version>1.8.0</version>
+      <version>1.9.0</version>
     </dependency>
 
     <!-- Test -->

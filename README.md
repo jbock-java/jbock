@@ -60,7 +60,7 @@ this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upl
         "boolean for flags")
         boolean verbose,
     @ShortName('X') @Description(
-        "String or Optional<String> for regular arguments")
+        "Optional<String> for regular arguments")
         Optional<String> method,
     @OtherTokens @Description({
         "@OtherTokens to capture everything else.",

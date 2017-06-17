@@ -23,7 +23,7 @@ final class Curl {
         "boolean for flags")
         boolean verbose,
     @ShortName('X') @Description(
-        "String or Optional<String> for regular arguments")
+        "Optional<String> for regular arguments")
         Optional<String> method,
     @OtherTokens @Description({
         "@OtherTokens to capture everything else.",

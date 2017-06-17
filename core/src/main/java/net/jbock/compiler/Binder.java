@@ -63,7 +63,7 @@ final class Binder {
       if (j > 0) {
         builder.add(",\n    ");
       }
-      OptionType optionType = constructor.parameters.get(j).optionType;
+      OptionType optionType = constructor.parameters.get(j).optionType();
       if (optionType == OptionType.FLAG) {
         builder.add("$N.containsKey($T.$N)", optMap, option.optionClass, option.enumConstant(j));
       } else if (optionType == OptionType.OPTIONAL) {

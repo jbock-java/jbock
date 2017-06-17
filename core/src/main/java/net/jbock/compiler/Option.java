@@ -70,20 +70,20 @@ final class Option {
 
   String enumConstant(int i) {
     String suffix = needsSuffix ? String.format("_%d", i) : "";
-    return upcase(constructor.parameters.get(i).parameterName) + suffix;
+    return upcase(constructor.parameters.get(i).parameterName()) + suffix;
   }
 
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(optionClass);
     for (int i = 0; i < constructor.parameters.size(); i++) {
       Param param = constructor.parameters.get(i);
-      String[] desc = getText(param.description);
-      String argumentName = Processor.ARGNAME_LESS.contains(param.optionType) ? null : getArgumentName(param.argName);
+      String[] desc = getText(param.description());
+      String argumentName = Processor.ARGNAME_LESS.contains(param.optionType()) ? null : getArgumentName(param.argName());
       String enumConstant = enumConstant(i);
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {\n    %s}",
           String.join(",\n    ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
-          Arrays.asList(param.longName, param.shortName(), optionTypeClass, param.optionType, argumentName, STRING);
+          Arrays.asList(param.longName(), param.shortName(), optionTypeClass, param.optionType(), argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
       args.addAll(fixArgs);
       args.addAll(Arrays.asList(desc));

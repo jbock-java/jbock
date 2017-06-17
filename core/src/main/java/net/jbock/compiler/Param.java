@@ -20,34 +20,36 @@ import static net.jbock.compiler.Util.equalsType;
 
 final class Param {
 
+  private final String longName;
   private final Character shortName;
-  final String longName;
-  final OptionType optionType;
-  final String parameterName;
+  private final OptionType optionType;
+
   final String stopword;
 
-  final Description description;
-  final ArgumentName argName;
+  private final VariableElement variableElement;
 
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
-  private Param(Character shortName,
-                String longName,
-                OptionType optionType,
-                String parameterName,
-                Description description,
-                ArgumentName argName, String stopword) {
-    this.optionType = optionType;
+  private Param(
+      Character shortName,
+      String longName,
+      String stopword,
+      VariableElement variableElement) {
     this.shortName = shortName;
     this.longName = longName;
-    this.parameterName = parameterName;
-    this.description = description;
-    this.argName = argName;
     this.stopword = stopword;
+    this.variableElement = variableElement;
+    this.optionType = getOptionType(variableElement);
   }
 
-  private static OptionType getOptionType(VariableElement var) {
-    TypeMirror type = var.asType();
+  private static OptionType getOptionType(VariableElement variableElement) {
+    if (variableElement.getAnnotation(OtherTokens.class) != null) {
+      return OptionType.OTHER_TOKENS;
+    }
+    if (variableElement.getAnnotation(EverythingAfter.class) != null) {
+      return OptionType.EVERYTHING_AFTER;
+    }
+    TypeMirror type = variableElement.asType();
     if (type.getKind() == TypeKind.BOOLEAN) {
       return OptionType.FLAG;
     }
@@ -58,8 +60,8 @@ final class Param {
       return OptionType.OPTIONAL;
     }
     String message = "Only Optional<String>, List<String> and boolean allowed, " +
-        String.format("but parameter %s has type %s", var.getSimpleName(), type);
-    throw new ValidationException(message, var);
+        String.format("but parameter %s has type %s", variableElement.getSimpleName(), type);
+    throw new ValidationException(message, variableElement);
   }
 
   static Param create(VariableElement variableElement) {
@@ -73,25 +75,36 @@ final class Param {
             "@OtherTokens and @EverythingAfter cannot be on the same parameter", variableElement);
       }
       checkList(variableElement);
+      if (longName != null) {
+        throw new ValidationException(
+            "@OtherTokens and @LongName cannot be on the same parameter", variableElement);
+      }
+      if (shortName != null) {
+        throw new ValidationException(
+            "@OtherTokens and @ShortName cannot be on the same parameter", variableElement);
+      }
       return new Param(null,
           variableElement.getSimpleName().toString(),
-          OptionType.OTHER_TOKENS,
-          variableElement.getSimpleName().toString(),
-          variableElement.getAnnotation(Description.class),
-          variableElement.getAnnotation(ArgumentName.class),
-          null);
+          null,
+          variableElement);
     }
     if (everythingAfter != null) {
       checkList(variableElement);
+      if (longName != null) {
+        throw new ValidationException(
+            "@EverythingAfter and @LongName cannot be on the same parameter", variableElement);
+      }
+      if (shortName != null) {
+        throw new ValidationException(
+            "@EverythingAfter and @ShortName cannot be on the same parameter", variableElement);
+      }
       String stopword = everythingAfter.value();
       basicCheckName(variableElement, stopword);
-      return new Param(null, variableElement.getSimpleName().toString(), OptionType.EVERYTHING_AFTER,
+      return new Param(null,
           variableElement.getSimpleName().toString(),
-          variableElement.getAnnotation(Description.class),
-          variableElement.getAnnotation(ArgumentName.class),
-          stopword);
+          stopword,
+          variableElement);
     }
-    OptionType optionType = getOptionType(variableElement);
     String ln = null;
     Character sn = null;
     if (longName != null) {
@@ -107,9 +120,11 @@ final class Param {
       checkName(variableElement, Character.toString(sn));
     }
     checkName(variableElement, ln);
-    return new Param(sn, ln, optionType, variableElement.getSimpleName().toString(),
-        variableElement.getAnnotation(Description.class),
-        variableElement.getAnnotation(ArgumentName.class), null);
+    return new Param(
+        sn,
+        ln,
+        null,
+        variableElement);
   }
 
   private static void checkList(VariableElement variableElement) {
@@ -169,5 +184,25 @@ final class Param {
 
   String shortName() {
     return Objects.toString(shortName, null);
+  }
+
+  String longName() {
+    return longName;
+  }
+
+  Description description() {
+    return variableElement.getAnnotation(Description.class);
+  }
+
+  ArgumentName argName() {
+    return variableElement.getAnnotation(ArgumentName.class);
+  }
+
+  String parameterName() {
+    return variableElement.getSimpleName().toString();
+  }
+
+  OptionType optionType() {
+    return optionType;
   }
 }

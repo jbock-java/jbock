@@ -82,23 +82,22 @@ public final class Processor extends AbstractProcessor {
     return false;
   }
 
-  private void handleException(ExecutableElement enclosingElement, Exception e) {
-    e.printStackTrace();
-    String message = "Error processing " +
-        ClassName.get(asType(enclosingElement.getEnclosingElement())) +
+  private void handleException(ExecutableElement constructor, Exception e) {
+    String message = "Unexpected error while processing " +
+        ClassName.get(asType(constructor.getEnclosingElement())) +
         ": " + e.getMessage();
-    processingEnv.getMessager().printMessage(ERROR, message, enclosingElement);
+    processingEnv.getMessager().printMessage(ERROR, message, constructor);
   }
 
   private void validate(Set<ExecutableElement> constructors) {
-    Set<TypeElement> check = new HashSet<>();
+    Set<String> check = new HashSet<>();
     List<TypeElement> t = constructors.stream()
         .map(ExecutableElement::getEnclosingElement)
         .map(Element::asType)
         .map(LessTypes::asTypeElement)
         .collect(toList());
     for (TypeElement typeElement : t) {
-      if (!check.add(typeElement)) {
+      if (!check.add(typeElement.getQualifiedName().toString())) {
         processingEnv.getMessager().printMessage(ERROR,
             CommandLineArguments.class.getSimpleName() + " can only appear once per class",
             typeElement);
@@ -156,28 +155,28 @@ public final class Processor extends AbstractProcessor {
     String[] stopword = new String[1];
     parameters.forEach(p -> {
       Param param = Param.create(p);
-      if (NAMELESS.contains(param.optionType)) {
+      if (NAMELESS.contains(param.optionType())) {
         checkNotPresent(p, asList(LongName.class, ShortName.class));
       }
-      if (ARGNAME_LESS.contains(param.optionType)) {
+      if (ARGNAME_LESS.contains(param.optionType())) {
         checkNotPresent(p, singletonList(ArgumentName.class));
       }
-      if (param.longName != null && !longNames.add(param.longName)) {
+      if (param.longName() != null && !longNames.add(param.longName())) {
         throw new ValidationException(
-            "Duplicate longName: " + param.longName, p);
+            "Duplicate longName: " + param.longName(), p);
       }
       if (param.shortName() != null && !shortNames.add(param.shortName())) {
         throw new ValidationException(
             "Duplicate shortName: " + param.shortName(), p);
       }
-      if (param.optionType == OTHER_TOKENS) {
+      if (param.optionType() == OTHER_TOKENS) {
         if (otherTokensFound[0]) {
           throw new ValidationException(
               "Only one parameter may have @OtherTokens", p);
         }
         otherTokensFound[0] = true;
       }
-      if (param.optionType == EVERYTHING_AFTER) {
+      if (param.optionType() == EVERYTHING_AFTER) {
         if (stopword[0] != null) {
           throw new ValidationException(
               "Only one parameter may have @EverythingAfter", p);
@@ -214,9 +213,12 @@ public final class Processor extends AbstractProcessor {
     final List<TypeName> thrownTypes;
     final String stopword;
 
-    private Constructor(TypeName enclosingType, ClassName generatedClass,
-                        List<Param> parameters, List<TypeName> thrownTypes,
-                        String stopword) {
+    private Constructor(
+        TypeName enclosingType,
+        ClassName generatedClass,
+        List<Param> parameters,
+        List<TypeName> thrownTypes,
+        String stopword) {
       this.enclosingType = enclosingType;
       this.generatedClass = generatedClass;
       this.parameters = parameters;
@@ -224,8 +226,9 @@ public final class Processor extends AbstractProcessor {
       this.stopword = stopword;
     }
 
-    private static Constructor create(ExecutableElement executableElement,
-                                      String stopword) {
+    private static Constructor create(
+        ExecutableElement executableElement,
+        String stopword) {
       List<TypeName> thrownTypes = executableElement.getThrownTypes().stream().map(TypeName::get).collect(toList());
       TypeName enclosingType = TypeName.get(executableElement.getEnclosingElement().asType());
       List<Param> parameters = executableElement.getParameters().stream()
