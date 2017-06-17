@@ -41,15 +41,14 @@ final class Analyser {
   private static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
   private static final ParameterSpec ARGS = ParameterSpec.builder(STRING_ARRAY, "args")
       .build();
-  private static final FieldSpec otherTokens = FieldSpec.builder(STRING_LIST, "otherTokens", PRIVATE, FINAL)
+  static final FieldSpec otherTokens = FieldSpec.builder(STRING_LIST, "otherTokens", PRIVATE, FINAL)
       .build();
 
-  private final Constructor constructor;
+  final Constructor constructor;
 
-  private final ClassName binderClass;
-  private final Option option;
-  private final ClassName optionTypeClass;
-  private final ClassName keysClass;
+  final ClassName binderClass;
+  final Option option;
+  final ClassName keysClass;
 
   private final MethodSpec read;
   private final MethodSpec readOption;
@@ -57,12 +56,12 @@ final class Analyser {
   private final MethodSpec readArgument;
   private final MethodSpec removeFirstFlag;
 
-  private final FieldSpec longNames;
-  private final FieldSpec shortNames;
-  private final FieldSpec optMap;
-  private final FieldSpec optionType;
+  final FieldSpec longNames;
+  final FieldSpec shortNames;
+  final FieldSpec optMap;
 
   private final TypeName optionMapType;
+  private final ClassName optionTypeClass;
 
   static Analyser create(Constructor constructor) {
     return new Analyser(constructor);
@@ -73,7 +72,7 @@ final class Analyser {
     this.keysClass = constructor.generatedClass.nestedClass("Names");
     this.binderClass = constructor.generatedClass.nestedClass("Binder");
     this.optionTypeClass = constructor.generatedClass.nestedClass("OptionType");
-    this.optionType = FieldSpec.builder(optionTypeClass, "type", PRIVATE, FINAL).build();
+    FieldSpec optionType = FieldSpec.builder(optionTypeClass, "type", PRIVATE, FINAL).build();
     this.option = Option.create(constructor,
         constructor.generatedClass.nestedClass("Option"), optionTypeClass, optionType);
     TypeName soType = ParameterizedTypeName.get(ClassName.get(Map.class),
@@ -139,11 +138,9 @@ final class Analyser {
 
   TypeSpec analyse() {
     return TypeSpec.classBuilder(constructor.generatedClass)
-        .addType(Names.create(option.optionClass, keysClass,
-            longNames, shortNames).define())
-        .addType(Option.create(constructor, option.optionClass, optionTypeClass, optionType).define())
-        .addType(Binder.create(binderClass, option, optMap,
-            otherTokens, constructor).define())
+        .addType(Names.create(this).define())
+        .addType(option.define())
+        .addType(Binder.create(this).define())
         .addType(OptionType.define(optionTypeClass))
         .addAnnotation(generatedAnnotation())
         .addMethod(parseMethod())
@@ -179,20 +176,21 @@ final class Analyser {
         .beginControlFlow("if ($N == null)", token)
           .addStatement("throw new $T($S)", IllegalArgumentException.class, "null token")
           .endControlFlow();
+    //@formatter:on
     if (constructor.stopword != null) {
       builder.beginControlFlow("if ($N)", stop)
-        .addStatement("$N.add($N)", rest, token)
-        .addStatement("continue")
-        .endControlFlow()
-      .beginControlFlow("if ($N.equals($S))", token, constructor.stopword)
-        .addStatement("$N = $L", stop, true)
-        .addStatement("continue")
-        .endControlFlow();
+          .addStatement("$N.add($N)", rest, token)
+          .addStatement("continue")
+          .endControlFlow()
+          .beginControlFlow("if ($N.equals($S))", token, constructor.stopword)
+          .addStatement("$N = $L", stop, true)
+          .addStatement("continue")
+          .endControlFlow();
     }
     builder.addStatement("$N($N, $N, $N, $N, $N)",
-              read, token, names, optMap, otherTokens, it)
+        read, token, names, optMap, otherTokens, it)
         .endControlFlow()
-      .addStatement("return new $T($N, $N, $N)", binderClass, optMap, otherTokens, rest);
+        .addStatement("return new $T($N, $N, $N)", binderClass, optMap, otherTokens, rest);
     return MethodSpec.methodBuilder("parse")
         .addParameter(ARGS)
         .addCode(builder.build())

@@ -5,7 +5,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.Arrays;
@@ -16,15 +15,14 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Analyser.STRING;
 import static net.jbock.compiler.Analyser.STRING_LIST;
+import static net.jbock.compiler.Analyser.otherTokens;
 
 final class Binder {
 
   private final ClassName binderClass;
   private final Option option;
   private final FieldSpec optMap;
-  private final FieldSpec otherTokens;
   private final FieldSpec rest = FieldSpec.builder(STRING_LIST, "rest")
       .addModifiers(PRIVATE, FINAL)
       .build();
@@ -33,26 +31,22 @@ final class Binder {
   private Binder(ClassName binderClass,
                  Option option,
                  FieldSpec optMap,
-                 FieldSpec otherTokens,
                  Processor.Constructor constructor) {
     this.binderClass = binderClass;
     this.option = option;
     this.optMap = optMap;
-    this.otherTokens = otherTokens;
     this.constructor = constructor;
   }
 
-  static Binder create(ClassName binderClass,
-                       Option optionClass,
-                       FieldSpec optMap,
-                       FieldSpec otherTokens,
-                       Processor.Constructor constructor) {
-    return new Binder(binderClass, optionClass,
-        optMap, otherTokens, constructor);
+  static Binder create(Analyser analyser) {
+    return new Binder(
+        analyser.binderClass,
+        analyser.option,
+        analyser.optMap,
+        analyser.constructor);
   }
 
   TypeSpec define() {
-    TypeName originalClass = constructor.enclosingType;
     return TypeSpec.classBuilder(binderClass)
         .addFields(Arrays.asList(optMap, otherTokens, rest))
         .addModifiers(PUBLIC, STATIC, FINAL)
@@ -64,7 +58,6 @@ final class Binder {
 
   private MethodSpec bindMethod() {
     CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec a = ParameterSpec.builder(STRING, "a").build();
     builder.add("return new $T(\n    ", constructor.enclosingType);
     for (int j = 0; j < constructor.parameters.size(); j++) {
       if (j > 0) {
@@ -77,6 +70,10 @@ final class Binder {
         builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
             optMap, option.optionClass, option.enumConstant(j), Collections.class)
             .add("        .findFirst().orElse(null)");
+      } else if (optionType == OptionType.AT_MOST_ONCE_OPTIONAL) {
+        builder.add("$N.getOrDefault($T.$L, $T.emptyList()).stream()\n",
+            optMap, option.optionClass, option.enumConstant(j), Collections.class)
+            .add("        .findFirst()");
       } else if (optionType == OptionType.OTHER_TOKENS) {
         builder.add("$N", otherTokens);
       } else if (optionType == OptionType.EVERYTHING_AFTER) {
@@ -108,11 +105,12 @@ final class Binder {
     CodeBlock.Builder builder = CodeBlock.builder();
     ParameterSpec optMap = ParameterSpec.builder(this.optMap.type, this.optMap.name)
         .build();
-    ParameterSpec otherTokens = ParameterSpec.builder(this.otherTokens.type, this.otherTokens.name)
-        .build();
+    ParameterSpec otherTokens = ParameterSpec.builder(
+        Analyser.otherTokens.type, Analyser.otherTokens.name).build();
     ParameterSpec esc = ParameterSpec.builder(this.rest.type, this.rest.name).build();
     builder.addStatement("this.$N = $T.unmodifiableMap($N)", this.optMap, Collections.class, optMap);
-    builder.addStatement("this.$N = $T.unmodifiableList($N)", this.otherTokens, Collections.class, otherTokens);
+    builder.addStatement("this.$N = $T.unmodifiableList($N)",
+        Analyser.otherTokens, Collections.class, otherTokens);
     builder.addStatement("this.$N = $T.unmodifiableList($N)", this.rest, Collections.class, esc);
     return MethodSpec.constructorBuilder()
         .addParameters(Arrays.asList(optMap, otherTokens, esc))

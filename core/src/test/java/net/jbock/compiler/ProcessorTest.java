@@ -57,8 +57,8 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Only String, boolean or java.util.List<String> allowed, " +
-            "but parameter a has type int");
+        .withErrorContaining(
+            "Only String, Optional<String>, boolean or List<String> allowed, but parameter a has type int");
   }
 
   @Test
@@ -107,8 +107,9 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Only String, boolean or java.util.List<String> allowed, but parameter a " +
-            "has type java.lang.Boolean");
+        .withErrorContaining(
+            "Only String, Optional<String>, boolean or List<String> allowed, " +
+                "but parameter a has type java.lang.Boolean");
   }
 
   @Test
@@ -126,7 +127,7 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("One argument may not have both @OtherTokens and @EverythingAfter");
+        .withErrorContaining("@OtherTokens and @EverythingAfter cannot be on the same parameter");
   }
 
   @Test

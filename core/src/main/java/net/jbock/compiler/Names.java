@@ -33,10 +33,12 @@ final class Names {
     this.shortNames = shortNames;
   }
 
-  static Names create(ClassName optionClass,
-                      ClassName keysClass,
-                      FieldSpec longNames, FieldSpec shortNames) {
-    return new Names(optionClass, keysClass, longNames, shortNames);
+  static Names create(Analyser analyser) {
+    return new Names(
+        analyser.option.optionClass,
+        analyser.keysClass,
+        analyser.longNames,
+        analyser.shortNames);
   }
 
   TypeSpec define() {

@@ -17,7 +17,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
@@ -126,11 +125,11 @@ public final class Processor extends AbstractProcessor {
 
   private void staticChecks(TypeElement enclosingElement) {
     if (enclosingElement.getModifiers().contains(Modifier.PRIVATE)) {
-      throw new ValidationException(ERROR, "The class may not be private", enclosingElement);
+      throw new ValidationException("The class may not be private", enclosingElement);
     }
     if (enclosingElement.getNestingKind().isNested() &&
         !enclosingElement.getModifiers().contains(Modifier.STATIC)) {
-      throw new ValidationException(ERROR, "The inner class must be static", enclosingElement);
+      throw new ValidationException("The inner class must be static", enclosingElement);
     }
   }
 
@@ -139,13 +138,13 @@ public final class Processor extends AbstractProcessor {
 
   private String staticChecks(ExecutableElement constructor) {
     if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
-      throw new ValidationException(ERROR, "The constructor may not be private", constructor);
+      throw new ValidationException("The constructor may not be private", constructor);
     }
     constructor.getThrownTypes()
         .forEach(t -> {
           TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(t.toString());
           if (typeElement.getModifiers().contains(Modifier.PRIVATE)) {
-            throw new ValidationException(ERROR,
+            throw new ValidationException(
                 String.format("Class '%s' may not be private", typeElement.getSimpleName())
                 , constructor);
           }
@@ -164,23 +163,23 @@ public final class Processor extends AbstractProcessor {
         checkNotPresent(p, singletonList(ArgumentName.class));
       }
       if (param.longName != null && !longNames.add(param.longName)) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
+        throw new ValidationException(
             "Duplicate longName: " + param.longName, p);
       }
       if (param.shortName() != null && !shortNames.add(param.shortName())) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
+        throw new ValidationException(
             "Duplicate shortName: " + param.shortName(), p);
       }
       if (param.optionType == OTHER_TOKENS) {
         if (otherTokensFound[0]) {
-          throw new ValidationException(Diagnostic.Kind.ERROR,
+          throw new ValidationException(
               "Only one parameter may have @OtherTokens", p);
         }
         otherTokensFound[0] = true;
       }
       if (param.optionType == EVERYTHING_AFTER) {
         if (stopword[0] != null) {
-          throw new ValidationException(Diagnostic.Kind.ERROR,
+          throw new ValidationException(
               "Only one parameter may have @EverythingAfter", p);
         }
         stopword[0] = param.stopword;
@@ -188,11 +187,11 @@ public final class Processor extends AbstractProcessor {
     });
     if (stopword[0] != null && stopword[0].startsWith("-")) {
       if (stopword[0].startsWith("--") && longNames.contains(stopword[0].substring(2))) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
+        throw new ValidationException(
             "@EverythingAfter coincides with a long option", constructor);
       }
       if (shortNames.contains(stopword[0].substring(1))) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
+        throw new ValidationException(
             "@EverythingAfter coincides with a short option", constructor);
       }
     }
@@ -202,7 +201,7 @@ public final class Processor extends AbstractProcessor {
   private void checkNotPresent(VariableElement p, List<Class<? extends Annotation>> namelesss) {
     for (Class<? extends Annotation> nameless : namelesss) {
       if (p.getAnnotation(nameless) != null) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
+        throw new ValidationException(
             "@" + nameless.getSimpleName() + " not allowed here", p);
       }
     }

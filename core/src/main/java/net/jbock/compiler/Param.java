@@ -1,8 +1,5 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import net.jbock.ArgumentName;
 import net.jbock.Description;
 import net.jbock.EverythingAfter;
@@ -10,11 +7,16 @@ import net.jbock.LongName;
 import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
-import javax.tools.Diagnostic;
-import java.util.List;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import java.util.Objects;
 import java.util.regex.Pattern;
+
+import static net.jbock.compiler.Util.AS_TYPE_ELEMENT;
+import static net.jbock.compiler.Util.equalsType;
 
 final class Param {
 
@@ -44,17 +46,23 @@ final class Param {
     this.stopword = stopword;
   }
 
-  private static OptionType getOptionType(TypeName type) {
-    if (type.equals(TypeName.BOOLEAN)) {
+  private static OptionType getOptionType(VariableElement var) {
+    TypeMirror type = var.asType();
+    if (type.getKind() == TypeKind.BOOLEAN) {
       return OptionType.FLAG;
     }
-    if (type.equals(Analyser.STRING)) {
+    if (equalsType(type, "java.lang.String")) {
       return OptionType.AT_MOST_ONCE;
     }
-    if (isList(type)) {
+    if (isListOfString(type)) {
       return OptionType.REPEATABLE;
     }
-    return null;
+    if (isOptionalString(type)) {
+      return OptionType.AT_MOST_ONCE_OPTIONAL;
+    }
+    String message = "Only String, Optional<String>, boolean or List<String> allowed, " +
+        String.format("but parameter %s has type %s", var.getSimpleName(), type);
+    throw new ValidationException(message, var);
   }
 
   static Param create(VariableElement variableElement) {
@@ -62,21 +70,22 @@ final class Param {
     ShortName shortName = variableElement.getAnnotation(ShortName.class);
     OtherTokens otherTokens = variableElement.getAnnotation(OtherTokens.class);
     EverythingAfter everythingAfter = variableElement.getAnnotation(EverythingAfter.class);
-    TypeName type = TypeName.get(variableElement.asType());
     if (otherTokens != null) {
       if (everythingAfter != null) {
-        throw new ValidationException(Diagnostic.Kind.ERROR,
-            "One argument may not have both @OtherTokens and @EverythingAfter", variableElement);
+        throw new ValidationException(
+            "@OtherTokens and @EverythingAfter cannot be on the same parameter", variableElement);
       }
-      checkList(variableElement, type);
-      return new Param(null, variableElement.getSimpleName().toString(), OptionType.OTHER_TOKENS,
+      checkList(variableElement);
+      return new Param(null,
+          variableElement.getSimpleName().toString(),
+          OptionType.OTHER_TOKENS,
           variableElement.getSimpleName().toString(),
           variableElement.getAnnotation(Description.class),
           variableElement.getAnnotation(ArgumentName.class),
           null);
     }
     if (everythingAfter != null) {
-      checkList(variableElement, type);
+      checkList(variableElement);
       String stopword = everythingAfter.value();
       basicCheckName(variableElement, stopword);
       return new Param(null, variableElement.getSimpleName().toString(), OptionType.EVERYTHING_AFTER,
@@ -85,16 +94,9 @@ final class Param {
           variableElement.getAnnotation(ArgumentName.class),
           stopword);
     }
-    OptionType optionType = getOptionType(type);
+    OptionType optionType = getOptionType(variableElement);
     String ln = null;
     Character sn = null;
-    if (optionType == null) {
-      throw new ValidationException(Diagnostic.Kind.ERROR,
-          String.format("Only String, boolean or java.util.List<String> allowed, but parameter %s has type %s",
-              variableElement.getSimpleName(),
-              TypeName.get(variableElement.asType())),
-          variableElement);
-    }
     if (longName != null) {
       ln = longName.value();
     }
@@ -113,21 +115,34 @@ final class Param {
         variableElement.getAnnotation(ArgumentName.class), null);
   }
 
-  private static void checkList(VariableElement variableElement, TypeName type) {
-    if (!isList(type)) {
-      throw new ValidationException(Diagnostic.Kind.ERROR,
-          "Must be a java.util.List<String>", variableElement);
+  private static void checkList(VariableElement variableElement) {
+    if (!isListOfString(variableElement.asType())) {
+      throw new ValidationException("Must be a List<String>", variableElement);
     }
   }
 
-  private static boolean isList(TypeName type) {
-    if (!(type instanceof ParameterizedTypeName)) {
+  private static boolean isListOfString(TypeMirror type) {
+    return isXOfString(type, "java.util.List");
+  }
+
+  private static boolean isOptionalString(TypeMirror type) {
+    return isXOfString(type, "java.util.Optional");
+  }
+
+  private static boolean isXOfString(
+      TypeMirror type, String x) {
+    DeclaredType declared = type.accept(Util.AS_DECLARED, null);
+    if (declared == null) {
       return false;
     }
-    ParameterizedTypeName t = (ParameterizedTypeName) type;
-    return t.rawType.equals(ClassName.get(List.class)) &&
-        t.typeArguments.size() == 1 &&
-        t.typeArguments.get(0).equals(Analyser.STRING);
+    if (declared.getTypeArguments().size() != 1) {
+      return false;
+    }
+    TypeElement element = declared.asElement().accept(AS_TYPE_ELEMENT, null);
+    return x.equals(
+        element.getQualifiedName().toString()) &&
+        equalsType(declared.getTypeArguments().get(0),
+            "java.lang.String");
   }
 
   private static void checkName(VariableElement parameter, String name) {
@@ -136,22 +151,22 @@ final class Param {
     }
     basicCheckName(parameter, name);
     if (name.startsWith("-")) {
-      throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not start with '-'", parameter);
+      throw new ValidationException("The name may not start with '-'", parameter);
     }
     if (name.indexOf('=') >= 0) {
-      throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not contain '='", parameter);
+      throw new ValidationException("The name may not contain '='", parameter);
     }
   }
 
   private static void basicCheckName(VariableElement parameter, String name) {
     if (name == null) {
-      throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not be null", parameter);
+      throw new ValidationException("The name may not be null", parameter);
     }
     if (name.isEmpty()) {
-      throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not be empty", parameter);
+      throw new ValidationException("The name may not be empty", parameter);
     }
     if (WHITE_SPACE.matcher(name).matches()) {
-      throw new ValidationException(Diagnostic.Kind.ERROR, "The name may not contain whitespace characters", parameter);
+      throw new ValidationException("The name may not contain whitespace characters", parameter);
     }
   }
 

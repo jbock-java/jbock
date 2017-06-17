@@ -49,36 +49,27 @@ The following additional rules apply:
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
 this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload/blob/master/src/main/java/ich/bins/ArchiveMPU.java).
 
-### Example: curl
+### Example: `Curl` constructor
 
 ````java
-final class Curl {
-
-  final List<String> headers;
-  final List<String> urls;
-  final String method;
-  final boolean verbose;
-
-  @CommandLineArguments
-  Curl(@ShortName('H') @Description(
-           "List<String> for arguments that can appear multiple times")
-           List<String> headers,
-       @ShortName('v') @Description(
-           "boolean for value-less arguments, a.k.a. flags")
-           boolean verbose,
-       @ShortName('X') @LongName("method") @Description(
-           "String for arguments that can appear at most once")
-           String method,
-       @OtherTokens @Description({
-           "@OtherTokens to capture everything else.",
-           "In this case, everything that isn't a verbose flag,",
-           "a header or a HTTP method."})
-           List<String> urls) {
-    this.headers = headers;
-    this.verbose = verbose;
-    this.method = method == null ? "GET" : method;
-    this.urls = urls;
-  }
+@CommandLineArguments
+Curl(@ShortName('H') @Description(
+    "List<String> for arguments that appear multiple times")
+         List<String> headers,
+     @ShortName('v') @Description(
+         "boolean for flags")
+         boolean verbose,
+     @ShortName('X') @Description(
+         "String or Optional<String> for regular arguments")
+         Optional<String> method,
+     @OtherTokens @Description({
+         "@OtherTokens to capture everything else.",
+         "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
+         List<String> urls) {
+  this.headers = headers;
+  this.verbose = verbose;
+  this.method = method.orElse("GET");
+  this.urls = urls;
 }
 ````
 

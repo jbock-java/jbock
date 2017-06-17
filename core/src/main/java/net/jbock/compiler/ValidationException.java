@@ -8,9 +8,13 @@ final class ValidationException extends RuntimeException {
   final Diagnostic.Kind kind;
   final Element about;
 
-  ValidationException(Diagnostic.Kind kind, String message, Element about) {
+  private ValidationException(Diagnostic.Kind kind, String message, Element about) {
     super(message);
     this.kind = kind;
     this.about = about;
+  }
+
+  ValidationException(String message, Element about) {
+    this(Diagnostic.Kind.ERROR, message, about);
   }
 }

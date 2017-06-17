@@ -73,22 +73,6 @@ final class Option {
     return upcase(constructor.parameters.get(i).parameterName) + suffix;
   }
 
-  static String constructorArgumentsForJavadoc(Constructor constructor) {
-    return constructor.parameters.stream()
-        .map(o -> o.optionType)
-        .map(type -> {
-          switch (type) {
-            case FLAG:
-              return "boolean";
-            case AT_MOST_ONCE:
-              return "String";
-            default:
-              return "java.util.List";
-          }
-        })
-        .collect(Collectors.joining(",\n       "));
-  }
-
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(optionClass);
     for (int i = 0; i < constructor.parameters.size(); i++) {
@@ -188,7 +172,7 @@ final class Option {
         .build();
   }
 
-  public static String upcase(String input) {
+  private static String upcase(String input) {
     StringBuilder sb = new StringBuilder();
     for (int i = 0; i < input.length(); i++) {
       char c = input.charAt(i);
