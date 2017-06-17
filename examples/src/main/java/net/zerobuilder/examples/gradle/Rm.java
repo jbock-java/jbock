@@ -17,20 +17,20 @@ final class Rm {
   final boolean force;
   final List<String> filesToDelete;
 
-  @CommandLineArguments
-  Rm(@ShortName('r') boolean recursive,
-     @ShortName('f') boolean force,
-     @OtherTokens List<String> fileNames,
-     @EverythingAfter("--") @Description({
-         "@EverythingAfter to create a last resort",
-         "for problematic @OtherTokens.",
-         "For example, when the file name is '-f'"})
-         List<String> escapedFileNames) {
-    this.recursive = recursive;
-    this.force = force;
-    this.filesToDelete = Stream.of(fileNames, escapedFileNames)
-        .map(List::stream)
-        .flatMap(Function.identity())
-        .collect(Collectors.toList());
-  }
+@CommandLineArguments Rm(
+    @ShortName('r') boolean recursive,
+    @ShortName('f') boolean force,
+    @OtherTokens List<String> fileNames,
+    @EverythingAfter("--") @Description({
+        "@EverythingAfter to create a last resort",
+        "for problematic @OtherTokens.",
+        "For example, when the file name is '-f'"})
+        List<String> escapedFileNames) {
+  this.recursive = recursive;
+  this.force = force;
+  this.filesToDelete = Stream.of(fileNames, escapedFileNames)
+      .map(List::stream)
+      .flatMap(Function.identity())
+      .collect(Collectors.toList());
+}
 }

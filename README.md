@@ -32,40 +32,40 @@ In this constructor, only three types of parameters are allowed:
 
 * A `boolean` parameter declares a flag.
 * A `List<String>` parameter declares a repeatable argument.
-* A `String` parameter declares an argument that can appear at most once.
+* A `String` or `Optional<String>` parameter declares an argument that may appear at most once.
 
 The following additional rules apply:
 
 * At most one of the parameters can have the annotation `@OtherTokens`.
 * At most one parameter can have the annotation `@EverythingAfter`. 
   `@OtherTokens` and `@EverythingAfter` cannot appear on the same parameter.
-* Parameters that have the `@OtherTokens` or `@EverythingAfter` annotation are called "special". 
-  All others are called "regular".
-* Special parameters must be of type `List<String>`.
-* Regular parameters can have the `@LongName` or `@ShortName` annotation, or both.
-* If a regular parameter has neither `@LongName` nor `@ShortName`, 
+* Parameters that have the `@OtherTokens` or `@EverythingAfter` annotation are called *special*. 
+  All others are called *regular*.
+* A *special* parameter must be of type `List<String>`.
+* A *regular* parameter can have the `@LongName` or `@ShortName` annotation, or both.
+* If a *regular* parameter has neither `@LongName` nor `@ShortName`, 
   then by default the parameter name becomes the long name, and it there is no short name.
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
 this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload/blob/master/src/main/java/ich/bins/ArchiveMPU.java).
 
-### Example: `Curl` constructor
+### Example: `curl` constructor
 
 ````java
-@CommandLineArguments
-Curl(@ShortName('H') @Description(
-    "List<String> for arguments that appear multiple times")
-         List<String> headers,
-     @ShortName('v') @Description(
-         "boolean for flags")
-         boolean verbose,
-     @ShortName('X') @Description(
-         "String or Optional<String> for regular arguments")
-         Optional<String> method,
-     @OtherTokens @Description({
-         "@OtherTokens to capture everything else.",
-         "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
-         List<String> urls) {
+@CommandLineArguments Curl(
+    @ShortName('H') @Description(
+        "List<String> for arguments that appear multiple times")
+        List<String> headers,
+    @ShortName('v') @Description(
+        "boolean for flags")
+        boolean verbose,
+    @ShortName('X') @Description(
+        "String or Optional<String> for regular arguments")
+        Optional<String> method,
+    @OtherTokens @Description({
+        "@OtherTokens to capture everything else.",
+        "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
+        List<String> urls) {
   this.headers = headers;
   this.verbose = verbose;
   this.method = method.orElse("GET");
@@ -105,31 +105,24 @@ For example, if `args` is
 The next example shows how to use `@EverythingAfter`.
 This can be used to take care of some syntactic corner cases that may arise if `@OtherTokens` is used.
 
-### Example: rm
+### Example: `rm` constructor
 
 ````java
-final class Rm {
-
-  final boolean recursive;
-  final boolean force;
-  final List<String> filesToDelete;
-
-  @CommandLineArguments
-  Rm(@ShortName('r') boolean recursive,
-     @ShortName('f') boolean force,
-     @OtherTokens List<String> fileNames,
-     @EverythingAfter("--") @Description({
-         "@EverythingAfter can be used as an 'escape mechanism'",
-         "for unnamed arguments, a.k.a. @OtherTokens.",
-         "For example, to specify a file named '-f'"})
-         List<String> moreFileNames) {
-    this.recursive = recursive;
-    this.force = force;
-    this.filesToDelete = Stream.of(fileNames, moreFileNames)
-        .map(List::stream)
-        .flatMap(Function.identity())
-        .collect(Collectors.toList());
-  }
+@CommandLineArguments Rm(
+    @ShortName('r') boolean recursive,
+    @ShortName('f') boolean force,
+    @OtherTokens List<String> fileNames,
+    @EverythingAfter("--") @Description({
+        "@EverythingAfter to create a last resort",
+        "for problematic @OtherTokens.",
+        "For example, when the file name is '-f'"})
+        List<String> escapedFileNames) {
+  this.recursive = recursive;
+  this.force = force;
+  this.filesToDelete = Stream.of(fileNames, escapedFileNames)
+      .map(List::stream)
+      .flatMap(Function.identity())
+      .collect(Collectors.toList());
 }
 ````
 
