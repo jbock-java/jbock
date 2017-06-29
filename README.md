@@ -134,7 +134,7 @@ If you're not familiar with `rm`'s `--` option, try `echo >>-f` and deleting the
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>1.8</version>
+  <version>1.8.1</version>
   <scope>provided</scope>
 </dependency>
 ````
