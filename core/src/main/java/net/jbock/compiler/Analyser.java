@@ -16,16 +16,17 @@ import javax.annotation.Generated;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.OptionType.REPEATABLE;
 
 final class Analyser {
 
@@ -53,15 +54,18 @@ final class Analyser {
 
   private final MethodSpec read;
   private final MethodSpec readOption;
-  private final MethodSpec checkConflict;
   private final MethodSpec readArgument;
   private final MethodSpec removeFirstFlag;
 
   final FieldSpec longNames;
   final FieldSpec shortNames;
   final FieldSpec optMap;
+  final FieldSpec sMap;
+  final FieldSpec flags;
 
-  private final TypeName optionMapType;
+  private final TypeName optMapType;
+  private final TypeName sMapType;
+  private final TypeName flagsType;
   private final ClassName optionTypeClass;
 
   static Analyser create(Constructor constructor) {
@@ -80,11 +84,21 @@ final class Analyser {
         STRING, option.optionClass);
     ParameterizedTypeName listOfArgumentType = ParameterizedTypeName.get(
         ClassName.get(List.class), STRING);
-    this.optionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
+    this.optMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
         option.optionClass, listOfArgumentType);
+    this.sMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
+        option.optionClass, STRING);
+    this.flagsType = ParameterizedTypeName.get(ClassName.get(Set.class),
+        option.optionClass);
     this.readArgument = readArgumentMethod();
     this.removeFirstFlag = removeFirstFlagMethod();
-    this.optMap = FieldSpec.builder(optionMapType, "optMap")
+    this.optMap = FieldSpec.builder(optMapType, "optMap")
+        .addModifiers(PRIVATE, FINAL)
+        .build();
+    this.sMap = FieldSpec.builder(sMapType, "sMap")
+        .addModifiers(PRIVATE, FINAL)
+        .build();
+    this.flags = FieldSpec.builder(flagsType, "flags")
         .addModifiers(PRIVATE, FINAL)
         .build();
     this.longNames = FieldSpec.builder(soType, "longNames")
@@ -94,9 +108,8 @@ final class Analyser {
         .addModifiers(PRIVATE, FINAL)
         .build();
     this.readOption = readOptionMethod(keysClass, longNames, shortNames, option.optionClass);
-    this.checkConflict = checkConflictMethod(optionMapType, option.optionClass, optionTypeClass, optionType);
-    this.read = readMethod(keysClass, readOption, readArgument, optionMapType,
-        option.optionClass, optionType, optionTypeClass, checkConflict, removeFirstFlag);
+    this.read = readMethod(keysClass, readOption, readArgument, optMapType, sMapType, flagsType,
+        option.optionClass, optionType, optionTypeClass, removeFirstFlag);
   }
 
   private static MethodSpec removeFirstFlagMethod() {
@@ -113,39 +126,6 @@ final class Analyser {
         .build();
   }
 
-  private static MethodSpec checkConflictMethod(
-      TypeName optionMapType,
-      ClassName optionClass,
-      ClassName optionTypeClass,
-      FieldSpec optionType) {
-    ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optionMap").build();
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
-    ParameterSpec message = ParameterSpec.builder(STRING, "message").build();
-    ParameterSpec bucket = ParameterSpec.builder(STRING_LIST, "bucket").build();
-    ParameterSpec ignore = ParameterSpec.builder(optionClass, "__").build();
-    CodeBlock block = CodeBlock.builder()
-        .addStatement("$T $N = $N.computeIfAbsent($N, $N -> new $T<>())",
-            bucket.type, bucket, optMap, option, ignore, ArrayList.class)
-        .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, REPEATABLE)
-        .addStatement("return $N", bucket)
-        .endControlFlow()
-        .beginControlFlow("if (!$N.isEmpty())", bucket)
-        .addStatement("$T $N = $N.$N == $T.$L ?\n  $S :\n  $S", STRING, message, option, optionType,
-            optionTypeClass, OptionType.FLAG, "Duplicate flag", "Conflicting token")
-        .addStatement("throw new $T($N + $S + $N)", IllegalArgumentException.class,
-            message, ": ", token)
-        .endControlFlow()
-        .addStatement("return $N", bucket)
-        .build();
-    return MethodSpec.methodBuilder("checkConflict")
-        .addParameters(Arrays.asList(optMap, option, token))
-        .addCode(block)
-        .returns(STRING_LIST)
-        .addModifiers(PRIVATE, STATIC)
-        .build();
-  }
-
   TypeSpec analyse() {
     return TypeSpec.classBuilder(constructor.generatedClass)
         .addType(Names.create(this).define())
@@ -157,8 +137,8 @@ final class Analyser {
         .addMethod(read)
         .addMethod(readOption)
         .addMethod(readArgument)
-        .addMethod(checkConflict)
         .addMethod(removeFirstFlag)
+        .addMethod(option.printUsageMethod())
         .addModifiers(PUBLIC, FINAL)
         .build();
   }
@@ -169,7 +149,9 @@ final class Analyser {
     ParameterSpec names = ParameterSpec.builder(keysClass, "names").build();
     ParameterSpec rest = ParameterSpec.builder(STRING_LIST, "rest").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optionMap").build();
+    ParameterSpec optMap = ParameterSpec.builder(optMapType, "optMap").build();
+    ParameterSpec sMap = ParameterSpec.builder(sMapType, "sMap").build();
+    ParameterSpec flags = ParameterSpec.builder(flagsType, "flags").build();
     ParameterSpec stop = ParameterSpec.builder(TypeName.BOOLEAN, "stop").build();
     CodeBlock.Builder builder = CodeBlock.builder();
     if (constructor.stopword != null) {
@@ -180,6 +162,8 @@ final class Analyser {
       .addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class)
       .addStatement("$T $N = new $T()", names.type, names, keysClass)
       .addStatement("$T $N = new $T<>($T.class)", optMap.type, optMap, EnumMap.class, option.optionClass)
+      .addStatement("$T $N = new $T<>($T.class)", sMap.type, sMap, EnumMap.class, option.optionClass)
+      .addStatement("$T $N = $T.noneOf($T.class)", flags.type, flags, EnumSet.class, option.optionClass)
       .addStatement("$T $N = $T.stream($N).iterator()", it.type, it, Arrays.class, ARGS)
       .beginControlFlow("while ($N.hasNext())", it)
         .addStatement("$T $N = $N.next()", STRING, token, it)
@@ -197,10 +181,11 @@ final class Analyser {
           .addStatement("continue")
           .endControlFlow();
     }
-    builder.addStatement("$N($N, $N, $N, $N, $N)",
-        read, token, names, optMap, otherTokens, it)
+    builder.addStatement("$N($N, $N, $N, $N, $N, $N, $N)",
+        read, token, names, optMap, sMap, flags, otherTokens, it)
         .endControlFlow()
-        .addStatement("return new $T($N, $N, $N)", binderClass, optMap, otherTokens, rest);
+        .addStatement("return new $T($N, $N, $N, $N, $N)",
+            binderClass, optMap, sMap, flags, otherTokens, rest);
     return MethodSpec.methodBuilder("parse")
         .addParameter(ARGS)
         .addCode(builder.build())
@@ -277,13 +262,16 @@ final class Analyser {
       MethodSpec readOption,
       MethodSpec readArgument,
       TypeName optionMapType,
+      TypeName sMapType,
+      TypeName flagsType,
       ClassName optionClass,
       FieldSpec optionType,
       ClassName optionTypeClass,
-      MethodSpec checkConflict,
       MethodSpec removeFirstFlag) {
     ParameterSpec names = ParameterSpec.builder(keysClass, "names").build();
     ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optMap").build();
+    ParameterSpec sMap = ParameterSpec.builder(sMapType, "sMap").build();
+    ParameterSpec flags = ParameterSpec.builder(flagsType, "flags").build();
     ParameterSpec otherTokens = ParameterSpec.builder(STRING_LIST, "otherTokens").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec bucket = ParameterSpec.builder(STRING_LIST, "bucket").build();
@@ -301,8 +289,10 @@ final class Analyser {
           .addStatement("return")
           .endControlFlow()
         .beginControlFlow("while ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.FLAG)
-          .addStatement("$T $N = $N($N, $N, $N)", bucket.type, bucket, checkConflict, optMap, option, token)
-          .addStatement("$N.add($S)", bucket, "t")
+          .beginControlFlow("if (!$N.add($N))", flags, option)
+            .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+                "Duplicate flag: ", token)
+            .endControlFlow()
           .addStatement("$N = $N($N)", token, removeFirstFlag, token)
           .beginControlFlow("if ($N == null)", token)
             .addStatement("return")
@@ -313,11 +303,22 @@ final class Analyser {
                 "invalid token: ", originalToken)
             .endControlFlow()
           .endControlFlow()
-        .addStatement("$T $N = $N($N, $N, $N)", bucket.type, bucket, checkConflict, optMap, option, token)
-        .addStatement("$N.add($N($N, $N))", bucket, readArgument, token, it);
+        .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.OPTIONAL)
+          .beginControlFlow("if ($N.containsKey($N))", sMap, option)
+            .addStatement("throw new $T(\n$S + $N)", IllegalArgumentException.class,
+            "Conflicting token: ", token)
+          .endControlFlow()
+          .addStatement("$N.put($N, $N($N, $N))", sMap, option, readArgument, token, it)
+          .endControlFlow()
+        .beginControlFlow("else")
+          .addStatement("$T $N = $N.computeIfAbsent($N, $N -> new $T<>())",
+              bucket.type, bucket, optMap, option, ignore, ArrayList.class)
+          .addStatement("$N.add($N($N, $N))", bucket, readArgument, token, it)
+          .endControlFlow();
+
     //@formatter:on
     return MethodSpec.methodBuilder("read")
-        .addParameters(Arrays.asList(originalToken, names, optMap, otherTokens, it))
+        .addParameters(Arrays.asList(originalToken, names, optMap, sMap, flags, otherTokens, it))
         .addModifiers(STATIC, PRIVATE)
         .addCode(builder.build())
         .build();

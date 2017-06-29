@@ -12,6 +12,7 @@ import net.jbock.ArgumentName;
 import net.jbock.Description;
 import net.jbock.compiler.Processor.Constructor;
 
+import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -25,6 +26,7 @@ import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
@@ -64,8 +66,8 @@ final class Option {
     this.needsSuffix = uppercaseArgumentNames.size() < constructor.parameters.size();
   }
 
-  static Option create(Constructor constructor, ClassName argumentInfo, ClassName optionTypeClass, FieldSpec optionType) {
-    return new Option(constructor, argumentInfo, optionTypeClass, optionType);
+  static Option create(Constructor constructor, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
+    return new Option(constructor, optionClass, optionTypeClass, optionType);
   }
 
   String enumConstant(int i) {
@@ -101,6 +103,19 @@ final class Option {
         .addMethod(descriptionParameterMethod())
         .addMethod(typeMethod())
         .addMethod(privateConstructor())
+        .build();
+  }
+
+  MethodSpec printUsageMethod() {
+    ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
+    ParameterSpec out = ParameterSpec.builder(ClassName.get(PrintStream.class), "out").build();
+    ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
+    return MethodSpec.methodBuilder("printUsage")
+        .beginControlFlow("for ($T $N: $T.values())", option.type, option, optionClass)
+        .addStatement("$N.println($N.describe($N))", out, option, indent)
+        .endControlFlow()
+        .addModifiers(STATIC, PUBLIC)
+        .addParameters(Arrays.asList(out, indent))
         .build();
   }
 

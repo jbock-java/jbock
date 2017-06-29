@@ -86,6 +86,7 @@ public final class Processor extends AbstractProcessor {
     String message = "Unexpected error while processing " +
         ClassName.get(asType(constructor.getEnclosingElement())) +
         ": " + e.getMessage();
+    e.printStackTrace();
     processingEnv.getMessager().printMessage(ERROR, message, constructor);
   }
 
