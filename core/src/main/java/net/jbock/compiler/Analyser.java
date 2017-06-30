@@ -139,6 +139,7 @@ final class Analyser {
         .addMethod(readArgument)
         .addMethod(removeFirstFlag)
         .addMethod(option.printUsageMethod())
+        .addMethod(privateConstructor())
         .addModifiers(PUBLIC, FINAL)
         .build();
   }
@@ -328,5 +329,9 @@ final class Analyser {
     return AnnotationSpec.builder(Generated.class)
         .addMember("value", "$S", Processor.class.getName())
         .build();
+  }
+
+  private MethodSpec privateConstructor() {
+    return MethodSpec.constructorBuilder().addModifiers(PRIVATE).build();
   }
 }
