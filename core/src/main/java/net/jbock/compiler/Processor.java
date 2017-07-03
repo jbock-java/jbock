@@ -1,42 +1,48 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
-import net.jbock.ArgumentName;
-import net.jbock.CommandLineArguments;
-import net.jbock.LongName;
-import net.jbock.ShortName;
-
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.tools.JavaFileObject;
-import java.io.IOException;
-import java.io.Writer;
-import java.lang.annotation.Annotation;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.constructorsIn;
+import static javax.lang.model.util.ElementFilter.methodsIn;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static net.jbock.compiler.LessElements.asType;
 import static net.jbock.compiler.OptionType.EVERYTHING_AFTER;
+import static net.jbock.compiler.OptionType.FLAG;
 import static net.jbock.compiler.OptionType.OTHER_TOKENS;
+
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.TypeSpec;
+import java.io.IOException;
+import java.io.Writer;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Locale;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.TypeKind;
+import javax.tools.JavaFileObject;
+import net.jbock.ArgumentName;
+import net.jbock.CommandLineArguments;
+import net.jbock.LongName;
+import net.jbock.ShortName;
 
 public final class Processor extends AbstractProcessor {
 
@@ -59,19 +65,19 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-    Set<ExecutableElement> constructors =
-        constructorsIn(env.getElementsAnnotatedWith(CommandLineArguments.class));
+    List<ExecutableElement> constructors =
+        getAnnotatedExecutableElements(env);
     validate(constructors);
     for (ExecutableElement c : constructors) {
       try {
         String stopword = staticChecks(c);
         staticChecks(LessElements.asType(c.getEnclosingElement()));
-        Constructor constructor = Constructor.create(c, stopword);
-        if (!done.add(constructor.enclosingType)) {
+        Context context = Context.create(c, stopword);
+        if (!done.add(context.enclosingType)) {
           continue;
         }
-        TypeSpec typeSpec = Analyser.create(constructor).analyse();
-        write(constructor.generatedClass, typeSpec);
+        TypeSpec typeSpec = Analyser.create(context).analyse();
+        write(context.generatedClass, typeSpec);
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
@@ -82,6 +88,14 @@ public final class Processor extends AbstractProcessor {
     return false;
   }
 
+  private List<ExecutableElement> getAnnotatedExecutableElements(RoundEnvironment env) {
+    Set<? extends Element> annotated = env.getElementsAnnotatedWith(CommandLineArguments.class);
+    List<ExecutableElement> result = new ArrayList<>();
+    result.addAll(constructorsIn(annotated));
+    result.addAll(methodsIn(annotated));
+    return result;
+  }
+
   private void handleException(ExecutableElement constructor, Exception e) {
     String message = "Unexpected error while processing " +
         ClassName.get(asType(constructor.getEnclosingElement())) +
@@ -90,7 +104,7 @@ public final class Processor extends AbstractProcessor {
     processingEnv.getMessager().printMessage(ERROR, message, constructor);
   }
 
-  private void validate(Set<ExecutableElement> constructors) {
+  private void validate(Collection<ExecutableElement> constructors) {
     Set<String> check = new HashSet<>();
     List<TypeElement> t = constructors.stream()
         .map(ExecutableElement::getEnclosingElement)
@@ -133,23 +147,32 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  static final Set<OptionType> ARGNAME_LESS = EnumSet.of(OptionType.EVERYTHING_AFTER, OTHER_TOKENS, OptionType.FLAG);
-  private static final Set<OptionType> NAMELESS = EnumSet.of(OptionType.EVERYTHING_AFTER, OTHER_TOKENS);
+  static final Set<OptionType> ARGNAME_LESS = EnumSet.of(EVERYTHING_AFTER, OTHER_TOKENS, FLAG);
+  private static final Set<OptionType> NAMELESS = EnumSet.of(EVERYTHING_AFTER, OTHER_TOKENS);
 
-  private String staticChecks(ExecutableElement constructor) {
-    if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
-      throw new ValidationException("The constructor may not be private", constructor);
+  private String staticChecks(ExecutableElement executableElement) {
+    if (executableElement.getModifiers().contains(Modifier.PRIVATE)) {
+      throw new ValidationException(String.format("The %s may not be private",
+          executableElement.getKind().name().toLowerCase(Locale.ENGLISH)), executableElement);
     }
-    constructor.getThrownTypes()
+    if (executableElement.getKind() == ElementKind.METHOD &&
+        !executableElement.getModifiers().contains(Modifier.STATIC)) {
+      throw new ValidationException("The method must be static", executableElement);
+    }
+    if (executableElement.getKind() == ElementKind.METHOD &&
+        executableElement.getReturnType().getKind() == TypeKind.VOID) {
+      throw new ValidationException("The method may not return void", executableElement);
+    }
+    executableElement.getThrownTypes()
         .forEach(t -> {
           TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(t.toString());
           if (typeElement.getModifiers().contains(Modifier.PRIVATE)) {
             throw new ValidationException(
                 String.format("Class '%s' may not be private", typeElement.getSimpleName())
-                , constructor);
+                , executableElement);
           }
         });
-    List<? extends VariableElement> parameters = constructor.getParameters();
+    List<? extends VariableElement> parameters = executableElement.getParameters();
     Set<String> shortNames = new HashSet<>();
     Set<String> longNames = new HashSet<>();
     boolean[] otherTokensFound = new boolean[1];
@@ -188,11 +211,11 @@ public final class Processor extends AbstractProcessor {
     if (stopword[0] != null && stopword[0].startsWith("-")) {
       if (stopword[0].startsWith("--") && longNames.contains(stopword[0].substring(2))) {
         throw new ValidationException(
-            "@EverythingAfter coincides with a long option", constructor);
+            "@EverythingAfter coincides with a long option", executableElement);
       }
       if (shortNames.contains(stopword[0].substring(1))) {
         throw new ValidationException(
-            "@EverythingAfter coincides with a short option", constructor);
+            "@EverythingAfter coincides with a short option", executableElement);
       }
     }
     return stopword[0];
@@ -207,27 +230,30 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  static final class Constructor {
+  static final class Context {
     final TypeName enclosingType;
     final ClassName generatedClass;
     final List<Param> parameters;
     final List<TypeName> thrownTypes;
     final String stopword;
+    final ExecutableElement executableElement;
 
-    private Constructor(
+    private Context(
         TypeName enclosingType,
         ClassName generatedClass,
         List<Param> parameters,
         List<TypeName> thrownTypes,
-        String stopword) {
+        String stopword,
+        ExecutableElement executableElement) {
       this.enclosingType = enclosingType;
       this.generatedClass = generatedClass;
       this.parameters = parameters;
       this.thrownTypes = thrownTypes;
       this.stopword = stopword;
+      this.executableElement = executableElement;
     }
 
-    private static Constructor create(
+    private static Context create(
         ExecutableElement executableElement,
         String stopword) {
       List<TypeName> thrownTypes = executableElement.getThrownTypes().stream().map(TypeName::get).collect(toList());
@@ -236,7 +262,13 @@ public final class Processor extends AbstractProcessor {
           .map(Param::create)
           .collect(Collectors.toList());
       ClassName generatedClass = peer(ClassName.get(asType(executableElement.getEnclosingElement())), SUFFIX);
-      return new Constructor(enclosingType, generatedClass, parameters, thrownTypes, stopword);
+      return new Context(enclosingType, generatedClass, parameters, thrownTypes, stopword, executableElement);
+    }
+
+    TypeName returnType() {
+      return executableElement.getKind() == ElementKind.CONSTRUCTOR ?
+          enclosingType :
+          TypeName.get(executableElement.getReturnType());
     }
   }
 }

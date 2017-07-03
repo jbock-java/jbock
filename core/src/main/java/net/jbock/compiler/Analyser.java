@@ -10,7 +10,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Processor.Constructor;
+import net.jbock.compiler.Processor.Context;
 
 import javax.annotation.Generated;
 import java.util.ArrayList;
@@ -46,7 +46,7 @@ final class Analyser {
   static final FieldSpec otherTokens = FieldSpec.builder(STRING_LIST, "otherTokens", PRIVATE, FINAL)
       .build();
 
-  final Constructor constructor;
+  final Context context;
 
   final ClassName binderClass;
   final Option option;
@@ -68,18 +68,18 @@ final class Analyser {
   private final TypeName flagsType;
   private final ClassName optionTypeClass;
 
-  static Analyser create(Constructor constructor) {
-    return new Analyser(constructor);
+  static Analyser create(Context context) {
+    return new Analyser(context);
   }
 
-  private Analyser(Constructor constructor) {
-    this.constructor = constructor;
-    this.keysClass = constructor.generatedClass.nestedClass("Names");
-    this.binderClass = constructor.generatedClass.nestedClass("Binder");
-    this.optionTypeClass = constructor.generatedClass.nestedClass("OptionType");
+  private Analyser(Processor.Context context) {
+    this.context = context;
+    this.keysClass = context.generatedClass.nestedClass("Names");
+    this.binderClass = context.generatedClass.nestedClass("Binder");
+    this.optionTypeClass = context.generatedClass.nestedClass("OptionType");
     FieldSpec optionType = FieldSpec.builder(optionTypeClass, "type", PRIVATE, FINAL).build();
-    this.option = Option.create(constructor,
-        constructor.generatedClass.nestedClass("Option"), optionTypeClass, optionType);
+    this.option = Option.create(context,
+        context.generatedClass.nestedClass("Option"), optionTypeClass, optionType);
     TypeName soType = ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, option.optionClass);
     ParameterizedTypeName listOfArgumentType = ParameterizedTypeName.get(
@@ -127,7 +127,7 @@ final class Analyser {
   }
 
   TypeSpec analyse() {
-    return TypeSpec.classBuilder(constructor.generatedClass)
+    return TypeSpec.classBuilder(context.generatedClass)
         .addType(Names.create(this).define())
         .addType(option.define())
         .addType(Binder.create(this).define())
@@ -155,7 +155,7 @@ final class Analyser {
     ParameterSpec flags = ParameterSpec.builder(flagsType, "flags").build();
     ParameterSpec stop = ParameterSpec.builder(TypeName.BOOLEAN, "stop").build();
     CodeBlock.Builder builder = CodeBlock.builder();
-    if (constructor.stopword != null) {
+    if (context.stopword != null) {
       builder.addStatement("$T $N = $L", TypeName.BOOLEAN, stop, false);
     }
     //@formatter:off
@@ -172,12 +172,12 @@ final class Analyser {
           .addStatement("throw new $T($S)", IllegalArgumentException.class, "null token")
           .endControlFlow();
     //@formatter:on
-    if (constructor.stopword != null) {
+    if (context.stopword != null) {
       builder.beginControlFlow("if ($N)", stop)
           .addStatement("$N.add($N)", rest, token)
           .addStatement("continue")
           .endControlFlow()
-          .beginControlFlow("if ($N.equals($S))", token, constructor.stopword)
+          .beginControlFlow("if ($N.equals($S))", token, context.stopword)
           .addStatement("$N = $L", stop, true)
           .addStatement("continue")
           .endControlFlow();

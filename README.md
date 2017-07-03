@@ -10,7 +10,7 @@ non-options do not stop option parsing, so options and non-options can be in any
 
 * No reflection, purely static analysis.
 * No runtime dependency. The generated `*_Parser.java` is self-contained.
-* Convenient, flexible property binding via constructor.
+* Convenient, flexible property binding via constructor or static method.
 * Using `Optional<String>` for regular properties
 * Deliberately simple: No <em>converters</em>, <em>default values</em> or <em>required checking</em>.
   With java 8, it's easy to add this stuff by hand.
@@ -26,8 +26,8 @@ non-options do not stop option parsing, so options and non-options can be in any
 
 ### Basic usage
 
-Annotate a constructor with `@CommandLineArguments`.
-In this constructor, only three types of parameters are allowed:
+Annotate a constructor or static method with `@CommandLineArguments`.
+Only three types of parameters are allowed:
 
 * A `boolean` parameter declares a flag.
 * A `List<String>` parameter declares a repeatable argument.
@@ -43,7 +43,7 @@ The following additional rules apply:
 * A *special* parameter must be of type `List<String>`.
 * A *regular* parameter can have the `@LongName` or `@ShortName` annotation, or both.
 * If a *regular* parameter has neither `@LongName` nor `@ShortName`, 
-  then by default the parameter name becomes the long name, and it there is no short name.
+  then by default the parameter name becomes the long name, and there is no short name.
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
 this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload/blob/master/src/main/java/ich/bins/ArchiveMPU.java).
@@ -78,7 +78,7 @@ this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upl
 `Curl_Parser` has only one method, but there's also an `enum` to consider.
 
 * The generated enum `Curl_Parser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
-  These correspond to the constructor arguments, and have methods to <b>generate usage text</b>.
+  These correspond to the constructor arguments, and have methods to generate usage text.
 * The generated static method `Curl_Parser.parse(String[] args)` 
   takes the `args` argument from `public static void main(String[] args)`.
 * `parse` returns another generated class, `Curl_Parser.Binder`.
@@ -134,7 +134,7 @@ If you're not familiar with `rm`'s `--` option, try `echo >>-f` and deleting the
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>1.8.1</version>
+  <version>1.8.2</version>
   <scope>provided</scope>
 </dependency>
 ````

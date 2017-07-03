@@ -1,5 +1,14 @@
 package net.jbock.compiler;
 
+import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
+import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Analyser.LONG_NAME;
+import static net.jbock.compiler.Analyser.SHORT_NAME;
+import static net.jbock.compiler.Analyser.STRING;
+
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -8,10 +17,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.ArgumentName;
-import net.jbock.Description;
-import net.jbock.compiler.Processor.Constructor;
-
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,15 +26,9 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-
-import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Analyser.LONG_NAME;
-import static net.jbock.compiler.Analyser.SHORT_NAME;
-import static net.jbock.compiler.Analyser.STRING;
+import net.jbock.ArgumentName;
+import net.jbock.Description;
+import net.jbock.compiler.Processor.Context;
 
 final class Option {
 
@@ -45,7 +44,7 @@ final class Option {
 
   final ClassName optionClass;
 
-  private final Constructor constructor;
+  private final Context context;
   private final ClassName optionTypeClass;
   private final boolean needsSuffix;
 
@@ -53,32 +52,32 @@ final class Option {
   private final MethodSpec describeNamesMethod;
   private final MethodSpec descriptionBlockMethod;
 
-  private Option(Constructor constructor, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
-    this.constructor = constructor;
+  private Option(Context context, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
+    this.context = context;
     this.optionClass = optionClass;
     this.optionTypeClass = optionTypeClass;
     this.optionType = optionType;
     this.describeNamesMethod = describeNamesMethod(optionType, optionTypeClass);
     this.descriptionBlockMethod = descriptionBlockMethod();
-    Set<String> uppercaseArgumentNames = IntStream.range(0, constructor.parameters.size())
+    Set<String> uppercaseArgumentNames = IntStream.range(0, context.parameters.size())
         .mapToObj(this::enumConstant)
         .collect(Collectors.toSet());
-    this.needsSuffix = uppercaseArgumentNames.size() < constructor.parameters.size();
+    this.needsSuffix = uppercaseArgumentNames.size() < context.parameters.size();
   }
 
-  static Option create(Constructor constructor, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
-    return new Option(constructor, optionClass, optionTypeClass, optionType);
+  static Option create(Context context, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
+    return new Option(context, optionClass, optionTypeClass, optionType);
   }
 
   String enumConstant(int i) {
     String suffix = needsSuffix ? String.format("_%d", i) : "";
-    return upcase(constructor.parameters.get(i).parameterName()) + suffix;
+    return upcase(context.parameters.get(i).parameterName()) + suffix;
   }
 
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(optionClass);
-    for (int i = 0; i < constructor.parameters.size(); i++) {
-      Param param = constructor.parameters.get(i);
+    for (int i = 0; i < context.parameters.size(); i++) {
+      Param param = context.parameters.get(i);
       String[] desc = getText(param.description());
       String argumentName = Processor.ARGNAME_LESS.contains(param.optionType()) ? null : getArgumentName(param.argName());
       String enumConstant = enumConstant(i);
