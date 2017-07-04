@@ -1,5 +1,16 @@
 package net.jbock.compiler;
 
+import static java.util.Collections.emptySet;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -24,6 +35,14 @@ final class Util {
         }
       };
 
+  static final SimpleElementVisitor8<String, Void> QUALIFIED_NAME =
+      new SimpleElementVisitor8<String, Void>() {
+        @Override
+        public String visitType(TypeElement typeElement, Void _null) {
+          return typeElement.getQualifiedName().toString();
+        }
+      };
+
   static boolean equalsType(TypeMirror typeMirror, String qualified) {
     DeclaredType declared = typeMirror.accept(AS_DECLARED, null);
     if (declared == null) {
@@ -34,5 +53,46 @@ final class Util {
       return false;
     }
     return typeElement.getQualifiedName().toString().equals(qualified);
+  }
+
+  static <E> Collector<E, List<E>, Set<E>> distinctSet(
+      Function<E, RuntimeException> error) {
+    return new Collector<E, List<E>, Set<E>>() {
+      @Override
+      public Supplier<List<E>> supplier() {
+        return ArrayList::new;
+      }
+
+      @Override
+      public BiConsumer<List<E>, E> accumulator() {
+        return List::add;
+      }
+
+      @Override
+      public BinaryOperator<List<E>> combiner() {
+        return (left, right) -> {
+          left.addAll(right);
+          return left;
+        };
+      }
+
+      @Override
+      public Function<List<E>, Set<E>> finisher() {
+        return elements -> {
+          Set<E> set = new HashSet<>();
+          for (E element : elements) {
+            if (!set.add(element)) {
+              throw error.apply(element);
+            }
+          }
+          return set;
+        };
+      }
+
+      @Override
+      public Set<Characteristics> characteristics() {
+        return emptySet();
+      }
+    };
   }
 }

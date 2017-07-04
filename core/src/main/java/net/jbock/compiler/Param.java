@@ -1,5 +1,16 @@
 package net.jbock.compiler;
 
+import static net.jbock.compiler.Util.AS_TYPE_ELEMENT;
+import static net.jbock.compiler.Util.equalsType;
+
+import java.util.Objects;
+import java.util.regex.Pattern;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import net.jbock.ArgumentName;
 import net.jbock.Description;
 import net.jbock.EverythingAfter;
@@ -7,26 +18,16 @@ import net.jbock.LongName;
 import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
-import java.util.Objects;
-import java.util.regex.Pattern;
-
-import static net.jbock.compiler.Util.AS_TYPE_ELEMENT;
-import static net.jbock.compiler.Util.equalsType;
-
 final class Param {
 
   private final String longName;
   private final Character shortName;
   private final OptionType optionType;
 
-  final String stopword;
+  private final String stopword;
 
-  private final VariableElement variableElement;
+  final VariableElement variableElement;
+  final ExecutableElement executableElement;
 
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
@@ -34,12 +35,14 @@ final class Param {
       Character shortName,
       String longName,
       String stopword,
-      VariableElement variableElement) {
+      VariableElement variableElement,
+      ExecutableElement executableElement) {
     this.shortName = shortName;
     this.longName = longName;
     this.stopword = stopword;
     this.variableElement = variableElement;
     this.optionType = getOptionType(variableElement);
+    this.executableElement = executableElement;
   }
 
   private static OptionType getOptionType(VariableElement variableElement) {
@@ -64,7 +67,7 @@ final class Param {
     throw new ValidationException(message, variableElement);
   }
 
-  static Param create(VariableElement variableElement) {
+  static Param create(ExecutableElement executableElement, VariableElement variableElement) {
     LongName longName = variableElement.getAnnotation(LongName.class);
     ShortName shortName = variableElement.getAnnotation(ShortName.class);
     OtherTokens otherTokens = variableElement.getAnnotation(OtherTokens.class);
@@ -86,7 +89,8 @@ final class Param {
       return new Param(null,
           variableElement.getSimpleName().toString(),
           null,
-          variableElement);
+          variableElement,
+          executableElement);
     }
     if (everythingAfter != null) {
       checkList(variableElement);
@@ -103,7 +107,7 @@ final class Param {
       return new Param(null,
           variableElement.getSimpleName().toString(),
           stopword,
-          variableElement);
+          variableElement, executableElement);
     }
     String ln = null;
     Character sn = null;
@@ -124,7 +128,7 @@ final class Param {
         sn,
         ln,
         null,
-        variableElement);
+        variableElement, executableElement);
   }
 
   private static void checkList(VariableElement variableElement) {
@@ -188,6 +192,10 @@ final class Param {
 
   String longName() {
     return longName;
+  }
+
+  public String stopword() {
+    return stopword;
   }
 
   Description description() {

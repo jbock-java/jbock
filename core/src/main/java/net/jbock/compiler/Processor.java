@@ -20,13 +20,12 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -48,7 +47,7 @@ public final class Processor extends AbstractProcessor {
 
   private static final String SUFFIX = "_Parser";
 
-  private final Set<TypeName> done = new HashSet<>();
+  private final Set<String> done = new HashSet<>();
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
@@ -65,15 +64,13 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-    List<ExecutableElement> constructors =
-        getAnnotatedExecutableElements(env);
-    validate(constructors);
-    for (ExecutableElement c : constructors) {
+    for (ExecutableElement executableElement : validate(env)) {
       try {
-        String stopword = staticChecks(c);
-        staticChecks(LessElements.asType(c.getEnclosingElement()));
-        Context context = Context.create(c, stopword);
-        if (!done.add(context.enclosingType)) {
+        List<Param> params = validate(executableElement);
+        String stopword = stopword(params, executableElement);
+        Context context = Context.create(executableElement, params, stopword);
+        if (!done.add(context.executableElement.getEnclosingElement()
+            .accept(Util.QUALIFIED_NAME, null))) {
           continue;
         }
         TypeSpec typeSpec = Analyser.create(context).analyse();
@@ -81,7 +78,7 @@ public final class Processor extends AbstractProcessor {
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
-        handleException(c, e);
+        handleException(executableElement, e);
         return false;
       }
     }
@@ -104,20 +101,23 @@ public final class Processor extends AbstractProcessor {
     processingEnv.getMessager().printMessage(ERROR, message, constructor);
   }
 
-  private void validate(Collection<ExecutableElement> constructors) {
+  private Set<ExecutableElement> validate(RoundEnvironment env) {
+    List<ExecutableElement> executableElements =
+        getAnnotatedExecutableElements(env);
     Set<String> check = new HashSet<>();
-    List<TypeElement> t = constructors.stream()
-        .map(ExecutableElement::getEnclosingElement)
-        .map(Element::asType)
-        .map(LessTypes::asTypeElement)
-        .collect(toList());
-    for (TypeElement typeElement : t) {
+    Set<ExecutableElement> valid = new HashSet<>();
+    for (ExecutableElement executableElement : executableElements) {
+      TypeElement typeElement = executableElement.getEnclosingElement()
+          .accept(Util.AS_TYPE_ELEMENT, null);
       if (!check.add(typeElement.getQualifiedName().toString())) {
         processingEnv.getMessager().printMessage(ERROR,
             CommandLineArguments.class.getSimpleName() + " can only appear once per class",
             typeElement);
+      } else {
+        valid.add(executableElement);
       }
     }
+    return valid;
   }
 
   private void write(ClassName generatedType, TypeSpec typeSpec) throws IOException {
@@ -137,7 +137,7 @@ public final class Processor extends AbstractProcessor {
     return type.topLevelClassName().peerClass(name);
   }
 
-  private void staticChecks(TypeElement enclosingElement) {
+  private void classChecks(TypeElement enclosingElement) {
     if (enclosingElement.getModifiers().contains(Modifier.PRIVATE)) {
       throw new ValidationException("The class may not be private", enclosingElement);
     }
@@ -150,10 +150,21 @@ public final class Processor extends AbstractProcessor {
   static final Set<OptionType> ARGNAME_LESS = EnumSet.of(EVERYTHING_AFTER, OTHER_TOKENS, FLAG);
   private static final Set<OptionType> NAMELESS = EnumSet.of(EVERYTHING_AFTER, OTHER_TOKENS);
 
-  private String staticChecks(ExecutableElement executableElement) {
+  private void combinationChecks(List<Param> params) {
+    params.forEach(param -> {
+      if (NAMELESS.contains(param.optionType())) {
+        checkNotPresent(param.variableElement, asList(LongName.class, ShortName.class));
+      }
+      if (ARGNAME_LESS.contains(param.optionType())) {
+        checkNotPresent(param.variableElement, singletonList(ArgumentName.class));
+      }
+    });
+  }
+
+  private List<Param> validate(ExecutableElement executableElement) {
     if (executableElement.getModifiers().contains(Modifier.PRIVATE)) {
       throw new ValidationException(String.format("The %s may not be private",
-          executableElement.getKind().name().toLowerCase(Locale.ENGLISH)), executableElement);
+          executableElement.getKind().name().toLowerCase(Locale.US)), executableElement);
     }
     if (executableElement.getKind() == ElementKind.METHOD &&
         !executableElement.getModifiers().contains(Modifier.STATIC)) {
@@ -168,57 +179,60 @@ public final class Processor extends AbstractProcessor {
           TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(t.toString());
           if (typeElement.getModifiers().contains(Modifier.PRIVATE)) {
             throw new ValidationException(
-                String.format("Class '%s' may not be private", typeElement.getSimpleName())
-                , executableElement);
+                String.format("Class '%s' may not be private", typeElement.getSimpleName()),
+                executableElement);
           }
         });
-    List<? extends VariableElement> parameters = executableElement.getParameters();
-    Set<String> shortNames = new HashSet<>();
-    Set<String> longNames = new HashSet<>();
-    boolean[] otherTokensFound = new boolean[1];
-    String[] stopword = new String[1];
-    parameters.forEach(p -> {
-      Param param = Param.create(p);
-      if (NAMELESS.contains(param.optionType())) {
-        checkNotPresent(p, asList(LongName.class, ShortName.class));
-      }
-      if (ARGNAME_LESS.contains(param.optionType())) {
-        checkNotPresent(p, singletonList(ArgumentName.class));
-      }
-      if (param.longName() != null && !longNames.add(param.longName())) {
-        throw new ValidationException(
-            "Duplicate longName: " + param.longName(), p);
-      }
-      if (param.shortName() != null && !shortNames.add(param.shortName())) {
-        throw new ValidationException(
-            "Duplicate shortName: " + param.shortName(), p);
-      }
-      if (param.optionType() == OTHER_TOKENS) {
-        if (otherTokensFound[0]) {
-          throw new ValidationException(
-              "Only one parameter may have @OtherTokens", p);
-        }
-        otherTokensFound[0] = true;
-      }
-      if (param.optionType() == EVERYTHING_AFTER) {
-        if (stopword[0] != null) {
-          throw new ValidationException(
-              "Only one parameter may have @EverythingAfter", p);
-        }
-        stopword[0] = param.stopword;
-      }
-    });
-    if (stopword[0] != null && stopword[0].startsWith("-")) {
-      if (stopword[0].startsWith("--") && longNames.contains(stopword[0].substring(2))) {
-        throw new ValidationException(
-            "@EverythingAfter coincides with a long option", executableElement);
-      }
-      if (shortNames.contains(stopword[0].substring(1))) {
-        throw new ValidationException(
-            "@EverythingAfter coincides with a short option", executableElement);
-      }
+    classChecks(asType(executableElement.getEnclosingElement()));
+    List<Param> params = executableElement.getParameters().stream()
+        .map(v -> Param.create(executableElement, v)).collect(toList());
+    combinationChecks(params);
+    return params;
+  }
+
+  private Set<String> shortNames(List<Param> params, ExecutableElement executableElement) {
+    return params.stream()
+        .map(Param::shortName)
+        .filter(Objects::nonNull)
+        .collect(Util.distinctSet(element ->
+            new ValidationException(
+                "Duplicate shortName: " + element, executableElement)));
+  }
+
+  private Set<String> longNames(List<Param> params, ExecutableElement executableElement) {
+    return params.stream()
+        .map(Param::longName)
+        .filter(Objects::nonNull)
+        .collect(Util.distinctSet(element ->
+            new ValidationException(
+                "Duplicate longName: " + element, executableElement)));
+  }
+
+  private String stopword(
+      List<Param> params,
+      ExecutableElement executableElement) {
+    Set<String> longNames = longNames(params, executableElement);
+    Set<String> shortNames = shortNames(params, executableElement);
+    List<String> stopwords = params.stream()
+        .map(Param::stopword)
+        .filter(Objects::nonNull)
+        .collect(toList());
+    if (stopwords.size() > 1) {
+      throw new ValidationException("Only one parameter may have @EverythingAfter", executableElement);
     }
-    return stopword[0];
+    return stopwords.stream().findAny().map(stopword -> {
+      if (stopword.startsWith("-")) {
+        if (stopword.startsWith("--") && longNames.contains(stopword.substring(2))) {
+          throw new ValidationException(
+              "@EverythingAfter coincides with a long option", executableElement);
+        }
+        if (shortNames.contains(stopword.substring(1))) {
+          throw new ValidationException(
+              "@EverythingAfter coincides with a short option", executableElement);
+        }
+      }
+      return stopword;
+    }).orElse(null);
   }
 
   private void checkNotPresent(VariableElement p, List<Class<? extends Annotation>> namelesss) {
@@ -255,12 +269,10 @@ public final class Processor extends AbstractProcessor {
 
     private static Context create(
         ExecutableElement executableElement,
+        List<Param> parameters,
         String stopword) {
       List<TypeName> thrownTypes = executableElement.getThrownTypes().stream().map(TypeName::get).collect(toList());
       TypeName enclosingType = TypeName.get(executableElement.getEnclosingElement().asType());
-      List<Param> parameters = executableElement.getParameters().stream()
-          .map(Param::create)
-          .collect(Collectors.toList());
       ClassName generatedClass = peer(ClassName.get(asType(executableElement.getEnclosingElement())), SUFFIX);
       return new Context(enclosingType, generatedClass, parameters, thrownTypes, stopword, executableElement);
     }

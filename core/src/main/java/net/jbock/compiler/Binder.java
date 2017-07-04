@@ -93,7 +93,7 @@ final class Binder {
     } else {
       builder.addStatement("return $T.$L(\n$L)",
           context.enclosingType,
-          context.executableElement.getSimpleName().toString(), args.build());
+          context.executableElement.getSimpleName(), args.build());
     }
     return MethodSpec.methodBuilder("bind")
         .addCode(builder.build())
