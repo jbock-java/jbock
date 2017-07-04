@@ -20,10 +20,13 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -69,7 +72,7 @@ public final class Processor extends AbstractProcessor {
         List<Param> params = validate(executableElement);
         String stopword = stopword(params, executableElement);
         Context context = Context.create(executableElement, params, stopword);
-        if (!done.add(context.executableElement.getEnclosingElement()
+        if (!done.add(executableElement.getEnclosingElement()
             .accept(Util.QUALIFIED_NAME, null))) {
           continue;
         }
@@ -79,7 +82,6 @@ public final class Processor extends AbstractProcessor {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
         handleException(executableElement, e);
-        return false;
       }
     }
     return false;
@@ -101,23 +103,21 @@ public final class Processor extends AbstractProcessor {
     processingEnv.getMessager().printMessage(ERROR, message, constructor);
   }
 
-  private Set<ExecutableElement> validate(RoundEnvironment env) {
+  private Collection<ExecutableElement> validate(RoundEnvironment env) {
     List<ExecutableElement> executableElements =
         getAnnotatedExecutableElements(env);
-    Set<String> check = new HashSet<>();
-    Set<ExecutableElement> valid = new HashSet<>();
+    Map<String, ExecutableElement> check = new HashMap<>();
     for (ExecutableElement executableElement : executableElements) {
       TypeElement typeElement = executableElement.getEnclosingElement()
           .accept(Util.AS_TYPE_ELEMENT, null);
-      if (!check.add(typeElement.getQualifiedName().toString())) {
+      if (check.put(typeElement.getQualifiedName().toString(),
+          executableElement) != null) {
         processingEnv.getMessager().printMessage(ERROR,
             CommandLineArguments.class.getSimpleName() + " can only appear once per class",
             typeElement);
-      } else {
-        valid.add(executableElement);
       }
     }
-    return valid;
+    return check.values();
   }
 
   private void write(ClassName generatedType, TypeSpec typeSpec) throws IOException {
