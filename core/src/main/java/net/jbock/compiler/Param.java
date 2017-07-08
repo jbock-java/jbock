@@ -5,7 +5,6 @@ import static net.jbock.compiler.Util.equalsType;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
@@ -21,28 +20,25 @@ import net.jbock.ShortName;
 final class Param {
 
   private final String longName;
-  private final Character shortName;
+  private final String shortName;
   private final OptionType optionType;
 
   private final String stopword;
 
   final VariableElement variableElement;
-  final ExecutableElement executableElement;
 
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
   private Param(
-      Character shortName,
+      String shortName,
       String longName,
       String stopword,
-      VariableElement variableElement,
-      ExecutableElement executableElement) {
+      VariableElement variableElement) {
     this.shortName = shortName;
     this.longName = longName;
     this.stopword = stopword;
     this.variableElement = variableElement;
     this.optionType = getOptionType(variableElement);
-    this.executableElement = executableElement;
   }
 
   private static OptionType getOptionType(VariableElement variableElement) {
@@ -67,68 +63,37 @@ final class Param {
     throw new ValidationException(message, variableElement);
   }
 
-  static Param create(ExecutableElement executableElement, VariableElement variableElement) {
-    LongName longName = variableElement.getAnnotation(LongName.class);
-    ShortName shortName = variableElement.getAnnotation(ShortName.class);
-    OtherTokens otherTokens = variableElement.getAnnotation(OtherTokens.class);
-    EverythingAfter everythingAfter = variableElement.getAnnotation(EverythingAfter.class);
-    if (otherTokens != null) {
-      if (everythingAfter != null) {
-        throw new ValidationException(
-            "@OtherTokens and @EverythingAfter cannot be on the same parameter", variableElement);
-      }
-      checkList(variableElement);
-      if (longName != null) {
-        throw new ValidationException(
-            "@OtherTokens and @LongName cannot be on the same parameter", variableElement);
-      }
-      if (shortName != null) {
-        throw new ValidationException(
-            "@OtherTokens and @ShortName cannot be on the same parameter", variableElement);
-      }
-      return new Param(null,
-          variableElement.getSimpleName().toString(),
-          null,
-          variableElement,
-          executableElement);
+  static Param create(VariableElement parameter) {
+    CreateHelper createHelper = new CreateHelper(parameter);
+    if (parameter.getAnnotation(OtherTokens.class) != null) {
+      return createHelper.createOtherTokens();
     }
-    if (everythingAfter != null) {
-      checkList(variableElement);
-      if (longName != null) {
-        throw new ValidationException(
-            "@EverythingAfter and @LongName cannot be on the same parameter", variableElement);
-      }
-      if (shortName != null) {
-        throw new ValidationException(
-            "@EverythingAfter and @ShortName cannot be on the same parameter", variableElement);
-      }
-      String stopword = everythingAfter.value();
-      basicCheckName(variableElement, stopword);
-      return new Param(null,
-          variableElement.getSimpleName().toString(),
-          stopword,
-          variableElement, executableElement);
+    if (parameter.getAnnotation(EverythingAfter.class) != null) {
+      return createHelper.createEverythingAfter();
     }
-    String ln = null;
-    Character sn = null;
-    if (longName != null) {
-      ln = longName.value();
-    }
-    if (shortName != null) {
-      sn = shortName.value();
-    }
-    if (shortName == null && longName == null) {
-      ln = variableElement.getSimpleName().toString();
-    }
-    if (sn != null) {
-      checkName(variableElement, Character.toString(sn));
-    }
-    checkName(variableElement, ln);
+    String longName = longName(parameter);
+    String shortName = shortName(parameter);
+    createHelper.checkName(shortName);
+    createHelper.checkName(longName);
     return new Param(
-        sn,
-        ln,
+        shortName,
+        longName,
         null,
-        variableElement, executableElement);
+        parameter);
+  }
+
+  private static String shortName(VariableElement parameter) {
+    ShortName shortName = parameter.getAnnotation(ShortName.class);
+    return shortName != null ? Character.toString(shortName.value()) : null;
+  }
+
+  private static String longName(VariableElement parameter) {
+    LongName longName = parameter.getAnnotation(LongName.class);
+    String ln = longName != null ? longName.value() : null;
+    if (ln == null && parameter.getAnnotation(ShortName.class) == null) {
+      return parameter.getSimpleName().toString();
+    }
+    return ln;
   }
 
   private static void checkList(VariableElement variableElement) {
@@ -161,30 +126,77 @@ final class Param {
             "java.lang.String");
   }
 
-  private static void checkName(VariableElement parameter, String name) {
-    if (name == null) {
-      return;
+  private static final class CreateHelper {
+    final VariableElement parameter;
+
+    CreateHelper(VariableElement parameter) {
+      this.parameter = parameter;
     }
-    basicCheckName(parameter, name);
-    if (name.startsWith("-")) {
-      throw new ValidationException("The name may not start with '-'", parameter);
+
+    private void checkName(String name) {
+      if (name == null) {
+        return;
+      }
+      basicCheckName(name);
+      if (name.startsWith("-")) {
+        throw new ValidationException("The name may not start with '-'", parameter);
+      }
+      if (name.indexOf('=') >= 0) {
+        throw new ValidationException("The name may not contain '='", parameter);
+      }
     }
-    if (name.indexOf('=') >= 0) {
-      throw new ValidationException("The name may not contain '='", parameter);
+
+    private void basicCheckName(String name) {
+      if (name == null) {
+        throw new ValidationException("The name may not be null", parameter);
+      }
+      if (name.isEmpty()) {
+        throw new ValidationException("The name may not be empty", parameter);
+      }
+      if (WHITE_SPACE.matcher(name).matches()) {
+        throw new ValidationException("The name may not contain whitespace characters", parameter);
+      }
+    }
+
+    private Param createEverythingAfter() {
+      checkList(parameter);
+      if (parameter.getAnnotation(LongName.class) != null) {
+        throw new ValidationException(
+            "@EverythingAfter and @LongName cannot be on the same parameter", parameter);
+      }
+      if (parameter.getAnnotation(ShortName.class) != null) {
+        throw new ValidationException(
+            "@EverythingAfter and @ShortName cannot be on the same parameter", parameter);
+      }
+      String stopword = parameter.getAnnotation(EverythingAfter.class).value();
+      basicCheckName(stopword);
+      return new Param(null,
+          parameter.getSimpleName().toString(),
+          stopword,
+          parameter);
+    }
+
+    private Param createOtherTokens() {
+      if (parameter.getAnnotation(EverythingAfter.class) != null) {
+        throw new ValidationException(
+            "@OtherTokens and @EverythingAfter cannot be on the same parameter", parameter);
+      }
+      checkList(parameter);
+      if (parameter.getAnnotation(LongName.class) != null) {
+        throw new ValidationException(
+            "@OtherTokens and @LongName cannot be on the same parameter", parameter);
+      }
+      if (parameter.getAnnotation(ShortName.class) != null) {
+        throw new ValidationException(
+            "@OtherTokens and @ShortName cannot be on the same parameter", parameter);
+      }
+      return new Param(null,
+          parameter.getSimpleName().toString(),
+          null,
+          parameter);
     }
   }
 
-  private static void basicCheckName(VariableElement parameter, String name) {
-    if (name == null) {
-      throw new ValidationException("The name may not be null", parameter);
-    }
-    if (name.isEmpty()) {
-      throw new ValidationException("The name may not be empty", parameter);
-    }
-    if (WHITE_SPACE.matcher(name).matches()) {
-      throw new ValidationException("The name may not contain whitespace characters", parameter);
-    }
-  }
 
   String shortName() {
     return Objects.toString(shortName, null);
@@ -194,7 +206,7 @@ final class Param {
     return longName;
   }
 
-  public String stopword() {
+  String stopword() {
     return stopword;
   }
 

@@ -185,7 +185,7 @@ public final class Processor extends AbstractProcessor {
         });
     classChecks(asType(executableElement.getEnclosingElement()));
     List<Param> params = executableElement.getParameters().stream()
-        .map(v -> Param.create(executableElement, v)).collect(toList());
+        .map(Param::create).collect(toList());
     combinationChecks(params);
     return params;
   }
