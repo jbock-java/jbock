@@ -3,12 +3,12 @@ package net.jbock.compiler;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.SimpleElementVisitor6;
+import javax.lang.model.util.SimpleElementVisitor8;
 
 final class LessElements {
 
   private static final ElementVisitor<TypeElement, Void> TYPE_ELEMENT_VISITOR =
-      new SimpleElementVisitor6<TypeElement, Void>() {
+      new SimpleElementVisitor8<>() {
         @Override
         protected TypeElement defaultAction(Element e, Void p) {
           throw new IllegalArgumentException();

@@ -21,12 +21,6 @@
 
   <dependencies>
 
-    <dependency>
-      <groupId>com.squareup</groupId>
-      <artifactId>javapoet</artifactId>
-      <version>1.9.0</version>
-    </dependency>
-
     <!-- Test -->
 
     <!--
@@ -71,34 +65,12 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.7.0</version>
         <configuration>
-          <source>8</source>
-          <target>8</target>
+          <source>9</source>
+          <target>9</target>
           <compilerArgument>-proc:none</compilerArgument>
         </configuration>
       </plugin>
 
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-shade-plugin</artifactId>
-        <version>3.1.0</version>
-        <configuration>
-          <minimizeJar>true</minimizeJar>
-          <relocations>
-            <relocation>
-              <pattern>com.squareup.javapoet</pattern>
-              <shadedPattern>net.jbock.com.squareup.javapoet</shadedPattern>
-            </relocation>
-          </relocations>
-        </configuration>
-        <executions>
-          <execution>
-            <phase>package</phase>
-            <goals>
-              <goal>shade</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
     </plugins>
   </build>
 
