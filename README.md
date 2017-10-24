@@ -6,6 +6,9 @@ CLI parser. It can be used to define both short and long options.
 Just like the default behaviour of `getopt_long`, its behaviour is not `POSIXLY_CORRECT`:
 non-options do not stop option parsing, so options and non-options can be in any order.
 
+If necessary, it is possible to define a special token, that stops option parsing when encountered.
+See the `rm` example below.
+
 ### What sets it apart
 
 * No reflection, purely static analysis.
