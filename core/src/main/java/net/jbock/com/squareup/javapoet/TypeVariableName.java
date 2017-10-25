@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.javapoet;
+package net.jbock.com.squareup.javapoet;
 
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -28,8 +28,8 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 
-import static com.squareup.javapoet.Util.checkArgument;
-import static com.squareup.javapoet.Util.checkNotNull;
+import static net.jbock.com.squareup.javapoet.Util.checkArgument;
+import static net.jbock.com.squareup.javapoet.Util.checkNotNull;
 
 public final class TypeVariableName extends TypeName {
   public final String name;

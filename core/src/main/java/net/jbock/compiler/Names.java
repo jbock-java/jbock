@@ -1,11 +1,11 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeSpec;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.MethodSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.util.Arrays;
 import java.util.Collections;

@@ -1,6 +1,6 @@
 package net.jbock.compiler;
 
-import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
+import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -9,14 +9,14 @@ import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
 
-import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import net.jbock.com.squareup.javapoet.ArrayTypeName;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.MethodSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.com.squareup.javapoet.TypeSpec;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;

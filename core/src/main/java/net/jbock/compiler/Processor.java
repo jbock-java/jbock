@@ -12,10 +12,10 @@ import static net.jbock.compiler.OptionType.EVERYTHING_AFTER;
 import static net.jbock.compiler.OptionType.FLAG;
 import static net.jbock.compiler.OptionType.OTHER_TOKENS;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.JavaFile;
+import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;

@@ -1,7 +1,7 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeSpec;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import static javax.lang.model.element.Modifier.PUBLIC;
 

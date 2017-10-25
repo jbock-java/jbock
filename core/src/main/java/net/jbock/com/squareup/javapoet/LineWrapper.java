@@ -13,11 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.javapoet;
+package net.jbock.com.squareup.javapoet;
 
 import java.io.IOException;
 
-import static com.squareup.javapoet.Util.checkNotNull;
+import static net.jbock.com.squareup.javapoet.Util.checkNotNull;
 
 /**
  * Implements soft line wrapping on an appendable. To use, append characters using {@link #append}

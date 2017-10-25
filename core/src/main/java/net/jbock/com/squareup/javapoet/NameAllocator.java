@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.squareup.javapoet;
+package net.jbock.com.squareup.javapoet;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
@@ -22,7 +22,7 @@ import java.util.Set;
 import java.util.UUID;
 import javax.lang.model.SourceVersion;
 
-import static com.squareup.javapoet.Util.checkNotNull;
+import static net.jbock.com.squareup.javapoet.Util.checkNotNull;
 
 /**
  * Assigns Java identifier names to avoid collisions, keywords, and invalid characters. To use,
