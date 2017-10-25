@@ -37,6 +37,15 @@
         <configuration>
           <source>1.9</source>
           <target>1.9</target>
+          <!-- This is necessary until the following ticket is resolved: -->
+          <!-- https://issues.apache.org/jira/browse/MCOMPILER-310 -->
+          <annotationProcessorPaths>
+            <dependency>
+              <groupId>${project.groupId}</groupId>
+              <artifactId>jbock</artifactId>
+              <version>${project.version}</version>
+            </dependency>
+          </annotationProcessorPaths>
         </configuration>
       </plugin>
       <plugin>

@@ -1,13 +1,8 @@
 ## Running examples with Java 9
 
-There seems to be a problem with the maven-compiler-plugin.
-Apparently it's not picking up the annotation processor.
-
-But theres a workaround:
-
 ````bash
+# clean maven cache
+rm -rf ~/.m2/repository/com/github/h908714124/
 mvn clean install -f ../core/pom.xml
-mvn clean
-./generate_sources
-mvn test
+mvn clean test
 ````
