@@ -1,35 +1,28 @@
 package net.zerobuilder.examples.gradle;
 
+import java.util.List;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
 import net.jbock.EverythingAfter;
 import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 
-import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+@CommandLineArguments
+abstract class Rm {
 
-final class Rm {
+  @ShortName('r')
+  abstract boolean recursive();
 
-  final boolean recursive;
-  final boolean force;
-  final List<String> filesToDelete;
+  @ShortName('f')
+  abstract boolean force();
 
-@CommandLineArguments Rm(
-    @ShortName('r') boolean recursive,
-    @ShortName('f') boolean force,
-    @OtherTokens List<String> fileNames,
-    @EverythingAfter("--") @Description({
-        "@EverythingAfter to create a last resort",
-        "for problematic @OtherTokens.",
-        "For example, when the file name is '-f'"})
-        List<String> escapedFileNames) {
-  this.recursive = recursive;
-  this.force = force;
-  this.filesToDelete = Stream.of(fileNames, escapedFileNames)
-      .flatMap(List::stream)
-      .collect(Collectors.toList());
-}
+  @OtherTokens
+  abstract List<String> otherTokens();
+
+  @EverythingAfter("--")
+  @Description({
+      "@EverythingAfter to create a last resort",
+      "for problematic @OtherTokens.",
+      "For example, when the file name is '-f'"})
+  abstract List<String> filesToDelete();
 }

@@ -7,16 +7,18 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Analyser.STRING_LIST;
 import static net.jbock.compiler.Analyser.otherTokens;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Optional;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Optional;
-import javax.lang.model.element.ElementKind;
 import net.jbock.compiler.Processor.Context;
 
 final class Binder {
@@ -32,11 +34,11 @@ final class Binder {
   private final Context context;
 
   private Binder(ClassName binderClass,
-                 Option option,
-                 FieldSpec optMap,
-                 FieldSpec sMap,
-                 FieldSpec flags,
-                 Context context) {
+      Option option,
+      FieldSpec optMap,
+      FieldSpec sMap,
+      FieldSpec flags,
+      Context context) {
     this.binderClass = binderClass;
     this.option = option;
     this.optMap = optMap;
@@ -57,58 +59,38 @@ final class Binder {
 
   TypeSpec define() {
     return TypeSpec.classBuilder(binderClass)
+        .superclass(TypeName.get(context.sourceType.asType()))
         .addFields(Arrays.asList(optMap, sMap, flags, otherTokens, rest))
-        .addModifiers(PUBLIC, STATIC, FINAL)
+        .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(privateConstructor())
-        .addMethod(bindMethod())
-        .addMethod(otherTokensMethod())
+        .addMethods(bindMethods())
         .build();
   }
 
-  private MethodSpec bindMethod() {
-    CodeBlock.Builder args = CodeBlock.builder();
+  private List<MethodSpec> bindMethods() {
+    List<MethodSpec> result = new ArrayList<>(context.parameters.size());
     for (int j = 0; j < context.parameters.size(); j++) {
-      if (j > 0) {
-        args.add(",\n");
-      }
-      OptionType optionType = context.parameters.get(j).optionType();
+      Param param = context.parameters.get(j);
+      OptionType optionType = param.optionType();
+      MethodSpec.Builder builder = MethodSpec.methodBuilder(param.parameterName())
+          .addModifiers(PUBLIC, FINAL)
+          .returns(optionType.sourceType);
       if (optionType == OptionType.FLAG) {
-        args.add("$N.contains($T.$N)", flags, option.optionClass, option.enumConstant(j));
+        builder.addStatement("return $N.contains($T.$N)", flags, option.optionClass, option.enumConstant(j));
       } else if (optionType == OptionType.OPTIONAL) {
-        args.add("$T.ofNullable($N.get($T.$L))",
+        builder.addStatement("return $T.ofNullable($N.get($T.$L))",
             Optional.class, sMap, option.optionClass, option.enumConstant(j));
       } else if (optionType == OptionType.OTHER_TOKENS) {
-        args.add("$N", otherTokens);
+        builder.addStatement("return $N", otherTokens);
       } else if (optionType == OptionType.EVERYTHING_AFTER) {
-        args.add("$N", rest);
+        builder.addStatement("return $N", rest);
       } else {
-        args.add("$N.getOrDefault($T.$L, $T.emptyList())",
+        builder.addStatement("return $N.getOrDefault($T.$L, $T.emptyList())",
             optMap, option.optionClass, option.enumConstant(j), Collections.class);
       }
+      result.add(builder.build());
     }
-    CodeBlock.Builder builder = CodeBlock.builder();
-    if (context.executableElement.getKind() == ElementKind.CONSTRUCTOR) {
-      builder.addStatement("return new $T(\n$L)",
-          context.enclosingType, args.build());
-    } else {
-      builder.addStatement("return $T.$L(\n$L)",
-          context.enclosingType,
-          context.executableElement.getSimpleName(), args.build());
-    }
-    return MethodSpec.methodBuilder("bind")
-        .addCode(builder.build())
-        .addExceptions(context.thrownTypes)
-        .addModifiers(PUBLIC)
-        .returns(context.returnType())
-        .build();
-  }
-
-  private MethodSpec otherTokensMethod() {
-    return MethodSpec.methodBuilder("otherTokens")
-        .addStatement("return $N", otherTokens)
-        .returns(otherTokens.type)
-        .addModifiers(PUBLIC)
-        .build();
+    return result;
   }
 
   private MethodSpec privateConstructor() {
