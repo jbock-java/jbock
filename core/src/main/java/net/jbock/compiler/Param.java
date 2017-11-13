@@ -5,8 +5,8 @@ import static net.jbock.compiler.Util.equalsType;
 
 import java.util.Objects;
 import java.util.regex.Pattern;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -25,7 +25,7 @@ final class Param {
 
   private final String stopword;
 
-  final VariableElement variableElement;
+  final ExecutableElement variableElement;
 
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
@@ -33,7 +33,7 @@ final class Param {
       String shortName,
       String longName,
       String stopword,
-      VariableElement variableElement) {
+      ExecutableElement variableElement) {
     this.shortName = shortName;
     this.longName = longName;
     this.stopword = stopword;
@@ -41,7 +41,7 @@ final class Param {
     this.optionType = getOptionType(variableElement);
   }
 
-  private static OptionType getOptionType(VariableElement variableElement) {
+  private static OptionType getOptionType(ExecutableElement variableElement) {
     if (variableElement.getAnnotation(OtherTokens.class) != null) {
       return OptionType.OTHER_TOKENS;
     }
@@ -63,7 +63,7 @@ final class Param {
     throw new ValidationException(message, variableElement);
   }
 
-  static Param create(VariableElement parameter) {
+  static Param create(ExecutableElement parameter) {
     CreateHelper createHelper = new CreateHelper(parameter);
     if (parameter.getAnnotation(OtherTokens.class) != null) {
       return createHelper.createOtherTokens();
@@ -82,12 +82,12 @@ final class Param {
         parameter);
   }
 
-  private static String shortName(VariableElement parameter) {
+  private static String shortName(ExecutableElement parameter) {
     ShortName shortName = parameter.getAnnotation(ShortName.class);
     return shortName != null ? Character.toString(shortName.value()) : null;
   }
 
-  private static String longName(VariableElement parameter) {
+  private static String longName(ExecutableElement parameter) {
     LongName longName = parameter.getAnnotation(LongName.class);
     String ln = longName != null ? longName.value() : null;
     if (ln == null && parameter.getAnnotation(ShortName.class) == null) {
@@ -96,8 +96,8 @@ final class Param {
     return ln;
   }
 
-  private static void checkList(VariableElement variableElement) {
-    if (!isListOfString(variableElement.asType())) {
+  private static void checkList(ExecutableElement variableElement) {
+    if (!isListOfString(variableElement.getReturnType())) {
       throw new ValidationException("Must be a List<String>", variableElement);
     }
   }
@@ -127,9 +127,9 @@ final class Param {
   }
 
   private static final class CreateHelper {
-    final VariableElement parameter;
+    final ExecutableElement parameter;
 
-    CreateHelper(VariableElement parameter) {
+    CreateHelper(ExecutableElement parameter) {
       this.parameter = parameter;
     }
 

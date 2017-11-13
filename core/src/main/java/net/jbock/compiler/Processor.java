@@ -4,29 +4,19 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static javax.lang.model.util.ElementFilter.constructorsIn;
-import static javax.lang.model.util.ElementFilter.methodsIn;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static net.jbock.compiler.LessElements.asType;
 import static net.jbock.compiler.OptionType.EVERYTHING_AFTER;
 import static net.jbock.compiler.OptionType.FLAG;
 import static net.jbock.compiler.OptionType.OTHER_TOKENS;
 
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.JavaFile;
-import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.com.squareup.javapoet.TypeSpec;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Locale;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -38,13 +28,16 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.VariableElement;
-import javax.lang.model.type.TypeKind;
+import javax.lang.model.util.ElementFilter;
 import javax.tools.JavaFileObject;
 import net.jbock.ArgumentName;
 import net.jbock.CommandLineArguments;
 import net.jbock.LongName;
 import net.jbock.ShortName;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.JavaFile;
+import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.com.squareup.javapoet.TypeSpec;
 
 public final class Processor extends AbstractProcessor {
 
@@ -67,13 +60,12 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-    for (ExecutableElement executableElement : validate(env)) {
+    for (TypeElement typeElement : validate(env)) {
       try {
-        List<Param> params = validate(executableElement);
-        String stopword = stopword(params, executableElement);
-        Context context = Context.create(executableElement, params, stopword);
-        if (!done.add(executableElement.getEnclosingElement()
-            .accept(Util.QUALIFIED_NAME, null))) {
+        List<Param> params = validate(typeElement);
+        String stopword = stopword(params, typeElement);
+        Context context = Context.create(typeElement, params, stopword);
+        if (!done.add(typeElement.accept(Util.QUALIFIED_NAME, null))) {
           continue;
         }
         TypeSpec typeSpec = Analyser.create(context).analyse();
@@ -81,43 +73,44 @@ public final class Processor extends AbstractProcessor {
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
-        handleException(executableElement, e);
+        handleException(typeElement, e);
       }
     }
     return false;
   }
 
-  private List<ExecutableElement> getAnnotatedExecutableElements(RoundEnvironment env) {
+  private List<TypeElement> getAnnotatedExecutableElements(RoundEnvironment env) {
     Set<? extends Element> annotated = env.getElementsAnnotatedWith(CommandLineArguments.class);
-    List<ExecutableElement> result = new ArrayList<>();
-    result.addAll(constructorsIn(annotated));
-    result.addAll(methodsIn(annotated));
+    List<TypeElement> result = new ArrayList<>();
+    Set<TypeElement> typeElements = ElementFilter.typesIn(annotated);
+    result.addAll(typeElements);
     return result;
   }
 
-  private void handleException(ExecutableElement constructor, Exception e) {
+  private void handleException(TypeElement constructor, Exception e) {
     String message = "Unexpected error while processing " +
-        ClassName.get(asType(constructor.getEnclosingElement())) +
+        ClassName.get(asType(constructor)) +
         ": " + e.getMessage();
     e.printStackTrace();
     processingEnv.getMessager().printMessage(ERROR, message, constructor);
   }
 
-  private Collection<ExecutableElement> validate(RoundEnvironment env) {
-    List<ExecutableElement> executableElements =
+  private List<TypeElement> validate(RoundEnvironment env) {
+    List<TypeElement> executableElements =
         getAnnotatedExecutableElements(env);
-    Map<String, ExecutableElement> check = new HashMap<>();
-    for (ExecutableElement executableElement : executableElements) {
-      TypeElement typeElement = executableElement.getEnclosingElement()
-          .accept(Util.AS_TYPE_ELEMENT, null);
-      if (check.put(typeElement.getQualifiedName().toString(),
-          executableElement) != null) {
-        processingEnv.getMessager().printMessage(ERROR,
-            CommandLineArguments.class.getSimpleName() + " can only appear once per class",
+    for (TypeElement typeElement : executableElements) {
+      if (typeElement.getKind() == ElementKind.INTERFACE) {
+        throw new ValidationException(
+            CommandLineArguments.class.getSimpleName() + " must be an abstract class, not an interface",
+            typeElement);
+      }
+      if (!typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
+        throw new ValidationException(
+            CommandLineArguments.class.getSimpleName() + " must be abstract",
             typeElement);
       }
     }
-    return check.values();
+    return executableElements;
   }
 
   private void write(ClassName generatedType, TypeSpec typeSpec) throws IOException {
@@ -137,16 +130,6 @@ public final class Processor extends AbstractProcessor {
     return type.topLevelClassName().peerClass(name);
   }
 
-  private void classChecks(TypeElement enclosingElement) {
-    if (enclosingElement.getModifiers().contains(Modifier.PRIVATE)) {
-      throw new ValidationException("The class may not be private", enclosingElement);
-    }
-    if (enclosingElement.getNestingKind().isNested() &&
-        !enclosingElement.getModifiers().contains(Modifier.STATIC)) {
-      throw new ValidationException("The inner class must be static", enclosingElement);
-    }
-  }
-
   static final Set<OptionType> ARGNAME_LESS = EnumSet.of(EVERYTHING_AFTER, OTHER_TOKENS, FLAG);
   private static final Set<OptionType> NAMELESS = EnumSet.of(EVERYTHING_AFTER, OTHER_TOKENS);
 
@@ -161,36 +144,25 @@ public final class Processor extends AbstractProcessor {
     });
   }
 
-  private List<Param> validate(ExecutableElement executableElement) {
-    if (executableElement.getModifiers().contains(Modifier.PRIVATE)) {
-      throw new ValidationException(String.format("The %s may not be private",
-          executableElement.getKind().name().toLowerCase(Locale.US)), executableElement);
+  private List<Param> validate(TypeElement typeElement) {
+    if (typeElement.getModifiers().contains(Modifier.PRIVATE)) {
+      throw new ValidationException("The class may not be private", typeElement);
     }
-    if (executableElement.getKind() == ElementKind.METHOD &&
-        !executableElement.getModifiers().contains(Modifier.STATIC)) {
-      throw new ValidationException("The method must be static", executableElement);
+    if (typeElement.getNestingKind().isNested() &&
+        !typeElement.getModifiers().contains(Modifier.STATIC)) {
+      throw new ValidationException("The nested class must be static", typeElement);
     }
-    if (executableElement.getKind() == ElementKind.METHOD &&
-        executableElement.getReturnType().getKind() == TypeKind.VOID) {
-      throw new ValidationException("The method may not return void", executableElement);
-    }
-    executableElement.getThrownTypes()
-        .forEach(t -> {
-          TypeElement typeElement = processingEnv.getElementUtils().getTypeElement(t.toString());
-          if (typeElement.getModifiers().contains(Modifier.PRIVATE)) {
-            throw new ValidationException(
-                String.format("Class '%s' may not be private", typeElement.getSimpleName()),
-                executableElement);
-          }
-        });
-    classChecks(asType(executableElement.getEnclosingElement()));
-    List<Param> params = executableElement.getParameters().stream()
+    List<ExecutableElement> getters = ElementFilter.methodsIn(typeElement.getEnclosedElements()).stream()
+        .filter(method -> method.getModifiers().contains(Modifier.ABSTRACT))
+        .filter(method -> method.getParameters().isEmpty())
+        .collect(toList());
+    List<Param> params = getters.stream()
         .map(Param::create).collect(toList());
     combinationChecks(params);
     return params;
   }
 
-  private Set<String> shortNames(List<Param> params, ExecutableElement executableElement) {
+  private Set<String> shortNames(List<Param> params, TypeElement executableElement) {
     return params.stream()
         .map(Param::shortName)
         .filter(Objects::nonNull)
@@ -199,7 +171,7 @@ public final class Processor extends AbstractProcessor {
                 "Duplicate shortName: " + element, executableElement)));
   }
 
-  private Set<String> longNames(List<Param> params, ExecutableElement executableElement) {
+  private Set<String> longNames(List<Param> params, TypeElement executableElement) {
     return params.stream()
         .map(Param::longName)
         .filter(Objects::nonNull)
@@ -210,7 +182,7 @@ public final class Processor extends AbstractProcessor {
 
   private String stopword(
       List<Param> params,
-      ExecutableElement executableElement) {
+      TypeElement executableElement) {
     Set<String> longNames = longNames(params, executableElement);
     Set<String> shortNames = shortNames(params, executableElement);
     List<String> stopwords = params.stream()
@@ -235,7 +207,7 @@ public final class Processor extends AbstractProcessor {
     }).orElse(null);
   }
 
-  private void checkNotPresent(VariableElement p, List<Class<? extends Annotation>> namelesss) {
+  private void checkNotPresent(ExecutableElement p, List<Class<? extends Annotation>> namelesss) {
     for (Class<? extends Annotation> nameless : namelesss) {
       if (p.getAnnotation(nameless) != null) {
         throw new ValidationException(
@@ -245,42 +217,32 @@ public final class Processor extends AbstractProcessor {
   }
 
   static final class Context {
-    final TypeName enclosingType;
+    final TypeElement sourceType;
     final ClassName generatedClass;
     final List<Param> parameters;
-    final List<TypeName> thrownTypes;
     final String stopword;
-    final ExecutableElement executableElement;
 
     private Context(
-        TypeName enclosingType,
+        TypeElement sourceType,
         ClassName generatedClass,
         List<Param> parameters,
-        List<TypeName> thrownTypes,
-        String stopword,
-        ExecutableElement executableElement) {
-      this.enclosingType = enclosingType;
+        String stopword) {
+      this.sourceType = sourceType;
       this.generatedClass = generatedClass;
       this.parameters = parameters;
-      this.thrownTypes = thrownTypes;
       this.stopword = stopword;
-      this.executableElement = executableElement;
     }
 
     private static Context create(
-        ExecutableElement executableElement,
+        TypeElement sourceType,
         List<Param> parameters,
         String stopword) {
-      List<TypeName> thrownTypes = executableElement.getThrownTypes().stream().map(TypeName::get).collect(toList());
-      TypeName enclosingType = TypeName.get(executableElement.getEnclosingElement().asType());
-      ClassName generatedClass = peer(ClassName.get(asType(executableElement.getEnclosingElement())), SUFFIX);
-      return new Context(enclosingType, generatedClass, parameters, thrownTypes, stopword, executableElement);
+      ClassName generatedClass = peer(ClassName.get(asType(sourceType)), SUFFIX);
+      return new Context(sourceType, generatedClass, parameters, stopword);
     }
 
     TypeName returnType() {
-      return executableElement.getKind() == ElementKind.CONSTRUCTOR ?
-          enclosingType :
-          TypeName.get(executableElement.getReturnType());
+      return TypeName.get(sourceType.asType());
     }
   }
 }
