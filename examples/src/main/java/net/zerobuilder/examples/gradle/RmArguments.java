@@ -8,7 +8,7 @@ import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 
 @CommandLineArguments
-abstract class Rm {
+abstract class RmArguments {
 
   @ShortName('r')
   abstract boolean recursive();

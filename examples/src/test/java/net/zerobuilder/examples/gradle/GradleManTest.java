@@ -225,8 +225,17 @@ public final class GradleManTest {
 
   @Test
   public void testPrint() {
-    Arrays.stream(Option.values())
-        .map(o -> o.describe(4))
-        .forEach(System.out::println);
+    assertThat(Option.MESSAGE.describe(2).split("\n", -1),
+        is(new String[]{"-m, --message=MESSAGE", "  the message", "  message goes here"}));
+    assertThat(Option.FILE.describe(2).split("\n", -1),
+        is(new String[]{"-f FILE", "  the files"}));
+    assertThat(Option.DIR.describe(2).split("\n", -1),
+        is(new String[]{"--dir=DIR", "  the dir"}));
+    assertThat(Option.CMOS.describe(2).split("\n", -1),
+        is(new String[]{"-c", "  cmos flag"}));
+    assertThat(Option.VERBOSE.describe(2).split("\n", -1),
+        is(new String[]{"-v", "  --- description goes here ---"}));
+    assertThat(Option.OTHER_TOKENS.describe(2).split("\n", -1),
+        is(new String[]{"[otherTokens]", "  --- description goes here ---"}));
   }
 }

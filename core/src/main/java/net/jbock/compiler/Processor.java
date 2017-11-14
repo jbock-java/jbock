@@ -273,6 +273,26 @@ public final class Processor extends AbstractProcessor {
                 CommandLineArguments.class.getSimpleName() + " annotation", executableElement);
         return true;
       }
+      if (!executableElement.getModifiers().contains(Modifier.ABSTRACT)) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+            "Method " + executableElement.getSimpleName() + " must be abstract.", executableElement);
+        return true;
+      }
+      if (executableElement.getModifiers().contains(Modifier.PRIVATE)) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+            "Method " + executableElement.getSimpleName() + " may not be private.", executableElement);
+        return true;
+      }
+      if (executableElement.getModifiers().contains(Modifier.STATIC)) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+            "Method " + executableElement.getSimpleName() + " may not be static.", executableElement);
+        return true;
+      }
+      if (!executableElement.getParameters().isEmpty()) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+            "Method " + executableElement.getSimpleName() + " must have an empty parameter list.", executableElement);
+        return true;
+      }
     }
     return false;
   }

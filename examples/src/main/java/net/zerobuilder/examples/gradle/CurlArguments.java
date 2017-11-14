@@ -8,7 +8,7 @@ import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 
 @CommandLineArguments
-abstract class Curl {
+abstract class CurlArguments {
 
   @ShortName('X')
   @Description("Optional<String> for regular arguments")

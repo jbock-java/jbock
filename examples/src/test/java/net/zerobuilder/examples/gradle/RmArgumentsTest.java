@@ -5,11 +5,11 @@ import static org.junit.Assert.assertThat;
 
 import org.junit.Test;
 
-public class RmTest {
+public class RmArgumentsTest {
 
   @Test
   public void testRest() {
-    Rm rm = Rm_Parser.parse(new String[]{"-f", "a", "--", "-r", "--", "-f"});
+    RmArguments rm = RmArguments_Parser.parse(new String[]{"-f", "a", "--", "-r", "--", "-f"});
     assertThat(rm.force(), is(true));
     assertThat(rm.recursive(), is(false));
     assertThat(rm.otherTokens().size(), is(1));

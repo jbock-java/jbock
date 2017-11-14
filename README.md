@@ -56,7 +56,7 @@ this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upl
 
 ````java
 @CommandLineArguments
-abstract class Curl {
+abstract class CurlArguments {
 
   @ShortName('X')
   @Description("Optional<String> for regular arguments")
@@ -79,23 +79,23 @@ abstract class Curl {
 ````
 
 `@CommandLineArguments` triggers the code generation. 
-A class called `Curl_Parser` will be generated in the same package.
+A class called `CurlArguments_Parser` will be generated in the same package.
 
-* The enum `Curl_Parser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
+* The enum `CurlArguments_Parser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
   These correspond to the abstract methods, and can be used to generate usage text.
-* The static method `Curl_Parser.parse(String[] args)` 
+* The static method `CurlArguments_Parser.parse(String[] args)` 
   takes the `args` argument from `public static void main(String[] args)`,
   and returns a sensible implementation of `Curl`.
   It will throw `IllegalArgumentException` if it cannot make sense of the input.
-* The static method `Curl_Parser.printUsage(PrintStream out, int indent)` prints usage text
+* The static method `CurlArguments_Parser.printUsage(PrintStream out, int indent)` prints usage text
   to `out`.
 
-Let's see how `Curl_Parser.parse(String[] args)` handles some input.
+Let's see how `CurlArguments_Parser.parse(String[] args)` handles some input.
 For example, if `args` is
 
 * `{--method, --method}`, then `method()` will return the string `--method`. 
 * `{--method=}`, then `method()` will return the empty string.
-* `{--method}` or `{-X}`, then `Curl_Parser.parse()` will throw `IllegalArgumentException`
+* `{--method}` or `{-X}`, then `CurlArguments_Parser.parse()` will throw `IllegalArgumentException`
 * `{-v, false}` then `verbose()` returns `true` and `urls()` returns the string `false`.
 * `{}` (an empty array), then `method()` returns `null`, and `urls()` returns an empty list.
 * `{-Xда, -XНет}` leads to `IllegalArgumentException`.
@@ -108,7 +108,7 @@ This can be used to take care of some syntactic corner cases that may arise if `
 
 ````java
 @CommandLineArguments
-abstract class Rm {
+abstract class RmArguments {
 
   @ShortName('r')
   abstract boolean recursive();
