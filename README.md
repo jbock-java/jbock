@@ -12,11 +12,11 @@ See the `rm` example below.
 ### What sets it apart
 
 * No reflection, purely static analysis.
-* No runtime dependency. The generated `*_Parser.java` is self-contained.
-* Convenient, flexible property binding via constructor or static method.
-* Using `Optional<String>` for regular properties
+* No runtime dependency. The generated class `*_Parser.java` is self-contained.
+* Convenient, flexible property binding via abstract methods.
+* Uses `Optional<String>`, not `String` for regular properties.
 * Deliberately simple: No <em>converters</em>, <em>default values</em> or <em>required checking</em>.
-  With java 8, it's easy to add this stuff by hand.
+  With Java 8 or later, it's easy to add this stuff by hand.
 
 ### Features
 
@@ -29,49 +29,52 @@ See the `rm` example below.
 
 ### Basic usage
 
-Annotate a constructor or static method with `@CommandLineArguments`.
-Only three types of parameters are allowed:
+Annotate an abstract class with `@CommandLineArguments`.
+The annotation processor will consider all abstract methods that have an empty argument list.
+For these methods, only three types of return types are allowed:
 
-* A `boolean` parameter declares a flag.
-* A `List<String>` parameter declares a repeatable argument.
-* A `Optional<String>` parameter declares an argument that may appear at most once.
+* A method that returns `boolean` declares a flag.
+* A method that returns `List<String>` declares a repeatable argument.
+* A method that returns `Optional<String>` declares an argument that may appear at most once.
 
 The following additional rules apply:
 
-* At most one of the parameters can have the annotation `@OtherTokens`.
-* At most one parameter can have the annotation `@EverythingAfter`. 
-  `@OtherTokens` and `@EverythingAfter` cannot appear on the same parameter.
-* Parameters that have the `@OtherTokens` or `@EverythingAfter` annotation are called *special*. 
+* At most one of the methods can have the annotation `@OtherTokens`.
+* At most one method can have the annotation `@EverythingAfter`. 
+  `@OtherTokens` and `@EverythingAfter` cannot appear on the same method.
+* Methods that have the `@OtherTokens` or `@EverythingAfter` annotation are called *special*. 
   All others are called *regular*.
-* A *special* parameter must be of type `List<String>`.
-* A *regular* parameter can have the `@LongName` or `@ShortName` annotation, or both.
-* If a *regular* parameter has neither `@LongName` nor `@ShortName`, 
-  then by default the parameter name becomes the long name, and there is no short name.
+* A special method must return `List<String>`.
+* A regular method may have the `@LongName` or `@ShortName` annotation, or both.
+* If a regular method has neither the `@LongName` nor `@ShortName` annotation,
+  then by default the method name becomes the long name, and there is no short name.
 
 This documentation will be extended over time. Meanwhile, check out the examples folder, and 
 this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload/blob/master/src/main/java/ich/bins/ArchiveMPU.java).
 
-### Example: `curl` constructor
+### Example: `curl`
 
 ````java
-@CommandLineArguments Curl(
-    @ShortName('H') @Description(
-        "List<String> for arguments that appear multiple times")
-        List<String> headers,
-    @ShortName('v') @Description(
-        "boolean for flags")
-        boolean verbose,
-    @ShortName('X') @Description(
-        "Optional<String> for regular arguments")
-        Optional<String> method,
-    @OtherTokens @Description({
-        "@OtherTokens to capture everything else.",
-        "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
-        List<String> urls) {
-  this.headers = headers;
-  this.verbose = verbose;
-  this.method = method.orElse("GET");
-  this.urls = urls;
+@CommandLineArguments
+abstract class Curl {
+
+  @ShortName('X')
+  @Description("Optional<String> for regular arguments")
+  abstract Optional<String> method();
+
+  @ShortName('H')
+  @Description("List<String> for repeatable arguments")
+  abstract List<String> headers();
+
+  @ShortName('v')
+  @Description("boolean for flags")
+  abstract boolean verbose();
+
+  @OtherTokens
+  @Description({
+      "@OtherTokens to capture everything else.",
+      "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
+  abstract List<String> urls();
 }
 ````
 
@@ -84,25 +87,19 @@ this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upl
   These correspond to the constructor arguments, and have methods to generate usage text.
 * The generated static method `Curl_Parser.parse(String[] args)` 
   takes the `args` argument from `public static void main(String[] args)`.
-* `parse` returns another generated class, `Curl_Parser.Binder`.
+* `parse` returns an implementation of `Curl`.
 * `parse` will throw `IllegalArgumentException` if it cannot make sense of the input.
 
-The generated class `Curl_Parser.Binder` has two methods:
-
-* `binder.bind()` invokes the constructor. It returns a `Curl` instance.
-* `binder.otherTokens()` returns a `List<String>`. Unless `@OtherTokens` are already used in your constructor,
-   should be inspected before invoking `bind()`, to inform the user about a possible input error.
-
-Let's see how `Curl_Parser.parse(String[] args)` handles some good old input.
+Let's see how `Curl_Parser.parse(String[] args)` handles some input.
 For example, if `args` is
 
-* `{--method, --method}`, then `method` will be the string `--method`. 
-* `{--method=}`, then `method` will be the empty string.
-* `{--method}` or `{-X}`, then `parse` will throw `IllegalArgumentException`
-* `{-v, false}` then `verbose` is `true` and `urls` contains the string `false`.
-* `{}` (an empty array), then `method` is `null`, and `urls` is an empty list.
-* `{-Xда, -XНет}` is `IllegalArgumentException`.
-* `{-v, -v}` (repeated flag) is `IllegalArgumentException` as well.
+* `{--method, --method}`, then `method()` will return the string `--method`. 
+* `{--method=}`, then `method()` will return the empty string.
+* `{--method}` or `{-X}`, then `Curl_Parser.parse()` will throw `IllegalArgumentException`
+* `{-v, false}` then `verbose()` returns `true` and `urls()` returns the string `false`.
+* `{}` (an empty array), then `method()` returns `null`, and `urls` returns an empty list.
+* `{-Xда, -XНет}` leads to `IllegalArgumentException`.
+* `{-v, -v}` (repeated flag) leads to `IllegalArgumentException` as well.
 
 The next example shows how to use `@EverythingAfter`.
 This can be used to take care of some syntactic corner cases that may arise if `@OtherTokens` is used.
@@ -110,20 +107,24 @@ This can be used to take care of some syntactic corner cases that may arise if `
 ### Example: `rm` constructor
 
 ````java
-@CommandLineArguments Rm(
-    @ShortName('r') boolean recursive,
-    @ShortName('f') boolean force,
-    @OtherTokens List<String> fileNames,
-    @EverythingAfter("--") @Description({
-        "@EverythingAfter to create a last resort",
-        "for problematic @OtherTokens.",
-        "For example, when the file name is '-f'"})
-        List<String> escapedFileNames) {
-  this.recursive = recursive;
-  this.force = force;
-  this.filesToDelete = Stream.of(fileNames, escapedFileNames)
-      .flatMap(List::stream)
-      .collect(Collectors.toList());
+@CommandLineArguments
+abstract class Rm {
+
+  @ShortName('r')
+  abstract boolean recursive();
+
+  @ShortName('f')
+  abstract boolean force();
+
+  @OtherTokens
+  abstract List<String> otherTokens();
+
+  @EverythingAfter("--")
+  @Description({
+      "@EverythingAfter to create a last resort",
+      "for problematic @OtherTokens.",
+      "For example, when the file name is '-f'"})
+  abstract List<String> filesToDelete();
 }
 ````
 
@@ -137,17 +138,42 @@ If you're not familiar with `rm`'s `--` option, try `echo >>-f` and deleting the
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>1.8.4</version>
+  <version>2.0</version>
   <scope>provided</scope>
 </dependency>
 ````
 
-### The module side
+For Java 9 users, one more config is currently necessary until 
+[MCOMPILER-310](https://issues.apache.org/jira/browse/MCOMPILER-310) is resolved:
 
-See [examples](https://github.com/h908714124/jbock/tree/master/examples).
+````xml
+
+<plugin>
+  <groupId>org.apache.maven.plugins</groupId>
+  <artifactId>maven-compiler-plugin</artifactId>
+  <version>3.7.0</version>
+  <configuration>
+    <source>1.9</source>
+    <target>1.9</target>
+
+    <!-- Necessary until MCOMPILER-310 is resolved! -->
+    <annotationProcessorPaths>
+      <dependency>
+        <groupId>${project.groupId}</groupId>
+        <artifactId>jbock</artifactId>
+        <version>${project.version}</version>
+      </dependency>
+    </annotationProcessorPaths>
+
+  </configuration>
+</plugin>
+````
+
+### Java 9 config
+
+The [examples project](https://github.com/h908714124/jbock/tree/master/examples) uses Java 9.
+In order to use jbock on the module path, add the following to `module-info.java`:
 
 ````java
-module my.awesome.project {
-  requires net.jbock;
-}
+requires net.jbock;
 ````
