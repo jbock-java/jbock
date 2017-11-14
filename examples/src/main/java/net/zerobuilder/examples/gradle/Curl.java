@@ -1,12 +1,11 @@
 package net.zerobuilder.examples.gradle;
 
+import java.util.List;
+import java.util.Optional;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
 import net.jbock.OtherTokens;
 import net.jbock.ShortName;
-
-import java.util.List;
-import java.util.Optional;
 
 @CommandLineArguments
 abstract class Curl {
@@ -28,5 +27,4 @@ abstract class Curl {
       "@OtherTokens to capture everything else.",
       "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
   abstract List<String> urls();
-
 }
