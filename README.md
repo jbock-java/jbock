@@ -97,7 +97,7 @@ For example, if `args` is
 * `{--method=}`, then `method()` will return the empty string.
 * `{--method}` or `{-X}`, then `Curl_Parser.parse()` will throw `IllegalArgumentException`
 * `{-v, false}` then `verbose()` returns `true` and `urls()` returns the string `false`.
-* `{}` (an empty array), then `method()` returns `null`, and `urls` returns an empty list.
+* `{}` (an empty array), then `method()` returns `null`, and `urls()` returns an empty list.
 * `{-Xда, -XНет}` leads to `IllegalArgumentException`.
 * `{-v, -v}` (repeated flag) leads to `IllegalArgumentException` as well.
 
