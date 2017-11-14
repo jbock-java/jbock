@@ -188,7 +188,7 @@ final class Analyser {
         .addParameter(ARGS)
         .addCode(builder.build())
         .addException(IllegalArgumentException.class)
-        .returns(binderClass)
+        .returns(context.returnType())
         .addModifiers(PUBLIC, STATIC)
         .build();
   }

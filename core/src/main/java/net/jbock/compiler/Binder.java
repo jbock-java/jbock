@@ -34,11 +34,11 @@ final class Binder {
   private final Context context;
 
   private Binder(ClassName binderClass,
-                 Option option,
-                 FieldSpec optMap,
-                 FieldSpec sMap,
-                 FieldSpec flags,
-                 Context context) {
+      Option option,
+      FieldSpec optMap,
+      FieldSpec sMap,
+      FieldSpec flags,
+      Context context) {
     this.binderClass = binderClass;
     this.option = option;
     this.optMap = optMap;
@@ -61,10 +61,9 @@ final class Binder {
     return TypeSpec.classBuilder(binderClass)
         .superclass(TypeName.get(context.sourceType.asType()))
         .addFields(Arrays.asList(optMap, sMap, flags, otherTokens, rest))
-        .addModifiers(PUBLIC, STATIC, FINAL)
+        .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(privateConstructor())
-        .addMethod(bindMethod())
-        .addMethod(otherTokensMethod())
+        .addMethods(bindMethods())
         .build();
   }
 
@@ -77,61 +76,21 @@ final class Binder {
           .addModifiers(PUBLIC, FINAL)
           .returns(optionType.sourceType);
       if (optionType == OptionType.FLAG) {
-        builder.addCode("return $N.contains($T.$N)", flags, option.optionClass, option.enumConstant(j));
+        builder.addStatement("return $N.contains($T.$N)", flags, option.optionClass, option.enumConstant(j));
       } else if (optionType == OptionType.OPTIONAL) {
-        builder.addCode("return $T.ofNullable($N.get($T.$L))",
+        builder.addStatement("return $T.ofNullable($N.get($T.$L))",
             Optional.class, sMap, option.optionClass, option.enumConstant(j));
       } else if (optionType == OptionType.OTHER_TOKENS) {
-        builder.addCode("return $N", otherTokens);
+        builder.addStatement("return $N", otherTokens);
       } else if (optionType == OptionType.EVERYTHING_AFTER) {
-        builder.addCode("return $N", rest);
+        builder.addStatement("return $N", rest);
       } else {
-        builder.addCode("return $N.getOrDefault($T.$L, $T.emptyList())",
+        builder.addStatement("return $N.getOrDefault($T.$L, $T.emptyList())",
             optMap, option.optionClass, option.enumConstant(j), Collections.class);
       }
       result.add(builder.build());
     }
     return result;
-  }
-
-
-    private MethodSpec bindMethod() {
-    CodeBlock.Builder args = CodeBlock.builder();
-    for (int j = 0; j < context.parameters.size(); j++) {
-      if (j > 0) {
-        args.add(",\n");
-      }
-      OptionType optionType = context.parameters.get(j).optionType();
-      if (optionType == OptionType.FLAG) {
-        args.add("$N.contains($T.$N)", flags, option.optionClass, option.enumConstant(j));
-      } else if (optionType == OptionType.OPTIONAL) {
-        args.add("$T.ofNullable($N.get($T.$L))",
-            Optional.class, sMap, option.optionClass, option.enumConstant(j));
-      } else if (optionType == OptionType.OTHER_TOKENS) {
-        args.add("$N", otherTokens);
-      } else if (optionType == OptionType.EVERYTHING_AFTER) {
-        args.add("$N", rest);
-      } else {
-        args.add("$N.getOrDefault($T.$L, $T.emptyList())",
-            optMap, option.optionClass, option.enumConstant(j), Collections.class);
-      }
-    }
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("return new $T(\n$L)",
-        binderClass, args.build());
-    return MethodSpec.methodBuilder("bind")
-        .addCode(builder.build())
-        .addModifiers(PUBLIC)
-        .returns(context.returnType())
-        .build();
-  }
-
-  private MethodSpec otherTokensMethod() {
-    return MethodSpec.methodBuilder("otherTokens")
-        .addStatement("return $N", otherTokens)
-        .returns(otherTokens.type)
-        .addModifiers(PUBLIC)
-        .build();
   }
 
   private MethodSpec privateConstructor() {

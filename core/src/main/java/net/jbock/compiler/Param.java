@@ -41,14 +41,14 @@ final class Param {
     this.optionType = getOptionType(variableElement);
   }
 
-  private static OptionType getOptionType(ExecutableElement variableElement) {
-    if (variableElement.getAnnotation(OtherTokens.class) != null) {
+  private static OptionType getOptionType(ExecutableElement executableElement) {
+    if (executableElement.getAnnotation(OtherTokens.class) != null) {
       return OptionType.OTHER_TOKENS;
     }
-    if (variableElement.getAnnotation(EverythingAfter.class) != null) {
+    if (executableElement.getAnnotation(EverythingAfter.class) != null) {
       return OptionType.EVERYTHING_AFTER;
     }
-    TypeMirror type = variableElement.asType();
+    TypeMirror type = executableElement.getReturnType();
     if (type.getKind() == TypeKind.BOOLEAN) {
       return OptionType.FLAG;
     }
@@ -59,8 +59,8 @@ final class Param {
       return OptionType.OPTIONAL;
     }
     String message = "Only Optional<String>, List<String> and boolean allowed, " +
-        String.format("but parameter %s has type %s", variableElement.getSimpleName(), type);
-    throw new ValidationException(message, variableElement);
+        String.format("but %s() returns %s", executableElement.getSimpleName(), type);
+    throw new ValidationException(message, executableElement);
   }
 
   static Param create(ExecutableElement parameter) {
