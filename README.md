@@ -78,17 +78,17 @@ abstract class Curl {
 }
 ````
 
-* `@CommandLineArguments` triggers the code generation. The generated code requires Java 8.
-* Class `Curl_Parser` will be generated in the same package.
+`@CommandLineArguments` triggers the code generation. 
+A class called `Curl_Parser` will be generated in the same package.
 
-`Curl_Parser` has only one method, but there's also an `enum` to consider.
-
-* The generated enum `Curl_Parser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
-  These correspond to the constructor arguments, and have methods to generate usage text.
-* The generated static method `Curl_Parser.parse(String[] args)` 
-  takes the `args` argument from `public static void main(String[] args)`.
-* `parse` returns an implementation of `Curl`.
-* `parse` will throw `IllegalArgumentException` if it cannot make sense of the input.
+* The enum `Curl_Parser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
+  These correspond to the abstract methods, and can be used to generate usage text.
+* The static method `Curl_Parser.parse(String[] args)` 
+  takes the `args` argument from `public static void main(String[] args)`,
+  and returns a sensible implementation of `Curl`.
+  It will throw `IllegalArgumentException` if it cannot make sense of the input.
+* The static method `Curl_Parser.printUsage(PrintStream out, int indent)` prints usage text
+  to `out`.
 
 Let's see how `Curl_Parser.parse(String[] args)` handles some input.
 For example, if `args` is
@@ -97,14 +97,14 @@ For example, if `args` is
 * `{--method=}`, then `method()` will return the empty string.
 * `{--method}` or `{-X}`, then `Curl_Parser.parse()` will throw `IllegalArgumentException`
 * `{-v, false}` then `verbose()` returns `true` and `urls()` returns the string `false`.
-* `{}` (an empty array), then `method()` returns `null`, and `urls` returns an empty list.
+* `{}` (an empty array), then `method()` returns `null`, and `urls()` returns an empty list.
 * `{-Xда, -XНет}` leads to `IllegalArgumentException`.
 * `{-v, -v}` (repeated flag) leads to `IllegalArgumentException` as well.
 
 The next example shows how to use `@EverythingAfter`.
 This can be used to take care of some syntactic corner cases that may arise if `@OtherTokens` is used.
 
-### Example: `rm` constructor
+### Example: `rm`
 
 ````java
 @CommandLineArguments
@@ -128,7 +128,8 @@ abstract class Rm {
 }
 ````
 
-If you're not familiar with `rm`'s `--` option, try `echo >>-f` and deleting the file it creates.
+If you're not familiar with `rm`'s `--` option, try creating a file called `-f` as follows: `echo >>-f`,
+and then deleting this file using `rm`.
 
 ### The maven side
 
@@ -159,9 +160,9 @@ For Java 9 users, one more config is currently necessary until
     <!-- Necessary until MCOMPILER-310 is resolved! -->
     <annotationProcessorPaths>
       <dependency>
-        <groupId>${project.groupId}</groupId>
+        <groupId>com.github.h908714124</groupId>
         <artifactId>jbock</artifactId>
-        <version>${project.version}</version>
+        <version>2.0</version>
       </dependency>
     </annotationProcessorPaths>
 
