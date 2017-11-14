@@ -1,11 +1,19 @@
 package net.jbock.compiler;
 
-import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.com.squareup.javapoet.TypeName.INT;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
@@ -15,14 +23,6 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import net.jbock.compiler.Processor.Context;
 
 final class Analyser {
@@ -72,7 +72,8 @@ final class Analyser {
   private Analyser(Processor.Context context) {
     this.context = context;
     this.keysClass = context.generatedClass.nestedClass("Names");
-    this.binderClass = context.generatedClass.nestedClass("Binder");
+    this.binderClass = context.generatedClass.nestedClass(
+        context.sourceType.getSimpleName() + "Impl");
     this.optionTypeClass = context.generatedClass.nestedClass("OptionType");
     FieldSpec optionType = FieldSpec.builder(optionTypeClass, "type", PRIVATE, FINAL).build();
     this.option = Option.create(context,

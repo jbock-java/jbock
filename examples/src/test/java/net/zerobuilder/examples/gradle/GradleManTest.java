@@ -22,33 +22,45 @@ public final class GradleManTest {
   public final ExpectedException exception = ExpectedException.none();
 
   @Test
-  public void testShortLongConflict() {
+  public void errorShortLongConflict() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: --message=goodbye");
     GradleMan_Parser.parse(new String[]{"-m", "hello", "--message=goodbye"});
   }
 
   @Test
-  public void testMissingValue() {
+  public void errorMissingValue() {
     // there's nothing after -m
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Missing value: -m");
-    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-m"});
-    //gradleMan.message();
+    GradleMan_Parser.parse(new String[]{"-m"});
   }
 
   @Test
-  public void testLongShortConflict() {
+  public void errorLongShortConflict() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: -m");
     GradleMan_Parser.parse(new String[]{"--message=hello", "-m", "goodbye"});
   }
 
   @Test
-  public void testLongLongConflict() {
+  public void errorLongLongConflict() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Conflicting token: --message=goodbye");
     GradleMan_Parser.parse(new String[]{"--message=hello", "--message=goodbye"});
+  }
+
+  @Test
+  public void errorNull() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("null token");
+    GradleMan_Parser.parse(new String[]{null});
+  }
+
+  @Test
+  public void errorFlagWithTrailingGarbage() {
+    exception.expect(IllegalArgumentException.class);
+    GradleMan_Parser.parse(new String[]{"-c1"});
   }
 
   @Test
@@ -56,13 +68,6 @@ public final class GradleManTest {
     GradleMan gradleMan = GradleMan_Parser.parse(
         new String[]{"--message", "hello"});
     assertThat(gradleMan.message(), is(Optional.of("hello")));
-  }
-
-  @Test
-  public void testNull() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("null token");
-    GradleMan_Parser.parse(new String[]{null});
   }
 
   @Test
@@ -142,12 +147,6 @@ public final class GradleManTest {
     // bogus options
     GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"hello", "goodbye"});
     assertThat(gradleMan.otherTokens().size(), is(2));
-  }
-
-  @Test
-  public void testFlagWithTrailingGarbage() {
-    exception.expect(IllegalArgumentException.class);
-    GradleMan_Parser.parse(new String[]{"-c1"});
   }
 
   @Test

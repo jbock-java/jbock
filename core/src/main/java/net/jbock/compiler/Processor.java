@@ -4,6 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static javax.lang.model.util.ElementFilter.methodsIn;
 import static javax.tools.Diagnostic.Kind.ERROR;
 import static net.jbock.compiler.LessElements.asType;
 import static net.jbock.compiler.OptionType.EVERYTHING_AFTER;
@@ -29,10 +30,14 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
+import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import net.jbock.ArgumentName;
 import net.jbock.CommandLineArguments;
+import net.jbock.Description;
+import net.jbock.EverythingAfter;
 import net.jbock.LongName;
+import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.JavaFile;
@@ -48,7 +53,13 @@ public final class Processor extends AbstractProcessor {
   @Override
   public Set<String> getSupportedAnnotationTypes() {
     return Stream.of(
-        CommandLineArguments.class)
+        ArgumentName.class,
+        CommandLineArguments.class,
+        Description.class,
+        EverythingAfter.class,
+        LongName.class,
+        OtherTokens.class,
+        ShortName.class)
         .map(Class::getName)
         .collect(toSet());
   }
@@ -60,7 +71,11 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-    for (TypeElement typeElement : validate(env)) {
+    if (missingClassLevelAnnotation(env)) {
+      return false;
+    }
+    List<TypeElement> typeElements = getAnnotatedClasses(env);
+    for (TypeElement typeElement : typeElements) {
       try {
         List<Param> params = validate(typeElement);
         String stopword = stopword(params, typeElement);
@@ -79,7 +94,7 @@ public final class Processor extends AbstractProcessor {
     return false;
   }
 
-  private List<TypeElement> getAnnotatedExecutableElements(RoundEnvironment env) {
+  private List<TypeElement> getAnnotatedClasses(RoundEnvironment env) {
     Set<? extends Element> annotated = env.getElementsAnnotatedWith(CommandLineArguments.class);
     List<TypeElement> result = new ArrayList<>();
     Set<TypeElement> typeElements = ElementFilter.typesIn(annotated);
@@ -93,24 +108,6 @@ public final class Processor extends AbstractProcessor {
         ": " + e.getMessage();
     e.printStackTrace();
     processingEnv.getMessager().printMessage(ERROR, message, constructor);
-  }
-
-  private List<TypeElement> validate(RoundEnvironment env) {
-    List<TypeElement> executableElements =
-        getAnnotatedExecutableElements(env);
-    for (TypeElement typeElement : executableElements) {
-      if (typeElement.getKind() == ElementKind.INTERFACE) {
-        throw new ValidationException(
-            CommandLineArguments.class.getSimpleName() + " must be an abstract class, not an interface",
-            typeElement);
-      }
-      if (!typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
-        throw new ValidationException(
-            CommandLineArguments.class.getSimpleName() + " must be abstract",
-            typeElement);
-      }
-    }
-    return executableElements;
   }
 
   private void write(ClassName generatedType, TypeSpec typeSpec) throws IOException {
@@ -145,14 +142,27 @@ public final class Processor extends AbstractProcessor {
   }
 
   private List<Param> validate(TypeElement typeElement) {
+    if (typeElement.getKind() == ElementKind.INTERFACE) {
+      throw new ValidationException(
+          typeElement.getSimpleName() + " must be an abstract class, not an interface",
+          typeElement);
+    }
+    if (!typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
+      throw new ValidationException(
+          typeElement.getSimpleName() + " must be abstract",
+          typeElement);
+    }
     if (typeElement.getModifiers().contains(Modifier.PRIVATE)) {
-      throw new ValidationException("The class may not be private", typeElement);
+      throw new ValidationException(typeElement.getSimpleName() + " may not be private",
+          typeElement);
     }
     if (typeElement.getNestingKind().isNested() &&
         !typeElement.getModifiers().contains(Modifier.STATIC)) {
-      throw new ValidationException("The nested class must be static", typeElement);
+      throw new ValidationException(
+          "The nested class " + typeElement.getSimpleName() + "must be static",
+          typeElement);
     }
-    List<ExecutableElement> getters = ElementFilter.methodsIn(typeElement.getEnclosedElements()).stream()
+    List<ExecutableElement> getters = methodsIn(typeElement.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(Modifier.ABSTRACT))
         .filter(method -> method.getParameters().isEmpty())
         .collect(toList());
@@ -244,5 +254,26 @@ public final class Processor extends AbstractProcessor {
     TypeName returnType() {
       return TypeName.get(sourceType.asType());
     }
+  }
+
+
+  private boolean missingClassLevelAnnotation(RoundEnvironment env) {
+    List<ExecutableElement> toCheck = new ArrayList<>();
+    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(ArgumentName.class)));
+    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(Description.class)));
+    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(EverythingAfter.class)));
+    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(LongName.class)));
+    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(OtherTokens.class)));
+    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(ShortName.class)));
+    for (ExecutableElement executableElement : toCheck) {
+      Element enclosingElement = executableElement.getEnclosingElement();
+      if (enclosingElement.getAnnotation(CommandLineArguments.class) == null) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+            "The enclosing class " + enclosingElement.getSimpleName() + " must have the " +
+                CommandLineArguments.class.getSimpleName() + " annotation", executableElement);
+        return true;
+      }
+    }
+    return false;
   }
 }

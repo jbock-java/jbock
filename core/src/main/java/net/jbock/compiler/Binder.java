@@ -33,7 +33,8 @@ final class Binder {
       .build();
   private final Context context;
 
-  private Binder(ClassName binderClass,
+  private Binder(
+      ClassName binderClass,
       Option option,
       FieldSpec optMap,
       FieldSpec sMap,
