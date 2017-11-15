@@ -41,8 +41,6 @@ public class CurlArgumentsTest {
         .isEqualTo(Optional.of(""));
     assertThat(CurlArguments_Parser.parse(new String[]{"--method", ""}).method())
         .isEqualTo(Optional.of(""));
-    assertThat(CurlArguments_Parser.parse(new String[]{"--method="}).method())
-        .isEqualTo(Optional.of(""));
   }
 
   @Test
@@ -52,8 +50,6 @@ public class CurlArgumentsTest {
     assertThat(CurlArguments_Parser.parse(new String[]{"--header="}).headers())
         .isEqualTo(singletonList(""));
     assertThat(CurlArguments_Parser.parse(new String[]{"--header", ""}).headers())
-        .isEqualTo(singletonList(""));
-    assertThat(CurlArguments_Parser.parse(new String[]{"--header="}).headers())
         .isEqualTo(singletonList(""));
   }
 
