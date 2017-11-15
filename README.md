@@ -9,25 +9,31 @@ non-options do not stop option parsing, so options and non-options can be in any
 If necessary, it is possible to define a special token, that stops option parsing when encountered.
 See the `rm` example below.
 
-### What sets it apart
+## Goodies
 
+* Defines a valid Java 9 module.
 * No reflection, purely static analysis.
 * No runtime dependency. The generated class `*_Parser.java` is self-contained.
-* Convenient, flexible property binding via abstract methods.
-* Uses `Optional<String>`, not `String` for regular properties.
-* Deliberately simple: No <em>converters</em>, <em>default values</em> or <em>required checking</em>.
-  With Java 8 or later, it's easy to add this stuff by hand.
 
-### Features
+## Gotchas
 
-* Short args can be written `-n1` or `-n 1` style.
-* Long args can be written `--num=1` or `--num 1` style.
-* A long flag is written `--zap`, a short flag `-z`.
-* Grouping is possible, as in `tar -xzf d.tgz`.
-* "Non-options", like in `rm foo.txt`: Use `@OtherTokens`
-* "End of option scanning", like in `rm -- foo.txt`: Use `@EverythingAfter("--")`
+* The processor generates an implementation of an abstract, user-defined class.
+  [auto-value](https://github.com/google/auto/tree/master/value) users should be familiar with this.
+* Uses `List<String>`, `Optional<String>` or `boolean` for properties, but not `String`.
+* Currently there are no <em>converters</em>, <em>default values</em> or <em>required checking</em>.
+* Can potentially throw `IllegalArgumentException`, if non-repeatable arguments are repeated.
+  This will not happen if all properties are defined as `List<String>`.
 
-### Basic usage
+## Parser features
+
+* <em>Short args</em>, attached `-n1` or detached `-n 1` style.
+* <em>Long args</em>, attached `--num=1` or detached `--num 1` style.
+* <em>Flags</em>: Short `-r` or long `--recursive` style.
+* <em>Parameter grouping</em>: `-xzf d.tgz` is equivalent to `-x -z -f d.tgz`.
+* <em>Unnamed arguments</em>, like in `rm foo.txt` (see `@OtherTokens`)
+* <em>End of option scanning</em>, like in `rm -- -f` (see `@EverythingAfter`)
+
+## Basic usage
 
 Annotate an `abstract` class with `@CommandLineArguments`.
 In this class, each `abstract` method <em>must</em> have an empty argument list.
@@ -37,22 +43,9 @@ Only three different return types are allowed for any such method:
 * A method that returns `List<String>` declares a repeatable argument.
 * A method that returns `Optional<String>` declares an argument that may appear at most once.
 
-The following additional rules apply:
+See [here](additional_rules.md) for more details.
 
-* At most one of the methods can have the annotation `@OtherTokens`.
-* At most one method can have the annotation `@EverythingAfter`. 
-  `@OtherTokens` and `@EverythingAfter` cannot appear on the same method.
-* Methods that have the `@OtherTokens` or `@EverythingAfter` annotation are called *special*. 
-  All others are called *regular*.
-* A special method must return `List<String>`.
-* A regular method may have the `@LongName` or `@ShortName` annotation, or both.
-* If a regular method has neither the `@LongName` nor `@ShortName` annotation,
-  then by default the method name becomes the long name, and there is no short name.
-
-This documentation will be extended over time. Meanwhile, check out the examples folder, and 
-this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upload/blob/master/src/main/java/ich/bins/ArchiveMPU.java).
-
-### Example: `curl`
+## Example: `curl`
 
 ````java
 @CommandLineArguments
@@ -72,8 +65,9 @@ abstract class CurlArguments {
 
   @OtherTokens
   @Description({
-      "@OtherTokens to capture everything else.",
-      "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
+      "@OtherTokens to capture all other tokens in the input.",
+      "In this case, everything that isn't a '-v' flag",
+      "or immediately follows after a '-H' or '-X' token."})
   abstract List<String> urls();
 }
 ````
@@ -81,30 +75,25 @@ abstract class CurlArguments {
 `@CommandLineArguments` triggers the code generation. 
 A class called `CurlArguments_Parser` will be generated in the same package.
 
-* The enum `CurlArguments_Parser.Option` has constants `HEADERS`, `VERBOSE`, `METHOD` and `URLS`.
-  These correspond to the abstract methods, and can be used to generate usage text.
 * The static method `CurlArguments_Parser.parse(String[] args)` 
-  takes the `args` argument from `public static void main(String[] args)`,
+  takes the `args` array from `public static void main(String[] args)`,
   and returns a corresponding implementation of `CurlArguments`.
-  It will throw `IllegalArgumentException` if it cannot make sense of the input.
+  It will throw `IllegalArgumentException` if the input is invalid.
+  For example, `args = {"-X", "GET", "-X", "POST"}` would be invalid, because `method()`
+  returns an `Optional<String>`, not a `List<String>`.
 * The static method `CurlArguments_Parser.printUsage(PrintStream out, int indent)` prints usage text
-  to `out`.
+  to the PrintStream `out`.
+* The enum `CurlArguments_Parser.Option` contains the constants `METHOD`, `HEADERS`, `VERBOSE` and `URLS`.
+  These correspond to the abstract methods in `CurlArguments`,
+  and can be used as an alternative to `printUsage`,
+  for more fine-grained control over the usage text.
 
-Let's see how `CurlArguments_Parser.parse(String[] args)` handles some input.
-For example, if `args` is
-
-* `{--method, --method}`, then `method()` will return `Optional.of("--method")`. 
-* `{--method=}`, then `method()` will return an empty `Optional`.
-* `{--method}` or `{-X}`, then `CurlArguments_Parser.parse()` will throw `IllegalArgumentException`
-* `{-v, false}` then `verbose()` returns `true` and `urls()` returns a list containing a single string `"false"`.
-* `{}` (an empty array), then `method()` returns an empty `Optional`, and `urls()` returns an empty list.
-* `{-Xда, -XНет}` leads to `IllegalArgumentException`.
-* `{-v, -v}` (repeated flag) leads to `IllegalArgumentException` as well.
+Click [here](curl_parser_examples.md) to see how `CurlArguments_Parser` would handle some example input.
 
 The next example shows how to use `@EverythingAfter`.
 This can be used to take care of some syntactic corner cases that may arise if `@OtherTokens` is used.
 
-### Example: `rm`
+## Example: `rm`
 
 ````java
 @CommandLineArguments
@@ -131,7 +120,7 @@ abstract class RmArguments {
 If you're not familiar with `rm`'s `--` option, try creating a file called `-f` as follows: `echo >>-f`,
 and then deleting this file using `rm`.
 
-### The maven side
+## The maven side
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
@@ -170,7 +159,7 @@ For Java 9 users, one more config is currently necessary until
 </plugin>
 ````
 
-### Java 9 config
+## Java 9 config
 
 The [examples project](https://github.com/h908714124/jbock/tree/master/examples) uses Java 9.
 In order to use jbock on the module path, add the following to `module-info.java`:
