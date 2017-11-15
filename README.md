@@ -128,7 +128,7 @@ and then deleting this file using `rm`.
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>2.0</version>
+  <version>2.1</version>
   <scope>provided</scope>
 </dependency>
 ````
@@ -151,7 +151,7 @@ For Java 9 users, one more config is currently necessary until
       <dependency>
         <groupId>com.github.h908714124</groupId>
         <artifactId>jbock</artifactId>
-        <version>2.0</version>
+        <version>2.1</version>
       </dependency>
     </annotationProcessorPaths>
 
