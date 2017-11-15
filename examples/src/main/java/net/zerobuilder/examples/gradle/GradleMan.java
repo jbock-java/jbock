@@ -6,14 +6,13 @@ import java.util.Optional;
 import net.jbock.ArgumentName;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
-import net.jbock.LongName;
 import net.jbock.OtherTokens;
 import net.jbock.ShortName;
+import net.jbock.SuppressLongName;
 
 @CommandLineArguments
 abstract class GradleMan {
 
-  @LongName("message")
   @ShortName('m')
   @ArgumentName("MESSAGE")
   @Description({"the message", "message goes here"})
@@ -29,6 +28,7 @@ abstract class GradleMan {
   abstract Optional<String> dir();
 
   @ShortName('c')
+  @SuppressLongName
   @Description("cmos flag")
   abstract boolean cmos();
 

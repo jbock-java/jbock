@@ -16,6 +16,7 @@ import net.jbock.EverythingAfter;
 import net.jbock.LongName;
 import net.jbock.OtherTokens;
 import net.jbock.ShortName;
+import net.jbock.SuppressLongName;
 
 final class Param {
 
@@ -73,6 +74,9 @@ final class Param {
     }
     String longName = longName(parameter);
     String shortName = shortName(parameter);
+    if (shortName == null && longName == null) {
+      throw new ValidationException("Neither long nor short name defined", parameter);
+    }
     createHelper.checkName(shortName);
     createHelper.checkName(longName);
     return new Param(
@@ -89,11 +93,17 @@ final class Param {
 
   private static String longName(ExecutableElement parameter) {
     LongName longName = parameter.getAnnotation(LongName.class);
-    String ln = longName != null ? longName.value() : null;
-    if (ln == null && parameter.getAnnotation(ShortName.class) == null) {
+    if (parameter.getAnnotation(SuppressLongName.class) != null) {
+      if (longName != null) {
+        throw new ValidationException("LongName and SuppressLongName cannot be combined",
+            parameter);
+      }
+      return null;
+    }
+    if (longName == null) {
       return parameter.getSimpleName().toString();
     }
-    return ln;
+    return longName.value();
   }
 
   private static void checkList(ExecutableElement variableElement) {
@@ -160,13 +170,21 @@ final class Param {
 
     private Param createEverythingAfter() {
       checkList(parameter);
+      if (parameter.getAnnotation(OtherTokens.class) != null) {
+        throw new ValidationException(
+            "EverythingAfter and OtherTokens cannot be combined", parameter);
+      }
+      if (parameter.getAnnotation(SuppressLongName.class) != null) {
+        throw new ValidationException("EverythingAfter and SuppressLongName cannot be combined",
+            parameter);
+      }
       if (parameter.getAnnotation(LongName.class) != null) {
         throw new ValidationException(
-            "@EverythingAfter and @LongName cannot be on the same parameter", parameter);
+            "EverythingAfter and LongName cannot be combined", parameter);
       }
       if (parameter.getAnnotation(ShortName.class) != null) {
         throw new ValidationException(
-            "@EverythingAfter and @ShortName cannot be on the same parameter", parameter);
+            "EverythingAfter and ShortName cannot be combined", parameter);
       }
       String stopword = parameter.getAnnotation(EverythingAfter.class).value();
       basicCheckName(stopword);
@@ -177,18 +195,22 @@ final class Param {
     }
 
     private Param createOtherTokens() {
+      checkList(parameter);
       if (parameter.getAnnotation(EverythingAfter.class) != null) {
         throw new ValidationException(
-            "@OtherTokens and @EverythingAfter cannot be on the same parameter", parameter);
+            "OtherTokens and EverythingAfter cannot be combined", parameter);
       }
-      checkList(parameter);
+      if (parameter.getAnnotation(SuppressLongName.class) != null) {
+        throw new ValidationException("EverythingAfter and SuppressLongName cannot be combined",
+            parameter);
+      }
       if (parameter.getAnnotation(LongName.class) != null) {
         throw new ValidationException(
-            "@OtherTokens and @LongName cannot be on the same parameter", parameter);
+            "OtherTokens and LongName cannot be combined", parameter);
       }
       if (parameter.getAnnotation(ShortName.class) != null) {
         throw new ValidationException(
-            "@OtherTokens and @ShortName cannot be on the same parameter", parameter);
+            "OtherTokens and ShortName cannot be combined", parameter);
       }
       return new Param(null,
           parameter.getSimpleName().toString(),

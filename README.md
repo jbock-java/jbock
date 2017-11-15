@@ -21,8 +21,8 @@ See the `rm` example below.
   [auto-value](https://github.com/google/auto/tree/master/value) users should be familiar with this.
 * Uses `List<String>`, `Optional<String>` or `boolean` for properties, but not `String`.
 * Currently there are no <em>converters</em>, <em>default values</em> or <em>required checking</em>.
-* Can potentially throw `IllegalArgumentException`, if non-repeatable arguments are repeated.
-  This will not happen if all properties are defined as `List<String>`.
+* Can potentially throw `IllegalArgumentException`, if non-repeatable arguments are repeated, or if
+  the argument list ends after an option name.
 
 ## Parser features
 

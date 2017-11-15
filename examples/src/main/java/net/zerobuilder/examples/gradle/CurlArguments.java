@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Optional;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
+import net.jbock.LongName;
 import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 
@@ -11,10 +12,12 @@ import net.jbock.ShortName;
 abstract class CurlArguments {
 
   @ShortName('X')
+  @LongName("method")
   @Description("Optional<String> for regular arguments")
   abstract Optional<String> method();
 
   @ShortName('H')
+  @LongName("header")
   @Description("List<String> for repeatable arguments")
   abstract List<String> headers();
 
