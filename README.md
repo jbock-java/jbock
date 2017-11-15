@@ -41,7 +41,7 @@ Only three different return types are allowed for any such method:
 
 * A method that returns `boolean` declares a flag.
 * A method that returns `List<String>` declares a repeatable argument.
-* A method that returns `Optional<String>` declares an argument that may appear at most once.
+* A method that returns `Optional<String>` declares a non repeatable argument.
 
 See [here](additional_rules.md) for more details.
 
