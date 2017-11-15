@@ -159,13 +159,19 @@ public final class Processor extends AbstractProcessor {
     if (typeElement.getNestingKind().isNested() &&
         !typeElement.getModifiers().contains(Modifier.STATIC)) {
       throw new ValidationException(
-          "The nested class " + typeElement.getSimpleName() + "must be static",
+          "The nested class " + typeElement.getSimpleName() + " must be static",
           typeElement);
     }
     List<ExecutableElement> getters = methodsIn(typeElement.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(Modifier.ABSTRACT))
-        .filter(method -> method.getParameters().isEmpty())
         .collect(toList());
+    getters.stream()
+        .filter(method -> !method.getParameters().isEmpty())
+        .findFirst()
+        .ifPresent(badMethod -> {
+          throw new ValidationException(
+              "The abstract method must have an empty argument list", badMethod);
+        });
     List<Param> params = getters.stream()
         .map(Param::create).collect(toList());
     combinationChecks(params);

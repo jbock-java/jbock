@@ -29,9 +29,9 @@ See the `rm` example below.
 
 ### Basic usage
 
-Annotate an abstract class with `@CommandLineArguments`.
-The annotation processor will consider all abstract methods that have an empty argument list.
-For these methods, only three types of return types are allowed:
+Annotate an `abstract` class with `@CommandLineArguments`.
+In this class, each `abstract` method <em>must</em> have an empty argument list.
+Only three different return types are allowed for any such method:
 
 * A method that returns `boolean` declares a flag.
 * A method that returns `List<String>` declares a repeatable argument.
@@ -59,7 +59,7 @@ this [real-life example](https://github.com/h908714124/aws-glacier-multipart-upl
 abstract class CurlArguments {
 
   @ShortName('X')
-  @Description("Optional<String> for regular arguments")
+  @Description("Optional<String> for non-repeatable arguments")
   abstract Optional<String> method();
 
   @ShortName('H')
@@ -93,11 +93,11 @@ A class called `CurlArguments_Parser` will be generated in the same package.
 Let's see how `CurlArguments_Parser.parse(String[] args)` handles some input.
 For example, if `args` is
 
-* `{--method, --method}`, then `method()` will return the string `--method`. 
-* `{--method=}`, then `method()` will return the empty string.
+* `{--method, --method}`, then `method()` will return `Optional.of("--method")`. 
+* `{--method=}`, then `method()` will return an empty `Optional`.
 * `{--method}` or `{-X}`, then `CurlArguments_Parser.parse()` will throw `IllegalArgumentException`
-* `{-v, false}` then `verbose()` returns `true` and `urls()` returns the string `false`.
-* `{}` (an empty array), then `method()` returns `null`, and `urls()` returns an empty list.
+* `{-v, false}` then `verbose()` returns `true` and `urls()` returns a list containing a single string `"false"`.
+* `{}` (an empty array), then `method()` returns an empty `Optional`, and `urls()` returns an empty list.
 * `{-Xда, -XНет}` leads to `IllegalArgumentException`.
 * `{-v, -v}` (repeated flag) leads to `IllegalArgumentException` as well.
 
@@ -117,14 +117,14 @@ abstract class RmArguments {
   abstract boolean force();
 
   @OtherTokens
-  abstract List<String> otherTokens();
+  abstract List<String> filesToDelete();
 
   @EverythingAfter("--")
   @Description({
       "@EverythingAfter to create a last resort",
       "for problematic @OtherTokens.",
       "For example, when the file name is '-f'"})
-  abstract List<String> filesToDelete();
+  abstract List<String> moreFilesToDelete();
 }
 ````
 

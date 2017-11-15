@@ -75,6 +75,7 @@ final class Binder {
       OptionType optionType = param.optionType();
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.parameterName())
           .addModifiers(PUBLIC, FINAL)
+          .addAnnotation(Override.class)
           .returns(optionType.sourceType);
       if (optionType == OptionType.FLAG) {
         builder.addStatement("return $N.contains($T.$N)", flags, option.optionClass, option.enumConstant(j));
