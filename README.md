@@ -85,7 +85,7 @@ A class called `CurlArguments_Parser` will be generated in the same package.
   These correspond to the abstract methods, and can be used to generate usage text.
 * The static method `CurlArguments_Parser.parse(String[] args)` 
   takes the `args` argument from `public static void main(String[] args)`,
-  and returns a sensible implementation of `Curl`.
+  and returns a corresponding implementation of `CurlArguments`.
   It will throw `IllegalArgumentException` if it cannot make sense of the input.
 * The static method `CurlArguments_Parser.printUsage(PrintStream out, int indent)` prints usage text
   to `out`.
