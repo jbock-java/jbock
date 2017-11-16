@@ -34,23 +34,35 @@ public class CurlArgumentsTest {
   }
 
   @Test
-  public void testEmptyNonRepeatable() {
+  public void testNonRepeatable() {
     assertThat(CurlArguments_Parser.parse(new String[]{}).method())
         .isEqualTo(Optional.empty());
     assertThat(CurlArguments_Parser.parse(new String[]{"--method="}).method())
         .isEqualTo(Optional.of(""));
+    assertThat(CurlArguments_Parser.parse(new String[]{"--method= "}).method())
+        .isEqualTo(Optional.of(" "));
     assertThat(CurlArguments_Parser.parse(new String[]{"--method", ""}).method())
         .isEqualTo(Optional.of(""));
+    assertThat(CurlArguments_Parser.parse(new String[]{"-X1"}).method())
+        .isEqualTo(Optional.of("1"));
+    assertThat(CurlArguments_Parser.parse(new String[]{"-X", "1"}).method())
+        .isEqualTo(Optional.of("1"));
   }
 
   @Test
-  public void testEmptyRepeatable() {
+  public void testRepeatable() {
     assertThat(CurlArguments_Parser.parse(new String[]{}).headers())
         .isEqualTo(emptyList());
     assertThat(CurlArguments_Parser.parse(new String[]{"--header="}).headers())
         .isEqualTo(singletonList(""));
+    assertThat(CurlArguments_Parser.parse(new String[]{"--header= "}).headers())
+        .isEqualTo(singletonList(" "));
     assertThat(CurlArguments_Parser.parse(new String[]{"--header", ""}).headers())
         .isEqualTo(singletonList(""));
+    assertThat(CurlArguments_Parser.parse(new String[]{"-H1"}).headers())
+        .isEqualTo(singletonList("1"));
+    assertThat(CurlArguments_Parser.parse(new String[]{"-H", "1"}).headers())
+        .isEqualTo(singletonList("1"));
   }
 
   @Test(expected = IllegalArgumentException.class)
@@ -61,5 +73,25 @@ public class CurlArgumentsTest {
   @Test(expected = IllegalArgumentException.class)
   public void errorMissingNonRepeatable() {
     CurlArguments_Parser.parse(new String[]{"--method"});
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void errorDuplicateNonRepeatableLong() {
+    CurlArguments_Parser.parse(new String[]{"--method", "1", "--method", "2"});
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void errorDuplicateNonRepeatableShort() {
+    CurlArguments_Parser.parse(new String[]{"-X1", "-X2"});
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void errorDuplicateNonRepeatableLongDetachedShortAttached() {
+    CurlArguments_Parser.parse(new String[]{"--method", "1", "-X2"});
+  }
+
+  @Test(expected = IllegalArgumentException.class)
+  public void errorDuplicateNonRepeatableLongAttachedShortDetached() {
+    CurlArguments_Parser.parse(new String[]{"--method=1", "-X", "2"});
   }
 }
