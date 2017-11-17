@@ -3,21 +3,15 @@
 jbock is a simple annotation processor that generates a [getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired
 CLI parser. It can be used to define both short and long options.
 
-Just like the default behaviour of `getopt_long`, its behaviour is not `POSIXLY_CORRECT`:
-non-options do not stop option parsing, so options and non-options can be in any order.
-
-If necessary, it is possible to define a special token, that stops option parsing when encountered.
-See the `rm` example below.
-
 ## Goodies
 
 * Defines a valid Java 9 module.
 * No reflection, purely static analysis.
-* No runtime dependency. The generated class `*_Parser.java` is self-contained.
+* No runtime dependency. The processor generates a single, self-contained class.
 
 ## Gotchas
 
-* The processor generates an implementation of an abstract, user-defined class.
+* Generates an implementation of an abstract, user-defined class.
   [auto-value](https://github.com/google/auto/tree/master/value) users should be familiar with this.
 * Uses `List<String>`, `Optional<String>` or `boolean` for properties, but not `String`.
 * Currently there are no <em>converters</em>, <em>default values</em> or <em>required checking</em>.
@@ -30,13 +24,13 @@ See the `rm` example below.
 * <em>Long args</em>, attached `--num=1` or detached `--num 1` style.
 * <em>Flags</em>: Short `-r` or long `--recursive` style.
 * <em>Parameter grouping</em>: `-xzf d.tgz` is equivalent to `-x -z -f d.tgz`.
-* <em>Unnamed arguments</em>, like in `rm foo.txt` (see `@OtherTokens`)
-* <em>End of option scanning</em>, like in `rm -- -f` (see `@EverythingAfter`)
+* <em>Unnamed arguments</em>, like in `rm foo.txt` (see <a href="#example-curl">Example: curl</a>)
+* <em>End of option scanning</em>, like in `rm -- -f` (see <a href="#example-rm">Example: rm</a>)
 
 ## Basic usage
 
 Annotate an `abstract` class with `@CommandLineArguments`.
-In this class, each `abstract` method <em>must</em> have an empty argument list.
+In this class, each `abstract` method must have an empty argument list.
 Only three different return types are allowed for any such method:
 
 * A method that returns `boolean` declares a flag.
