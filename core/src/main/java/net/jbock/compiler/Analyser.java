@@ -244,7 +244,8 @@ final class Analyser {
           .addStatement("return $N.substring(2)", token)
           .endControlFlow()
         .beginControlFlow("if (!$N.hasNext())", it)
-          .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Missing value: ", token)
+          .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+              "Missing value after token: ", token)
           .endControlFlow()
         .addStatement("return $N.next()", it);
     //@formatter:on
@@ -289,8 +290,7 @@ final class Analyser {
           .endControlFlow()
         .beginControlFlow("while ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.FLAG)
           .beginControlFlow("if (!$N.add($N))", flags, option)
-            .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-                "Duplicate flag: ", token)
+            .add(repetitionErrorInGroup(option, originalToken))
             .endControlFlow()
           .addStatement("$N = $N($N)", token, removeFirstFlag, token)
           .beginControlFlow("if ($N == null)", token)
@@ -299,14 +299,13 @@ final class Analyser {
           .addStatement("$N = $N($N, $N)", option, readOption, names, token)
           .beginControlFlow("if ($N == null)", option)
             .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-                "invalid token: ", originalToken)
+                "Invalid option group: ", originalToken)
             .endControlFlow()
           .endControlFlow()
         .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.OPTIONAL)
           .beginControlFlow("if ($N.containsKey($N))", sMap, option)
-            .addStatement("throw new $T(\n$S + $N)", IllegalArgumentException.class,
-            "Conflicting token: ", token)
-          .endControlFlow()
+            .add(repetitionError(option, token))
+            .endControlFlow()
           .addStatement("$N.put($N, $N($N, $N))", sMap, option, readArgument, token, it)
           .endControlFlow()
         .beginControlFlow("else")
@@ -321,6 +320,29 @@ final class Analyser {
         .addModifiers(STATIC, PRIVATE)
         .addCode(builder.build())
         .build();
+  }
+
+  private static CodeBlock repetitionError(
+      ParameterSpec option,
+      ParameterSpec token) {
+    return CodeBlock.builder()
+        .addStatement("throw new $T($S + $N + $S + $N + $S)",
+            IllegalArgumentException.class,
+            "Found token: ", token, ", but option ", option, " is not repeatable")
+        .build();
+
+  }
+
+  private static CodeBlock repetitionErrorInGroup(
+      ParameterSpec option,
+      ParameterSpec originalToken) {
+    return CodeBlock.builder()
+        .addStatement("throw new $T($S + $N + $S + $N + $S)",
+            IllegalArgumentException.class,
+            "In option group ",
+            originalToken, ": option ", option, " is not repeatable")
+        .build();
+
   }
 
   private CodeBlock generatedInfo() {

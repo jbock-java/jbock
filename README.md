@@ -27,6 +27,10 @@ CLI parser. It can be used to define both short and long options.
 * <em>Unnamed arguments</em>, like in `rm foo.txt` (see <a href="#example-curl">Example: curl</a>)
 * <em>End of option scanning</em>, like in `rm -- -f` (see <a href="#example-rm">Example: rm</a>)
 
+See 
+<a href="https://github.com/h908714124/jbock/blob/master/examples/src/test/java/net/zerobuilder/examples/gradle/CurlArgumentsTest.java">
+this unit test</a> for more examples of the parsing behaviour.
+
 ## Basic usage
 
 Annotate an `abstract` class with `@CommandLineArguments`.

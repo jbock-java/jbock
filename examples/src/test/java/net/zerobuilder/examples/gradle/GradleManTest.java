@@ -22,7 +22,7 @@ public final class GradleManTest {
   @Test
   public void errorShortLongConflict() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Conflicting token: --message=goodbye");
+    exception.expectMessage("Found token: --message=goodbye, but option MESSAGE is not repeatable");
     GradleMan_Parser.parse(new String[]{"-m", "hello", "--message=goodbye"});
   }
 
@@ -30,21 +30,21 @@ public final class GradleManTest {
   public void errorMissingValue() {
     // there's nothing after -m
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing value: -m");
+    exception.expectMessage("Missing value after token: -m");
     GradleMan_Parser.parse(new String[]{"-m"});
   }
 
   @Test
   public void errorLongShortConflict() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Conflicting token: -m");
+    exception.expectMessage("Found token: -m, but option MESSAGE is not repeatable");
     GradleMan_Parser.parse(new String[]{"--message=hello", "-m", "goodbye"});
   }
 
   @Test
   public void errorLongLongConflict() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Conflicting token: --message=goodbye");
+    exception.expectMessage("Found token: --message=goodbye, but option MESSAGE is not repeatable");
     GradleMan_Parser.parse(new String[]{"--message=hello", "--message=goodbye"});
   }
 
