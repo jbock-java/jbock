@@ -3,6 +3,9 @@
 jbock is a simple annotation processor that generates a [getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired
 CLI parser. It can be used to define both short and long options.
 
+jbock generates an implementation of an abstract, user-defined class.
+[auto-value](https://github.com/google/auto/tree/master/value) users will be familiar with this.
+
 ## Goodies
 
 * Defines a valid Java 9 module.
@@ -11,12 +14,11 @@ CLI parser. It can be used to define both short and long options.
 
 ## Gotchas
 
-* Generates an implementation of an abstract, user-defined class.
-  [auto-value](https://github.com/google/auto/tree/master/value) users should be familiar with this.
-* Uses `List<String>`, `Optional<String>` or `boolean` for properties, but not `String`.
-* Currently there are no <em>converters</em>, <em>default values</em> or <em>required checking</em>.
-* Can potentially throw `IllegalArgumentException`, if non-repeatable arguments are repeated, or if
-  the argument list ends after an option name.
+jbock's `parse` method will throw an `IllegalArgumentException`:
+
+* if multiple values are given for a <em>non-repeatable</em> argument
+* if the argument list ends after an option name
+* if a <em>required</em> option is missing.
 
 ## Parser features
 
@@ -37,9 +39,10 @@ Annotate an `abstract` class with `@CommandLineArguments`.
 In this class, each `abstract` method must have an empty argument list.
 Only three different return types are allowed for any such method:
 
-* A method that returns `boolean` declares a flag.
-* A method that returns `List<String>` declares a repeatable argument.
-* A method that returns `Optional<String>` declares a non repeatable argument.
+* A method that returns `List<String>` declares a <em>repeatable</em> argument that may appear any number of times.
+* A method that returns `Optional<String>` declares an <em>optional</em> argument that may appear at most once.
+* A method that returns `String` declares a <em>required</em> argument that must appear exactly once.
+* A method that returns `boolean` declares a value-less argument, a.k.a. <em>flag</em>. Flags may appear at most once.
 
 See [here](additional_rules.md) for more details.
 
@@ -126,7 +129,7 @@ and then deleting this file using `rm`.
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>2.1</version>
+  <version>2.2</version>
   <scope>provided</scope>
 </dependency>
 ````
@@ -149,7 +152,7 @@ For Java 9 users, one more config is currently necessary until
       <dependency>
         <groupId>com.github.h908714124</groupId>
         <artifactId>jbock</artifactId>
-        <version>2.1</version>
+        <version>2.2</version>
       </dependency>
     </annotationProcessorPaths>
 
