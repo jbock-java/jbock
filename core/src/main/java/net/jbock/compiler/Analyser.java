@@ -106,7 +106,7 @@ final class Analyser {
         .addModifiers(PRIVATE, FINAL)
         .build();
     this.readOption = readOptionMethod(keysClass, longNames, shortNames, option.optionClass);
-    this.read = readMethod(keysClass, readOption, readArgument, optMapType, sMapType, flagsType,
+    this.read = readMethod(context, keysClass, readOption, readArgument, optMapType, sMapType, flagsType,
         option.optionClass, optionType, optionTypeClass, removeFirstFlag);
   }
 
@@ -258,6 +258,7 @@ final class Analyser {
   }
 
   private static MethodSpec readMethod(
+      Context context,
       ClassName keysClass,
       MethodSpec readOption,
       MethodSpec readArgument,
@@ -281,14 +282,27 @@ final class Analyser {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
     ParameterSpec ignore = ParameterSpec.builder(optionClass, "__").build();
-    //@formatter:off
+
     CodeBlock.Builder builder = CodeBlock.builder()
         .addStatement("$T $N = $N", STRING, token, originalToken)
-        .addStatement("$T $N = $N($N, $N)", option.type, option, readOption, names, token)
-        .beginControlFlow("if ($N == null)", option)
-          .addStatement("$N.add($N)", otherTokens, token)
-          .addStatement("return")
-          .endControlFlow()
+        .addStatement("$T $N = $N($N, $N)", option.type, option, readOption, names, token);
+
+    // @formatter:off
+    // handle "other" token
+        builder.beginControlFlow("if ($N == null)", option);
+        if (context.otherTokens) {
+          builder.addStatement("$N.add($N)", otherTokens, token)
+          .addStatement("return");
+        } else {
+          builder.addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+                "Unknown token: ", originalToken);
+        }
+        builder.endControlFlow();
+    // @formatter:on
+
+    // @formatter:off
+    // handle flag or option group
+        builder
         .beginControlFlow("while ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.FLAG)
           .beginControlFlow("if (!$N.add($N))", flags, option)
             .add(repetitionErrorInGroup(option, originalToken))
@@ -302,7 +316,12 @@ final class Analyser {
             .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
                 "Missing value after token: ", originalToken)
             .endControlFlow()
-          .endControlFlow()
+          .endControlFlow();
+    // @formatter:on
+
+    // @formatter:off
+    // handle option
+        builder
         .addStatement("$T $N = $N($N, $N)", argument.type, argument, readArgument, token, it)
         .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.OPTIONAL)
           .beginControlFlow("if ($N.containsKey($N))", sMap, option)
@@ -321,8 +340,8 @@ final class Analyser {
               bucket.type, bucket, optMap, option, ignore, ArrayList.class)
           .addStatement("$N.add($N)", bucket, argument)
           .endControlFlow();
+    // @formatter:on
 
-    //@formatter:on
     return MethodSpec.methodBuilder("read")
         .addParameters(Arrays.asList(originalToken, names, optMap, sMap, flags, otherTokens, it))
         .addModifiers(STATIC, PRIVATE)

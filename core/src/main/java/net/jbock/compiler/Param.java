@@ -21,7 +21,7 @@ final class Param {
 
   private final String longName;
   private final String shortName;
-  private final OptionType optionType;
+  final OptionType optionType;
 
   private final String stopword;
 
