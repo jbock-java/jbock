@@ -3,7 +3,6 @@ package net.zerobuilder.examples.gradle;
 
 import java.util.List;
 import java.util.Optional;
-import net.jbock.ArgumentName;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
 import net.jbock.OtherTokens;
@@ -14,17 +13,14 @@ import net.jbock.SuppressLongName;
 abstract class GradleMan {
 
   @ShortName('m')
-  @ArgumentName("MESSAGE")
-  @Description({"the message", "message goes here"})
+  @Description(value = {"the message", "message goes here"}, argumentName = "MESSAGE")
   abstract Optional<String> message();
 
   @ShortName('f')
-  @Description("the files")
-  @ArgumentName("FILE")
+  @Description(value = "the files", argumentName = "FILE")
   abstract List<String> file();
 
-  @Description("the dir")
-  @ArgumentName("DIR")
+  @Description(value = "the dir", argumentName = "DIR")
   abstract Optional<String> dir();
 
   @ShortName('c')

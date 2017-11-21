@@ -10,7 +10,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import net.jbock.ArgumentName;
 import net.jbock.Description;
 import net.jbock.EverythingAfter;
 import net.jbock.LongName;
@@ -250,10 +249,6 @@ final class Param {
 
   Description description() {
     return variableElement.getAnnotation(Description.class);
-  }
-
-  ArgumentName argName() {
-    return variableElement.getAnnotation(ArgumentName.class);
   }
 
   String parameterName() {

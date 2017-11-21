@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
@@ -30,7 +31,7 @@ final class Binder {
   private final FieldSpec sMap;
   private final FieldSpec flags;
   private final FieldSpec rest = FieldSpec.builder(STRING_LIST, "rest")
-      .addModifiers(PRIVATE, FINAL)
+      .addModifiers(FINAL)
       .build();
   private final Context context;
 
@@ -75,7 +76,7 @@ final class Binder {
       Param param = context.parameters.get(j);
       OptionType optionType = param.optionType();
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.parameterName())
-          .addModifiers(PUBLIC, FINAL)
+          .addModifiers(PUBLIC)
           .addAnnotation(Override.class)
           .returns(optionType.sourceType);
       if (optionType == OptionType.FLAG) {
@@ -84,9 +85,9 @@ final class Binder {
         builder.addStatement("return $T.ofNullable($N.get($T.$L))",
             Optional.class, sMap, option.optionClass, option.enumConstant(j));
       } else if (optionType == OptionType.REQUIRED) {
-        ParameterSpec p = ParameterSpec.builder(STRING, option.enumConstant(j)).build();
+        ParameterSpec p = ParameterSpec.builder(STRING, option.enumConstant(j).toLowerCase(Locale.US)).build();
         builder.addStatement("$T $N = $N.get($T.$L)",
-            STRING, p,
+            STRING, p, sMap,
             option.optionClass, option.enumConstant(j));
         builder.addStatement("assert $N != null", p);
         builder.addStatement("return $N", p);
@@ -123,7 +124,7 @@ final class Binder {
         .build();
     builder.beginControlFlow("for ($T $N: $T.values())", p.type, p, p.type)
         .beginControlFlow("if ($N.$N == $T.$L && $N.get($N) == null)",
-            p, option.optionType, option.optionTypeClass, OptionType.REQUIRED, optMap, p)
+            p, option.optionType, option.optionTypeClass, OptionType.REQUIRED, sMap, p)
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
             "Missing required option: ", p)
         .endControlFlow()
@@ -131,7 +132,6 @@ final class Binder {
     return MethodSpec.constructorBuilder()
         .addParameters(Arrays.asList(optMap, sMap, flags, otherTokens, esc))
         .addCode(builder.build())
-        .addModifiers(PRIVATE)
         .build();
   }
 }

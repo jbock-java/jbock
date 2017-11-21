@@ -40,7 +40,7 @@ final class Analyser {
   private static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
   private static final ParameterSpec ARGS = ParameterSpec.builder(STRING_ARRAY, "args")
       .build();
-  static final FieldSpec otherTokens = FieldSpec.builder(STRING_LIST, "otherTokens", PRIVATE, FINAL)
+  static final FieldSpec otherTokens = FieldSpec.builder(STRING_LIST, "otherTokens", FINAL)
       .build();
 
   final Context context;
@@ -91,13 +91,13 @@ final class Analyser {
     this.readArgument = readArgumentMethod();
     this.removeFirstFlag = removeFirstFlagMethod();
     this.optMap = FieldSpec.builder(optMapType, "optMap")
-        .addModifiers(PRIVATE, FINAL)
+        .addModifiers(FINAL)
         .build();
     this.sMap = FieldSpec.builder(sMapType, "sMap")
-        .addModifiers(PRIVATE, FINAL)
+        .addModifiers(FINAL)
         .build();
     this.flags = FieldSpec.builder(flagsType, "flags")
-        .addModifiers(PRIVATE, FINAL)
+        .addModifiers(FINAL)
         .build();
     this.longNames = FieldSpec.builder(soType, "longNames")
         .addModifiers(PRIVATE, FINAL)
@@ -360,6 +360,6 @@ final class Analyser {
   }
 
   private MethodSpec privateConstructor() {
-    return MethodSpec.constructorBuilder().addModifiers(PRIVATE).build();
+    return MethodSpec.constructorBuilder().build();
   }
 }

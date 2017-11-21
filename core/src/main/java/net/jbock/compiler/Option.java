@@ -1,22 +1,14 @@
 package net.jbock.compiler;
 
-import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
 
-import net.jbock.com.squareup.javapoet.ArrayTypeName;
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.CodeBlock;
-import net.jbock.com.squareup.javapoet.FieldSpec;
-import net.jbock.com.squareup.javapoet.MethodSpec;
-import net.jbock.com.squareup.javapoet.ParameterSpec;
-import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.com.squareup.javapoet.TypeSpec;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -26,8 +18,15 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import net.jbock.ArgumentName;
 import net.jbock.Description;
+import net.jbock.com.squareup.javapoet.ArrayTypeName;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.MethodSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Processor.Context;
 
 final class Option {
@@ -79,7 +78,9 @@ final class Option {
     for (int i = 0; i < context.parameters.size(); i++) {
       Param param = context.parameters.get(i);
       String[] desc = getText(param.description());
-      String argumentName = Processor.ARGNAME_LESS.contains(param.optionType()) ? null : getArgumentName(param.argName());
+      String argumentName = Processor.ARGNAME_LESS.contains(param.optionType()) ?
+          null :
+          param.description() == null ? "VAL" : param.description().argumentName();
       String enumConstant = enumConstant(i);
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {\n    %s}",
           String.join(",\n    ", Collections.nCopies(desc.length, "$S")));
@@ -207,13 +208,6 @@ final class Option {
       return new String[]{"--- description goes here ---"};
     }
     return description.value();
-  }
-
-  private static String getArgumentName(ArgumentName argumentName) {
-    if (argumentName == null) {
-      return "VAL";
-    }
-    return argumentName.value();
   }
 
   private static MethodSpec descriptionBlockMethod() {

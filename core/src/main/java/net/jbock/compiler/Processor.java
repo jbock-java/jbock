@@ -1,7 +1,6 @@
 package net.jbock.compiler;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -32,7 +31,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
-import net.jbock.ArgumentName;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
 import net.jbock.EverythingAfter;
@@ -54,7 +52,6 @@ public final class Processor extends AbstractProcessor {
   @Override
   public Set<String> getSupportedAnnotationTypes() {
     return Stream.of(
-        ArgumentName.class,
         CommandLineArguments.class,
         Description.class,
         EverythingAfter.class,
@@ -136,9 +133,6 @@ public final class Processor extends AbstractProcessor {
     params.forEach(param -> {
       if (NAMELESS.contains(param.optionType())) {
         checkNotPresent(param.variableElement, asList(LongName.class, ShortName.class));
-      }
-      if (ARGNAME_LESS.contains(param.optionType())) {
-        checkNotPresent(param.variableElement, singletonList(ArgumentName.class));
       }
     });
   }
@@ -267,7 +261,6 @@ public final class Processor extends AbstractProcessor {
 
   private boolean missingClassLevelAnnotation(RoundEnvironment env) {
     List<ExecutableElement> toCheck = new ArrayList<>();
-    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(ArgumentName.class)));
     toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(Description.class)));
     toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(EverythingAfter.class)));
     toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(LongName.class)));
