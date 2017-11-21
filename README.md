@@ -16,16 +16,16 @@ jbock generates an implementation of an abstract, user-defined class.
 
 jbock's `parse` method will throw an `IllegalArgumentException`:
 
-* if multiple values are given for a <em>non-repeatable</em> argument
-* if the argument list ends after an option name
-* if a <em>required</em> option is missing.
+* &#x2026;if multiple values are given for a non-repeatable argument.
+* &#x2026;if the argument list ends after an option name.
+* &#x2026;if a required option is missing.
 
 ## Parser features
 
-* <em>Short args</em>, attached `-n1` or detached `-n 1` style.
-* <em>Long args</em>, attached `--num=1` or detached `--num 1` style.
-* <em>Flags</em>: Short `-r` or long `--recursive` style.
-* <em>Parameter grouping</em>: `-xzf d.tgz` is equivalent to `-x -z -f d.tgz`.
+* <em>Short args</em>, attached `-n1` or detached `-n 1`
+* <em>Long args</em>, attached `--num=1` or detached `--num 1`
+* <em>Flags</em>: Short `-r` or long `--recursive`
+* <em>Parameter grouping</em>: For example, `-xzf d.tgz` is equivalent to `-x -z -f d.tgz`
 * <em>Unnamed arguments</em>, like in `rm foo.txt` (see <a href="#example-curl">Example: curl</a>)
 * <em>End of option scanning</em>, like in `rm -- -f` (see <a href="#example-rm">Example: rm</a>)
 
@@ -164,7 +164,7 @@ For Java 9 users, one more config is currently necessary until
 
 ## Java 9 config
 
-The [examples project](https://github.com/h908714124/jbock/tree/master/examples) uses Java 9.
+The [example project](https://github.com/h908714124/jbock/tree/master/examples) uses Java 9.
 In order to use jbock on the module path, add the following to `module-info.java`:
 
 ````java
