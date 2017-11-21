@@ -27,28 +27,28 @@ public class RequiredManTest {
   @Test
   public void errorDetachedDetached() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: --dir, but option DIR is not repeatable");
+    exception.expectMessage("Found token: --dir, but option DIR (--dir) is not repeatable");
     RequiredMan_Parser.parse(new String[]{"--dir", "A", "--dir", "B"});
   }
 
   @Test
   public void errorAttachedDetached() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: --dir, but option DIR is not repeatable");
+    exception.expectMessage("Found token: --dir, but option DIR (--dir) is not repeatable");
     RequiredMan_Parser.parse(new String[]{"--dir=A", "--dir", "B"});
   }
 
   @Test
   public void errorAttachedAttached() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: --dir=B, but option DIR is not repeatable");
+    exception.expectMessage("Found token: --dir=B, but option DIR (--dir) is not repeatable");
     RequiredMan_Parser.parse(new String[]{"--dir=A", "--dir=B"});
   }
 
   @Test
   public void errorDetachedAttached() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: --dir=B, but option DIR is not repeatable");
+    exception.expectMessage("Found token: --dir=B, but option DIR (--dir) is not repeatable");
     RequiredMan_Parser.parse(new String[]{"--dir", "A", "--dir=B"});
   }
 }

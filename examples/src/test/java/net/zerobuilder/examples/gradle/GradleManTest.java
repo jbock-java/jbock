@@ -22,7 +22,7 @@ public final class GradleManTest {
   @Test
   public void errorShortLongConflict() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: --message=goodbye, but option MESSAGE is not repeatable");
+    exception.expectMessage("Found token: --message=goodbye, but option MESSAGE (-m, --message) is not repeatable");
     GradleMan_Parser.parse(new String[]{"-m", "hello", "--message=goodbye"});
   }
 
@@ -37,14 +37,14 @@ public final class GradleManTest {
   @Test
   public void errorLongShortConflict() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: -m, but option MESSAGE is not repeatable");
+    exception.expectMessage("Found token: -m, but option MESSAGE (-m, --message) is not repeatable");
     GradleMan_Parser.parse(new String[]{"--message=hello", "-m", "goodbye"});
   }
 
   @Test
   public void errorLongLongConflict() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: --message=goodbye, but option MESSAGE is not repeatable");
+    exception.expectMessage("Found token: --message=goodbye, but option MESSAGE (-m, --message) is not repeatable");
     GradleMan_Parser.parse(new String[]{"--message=hello", "--message=goodbye"});
   }
 
@@ -226,16 +226,16 @@ public final class GradleManTest {
   @Test
   public void testPrint() {
     assertThat(Option.MESSAGE.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"-m, --message=MESSAGE", "  the message", "  message goes here"});
+        .isEqualTo(new String[]{"-m, --message MESSAGE", "  the message", "  message goes here"});
     assertThat(Option.FILE.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"-f, --file=FILE", "  the files"});
+        .isEqualTo(new String[]{"-f, --file FILE", "  the files"});
     assertThat(Option.DIR.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"--dir=DIR", "  the dir"});
+        .isEqualTo(new String[]{"--dir DIR", "  the dir"});
     assertThat(Option.CMOS.describe(2).split("\n", -1))
         .isEqualTo(new String[]{"-c", "  cmos flag"});
     assertThat(Option.VERBOSE.describe(2).split("\n", -1))
         .isEqualTo(new String[]{"-v, --verbose", "  --- description goes here ---"});
     assertThat(Option.OTHER_TOKENS.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"[otherTokens]", "  --- description goes here ---"});
+        .isEqualTo(new String[]{"Other tokens", "  --- description goes here ---"});
   }
 }

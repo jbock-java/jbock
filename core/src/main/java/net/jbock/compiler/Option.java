@@ -49,6 +49,7 @@ final class Option {
 
   final FieldSpec optionType;
   private final MethodSpec describeNamesMethod;
+  private final MethodSpec describeParamMethod;
   private final MethodSpec descriptionBlockMethod;
 
   private Option(Context context, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
@@ -56,7 +57,8 @@ final class Option {
     this.optionClass = optionClass;
     this.optionTypeClass = optionTypeClass;
     this.optionType = optionType;
-    this.describeNamesMethod = describeNamesMethod(optionType, optionTypeClass);
+    this.describeParamMethod = describeParamMethod(context, optionType, optionTypeClass);
+    this.describeNamesMethod = describeNamesMethod(describeParamMethod, optionType, optionTypeClass);
     this.descriptionBlockMethod = descriptionBlockMethod();
     Set<String> uppercaseArgumentNames = IntStream.range(0, context.parameters.size())
         .mapToObj(this::enumConstant)
@@ -95,7 +97,9 @@ final class Option {
     return builder.addModifiers(PUBLIC)
         .addFields(Arrays.asList(LONG_NAME, SHORT_NAME, optionType, ARGUMENT_NAME, DESCRIPTION))
         .addMethod(describeMethod())
+        .addMethod(toStringMethod())
         .addMethod(describeNamesMethod)
+        .addMethod(describeParamMethod)
         .addMethod(descriptionBlockMethod)
         .addMethod(shortNameMethod())
         .addMethod(longNameMethod())
@@ -246,12 +250,42 @@ final class Option {
         .build();
   }
 
-  private static MethodSpec describeNamesMethod(FieldSpec optionType, ClassName optionTypeClass) {
+  private static MethodSpec describeNamesMethod(
+      MethodSpec describeParamMethod,
+      FieldSpec optionType,
+      ClassName optionTypeClass) {
+    //@formatter:off
+    CodeBlock.Builder builder = CodeBlock.builder()
+        .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.REQUIRED)
+          .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
+          .endControlFlow()
+        .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.OPTIONAL)
+          .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
+          .endControlFlow()
+        .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.REPEATABLE)
+          .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
+          .endControlFlow()
+      .addStatement("return $N()", describeParamMethod);
+    //@formatter:on
+    return MethodSpec.methodBuilder("describeNames")
+        .addModifiers(PUBLIC)
+        .returns(Analyser.STRING)
+        .addCode(builder.build())
+        .build();
+  }
+
+  private static MethodSpec describeParamMethod(
+      Context context,
+      FieldSpec optionType,
+      ClassName optionTypeClass) {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     //@formatter:off
     CodeBlock.Builder builder = CodeBlock.builder()
       .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.OTHER_TOKENS)
-        .addStatement("return '[' + $N + ']'", LONG_NAME)
+        .addStatement("return $S", "Other tokens")
+        .endControlFlow()
+      .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.EVERYTHING_AFTER)
+        .addStatement("return $S + $S + $S", "Everything after '", context.stopword, "'")
         .endControlFlow()
       .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.FLAG)
         .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
@@ -270,20 +304,31 @@ final class Option {
       .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
       .beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
         .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
-        .addStatement("$N.append($S).append($S).append($N).append('=').append($N)", sb, CS, DD, LONG_NAME, ARGUMENT_NAME)
+        .addStatement("$N.append($S).append($S).append($N)", sb, CS, DD, LONG_NAME)
         .endControlFlow()
       .beginControlFlow("else if ($N != null)", LONG_NAME)
-        .addStatement("$N.append($S).append($N).append('=').append($N)", sb, DD, LONG_NAME, ARGUMENT_NAME)
+        .addStatement("$N.append($S).append($N)", sb, DD, LONG_NAME)
         .endControlFlow()
       .beginControlFlow("else")
-        .addStatement("$N.append('-').append($N).append(' ').append($N)", sb, SHORT_NAME, ARGUMENT_NAME)
+        .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
         .endControlFlow()
       .addStatement("return $N.toString()", sb);
     //@formatter:on
-    return MethodSpec.methodBuilder("describeNames")
-        .addModifiers(PUBLIC)
+    return MethodSpec.methodBuilder("describeParam")
+        .addModifiers(PRIVATE)
         .returns(Analyser.STRING)
         .addCode(builder.build())
+        .build();
+  }
+
+
+  private MethodSpec toStringMethod() {
+    ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
+    return MethodSpec.methodBuilder("toString")
+        .addAnnotation(Override.class)
+        .addModifiers(PUBLIC)
+        .returns(Analyser.STRING)
+        .addStatement("return name() + $S + $N() + $S", " (", describeParamMethod, ")")
         .build();
   }
 }

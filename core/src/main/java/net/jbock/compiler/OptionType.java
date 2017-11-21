@@ -1,13 +1,13 @@
 package net.jbock.compiler;
 
+import static javax.lang.model.element.Modifier.PUBLIC;
+
 import java.util.List;
 import java.util.Optional;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
-
-import static javax.lang.model.element.Modifier.PUBLIC;
 
 enum OptionType {
 
