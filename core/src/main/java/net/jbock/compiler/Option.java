@@ -45,10 +45,10 @@ final class Option {
   final ClassName optionClass;
 
   private final Context context;
-  private final ClassName optionTypeClass;
+  final ClassName optionTypeClass;
   private final boolean needsSuffix;
 
-  private final FieldSpec optionType;
+  final FieldSpec optionType;
   private final MethodSpec describeNamesMethod;
   private final MethodSpec descriptionBlockMethod;
 

@@ -4,6 +4,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Analyser.STRING;
 import static net.jbock.compiler.Analyser.STRING_LIST;
 import static net.jbock.compiler.Analyser.otherTokens;
 
@@ -82,6 +83,13 @@ final class Binder {
       } else if (optionType == OptionType.OPTIONAL) {
         builder.addStatement("return $T.ofNullable($N.get($T.$L))",
             Optional.class, sMap, option.optionClass, option.enumConstant(j));
+      } else if (optionType == OptionType.REQUIRED) {
+        ParameterSpec p = ParameterSpec.builder(STRING, option.enumConstant(j)).build();
+        builder.addStatement("$T $N = $N.get($T.$L)",
+            STRING, p,
+            option.optionClass, option.enumConstant(j));
+        builder.addStatement("assert $N != null", p);
+        builder.addStatement("return $N", p);
       } else if (optionType == OptionType.OTHER_TOKENS) {
         builder.addStatement("return $N", otherTokens);
       } else if (optionType == OptionType.EVERYTHING_AFTER) {
@@ -111,6 +119,15 @@ final class Binder {
     builder.addStatement("this.$N = $N", this.flags, flags);
     builder.addStatement("this.$N = $N", Analyser.otherTokens, otherTokens);
     builder.addStatement("this.$N = $N", this.rest, esc);
+    ParameterSpec p = ParameterSpec.builder(option.optionClass, "option")
+        .build();
+    builder.beginControlFlow("for ($T $N: $T.values())", p.type, p, p.type)
+        .beginControlFlow("if ($N.$N == $T.$L && $N.get($N) == null)",
+            p, option.optionType, option.optionTypeClass, OptionType.REQUIRED, optMap, p)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Missing required option: ", p)
+        .endControlFlow()
+        .endControlFlow();
     return MethodSpec.constructorBuilder()
         .addParameters(Arrays.asList(optMap, sMap, flags, otherTokens, esc))
         .addCode(builder.build())

@@ -59,7 +59,10 @@ final class Param {
     if (isOptionalString(type)) {
       return OptionType.OPTIONAL;
     }
-    String message = "Only Optional<String>, List<String> and boolean allowed, " +
+    if (isString(type)) {
+      return OptionType.REQUIRED;
+    }
+    String message = "Only String, Optional<String>, List<String> and boolean allowed, " +
         String.format("but %s() returns %s", executableElement.getSimpleName(), type);
     throw new ValidationException(message, executableElement);
   }
@@ -134,6 +137,19 @@ final class Param {
         element.getQualifiedName().toString()) &&
         equalsType(declared.getTypeArguments().get(0),
             "java.lang.String");
+  }
+
+  private static boolean isString(
+      TypeMirror type) {
+    DeclaredType declared = type.accept(Util.AS_DECLARED, null);
+    if (declared == null) {
+      return false;
+    }
+    if (!declared.getTypeArguments().isEmpty()) {
+      return false;
+    }
+    TypeElement element = declared.asElement().accept(AS_TYPE_ELEMENT, null);
+    return "java.lang.String".equals(element.getQualifiedName().toString());
   }
 
   private static final class CreateHelper {

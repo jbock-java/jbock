@@ -275,6 +275,7 @@ final class Analyser {
     ParameterSpec otherTokens = ParameterSpec.builder(STRING_LIST, "otherTokens").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec bucket = ParameterSpec.builder(STRING_LIST, "bucket").build();
+    ParameterSpec argument = ParameterSpec.builder(STRING, "argument").build();
 
     ParameterSpec originalToken = ParameterSpec.builder(STRING, "originalToken").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
@@ -299,19 +300,26 @@ final class Analyser {
           .addStatement("$N = $N($N, $N)", option, readOption, names, token)
           .beginControlFlow("if ($N == null)", option)
             .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-                "Invalid option group: ", originalToken)
+                "Missing value after token: ", originalToken)
             .endControlFlow()
           .endControlFlow()
+        .addStatement("$T $N = $N($N, $N)", argument.type, argument, readArgument, token, it)
         .beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.OPTIONAL)
           .beginControlFlow("if ($N.containsKey($N))", sMap, option)
             .add(repetitionError(option, token))
             .endControlFlow()
-          .addStatement("$N.put($N, $N($N, $N))", sMap, option, readArgument, token, it)
+          .addStatement("$N.put($N, $N)", sMap, option, argument)
+          .endControlFlow()
+        .beginControlFlow("else if ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.REQUIRED)
+          .beginControlFlow("if ($N.containsKey($N))", sMap, option)
+            .add(repetitionError(option, token))
+            .endControlFlow()
+          .addStatement("$N.put($N, $N)", sMap, option, argument)
           .endControlFlow()
         .beginControlFlow("else")
           .addStatement("$T $N = $N.computeIfAbsent($N, $N -> new $T<>())",
               bucket.type, bucket, optMap, option, ignore, ArrayList.class)
-          .addStatement("$N.add($N($N, $N))", bucket, readArgument, token, it)
+          .addStatement("$N.add($N)", bucket, argument)
           .endControlFlow();
 
     //@formatter:on

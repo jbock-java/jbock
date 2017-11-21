@@ -13,6 +13,7 @@ enum OptionType {
 
   FLAG(TypeName.BOOLEAN),
   OPTIONAL(ParameterizedTypeName.get(ClassName.get(Optional.class), ClassName.get(String.class))),
+  REQUIRED(ClassName.get(String.class)),
   REPEATABLE(ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class))),
   OTHER_TOKENS(ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class))),
   EVERYTHING_AFTER(ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class)));
