@@ -49,15 +49,19 @@ See [here](additional_rules.md) for more details.
 
 ## Example: `curl`
 
+This example shows the use of the `@OtherTokens` annotation.
+
 ````java
 @CommandLineArguments
 abstract class CurlArguments {
 
   @ShortName('X')
-  @Description("Optional<String> for non-repeatable arguments")
+  @LongName("method")
+  @Description("Optional<String> for regular arguments")
   abstract Optional<String> method();
 
   @ShortName('H')
+  @LongName("header")
   @Description("List<String> for repeatable arguments")
   abstract List<String> headers();
 
@@ -68,30 +72,34 @@ abstract class CurlArguments {
   @OtherTokens
   @Description({
       "@OtherTokens to capture any 'other' tokens in the input.",
-      "In this case, everything that isn't a '-v' flag",
-      "or follows directly after a '-H' or '-X' token.",
-      "If no method carries the @OtherTokens annotation, such a",
-      "token would cause IllegalArgumentException immediately."})
+      "In this case, that's any token which is not one of",
+      "'-v', '--verbose', '-X', '--method', '-H', '--header',",
+      "or follows immediately after one of the latter 4.",
+      "If there were no method with the @OtherTokens annotation,",
+      "such a token would cause an IllegalArgumentException to be",
+      "thrown from the CurlArguments_Parser.parse method."})
   abstract List<String> urls();
 }
 ````
 
-`@CommandLineArguments` triggers the code generation. 
-A class called `CurlArguments_Parser` will be generated in the same package.
+`CurlArguments` carries the `@CommandLineArguments` annotation.
+Therefore, a class called `CurlArguments_Parser` will be generated in the same package.
 
-* The static method `CurlArguments_Parser.parse(String[] args)` 
-  takes the `args` array from `public static void main(String[] args)`,
-  and returns a corresponding implementation of `CurlArguments`.
-  It will throw `IllegalArgumentException` if the input is invalid.
-  For example, `args = {"-X", "GET", "-X", "POST"}` would be invalid, 
-  because the "method" argument isn't repeatable: 
-  `method()` returns an `Optional<String>`, not a `List<String>`.
-* The static method `CurlArguments_Parser.printUsage(PrintStream out, int indent)` prints usage text
-  to the PrintStream `out`.
-* The enum `CurlArguments_Parser.Option` contains the constants `METHOD`, `HEADERS`, `VERBOSE` and `URLS`.
-  These correspond to the abstract methods in `CurlArguments`,
-  and can be used as an alternative to `printUsage`,
-  for more fine-grained control over the usage text.
+The generated static method `CurlArguments_Parser.parse(String[] args)` 
+takes the `args` argument from your `public static void main`,
+and returns an implementation of `CurlArguments`.
+It will throw `IllegalArgumentException` if the input is invalid.
+For example, `args = {"-X", "GET", "-X", "POST"}` would be invalid, 
+because the "method" argument isn't repeatable: 
+`method()` returns an `Optional<String>`, not a `List<String>`.
+
+The generated static method `CurlArguments_Parser.printUsage(PrintStream out, int indent)`
+prints general usage information to `out`.
+
+The generated enum `CurlArguments_Parser.Option` contains the constants `METHOD`, `HEADERS`, `VERBOSE` and `URLS`.
+These correspond to the abstract methods in `CurlArguments`,
+and can be used as an alternative to `printUsage`,
+for more fine-grained control over the usage text.
 
 Click [here](curl_parser_examples.md) to see how `CurlArguments_Parser` would handle some example input.
 
@@ -134,11 +142,13 @@ abstract class RmArguments {
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
+Add the following to the dependencies section of your pom file:
+
 ````xml
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>2.2.1</version>
+  <version>2.2.2</version>
   <scope>provided</scope>
 </dependency>
 ````
@@ -161,13 +171,15 @@ For Java 9 users, one more config is currently necessary until
       <dependency>
         <groupId>com.github.h908714124</groupId>
         <artifactId>jbock</artifactId>
-        <version>2.2.1</version>
+        <version>2.2.2</version>
       </dependency>
     </annotationProcessorPaths>
 
   </configuration>
 </plugin>
 ````
+
+<em>Note:</em> By default, maven will put all generated sources in the folder `target/generated-sources/annotations`.
 
 ## Java 9 config
 

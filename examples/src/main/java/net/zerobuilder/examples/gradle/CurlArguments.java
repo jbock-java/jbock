@@ -27,7 +27,12 @@ abstract class CurlArguments {
 
   @OtherTokens
   @Description({
-      "@OtherTokens to capture everything else.",
-      "In this case, everything that isn't '-v' or follows '-H' or '-X'"})
+      "@OtherTokens to capture any 'other' tokens in the input.",
+      "In this case, that's any token which is not one of",
+      "'-v', '--verbose', '-X', '--method', '-H', '--header',",
+      "or follows immediately after one of the latter 4.",
+      "If there were no method with the @OtherTokens annotation,",
+      "such a token would cause an IllegalArgumentException to be",
+      "thrown from the CurlArguments_Parser.parse method."})
   abstract List<String> urls();
 }
