@@ -8,6 +8,11 @@ import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
+import static net.jbock.compiler.OptionType.EVERYTHING_AFTER;
+import static net.jbock.compiler.OptionType.OPTIONAL;
+import static net.jbock.compiler.OptionType.OTHER_TOKENS;
+import static net.jbock.compiler.OptionType.REPEATABLE;
+import static net.jbock.compiler.OptionType.REQUIRED;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -35,11 +40,7 @@ final class Option {
       Analyser.STRING_LIST, "description", PRIVATE, FINAL).build();
 
   private static final FieldSpec ARGUMENT_NAME = FieldSpec.builder(
-      Analyser.STRING, "descriptionParameter", PRIVATE, FINAL).build();
-
-  private static final String DD = "--";
-  private static final String CS = ", ";
-  private static final String NL = "\n";
+      Analyser.STRING, "descriptionArgumentName", PRIVATE, FINAL).build();
 
   final ClassName optionClass;
 
@@ -129,26 +130,23 @@ final class Option {
     ParameterSpec optionType = ParameterSpec.builder(this.optionType.type, this.optionType.name).build();
     ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), DESCRIPTION.name).build();
     ParameterSpec argumentName = ParameterSpec.builder(ARGUMENT_NAME.type, ARGUMENT_NAME.name).build();
-    //@formatter:off
-    return MethodSpec.constructorBuilder()
-        .beginControlFlow("if ($N != null && $N.length() != 1)", shortName, shortName)
-          .addStatement("throw new $T($S)", AssertionError.class, "invalid short")
-          .endControlFlow()
-        .beginControlFlow("if ($N != null && $N.isEmpty())", longName, longName)
-          .addStatement("throw new $T($S)", AssertionError.class, "empty long")
-          .endControlFlow()
-        .beginControlFlow("if ($N == null)", description)
-          .addStatement("throw new $T($S)", AssertionError.class, "mission description")
-          .endControlFlow()
+    MethodSpec.Builder builder = MethodSpec.constructorBuilder();
+    builder
+        .addStatement("assert $N == null || $N.length() == 1", shortName, shortName)
+        .addStatement("assert $N == null || !$N.isEmpty()", longName, longName)
+        .addStatement("assert $N != null", description);
+
+    builder
         .addStatement("this.$N = $N", LONG_NAME, longName)
         .addStatement("this.$N = $N == null ? null : $N.charAt(0)", SHORT_NAME, shortName, shortName)
         .addStatement("this.$N = $N", this.optionType, optionType)
         .addStatement("this.$N = $T.unmodifiableList($T.asList($N))", DESCRIPTION,
             Collections.class, Arrays.class, description)
-        .addStatement("this.$N = $N", ARGUMENT_NAME, argumentName)
-        .addParameters(Arrays.asList(longName, shortName, optionType, argumentName, description))
-        .build();
-    //@formatter:on
+        .addStatement("this.$N = $N", ARGUMENT_NAME, argumentName);
+
+    builder.addParameters(Arrays.asList(
+        longName, shortName, optionType, argumentName, description));
+    return builder.build();
   }
 
   private static MethodSpec shortNameMethod() {
@@ -238,7 +236,7 @@ final class Option {
     CodeBlock codeBlock = CodeBlock.builder()
         .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
         .addStatement("$N.append($N())", sb, describeNamesMethod)
-        .addStatement("$N.append($S)", sb, NL)
+        .addStatement("$N.append($S)", sb, "\n")
         .addStatement("$N.append($N($N))", sb, descriptionBlockMethod, indent)
         .addStatement("return $N.toString()", sb)
         .build();
@@ -254,19 +252,17 @@ final class Option {
       MethodSpec describeParamMethod,
       FieldSpec optionType,
       ClassName optionTypeClass) {
-    //@formatter:off
-    CodeBlock.Builder builder = CodeBlock.builder()
-        .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.REQUIRED)
-          .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
-          .endControlFlow()
-        .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.OPTIONAL)
-          .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
-          .endControlFlow()
-        .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.REPEATABLE)
-          .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
-          .endControlFlow()
-      .addStatement("return $N()", describeParamMethod);
-    //@formatter:on
+    CodeBlock.Builder builder = CodeBlock.builder();
+    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, REQUIRED)
+        .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
+        .endControlFlow();
+    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OPTIONAL)
+        .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
+        .endControlFlow();
+    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, REPEATABLE)
+        .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
+        .endControlFlow();
+    builder.addStatement("return $N()", describeParamMethod);
     return MethodSpec.methodBuilder("describeNames")
         .addModifiers(PUBLIC)
         .returns(Analyser.STRING)
@@ -279,41 +275,32 @@ final class Option {
       FieldSpec optionType,
       ClassName optionTypeClass) {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
-    //@formatter:off
-    CodeBlock.Builder builder = CodeBlock.builder()
-      .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.OTHER_TOKENS)
+    CodeBlock.Builder builder = CodeBlock.builder();
+
+    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OTHER_TOKENS)
         .addStatement("return $S", "Other tokens")
-        .endControlFlow()
-      .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.EVERYTHING_AFTER)
+        .endControlFlow();
+
+    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, EVERYTHING_AFTER)
         .addStatement("return $S + $S + $S", "Everything after '", context.stopword, "'")
-        .endControlFlow()
-      .beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OptionType.FLAG)
-        .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
-        .beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
-          .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
-          .addStatement("$N.append($S).append($S).append($N)", sb, CS, DD, LONG_NAME)
-          .endControlFlow()
-        .beginControlFlow("else if ($N != null)", LONG_NAME)
-          .addStatement("$N.append($S).append($N)", sb, DD, LONG_NAME)
-          .endControlFlow()
-        .beginControlFlow("else")
-          .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
-          .endControlFlow()
-        .addStatement("return $N.toString()", sb)
-        .endControlFlow()
-      .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
-      .beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
+        .endControlFlow();
+
+    builder.addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class);
+
+    builder.beginControlFlow("if ($N != null)", SHORT_NAME)
         .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
-        .addStatement("$N.append($S).append($S).append($N)", sb, CS, DD, LONG_NAME)
-        .endControlFlow()
-      .beginControlFlow("else if ($N != null)", LONG_NAME)
-        .addStatement("$N.append($S).append($N)", sb, DD, LONG_NAME)
-        .endControlFlow()
-      .beginControlFlow("else")
-        .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
-        .endControlFlow()
-      .addStatement("return $N.toString()", sb);
-    //@formatter:on
+        .endControlFlow();
+
+    builder.beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
+        .addStatement("$N.append(',').append(' ')", sb)
+        .endControlFlow();
+
+    builder.beginControlFlow("if ($N != null)", LONG_NAME)
+        .addStatement("$N.append('-').append('-').append($N)", sb, LONG_NAME)
+        .endControlFlow();
+
+    builder.addStatement("return $N.toString()", sb);
+
     return MethodSpec.methodBuilder("describeParam")
         .addModifiers(PRIVATE)
         .returns(Analyser.STRING)

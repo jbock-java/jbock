@@ -45,7 +45,7 @@ final class Analyser {
 
   final Context context;
 
-  final ClassName binderClass;
+  final ClassName implClass;
   final Option option;
   final ClassName keysClass;
 
@@ -72,7 +72,7 @@ final class Analyser {
   private Analyser(Processor.Context context) {
     this.context = context;
     this.keysClass = context.generatedClass.nestedClass("Names");
-    this.binderClass = context.generatedClass.nestedClass(
+    this.implClass = context.generatedClass.nestedClass(
         context.sourceType.getSimpleName() + "Impl");
     this.optionTypeClass = context.generatedClass.nestedClass("OptionType");
     FieldSpec optionType = FieldSpec.builder(optionTypeClass, "type", PRIVATE, FINAL).build();
@@ -128,7 +128,7 @@ final class Analyser {
     return TypeSpec.classBuilder(context.generatedClass)
         .addType(Names.create(this).define())
         .addType(option.define())
-        .addType(Binder.create(this).define())
+        .addType(Impl.create(this).define())
         .addType(OptionType.define(optionTypeClass))
         .addJavadoc(generatedInfo())
         .addMethod(parseMethod())
@@ -156,35 +156,39 @@ final class Analyser {
     if (context.stopword != null) {
       builder.addStatement("$T $N = $L", TypeName.BOOLEAN, stop, false);
     }
-    //@formatter:off
     builder.addStatement("$T $N = new $T<>()", otherTokens.type, otherTokens, ArrayList.class)
-      .addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class)
-      .addStatement("$T $N = new $T()", names.type, names, keysClass)
-      .addStatement("$T $N = new $T<>($T.class)", optMap.type, optMap, EnumMap.class, option.optionClass)
-      .addStatement("$T $N = new $T<>($T.class)", sMap.type, sMap, EnumMap.class, option.optionClass)
-      .addStatement("$T $N = $T.noneOf($T.class)", flags.type, flags, EnumSet.class, option.optionClass)
-      .addStatement("$T $N = $T.stream($N).iterator()", it.type, it, Arrays.class, ARGS)
-      .beginControlFlow("while ($N.hasNext())", it)
-        .addStatement("$T $N = $N.next()", STRING, token, it)
-        .beginControlFlow("if ($N == null)", token)
-          .addStatement("throw new $T($S)", IllegalArgumentException.class, "null token")
-          .endControlFlow();
-    //@formatter:on
+        .addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class)
+        .addStatement("$T $N = new $T()", names.type, names, keysClass)
+        .addStatement("$T $N = new $T<>($T.class)", optMap.type, optMap, EnumMap.class, option.optionClass)
+        .addStatement("$T $N = new $T<>($T.class)", sMap.type, sMap, EnumMap.class, option.optionClass)
+        .addStatement("$T $N = $T.noneOf($T.class)", flags.type, flags, EnumSet.class, option.optionClass)
+        .addStatement("$T $N = $T.stream($N).iterator()", it.type, it, Arrays.class, ARGS);
+
+    // Begin parsing loop
+    builder.beginControlFlow("while ($N.hasNext())", it);
+
+    builder.addStatement("$T $N = $N.next()", STRING, token, it);
+
     if (context.stopword != null) {
       builder.beginControlFlow("if ($N)", stop)
           .addStatement("$N.add($N)", rest, token)
           .addStatement("continue")
-          .endControlFlow()
-          .beginControlFlow("if ($N.equals($S))", token, context.stopword)
+          .endControlFlow();
+      builder.beginControlFlow("if ($N.equals($S))", token, context.stopword)
           .addStatement("$N = $L", stop, true)
           .addStatement("continue")
           .endControlFlow();
     }
+
     builder.addStatement("$N($N, $N, $N, $N, $N, $N, $N)",
-        read, token, names, optMap, sMap, flags, otherTokens, it)
-        .endControlFlow()
-        .addStatement("return new $T($N, $N, $N, $N, $N)",
-            binderClass, optMap, sMap, flags, otherTokens, rest);
+        read, token, names, optMap, sMap, flags, otherTokens, it);
+
+    // End parsing loop
+    builder.endControlFlow();
+
+    builder.addStatement("return new $T($N, $N, $N, $N, $N)",
+        implClass, optMap, sMap, flags, otherTokens, rest);
+
     return MethodSpec.methodBuilder("parse")
         .addParameter(ARGS)
         .addCode(builder.build())
@@ -201,20 +205,24 @@ final class Analyser {
     ParameterSpec names = ParameterSpec.builder(keysClass, "names").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec idxe = ParameterSpec.builder(INT, "idxe").build();
-    //@formatter:off
-    CodeBlock.Builder builder = CodeBlock.builder()
-        .beginControlFlow("if ($N.length() < 2 || !$N.startsWith($S))", token, token, "-")
-          .addStatement("return null")
-           .endControlFlow()
-        .beginControlFlow("if (!$N.startsWith($S))", token, "--")
-          .addStatement("return $N.$N.get($N.substring(1, 2))", names, shortNames, token)
-          .endControlFlow()
-        .addStatement("$T $N = $N.indexOf('=')", INT, idxe, token)
-        .beginControlFlow("if ($N < 0)", idxe)
-          .addStatement("return $N.$N.get($N.substring(2))", names, longNames, token)
-          .endControlFlow()
-        .addStatement("return $N.$N.get($N.substring(2, $N))", names, longNames, token, idxe);
-    //@formatter:on
+    CodeBlock.Builder builder = CodeBlock.builder();
+
+    builder.beginControlFlow("if ($N.length() < 2 || !$N.startsWith($S))", token, token, "-")
+        .addStatement("return null")
+        .endControlFlow();
+
+    builder.beginControlFlow("if (!$N.startsWith($S))", token, "--")
+        .addStatement("return $N.$N.get($N.substring(1, 2))", names, shortNames, token)
+        .endControlFlow();
+
+    builder.addStatement("$T $N = $N.indexOf('=')", INT, idxe, token);
+
+    builder.beginControlFlow("if ($N < 0)", idxe)
+        .addStatement("return $N.$N.get($N.substring(2))", names, longNames, token)
+        .endControlFlow();
+
+    builder.addStatement("return $N.$N.get($N.substring(2, $N))", names, longNames, token, idxe);
+
     return MethodSpec.methodBuilder("readOption")
         .addParameters(Arrays.asList(names, token))
         .addModifiers(STATIC, PRIVATE)

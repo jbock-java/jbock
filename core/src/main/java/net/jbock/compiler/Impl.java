@@ -23,9 +23,9 @@ import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Processor.Context;
 
-final class Binder {
+final class Impl {
 
-  private final ClassName binderClass;
+  private final ClassName implClass;
   private final Option option;
   private final FieldSpec optMap;
   private final FieldSpec sMap;
@@ -35,14 +35,14 @@ final class Binder {
       .build();
   private final Context context;
 
-  private Binder(
-      ClassName binderClass,
+  private Impl(
+      ClassName implClass,
       Option option,
       FieldSpec optMap,
       FieldSpec sMap,
       FieldSpec flags,
       Context context) {
-    this.binderClass = binderClass;
+    this.implClass = implClass;
     this.option = option;
     this.optMap = optMap;
     this.sMap = sMap;
@@ -50,9 +50,9 @@ final class Binder {
     this.context = context;
   }
 
-  static Binder create(Analyser analyser) {
-    return new Binder(
-        analyser.binderClass,
+  static Impl create(Analyser analyser) {
+    return new Impl(
+        analyser.implClass,
         analyser.option,
         analyser.optMap,
         analyser.sMap,
@@ -61,7 +61,7 @@ final class Binder {
   }
 
   TypeSpec define() {
-    return TypeSpec.classBuilder(binderClass)
+    return TypeSpec.classBuilder(implClass)
         .superclass(TypeName.get(context.sourceType.asType()))
         .addFields(Arrays.asList(optMap, sMap, flags, otherTokens, rest))
         .addModifiers(PRIVATE, STATIC, FINAL)

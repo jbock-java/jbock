@@ -19,6 +19,7 @@ jbock's `parse` method will throw an `IllegalArgumentException`:
 * &#x2026;if multiple values are given for a non-repeatable argument.
 * &#x2026;if the argument list ends after an option name.
 * &#x2026;if a required option is missing.
+* &#x2026;if an unknown token is encountered, and there's no <a href="#example-curl">OtherTokens</a> method.
 
 ## Parser features
 
@@ -66,11 +67,11 @@ abstract class CurlArguments {
 
   @OtherTokens
   @Description({
-      "@OtherTokens to capture all other tokens in the input.",
+      "@OtherTokens to capture any 'other' tokens in the input.",
       "In this case, everything that isn't a '-v' flag",
-      "or immediately follows after a '-H' or '-X' token.",
-      "If no method carries the @OtherTokens annotation,",
-      "such a token will trigger an IllegalArgumentException."})
+      "or follows directly after a '-H' or '-X' token.",
+      "If no method carries the @OtherTokens annotation, such a",
+      "token would cause IllegalArgumentException immediately."})
   abstract List<String> urls();
 }
 ````
@@ -82,8 +83,9 @@ A class called `CurlArguments_Parser` will be generated in the same package.
   takes the `args` array from `public static void main(String[] args)`,
   and returns a corresponding implementation of `CurlArguments`.
   It will throw `IllegalArgumentException` if the input is invalid.
-  For example, `args = {"-X", "GET", "-X", "POST"}` would be invalid, because `method()`
-  returns an `Optional<String>`, not a `List<String>`.
+  For example, `args = {"-X", "GET", "-X", "POST"}` would be invalid, 
+  because the "method" argument isn't repeatable: 
+  `method()` returns an `Optional<String>`, not a `List<String>`.
 * The static method `CurlArguments_Parser.printUsage(PrintStream out, int indent)` prints usage text
   to the PrintStream `out`.
 * The enum `CurlArguments_Parser.Option` contains the constants `METHOD`, `HEADERS`, `VERBOSE` and `URLS`.
@@ -93,10 +95,18 @@ A class called `CurlArguments_Parser` will be generated in the same package.
 
 Click [here](curl_parser_examples.md) to see how `CurlArguments_Parser` would handle some example input.
 
-The next example shows how to use `@EverythingAfter`.
-This can be used to take care of some syntactic corner cases that may arise if `@OtherTokens` is used.
-
 ## Example: `rm`
+
+This example shows how to use the `@EverythingAfter` annotation.
+It is used to define a special token that stops option parsing, when encountered as an unbound token.
+
+As with the `@OtherTokens` annotation, its target method must return `List<String>`,
+and at most one method can have this annotation.
+
+Many command line tools, such as <a href="https://linux.die.net/man/1/rm"></a>,
+define such a special token. To see why this is useful,
+try creating a file called `-i` as follows: `echo -n >>-i`,
+and then deleting this file using the `rm` command.
 
 ````java
 @CommandLineArguments
@@ -119,9 +129,6 @@ abstract class RmArguments {
   abstract List<String> moreFilesToDelete();
 }
 ````
-
-If you're not familiar with `rm`'s `--` option, try creating a file called `-f` as follows: `echo >>-f`,
-and then deleting this file using `rm`.
 
 ## The maven side
 

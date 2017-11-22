@@ -49,10 +49,15 @@ public final class GradleManTest {
   }
 
   @Test
-  public void errorNull() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("null token");
+  public void errorNullInArray() {
+    exception.expect(NullPointerException.class);
     GradleMan_Parser.parse(new String[]{null});
+  }
+
+  @Test
+  public void errorArrayIsNull() {
+    exception.expect(NullPointerException.class);
+    GradleMan_Parser.parse(null);
   }
 
   @Test
@@ -204,7 +209,7 @@ public final class GradleManTest {
     assertThat(Option.MESSAGE.type()).isEqualTo(OptionType.OPTIONAL);
     assertThat(Option.MESSAGE.longName()).isEqualTo("message");
     assertThat(Option.MESSAGE.shortName()).isEqualTo("m");
-    assertThat(Option.MESSAGE.descriptionParameter()).isEqualTo("MESSAGE");
+    assertThat(Option.MESSAGE.descriptionArgumentName()).isEqualTo("MESSAGE");
   }
 
   @Test
@@ -214,7 +219,17 @@ public final class GradleManTest {
     assertThat(Option.CMOS.type()).isEqualTo(OptionType.FLAG);
     assertThat(Option.CMOS.longName()).isNull();
     assertThat(Option.CMOS.shortName()).isEqualTo("c");
-    assertThat(Option.CMOS.descriptionParameter()).isNull();
+    assertThat(Option.CMOS.descriptionArgumentName()).isNull();
+  }
+
+  @Test
+  public void testOtherTokensOption() {
+    assertThat(Option.OTHER_TOKENS.description().size()).isEqualTo(1);
+    assertThat(Option.OTHER_TOKENS.description().get(0)).isEqualTo("--- description goes here ---");
+    assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.OTHER_TOKENS);
+    assertThat(Option.OTHER_TOKENS.longName()).isNull();
+    assertThat(Option.OTHER_TOKENS.shortName()).isEqualTo("c");
+    assertThat(Option.OTHER_TOKENS.descriptionArgumentName()).isNull();
   }
 
   @Test
