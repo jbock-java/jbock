@@ -228,7 +228,7 @@ public final class GradleManTest {
     assertThat(Option.OTHER_TOKENS.description().get(0)).isEqualTo("--- description goes here ---");
     assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.OTHER_TOKENS);
     assertThat(Option.OTHER_TOKENS.longName()).isNull();
-    assertThat(Option.OTHER_TOKENS.shortName()).isEqualTo("c");
+    assertThat(Option.OTHER_TOKENS.shortName()).isNull();
     assertThat(Option.OTHER_TOKENS.descriptionArgumentName()).isNull();
   }
 

@@ -5,6 +5,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import java.util.List;
 import java.util.Optional;
 import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
@@ -31,6 +32,14 @@ enum OptionType {
       builder.addEnumConstant(optionType.name());
     }
     return builder.addModifiers(PUBLIC)
+        .addMethod(isSpecialMethod())
+        .build();
+  }
+
+  private static MethodSpec isSpecialMethod() {
+    return MethodSpec.methodBuilder("isSpecial")
+        .addStatement("return this == $L || this == $L", OTHER_TOKENS, EVERYTHING_AFTER)
+        .returns(TypeName.BOOLEAN)
         .build();
   }
 }
