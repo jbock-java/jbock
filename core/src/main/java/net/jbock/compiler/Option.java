@@ -9,10 +9,9 @@ import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
 import static net.jbock.compiler.OptionType.EVERYTHING_AFTER;
-import static net.jbock.compiler.OptionType.OPTIONAL;
+import static net.jbock.compiler.OptionType.IS_BINDING;
+import static net.jbock.compiler.OptionType.IS_SPECIAL;
 import static net.jbock.compiler.OptionType.OTHER_TOKENS;
-import static net.jbock.compiler.OptionType.REPEATABLE;
-import static net.jbock.compiler.OptionType.REQUIRED;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -107,6 +106,8 @@ final class Option {
         .addMethod(descriptionMethod())
         .addMethod(descriptionParameterMethod())
         .addMethod(typeMethod())
+        .addMethod(isSpecialMethod())
+        .addMethod(isBindingMethod())
         .addMethod(privateConstructor())
         .build();
   }
@@ -132,9 +133,12 @@ final class Option {
     ParameterSpec argumentName = ParameterSpec.builder(ARGUMENT_NAME.type, ARGUMENT_NAME.name).build();
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
     builder
+        .beginControlFlow("if (!$N.$N())", optionType, IS_SPECIAL)
         .addStatement("assert $N == null || $N.length() == 1", shortName, shortName)
         .addStatement("assert $N == null || !$N.isEmpty()", longName, longName)
-        .addStatement("assert $N != null", description);
+        .addStatement("assert $N != null || $N != null", longName, shortName)
+        .addStatement("assert $N != null", description)
+        .endControlFlow();
 
     builder
         .addStatement("this.$N = $N", LONG_NAME, longName)
@@ -185,6 +189,22 @@ final class Option {
     return MethodSpec.methodBuilder(optionType.name)
         .addStatement("return $N", optionType)
         .returns(optionType.type)
+        .addModifiers(PUBLIC)
+        .build();
+  }
+
+  private MethodSpec isSpecialMethod() {
+    return MethodSpec.methodBuilder(OptionType.IS_SPECIAL.name)
+        .addStatement("return $N.$N()", optionType, OptionType.IS_SPECIAL)
+        .returns(OptionType.IS_SPECIAL.returnType)
+        .addModifiers(PUBLIC)
+        .build();
+  }
+
+  private MethodSpec isBindingMethod() {
+    return MethodSpec.methodBuilder(IS_BINDING.name)
+        .addStatement("return $N.$N()", optionType, IS_BINDING)
+        .returns(IS_BINDING.returnType)
         .addModifiers(PUBLIC)
         .build();
   }
@@ -253,14 +273,8 @@ final class Option {
       FieldSpec optionType,
       ClassName optionTypeClass) {
     CodeBlock.Builder builder = CodeBlock.builder();
-    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, REQUIRED)
-        .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
-        .endControlFlow();
-    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OPTIONAL)
-        .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
-        .endControlFlow();
-    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, REPEATABLE)
-        .addStatement("return $N() + $S + $N", describeParamMethod, " ", ARGUMENT_NAME)
+    builder.beginControlFlow("if ($N())", IS_BINDING)
+        .addStatement("return $N() + ' ' + $N", describeParamMethod, ARGUMENT_NAME)
         .endControlFlow();
     builder.addStatement("return $N()", describeParamMethod);
     return MethodSpec.methodBuilder("describeNames")

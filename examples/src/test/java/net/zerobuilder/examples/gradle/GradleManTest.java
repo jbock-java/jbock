@@ -1,13 +1,11 @@
 package net.zerobuilder.examples.gradle;
 
-import static java.util.Arrays.asList;
+import static net.zerobuilder.examples.gradle.GradleMan_Parser.OptionType.FLAG;
+import static net.zerobuilder.examples.gradle.GradleMan_Parser.OptionType.OPTIONAL;
+import static net.zerobuilder.examples.gradle.GradleMan_Parser.OptionType.REPEATABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import net.zerobuilder.examples.gradle.GradleMan_Parser.Option;
 import net.zerobuilder.examples.gradle.GradleMan_Parser.OptionType;
 import org.junit.Rule;
@@ -179,26 +177,38 @@ public final class GradleManTest {
 
   @Test
   public void testOptions() {
+    assertThat(Option.MESSAGE.isSpecial()).isFalse();
+    assertThat(Option.MESSAGE.isBinding()).isTrue();
+    assertThat(Option.MESSAGE.type()).isEqualTo(OPTIONAL);
+    assertThat(Option.MESSAGE.longName()).isEqualTo("message");
+    assertThat(Option.MESSAGE.shortName()).isEqualTo("m");
+    assertThat(Option.CMOS.isSpecial()).isFalse();
+    assertThat(Option.CMOS.isBinding()).isFalse();
+    assertThat(Option.CMOS.type()).isEqualTo(FLAG);
+    assertThat(Option.CMOS.longName()).isNull();
+    assertThat(Option.CMOS.shortName()).isEqualTo("c");
+    assertThat(Option.DIR.isSpecial()).isFalse();
+    assertThat(Option.DIR.isBinding()).isTrue();
+    assertThat(Option.DIR.type()).isEqualTo(OPTIONAL);
+    assertThat(Option.DIR.longName()).isEqualTo("dir");
+    assertThat(Option.DIR.shortName()).isNull();
+    assertThat(Option.FILE.isSpecial()).isFalse();
+    assertThat(Option.FILE.isBinding()).isTrue();
+    assertThat(Option.FILE.type()).isEqualTo(REPEATABLE);
+    assertThat(Option.FILE.longName()).isEqualTo("file");
+    assertThat(Option.FILE.shortName()).isEqualTo("f");
+    assertThat(Option.VERBOSE.isSpecial()).isFalse();
+    assertThat(Option.VERBOSE.isBinding()).isFalse();
+    assertThat(Option.VERBOSE.type()).isEqualTo(FLAG);
+    assertThat(Option.VERBOSE.longName()).isEqualTo("verbose");
+    assertThat(Option.VERBOSE.shortName()).isEqualTo("v");
+    assertThat(Option.OTHER_TOKENS.isSpecial()).isTrue();
+    assertThat(Option.OTHER_TOKENS.isBinding()).isFalse();
+    assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.OTHER_TOKENS);
+    assertThat(Option.OTHER_TOKENS.longName()).isNull();
+    assertThat(Option.OTHER_TOKENS.shortName()).isNull();
     Option[] options = Option.values();
     assertThat(options.length).isEqualTo(6);
-    assertThat(Arrays.stream(options)
-        .filter(o -> o.type() != OptionType.FLAG)
-        .map(Option::longName)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet()))
-        .isEqualTo(new HashSet<>(asList("file", "otherTokens", "message", "dir")));
-    assertThat(Arrays.stream(options)
-        .filter(o -> o.type() != OptionType.FLAG)
-        .map(Option::shortName)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet()))
-        .isEqualTo(new HashSet<>(asList("f", "m")));
-    assertThat(Arrays.stream(options)
-        .filter(o -> o.type() == OptionType.FLAG)
-        .map(Option::shortName)
-        .filter(Objects::nonNull)
-        .collect(Collectors.toSet()))
-        .isEqualTo(new HashSet<>(asList("c", "v")));
   }
 
   @Test
@@ -206,9 +216,6 @@ public final class GradleManTest {
     assertThat(Option.MESSAGE.description().size()).isEqualTo(2);
     assertThat(Option.MESSAGE.description().get(0)).isEqualTo("the message");
     assertThat(Option.MESSAGE.description().get(1)).isEqualTo("message goes here");
-    assertThat(Option.MESSAGE.type()).isEqualTo(OptionType.OPTIONAL);
-    assertThat(Option.MESSAGE.longName()).isEqualTo("message");
-    assertThat(Option.MESSAGE.shortName()).isEqualTo("m");
     assertThat(Option.MESSAGE.descriptionArgumentName()).isEqualTo("MESSAGE");
   }
 
@@ -216,9 +223,6 @@ public final class GradleManTest {
   public void testCmosOption() {
     assertThat(Option.CMOS.description().size()).isEqualTo(1);
     assertThat(Option.CMOS.description().get(0)).isEqualTo("cmos flag");
-    assertThat(Option.CMOS.type()).isEqualTo(OptionType.FLAG);
-    assertThat(Option.CMOS.longName()).isNull();
-    assertThat(Option.CMOS.shortName()).isEqualTo("c");
     assertThat(Option.CMOS.descriptionArgumentName()).isNull();
   }
 
@@ -226,9 +230,6 @@ public final class GradleManTest {
   public void testOtherTokensOption() {
     assertThat(Option.OTHER_TOKENS.description().size()).isEqualTo(1);
     assertThat(Option.OTHER_TOKENS.description().get(0)).isEqualTo("--- description goes here ---");
-    assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.OTHER_TOKENS);
-    assertThat(Option.OTHER_TOKENS.longName()).isNull();
-    assertThat(Option.OTHER_TOKENS.shortName()).isNull();
     assertThat(Option.OTHER_TOKENS.descriptionArgumentName()).isNull();
   }
 

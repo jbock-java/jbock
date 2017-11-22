@@ -43,7 +43,7 @@ Only three different return types are allowed for any such method:
 * A method that returns `List<String>` declares a <em>repeatable</em> argument that may appear any number of times.
 * A method that returns `Optional<String>` declares an <em>optional</em> argument that may appear at most once.
 * A method that returns `String` declares a <em>required</em> argument that must appear exactly once.
-* A method that returns `boolean` declares a value-less argument, a.k.a. <em>flag</em>. Flags may appear at most once.
+* A method that returns `boolean` declares a <em>flag</em>.
 
 See [here](additional_rules.md) for more details.
 
@@ -103,7 +103,7 @@ It is used to define a special token that stops option parsing, when encountered
 As with the `@OtherTokens` annotation, its target method must return `List<String>`,
 and at most one method can have this annotation.
 
-Many command line tools, such as <a href="https://linux.die.net/man/1/rm"></a>,
+Many command line tools, such as <a href="https://linux.die.net/man/1/rm">rm</a>,
 define such a special token. To see why this is useful,
 try creating a file called `-i` as follows: `echo -n >>-i`,
 and then deleting this file using the `rm` command.

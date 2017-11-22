@@ -204,7 +204,7 @@ final class Param {
       String stopword = parameter.getAnnotation(EverythingAfter.class).value();
       basicCheckName(stopword);
       return new Param(null,
-          parameter.getSimpleName().toString(),
+          null,
           stopword,
           parameter);
     }
@@ -228,7 +228,7 @@ final class Param {
             "OtherTokens and ShortName cannot be combined", parameter);
       }
       return new Param(null,
-          parameter.getSimpleName().toString(),
+          null,
           null,
           parameter);
     }
