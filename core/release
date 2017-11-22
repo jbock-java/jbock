@@ -1,10 +1,6 @@
 #!/bin/bash
 if [[ -z "$1" ]]; then echo arg: version; exit 1; fi
-mvn versions:set -DnewVersion=$1 &>/dev/null
-if [[ "$1" =~ .*SNAPSHOT ]]; then
-  mvn clean install
-else
-  mvn clean install -Psonatype-oss-release
-fi
-mv dependency-reduced-pom.xml target/jbock-$1.pom
-mv pom.xml.versionsBackup pom.xml
+cp pom.xml pom.backup.xml
+sed -i "s/<version>0-SNAPSHOT<\/version>/<version>$1<\/version>/" pom.xml
+mvn clean install -Psonatype-oss-release
+mv pom.backup.xml pom.xml
