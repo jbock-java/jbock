@@ -21,11 +21,11 @@ public class CurlArgumentsTest {
   public void testNonRepeatable() {
     assertThat(CurlArguments_Parser.parse(new String[]{}).method())
         .isEqualTo(Optional.empty());
-    assertThat(CurlArguments_Parser.parse(new String[]{"--method="}).method())
+    assertThat(CurlArguments_Parser.parse(new String[]{"--request="}).method())
         .isEqualTo(Optional.of(""));
-    assertThat(CurlArguments_Parser.parse(new String[]{"--method= "}).method())
+    assertThat(CurlArguments_Parser.parse(new String[]{"--request= "}).method())
         .isEqualTo(Optional.of(" "));
-    assertThat(CurlArguments_Parser.parse(new String[]{"--method", ""}).method())
+    assertThat(CurlArguments_Parser.parse(new String[]{"--request", ""}).method())
         .isEqualTo(Optional.of(""));
     assertThat(CurlArguments_Parser.parse(new String[]{"-X1"}).method())
         .isEqualTo(Optional.of("1"));
@@ -37,16 +37,14 @@ public class CurlArgumentsTest {
   public void testRepeatable() {
     assertThat(CurlArguments_Parser.parse(new String[]{}).headers())
         .isEqualTo(emptyList());
-    assertThat(CurlArguments_Parser.parse(new String[]{"--header="}).headers())
-        .isEqualTo(singletonList(""));
-    assertThat(CurlArguments_Parser.parse(new String[]{"--header= "}).headers())
-        .isEqualTo(singletonList(" "));
-    assertThat(CurlArguments_Parser.parse(new String[]{"--header", ""}).headers())
-        .isEqualTo(singletonList(""));
     assertThat(CurlArguments_Parser.parse(new String[]{"-H1"}).headers())
         .isEqualTo(singletonList("1"));
+    assertThat(CurlArguments_Parser.parse(new String[]{"-H1", "-H2"}).headers())
+        .isEqualTo(asList("1", "2"));
     assertThat(CurlArguments_Parser.parse(new String[]{"-H", "1"}).headers())
         .isEqualTo(singletonList("1"));
+    assertThat(CurlArguments_Parser.parse(new String[]{"-H", "1", "-H", "2"}).headers())
+        .isEqualTo(asList("1", "2"));
   }
 
   @Test
@@ -68,50 +66,50 @@ public class CurlArgumentsTest {
   @Test
   public void errorGroupingDuplicateFlag() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("In option group -vH'Content-Type: application/xml': option VERBOSE (-v, --verbose) is not repeatable");
+    exception.expectMessage("In option group -vH'Content-Type: application/xml': option VERBOSE (-v) is not repeatable");
     CurlArguments_Parser.parse(new String[]{"-v", "-vH'Content-Type: application/xml'"});
   }
 
   @Test
   public void errorMissingRepeatable() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing value after token: --header");
-    CurlArguments_Parser.parse(new String[]{"--header"});
+    exception.expectMessage("Missing value after token: -H");
+    CurlArguments_Parser.parse(new String[]{"-H"});
   }
 
   @Test
   public void errorMissingNonRepeatable() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing value after token: --method");
-    CurlArguments_Parser.parse(new String[]{"--method"});
+    exception.expectMessage("Missing value after token: --request");
+    CurlArguments_Parser.parse(new String[]{"--request"});
   }
 
   @Test
   public void errorDuplicateNonRepeatableLong() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: --method, but option METHOD (-X, --method) is not repeatable");
-    CurlArguments_Parser.parse(new String[]{"--method", "GET", "--method", "POST"});
+    exception.expectMessage("Found token: --request, but option METHOD (-X, --request) is not repeatable");
+    CurlArguments_Parser.parse(new String[]{"--request", "GET", "--request", "POST"});
   }
 
   @Test
   public void errorDuplicateNonRepeatableShort() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: -X2, but option METHOD (-X, --method) is not repeatable");
+    exception.expectMessage("Found token: -X2, but option METHOD (-X, --request) is not repeatable");
     CurlArguments_Parser.parse(new String[]{"-X1", "-X2"});
   }
 
   @Test
   public void errorDuplicateNonRepeatableLongDetachedShortAttached() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: -X2, but option METHOD (-X, --method) is not repeatable");
-    CurlArguments_Parser.parse(new String[]{"--method", "1", "-X2"});
+    exception.expectMessage("Found token: -X2, but option METHOD (-X, --request) is not repeatable");
+    CurlArguments_Parser.parse(new String[]{"--request", "1", "-X2"});
   }
 
   @Test
   public void errorDuplicateNonRepeatableLongAttachedShortDetached() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: -X, but option METHOD (-X, --method) is not repeatable");
-    CurlArguments_Parser.parse(new String[]{"--method=1", "-X", "2"});
+    exception.expectMessage("Found token: -X, but option METHOD (-X, --request) is not repeatable");
+    CurlArguments_Parser.parse(new String[]{"--request=1", "-X", "2"});
   }
 
   @Test
@@ -120,18 +118,18 @@ public class CurlArgumentsTest {
     CurlArguments_Parser.printUsage(new PrintStream(out), 2);
     String[] lines = new String(out.toByteArray()).split("\n", -1);
     assertThat(lines.length).isEqualTo(16);
-    assertThat(lines[0]).isEqualTo("-X, --method VAL");
+    assertThat(lines[0]).isEqualTo("-X, --request VAL");
     assertThat(lines[1]).isEqualTo("  Optional<String> for regular arguments");
-    assertThat(lines[2]).isEqualTo("-H, --header VAL");
+    assertThat(lines[2]).isEqualTo("-H VAL");
     assertThat(lines[3]).isEqualTo("  List<String> for repeatable arguments");
-    assertThat(lines[4]).isEqualTo("-v, --verbose");
+    assertThat(lines[4]).isEqualTo("-v");
     assertThat(lines[5]).isEqualTo("  boolean for flags");
     assertThat(lines[6]).isEqualTo("Other tokens");
     assertThat(lines[7]).isEqualTo("  @OtherTokens to capture any 'other' tokens in the input.");
     assertThat(lines[8]).isEqualTo("  In this case, that's any token which doesn't match one of");
-    assertThat(lines[9]).isEqualTo("  -v, --verbose, -X(=.*)?, --method(=.*)?, -H(=.*)?, --header(=.*)?");
+    assertThat(lines[9]).isEqualTo("  /-v/, /-X(=.*)?/, /--request(=.*)?/, or /-H(=.*)?/,");
     assertThat(lines[10]).isEqualTo("  or follows immediately after the equality-less version");
-    assertThat(lines[11]).isEqualTo("  of one of the latter 4.");
+    assertThat(lines[11]).isEqualTo("  of one of the latter 3.");
     assertThat(lines[12]).isEqualTo("  If there were no method with the @OtherTokens annotation,");
     assertThat(lines[13]).isEqualTo("  such a token would cause an IllegalArgumentException to be");
     assertThat(lines[14]).isEqualTo("  thrown from the CurlArguments_Parser.parse method.");
