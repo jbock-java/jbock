@@ -119,7 +119,7 @@ public class CurlArgumentsTest {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     CurlArguments_Parser.printUsage(new PrintStream(out), 2);
     String[] lines = new String(out.toByteArray()).split("\n", -1);
-    assertThat(lines.length).isEqualTo(15);
+    assertThat(lines.length).isEqualTo(16);
     assertThat(lines[0]).isEqualTo("-X, --method VAL");
     assertThat(lines[1]).isEqualTo("  Optional<String> for regular arguments");
     assertThat(lines[2]).isEqualTo("-H, --header VAL");
@@ -128,12 +128,13 @@ public class CurlArgumentsTest {
     assertThat(lines[5]).isEqualTo("  boolean for flags");
     assertThat(lines[6]).isEqualTo("Other tokens");
     assertThat(lines[7]).isEqualTo("  @OtherTokens to capture any 'other' tokens in the input.");
-    assertThat(lines[8]).isEqualTo("  In this case, that's any token which is not one of");
-    assertThat(lines[9]).isEqualTo("  '-v', '--verbose', '-X', '--method', '-H', '--header',");
-    assertThat(lines[10]).isEqualTo("  or follows immediately after one of the latter 4.");
-    assertThat(lines[11]).isEqualTo("  If there were no method with the @OtherTokens annotation,");
-    assertThat(lines[12]).isEqualTo("  such a token would cause an IllegalArgumentException to be");
-    assertThat(lines[13]).isEqualTo("  thrown from the CurlArguments_Parser.parse method.");
-    assertThat(lines[14]).isEqualTo("");
+    assertThat(lines[8]).isEqualTo("  In this case, that's any token which doesn't match one of");
+    assertThat(lines[9]).isEqualTo("  -v, --verbose, -X(=.*)?, --method(=.*)?, -H(=.*)?, --header(=.*)?");
+    assertThat(lines[10]).isEqualTo("  or follows immediately after the equality-less version");
+    assertThat(lines[11]).isEqualTo("  of one of the latter 4.");
+    assertThat(lines[12]).isEqualTo("  If there were no method with the @OtherTokens annotation,");
+    assertThat(lines[13]).isEqualTo("  such a token would cause an IllegalArgumentException to be");
+    assertThat(lines[14]).isEqualTo("  thrown from the CurlArguments_Parser.parse method.");
+    assertThat(lines[15]).isEqualTo("");
   }
 }
