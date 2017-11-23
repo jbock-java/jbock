@@ -66,6 +66,41 @@ public final class GradleManTest {
   }
 
   @Test
+  public void errorWeirdOptionGroupEmbeddedHyphen() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Unknown token in option group: -c-v");
+    GradleMan_Parser.parse(new String[]{"-c-v"});
+  }
+
+  @Test
+  public void errorWeirdOptionGroupTrailingHyphen() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Unknown token in option group: -c-");
+    GradleMan_Parser.parse(new String[]{"-c-"});
+  }
+
+  @Test
+  public void errorWeirdOptionGroupEmbeddedEquals() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Unknown token in option group: -c=v");
+    GradleMan_Parser.parse(new String[]{"-c=v"});
+  }
+
+  @Test
+  public void errorWeirdOptionGroupTrailingEquals() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Unknown token in option group: -c=");
+    GradleMan_Parser.parse(new String[]{"-c="});
+  }
+
+  @Test
+  public void errorWeirdOptionGroupAttemptToPassMethod() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Unknown token in option group: -cX=1");
+    GradleMan_Parser.parse(new String[]{"-cX=1"});
+  }
+
+  @Test
   public void errorInvalidOptionGroupRepeated() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("In option group -cvv: option VERBOSE (-v, --verbose) is not repeatable");

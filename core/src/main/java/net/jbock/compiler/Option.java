@@ -48,16 +48,26 @@ final class Option {
   final ClassName optionTypeClass;
   private final boolean needsSuffix;
 
-  final FieldSpec optionType;
+  final FieldSpec optionTypeField;
   private final MethodSpec describeNamesMethod;
   private final MethodSpec describeParamMethod;
   private final MethodSpec descriptionBlockMethod;
+  final MethodSpec isSpecialMethod;
+  final MethodSpec isBindingMethod;
 
-  private Option(Context context, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
+  private Option(
+      Context context,
+      ClassName optionClass,
+      ClassName optionTypeClass,
+      FieldSpec optionType,
+      MethodSpec isSpecialMethod,
+      MethodSpec isBindingMethod) {
     this.context = context;
     this.optionClass = optionClass;
     this.optionTypeClass = optionTypeClass;
-    this.optionType = optionType;
+    this.optionTypeField = optionType;
+    this.isSpecialMethod = isSpecialMethod;
+    this.isBindingMethod = isBindingMethod;
     this.describeParamMethod = describeParamMethod(context, optionType, optionTypeClass);
     this.describeNamesMethod = describeNamesMethod(describeParamMethod, optionType, optionTypeClass);
     this.descriptionBlockMethod = descriptionBlockMethod();
@@ -67,8 +77,14 @@ final class Option {
     this.needsSuffix = uppercaseArgumentNames.size() < context.parameters.size();
   }
 
-  static Option create(Context context, ClassName optionClass, ClassName optionTypeClass, FieldSpec optionType) {
-    return new Option(context, optionClass, optionTypeClass, optionType);
+  static Option create(
+      Context context,
+      ClassName optionClass,
+      ClassName optionTypeClass,
+      FieldSpec optionTypeField) {
+    MethodSpec isSpecialMethod = isSpecialMethod(optionTypeField);
+    MethodSpec isBindingMethod = isBindingMethod(optionTypeField);
+    return new Option(context, optionClass, optionTypeClass, optionTypeField, isSpecialMethod, isBindingMethod);
   }
 
   String enumConstant(int i) {
@@ -96,7 +112,7 @@ final class Option {
           args.toArray()).build());
     }
     return builder.addModifiers(PUBLIC)
-        .addFields(Arrays.asList(LONG_NAME, SHORT_NAME, optionType, ARGUMENT_NAME, DESCRIPTION))
+        .addFields(Arrays.asList(LONG_NAME, SHORT_NAME, optionTypeField, ARGUMENT_NAME, DESCRIPTION))
         .addMethod(describeMethod())
         .addMethod(toStringMethod())
         .addMethod(describeNamesMethod)
@@ -107,8 +123,8 @@ final class Option {
         .addMethod(descriptionMethod())
         .addMethod(descriptionArgumentNameMethod())
         .addMethod(typeMethod())
-        .addMethod(isSpecialMethod())
-        .addMethod(isBindingMethod())
+        .addMethod(isSpecialMethod)
+        .addMethod(isBindingMethod)
         .addMethod(privateConstructor())
         .build();
   }
@@ -129,7 +145,7 @@ final class Option {
   private MethodSpec privateConstructor() {
     ParameterSpec longName = ParameterSpec.builder(LONG_NAME.type, LONG_NAME.name).build();
     ParameterSpec shortName = ParameterSpec.builder(STRING, SHORT_NAME.name).build();
-    ParameterSpec optionType = ParameterSpec.builder(this.optionType.type, this.optionType.name).build();
+    ParameterSpec optionType = ParameterSpec.builder(this.optionTypeField.type, this.optionTypeField.name).build();
     ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), DESCRIPTION.name).build();
     ParameterSpec argumentName = ParameterSpec.builder(ARGUMENT_NAME.type, ARGUMENT_NAME.name).build();
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
@@ -143,7 +159,7 @@ final class Option {
     builder
         .addStatement("this.$N = $N", LONG_NAME, longName)
         .addStatement("this.$N = $N == null ? null : $N.charAt(0)", SHORT_NAME, shortName, shortName)
-        .addStatement("this.$N = $N", this.optionType, optionType)
+        .addStatement("this.$N = $N", this.optionTypeField, optionType)
         .addStatement("this.$N = $T.unmodifiableList($T.asList($N))", DESCRIPTION,
             Collections.class, Arrays.class, description)
         .addStatement("this.$N = $N", ARGUMENT_NAME, argumentName);
@@ -186,24 +202,24 @@ final class Option {
   }
 
   private MethodSpec typeMethod() {
-    return MethodSpec.methodBuilder(optionType.name)
-        .addStatement("return $N", optionType)
-        .returns(optionType.type)
+    return MethodSpec.methodBuilder(optionTypeField.name)
+        .addStatement("return $N", optionTypeField)
+        .returns(optionTypeField.type)
         .addModifiers(PUBLIC)
         .build();
   }
 
-  private MethodSpec isSpecialMethod() {
+  private static MethodSpec isSpecialMethod(FieldSpec optionTypeField) {
     return MethodSpec.methodBuilder(OptionType.IS_SPECIAL.name)
-        .addStatement("return $N.$N()", optionType, OptionType.IS_SPECIAL)
+        .addStatement("return $N.$N()", optionTypeField, OptionType.IS_SPECIAL)
         .returns(OptionType.IS_SPECIAL.returnType)
         .addModifiers(PUBLIC)
         .build();
   }
 
-  private MethodSpec isBindingMethod() {
+  private static MethodSpec isBindingMethod(FieldSpec optionTypeField) {
     return MethodSpec.methodBuilder(IS_BINDING.name)
-        .addStatement("return $N.$N()", optionType, IS_BINDING)
+        .addStatement("return $N.$N()", optionTypeField, IS_BINDING)
         .returns(IS_BINDING.returnType)
         .addModifiers(PUBLIC)
         .build();
