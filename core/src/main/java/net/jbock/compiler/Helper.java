@@ -92,12 +92,12 @@ final class Helper {
     // begin iteration over options
     builder.beginControlFlow("for ($T $N : $T.values())", optionClass, option, optionClass);
 
-    builder.beginControlFlow("if ($N.$N() != null)", option, SHORT_NAME)
-        .addStatement("$N.put($N.$N(), $N)", shortNames, option, SHORT_NAME, option)
+    builder.beginControlFlow("if ($N.$N != null)", option, SHORT_NAME)
+        .addStatement("$N.put($N.$N.toString(), $N)", shortNames, option, SHORT_NAME, option)
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N.$N() != null)", option, LONG_NAME)
-        .addStatement("$N.put($N.$N(), $N)", longNames, option, LONG_NAME, option)
+    builder.beginControlFlow("if ($N.$N != null)", option, LONG_NAME)
+        .addStatement("$N.put($N.$N, $N)", longNames, option, LONG_NAME, option)
         .endControlFlow();
 
     // end iteration over options

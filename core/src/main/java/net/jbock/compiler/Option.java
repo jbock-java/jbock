@@ -18,7 +18,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -29,6 +29,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Processor.Context;
@@ -104,7 +105,7 @@ final class Option {
         .addMethod(shortNameMethod())
         .addMethod(longNameMethod())
         .addMethod(descriptionMethod())
-        .addMethod(descriptionParameterMethod())
+        .addMethod(descriptionArgumentNameMethod())
         .addMethod(typeMethod())
         .addMethod(isSpecialMethod())
         .addMethod(isBindingMethod())
@@ -137,7 +138,6 @@ final class Option {
         .addStatement("assert $N == null || $N.length() == 1", shortName, shortName)
         .addStatement("assert $N == null || !$N.isEmpty()", longName, longName)
         .addStatement("assert $N != null || $N != null", longName, shortName)
-        .addStatement("assert $N != null", description)
         .endControlFlow();
 
     builder
@@ -155,16 +155,16 @@ final class Option {
 
   private static MethodSpec shortNameMethod() {
     return MethodSpec.methodBuilder(SHORT_NAME.name)
-        .addStatement("return $T.toString($N, null)", Objects.class, SHORT_NAME)
-        .returns(STRING)
+        .addStatement("return $T.ofNullable($N)", Optional.class, SHORT_NAME)
+        .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), TypeName.get(Character.class)))
         .addModifiers(PUBLIC)
         .build();
   }
 
   private static MethodSpec longNameMethod() {
     return MethodSpec.methodBuilder(LONG_NAME.name)
-        .addStatement("return $N", LONG_NAME)
-        .returns(LONG_NAME.type)
+        .addStatement("return $T.ofNullable($N)", Optional.class, LONG_NAME)
+        .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), STRING))
         .addModifiers(PUBLIC)
         .build();
   }
@@ -177,10 +177,10 @@ final class Option {
         .build();
   }
 
-  private static MethodSpec descriptionParameterMethod() {
+  private static MethodSpec descriptionArgumentNameMethod() {
     return MethodSpec.methodBuilder(ARGUMENT_NAME.name)
-        .addStatement("return $N", ARGUMENT_NAME)
-        .returns(ARGUMENT_NAME.type)
+        .addStatement("return $T.ofNullable($N)", Optional.class, ARGUMENT_NAME)
+        .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), STRING))
         .addModifiers(PUBLIC)
         .build();
   }

@@ -194,12 +194,10 @@ final class Analyser {
     builder.addStatement("$T $N = $N.next()", STRING, token, it);
 
     if (context.stopword != null) {
-      builder.beginControlFlow("if ($N.equals($N))", token, stopword);
-      builder.beginControlFlow("while ($N.hasNext())", it)
-          .addStatement("$N.add($N.next())", rest, it)
+      builder.beginControlFlow("if ($N.equals($N))", token, stopword)
+          .addStatement("$N.forEachRemaining($N::add)", it, rest)
+          .addStatement("break")
           .endControlFlow();
-      builder.addStatement("break");
-      builder.endControlFlow();
     }
 
     builder.addStatement("$T $N = $N($N, $N, $N)",

@@ -162,9 +162,10 @@ public final class GradleManTest {
 
   @Test
   public void testFlag() {
-    // -c is a flag; last token goes in the trash
     GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-c", "hello"});
     assertThat(gradleMan.cmos()).isEqualTo(true);
+    assertThat(gradleMan.otherTokens().size()).isEqualTo(1);
+    assertThat(gradleMan.otherTokens().get(0)).isEqualTo("hello");
   }
 
   @Test
@@ -207,33 +208,33 @@ public final class GradleManTest {
     assertThat(Option.MESSAGE.isSpecial()).isFalse();
     assertThat(Option.MESSAGE.isBinding()).isTrue();
     assertThat(Option.MESSAGE.type()).isEqualTo(OPTIONAL);
-    assertThat(Option.MESSAGE.longName()).isEqualTo("message");
-    assertThat(Option.MESSAGE.shortName()).isEqualTo("m");
+    assertThat(Option.MESSAGE.longName()).isEqualTo(Optional.of("message"));
+    assertThat(Option.MESSAGE.shortName()).isEqualTo(Optional.of('m'));
     assertThat(Option.CMOS.isSpecial()).isFalse();
     assertThat(Option.CMOS.isBinding()).isFalse();
     assertThat(Option.CMOS.type()).isEqualTo(FLAG);
-    assertThat(Option.CMOS.longName()).isNull();
-    assertThat(Option.CMOS.shortName()).isEqualTo("c");
+    assertThat(Option.CMOS.longName()).isEmpty();
+    assertThat(Option.CMOS.shortName()).isEqualTo(Optional.of('c'));
     assertThat(Option.DIR.isSpecial()).isFalse();
     assertThat(Option.DIR.isBinding()).isTrue();
     assertThat(Option.DIR.type()).isEqualTo(OPTIONAL);
-    assertThat(Option.DIR.longName()).isEqualTo("dir");
-    assertThat(Option.DIR.shortName()).isNull();
+    assertThat(Option.DIR.longName()).isEqualTo(Optional.of("dir"));
+    assertThat(Option.DIR.shortName()).isEmpty();
     assertThat(Option.FILE.isSpecial()).isFalse();
     assertThat(Option.FILE.isBinding()).isTrue();
     assertThat(Option.FILE.type()).isEqualTo(REPEATABLE);
-    assertThat(Option.FILE.longName()).isEqualTo("file");
-    assertThat(Option.FILE.shortName()).isEqualTo("f");
+    assertThat(Option.FILE.longName()).isEqualTo(Optional.of("file"));
+    assertThat(Option.FILE.shortName()).isEqualTo(Optional.of('f'));
     assertThat(Option.VERBOSE.isSpecial()).isFalse();
     assertThat(Option.VERBOSE.isBinding()).isFalse();
     assertThat(Option.VERBOSE.type()).isEqualTo(FLAG);
-    assertThat(Option.VERBOSE.longName()).isEqualTo("verbose");
-    assertThat(Option.VERBOSE.shortName()).isEqualTo("v");
+    assertThat(Option.VERBOSE.longName()).isEqualTo(Optional.of("verbose"));
+    assertThat(Option.VERBOSE.shortName()).isEqualTo(Optional.of('v'));
     assertThat(Option.OTHER_TOKENS.isSpecial()).isTrue();
     assertThat(Option.OTHER_TOKENS.isBinding()).isFalse();
     assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.OTHER_TOKENS);
-    assertThat(Option.OTHER_TOKENS.longName()).isNull();
-    assertThat(Option.OTHER_TOKENS.shortName()).isNull();
+    assertThat(Option.OTHER_TOKENS.longName()).isEmpty();
+    assertThat(Option.OTHER_TOKENS.shortName()).isEmpty();
     Option[] options = Option.values();
     assertThat(options.length).isEqualTo(6);
   }
@@ -243,21 +244,21 @@ public final class GradleManTest {
     assertThat(Option.MESSAGE.description().size()).isEqualTo(2);
     assertThat(Option.MESSAGE.description().get(0)).isEqualTo("the message");
     assertThat(Option.MESSAGE.description().get(1)).isEqualTo("message goes here");
-    assertThat(Option.MESSAGE.descriptionArgumentName()).isEqualTo("MESSAGE");
+    assertThat(Option.MESSAGE.descriptionArgumentName()).isEqualTo(Optional.of("MESSAGE"));
   }
 
   @Test
   public void testCmosOption() {
     assertThat(Option.CMOS.description().size()).isEqualTo(1);
     assertThat(Option.CMOS.description().get(0)).isEqualTo("cmos flag");
-    assertThat(Option.CMOS.descriptionArgumentName()).isNull();
+    assertThat(Option.CMOS.descriptionArgumentName()).isEmpty();
   }
 
   @Test
   public void testOtherTokensOption() {
     assertThat(Option.OTHER_TOKENS.description().size()).isEqualTo(1);
     assertThat(Option.OTHER_TOKENS.description().get(0)).isEqualTo("--- description goes here ---");
-    assertThat(Option.OTHER_TOKENS.descriptionArgumentName()).isNull();
+    assertThat(Option.OTHER_TOKENS.descriptionArgumentName()).isEmpty();
   }
 
   @Test
