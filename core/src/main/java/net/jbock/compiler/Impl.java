@@ -27,6 +27,7 @@ final class Impl {
 
   private final ClassName implClass;
   private final Option option;
+  private final TypeName keysClass;
   private final FieldSpec optMap;
   private final FieldSpec sMap;
   private final FieldSpec flags;
@@ -37,12 +38,14 @@ final class Impl {
 
   private Impl(
       ClassName implClass,
+      ClassName keysClass,
       Option option,
       FieldSpec optMap,
       FieldSpec sMap,
       FieldSpec flags,
       Context context) {
     this.implClass = implClass;
+    this.keysClass = keysClass;
     this.option = option;
     this.optMap = optMap;
     this.sMap = sMap;
@@ -50,13 +53,14 @@ final class Impl {
     this.context = context;
   }
 
-  static Impl create(Analyser analyser) {
+  static Impl create(Analyser analyser, Helper helper) {
     return new Impl(
         analyser.implClass,
+        analyser.helperClass,
         analyser.option,
-        analyser.optMap,
-        analyser.sMap,
-        analyser.flags,
+        helper.optMap,
+        helper.sMap,
+        helper.flags,
         analyser.context);
   }
 
@@ -106,18 +110,14 @@ final class Impl {
 
   private MethodSpec privateConstructor() {
     CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec optMap = ParameterSpec.builder(this.optMap.type, this.optMap.name)
-        .build();
-    ParameterSpec sMap = ParameterSpec.builder(this.sMap.type, this.sMap.name)
-        .build();
-    ParameterSpec flags = ParameterSpec.builder(this.flags.type, this.flags.name)
+    ParameterSpec helper = ParameterSpec.builder(this.keysClass, "helper")
         .build();
     ParameterSpec otherTokens = ParameterSpec.builder(
         Analyser.otherTokens.type, Analyser.otherTokens.name).build();
     ParameterSpec esc = ParameterSpec.builder(this.rest.type, this.rest.name).build();
-    builder.addStatement("this.$N = $N", this.optMap, optMap);
-    builder.addStatement("this.$N = $N", this.sMap, sMap);
-    builder.addStatement("this.$N = $N", this.flags, flags);
+    builder.addStatement("this.$N = $N.$N", this.optMap, helper, optMap);
+    builder.addStatement("this.$N = $N.$N", this.sMap, helper, sMap);
+    builder.addStatement("this.$N = $N.$N", this.flags, helper, flags);
     builder.addStatement("this.$N = $N", Analyser.otherTokens, otherTokens);
     builder.addStatement("this.$N = $N", this.rest, esc);
     ParameterSpec p = ParameterSpec.builder(option.optionClass, "option")
@@ -130,7 +130,7 @@ final class Impl {
         .endControlFlow()
         .endControlFlow();
     return MethodSpec.constructorBuilder()
-        .addParameters(Arrays.asList(optMap, sMap, flags, otherTokens, esc))
+        .addParameters(Arrays.asList(helper, otherTokens, esc))
         .addCode(builder.build())
         .build();
   }

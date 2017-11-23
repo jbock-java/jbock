@@ -8,6 +8,8 @@ import static net.jbock.compiler.Analyser.SHORT_NAME;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
 import java.util.HashMap;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
@@ -16,33 +18,52 @@ import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
-final class Names {
+final class Helper {
 
   private final ClassName optionClass;
   private final ClassName keysClass;
   private final FieldSpec longNames;
   private final FieldSpec shortNames;
 
-  private Names(ClassName optionClass,
+  final FieldSpec optMap;
+  final FieldSpec sMap;
+  final FieldSpec flags;
+
+  private Helper(
+      ClassName optionClass,
       ClassName keysClass,
-      FieldSpec longNames, FieldSpec shortNames) {
+      FieldSpec longNames,
+      FieldSpec shortNames,
+      FieldSpec optMap,
+      FieldSpec sMap,
+      FieldSpec flags) {
     this.optionClass = optionClass;
     this.keysClass = keysClass;
     this.longNames = longNames;
     this.shortNames = shortNames;
+    this.optMap = optMap;
+    this.sMap = sMap;
+    this.flags = flags;
   }
 
-  static Names create(Analyser analyser) {
-    return new Names(
+  static Helper create(Analyser analyser) {
+    FieldSpec optMap = FieldSpec.builder(analyser.optMapType, "optMap", FINAL).build();
+    FieldSpec sMap = FieldSpec.builder(analyser.sMapType, "sMap", FINAL).build();
+    FieldSpec flags = FieldSpec.builder(analyser.flagsType, "flags", FINAL).build();
+
+    return new Helper(
         analyser.option.optionClass,
-        analyser.keysClass,
+        analyser.helperClass,
         analyser.longNames,
-        analyser.shortNames);
+        analyser.shortNames,
+        optMap,
+        sMap,
+        flags);
   }
 
   TypeSpec define() {
     return TypeSpec.classBuilder(keysClass)
-        .addFields(Arrays.asList(longNames, shortNames))
+        .addFields(Arrays.asList(longNames, shortNames, optMap, sMap, flags))
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(privateConstructor())
         .build();
@@ -57,11 +78,16 @@ final class Names {
     ParameterSpec option = ParameterSpec.builder(optionClass, "option")
         .build();
 
-    builder.addStatement("$T $N = new $T<>()",
-        longNames.type, longNames, HashMap.class);
+    builder.add("\n");
+    builder.addStatement("this.$N = new $T<>($T.class)", optMap, EnumMap.class, optionClass)
+        .addStatement("this.$N = new $T<>($T.class)", sMap, EnumMap.class, optionClass)
+        .addStatement("this.$N = $T.noneOf($T.class)", flags, EnumSet.class, optionClass);
 
+    builder.add("\n");
     builder.addStatement("$T $N = new $T<>()",
-        shortNames.type, shortNames, HashMap.class);
+        longNames.type, longNames, HashMap.class)
+        .addStatement("$T $N = new $T<>()",
+            shortNames.type, shortNames, HashMap.class);
 
     // begin iteration over options
     builder.beginControlFlow("for ($T $N : $T.values())", optionClass, option, optionClass);
