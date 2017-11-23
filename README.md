@@ -150,7 +150,7 @@ Add the following to the dependencies section of your pom file:
 <dependency>
   <groupId>com.github.h908714124</groupId>
   <artifactId>jbock</artifactId>
-  <version>2.2.2</version>
+  <version>2.2.3</version>
   <scope>provided</scope>
 </dependency>
 ````
@@ -173,7 +173,7 @@ For Java 9 users, one more config is currently necessary until
       <dependency>
         <groupId>com.github.h908714124</groupId>
         <artifactId>jbock</artifactId>
-        <version>2.2.2</version>
+        <version>2.2.3</version>
       </dependency>
     </annotationProcessorPaths>
 
