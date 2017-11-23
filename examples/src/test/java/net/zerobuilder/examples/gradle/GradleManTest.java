@@ -61,7 +61,29 @@ public final class GradleManTest {
   @Test
   public void errorFlagWithTrailingGarbage() {
     exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Unknown token in option group: -c1");
     GradleMan_Parser.parse(new String[]{"-c1"});
+  }
+
+  @Test
+  public void errorInvalidOptionGroupRepeated() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("In option group -cvv: option VERBOSE (-v, --verbose) is not repeatable");
+    GradleMan_Parser.parse(new String[]{"-cvv"});
+  }
+
+  @Test
+  public void errorInvalidOptionGroupUnknownToken() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Unknown token in option group: -cvx");
+    GradleMan_Parser.parse(new String[]{"-cvx"});
+  }
+
+  @Test
+  public void errorInvalidOptionGroupMissingToken() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Missing value after token: -m");
+    GradleMan_Parser.parse(new String[]{"-cvm"});
   }
 
   @Test
@@ -153,10 +175,15 @@ public final class GradleManTest {
   }
 
   @Test
-  public void testDoubleFlag() {
-    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-cv"});
-    assertThat(gradleMan.cmos()).isEqualTo(true);
-    assertThat(gradleMan.verbose()).isEqualTo(true);
+  public void testOptionGroup() {
+    assertThat(GradleMan_Parser.parse(new String[]{"-cv"}).cmos())
+        .isTrue();
+    assertThat(GradleMan_Parser.parse(new String[]{"-cv"}).verbose())
+        .isTrue();
+    assertThat(GradleMan_Parser.parse(new String[]{"-cv"}).message())
+        .isEqualTo(Optional.empty());
+    assertThat(GradleMan_Parser.parse(new String[]{"-cvma"}).message())
+        .isEqualTo(Optional.of("a"));
   }
 
   @Test

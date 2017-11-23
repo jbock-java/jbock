@@ -175,11 +175,12 @@ final class Analyser {
     ParameterSpec optMap = ParameterSpec.builder(optMapType, "optMap").build();
     ParameterSpec sMap = ParameterSpec.builder(sMapType, "sMap").build();
     ParameterSpec flags = ParameterSpec.builder(flagsType, "flags").build();
-    ParameterSpec stop = ParameterSpec.builder(BOOLEAN, "stop").build();
+    ParameterSpec stopword = ParameterSpec.builder(STRING, "stopword").build();
+    ParameterSpec tokenRead = ParameterSpec.builder(BOOLEAN, "tokenRead").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
     if (context.stopword != null) {
-      builder.addStatement("$T $N = $L", BOOLEAN, stop, false);
+      builder.addStatement("$T $N = $S", stopword.type, stopword, context.stopword);
     }
 
     if (context.otherTokens) {
@@ -188,8 +189,13 @@ final class Analyser {
       builder.addStatement("$T $N = $T.emptyList()", otherTokens.type, otherTokens, Collections.class);
     }
 
-    builder.addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class)
-        .addStatement("$T $N = new $T()", names.type, names, keysClass)
+    if (context.rest) {
+      builder.addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class);
+    } else {
+      builder.addStatement("$T $N = $T.emptyList()", rest.type, rest, Collections.class);
+    }
+
+    builder.addStatement("$T $N = new $T()", names.type, names, keysClass)
         .addStatement("$T $N = new $T<>($T.class)", optMap.type, optMap, EnumMap.class, option.optionClass)
         .addStatement("$T $N = new $T<>($T.class)", sMap.type, sMap, EnumMap.class, option.optionClass)
         .addStatement("$T $N = $T.noneOf($T.class)", flags.type, flags, EnumSet.class, option.optionClass)
@@ -201,18 +207,18 @@ final class Analyser {
     builder.addStatement("$T $N = $N.next()", STRING, token, it);
 
     if (context.stopword != null) {
-      builder.beginControlFlow("if ($N)", stop)
-          .addStatement("$N.add($N)", rest, token)
-          .addStatement("continue")
+      builder.beginControlFlow("if ($N.equals($N))", token, stopword);
+      builder.beginControlFlow("while ($N.hasNext())", it)
+          .addStatement("$N.add($N.next())", rest, it)
           .endControlFlow();
-      builder.beginControlFlow("if ($N.equals($S))", token, context.stopword)
-          .addStatement("$N = $L", stop, true)
-          .addStatement("continue")
-          .endControlFlow();
+      builder.addStatement("break");
+      builder.endControlFlow();
     }
 
-    builder.beginControlFlow("if (!$N($N, $N, $N, $N, $N, $N))",
-        read, token, names, optMap, sMap, flags, it);
+    builder.addStatement("$T $N = $N($N, $N, $N, $N, $N, $N)",
+        tokenRead.type, tokenRead, read, token, names, optMap, sMap, flags, it);
+
+    builder.beginControlFlow("if (!$N)", tokenRead);
     if (context.otherTokens) {
       builder.addStatement("$N.add($N)", otherTokens, token);
     } else {
@@ -367,7 +373,7 @@ final class Analyser {
     builder.addStatement("$N = $N($N, $N)", option, readOption, names, token);
     builder.beginControlFlow("if ($N == null)", option)
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing value after token: ", originalToken)
+            "Unknown token in option group: ", originalToken)
         .endControlFlow();
 
     // end option group loop

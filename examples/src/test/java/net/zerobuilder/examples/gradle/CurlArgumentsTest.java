@@ -115,7 +115,7 @@ public class CurlArgumentsTest {
   }
 
   @Test
-  public void testPrintUsage() throws Exception {
+  public void testPrintUsage() {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     CurlArguments_Parser.printUsage(new PrintStream(out), 2);
     String[] lines = new String(out.toByteArray()).split("\n", -1);

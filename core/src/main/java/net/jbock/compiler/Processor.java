@@ -234,17 +234,19 @@ public final class Processor extends AbstractProcessor {
     final List<Param> parameters;
     final String stopword;
     final boolean otherTokens;
+    final boolean rest;
 
     private Context(
         TypeElement sourceType,
         ClassName generatedClass,
         List<Param> parameters,
-        String stopword, boolean otherTokens) {
+        String stopword, boolean otherTokens, boolean rest) {
       this.sourceType = sourceType;
       this.generatedClass = generatedClass;
       this.parameters = parameters;
       this.stopword = stopword;
       this.otherTokens = otherTokens;
+      this.rest = rest;
     }
 
     private static Context create(
@@ -252,8 +254,11 @@ public final class Processor extends AbstractProcessor {
         List<Param> parameters,
         String stopword) {
       ClassName generatedClass = peer(ClassName.get(asType(sourceType)), SUFFIX);
-      boolean otherTokens = parameters.stream().anyMatch(p -> p.optionType == OptionType.OTHER_TOKENS);
-      return new Context(sourceType, generatedClass, parameters, stopword, otherTokens);
+      boolean otherTokens = parameters.stream()
+          .anyMatch(p -> p.optionType == OptionType.OTHER_TOKENS);
+      boolean rest = parameters.stream()
+          .anyMatch(p -> p.optionType == OptionType.EVERYTHING_AFTER);
+      return new Context(sourceType, generatedClass, parameters, stopword, otherTokens, rest);
     }
 
     TypeName returnType() {
