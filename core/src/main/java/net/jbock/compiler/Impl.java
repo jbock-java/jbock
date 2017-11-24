@@ -124,7 +124,7 @@ final class Impl {
         .build();
     builder.beginControlFlow("for ($T $N: $T.values())", p.type, p, p.type)
         .beginControlFlow("if ($N.$N == $T.$L && $N.get($N) == null)",
-            p, option.optionTypeField, option.optionTypeClass, OptionType.REQUIRED, sMap, p)
+            p, option.optionTypeField, option.optionType, OptionType.REQUIRED, sMap, p)
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
             "Missing required option: ", p)
         .endControlFlow()

@@ -4,10 +4,14 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
+import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Analyser.LONG_NAME;
 import static net.jbock.compiler.Analyser.SHORT_NAME;
 import static net.jbock.compiler.Analyser.STRING;
+import static net.jbock.compiler.Analyser.STRING_ITERATOR;
 import static net.jbock.compiler.Analyser.STRING_LIST;
+import static net.jbock.compiler.Analyser.repetitionError;
+import static net.jbock.compiler.Analyser.throwRepetitionErrorInGroup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,6 +42,10 @@ final class Helper {
   final MethodSpec addFlagMethod;
   final MethodSpec addMethod;
 
+  final MethodSpec readMethod;
+
+  final MethodSpec readRegularOptionMethod;
+
   private Helper(
       ClassName optionClass,
       ClassName optionTypeClass,
@@ -49,7 +57,9 @@ final class Helper {
       FieldSpec flags,
       Option option,
       MethodSpec addFlagMethod,
-      MethodSpec addMethod) {
+      MethodSpec addMethod,
+      MethodSpec readMethod,
+      MethodSpec readRegularOptionMethod) {
     this.optionClass = optionClass;
     this.optionTypeClass = optionTypeClass;
     this.keysClass = keysClass;
@@ -61,9 +71,14 @@ final class Helper {
     this.option = option;
     this.addFlagMethod = addFlagMethod;
     this.addMethod = addMethod;
+    this.readMethod = readMethod;
+    this.readRegularOptionMethod = readRegularOptionMethod;
   }
 
   static Helper create(
+      Processor.Context context,
+      MethodSpec readArgumentMethod,
+      MethodSpec chopOffShortFlagMethod,
       TypeName optMapType,
       TypeName sMapType,
       TypeName flagsType,
@@ -74,12 +89,31 @@ final class Helper {
     FieldSpec optMap = FieldSpec.builder(optMapType, "optMap", FINAL).build();
     FieldSpec sMap = FieldSpec.builder(sMapType, "sMap", FINAL).build();
     FieldSpec flags = FieldSpec.builder(flagsType, "flags", FINAL).build();
-    MethodSpec addFlagMethod = addFlagMethod(option.optionClass, option.optionTypeClass, flags);
-    MethodSpec addMethod = addMethod(option.optionClass, option.optionTypeClass,
+    MethodSpec addFlagMethod = addFlagMethod(option.optionClass, option.optionType, flags);
+    MethodSpec addMethod = addMethod(option.optionClass, option.optionType,
         optMap, sMap, option.isBindingMethod);
+    MethodSpec readRegularOptionMethod = readRegularOptionMethod(
+        helperClass, longNamesField, shortNamesField, option.optionClass);
+
+    MethodSpec read = readMethod(
+        context,
+        helperClass,
+        readArgumentMethod,
+        readRegularOptionMethod,
+        optMapType,
+        sMapType,
+        flagsType,
+        option.optionClass,
+        option.optionTypeField,
+        option.optionType,
+        chopOffShortFlagMethod,
+        addMethod,
+        addFlagMethod);
+
     return new Helper(
         option.optionClass,
-        option.optionTypeClass,
+        option.optionType,
+
         helperClass,
         longNamesField,
         shortNamesField,
@@ -88,14 +122,28 @@ final class Helper {
         flags,
         option,
         addFlagMethod,
-        addMethod);
+        addMethod,
+        read, readRegularOptionMethod);
   }
 
   TypeSpec define() {
     return TypeSpec.classBuilder(keysClass)
-        .addFields(Arrays.asList(longNamesField, shortNamesField, optMap, sMap, flags))
+        .addFields(Arrays.asList(
+            longNamesField,
+            shortNamesField,
+            optMap.toBuilder()
+                .initializer("new $T<>($T.class)", EnumMap.class, optionClass)
+                .build(),
+            sMap.toBuilder()
+                .initializer("new $T<>($T.class)", EnumMap.class, optionClass)
+                .build(),
+            flags.toBuilder()
+                .initializer("$T.noneOf($T.class)", EnumSet.class, optionClass)
+                .build()))
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(privateConstructor())
+        .addMethod(readMethod)
+        .addMethod(readRegularOptionMethod)
         .addMethod(addMethod)
         .addMethod(addFlagMethod)
         .build();
@@ -109,11 +157,6 @@ final class Helper {
         .build();
     ParameterSpec option = ParameterSpec.builder(optionClass, "option")
         .build();
-
-    builder.add("\n");
-    builder.addStatement("this.$N = new $T<>($T.class)", optMap, EnumMap.class, optionClass)
-        .addStatement("this.$N = new $T<>($T.class)", sMap, EnumMap.class, optionClass)
-        .addStatement("this.$N = $T.noneOf($T.class)", flags, EnumSet.class, optionClass);
 
     builder.add("\n");
     builder.addStatement("$T $N = new $T<>()",
@@ -194,6 +237,133 @@ final class Helper {
     builder.addStatement("return $L", true);
 
     return builder.addParameters(Arrays.asList(option, argument))
+        .returns(BOOLEAN)
+        .build();
+  }
+
+  private static MethodSpec readRegularOptionMethod(
+      ClassName keysClass,
+      FieldSpec longNames,
+      FieldSpec shortNames,
+      ClassName optionClass) {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+
+    builder.beginControlFlow("if ($N.length() <= 1 || $N.charAt(0) != '-')", token, token)
+        .add("// not an option\n")
+        .addStatement("return null")
+        .endControlFlow();
+
+    builder.beginControlFlow("if ($N.charAt(1) != '-')", token)
+        .add("// short option\n")
+        .addStatement("return $N.get($N.substring(1, 2))", shortNames, token)
+        .endControlFlow();
+
+    builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
+
+    builder.beginControlFlow("if ($N < 0)", index)
+        .addStatement("return $N.get($N.substring(2))", longNames, token)
+        .endControlFlow();
+
+    builder.addStatement("return $N.get($N.substring(2, $N))", longNames, token, index);
+
+    return MethodSpec.methodBuilder("readRegularOption")
+        .addParameter(token)
+        .returns(optionClass)
+        .addCode(builder.build())
+        .build();
+  }
+
+  /**
+   * <p>The read method takes one token. If the token is
+   * <em>known</em>, its argument is  also consumed (unless it's a flag),
+   * and this information is added to one of
+   * {@code sMap}, {@code optMap}, {@code flags}, and {@code true} is returned.
+   * Otherwise, none of these collections are modified, and {@code false}
+   * is returned.</p>
+   *
+   * <p>If the token is an <em>option group</em>, then all tokens of this
+   * group are consumed, along with its argument (unless the group ends with
+   * a flag).</p>
+   *
+   * <p>After this method returns, the next token in the iterator will be
+   * a free token, if any. </p>
+   */
+  private static MethodSpec readMethod(
+      Processor.Context context,
+      ClassName keysClass,
+      MethodSpec readArgumentMethod,
+      MethodSpec readRegularOptionMethod,
+      TypeName optionMapType,
+      TypeName sMapType,
+      TypeName flagsType,
+      ClassName optionClass,
+      FieldSpec optionType,
+      ClassName optionTypeClass,
+      MethodSpec chopOffShortFlagMethod,
+      MethodSpec addMethod,
+      MethodSpec addFlagMethod) {
+
+    ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optMap").build();
+    ParameterSpec sMap = ParameterSpec.builder(sMapType, "sMap").build();
+    ParameterSpec flags = ParameterSpec.builder(flagsType, "flags").build();
+    ParameterSpec otherTokens = ParameterSpec.builder(STRING_LIST, "otherTokens").build();
+    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
+    ParameterSpec bucket = ParameterSpec.builder(STRING_LIST, "bucket").build();
+    ParameterSpec argument = ParameterSpec.builder(STRING, "argument").build();
+
+    ParameterSpec freeToken = ParameterSpec.builder(STRING, "freeToken").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
+    ParameterSpec ignore = ParameterSpec.builder(optionClass, "__").build();
+
+    CodeBlock.Builder builder = CodeBlock.builder();
+    builder.addStatement("$T $N = $N($N)", option.type, option, readRegularOptionMethod, freeToken);
+
+    // unknown token
+    builder.beginControlFlow("if ($N == null)", option)
+        .addStatement("return $L", false)
+        .endControlFlow();
+
+    builder.add("\n");
+    builder.add("// handle flags\n");
+    builder.addStatement("$T $N = $N", STRING, token, freeToken);
+
+    // begin option group loop
+    builder.beginControlFlow("while ($N.$N == $T.$L)", option, optionType, optionTypeClass, OptionType.FLAG);
+
+    builder.beginControlFlow("if (!$N($N))", addFlagMethod, option)
+        .add(throwRepetitionErrorInGroup(option, freeToken))
+        .endControlFlow();
+    builder.addStatement("$N = $N($N)", token, chopOffShortFlagMethod, token);
+    builder.beginControlFlow("if ($N == null)", token)
+        .add("// done reading flags\n")
+        .addStatement("return $L", true)
+        .endControlFlow();
+    builder.addStatement("$N = $N($N)", option, readRegularOptionMethod, token);
+    builder.beginControlFlow("if ($N == null)", option)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Unknown token in option group: ", freeToken)
+        .endControlFlow();
+
+    // end option group loop
+    builder.endControlFlow();
+
+    // if we got here, the option must be binding, so read next token
+    builder.add("\n");
+    builder.add("// option is now binding\n");
+    builder.addStatement("$T $N = $N($N, $N)", argument.type, argument, readArgumentMethod, token, it);
+
+    builder.beginControlFlow("if (!$N($N, $N))", addMethod, option, argument)
+        .add(repetitionError(option, token))
+        .endControlFlow();
+
+    builder.addStatement("return $L", true);
+
+    return MethodSpec.methodBuilder("read")
+        .addParameters(Arrays.asList(freeToken, it))
+        .addCode(builder.build())
         .returns(BOOLEAN)
         .build();
   }

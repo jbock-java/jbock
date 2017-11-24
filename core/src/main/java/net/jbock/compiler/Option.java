@@ -45,7 +45,7 @@ final class Option {
   final ClassName optionClass;
 
   private final Context context;
-  final ClassName optionTypeClass;
+  final ClassName optionType;
   private final boolean needsSuffix;
 
   final FieldSpec optionTypeField;
@@ -58,18 +58,18 @@ final class Option {
   private Option(
       Context context,
       ClassName optionClass,
-      ClassName optionTypeClass,
-      FieldSpec optionType,
+      ClassName optionType,
+      FieldSpec optionTypeField,
       MethodSpec isSpecialMethod,
       MethodSpec isBindingMethod) {
     this.context = context;
     this.optionClass = optionClass;
-    this.optionTypeClass = optionTypeClass;
-    this.optionTypeField = optionType;
+    this.optionType = optionType;
+    this.optionTypeField = optionTypeField;
     this.isSpecialMethod = isSpecialMethod;
     this.isBindingMethod = isBindingMethod;
-    this.describeParamMethod = describeParamMethod(context, optionType, optionTypeClass);
-    this.describeNamesMethod = describeNamesMethod(describeParamMethod, optionType, optionTypeClass);
+    this.describeParamMethod = describeParamMethod(context, optionTypeField, optionType);
+    this.describeNamesMethod = describeNamesMethod(describeParamMethod, optionTypeField, optionType);
     this.descriptionBlockMethod = descriptionBlockMethod();
     Set<String> uppercaseArgumentNames = IntStream.range(0, context.parameters.size())
         .mapToObj(this::enumConstant)
@@ -80,11 +80,11 @@ final class Option {
   static Option create(
       Context context,
       ClassName optionClass,
-      ClassName optionTypeClass,
+      ClassName optionType,
       FieldSpec optionTypeField) {
     MethodSpec isSpecialMethod = isSpecialMethod(optionTypeField);
     MethodSpec isBindingMethod = isBindingMethod(optionTypeField);
-    return new Option(context, optionClass, optionTypeClass, optionTypeField, isSpecialMethod, isBindingMethod);
+    return new Option(context, optionClass, optionType, optionTypeField, isSpecialMethod, isBindingMethod);
   }
 
   String enumConstant(int i) {
@@ -104,7 +104,7 @@ final class Option {
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {\n    %s}",
           String.join(",\n    ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
-          Arrays.asList(param.longName(), param.shortName(), optionTypeClass, param.optionType(), argumentName, STRING);
+          Arrays.asList(param.longName(), param.shortName(), optionType, param.optionType(), argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
       args.addAll(fixArgs);
       args.addAll(Arrays.asList(desc));
