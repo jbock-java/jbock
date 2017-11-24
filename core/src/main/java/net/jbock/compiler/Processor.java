@@ -40,12 +40,11 @@ import net.jbock.ShortName;
 import net.jbock.SuppressLongName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.JavaFile;
-import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 public final class Processor extends AbstractProcessor {
 
-  private static final String SUFFIX = "_Parser";
+  static final String SUFFIX = "_Parser";
 
   private final Set<String> done = new HashSet<>();
 
@@ -78,7 +77,7 @@ public final class Processor extends AbstractProcessor {
       try {
         List<Param> params = validate(typeElement);
         String stopword = stopword(params, typeElement);
-        Context context = Context.create(typeElement, params, stopword);
+        JbockContext context = JbockContext.create(typeElement, params, stopword);
         if (!done.add(typeElement.accept(Util.QUALIFIED_NAME, null))) {
           continue;
         }
@@ -119,11 +118,6 @@ public final class Processor extends AbstractProcessor {
     try (Writer writer = sourceFile.openWriter()) {
       writer.write(javaFile.toString());
     }
-  }
-
-  private static ClassName peer(ClassName type, String suffix) {
-    String name = String.join("_", type.simpleNames()) + suffix;
-    return type.topLevelClassName().peerClass(name);
   }
 
   static final Set<OptionType> ARGNAME_LESS = EnumSet.of(EVERYTHING_AFTER, OTHER_TOKENS, FLAG);
@@ -225,44 +219,6 @@ public final class Processor extends AbstractProcessor {
         throw new ValidationException(
             "@" + nameless.getSimpleName() + " not allowed here", p);
       }
-    }
-  }
-
-  static final class Context {
-    final TypeElement sourceType;
-    final ClassName generatedClass;
-    final List<Param> parameters;
-    final String stopword;
-    final boolean otherTokens;
-    final boolean rest;
-
-    private Context(
-        TypeElement sourceType,
-        ClassName generatedClass,
-        List<Param> parameters,
-        String stopword, boolean otherTokens, boolean rest) {
-      this.sourceType = sourceType;
-      this.generatedClass = generatedClass;
-      this.parameters = parameters;
-      this.stopword = stopword;
-      this.otherTokens = otherTokens;
-      this.rest = rest;
-    }
-
-    private static Context create(
-        TypeElement sourceType,
-        List<Param> parameters,
-        String stopword) {
-      ClassName generatedClass = peer(ClassName.get(asType(sourceType)), SUFFIX);
-      boolean otherTokens = parameters.stream()
-          .anyMatch(p -> p.optionType == OptionType.OTHER_TOKENS);
-      boolean rest = parameters.stream()
-          .anyMatch(p -> p.optionType == OptionType.EVERYTHING_AFTER);
-      return new Context(sourceType, generatedClass, parameters, stopword, otherTokens, rest);
-    }
-
-    TypeName returnType() {
-      return TypeName.get(sourceType.asType());
     }
   }
 

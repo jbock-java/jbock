@@ -76,7 +76,7 @@ final class Helper {
   }
 
   static Helper create(
-      Processor.Context context,
+      JbockContext context,
       MethodSpec readArgumentMethod,
       MethodSpec chopOffShortFlagMethod,
       TypeName optMapType,
@@ -291,7 +291,7 @@ final class Helper {
    * a free token, if any. </p>
    */
   private static MethodSpec readMethod(
-      Processor.Context context,
+      JbockContext context,
       ClassName keysClass,
       MethodSpec readArgumentMethod,
       MethodSpec readRegularOptionMethod,

@@ -23,7 +23,7 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Processor.Context;
+import net.jbock.compiler.JbockContext;
 
 final class Analyser {
 
@@ -43,7 +43,7 @@ final class Analyser {
   static final FieldSpec otherTokens = FieldSpec.builder(STRING_LIST, "otherTokens", FINAL)
       .build();
 
-  final Context context;
+  final JbockContext context;
 
   final ClassName implClass;
   final Option option;
@@ -58,28 +58,20 @@ final class Analyser {
   final TypeName optMapType;
   final TypeName sMapType;
   final TypeName flagsType;
-  final ClassName optionType;
 
   final Helper helper;
 
-  static Analyser create(Context context) {
+  static Analyser create(JbockContext context) {
     return new Analyser(context);
   }
 
-  private Analyser(Processor.Context context) {
+  private Analyser(JbockContext context) {
     this.context = context;
     this.helperClass = context.generatedClass.nestedClass("Helper");
     this.implClass = context.generatedClass.nestedClass(
         context.sourceType.getSimpleName() + "Impl");
-    this.optionType = context.generatedClass.nestedClass("OptionType");
 
-    FieldSpec optionTypeField = FieldSpec.builder(optionType, "type", PRIVATE, FINAL).build();
-
-    this.option = Option.create(
-        context,
-        context.generatedClass.nestedClass("Option"),
-        optionType,
-        optionTypeField);
+    this.option = Option.create(context);
 
     TypeName stringOptionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, option.optionClass);
@@ -139,7 +131,7 @@ final class Analyser {
         .addType(helper.define())
         .addType(option.define())
         .addType(Impl.create(this, helper).define())
-        .addType(OptionType.define(optionType))
+        .addType(OptionType.define(option.optionType))
         .addJavadoc(generatedInfo())
         .addMethod(parseMethod())
         .addMethod(readArgumentMethod)
@@ -261,7 +253,7 @@ final class Analyser {
   }
 
   private static List<ParameterSpec> readMethodArguments(
-      Context context,
+      JbockContext context,
       List<ParameterSpec> arguments) {
     if (context.otherTokens) {
       return arguments;

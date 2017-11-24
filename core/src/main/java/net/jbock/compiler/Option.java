@@ -32,7 +32,6 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Processor.Context;
 
 final class Option {
 
@@ -44,7 +43,7 @@ final class Option {
 
   final ClassName optionClass;
 
-  private final Context context;
+  private final JbockContext context;
   final ClassName optionType;
   private final boolean needsSuffix;
 
@@ -56,7 +55,7 @@ final class Option {
   final MethodSpec isBindingMethod;
 
   private Option(
-      Context context,
+      JbockContext context,
       ClassName optionClass,
       ClassName optionType,
       FieldSpec optionTypeField,
@@ -77,14 +76,18 @@ final class Option {
     this.needsSuffix = uppercaseArgumentNames.size() < context.parameters.size();
   }
 
-  static Option create(
-      Context context,
-      ClassName optionClass,
-      ClassName optionType,
-      FieldSpec optionTypeField) {
+  static Option create(JbockContext context) {
+    ClassName optionType = context.generatedClass.nestedClass("OptionType");
+    FieldSpec optionTypeField = FieldSpec.builder(optionType, "type", PRIVATE, FINAL).build();
     MethodSpec isSpecialMethod = isSpecialMethod(optionTypeField);
     MethodSpec isBindingMethod = isBindingMethod(optionTypeField);
-    return new Option(context, optionClass, optionType, optionTypeField, isSpecialMethod, isBindingMethod);
+    return new Option(
+        context,
+        context.generatedClass.nestedClass("Option"),
+        optionType,
+        optionTypeField,
+        isSpecialMethod,
+        isBindingMethod);
   }
 
   String enumConstant(int i) {
@@ -301,7 +304,7 @@ final class Option {
   }
 
   private static MethodSpec describeParamMethod(
-      Context context,
+      JbockContext context,
       FieldSpec optionType,
       ClassName optionTypeClass) {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();

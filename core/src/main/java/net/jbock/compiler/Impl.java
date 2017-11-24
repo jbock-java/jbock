@@ -21,7 +21,6 @@ import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Processor.Context;
 
 final class Impl {
 
@@ -34,7 +33,7 @@ final class Impl {
   private final FieldSpec rest = FieldSpec.builder(STRING_LIST, "rest")
       .addModifiers(FINAL)
       .build();
-  private final Context context;
+  private final JbockContext context;
 
   private Impl(
       ClassName implClass,
@@ -43,7 +42,7 @@ final class Impl {
       FieldSpec optMap,
       FieldSpec sMap,
       FieldSpec flags,
-      Context context) {
+      JbockContext context) {
     this.implClass = implClass;
     this.keysClass = keysClass;
     this.option = option;
