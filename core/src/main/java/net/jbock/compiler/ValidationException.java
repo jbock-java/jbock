@@ -4,6 +4,7 @@ import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 
 final class ValidationException extends RuntimeException {
+
   private static final long serialVersionUID = 0;
   final Diagnostic.Kind kind;
   final Element about;

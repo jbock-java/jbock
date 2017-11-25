@@ -1,6 +1,7 @@
 package net.jbock.compiler;
 
 import static java.util.Collections.emptySet;
+import static java.util.Locale.US;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -11,6 +12,7 @@ import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -43,6 +45,14 @@ final class Util {
         }
       };
 
+  static TypeElement asType(Element element) {
+    TypeElement result = element.accept(AS_TYPE_ELEMENT, null);
+    if (result == null) {
+      throw new IllegalArgumentException("Not a TypeElement: " + element);
+    }
+    return result;
+  }
+
   static boolean equalsType(TypeMirror typeMirror, String qualified) {
     DeclaredType declared = typeMirror.accept(AS_DECLARED, null);
     if (declared == null) {
@@ -55,6 +65,10 @@ final class Util {
     return typeElement.getQualifiedName().toString().equals(qualified);
   }
 
+  /**
+   * A collector that produces a set, like {@link java.util.stream.Collectors#toSet},
+   * but throws an exception if there are any duplicates in the stream.
+   */
   static <E> Collector<E, List<E>, Set<E>> distinctSet(
       Function<E, RuntimeException> error) {
     return new Collector<E, List<E>, Set<E>>() {
@@ -94,5 +108,27 @@ final class Util {
         return emptySet();
       }
     };
+  }
+
+  static String snakeCase(String input) {
+    if (Character.isUpperCase(input.charAt(0))) {
+      return input.toUpperCase(US);
+    }
+    if (input.indexOf('_') >= 0) {
+      return input.toUpperCase(US);
+    }
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < input.length(); i++) {
+      char c = input.charAt(i);
+      if (Character.isUpperCase(c)) {
+        if (i > 0) {
+          sb.append('_');
+        }
+        sb.append(c);
+      } else {
+        sb.append(Character.toUpperCase(c));
+      }
+    }
+    return sb.toString();
   }
 }

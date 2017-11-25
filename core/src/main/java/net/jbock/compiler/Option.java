@@ -3,18 +3,13 @@ package net.jbock.compiler;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
-import static net.jbock.compiler.Parser.LONG_NAME;
-import static net.jbock.compiler.Parser.SHORT_NAME;
-import static net.jbock.compiler.Parser.STRING;
-import static net.jbock.compiler.Parser.STRING_LIST;
-import static net.jbock.compiler.OptionType.EVERYTHING_AFTER;
-import static net.jbock.compiler.OptionType.IS_BINDING;
-import static net.jbock.compiler.OptionType.IS_SPECIAL;
-import static net.jbock.compiler.OptionType.OTHER_TOKENS;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Type.EVERYTHING_AFTER;
+import static net.jbock.compiler.Type.OTHER_TOKENS;
+import static net.jbock.compiler.Util.snakeCase;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -22,8 +17,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 import net.jbock.Description;
 import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
@@ -36,95 +29,117 @@ import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 /**
- * Generates the *_Parser.Option class.
+ * Defines the *_Parser.Option inner class.
+ *
+ * @see Parser
  */
 final class Option {
 
-  private static final FieldSpec DESCRIPTION = FieldSpec.builder(
-      STRING_LIST, "description", PRIVATE, FINAL).build();
+  final ClassName type;
 
-  private static final FieldSpec ARGUMENT_NAME = FieldSpec.builder(
-      Parser.STRING, "descriptionArgumentName", PRIVATE, FINAL).build();
+  private final FieldSpec descriptionField;
+  private final FieldSpec argumentNameField;
 
-  final ClassName optionClass;
+  private final Context context;
+  private final OptionType optionType;
 
-  private final JbockContext context;
-  final ClassName optionType;
-  private final boolean needsSuffix;
-
-  final FieldSpec optionTypeField;
   private final MethodSpec describeNamesMethod;
   private final MethodSpec describeParamMethod;
   private final MethodSpec descriptionBlockMethod;
+
+  final FieldSpec longNameField;
+  final FieldSpec shortNameField;
+  final FieldSpec typeField;
+
   final MethodSpec isSpecialMethod;
   final MethodSpec isBindingMethod;
-  final ParameterizedTypeName optMapType;
-  final ParameterizedTypeName sMapType;
-  final ParameterizedTypeName flagsType;
-  final ParameterizedTypeName stringOptionMapType;
+
+  final TypeName optMapType;
+  final TypeName sMapType;
+  final TypeName flagsType;
+  final TypeName stringOptionMapType;
 
   private Option(
-      JbockContext context,
-      ClassName optionClass,
-      ClassName optionType,
-      FieldSpec optionTypeField,
+      Context context,
+      ClassName type,
+      OptionType optionType,
+      FieldSpec typeField,
+      FieldSpec descriptionField,
+      FieldSpec argumentNameField,
       MethodSpec isSpecialMethod,
       MethodSpec isBindingMethod) {
+    this.descriptionField = descriptionField;
+    this.argumentNameField = argumentNameField;
+    this.longNameField = FieldSpec.builder(STRING, "longName", PRIVATE, FINAL).build();
+    this.shortNameField = FieldSpec.builder(ClassName.get(Character.class),
+        "shortName", PRIVATE, FINAL).build();
     this.context = context;
-    this.optionClass = optionClass;
+    this.type = type;
     this.optionType = optionType;
-    this.optionTypeField = optionTypeField;
+    this.typeField = typeField;
     this.isSpecialMethod = isSpecialMethod;
     this.isBindingMethod = isBindingMethod;
-    this.describeParamMethod = describeParamMethod(context, optionTypeField, optionType);
-    this.describeNamesMethod = describeNamesMethod(describeParamMethod, optionTypeField, optionType);
-    this.descriptionBlockMethod = descriptionBlockMethod();
-    Set<String> uppercaseArgumentNames = IntStream.range(0, context.parameters.size())
-        .mapToObj(this::enumConstant)
-        .collect(Collectors.toSet());
-    this.needsSuffix = uppercaseArgumentNames.size() < context.parameters.size();
+    this.describeParamMethod = describeParamMethod(
+        context,
+        longNameField,
+        shortNameField,
+        typeField,
+        optionType);
+    this.describeNamesMethod = describeNamesMethod(
+        describeParamMethod,
+        typeField,
+        argumentNameField,
+        optionType);
+    this.descriptionBlockMethod = descriptionBlockMethod(descriptionField);
     this.optMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        optionClass, STRING_LIST);
+        type, LIST_OF_STRING);
     this.sMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        optionClass, STRING);
+        type, STRING);
     this.flagsType = ParameterizedTypeName.get(ClassName.get(Set.class),
-        optionClass);
+        type);
     this.stringOptionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        STRING, optionClass);
+        STRING, type);
   }
 
-  static Option create(JbockContext context) {
-    ClassName optionType = context.generatedClass.nestedClass("OptionType");
-    FieldSpec optionTypeField = FieldSpec.builder(optionType, "type", PRIVATE, FINAL).build();
-    MethodSpec isSpecialMethod = isSpecialMethod(optionTypeField);
-    MethodSpec isBindingMethod = isBindingMethod(optionTypeField);
+  static Option create(Context context, OptionType optionType) {
+    FieldSpec typeField = FieldSpec.builder(optionType.type, "type", PRIVATE, FINAL).build();
+    MethodSpec isSpecialMethod = isSpecialMethod(optionType, typeField);
+    MethodSpec isBindingMethod = isBindingMethod(optionType, typeField);
+    FieldSpec descriptionField = FieldSpec.builder(
+        LIST_OF_STRING, "description", PRIVATE, FINAL).build();
+    FieldSpec argumentNameField = FieldSpec.builder(
+        STRING, "descriptionArgumentName", PRIVATE, FINAL).build();
     return new Option(
         context,
         context.generatedClass.nestedClass("Option"),
         optionType,
-        optionTypeField,
+        typeField,
+        descriptionField,
+        argumentNameField,
         isSpecialMethod,
         isBindingMethod);
   }
 
   String enumConstant(int i) {
-    String suffix = needsSuffix ? String.format("_%d", i) : "";
-    return upcase(context.parameters.get(i).parameterName()) + suffix;
+    String result = snakeCase(context.parameters.get(i).parameterName());
+    if (!context.problematicOptionNames) {
+      return result;
+    }
+    return result + '_' + i;
   }
 
   TypeSpec define() {
-    TypeSpec.Builder builder = TypeSpec.enumBuilder(optionClass);
+    TypeSpec.Builder builder = TypeSpec.enumBuilder(type);
     for (int i = 0; i < context.parameters.size(); i++) {
       Param param = context.parameters.get(i);
       String[] desc = getText(param.description());
-      String argumentName = Processor.ARGNAME_LESS.contains(param.optionType()) ?
-          null :
-          param.description() == null ? "VAL" : param.description().argumentName();
+      String argumentName = param.descriptionArgumentName();
       String enumConstant = enumConstant(i);
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {\n    %s}",
           String.join(",\n    ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
-          Arrays.asList(param.longName(), param.shortName(), optionType, param.optionType(), argumentName, STRING);
+          Arrays.asList(param.longName(), param.shortName(), optionType.type,
+              param.optionType(), argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
       args.addAll(fixArgs);
       args.addAll(Arrays.asList(desc));
@@ -132,16 +147,16 @@ final class Option {
           args.toArray()).build());
     }
     return builder.addModifiers(PUBLIC)
-        .addFields(Arrays.asList(LONG_NAME, SHORT_NAME, optionTypeField, ARGUMENT_NAME, DESCRIPTION))
+        .addFields(Arrays.asList(longNameField, shortNameField, typeField, argumentNameField, descriptionField))
         .addMethod(describeMethod())
         .addMethod(toStringMethod())
         .addMethod(describeNamesMethod)
         .addMethod(describeParamMethod)
         .addMethod(descriptionBlockMethod)
-        .addMethod(shortNameMethod())
-        .addMethod(longNameMethod())
+        .addMethod(shortNameMethod(shortNameField))
+        .addMethod(longNameMethod(longNameField))
         .addMethod(descriptionMethod())
-        .addMethod(descriptionArgumentNameMethod())
+        .addMethod(descriptionArgumentNameMethod(argumentNameField))
         .addMethod(typeMethod())
         .addMethod(isSpecialMethod)
         .addMethod(isBindingMethod)
@@ -149,116 +164,91 @@ final class Option {
         .build();
   }
 
-  MethodSpec printUsageMethod() {
-    ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
-    ParameterSpec out = ParameterSpec.builder(ClassName.get(PrintStream.class), "out").build();
-    ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
-    return MethodSpec.methodBuilder("printUsage")
-        .beginControlFlow("for ($T $N: $T.values())", option.type, option, optionClass)
-        .addStatement("$N.println($N.describe($N))", out, option, indent)
-        .endControlFlow()
-        .addModifiers(STATIC, PUBLIC)
-        .addParameters(Arrays.asList(out, indent))
-        .build();
-  }
-
   private MethodSpec privateConstructor() {
-    ParameterSpec longName = ParameterSpec.builder(LONG_NAME.type, LONG_NAME.name).build();
-    ParameterSpec shortName = ParameterSpec.builder(STRING, SHORT_NAME.name).build();
-    ParameterSpec optionType = ParameterSpec.builder(this.optionTypeField.type, this.optionTypeField.name).build();
-    ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), DESCRIPTION.name).build();
-    ParameterSpec argumentName = ParameterSpec.builder(ARGUMENT_NAME.type, ARGUMENT_NAME.name).build();
+    ParameterSpec longName = ParameterSpec.builder(longNameField.type, longNameField.name).build();
+    ParameterSpec shortName = ParameterSpec.builder(STRING, shortNameField.name).build();
+    ParameterSpec optionType = ParameterSpec.builder(this.typeField.type, this.typeField.name).build();
+    ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), descriptionField.name).build();
+    ParameterSpec argumentName = ParameterSpec.builder(argumentNameField.type, argumentNameField.name).build();
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
     builder
-        .beginControlFlow("if (!$N.$N())", optionType, IS_SPECIAL)
+        .beginControlFlow("if (!$N.$N())", optionType, this.optionType.isSpecialMethod)
         .addStatement("assert $N == null || $N.length() == 1", shortName, shortName)
         .addStatement("assert $N == null || !$N.isEmpty()", longName, longName)
         .addStatement("assert $N != null || $N != null", longName, shortName)
         .endControlFlow();
 
     builder
-        .addStatement("this.$N = $N", LONG_NAME, longName)
-        .addStatement("this.$N = $N == null ? null : $N.charAt(0)", SHORT_NAME, shortName, shortName)
-        .addStatement("this.$N = $N", this.optionTypeField, optionType)
-        .addStatement("this.$N = $T.unmodifiableList($T.asList($N))", DESCRIPTION,
+        .addStatement("this.$N = $N", longNameField, longName)
+        .addStatement("this.$N = $N == null ? null : $N.charAt(0)", shortNameField, shortName, shortName)
+        .addStatement("this.$N = $N", this.typeField, optionType)
+        .addStatement("this.$N = $T.unmodifiableList($T.asList($N))", descriptionField,
             Collections.class, Arrays.class, description)
-        .addStatement("this.$N = $N", ARGUMENT_NAME, argumentName);
+        .addStatement("this.$N = $N", argumentNameField, argumentName);
 
     builder.addParameters(Arrays.asList(
         longName, shortName, optionType, argumentName, description));
     return builder.build();
   }
 
-  private static MethodSpec shortNameMethod() {
-    return MethodSpec.methodBuilder(SHORT_NAME.name)
-        .addStatement("return $T.ofNullable($N)", Optional.class, SHORT_NAME)
+  private static MethodSpec shortNameMethod(FieldSpec shortNameField) {
+    return MethodSpec.methodBuilder(shortNameField.name)
+        .addStatement("return $T.ofNullable($N)", Optional.class, shortNameField)
         .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), TypeName.get(Character.class)))
         .addModifiers(PUBLIC)
         .build();
   }
 
-  private static MethodSpec longNameMethod() {
-    return MethodSpec.methodBuilder(LONG_NAME.name)
-        .addStatement("return $T.ofNullable($N)", Optional.class, LONG_NAME)
+  private static MethodSpec longNameMethod(FieldSpec longNameField) {
+    return MethodSpec.methodBuilder(longNameField.name)
+        .addStatement("return $T.ofNullable($N)", Optional.class, longNameField)
         .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), STRING))
         .addModifiers(PUBLIC)
         .build();
   }
 
   private MethodSpec descriptionMethod() {
-    return MethodSpec.methodBuilder(DESCRIPTION.name)
-        .addStatement("return $N", DESCRIPTION)
-        .returns(DESCRIPTION.type)
+    return MethodSpec.methodBuilder(descriptionField.name)
+        .addStatement("return $N", descriptionField)
+        .returns(descriptionField.type)
         .addModifiers(PUBLIC)
         .build();
   }
 
-  private static MethodSpec descriptionArgumentNameMethod() {
-    return MethodSpec.methodBuilder(ARGUMENT_NAME.name)
-        .addStatement("return $T.ofNullable($N)", Optional.class, ARGUMENT_NAME)
+  private static MethodSpec descriptionArgumentNameMethod(FieldSpec argumentNameField) {
+    return MethodSpec.methodBuilder(argumentNameField.name)
+        .addStatement("return $T.ofNullable($N)", Optional.class, argumentNameField)
         .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), STRING))
         .addModifiers(PUBLIC)
         .build();
   }
 
   private MethodSpec typeMethod() {
-    return MethodSpec.methodBuilder(optionTypeField.name)
-        .addStatement("return $N", optionTypeField)
-        .returns(optionTypeField.type)
+    return MethodSpec.methodBuilder(typeField.name)
+        .addStatement("return $N", typeField)
+        .returns(typeField.type)
         .addModifiers(PUBLIC)
         .build();
   }
 
-  private static MethodSpec isSpecialMethod(FieldSpec optionTypeField) {
-    return MethodSpec.methodBuilder(OptionType.IS_SPECIAL.name)
-        .addStatement("return $N.$N()", optionTypeField, OptionType.IS_SPECIAL)
-        .returns(OptionType.IS_SPECIAL.returnType)
+  private static MethodSpec isSpecialMethod(
+      OptionType optionType,
+      FieldSpec optionTypeField) {
+    return MethodSpec.methodBuilder(optionType.isSpecialMethod.name)
+        .addStatement("return $N.$N()", optionTypeField, optionType.isSpecialMethod)
+        .returns(optionType.isSpecialMethod.returnType)
         .addModifiers(PUBLIC)
         .build();
   }
 
-  private static MethodSpec isBindingMethod(FieldSpec optionTypeField) {
-    return MethodSpec.methodBuilder(IS_BINDING.name)
-        .addStatement("return $N.$N()", optionTypeField, IS_BINDING)
-        .returns(IS_BINDING.returnType)
+  private static MethodSpec isBindingMethod(
+      OptionType optionType,
+      FieldSpec optionTypeField) {
+    return MethodSpec.methodBuilder(optionType.isBindingMethod.name)
+        .addStatement("return $N.$N()", optionTypeField, optionType.isBindingMethod)
+        .returns(optionType.isBindingMethod.returnType)
         .addModifiers(PUBLIC)
         .build();
-  }
-
-  private static String upcase(String input) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < input.length(); i++) {
-      char c = input.charAt(i);
-      if (Character.isUpperCase(c)) {
-        if (i > 0) {
-          sb.append('_');
-        }
-        sb.append(c);
-      } else {
-        sb.append(Character.toUpperCase(c));
-      }
-    }
-    return sb.toString();
   }
 
   private static String[] getText(Description description) {
@@ -268,7 +258,7 @@ final class Option {
     return description.value();
   }
 
-  private static MethodSpec descriptionBlockMethod() {
+  private static MethodSpec descriptionBlockMethod(FieldSpec descriptionField) {
     ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
     ParameterSpec sIndent = ParameterSpec.builder(STRING, "indentString").build();
     ParameterSpec aIndent = ParameterSpec.builder(ArrayTypeName.of(TypeName.CHAR), "a").build();
@@ -276,15 +266,14 @@ final class Option {
         .addStatement("$T $N = new $T[$N]", aIndent.type, aIndent, TypeName.CHAR, indent)
         .addStatement("$T.fill($N, ' ')", Arrays.class, aIndent)
         .addStatement("$T $N = new $T($N)", STRING, sIndent, STRING, aIndent)
-        .addStatement("return $N + $T.join('\\n' + $N, $N)", sIndent, STRING, sIndent, DESCRIPTION);
+        .addStatement("return $N + $T.join('\\n' + $N, $N)", sIndent, STRING, sIndent, descriptionField);
     return MethodSpec.methodBuilder("descriptionBlock")
         .addModifiers(PUBLIC)
         .addParameter(indent)
-        .returns(Parser.STRING)
+        .returns(STRING)
         .addCode(builder.build())
         .build();
   }
-
 
   private MethodSpec describeMethod() {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
@@ -298,7 +287,7 @@ final class Option {
         .build();
     return MethodSpec.methodBuilder("describe")
         .addModifiers(PUBLIC)
-        .returns(Parser.STRING)
+        .returns(STRING)
         .addParameter(indent)
         .addCode(codeBlock)
         .build();
@@ -306,65 +295,67 @@ final class Option {
 
   private static MethodSpec describeNamesMethod(
       MethodSpec describeParamMethod,
-      FieldSpec optionType,
-      ClassName optionTypeClass) {
+      FieldSpec optionTypeField,
+      FieldSpec argumentNameField,
+      OptionType optionType) {
     CodeBlock.Builder builder = CodeBlock.builder();
-    builder.beginControlFlow("if ($N())", IS_BINDING)
-        .addStatement("return $N() + ' ' + $N", describeParamMethod, ARGUMENT_NAME)
+    builder.beginControlFlow("if ($N.$N())", optionTypeField, optionType.isBindingMethod)
+        .addStatement("return $N() + ' ' + $N", describeParamMethod, argumentNameField)
         .endControlFlow();
     builder.addStatement("return $N()", describeParamMethod);
     return MethodSpec.methodBuilder("describeNames")
         .addModifiers(PUBLIC)
-        .returns(Parser.STRING)
+        .returns(STRING)
         .addCode(builder.build())
         .build();
   }
 
   private static MethodSpec describeParamMethod(
-      JbockContext context,
-      FieldSpec optionType,
-      ClassName optionTypeClass) {
+      Context context,
+      FieldSpec longNameField,
+      FieldSpec shortNameField,
+      FieldSpec optionTypeField,
+      OptionType optionType) {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
-    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, OTHER_TOKENS)
+    builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, OTHER_TOKENS)
         .addStatement("return $S", "Other tokens")
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N == $T.$L)", optionType, optionTypeClass, EVERYTHING_AFTER)
+    builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, EVERYTHING_AFTER)
         .addStatement("return $S + $S + $S", "Everything after '", context.stopword, "'")
         .endControlFlow();
 
     builder.addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class);
 
-    builder.beginControlFlow("if ($N != null)", SHORT_NAME)
-        .addStatement("$N.append('-').append($N)", sb, SHORT_NAME)
+    builder.beginControlFlow("if ($N != null)", shortNameField)
+        .addStatement("$N.append('-').append($N)", sb, shortNameField)
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N != null && $N != null)", LONG_NAME, SHORT_NAME)
+    builder.beginControlFlow("if ($N != null && $N != null)", longNameField, shortNameField)
         .addStatement("$N.append(',').append(' ')", sb)
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N != null)", LONG_NAME)
-        .addStatement("$N.append('-').append('-').append($N)", sb, LONG_NAME)
+    builder.beginControlFlow("if ($N != null)", longNameField)
+        .addStatement("$N.append('-').append('-').append($N)", sb, longNameField)
         .endControlFlow();
 
     builder.addStatement("return $N.toString()", sb);
 
     return MethodSpec.methodBuilder("describeParam")
         .addModifiers(PRIVATE)
-        .returns(Parser.STRING)
+        .returns(STRING)
         .addCode(builder.build())
         .build();
   }
-
 
   private MethodSpec toStringMethod() {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     return MethodSpec.methodBuilder("toString")
         .addAnnotation(Override.class)
         .addModifiers(PUBLIC)
-        .returns(Parser.STRING)
+        .returns(STRING)
         .addStatement("return name() + $S + $N() + $S", " (", describeParamMethod, ")")
         .build();
   }

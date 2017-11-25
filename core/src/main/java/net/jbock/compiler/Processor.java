@@ -5,16 +5,12 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static javax.tools.Diagnostic.Kind.ERROR;
-import static net.jbock.compiler.LessElements.asType;
-import static net.jbock.compiler.OptionType.EVERYTHING_AFTER;
-import static net.jbock.compiler.OptionType.FLAG;
-import static net.jbock.compiler.OptionType.OTHER_TOKENS;
+import static net.jbock.compiler.Util.asType;
 
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -77,11 +73,11 @@ public final class Processor extends AbstractProcessor {
       try {
         List<Param> params = validate(typeElement);
         String stopword = stopword(params, typeElement);
-        JbockContext context = JbockContext.create(typeElement, params, stopword);
+        Context context = Context.create(typeElement, params, stopword);
         if (!done.add(typeElement.accept(Util.QUALIFIED_NAME, null))) {
           continue;
         }
-        TypeSpec typeSpec = Parser.create(context).analyse();
+        TypeSpec typeSpec = Parser.create(context).define();
         write(context.generatedClass, typeSpec);
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
@@ -120,13 +116,11 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  static final Set<OptionType> ARGNAME_LESS = EnumSet.of(EVERYTHING_AFTER, OTHER_TOKENS, FLAG);
-  private static final Set<OptionType> NAMELESS = EnumSet.of(EVERYTHING_AFTER, OTHER_TOKENS);
-
   private void combinationChecks(List<Param> params) {
     params.forEach(param -> {
-      if (NAMELESS.contains(param.optionType())) {
-        checkNotPresent(param.variableElement, asList(LongName.class, ShortName.class));
+      if (param.isSpecial()) {
+        checkNotPresent(param.sourceMethod,
+            asList(SuppressLongName.class, LongName.class, ShortName.class));
       }
     });
   }

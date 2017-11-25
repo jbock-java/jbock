@@ -5,86 +5,78 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 
-import java.util.List;
-import java.util.Optional;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
-import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 /**
- * Generates the *_Parser.OptionType enum.
+ * Defines the *_Parser.OptionType enum.
+ *
+ * @see Parser
  */
-enum OptionType {
+final class OptionType {
 
-  FLAG(TypeName.BOOLEAN, false, false),
-  OPTIONAL(ParameterizedTypeName.get(ClassName.get(Optional.class), ClassName.get(String.class)), false, true),
-  REQUIRED(ClassName.get(String.class), false, true),
-  REPEATABLE(ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class)), false, true),
-  OTHER_TOKENS(ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class)), true, false),
-  EVERYTHING_AFTER(ParameterizedTypeName.get(ClassName.get(List.class), ClassName.get(String.class)), true, false);
+  final ClassName type;
 
-  final TypeName sourceType;
-  final boolean special;
-  final boolean binding;
+  private final FieldSpec isSpecialField;
+  private final FieldSpec isBindingField;
 
-  private static final FieldSpec SPECIAL = FieldSpec.builder(TypeName.BOOLEAN, "special", PRIVATE, FINAL)
-      .build();
-  private static final FieldSpec BINDING = FieldSpec.builder(TypeName.BOOLEAN, "binding", PRIVATE, FINAL)
-      .build();
+  final MethodSpec isSpecialMethod;
+  final MethodSpec isBindingMethod;
 
-  static final MethodSpec IS_SPECIAL = isSpecialMethod();
-  static final MethodSpec IS_BINDING = isBindingMethod();
-
-  OptionType(
-      TypeName sourceType,
-      boolean special,
-      boolean binding) {
-    this.sourceType = sourceType;
-    this.special = special;
-    this.binding = binding;
+  private OptionType(Context context) {
+    this.isSpecialField = FieldSpec.builder(TypeName.BOOLEAN, "special", PRIVATE, FINAL)
+        .build();
+    this.isBindingField = FieldSpec.builder(TypeName.BOOLEAN, "binding", PRIVATE, FINAL)
+        .build();
+    this.type = context.generatedClass.nestedClass("OptionType");
+    this.isSpecialMethod = isSpecialMethod(isSpecialField);
+    this.isBindingMethod = isBindingMethod(isBindingField);
   }
 
+  static OptionType create(Context context) {
+    return new OptionType(context);
+  }
 
-  static TypeSpec define(ClassName optionTypeClass) {
-    TypeSpec.Builder builder = TypeSpec.enumBuilder(optionTypeClass);
-    for (OptionType optionType : values()) {
+  TypeSpec define() {
+    TypeSpec.Builder builder = TypeSpec.enumBuilder(type);
+    for (Type optionType : Type.values()) {
       builder.addEnumConstant(optionType.name(),
           anonymousClassBuilder("$L, $L", optionType.special, optionType.binding)
               .build());
     }
     return builder.addModifiers(PUBLIC)
-        .addField(SPECIAL)
-        .addField(BINDING)
+        .addField(isSpecialField)
+        .addField(isBindingField)
         .addMethod(privateConstructor())
-        .addMethod(IS_SPECIAL)
-        .addMethod(IS_BINDING)
+        .addMethod(isSpecialMethod)
+        .addMethod(isBindingMethod)
         .build();
   }
 
-  private static MethodSpec privateConstructor() {
+  private MethodSpec privateConstructor() {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
-    ParameterSpec special = ParameterSpec.builder(SPECIAL.type, SPECIAL.name).build();
-    ParameterSpec binding = ParameterSpec.builder(BINDING.type, BINDING.name).build();
-    builder.addStatement("this.$N = $N", SPECIAL, special);
-    builder.addStatement("this.$N = $N", BINDING, binding);
+    ParameterSpec special = ParameterSpec.builder(isSpecialField.type, isSpecialField.name).build();
+    ParameterSpec binding = ParameterSpec.builder(isBindingField.type, isBindingField.name).build();
+    builder.addStatement("this.$N = $N", isSpecialField, special);
+    builder.addStatement("this.$N = $N", isBindingField, binding);
     return builder.addParameter(special).addParameter(binding).build();
   }
 
-  private static MethodSpec isSpecialMethod() {
+  private static MethodSpec isSpecialMethod(FieldSpec isSpecialField) {
     return MethodSpec.methodBuilder("isSpecial")
-        .addStatement("return $N", SPECIAL)
+        .addStatement("return $N", isSpecialField)
         .returns(TypeName.BOOLEAN)
         .addModifiers(PUBLIC)
         .build();
   }
 
-  private static MethodSpec isBindingMethod() {
+  private static MethodSpec isBindingMethod(FieldSpec isBindingField) {
     return MethodSpec.methodBuilder("isBinding")
-        .addStatement("return $N", BINDING)
+        .addStatement("return $N", isBindingField)
         .returns(TypeName.BOOLEAN)
         .addModifiers(PUBLIC)
         .build();
