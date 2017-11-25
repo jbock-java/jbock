@@ -7,7 +7,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
 import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.TypeName;
 
 final class Context {
 
@@ -40,7 +39,7 @@ final class Context {
       TypeElement sourceType,
       List<Param> parameters,
       String stopword) {
-    ClassName generatedClass = peer(ClassName.get(asType(sourceType)), Processor.SUFFIX);
+    ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean otherTokens = parameters.stream()
         .anyMatch(p -> p.optionType == Type.OTHER_TOKENS);
     boolean rest = parameters.stream()
@@ -64,8 +63,8 @@ final class Context {
     return uppercaseArgumentNames.size() < parameters.size();
   }
 
-  private static ClassName peer(ClassName type, String suffix) {
-    String name = String.join("_", type.simpleNames()) + suffix;
+  private static ClassName parserClass(ClassName type) {
+    String name = String.join("_", type.simpleNames()) + "_Parser";
     return type.topLevelClassName().peerClass(name);
   }
 }

@@ -40,8 +40,6 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 
 public final class Processor extends AbstractProcessor {
 
-  static final String SUFFIX = "_Parser";
-
   private final Set<String> done = new HashSet<>();
 
   @Override
