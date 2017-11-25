@@ -296,12 +296,12 @@ final class Helper {
    * and this information is added to one of
    * {@code sMap}, {@code optMap}, {@code flags}, and {@code true} is returned.
    * Otherwise, none of these collections are modified, and {@code false}
-   * is returned.</p>
-   * <p>
-   * <p>If the token is an <em>option group</em>, then all tokens of this
-   * group are consumed, along with its argument (unless the group ends with
-   * a flag).</p>
-   * <p>
+   * is returned.
+   * </p>
+   * <p>If the token is an <em>option group</em>, then all flags of this
+   * group are read. If the group ends with a binding token, then its argument is
+   * also consumed.
+   * </p>
    * <p>After this method returns, the next token in the iterator will be
    * a free token, if any. </p>
    */

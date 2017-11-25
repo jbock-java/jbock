@@ -1,50 +1,35 @@
 # jbock
 
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
+
 jbock is a simple annotation processor that generates a [getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired
-CLI parser. It can be used to define both short and long options.
+CLI parser. It can be used to define both short and long options, and supports option grouping.
 
-jbock generates an implementation of an abstract, user-defined class.
-[auto-value](https://github.com/google/auto/tree/master/value) users will be familiar with this.
-
-## Goodies
-
-* Defines a valid Java 9 module.
-* No reflection, purely static analysis.
-* No runtime dependency. The processor generates a single, self-contained class.
-
-## Gotchas
-
-jbock's `parse` method will throw an `IllegalArgumentException`:
-
-* &#x2026;if multiple values are given for a non-repeatable argument.
-* &#x2026;if the argument list ends after an option name.
-* &#x2026;if a required option is missing.
-* &#x2026;if an unknown token is encountered, and there's no <a href="#example-curl">OtherTokens</a> method.
+jbock generates an implementation of an abstract, user-defined class, similar to
+[auto-value](https://github.com/google/auto/tree/master/value).
 
 ## Parser features
 
 * <em>Short args</em>, attached `-n1` or detached `-n 1`
 * <em>Long args</em>, attached `--num=1` or detached `--num 1`
 * <em>Flags</em>: Short `-r` or long `--recursive`
-* <em>Parameter grouping</em>: For example, `-xzf d.tgz` is equivalent to `-x -z -f d.tgz`
+* <em>Option grouping</em>: For example, `-xzf d.tgz` is equivalent to `-x -z -f d.tgz`. Note that the leading hyphen cannot be omitted.
 * <em>Unnamed arguments</em>, like in `rm foo.txt` (see <a href="#example-curl">Example: curl</a>)
 * <em>End of option scanning</em>, like in `rm -- -f` (see <a href="#example-rm">Example: rm</a>)
 
-See 
-<a href="https://github.com/h908714124/jbock/blob/master/examples/src/test/java/net/zerobuilder/examples/gradle/CurlArgumentsTest.java">
-this unit test</a> for more examples of the parsing behaviour.
-
-## Basic usage
+## Basic use
 
 Annotate an `abstract` class with `@CommandLineArguments`.
 In this class, each `abstract` method must have an empty argument list.
-Only three different return types are allowed for any such method:
+The method must also return one of four permissible types:
 
 * A method that returns `List<String>` declares a <em>repeatable</em> argument that may appear any number of times.
 * A method that returns `Optional<String>` declares an <em>optional</em> argument that may appear at most once.
 * A method that returns `String` declares a <em>required</em> argument that must appear exactly once.
 * A method that returns `boolean` declares a <em>flag</em>.
 
+The abstract methods may also carry some of jbock's additional annotations.
+These are: `@LongName`, `@ShortName`, `@SuppressLongName`, `@Description`, `@OtherTokens`, and `@EverythingAfter`.
 See [here](additional_rules.md) for more details.
 
 ## Example: `curl`
@@ -96,7 +81,7 @@ because the "method" argument isn't repeatable:
 `method()` returns an `Optional<String>`, not a `List<String>`.
 
 The generated static method `CurlArguments_Parser.printUsage(PrintStream out, int indent)`
-prints general usage information to `out`.
+prints formatted documentation about `CurlArguments` to `out`.
 
 The generated enum `CurlArguments_Parser.Option` contains the constants `METHOD`, `HEADERS`, `VERBOSE` and `URLS`.
 These correspond to the abstract methods in `CurlArguments`,
@@ -104,6 +89,19 @@ and can be used as an alternative to `printUsage`,
 for more fine-grained control over the usage text.
 
 Click [here](curl_parser_examples.md) to see how `CurlArguments_Parser` would handle some example input.
+
+## Failure
+
+jbock's `parse` method will throw an `IllegalArgumentException`:
+
+* &#x2026;if multiple values are given for a non-repeatable argument.
+* &#x2026;if the argument list ends after an option name.
+* &#x2026;if a required option is missing.
+* &#x2026;if an unknown token is encountered, and there's no <a href="#example-curl">OtherTokens</a> method.
+
+See 
+<a href="https://github.com/h908714124/jbock/blob/master/examples/src/test/java/net/zerobuilder/examples/gradle/CurlArgumentsTest.java">
+this unit test</a> for more examples of the parsing behaviour.
 
 ## Example: `rm`
 
@@ -140,45 +138,41 @@ abstract class RmArguments {
 }
 ````
 
-## The maven side
+## Maven config
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
-
-Add the following to the dependencies section of your pom file:
-
-````xml
-<dependency>
-  <groupId>com.github.h908714124</groupId>
-  <artifactId>jbock</artifactId>
-  <version>2.2.3</version>
-  <scope>provided</scope>
-</dependency>
-````
-
-For Java 9 users, one more config is currently necessary until 
-[MCOMPILER-310](https://issues.apache.org/jira/browse/MCOMPILER-310) is resolved:
+No part of the jbock jar is needed at runtime, so it's enough to add it as a provided scope dependency.
+The compiler plugin may also need some configuration.
 
 ````xml
-
-<plugin>
-  <groupId>org.apache.maven.plugins</groupId>
-  <artifactId>maven-compiler-plugin</artifactId>
-  <version>3.7.0</version>
-  <configuration>
-    <source>1.9</source>
-    <target>1.9</target>
-
-    <!-- Necessary until MCOMPILER-310 is resolved! -->
-    <annotationProcessorPaths>
-      <dependency>
-        <groupId>com.github.h908714124</groupId>
-        <artifactId>jbock</artifactId>
-        <version>2.2.3</version>
-      </dependency>
-    </annotationProcessorPaths>
-
-  </configuration>
-</plugin>
+<properties>
+  <jbock.version>2.2.4</jbock.version>
+</properties>
+<dependencies>
+  <dependency>
+    <groupId>com.github.h908714124</groupId>
+    <artifactId>jbock</artifactId>
+    <version>${jbock.version}</version>
+    <scope>provided</scope>
+  </dependency>
+</dependencies>
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>3.7.0</version>
+      <configuration>
+        <annotationProcessorPaths>
+          <dependency>
+            <groupId>com.github.h908714124</groupId>
+            <artifactId>jbock</artifactId>
+            <version>${jbock.version}</version>
+          </dependency>
+        </annotationProcessorPaths>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
 ````
 
 <em>Note:</em> By default, maven will put all generated sources in the folder `target/generated-sources/annotations`.
