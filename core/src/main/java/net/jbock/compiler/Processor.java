@@ -4,7 +4,7 @@ import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static javax.tools.Diagnostic.Kind.ERROR;
+import static net.jbock.compiler.Type.EVERYTHING_AFTER;
 import static net.jbock.compiler.Util.asType;
 
 import java.io.IOException;
@@ -65,7 +65,7 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-    if (missingClassLevelAnnotation(env)) {
+    if (!checkValid(env)) {
       return false;
     }
     List<TypeElement> typeElements = getAnnotatedClasses(env);
@@ -74,7 +74,7 @@ public final class Processor extends AbstractProcessor {
         List<Param> params = validate(typeElement);
         String stopword = stopword(params, typeElement);
         Context context = Context.create(typeElement, params, stopword);
-        if (!done.add(typeElement.accept(Util.QUALIFIED_NAME, null))) {
+        if (!done.add(asType(typeElement).getQualifiedName().toString())) {
           continue;
         }
         TypeSpec typeSpec = Parser.create(context).define();
@@ -96,12 +96,14 @@ public final class Processor extends AbstractProcessor {
     return result;
   }
 
-  private void handleException(TypeElement constructor, Exception e) {
+  private void handleException(
+      TypeElement sourceType,
+      Exception e) {
     String message = "Unexpected error while processing " +
-        ClassName.get(asType(constructor)) +
+        ClassName.get(asType(sourceType)) +
         ": " + e.getMessage();
     e.printStackTrace();
-    processingEnv.getMessager().printMessage(ERROR, message, constructor);
+    printError(sourceType, message);
   }
 
   private void write(ClassName generatedType, TypeSpec typeSpec) throws IOException {
@@ -116,144 +118,151 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void combinationChecks(List<Param> params) {
+  private void checkSpecialParams(List<Param> params) {
     params.forEach(param -> {
       if (param.isSpecial()) {
         checkNotPresent(param.sourceMethod,
             asList(SuppressLongName.class, LongName.class, ShortName.class));
       }
     });
+    List<Param> otherTokens = params.stream()
+        .filter(param -> param.optionType == Type.OTHER_TOKENS)
+        .collect(toList());
+    if (otherTokens.size() > 1) {
+      throw new ValidationException(params.get(1).sourceMethod,
+          "Only one method may have the @OtherTokens annotation");
+    }
   }
 
   private List<Param> validate(TypeElement typeElement) {
     if (typeElement.getKind() == ElementKind.INTERFACE) {
-      throw new ValidationException(
-          typeElement.getSimpleName() + " must be an abstract class, not an interface",
-          typeElement);
+      throw new ValidationException(typeElement,
+          typeElement.getSimpleName() + " must be an abstract class, not an interface");
     }
     if (!typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
-      throw new ValidationException(
-          typeElement.getSimpleName() + " must be abstract",
-          typeElement);
+      throw new ValidationException(typeElement,
+          typeElement.getSimpleName() + " must be abstract");
     }
     if (typeElement.getModifiers().contains(Modifier.PRIVATE)) {
-      throw new ValidationException(typeElement.getSimpleName() + " may not be private",
-          typeElement);
+      throw new ValidationException(typeElement,
+          typeElement.getSimpleName() + " may not be private");
     }
     if (typeElement.getNestingKind().isNested() &&
         !typeElement.getModifiers().contains(Modifier.STATIC)) {
-      throw new ValidationException(
-          "The nested class " + typeElement.getSimpleName() + " must be static",
-          typeElement);
+      throw new ValidationException(typeElement,
+          "The nested class " + typeElement.getSimpleName() + " must be static");
     }
-    List<ExecutableElement> getters = methodsIn(typeElement.getEnclosedElements()).stream()
+    List<Param> params = methodsIn(typeElement.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(Modifier.ABSTRACT))
-        .collect(toList());
-    getters.stream()
-        .filter(method -> !method.getParameters().isEmpty())
-        .findFirst()
-        .ifPresent(badMethod -> {
-          throw new ValidationException(
-              "The abstract method must have an empty argument list", badMethod);
-        });
-    List<Param> params = getters.stream()
         .map(Param::create).collect(toList());
-    combinationChecks(params);
+    checkSpecialParams(params);
     return params;
   }
 
-  private Set<String> shortNames(List<Param> params, TypeElement executableElement) {
+  private Set<String> shortNames(List<Param> params, TypeElement sourceType) {
     return params.stream()
         .map(Param::shortName)
         .filter(Objects::nonNull)
         .collect(Util.distinctSet(element ->
-            new ValidationException(
-                "Duplicate shortName: " + element, executableElement)));
+            new ValidationException(sourceType,
+                "Duplicate shortName: " + element)));
   }
 
-  private Set<String> longNames(List<Param> params, TypeElement executableElement) {
+  private Set<String> longNames(List<Param> params, TypeElement sourceType) {
     return params.stream()
         .map(Param::longName)
         .filter(Objects::nonNull)
         .collect(Util.distinctSet(element ->
-            new ValidationException(
-                "Duplicate longName: " + element, executableElement)));
+            new ValidationException(sourceType,
+                "Duplicate longName: " + element)));
   }
 
   private String stopword(
       List<Param> params,
-      TypeElement executableElement) {
-    Set<String> longNames = longNames(params, executableElement);
-    Set<String> shortNames = shortNames(params, executableElement);
+      TypeElement sourceType) {
+    Set<String> longNames = longNames(params, sourceType);
+    Set<String> shortNames = shortNames(params, sourceType);
     List<String> stopwords = params.stream()
+        .filter(param -> param.optionType == EVERYTHING_AFTER)
         .map(Param::stopword)
-        .filter(Objects::nonNull)
         .collect(toList());
     if (stopwords.size() > 1) {
-      throw new ValidationException("Only one parameter may have @EverythingAfter", executableElement);
+      throw new ValidationException(sourceType,
+          "Only one method may have the @EverythingAfter annotation");
     }
-    return stopwords.stream().findAny().map(stopword -> {
-      if (stopword.startsWith("-")) {
-        if (stopword.startsWith("--") && longNames.contains(stopword.substring(2))) {
-          throw new ValidationException(
-              "@EverythingAfter coincides with a long option", executableElement);
-        }
-        if (shortNames.contains(stopword.substring(1))) {
-          throw new ValidationException(
-              "@EverythingAfter coincides with a short option", executableElement);
-        }
-      }
+    if (stopwords.isEmpty()) {
+      return null;
+    }
+    String stopword = stopwords.get(0);
+    if (stopword.charAt(0) != '-') {
       return stopword;
-    }).orElse(null);
+    }
+    if (shortNames.contains(stopword.substring(1))) {
+      throw new ValidationException(sourceType,
+          "stopword coincides with an option: " + stopword);
+    }
+    if (stopword.length() == 1) {
+      return stopword;
+    }
+    if (stopword.charAt(1) == '-' && longNames.contains(stopword.substring(2))) {
+      throw new ValidationException(sourceType,
+          "stopword coincides with an option: " + stopword);
+    }
+    return stopword;
   }
 
-  private void checkNotPresent(ExecutableElement p, List<Class<? extends Annotation>> namelesss) {
-    for (Class<? extends Annotation> nameless : namelesss) {
-      if (p.getAnnotation(nameless) != null) {
-        throw new ValidationException(
-            "@" + nameless.getSimpleName() + " not allowed here", p);
+  private void checkNotPresent(
+      ExecutableElement executableElement,
+      List<Class<? extends Annotation>> forbiddenAnnotations) {
+    for (Class<? extends Annotation> annotation : forbiddenAnnotations) {
+      if (executableElement.getAnnotation(annotation) != null) {
+        throw new ValidationException(executableElement,
+            "@" + annotation.getSimpleName() + " not allowed here");
       }
     }
   }
 
-
-  private boolean missingClassLevelAnnotation(RoundEnvironment env) {
-    List<ExecutableElement> toCheck = new ArrayList<>();
-    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(Description.class)));
-    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(EverythingAfter.class)));
-    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(LongName.class)));
-    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(OtherTokens.class)));
-    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(ShortName.class)));
-    toCheck.addAll(methodsIn(env.getElementsAnnotatedWith(SuppressLongName.class)));
-    for (ExecutableElement executableElement : toCheck) {
-      Element enclosingElement = executableElement.getEnclosingElement();
+  private boolean checkValid(RoundEnvironment env) {
+    List<ExecutableElement> methods = new ArrayList<>();
+    methods.addAll(methodsIn(env.getElementsAnnotatedWith(Description.class)));
+    methods.addAll(methodsIn(env.getElementsAnnotatedWith(EverythingAfter.class)));
+    methods.addAll(methodsIn(env.getElementsAnnotatedWith(LongName.class)));
+    methods.addAll(methodsIn(env.getElementsAnnotatedWith(OtherTokens.class)));
+    methods.addAll(methodsIn(env.getElementsAnnotatedWith(ShortName.class)));
+    methods.addAll(methodsIn(env.getElementsAnnotatedWith(SuppressLongName.class)));
+    for (ExecutableElement method : methods) {
+      Element enclosingElement = method.getEnclosingElement();
       if (enclosingElement.getAnnotation(CommandLineArguments.class) == null) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
+        printError(method,
             "The enclosing class " + enclosingElement.getSimpleName() + " must have the " +
-                CommandLineArguments.class.getSimpleName() + " annotation", executableElement);
-        return true;
+                CommandLineArguments.class.getSimpleName() + " annotation");
+        return false;
       }
-      if (!executableElement.getModifiers().contains(Modifier.ABSTRACT)) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-            "Method " + executableElement.getSimpleName() + " must be abstract.", executableElement);
-        return true;
+      if (!method.getModifiers().contains(Modifier.ABSTRACT)) {
+        printError(method,
+            "Method " + method.getSimpleName() + " must be abstract.");
+        return false;
       }
-      if (executableElement.getModifiers().contains(Modifier.PRIVATE)) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-            "Method " + executableElement.getSimpleName() + " may not be private.", executableElement);
-        return true;
+      if (method.getModifiers().contains(Modifier.PRIVATE)) {
+        printError(method,
+            "Method " + method.getSimpleName() + " may not be private.");
+        return false;
       }
-      if (executableElement.getModifiers().contains(Modifier.STATIC)) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-            "Method " + executableElement.getSimpleName() + " may not be static.", executableElement);
-        return true;
+      if (method.getModifiers().contains(Modifier.STATIC)) {
+        printError(method,
+            "Method " + method.getSimpleName() + " may not be static.");
+        return false;
       }
-      if (!executableElement.getParameters().isEmpty()) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR,
-            "Method " + executableElement.getSimpleName() + " must have an empty parameter list.", executableElement);
-        return true;
+      if (!method.getParameters().isEmpty()) {
+        printError(method,
+            "Method " + method.getSimpleName() + " must have an empty parameter list.");
+        return false;
       }
     }
-    return false;
+    return true;
+  }
+
+  private void printError(Element element, String message) {
+    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, element);
   }
 }

@@ -29,7 +29,7 @@ import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 /**
- * Defines the *_Parser.Option inner class.
+ * Defines the *_Parser.Option enum.
  *
  * @see Parser
  */

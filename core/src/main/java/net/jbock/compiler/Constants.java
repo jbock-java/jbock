@@ -9,6 +9,8 @@ import net.jbock.com.squareup.javapoet.TypeName;
 
 final class Constants {
 
+  static final String JAVA_LANG_STRING = "java.lang.String";
+
   static final ClassName STRING = ClassName.get(String.class);
 
   static final ParameterizedTypeName OPTIONAL_STRING =

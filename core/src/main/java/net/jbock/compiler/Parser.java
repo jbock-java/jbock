@@ -138,7 +138,7 @@ final class Parser {
         .addParameter(args)
         .addCode(builder.build())
         .addException(IllegalArgumentException.class)
-        .returns(context.returnType())
+        .returns(TypeName.get(context.sourceType.asType()))
         .addModifiers(PUBLIC, STATIC)
         .build();
   }

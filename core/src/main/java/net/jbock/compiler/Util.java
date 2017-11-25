@@ -21,7 +21,7 @@ import javax.lang.model.util.SimpleTypeVisitor8;
 
 final class Util {
 
-  static final SimpleTypeVisitor8<DeclaredType, Void> AS_DECLARED =
+  private static final SimpleTypeVisitor8<DeclaredType, Void> AS_DECLARED =
       new SimpleTypeVisitor8<DeclaredType, Void>() {
         @Override
         public DeclaredType visitDeclared(DeclaredType declaredType, Void _null) {
@@ -29,7 +29,7 @@ final class Util {
         }
       };
 
-  static final SimpleElementVisitor8<TypeElement, Void> AS_TYPE_ELEMENT =
+  private static final SimpleElementVisitor8<TypeElement, Void> AS_TYPE_ELEMENT =
       new SimpleElementVisitor8<TypeElement, Void>() {
         @Override
         public TypeElement visitType(TypeElement typeElement, Void _null) {
@@ -37,13 +37,9 @@ final class Util {
         }
       };
 
-  static final SimpleElementVisitor8<String, Void> QUALIFIED_NAME =
-      new SimpleElementVisitor8<String, Void>() {
-        @Override
-        public String visitType(TypeElement typeElement, Void _null) {
-          return typeElement.getQualifiedName().toString();
-        }
-      };
+  static DeclaredType asDeclared(TypeMirror mirror) {
+    return mirror.accept(AS_DECLARED, null);
+  }
 
   static TypeElement asType(Element element) {
     TypeElement result = element.accept(AS_TYPE_ELEMENT, null);

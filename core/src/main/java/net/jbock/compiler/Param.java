@@ -1,6 +1,8 @@
 package net.jbock.compiler;
 
-import static net.jbock.compiler.Util.AS_TYPE_ELEMENT;
+import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
+import static net.jbock.compiler.Util.asDeclared;
+import static net.jbock.compiler.Util.asType;
 import static net.jbock.compiler.Util.equalsType;
 
 import java.util.Objects;
@@ -45,14 +47,14 @@ final class Param {
     this.optionType = getOptionType(sourceMethod);
   }
 
-  private static Type getOptionType(ExecutableElement executableElement) {
-    if (executableElement.getAnnotation(OtherTokens.class) != null) {
+  private static Type getOptionType(ExecutableElement sourceMethod) {
+    if (sourceMethod.getAnnotation(OtherTokens.class) != null) {
       return Type.OTHER_TOKENS;
     }
-    if (executableElement.getAnnotation(EverythingAfter.class) != null) {
+    if (sourceMethod.getAnnotation(EverythingAfter.class) != null) {
       return Type.EVERYTHING_AFTER;
     }
-    TypeMirror type = executableElement.getReturnType();
+    TypeMirror type = sourceMethod.getReturnType();
     if (type.getKind() == TypeKind.BOOLEAN) {
       return Type.FLAG;
     }
@@ -66,22 +68,30 @@ final class Param {
       return Type.REQUIRED;
     }
     String message = "Only String, Optional<String>, List<String> and boolean allowed, " +
-        String.format("but %s() returns %s", executableElement.getSimpleName(), type);
-    throw new ValidationException(message, executableElement);
+        String.format("but %s() returns %s", sourceMethod.getSimpleName(), type);
+    throw new ValidationException(sourceMethod, message);
   }
 
-  static Param create(ExecutableElement parameter) {
-    CreateHelper createHelper = new CreateHelper(parameter);
-    if (parameter.getAnnotation(OtherTokens.class) != null) {
+  static Param create(ExecutableElement sourceMethod) {
+    CreateHelper createHelper = new CreateHelper(sourceMethod);
+    OtherTokens otherTokens = sourceMethod.getAnnotation(OtherTokens.class);
+    EverythingAfter everythingAfter = sourceMethod.getAnnotation(EverythingAfter.class);
+    if (otherTokens != null && everythingAfter != null) {
+      throw new ValidationException(sourceMethod,
+          "OtherTokens and EverythingAfter cannot be combined");
+    }
+
+    if (otherTokens != null) {
       return createHelper.createOtherTokens();
     }
-    if (parameter.getAnnotation(EverythingAfter.class) != null) {
+    if (everythingAfter != null) {
       return createHelper.createEverythingAfter();
     }
-    String longName = longName(parameter);
-    String shortName = shortName(parameter);
+    String longName = longName(sourceMethod);
+    String shortName = shortName(sourceMethod);
     if (shortName == null && longName == null) {
-      throw new ValidationException("Neither long nor short name defined", parameter);
+      throw new ValidationException(sourceMethod,
+          "Neither long nor short name defined");
     }
     createHelper.checkName(shortName);
     createHelper.checkName(longName);
@@ -89,32 +99,33 @@ final class Param {
         shortName,
         longName,
         null,
-        parameter);
+        sourceMethod);
   }
 
-  private static String shortName(ExecutableElement parameter) {
-    ShortName shortName = parameter.getAnnotation(ShortName.class);
+  private static String shortName(ExecutableElement sourceMethod) {
+    ShortName shortName = sourceMethod.getAnnotation(ShortName.class);
     return shortName != null ? Character.toString(shortName.value()) : null;
   }
 
-  private static String longName(ExecutableElement parameter) {
-    LongName longName = parameter.getAnnotation(LongName.class);
-    if (parameter.getAnnotation(SuppressLongName.class) != null) {
+  private static String longName(ExecutableElement sourceMethod) {
+    LongName longName = sourceMethod.getAnnotation(LongName.class);
+    if (sourceMethod.getAnnotation(SuppressLongName.class) != null) {
       if (longName != null) {
-        throw new ValidationException("LongName and SuppressLongName cannot be combined",
-            parameter);
+        throw new ValidationException(sourceMethod,
+            "LongName and SuppressLongName cannot be combined");
       }
       return null;
     }
     if (longName == null) {
-      return parameter.getSimpleName().toString();
+      return sourceMethod.getSimpleName().toString();
     }
     return longName.value();
   }
 
-  private static void checkList(ExecutableElement variableElement) {
-    if (!isListOfString(variableElement.getReturnType())) {
-      throw new ValidationException("Must be a List<String>", variableElement);
+  private static void checkList(ExecutableElement sourceMethod) {
+    if (!isListOfString(sourceMethod.getReturnType())) {
+      throw new ValidationException(sourceMethod,
+          "Must be a List<String>");
     }
   }
 
@@ -127,32 +138,34 @@ final class Param {
   }
 
   private static boolean isXOfString(
-      TypeMirror type, String x) {
-    DeclaredType declared = type.accept(Util.AS_DECLARED, null);
+      TypeMirror type,
+      String x) {
+    DeclaredType declared = asDeclared(type);
     if (declared == null) {
       return false;
     }
     if (declared.getTypeArguments().size() != 1) {
       return false;
     }
-    TypeElement element = declared.asElement().accept(AS_TYPE_ELEMENT, null);
+    TypeElement typeElement = asType(declared.asElement());
     return x.equals(
-        element.getQualifiedName().toString()) &&
+        typeElement.getQualifiedName().toString()) &&
         equalsType(declared.getTypeArguments().get(0),
-            "java.lang.String");
+            JAVA_LANG_STRING);
   }
 
   private static boolean isString(
       TypeMirror type) {
-    DeclaredType declared = type.accept(Util.AS_DECLARED, null);
+    DeclaredType declared = asDeclared(type);
     if (declared == null) {
       return false;
     }
     if (!declared.getTypeArguments().isEmpty()) {
       return false;
     }
-    TypeElement element = declared.asElement().accept(AS_TYPE_ELEMENT, null);
-    return "java.lang.String".equals(element.getQualifiedName().toString());
+    TypeElement element = asType(declared.asElement());
+    return JAVA_LANG_STRING.equals(
+        element.getQualifiedName().toString());
   }
 
   private static final class CreateHelper {
@@ -167,47 +180,37 @@ final class Param {
         return;
       }
       basicCheckName(name);
-      if (name.startsWith("-")) {
-        throw new ValidationException("The name may not start with '-'", sourceMethod);
+      if (name.indexOf(0) == '-') {
+        throw new ValidationException(sourceMethod,
+            "The name may not start with '-'");
       }
       if (name.indexOf('=') >= 0) {
-        throw new ValidationException("The name may not contain '='", sourceMethod);
+        throw new ValidationException(sourceMethod,
+            "The name may not contain '='");
       }
     }
 
     private void basicCheckName(String name) {
       if (name == null) {
-        throw new ValidationException("The name may not be null", sourceMethod);
+        throw new ValidationException(sourceMethod,
+            "The name may not be null");
       }
       if (name.isEmpty()) {
-        throw new ValidationException("The name may not be empty", sourceMethod);
+        throw new ValidationException(sourceMethod,
+            "The name may not be empty");
       }
       if (WHITE_SPACE.matcher(name).matches()) {
-        throw new ValidationException("The name may not contain whitespace characters", sourceMethod);
+        throw new ValidationException(sourceMethod,
+            "The name may not contain whitespace characters");
       }
     }
 
     private Param createEverythingAfter() {
       checkList(sourceMethod);
-      if (sourceMethod.getAnnotation(OtherTokens.class) != null) {
-        throw new ValidationException(
-            "EverythingAfter and OtherTokens cannot be combined", sourceMethod);
-      }
-      if (sourceMethod.getAnnotation(SuppressLongName.class) != null) {
-        throw new ValidationException("EverythingAfter and SuppressLongName cannot be combined",
-            sourceMethod);
-      }
-      if (sourceMethod.getAnnotation(LongName.class) != null) {
-        throw new ValidationException(
-            "EverythingAfter and LongName cannot be combined", sourceMethod);
-      }
-      if (sourceMethod.getAnnotation(ShortName.class) != null) {
-        throw new ValidationException(
-            "EverythingAfter and ShortName cannot be combined", sourceMethod);
-      }
       String stopword = sourceMethod.getAnnotation(EverythingAfter.class).value();
       basicCheckName(stopword);
-      return new Param(null,
+      return new Param(
+          null,
           null,
           stopword,
           sourceMethod);
@@ -215,23 +218,8 @@ final class Param {
 
     private Param createOtherTokens() {
       checkList(sourceMethod);
-      if (sourceMethod.getAnnotation(EverythingAfter.class) != null) {
-        throw new ValidationException(
-            "OtherTokens and EverythingAfter cannot be combined", sourceMethod);
-      }
-      if (sourceMethod.getAnnotation(SuppressLongName.class) != null) {
-        throw new ValidationException("EverythingAfter and SuppressLongName cannot be combined",
-            sourceMethod);
-      }
-      if (sourceMethod.getAnnotation(LongName.class) != null) {
-        throw new ValidationException(
-            "OtherTokens and LongName cannot be combined", sourceMethod);
-      }
-      if (sourceMethod.getAnnotation(ShortName.class) != null) {
-        throw new ValidationException(
-            "OtherTokens and ShortName cannot be combined", sourceMethod);
-      }
-      return new Param(null,
+      return new Param(
+          null,
           null,
           null,
           sourceMethod);

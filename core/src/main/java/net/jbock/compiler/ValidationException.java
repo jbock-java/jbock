@@ -15,7 +15,7 @@ final class ValidationException extends RuntimeException {
     this.about = about;
   }
 
-  ValidationException(String message, Element about) {
+  ValidationException(Element about, String message) {
     this(Diagnostic.Kind.ERROR, message, about);
   }
 }

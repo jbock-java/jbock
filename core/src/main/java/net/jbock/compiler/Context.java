@@ -68,8 +68,4 @@ final class Context {
     String name = String.join("_", type.simpleNames()) + suffix;
     return type.topLevelClassName().peerClass(name);
   }
-
-  public TypeName returnType() {
-    return TypeName.get(sourceType.asType());
-  }
 }
