@@ -81,7 +81,7 @@ public final class Processor extends AbstractProcessor {
         if (!done.add(typeElement.accept(Util.QUALIFIED_NAME, null))) {
           continue;
         }
-        TypeSpec typeSpec = Analyser.create(context).analyse();
+        TypeSpec typeSpec = Parser.create(context).analyse();
         write(context.generatedClass, typeSpec);
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);

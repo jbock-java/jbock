@@ -5,9 +5,10 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
-import static net.jbock.compiler.Analyser.LONG_NAME;
-import static net.jbock.compiler.Analyser.SHORT_NAME;
-import static net.jbock.compiler.Analyser.STRING;
+import static net.jbock.compiler.Parser.LONG_NAME;
+import static net.jbock.compiler.Parser.SHORT_NAME;
+import static net.jbock.compiler.Parser.STRING;
+import static net.jbock.compiler.Parser.STRING_LIST;
 import static net.jbock.compiler.OptionType.EVERYTHING_AFTER;
 import static net.jbock.compiler.OptionType.IS_BINDING;
 import static net.jbock.compiler.OptionType.IS_SPECIAL;
@@ -18,6 +19,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -33,13 +35,16 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
+/**
+ * Generates the *_Parser.Option class.
+ */
 final class Option {
 
   private static final FieldSpec DESCRIPTION = FieldSpec.builder(
-      Analyser.STRING_LIST, "description", PRIVATE, FINAL).build();
+      STRING_LIST, "description", PRIVATE, FINAL).build();
 
   private static final FieldSpec ARGUMENT_NAME = FieldSpec.builder(
-      Analyser.STRING, "descriptionArgumentName", PRIVATE, FINAL).build();
+      Parser.STRING, "descriptionArgumentName", PRIVATE, FINAL).build();
 
   final ClassName optionClass;
 
@@ -53,6 +58,10 @@ final class Option {
   private final MethodSpec descriptionBlockMethod;
   final MethodSpec isSpecialMethod;
   final MethodSpec isBindingMethod;
+  final ParameterizedTypeName optMapType;
+  final ParameterizedTypeName sMapType;
+  final ParameterizedTypeName flagsType;
+  final ParameterizedTypeName stringOptionMapType;
 
   private Option(
       JbockContext context,
@@ -74,6 +83,14 @@ final class Option {
         .mapToObj(this::enumConstant)
         .collect(Collectors.toSet());
     this.needsSuffix = uppercaseArgumentNames.size() < context.parameters.size();
+    this.optMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
+        optionClass, STRING_LIST);
+    this.sMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
+        optionClass, STRING);
+    this.flagsType = ParameterizedTypeName.get(ClassName.get(Set.class),
+        optionClass);
+    this.stringOptionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
+        STRING, optionClass);
   }
 
   static Option create(JbockContext context) {
@@ -263,7 +280,7 @@ final class Option {
     return MethodSpec.methodBuilder("descriptionBlock")
         .addModifiers(PUBLIC)
         .addParameter(indent)
-        .returns(Analyser.STRING)
+        .returns(Parser.STRING)
         .addCode(builder.build())
         .build();
   }
@@ -281,7 +298,7 @@ final class Option {
         .build();
     return MethodSpec.methodBuilder("describe")
         .addModifiers(PUBLIC)
-        .returns(Analyser.STRING)
+        .returns(Parser.STRING)
         .addParameter(indent)
         .addCode(codeBlock)
         .build();
@@ -298,7 +315,7 @@ final class Option {
     builder.addStatement("return $N()", describeParamMethod);
     return MethodSpec.methodBuilder("describeNames")
         .addModifiers(PUBLIC)
-        .returns(Analyser.STRING)
+        .returns(Parser.STRING)
         .addCode(builder.build())
         .build();
   }
@@ -336,7 +353,7 @@ final class Option {
 
     return MethodSpec.methodBuilder("describeParam")
         .addModifiers(PRIVATE)
-        .returns(Analyser.STRING)
+        .returns(Parser.STRING)
         .addCode(builder.build())
         .build();
   }
@@ -347,7 +364,7 @@ final class Option {
     return MethodSpec.methodBuilder("toString")
         .addAnnotation(Override.class)
         .addModifiers(PUBLIC)
-        .returns(Analyser.STRING)
+        .returns(Parser.STRING)
         .addStatement("return name() + $S + $N() + $S", " (", describeParamMethod, ")")
         .build();
   }

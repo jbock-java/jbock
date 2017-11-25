@@ -4,9 +4,9 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Analyser.STRING;
-import static net.jbock.compiler.Analyser.STRING_LIST;
-import static net.jbock.compiler.Analyser.otherTokens;
+import static net.jbock.compiler.Parser.STRING;
+import static net.jbock.compiler.Parser.STRING_LIST;
+import static net.jbock.compiler.Parser.otherTokens;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -22,9 +22,12 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
+/**
+ * Generates the *_Parser.*_Impl class.
+ */
 final class Impl {
 
-  private final ClassName implClass;
+  final ClassName implClass;
   private final Option option;
   private final TypeName keysClass;
   private final FieldSpec optMap;
@@ -52,15 +55,20 @@ final class Impl {
     this.context = context;
   }
 
-  static Impl create(Analyser analyser, Helper helper) {
+  static Impl create(
+      JbockContext context,
+      Option option,
+      Helper helper) {
+    ClassName implClass = context.generatedClass.nestedClass(
+        context.sourceType.getSimpleName() + "Impl");
     return new Impl(
-        analyser.implClass,
-        analyser.helperClass,
-        analyser.option,
-        helper.optMap,
-        helper.sMap,
-        helper.flags,
-        analyser.context);
+        implClass,
+        helper.helperClass,
+        option,
+        helper.optMapField,
+        helper.sMapField,
+        helper.flagsField,
+        context);
   }
 
   TypeSpec define() {
@@ -112,12 +120,12 @@ final class Impl {
     ParameterSpec helper = ParameterSpec.builder(this.keysClass, "helper")
         .build();
     ParameterSpec otherTokens = ParameterSpec.builder(
-        Analyser.otherTokens.type, Analyser.otherTokens.name).build();
+        Parser.otherTokens.type, Parser.otherTokens.name).build();
     ParameterSpec esc = ParameterSpec.builder(this.rest.type, this.rest.name).build();
     builder.addStatement("this.$N = $N.$N", this.optMap, helper, optMap);
     builder.addStatement("this.$N = $N.$N", this.sMap, helper, sMap);
     builder.addStatement("this.$N = $N.$N", this.flags, helper, flags);
-    builder.addStatement("this.$N = $N", Analyser.otherTokens, otherTokens);
+    builder.addStatement("this.$N = $N", Parser.otherTokens, otherTokens);
     builder.addStatement("this.$N = $N", this.rest, esc);
     ParameterSpec p = ParameterSpec.builder(option.optionClass, "option")
         .build();

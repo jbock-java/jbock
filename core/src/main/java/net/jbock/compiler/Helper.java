@@ -5,13 +5,13 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
-import static net.jbock.compiler.Analyser.LONG_NAME;
-import static net.jbock.compiler.Analyser.SHORT_NAME;
-import static net.jbock.compiler.Analyser.STRING;
-import static net.jbock.compiler.Analyser.STRING_ITERATOR;
-import static net.jbock.compiler.Analyser.STRING_LIST;
-import static net.jbock.compiler.Analyser.repetitionError;
-import static net.jbock.compiler.Analyser.throwRepetitionErrorInGroup;
+import static net.jbock.compiler.Parser.LONG_NAME;
+import static net.jbock.compiler.Parser.SHORT_NAME;
+import static net.jbock.compiler.Parser.STRING;
+import static net.jbock.compiler.Parser.STRING_ITERATOR;
+import static net.jbock.compiler.Parser.STRING_LIST;
+import static net.jbock.compiler.Parser.repetitionError;
+import static net.jbock.compiler.Parser.throwRepetitionErrorInGroup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -31,13 +31,13 @@ final class Helper {
 
   private final ClassName optionClass;
   private final ClassName optionTypeClass;
-  private final ClassName keysClass;
+  final ClassName helperClass;
   private final FieldSpec longNamesField;
   private final FieldSpec shortNamesField;
 
-  final FieldSpec optMap;
-  final FieldSpec sMap;
-  final FieldSpec flags;
+  final FieldSpec optMapField;
+  final FieldSpec sMapField;
+  final FieldSpec flagsField;
   final Option option;
   final MethodSpec addFlagMethod;
   final MethodSpec addMethod;
@@ -46,63 +46,71 @@ final class Helper {
 
   final MethodSpec readRegularOptionMethod;
 
+  private final MethodSpec readArgumentMethod;
+  private final MethodSpec chopOffShortFlagMethod;
+
   private Helper(
       ClassName optionClass,
       ClassName optionTypeClass,
-      ClassName keysClass,
+      ClassName helperClass,
       FieldSpec longNamesField,
       FieldSpec shortNamesField,
-      FieldSpec optMap,
-      FieldSpec sMap,
-      FieldSpec flags,
+      FieldSpec optMapField,
+      FieldSpec sMapField,
+      FieldSpec flagsField,
       Option option,
       MethodSpec addFlagMethod,
       MethodSpec addMethod,
       MethodSpec readMethod,
-      MethodSpec readRegularOptionMethod) {
+      MethodSpec readRegularOptionMethod,
+      MethodSpec readArgumentMethod,
+      MethodSpec chopOffShortFlagMethod) {
     this.optionClass = optionClass;
     this.optionTypeClass = optionTypeClass;
-    this.keysClass = keysClass;
+    this.helperClass = helperClass;
     this.longNamesField = longNamesField;
     this.shortNamesField = shortNamesField;
-    this.optMap = optMap;
-    this.sMap = sMap;
-    this.flags = flags;
+    this.optMapField = optMapField;
+    this.sMapField = sMapField;
+    this.flagsField = flagsField;
     this.option = option;
     this.addFlagMethod = addFlagMethod;
     this.addMethod = addMethod;
     this.readMethod = readMethod;
     this.readRegularOptionMethod = readRegularOptionMethod;
+    this.readArgumentMethod = readArgumentMethod;
+    this.chopOffShortFlagMethod = chopOffShortFlagMethod;
   }
 
   static Helper create(
       JbockContext context,
-      MethodSpec readArgumentMethod,
-      MethodSpec chopOffShortFlagMethod,
-      TypeName optMapType,
-      TypeName sMapType,
-      TypeName flagsType,
-      Option option,
-      ClassName helperClass,
-      FieldSpec longNamesField,
-      FieldSpec shortNamesField) {
-    FieldSpec optMap = FieldSpec.builder(optMapType, "optMap", FINAL).build();
-    FieldSpec sMap = FieldSpec.builder(sMapType, "sMap", FINAL).build();
-    FieldSpec flags = FieldSpec.builder(flagsType, "flags", FINAL).build();
-    MethodSpec addFlagMethod = addFlagMethod(option.optionClass, option.optionType, flags);
+      Option option) {
+    MethodSpec readArgumentMethod = readArgumentMethod();
+    MethodSpec chopOffShortFlagMethod = chopOffShortFlagMethod();
+    FieldSpec longNamesField = FieldSpec.builder(option.stringOptionMapType, "longNames")
+        .addModifiers(FINAL)
+        .build();
+    FieldSpec shortNamesField = FieldSpec.builder(option.stringOptionMapType, "shortNames")
+        .addModifiers(FINAL)
+        .build();
+    ClassName helperClass = context.generatedClass.nestedClass("Helper");
+    FieldSpec optMapField = FieldSpec.builder(option.optMapType, "optMap", FINAL).build();
+    FieldSpec sMapField = FieldSpec.builder(option.sMapType, "sMap", FINAL).build();
+    FieldSpec flagsField = FieldSpec.builder(option.flagsType, "flags", FINAL).build();
+    MethodSpec addFlagMethod = addFlagMethod(option.optionClass, option.optionType, flagsField);
     MethodSpec addMethod = addMethod(option.optionClass, option.optionType,
-        optMap, sMap, option.isBindingMethod);
+        optMapField, sMapField, option.isBindingMethod);
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(
         helperClass, longNamesField, shortNamesField, option.optionClass);
 
-    MethodSpec read = readMethod(
+    MethodSpec readMethod = readMethod(
         context,
         helperClass,
         readArgumentMethod,
         readRegularOptionMethod,
-        optMapType,
-        sMapType,
-        flagsType,
+        option.optMapType,
+        option.sMapType,
+        option.flagsType,
         option.optionClass,
         option.optionTypeField,
         option.optionType,
@@ -113,31 +121,33 @@ final class Helper {
     return new Helper(
         option.optionClass,
         option.optionType,
-
         helperClass,
         longNamesField,
         shortNamesField,
-        optMap,
-        sMap,
-        flags,
+        optMapField,
+        sMapField,
+        flagsField,
         option,
         addFlagMethod,
         addMethod,
-        read, readRegularOptionMethod);
+        readMethod,
+        readRegularOptionMethod,
+        readArgumentMethod,
+        chopOffShortFlagMethod);
   }
 
   TypeSpec define() {
-    return TypeSpec.classBuilder(keysClass)
+    return TypeSpec.classBuilder(helperClass)
         .addFields(Arrays.asList(
             longNamesField,
             shortNamesField,
-            optMap.toBuilder()
+            optMapField.toBuilder()
                 .initializer("new $T<>($T.class)", EnumMap.class, optionClass)
                 .build(),
-            sMap.toBuilder()
+            sMapField.toBuilder()
                 .initializer("new $T<>($T.class)", EnumMap.class, optionClass)
                 .build(),
-            flags.toBuilder()
+            flagsField.toBuilder()
                 .initializer("$T.noneOf($T.class)", EnumSet.class, optionClass)
                 .build()))
         .addModifiers(PRIVATE, STATIC, FINAL)
@@ -146,6 +156,8 @@ final class Helper {
         .addMethod(readRegularOptionMethod)
         .addMethod(addMethod)
         .addMethod(addFlagMethod)
+        .addMethod(readArgumentMethod)
+        .addMethod(chopOffShortFlagMethod)
         .build();
   }
 
@@ -282,11 +294,11 @@ final class Helper {
    * {@code sMap}, {@code optMap}, {@code flags}, and {@code true} is returned.
    * Otherwise, none of these collections are modified, and {@code false}
    * is returned.</p>
-   *
+   * <p>
    * <p>If the token is an <em>option group</em>, then all tokens of this
    * group are consumed, along with its argument (unless the group ends with
    * a flag).</p>
-   *
+   * <p>
    * <p>After this method returns, the next token in the iterator will be
    * a free token, if any. </p>
    */
@@ -295,7 +307,7 @@ final class Helper {
       ClassName keysClass,
       MethodSpec readArgumentMethod,
       MethodSpec readRegularOptionMethod,
-      TypeName optionMapType,
+      TypeName optMapType,
       TypeName sMapType,
       TypeName flagsType,
       ClassName optionClass,
@@ -305,7 +317,7 @@ final class Helper {
       MethodSpec addMethod,
       MethodSpec addFlagMethod) {
 
-    ParameterSpec optMap = ParameterSpec.builder(optionMapType, "optMap").build();
+    ParameterSpec optMap = ParameterSpec.builder(optMapType, "optMap").build();
     ParameterSpec sMap = ParameterSpec.builder(sMapType, "sMap").build();
     ParameterSpec flags = ParameterSpec.builder(flagsType, "flags").build();
     ParameterSpec otherTokens = ParameterSpec.builder(STRING_LIST, "otherTokens").build();
@@ -365,6 +377,59 @@ final class Helper {
         .addParameters(Arrays.asList(freeToken, it))
         .addCode(builder.build())
         .returns(BOOLEAN)
+        .build();
+  }
+
+  private static MethodSpec readArgumentMethod() {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
+    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    ParameterSpec isLong = ParameterSpec.builder(BOOLEAN, "isLong").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+
+    builder.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
+    builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
+
+    builder.beginControlFlow("if ($N && $N >= 0)", isLong, index)
+        .add("// attached long\n")
+        .addStatement("return $N.substring($N + 1)", token, index)
+        .endControlFlow();
+
+    builder.beginControlFlow("if (!$N && $N.length() > 2)", isLong, token)
+        .add("// attached short\n")
+        .addStatement("return $N.substring(2)", token)
+        .endControlFlow();
+
+    builder.add("// not attached\n");
+    builder.beginControlFlow("if (!$N.hasNext())", it)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Missing value after token: ", token)
+        .endControlFlow();
+
+    builder.addStatement("return $N.next()", it);
+
+    return MethodSpec.methodBuilder("readArgument")
+        .addParameters(Arrays.asList(token, it))
+        .returns(STRING)
+        .addCode(builder.build())
+        .addModifiers(PRIVATE, STATIC)
+        .build();
+  }
+
+  private static MethodSpec chopOffShortFlagMethod() {
+
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("chopOffShortFlag");
+
+    builder.beginControlFlow("if ($N.length() <= 2 || $N.charAt(1) == '-')", token, token)
+        .addStatement("return null")
+        .endControlFlow();
+
+    builder.addStatement("return '-' + $N.substring(2)", token);
+
+    return builder.addParameter(token)
+        .addModifiers(PRIVATE, STATIC)
+        .returns(STRING)
         .build();
   }
 }

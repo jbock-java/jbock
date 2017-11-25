@@ -15,6 +15,9 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
+/**
+ * Generates the *_Parser.OptionType enum.
+ */
 enum OptionType {
 
   FLAG(TypeName.BOOLEAN, false, false),
