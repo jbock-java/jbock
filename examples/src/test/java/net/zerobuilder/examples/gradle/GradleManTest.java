@@ -68,14 +68,14 @@ public final class GradleManTest {
   @Test
   public void errorWeirdOptionGroupEmbeddedHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found hyphen in option group: c-v");
+    exception.expectMessage("Found hyphen in group: -c-v");
     GradleMan_Parser.parse(new String[]{"-c-v"});
   }
 
   @Test
   public void errorWeirdOptionGroupTrailingHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found hyphen in option group: c-");
+    exception.expectMessage("Found hyphen in group: -c-");
     GradleMan_Parser.parse(new String[]{"-c-"});
   }
 

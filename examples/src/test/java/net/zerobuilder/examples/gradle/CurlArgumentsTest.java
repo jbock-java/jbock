@@ -66,14 +66,14 @@ public class CurlArgumentsTest {
   @Test
   public void errorInvalidGrouping() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option group may not end in: H1");
+    exception.expectMessage("Invalid option group:: -vH1");
     CurlArguments_Parser.parse(new String[]{"-vH1"});
   }
 
   @Test
   public void errorInvalidGroupingLong() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option group may not end in: XPOST");
+    exception.expectMessage("Invalid option group:: -vXPOST");
     CurlArguments_Parser.parse(new String[]{"-vXPOST"});
   }
 

@@ -103,6 +103,7 @@ final class Parser {
 
     if (context.grouping) {
 
+      builder.add("\n");
       ParameterSpec firstToken = ParameterSpec.builder(STRING, "firstToken").build();
 
       // begin handle first token
