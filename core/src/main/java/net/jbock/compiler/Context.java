@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
+import net.jbock.CommandLineArguments;
 import net.jbock.com.squareup.javapoet.ClassName;
 
 final class Context {
@@ -17,6 +18,7 @@ final class Context {
   final boolean otherTokens;
   final boolean rest;
   final boolean problematicOptionNames;
+  final boolean grouping;
 
   private Context(
       TypeElement sourceType,
@@ -25,7 +27,8 @@ final class Context {
       String stopword,
       boolean otherTokens,
       boolean rest,
-      boolean problematicOptionNames) {
+      boolean problematicOptionNames,
+      boolean grouping) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -33,6 +36,7 @@ final class Context {
     this.otherTokens = otherTokens;
     this.rest = rest;
     this.problematicOptionNames = problematicOptionNames;
+    this.grouping = grouping;
   }
 
   static Context create(
@@ -45,6 +49,7 @@ final class Context {
     boolean rest = parameters.stream()
         .anyMatch(p -> p.optionType == Type.EVERYTHING_AFTER);
     boolean problematicOptionNames = problematicOptionNames(parameters);
+    boolean grouping = sourceType.getAnnotation(CommandLineArguments.class).grouping();
     return new Context(
         sourceType,
         generatedClass,
@@ -52,7 +57,8 @@ final class Context {
         stopword,
         otherTokens,
         rest,
-        problematicOptionNames);
+        problematicOptionNames,
+        grouping);
   }
 
   private static boolean problematicOptionNames(List<Param> parameters) {

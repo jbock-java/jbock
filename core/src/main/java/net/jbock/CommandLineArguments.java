@@ -24,4 +24,17 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface CommandLineArguments {
+
+  /**
+   * <p>
+   *   Should an attempt be made to read the first token as an option group?
+   * </p>
+   *
+   * <p>
+   *   For example, in {@code tar xzf foobar.tgz}, the first token {@code xzf}
+   *   is an option group, consisting of two flags {@code x} and {@code z},
+   *   followed by the binding token {@code f}.
+   * </p>
+   */
+  boolean grouping() default true;
 }

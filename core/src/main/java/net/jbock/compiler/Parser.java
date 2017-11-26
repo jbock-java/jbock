@@ -70,7 +70,6 @@ final class Parser {
   private MethodSpec parseMethod() {
 
     ParameterSpec otherTokens = ParameterSpec.builder(LIST_OF_STRING, "otherTokens").build();
-    ParameterSpec token = ParameterSpec.builder(STRING, "freeToken").build();
     ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
     ParameterSpec rest = ParameterSpec.builder(LIST_OF_STRING, "rest").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
@@ -102,44 +101,50 @@ final class Parser {
       builder.addStatement("$T $N = $T.emptyList()", rest.type, rest, Collections.class);
     }
 
-    // begin handle first token
-    builder.beginControlFlow("if ($N.hasNext())", it);
+    if (context.grouping) {
 
-    builder.addStatement("$T $N = $N.next()", STRING, token, it);
+      ParameterSpec firstToken = ParameterSpec.builder(STRING, "firstToken").build();
 
-    if (context.stopword != null) {
-      builder.beginControlFlow("if ($N.equals($N))", token, stopword)
-          .addStatement("$N.forEachRemaining($N::add)", it, rest)
-          .addStatement("return new $T($N, $N, $N)",
-              impl.type, helper, otherTokens, rest)
-          .endControlFlow();
+      // begin handle first token
+      builder.beginControlFlow("if ($N.hasNext())", it);
+
+      builder.addStatement("$T $N = $N.next()", STRING, firstToken, it);
+
+      if (context.stopword != null) {
+        builder.beginControlFlow("if ($N.equals($N))", firstToken, stopword)
+            .addStatement("$N.forEachRemaining($N::add)", it, rest)
+            .addStatement("return new $T($N, $N, $N)",
+                impl.type, helper, otherTokens, rest)
+            .endControlFlow();
+      }
+
+      builder.addStatement("$T $N = $N.$N($N, $N)",
+          tokenRead.type, tokenRead, helper, this.helper.readGroupMethod, firstToken, it);
+
+      builder.beginControlFlow("if (!$N)", tokenRead);
+      if (context.otherTokens) {
+        builder.addStatement("$N.add($N)", otherTokens, firstToken);
+      } else {
+        builder.addStatement("throw new $T($S + $N)",
+            IllegalArgumentException.class, "Unknown token: ", firstToken);
+      }
+
+      builder.endControlFlow();
+
+      // end handle first token
+      builder.endControlFlow();
     }
 
-    builder.addStatement("$T $N = $N.$N($N, $N)",
-        tokenRead.type, tokenRead, helper, this.helper.readGroupMethod, token, it);
-
-    builder.beginControlFlow("if (!$N)", tokenRead);
-    if (context.otherTokens) {
-      builder.addStatement("$N.add($N)", otherTokens, token);
-    } else {
-      builder.addStatement("throw new $T($S + $N)",
-          IllegalArgumentException.class, "Unknown token: ", token);
-    }
-
-    builder.endControlFlow();
-
-    // end handle first token
-    builder.endControlFlow();
-
+    ParameterSpec freetoken = ParameterSpec.builder(STRING, "freeToken").build();
 
     // Begin parsing loop
     builder.add("\n");
     builder.beginControlFlow("while ($N.hasNext())", it);
 
-    builder.addStatement("$T $N = $N.next()", STRING, token, it);
+    builder.addStatement("$T $N = $N.next()", STRING, freetoken, it);
 
     if (context.stopword != null) {
-      builder.beginControlFlow("if ($N.equals($N))", token, stopword)
+      builder.beginControlFlow("if ($N.equals($N))", freetoken, stopword)
           .addStatement("$N.forEachRemaining($N::add)", it, rest)
           .addStatement("return new $T($N, $N, $N)",
               impl.type, helper, otherTokens, rest)
@@ -147,14 +152,14 @@ final class Parser {
     }
 
     builder.addStatement("$T $N = $N.$N($N, $N)",
-        tokenRead.type, tokenRead, helper, this.helper.readMethod, token, it);
+        tokenRead.type, tokenRead, helper, this.helper.readMethod, freetoken, it);
 
     builder.beginControlFlow("if (!$N)", tokenRead);
     if (context.otherTokens) {
-      builder.addStatement("$N.add($N)", otherTokens, token);
+      builder.addStatement("$N.add($N)", otherTokens, freetoken);
     } else {
       builder.addStatement("throw new $T($S + $N)",
-          IllegalArgumentException.class, "Unknown token: ", token);
+          IllegalArgumentException.class, "Unknown token: ", freetoken);
     }
     builder.endControlFlow();
 
