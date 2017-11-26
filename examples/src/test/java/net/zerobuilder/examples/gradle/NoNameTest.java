@@ -25,6 +25,12 @@ public class NoNameTest {
   }
 
   @Test
+  public void testFlag() {
+    NoName noName = NoName_Parser.parse(new String[]{"--cmos"});
+    assertThat(noName.cmos()).isEqualTo(true);
+  }
+
+  @Test
   public void errorUnknownToken() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Unknown token: blabla");

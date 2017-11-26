@@ -32,7 +32,6 @@ final class Impl {
 
   private final Option option;
   private final OptionType optionType;
-  private final TypeName keysClass;
   private final FieldSpec restField = FieldSpec.builder(LIST_OF_STRING, "rest")
       .addModifiers(FINAL)
       .build();
@@ -42,13 +41,11 @@ final class Impl {
 
   private Impl(
       ClassName type,
-      ClassName keysClass,
       Option option,
       OptionType optionType,
       Context context,
       Helper helper) {
     this.type = type;
-    this.keysClass = keysClass;
     this.option = option;
     this.optionType = optionType;
     this.context = context;
@@ -64,7 +61,6 @@ final class Impl {
         context.sourceType.getSimpleName() + "Impl");
     return new Impl(
         implClass,
-        helper.type,
         option,
         optionType,
         context,
@@ -123,7 +119,7 @@ final class Impl {
 
   private MethodSpec privateConstructor() {
     CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec helper = ParameterSpec.builder(this.keysClass, "helper")
+    ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper")
         .build();
     ParameterSpec otherTokens = ParameterSpec.builder(
         this.helper.otherTokensField.type, this.helper.otherTokensField.name).build();

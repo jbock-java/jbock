@@ -49,7 +49,10 @@ final class Helper {
   final MethodSpec addFlagMethod;
   final MethodSpec addMethod;
   final MethodSpec readMethod;
+  final MethodSpec readNextMethod;
+  final MethodSpec readLongMethod;
   final MethodSpec readRegularOptionMethod;
+  final MethodSpec readOptionFromGroupMethod;
 
   private final MethodSpec readArgumentMethod;
   private final MethodSpec chopOffShortFlagMethod;
@@ -66,7 +69,10 @@ final class Helper {
       MethodSpec addFlagMethod,
       MethodSpec addMethod,
       MethodSpec readMethod,
+      MethodSpec readNextMethod,
+      MethodSpec readLongMethod,
       MethodSpec readRegularOptionMethod,
+      MethodSpec readOptionFromGroupMethod,
       MethodSpec readArgumentMethod,
       MethodSpec chopOffShortFlagMethod) {
     this.type = type;
@@ -80,7 +86,10 @@ final class Helper {
     this.addFlagMethod = addFlagMethod;
     this.addMethod = addMethod;
     this.readMethod = readMethod;
+    this.readNextMethod = readNextMethod;
+    this.readLongMethod = readLongMethod;
     this.readRegularOptionMethod = readRegularOptionMethod;
+    this.readOptionFromGroupMethod = readOptionFromGroupMethod;
     this.readArgumentMethod = readArgumentMethod;
     this.chopOffShortFlagMethod = chopOffShortFlagMethod;
   }
@@ -89,7 +98,8 @@ final class Helper {
       Context context,
       OptionType optionType,
       Option option) {
-    MethodSpec readArgumentMethod = readArgumentMethod();
+    MethodSpec readNextMethod = readNextMethod();
+    MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
     MethodSpec chopOffShortFlagMethod = chopOffShortFlagMethod();
     FieldSpec longNamesField = FieldSpec.builder(option.stringOptionMapType, "longNames")
         .addModifiers(FINAL)
@@ -104,14 +114,19 @@ final class Helper {
     MethodSpec addFlagMethod = addFlagMethod(option.type, optionType.type, flagsField);
     MethodSpec addMethod = addMethod(option.type, optionType.type,
         optMapField, sMapField, option.isBindingMethod);
+    MethodSpec readLongMethod = readLongMethod(
+        longNamesField, option.type);
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(
-        helperClass, longNamesField, shortNamesField, option.type);
+        shortNamesField, option.type, readLongMethod);
+    MethodSpec readOptionFromGroupMethod = readOptionFromGroupMethod(
+        shortNamesField, option.type, readLongMethod);
 
     MethodSpec readMethod = readMethod(
         context,
         helperClass,
         readArgumentMethod,
         readRegularOptionMethod,
+        readOptionFromGroupMethod,
         option.optMapType,
         option.sMapType,
         option.flagsType,
@@ -134,7 +149,10 @@ final class Helper {
         addFlagMethod,
         addMethod,
         readMethod,
+        readNextMethod,
+        readLongMethod,
         readRegularOptionMethod,
+        readOptionFromGroupMethod,
         readArgumentMethod,
         chopOffShortFlagMethod);
   }
@@ -157,9 +175,12 @@ final class Helper {
         .addMethod(privateConstructor())
         .addMethod(readMethod)
         .addMethod(readRegularOptionMethod)
+        .addMethod(readOptionFromGroupMethod)
         .addMethod(addMethod)
         .addMethod(addFlagMethod)
         .addMethod(readArgumentMethod)
+        .addMethod(readNextMethod)
+        .addMethod(readLongMethod)
         .addMethod(chopOffShortFlagMethod)
         .build();
   }
@@ -257,10 +278,9 @@ final class Helper {
   }
 
   private static MethodSpec readRegularOptionMethod(
-      ClassName keysClass,
-      FieldSpec longNames,
       FieldSpec shortNames,
-      ClassName optionClass) {
+      ClassName optionClass,
+      MethodSpec readLongMethod) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
     CodeBlock.Builder builder = CodeBlock.builder();
@@ -275,6 +295,51 @@ final class Helper {
         .addStatement("return $N.get($N.substring(1, 2))", shortNames, token)
         .endControlFlow();
 
+    builder.addStatement("return $N($N)", readLongMethod, token);
+
+    return MethodSpec.methodBuilder("readRegularOption")
+        .addParameter(token)
+        .returns(optionClass)
+        .addCode(builder.build())
+        .build();
+  }
+
+  private static MethodSpec readOptionFromGroupMethod(
+      FieldSpec shortNames,
+      ClassName optionClass,
+      MethodSpec readLongMethod) {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    ParameterSpec shortName = ParameterSpec.builder(STRING, "shortName").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+
+    builder.beginControlFlow("if ($N.length() >= 2 && $N.charAt(0) == '-' && $N.charAt(1) == '-')",
+        token, token, token)
+        .addStatement("return $N($N)", readLongMethod, token)
+        .endControlFlow();
+
+    builder.beginControlFlow("if ($N.length() >= 2 && $N.charAt(0) == '-')", token, token)
+        .addStatement("$N = $N.substring(1)", token, token)
+        .endControlFlow();
+
+    builder.addStatement("$T $N = $N.substring(0, 1)", shortName.type, shortName, token);
+
+    builder.addStatement("return $N.get($N)", shortNames, shortName);
+
+    return MethodSpec.methodBuilder("readOptionFromGroup")
+        .addParameter(token)
+        .returns(optionClass)
+        .addCode(builder.build())
+        .build();
+  }
+
+  private static MethodSpec readLongMethod(
+      FieldSpec longNames,
+      ClassName optionClass) {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+
     builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
 
     builder.beginControlFlow("if ($N < 0)", index)
@@ -283,7 +348,7 @@ final class Helper {
 
     builder.addStatement("return $N.get($N.substring(2, $N))", longNames, token, index);
 
-    return MethodSpec.methodBuilder("readRegularOption")
+    return MethodSpec.methodBuilder("readLong")
         .addParameter(token)
         .returns(optionClass)
         .addCode(builder.build())
@@ -310,6 +375,7 @@ final class Helper {
       ClassName keysClass,
       MethodSpec readArgumentMethod,
       MethodSpec readRegularOptionMethod,
+      MethodSpec readOptionFromGroupMethod,
       TypeName optMapType,
       TypeName sMapType,
       TypeName flagsType,
@@ -356,7 +422,7 @@ final class Helper {
         .add("// done reading flags\n")
         .addStatement("return $L", true)
         .endControlFlow();
-    builder.addStatement("$N = $N($N)", option, readRegularOptionMethod, token);
+    builder.addStatement("$N = $N($N)", option, readOptionFromGroupMethod, token);
     builder.beginControlFlow("if ($N == null)", option)
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
             "Unknown token in option group: ", freeToken)
@@ -383,12 +449,30 @@ final class Helper {
         .build();
   }
 
-  private static MethodSpec readArgumentMethod() {
+  private static MethodSpec readArgumentMethod(
+      MethodSpec readNextMethod) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
     ParameterSpec isLong = ParameterSpec.builder(BOOLEAN, "isLong").build();
     CodeBlock.Builder builder = CodeBlock.builder();
+
+    // handle bsd
+    builder.beginControlFlow("if ($N.charAt(0) != '-')", token);
+
+    builder.beginControlFlow("if ($N.length() >= 2)", token)
+        .add("// attached short\n")
+        .addStatement("return $N.substring(1)", token)
+        .endControlFlow();
+
+    builder.addStatement("return $N($N, $N)", readNextMethod, token, it);
+
+    // end handle bsd
+    builder.endControlFlow();
+
+    builder.add("\n");
+    builder.addStatement("assert $N.length() >= 2", token);
+    builder.add("\n");
 
     builder.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
     builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
@@ -403,7 +487,21 @@ final class Helper {
         .addStatement("return $N.substring(2)", token)
         .endControlFlow();
 
-    builder.add("// not attached\n");
+    builder.addStatement("return $N($N, $N)", readNextMethod, token, it);
+
+    return MethodSpec.methodBuilder("readArgument")
+        .addParameters(Arrays.asList(token, it))
+        .returns(STRING)
+        .addCode(builder.build())
+        .addModifiers(PRIVATE, STATIC)
+        .build();
+  }
+
+  private static MethodSpec readNextMethod() {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+
     builder.beginControlFlow("if (!$N.hasNext())", it)
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
             "Missing value after token: ", token)
@@ -411,7 +509,7 @@ final class Helper {
 
     builder.addStatement("return $N.next()", it);
 
-    return MethodSpec.methodBuilder("readArgument")
+    return MethodSpec.methodBuilder("readNext")
         .addParameters(Arrays.asList(token, it))
         .returns(STRING)
         .addCode(builder.build())
@@ -422,13 +520,31 @@ final class Helper {
   private static MethodSpec chopOffShortFlagMethod() {
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec rest = ParameterSpec.builder(STRING, "rest").build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("chopOffShortFlag");
 
-    builder.beginControlFlow("if ($N.length() <= 2 || $N.charAt(1) == '-')", token, token)
+    builder.beginControlFlow("if ($N.length() >= 2 && $N.charAt(0) == '-' && $N.charAt(1) == '-')",
+        token, token, token)
+        .addCode("// long flag\n")
         .addStatement("return null")
         .endControlFlow();
 
-    builder.addStatement("return '-' + $N.substring(2)", token);
+    builder.beginControlFlow("if ($N.length() >= 1 && $N.charAt(0) == '-')", token, token)
+        .addStatement("$N = $N.substring(1)", token, token)
+        .endControlFlow();
+
+    builder.beginControlFlow("if ($N.length() <= 1)", token)
+        .addStatement("return null")
+        .endControlFlow();
+
+    builder.addStatement("$T $N = $N.substring(1)", rest.type, rest, token);
+
+    builder.beginControlFlow("if ($N.charAt(0) == '-')", rest)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Found hyphen in option group: ", token)
+        .endControlFlow();
+
+    builder.addStatement("return $N", rest);
 
     return builder.addParameter(token)
         .addModifiers(PRIVATE, STATIC)
