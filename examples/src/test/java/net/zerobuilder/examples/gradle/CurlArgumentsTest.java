@@ -49,18 +49,32 @@ public class CurlArgumentsTest {
 
   @Test
   public void testGrouping() {
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vH1"}).headers())
+    assertThat(CurlArguments_Parser.parse(new String[]{"-vH", "1"}).headers())
         .isEqualTo(singletonList("1"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vH1"}).verbose())
+    assertThat(CurlArguments_Parser.parse(new String[]{"-vH", "1"}).verbose())
         .isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vH1", "-H2"}).headers())
+    assertThat(CurlArguments_Parser.parse(new String[]{"-vH", "1", "-H2"}).headers())
         .isEqualTo(asList("1", "2"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vH1", "-H2"}).verbose())
+    assertThat(CurlArguments_Parser.parse(new String[]{"-vH", "1", "-H2"}).verbose())
         .isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vXPOST"}).method())
+    assertThat(CurlArguments_Parser.parse(new String[]{"-vX", "POST"}).method())
         .isEqualTo(Optional.of("POST"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vXPOST"}).verbose())
+    assertThat(CurlArguments_Parser.parse(new String[]{"-vX", "POST"}).verbose())
         .isTrue();
+  }
+
+  @Test
+  public void errorInvalidGrouping() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Option group may not end in: H1");
+    CurlArguments_Parser.parse(new String[]{"-vH1"});
+  }
+
+  @Test
+  public void errorInvalidGroupingLong() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Option group may not end in: XPOST");
+    CurlArguments_Parser.parse(new String[]{"-vXPOST"});
   }
 
   @Test

@@ -218,13 +218,21 @@ public final class GradleManTest {
         .isTrue();
     assertThat(GradleMan_Parser.parse(new String[]{"-cv"}).message())
         .isEqualTo(Optional.empty());
-    assertThat(GradleMan_Parser.parse(new String[]{"-cvma"}).message())
+    assertThat(GradleMan_Parser.parse(new String[]{"-cvm", "a"}).message())
         .isEqualTo(Optional.of("a"));
   }
 
   @Test
   public void testDoubleFlagWithAttachedOption() {
-    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-cvmhello"});
+    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-cvm", "hello"});
+    assertThat(gradleMan.cmos()).isEqualTo(true);
+    assertThat(gradleMan.verbose()).isEqualTo(true);
+    assertThat(gradleMan.message()).isEqualTo(Optional.of("hello"));
+  }
+
+  @Test
+  public void testDoubleFlagWithAttachedOptionNoHyphen() {
+    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"cvm", "hello"});
     assertThat(gradleMan.cmos()).isEqualTo(true);
     assertThat(gradleMan.verbose()).isEqualTo(true);
     assertThat(gradleMan.message()).isEqualTo(Optional.of("hello"));

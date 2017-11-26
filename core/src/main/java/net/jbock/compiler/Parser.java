@@ -102,6 +102,36 @@ final class Parser {
       builder.addStatement("$T $N = $T.emptyList()", rest.type, rest, Collections.class);
     }
 
+    // begin handle first token
+    builder.beginControlFlow("if ($N.hasNext())", it);
+
+    builder.addStatement("$T $N = $N.next()", STRING, token, it);
+
+    if (context.stopword != null) {
+      builder.beginControlFlow("if ($N.equals($N))", token, stopword)
+          .addStatement("$N.forEachRemaining($N::add)", it, rest)
+          .addStatement("return new $T($N, $N, $N)",
+              impl.type, helper, otherTokens, rest)
+          .endControlFlow();
+    }
+
+    builder.addStatement("$T $N = $N.$N($N, $N)",
+        tokenRead.type, tokenRead, helper, this.helper.readGroupMethod, token, it);
+
+    builder.beginControlFlow("if (!$N)", tokenRead);
+    if (context.otherTokens) {
+      builder.addStatement("$N.add($N)", otherTokens, token);
+    } else {
+      builder.addStatement("throw new $T($S + $N)",
+          IllegalArgumentException.class, "Unknown token: ", token);
+    }
+
+    builder.endControlFlow();
+
+    // end handle first token
+    builder.endControlFlow();
+
+
     // Begin parsing loop
     builder.add("\n");
     builder.beginControlFlow("while ($N.hasNext())", it);
@@ -111,7 +141,8 @@ final class Parser {
     if (context.stopword != null) {
       builder.beginControlFlow("if ($N.equals($N))", token, stopword)
           .addStatement("$N.forEachRemaining($N::add)", it, rest)
-          .addStatement("break")
+          .addStatement("return new $T($N, $N, $N)",
+              impl.type, helper, otherTokens, rest)
           .endControlFlow();
     }
 

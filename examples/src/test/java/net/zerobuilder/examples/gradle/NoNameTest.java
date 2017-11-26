@@ -13,7 +13,7 @@ public class NoNameTest {
   public final ExpectedException exception = ExpectedException.none();
 
   @Test
-  public void test() {
+  public void basicTest() {
     NoName noName = NoName_Parser.parse(new String[]{"--message=m", "--file=f", "--file=o",
         "--file=o", "--cmos"});
     assertThat(noName.cmos()).isEqualTo(true);
