@@ -10,14 +10,14 @@ public class SimpleArgumentsTest {
   public final ExpectedException exception = ExpectedException.none();
 
   @Test
-  public void noGrouping() {
+  public void noGroupingOfFirstArgument() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Unknown token: xf");
     SimpleArguments_Parser.parse(new String[]{"xf", "1"});
   }
 
   @Test
-  public void noGroupingHyphen() {
+  public void noGroupingFirstArgumentHyphen() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Invalid characters after flag in: -xf");
     SimpleArguments_Parser.parse(new String[]{"-xf", "1"});

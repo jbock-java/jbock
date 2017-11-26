@@ -122,8 +122,14 @@ final class Helper {
         optMapField, sMapField, option.isBindingMethod);
     MethodSpec readLongMethod = readLongMethod(
         longNamesField, option.type);
+
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(
-        shortNamesField, option.type, readLongMethod);
+        shortNamesField,
+        option.typeField,
+        optionType.type,
+        option.type,
+        readLongMethod);
+
     MethodSpec readOptionFromGroupMethod = readOptionFromGroupMethod(
         shortNamesField, option.type, readLongMethod);
 
@@ -145,7 +151,6 @@ final class Helper {
         option.type,
         option.typeField,
         optionType.type,
-        chopOffShortFlagMethod,
         addMethod,
         addFlagMethod);
 
@@ -295,10 +300,13 @@ final class Helper {
 
   private static MethodSpec readRegularOptionMethod(
       FieldSpec shortNames,
-      ClassName optionClass,
+      FieldSpec optionTypeField,
+      ClassName optionTypeType,
+      ClassName optionType,
       MethodSpec readLongMethod) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if ($N.length() <= 1 || $N.charAt(0) != '-')", token, token)
@@ -306,16 +314,35 @@ final class Helper {
         .addStatement("return null")
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N.charAt(1) != '-')", token)
-        .add("// short option\n")
-        .addStatement("return $N.get($N.substring(1, 2))", shortNames, token)
+    // begin handle short option
+    builder.beginControlFlow("if ($N.charAt(1) != '-')", token);
+
+    builder.add("// short option\n");
+    builder.addStatement("$T $N = $N.get($N.substring(1, 2))", option.type, option, shortNames, token);
+
+    builder.beginControlFlow("if ($N == null)", option)
+        .addStatement("return null")
         .endControlFlow();
 
+    builder.beginControlFlow("if ($N.$N != $T.$L)", option, optionTypeField, optionTypeType, Type.FLAG)
+        .add("// not a flag, possibly attached value\n")
+        .addStatement("return $N", option)
+        .endControlFlow();
+
+    builder.beginControlFlow("if ($N.length() > 2)", token)
+        .add("// flags cannot have an attached value\n")
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Invalid characters after flag in: ", token)
+        .endControlFlow();
+    builder.addStatement("return $N", option);
+    builder.endControlFlow();
+
+    // end handle short option
     builder.addStatement("return $N($N)", readLongMethod, token);
 
     return MethodSpec.methodBuilder("readRegularOption")
         .addParameter(token)
-        .returns(optionClass)
+        .returns(optionType)
         .addCode(builder.build())
         .build();
   }
@@ -478,7 +505,6 @@ final class Helper {
       ClassName optionClass,
       FieldSpec optionType,
       ClassName optionTypeClass,
-      MethodSpec chopOffShortFlagMethod,
       MethodSpec addMethod,
       MethodSpec addFlagMethod) {
 
@@ -508,12 +534,6 @@ final class Helper {
         .add(throwRepetitionErrorInGroup(option, token))
         .endControlFlow();
 
-    builder.addStatement("$T $N = $N($N)", chopped.type, chopped, chopOffShortFlagMethod, token);
-
-    builder.beginControlFlow("if ($N != null)", chopped)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Invalid characters after flag in: ", token)
-        .endControlFlow();
     builder.addStatement("return $L", true);
 
     // end handle flag

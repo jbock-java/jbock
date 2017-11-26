@@ -80,7 +80,7 @@ public class CurlArgumentsTest {
   @Test
   public void errorGroupingDuplicateFlag() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("In option group -vH'Content-Type: application/xml': option VERBOSE (-v) is not repeatable");
+    exception.expectMessage("Invalid characters after flag in: -vH'Content-Type: application/xml'");
     CurlArguments_Parser.parse(new String[]{"-v", "-vH'Content-Type: application/xml'"});
   }
 

@@ -181,6 +181,14 @@ public final class GradleManTest {
   }
 
   @Test
+  public void testAttachedFirstToken() {
+    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-fbar.txt", "--message=hello"});
+    assertThat(gradleMan.file().size()).isEqualTo(1);
+    assertThat(gradleMan.file().get(0)).isEqualTo("bar.txt");
+    assertThat(gradleMan.message()).isEqualTo(Optional.of("hello"));
+  }
+
+  @Test
   public void testLongSuppressed() {
     // Long option --cmos is suppressed
     GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"--cmos"});
