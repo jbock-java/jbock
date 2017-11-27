@@ -12,12 +12,15 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
@@ -69,9 +72,12 @@ final class Impl {
       OptionType optionType,
       Option option,
       Helper helper) {
-    FieldSpec optMapField = FieldSpec.builder(option.optMapType, "optMap", FINAL).build();
-    FieldSpec sMapField = FieldSpec.builder(option.sMapType, "sMap", FINAL).build();
-    FieldSpec flagsField = FieldSpec.builder(option.flagsType, "flags", FINAL).build();
+    FieldSpec optMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        option.type, LIST_OF_STRING), "optMap", FINAL).build();
+    FieldSpec sMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        option.type, STRING), "sMap", FINAL).build();
+    FieldSpec flagsField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
+        option.type), "flags", FINAL).build();
     return new Impl(
         implType,
         optMapField,

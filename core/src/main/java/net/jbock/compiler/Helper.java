@@ -8,20 +8,19 @@ import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.Parser.repetitionError;
-import static net.jbock.compiler.Parser.throwRepetitionErrorInGroup;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 /**
@@ -122,10 +121,12 @@ final class Helper {
     MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
     MethodSpec looksLikeLongMethod = looksLikeLongMethod();
     MethodSpec chopOffHeadMethod = chopOffHeadMethod();
-    FieldSpec longNamesField = FieldSpec.builder(option.stringOptionMapType, "longNames")
+    FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        STRING, option.type), "longNames")
         .addModifiers(FINAL)
         .build();
-    FieldSpec shortNamesField = FieldSpec.builder(option.stringOptionMapType, "shortNames")
+    FieldSpec shortNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        STRING, option.type), "shortNames")
         .addModifiers(FINAL)
         .build();
     MethodSpec looksLikeGroupMethod = looksLikeGroupMethod(
@@ -135,9 +136,12 @@ final class Helper {
         option.type,
         optionType.type);
     ClassName helperClass = context.generatedClass.nestedClass("Helper");
-    FieldSpec optMapField = FieldSpec.builder(option.optMapType, "optMap", FINAL).build();
-    FieldSpec sMapField = FieldSpec.builder(option.sMapType, "sMap", FINAL).build();
-    FieldSpec flagsField = FieldSpec.builder(option.flagsType, "flags", FINAL).build();
+    FieldSpec optMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        option.type, LIST_OF_STRING), "optMap", FINAL).build();
+    FieldSpec sMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        option.type, STRING), "sMap", FINAL).build();
+    FieldSpec flagsField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
+        option.type), "flags", FINAL).build();
     MethodSpec buildMethod = buildMethod(implType, optMapField, sMapField, flagsField);
     MethodSpec addFlagMethod = addFlagMethod(option.type, optionType.type, flagsField);
     MethodSpec addMethod = addMethod(option.type, optionType.type,
@@ -208,8 +212,12 @@ final class Helper {
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.classBuilder(type)
         .addFields(Arrays.asList(
-            longNamesField,
-            shortNamesField,
+            longNamesField.toBuilder()
+                .initializer("$T.$N()", option.type, this.option.longNameMapMethod)
+                .build(),
+            shortNamesField.toBuilder()
+                .initializer("$T.$N()", option.type, this.option.shortNameMapMethod)
+                .build(),
             optMapField.toBuilder()
                 .initializer("new $T<>($T.class)", EnumMap.class, option.type)
                 .build(),
@@ -220,7 +228,6 @@ final class Helper {
                 .initializer("$T.noneOf($T.class)", EnumSet.class, option.type)
                 .build()))
         .addModifiers(PRIVATE, STATIC, FINAL)
-        .addMethod(privateConstructor())
         .addMethod(readMethod)
         .addMethod(readRegularOptionMethod)
         .addMethod(addMethod)
@@ -236,50 +243,7 @@ final class Helper {
           .addMethod(readGroupMethod)
           .addMethod(readOptionFromGroupMethod);
     }
-    return builder
-        .build();
-  }
-
-  private MethodSpec privateConstructor() {
-    CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec longNames = ParameterSpec.builder(this.longNamesField.type, this.longNamesField.name)
-        .build();
-    ParameterSpec shortNames = ParameterSpec.builder(this.shortNamesField.type, this.shortNamesField.name)
-        .build();
-    ParameterSpec option = ParameterSpec.builder(this.option.type, "option")
-        .build();
-
-    builder.add("\n");
-    builder.addStatement("$T $N = new $T<>()",
-        longNames.type, longNames, HashMap.class)
-        .addStatement("$T $N = new $T<>()",
-            shortNames.type, shortNames, HashMap.class);
-
-    // begin iteration over options
-    builder.add("\n");
-    builder.beginControlFlow("for ($T $N : $T.values())", this.option.type, option, this.option.type);
-
-    builder.beginControlFlow("if ($N.$N != null)", option, this.option.shortNameField)
-        .addStatement("$N.put($N.$N.toString(), $N)", shortNames, option, this.option.shortNameField, option)
-        .endControlFlow();
-
-    builder.beginControlFlow("if ($N.$N != null)", option, this.option.longNameField)
-        .addStatement("$N.put($N.$N, $N)", longNames, option, this.option.longNameField, option)
-        .endControlFlow();
-
-    // end iteration over options
-    builder.endControlFlow();
-
-    builder.add("\n");
-    builder.addStatement("this.$N = $T.unmodifiableMap($N)",
-        longNames, Collections.class, longNames);
-
-    builder.addStatement("this.$N = $T.unmodifiableMap($N)",
-        shortNames, Collections.class, shortNames);
-
-    return MethodSpec.constructorBuilder()
-        .addCode(builder.build())
-        .build();
+    return builder.build();
   }
 
   private static MethodSpec addFlagMethod(
@@ -734,6 +698,27 @@ final class Helper {
             optMapField, sMapField, flagsField, otherTokens, rest)
         .addParameters(Arrays.asList(otherTokens, rest))
         .returns(implType)
+        .build();
+  }
+
+  private static CodeBlock repetitionError(
+      ParameterSpec option,
+      ParameterSpec token) {
+    return CodeBlock.builder()
+        .addStatement("throw new $T($S + $N + $S + $N + $S)",
+            IllegalArgumentException.class,
+            "Found token: ", token, ", but option ", option, " is not repeatable")
+        .build();
+  }
+
+  private static CodeBlock throwRepetitionErrorInGroup(
+      ParameterSpec option,
+      ParameterSpec originalToken) {
+    return CodeBlock.builder()
+        .addStatement("throw new $T($S + $N + $S + $N + $S)",
+            IllegalArgumentException.class,
+            "In option group ",
+            originalToken, ": option ", option, " is not repeatable")
         .build();
   }
 }

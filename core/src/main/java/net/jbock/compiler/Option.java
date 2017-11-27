@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
@@ -13,10 +14,10 @@ import static net.jbock.compiler.Util.snakeCase;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import net.jbock.Description;
 import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
@@ -47,36 +48,39 @@ final class Option {
   private final MethodSpec describeParamMethod;
   private final MethodSpec descriptionBlockMethod;
 
-  final FieldSpec longNameField;
-  final FieldSpec shortNameField;
+  private final FieldSpec longNameField;
+  private final FieldSpec shortNameField;
+
   final FieldSpec typeField;
 
   final MethodSpec isSpecialMethod;
   final MethodSpec isBindingMethod;
 
-  final TypeName optMapType;
-  final TypeName sMapType;
-  final TypeName flagsType;
-  final TypeName stringOptionMapType;
+  final MethodSpec shortNameMapMethod;
+  final MethodSpec longNameMapMethod;
 
   private Option(
       Context context,
       ClassName type,
       OptionType optionType,
+      FieldSpec longNameField,
+      FieldSpec shortNameField,
       FieldSpec typeField,
       FieldSpec descriptionField,
       FieldSpec argumentNameField,
-      MethodSpec isSpecialMethod,
+      MethodSpec shortNameMapMethod,
+      MethodSpec longNameMapMethod, MethodSpec isSpecialMethod,
       MethodSpec isBindingMethod) {
+    this.longNameField = longNameField;
+    this.shortNameField = shortNameField;
     this.descriptionField = descriptionField;
     this.argumentNameField = argumentNameField;
-    this.longNameField = FieldSpec.builder(STRING, "longName", PRIVATE, FINAL).build();
-    this.shortNameField = FieldSpec.builder(ClassName.get(Character.class),
-        "shortName", PRIVATE, FINAL).build();
+    this.shortNameMapMethod = shortNameMapMethod;
     this.context = context;
     this.type = type;
     this.optionType = optionType;
     this.typeField = typeField;
+    this.longNameMapMethod = longNameMapMethod;
     this.isSpecialMethod = isSpecialMethod;
     this.isBindingMethod = isBindingMethod;
     this.describeParamMethod = describeParamMethod(
@@ -91,31 +95,33 @@ final class Option {
         argumentNameField,
         optionType);
     this.descriptionBlockMethod = descriptionBlockMethod(descriptionField);
-    this.optMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        type, LIST_OF_STRING);
-    this.sMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        type, STRING);
-    this.flagsType = ParameterizedTypeName.get(ClassName.get(Set.class),
-        type);
-    this.stringOptionMapType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        STRING, type);
   }
 
   static Option create(Context context, OptionType optionType) {
     FieldSpec typeField = FieldSpec.builder(optionType.type, "type", PRIVATE, FINAL).build();
+    FieldSpec longNameField = FieldSpec.builder(STRING, "longName", PRIVATE, FINAL).build();
+    FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
+        "shortName", PRIVATE, FINAL).build();
     MethodSpec isSpecialMethod = isSpecialMethod(optionType, typeField);
+    ClassName type = context.generatedClass.nestedClass("Option");
     MethodSpec isBindingMethod = isBindingMethod(optionType, typeField);
+    MethodSpec shortNameMapMethod = shortNameMapMethod(type, shortNameField);
+    MethodSpec longNameMapMethod = longNameMapMethod(type, longNameField);
     FieldSpec descriptionField = FieldSpec.builder(
         LIST_OF_STRING, "description", PRIVATE, FINAL).build();
     FieldSpec argumentNameField = FieldSpec.builder(
         STRING, "descriptionArgumentName", PRIVATE, FINAL).build();
     return new Option(
         context,
-        context.generatedClass.nestedClass("Option"),
+        type,
         optionType,
+        longNameField,
+        shortNameField,
         typeField,
         descriptionField,
         argumentNameField,
+        shortNameMapMethod,
+        longNameMapMethod,
         isSpecialMethod,
         isBindingMethod);
   }
@@ -161,6 +167,8 @@ final class Option {
         .addMethod(isSpecialMethod)
         .addMethod(isBindingMethod)
         .addMethod(privateConstructor())
+        .addMethod(shortNameMapMethod)
+        .addMethod(longNameMapMethod)
         .build();
   }
 
@@ -196,6 +204,66 @@ final class Option {
         .addStatement("return $T.ofNullable($N)", Optional.class, shortNameField)
         .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), TypeName.get(Character.class)))
         .addModifiers(PUBLIC)
+        .build();
+  }
+
+  private static MethodSpec shortNameMapMethod(
+      ClassName optionType,
+      FieldSpec shortNameField) {
+    ParameterSpec shortNames = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        STRING, optionType), "shortNames")
+        .build();
+    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
+
+    CodeBlock.Builder builder = CodeBlock.builder();
+    builder.addStatement("$T $N = new $T<>()", shortNames.type, shortNames, HashMap.class);
+
+    // begin iteration over options
+    builder.add("\n");
+    builder.beginControlFlow("for ($T $N : $T.values())", optionType, option, optionType);
+
+    builder.beginControlFlow("if ($N.$N != null)", option, shortNameField)
+        .addStatement("$N.put($N.$N.toString(), $N)", shortNames, option, shortNameField, option)
+        .endControlFlow();
+
+    // end iteration over options
+    builder.endControlFlow();
+    builder.addStatement("return $T.unmodifiableMap($N)", Collections.class, shortNames);
+
+    return MethodSpec.methodBuilder("shortNameMap")
+        .addCode(builder.build())
+        .returns(shortNames.type)
+        .addModifiers(PRIVATE, STATIC)
+        .build();
+  }
+
+  private static MethodSpec longNameMapMethod(
+      ClassName optionType,
+      FieldSpec longNameField) {
+    ParameterSpec longNames = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        STRING, optionType), "longNames")
+        .build();
+    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
+
+    CodeBlock.Builder builder = CodeBlock.builder();
+    builder.addStatement("$T $N = new $T<>()", longNames.type, longNames, HashMap.class);
+
+    // begin iteration over options
+    builder.add("\n");
+    builder.beginControlFlow("for ($T $N : $T.values())", optionType, option, optionType);
+
+    builder.beginControlFlow("if ($N.$N != null)", option, longNameField)
+        .addStatement("$N.put($N.$N, $N)", longNames, option, longNameField, option)
+        .endControlFlow();
+
+    // end iteration over options
+    builder.endControlFlow();
+    builder.addStatement("return $T.unmodifiableMap($N)", Collections.class, longNames);
+
+    return MethodSpec.methodBuilder("longNameMap")
+        .addCode(builder.build())
+        .returns(longNames.type)
+        .addModifiers(PRIVATE, STATIC)
         .build();
   }
 

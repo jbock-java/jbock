@@ -26,11 +26,11 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
  */
 final class Parser {
 
-  final Context context;
-  final OptionType optionType;
-  final Option option;
-  final Helper helper;
-  final Impl impl;
+  private final Context context;
+  private final OptionType optionType;
+  private final Option option;
+  private final Helper helper;
+  private final Impl impl;
 
   private Parser(
       Context context,
@@ -191,27 +191,6 @@ final class Parser {
         .endControlFlow()
         .addModifiers(STATIC, PUBLIC)
         .addParameters(Arrays.asList(out, indent))
-        .build();
-  }
-
-  static CodeBlock repetitionError(
-      ParameterSpec option,
-      ParameterSpec token) {
-    return CodeBlock.builder()
-        .addStatement("throw new $T($S + $N + $S + $N + $S)",
-            IllegalArgumentException.class,
-            "Found token: ", token, ", but option ", option, " is not repeatable")
-        .build();
-  }
-
-  static CodeBlock throwRepetitionErrorInGroup(
-      ParameterSpec option,
-      ParameterSpec originalToken) {
-    return CodeBlock.builder()
-        .addStatement("throw new $T($S + $N + $S + $N + $S)",
-            IllegalArgumentException.class,
-            "In option group ",
-            originalToken, ": option ", option, " is not repeatable")
         .build();
   }
 
