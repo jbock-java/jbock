@@ -36,5 +36,5 @@ public @interface CommandLineArguments {
    *   followed by the binding token {@code f}.
    * </p>
    */
-  boolean grouping() default true;
+  boolean grouping() default false;
 }

@@ -7,7 +7,7 @@ import net.jbock.EverythingAfter;
 import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 
-@CommandLineArguments
+@CommandLineArguments(grouping = true)
 abstract class RmArguments {
 
   @ShortName('r')

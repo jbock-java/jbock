@@ -4,7 +4,7 @@ import java.util.Optional;
 import net.jbock.CommandLineArguments;
 import net.jbock.ShortName;
 
-@CommandLineArguments(grouping = false)
+@CommandLineArguments
 abstract class SimpleArguments {
 
   @ShortName('x')

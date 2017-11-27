@@ -9,7 +9,7 @@ import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 import net.jbock.SuppressLongName;
 
-@CommandLineArguments
+@CommandLineArguments(grouping = true)
 abstract class GradleMan {
 
   @ShortName('m')
