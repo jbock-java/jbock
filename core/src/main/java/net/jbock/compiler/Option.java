@@ -319,13 +319,17 @@ final class Option {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
-    builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, OTHER_TOKENS)
-        .addStatement("return $S", "Other tokens")
-        .endControlFlow();
+    if (context.otherTokens) {
+      builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, OTHER_TOKENS)
+          .addStatement("return $S", "Other tokens")
+          .endControlFlow();
+    }
 
-    builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, EVERYTHING_AFTER)
-        .addStatement("return $S + $S + $S", "Everything after '", context.stopword, "'")
-        .endControlFlow();
+    if (context.rest) {
+      builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, EVERYTHING_AFTER)
+          .addStatement("return $S + $S + $S", "Everything after '", context.stopword, "'")
+          .endControlFlow();
+    }
 
     builder.addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class);
 

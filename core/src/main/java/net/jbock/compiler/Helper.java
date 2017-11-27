@@ -36,6 +36,7 @@ final class Helper {
   final FieldSpec otherTokensField = FieldSpec.builder(LIST_OF_STRING, "otherTokens", FINAL)
       .build();
 
+  private final Context context;
   private final Option option;
   private final OptionType optionType;
 
@@ -61,6 +62,7 @@ final class Helper {
 
   private Helper(
       ClassName type,
+      Context context,
       FieldSpec longNamesField,
       FieldSpec shortNamesField,
       FieldSpec optMapField,
@@ -81,6 +83,7 @@ final class Helper {
       MethodSpec readArgumentMethod,
       MethodSpec chopOffHeadMethod) {
     this.type = type;
+    this.context = context;
     this.longNamesField = longNamesField;
     this.shortNamesField = shortNamesField;
     this.optMapField = optMapField;
@@ -168,6 +171,7 @@ final class Helper {
 
     return new Helper(
         helperClass,
+        context,
         longNamesField,
         shortNamesField,
         optMapField,
@@ -190,7 +194,7 @@ final class Helper {
   }
 
   TypeSpec define() {
-    return TypeSpec.classBuilder(type)
+    TypeSpec.Builder builder = TypeSpec.classBuilder(type)
         .addFields(Arrays.asList(
             longNamesField,
             shortNamesField,
@@ -205,18 +209,21 @@ final class Helper {
                 .build()))
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(privateConstructor())
-        .addMethod(readGroupMethod)
         .addMethod(readMethod)
         .addMethod(readRegularOptionMethod)
-        .addMethod(readOptionFromGroupMethod)
         .addMethod(addMethod)
         .addMethod(addFlagMethod)
         .addMethod(readArgumentMethod)
         .addMethod(readNextMethod)
         .addMethod(readLongMethod)
-        .addMethod(looksLikeLongMethod)
-        .addMethod(looksLikeGroupMethod)
-        .addMethod(chopOffHeadMethod)
+        .addMethod(looksLikeLongMethod);
+    if (context.grouping) {
+      builder.addMethod(looksLikeGroupMethod)
+          .addMethod(chopOffHeadMethod)
+          .addMethod(readGroupMethod)
+          .addMethod(readOptionFromGroupMethod);
+    }
+    return builder
         .build();
   }
 
@@ -236,6 +243,7 @@ final class Helper {
             shortNames.type, shortNames, HashMap.class);
 
     // begin iteration over options
+    builder.add("\n");
     builder.beginControlFlow("for ($T $N : $T.values())", this.option.type, option, this.option.type);
 
     builder.beginControlFlow("if ($N.$N != null)", option, this.option.shortNameField)
@@ -249,6 +257,7 @@ final class Helper {
     // end iteration over options
     builder.endControlFlow();
 
+    builder.add("\n");
     builder.addStatement("this.$N = $T.unmodifiableMap($N)",
         longNames, Collections.class, longNames);
 
@@ -641,12 +650,8 @@ final class Helper {
         .addStatement("return $L", false)
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N.charAt(0) != '-' || $N.charAt(1) != '-')",
-        token, token)
-        .addStatement("return $L", false)
-        .endControlFlow();
-
-    builder.addStatement("return $L", true);
+    builder.addStatement("return $N.charAt(0) == '-' && $N.charAt(1) == '-'",
+        token, token);
 
     return builder.addParameter(token)
         .addModifiers(STATIC)

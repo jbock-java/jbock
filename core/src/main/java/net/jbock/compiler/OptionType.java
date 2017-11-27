@@ -4,6 +4,8 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
+import static net.jbock.compiler.Type.EVERYTHING_AFTER;
+import static net.jbock.compiler.Type.OTHER_TOKENS;
 
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.FieldSpec;
@@ -21,6 +23,8 @@ final class OptionType {
 
   final ClassName type;
 
+  private final Context context;
+
   private final FieldSpec isSpecialField;
   private final FieldSpec isBindingField;
 
@@ -28,6 +32,7 @@ final class OptionType {
   final MethodSpec isBindingMethod;
 
   private OptionType(Context context) {
+    this.context = context;
     this.isSpecialField = FieldSpec.builder(TypeName.BOOLEAN, "special", PRIVATE, FINAL)
         .build();
     this.isBindingField = FieldSpec.builder(TypeName.BOOLEAN, "binding", PRIVATE, FINAL)
@@ -44,9 +49,15 @@ final class OptionType {
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(type);
     for (Type optionType : Type.values()) {
-      builder.addEnumConstant(optionType.name(),
-          anonymousClassBuilder("$L, $L", optionType.special, optionType.binding)
-              .build());
+      if (!optionType.special) {
+        addType(builder, optionType);
+      }
+    }
+    if (context.otherTokens) {
+      addType(builder, OTHER_TOKENS);
+    }
+    if (context.rest) {
+      addType(builder, EVERYTHING_AFTER);
     }
     return builder.addModifiers(PUBLIC)
         .addField(isSpecialField)
@@ -55,6 +66,12 @@ final class OptionType {
         .addMethod(isSpecialMethod)
         .addMethod(isBindingMethod)
         .build();
+  }
+
+  private void addType(TypeSpec.Builder builder, Type optionType) {
+    builder.addEnumConstant(optionType.name(),
+        anonymousClassBuilder("$L, $L", optionType.special, optionType.binding)
+            .build());
   }
 
   private MethodSpec privateConstructor() {

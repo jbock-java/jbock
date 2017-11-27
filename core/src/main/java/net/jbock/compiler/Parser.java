@@ -174,7 +174,6 @@ final class Parser {
     return MethodSpec.methodBuilder("parse")
         .addParameter(args)
         .addCode(builder.build())
-        .addException(IllegalArgumentException.class)
         .returns(TypeName.get(context.sourceType.asType()))
         .addModifiers(PUBLIC, STATIC)
         .build();
