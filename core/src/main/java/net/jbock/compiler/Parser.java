@@ -46,10 +46,12 @@ final class Parser {
   }
 
   static Parser create(Context context) {
+    ClassName implType = context.generatedClass.nestedClass(
+        context.sourceType.getSimpleName() + "Impl");
     OptionType optionType = OptionType.create(context);
     Option option = Option.create(context, optionType);
-    Helper helper = Helper.create(context, optionType, option);
-    Impl impl = Impl.create(context, optionType, option, helper);
+    Helper helper = Helper.create(context, implType, optionType, option);
+    Impl impl = Impl.create(context, implType, optionType, option, helper);
     return new Parser(context, optionType, option, helper, impl);
   }
 
@@ -80,7 +82,7 @@ final class Parser {
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.add("\n");
-    builder.addStatement("$T $N = new $T()", helper.type, helper, this.helper.type);
+    builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
     builder.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
 
     if (context.stopword != null) {
@@ -114,8 +116,8 @@ final class Parser {
       if (context.stopword != null) {
         builder.beginControlFlow("if ($N.equals($N))", firstToken, stopword)
             .addStatement("$N.forEachRemaining($N::add)", it, rest)
-            .addStatement("return new $T($N, $N, $N)",
-                impl.type, helper, otherTokens, rest)
+            .addStatement("return $N.$N($N, $N)",
+                helper, this.helper.buildMethod, otherTokens, rest)
             .endControlFlow();
       }
 
@@ -147,8 +149,8 @@ final class Parser {
     if (context.stopword != null) {
       builder.beginControlFlow("if ($N.equals($N))", freetoken, stopword)
           .addStatement("$N.forEachRemaining($N::add)", it, rest)
-          .addStatement("return new $T($N, $N, $N)",
-              impl.type, helper, otherTokens, rest)
+          .addStatement("return $N.$N($N, $N)",
+              helper, this.helper.buildMethod, otherTokens, rest)
           .endControlFlow();
     }
 
@@ -168,8 +170,8 @@ final class Parser {
     builder.endControlFlow();
 
     builder.add("\n");
-    builder.addStatement("return new $T($N, $N, $N)",
-        impl.type, helper, otherTokens, rest);
+    builder.addStatement("return $N.$N($N, $N)",
+        helper, this.helper.buildMethod, otherTokens, rest);
 
     return MethodSpec.methodBuilder("parse")
         .addParameter(args)
@@ -184,7 +186,7 @@ final class Parser {
     ParameterSpec out = ParameterSpec.builder(ClassName.get(PrintStream.class), "out").build();
     ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
     return MethodSpec.methodBuilder("printUsage")
-        .beginControlFlow("for ($T $N: $T.values())", option.type, option, this.option.type)
+        .beginControlFlow("for ($T $N: $T.values())", option.type, option, option.type)
         .addStatement("$N.println($N.describe($N))", out, option, indent)
         .endControlFlow()
         .addModifiers(STATIC, PUBLIC)

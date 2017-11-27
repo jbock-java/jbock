@@ -2,8 +2,8 @@ package net.zerobuilder.examples.gradle;
 
 import net.jbock.CommandLineArguments;
 
-@CommandLineArguments(grouping = true)
-abstract class EvilArguments {
+@CommandLineArguments
+abstract class SimpleEvilArguments {
 
   abstract String fancy();
 

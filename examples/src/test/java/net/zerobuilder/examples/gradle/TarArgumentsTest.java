@@ -31,7 +31,7 @@ public class TarArgumentsTest {
   @Test
   public void errorGroupIsNotTheFirstTokenHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid characters after flag in: -xf");
+    exception.expectMessage("Unknown token: -xf");
     TarArguments_Parser.parse(new String[]{"-v", "-xf", "foo.tar"});
   }
 }

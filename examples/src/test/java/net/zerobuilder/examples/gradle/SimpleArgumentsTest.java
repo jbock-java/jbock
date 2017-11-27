@@ -19,7 +19,7 @@ public class SimpleArgumentsTest {
   @Test
   public void noGroupingFirstArgumentHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid characters after flag in: -xf");
+    exception.expectMessage("Unknown token: -xf");
     SimpleArguments_Parser.parse(new String[]{"-xf", "1"});
   }
 }

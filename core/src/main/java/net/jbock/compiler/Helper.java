@@ -33,36 +33,41 @@ final class Helper {
 
   final ClassName type;
 
-  final FieldSpec otherTokensField = FieldSpec.builder(LIST_OF_STRING, "otherTokens", FINAL)
+  private final FieldSpec otherTokensField = FieldSpec.builder(LIST_OF_STRING, "otherTokens", FINAL)
       .build();
 
   private final Context context;
   private final Option option;
   private final OptionType optionType;
 
-  final FieldSpec optMapField;
-  final FieldSpec sMapField;
-  final FieldSpec flagsField;
-  final FieldSpec longNamesField;
-  final FieldSpec shortNamesField;
+  private final FieldSpec optMapField;
+  private final FieldSpec sMapField;
+  private final FieldSpec flagsField;
 
-  final MethodSpec addFlagMethod;
-  final MethodSpec addMethod;
+  private final ClassName implType;
+
+  private final FieldSpec longNamesField;
+  private final FieldSpec shortNamesField;
+
   final MethodSpec readGroupMethod;
   final MethodSpec readMethod;
-  final MethodSpec readNextMethod;
-  final MethodSpec readLongMethod;
-  final MethodSpec looksLikeLongMethod;
-  final MethodSpec looksLikeGroupMethod;
-  final MethodSpec readRegularOptionMethod;
-  final MethodSpec readOptionFromGroupMethod;
+  final MethodSpec buildMethod;
+
+  private final MethodSpec addFlagMethod;
+  private final MethodSpec addMethod;
+  private final MethodSpec readNextMethod;
+  private final MethodSpec readLongMethod;
+  private final MethodSpec looksLikeLongMethod;
+  private final MethodSpec looksLikeGroupMethod;
+  private final MethodSpec readRegularOptionMethod;
+  private final MethodSpec readOptionFromGroupMethod;
 
   private final MethodSpec readArgumentMethod;
   private final MethodSpec chopOffHeadMethod;
 
   private Helper(
       ClassName type,
-      Context context,
+      ClassName implType, Context context,
       FieldSpec longNamesField,
       FieldSpec shortNamesField,
       FieldSpec optMapField,
@@ -70,6 +75,7 @@ final class Helper {
       FieldSpec flagsField,
       Option option,
       OptionType optionType,
+      MethodSpec buildMethod,
       MethodSpec addFlagMethod,
       MethodSpec addMethod,
       MethodSpec readMethod,
@@ -83,6 +89,7 @@ final class Helper {
       MethodSpec readArgumentMethod,
       MethodSpec chopOffHeadMethod) {
     this.type = type;
+    this.implType = implType;
     this.context = context;
     this.longNamesField = longNamesField;
     this.shortNamesField = shortNamesField;
@@ -91,6 +98,7 @@ final class Helper {
     this.flagsField = flagsField;
     this.option = option;
     this.optionType = optionType;
+    this.buildMethod = buildMethod;
     this.addFlagMethod = addFlagMethod;
     this.addMethod = addMethod;
     this.readMethod = readMethod;
@@ -107,6 +115,7 @@ final class Helper {
 
   static Helper create(
       Context context,
+      ClassName implType,
       OptionType optionType,
       Option option) {
     MethodSpec readNextMethod = readNextMethod();
@@ -129,6 +138,7 @@ final class Helper {
     FieldSpec optMapField = FieldSpec.builder(option.optMapType, "optMap", FINAL).build();
     FieldSpec sMapField = FieldSpec.builder(option.sMapType, "sMap", FINAL).build();
     FieldSpec flagsField = FieldSpec.builder(option.flagsType, "flags", FINAL).build();
+    MethodSpec buildMethod = buildMethod(implType, optMapField, sMapField, flagsField);
     MethodSpec addFlagMethod = addFlagMethod(option.type, optionType.type, flagsField);
     MethodSpec addMethod = addMethod(option.type, optionType.type,
         optMapField, sMapField, option.isBindingMethod);
@@ -171,6 +181,7 @@ final class Helper {
 
     return new Helper(
         helperClass,
+        implType,
         context,
         longNamesField,
         shortNamesField,
@@ -179,6 +190,7 @@ final class Helper {
         flagsField,
         option,
         optionType,
+        buildMethod,
         addFlagMethod,
         addMethod,
         readMethod,
@@ -216,6 +228,7 @@ final class Helper {
         .addMethod(readArgumentMethod)
         .addMethod(readNextMethod)
         .addMethod(readLongMethod)
+        .addMethod(buildMethod)
         .addMethod(looksLikeLongMethod);
     if (context.grouping) {
       builder.addMethod(looksLikeGroupMethod)
@@ -357,8 +370,7 @@ final class Helper {
 
     builder.beginControlFlow("if ($N.length() > 2)", token)
         .add("// flags cannot have an attached value\n")
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Invalid characters after flag in: ", token)
+        .addStatement("return null")
         .endControlFlow();
     builder.addStatement("return $N", option);
 
@@ -707,6 +719,21 @@ final class Helper {
         .addParameter(originalToken)
         .returns(BOOLEAN)
         .addCode(builder.build())
+        .build();
+  }
+
+  private static MethodSpec buildMethod(
+      ClassName implType,
+      FieldSpec optMapField,
+      FieldSpec sMapField,
+      FieldSpec flagsField) {
+    ParameterSpec otherTokens = ParameterSpec.builder(LIST_OF_STRING, "otherTokens").build();
+    ParameterSpec rest = ParameterSpec.builder(LIST_OF_STRING, "rest").build();
+    return MethodSpec.methodBuilder("build")
+        .addStatement("return new $T($N, $N, $N, $N, $N)", implType,
+            optMapField, sMapField, flagsField, otherTokens, rest)
+        .addParameters(Arrays.asList(otherTokens, rest))
+        .returns(implType)
         .build();
   }
 }

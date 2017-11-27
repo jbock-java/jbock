@@ -79,9 +79,10 @@ public class CurlArgumentsTest {
 
   @Test
   public void errorGroupingDuplicateFlag() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid characters after flag in: -vH'Content-Type: application/xml'");
-    CurlArguments_Parser.parse(new String[]{"-v", "-vH'Content-Type: application/xml'"});
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-vH'Content-Type: application/xml'"}).urls().size())
+        .isEqualTo(1);
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-vH'Content-Type: application/xml'"}).urls().get(0))
+        .isEqualTo("-vH'Content-Type: application/xml'");
   }
 
   @Test
