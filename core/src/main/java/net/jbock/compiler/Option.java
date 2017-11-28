@@ -4,6 +4,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
@@ -145,7 +146,7 @@ final class Option {
           String.join(",\n    ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
           Arrays.asList(param.longName(), param.shortName(), optionType.type,
-              param.optionType(), argumentName, STRING);
+              param.optionType, argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
       args.addAll(fixArgs);
       args.addAll(Arrays.asList(desc));
@@ -180,7 +181,7 @@ final class Option {
     ParameterSpec argumentName = ParameterSpec.builder(argumentNameField.type, argumentNameField.name).build();
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
     builder
-        .beginControlFlow("if (!$N.$N())", optionType, this.optionType.isSpecialMethod)
+        .beginControlFlow("if (!$N.$N)", optionType, this.optionType.isSpecialField)
         .addStatement("assert $N == null || $N.length() == 1", shortName, shortName)
         .addStatement("assert $N == null || !$N.isEmpty()", longName, longName)
         .addStatement("assert $N != null || $N != null", longName, shortName)
@@ -216,7 +217,8 @@ final class Option {
     ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
 
     CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = new $T<>()", shortNames.type, shortNames, HashMap.class);
+    builder.addStatement("$T $N = new $T<>($T.values().length)",
+        shortNames.type, shortNames, HashMap.class, optionType);
 
     // begin iteration over options
     builder.add("\n");
@@ -246,7 +248,8 @@ final class Option {
     ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
 
     CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = new $T<>()", longNames.type, longNames, HashMap.class);
+    builder.addStatement("$T $N = new $T<>($T.values().length)",
+        longNames.type, longNames, HashMap.class, optionType);
 
     // begin iteration over options
     builder.add("\n");
@@ -302,9 +305,9 @@ final class Option {
   private static MethodSpec isSpecialMethod(
       OptionType optionType,
       FieldSpec optionTypeField) {
-    return MethodSpec.methodBuilder(optionType.isSpecialMethod.name)
-        .addStatement("return $N.$N()", optionTypeField, optionType.isSpecialMethod)
-        .returns(optionType.isSpecialMethod.returnType)
+    return MethodSpec.methodBuilder("isSpecial")
+        .addStatement("return $N.$N", optionTypeField, optionType.isSpecialField)
+        .returns(BOOLEAN)
         .addModifiers(PUBLIC)
         .build();
   }
@@ -312,9 +315,9 @@ final class Option {
   private static MethodSpec isBindingMethod(
       OptionType optionType,
       FieldSpec optionTypeField) {
-    return MethodSpec.methodBuilder(optionType.isBindingMethod.name)
-        .addStatement("return $N.$N()", optionTypeField, optionType.isBindingMethod)
-        .returns(optionType.isBindingMethod.returnType)
+    return MethodSpec.methodBuilder("isBinding")
+        .addStatement("return $N.$N", optionTypeField, optionType.isBindingField)
+        .returns(BOOLEAN)
         .addModifiers(PUBLIC)
         .build();
   }
@@ -367,7 +370,7 @@ final class Option {
       FieldSpec argumentNameField,
       OptionType optionType) {
     CodeBlock.Builder builder = CodeBlock.builder();
-    builder.beginControlFlow("if ($N.$N())", optionTypeField, optionType.isBindingMethod)
+    builder.beginControlFlow("if ($N.$N)", optionTypeField, optionType.isBindingField)
         .addStatement("return $N() + ' ' + $N", describeParamMethod, argumentNameField)
         .endControlFlow();
     builder.addStatement("return $N()", describeParamMethod);

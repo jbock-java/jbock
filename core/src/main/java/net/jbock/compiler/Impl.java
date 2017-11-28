@@ -11,7 +11,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -107,27 +106,22 @@ final class Impl {
     List<MethodSpec> result = new ArrayList<>(context.parameters.size());
     for (int j = 0; j < context.parameters.size(); j++) {
       Param param = context.parameters.get(j);
-      Type optionType = param.optionType();
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.parameterName())
           .addModifiers(PUBLIC)
           .addAnnotation(Override.class)
-          .returns(optionType.sourceType);
-      if (optionType == Type.FLAG) {
+          .returns(param.optionType.sourceType);
+      if (param.optionType == Type.FLAG) {
         builder.addStatement("return $N.contains($T.$N)",
             flagsField, option.type, option.enumConstant(j));
-      } else if (optionType == Type.OPTIONAL) {
+      } else if (param.optionType == Type.OPTIONAL) {
         builder.addStatement("return $T.ofNullable($N.get($T.$L))",
             Optional.class, sMapField, option.type, option.enumConstant(j));
-      } else if (optionType == Type.REQUIRED) {
-        ParameterSpec p = ParameterSpec.builder(STRING, option.enumConstant(j).toLowerCase(Locale.US)).build();
-        builder.addStatement("$T $N = $N.get($T.$L)",
-            STRING, p, sMapField,
-            option.type, option.enumConstant(j))
-            .addStatement("assert $N != null", p)
-            .addStatement("return $N", p);
-      } else if (optionType == Type.OTHER_TOKENS) {
+      } else if (param.optionType == Type.REQUIRED) {
+        builder.addStatement("return $N.get($T.$L)",
+            sMapField, option.type, option.enumConstant(j));
+      } else if (param.optionType == Type.OTHER_TOKENS) {
         builder.addStatement("return $N", otherTokensField);
-      } else if (optionType == Type.EVERYTHING_AFTER) {
+      } else if (param.optionType == Type.EVERYTHING_AFTER) {
         builder.addStatement("return $N", restField);
       } else {
         builder.addStatement("return $N.getOrDefault($T.$L, $T.emptyList())",

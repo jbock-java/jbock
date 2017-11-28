@@ -25,11 +25,8 @@ final class OptionType {
 
   private final Context context;
 
-  private final FieldSpec isSpecialField;
-  private final FieldSpec isBindingField;
-
-  final MethodSpec isSpecialMethod;
-  final MethodSpec isBindingMethod;
+  final FieldSpec isSpecialField;
+  final FieldSpec isBindingField;
 
   private OptionType(Context context) {
     this.context = context;
@@ -38,8 +35,6 @@ final class OptionType {
     this.isBindingField = FieldSpec.builder(TypeName.BOOLEAN, "binding", PRIVATE, FINAL)
         .build();
     this.type = context.generatedClass.nestedClass("OptionType");
-    this.isSpecialMethod = isSpecialMethod(isSpecialField);
-    this.isBindingMethod = isBindingMethod(isBindingField);
   }
 
   static OptionType create(Context context) {
@@ -63,8 +58,6 @@ final class OptionType {
         .addField(isSpecialField)
         .addField(isBindingField)
         .addMethod(privateConstructor())
-        .addMethod(isSpecialMethod)
-        .addMethod(isBindingMethod)
         .build();
   }
 
@@ -81,21 +74,5 @@ final class OptionType {
     builder.addStatement("this.$N = $N", isSpecialField, special);
     builder.addStatement("this.$N = $N", isBindingField, binding);
     return builder.addParameter(special).addParameter(binding).build();
-  }
-
-  private static MethodSpec isSpecialMethod(FieldSpec isSpecialField) {
-    return MethodSpec.methodBuilder("isSpecial")
-        .addStatement("return $N", isSpecialField)
-        .returns(TypeName.BOOLEAN)
-        .addModifiers(PUBLIC)
-        .build();
-  }
-
-  private static MethodSpec isBindingMethod(FieldSpec isBindingField) {
-    return MethodSpec.methodBuilder("isBinding")
-        .addStatement("return $N", isBindingField)
-        .returns(TypeName.BOOLEAN)
-        .addModifiers(PUBLIC)
-        .build();
   }
 }

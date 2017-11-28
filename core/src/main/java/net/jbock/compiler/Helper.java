@@ -251,8 +251,7 @@ final class Helper {
       ClassName optionTypeClass,
       FieldSpec flags) {
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
-    return MethodSpec.methodBuilder("add")
-        .addStatement("assert $N.type == $T.$L", option, optionTypeClass, Type.FLAG)
+    return MethodSpec.methodBuilder("addFlag")
         .addStatement("return $N.add($N)", flags, option)
         .addParameter(option)
         .returns(BOOLEAN)
@@ -270,7 +269,6 @@ final class Helper {
     ParameterSpec bucket = ParameterSpec.builder(LIST_OF_STRING, "bucket").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("add");
-    builder.addStatement("assert $N.$N()", option, isBindingMethod);
 
     // begin handle repeatable
     builder.beginControlFlow("if ($N.type == $T.$L)", option, optionTypeClass, Type.REPEATABLE);

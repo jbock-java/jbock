@@ -246,10 +246,6 @@ final class Param {
     return sourceMethod.getSimpleName().toString();
   }
 
-  Type optionType() {
-    return optionType;
-  }
-
   boolean isSpecial() {
     return optionType.special;
   }
