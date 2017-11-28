@@ -7,7 +7,9 @@ import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.asDeclared;
 import static net.jbock.compiler.Util.asType;
 import static net.jbock.compiler.Util.equalsType;
+import static net.jbock.compiler.Util.methodToString;
 
+import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -95,7 +97,7 @@ final class Param {
     String shortName = shortName(sourceMethod);
     if (shortName == null && longName == null) {
       throw new ValidationException(sourceMethod,
-          "Neither long nor short name defined");
+          "Neither long nor short name defined for method " + Util.methodToString(sourceMethod));
     }
     checkName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
@@ -114,20 +116,24 @@ final class Param {
     }
     if (sourceMethod.getModifiers().contains(STATIC)) {
       throw new ValidationException(sourceMethod,
-          "The method may not be static.");
+          "Method " + methodToString(sourceMethod) +
+              "may not be static.");
 
     }
     if (!sourceMethod.getParameters().isEmpty()) {
       throw new ValidationException(sourceMethod,
-          "The method must have an empty parameter list.");
+          "Method " + methodToString(sourceMethod) +
+              " must have an empty parameter list.");
     }
     if (!sourceMethod.getTypeParameters().isEmpty()) {
       throw new ValidationException(sourceMethod,
-          "The method must have type parameters.");
+          "Method " + methodToString(sourceMethod) +
+              "must have type parameters.");
     }
     if (!sourceMethod.getThrownTypes().isEmpty()) {
       throw new ValidationException(sourceMethod,
-          "The method may not declare any exceptions.");
+          "Method " + methodToString(sourceMethod) +
+              "may not declare any exceptions.");
     }
   }
 
@@ -151,10 +157,12 @@ final class Param {
     return longName.value();
   }
 
-  private static void checkList(ExecutableElement sourceMethod) {
+  private static void checkList(
+      ExecutableElement sourceMethod, Annotation cause) {
     if (!isListOfString(sourceMethod.getReturnType())) {
       throw new ValidationException(sourceMethod,
-          "Must be a List<String>");
+          "The method that carries the " + cause.annotationType().getSimpleName() +
+              " annotation must return List<String>");
     }
   }
 
@@ -232,8 +240,8 @@ final class Param {
   }
 
   private static Param createEverythingAfter(ExecutableElement sourceMethod) {
-    checkList(sourceMethod);
     EverythingAfter everythingAfter = sourceMethod.getAnnotation(EverythingAfter.class);
+    checkList(sourceMethod, everythingAfter);
     String stopword = everythingAfter.value();
     basicCheckName(sourceMethod, stopword);
     checkNotPresent(sourceMethod,
@@ -251,8 +259,8 @@ final class Param {
   }
 
   private static Param createOtherTokens(ExecutableElement sourceMethod) {
-    checkList(sourceMethod);
     OtherTokens otherTokens = sourceMethod.getAnnotation(OtherTokens.class);
+    checkList(sourceMethod, otherTokens);
     checkNotPresent(sourceMethod,
         otherTokens,
         Arrays.asList(

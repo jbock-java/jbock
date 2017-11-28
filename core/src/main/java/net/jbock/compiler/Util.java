@@ -7,13 +7,16 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.VariableElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleElementVisitor8;
@@ -126,5 +129,13 @@ final class Util {
       }
     }
     return sb.toString();
+  }
+
+  static String methodToString(ExecutableElement method) {
+    StringJoiner joiner = new StringJoiner(", ", "(", ")");
+    for (VariableElement variableElement : method.getParameters()) {
+      joiner.add(variableElement.asType().toString());
+    }
+    return method.getSimpleName() + joiner.toString();
   }
 }

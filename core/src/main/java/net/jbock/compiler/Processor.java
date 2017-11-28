@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.compiler.Type.EVERYTHING_AFTER;
 import static net.jbock.compiler.Util.asType;
+import static net.jbock.compiler.Util.methodToString;
 
 import java.io.IOException;
 import java.io.Writer;
@@ -69,6 +70,11 @@ public final class Processor extends AbstractProcessor {
     for (TypeElement typeElement : typeElements) {
       try {
         List<Param> params = validate(typeElement);
+        if (params.isEmpty()) {
+          processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+              "Skipping code generation: No abstract methods found", typeElement);
+          continue;
+        }
         String stopword = stopword(params, typeElement);
         Context context = Context.create(typeElement, params, stopword);
         if (!done.add(asType(typeElement).getQualifiedName().toString())) {
@@ -156,7 +162,7 @@ public final class Processor extends AbstractProcessor {
         .filter(Objects::nonNull)
         .collect(Util.distinctSet(element ->
             new ValidationException(sourceType,
-                "Duplicate shortName: " + element)));
+                "Duplicate short name: " + element)));
   }
 
   private Set<String> longNames(List<Param> params, TypeElement sourceType) {
@@ -165,7 +171,7 @@ public final class Processor extends AbstractProcessor {
         .filter(Objects::nonNull)
         .collect(Util.distinctSet(element ->
             new ValidationException(sourceType,
-                "Duplicate longName: " + element)));
+                "Duplicate long name: " + element)));
   }
 
   private String stopword(
@@ -210,7 +216,7 @@ public final class Processor extends AbstractProcessor {
       if (executableElement.getAnnotation(annotation) != null) {
         throw new ValidationException(executableElement,
             "@" + annotation.getSimpleName() +
-                " is conflicting with @" + cause.getClass().getSimpleName());
+                " is conflicting with @" + cause.annotationType().getSimpleName());
       }
     }
   }
@@ -233,7 +239,7 @@ public final class Processor extends AbstractProcessor {
       }
       if (!method.getModifiers().contains(Modifier.ABSTRACT)) {
         printError(method,
-            "Method " + method.getSimpleName() + " must be abstract.");
+            "Method " + methodToString(method) + " must be abstract.");
         return false;
       }
     }
