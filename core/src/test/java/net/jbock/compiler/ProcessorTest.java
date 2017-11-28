@@ -1,40 +1,30 @@
 package net.jbock.compiler;
 
+import static com.google.common.truth.Truth.assertAbout;
+import static com.google.testing.compile.JavaFileObjects.forSourceLines;
+import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
+import static java.util.Collections.singletonList;
+
+import java.util.Arrays;
+import java.util.List;
+import javax.tools.JavaFileObject;
+import org.junit.Test;
+
 public class ProcessorTest {
-/*
-  test disabled
-  until https://github.com/google/compile-testing/issues/134 is resolved
-*/
-
-/*
 
   @Test
-  public void process() throws Exception {
+  public void duplicateName() {
     List<String> sourceLines = Arrays.asList(
         "package test;",
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.LongName;",
-        "import java.util.Optional;",
-        "class JJob {",
-        "  @CommandLineArguments JJob(@LongName(\"x\") Optional<String> a, Optional<String> b) {}",
+        "",
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @LongName(\"x\") abstract String a();",
+        "  @LongName(\"x\") abstract String b();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  public void duplicateName() throws Exception {
-    List<String> sourceLines = Arrays.asList(
-        "package test;",
-        "import net.jbock.CommandLineArguments;",
-        "import net.jbock.LongName;",
-        "import java.util.Optional;",
-        "class JJob {",
-        "  @CommandLineArguments JJob(@LongName(\"x\") Optional<String> a, @LongName(\"x\") Optional<String> b) {}",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -42,34 +32,34 @@ public class ProcessorTest {
   }
 
   @Test
-  public void wrongType() throws Exception {
+  public void wrongType() {
     List<String> sourceLines = Arrays.asList(
         "package test;",
         "import net.jbock.CommandLineArguments;",
-        "import net.jbock.LongName;",
-        "class JJob {",
-        "  @CommandLineArguments JJob(@LongName(\"x\") int a) {}",
+        "",
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  abstract int a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Only Optional<String>, List<String> and boolean allowed, " +
-            "but parameter a has type int");
+        .withErrorContaining("a() returns int");
   }
 
   @Test
-  public void privateException() throws Exception {
+  public void privateException() {
     List<String> sourceLines = Arrays.asList(
         "package test;",
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.LongName;",
-        "import java.util.Optional;",
-        "class JJob {",
-        "  @CommandLineArguments JJob(String a) throws Hammer {}",
-        "  private static final class Hammer extends Exception {}",
+        "",
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  abstract String a() throws IllegalArgumentException;",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.JJobParser", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -77,7 +67,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void whitespace() throws Exception {
+  public void whitespace() {
     List<String> sourceLines = Arrays.asList(
         "package test;",
         "import net.jbock.CommandLineArguments;",
@@ -94,7 +84,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void booleanWrapper() throws Exception {
+  public void booleanWrapper() {
     List<String> sourceLines = Arrays.asList(
         "package test;",
         "import net.jbock.CommandLineArguments;",
@@ -111,7 +101,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void otherTokensAndEverythingAfter() throws Exception {
+  public void otherTokensAndEverythingAfter() {
     List<String> sourceLines = Arrays.asList(
         "package test;",
         "import net.jbock.CommandLineArguments;",
@@ -129,7 +119,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void everythingAfterCollidesWithOption() throws Exception {
+  public void everythingAfterCollidesWithOption() {
     List<String> sourceLines = Arrays.asList(
         "package test;",
         "import net.jbock.CommandLineArguments;",
@@ -145,5 +135,4 @@ public class ProcessorTest {
         .failsToCompile()
         .withErrorContaining("@EverythingAfter coincides with a long option");
   }
-*/
 }

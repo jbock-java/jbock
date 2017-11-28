@@ -1,10 +1,14 @@
 package net.jbock.compiler;
 
+import static java.lang.reflect.Modifier.PRIVATE;
+import static java.lang.reflect.Modifier.STATIC;
 import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
+import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.asDeclared;
 import static net.jbock.compiler.Util.asType;
 import static net.jbock.compiler.Util.equalsType;
 
+import java.util.Arrays;
 import java.util.Objects;
 import java.util.regex.Pattern;
 import javax.lang.model.element.ExecutableElement;
@@ -73,7 +77,7 @@ final class Param {
   }
 
   static Param create(ExecutableElement sourceMethod) {
-    CreateHelper createHelper = new CreateHelper(sourceMethod);
+    basicChecks(sourceMethod);
     OtherTokens otherTokens = sourceMethod.getAnnotation(OtherTokens.class);
     EverythingAfter everythingAfter = sourceMethod.getAnnotation(EverythingAfter.class);
     if (otherTokens != null && everythingAfter != null) {
@@ -82,10 +86,10 @@ final class Param {
     }
 
     if (otherTokens != null) {
-      return createHelper.createOtherTokens();
+      return createOtherTokens(sourceMethod);
     }
     if (everythingAfter != null) {
-      return createHelper.createEverythingAfter();
+      return createEverythingAfter(sourceMethod);
     }
     String longName = longName(sourceMethod);
     String shortName = shortName(sourceMethod);
@@ -93,13 +97,38 @@ final class Param {
       throw new ValidationException(sourceMethod,
           "Neither long nor short name defined");
     }
-    createHelper.checkName(shortName);
-    createHelper.checkName(longName);
+    checkName(sourceMethod, shortName);
+    checkName(sourceMethod, longName);
     return new Param(
         shortName,
         longName,
         null,
         sourceMethod);
+  }
+
+  private static void basicChecks(ExecutableElement sourceMethod) {
+    if (sourceMethod.getModifiers().contains(PRIVATE)) {
+      throw new ValidationException(sourceMethod,
+          "The method may not be private.");
+
+    }
+    if (sourceMethod.getModifiers().contains(STATIC)) {
+      throw new ValidationException(sourceMethod,
+          "The method may not be static.");
+
+    }
+    if (!sourceMethod.getParameters().isEmpty()) {
+      throw new ValidationException(sourceMethod,
+          "The method must have an empty parameter list.");
+    }
+    if (!sourceMethod.getTypeParameters().isEmpty()) {
+      throw new ValidationException(sourceMethod,
+          "The method must have type parameters.");
+    }
+    if (!sourceMethod.getThrownTypes().isEmpty()) {
+      throw new ValidationException(sourceMethod,
+          "The method may not declare any exceptions.");
+    }
   }
 
   private static String shortName(ExecutableElement sourceMethod) {
@@ -168,62 +197,74 @@ final class Param {
         element.getQualifiedName().toString());
   }
 
-  private static final class CreateHelper {
-    final ExecutableElement sourceMethod;
-
-    CreateHelper(ExecutableElement sourceMethod) {
-      this.sourceMethod = sourceMethod;
+  private static void checkName(
+      ExecutableElement sourceMethod,
+      String name) {
+    if (name == null) {
+      return;
     }
-
-    private void checkName(String name) {
-      if (name == null) {
-        return;
-      }
-      basicCheckName(name);
-      if (name.indexOf(0) == '-') {
-        throw new ValidationException(sourceMethod,
-            "The name may not start with '-'");
-      }
-      if (name.indexOf('=') >= 0) {
-        throw new ValidationException(sourceMethod,
-            "The name may not contain '='");
-      }
+    basicCheckName(sourceMethod, name);
+    if (name.indexOf(0) == '-') {
+      throw new ValidationException(sourceMethod,
+          "The name may not start with '-'");
     }
-
-    private void basicCheckName(String name) {
-      if (name == null) {
-        throw new ValidationException(sourceMethod,
-            "The name may not be null");
-      }
-      if (name.isEmpty()) {
-        throw new ValidationException(sourceMethod,
-            "The name may not be empty");
-      }
-      if (WHITE_SPACE.matcher(name).matches()) {
-        throw new ValidationException(sourceMethod,
-            "The name may not contain whitespace characters");
-      }
+    if (name.indexOf('=') >= 0) {
+      throw new ValidationException(sourceMethod,
+          "The name may not contain '='");
     }
+  }
 
-    private Param createEverythingAfter() {
-      checkList(sourceMethod);
-      String stopword = sourceMethod.getAnnotation(EverythingAfter.class).value();
-      basicCheckName(stopword);
-      return new Param(
-          null,
-          null,
-          stopword,
-          sourceMethod);
+  private static void basicCheckName(
+      ExecutableElement sourceMethod,
+      String name) {
+    if (name == null) {
+      throw new ValidationException(sourceMethod,
+          "The name may not be null");
     }
+    if (name.isEmpty()) {
+      throw new ValidationException(sourceMethod,
+          "The name may not be empty");
+    }
+    if (WHITE_SPACE.matcher(name).matches()) {
+      throw new ValidationException(sourceMethod,
+          "The name may not contain whitespace characters");
+    }
+  }
 
-    private Param createOtherTokens() {
-      checkList(sourceMethod);
-      return new Param(
-          null,
-          null,
-          null,
-          sourceMethod);
-    }
+  private static Param createEverythingAfter(ExecutableElement sourceMethod) {
+    checkList(sourceMethod);
+    EverythingAfter everythingAfter = sourceMethod.getAnnotation(EverythingAfter.class);
+    String stopword = everythingAfter.value();
+    basicCheckName(sourceMethod, stopword);
+    checkNotPresent(sourceMethod,
+        everythingAfter,
+        Arrays.asList(
+            SuppressLongName.class,
+            ShortName.class,
+            LongName.class,
+            OtherTokens.class));
+    return new Param(
+        null,
+        null,
+        stopword,
+        sourceMethod);
+  }
+
+  private static Param createOtherTokens(ExecutableElement sourceMethod) {
+    checkList(sourceMethod);
+    OtherTokens otherTokens = sourceMethod.getAnnotation(OtherTokens.class);
+    checkNotPresent(sourceMethod,
+        otherTokens,
+        Arrays.asList(
+            SuppressLongName.class,
+            ShortName.class,
+            LongName.class,
+            EverythingAfter.class));
+    return new Param(
+        null,
+        null,
+        null,
+        sourceMethod);
   }
 
   String shortName() {

@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -117,12 +116,6 @@ public final class Processor extends AbstractProcessor {
   }
 
   private void checkSpecialParams(List<Param> params) {
-    params.forEach(param -> {
-      if (param.isSpecial()) {
-        checkNotPresent(param.sourceMethod,
-            asList(SuppressLongName.class, LongName.class, ShortName.class));
-      }
-    });
     List<Param> otherTokens = params.stream()
         .filter(param -> param.optionType == Type.OTHER_TOKENS)
         .collect(toList());
@@ -209,13 +202,15 @@ public final class Processor extends AbstractProcessor {
     return stopword;
   }
 
-  private void checkNotPresent(
+  static void checkNotPresent(
       ExecutableElement executableElement,
+      Annotation cause,
       List<Class<? extends Annotation>> forbiddenAnnotations) {
     for (Class<? extends Annotation> annotation : forbiddenAnnotations) {
       if (executableElement.getAnnotation(annotation) != null) {
         throw new ValidationException(executableElement,
-            "@" + annotation.getSimpleName() + " not allowed here");
+            "@" + annotation.getSimpleName() +
+                " is conflicting with @" + cause.getClass().getSimpleName());
       }
     }
   }
@@ -239,21 +234,6 @@ public final class Processor extends AbstractProcessor {
       if (!method.getModifiers().contains(Modifier.ABSTRACT)) {
         printError(method,
             "Method " + method.getSimpleName() + " must be abstract.");
-        return false;
-      }
-      if (method.getModifiers().contains(Modifier.PRIVATE)) {
-        printError(method,
-            "Method " + method.getSimpleName() + " may not be private.");
-        return false;
-      }
-      if (method.getModifiers().contains(Modifier.STATIC)) {
-        printError(method,
-            "Method " + method.getSimpleName() + " may not be static.");
-        return false;
-      }
-      if (!method.getParameters().isEmpty()) {
-        printError(method,
-            "Method " + method.getSimpleName() + " must have an empty parameter list.");
         return false;
       }
     }

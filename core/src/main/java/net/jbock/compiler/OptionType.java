@@ -51,7 +51,7 @@ final class OptionType {
     if (context.otherTokens) {
       addType(builder, OTHER_TOKENS);
     }
-    if (context.rest) {
+    if (context.everythingAfter()) {
       addType(builder, EVERYTHING_AFTER);
     }
     return builder.addModifiers(PUBLIC)

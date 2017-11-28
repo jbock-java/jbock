@@ -396,7 +396,7 @@ final class Option {
           .endControlFlow();
     }
 
-    if (context.rest) {
+    if (context.everythingAfter()) {
       builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, EVERYTHING_AFTER)
           .addStatement("return $S + $S + $S", "Everything after '", context.stopword, "'")
           .endControlFlow();

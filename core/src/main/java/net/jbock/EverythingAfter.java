@@ -25,5 +25,9 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface EverythingAfter {
 
+  /**
+   * Defines a &quot;stopword&quot; that ends option parsing,
+   * when encountered as an unbound token.
+   */
   String value();
 }

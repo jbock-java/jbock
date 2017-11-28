@@ -11,13 +11,25 @@ import net.jbock.com.squareup.javapoet.ClassName;
 
 final class Context {
 
+  // the annotated class
   final TypeElement sourceType;
+
+  // the *_Parser class that will be generated
   final ClassName generatedClass;
+
+  // corresponds to the abstract methods of the source type
   final List<Param> parameters;
+
+  // non-null if one method has the EverythingAfter annotation
   final String stopword;
+
+  // true if one method has the OtherTokens annotation
   final boolean otherTokens;
-  final boolean rest;
+
+  // true if upper-casing the method names may cause a naming conflict
   final boolean problematicOptionNames;
+
+  // true if option grouping is allowed in the first argument
   final boolean grouping;
 
   private Context(
@@ -26,7 +38,6 @@ final class Context {
       List<Param> parameters,
       String stopword,
       boolean otherTokens,
-      boolean rest,
       boolean problematicOptionNames,
       boolean grouping) {
     this.sourceType = sourceType;
@@ -34,7 +45,6 @@ final class Context {
     this.parameters = parameters;
     this.stopword = stopword;
     this.otherTokens = otherTokens;
-    this.rest = rest;
     this.problematicOptionNames = problematicOptionNames;
     this.grouping = grouping;
   }
@@ -46,8 +56,6 @@ final class Context {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean otherTokens = parameters.stream()
         .anyMatch(p -> p.optionType == Type.OTHER_TOKENS);
-    boolean rest = parameters.stream()
-        .anyMatch(p -> p.optionType == Type.EVERYTHING_AFTER);
     boolean problematicOptionNames = problematicOptionNames(parameters);
     boolean grouping = sourceType.getAnnotation(CommandLineArguments.class).grouping();
     return new Context(
@@ -56,7 +64,6 @@ final class Context {
         parameters,
         stopword,
         otherTokens,
-        rest,
         problematicOptionNames,
         grouping);
   }
@@ -72,5 +79,9 @@ final class Context {
   private static ClassName parserClass(ClassName type) {
     String name = String.join("_", type.simpleNames()) + "_Parser";
     return type.topLevelClassName().peerClass(name);
+  }
+
+  boolean everythingAfter() {
+    return stopword != null;
   }
 }

@@ -97,7 +97,7 @@ final class Parser {
       builder.addStatement("$T $N = $T.emptyList()", otherTokens.type, otherTokens, Collections.class);
     }
 
-    if (context.rest) {
+    if (context.everythingAfter()) {
       builder.addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class);
     } else {
       builder.addStatement("$T $N = $T.emptyList()", rest.type, rest, Collections.class);
