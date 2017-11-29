@@ -55,7 +55,7 @@ final class Context {
       String stopword) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean otherTokens = parameters.stream()
-        .anyMatch(p -> p.optionType == Type.OTHER_TOKENS);
+        .anyMatch(p -> p.paramType == Type.OTHER_TOKENS);
     boolean problematicOptionNames = problematicOptionNames(parameters);
     boolean grouping = sourceType.getAnnotation(CommandLineArguments.class).grouping();
     return new Context(
@@ -70,7 +70,7 @@ final class Context {
 
   private static boolean problematicOptionNames(List<Param> parameters) {
     Set<String> uppercaseArgumentNames = parameters.stream()
-        .map(Param::parameterName)
+        .map(Param::methodName)
         .map(Util::snakeCase)
         .collect(Collectors.toSet());
     return uppercaseArgumentNames.size() < parameters.size();

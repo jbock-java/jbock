@@ -4,21 +4,14 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
-import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
@@ -31,78 +24,95 @@ final class Impl {
 
   final ClassName type;
 
-  private final FieldSpec optMapField;
-  private final FieldSpec sMapField;
-  private final FieldSpec flagsField;
+  final MethodSpec createMethod;
 
   private final Option option;
   private final OptionType optionType;
-  private final FieldSpec restField = FieldSpec.builder(LIST_OF_STRING, "rest", FINAL)
-      .build();
-  private final FieldSpec otherTokensField = FieldSpec.builder(LIST_OF_STRING, "otherTokens", FINAL)
-      .build();
 
   private final Context context;
-  private final Helper helper;
+
+  private final List<FieldSpec> fields;
 
   private Impl(
       ClassName type,
-      FieldSpec optMapField,
-      FieldSpec sMapField,
-      FieldSpec flagsField,
+      MethodSpec createMethod,
       Option option,
       OptionType optionType,
       Context context,
-      Helper helper) {
+      List<FieldSpec> fields) {
     this.type = type;
-    this.optMapField = optMapField;
-    this.sMapField = sMapField;
-    this.flagsField = flagsField;
+    this.createMethod = createMethod;
     this.option = option;
     this.optionType = optionType;
     this.context = context;
-    this.helper = helper;
+    this.fields = fields;
   }
 
   static Impl create(
       Context context,
       ClassName implType,
       OptionType optionType,
-      Option option,
-      Helper helper) {
-    FieldSpec optMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        option.type, LIST_OF_STRING), "optMap", FINAL).build();
-    FieldSpec sMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        option.type, STRING), "sMap", FINAL).build();
-    FieldSpec flagsField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
-        option.type), "flags", FINAL).build();
+      Option option) {
+    List<FieldSpec> fields = new ArrayList<>(context.parameters.size());
+    for (int j = 0; j < context.parameters.size(); j++) {
+      Param param = context.parameters.get(j);
+      fields.add(FieldSpec.builder(param.paramType.returnType, param.methodName())
+          .addModifiers(PRIVATE, FINAL)
+          .build());
+    }
+    MethodSpec createMethod = createMethod(context, implType, option, optionType, fields);
     return new Impl(
         implType,
-        optMapField,
-        sMapField,
-        flagsField, option,
+        createMethod,
+        option,
         optionType,
         context,
-        helper);
+        fields);
   }
 
   TypeSpec define() {
-    TypeSpec.Builder builder = TypeSpec.classBuilder(type)
+    return TypeSpec.classBuilder(type)
         .superclass(TypeName.get(context.sourceType.asType()))
-        .addFields(Arrays.asList(
-            optMapField,
-            sMapField,
-            flagsField));
-    if (context.otherTokens) {
-      builder.addField(otherTokensField);
-    }
-    if (context.everythingAfter()) {
-      builder.addField(restField);
-    }
-    return builder
+        .addFields(fields)
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(privateConstructor())
+        .addMethod(createMethod)
         .addMethods(bindMethods())
+        .build();
+  }
+
+  private static MethodSpec createMethod(
+      Context context,
+      ClassName implType,
+      Option option,
+      OptionType optionType,
+      List<FieldSpec> fields) {
+    CodeBlock.Builder args = CodeBlock.builder().add("\n    ");
+    for (int j = 0; j < context.parameters.size(); j++) {
+      Param param = context.parameters.get(j);
+      args.add(param.paramType.extractExpression(option, j));
+      if (j < context.parameters.size() - 1) {
+        args.add(",\n    ");
+      }
+    }
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("create");
+    builder.addParameter(option.optMapParameter);
+    builder.addParameter(option.sMapParameter);
+    builder.addParameter(option.flagsParameter);
+    builder.addParameter(option.otherTokensParameter);
+    builder.addParameter(option.restParameter);
+    ParameterSpec p = ParameterSpec.builder(option.type, "option").build();
+
+    builder.beginControlFlow("for ($T $N: $T.values())", option.type, p, option.type)
+        .beginControlFlow("if ($N.$N == $T.$L && $N.get($N) == null)",
+            p, option.typeField, optionType.type, Type.REQUIRED, option.sMapParameter, p)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Missing required option: ", p)
+        .endControlFlow()
+        .endControlFlow();
+    builder.addStatement("return new $T($L)", implType, args.build());
+    return builder.addModifiers(STATIC)
+        .returns(implType)
         .build();
   }
 
@@ -110,45 +120,27 @@ final class Impl {
     List<MethodSpec> result = new ArrayList<>(context.parameters.size());
     for (int j = 0; j < context.parameters.size(); j++) {
       Param param = context.parameters.get(j);
-      MethodSpec.Builder builder = MethodSpec.methodBuilder(param.parameterName())
+      MethodSpec.Builder builder = MethodSpec.methodBuilder(param.methodName())
           .addModifiers(PUBLIC)
           .addAnnotation(Override.class)
-          .returns(param.optionType.sourceType);
-      builder.addStatement(param.optionType.extractStatement(option, j));
+          .returns(param.paramType.returnType)
+          .addStatement("return $N", fields.get(j));
       result.add(builder.build());
     }
     return result;
   }
 
   private MethodSpec privateConstructor() {
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("this.$N = $T.unmodifiableMap($N)", optMapField, Collections.class, option.optMapParameter);
-    builder.addStatement("this.$N = $T.unmodifiableMap($N)", sMapField, Collections.class, option.sMapParameter);
-    builder.addStatement("this.$N = $T.unmodifiableSet($N)", flagsField, Collections.class, option.flagsParameter);
-    if (context.otherTokens) {
-      builder.addStatement("this.$N = $T.unmodifiableList($N)", otherTokensField, Collections.class, option.otherTokensParameter);
+    MethodSpec.Builder builder = MethodSpec.constructorBuilder();
+    for (FieldSpec field : fields) {
+      ParameterSpec param = ParameterSpec.builder(field.type, field.name).build();
+      if (field.type.isPrimitive()) {
+        builder.addStatement("this.$N = $N", field, param);
+      } else {
+        builder.addStatement("this.$N = requireNonNull($N)", field, param);
+      }
+      builder.addParameter(param);
     }
-    if (context.everythingAfter()) {
-      builder.addStatement("this.$N = $T.unmodifiableList($N)", restField, Collections.class, option.restParameter);
-    }
-    ParameterSpec p = ParameterSpec.builder(option.type, "option")
-        .build();
-    builder.add("\n");
-    builder.beginControlFlow("for ($T $N: $T.values())", p.type, p, p.type)
-        .beginControlFlow("if ($N.$N == $T.$L && $N.get($N) == null)",
-            p, option.typeField, optionType.type, Type.REQUIRED, sMapField, p)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing required option: ", p)
-        .endControlFlow()
-        .endControlFlow();
-    return MethodSpec.constructorBuilder()
-        .addParameters(Arrays.asList(
-            option.optMapParameter,
-            option.sMapParameter,
-            option.flagsParameter,
-            option.otherTokensParameter,
-            option.restParameter))
-        .addCode(builder.build())
-        .build();
+    return builder.build();
   }
 }

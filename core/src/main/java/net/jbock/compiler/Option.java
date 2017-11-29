@@ -161,7 +161,7 @@ final class Option {
   }
 
   String enumConstant(int i) {
-    String result = snakeCase(context.parameters.get(i).parameterName());
+    String result = snakeCase(context.parameters.get(i).methodName());
     if (!context.problematicOptionNames) {
       return result;
     }
@@ -179,7 +179,7 @@ final class Option {
           String.join(",\n    ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
           Arrays.asList(param.longName(), param.shortName(), optionType.type,
-              param.optionType, argumentName, STRING);
+              param.paramType, argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
       args.addAll(fixArgs);
       args.addAll(Arrays.asList(desc));

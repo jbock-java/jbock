@@ -81,7 +81,9 @@ public final class Processor extends AbstractProcessor {
           continue;
         }
         TypeSpec typeSpec = Parser.create(context).define();
-        write(context.generatedClass, typeSpec);
+        boolean onlyPrimitives = params.stream()
+            .allMatch(p -> p.paramType.returnType.isPrimitive());
+        write(onlyPrimitives, context.generatedClass, typeSpec);
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
@@ -109,8 +111,15 @@ public final class Processor extends AbstractProcessor {
     printError(sourceType, message);
   }
 
-  private void write(ClassName generatedType, TypeSpec typeSpec) throws IOException {
-    JavaFile javaFile = JavaFile.builder(generatedType.packageName(), typeSpec)
+  private void write(
+      boolean onlyPrimitive,
+      ClassName generatedType,
+      TypeSpec typeSpec) throws IOException {
+    JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), typeSpec);
+    if (!onlyPrimitive) {
+      builder.addStaticImport(Objects.class, "requireNonNull");
+    }
+    JavaFile javaFile = builder
         .skipJavaLangImports(true)
         .build();
     JavaFileObject sourceFile = processingEnv.getFiler()
@@ -123,7 +132,7 @@ public final class Processor extends AbstractProcessor {
 
   private void checkSpecialParams(List<Param> params) {
     List<Param> otherTokens = params.stream()
-        .filter(param -> param.optionType == Type.OTHER_TOKENS)
+        .filter(param -> param.paramType == Type.OTHER_TOKENS)
         .collect(toList());
     if (otherTokens.size() > 1) {
       throw new ValidationException(params.get(1).sourceMethod,
@@ -180,7 +189,7 @@ public final class Processor extends AbstractProcessor {
     Set<String> longNames = longNames(params, sourceType);
     Set<String> shortNames = shortNames(params, sourceType);
     List<String> stopwords = params.stream()
-        .filter(param -> param.optionType == EVERYTHING_AFTER)
+        .filter(param -> param.paramType == EVERYTHING_AFTER)
         .map(Param::stopword)
         .collect(toList());
     if (stopwords.size() > 1) {

@@ -50,8 +50,8 @@ final class Parser {
         context.sourceType.getSimpleName() + "Impl");
     OptionType optionType = OptionType.create(context);
     Option option = Option.create(context, optionType);
-    Helper helper = Helper.create(context, implType, optionType, option);
-    Impl impl = Impl.create(context, implType, optionType, option, helper);
+    Impl impl = Impl.create(context, implType, optionType, option);
+    Helper helper = Helper.create(context, impl, optionType, option);
     return new Parser(context, optionType, option, helper, impl);
   }
 

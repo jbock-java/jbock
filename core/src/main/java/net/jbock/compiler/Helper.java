@@ -43,7 +43,7 @@ final class Helper {
   private final FieldSpec sMapField;
   private final FieldSpec flagsField;
 
-  private final ClassName implType;
+  private final Impl impl;
 
   private final FieldSpec longNamesField;
   private final FieldSpec shortNamesField;
@@ -66,7 +66,8 @@ final class Helper {
 
   private Helper(
       ClassName type,
-      ClassName implType, Context context,
+      Impl impl,
+      Context context,
       FieldSpec longNamesField,
       FieldSpec shortNamesField,
       FieldSpec optMapField,
@@ -88,7 +89,7 @@ final class Helper {
       MethodSpec readArgumentMethod,
       MethodSpec chopOffHeadMethod) {
     this.type = type;
-    this.implType = implType;
+    this.impl = impl;
     this.context = context;
     this.longNamesField = longNamesField;
     this.shortNamesField = shortNamesField;
@@ -114,7 +115,7 @@ final class Helper {
 
   static Helper create(
       Context context,
-      ClassName implType,
+      Impl impl,
       OptionType optionType,
       Option option) {
     MethodSpec readNextMethod = readNextMethod();
@@ -142,7 +143,7 @@ final class Helper {
         option.type, STRING), "sMap", FINAL).build();
     FieldSpec flagsField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
         option.type), "flags", FINAL).build();
-    MethodSpec buildMethod = buildMethod(implType, optMapField, sMapField, flagsField);
+    MethodSpec buildMethod = buildMethod(impl, optMapField, sMapField, flagsField);
     MethodSpec addFlagMethod = addFlagMethod(option.type, optionType.type, flagsField);
     MethodSpec addMethod = addMethod(option.type, optionType.type,
         optMapField, sMapField, option.isBindingMethod);
@@ -185,7 +186,7 @@ final class Helper {
 
     return new Helper(
         helperClass,
-        implType,
+        impl,
         context,
         longNamesField,
         shortNamesField,
@@ -685,17 +686,17 @@ final class Helper {
   }
 
   private static MethodSpec buildMethod(
-      ClassName implType,
+      Impl impl,
       FieldSpec optMapField,
       FieldSpec sMapField,
       FieldSpec flagsField) {
     ParameterSpec otherTokens = ParameterSpec.builder(LIST_OF_STRING, "otherTokens").build();
     ParameterSpec rest = ParameterSpec.builder(LIST_OF_STRING, "rest").build();
     return MethodSpec.methodBuilder("build")
-        .addStatement("return new $T($N, $N, $N, $N, $N)", implType,
+        .addStatement("return $T.$N($N, $N, $N, $N, $N)", impl.type, impl.createMethod,
             optMapField, sMapField, flagsField, otherTokens, rest)
         .addParameters(Arrays.asList(otherTokens, rest))
-        .returns(implType)
+        .returns(impl.type)
         .build();
   }
 

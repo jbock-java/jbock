@@ -33,7 +33,7 @@ final class Param {
   private final String longName;
   private final String shortName;
 
-  final Type optionType;
+  final Type paramType;
 
   private final String stopword;
 
@@ -50,10 +50,10 @@ final class Param {
     this.longName = longName;
     this.stopword = stopword;
     this.sourceMethod = sourceMethod;
-    this.optionType = getOptionType(sourceMethod);
+    this.paramType = getParamType(sourceMethod);
   }
 
-  private static Type getOptionType(ExecutableElement sourceMethod) {
+  private static Type getParamType(ExecutableElement sourceMethod) {
     if (sourceMethod.getAnnotation(OtherTokens.class) != null) {
       return Type.OTHER_TOKENS;
     }
@@ -291,16 +291,16 @@ final class Param {
     return sourceMethod.getAnnotation(Description.class);
   }
 
-  String parameterName() {
+  String methodName() {
     return sourceMethod.getSimpleName().toString();
   }
 
   boolean isSpecial() {
-    return optionType.special;
+    return paramType.special;
   }
 
   String descriptionArgumentName() {
-    if (!optionType.binding) {
+    if (!paramType.binding) {
       return null;
     }
     return description() == null ?
