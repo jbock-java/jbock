@@ -12,7 +12,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
@@ -88,14 +87,19 @@ final class Impl {
   }
 
   TypeSpec define() {
-    return TypeSpec.classBuilder(type)
+    TypeSpec.Builder builder = TypeSpec.classBuilder(type)
         .superclass(TypeName.get(context.sourceType.asType()))
         .addFields(Arrays.asList(
             optMapField,
             sMapField,
-            flagsField,
-            otherTokensField,
-            restField))
+            flagsField));
+    if (context.otherTokens) {
+      builder.addField(otherTokensField);
+    }
+    if (context.everythingAfter()) {
+      builder.addField(restField);
+    }
+    return builder
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(privateConstructor())
         .addMethods(bindMethods())
@@ -110,23 +114,7 @@ final class Impl {
           .addModifiers(PUBLIC)
           .addAnnotation(Override.class)
           .returns(param.optionType.sourceType);
-      if (param.optionType == Type.FLAG) {
-        builder.addStatement("return $N.contains($T.$N)",
-            flagsField, option.type, option.enumConstant(j));
-      } else if (param.optionType == Type.OPTIONAL) {
-        builder.addStatement("return $T.ofNullable($N.get($T.$L))",
-            Optional.class, sMapField, option.type, option.enumConstant(j));
-      } else if (param.optionType == Type.REQUIRED) {
-        builder.addStatement("return $N.get($T.$L)",
-            sMapField, option.type, option.enumConstant(j));
-      } else if (param.optionType == Type.OTHER_TOKENS) {
-        builder.addStatement("return $N", otherTokensField);
-      } else if (param.optionType == Type.EVERYTHING_AFTER) {
-        builder.addStatement("return $N", restField);
-      } else {
-        builder.addStatement("return $N.getOrDefault($T.$L, $T.emptyList())",
-            optMapField, option.type, option.enumConstant(j), Collections.class);
-      }
+      builder.addStatement(param.optionType.extractStatement(option, j));
       result.add(builder.build());
     }
     return result;
@@ -134,16 +122,15 @@ final class Impl {
 
   private MethodSpec privateConstructor() {
     CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec otherTokens = ParameterSpec.builder(otherTokensField.type, otherTokensField.name).build();
-    ParameterSpec rest = ParameterSpec.builder(restField.type, restField.name).build();
-    ParameterSpec optMap = ParameterSpec.builder(optMapField.type, optMapField.name).build();
-    ParameterSpec sMap = ParameterSpec.builder(sMapField.type, sMapField.name).build();
-    ParameterSpec flags = ParameterSpec.builder(flagsField.type, flagsField.name).build();
-    builder.addStatement("this.$N = $T.unmodifiableMap($N)", optMapField, Collections.class, optMap);
-    builder.addStatement("this.$N = $T.unmodifiableMap($N)", sMapField, Collections.class, sMap);
-    builder.addStatement("this.$N = $T.unmodifiableSet($N)", flagsField, Collections.class, flags);
-    builder.addStatement("this.$N = $T.unmodifiableList($N)", otherTokensField, Collections.class, otherTokens);
-    builder.addStatement("this.$N = $T.unmodifiableList($N)", restField, Collections.class, rest);
+    builder.addStatement("this.$N = $T.unmodifiableMap($N)", optMapField, Collections.class, option.optMapParameter);
+    builder.addStatement("this.$N = $T.unmodifiableMap($N)", sMapField, Collections.class, option.sMapParameter);
+    builder.addStatement("this.$N = $T.unmodifiableSet($N)", flagsField, Collections.class, option.flagsParameter);
+    if (context.otherTokens) {
+      builder.addStatement("this.$N = $T.unmodifiableList($N)", otherTokensField, Collections.class, option.otherTokensParameter);
+    }
+    if (context.everythingAfter()) {
+      builder.addStatement("this.$N = $T.unmodifiableList($N)", restField, Collections.class, option.restParameter);
+    }
     ParameterSpec p = ParameterSpec.builder(option.type, "option")
         .build();
     builder.add("\n");
@@ -155,7 +142,12 @@ final class Impl {
         .endControlFlow()
         .endControlFlow();
     return MethodSpec.constructorBuilder()
-        .addParameters(Arrays.asList(optMap, sMap, flags, otherTokens, rest))
+        .addParameters(Arrays.asList(
+            option.optMapParameter,
+            option.sMapParameter,
+            option.flagsParameter,
+            option.otherTokensParameter,
+            option.restParameter))
         .addCode(builder.build())
         .build();
   }

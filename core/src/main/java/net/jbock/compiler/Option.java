@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import net.jbock.Description;
 import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
@@ -60,6 +61,12 @@ final class Option {
   final MethodSpec shortNameMapMethod;
   final MethodSpec longNameMapMethod;
 
+  final ParameterSpec optMapParameter;
+  final ParameterSpec sMapParameter;
+  final ParameterSpec flagsParameter;
+  final ParameterSpec otherTokensParameter;
+  final ParameterSpec restParameter;
+
   private Option(
       Context context,
       ClassName type,
@@ -71,7 +78,12 @@ final class Option {
       FieldSpec argumentNameField,
       MethodSpec shortNameMapMethod,
       MethodSpec longNameMapMethod, MethodSpec isSpecialMethod,
-      MethodSpec isBindingMethod) {
+      MethodSpec isBindingMethod,
+      ParameterSpec optMapParameter,
+      ParameterSpec sMapParameter,
+      ParameterSpec flagsParameter,
+      ParameterSpec otherTokensParameter,
+      ParameterSpec restParameter) {
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
     this.descriptionField = descriptionField;
@@ -84,6 +96,11 @@ final class Option {
     this.longNameMapMethod = longNameMapMethod;
     this.isSpecialMethod = isSpecialMethod;
     this.isBindingMethod = isBindingMethod;
+    this.optMapParameter = optMapParameter;
+    this.sMapParameter = sMapParameter;
+    this.flagsParameter = flagsParameter;
+    this.otherTokensParameter = otherTokensParameter;
+    this.restParameter = restParameter;
     this.describeParamMethod = describeParamMethod(
         context,
         longNameField,
@@ -112,6 +129,17 @@ final class Option {
         LIST_OF_STRING, "description", PRIVATE, FINAL).build();
     FieldSpec argumentNameField = FieldSpec.builder(
         STRING, "descriptionArgumentName", PRIVATE, FINAL).build();
+    ParameterSpec optMapParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        type, LIST_OF_STRING), "optMap", FINAL).build();
+    ParameterSpec sMapParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        type, STRING), "sMap", FINAL).build();
+    ParameterSpec flagsParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
+        type), "flags", FINAL).build();
+    ParameterSpec otherTokensParameter = ParameterSpec.builder(LIST_OF_STRING, "otherTokens", FINAL)
+        .build();
+    ParameterSpec restParameter = ParameterSpec.builder(LIST_OF_STRING, "rest", FINAL)
+        .build();
+
     return new Option(
         context,
         type,
@@ -124,7 +152,12 @@ final class Option {
         shortNameMapMethod,
         longNameMapMethod,
         isSpecialMethod,
-        isBindingMethod);
+        isBindingMethod,
+        optMapParameter,
+        sMapParameter,
+        flagsParameter,
+        otherTokensParameter,
+        restParameter);
   }
 
   String enumConstant(int i) {

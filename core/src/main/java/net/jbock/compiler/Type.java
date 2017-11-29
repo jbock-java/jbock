@@ -5,8 +5,11 @@ import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
+import java.util.Collections;
 import java.util.EnumSet;
+import java.util.Optional;
 import java.util.Set;
+import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 /**
@@ -14,16 +17,66 @@ import net.jbock.com.squareup.javapoet.TypeName;
  */
 enum Type {
 
-  FLAG(BOOLEAN, false, false),
-  OPTIONAL(OPTIONAL_STRING, false, true),
-  REQUIRED(STRING, false, true),
-  REPEATABLE(LIST_OF_STRING, false, true),
-  OTHER_TOKENS(LIST_OF_STRING, true, false),
-  EVERYTHING_AFTER(LIST_OF_STRING, true, false);
+  FLAG(BOOLEAN, false, false) {
+    @Override
+    CodeBlock extractStatement(Option option, int j) {
+      return CodeBlock.builder().add(
+          "return $N.contains($T.$N)",
+          option.flagsParameter, option.type, option.enumConstant(j))
+          .build();
+    }
+  },
+  OPTIONAL(OPTIONAL_STRING, false, true) {
+    @Override
+    CodeBlock extractStatement(Option option, int j) {
+      return CodeBlock.builder().add(
+          "return $T.ofNullable($N.get($T.$L))",
+          Optional.class, option.sMapParameter, option.type, option.enumConstant(j))
+          .build();
+    }
+  },
+  REQUIRED(STRING, false, true) {
+    @Override
+    CodeBlock extractStatement(Option option, int j) {
+      return CodeBlock.builder().add(
+          "return $N.get($T.$L)",
+          option.sMapParameter, option.type, option.enumConstant(j))
+          .build();
+    }
+  },
+  REPEATABLE(LIST_OF_STRING, false, true) {
+    @Override
+    CodeBlock extractStatement(Option option, int j) {
+      return CodeBlock.builder().add(
+          "return $N.getOrDefault($T.$L, $T.emptyList())",
+          option.optMapParameter, option.type, option.enumConstant(j), Collections.class)
+          .build();
+    }
+  },
+  OTHER_TOKENS(LIST_OF_STRING, true, false) {
+    @Override
+    CodeBlock extractStatement(Option option, int j) {
+      return CodeBlock.builder().add(
+          "return $N",
+          option.otherTokensParameter)
+          .build();
+    }
+  },
+  EVERYTHING_AFTER(LIST_OF_STRING, true, false) {
+    @Override
+    CodeBlock extractStatement(Option option, int j) {
+      return CodeBlock.builder().add(
+          "return $N",
+          option.restParameter)
+          .build();
+    }
+  };
 
   final TypeName sourceType;
   final boolean special;
   final boolean binding;
+
+  abstract CodeBlock extractStatement(Option option, int j);
 
   Type(
       TypeName sourceType,
