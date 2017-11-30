@@ -13,11 +13,11 @@ public class TarArgumentsTest {
 
   @Test
   public void testExtract() {
-    assertThat(TarArguments_Parser.parse(new String[]{"xf", "foo.tar"}).extract())
+    assertThat(TarArguments_Parser.parse(new String[]{"-x", "-f", "foo.tar"}).extract())
         .isTrue();
-    assertThat(TarArguments_Parser.parse(new String[]{"xf", "foo.tar"}).file())
+    assertThat(TarArguments_Parser.parse(new String[]{"-x", "-f", "foo.tar"}).file())
         .isEqualTo("foo.tar");
-    assertThat(TarArguments_Parser.parse(new String[]{"vxf", "foo.tar"}).verbose())
+    assertThat(TarArguments_Parser.parse(new String[]{"vx", "-f", "foo.tar"}).verbose())
         .isTrue();
   }
 

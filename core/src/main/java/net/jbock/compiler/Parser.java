@@ -121,8 +121,17 @@ final class Parser {
             .endControlFlow();
       }
 
-      builder.addStatement("$T $N = $N.$N($N, $N)",
-          tokenRead.type, tokenRead, helper, this.helper.readGroupMethod, firstToken, it);
+      builder.addStatement("$T $N", tokenRead.type, tokenRead);
+
+      builder.beginControlFlow("if ($N.$N($N))", helper, this.helper.looksLikeGroupMethod, firstToken)
+          .addStatement("$N.$N($N)",
+              helper, this.helper.readGroupMethod, firstToken)
+          .addStatement("$N = $L", tokenRead, true)
+          .endControlFlow()
+          .beginControlFlow("else")
+          .addStatement("$N = $N.$N($N, $N)",
+              tokenRead, helper, this.helper.readMethod, firstToken, it)
+          .endControlFlow();
 
       builder.beginControlFlow("if (!$N)", tokenRead);
       if (context.otherTokens) {

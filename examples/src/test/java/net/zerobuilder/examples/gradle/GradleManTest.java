@@ -61,63 +61,63 @@ public final class GradleManTest {
   @Test
   public void errorFlagWithTrailingGarbage() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Unknown token in option group: -c1");
+    exception.expectMessage("Invalid token in option group '-c1': '1'");
     GradleMan_Parser.parse(new String[]{"-c1"});
   }
 
   @Test
   public void errorWeirdOptionGroupEmbeddedHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found hyphen in group: -c-v");
+    exception.expectMessage("Invalid token in option group '-c-v': '-'");
     GradleMan_Parser.parse(new String[]{"-c-v"});
   }
 
   @Test
   public void errorWeirdOptionGroupTrailingHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found hyphen in group: -c-");
+    exception.expectMessage("Invalid token in option group '-c-': '-'");
     GradleMan_Parser.parse(new String[]{"-c-"});
   }
 
   @Test
   public void errorWeirdOptionGroupEmbeddedEquals() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Unknown token in option group: -c=v");
+    exception.expectMessage("Invalid token in option group '-c=v': '='");
     GradleMan_Parser.parse(new String[]{"-c=v"});
   }
 
   @Test
   public void errorWeirdOptionGroupTrailingEquals() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Unknown token in option group: -c=");
+    exception.expectMessage("Invalid token in option group '-c=': '='");
     GradleMan_Parser.parse(new String[]{"-c="});
   }
 
   @Test
   public void errorWeirdOptionGroupAttemptToPassMethod() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Unknown token in option group: -cX=1");
+    exception.expectMessage("Invalid token in option group '-cX=1': 'X'");
     GradleMan_Parser.parse(new String[]{"-cX=1"});
   }
 
   @Test
   public void errorInvalidOptionGroupRepeated() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("In option group -cvv: option VERBOSE (-v, --verbose) is not repeatable");
+    exception.expectMessage("In option group '-cvv': option 'v' is not repeatable");
     GradleMan_Parser.parse(new String[]{"-cvv"});
   }
 
   @Test
   public void errorInvalidOptionGroupUnknownToken() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Unknown token in option group: -cvx");
+    exception.expectMessage("Invalid token in option group '-cvx': 'x'");
     GradleMan_Parser.parse(new String[]{"-cvx"});
   }
 
   @Test
   public void errorInvalidOptionGroupMissingToken() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing value after token: m");
+    exception.expectMessage("Invalid token in option group '-cvm': 'm'");
     GradleMan_Parser.parse(new String[]{"-cvm"});
   }
 
@@ -226,32 +226,20 @@ public final class GradleManTest {
         .isTrue();
     assertThat(GradleMan_Parser.parse(new String[]{"-cv"}).message())
         .isEqualTo(Optional.empty());
-    assertThat(GradleMan_Parser.parse(new String[]{"-cvm", "a"}).message())
-        .isEqualTo(Optional.of("a"));
   }
 
   @Test
-  public void testDoubleFlagWithAttachedOption() {
-    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-cvm", "hello"});
-    assertThat(gradleMan.cmos()).isEqualTo(true);
-    assertThat(gradleMan.verbose()).isEqualTo(true);
-    assertThat(gradleMan.message()).isEqualTo(Optional.of("hello"));
+  public void errorDoubleFlagWithAttachedOption() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Invalid token in option group '-cvm': 'm'");
+    GradleMan_Parser.parse(new String[]{"-cvm", "hello"});
   }
 
   @Test
-  public void testDoubleFlagWithAttachedOptionNoHyphen() {
-    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"cvm", "hello"});
-    assertThat(gradleMan.cmos()).isEqualTo(true);
-    assertThat(gradleMan.verbose()).isEqualTo(true);
-    assertThat(gradleMan.message()).isEqualTo(Optional.of("hello"));
-  }
-
-  @Test
-  public void testDoubleFlagWithDetachedOption() {
-    GradleMan gradleMan = GradleMan_Parser.parse(new String[]{"-cvm", "hello"});
-    assertThat(gradleMan.cmos()).isEqualTo(true);
-    assertThat(gradleMan.verbose()).isEqualTo(true);
-    assertThat(gradleMan.message()).isEqualTo(Optional.of("hello"));
+  public void errorDoubleFlagWithAttachedOptionNoHyphen() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Invalid token in option group 'cvm': 'm'");
+    GradleMan_Parser.parse(new String[]{"cvm", "hello"});
   }
 
   @Test

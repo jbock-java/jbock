@@ -51,8 +51,8 @@ final class Option {
   private final MethodSpec descriptionBlockMethod;
 
   private final FieldSpec longNameField;
-  private final FieldSpec shortNameField;
 
+  final FieldSpec shortNameField;
   final FieldSpec typeField;
 
   final MethodSpec isSpecialMethod;

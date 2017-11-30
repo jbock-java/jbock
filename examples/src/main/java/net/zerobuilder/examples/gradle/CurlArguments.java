@@ -27,6 +27,9 @@ abstract class CurlArguments {
   @Description("boolean for flags")
   abstract boolean verbose();
 
+  @ShortName('i')
+  abstract boolean include();
+
   @OtherTokens
   @Description({
       "@OtherTokens to capture any 'other' tokens in the input.",
