@@ -32,18 +32,12 @@ final class Helper {
 
   final ClassName type;
 
-  private final FieldSpec otherTokensField = FieldSpec.builder(LIST_OF_STRING, "otherTokens", FINAL)
-      .build();
-
   private final Context context;
   private final Option option;
-  private final OptionType optionType;
 
   private final FieldSpec optMapField;
   private final FieldSpec sMapField;
   private final FieldSpec flagsField;
-
-  private final Impl impl;
 
   private final FieldSpec longNamesField;
   private final FieldSpec shortNamesField;
@@ -67,7 +61,6 @@ final class Helper {
 
   private Helper(
       ClassName type,
-      Impl impl,
       Context context,
       FieldSpec longNamesField,
       FieldSpec shortNamesField,
@@ -75,7 +68,6 @@ final class Helper {
       FieldSpec sMapField,
       FieldSpec flagsField,
       Option option,
-      OptionType optionType,
       MethodSpec buildMethod,
       MethodSpec stripMethod,
       MethodSpec addFlagMethod,
@@ -91,7 +83,6 @@ final class Helper {
       MethodSpec readArgumentMethod,
       MethodSpec chopMethod) {
     this.type = type;
-    this.impl = impl;
     this.context = context;
     this.longNamesField = longNamesField;
     this.shortNamesField = shortNamesField;
@@ -99,7 +90,6 @@ final class Helper {
     this.sMapField = sMapField;
     this.flagsField = flagsField;
     this.option = option;
-    this.optionType = optionType;
     this.buildMethod = buildMethod;
     this.stripMethod = stripMethod;
     this.addFlagMethod = addFlagMethod;
@@ -134,6 +124,7 @@ final class Helper {
         .addModifiers(FINAL)
         .build();
     MethodSpec looksLikeGroupMethod = looksLikeGroupMethod(
+        context,
         looksLikeLongMethod,
         option.typeField,
         shortNamesField,
@@ -147,13 +138,18 @@ final class Helper {
     FieldSpec flagsField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
         option.type), "flags", FINAL).build();
     MethodSpec buildMethod = buildMethod(impl, optMapField, sMapField, flagsField);
-    MethodSpec addFlagMethod = addFlagMethod(option, optionType.type, flagsField);
-    MethodSpec addMethod = addArgumentMethod(option.type, optionType.type,
-        optMapField, sMapField, option.isBindingMethod);
+    MethodSpec addFlagMethod = addFlagMethod(context, option, optionType.type, flagsField);
+    MethodSpec addMethod = addArgumentMethod(
+        context,
+        option.type,
+        optionType.type,
+        optMapField,
+        sMapField);
     MethodSpec readLongMethod = readLongMethod(
         longNamesField, option.type);
 
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(
+        context,
         shortNamesField,
         option.typeField,
         optionType.type,
@@ -163,10 +159,10 @@ final class Helper {
 
     MethodSpec readOptionFromGroupMethod = readOptionFromGroupMethod(
         shortNamesField,
-        option.type,
-        readLongMethod);
+        option.type);
 
     MethodSpec readMethod = readMethod(
+        context,
         readArgumentMethod,
         readRegularOptionMethod,
         option.type,
@@ -178,20 +174,14 @@ final class Helper {
     MethodSpec stripMethod = stripMethod();
 
     MethodSpec readGroupMethod = readGroupMethod(
-        readMethod,
-        readNextMethod,
         readOptionFromGroupMethod,
         stripMethod,
         option.type,
-        option.typeField,
-        optionType.type,
         chopMethod,
-        addMethod,
         addFlagMethod);
 
     return new Helper(
         helperClass,
-        impl,
         context,
         longNamesField,
         shortNamesField,
@@ -199,7 +189,6 @@ final class Helper {
         sMapField,
         flagsField,
         option,
-        optionType,
         buildMethod,
         stripMethod,
         addFlagMethod,
@@ -255,6 +244,7 @@ final class Helper {
   }
 
   private static MethodSpec addFlagMethod(
+      Context context,
       Option option,
       ClassName optionTypeClass,
       FieldSpec flags) {
@@ -262,11 +252,13 @@ final class Helper {
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
     ParameterSpec freeToken = ParameterSpec.builder(STRING, "freeToken").build();
 
-    builder.beginControlFlow("if ($N.type != $T.$L)", optionParam, optionTypeClass, Type.FLAG)
-        .addStatement("throw new $T($S +\n$N + $S + $N.$N + $S)", IllegalArgumentException.class,
-            "Invalid token in option group '", freeToken, "': '",
-            optionParam, option.shortNameField, "'")
-        .endControlFlow();
+    if (context.paramTypes.contains(Type.FLAG)) {
+      builder.beginControlFlow("if ($N.type != $T.$L)", optionParam, optionTypeClass, Type.FLAG)
+          .addStatement("throw new $T($S +\n$N + $S + $N.$N + $S)", IllegalArgumentException.class,
+              "Invalid token in option group '", freeToken, "': '",
+              optionParam, option.shortNameField, "'")
+          .endControlFlow();
+    }
 
     builder.beginControlFlow("if (!$N.add($N))", flags, optionParam)
         .addStatement(throwRepetitionErrorInGroup(option, optionParam, freeToken))
@@ -276,11 +268,11 @@ final class Helper {
   }
 
   private static MethodSpec addArgumentMethod(
+      Context context,
       ClassName optionClass,
       ClassName optionTypeClass,
       FieldSpec optMap,
-      FieldSpec sMap,
-      MethodSpec isBindingMethod) {
+      FieldSpec sMap) {
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec argument = ParameterSpec.builder(STRING, "argument").build();
@@ -288,21 +280,21 @@ final class Helper {
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("addArgument");
 
-    // begin handle repeatable
-    builder.beginControlFlow("if ($N.type == $T.$L)", option, optionTypeClass, Type.REPEATABLE);
+    if (context.paramTypes.contains(Type.REPEATABLE)) {
+      builder.beginControlFlow("if ($N.type == $T.$L)", option, optionTypeClass, Type.REPEATABLE);
 
-    builder.addStatement("$T $N = $N.get($N)", bucket.type, bucket, optMap, option);
+      builder.addStatement("$T $N = $N.get($N)", bucket.type, bucket, optMap, option);
 
-    builder.beginControlFlow("if ($N == null)", bucket)
-        .addStatement("$N = new $T<>()", bucket, ArrayList.class)
-        .addStatement("$N.put($N, $N)", optMap, option, bucket)
-        .endControlFlow();
+      builder.beginControlFlow("if ($N == null)", bucket)
+          .addStatement("$N = new $T<>()", bucket, ArrayList.class)
+          .addStatement("$N.put($N, $N)", optMap, option, bucket)
+          .endControlFlow();
 
-    builder.addStatement("$N.add($N)", bucket, argument);
-    builder.addStatement("return $L", true);
+      builder.addStatement("$N.add($N)", bucket, argument);
+      builder.addStatement("return $L", true);
 
-    // done handling repeatable
-    builder.endControlFlow();
+      builder.endControlFlow();
+    }
 
     builder.beginControlFlow("if ($N.containsKey($N))", sMap, option)
         .addStatement(repetitionError(option, token))
@@ -318,6 +310,7 @@ final class Helper {
   }
 
   private static MethodSpec readRegularOptionMethod(
+      Context context,
       FieldSpec shortNamesField,
       FieldSpec optionTypeField,
       ClassName optionTypeType,
@@ -325,7 +318,6 @@ final class Helper {
       MethodSpec readLongMethod,
       MethodSpec looksLikeLongMethod) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
     ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
@@ -346,11 +338,13 @@ final class Helper {
         .addStatement("return null")
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N.$N == $T.$L && $N.length() >= 3)", option, optionTypeField,
-        optionTypeType, Type.FLAG, token)
-        .add("// flags cannot have an argument attached\n")
-        .addStatement("return null", option)
-        .endControlFlow();
+    if (context.paramTypes.contains(Type.FLAG)) {
+      builder.beginControlFlow("if ($N.$N == $T.$L && $N.length() >= 3)", option, optionTypeField,
+          optionTypeType, Type.FLAG, token)
+          .add("// flags cannot have an argument attached\n")
+          .addStatement("return null", option)
+          .endControlFlow();
+    }
 
     builder.addStatement("return $N", option);
 
@@ -362,18 +356,15 @@ final class Helper {
   }
 
   private static MethodSpec readOptionFromGroupMethod(
-      FieldSpec shortNames,
-      ClassName optionClass,
-      MethodSpec readLongMethod) {
+      FieldSpec shortNamesField,
+      ClassName optionClass) {
     ParameterSpec firstToken = ParameterSpec.builder(STRING, "firstToken").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec shortName = ParameterSpec.builder(STRING, "shortName").build();
     ParameterSpec optionParam = ParameterSpec.builder(optionClass, "option").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.addStatement("$T $N = $N.get($T.toString($N.charAt(0)))",
-        optionParam.type, optionParam, shortNames, Character.class, token);
+        optionParam.type, optionParam, shortNamesField, Character.class, token);
 
     builder.beginControlFlow("if ($N == null)", optionParam)
         .addStatement("throw new $T($S +\n$N + $S + $N.charAt(0) + $S)", IllegalArgumentException.class,
@@ -427,18 +418,12 @@ final class Helper {
    * a free token, if any. </p>
    */
   private static MethodSpec readGroupMethod(
-      MethodSpec readMethod,
-      MethodSpec readNextMethod,
       MethodSpec readOptionFromGroupMethod,
       MethodSpec stripMethod,
       ClassName optionClass,
-      FieldSpec optionType,
-      ClassName optionTypeClass,
       MethodSpec chopMethod,
-      MethodSpec addMethod,
       MethodSpec addFlagMethod) {
 
-    ParameterSpec argument = ParameterSpec.builder(STRING, "argument").build();
     ParameterSpec firstToken = ParameterSpec.builder(STRING, "firstToken").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
@@ -456,6 +441,7 @@ final class Helper {
   }
 
   private static MethodSpec readMethod(
+      Context context,
       MethodSpec readArgumentMethod,
       MethodSpec readRegularOptionMethod,
       ClassName optionClass,
@@ -469,7 +455,6 @@ final class Helper {
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
-    ParameterSpec chopped = ParameterSpec.builder(STRING, "chopped").build();
 
     CodeBlock.Builder builder = CodeBlock.builder();
 
@@ -481,14 +466,15 @@ final class Helper {
         .addStatement("return $L", false)
         .endControlFlow();
 
-    builder.add("\n");
-    builder.beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, Type.FLAG)
-        .addStatement("$N($N, $N)", addFlagMethod, option, token)
-        .addStatement("return $L", true)
-        .endControlFlow();
+    if (context.paramTypes.contains(Type.FLAG)) {
+      builder.add("\n");
+      builder.beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, Type.FLAG)
+          .addStatement("$N($N, $N)", addFlagMethod, option, token)
+          .addStatement("return $L", true)
+          .endControlFlow();
+    }
 
     builder.add("\n");
-    builder.add("// not a flag; now read the argument\n");
     builder.addStatement("$T $N = $N($N, $N)", argument.type, argument, readArgumentMethod, token, it);
 
     builder.addStatement("$N($N, $N, $N)", addMethod, option, token, argument);
@@ -608,6 +594,7 @@ final class Helper {
   }
 
   private static MethodSpec looksLikeGroupMethod(
+      Context context,
       MethodSpec looksLikeLongMethod,
       FieldSpec optionTypeField,
       FieldSpec shortNamesField,
@@ -641,9 +628,13 @@ final class Helper {
         .addStatement("return $L", false)
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N.$N != $T.$L)", option, optionTypeField, optionTypeType, Type.FLAG)
-        .addStatement("return $L", false)
-        .endControlFlow();
+
+    if (context.paramTypes.contains(Type.FLAG)) {
+      builder.beginControlFlow("if ($N.$N != $T.$L)",
+          option, optionTypeField, optionTypeType, Type.FLAG)
+          .addStatement("return $L", false)
+          .endControlFlow();
+    }
 
     builder.addStatement("return $L", true);
 

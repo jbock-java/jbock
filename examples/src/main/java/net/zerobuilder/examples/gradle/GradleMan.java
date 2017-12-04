@@ -38,4 +38,19 @@ abstract class GradleMan {
   static abstract class Foo {
     abstract Optional<String> bar();
   }
+
+  @CommandLineArguments
+  static abstract class Bar {
+    abstract List<String> bar();
+  }
+
+  @CommandLineArguments(grouping = true)
+  static abstract class GroupingFoo {
+    abstract Optional<String> bar();
+  }
+
+  @CommandLineArguments(grouping = true)
+  static abstract class GroupingBar {
+    abstract List<String> bar();
+  }
 }

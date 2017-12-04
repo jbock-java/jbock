@@ -2,6 +2,7 @@ package net.jbock.compiler;
 
 import static net.jbock.compiler.Util.asType;
 
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -32,6 +33,8 @@ final class Context {
   // true if option grouping is allowed in the first argument
   final boolean grouping;
 
+  final Set<Type> paramTypes;
+
   private Context(
       TypeElement sourceType,
       ClassName generatedClass,
@@ -39,7 +42,8 @@ final class Context {
       String stopword,
       boolean otherTokens,
       boolean problematicOptionNames,
-      boolean grouping) {
+      boolean grouping,
+      Set<Type> paramTypes) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -47,6 +51,7 @@ final class Context {
     this.otherTokens = otherTokens;
     this.problematicOptionNames = problematicOptionNames;
     this.grouping = grouping;
+    this.paramTypes = paramTypes;
   }
 
   static Context create(
@@ -54,10 +59,11 @@ final class Context {
       List<Param> parameters,
       String stopword) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
-    boolean otherTokens = parameters.stream()
-        .anyMatch(p -> p.paramType == Type.OTHER_TOKENS);
     boolean problematicOptionNames = problematicOptionNames(parameters);
     boolean grouping = sourceType.getAnnotation(CommandLineArguments.class).grouping();
+    Set<Type> paramTypes = EnumSet.noneOf(Type.class);
+    parameters.forEach(p -> paramTypes.add(p.paramType));
+    boolean otherTokens = paramTypes.contains(Type.OTHER_TOKENS);
     return new Context(
         sourceType,
         generatedClass,
@@ -65,7 +71,8 @@ final class Context {
         stopword,
         otherTokens,
         problematicOptionNames,
-        grouping);
+        grouping,
+        paramTypes);
   }
 
   private static boolean problematicOptionNames(List<Param> parameters) {

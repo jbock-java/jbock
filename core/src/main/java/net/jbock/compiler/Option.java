@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import net.jbock.Description;
 import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
@@ -55,9 +56,6 @@ final class Option {
   final FieldSpec shortNameField;
   final FieldSpec typeField;
 
-  final MethodSpec isSpecialMethod;
-  final MethodSpec isBindingMethod;
-
   final MethodSpec shortNameMapMethod;
   final MethodSpec longNameMapMethod;
 
@@ -66,6 +64,9 @@ final class Option {
   final ParameterSpec flagsParameter;
   final ParameterSpec otherTokensParameter;
   final ParameterSpec restParameter;
+
+  private final MethodSpec isSpecialMethod;
+  private final MethodSpec isBindingMethod;
 
   private Option(
       Context context,
@@ -77,7 +78,8 @@ final class Option {
       FieldSpec descriptionField,
       FieldSpec argumentNameField,
       MethodSpec shortNameMapMethod,
-      MethodSpec longNameMapMethod, MethodSpec isSpecialMethod,
+      MethodSpec longNameMapMethod,
+      MethodSpec isSpecialMethod,
       MethodSpec isBindingMethod,
       ParameterSpec optMapParameter,
       ParameterSpec sMapParameter,
@@ -130,14 +132,14 @@ final class Option {
     FieldSpec argumentNameField = FieldSpec.builder(
         STRING, "descriptionArgumentName", PRIVATE, FINAL).build();
     ParameterSpec optMapParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        type, LIST_OF_STRING), "optMap", FINAL).build();
+        type, LIST_OF_STRING), "optMap").build();
     ParameterSpec sMapParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        type, STRING), "sMap", FINAL).build();
+        type, STRING), "sMap").build();
     ParameterSpec flagsParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
-        type), "flags", FINAL).build();
-    ParameterSpec otherTokensParameter = ParameterSpec.builder(LIST_OF_STRING, "otherTokens", FINAL)
+        type), "flags").build();
+    ParameterSpec otherTokensParameter = ParameterSpec.builder(LIST_OF_STRING, "otherTokens")
         .build();
-    ParameterSpec restParameter = ParameterSpec.builder(LIST_OF_STRING, "rest", FINAL)
+    ParameterSpec restParameter = ParameterSpec.builder(LIST_OF_STRING, "rest")
         .build();
 
     return new Option(
@@ -213,19 +215,12 @@ final class Option {
     ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), descriptionField.name).build();
     ParameterSpec argumentName = ParameterSpec.builder(argumentNameField.type, argumentNameField.name).build();
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
-    builder
-        .beginControlFlow("if (!$N.$N)", optionType, this.optionType.isSpecialField)
-        .addStatement("assert $N == null || $N.length() == 1", shortName, shortName)
-        .addStatement("assert $N == null || !$N.isEmpty()", longName, longName)
-        .addStatement("assert $N != null || $N != null", longName, shortName)
-        .endControlFlow();
 
     builder
         .addStatement("this.$N = $N", longNameField, longName)
         .addStatement("this.$N = $N == null ? null : $N.charAt(0)", shortNameField, shortName, shortName)
         .addStatement("this.$N = $N", this.typeField, optionType)
-        .addStatement("this.$N = $T.unmodifiableList($T.asList($N))", descriptionField,
-            Collections.class, Arrays.class, description)
+        .addStatement("this.$N = $T.asList($N)", descriptionField, Arrays.class, description)
         .addStatement("this.$N = $N", argumentNameField, argumentName);
 
     builder.addParameters(Arrays.asList(
@@ -363,14 +358,21 @@ final class Option {
   }
 
   private static MethodSpec descriptionBlockMethod(FieldSpec descriptionField) {
+    ParameterSpec line = ParameterSpec.builder(STRING, "line").build();
     ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
-    ParameterSpec sIndent = ParameterSpec.builder(STRING, "indentString").build();
-    ParameterSpec aIndent = ParameterSpec.builder(ArrayTypeName.of(TypeName.CHAR), "a").build();
-    CodeBlock.Builder builder = CodeBlock.builder()
-        .addStatement("$T $N = new $T[$N]", aIndent.type, aIndent, TypeName.CHAR, indent)
-        .addStatement("$T.fill($N, ' ')", Arrays.class, aIndent)
-        .addStatement("$T $N = new $T($N)", STRING, sIndent, STRING, aIndent)
-        .addStatement("return $N + $T.join('\\n' + $N, $N)", sIndent, STRING, sIndent, descriptionField);
+    ParameterSpec spaces = ParameterSpec.builder(STRING, "spaces").build();
+    ParameterSpec sp = ParameterSpec.builder(ArrayTypeName.of(TypeName.CHAR), "sp").build();
+    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+    builder.addStatement("$T $N = new $T[$N]", sp.type, sp, TypeName.CHAR, indent);
+    builder.addStatement("$T.fill($N, ' ')", Arrays.class, sp);
+    builder.addStatement("$T $N = new $T($N)", STRING, spaces, STRING, sp);
+    builder.addStatement("$T $N = new $T($S + $N, $N, $S)", joiner.type, joiner, joiner.type,
+        "\n", spaces, spaces, "");
+    builder.beginControlFlow("for ($T $N : $N)", STRING, line, descriptionField)
+        .addStatement("$N.add($N)", joiner, line)
+        .endControlFlow();
+    builder.addStatement("return $N.toString()", joiner);
     return MethodSpec.methodBuilder("descriptionBlock")
         .addModifiers(PUBLIC)
         .addParameter(indent)
@@ -435,19 +437,19 @@ final class Option {
           .endControlFlow();
     }
 
-    builder.addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class);
-
-    builder.beginControlFlow("if ($N != null)", shortNameField)
-        .addStatement("$N.append('-').append($N)", sb, shortNameField)
+    builder.beginControlFlow("if ($N == null)", shortNameField)
+        .addStatement("return $S + $N", "--", longNameField)
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N != null && $N != null)", longNameField, shortNameField)
-        .addStatement("$N.append(',').append(' ')", sb)
+    builder.beginControlFlow("if ($N == null)", longNameField)
+        .addStatement("return $S + $N", "-", shortNameField)
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N != null)", longNameField)
-        .addStatement("$N.append('-').append('-').append($N)", sb, longNameField)
-        .endControlFlow();
+    builder.addStatement("$T $N = new $T($N.length() + 6)",
+        StringBuilder.class, sb, StringBuilder.class, longNameField);
+    builder.addStatement("$N.append('-').append($N)", sb, shortNameField);
+    builder.addStatement("$N.append(',').append(' ')", sb);
+    builder.addStatement("$N.append('-').append('-').append($N)", sb, longNameField);
 
     builder.addStatement("return $N.toString()", sb);
 
@@ -459,7 +461,6 @@ final class Option {
   }
 
   private MethodSpec toStringMethod() {
-    ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     return MethodSpec.methodBuilder("toString")
         .addAnnotation(Override.class)
         .addModifiers(PUBLIC)

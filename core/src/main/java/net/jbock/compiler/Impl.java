@@ -26,9 +26,6 @@ final class Impl {
 
   final MethodSpec createMethod;
 
-  private final Option option;
-  private final OptionType optionType;
-
   private final Context context;
 
   private final List<FieldSpec> fields;
@@ -36,14 +33,10 @@ final class Impl {
   private Impl(
       ClassName type,
       MethodSpec createMethod,
-      Option option,
-      OptionType optionType,
       Context context,
       List<FieldSpec> fields) {
     this.type = type;
     this.createMethod = createMethod;
-    this.option = option;
-    this.optionType = optionType;
     this.context = context;
     this.fields = fields;
   }
@@ -60,12 +53,10 @@ final class Impl {
           .addModifiers(PRIVATE, FINAL)
           .build());
     }
-    MethodSpec createMethod = createMethod(context, implType, option, optionType, fields);
+    MethodSpec createMethod = createMethod(context, implType, option, optionType);
     return new Impl(
         implType,
         createMethod,
-        option,
-        optionType,
         context,
         fields);
   }
@@ -85,8 +76,7 @@ final class Impl {
       Context context,
       ClassName implType,
       Option option,
-      OptionType optionType,
-      List<FieldSpec> fields) {
+      OptionType optionType) {
     CodeBlock.Builder args = CodeBlock.builder().add("\n    ");
     for (int j = 0; j < context.parameters.size(); j++) {
       Param param = context.parameters.get(j);
@@ -103,13 +93,15 @@ final class Impl {
     builder.addParameter(option.restParameter);
     ParameterSpec p = ParameterSpec.builder(option.type, "option").build();
 
-    builder.beginControlFlow("for ($T $N: $T.values())", option.type, p, option.type)
-        .beginControlFlow("if ($N.$N == $T.$L && $N.get($N) == null)",
-            p, option.typeField, optionType.type, Type.REQUIRED, option.sMapParameter, p)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing required option: ", p)
-        .endControlFlow()
-        .endControlFlow();
+    if (context.paramTypes.contains(Type.REQUIRED)) {
+      builder.beginControlFlow("for ($T $N: $T.values())", option.type, p, option.type);
+      builder.beginControlFlow("if ($N.$N == $T.$L && $N.get($N) == null)",
+          p, option.typeField, optionType.type, Type.REQUIRED, option.sMapParameter, p)
+          .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+              "Missing required option: ", p)
+          .endControlFlow();
+      builder.endControlFlow();
+    }
     builder.addStatement("return new $T($L)", implType, args.build());
     return builder.addModifiers(STATIC)
         .returns(implType)

@@ -43,16 +43,8 @@ final class OptionType {
 
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(type);
-    for (Type optionType : Type.values()) {
-      if (!optionType.special) {
-        addType(builder, optionType);
-      }
-    }
-    if (context.otherTokens) {
-      addType(builder, OTHER_TOKENS);
-    }
-    if (context.everythingAfter()) {
-      addType(builder, EVERYTHING_AFTER);
+    for (Type optionType : context.paramTypes) {
+      addType(builder, optionType);
     }
     return builder.addModifiers(PUBLIC)
         .addField(isSpecialField)
