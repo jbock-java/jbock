@@ -26,6 +26,8 @@ final class Impl {
 
   final MethodSpec createMethod;
 
+  private final Option option;
+
   private final Context context;
 
   private final List<FieldSpec> fields;
@@ -33,10 +35,12 @@ final class Impl {
   private Impl(
       ClassName type,
       MethodSpec createMethod,
+      Option option,
       Context context,
       List<FieldSpec> fields) {
     this.type = type;
     this.createMethod = createMethod;
+    this.option = option;
     this.context = context;
     this.fields = fields;
   }
@@ -57,6 +61,7 @@ final class Impl {
     return new Impl(
         implType,
         createMethod,
+        option,
         context,
         fields);
   }
@@ -68,6 +73,7 @@ final class Impl {
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(privateConstructor())
         .addMethod(createMethod)
+        .addMethod(option.extractOptionalIntMethod)
         .addMethods(bindMethods())
         .build();
   }

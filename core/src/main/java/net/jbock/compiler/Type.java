@@ -7,6 +7,8 @@ import static net.jbock.compiler.Constants.STRING;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.OptionalInt;
+import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
 
@@ -31,6 +33,17 @@ enum Type {
       return CodeBlock.builder().add(
           "$T.ofNullable($N.get($T.$L))",
           Optional.class, option.sMapParameter, option.type, option.enumConstant(j))
+          .build();
+    }
+  },
+
+  OPTIONAL_INT(ClassName.get(OptionalInt.class), false, true) {
+    @Override
+    CodeBlock extractExpression(Option option, int j) {
+      return CodeBlock.builder().add(
+          "$N($N, $T.$L)",
+          option.extractOptionalIntMethod, option.sMapParameter,
+          option.type, option.enumConstant(j))
           .build();
     }
   },

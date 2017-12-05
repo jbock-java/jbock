@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.StringJoiner;
 import net.jbock.Description;
@@ -59,6 +60,8 @@ final class Option {
   final MethodSpec shortNameMapMethod;
   final MethodSpec longNameMapMethod;
 
+  final MethodSpec extractOptionalIntMethod;
+
   final ParameterSpec optMapParameter;
   final ParameterSpec sMapParameter;
   final ParameterSpec flagsParameter;
@@ -72,6 +75,7 @@ final class Option {
       Context context,
       ClassName type,
       OptionType optionType,
+      MethodSpec extractOptionalIntMethod,
       FieldSpec longNameField,
       FieldSpec shortNameField,
       FieldSpec typeField,
@@ -86,6 +90,7 @@ final class Option {
       ParameterSpec flagsParameter,
       ParameterSpec otherTokensParameter,
       ParameterSpec restParameter) {
+    this.extractOptionalIntMethod = extractOptionalIntMethod;
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
     this.descriptionField = descriptionField;
@@ -141,11 +146,13 @@ final class Option {
         .build();
     ParameterSpec restParameter = ParameterSpec.builder(LIST_OF_STRING, "rest")
         .build();
+    MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(type, sMapParameter);
 
     return new Option(
         context,
         type,
         optionType,
+        extractOptionalIntMethod,
         longNameField,
         shortNameField,
         typeField,
@@ -467,5 +474,25 @@ final class Option {
         .returns(STRING)
         .addStatement("return name() + $S + $N() + $S", " (", describeParamMethod, ")")
         .build();
+  }
+
+  private static MethodSpec extractOptionalIntMethod(
+      ClassName optionType,
+      ParameterSpec sMapParameter) {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractOptionalInt");
+
+    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapParameter, option);
+
+    builder.beginControlFlow("if ($N == null)", token)
+        .addStatement("return $T.empty()", OptionalInt.class)
+        .endControlFlow();
+
+    builder.addStatement("return $T.of($T.parseInt($N))",
+        OptionalInt.class, Integer.class, token);
+    return builder.addParameters(Arrays.asList(sMapParameter, option))
+        .returns(OptionalInt.class).build();
   }
 }
