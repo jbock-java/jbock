@@ -236,13 +236,6 @@ public final class GradleManTest {
   }
 
   @Test
-  public void errorDoubleFlagWithAttachedOptionNoHyphen() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group 'cvm': 'm'");
-    GradleMan_Parser.parse(new String[]{"cvm", "hello"});
-  }
-
-  @Test
   public void testOptions() {
     assertThat(Option.MESSAGE.isSpecial()).isFalse();
     assertThat(Option.MESSAGE.isBinding()).isTrue();

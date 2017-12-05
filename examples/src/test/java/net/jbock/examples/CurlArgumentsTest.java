@@ -53,12 +53,6 @@ public class CurlArgumentsTest {
         .headers()).isEqualTo(singletonList("1"));
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
         .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"v", "-H1"})
-        .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"vi", "-H1"})
-        .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"vi", "-H1"})
-        .headers()).isEqualTo(singletonList("1"));
     assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-H1"})
         .verbose()).isTrue();
     assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-H1"})
@@ -66,10 +60,6 @@ public class CurlArgumentsTest {
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
         .include()).isFalse();
     assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-H1"})
-        .include()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"vi", "-H1"})
-        .include()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"iv", "-H1"})
         .include()).isTrue();
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
         .verbose()).isTrue();

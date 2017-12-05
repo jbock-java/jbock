@@ -124,12 +124,9 @@ final class Helper {
         .addModifiers(FINAL)
         .build();
     MethodSpec looksLikeGroupMethod = looksLikeGroupMethod(
-        context,
         looksLikeLongMethod,
-        option.typeField,
-        shortNamesField,
-        option.type,
-        optionType.type);
+        option,
+        shortNamesField);
     ClassName helperClass = context.generatedClass.nestedClass("Helper");
     FieldSpec optMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         option.type, LIST_OF_STRING), "optMap", FINAL).build();
@@ -594,15 +591,12 @@ final class Helper {
   }
 
   private static MethodSpec looksLikeGroupMethod(
-      Context context,
       MethodSpec looksLikeLongMethod,
-      FieldSpec optionTypeField,
-      FieldSpec shortNamesField,
-      ClassName optionType,
-      ClassName optionTypeType) {
+      Option option,
+      FieldSpec shortNamesField) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec originalToken = ParameterSpec.builder(STRING, "originalToken").build();
-    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if ($N($N))", looksLikeLongMethod, originalToken)
@@ -611,30 +605,27 @@ final class Helper {
 
     builder.addStatement("$T $N = $N", token.type, token, originalToken);
 
-    builder.beginControlFlow("if ($N.length() >= 1 && $N.charAt(0) == '-')", token, token)
-        .addStatement("$N = $N.substring(1)", token, token)
+    builder.beginControlFlow("if ($N.length() <= 2)", token)
+        .addStatement("return $L", false)
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N.isEmpty())", token)
+    builder.beginControlFlow("if ($N.charAt(0) != '-')", token)
         .addStatement("return $L", false)
         .endControlFlow();
 
     builder.add("\n");
-    builder.addStatement("$T $N = $N.get($T.toString($N.charAt(0)))",
-        option.type, option, shortNamesField, Character.class, token);
+    builder.addStatement("$T $N = $N.get($T.toString($N.charAt(1)))",
+        optionParam.type, optionParam, shortNamesField, Character.class, token);
     builder.add("\n");
 
-    builder.beginControlFlow("if ($N == null)", option)
+    builder.beginControlFlow("if ($N == null)", optionParam)
         .addStatement("return $L", false)
         .endControlFlow();
 
-
-    if (context.paramTypes.contains(Type.FLAG)) {
-      builder.beginControlFlow("if ($N.$N != $T.$L)",
-          option, optionTypeField, optionTypeType, Type.FLAG)
-          .addStatement("return $L", false)
-          .endControlFlow();
-    }
+    builder.beginControlFlow("if ($N.$N != $T.$L)",
+        optionParam, option.typeField, option.optionType.type, Type.FLAG)
+        .addStatement("return $L", false)
+        .endControlFlow();
 
     builder.addStatement("return $L", true);
 

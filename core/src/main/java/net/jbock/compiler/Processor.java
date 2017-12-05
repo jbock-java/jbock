@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
@@ -67,38 +68,52 @@ public final class Processor extends AbstractProcessor {
       return false;
     }
     List<TypeElement> typeElements = getAnnotatedClasses(env);
-    for (TypeElement typeElement : typeElements) {
+    for (TypeElement sourceType : typeElements) {
       try {
-        List<Param> params = validate(typeElement);
-        if (params.isEmpty()) {
+        List<Param> parameters = validate(sourceType);
+        if (parameters.isEmpty()) {
           processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
-              "Skipping code generation: No abstract methods found", typeElement);
+              "Skipping code generation: No abstract methods found", sourceType);
           continue;
         }
-        String stopword = stopword(params, typeElement);
-        Context context = Context.create(typeElement, params, stopword);
-        if (!done.add(asType(typeElement).getQualifiedName().toString())) {
+        String stopword = stopword(parameters, sourceType);
+        Set<Type> paramTypes = paramTypes(parameters);
+        long numFlags = parameters.stream()
+            .filter(p -> p.paramType == Type.FLAG)
+            .count();
+        boolean groupingRequested = sourceType.getAnnotation(CommandLineArguments.class).grouping();
+        boolean grouping = groupingRequested && numFlags >= 2;
+        if (groupingRequested && !grouping) {
+          processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+              "Grouping requested, but less than two flags defined", sourceType);
+        }
+        Context context = Context.create(sourceType, parameters, stopword, paramTypes, grouping);
+        if (!done.add(asType(sourceType).getQualifiedName().toString())) {
           continue;
         }
         TypeSpec typeSpec = Parser.create(context).define();
-        boolean onlyPrimitives = params.stream()
+        boolean onlyPrimitives = parameters.stream()
             .allMatch(p -> p.paramType.returnType.isPrimitive());
         write(onlyPrimitives, context.generatedClass, typeSpec);
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
-        handleException(typeElement, e);
+        handleException(sourceType, e);
       }
     }
     return false;
   }
 
+  private static Set<Type> paramTypes(List<Param> parameters) {
+    Set<Type> paramTypes = EnumSet.noneOf(Type.class);
+    parameters.forEach(p -> paramTypes.add(p.paramType));
+    return paramTypes;
+  }
+
   private List<TypeElement> getAnnotatedClasses(RoundEnvironment env) {
     Set<? extends Element> annotated = env.getElementsAnnotatedWith(CommandLineArguments.class);
-    List<TypeElement> result = new ArrayList<>();
     Set<TypeElement> typeElements = ElementFilter.typesIn(annotated);
-    result.addAll(typeElements);
-    return result;
+    return new ArrayList<>(typeElements);
   }
 
   private void handleException(

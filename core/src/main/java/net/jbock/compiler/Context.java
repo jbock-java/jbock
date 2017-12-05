@@ -2,7 +2,6 @@ package net.jbock.compiler;
 
 import static net.jbock.compiler.Util.asType;
 
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -57,12 +56,11 @@ final class Context {
   static Context create(
       TypeElement sourceType,
       List<Param> parameters,
-      String stopword) {
+      String stopword,
+      Set<Type> paramTypes,
+      boolean grouping) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean problematicOptionNames = problematicOptionNames(parameters);
-    boolean grouping = sourceType.getAnnotation(CommandLineArguments.class).grouping();
-    Set<Type> paramTypes = EnumSet.noneOf(Type.class);
-    parameters.forEach(p -> paramTypes.add(p.paramType));
     boolean otherTokens = paramTypes.contains(Type.OTHER_TOKENS);
     return new Context(
         sourceType,

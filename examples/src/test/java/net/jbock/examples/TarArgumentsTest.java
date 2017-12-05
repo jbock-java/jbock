@@ -17,7 +17,7 @@ public class TarArgumentsTest {
         .isTrue();
     assertThat(TarArguments_Parser.parse(new String[]{"-x", "-f", "foo.tar"}).file())
         .isEqualTo("foo.tar");
-    assertThat(TarArguments_Parser.parse(new String[]{"vx", "-f", "foo.tar"}).verbose())
+    assertThat(TarArguments_Parser.parse(new String[]{"-vx", "-f", "foo.tar"}).verbose())
         .isTrue();
   }
 

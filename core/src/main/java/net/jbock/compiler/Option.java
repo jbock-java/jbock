@@ -41,12 +41,12 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 final class Option {
 
   final ClassName type;
+  final OptionType optionType;
 
   private final FieldSpec descriptionField;
   private final FieldSpec argumentNameField;
 
   private final Context context;
-  private final OptionType optionType;
 
   private final MethodSpec describeNamesMethod;
   private final MethodSpec describeParamMethod;
