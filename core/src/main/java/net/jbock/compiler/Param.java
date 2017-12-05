@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import static java.lang.reflect.Modifier.PRIVATE;
 import static java.lang.reflect.Modifier.STATIC;
 import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
+import static net.jbock.compiler.Constants.JAVA_UTIL_OPTIONAL_INT;
 import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.asDeclared;
 import static net.jbock.compiler.Util.asType;
@@ -12,7 +13,9 @@ import static net.jbock.compiler.Util.methodToString;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Objects;
+import java.util.Set;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -24,6 +27,7 @@ import net.jbock.LongName;
 import net.jbock.OtherTokens;
 import net.jbock.ShortName;
 import net.jbock.SuppressLongName;
+import net.jbock.com.squareup.javapoet.TypeName;
 
 /**
  * Internal representation of an abstract method in the source class.
@@ -64,17 +68,28 @@ final class Param {
     if (type.getKind() == TypeKind.BOOLEAN) {
       return Type.FLAG;
     }
+    if (type.getKind() == TypeKind.INT) {
+      return Type.REQUIRED_INT;
+    }
     if (isListOfString(type)) {
       return Type.REPEATABLE;
     }
     if (isOptionalString(type)) {
       return Type.OPTIONAL;
     }
+    if (isOptionalInt(type)) {
+      return Type.OPTIONAL_INT;
+    }
     if (isString(type)) {
       return Type.REQUIRED;
     }
-    String message = "Only String, Optional<String>, List<String> and boolean allowed, " +
-        String.format("but %s() returns %s", sourceMethod.getSimpleName(), type);
+    Set<String> allowed = Arrays.stream(Type.values())
+        .map(t -> t.returnType)
+        .map(TypeName::toString)
+        .collect(Collectors.toSet());
+    String message = String.format("Allowed return types: [" +
+        String.join(", ", allowed) +
+        "], but %s() returns %s", sourceMethod.getSimpleName(), type);
     throw new ValidationException(sourceMethod, message);
   }
 
@@ -193,6 +208,15 @@ final class Param {
 
   private static boolean isString(
       TypeMirror type) {
+    return isSimpleType(type, JAVA_LANG_STRING);
+  }
+
+  private static boolean isOptionalInt(
+      TypeMirror type) {
+    return isSimpleType(type, JAVA_UTIL_OPTIONAL_INT);
+  }
+
+  private static boolean isSimpleType(TypeMirror type, String qname) {
     DeclaredType declared = asDeclared(type);
     if (declared == null) {
       return false;
@@ -201,8 +225,7 @@ final class Param {
       return false;
     }
     TypeElement element = asType(declared.asElement());
-    return JAVA_LANG_STRING.equals(
-        element.getQualifiedName().toString());
+    return qname.equals(element.getQualifiedName().toString());
   }
 
   private static void checkName(

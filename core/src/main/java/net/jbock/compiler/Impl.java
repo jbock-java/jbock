@@ -97,14 +97,15 @@ final class Impl {
     builder.addParameter(option.flagsParameter);
     builder.addParameter(option.otherTokensParameter);
     builder.addParameter(option.restParameter);
-    ParameterSpec p = ParameterSpec.builder(option.type, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
-    if (context.paramTypes.contains(Type.REQUIRED)) {
-      builder.beginControlFlow("for ($T $N: $T.values())", option.type, p, option.type);
-      builder.beginControlFlow("if ($N.$N == $T.$L && $N.get($N) == null)",
-          p, option.typeField, optionType.type, Type.REQUIRED, option.sMapParameter, p)
+    if (context.paramTypes.contains(Type.REQUIRED) ||
+        context.paramTypes.contains(Type.REQUIRED_INT)) {
+      builder.beginControlFlow("for ($T $N: $T.values())", option.type, optionParam, option.type);
+      builder.beginControlFlow("if ($N.$N.$N && $N.get($N) == null)",
+          optionParam, option.typeField, optionType.isRequiredField, option.sMapParameter, optionParam)
           .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-              "Missing required option: ", p)
+              "Missing required option: ", optionParam)
           .endControlFlow();
       builder.endControlFlow();
     }

@@ -3,15 +3,14 @@ package net.jbock.compiler;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
+import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
-import static net.jbock.compiler.Type.EVERYTHING_AFTER;
-import static net.jbock.compiler.Type.OTHER_TOKENS;
 
+import java.util.Arrays;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
-import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 /**
@@ -27,12 +26,15 @@ final class OptionType {
 
   final FieldSpec isSpecialField;
   final FieldSpec isBindingField;
+  final FieldSpec isRequiredField;
 
   private OptionType(Context context) {
     this.context = context;
-    this.isSpecialField = FieldSpec.builder(TypeName.BOOLEAN, "special", PRIVATE, FINAL)
+    this.isSpecialField = FieldSpec.builder(BOOLEAN, "special", PRIVATE, FINAL)
         .build();
-    this.isBindingField = FieldSpec.builder(TypeName.BOOLEAN, "binding", PRIVATE, FINAL)
+    this.isBindingField = FieldSpec.builder(BOOLEAN, "binding", PRIVATE, FINAL)
+        .build();
+    this.isRequiredField = FieldSpec.builder(BOOLEAN, "required", PRIVATE, FINAL)
         .build();
     this.type = context.generatedClass.nestedClass("OptionType");
   }
@@ -49,22 +51,26 @@ final class OptionType {
     return builder.addModifiers(PUBLIC)
         .addField(isSpecialField)
         .addField(isBindingField)
+        .addField(isRequiredField)
         .addMethod(privateConstructor())
         .build();
   }
 
   private void addType(TypeSpec.Builder builder, Type optionType) {
     builder.addEnumConstant(optionType.name(),
-        anonymousClassBuilder("$L, $L", optionType.special, optionType.binding)
+        anonymousClassBuilder("$L, $L, $L",
+            optionType.special, optionType.binding, optionType.required)
             .build());
   }
 
   private MethodSpec privateConstructor() {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
-    ParameterSpec special = ParameterSpec.builder(isSpecialField.type, isSpecialField.name).build();
-    ParameterSpec binding = ParameterSpec.builder(isBindingField.type, isBindingField.name).build();
+    ParameterSpec special = ParameterSpec.builder(BOOLEAN, isSpecialField.name).build();
+    ParameterSpec binding = ParameterSpec.builder(BOOLEAN, isBindingField.name).build();
+    ParameterSpec required = ParameterSpec.builder(BOOLEAN, isRequiredField.name).build();
     builder.addStatement("this.$N = $N", isSpecialField, special);
     builder.addStatement("this.$N = $N", isBindingField, binding);
-    return builder.addParameter(special).addParameter(binding).build();
+    builder.addStatement("this.$N = $N", isRequiredField, required);
+    return builder.addParameters(Arrays.asList(special, binding, required)).build();
   }
 }

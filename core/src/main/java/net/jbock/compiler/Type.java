@@ -17,7 +17,7 @@ import net.jbock.com.squareup.javapoet.TypeName;
  */
 enum Type {
 
-  FLAG(BOOLEAN, false, false) {
+  FLAG(BOOLEAN, false, false, false) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -27,7 +27,7 @@ enum Type {
     }
   },
 
-  OPTIONAL(OPTIONAL_STRING, false, true) {
+  OPTIONAL(OPTIONAL_STRING, false, true, false) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -37,7 +37,7 @@ enum Type {
     }
   },
 
-  OPTIONAL_INT(ClassName.get(OptionalInt.class), false, true) {
+  OPTIONAL_INT(ClassName.get(OptionalInt.class), false, true, false) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -48,7 +48,7 @@ enum Type {
     }
   },
 
-  REQUIRED(STRING, false, true) {
+  REQUIRED(STRING, false, true, true) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -58,7 +58,17 @@ enum Type {
     }
   },
 
-  REPEATABLE(LIST_OF_STRING, false, true) {
+  REQUIRED_INT(TypeName.INT, false, true, true) {
+    @Override
+    CodeBlock extractExpression(Option option, int j) {
+      return CodeBlock.builder().add(
+          "$T.parseInt($N.get($T.$L))",
+          Integer.class, option.sMapParameter, option.type, option.enumConstant(j))
+          .build();
+    }
+  },
+
+  REPEATABLE(LIST_OF_STRING, false, true, false) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -68,7 +78,7 @@ enum Type {
     }
   },
 
-  OTHER_TOKENS(LIST_OF_STRING, true, false) {
+  OTHER_TOKENS(LIST_OF_STRING, true, false, false) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -76,7 +86,7 @@ enum Type {
     }
   },
 
-  EVERYTHING_AFTER(LIST_OF_STRING, true, false) {
+  EVERYTHING_AFTER(LIST_OF_STRING, true, false, false) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -87,15 +97,17 @@ enum Type {
   final TypeName returnType;
   final boolean special;
   final boolean binding;
+  final boolean required;
 
   abstract CodeBlock extractExpression(Option option, int j);
 
   Type(
       TypeName returnType,
       boolean special,
-      boolean binding) {
+      boolean binding, boolean required) {
     this.returnType = returnType;
     this.special = special;
     this.binding = binding;
+    this.required = required;
   }
 }

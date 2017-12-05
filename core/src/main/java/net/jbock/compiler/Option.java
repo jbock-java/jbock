@@ -493,6 +493,7 @@ final class Option {
     builder.addStatement("return $T.of($T.parseInt($N))",
         OptionalInt.class, Integer.class, token);
     return builder.addParameters(Arrays.asList(sMapParameter, option))
+        .addModifiers(STATIC)
         .returns(OptionalInt.class).build();
   }
 }
