@@ -5,7 +5,7 @@ import java.util.Optional;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
 import net.jbock.LongName;
-import net.jbock.OtherTokens;
+import net.jbock.Positional;
 import net.jbock.ShortName;
 import net.jbock.SuppressLongName;
 
@@ -30,7 +30,7 @@ abstract class CurlArguments {
   @ShortName('i')
   abstract boolean include();
 
-  @OtherTokens
+  @Positional
   @Description({
       "@OtherTokens to capture any 'other' tokens in the input.",
       "In this case, that's any token which doesn't match one of",

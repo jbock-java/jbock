@@ -27,22 +27,21 @@ public @interface CommandLineArguments {
    * </p>
    *
    * <p>
+   *   All tokens in the option group must be flags in their short form.
+   *   Binding arguments may not appear in the option group, not even in the last position.
+   * </p>
+   *
+   * <p>
+   *   The first flag in the group must be preceded with a hyphen.
+   *   It is not permissible to omit this leading hyphen.
+   * </p>
+   *
+   * <p>
    *   For example, in {@code tar xzf foobar.tgz}, the first token {@code xzf}
-   *   would be an option group, consisting of two flags {@code x} and {@code z},
-   *   followed by the binding token {@code f}.
-   * </p>
-   *
-   * <p>
-   *   All tokens in the option group must be in their short form, without the hyphen.
-   *   Only the first option in the group may be preceded with a hyphen.
-   *   It is permissible to omit the hyphen for the first option as well.
-   * </p>
-   *
-   * <p>
-   *   All tokens in the option group must be flags, except the last one,
-   *   which may be a flag or a binding token. If it is a binding token, it
-   *   may not have its value attached. Instead, the next token after the option group
-   *   will be bound.
+   *   would be an option group, consisting of three flags {@code x}, {@code z}
+   *   and {@code f}. Note that {@code f} must be a flag, too.
+   *   Therefore, {@code foobar.tgz} is a positional argument,
+   *   not an argument bound to {@code f}.
    * </p>
    */
   boolean grouping() default false;

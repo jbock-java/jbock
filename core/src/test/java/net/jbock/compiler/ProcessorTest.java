@@ -119,13 +119,13 @@ public class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @OtherTokens abstract String a();",
+        "  @Positional abstract String a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The method that carries the OtherTokens annotation must return List<String>");
+        .withErrorContaining("The method that carries the Positional annotation must return List<String>");
   }
 
   @Test
@@ -147,13 +147,13 @@ public class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @OtherTokens @EverythingAfter(\"-\") abstract List<String> a();",
+        "  @Positional @EverythingAfter(\"-\") abstract List<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("OtherTokens and EverythingAfter cannot be combined");
+        .withErrorContaining("Positional and EverythingAfter cannot be combined");
   }
 
   @Test
@@ -161,14 +161,14 @@ public class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @OtherTokens abstract List<String> a();",
-        "  @OtherTokens abstract List<String> b();",
+        "  @Positional abstract List<String> a();",
+        "  @Positional abstract List<String> b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Only one method may have the @OtherTokens annotation");
+        .withErrorContaining("Only one method may have the @Positional annotation");
   }
 
   @Test
@@ -257,7 +257,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void noMethods() {
+  public void warningNoMethods() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -267,6 +267,20 @@ public class ProcessorTest {
         .processedWith(new Processor())
         .compilesWithoutError()
         .withWarningContaining("Skipping");
+  }
+
+  @Test
+  public void warningOnlyOneFlag() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments(grouping = true)",
+        "abstract class InvalidArguments {",
+        "  abstract String foo();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError()
+        .withWarningContaining("less than two flags");
   }
 
   private List<String> withImports(String... strings) {
@@ -279,7 +293,7 @@ public class ProcessorTest {
         "",
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.EverythingAfter;",
-        "import net.jbock.OtherTokens;",
+        "import net.jbock.Positional;",
         "import net.jbock.LongName;",
         "import net.jbock.ShortName;",
         "import net.jbock.SuppressLongName;",

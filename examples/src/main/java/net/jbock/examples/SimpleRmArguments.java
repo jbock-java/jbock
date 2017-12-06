@@ -4,7 +4,7 @@ import java.util.List;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
 import net.jbock.EverythingAfter;
-import net.jbock.OtherTokens;
+import net.jbock.Positional;
 import net.jbock.ShortName;
 
 @CommandLineArguments
@@ -16,7 +16,7 @@ abstract class SimpleRmArguments {
   @ShortName('f')
   abstract boolean force();
 
-  @OtherTokens
+  @Positional
   abstract List<String> otherTokens();
 
   @EverythingAfter("--")

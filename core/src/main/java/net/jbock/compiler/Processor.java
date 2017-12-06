@@ -32,7 +32,7 @@ import net.jbock.CommandLineArguments;
 import net.jbock.Description;
 import net.jbock.EverythingAfter;
 import net.jbock.LongName;
-import net.jbock.OtherTokens;
+import net.jbock.Positional;
 import net.jbock.ShortName;
 import net.jbock.SuppressLongName;
 import net.jbock.com.squareup.javapoet.ClassName;
@@ -50,7 +50,7 @@ public final class Processor extends AbstractProcessor {
         Description.class,
         EverythingAfter.class,
         LongName.class,
-        OtherTokens.class,
+        Positional.class,
         ShortName.class,
         SuppressLongName.class)
         .map(Class::getName)
@@ -151,7 +151,7 @@ public final class Processor extends AbstractProcessor {
         .collect(toList());
     if (otherTokens.size() > 1) {
       throw new ValidationException(params.get(1).sourceMethod,
-          "Only one method may have the @OtherTokens annotation");
+          "Only one method may have the @Positional annotation");
     }
   }
 
@@ -250,7 +250,7 @@ public final class Processor extends AbstractProcessor {
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(Description.class)));
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(EverythingAfter.class)));
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(LongName.class)));
-    methods.addAll(methodsIn(env.getElementsAnnotatedWith(OtherTokens.class)));
+    methods.addAll(methodsIn(env.getElementsAnnotatedWith(Positional.class)));
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(ShortName.class)));
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(SuppressLongName.class)));
     for (ExecutableElement method : methods) {

@@ -24,7 +24,7 @@ import javax.lang.model.type.TypeMirror;
 import net.jbock.Description;
 import net.jbock.EverythingAfter;
 import net.jbock.LongName;
-import net.jbock.OtherTokens;
+import net.jbock.Positional;
 import net.jbock.ShortName;
 import net.jbock.SuppressLongName;
 import net.jbock.com.squareup.javapoet.TypeName;
@@ -58,7 +58,7 @@ final class Param {
   }
 
   private static Type getParamType(ExecutableElement sourceMethod) {
-    if (sourceMethod.getAnnotation(OtherTokens.class) != null) {
+    if (sourceMethod.getAnnotation(Positional.class) != null) {
       return Type.OTHER_TOKENS;
     }
     if (sourceMethod.getAnnotation(EverythingAfter.class) != null) {
@@ -95,14 +95,14 @@ final class Param {
 
   static Param create(ExecutableElement sourceMethod) {
     basicChecks(sourceMethod);
-    OtherTokens otherTokens = sourceMethod.getAnnotation(OtherTokens.class);
+    Positional positional = sourceMethod.getAnnotation(Positional.class);
     EverythingAfter everythingAfter = sourceMethod.getAnnotation(EverythingAfter.class);
-    if (otherTokens != null && everythingAfter != null) {
+    if (positional != null && everythingAfter != null) {
       throw new ValidationException(sourceMethod,
-          "OtherTokens and EverythingAfter cannot be combined");
+          "Positional and EverythingAfter cannot be combined");
     }
 
-    if (otherTokens != null) {
+    if (positional != null) {
       return createOtherTokens(sourceMethod);
     }
     if (everythingAfter != null) {
@@ -273,7 +273,7 @@ final class Param {
             SuppressLongName.class,
             ShortName.class,
             LongName.class,
-            OtherTokens.class));
+            Positional.class));
     return new Param(
         null,
         null,
@@ -282,10 +282,10 @@ final class Param {
   }
 
   private static Param createOtherTokens(ExecutableElement sourceMethod) {
-    OtherTokens otherTokens = sourceMethod.getAnnotation(OtherTokens.class);
-    checkList(sourceMethod, otherTokens);
+    Positional positional = sourceMethod.getAnnotation(Positional.class);
+    checkList(sourceMethod, positional);
     checkNotPresent(sourceMethod,
-        otherTokens,
+        positional,
         Arrays.asList(
             SuppressLongName.class,
             ShortName.class,

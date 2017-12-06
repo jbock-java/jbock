@@ -5,7 +5,7 @@ import java.util.List;
 import java.util.Optional;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
-import net.jbock.OtherTokens;
+import net.jbock.Positional;
 import net.jbock.ShortName;
 import net.jbock.SuppressLongName;
 
@@ -31,6 +31,6 @@ abstract class SimpleGradleMan {
   @ShortName('v')
   abstract boolean verbose();
 
-  @OtherTokens
+  @Positional
   abstract List<String> otherTokens();
 }

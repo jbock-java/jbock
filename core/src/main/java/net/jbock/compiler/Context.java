@@ -23,7 +23,7 @@ final class Context {
   // non-null if one method has the EverythingAfter annotation
   final String stopword;
 
-  // true if one method has the OtherTokens annotation
+  // true if one method has the Positional annotation
   final boolean otherTokens;
 
   // true if upper-casing the method names may cause a naming conflict
