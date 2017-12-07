@@ -2,6 +2,7 @@ package net.jbock.examples;
 
 import static net.jbock.examples.SimpleGradleArguments_Parser.OptionType.FLAG;
 import static net.jbock.examples.SimpleGradleArguments_Parser.OptionType.OPTIONAL;
+import static net.jbock.examples.SimpleGradleArguments_Parser.OptionType.POSITIONAL;
 import static net.jbock.examples.SimpleGradleArguments_Parser.OptionType.REPEATABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -274,7 +275,7 @@ public class SimpleGradleArgumentsTest {
     assertThat(SimpleGradleArguments_Parser.Option.VERBOSE.shortName()).isEqualTo(Optional.of('v'));
     assertThat(SimpleGradleArguments_Parser.Option.OTHER_TOKENS.isSpecial()).isTrue();
     assertThat(SimpleGradleArguments_Parser.Option.OTHER_TOKENS.isBinding()).isFalse();
-    assertThat(SimpleGradleArguments_Parser.Option.OTHER_TOKENS.type()).isEqualTo(SimpleGradleArguments_Parser.OptionType.OTHER_TOKENS);
+    assertThat(SimpleGradleArguments_Parser.Option.OTHER_TOKENS.type()).isEqualTo(POSITIONAL);
     assertThat(SimpleGradleArguments_Parser.Option.OTHER_TOKENS.longName()).isEmpty();
     assertThat(SimpleGradleArguments_Parser.Option.OTHER_TOKENS.shortName()).isEmpty();
     SimpleGradleArguments_Parser.Option[] options = SimpleGradleArguments_Parser.Option.values();
@@ -316,6 +317,6 @@ public class SimpleGradleArgumentsTest {
     assertThat(SimpleGradleArguments_Parser.Option.VERBOSE.describe(2).split("\n", -1))
         .isEqualTo(new String[]{"-v, --verbose", "  --- description goes here ---"});
     assertThat(SimpleGradleArguments_Parser.Option.OTHER_TOKENS.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"Other tokens", "  --- description goes here ---"});
+        .isEqualTo(new String[]{"(positional arguments)", "  --- description goes here ---"});
   }
 }

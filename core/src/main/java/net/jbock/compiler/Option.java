@@ -8,8 +8,7 @@ import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Type.EVERYTHING_AFTER;
-import static net.jbock.compiler.Type.OTHER_TOKENS;
+import static net.jbock.compiler.Type.POSITIONAL;
 import static net.jbock.compiler.Util.snakeCase;
 
 import java.util.ArrayList;
@@ -65,8 +64,7 @@ final class Option {
   final ParameterSpec optMapParameter;
   final ParameterSpec sMapParameter;
   final ParameterSpec flagsParameter;
-  final ParameterSpec otherTokensParameter;
-  final ParameterSpec restParameter;
+  final ParameterSpec positionalParameter;
 
   private final MethodSpec isSpecialMethod;
   private final MethodSpec isBindingMethod;
@@ -88,8 +86,7 @@ final class Option {
       ParameterSpec optMapParameter,
       ParameterSpec sMapParameter,
       ParameterSpec flagsParameter,
-      ParameterSpec otherTokensParameter,
-      ParameterSpec restParameter) {
+      ParameterSpec positionalParameter) {
     this.extractOptionalIntMethod = extractOptionalIntMethod;
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
@@ -106,8 +103,7 @@ final class Option {
     this.optMapParameter = optMapParameter;
     this.sMapParameter = sMapParameter;
     this.flagsParameter = flagsParameter;
-    this.otherTokensParameter = otherTokensParameter;
-    this.restParameter = restParameter;
+    this.positionalParameter = positionalParameter;
     this.describeParamMethod = describeParamMethod(
         context,
         longNameField,
@@ -142,9 +138,7 @@ final class Option {
         type, STRING), "sMap").build();
     ParameterSpec flagsParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
         type), "flags").build();
-    ParameterSpec otherTokensParameter = ParameterSpec.builder(LIST_OF_STRING, "otherTokens")
-        .build();
-    ParameterSpec restParameter = ParameterSpec.builder(LIST_OF_STRING, "rest")
+    ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional")
         .build();
     MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(type, sMapParameter);
 
@@ -165,8 +159,7 @@ final class Option {
         optMapParameter,
         sMapParameter,
         flagsParameter,
-        otherTokensParameter,
-        restParameter);
+        positionalParameter);
   }
 
   String enumConstant(int i) {
@@ -433,14 +426,8 @@ final class Option {
     CodeBlock.Builder builder = CodeBlock.builder();
 
     if (context.otherTokens) {
-      builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, OTHER_TOKENS)
-          .addStatement("return $S", "Other tokens")
-          .endControlFlow();
-    }
-
-    if (context.everythingAfter()) {
-      builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, EVERYTHING_AFTER)
-          .addStatement("return $S + $S + $S", "Everything after '", context.stopword, "'")
+      builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, POSITIONAL)
+          .addStatement("return $S", "(positional arguments)")
           .endControlFlow();
     }
 

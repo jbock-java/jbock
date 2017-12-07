@@ -1,7 +1,5 @@
 package net.jbock.compiler;
 
-import static java.lang.reflect.Modifier.PRIVATE;
-import static java.lang.reflect.Modifier.STATIC;
 import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
 import static net.jbock.compiler.Constants.JAVA_UTIL_OPTIONAL_INT;
 import static net.jbock.compiler.Processor.checkNotPresent;
@@ -22,7 +20,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import net.jbock.Description;
-import net.jbock.EverythingAfter;
 import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
@@ -59,10 +56,7 @@ final class Param {
 
   private static Type getParamType(ExecutableElement sourceMethod) {
     if (sourceMethod.getAnnotation(Positional.class) != null) {
-      return Type.OTHER_TOKENS;
-    }
-    if (sourceMethod.getAnnotation(EverythingAfter.class) != null) {
-      return Type.EVERYTHING_AFTER;
+      return Type.POSITIONAL;
     }
     TypeMirror type = sourceMethod.getReturnType();
     if (type.getKind() == TypeKind.BOOLEAN) {
@@ -96,17 +90,9 @@ final class Param {
   static Param create(ExecutableElement sourceMethod) {
     basicChecks(sourceMethod);
     Positional positional = sourceMethod.getAnnotation(Positional.class);
-    EverythingAfter everythingAfter = sourceMethod.getAnnotation(EverythingAfter.class);
-    if (positional != null && everythingAfter != null) {
-      throw new ValidationException(sourceMethod,
-          "Positional and EverythingAfter cannot be combined");
-    }
 
     if (positional != null) {
       return createOtherTokens(sourceMethod);
-    }
-    if (everythingAfter != null) {
-      return createEverythingAfter(sourceMethod);
     }
     String longName = longName(sourceMethod);
     String shortName = shortName(sourceMethod);
@@ -124,26 +110,15 @@ final class Param {
   }
 
   private static void basicChecks(ExecutableElement sourceMethod) {
-    if (sourceMethod.getModifiers().contains(PRIVATE)) {
-      throw new ValidationException(sourceMethod,
-          "The method may not be private.");
-
-    }
-    if (sourceMethod.getModifiers().contains(STATIC)) {
-      throw new ValidationException(sourceMethod,
-          "Method " + methodToString(sourceMethod) +
-              "may not be static.");
-
-    }
     if (!sourceMethod.getParameters().isEmpty()) {
       throw new ValidationException(sourceMethod,
           "Method " + methodToString(sourceMethod) +
-              " must have an empty parameter list.");
+              " may not have parameters.");
     }
     if (!sourceMethod.getTypeParameters().isEmpty()) {
       throw new ValidationException(sourceMethod,
           "Method " + methodToString(sourceMethod) +
-              "must have type parameters.");
+              "may not have type parameters.");
     }
     if (!sourceMethod.getThrownTypes().isEmpty()) {
       throw new ValidationException(sourceMethod,
@@ -262,25 +237,6 @@ final class Param {
     }
   }
 
-  private static Param createEverythingAfter(ExecutableElement sourceMethod) {
-    EverythingAfter everythingAfter = sourceMethod.getAnnotation(EverythingAfter.class);
-    checkList(sourceMethod, everythingAfter);
-    String stopword = everythingAfter.value();
-    basicCheckName(sourceMethod, stopword);
-    checkNotPresent(sourceMethod,
-        everythingAfter,
-        Arrays.asList(
-            SuppressLongName.class,
-            ShortName.class,
-            LongName.class,
-            Positional.class));
-    return new Param(
-        null,
-        null,
-        stopword,
-        sourceMethod);
-  }
-
   private static Param createOtherTokens(ExecutableElement sourceMethod) {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
     checkList(sourceMethod, positional);
@@ -289,12 +245,11 @@ final class Param {
         Arrays.asList(
             SuppressLongName.class,
             ShortName.class,
-            LongName.class,
-            EverythingAfter.class));
+            LongName.class));
     return new Param(
         null,
         null,
-        null,
+        positional.esc() ? "--" : null,
         sourceMethod);
   }
 
@@ -316,10 +271,6 @@ final class Param {
 
   String methodName() {
     return sourceMethod.getSimpleName().toString();
-  }
-
-  boolean isSpecial() {
-    return paramType.special;
   }
 
   String descriptionArgumentName() {

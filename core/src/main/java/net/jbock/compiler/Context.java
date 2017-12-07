@@ -3,10 +3,10 @@ package net.jbock.compiler;
 import static net.jbock.compiler.Util.asType;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
-import net.jbock.CommandLineArguments;
 import net.jbock.com.squareup.javapoet.ClassName;
 
 final class Context {
@@ -56,12 +56,15 @@ final class Context {
   static Context create(
       TypeElement sourceType,
       List<Param> parameters,
-      String stopword,
       Set<Type> paramTypes,
       boolean grouping) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean problematicOptionNames = problematicOptionNames(parameters);
-    boolean otherTokens = paramTypes.contains(Type.OTHER_TOKENS);
+    boolean otherTokens = paramTypes.contains(Type.POSITIONAL);
+    String stopword = parameters.stream()
+        .map(Param::stopword)
+        .filter(Objects::nonNull)
+        .findAny().orElse(null);
     return new Context(
         sourceType,
         generatedClass,

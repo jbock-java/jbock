@@ -264,7 +264,7 @@ public final class GradleArgumentsTest {
     assertThat(Option.VERBOSE.shortName()).isEqualTo(Optional.of('v'));
     assertThat(Option.OTHER_TOKENS.isSpecial()).isTrue();
     assertThat(Option.OTHER_TOKENS.isBinding()).isFalse();
-    assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.OTHER_TOKENS);
+    assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.POSITIONAL);
     assertThat(Option.OTHER_TOKENS.longName()).isEmpty();
     assertThat(Option.OTHER_TOKENS.shortName()).isEmpty();
     Option[] options = Option.values();
@@ -312,6 +312,6 @@ public final class GradleArgumentsTest {
     assertThat(Option.VERBOSE.describe(2).split("\n", -1))
         .isEqualTo(new String[]{"-v, --verbose", "  --- description goes here ---"});
     assertThat(Option.OTHER_TOKENS.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"Other tokens", "  --- description goes here ---"});
+        .isEqualTo(new String[]{"(positional arguments)", "  --- description goes here ---"});
   }
 }

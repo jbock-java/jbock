@@ -3,7 +3,6 @@ package net.jbock.compiler;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static net.jbock.compiler.Type.EVERYTHING_AFTER;
 import static net.jbock.compiler.Util.asType;
 import static net.jbock.compiler.Util.methodToString;
 
@@ -30,7 +29,6 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
-import net.jbock.EverythingAfter;
 import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
@@ -48,7 +46,6 @@ public final class Processor extends AbstractProcessor {
     return Stream.of(
         CommandLineArguments.class,
         Description.class,
-        EverythingAfter.class,
         LongName.class,
         Positional.class,
         ShortName.class,
@@ -76,7 +73,6 @@ public final class Processor extends AbstractProcessor {
               "Skipping code generation: No abstract methods found", sourceType);
           continue;
         }
-        String stopword = stopword(parameters, sourceType);
         Set<Type> paramTypes = paramTypes(parameters);
         long numFlags = parameters.stream()
             .filter(p -> p.paramType == Type.FLAG)
@@ -87,7 +83,7 @@ public final class Processor extends AbstractProcessor {
           processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
               "Grouping requested, but less than two flags defined", sourceType);
         }
-        Context context = Context.create(sourceType, parameters, stopword, paramTypes, grouping);
+        Context context = Context.create(sourceType, parameters, paramTypes, grouping);
         if (!done.add(asType(sourceType).getQualifiedName().toString())) {
           continue;
         }
@@ -147,7 +143,7 @@ public final class Processor extends AbstractProcessor {
 
   private void checkSpecialParams(List<Param> params) {
     List<Param> otherTokens = params.stream()
-        .filter(param -> param.paramType == Type.OTHER_TOKENS)
+        .filter(param -> param.paramType == Type.POSITIONAL)
         .collect(toList());
     if (otherTokens.size() > 1) {
       throw new ValidationException(params.get(1).sourceMethod,
@@ -155,32 +151,34 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private List<Param> validate(TypeElement typeElement) {
-    if (typeElement.getKind() == ElementKind.INTERFACE) {
-      throw new ValidationException(typeElement,
-          typeElement.getSimpleName() + " must be an abstract class, not an interface");
+  private List<Param> validate(TypeElement sourceType) {
+    if (sourceType.getKind() == ElementKind.INTERFACE) {
+      throw new ValidationException(sourceType,
+          sourceType.getSimpleName() + " must be an abstract class, not an interface");
     }
-    if (!typeElement.getModifiers().contains(Modifier.ABSTRACT)) {
-      throw new ValidationException(typeElement,
-          typeElement.getSimpleName() + " must be abstract");
+    if (!sourceType.getModifiers().contains(Modifier.ABSTRACT)) {
+      throw new ValidationException(sourceType,
+          sourceType.getSimpleName() + " must be abstract");
     }
-    if (typeElement.getModifiers().contains(Modifier.PRIVATE)) {
-      throw new ValidationException(typeElement,
-          typeElement.getSimpleName() + " may not be private");
+    if (sourceType.getModifiers().contains(Modifier.PRIVATE)) {
+      throw new ValidationException(sourceType,
+          sourceType.getSimpleName() + " may not be private");
     }
-    if (typeElement.getNestingKind().isNested() &&
-        !typeElement.getModifiers().contains(Modifier.STATIC)) {
-      throw new ValidationException(typeElement,
-          "The nested class " + typeElement.getSimpleName() + " must be static");
+    if (sourceType.getNestingKind().isNested() &&
+        !sourceType.getModifiers().contains(Modifier.STATIC)) {
+      throw new ValidationException(sourceType,
+          "The nested class " + sourceType.getSimpleName() + " must be static");
     }
-    List<Param> params = methodsIn(typeElement.getEnclosedElements()).stream()
+    List<Param> parameters = methodsIn(sourceType.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(Modifier.ABSTRACT))
         .map(Param::create).collect(toList());
-    checkSpecialParams(params);
-    return params;
+    checkSpecialParams(parameters);
+    checkLongNames(parameters, sourceType);
+    checkShortNames(parameters, sourceType);
+    return parameters;
   }
 
-  private Set<String> shortNames(List<Param> params, TypeElement sourceType) {
+  private Set<String> checkShortNames(List<Param> params, TypeElement sourceType) {
     return params.stream()
         .map(Param::shortName)
         .filter(Objects::nonNull)
@@ -189,47 +187,13 @@ public final class Processor extends AbstractProcessor {
                 "Duplicate short name: " + element)));
   }
 
-  private Set<String> longNames(List<Param> params, TypeElement sourceType) {
+  private Set<String> checkLongNames(List<Param> params, TypeElement sourceType) {
     return params.stream()
         .map(Param::longName)
         .filter(Objects::nonNull)
         .collect(Util.distinctSet(element ->
             new ValidationException(sourceType,
                 "Duplicate long name: " + element)));
-  }
-
-  private String stopword(
-      List<Param> params,
-      TypeElement sourceType) {
-    Set<String> longNames = longNames(params, sourceType);
-    Set<String> shortNames = shortNames(params, sourceType);
-    List<String> stopwords = params.stream()
-        .filter(param -> param.paramType == EVERYTHING_AFTER)
-        .map(Param::stopword)
-        .collect(toList());
-    if (stopwords.size() > 1) {
-      throw new ValidationException(sourceType,
-          "Only one method may have the @EverythingAfter annotation");
-    }
-    if (stopwords.isEmpty()) {
-      return null;
-    }
-    String stopword = stopwords.get(0);
-    if (stopword.charAt(0) != '-') {
-      return stopword;
-    }
-    if (shortNames.contains(stopword.substring(1))) {
-      throw new ValidationException(sourceType,
-          "stopword coincides with an option: " + stopword);
-    }
-    if (stopword.length() == 1) {
-      return stopword;
-    }
-    if (stopword.charAt(1) == '-' && longNames.contains(stopword.substring(2))) {
-      throw new ValidationException(sourceType,
-          "stopword coincides with an option: " + stopword);
-    }
-    return stopword;
   }
 
   static void checkNotPresent(
@@ -248,7 +212,6 @@ public final class Processor extends AbstractProcessor {
   private boolean checkValid(RoundEnvironment env) {
     List<ExecutableElement> methods = new ArrayList<>();
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(Description.class)));
-    methods.addAll(methodsIn(env.getElementsAnnotatedWith(EverythingAfter.class)));
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(LongName.class)));
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(Positional.class)));
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(ShortName.class)));

@@ -71,7 +71,7 @@ final class Impl {
         .superclass(TypeName.get(context.sourceType.asType()))
         .addFields(fields)
         .addModifiers(PRIVATE, STATIC, FINAL)
-        .addMethod(privateConstructor())
+        .addMethod(implConstructor())
         .addMethod(createMethod)
         .addMethod(option.extractOptionalIntMethod)
         .addMethods(bindMethods())
@@ -95,8 +95,7 @@ final class Impl {
     builder.addParameter(option.optMapParameter);
     builder.addParameter(option.sMapParameter);
     builder.addParameter(option.flagsParameter);
-    builder.addParameter(option.otherTokensParameter);
-    builder.addParameter(option.restParameter);
+    builder.addParameter(option.positionalParameter);
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
     if (context.paramTypes.contains(Type.REQUIRED) ||
@@ -129,7 +128,7 @@ final class Impl {
     return result;
   }
 
-  private MethodSpec privateConstructor() {
+  private MethodSpec implConstructor() {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
     for (FieldSpec field : fields) {
       ParameterSpec param = ParameterSpec.builder(field.type, field.name).build();

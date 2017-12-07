@@ -129,34 +129,6 @@ public class ProcessorTest {
   }
 
   @Test
-  public void everythingAfterNotList() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @EverythingAfter(\"-\") abstract String a();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("The method that carries the EverythingAfter annotation must return List<String>");
-  }
-
-  @Test
-  public void otherTokensAndEverythingAfter() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @Positional @EverythingAfter(\"-\") abstract List<String> a();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Positional and EverythingAfter cannot be combined");
-  }
-
-  @Test
   public void otherTokensTwice() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -172,21 +144,6 @@ public class ProcessorTest {
   }
 
   @Test
-  public void everythingAfterTwice() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @EverythingAfter(\"-\") abstract List<String> a();",
-        "  @EverythingAfter(\"--\") abstract List<String> b();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Only one method may have the @EverythingAfter annotation");
-  }
-
-  @Test
   public void missingCommandLineArgumentsAnnotation() {
     List<String> sourceLines = withImports(
         "abstract class InvalidArguments {",
@@ -197,21 +154,6 @@ public class ProcessorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("must have the CommandLineArguments annotation");
-  }
-
-  @Test
-  public void stopwordConflict() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @EverythingAfter(\"--b\") abstract List<String> a();",
-        "  abstract String b();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("stopword coincides with an option: --b");
   }
 
   @Test
@@ -253,7 +195,7 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("a(int, int) must have an empty parameter list");
+        .withErrorContaining("a(int, int) may not have parameters");
   }
 
   @Test
@@ -292,7 +234,6 @@ public class ProcessorTest {
         "import java.util.Optional;",
         "",
         "import net.jbock.CommandLineArguments;",
-        "import net.jbock.EverythingAfter;",
         "import net.jbock.Positional;",
         "import net.jbock.LongName;",
         "import net.jbock.ShortName;",

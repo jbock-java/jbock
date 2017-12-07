@@ -78,19 +78,11 @@ enum Type {
     }
   },
 
-  OTHER_TOKENS(LIST_OF_STRING, true, false, false) {
+  POSITIONAL(LIST_OF_STRING, true, false, false) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
-          "$N", option.otherTokensParameter).build();
-    }
-  },
-
-  EVERYTHING_AFTER(LIST_OF_STRING, true, false, false) {
-    @Override
-    CodeBlock extractExpression(Option option, int j) {
-      return CodeBlock.builder().add(
-          "$N", option.restParameter).build();
+          "$N", option.positionalParameter).build();
     }
   };
 

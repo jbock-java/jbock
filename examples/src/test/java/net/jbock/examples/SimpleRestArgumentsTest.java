@@ -8,14 +8,16 @@ public class SimpleRestArgumentsTest {
   @Test
   public void testRest() {
     assertThat(SimpleRestArguments_Parser.parse(new String[]{"-", "a"}).rest().size())
-        .isEqualTo(1);
+        .isEqualTo(2);
   }
 
   @Test
   public void testFiles() {
-    assertThat(SimpleRestArguments_Parser.parse(new String[]{"--file=1", "--file", "2", "-", "a"}).rest().size())
-        .isEqualTo(1);
-    assertThat(SimpleRestArguments_Parser.parse(new String[]{"--file=1", "--file", "2", "-", "a"}).file().size())
+    assertThat(SimpleRestArguments_Parser.parse(new String[]{"--file=1", "--file", "2", "-", "a"})
+        .rest().size())
+        .isEqualTo(2);
+    assertThat(SimpleRestArguments_Parser.parse(new String[]{"--file=1", "--file", "2", "-", "a"})
+        .file().size())
         .isEqualTo(2);
   }
 

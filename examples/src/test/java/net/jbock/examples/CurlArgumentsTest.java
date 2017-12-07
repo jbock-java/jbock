@@ -173,7 +173,7 @@ public class CurlArgumentsTest {
     assertThat(lines[5]).isEqualTo("  boolean for flags");
     assertThat(lines[6]).isEqualTo("-i, --include");
     assertThat(lines[7]).isEqualTo("  --- description goes here ---");
-    assertThat(lines[8]).isEqualTo("Other tokens");
+    assertThat(lines[8]).isEqualTo("(positional arguments)");
     assertThat(lines[9]).isEqualTo("  @OtherTokens to capture any 'other' tokens in the input.");
     assertThat(lines[10]).isEqualTo("  In this case, that's any token which doesn't match one of");
     assertThat(lines[11]).isEqualTo("  /-v/, /-X(=.*)?/, /--request(=.*)?/, or /-H(=.*)?/,");

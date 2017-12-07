@@ -641,12 +641,11 @@ final class Helper {
       FieldSpec optMapField,
       FieldSpec sMapField,
       FieldSpec flagsField) {
-    ParameterSpec otherTokens = ParameterSpec.builder(LIST_OF_STRING, "otherTokens").build();
-    ParameterSpec rest = ParameterSpec.builder(LIST_OF_STRING, "rest").build();
+    ParameterSpec positional = ParameterSpec.builder(LIST_OF_STRING, "positional").build();
     return MethodSpec.methodBuilder("build")
-        .addStatement("return $T.$N($N, $N, $N, $N, $N)", impl.type, impl.createMethod,
-            optMapField, sMapField, flagsField, otherTokens, rest)
-        .addParameters(asList(otherTokens, rest))
+        .addStatement("return $T.$N($N, $N, $N, $N)", impl.type, impl.createMethod,
+            optMapField, sMapField, flagsField, positional)
+        .addParameter(positional)
         .returns(impl.type)
         .build();
   }

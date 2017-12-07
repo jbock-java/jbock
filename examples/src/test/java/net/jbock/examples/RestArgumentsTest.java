@@ -9,13 +9,13 @@ public class RestArgumentsTest {
   @Test
   public void testRest() {
     assertThat(RestArguments_Parser.parse(new String[]{"-", "a"}).rest().size())
-        .isEqualTo(1);
+        .isEqualTo(2);
   }
 
   @Test
   public void testFiles() {
     assertThat(RestArguments_Parser.parse(new String[]{"--file=1", "--file", "2", "-", "a"}).rest().size())
-        .isEqualTo(1);
+        .isEqualTo(2);
     assertThat(RestArguments_Parser.parse(new String[]{"--file=1", "--file", "2", "-", "a"}).file().size())
         .isEqualTo(2);
   }
