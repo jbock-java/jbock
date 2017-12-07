@@ -272,7 +272,7 @@ public class ProcessorTest {
   @Test
   public void warningOnlyOneFlag() {
     List<String> sourceLines = withImports(
-        "@CommandLineArguments(grouping = true)",
+        "@CommandLineArguments(allowGrouping = true)",
         "abstract class InvalidArguments {",
         "  abstract String foo();",
         "}");

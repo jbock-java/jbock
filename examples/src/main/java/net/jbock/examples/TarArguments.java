@@ -4,7 +4,7 @@ package net.jbock.examples;
 import net.jbock.CommandLineArguments;
 import net.jbock.ShortName;
 
-@CommandLineArguments(grouping = true)
+@CommandLineArguments(allowGrouping = true)
 abstract class TarArguments {
 
   @ShortName('x')

@@ -27,16 +27,14 @@ public @interface Positional {
 
   /**
    * <p>
-   *   Set to true if a double hyphen &quot;--&quot;, when encountered
-   *   as an unbound token, should end option parsing.
-   *   When option parsing ends, all remaining tokens after the double hyphen
-   *   are then added to the list of positional arguments.
+   *   If enabled, a double hyphen &quot;{@code --}&quot; ends option parsing, when encountered
+   *   as an unbound token.
    * </p>
-   *
    * <p>
-   *   When double dash escaping is enabled,
-   *   the double hyphen itself will not be added to the list of positional arguments.
+   *   When option parsing ends, the double hyphen itself along with all remaining tokens
+   *   after it,
+   *   are added to the list of positional arguments.
    * </p>
    */
-  boolean doubleDashEscaping() default false;
+  boolean esc() default true;
 }

@@ -6,7 +6,7 @@ import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
 
 @CommandLineArguments
-abstract class SimpleRequiredMan {
+abstract class SimpleRequiredArguments {
 
   abstract String dir();
 

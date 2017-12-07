@@ -5,8 +5,8 @@ import java.util.List;
 import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
 
-@CommandLineArguments(grouping = true)
-abstract class RequiredMan {
+@CommandLineArguments(allowGrouping = true)
+abstract class RequiredArguments {
 
   abstract String dir();
 

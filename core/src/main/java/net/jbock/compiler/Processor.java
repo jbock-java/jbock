@@ -81,7 +81,7 @@ public final class Processor extends AbstractProcessor {
         long numFlags = parameters.stream()
             .filter(p -> p.paramType == Type.FLAG)
             .count();
-        boolean groupingRequested = sourceType.getAnnotation(CommandLineArguments.class).grouping();
+        boolean groupingRequested = sourceType.getAnnotation(CommandLineArguments.class).allowGrouping();
         boolean grouping = groupingRequested && numFlags >= 2;
         if (groupingRequested && !grouping) {
           processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,

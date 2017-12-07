@@ -44,5 +44,5 @@ public @interface CommandLineArguments {
    *   not an argument bound to {@code f}.
    * </p>
    */
-  boolean grouping() default false;
+  boolean allowGrouping() default false;
 }

@@ -4,7 +4,7 @@ import java.util.List;
 import net.jbock.CommandLineArguments;
 import net.jbock.EverythingAfter;
 
-@CommandLineArguments(grouping = true)
+@CommandLineArguments(allowGrouping = true)
 abstract class RestArguments {
 
   abstract List<String> file();

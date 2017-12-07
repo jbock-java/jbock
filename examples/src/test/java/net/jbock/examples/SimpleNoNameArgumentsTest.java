@@ -1,6 +1,5 @@
 package net.jbock.examples;
 
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
@@ -8,14 +7,14 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class SimpleNoNameTest {
+public class SimpleNoNameArgumentsTest {
 
   @Rule
   public final ExpectedException exception = ExpectedException.none();
 
   @Test
   public void basicTest() {
-    SimpleNoName noName = SimpleNoName_Parser.parse(new String[]{"--message=m", "--file=f", "--file=o",
+    SimpleNoNameArguments noName = SimpleNoNameArguments_Parser.parse(new String[]{"--message=m", "--file=f", "--file=o",
         "--file=o", "--cmos"});
     assertThat(noName.cmos()).isEqualTo(true);
     assertThat(noName.message()).isEqualTo(Optional.of("m"));
@@ -27,7 +26,7 @@ public class SimpleNoNameTest {
 
   @Test
   public void testFlag() {
-    SimpleNoName noName = SimpleNoName_Parser.parse(new String[]{"--cmos"});
+    SimpleNoNameArguments noName = SimpleNoNameArguments_Parser.parse(new String[]{"--cmos"});
     assertThat(noName.cmos()).isEqualTo(true);
   }
 
@@ -35,6 +34,6 @@ public class SimpleNoNameTest {
   public void errorUnknownToken() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Unknown token: blabla");
-    SimpleNoName noName = SimpleNoName_Parser.parse(new String[]{"blabla"});
+    SimpleNoNameArguments_Parser.parse(new String[]{"blabla"});
   }
 }

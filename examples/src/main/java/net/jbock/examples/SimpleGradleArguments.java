@@ -10,7 +10,7 @@ import net.jbock.ShortName;
 import net.jbock.SuppressLongName;
 
 @CommandLineArguments
-abstract class SimpleGradleMan {
+abstract class SimpleGradleArguments {
 
   @ShortName('m')
   @Description(value = {"the message", "message goes here"}, argumentName = "MESSAGE")

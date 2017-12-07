@@ -9,8 +9,8 @@ import net.jbock.Positional;
 import net.jbock.ShortName;
 import net.jbock.SuppressLongName;
 
-@CommandLineArguments(grouping = true)
-abstract class GradleMan {
+@CommandLineArguments(allowGrouping = true)
+abstract class GradleArguments {
 
   @ShortName('m')
   @Description(value = {"the message", "message goes here"}, argumentName = "MESSAGE")
@@ -44,12 +44,12 @@ abstract class GradleMan {
     abstract List<String> bar();
   }
 
-  @CommandLineArguments(grouping = true)
+  @CommandLineArguments(allowGrouping = true)
   static abstract class GroupingFoo {
     abstract Optional<String> bar();
   }
 
-  @CommandLineArguments(grouping = true)
+  @CommandLineArguments(allowGrouping = true)
   static abstract class GroupingBar {
     abstract List<String> bar();
   }

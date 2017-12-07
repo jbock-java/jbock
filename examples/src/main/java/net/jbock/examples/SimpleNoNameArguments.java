@@ -6,7 +6,7 @@ import java.util.Optional;
 import net.jbock.CommandLineArguments;
 
 @CommandLineArguments
-abstract class SimpleNoName {
+abstract class SimpleNoNameArguments {
 
   abstract Optional<String> message();
 

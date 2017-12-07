@@ -7,8 +7,8 @@ import java.util.OptionalInt;
 import net.jbock.CommandLineArguments;
 import net.jbock.ShortName;
 
-@CommandLineArguments(grouping = true)
-abstract class NoName {
+@CommandLineArguments(allowGrouping = true)
+abstract class NoNameArguments {
 
   abstract Optional<String> message();
 
