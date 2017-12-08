@@ -9,7 +9,7 @@ import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Type.POSITIONAL;
+import static net.jbock.compiler.Type.POSITIONAL_LIST;
 import static net.jbock.compiler.Util.snakeCase;
 
 import java.util.ArrayList;
@@ -433,7 +433,7 @@ final class Option {
     CodeBlock.Builder builder = CodeBlock.builder();
 
     if (context.otherTokens) {
-      builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, POSITIONAL)
+      builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, POSITIONAL_LIST)
           .addStatement("return $S", "(positional arguments)")
           .endControlFlow();
     }

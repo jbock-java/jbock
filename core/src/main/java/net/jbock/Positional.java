@@ -24,17 +24,4 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
 public @interface Positional {
-
-  /**
-   * <p>
-   *   If enabled, a double hyphen &quot;{@code --}&quot; ends option parsing, when encountered
-   *   as an unbound token.
-   * </p>
-   * <p>
-   *   When option parsing ends, the double hyphen itself along with all remaining tokens
-   *   after it,
-   *   are added to the list of positional arguments.
-   * </p>
-   */
-  boolean esc() default true;
 }

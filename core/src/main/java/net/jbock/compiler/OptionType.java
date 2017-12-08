@@ -30,7 +30,7 @@ final class OptionType {
 
   private OptionType(Context context) {
     this.context = context;
-    this.isSpecialField = FieldSpec.builder(BOOLEAN, "special", PRIVATE, FINAL)
+    this.isSpecialField = FieldSpec.builder(BOOLEAN, "positional", PRIVATE, FINAL)
         .build();
     this.isBindingField = FieldSpec.builder(BOOLEAN, "binding", PRIVATE, FINAL)
         .build();
@@ -59,7 +59,7 @@ final class OptionType {
   private void addType(TypeSpec.Builder builder, Type optionType) {
     builder.addEnumConstant(optionType.name(),
         anonymousClassBuilder("$L, $L, $L",
-            optionType.special, optionType.binding, optionType.required)
+            optionType.positional, optionType.binding, optionType.required)
             .build());
   }
 

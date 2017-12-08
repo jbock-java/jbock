@@ -84,9 +84,9 @@ final class Parser {
     builder.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
     builder.addStatement("$T $N = $L", INT, option.ddIndexParameter, -1);
 
-    if (context.stopword != null) {
+    if (context.stopword) {
       builder.add("\n");
-      builder.addStatement("$T $N = $S", stopword.type, stopword, context.stopword);
+      builder.addStatement("$T $N = $S", stopword.type, stopword, "--");
     }
 
     builder.add("\n");
@@ -108,7 +108,7 @@ final class Parser {
 
       builder.addStatement("$T $N = $N.next()", STRING, firstToken, it);
 
-      if (context.stopword != null) {
+      if (context.stopword) {
         builder.beginControlFlow("if ($N.equals($N))", firstToken, stopword)
             .addStatement("$N = $N.size()", option.ddIndexParameter, option.positionalParameter)
             .addStatement("$N.forEachRemaining($N::add)", it, option.positionalParameter)
@@ -151,7 +151,7 @@ final class Parser {
 
     builder.addStatement("$T $N = $N.next()", STRING, freeToken, it);
 
-    if (context.stopword != null) {
+    if (context.stopword) {
       builder.beginControlFlow("if ($N.equals($N))", freeToken, stopword)
           .addStatement("$N = $N.size()", option.ddIndexParameter, option.positionalParameter)
           .addStatement("$N.forEachRemaining($N::add)", it, option.positionalParameter)

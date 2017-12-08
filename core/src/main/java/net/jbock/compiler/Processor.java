@@ -143,14 +143,38 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void checkSpecialParams(List<Param> params) {
-    List<Param> otherTokens = params.stream()
-        .filter(param -> param.paramType == Type.POSITIONAL)
-        .collect(toList());
-    if (otherTokens.size() > 1) {
-      throw new ValidationException(params.get(1).sourceMethod,
-          "Only one method may have the @Positional annotation");
+  private List<Param> checkPositional(List<Param> params) {
+    List<Param> result = new ArrayList<>(params.size());
+    int lists = 0;
+    Param previous = null;
+    for (Param param : params) {
+      if (!param.paramType.positional) {
+        result.add(param);
+        continue;
+      }
+      if (previous != null) {
+        if (param.paramType.ordinal() < previous.paramType.ordinal()) {
+          throw new ValidationException(param.sourceMethod,
+              "@Positional " + previous.paramType.returnType +
+                  " may not stand above @Positional " + param.paramType.returnType);
+        }
+      }
+      if (param.paramType == Type.POSITIONAL_LIST) {
+        lists++;
+        if (lists == 1) {
+          result.add(param);
+        } else if (lists == 2) {
+          result.add(param.asPositional2());
+        } else if (lists >= 3) {
+          throw new ValidationException(param.sourceMethod,
+              "There can be at most 2 positional lists.");
+        }
+      } else {
+        result.add(param);
+      }
+      previous = param;
     }
+    return result;
   }
 
   private List<Param> validate(TypeElement sourceType) {
@@ -181,10 +205,9 @@ public final class Processor extends AbstractProcessor {
       ExecutableElement method = abstractMethods.get(index);
       parameters.add(Param.create(method, index));
     }
-    checkSpecialParams(parameters);
     checkLongNames(parameters, sourceType);
     checkShortNames(parameters, sourceType);
-    return parameters;
+    return checkPositional(parameters);
   }
 
   private Set<String> checkShortNames(List<Param> params, TypeElement sourceType) {

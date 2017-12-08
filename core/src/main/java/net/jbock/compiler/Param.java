@@ -36,10 +36,8 @@ final class Param {
 
   final Type paramType;
 
-  // index in all parameters
+  // index in the list of abstract methods
   final int index;
-
-  private final String stopword;
 
   final ExecutableElement sourceMethod;
 
@@ -49,19 +47,18 @@ final class Param {
       String shortName,
       String longName,
       int index,
-      String stopword,
+      Type paramType,
       ExecutableElement sourceMethod) {
     this.shortName = shortName;
     this.longName = longName;
     this.index = index;
-    this.stopword = stopword;
     this.sourceMethod = sourceMethod;
-    this.paramType = getParamType(sourceMethod);
+    this.paramType = paramType;
   }
 
   private static Type getParamType(ExecutableElement sourceMethod) {
     if (sourceMethod.getAnnotation(Positional.class) != null) {
-      return Type.POSITIONAL;
+      return Type.POSITIONAL_LIST;
     }
     TypeMirror type = sourceMethod.getReturnType();
     if (type.getKind() == TypeKind.BOOLEAN) {
@@ -111,7 +108,7 @@ final class Param {
         shortName,
         longName,
         index,
-        null,
+        getParamType(sourceMethod),
         sourceMethod);
   }
 
@@ -153,13 +150,20 @@ final class Param {
     return longName.value();
   }
 
-  private static void checkList(
+  private static Type checkOptionalType(
       ExecutableElement sourceMethod, Annotation cause) {
-    if (!isListOfString(sourceMethod.getReturnType())) {
-      throw new ValidationException(sourceMethod,
-          "The method that carries the " + cause.annotationType().getSimpleName() +
-              " annotation must return List<String>");
+    if (isListOfString(sourceMethod.getReturnType())) {
+      return Type.POSITIONAL_LIST;
     }
+    if (isString(sourceMethod.getReturnType())) {
+      return Type.REQUIRED_POSITIONAL;
+    }
+    if (isOptionalString(sourceMethod.getReturnType())) {
+      return Type.OPTIONAL_POSITIONAL;
+    }
+    throw new ValidationException(sourceMethod,
+        "A method that carries the " + cause.annotationType().getSimpleName() +
+            " annotation must return String, Optional<String> or List<String>");
   }
 
   private static boolean isListOfString(TypeMirror type) {
@@ -245,7 +249,7 @@ final class Param {
 
   private static Param createOtherTokens(ExecutableElement sourceMethod, int index) {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
-    checkList(sourceMethod, positional);
+    Type type = checkOptionalType(sourceMethod, positional);
     checkNotPresent(sourceMethod,
         positional,
         Arrays.asList(
@@ -256,7 +260,7 @@ final class Param {
         null,
         null,
         index,
-        positional.esc() ? "--" : null,
+        type,
         sourceMethod);
   }
 
@@ -268,16 +272,16 @@ final class Param {
     return longName;
   }
 
-  String stopword() {
-    return stopword;
-  }
-
   Description description() {
     return sourceMethod.getAnnotation(Description.class);
   }
 
   String methodName() {
     return sourceMethod.getSimpleName().toString();
+  }
+
+  Param asPositional2() {
+    return new Param(shortName, longName, index, Type.POSITIONAL_LIST_2, sourceMethod);
   }
 
   String descriptionArgumentName() {

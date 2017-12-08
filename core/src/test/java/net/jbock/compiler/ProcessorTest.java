@@ -129,18 +129,19 @@ public class ProcessorTest {
   }
 
   @Test
-  public void otherTokensTwice() {
+  public void positionalListBeforeRequiredPositional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Positional abstract List<String> a();",
-        "  @Positional abstract List<String> b();",
+        "  @Positional abstract String b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Only one method may have the @Positional annotation");
+        .withErrorContaining("@Positional java.util.List<java.lang.String> " +
+            "may not stand above @Positional java.lang.String");
   }
 
   @Test

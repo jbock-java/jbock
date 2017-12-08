@@ -78,23 +78,7 @@ enum Type {
     }
   },
 
-  POSITIONAL(LIST_OF_STRING, true, false, false) {
-    @Override
-    CodeBlock extractExpression(Option option, int j) {
-      return CodeBlock.builder().add(
-          "$N", option.positionalParameter).build();
-    }
-  },
-
-  POSITIONAL2(LIST_OF_STRING, true, false, false) {
-    @Override
-    CodeBlock extractExpression(Option option, int j) {
-      return CodeBlock.builder().add(
-          "$N", option.positionalParameter).build();
-    }
-  },
-
-  OPT_POSITIONAL(OPTIONAL_STRING, true, false, false) {
+  OPTIONAL_POSITIONAL(OPTIONAL_STRING, true, false, false) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -108,10 +92,26 @@ enum Type {
       return CodeBlock.builder().add(
           "$N", option.positionalParameter).build();
     }
+  },
+
+  POSITIONAL_LIST(LIST_OF_STRING, true, false, false) {
+    @Override
+    CodeBlock extractExpression(Option option, int j) {
+      return CodeBlock.builder().add(
+          "$N", option.positionalParameter).build();
+    }
+  },
+
+  POSITIONAL_LIST_2(LIST_OF_STRING, true, false, false) {
+    @Override
+    CodeBlock extractExpression(Option option, int j) {
+      return CodeBlock.builder().add(
+          "$N", option.positionalParameter).build();
+    }
   };
 
   final TypeName returnType;
-  final boolean special;
+  final boolean positional;
   final boolean binding;
   final boolean required;
 
@@ -125,11 +125,11 @@ enum Type {
 
   Type(
       TypeName returnType,
-      boolean special,
+      boolean positional,
       boolean binding,
       boolean required) {
     this.returnType = returnType;
-    this.special = special;
+    this.positional = positional;
     this.binding = binding;
     this.required = required;
   }

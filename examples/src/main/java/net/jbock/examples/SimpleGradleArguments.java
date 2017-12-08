@@ -31,6 +31,6 @@ abstract class SimpleGradleArguments {
   @ShortName('v')
   abstract boolean verbose();
 
-  @Positional(esc = false)
+  @Positional
   abstract List<String> otherTokens();
 }

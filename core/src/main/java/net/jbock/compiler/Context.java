@@ -4,7 +4,6 @@ import static java.util.stream.Collectors.toList;
 import static net.jbock.compiler.Util.asType;
 
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
@@ -25,7 +24,7 @@ final class Context {
   final List<Param> positionalParameters;
 
   // the stopword is either "--" or null
-  final String stopword;
+  final boolean stopword;
 
   // true if one method has the Positional annotation
   final boolean otherTokens;
@@ -44,7 +43,7 @@ final class Context {
       ClassName generatedClass,
       List<Param> parameters,
       List<Param> positionalParameters,
-      String stopword,
+      boolean stopword,
       boolean otherTokens,
       boolean problematicOptionNames,
       boolean grouping,
@@ -67,12 +66,11 @@ final class Context {
       boolean grouping) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean problematicOptionNames = problematicOptionNames(parameters);
-    boolean otherTokens = paramTypes.contains(Type.POSITIONAL);
-    String stopword = parameters.stream()
-        .map(Param::stopword)
-        .filter(Objects::nonNull)
-        .findAny().orElse(null);
-    List<Param> positionalParameters = parameters.stream().filter(p -> p.paramType.special).collect(toList());
+    boolean otherTokens = paramTypes.contains(Type.POSITIONAL_LIST);
+    boolean stopword = parameters.stream()
+        .filter(param -> param.paramType == Type.POSITIONAL_LIST)
+        .count() >= 2;
+    List<Param> positionalParameters = parameters.stream().filter(p -> p.paramType.positional).collect(toList());
     return new Context(
         sourceType,
         generatedClass,
@@ -112,9 +110,5 @@ final class Context {
     }
     // can only happen if j is not the O-index of a positional param
     throw new AssertionError();
-  }
-
-  boolean everythingAfter() {
-    return stopword != null;
   }
 }

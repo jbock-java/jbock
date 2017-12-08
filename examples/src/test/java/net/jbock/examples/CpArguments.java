@@ -1,15 +1,14 @@
 package net.jbock.examples;
 
-
-import java.util.List;
 import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
 
 @CommandLineArguments
-abstract class SimpleRequiredArguments {
-
-  abstract String dir();
+abstract class CpArguments {
 
   @Positional
-  abstract List<String> otherTokens();
+  abstract String source();
+
+  @Positional
+  abstract String dest();
 }
