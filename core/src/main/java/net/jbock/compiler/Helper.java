@@ -134,7 +134,7 @@ final class Helper {
         option.type, STRING), "sMap", FINAL).build();
     FieldSpec flagsField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
         option.type), "flags", FINAL).build();
-    MethodSpec buildMethod = buildMethod(impl, optMapField, sMapField, flagsField);
+    MethodSpec buildMethod = buildMethod(option, impl, optMapField, sMapField, flagsField);
     MethodSpec addFlagMethod = addFlagMethod(context, option, optionType.type, flagsField);
     MethodSpec addMethod = addArgumentMethod(
         context,
@@ -173,7 +173,7 @@ final class Helper {
     MethodSpec readGroupMethod = readGroupMethod(
         readOptionFromGroupMethod,
         stripMethod,
-        option.type,
+        option,
         chopMethod,
         addFlagMethod);
 
@@ -247,21 +247,13 @@ final class Helper {
       FieldSpec flags) {
     MethodSpec.Builder builder = MethodSpec.methodBuilder("addFlag");
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
-    ParameterSpec freeToken = ParameterSpec.builder(STRING, "freeToken").build();
-
-    if (context.paramTypes.contains(Type.FLAG)) {
-      builder.beginControlFlow("if ($N.type != $T.$L)", optionParam, optionTypeClass, Type.FLAG)
-          .addStatement("throw new $T($S +\n$N + $S + $N.$N + $S)", IllegalArgumentException.class,
-              "Invalid token in option group '", freeToken, "': '",
-              optionParam, option.shortNameField, "'")
-          .endControlFlow();
-    }
 
     builder.beginControlFlow("if (!$N.add($N))", flags, optionParam)
-        .addStatement(throwRepetitionErrorInGroup(option, optionParam, freeToken))
+        .addStatement("throw new $T($S + $N.$N + $S)", IllegalArgumentException.class,
+            "Option '-", optionParam, option.shortNameField, "' is not repeatable")
         .endControlFlow();
 
-    return builder.addParameters(asList(optionParam, freeToken)).build();
+    return builder.addParameter(optionParam).build();
   }
 
   private static MethodSpec addArgumentMethod(
@@ -417,20 +409,26 @@ final class Helper {
   private static MethodSpec readGroupMethod(
       MethodSpec readOptionFromGroupMethod,
       MethodSpec stripMethod,
-      ClassName optionClass,
+      Option option,
       MethodSpec chopMethod,
       MethodSpec addFlagMethod) {
 
     ParameterSpec firstToken = ParameterSpec.builder(STRING, "firstToken").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(optionClass, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("readGroup");
     builder.addStatement("$T $N = $N($N)", STRING, token, stripMethod, firstToken);
     builder.beginControlFlow("while(!$N.isEmpty())", token)
         .addStatement("$T $N = $N($N, $N)",
-            option.type, option, readOptionFromGroupMethod, token, firstToken)
-        .addStatement("$N($N, $N)", addFlagMethod, option, firstToken)
+            optionParam.type, optionParam, readOptionFromGroupMethod, token, firstToken);
+    builder.beginControlFlow("if ($N.type != $T.$L)", optionParam, option.optionType.type, Type.FLAG)
+        .addStatement("throw new $T($S +\n$N + $S + $N.$N + $S)", IllegalArgumentException.class,
+            "Invalid token in option group '", firstToken, "': '",
+            optionParam, option.shortNameField, "'")
+        .endControlFlow();
+
+    builder.addStatement("$N($N)", addFlagMethod, optionParam)
         .addStatement("$N = $N($N)", token, chopMethod, token)
         .endControlFlow();
 
@@ -466,7 +464,7 @@ final class Helper {
     if (context.paramTypes.contains(Type.FLAG)) {
       builder.add("\n");
       builder.beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, Type.FLAG)
-          .addStatement("$N($N, $N)", addFlagMethod, option, token)
+          .addStatement("$N($N)", addFlagMethod, option)
           .addStatement("return $L", true)
           .endControlFlow();
     }
@@ -637,15 +635,16 @@ final class Helper {
   }
 
   private static MethodSpec buildMethod(
+      Option option,
       Impl impl,
       FieldSpec optMapField,
       FieldSpec sMapField,
       FieldSpec flagsField) {
-    ParameterSpec positional = ParameterSpec.builder(LIST_OF_STRING, "positional").build();
     return MethodSpec.methodBuilder("build")
-        .addStatement("return $T.$N($N, $N, $N, $N)", impl.type, impl.createMethod,
-            optMapField, sMapField, flagsField, positional)
-        .addParameter(positional)
+        .addStatement("return $T.$N($N, $N, $N, $N, $N)", impl.type, impl.createMethod,
+            optMapField, sMapField, flagsField, option.positionalParameter, option.ddIndexParameter)
+        .addParameter(option.positionalParameter)
+        .addParameter(option.ddIndexParameter)
         .returns(impl.type)
         .build();
   }

@@ -10,6 +10,6 @@ abstract class SimpleRequiredArguments {
 
   abstract String dir();
 
-  @Positional
+  @Positional(esc = false)
   abstract List<String> otherTokens();
 }

@@ -5,7 +5,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
@@ -71,7 +71,6 @@ final class Parser {
 
   private MethodSpec parseMethod() {
 
-    ParameterSpec positional = ParameterSpec.builder(LIST_OF_STRING, "positional").build();
     ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec stopword = ParameterSpec.builder(STRING, "stopword").build();
@@ -83,6 +82,7 @@ final class Parser {
     builder.add("\n");
     builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
     builder.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
+    builder.addStatement("$T $N = $L", INT, option.ddIndexParameter, -1);
 
     if (context.stopword != null) {
       builder.add("\n");
@@ -91,9 +91,11 @@ final class Parser {
 
     builder.add("\n");
     if (context.otherTokens) {
-      builder.addStatement("$T $N = new $T<>()", positional.type, positional, ArrayList.class);
+      builder.addStatement("$T $N = new $T<>()",
+          option.positionalParameter.type, option.positionalParameter, ArrayList.class);
     } else {
-      builder.addStatement("$T $N = $T.emptyList()", positional.type, positional, Collections.class);
+      builder.addStatement("$T $N = $T.emptyList()",
+          option.positionalParameter.type, option.positionalParameter, Collections.class);
     }
 
     if (context.grouping) {
@@ -108,10 +110,10 @@ final class Parser {
 
       if (context.stopword != null) {
         builder.beginControlFlow("if ($N.equals($N))", firstToken, stopword)
-            .addStatement("$N.add($N)", positional, firstToken)
-            .addStatement("$N.forEachRemaining($N::add)", it, positional)
-            .addStatement("return $N.$N($N)",
-                helper, this.helper.buildMethod, positional)
+            .addStatement("$N = $N.size()", option.ddIndexParameter, option.positionalParameter)
+            .addStatement("$N.forEachRemaining($N::add)", it, option.positionalParameter)
+            .addStatement("return $N.$N($N, $N)",
+                helper, this.helper.buildMethod, option.positionalParameter, option.ddIndexParameter)
             .endControlFlow();
       }
 
@@ -129,7 +131,7 @@ final class Parser {
 
       builder.beginControlFlow("if (!$N)", tokenRead);
       if (context.otherTokens) {
-        builder.addStatement("$N.add($N)", positional, firstToken);
+        builder.addStatement("$N.add($N)", option.positionalParameter, firstToken);
       } else {
         builder.addStatement("throw new $T($S + $N)",
             IllegalArgumentException.class, "Unknown token: ", firstToken);
@@ -151,10 +153,10 @@ final class Parser {
 
     if (context.stopword != null) {
       builder.beginControlFlow("if ($N.equals($N))", freeToken, stopword)
-          .addStatement("$N.add($N)", positional, freeToken)
-          .addStatement("$N.forEachRemaining($N::add)", it, positional)
-          .addStatement("return $N.$N($N)",
-              helper, this.helper.buildMethod, positional)
+          .addStatement("$N = $N.size()", option.ddIndexParameter, option.positionalParameter)
+          .addStatement("$N.forEachRemaining($N::add)", it, option.positionalParameter)
+          .addStatement("return $N.$N($N, $N)",
+              helper, this.helper.buildMethod, option.positionalParameter, option.ddIndexParameter)
           .endControlFlow();
     }
 
@@ -163,7 +165,7 @@ final class Parser {
 
     builder.beginControlFlow("if (!$N)", tokenRead);
     if (context.otherTokens) {
-      builder.addStatement("$N.add($N)", positional, freeToken);
+      builder.addStatement("$N.add($N)", option.positionalParameter, freeToken);
     } else {
       builder.addStatement("throw new $T($S + $N)",
           IllegalArgumentException.class, "Unknown token: ", freeToken);
@@ -174,8 +176,8 @@ final class Parser {
     builder.endControlFlow();
 
     builder.add("\n");
-    builder.addStatement("return $N.$N($N)",
-        helper, this.helper.buildMethod, positional);
+    builder.addStatement("return $N.$N($N, $N)",
+        helper, this.helper.buildMethod, option.positionalParameter, option.ddIndexParameter);
 
     return MethodSpec.methodBuilder("parse")
         .addParameter(args)
@@ -188,7 +190,7 @@ final class Parser {
   private MethodSpec printUsageMethod() {
     ParameterSpec option = ParameterSpec.builder(this.option.type, "option").build();
     ParameterSpec out = ParameterSpec.builder(ClassName.get(PrintStream.class), "out").build();
-    ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
+    ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
     return MethodSpec.methodBuilder("printUsage")
         .beginControlFlow("for ($T $N: $T.values())", option.type, option, option.type)
         .addStatement("$N.println($N.describe($N))", out, option, indent)

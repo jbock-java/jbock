@@ -5,6 +5,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
+import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
@@ -41,11 +42,11 @@ final class Option {
 
   final ClassName type;
   final OptionType optionType;
+  final Context context;
 
   private final FieldSpec descriptionField;
   private final FieldSpec argumentNameField;
 
-  private final Context context;
 
   private final MethodSpec describeNamesMethod;
   private final MethodSpec describeParamMethod;
@@ -61,10 +62,12 @@ final class Option {
 
   final MethodSpec extractOptionalIntMethod;
 
+  // parameters of the static Impl.create method
   final ParameterSpec optMapParameter;
   final ParameterSpec sMapParameter;
   final ParameterSpec flagsParameter;
   final ParameterSpec positionalParameter;
+  final ParameterSpec ddIndexParameter;
 
   private final MethodSpec isSpecialMethod;
   private final MethodSpec isBindingMethod;
@@ -86,7 +89,8 @@ final class Option {
       ParameterSpec optMapParameter,
       ParameterSpec sMapParameter,
       ParameterSpec flagsParameter,
-      ParameterSpec positionalParameter) {
+      ParameterSpec positionalParameter,
+      ParameterSpec ddIndexParameter) {
     this.extractOptionalIntMethod = extractOptionalIntMethod;
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
@@ -104,6 +108,7 @@ final class Option {
     this.sMapParameter = sMapParameter;
     this.flagsParameter = flagsParameter;
     this.positionalParameter = positionalParameter;
+    this.ddIndexParameter = ddIndexParameter;
     this.describeParamMethod = describeParamMethod(
         context,
         longNameField,
@@ -140,6 +145,7 @@ final class Option {
         type), "flags").build();
     ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional")
         .build();
+    ParameterSpec ddIndexParameter = ParameterSpec.builder(INT, "ddIndex").build();
     MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(type, sMapParameter);
 
     return new Option(
@@ -159,7 +165,8 @@ final class Option {
         optMapParameter,
         sMapParameter,
         flagsParameter,
-        positionalParameter);
+        positionalParameter,
+        ddIndexParameter);
   }
 
   String enumConstant(int i) {
@@ -359,7 +366,7 @@ final class Option {
 
   private static MethodSpec descriptionBlockMethod(FieldSpec descriptionField) {
     ParameterSpec line = ParameterSpec.builder(STRING, "line").build();
-    ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
+    ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
     ParameterSpec spaces = ParameterSpec.builder(STRING, "spaces").build();
     ParameterSpec sp = ParameterSpec.builder(ArrayTypeName.of(TypeName.CHAR), "sp").build();
     ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
@@ -383,7 +390,7 @@ final class Option {
 
   private MethodSpec describeMethod() {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
-    ParameterSpec indent = ParameterSpec.builder(TypeName.INT, "indent").build();
+    ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
     CodeBlock codeBlock = CodeBlock.builder()
         .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
         .addStatement("$N.append($N())", sb, describeNamesMethod)

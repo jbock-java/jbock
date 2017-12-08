@@ -36,6 +36,9 @@ final class Param {
 
   final Type paramType;
 
+  // index in all parameters
+  final int index;
+
   private final String stopword;
 
   final ExecutableElement sourceMethod;
@@ -45,10 +48,12 @@ final class Param {
   private Param(
       String shortName,
       String longName,
+      int index,
       String stopword,
       ExecutableElement sourceMethod) {
     this.shortName = shortName;
     this.longName = longName;
+    this.index = index;
     this.stopword = stopword;
     this.sourceMethod = sourceMethod;
     this.paramType = getParamType(sourceMethod);
@@ -87,12 +92,12 @@ final class Param {
     throw new ValidationException(sourceMethod, message);
   }
 
-  static Param create(ExecutableElement sourceMethod) {
+  static Param create(ExecutableElement sourceMethod, int index) {
     basicChecks(sourceMethod);
     Positional positional = sourceMethod.getAnnotation(Positional.class);
 
     if (positional != null) {
-      return createOtherTokens(sourceMethod);
+      return createOtherTokens(sourceMethod, index);
     }
     String longName = longName(sourceMethod);
     String shortName = shortName(sourceMethod);
@@ -105,6 +110,7 @@ final class Param {
     return new Param(
         shortName,
         longName,
+        index,
         null,
         sourceMethod);
   }
@@ -237,7 +243,7 @@ final class Param {
     }
   }
 
-  private static Param createOtherTokens(ExecutableElement sourceMethod) {
+  private static Param createOtherTokens(ExecutableElement sourceMethod, int index) {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
     checkList(sourceMethod, positional);
     checkNotPresent(sourceMethod,
@@ -249,6 +255,7 @@ final class Param {
     return new Param(
         null,
         null,
+        index,
         positional.esc() ? "--" : null,
         sourceMethod);
   }

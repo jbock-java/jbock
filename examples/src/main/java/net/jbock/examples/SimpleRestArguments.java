@@ -9,6 +9,6 @@ abstract class SimpleRestArguments {
 
   abstract List<String> file();
 
-  @Positional
+  @Positional(esc = false)
   abstract List<String> rest();
 }

@@ -14,6 +14,6 @@ abstract class SimpleRmArguments {
   @ShortName('f')
   abstract boolean force();
 
-  @Positional
+  @Positional(esc = false)
   abstract List<String> otherTokens();
 }

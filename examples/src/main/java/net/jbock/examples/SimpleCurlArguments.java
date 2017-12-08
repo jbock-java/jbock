@@ -23,6 +23,6 @@ abstract class SimpleCurlArguments {
   @SuppressLongName
   abstract boolean verbose();
 
-  @Positional
+  @Positional(esc = false)
   abstract List<String> urls();
 }

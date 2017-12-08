@@ -2,6 +2,8 @@ package net.jbock.compiler;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
+import static javax.lang.model.element.ElementKind.METHOD;
+import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.compiler.Util.asType;
 import static net.jbock.compiler.Util.methodToString;
@@ -156,7 +158,7 @@ public final class Processor extends AbstractProcessor {
       throw new ValidationException(sourceType,
           sourceType.getSimpleName() + " must be an abstract class, not an interface");
     }
-    if (!sourceType.getModifiers().contains(Modifier.ABSTRACT)) {
+    if (!sourceType.getModifiers().contains(ABSTRACT)) {
       throw new ValidationException(sourceType,
           sourceType.getSimpleName() + " must be abstract");
     }
@@ -169,9 +171,16 @@ public final class Processor extends AbstractProcessor {
       throw new ValidationException(sourceType,
           "The nested class " + sourceType.getSimpleName() + " must be static");
     }
-    List<Param> parameters = methodsIn(sourceType.getEnclosedElements()).stream()
-        .filter(method -> method.getModifiers().contains(Modifier.ABSTRACT))
-        .map(Param::create).collect(toList());
+    List<ExecutableElement> abstractMethods = sourceType.getEnclosedElements().stream()
+        .filter(element -> element.getKind() == METHOD)
+        .map(method -> (ExecutableElement) method)
+        .filter(method -> method.getModifiers().contains(ABSTRACT))
+        .collect(toList());
+    List<Param> parameters = new ArrayList<>(abstractMethods.size());
+    for (int index = 0; index < abstractMethods.size(); index++) {
+      ExecutableElement method = abstractMethods.get(index);
+      parameters.add(Param.create(method, index));
+    }
     checkSpecialParams(parameters);
     checkLongNames(parameters, sourceType);
     checkShortNames(parameters, sourceType);
@@ -224,7 +233,7 @@ public final class Processor extends AbstractProcessor {
                 CommandLineArguments.class.getSimpleName() + " annotation");
         return false;
       }
-      if (!method.getModifiers().contains(Modifier.ABSTRACT)) {
+      if (!method.getModifiers().contains(ABSTRACT)) {
         printError(method,
             "Method " + methodToString(method) + " must be abstract.");
         return false;

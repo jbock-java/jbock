@@ -84,6 +84,30 @@ enum Type {
       return CodeBlock.builder().add(
           "$N", option.positionalParameter).build();
     }
+  },
+
+  POSITIONAL2(LIST_OF_STRING, true, false, false) {
+    @Override
+    CodeBlock extractExpression(Option option, int j) {
+      return CodeBlock.builder().add(
+          "$N", option.positionalParameter).build();
+    }
+  },
+
+  OPT_POSITIONAL(OPTIONAL_STRING, true, false, false) {
+    @Override
+    CodeBlock extractExpression(Option option, int j) {
+      return CodeBlock.builder().add(
+          "$N", option.positionalParameter).build();
+    }
+  },
+
+  REQUIRED_POSITIONAL(STRING, true, false, false) {
+    @Override
+    CodeBlock extractExpression(Option option, int j) {
+      return CodeBlock.builder().add(
+          "$N", option.positionalParameter).build();
+    }
   };
 
   final TypeName returnType;
@@ -91,12 +115,19 @@ enum Type {
   final boolean binding;
   final boolean required;
 
+  /**
+   * @param j an index in the Option enum
+   * @return An expression that returns the value of the parameter specified by {@code j}.
+   *     The expression will be used inside a static method,
+   *     which has the parameters listed in {@link Option} (see comment there).
+   */
   abstract CodeBlock extractExpression(Option option, int j);
 
   Type(
       TypeName returnType,
       boolean special,
-      boolean binding, boolean required) {
+      boolean binding,
+      boolean required) {
     this.returnType = returnType;
     this.special = special;
     this.binding = binding;

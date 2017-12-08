@@ -96,6 +96,7 @@ final class Impl {
     builder.addParameter(option.sMapParameter);
     builder.addParameter(option.flagsParameter);
     builder.addParameter(option.positionalParameter);
+    builder.addParameter(option.ddIndexParameter);
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
     if (context.paramTypes.contains(Type.REQUIRED) ||

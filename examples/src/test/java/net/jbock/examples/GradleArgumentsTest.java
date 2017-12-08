@@ -103,7 +103,7 @@ public final class GradleArgumentsTest {
   @Test
   public void errorInvalidOptionGroupRepeated() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("In option group '-cvv': option 'v' is not repeatable");
+    exception.expectMessage("Option '-v' is not repeatable");
     GradleArguments_Parser.parse(new String[]{"-cvv"});
   }
 
@@ -133,13 +133,12 @@ public final class GradleArgumentsTest {
     GradleArguments gradleArguments = GradleArguments_Parser.parse(
         new String[]{"--message=hello", "-", "--", "->", "<=>", "", " "});
     assertThat(gradleArguments.message()).isEqualTo(Optional.of("hello"));
-    assertThat(gradleArguments.otherTokens().size()).isEqualTo(6);
+    assertThat(gradleArguments.otherTokens().size()).isEqualTo(5);
     assertThat(gradleArguments.otherTokens().get(0)).isEqualTo("-");
-    assertThat(gradleArguments.otherTokens().get(1)).isEqualTo("--");
-    assertThat(gradleArguments.otherTokens().get(2)).isEqualTo("->");
-    assertThat(gradleArguments.otherTokens().get(3)).isEqualTo("<=>");
-    assertThat(gradleArguments.otherTokens().get(4)).isEqualTo("");
-    assertThat(gradleArguments.otherTokens().get(5)).isEqualTo(" ");
+    assertThat(gradleArguments.otherTokens().get(1)).isEqualTo("->");
+    assertThat(gradleArguments.otherTokens().get(2)).isEqualTo("<=>");
+    assertThat(gradleArguments.otherTokens().get(3)).isEqualTo("");
+    assertThat(gradleArguments.otherTokens().get(4)).isEqualTo(" ");
   }
 
   @Test
