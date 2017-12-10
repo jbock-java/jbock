@@ -31,14 +31,5 @@ abstract class CurlArguments {
   abstract boolean include();
 
   @Positional
-  @Description({
-      "@OtherTokens to capture any 'other' tokens in the input.",
-      "In this case, that's any token which doesn't match one of",
-      "/-v/, /-X(=.*)?/, /--request(=.*)?/, or /-H(=.*)?/,",
-      "or follows immediately after the equality-less version",
-      "of one of the latter 3.",
-      "If there were no method with the @OtherTokens annotation,",
-      "such a token would cause an IllegalArgumentException to be",
-      "thrown from the CurlArguments_Parser.parse method."})
   abstract List<String> urls();
 }

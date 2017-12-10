@@ -2,9 +2,28 @@ package net.jbock.examples;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 
 public class CpArgumentsTest {
+
+  @Rule
+  public final ExpectedException exception = ExpectedException.none();
+
+  @Test
+  public void errorMissingSource() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Missing positional parameter: SOURCE");
+    CpArguments_Parser.parse(new String[]{});
+  }
+
+  @Test
+  public void errorMissingDest() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Missing positional parameter: DEST");
+    CpArguments_Parser.parse(new String[]{"a"});
+  }
 
   @Test
   public void minimal() {
@@ -38,5 +57,11 @@ public class CpArgumentsTest {
         .isEqualTo(1);
     assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "--", "e"}).ddTokens().get(0))
         .isEqualTo("e");
+    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "--"}).ddTokens())
+        .isEmpty();
+    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c"}).ddTokens())
+        .isEmpty();
+    assertThat(CpArguments_Parser.parse(new String[]{"a", "b"}).ddTokens())
+        .isEmpty();
   }
 }

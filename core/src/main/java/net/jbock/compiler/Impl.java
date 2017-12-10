@@ -74,6 +74,12 @@ final class Impl {
         .addMethod(implConstructor())
         .addMethod(createMethod)
         .addMethods(bindMethods());
+    if (context.paramTypes.contains(Type.REQUIRED)) {
+      builder.addMethod(option.extractRequiredMethod);
+    }
+    if (context.paramTypes.contains(Type.REQUIRED_INT)) {
+      builder.addMethod(option.extractRequiredIntMethod);
+    }
     if (context.paramTypes.contains(Type.OPTIONAL_INT)) {
       builder.addMethod(option.extractOptionalIntMethod);
     }
@@ -82,6 +88,9 @@ final class Impl {
     }
     if (context.paramTypes.contains(Type.POSITIONAL_OPTIONAL)) {
       builder.addMethod(option.extractPositionalOptionalMethod);
+    }
+    if (context.paramTypes.contains(Type.POSITIONAL_REQUIRED)) {
+      builder.addMethod(option.extractPositionalRequiredMethod);
     }
     if (context.paramTypes.contains(Type.POSITIONAL_LIST_2)) {
       builder.addMethod(option.extractPositionalList2Method);
@@ -110,16 +119,6 @@ final class Impl {
     builder.addParameter(option.ddIndexParameter);
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
-    if (context.paramTypes.contains(Type.REQUIRED) ||
-        context.paramTypes.contains(Type.REQUIRED_INT)) {
-      builder.beginControlFlow("for ($T $N: $T.values())", option.type, optionParam, option.type);
-      builder.beginControlFlow("if ($N.$N.$N && $N.get($N) == null)",
-          optionParam, option.typeField, optionType.isRequiredField, option.sMapParameter, optionParam)
-          .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-              "Missing required option: ", optionParam)
-          .endControlFlow();
-      builder.endControlFlow();
-    }
     builder.addStatement("return new $T($L)", implType, args.build());
     return builder.addModifiers(STATIC)
         .returns(implType)

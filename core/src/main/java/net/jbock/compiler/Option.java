@@ -59,10 +59,13 @@ final class Option {
   final MethodSpec shortNameMapMethod;
   final MethodSpec longNameMapMethod;
 
+  final MethodSpec extractRequiredMethod;
+  final MethodSpec extractRequiredIntMethod;
   final MethodSpec extractOptionalIntMethod;
+  final MethodSpec extractPositionalRequiredMethod;
+  final MethodSpec extractPositionalOptionalMethod;
   final MethodSpec extractPositionalListMethod;
   final MethodSpec extractPositionalList2Method;
-  final MethodSpec extractPositionalOptionalMethod;
 
   // parameters of the static Impl.create method
   final ParameterSpec optMapParameter;
@@ -78,7 +81,10 @@ final class Option {
       Context context,
       ClassName type,
       OptionType optionType,
+      MethodSpec extractRequiredMethod,
+      MethodSpec extractRequiredIntMethod,
       MethodSpec extractOptionalIntMethod,
+      MethodSpec extractPositionalRequiredMethod,
       MethodSpec extractPositionalListMethod,
       MethodSpec extractPositionalOptionalMethod,
       MethodSpec extractPositionalList2Method,
@@ -96,7 +102,10 @@ final class Option {
       ParameterSpec flagsParameter,
       ParameterSpec positionalParameter,
       ParameterSpec ddIndexParameter) {
+    this.extractRequiredMethod = extractRequiredMethod;
+    this.extractRequiredIntMethod = extractRequiredIntMethod;
     this.extractOptionalIntMethod = extractOptionalIntMethod;
+    this.extractPositionalRequiredMethod = extractPositionalRequiredMethod;
     this.extractPositionalListMethod = extractPositionalListMethod;
     this.extractPositionalOptionalMethod = extractPositionalOptionalMethod;
     this.extractPositionalList2Method = extractPositionalList2Method;
@@ -155,6 +164,10 @@ final class Option {
         .build();
     ParameterSpec ddIndexParameter = ParameterSpec.builder(INT, "ddIndex").build();
     MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(type, sMapParameter);
+    MethodSpec extractRequiredMethod = extractRequiredMethod(type, sMapParameter);
+    MethodSpec extractRequiredIntMethod = extractRequiredIntMethod(type, sMapParameter);
+    MethodSpec extractPositionalRequiredMethod = extractPositionalRequiredMethod(
+        type, positionalParameter, ddIndexParameter);
     MethodSpec extractPositionalListMethod = extractPositionalListMethod(
         positionalParameter, ddIndexParameter);
     MethodSpec extractPositionalOptionalMethod = extractPositionalOptionalMethod(
@@ -166,7 +179,10 @@ final class Option {
         context,
         type,
         optionType,
+        extractRequiredMethod,
+        extractRequiredIntMethod,
         extractOptionalIntMethod,
+        extractPositionalRequiredMethod,
         extractPositionalListMethod,
         extractPositionalOptionalMethod,
         extractPositionalList2Method,
@@ -487,6 +503,46 @@ final class Option {
         .build();
   }
 
+  private static MethodSpec extractRequiredMethod(
+      ClassName optionType,
+      ParameterSpec sMapParameter) {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractRequired");
+
+    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapParameter, option);
+
+    builder.beginControlFlow("if ($N == null)", token)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Missing required option: ", option)
+        .endControlFlow();
+
+    builder.addStatement("return $N", token);
+    return builder.addParameters(Arrays.asList(sMapParameter, option))
+        .addModifiers(STATIC)
+        .returns(STRING).build();
+  }
+
+  private static MethodSpec extractRequiredIntMethod(
+      ClassName optionType,
+      ParameterSpec sMapParameter) {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractRequiredInt");
+
+    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapParameter, option);
+
+    builder.beginControlFlow("if ($N == null)", token)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Missing required option: ", option)
+        .endControlFlow();
+
+    builder.addStatement("return $T.parseInt($N)", Integer.class, token);
+    return builder.addParameters(Arrays.asList(sMapParameter, option))
+        .addModifiers(STATIC)
+        .returns(INT).build();
+  }
+
   private static MethodSpec extractOptionalIntMethod(
       ClassName optionType,
       ParameterSpec sMapParameter) {
@@ -506,6 +562,30 @@ final class Option {
     return builder.addParameters(Arrays.asList(sMapParameter, option))
         .addModifiers(STATIC)
         .returns(OptionalInt.class).build();
+  }
+
+  private static MethodSpec extractPositionalRequiredMethod(
+      ClassName type,
+      ParameterSpec positionalParameter,
+      ParameterSpec ddIndexParameter) {
+    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    ParameterSpec outOfBounds = ParameterSpec.builder(INT, "outOfBounds").build();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalRequired");
+
+    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
+        INT, outOfBounds, ddIndexParameter, positionalParameter, ddIndexParameter);
+
+    builder.beginControlFlow("if ($N >= $N)", index, outOfBounds)
+        .addStatement("throw new $T($S + $T.values()[$N].name())", IllegalArgumentException.class,
+            "Missing positional parameter: ", type, index)
+        .endControlFlow();
+
+    builder.addStatement("return $N.get($N)", positionalParameter, index);
+
+    return builder.addModifiers(STATIC)
+        .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter))
+        .returns(STRING).build();
   }
 
   private static MethodSpec extractPositionalOptionalMethod(

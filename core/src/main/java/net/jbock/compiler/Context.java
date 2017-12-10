@@ -99,7 +99,8 @@ final class Context {
         return i;
       }
     }
-    // can only happen if j is not the O-index of a positional param
-    throw new AssertionError();
+    // j is not the Option index of a positional param. This would be a bug.
+    throw new IllegalArgumentException(
+        "Not a positional parameter: " + j);
   }
 }
