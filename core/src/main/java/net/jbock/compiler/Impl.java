@@ -67,15 +67,23 @@ final class Impl {
   }
 
   TypeSpec define() {
-    return TypeSpec.classBuilder(type)
-        .superclass(TypeName.get(context.sourceType.asType()))
+    TypeSpec.Builder builder = TypeSpec.classBuilder(type);
+    builder.superclass(TypeName.get(context.sourceType.asType()))
         .addFields(fields)
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(implConstructor())
         .addMethod(createMethod)
-        .addMethod(option.extractOptionalIntMethod)
-        .addMethods(bindMethods())
-        .build();
+        .addMethods(bindMethods());
+    if (context.paramTypes.contains(Type.OPTIONAL_INT)) {
+      builder.addMethod(option.extractOptionalIntMethod);
+    }
+    if (context.paramTypes.contains(Type.POSITIONAL_LIST)) {
+      builder.addMethod(option.extractPositionalListMethod);
+    }
+    if (context.paramTypes.contains(Type.POSITIONAL_LIST_2)) {
+      builder.addMethod(option.extractPositionalList2Method);
+    }
+    return builder.build();
   }
 
   private static MethodSpec createMethod(

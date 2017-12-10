@@ -99,10 +99,9 @@ enum Type {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
-          "$N.subList($L, $N < 0 ? $N.size() : $N)",
-          option.positionalParameter,
+          "$N($L, $N, $N)",
+          option.extractPositionalListMethod,
           option.context.positionalIndex(j),
-          option.ddIndexParameter,
           option.positionalParameter,
           option.ddIndexParameter)
           .build();
@@ -113,12 +112,11 @@ enum Type {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
-          "$N < 0 ? $T.emptyList() : $N.subList($N, $N.size())",
-          option.ddIndexParameter,
-          Collections.class,
+          "$N($L, $N, $N)",
+          option.extractPositionalList2Method,
+          option.context.positionalIndex(j),
           option.positionalParameter,
-          option.ddIndexParameter,
-          option.positionalParameter)
+          option.ddIndexParameter)
           .build();
     }
   };

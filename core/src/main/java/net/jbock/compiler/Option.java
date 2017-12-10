@@ -46,7 +46,6 @@ final class Option {
   private final FieldSpec descriptionField;
   private final FieldSpec argumentNameField;
 
-
   private final MethodSpec describeNamesMethod;
   private final MethodSpec describeParamMethod;
   private final MethodSpec descriptionBlockMethod;
@@ -60,6 +59,8 @@ final class Option {
   final MethodSpec longNameMapMethod;
 
   final MethodSpec extractOptionalIntMethod;
+  final MethodSpec extractPositionalListMethod;
+  final MethodSpec extractPositionalList2Method;
 
   // parameters of the static Impl.create method
   final ParameterSpec optMapParameter;
@@ -76,6 +77,8 @@ final class Option {
       ClassName type,
       OptionType optionType,
       MethodSpec extractOptionalIntMethod,
+      MethodSpec extractPositionalListMethod,
+      MethodSpec extractPositionalList2Method,
       FieldSpec longNameField,
       FieldSpec shortNameField,
       FieldSpec typeField,
@@ -91,6 +94,8 @@ final class Option {
       ParameterSpec positionalParameter,
       ParameterSpec ddIndexParameter) {
     this.extractOptionalIntMethod = extractOptionalIntMethod;
+    this.extractPositionalListMethod = extractPositionalListMethod;
+    this.extractPositionalList2Method = extractPositionalList2Method;
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
     this.descriptionField = descriptionField;
@@ -146,12 +151,18 @@ final class Option {
         .build();
     ParameterSpec ddIndexParameter = ParameterSpec.builder(INT, "ddIndex").build();
     MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(type, sMapParameter);
+    MethodSpec extractPositionalListMethod = extractPositionalListMethod(
+        positionalParameter, ddIndexParameter);
+    MethodSpec extractPositionalList2Method = extractPositionalList2Method(
+        positionalParameter, ddIndexParameter);
 
     return new Option(
         context,
         type,
         optionType,
         extractOptionalIntMethod,
+        extractPositionalListMethod,
+        extractPositionalList2Method,
         longNameField,
         shortNameField,
         typeField,
@@ -488,5 +499,45 @@ final class Option {
     return builder.addParameters(Arrays.asList(sMapParameter, option))
         .addModifiers(STATIC)
         .returns(OptionalInt.class).build();
+  }
+
+  private static MethodSpec extractPositionalListMethod(
+      ParameterSpec positionalParameter,
+      ParameterSpec ddIndexParameter) {
+    ParameterSpec start = ParameterSpec.builder(INT, "start").build();
+    ParameterSpec end = ParameterSpec.builder(INT, "end").build();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalList");
+
+    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
+        INT, end, ddIndexParameter, positionalParameter, ddIndexParameter);
+
+    builder.addStatement(
+        "return $N.subList($N, $N)",
+        positionalParameter,
+        start,
+        end);
+    return builder.addModifiers(STATIC)
+        .addParameters(Arrays.asList(start, positionalParameter, ddIndexParameter))
+        .returns(LIST_OF_STRING).build();
+  }
+
+  private static MethodSpec extractPositionalList2Method(
+      ParameterSpec positionalParameter,
+      ParameterSpec ddIndexParameter) {
+    ParameterSpec start = ParameterSpec.builder(INT, "start").build();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalList2");
+
+    builder.beginControlFlow("if ($N < 0)", ddIndexParameter)
+        .addStatement("return $T.emptyList()", Collections.class)
+        .endControlFlow();
+
+    builder.addStatement("return $N.subList($N, $N.size())",
+        positionalParameter, start, positionalParameter);
+
+    return builder.addModifiers(STATIC)
+        .addParameters(Arrays.asList(start, positionalParameter, ddIndexParameter))
+        .returns(LIST_OF_STRING).build();
   }
 }

@@ -15,4 +15,7 @@ abstract class CpArguments {
 
   @Positional
   abstract List<String> otherTokens();
+
+  @Positional
+  abstract List<String> ddTokens();
 }
