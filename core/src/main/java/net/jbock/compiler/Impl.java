@@ -80,6 +80,9 @@ final class Impl {
     if (context.paramTypes.contains(Type.POSITIONAL_LIST)) {
       builder.addMethod(option.extractPositionalListMethod);
     }
+    if (context.paramTypes.contains(Type.POSITIONAL_OPTIONAL)) {
+      builder.addMethod(option.extractPositionalOptionalMethod);
+    }
     if (context.paramTypes.contains(Type.POSITIONAL_LIST_2)) {
       builder.addMethod(option.extractPositionalList2Method);
     }

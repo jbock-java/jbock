@@ -8,6 +8,7 @@ import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.snakeCase;
 
@@ -61,6 +62,7 @@ final class Option {
   final MethodSpec extractOptionalIntMethod;
   final MethodSpec extractPositionalListMethod;
   final MethodSpec extractPositionalList2Method;
+  final MethodSpec extractPositionalOptionalMethod;
 
   // parameters of the static Impl.create method
   final ParameterSpec optMapParameter;
@@ -78,6 +80,7 @@ final class Option {
       OptionType optionType,
       MethodSpec extractOptionalIntMethod,
       MethodSpec extractPositionalListMethod,
+      MethodSpec extractPositionalOptionalMethod,
       MethodSpec extractPositionalList2Method,
       FieldSpec longNameField,
       FieldSpec shortNameField,
@@ -95,6 +98,7 @@ final class Option {
       ParameterSpec ddIndexParameter) {
     this.extractOptionalIntMethod = extractOptionalIntMethod;
     this.extractPositionalListMethod = extractPositionalListMethod;
+    this.extractPositionalOptionalMethod = extractPositionalOptionalMethod;
     this.extractPositionalList2Method = extractPositionalList2Method;
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
@@ -153,6 +157,8 @@ final class Option {
     MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(type, sMapParameter);
     MethodSpec extractPositionalListMethod = extractPositionalListMethod(
         positionalParameter, ddIndexParameter);
+    MethodSpec extractPositionalOptionalMethod = extractPositionalOptionalMethod(
+        positionalParameter, ddIndexParameter);
     MethodSpec extractPositionalList2Method = extractPositionalList2Method(
         positionalParameter, ddIndexParameter);
 
@@ -162,6 +168,7 @@ final class Option {
         optionType,
         extractOptionalIntMethod,
         extractPositionalListMethod,
+        extractPositionalOptionalMethod,
         extractPositionalList2Method,
         longNameField,
         shortNameField,
@@ -501,6 +508,29 @@ final class Option {
         .returns(OptionalInt.class).build();
   }
 
+  private static MethodSpec extractPositionalOptionalMethod(
+      ParameterSpec positionalParameter,
+      ParameterSpec ddIndexParameter) {
+    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    ParameterSpec outOfBounds = ParameterSpec.builder(INT, "outOfBounds").build();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalOptional");
+
+    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
+        INT, outOfBounds, ddIndexParameter, positionalParameter, ddIndexParameter);
+
+    builder.beginControlFlow("if ($N >= $N)", index, outOfBounds)
+        .addStatement("return $T.empty()", Optional.class)
+        .endControlFlow();
+
+    builder.addStatement("return $T.of($N.get($N))",
+        Optional.class, positionalParameter, index);
+
+    return builder.addModifiers(STATIC)
+        .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter))
+        .returns(OPTIONAL_STRING).build();
+  }
+
   private static MethodSpec extractPositionalListMethod(
       ParameterSpec positionalParameter,
       ParameterSpec ddIndexParameter) {
@@ -509,8 +539,16 @@ final class Option {
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalList");
 
+    builder.beginControlFlow("if ($N >= $N.size())", start, positionalParameter)
+        .addStatement("return $T.emptyList()", Collections.class)
+        .endControlFlow();
+
     builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
         INT, end, ddIndexParameter, positionalParameter, ddIndexParameter);
+
+    builder.beginControlFlow("if ($N >= $N)", start, end)
+        .addStatement("return $T.emptyList()", Collections.class)
+        .endControlFlow();
 
     builder.addStatement(
         "return $N.subList($N, $N)",
@@ -525,7 +563,6 @@ final class Option {
   private static MethodSpec extractPositionalList2Method(
       ParameterSpec positionalParameter,
       ParameterSpec ddIndexParameter) {
-    ParameterSpec start = ParameterSpec.builder(INT, "start").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalList2");
 
@@ -534,10 +571,10 @@ final class Option {
         .endControlFlow();
 
     builder.addStatement("return $N.subList($N, $N.size())",
-        positionalParameter, start, positionalParameter);
+        positionalParameter, ddIndexParameter, positionalParameter);
 
     return builder.addModifiers(STATIC)
-        .addParameters(Arrays.asList(start, positionalParameter, ddIndexParameter))
+        .addParameters(Arrays.asList(ddIndexParameter, positionalParameter))
         .returns(LIST_OF_STRING).build();
   }
 }
