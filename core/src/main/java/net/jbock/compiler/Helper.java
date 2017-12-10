@@ -575,7 +575,7 @@ final class Helper {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("looksLikeLong");
 
-    builder.beginControlFlow("if ($N.length() <= 1)", token)
+    builder.beginControlFlow("if ($N.length() < 2)", token)
         .addStatement("return $L", false)
         .endControlFlow();
 
@@ -603,7 +603,7 @@ final class Helper {
 
     builder.addStatement("$T $N = $N", token.type, token, originalToken);
 
-    builder.beginControlFlow("if ($N.length() <= 2)", token)
+    builder.beginControlFlow("if ($N.length() < 3 )", token)
         .addStatement("return $L", false)
         .endControlFlow();
 

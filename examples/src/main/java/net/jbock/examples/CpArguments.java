@@ -1,5 +1,6 @@
 package net.jbock.examples;
 
+import java.util.List;
 import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
 
@@ -11,4 +12,7 @@ abstract class CpArguments {
 
   @Positional
   abstract String dest();
+
+  @Positional
+  abstract List<String> otherTokens();
 }

@@ -24,13 +24,13 @@ final class OptionType {
 
   private final Context context;
 
-  final FieldSpec isSpecialField;
+  final FieldSpec isPositionalField;
   final FieldSpec isBindingField;
   final FieldSpec isRequiredField;
 
   private OptionType(Context context) {
     this.context = context;
-    this.isSpecialField = FieldSpec.builder(BOOLEAN, "positional", PRIVATE, FINAL)
+    this.isPositionalField = FieldSpec.builder(BOOLEAN, "positional", PRIVATE, FINAL)
         .build();
     this.isBindingField = FieldSpec.builder(BOOLEAN, "binding", PRIVATE, FINAL)
         .build();
@@ -49,7 +49,7 @@ final class OptionType {
       addType(builder, optionType);
     }
     return builder.addModifiers(PUBLIC)
-        .addField(isSpecialField)
+        .addField(isPositionalField)
         .addField(isBindingField)
         .addField(isRequiredField)
         .addMethod(privateConstructor())
@@ -65,10 +65,10 @@ final class OptionType {
 
   private MethodSpec privateConstructor() {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
-    ParameterSpec special = ParameterSpec.builder(BOOLEAN, isSpecialField.name).build();
+    ParameterSpec special = ParameterSpec.builder(BOOLEAN, isPositionalField.name).build();
     ParameterSpec binding = ParameterSpec.builder(BOOLEAN, isBindingField.name).build();
     ParameterSpec required = ParameterSpec.builder(BOOLEAN, isRequiredField.name).build();
-    builder.addStatement("this.$N = $N", isSpecialField, special);
+    builder.addStatement("this.$N = $N", isPositionalField, special);
     builder.addStatement("this.$N = $N", isBindingField, binding);
     builder.addStatement("this.$N = $N", isRequiredField, required);
     return builder.addParameters(Arrays.asList(special, binding, required)).build();

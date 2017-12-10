@@ -34,6 +34,9 @@ abstract class GradleArguments {
   @Positional
   abstract List<String> otherTokens();
 
+  @Positional
+  abstract List<String> ddTokens();
+
   @CommandLineArguments
   static abstract class Foo {
     abstract Optional<String> bar();

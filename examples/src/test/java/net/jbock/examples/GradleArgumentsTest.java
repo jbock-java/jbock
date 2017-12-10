@@ -133,12 +133,13 @@ public final class GradleArgumentsTest {
     GradleArguments gradleArguments = GradleArguments_Parser.parse(
         new String[]{"--message=hello", "-", "--", "->", "<=>", "", " "});
     assertThat(gradleArguments.message()).isEqualTo(Optional.of("hello"));
-    assertThat(gradleArguments.otherTokens().size()).isEqualTo(5);
+    assertThat(gradleArguments.otherTokens().size()).isEqualTo(1);
     assertThat(gradleArguments.otherTokens().get(0)).isEqualTo("-");
-    assertThat(gradleArguments.otherTokens().get(1)).isEqualTo("->");
-    assertThat(gradleArguments.otherTokens().get(2)).isEqualTo("<=>");
-    assertThat(gradleArguments.otherTokens().get(3)).isEqualTo("");
-    assertThat(gradleArguments.otherTokens().get(4)).isEqualTo(" ");
+    assertThat(gradleArguments.ddTokens().size()).isEqualTo(4);
+    assertThat(gradleArguments.ddTokens().get(0)).isEqualTo("->");
+    assertThat(gradleArguments.ddTokens().get(1)).isEqualTo("<=>");
+    assertThat(gradleArguments.ddTokens().get(2)).isEqualTo("");
+    assertThat(gradleArguments.ddTokens().get(3)).isEqualTo(" ");
   }
 
   @Test
@@ -263,11 +264,11 @@ public final class GradleArgumentsTest {
     assertThat(Option.VERBOSE.shortName()).isEqualTo(Optional.of('v'));
     assertThat(Option.OTHER_TOKENS.isSpecial()).isTrue();
     assertThat(Option.OTHER_TOKENS.isBinding()).isFalse();
-    assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.POSITIONAL);
+    assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.POSITIONAL_LIST);
     assertThat(Option.OTHER_TOKENS.longName()).isEmpty();
     assertThat(Option.OTHER_TOKENS.shortName()).isEmpty();
     Option[] options = Option.values();
-    assertThat(options.length).isEqualTo(6);
+    assertThat(options.length).isEqualTo(7);
   }
 
   @Test

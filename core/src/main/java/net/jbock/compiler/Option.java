@@ -9,7 +9,6 @@ import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Type.POSITIONAL_LIST;
 import static net.jbock.compiler.Util.snakeCase;
 
 import java.util.ArrayList;
@@ -341,7 +340,7 @@ final class Option {
       OptionType optionType,
       FieldSpec optionTypeField) {
     return MethodSpec.methodBuilder("isSpecial")
-        .addStatement("return $N.$N", optionTypeField, optionType.isSpecialField)
+        .addStatement("return $N.$N", optionTypeField, optionType.isPositionalField)
         .returns(BOOLEAN)
         .addModifiers(PUBLIC)
         .build();
@@ -432,8 +431,8 @@ final class Option {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
-    if (context.otherTokens) {
-      builder.beginControlFlow("if ($N == $T.$L)", optionTypeField, optionType.type, POSITIONAL_LIST)
+    if (!context.positionalParameters.isEmpty()) {
+      builder.beginControlFlow("if ($N.$N)", optionTypeField, optionType.isPositionalField)
           .addStatement("return $S", "(positional arguments)")
           .endControlFlow();
     }

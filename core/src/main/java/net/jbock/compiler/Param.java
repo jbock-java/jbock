@@ -156,14 +156,18 @@ final class Param {
       return Type.POSITIONAL_LIST;
     }
     if (isString(sourceMethod.getReturnType())) {
-      return Type.REQUIRED_POSITIONAL;
+      return Type.POSITIONAL_REQUIRED;
     }
     if (isOptionalString(sourceMethod.getReturnType())) {
-      return Type.OPTIONAL_POSITIONAL;
+      return Type.POSITIONAL_OPTIONAL;
     }
     throw new ValidationException(sourceMethod,
         "A method that carries the " + cause.annotationType().getSimpleName() +
-            " annotation must return String, Optional<String> or List<String>");
+            " annotation must return one of " + Arrays.stream(Type.values())
+            .filter(t -> t.positional)
+            .map(t -> t.returnType)
+            .map(TypeName::toString)
+            .collect(Collectors.toSet()));
   }
 
   private static boolean isListOfString(TypeMirror type) {

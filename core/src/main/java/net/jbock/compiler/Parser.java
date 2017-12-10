@@ -90,7 +90,7 @@ final class Parser {
     }
 
     builder.add("\n");
-    if (context.otherTokens) {
+    if (!context.positionalParameters.isEmpty()) {
       builder.addStatement("$T $N = new $T<>()",
           option.positionalParameter.type, option.positionalParameter, ArrayList.class);
     } else {
@@ -130,7 +130,7 @@ final class Parser {
           .endControlFlow();
 
       builder.beginControlFlow("if (!$N)", tokenRead);
-      if (context.otherTokens) {
+      if (!context.positionalParameters.isEmpty()) {
         builder.addStatement("$N.add($N)", option.positionalParameter, firstToken);
       } else {
         builder.addStatement("throw new $T($S + $N)",
@@ -164,7 +164,7 @@ final class Parser {
         tokenRead.type, tokenRead, helper, this.helper.readMethod, freeToken, it);
 
     builder.beginControlFlow("if (!$N)", tokenRead);
-    if (context.otherTokens) {
+    if (!context.positionalParameters.isEmpty()) {
       builder.addStatement("$N.add($N)", option.positionalParameter, freeToken);
     } else {
       builder.addStatement("throw new $T($S + $N)",

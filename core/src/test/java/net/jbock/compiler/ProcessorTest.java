@@ -119,13 +119,14 @@ public class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Positional abstract String a();",
+        "  @Positional abstract StringBuilder a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The method that carries the Positional annotation must return List<String>");
+        .withErrorContaining("must return one of [java.util.List<java.lang.String>, " +
+            "java.lang.String, java.util.Optional<java.lang.String>]");
   }
 
   @Test

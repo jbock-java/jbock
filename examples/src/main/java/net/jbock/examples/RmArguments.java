@@ -5,7 +5,7 @@ import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
 import net.jbock.ShortName;
 
-@CommandLineArguments(allowGrouping = true)
+@CommandLineArguments
 abstract class RmArguments {
 
   @ShortName('r')
@@ -16,4 +16,7 @@ abstract class RmArguments {
 
   @Positional
   abstract List<String> otherTokens();
+
+  @Positional
+  abstract List<String> ddTokens();
 }

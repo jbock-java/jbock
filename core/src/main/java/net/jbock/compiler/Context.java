@@ -26,9 +26,6 @@ final class Context {
   // the stopword is either "--" or null
   final boolean stopword;
 
-  // true if one method has the Positional annotation
-  final boolean otherTokens;
-
   // true if upper-casing the method names would cause a naming conflict
   final boolean problematicOptionNames;
 
@@ -44,7 +41,6 @@ final class Context {
       List<Param> parameters,
       List<Param> positionalParameters,
       boolean stopword,
-      boolean otherTokens,
       boolean problematicOptionNames,
       boolean grouping,
       Set<Type> paramTypes) {
@@ -53,7 +49,6 @@ final class Context {
     this.parameters = parameters;
     this.positionalParameters = positionalParameters;
     this.stopword = stopword;
-    this.otherTokens = otherTokens;
     this.problematicOptionNames = problematicOptionNames;
     this.grouping = grouping;
     this.paramTypes = paramTypes;
@@ -66,10 +61,7 @@ final class Context {
       boolean grouping) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean problematicOptionNames = problematicOptionNames(parameters);
-    boolean otherTokens = paramTypes.contains(Type.POSITIONAL_LIST);
-    boolean stopword = parameters.stream()
-        .filter(param -> param.paramType == Type.POSITIONAL_LIST)
-        .count() >= 2;
+    boolean stopword = paramTypes.contains(Type.POSITIONAL_LIST_2);
     List<Param> positionalParameters = parameters.stream().filter(p -> p.paramType.positional).collect(toList());
     return new Context(
         sourceType,
@@ -77,7 +69,6 @@ final class Context {
         parameters,
         positionalParameters,
         stopword,
-        otherTokens,
         problematicOptionNames,
         grouping,
         paramTypes);
@@ -98,7 +89,7 @@ final class Context {
 
   /**
    * @param j must be the Option index of a positional param
-   * @return the positional index of the param that's specified by {@code j}.
+   * @return the index in the list of all positional parameters, of the param that's specified by {@code j}.
    */
   int positionalIndex(int j) {
     Param param = parameters.get(j);

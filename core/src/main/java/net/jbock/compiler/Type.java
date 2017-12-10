@@ -78,7 +78,7 @@ enum Type {
     }
   },
 
-  OPTIONAL_POSITIONAL(OPTIONAL_STRING, true, false, false) {
+  POSITIONAL_OPTIONAL(OPTIONAL_STRING, true, false, false) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -86,11 +86,12 @@ enum Type {
     }
   },
 
-  REQUIRED_POSITIONAL(STRING, true, false, false) {
+  POSITIONAL_REQUIRED(STRING, true, false, false) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
-          "$N", option.positionalParameter).build();
+          "$N.get($L)", option.positionalParameter, option.context.positionalIndex(j))
+          .build();
     }
   },
 
@@ -98,7 +99,13 @@ enum Type {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
-          "$N", option.positionalParameter).build();
+          "$N.subList($L, $N < 0 ? $N.size() : $N)",
+          option.positionalParameter,
+          option.context.positionalIndex(j),
+          option.ddIndexParameter,
+          option.positionalParameter,
+          option.ddIndexParameter)
+          .build();
     }
   },
 
@@ -106,7 +113,13 @@ enum Type {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
-          "$N", option.positionalParameter).build();
+          "$N < 0 ? $T.emptyList() : $N.subList($N, $N.size())",
+          option.ddIndexParameter,
+          Collections.class,
+          option.positionalParameter,
+          option.ddIndexParameter,
+          option.positionalParameter)
+          .build();
     }
   };
 
