@@ -7,7 +7,6 @@ import net.jbock.Description;
 import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
-import net.jbock.SuppressLongName;
 
 @CommandLineArguments(allowGrouping = true)
 abstract class CurlArguments {
@@ -18,12 +17,12 @@ abstract class CurlArguments {
   abstract Optional<String> method();
 
   @ShortName('H')
-  @SuppressLongName
+  @LongName("")
   @Description("List<String> for repeatable arguments")
   abstract List<String> headers();
 
   @ShortName('v')
-  @SuppressLongName
+  @LongName("")
   @Description("boolean for flags")
   abstract boolean verbose();
 

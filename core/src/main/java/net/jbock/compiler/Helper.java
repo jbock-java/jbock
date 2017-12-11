@@ -316,8 +316,8 @@ final class Helper {
     builder.add("\n");
 
     builder.beginControlFlow("if ($N == null)", option)
-        .addStatement("throw new $T($S + $N + $S)", IllegalArgumentException.class,
-            "Invalid option: '", token, "'")
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Invalid option: ", token)
         .endControlFlow();
 
     builder.addStatement("return $N", option);
@@ -332,7 +332,6 @@ final class Helper {
   private static MethodSpec readOptionFromGroupMethod(
       FieldSpec shortNamesField,
       ClassName optionClass) {
-    ParameterSpec firstToken = ParameterSpec.builder(STRING, "firstToken").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec optionParam = ParameterSpec.builder(optionClass, "option").build();
     CodeBlock.Builder builder = CodeBlock.builder();
@@ -341,14 +340,14 @@ final class Helper {
         optionParam.type, optionParam, shortNamesField, Character.class, token);
 
     builder.beginControlFlow("if ($N == null)", optionParam)
-        .addStatement("throw new $T($S +\n$N + $S + $N.charAt(0) + $S)", IllegalArgumentException.class,
-            "Invalid token in option group '", firstToken, "': '", token, "'")
+        .addStatement("throw new $T($S + $N.charAt(0))", IllegalArgumentException.class,
+            "Invalid option: ", token)
         .endControlFlow();
 
     builder.addStatement("return $N", optionParam);
 
     return MethodSpec.methodBuilder("readOptionFromGroup")
-        .addParameters(asList(token, firstToken))
+        .addParameters(asList(token))
         .returns(optionClass)
         .addCode(builder.build())
         .build();
@@ -374,8 +373,8 @@ final class Helper {
         .endControlFlow();
 
     builder.beginControlFlow("if ($N == null)", option)
-        .addStatement("throw new $T($S + $N + $S)", IllegalArgumentException.class,
-            "Invalid option: '", token, "'")
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Invalid option: ", token)
         .endControlFlow();
 
     builder.addStatement("return $N", option);
@@ -409,26 +408,24 @@ final class Helper {
       MethodSpec chopMethod,
       MethodSpec addFlagMethod) {
 
-    ParameterSpec firstToken = ParameterSpec.builder(STRING, "firstToken").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("readGroup");
-    builder.addStatement("$T $N = $N($N)", STRING, token, stripMethod, firstToken);
+    builder.addStatement("$N = $N($N)", token, stripMethod, token);
     builder.beginControlFlow("while(!$N.isEmpty())", token)
-        .addStatement("$T $N = $N($N, $N)",
-            optionParam.type, optionParam, readOptionFromGroupMethod, token, firstToken);
+        .addStatement("$T $N = $N($N)",
+            optionParam.type, optionParam, readOptionFromGroupMethod, token);
     builder.beginControlFlow("if ($N.type != $T.$L)", optionParam, option.optionType.type, Type.FLAG)
-        .addStatement("throw new $T($S +\n$N + $S + $N.$N + $S)", IllegalArgumentException.class,
-            "Invalid token in option group '", firstToken, "': '",
-            optionParam, option.shortNameField, "'")
+        .addStatement("throw new $T($S + $N.charAt(0))", IllegalArgumentException.class,
+            "Invalid option: ", token)
         .endControlFlow();
 
     builder.addStatement("$N($N)", addFlagMethod, optionParam)
         .addStatement("$N = $N($N)", token, chopMethod, token)
         .endControlFlow();
 
-    return builder.addParameter(firstToken).build();
+    return builder.addParameter(token).build();
   }
 
   private static MethodSpec readMethod(

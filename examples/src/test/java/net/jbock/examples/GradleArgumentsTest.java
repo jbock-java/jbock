@@ -61,42 +61,42 @@ public final class GradleArgumentsTest {
   @Test
   public void errorFlagWithTrailingGarbage() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-c1': '1'");
+    exception.expectMessage("Invalid option: 1");
     GradleArguments_Parser.parse(new String[]{"-c1"});
   }
 
   @Test
   public void errorWeirdOptionGroupEmbeddedHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-c-v': '-'");
+    exception.expectMessage("Invalid option: -");
     GradleArguments_Parser.parse(new String[]{"-c-v"});
   }
 
   @Test
   public void errorWeirdOptionGroupTrailingHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-c-': '-'");
+    exception.expectMessage("Invalid option: -");
     GradleArguments_Parser.parse(new String[]{"-c-"});
   }
 
   @Test
   public void errorWeirdOptionGroupEmbeddedEquals() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-c=v': '='");
+    exception.expectMessage("Invalid option: =");
     GradleArguments_Parser.parse(new String[]{"-c=v"});
   }
 
   @Test
   public void errorWeirdOptionGroupTrailingEquals() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-c=': '='");
+    exception.expectMessage("Invalid option: =");
     GradleArguments_Parser.parse(new String[]{"-c="});
   }
 
   @Test
   public void errorWeirdOptionGroupAttemptToPassMethod() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-cX=1': 'X'");
+    exception.expectMessage("Invalid option: X");
     GradleArguments_Parser.parse(new String[]{"-cX=1"});
   }
 
@@ -110,14 +110,14 @@ public final class GradleArgumentsTest {
   @Test
   public void errorInvalidOptionGroupUnknownToken() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-cvx': 'x'");
+    exception.expectMessage("Invalid option: x");
     GradleArguments_Parser.parse(new String[]{"-cvx"});
   }
 
   @Test
   public void errorInvalidOptionGroupMissingToken() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-cvm': 'm'");
+    exception.expectMessage("Invalid option: m");
     GradleArguments_Parser.parse(new String[]{"-cvm"});
   }
 
@@ -192,7 +192,7 @@ public final class GradleArgumentsTest {
   public void testLongSuppressed() {
     // Long option --cmos is suppressed
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: '--cmos'");
+    exception.expectMessage("Invalid option: --cmos");
     GradleArguments_Parser.parse(new String[]{"--cmos"});
   }
 
@@ -230,7 +230,7 @@ public final class GradleArgumentsTest {
   @Test
   public void errorDoubleFlagWithAttachedOption() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-cvm': 'm'");
+    exception.expectMessage("Invalid option: m");
     GradleArguments_Parser.parse(new String[]{"-cvm", "hello"});
   }
 

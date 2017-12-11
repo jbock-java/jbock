@@ -163,7 +163,7 @@ public class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @SuppressLongName abstract String a();",
+        "  @LongName(\"\") abstract String a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -225,7 +225,6 @@ public class ProcessorTest {
         "import net.jbock.Positional;",
         "import net.jbock.LongName;",
         "import net.jbock.ShortName;",
-        "import net.jbock.SuppressLongName;",
         "import net.jbock.Description;",
         ""));
     Collections.addAll(result, strings);

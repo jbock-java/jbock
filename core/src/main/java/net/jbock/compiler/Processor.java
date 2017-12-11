@@ -34,7 +34,6 @@ import net.jbock.Description;
 import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
-import net.jbock.SuppressLongName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.JavaFile;
 import net.jbock.com.squareup.javapoet.TypeSpec;
@@ -50,8 +49,7 @@ public final class Processor extends AbstractProcessor {
         Description.class,
         LongName.class,
         Positional.class,
-        ShortName.class,
-        SuppressLongName.class)
+        ShortName.class)
         .map(Class::getName)
         .collect(toSet());
   }
@@ -239,7 +237,6 @@ public final class Processor extends AbstractProcessor {
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(LongName.class)));
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(Positional.class)));
     methods.addAll(methodsIn(env.getElementsAnnotatedWith(ShortName.class)));
-    methods.addAll(methodsIn(env.getElementsAnnotatedWith(SuppressLongName.class)));
     for (ExecutableElement method : methods) {
       Element enclosingElement = method.getEnclosingElement();
       if (enclosingElement.getAnnotation(CommandLineArguments.class) == null) {

@@ -23,7 +23,6 @@ import net.jbock.Description;
 import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
-import net.jbock.SuppressLongName;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 /**
@@ -94,7 +93,7 @@ final class Param {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
 
     if (positional != null) {
-      return createOtherTokens(sourceMethod, index);
+      return createPositional(sourceMethod, index);
     }
     String longName = longName(sourceMethod);
     String shortName = shortName(sourceMethod);
@@ -137,15 +136,12 @@ final class Param {
 
   private static String longName(ExecutableElement sourceMethod) {
     LongName longName = sourceMethod.getAnnotation(LongName.class);
-    if (sourceMethod.getAnnotation(SuppressLongName.class) != null) {
-      if (longName != null) {
-        throw new ValidationException(sourceMethod,
-            "LongName and SuppressLongName cannot be combined");
-      }
-      return null;
-    }
     if (longName == null) {
       return sourceMethod.getSimpleName().toString();
+    }
+    if (longName.value().isEmpty()) {
+      // an empty string indicates that no long name should be defined
+      return null;
     }
     return longName.value();
   }
@@ -251,13 +247,12 @@ final class Param {
     }
   }
 
-  private static Param createOtherTokens(ExecutableElement sourceMethod, int index) {
+  private static Param createPositional(ExecutableElement sourceMethod, int index) {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
     Type type = checkOptionalType(sourceMethod, positional);
     checkNotPresent(sourceMethod,
         positional,
         Arrays.asList(
-            SuppressLongName.class,
             ShortName.class,
             LongName.class));
     return new Param(

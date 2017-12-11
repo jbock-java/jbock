@@ -98,14 +98,14 @@ public class CurlArgumentsTest {
   @Test
   public void errorInvalidGrouping() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-vH1': 'H'");
+    exception.expectMessage("Invalid option: H");
     CurlArguments_Parser.parse(new String[]{"-vH1"});
   }
 
   @Test
   public void errorInvalidGroupingLong() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-vXPOST': 'X'");
+    exception.expectMessage("Invalid option: X");
     CurlArguments_Parser.parse(new String[]{"-vXPOST"});
   }
 

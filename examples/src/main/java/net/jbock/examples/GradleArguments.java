@@ -5,9 +5,9 @@ import java.util.List;
 import java.util.Optional;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
+import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
-import net.jbock.SuppressLongName;
 
 @CommandLineArguments(allowGrouping = true)
 abstract class GradleArguments {
@@ -24,7 +24,7 @@ abstract class GradleArguments {
   abstract Optional<String> dir();
 
   @ShortName('c')
-  @SuppressLongName
+  @LongName("")
   @Description("cmos flag")
   abstract boolean cmos();
 

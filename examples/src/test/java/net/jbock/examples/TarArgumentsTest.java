@@ -31,7 +31,7 @@ public class TarArgumentsTest {
   @Test
   public void errorGroupIsNotTheFirstTokenHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid token in option group '-xf': 'f'");
+    exception.expectMessage("Invalid option: f");
     TarArguments_Parser.parse(new String[]{"-v", "-xf", "foo.tar"});
   }
 }
