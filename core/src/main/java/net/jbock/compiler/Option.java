@@ -504,10 +504,10 @@ final class Option {
   }
 
   private static MethodSpec extractRequiredMethod(
-      ClassName optionType,
+      ClassName type,
       ParameterSpec sMapParameter) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
+    ParameterSpec option = ParameterSpec.builder(type, "option").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractRequired");
 
@@ -524,10 +524,10 @@ final class Option {
   }
 
   private static MethodSpec extractRequiredIntMethod(
-      ClassName optionType,
+      ClassName type,
       ParameterSpec sMapParameter) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
+    ParameterSpec option = ParameterSpec.builder(type, "option").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractRequiredInt");
 
@@ -544,10 +544,10 @@ final class Option {
   }
 
   private static MethodSpec extractOptionalIntMethod(
-      ClassName optionType,
+      ClassName type,
       ParameterSpec sMapParameter) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
+    ParameterSpec option = ParameterSpec.builder(type, "option").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractOptionalInt");
 
@@ -568,23 +568,24 @@ final class Option {
       ClassName type,
       ParameterSpec positionalParameter,
       ParameterSpec ddIndexParameter) {
+    ParameterSpec option = ParameterSpec.builder(type, "option").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec outOfBounds = ParameterSpec.builder(INT, "outOfBounds").build();
+    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalRequired");
 
     builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, outOfBounds, ddIndexParameter, positionalParameter, ddIndexParameter);
+        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
 
-    builder.beginControlFlow("if ($N >= $N)", index, outOfBounds)
-        .addStatement("throw new $T($S + $T.values()[$N].name())", IllegalArgumentException.class,
-            "Missing positional parameter: ", type, index)
+    builder.beginControlFlow("if ($N >= $N)", index, size)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Missing positional parameter: ", option)
         .endControlFlow();
 
     builder.addStatement("return $N.get($N)", positionalParameter, index);
 
     return builder.addModifiers(STATIC)
-        .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter))
+        .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, option))
         .returns(STRING).build();
   }
 

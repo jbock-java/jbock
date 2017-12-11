@@ -1,25 +1,18 @@
 package net.jbock.examples;
 
-import java.util.List;
-import java.util.Optional;
 import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
+import net.jbock.ShortName;
 
 @CommandLineArguments
 abstract class CpArguments {
+
+  @ShortName('r')
+  abstract boolean recursive();
 
   @Positional
   abstract String source();
 
   @Positional
   abstract String dest();
-
-  @Positional
-  abstract Optional<String> optString();
-
-  @Positional
-  abstract List<String> otherTokens();
-
-  @Positional
-  abstract List<String> ddTokens();
 }

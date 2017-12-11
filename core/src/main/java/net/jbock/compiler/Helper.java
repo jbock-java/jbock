@@ -306,11 +306,6 @@ final class Helper {
         .addStatement("return $N($N)", readLongMethod, token)
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N.length() < 2 || $N.charAt(0) != '-')", token, token)
-        .addStatement("return null")
-        .endControlFlow();
-
-    builder.add("\n");
     builder.addStatement("$T $N = $N.get($T.toString($N.charAt(1)))", option.type, option,
         shortNamesField, Character.class, token);
     builder.add("\n");
@@ -448,17 +443,11 @@ final class Helper {
 
     builder.addStatement("$T $N = $N($N)", option.type, option, readRegularOptionMethod, token);
 
-    // unknown token
-    builder.beginControlFlow("if ($N == null)", option)
-        .add("// unknown token\n")
-        .addStatement("return $L", false)
-        .endControlFlow();
-
     if (context.paramTypes.contains(Type.FLAG)) {
       builder.add("\n");
       builder.beginControlFlow("if ($N.$N == $T.$L)", option, optionType, optionTypeClass, Type.FLAG)
           .addStatement("$N($N)", addFlagMethod, option)
-          .addStatement("return $L", true)
+          .addStatement("return")
           .endControlFlow();
     }
 
@@ -467,12 +456,9 @@ final class Helper {
 
     builder.addStatement("$N($N, $N, $N)", addMethod, option, token, argument);
 
-    builder.addStatement("return $L", true);
-
     return MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it))
         .addCode(builder.build())
-        .returns(BOOLEAN)
         .build();
   }
 
@@ -568,12 +554,7 @@ final class Helper {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("looksLikeLong");
 
-    builder.beginControlFlow("if ($N.length() < 2)", token)
-        .addStatement("return $L", false)
-        .endControlFlow();
-
-    builder.addStatement("return $N.charAt(0) == '-' && $N.charAt(1) == '-'",
-        token, token);
+    builder.addStatement("return $N.charAt(1) == '-'", token);
 
     return builder.addParameter(token)
         .addModifiers(STATIC)

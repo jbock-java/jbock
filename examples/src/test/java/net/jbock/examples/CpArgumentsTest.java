@@ -34,34 +34,16 @@ public class CpArgumentsTest {
   }
 
   @Test
-  public void otherTokens() {
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "d"}).otherTokens().size())
-        .isEqualTo(1);
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "d"}).otherTokens().get(0))
-        .isEqualTo("d");
+  public void tooMany() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Excess option: c");
+    CpArguments_Parser.parse(new String[]{"a", "b", "c"});
   }
 
   @Test
-  public void ddTokens() {
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "d", "--", "e"}).otherTokens().size())
-        .isEqualTo(1);
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "d", "--", "e"}).otherTokens().get(0))
-        .isEqualTo("d");
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "d", "--", "e"}).ddTokens().size())
-        .isEqualTo(1);
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "d", "--", "e"}).ddTokens().get(0))
-        .isEqualTo("e");
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "--", "e"}).otherTokens())
-        .isEmpty();
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "--", "e"}).ddTokens().size())
-        .isEqualTo(1);
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "--", "e"}).ddTokens().get(0))
-        .isEqualTo("e");
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c", "--"}).ddTokens())
-        .isEmpty();
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "c"}).ddTokens())
-        .isEmpty();
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b"}).ddTokens())
-        .isEmpty();
+  public void tooManyAndFlag() {
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Excess option: c");
+    CpArguments_Parser.parse(new String[]{"-r", "a", "b", "c"});
   }
 }

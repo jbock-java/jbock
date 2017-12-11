@@ -50,7 +50,7 @@ final class Parser {
         context.sourceType.getSimpleName() + "Impl");
     OptionType optionType = OptionType.create(context);
     Option option = Option.create(context, optionType);
-    Impl impl = Impl.create(context, implType, optionType, option);
+    Impl impl = Impl.create(context, implType, option);
     Helper helper = Helper.create(context, impl, optionType, option);
     return new Parser(context, optionType, option, helper, impl);
   }
@@ -74,10 +74,9 @@ final class Parser {
     ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec stopword = ParameterSpec.builder(STRING, "stopword").build();
-    ParameterSpec tokenRead = ParameterSpec.builder(BOOLEAN, "tokenRead").build();
     ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
         .build();
-    ParameterSpec freeToken = ParameterSpec.builder(STRING, "freeToken").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
 
     CodeBlock.Builder builder = CodeBlock.builder();
 
@@ -104,10 +103,10 @@ final class Parser {
     builder.add("\n");
     builder.beginControlFlow("while ($N.hasNext())", it);
 
-    builder.addStatement("$T $N = $N.next()", STRING, freeToken, it);
+    builder.addStatement("$T $N = $N.next()", STRING, token, it);
 
     if (context.stopword) {
-      builder.beginControlFlow("if ($N.equals($N))", freeToken, stopword)
+      builder.beginControlFlow("if ($N.equals($N))", token, stopword)
           .addStatement("$N = $N.size()", option.ddIndexParameter, option.positionalParameter)
           .addStatement("$N.forEachRemaining($N::add)", it, option.positionalParameter)
           .addStatement("return $N.$N($N, $N)",
@@ -115,25 +114,27 @@ final class Parser {
           .endControlFlow();
     }
 
+
+    // handle positional token
+    builder.beginControlFlow("if ($N.length() <= 1 || $N.charAt(0) != '-')", token, token);
+    if (!context.positionalParameters.isEmpty()) {
+      builder.addStatement("$N.add($N)", option.positionalParameter, token);
+    } else {
+      builder.addStatement("throw new $T($S + $N)",
+          IllegalArgumentException.class, "Unknown token: ", token);
+    }
+    builder.endControlFlow();
+
     if (context.grouping) {
-      builder.beginControlFlow("if ($N.$N($N))", helper, this.helper.looksLikeGroupMethod, freeToken)
+      builder.beginControlFlow("else if ($N.$N($N))", helper, this.helper.looksLikeGroupMethod, token)
           .addStatement("$N.$N($N)",
-              helper, this.helper.readGroupMethod, freeToken)
-          .addStatement("continue")
+              helper, this.helper.readGroupMethod, token)
           .endControlFlow();
     }
 
-    builder.addStatement("$T $N = $N.$N($N, $N)",
-        tokenRead.type, tokenRead, helper, this.helper.readMethod, freeToken, it);
-
-    builder.beginControlFlow("if (!$N)", tokenRead);
-    if (!context.positionalParameters.isEmpty()) {
-      builder.addStatement("$N.add($N)", option.positionalParameter, freeToken);
-    } else {
-      builder.addStatement("throw new $T($S + $N)",
-          IllegalArgumentException.class, "Unknown token: ", freeToken);
-    }
-    builder.endControlFlow();
+    builder.beginControlFlow("else")
+        .addStatement("$N.$N($N, $N)", helper, this.helper.readMethod, token, it)
+        .endControlFlow();
 
     // End parsing loop
     builder.endControlFlow();

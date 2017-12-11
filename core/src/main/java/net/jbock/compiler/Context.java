@@ -103,4 +103,18 @@ final class Context {
     throw new IllegalArgumentException(
         "Not a positional parameter: " + j);
   }
+
+  int maxPositional() {
+    if (paramTypes.contains(Type.POSITIONAL_LIST)) {
+      return -1;
+    }
+    int count = 0;
+    for (Param parameter : parameters) {
+      if (parameter.paramType.positional &&
+          parameter.paramType != Type.POSITIONAL_LIST_2) {
+        count++;
+      }
+    }
+    return count;
+  }
 }

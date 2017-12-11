@@ -4,6 +4,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.com.squareup.javapoet.TypeName.INT;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +49,6 @@ final class Impl {
   static Impl create(
       Context context,
       ClassName implType,
-      OptionType optionType,
       Option option) {
     List<FieldSpec> fields = new ArrayList<>(context.parameters.size());
     for (int j = 0; j < context.parameters.size(); j++) {
@@ -57,7 +57,7 @@ final class Impl {
           .addModifiers(PRIVATE, FINAL)
           .build());
     }
-    MethodSpec createMethod = createMethod(context, implType, option, optionType);
+    MethodSpec createMethod = createMethod(context, implType, option);
     return new Impl(
         implType,
         createMethod,
@@ -101,8 +101,7 @@ final class Impl {
   private static MethodSpec createMethod(
       Context context,
       ClassName implType,
-      Option option,
-      OptionType optionType) {
+      Option option) {
     CodeBlock.Builder args = CodeBlock.builder().add("\n    ");
     for (int j = 0; j < context.parameters.size(); j++) {
       Param param = context.parameters.get(j);
@@ -112,12 +111,28 @@ final class Impl {
       }
     }
     MethodSpec.Builder builder = MethodSpec.methodBuilder("create");
+
+    ParameterSpec last = ParameterSpec.builder(INT, "size").build();
+    ParameterSpec max = ParameterSpec.builder(INT, "max").build();
+
+    int maxPositional = context.maxPositional();
+    if (maxPositional >= 0) {
+      builder.addStatement("$T $N = $L",
+          INT, max, maxPositional);
+      builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
+          INT, last, option.ddIndexParameter, option.positionalParameter, option.ddIndexParameter);
+
+      builder.beginControlFlow("if ($N > $N)", last, max)
+          .addStatement("throw new $T($S + $N.get($N))", IllegalArgumentException.class,
+              "Excess option: ", option.positionalParameter, max)
+          .endControlFlow();
+    }
+
     builder.addParameter(option.optMapParameter);
     builder.addParameter(option.sMapParameter);
     builder.addParameter(option.flagsParameter);
     builder.addParameter(option.positionalParameter);
     builder.addParameter(option.ddIndexParameter);
-    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
     builder.addStatement("return new $T($L)", implType, args.build());
     return builder.addModifiers(STATIC)

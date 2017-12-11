@@ -42,7 +42,8 @@ enum Type {
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
           "$N($N, $T.$L)",
-          option.extractOptionalIntMethod, option.sMapParameter,
+          option.extractOptionalIntMethod,
+          option.sMapParameter,
           option.type, option.enumConstant(j))
           .build();
     }
@@ -84,11 +85,12 @@ enum Type {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
-          "$N($L, $N, $N)",
+          "$N($L, $N, $N, $T.$L)",
           option.extractPositionalRequiredMethod,
           option.context.positionalIndex(j),
           option.positionalParameter,
-          option.ddIndexParameter)
+          option.ddIndexParameter,
+          option.type, option.enumConstant(j))
           .build();
     }
   },
