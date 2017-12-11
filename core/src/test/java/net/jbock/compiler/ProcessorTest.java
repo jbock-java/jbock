@@ -213,20 +213,6 @@ public class ProcessorTest {
         .withWarningContaining("Skipping");
   }
 
-  @Test
-  public void warningOnlyOneFlag() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments(allowGrouping = true)",
-        "abstract class InvalidArguments {",
-        "  abstract String foo();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError()
-        .withWarningContaining("less than two flags");
-  }
-
   private List<String> withImports(String... strings) {
     List<String> result = new ArrayList<>(strings.length + 13);
     result.addAll(Arrays.asList(

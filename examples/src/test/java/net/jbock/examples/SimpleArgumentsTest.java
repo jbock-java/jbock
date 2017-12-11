@@ -19,7 +19,7 @@ public class SimpleArgumentsTest {
   @Test
   public void noGroupingFirstArgumentHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Unknown token: -xf");
+    exception.expectMessage("Invalid token in option group '-xf': 'f'");
     SimpleArguments_Parser.parse(new String[]{"-xf", "1"});
   }
 }

@@ -135,7 +135,7 @@ final class Helper {
     FieldSpec flagsField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
         option.type), "flags", FINAL).build();
     MethodSpec buildMethod = buildMethod(option, impl, optMapField, sMapField, flagsField);
-    MethodSpec addFlagMethod = addFlagMethod(context, option, optionType.type, flagsField);
+    MethodSpec addFlagMethod = addFlagMethod(option, flagsField);
     MethodSpec addMethod = addArgumentMethod(
         context,
         option.type,
@@ -146,10 +146,7 @@ final class Helper {
         longNamesField, option.type);
 
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(
-        context,
         shortNamesField,
-        option.typeField,
-        optionType.type,
         option.type,
         readLongMethod,
         looksLikeLongMethod);
@@ -241,9 +238,7 @@ final class Helper {
   }
 
   private static MethodSpec addFlagMethod(
-      Context context,
       Option option,
-      ClassName optionTypeClass,
       FieldSpec flags) {
     MethodSpec.Builder builder = MethodSpec.methodBuilder("addFlag");
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
@@ -299,10 +294,7 @@ final class Helper {
   }
 
   private static MethodSpec readRegularOptionMethod(
-      Context context,
       FieldSpec shortNamesField,
-      FieldSpec optionTypeField,
-      ClassName optionTypeType,
       ClassName optionType,
       MethodSpec readLongMethod,
       MethodSpec looksLikeLongMethod) {
@@ -324,16 +316,9 @@ final class Helper {
     builder.add("\n");
 
     builder.beginControlFlow("if ($N == null)", option)
-        .addStatement("return null")
+        .addStatement("throw new $T($S + $N + $S)", IllegalArgumentException.class,
+            "Invalid option: '", token, "'")
         .endControlFlow();
-
-    if (context.paramTypes.contains(Type.FLAG)) {
-      builder.beginControlFlow("if ($N.$N == $T.$L && $N.length() >= 3)", option, optionTypeField,
-          optionTypeType, Type.FLAG, token)
-          .add("// flags cannot have an argument attached\n")
-          .addStatement("return null", option)
-          .endControlFlow();
-    }
 
     builder.addStatement("return $N", option);
 
@@ -374,15 +359,26 @@ final class Helper {
       ClassName optionClass) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    ParameterSpec option = ParameterSpec.builder(INT, "option").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
+    builder.addStatement("$T $N", optionClass, option);
 
     builder.beginControlFlow("if ($N < 0)", index)
-        .addStatement("return $N.get($N.substring(2))", longNamesField, token)
+        .addStatement("$N = $N.get($N.substring(2))", option, longNamesField, token)
         .endControlFlow();
 
-    builder.addStatement("return $N.get($N.substring(2, $N))", longNamesField, token, index);
+    builder.beginControlFlow("else")
+        .addStatement("$N = $N.get($N.substring(2, $N))", option, longNamesField, token, index)
+        .endControlFlow();
+
+    builder.beginControlFlow("if ($N == null)", option)
+        .addStatement("throw new $T($S + $N + $S)", IllegalArgumentException.class,
+            "Invalid option: '", token, "'")
+        .endControlFlow();
+
+    builder.addStatement("return $N", option);
 
     return MethodSpec.methodBuilder("readLong")
         .addParameter(token)
@@ -656,19 +652,6 @@ final class Helper {
         .add("throw new $T($S +\n$N + $S + $N + $S)",
             IllegalArgumentException.class,
             "Found token: ", token, ", but option ", option, " is not repeatable")
-        .build();
-  }
-
-  private static CodeBlock throwRepetitionErrorInGroup(
-      Option option,
-      ParameterSpec optionParam,
-      ParameterSpec originalToken) {
-    return CodeBlock.builder()
-        .add("throw new $T($S +\n$N + $S + $N.$N + $S)",
-            IllegalArgumentException.class,
-            "In option group '",
-            originalToken, "': option '",
-            optionParam, option.shortNameField, "' is not repeatable")
         .build();
   }
 }

@@ -191,10 +191,9 @@ public final class GradleArgumentsTest {
   @Test
   public void testLongSuppressed() {
     // Long option --cmos is suppressed
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(new String[]{"--cmos"});
-    assertThat(gradleArguments.cmos()).isEqualTo(false);
-    assertThat(gradleArguments.otherTokens().size()).isEqualTo(1);
-    assertThat(gradleArguments.otherTokens().get(0)).isEqualTo("--cmos");
+    exception.expect(IllegalArgumentException.class);
+    exception.expectMessage("Invalid option: '--cmos'");
+    GradleArguments_Parser.parse(new String[]{"--cmos"});
   }
 
   @Test

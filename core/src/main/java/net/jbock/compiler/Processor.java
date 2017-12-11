@@ -76,15 +76,7 @@ public final class Processor extends AbstractProcessor {
           continue;
         }
         Set<Type> paramTypes = paramTypes(parameters);
-        long numFlags = parameters.stream()
-            .filter(p -> p.paramType == Type.FLAG)
-            .count();
-        boolean groupingRequested = sourceType.getAnnotation(CommandLineArguments.class).allowGrouping();
-        boolean grouping = groupingRequested && numFlags >= 2;
-        if (groupingRequested && !grouping) {
-          processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
-              "Grouping requested, but less than two flags defined", sourceType);
-        }
+        boolean grouping = paramTypes.contains(Type.FLAG);
         Context context = Context.create(sourceType, parameters, paramTypes, grouping);
         if (!done.add(asType(sourceType).getQualifiedName().toString())) {
           continue;
