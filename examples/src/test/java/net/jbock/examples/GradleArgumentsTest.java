@@ -1,13 +1,8 @@
 package net.jbock.examples;
 
-import static net.jbock.examples.GradleArguments_Parser.OptionType.FLAG;
-import static net.jbock.examples.GradleArguments_Parser.OptionType.OPTIONAL;
-import static net.jbock.examples.GradleArguments_Parser.OptionType.REPEATABLE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 import java.util.Optional;
-import net.jbock.examples.GradleArguments_Parser.Option;
-import net.jbock.examples.GradleArguments_Parser.OptionType;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -20,7 +15,7 @@ public final class GradleArgumentsTest {
   @Test
   public void errorShortLongConflict() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: --message=goodbye, but option MESSAGE (-m, --message) is not repeatable");
+    exception.expectMessage("Option MESSAGE (-m, --message) is not repeatable");
     GradleArguments_Parser.parse(new String[]{"-m", "hello", "--message=goodbye"});
   }
 
@@ -35,14 +30,14 @@ public final class GradleArgumentsTest {
   @Test
   public void errorLongShortConflict() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: -m, but option MESSAGE (-m, --message) is not repeatable");
+    exception.expectMessage("Option MESSAGE (-m, --message) is not repeatable");
     GradleArguments_Parser.parse(new String[]{"--message=hello", "-m", "goodbye"});
   }
 
   @Test
   public void errorLongLongConflict() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: --message=goodbye, but option MESSAGE (-m, --message) is not repeatable");
+    exception.expectMessage("Option MESSAGE (-m, --message) is not repeatable");
     GradleArguments_Parser.parse(new String[]{"--message=hello", "--message=goodbye"});
   }
 
@@ -235,76 +230,8 @@ public final class GradleArgumentsTest {
   }
 
   @Test
-  public void testOptions() {
-    assertThat(Option.MESSAGE.isPositional()).isFalse();
-    assertThat(Option.MESSAGE.type()).isEqualTo(OPTIONAL);
-    assertThat(Option.MESSAGE.longName()).isEqualTo(Optional.of("message"));
-    assertThat(Option.MESSAGE.shortName()).isEqualTo(Optional.of('m'));
-    assertThat(Option.CMOS.isPositional()).isFalse();
-    assertThat(Option.CMOS.type()).isEqualTo(FLAG);
-    assertThat(Option.CMOS.longName()).isEmpty();
-    assertThat(Option.CMOS.shortName()).isEqualTo(Optional.of('c'));
-    assertThat(Option.DIR.isPositional()).isFalse();
-    assertThat(Option.DIR.type()).isEqualTo(OPTIONAL);
-    assertThat(Option.DIR.longName()).isEqualTo(Optional.of("dir"));
-    assertThat(Option.DIR.shortName()).isEmpty();
-    assertThat(Option.FILE.isPositional()).isFalse();
-    assertThat(Option.FILE.type()).isEqualTo(REPEATABLE);
-    assertThat(Option.FILE.longName()).isEqualTo(Optional.of("file"));
-    assertThat(Option.FILE.shortName()).isEqualTo(Optional.of('f'));
-    assertThat(Option.VERBOSE.isPositional()).isFalse();
-    assertThat(Option.VERBOSE.type()).isEqualTo(FLAG);
-    assertThat(Option.VERBOSE.longName()).isEqualTo(Optional.of("verbose"));
-    assertThat(Option.VERBOSE.shortName()).isEqualTo(Optional.of('v'));
-    assertThat(Option.OTHER_TOKENS.isPositional()).isTrue();
-    assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.POSITIONAL_LIST);
-    assertThat(Option.OTHER_TOKENS.longName()).isEmpty();
-    assertThat(Option.OTHER_TOKENS.shortName()).isEmpty();
-    Option[] options = Option.values();
-    assertThat(options.length).isEqualTo(7);
-  }
-
-  @Test
-  public void testMessageOption() {
-    assertThat(Option.MESSAGE.description().size()).isEqualTo(2);
-    assertThat(Option.MESSAGE.description().get(0)).isEqualTo("the message");
-    assertThat(Option.MESSAGE.description().get(1)).isEqualTo("message goes here");
-    assertThat(Option.MESSAGE.descriptionArgumentName()).isEqualTo(Optional.of("MESSAGE"));
-  }
-
-  @Test
-  public void testCmosOption() {
-    assertThat(Option.CMOS.description().size()).isEqualTo(1);
-    assertThat(Option.CMOS.description().get(0)).isEqualTo("cmos flag");
-    assertThat(Option.CMOS.descriptionArgumentName()).isEmpty();
-  }
-
-  @Test
-  public void testOtherTokensOption() {
-    assertThat(Option.OTHER_TOKENS.description().size()).isEqualTo(1);
-    assertThat(Option.OTHER_TOKENS.description().get(0)).isEqualTo("--- description goes here ---");
-    assertThat(Option.OTHER_TOKENS.descriptionArgumentName()).isEmpty();
-  }
-
-  @Test
   public void testParserForNestedClass() {
     GradleArguments.Foo foo = GradleArguments_Foo_Parser.parse(new String[]{"--bar=4"});
     assertThat(foo.bar()).isEqualTo(Optional.of("4"));
-  }
-
-  @Test
-  public void testPrint() {
-    assertThat(Option.MESSAGE.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"-m, --message MESSAGE", "  the message", "  message goes here"});
-    assertThat(Option.FILE.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"-f, --file FILE", "  the files"});
-    assertThat(Option.DIR.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"--dir DIR", "  the dir"});
-    assertThat(Option.CMOS.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"-c", "  cmos flag"});
-    assertThat(Option.VERBOSE.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"-v, --verbose", "  --- description goes here ---"});
-    assertThat(Option.OTHER_TOKENS.describe(2).split("\n", -1))
-        .isEqualTo(new String[]{"(positional arguments)", "  --- description goes here ---"});
   }
 }

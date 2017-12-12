@@ -4,7 +4,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
@@ -76,8 +75,6 @@ final class Option {
   final ParameterSpec positionalParameter;
   final ParameterSpec ddIndexParameter;
 
-  private final MethodSpec isPositionalMethod;
-
   private Option(
       Context context,
       ClassName type,
@@ -98,7 +95,6 @@ final class Option {
       FieldSpec argumentNameField,
       MethodSpec shortNameMapMethod,
       MethodSpec longNameMapMethod,
-      MethodSpec isPositionalMethod,
       ParameterSpec optMapParameter,
       ParameterSpec sMapParameter,
       ParameterSpec flagsParameter,
@@ -123,7 +119,6 @@ final class Option {
     this.optionType = optionType;
     this.typeField = typeField;
     this.longNameMapMethod = longNameMapMethod;
-    this.isPositionalMethod = isPositionalMethod;
     this.optMapParameter = optMapParameter;
     this.sMapParameter = sMapParameter;
     this.flagsParameter = flagsParameter;
@@ -145,18 +140,17 @@ final class Option {
   }
 
   static Option create(Context context, OptionType optionType) {
-    FieldSpec typeField = FieldSpec.builder(optionType.type, "type", PRIVATE, FINAL).build();
-    FieldSpec longNameField = FieldSpec.builder(STRING, "longName", PRIVATE, FINAL).build();
+    FieldSpec typeField = FieldSpec.builder(optionType.type, "type", FINAL).build();
+    FieldSpec longNameField = FieldSpec.builder(STRING, "longName", FINAL).build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
-        "shortName", PRIVATE, FINAL).build();
-    MethodSpec isPositionalMethod = isPositionalMethod(optionType, typeField);
+        "shortName", FINAL).build();
     ClassName type = context.generatedClass.nestedClass("Option");
     MethodSpec shortNameMapMethod = shortNameMapMethod(type, shortNameField);
     MethodSpec longNameMapMethod = longNameMapMethod(type, longNameField);
     FieldSpec descriptionField = FieldSpec.builder(
-        LIST_OF_STRING, "description", PRIVATE, FINAL).build();
+        LIST_OF_STRING, "description", FINAL).build();
     FieldSpec argumentNameField = FieldSpec.builder(
-        STRING, "descriptionArgumentName", PRIVATE, FINAL).build();
+        STRING, "descriptionArgumentName", FINAL).build();
     ParameterSpec optMapParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         type, LIST_OF_STRING), "optMap").build();
     ParameterSpec sMapParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
@@ -202,7 +196,6 @@ final class Option {
         argumentNameField,
         shortNameMapMethod,
         longNameMapMethod,
-        isPositionalMethod,
         optMapParameter,
         sMapParameter,
         flagsParameter,
@@ -237,19 +230,13 @@ final class Option {
       builder.addEnumConstant(enumConstant, anonymousClassBuilder(format,
           args.toArray()).build());
     }
-    return builder.addModifiers(PUBLIC)
+    return builder.addModifiers(PRIVATE)
         .addFields(Arrays.asList(longNameField, shortNameField, typeField, argumentNameField, descriptionField))
         .addMethod(describeMethod())
         .addMethod(toStringMethod())
         .addMethod(describeNamesMethod)
         .addMethod(describeParamMethod)
         .addMethod(descriptionBlockMethod)
-        .addMethod(shortNameMethod(shortNameField))
-        .addMethod(longNameMethod(longNameField))
-        .addMethod(descriptionMethod())
-        .addMethod(descriptionArgumentNameMethod(argumentNameField))
-        .addMethod(typeMethod())
-        .addMethod(isPositionalMethod)
         .addMethod(privateConstructor())
         .addMethod(shortNameMapMethod)
         .addMethod(longNameMapMethod)
@@ -274,14 +261,6 @@ final class Option {
     builder.addParameters(Arrays.asList(
         longName, shortName, optionType, argumentName, description));
     return builder.build();
-  }
-
-  private static MethodSpec shortNameMethod(FieldSpec shortNameField) {
-    return MethodSpec.methodBuilder(shortNameField.name)
-        .addStatement("return $T.ofNullable($N)", Optional.class, shortNameField)
-        .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), TypeName.get(Character.class)))
-        .addModifiers(PUBLIC)
-        .build();
   }
 
   private static MethodSpec shortNameMapMethod(
@@ -311,7 +290,7 @@ final class Option {
     return MethodSpec.methodBuilder("shortNameMap")
         .addCode(builder.build())
         .returns(shortNames.type)
-        .addModifiers(PRIVATE, STATIC)
+        .addModifiers(STATIC)
         .build();
   }
 
@@ -342,49 +321,7 @@ final class Option {
     return MethodSpec.methodBuilder("longNameMap")
         .addCode(builder.build())
         .returns(longNames.type)
-        .addModifiers(PRIVATE, STATIC)
-        .build();
-  }
-
-  private static MethodSpec longNameMethod(FieldSpec longNameField) {
-    return MethodSpec.methodBuilder(longNameField.name)
-        .addStatement("return $T.ofNullable($N)", Optional.class, longNameField)
-        .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), STRING))
-        .addModifiers(PUBLIC)
-        .build();
-  }
-
-  private MethodSpec descriptionMethod() {
-    return MethodSpec.methodBuilder(descriptionField.name)
-        .addStatement("return $N", descriptionField)
-        .returns(descriptionField.type)
-        .addModifiers(PUBLIC)
-        .build();
-  }
-
-  private static MethodSpec descriptionArgumentNameMethod(FieldSpec argumentNameField) {
-    return MethodSpec.methodBuilder(argumentNameField.name)
-        .addStatement("return $T.ofNullable($N)", Optional.class, argumentNameField)
-        .returns(ParameterizedTypeName.get(ClassName.get(Optional.class), STRING))
-        .addModifiers(PUBLIC)
-        .build();
-  }
-
-  private MethodSpec typeMethod() {
-    return MethodSpec.methodBuilder(typeField.name)
-        .addStatement("return $N", typeField)
-        .returns(typeField.type)
-        .addModifiers(PUBLIC)
-        .build();
-  }
-
-  private static MethodSpec isPositionalMethod(
-      OptionType optionType,
-      FieldSpec optionTypeField) {
-    return MethodSpec.methodBuilder("isPositional")
-        .addStatement("return $N.$N", optionTypeField, optionType.isPositionalField)
-        .returns(BOOLEAN)
-        .addModifiers(PUBLIC)
+        .addModifiers(STATIC)
         .build();
   }
 
@@ -412,7 +349,6 @@ final class Option {
         .endControlFlow();
     builder.addStatement("return $N.toString()", joiner);
     return MethodSpec.methodBuilder("descriptionBlock")
-        .addModifiers(PUBLIC)
         .addParameter(indent)
         .returns(STRING)
         .addCode(builder.build())
@@ -430,7 +366,6 @@ final class Option {
         .addStatement("return $N.toString()", sb)
         .build();
     return MethodSpec.methodBuilder("describe")
-        .addModifiers(PUBLIC)
         .returns(STRING)
         .addParameter(indent)
         .addCode(codeBlock)
@@ -456,7 +391,6 @@ final class Option {
         .endControlFlow();
     builder.addStatement("return $N() + ' ' + $N", describeParamMethod, argumentNameField);
     return MethodSpec.methodBuilder("describeNames")
-        .addModifiers(PUBLIC)
         .returns(STRING)
         .addCode(builder.build())
         .build();
@@ -494,7 +428,6 @@ final class Option {
     builder.addStatement("return $N.toString()", sb);
 
     return MethodSpec.methodBuilder("describeParam")
-        .addModifiers(PRIVATE)
         .returns(STRING)
         .addCode(builder.build())
         .build();
@@ -503,9 +436,9 @@ final class Option {
   private MethodSpec toStringMethod() {
     return MethodSpec.methodBuilder("toString")
         .addAnnotation(Override.class)
-        .addModifiers(PUBLIC)
         .returns(STRING)
         .addStatement("return name() + $S + $N() + $S", " (", describeParamMethod, ")")
+        .addModifiers(PUBLIC)
         .build();
   }
 

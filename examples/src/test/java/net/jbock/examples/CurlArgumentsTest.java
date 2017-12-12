@@ -133,28 +133,28 @@ public class CurlArgumentsTest {
   @Test
   public void errorDuplicateNonRepeatableLong() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: --request, but option METHOD (-X, --request) is not repeatable");
+    exception.expectMessage("Option METHOD (-X, --request) is not repeatable");
     CurlArguments_Parser.parse(new String[]{"--request", "GET", "--request", "POST"});
   }
 
   @Test
   public void errorDuplicateNonRepeatableShort() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: -X2, but option METHOD (-X, --request) is not repeatable");
+    exception.expectMessage("Option METHOD (-X, --request) is not repeatable");
     CurlArguments_Parser.parse(new String[]{"-X1", "-X2"});
   }
 
   @Test
   public void errorDuplicateNonRepeatableLongDetachedShortAttached() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: -X2, but option METHOD (-X, --request) is not repeatable");
+    exception.expectMessage("Option METHOD (-X, --request) is not repeatable");
     CurlArguments_Parser.parse(new String[]{"--request", "1", "-X2"});
   }
 
   @Test
   public void errorDuplicateNonRepeatableLongAttachedShortDetached() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Found token: -X, but option METHOD (-X, --request) is not repeatable");
+    exception.expectMessage("Option METHOD (-X, --request) is not repeatable");
     CurlArguments_Parser.parse(new String[]{"--request=1", "-X", "2"});
   }
 

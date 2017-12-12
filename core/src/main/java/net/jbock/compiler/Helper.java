@@ -281,7 +281,7 @@ final class Helper {
     }
 
     builder.beginControlFlow("if ($N.containsKey($N))", sMap, option)
-        .addStatement(repetitionError(option, token))
+        .addStatement(repetitionError(option))
         .endControlFlow();
 
     builder.addStatement("$N.put($N, $N)", sMap, option, argument);
@@ -624,12 +624,11 @@ final class Helper {
   }
 
   private static CodeBlock repetitionError(
-      ParameterSpec option,
-      ParameterSpec token) {
+      ParameterSpec option) {
     return CodeBlock.builder()
-        .add("throw new $T($S +\n$N + $S + $N + $S)",
+        .add("throw new $T($S +$N + $S)",
             IllegalArgumentException.class,
-            "Found token: ", token, ", but option ", option, " is not repeatable")
+            "Option ", option, " is not repeatable")
         .build();
   }
 }
