@@ -23,26 +23,12 @@ public @interface CommandLineArguments {
 
   /**
    * <p>
-   *   True, if an attempt should be made to read the first token as an option group.
-   * </p>
-   *
-   * <p>
-   *   All tokens in the option group must be flags in their short form.
-   *   Binding arguments may not appear in the option group, not even in the last position.
-   * </p>
-   *
-   * <p>
-   *   The first flag in the group must be preceded with a hyphen.
-   *   It is not permissible to omit this leading hyphen.
-   * </p>
-   *
-   * <p>
-   *   For example, in {@code tar xzf foobar.tgz}, the first token {@code xzf}
-   *   would be an option group, consisting of three flags {@code x}, {@code z}
-   *   and {@code f}. Note that {@code f} must be a flag, too.
-   *   Therefore, {@code foobar.tgz} is a positional argument,
-   *   not an argument bound to {@code f}.
+   *   {@code true} if unknown tokens should be read as positional arguments (if any are declared),
+   *   even if they start with the hyphen character.
+   * </p><p>
+   *   If {@code false}, an unknown token that starts with a hyphen
+   *   (and is not bound to an option name) will raise an {@link IllegalArgumentException}.
    * </p>
    */
-  boolean allowGrouping() default false;
+  boolean ignoreDashes() default false;
 }
