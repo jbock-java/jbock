@@ -83,16 +83,22 @@ final class Impl {
     if (context.paramTypes.contains(Type.OPTIONAL_INT)) {
       builder.addMethod(option.extractOptionalIntMethod);
     }
-    if (context.paramTypes.contains(Type.POSITIONAL_LIST)) {
+    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_LIST)) {
       builder.addMethod(option.extractPositionalListMethod);
     }
-    if (context.paramTypes.contains(Type.POSITIONAL_OPTIONAL)) {
+    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_OPTIONAL)) {
       builder.addMethod(option.extractPositionalOptionalMethod);
     }
-    if (context.paramTypes.contains(Type.POSITIONAL_REQUIRED)) {
+    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_OPTIONAL_INT)) {
+      builder.addMethod(option.extractPositionalOptionalIntMethod);
+    }
+    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_REQUIRED)) {
       builder.addMethod(option.extractPositionalRequiredMethod);
     }
-    if (context.paramTypes.contains(Type.POSITIONAL_LIST_2)) {
+    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_REQUIRED_INT)) {
+      builder.addMethod(option.extractPositionalRequiredIntMethod);
+    }
+    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_LIST_2)) {
       builder.addMethod(option.extractPositionalList2Method);
     }
     return builder.build();
@@ -105,7 +111,7 @@ final class Impl {
     CodeBlock.Builder args = CodeBlock.builder().add("\n    ");
     for (int j = 0; j < context.parameters.size(); j++) {
       Param param = context.parameters.get(j);
-      args.add(param.paramType.extractExpression(option, j));
+      args.add(param.extractExpression(option, j));
       if (j < context.parameters.size() - 1) {
         args.add(",\n    ");
       }

@@ -6,7 +6,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 
-import java.util.Arrays;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
@@ -25,16 +24,10 @@ final class OptionType {
   private final Context context;
 
   final FieldSpec isPositionalField;
-  final FieldSpec isBindingField;
-  final FieldSpec isRequiredField;
 
   private OptionType(Context context) {
     this.context = context;
     this.isPositionalField = FieldSpec.builder(BOOLEAN, "positional", PRIVATE, FINAL)
-        .build();
-    this.isBindingField = FieldSpec.builder(BOOLEAN, "binding", PRIVATE, FINAL)
-        .build();
-    this.isRequiredField = FieldSpec.builder(BOOLEAN, "required", PRIVATE, FINAL)
         .build();
     this.type = context.generatedClass.nestedClass("OptionType");
   }
@@ -48,29 +41,29 @@ final class OptionType {
     for (Type optionType : context.paramTypes) {
       addType(builder, optionType);
     }
+    for (PositionalType optionType : context.positionalParamTypes) {
+      addType(builder, optionType);
+    }
     return builder.addModifiers(PUBLIC)
         .addField(isPositionalField)
-        .addField(isBindingField)
-        .addField(isRequiredField)
         .addMethod(privateConstructor())
         .build();
   }
 
   private void addType(TypeSpec.Builder builder, Type optionType) {
     builder.addEnumConstant(optionType.name(),
-        anonymousClassBuilder("$L, $L, $L",
-            optionType.positional, optionType.binding, optionType.required)
-            .build());
+        anonymousClassBuilder("$L", false).build());
+  }
+
+  private void addType(TypeSpec.Builder builder, PositionalType optionType) {
+    builder.addEnumConstant(optionType.name(),
+        anonymousClassBuilder("$L", true).build());
   }
 
   private MethodSpec privateConstructor() {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
-    ParameterSpec special = ParameterSpec.builder(BOOLEAN, isPositionalField.name).build();
-    ParameterSpec binding = ParameterSpec.builder(BOOLEAN, isBindingField.name).build();
-    ParameterSpec required = ParameterSpec.builder(BOOLEAN, isRequiredField.name).build();
-    builder.addStatement("this.$N = $N", isPositionalField, special);
-    builder.addStatement("this.$N = $N", isBindingField, binding);
-    builder.addStatement("this.$N = $N", isRequiredField, required);
-    return builder.addParameters(Arrays.asList(special, binding, required)).build();
+    ParameterSpec positional = ParameterSpec.builder(BOOLEAN, isPositionalField.name).build();
+    builder.addStatement("this.$N = $N", isPositionalField, positional);
+    return builder.addParameter(positional).build();
   }
 }

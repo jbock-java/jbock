@@ -17,10 +17,10 @@ final class Context {
   // the *_Parser class that will be generated
   final ClassName generatedClass;
 
-  // corresponds to the abstract methods of the source type (in source order)
+  // corresponds to _all_ abstract methods of the source type (in source order, inheritance not considered)
   final List<Param> parameters;
 
-  // corresponds to the methods that have the Positional annotation (in source order)
+  // only the methods that have the Positional annotation (in source order, inheritance not considered)
   final List<Param> positionalParameters;
 
   // the stopword is either "--" or null
@@ -32,8 +32,11 @@ final class Context {
   // true if option grouping is allowed in the first argument
   final boolean grouping;
 
-  // a set of all the param types in the sourceType
+  // a set of only the non-positional param types in the sourceType
   final Set<Type> paramTypes;
+
+  // a set of only the positional param types in the sourceType
+  final Set<PositionalType> positionalParamTypes;
 
   private Context(
       TypeElement sourceType,
@@ -43,7 +46,8 @@ final class Context {
       boolean stopword,
       boolean problematicOptionNames,
       boolean grouping,
-      Set<Type> paramTypes) {
+      Set<Type> paramTypes,
+      Set<PositionalType> positionalParamTypes) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -52,17 +56,19 @@ final class Context {
     this.problematicOptionNames = problematicOptionNames;
     this.grouping = grouping;
     this.paramTypes = paramTypes;
+    this.positionalParamTypes = positionalParamTypes;
   }
 
   static Context create(
       TypeElement sourceType,
       List<Param> parameters,
       Set<Type> paramTypes,
+      Set<PositionalType> positionalParamTypes,
       boolean grouping) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean problematicOptionNames = problematicOptionNames(parameters);
-    boolean stopword = paramTypes.contains(Type.POSITIONAL_LIST_2);
-    List<Param> positionalParameters = parameters.stream().filter(p -> p.paramType.positional).collect(toList());
+    boolean stopword = positionalParamTypes.contains(PositionalType.POSITIONAL_LIST_2);
+    List<Param> positionalParameters = parameters.stream().filter(p -> p.positionalType != null).collect(toList());
     return new Context(
         sourceType,
         generatedClass,
@@ -71,7 +77,8 @@ final class Context {
         stopword,
         problematicOptionNames,
         grouping,
-        paramTypes);
+        paramTypes,
+        positionalParamTypes);
   }
 
   private static boolean problematicOptionNames(List<Param> parameters) {
@@ -99,19 +106,26 @@ final class Context {
         return i;
       }
     }
-    // j is not the Option index of a positional param. This would be a bug.
+    // j is not the Option index of a positional param.
+    // Calling this method with such an argument is not allowed.
     throw new IllegalArgumentException(
         "Not a positional parameter: " + j);
   }
 
+  /**
+   * Determine how many positional arguments the user can specify at most,
+   * before doubledash.
+   *
+   * @return the maximum number of positional arguments,
+   *     or {@code -1} if there is no limit
+   */
   int maxPositional() {
-    if (paramTypes.contains(Type.POSITIONAL_LIST)) {
+    if (positionalParamTypes.contains(PositionalType.POSITIONAL_LIST)) {
       return -1;
     }
     int count = 0;
-    for (Param parameter : parameters) {
-      if (parameter.paramType.positional &&
-          parameter.paramType != Type.POSITIONAL_LIST_2) {
+    for (Param parameter : positionalParameters) {
+      if (parameter.positionalType != PositionalType.POSITIONAL_LIST_2) {
         count++;
       }
     }

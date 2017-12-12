@@ -236,33 +236,27 @@ public final class GradleArgumentsTest {
 
   @Test
   public void testOptions() {
-    assertThat(Option.MESSAGE.isSpecial()).isFalse();
-    assertThat(Option.MESSAGE.isBinding()).isTrue();
+    assertThat(Option.MESSAGE.isPositional()).isFalse();
     assertThat(Option.MESSAGE.type()).isEqualTo(OPTIONAL);
     assertThat(Option.MESSAGE.longName()).isEqualTo(Optional.of("message"));
     assertThat(Option.MESSAGE.shortName()).isEqualTo(Optional.of('m'));
-    assertThat(Option.CMOS.isSpecial()).isFalse();
-    assertThat(Option.CMOS.isBinding()).isFalse();
+    assertThat(Option.CMOS.isPositional()).isFalse();
     assertThat(Option.CMOS.type()).isEqualTo(FLAG);
     assertThat(Option.CMOS.longName()).isEmpty();
     assertThat(Option.CMOS.shortName()).isEqualTo(Optional.of('c'));
-    assertThat(Option.DIR.isSpecial()).isFalse();
-    assertThat(Option.DIR.isBinding()).isTrue();
+    assertThat(Option.DIR.isPositional()).isFalse();
     assertThat(Option.DIR.type()).isEqualTo(OPTIONAL);
     assertThat(Option.DIR.longName()).isEqualTo(Optional.of("dir"));
     assertThat(Option.DIR.shortName()).isEmpty();
-    assertThat(Option.FILE.isSpecial()).isFalse();
-    assertThat(Option.FILE.isBinding()).isTrue();
+    assertThat(Option.FILE.isPositional()).isFalse();
     assertThat(Option.FILE.type()).isEqualTo(REPEATABLE);
     assertThat(Option.FILE.longName()).isEqualTo(Optional.of("file"));
     assertThat(Option.FILE.shortName()).isEqualTo(Optional.of('f'));
-    assertThat(Option.VERBOSE.isSpecial()).isFalse();
-    assertThat(Option.VERBOSE.isBinding()).isFalse();
+    assertThat(Option.VERBOSE.isPositional()).isFalse();
     assertThat(Option.VERBOSE.type()).isEqualTo(FLAG);
     assertThat(Option.VERBOSE.longName()).isEqualTo(Optional.of("verbose"));
     assertThat(Option.VERBOSE.shortName()).isEqualTo(Optional.of('v'));
-    assertThat(Option.OTHER_TOKENS.isSpecial()).isTrue();
-    assertThat(Option.OTHER_TOKENS.isBinding()).isFalse();
+    assertThat(Option.OTHER_TOKENS.isPositional()).isTrue();
     assertThat(Option.OTHER_TOKENS.type()).isEqualTo(OptionType.POSITIONAL_LIST);
     assertThat(Option.OTHER_TOKENS.longName()).isEmpty();
     assertThat(Option.OTHER_TOKENS.shortName()).isEmpty();

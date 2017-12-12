@@ -4,6 +4,11 @@ import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.PositionalType.POSITIONAL_LIST;
+import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL;
+import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL_INT;
+import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED;
+import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED_INT;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -13,11 +18,11 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 /**
- * An enumeration of the enum constants that {@link OptionType} defines.
+ * Some of the enum constants that {@link OptionType} defines.
  */
 enum Type {
 
-  FLAG(BOOLEAN, false, false, false) {
+  FLAG(BOOLEAN, null) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -27,7 +32,7 @@ enum Type {
     }
   },
 
-  OPTIONAL(OPTIONAL_STRING, false, true, false) {
+  OPTIONAL(OPTIONAL_STRING, POSITIONAL_OPTIONAL) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -37,7 +42,7 @@ enum Type {
     }
   },
 
-  OPTIONAL_INT(ClassName.get(OptionalInt.class), false, true, false) {
+  OPTIONAL_INT(ClassName.get(OptionalInt.class), POSITIONAL_OPTIONAL_INT) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -49,7 +54,7 @@ enum Type {
     }
   },
 
-  REQUIRED(STRING, false, true, true) {
+  REQUIRED(STRING, POSITIONAL_REQUIRED) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -60,7 +65,7 @@ enum Type {
     }
   },
 
-  REQUIRED_INT(TypeName.INT, false, true, true) {
+  REQUIRED_INT(TypeName.INT, POSITIONAL_REQUIRED_INT) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -71,7 +76,7 @@ enum Type {
     }
   },
 
-  REPEATABLE(LIST_OF_STRING, false, true, false) {
+  REPEATABLE(LIST_OF_STRING, POSITIONAL_LIST) {
     @Override
     CodeBlock extractExpression(Option option, int j) {
       return CodeBlock.builder().add(
@@ -79,64 +84,10 @@ enum Type {
           option.optMapParameter, option.type, option.enumConstant(j), Collections.class)
           .build();
     }
-  },
-
-  POSITIONAL_REQUIRED(STRING, true, false, false) {
-    @Override
-    CodeBlock extractExpression(Option option, int j) {
-      return CodeBlock.builder().add(
-          "$N($L, $N, $N, $T.$L)",
-          option.extractPositionalRequiredMethod,
-          option.context.positionalIndex(j),
-          option.positionalParameter,
-          option.ddIndexParameter,
-          option.type, option.enumConstant(j))
-          .build();
-    }
-  },
-
-  POSITIONAL_OPTIONAL(OPTIONAL_STRING, true, false, false) {
-    @Override
-    CodeBlock extractExpression(Option option, int j) {
-      return CodeBlock.builder().add(
-          "$N($L, $N, $N)",
-          option.extractPositionalOptionalMethod,
-          option.context.positionalIndex(j),
-          option.positionalParameter,
-          option.ddIndexParameter)
-          .build();
-    }
-  },
-
-  POSITIONAL_LIST(LIST_OF_STRING, true, false, false) {
-    @Override
-    CodeBlock extractExpression(Option option, int j) {
-      return CodeBlock.builder().add(
-          "$N($L, $N, $N)",
-          option.extractPositionalListMethod,
-          option.context.positionalIndex(j),
-          option.positionalParameter,
-          option.ddIndexParameter)
-          .build();
-    }
-  },
-
-  POSITIONAL_LIST_2(LIST_OF_STRING, true, false, false) {
-    @Override
-    CodeBlock extractExpression(Option option, int j) {
-      return CodeBlock.builder().add(
-          "$N($N, $N)",
-          option.extractPositionalList2Method,
-          option.ddIndexParameter,
-          option.positionalParameter)
-          .build();
-    }
   };
 
   final TypeName returnType;
-  final boolean positional;
-  final boolean binding;
-  final boolean required;
+  final PositionalType positionalType;
 
   /**
    * @param j an index in the Option enum
@@ -146,14 +97,8 @@ enum Type {
    */
   abstract CodeBlock extractExpression(Option option, int j);
 
-  Type(
-      TypeName returnType,
-      boolean positional,
-      boolean binding,
-      boolean required) {
+  Type(TypeName returnType, PositionalType positionalType) {
     this.returnType = returnType;
-    this.positional = positional;
-    this.binding = binding;
-    this.required = required;
+    this.positionalType = positionalType;
   }
 }

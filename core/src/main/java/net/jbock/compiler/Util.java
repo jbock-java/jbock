@@ -1,18 +1,8 @@
 package net.jbock.compiler;
 
-import static java.util.Collections.emptySet;
 import static java.util.Locale.US;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.StringJoiner;
-import java.util.function.BiConsumer;
-import java.util.function.BinaryOperator;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Collector;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -62,51 +52,6 @@ final class Util {
       return false;
     }
     return typeElement.getQualifiedName().toString().equals(qualified);
-  }
-
-  /**
-   * A collector that produces a set, like {@link java.util.stream.Collectors#toSet},
-   * but throws an exception if there are any duplicates in the stream.
-   */
-  static <E> Collector<E, List<E>, Set<E>> distinctSet(
-      Function<E, RuntimeException> error) {
-    return new Collector<E, List<E>, Set<E>>() {
-      @Override
-      public Supplier<List<E>> supplier() {
-        return ArrayList::new;
-      }
-
-      @Override
-      public BiConsumer<List<E>, E> accumulator() {
-        return List::add;
-      }
-
-      @Override
-      public BinaryOperator<List<E>> combiner() {
-        return (left, right) -> {
-          left.addAll(right);
-          return left;
-        };
-      }
-
-      @Override
-      public Function<List<E>, Set<E>> finisher() {
-        return elements -> {
-          Set<E> set = new HashSet<>();
-          for (E element : elements) {
-            if (!set.add(element)) {
-              throw error.apply(element);
-            }
-          }
-          return set;
-        };
-      }
-
-      @Override
-      public Set<Characteristics> characteristics() {
-        return emptySet();
-      }
-    };
   }
 
   static String snakeCase(String input) {

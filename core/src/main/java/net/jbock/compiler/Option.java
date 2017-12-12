@@ -63,7 +63,9 @@ final class Option {
   final MethodSpec extractRequiredIntMethod;
   final MethodSpec extractOptionalIntMethod;
   final MethodSpec extractPositionalRequiredMethod;
+  final MethodSpec extractPositionalRequiredIntMethod;
   final MethodSpec extractPositionalOptionalMethod;
+  final MethodSpec extractPositionalOptionalIntMethod;
   final MethodSpec extractPositionalListMethod;
   final MethodSpec extractPositionalList2Method;
 
@@ -74,8 +76,7 @@ final class Option {
   final ParameterSpec positionalParameter;
   final ParameterSpec ddIndexParameter;
 
-  private final MethodSpec isSpecialMethod;
-  private final MethodSpec isBindingMethod;
+  private final MethodSpec isPositionalMethod;
 
   private Option(
       Context context,
@@ -85,6 +86,8 @@ final class Option {
       MethodSpec extractRequiredIntMethod,
       MethodSpec extractOptionalIntMethod,
       MethodSpec extractPositionalRequiredMethod,
+      MethodSpec extractPositionalRequiredIntMethod,
+      MethodSpec extractPositionalOptionalIntMethod,
       MethodSpec extractPositionalListMethod,
       MethodSpec extractPositionalOptionalMethod,
       MethodSpec extractPositionalList2Method,
@@ -95,8 +98,7 @@ final class Option {
       FieldSpec argumentNameField,
       MethodSpec shortNameMapMethod,
       MethodSpec longNameMapMethod,
-      MethodSpec isSpecialMethod,
-      MethodSpec isBindingMethod,
+      MethodSpec isPositionalMethod,
       ParameterSpec optMapParameter,
       ParameterSpec sMapParameter,
       ParameterSpec flagsParameter,
@@ -106,6 +108,8 @@ final class Option {
     this.extractRequiredIntMethod = extractRequiredIntMethod;
     this.extractOptionalIntMethod = extractOptionalIntMethod;
     this.extractPositionalRequiredMethod = extractPositionalRequiredMethod;
+    this.extractPositionalRequiredIntMethod = extractPositionalRequiredIntMethod;
+    this.extractPositionalOptionalIntMethod = extractPositionalOptionalIntMethod;
     this.extractPositionalListMethod = extractPositionalListMethod;
     this.extractPositionalOptionalMethod = extractPositionalOptionalMethod;
     this.extractPositionalList2Method = extractPositionalList2Method;
@@ -119,8 +123,7 @@ final class Option {
     this.optionType = optionType;
     this.typeField = typeField;
     this.longNameMapMethod = longNameMapMethod;
-    this.isSpecialMethod = isSpecialMethod;
-    this.isBindingMethod = isBindingMethod;
+    this.isPositionalMethod = isPositionalMethod;
     this.optMapParameter = optMapParameter;
     this.sMapParameter = sMapParameter;
     this.flagsParameter = flagsParameter;
@@ -133,6 +136,7 @@ final class Option {
         typeField,
         optionType);
     this.describeNamesMethod = describeNamesMethod(
+        context,
         describeParamMethod,
         typeField,
         argumentNameField,
@@ -145,9 +149,8 @@ final class Option {
     FieldSpec longNameField = FieldSpec.builder(STRING, "longName", PRIVATE, FINAL).build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
         "shortName", PRIVATE, FINAL).build();
-    MethodSpec isSpecialMethod = isSpecialMethod(optionType, typeField);
+    MethodSpec isPositionalMethod = isPositionalMethod(optionType, typeField);
     ClassName type = context.generatedClass.nestedClass("Option");
-    MethodSpec isBindingMethod = isBindingMethod(optionType, typeField);
     MethodSpec shortNameMapMethod = shortNameMapMethod(type, shortNameField);
     MethodSpec longNameMapMethod = longNameMapMethod(type, longNameField);
     FieldSpec descriptionField = FieldSpec.builder(
@@ -168,9 +171,13 @@ final class Option {
     MethodSpec extractRequiredIntMethod = extractRequiredIntMethod(type, sMapParameter);
     MethodSpec extractPositionalRequiredMethod = extractPositionalRequiredMethod(
         type, positionalParameter, ddIndexParameter);
+    MethodSpec extractPositionalRequiredIntMethod = extractPositionalRequiredIntMethod(
+        type, positionalParameter, ddIndexParameter);
     MethodSpec extractPositionalListMethod = extractPositionalListMethod(
         positionalParameter, ddIndexParameter);
     MethodSpec extractPositionalOptionalMethod = extractPositionalOptionalMethod(
+        positionalParameter, ddIndexParameter);
+    MethodSpec extractPositionalOptionalIntMethod = extractPositionalOptionalIntMethod(
         positionalParameter, ddIndexParameter);
     MethodSpec extractPositionalList2Method = extractPositionalList2Method(
         positionalParameter, ddIndexParameter);
@@ -183,6 +190,8 @@ final class Option {
         extractRequiredIntMethod,
         extractOptionalIntMethod,
         extractPositionalRequiredMethod,
+        extractPositionalRequiredIntMethod,
+        extractPositionalOptionalIntMethod,
         extractPositionalListMethod,
         extractPositionalOptionalMethod,
         extractPositionalList2Method,
@@ -193,8 +202,7 @@ final class Option {
         argumentNameField,
         shortNameMapMethod,
         longNameMapMethod,
-        isSpecialMethod,
-        isBindingMethod,
+        isPositionalMethod,
         optMapParameter,
         sMapParameter,
         flagsParameter,
@@ -221,7 +229,8 @@ final class Option {
           String.join(",\n    ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
           Arrays.asList(param.longName(), param.shortName(), optionType.type,
-              param.paramType, argumentName, STRING);
+              param.positionalType != null ? param.positionalType : param.paramType,
+              argumentName, STRING);
       List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
       args.addAll(fixArgs);
       args.addAll(Arrays.asList(desc));
@@ -240,8 +249,7 @@ final class Option {
         .addMethod(descriptionMethod())
         .addMethod(descriptionArgumentNameMethod(argumentNameField))
         .addMethod(typeMethod())
-        .addMethod(isSpecialMethod)
-        .addMethod(isBindingMethod)
+        .addMethod(isPositionalMethod)
         .addMethod(privateConstructor())
         .addMethod(shortNameMapMethod)
         .addMethod(longNameMapMethod)
@@ -370,21 +378,11 @@ final class Option {
         .build();
   }
 
-  private static MethodSpec isSpecialMethod(
+  private static MethodSpec isPositionalMethod(
       OptionType optionType,
       FieldSpec optionTypeField) {
-    return MethodSpec.methodBuilder("isSpecial")
+    return MethodSpec.methodBuilder("isPositional")
         .addStatement("return $N.$N", optionTypeField, optionType.isPositionalField)
-        .returns(BOOLEAN)
-        .addModifiers(PUBLIC)
-        .build();
-  }
-
-  private static MethodSpec isBindingMethod(
-      OptionType optionType,
-      FieldSpec optionTypeField) {
-    return MethodSpec.methodBuilder("isBinding")
-        .addStatement("return $N.$N", optionTypeField, optionType.isBindingField)
         .returns(BOOLEAN)
         .addModifiers(PUBLIC)
         .build();
@@ -440,15 +438,23 @@ final class Option {
   }
 
   private static MethodSpec describeNamesMethod(
+      Context context,
       MethodSpec describeParamMethod,
       FieldSpec optionTypeField,
       FieldSpec argumentNameField,
       OptionType optionType) {
     CodeBlock.Builder builder = CodeBlock.builder();
-    builder.beginControlFlow("if ($N.$N)", optionTypeField, optionType.isBindingField)
-        .addStatement("return $N() + ' ' + $N", describeParamMethod, argumentNameField)
+    if (context.paramTypes.contains(Type.FLAG)) {
+      builder.beginControlFlow("if ($N == $T.$L)",
+          optionTypeField, optionType.type, Type.FLAG)
+          .addStatement("return $N()", describeParamMethod)
+          .endControlFlow();
+    }
+    builder.beginControlFlow("if ($N.$N)",
+        optionTypeField, optionType.isPositionalField)
+        .addStatement("return $N()", describeParamMethod)
         .endControlFlow();
-    builder.addStatement("return $N()", describeParamMethod);
+    builder.addStatement("return $N() + ' ' + $N", describeParamMethod, argumentNameField);
     return MethodSpec.methodBuilder("describeNames")
         .addModifiers(PUBLIC)
         .returns(STRING)
@@ -589,18 +595,43 @@ final class Option {
         .returns(STRING).build();
   }
 
+  private static MethodSpec extractPositionalRequiredIntMethod(
+      ClassName type,
+      ParameterSpec positionalParameter,
+      ParameterSpec ddIndexParameter) {
+    ParameterSpec option = ParameterSpec.builder(type, "option").build();
+    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalRequiredInt");
+
+    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
+        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
+
+    builder.beginControlFlow("if ($N >= $N)", index, size)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Missing positional parameter: ", option)
+        .endControlFlow();
+
+    builder.addStatement("return $T.parseInt($N.get($N))", Integer.class, positionalParameter, index);
+
+    return builder.addModifiers(STATIC)
+        .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, option))
+        .returns(INT).build();
+  }
+
   private static MethodSpec extractPositionalOptionalMethod(
       ParameterSpec positionalParameter,
       ParameterSpec ddIndexParameter) {
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec outOfBounds = ParameterSpec.builder(INT, "outOfBounds").build();
+    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalOptional");
 
     builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, outOfBounds, ddIndexParameter, positionalParameter, ddIndexParameter);
+        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
 
-    builder.beginControlFlow("if ($N >= $N)", index, outOfBounds)
+    builder.beginControlFlow("if ($N >= $N)", index, size)
         .addStatement("return $T.empty()", Optional.class)
         .endControlFlow();
 
@@ -610,6 +641,29 @@ final class Option {
     return builder.addModifiers(STATIC)
         .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter))
         .returns(OPTIONAL_STRING).build();
+  }
+
+  private static MethodSpec extractPositionalOptionalIntMethod(
+      ParameterSpec positionalParameter,
+      ParameterSpec ddIndexParameter) {
+    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalOptionalInt");
+
+    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
+        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
+
+    builder.beginControlFlow("if ($N >= $N)", index, size)
+        .addStatement("return $T.empty()", OptionalInt.class)
+        .endControlFlow();
+
+    builder.addStatement("return $T.of($T.parseInt($N.get($N)))",
+        OptionalInt.class, Integer.class, positionalParameter, index);
+
+    return builder.addModifiers(STATIC)
+        .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter))
+        .returns(OptionalInt.class).build();
   }
 
   private static MethodSpec extractPositionalListMethod(

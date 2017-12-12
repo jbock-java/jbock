@@ -74,8 +74,14 @@ public final class Processor extends AbstractProcessor {
           continue;
         }
         Set<Type> paramTypes = paramTypes(parameters);
+        Set<PositionalType> positionalParamTypes = positionalParamTypes(parameters);
         boolean grouping = paramTypes.contains(Type.FLAG);
-        Context context = Context.create(sourceType, parameters, paramTypes, grouping);
+        Context context = Context.create(
+            sourceType,
+            parameters,
+            paramTypes,
+            positionalParamTypes,
+            grouping);
         if (!done.add(asType(sourceType).getQualifiedName().toString())) {
           continue;
         }
@@ -94,7 +100,19 @@ public final class Processor extends AbstractProcessor {
 
   private static Set<Type> paramTypes(List<Param> parameters) {
     Set<Type> paramTypes = EnumSet.noneOf(Type.class);
-    parameters.forEach(p -> paramTypes.add(p.paramType));
+    parameters.stream()
+        .filter(p -> p.positionalType == null)
+        .map(p -> p.paramType)
+        .forEach(paramTypes::add);
+    return paramTypes;
+  }
+
+  private static Set<PositionalType> positionalParamTypes(List<Param> parameters) {
+    Set<PositionalType> paramTypes = EnumSet.noneOf(PositionalType.class);
+    parameters.stream()
+        .map(p -> p.positionalType)
+        .filter(Objects::nonNull)
+        .forEach(paramTypes::add);
     return paramTypes;
   }
 
@@ -138,24 +156,25 @@ public final class Processor extends AbstractProcessor {
     int lists = 0;
     Param previous = null;
     for (Param param : params) {
-      if (!param.paramType.positional) {
+      if (param.positionalType == null) {
         result.add(param);
         continue;
       }
+      PositionalType positionalType = param.positionalType;
       if (previous != null) {
-        if (param.paramType.ordinal() < previous.paramType.ordinal()) {
+        if (positionalType.ordinal() < previous.positionalType.ordinal()) {
           throw new ValidationException(param.sourceMethod,
               "@Positional " + previous.paramType.returnType +
                   " may not stand above @Positional " + param.paramType.returnType);
         }
       }
-      if (param.paramType == Type.POSITIONAL_LIST) {
+      if (positionalType == PositionalType.POSITIONAL_LIST) {
         lists++;
         if (lists == 1) {
           result.add(param);
         } else if (lists == 2) {
           result.add(param.asPositional2());
-        } else if (lists >= 3) {
+        } else {
           throw new ValidationException(param.sourceMethod,
               "There can be at most 2 positional lists.");
         }
@@ -195,27 +214,37 @@ public final class Processor extends AbstractProcessor {
       ExecutableElement method = abstractMethods.get(index);
       parameters.add(Param.create(method, index));
     }
-    checkLongNames(parameters, sourceType);
-    checkShortNames(parameters, sourceType);
+    checkDistinctLongNames(parameters);
+    checkDistinctShortNames(parameters);
     return checkPositional(parameters);
   }
 
-  private Set<String> checkShortNames(List<Param> params, TypeElement sourceType) {
-    return params.stream()
-        .map(Param::shortName)
-        .filter(Objects::nonNull)
-        .collect(Util.distinctSet(element ->
-            new ValidationException(sourceType,
-                "Duplicate short name: " + element)));
+  private void checkDistinctShortNames(List<Param> params) {
+    Set<String> names = new HashSet<>(params.size());
+    for (Param param : params) {
+      String name = param.shortName();
+      if (name != null) {
+        boolean added = names.add(name);
+        if (!added) {
+          throw new ValidationException(param.sourceMethod,
+              "Duplicate short name: " + name);
+        }
+      }
+    }
   }
 
-  private Set<String> checkLongNames(List<Param> params, TypeElement sourceType) {
-    return params.stream()
-        .map(Param::longName)
-        .filter(Objects::nonNull)
-        .collect(Util.distinctSet(element ->
-            new ValidationException(sourceType,
-                "Duplicate long name: " + element)));
+  private void checkDistinctLongNames(List<Param> params) {
+    Set<String> names = new HashSet<>(params.size());
+    for (Param param : params) {
+      String name = param.longName();
+      if (name != null) {
+        boolean added = names.add(name);
+        if (!added) {
+          throw new ValidationException(param.sourceMethod,
+              "Duplicate long name: " + name);
+        }
+      }
+    }
   }
 
   static void checkNotPresent(

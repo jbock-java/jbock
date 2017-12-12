@@ -8,7 +8,6 @@ import static net.jbock.compiler.Util.asType;
 import static net.jbock.compiler.Util.equalsType;
 import static net.jbock.compiler.Util.methodToString;
 
-import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.Set;
@@ -23,6 +22,7 @@ import net.jbock.Description;
 import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
+import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 /**
@@ -30,14 +30,22 @@ import net.jbock.com.squareup.javapoet.TypeName;
  */
 final class Param {
 
+  // can be null
   private final String longName;
+
+  // can be null
   private final String shortName;
 
+  // never null
   final Type paramType;
 
-  // index in the list of abstract methods
+  // non-null iff this param is positional
+  final PositionalType positionalType;
+
+  // index in the list of all abstract methods (in source order, ignoring inheritance)
   final int index;
 
+  // never null
   final ExecutableElement sourceMethod;
 
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
@@ -47,18 +55,24 @@ final class Param {
       String longName,
       int index,
       Type paramType,
+      PositionalType positionalType,
       ExecutableElement sourceMethod) {
     this.shortName = shortName;
     this.longName = longName;
     this.index = index;
+    this.positionalType = positionalType;
     this.sourceMethod = sourceMethod;
     this.paramType = paramType;
   }
 
-  private static Type getParamType(ExecutableElement sourceMethod) {
-    if (sourceMethod.getAnnotation(Positional.class) != null) {
-      return Type.POSITIONAL_LIST;
+  CodeBlock extractExpression(Option option, int j) {
+    if (positionalType == null) {
+      return paramType.extractExpression(option, j);
     }
+    return positionalType.extractExpression(option, j);
+  }
+
+  private static Type checkNonpositionalType(ExecutableElement sourceMethod) {
     TypeMirror type = sourceMethod.getReturnType();
     if (type.getKind() == TypeKind.BOOLEAN) {
       return Type.FLAG;
@@ -107,7 +121,8 @@ final class Param {
         shortName,
         longName,
         index,
-        getParamType(sourceMethod),
+        checkNonpositionalType(sourceMethod),
+        null,
         sourceMethod);
   }
 
@@ -144,26 +159,6 @@ final class Param {
       return null;
     }
     return longName.value();
-  }
-
-  private static Type checkOptionalType(
-      ExecutableElement sourceMethod, Annotation cause) {
-    if (isListOfString(sourceMethod.getReturnType())) {
-      return Type.POSITIONAL_LIST;
-    }
-    if (isString(sourceMethod.getReturnType())) {
-      return Type.POSITIONAL_REQUIRED;
-    }
-    if (isOptionalString(sourceMethod.getReturnType())) {
-      return Type.POSITIONAL_OPTIONAL;
-    }
-    throw new ValidationException(sourceMethod,
-        "A method that carries the " + cause.annotationType().getSimpleName() +
-            " annotation must return one of " + Arrays.stream(Type.values())
-            .filter(t -> t.positional)
-            .map(t -> t.returnType)
-            .map(TypeName::toString)
-            .collect(Collectors.toSet()));
   }
 
   private static boolean isListOfString(TypeMirror type) {
@@ -249,7 +244,12 @@ final class Param {
 
   private static Param createPositional(ExecutableElement sourceMethod, int index) {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
-    Type type = checkOptionalType(sourceMethod, positional);
+    Type type = checkNonpositionalType(sourceMethod);
+    if (type.positionalType == null) {
+      throw new ValidationException(sourceMethod,
+          "A method that carries the Positional annotation " +
+              "may not return " + type.returnType);
+    }
     checkNotPresent(sourceMethod,
         positional,
         Arrays.asList(
@@ -260,6 +260,7 @@ final class Param {
         null,
         index,
         type,
+        type.positionalType,
         sourceMethod);
   }
 
@@ -280,11 +281,12 @@ final class Param {
   }
 
   Param asPositional2() {
-    return new Param(shortName, longName, index, Type.POSITIONAL_LIST_2, sourceMethod);
+    return new Param(shortName, longName, index, paramType,
+        PositionalType.POSITIONAL_LIST_2, sourceMethod);
   }
 
   String descriptionArgumentName() {
-    if (!paramType.binding) {
+    if (positionalType != null || paramType == Type.FLAG) {
       return null;
     }
     return description() == null ?

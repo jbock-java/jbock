@@ -30,6 +30,20 @@ public class ProcessorTest {
   }
 
   @Test
+  public void vli() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Positional abstract List<String> a();",
+        "  @Positional abstract List<String> b();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   public void duplicateShortName() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -115,7 +129,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void otherTokensNotList() {
+  public void positionalBadReturnTypeStringBuilder() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -125,8 +139,21 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("must return one of [java.util.List<java.lang.String>, " +
-            "java.lang.String, java.util.Optional<java.lang.String>]");
+        .withErrorContaining("a() returns java.lang.StringBuilder");
+  }
+
+  @Test
+  public void positionalBadReturnTypeBoolean() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Positional abstract boolean a();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("may not return boolean");
   }
 
   @Test
