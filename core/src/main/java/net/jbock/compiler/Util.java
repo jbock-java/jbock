@@ -15,7 +15,7 @@ import javax.lang.model.util.SimpleTypeVisitor8;
 final class Util {
 
   private static final SimpleTypeVisitor8<DeclaredType, Void> AS_DECLARED =
-      new SimpleTypeVisitor8<DeclaredType, Void>() {
+      new SimpleTypeVisitor8<>() {
         @Override
         public DeclaredType visitDeclared(DeclaredType declaredType, Void _null) {
           return declaredType;
@@ -23,7 +23,7 @@ final class Util {
       };
 
   private static final SimpleElementVisitor8<TypeElement, Void> AS_TYPE_ELEMENT =
-      new SimpleElementVisitor8<TypeElement, Void>() {
+      new SimpleElementVisitor8<>() {
         @Override
         public TypeElement visitType(TypeElement typeElement, Void _null) {
           return typeElement;
@@ -48,10 +48,8 @@ final class Util {
       return false;
     }
     TypeElement typeElement = declared.asElement().accept(AS_TYPE_ELEMENT, null);
-    if (typeElement == null) {
-      return false;
-    }
-    return typeElement.getQualifiedName().toString().equals(qualified);
+    return typeElement != null &&
+        typeElement.getQualifiedName().toString().equals(qualified);
   }
 
   static String snakeCase(String input) {

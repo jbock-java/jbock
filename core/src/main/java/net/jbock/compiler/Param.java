@@ -65,11 +65,11 @@ final class Param {
     this.paramType = paramType;
   }
 
-  CodeBlock extractExpression(Option option, int j) {
+  CodeBlock extractExpression(Helper helper, int j) {
     if (positionalType == null) {
-      return paramType.extractExpression(option, j);
+      return paramType.extractExpression(helper, j);
     }
-    return positionalType.extractExpression(option, j);
+    return positionalType.extractExpression(helper, j);
   }
 
   private static Type checkNonpositionalType(ExecutableElement sourceMethod) {

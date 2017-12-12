@@ -18,70 +18,80 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 /**
- * Some of the enum constants that {@link OptionType} defines.
+ * The non-positional constants that {@link OptionType} defines.
  */
 enum Type {
 
   FLAG(BOOLEAN, null) {
     @Override
-    CodeBlock extractExpression(Option option, int j) {
+    CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
           "$N.contains($T.$N)",
-          option.flagsParameter, option.type, option.enumConstant(j))
+          helper.flagsField,
+          helper.option.type,
+          helper.option.enumConstant(j))
           .build();
     }
   },
 
   OPTIONAL(OPTIONAL_STRING, POSITIONAL_OPTIONAL) {
     @Override
-    CodeBlock extractExpression(Option option, int j) {
+    CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
           "$T.ofNullable($N.get($T.$L))",
-          Optional.class, option.sMapParameter, option.type, option.enumConstant(j))
+          Optional.class,
+          helper.sMapField,
+          helper.option.type,
+          helper.option.enumConstant(j))
           .build();
     }
   },
 
   OPTIONAL_INT(ClassName.get(OptionalInt.class), POSITIONAL_OPTIONAL_INT) {
     @Override
-    CodeBlock extractExpression(Option option, int j) {
+    CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
-          "$N($N, $T.$L)",
-          option.extractOptionalIntMethod,
-          option.sMapParameter,
-          option.type, option.enumConstant(j))
+          "$N($T.$L)",
+          helper.extractOptionalIntMethod,
+          helper.option.type,
+          helper.option.enumConstant(j))
           .build();
     }
   },
 
   REQUIRED(STRING, POSITIONAL_REQUIRED) {
     @Override
-    CodeBlock extractExpression(Option option, int j) {
+    CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
-          "$N($N, $T.$L)",
-          option.extractRequiredMethod, option.sMapParameter,
-          option.type, option.enumConstant(j))
+          "$N($T.$L)",
+          helper.extractRequiredMethod,
+          helper.option.type,
+          helper.option.enumConstant(j))
           .build();
     }
   },
 
   REQUIRED_INT(TypeName.INT, POSITIONAL_REQUIRED_INT) {
     @Override
-    CodeBlock extractExpression(Option option, int j) {
+    CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
-          "$N($N, $T.$L)",
-          option.extractRequiredIntMethod, option.sMapParameter,
-          option.type, option.enumConstant(j))
+          "$N($T.$L)",
+          helper.extractRequiredIntMethod,
+          helper.option.type,
+          helper.option.enumConstant(j))
           .build();
     }
   },
 
   REPEATABLE(LIST_OF_STRING, POSITIONAL_LIST) {
     @Override
-    CodeBlock extractExpression(Option option, int j) {
+    CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
           "$N.getOrDefault($T.$L, $T.emptyList())",
-          option.optMapParameter, option.type, option.enumConstant(j), Collections.class)
+          helper.optMapField,
+          helper.option.type,
+          helper.option.enumConstant(j),
+          Collections.class)
           .build();
     }
   };
@@ -95,7 +105,7 @@ enum Type {
    *     The expression will be used inside a static method,
    *     which has the parameters listed in {@link Option} (see comment there).
    */
-  abstract CodeBlock extractExpression(Option option, int j);
+  abstract CodeBlock extractExpression(Helper helper, int j);
 
   Type(TypeName returnType, PositionalType positionalType) {
     this.returnType = returnType;

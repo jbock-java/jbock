@@ -4,15 +4,14 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
@@ -50,7 +49,7 @@ final class Parser {
         context.sourceType.getSimpleName() + "Impl");
     OptionType optionType = OptionType.create(context);
     Option option = Option.create(context, optionType);
-    Impl impl = Impl.create(context, implType, option);
+    Impl impl = Impl.create(context, implType);
     Helper helper = Helper.create(context, impl, optionType, option);
     return new Parser(context, optionType, option, helper, impl);
   }
@@ -83,7 +82,6 @@ final class Parser {
     builder.add("\n");
     builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
     builder.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
-    builder.addStatement("$T $N = $L", INT, option.ddIndexParameter, -1);
 
     if (context.stopword) {
       builder.add("\n");
@@ -93,10 +91,8 @@ final class Parser {
     builder.add("\n");
     if (!context.positionalParameters.isEmpty()) {
       builder.addStatement("$T $N = new $T<>()",
-          option.positionalParameter.type, option.positionalParameter, ArrayList.class);
-    } else {
-      builder.addStatement("$T $N = $T.emptyList()",
-          option.positionalParameter.type, option.positionalParameter, Collections.class);
+          LIST_OF_STRING, this.helper.positionalParameter, ArrayList.class);
+      builder.addStatement("$T $N = $L", INT, this.helper.ddIndexParameter, -1);
     }
 
     // Begin parsing loop
@@ -107,10 +103,9 @@ final class Parser {
 
     if (context.stopword) {
       builder.beginControlFlow("if ($N.equals($N))", token, stopword)
-          .addStatement("$N = $N.size()", option.ddIndexParameter, option.positionalParameter)
-          .addStatement("$N.forEachRemaining($N::add)", it, option.positionalParameter)
-          .addStatement("return $N.$N($N, $N)",
-              helper, this.helper.buildMethod, option.positionalParameter, option.ddIndexParameter)
+          .addStatement("$N = $N.size()", this.helper.ddIndexParameter, this.helper.positionalParameter)
+          .addStatement("$N.forEachRemaining($N::add)", it, this.helper.positionalParameter)
+          .addStatement(buildExpression(helper))
           .endControlFlow();
     }
 
@@ -118,7 +113,7 @@ final class Parser {
     // handle positional token
     builder.beginControlFlow("if ($N.length() <= 1 || $N.charAt(0) != '-')", token, token);
     if (!context.positionalParameters.isEmpty()) {
-      builder.addStatement("$N.add($N)", option.positionalParameter, token);
+      builder.addStatement("$N.add($N)", this.helper.positionalParameter, token);
     } else {
       builder.addStatement("throw new $T($S + $N)",
           IllegalArgumentException.class, "Unknown token: ", token);
@@ -140,14 +135,25 @@ final class Parser {
     builder.endControlFlow();
 
     builder.add("\n");
-    builder.addStatement("return $N.$N($N, $N)",
-        helper, this.helper.buildMethod, option.positionalParameter, option.ddIndexParameter);
+    builder.addStatement(buildExpression(helper));
 
     return MethodSpec.methodBuilder("parse")
         .addParameter(args)
         .addCode(builder.build())
         .returns(TypeName.get(context.sourceType.asType()))
         .addModifiers(PUBLIC, STATIC)
+        .build();
+  }
+
+  private CodeBlock buildExpression(ParameterSpec helper) {
+    if (context.positionalParameters.isEmpty()) {
+      return CodeBlock.builder()
+          .add("return $N.build()", helper)
+          .build();
+    }
+    return CodeBlock.builder()
+        .add("return $N.build($N, $N)",
+            helper, this.helper.positionalParameter, this.helper.ddIndexParameter)
         .build();
   }
 

@@ -7,7 +7,6 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.snakeCase;
 
@@ -17,9 +16,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Set;
 import java.util.StringJoiner;
 import net.jbock.Description;
 import net.jbock.com.squareup.javapoet.ArrayTypeName;
@@ -58,57 +54,17 @@ final class Option {
   final MethodSpec shortNameMapMethod;
   final MethodSpec longNameMapMethod;
 
-  final MethodSpec extractRequiredMethod;
-  final MethodSpec extractRequiredIntMethod;
-  final MethodSpec extractOptionalIntMethod;
-  final MethodSpec extractPositionalRequiredMethod;
-  final MethodSpec extractPositionalRequiredIntMethod;
-  final MethodSpec extractPositionalOptionalMethod;
-  final MethodSpec extractPositionalOptionalIntMethod;
-  final MethodSpec extractPositionalListMethod;
-  final MethodSpec extractPositionalList2Method;
-
-  // parameters of the static Impl.create method
-  final ParameterSpec optMapParameter;
-  final ParameterSpec sMapParameter;
-  final ParameterSpec flagsParameter;
-  final ParameterSpec positionalParameter;
-  final ParameterSpec ddIndexParameter;
-
   private Option(
       Context context,
       ClassName type,
       OptionType optionType,
-      MethodSpec extractRequiredMethod,
-      MethodSpec extractRequiredIntMethod,
-      MethodSpec extractOptionalIntMethod,
-      MethodSpec extractPositionalRequiredMethod,
-      MethodSpec extractPositionalRequiredIntMethod,
-      MethodSpec extractPositionalOptionalIntMethod,
-      MethodSpec extractPositionalListMethod,
-      MethodSpec extractPositionalOptionalMethod,
-      MethodSpec extractPositionalList2Method,
       FieldSpec longNameField,
       FieldSpec shortNameField,
       FieldSpec typeField,
       FieldSpec descriptionField,
       FieldSpec argumentNameField,
       MethodSpec shortNameMapMethod,
-      MethodSpec longNameMapMethod,
-      ParameterSpec optMapParameter,
-      ParameterSpec sMapParameter,
-      ParameterSpec flagsParameter,
-      ParameterSpec positionalParameter,
-      ParameterSpec ddIndexParameter) {
-    this.extractRequiredMethod = extractRequiredMethod;
-    this.extractRequiredIntMethod = extractRequiredIntMethod;
-    this.extractOptionalIntMethod = extractOptionalIntMethod;
-    this.extractPositionalRequiredMethod = extractPositionalRequiredMethod;
-    this.extractPositionalRequiredIntMethod = extractPositionalRequiredIntMethod;
-    this.extractPositionalOptionalIntMethod = extractPositionalOptionalIntMethod;
-    this.extractPositionalListMethod = extractPositionalListMethod;
-    this.extractPositionalOptionalMethod = extractPositionalOptionalMethod;
-    this.extractPositionalList2Method = extractPositionalList2Method;
+      MethodSpec longNameMapMethod) {
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
     this.descriptionField = descriptionField;
@@ -119,11 +75,6 @@ final class Option {
     this.optionType = optionType;
     this.typeField = typeField;
     this.longNameMapMethod = longNameMapMethod;
-    this.optMapParameter = optMapParameter;
-    this.sMapParameter = sMapParameter;
-    this.flagsParameter = flagsParameter;
-    this.positionalParameter = positionalParameter;
-    this.ddIndexParameter = ddIndexParameter;
     this.describeParamMethod = describeParamMethod(
         context,
         longNameField,
@@ -151,56 +102,18 @@ final class Option {
         LIST_OF_STRING, "description", FINAL).build();
     FieldSpec argumentNameField = FieldSpec.builder(
         STRING, "descriptionArgumentName", FINAL).build();
-    ParameterSpec optMapParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        type, LIST_OF_STRING), "optMap").build();
-    ParameterSpec sMapParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        type, STRING), "sMap").build();
-    ParameterSpec flagsParameter = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
-        type), "flags").build();
-    ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional")
-        .build();
-    ParameterSpec ddIndexParameter = ParameterSpec.builder(INT, "ddIndex").build();
-    MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(type, sMapParameter);
-    MethodSpec extractRequiredMethod = extractRequiredMethod(type, sMapParameter);
-    MethodSpec extractRequiredIntMethod = extractRequiredIntMethod(type, sMapParameter);
-    MethodSpec extractPositionalRequiredMethod = extractPositionalRequiredMethod(
-        type, positionalParameter, ddIndexParameter);
-    MethodSpec extractPositionalRequiredIntMethod = extractPositionalRequiredIntMethod(
-        type, positionalParameter, ddIndexParameter);
-    MethodSpec extractPositionalListMethod = extractPositionalListMethod(
-        positionalParameter, ddIndexParameter);
-    MethodSpec extractPositionalOptionalMethod = extractPositionalOptionalMethod(
-        positionalParameter, ddIndexParameter);
-    MethodSpec extractPositionalOptionalIntMethod = extractPositionalOptionalIntMethod(
-        positionalParameter, ddIndexParameter);
-    MethodSpec extractPositionalList2Method = extractPositionalList2Method(
-        positionalParameter, ddIndexParameter);
 
     return new Option(
         context,
         type,
         optionType,
-        extractRequiredMethod,
-        extractRequiredIntMethod,
-        extractOptionalIntMethod,
-        extractPositionalRequiredMethod,
-        extractPositionalRequiredIntMethod,
-        extractPositionalOptionalIntMethod,
-        extractPositionalListMethod,
-        extractPositionalOptionalMethod,
-        extractPositionalList2Method,
         longNameField,
         shortNameField,
         typeField,
         descriptionField,
         argumentNameField,
         shortNameMapMethod,
-        longNameMapMethod,
-        optMapParameter,
-        sMapParameter,
-        flagsParameter,
-        positionalParameter,
-        ddIndexParameter);
+        longNameMapMethod);
   }
 
   String enumConstant(int i) {
@@ -230,17 +143,19 @@ final class Option {
       builder.addEnumConstant(enumConstant, anonymousClassBuilder(format,
           args.toArray()).build());
     }
-    return builder.addModifiers(PRIVATE)
+    builder.addModifiers(PRIVATE)
         .addFields(Arrays.asList(longNameField, shortNameField, typeField, argumentNameField, descriptionField))
         .addMethod(describeMethod())
         .addMethod(toStringMethod())
         .addMethod(describeNamesMethod)
         .addMethod(describeParamMethod)
         .addMethod(descriptionBlockMethod)
-        .addMethod(privateConstructor())
-        .addMethod(shortNameMapMethod)
-        .addMethod(longNameMapMethod)
-        .build();
+        .addMethod(privateConstructor());
+    if (!context.paramTypes.isEmpty()) {
+      builder.addMethod(shortNameMapMethod)
+          .addMethod(longNameMapMethod);
+    }
+    return builder.build();
   }
 
   private MethodSpec privateConstructor() {
@@ -440,209 +355,5 @@ final class Option {
         .addStatement("return name() + $S + $N() + $S", " (", describeParamMethod, ")")
         .addModifiers(PUBLIC)
         .build();
-  }
-
-  private static MethodSpec extractRequiredMethod(
-      ClassName type,
-      ParameterSpec sMapParameter) {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(type, "option").build();
-
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractRequired");
-
-    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapParameter, option);
-
-    builder.beginControlFlow("if ($N == null)", token)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Missing required option: ", option)
-        .endControlFlow();
-
-    builder.addStatement("return $N", token);
-    return builder.addParameters(Arrays.asList(sMapParameter, option))
-        .addModifiers(STATIC)
-        .returns(STRING).build();
-  }
-
-  private static MethodSpec extractRequiredIntMethod(
-      ClassName type,
-      ParameterSpec sMapParameter) {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(type, "option").build();
-
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractRequiredInt");
-
-    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapParameter, option);
-
-    builder.beginControlFlow("if ($N == null)", token)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Missing required option: ", option)
-        .endControlFlow();
-
-    builder.addStatement("return $T.parseInt($N)", Integer.class, token);
-    return builder.addParameters(Arrays.asList(sMapParameter, option))
-        .addModifiers(STATIC)
-        .returns(INT).build();
-  }
-
-  private static MethodSpec extractOptionalIntMethod(
-      ClassName type,
-      ParameterSpec sMapParameter) {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(type, "option").build();
-
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractOptionalInt");
-
-    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapParameter, option);
-
-    builder.beginControlFlow("if ($N == null)", token)
-        .addStatement("return $T.empty()", OptionalInt.class)
-        .endControlFlow();
-
-    builder.addStatement("return $T.of($T.parseInt($N))",
-        OptionalInt.class, Integer.class, token);
-    return builder.addParameters(Arrays.asList(sMapParameter, option))
-        .addModifiers(STATIC)
-        .returns(OptionalInt.class).build();
-  }
-
-  private static MethodSpec extractPositionalRequiredMethod(
-      ClassName type,
-      ParameterSpec positionalParameter,
-      ParameterSpec ddIndexParameter) {
-    ParameterSpec option = ParameterSpec.builder(type, "option").build();
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
-
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalRequired");
-
-    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
-
-    builder.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing positional parameter: ", option)
-        .endControlFlow();
-
-    builder.addStatement("return $N.get($N)", positionalParameter, index);
-
-    return builder.addModifiers(STATIC)
-        .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, option))
-        .returns(STRING).build();
-  }
-
-  private static MethodSpec extractPositionalRequiredIntMethod(
-      ClassName type,
-      ParameterSpec positionalParameter,
-      ParameterSpec ddIndexParameter) {
-    ParameterSpec option = ParameterSpec.builder(type, "option").build();
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
-
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalRequiredInt");
-
-    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
-
-    builder.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing positional parameter: ", option)
-        .endControlFlow();
-
-    builder.addStatement("return $T.parseInt($N.get($N))", Integer.class, positionalParameter, index);
-
-    return builder.addModifiers(STATIC)
-        .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, option))
-        .returns(INT).build();
-  }
-
-  private static MethodSpec extractPositionalOptionalMethod(
-      ParameterSpec positionalParameter,
-      ParameterSpec ddIndexParameter) {
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
-
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalOptional");
-
-    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
-
-    builder.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement("return $T.empty()", Optional.class)
-        .endControlFlow();
-
-    builder.addStatement("return $T.of($N.get($N))",
-        Optional.class, positionalParameter, index);
-
-    return builder.addModifiers(STATIC)
-        .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter))
-        .returns(OPTIONAL_STRING).build();
-  }
-
-  private static MethodSpec extractPositionalOptionalIntMethod(
-      ParameterSpec positionalParameter,
-      ParameterSpec ddIndexParameter) {
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
-
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalOptionalInt");
-
-    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
-
-    builder.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement("return $T.empty()", OptionalInt.class)
-        .endControlFlow();
-
-    builder.addStatement("return $T.of($T.parseInt($N.get($N)))",
-        OptionalInt.class, Integer.class, positionalParameter, index);
-
-    return builder.addModifiers(STATIC)
-        .addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter))
-        .returns(OptionalInt.class).build();
-  }
-
-  private static MethodSpec extractPositionalListMethod(
-      ParameterSpec positionalParameter,
-      ParameterSpec ddIndexParameter) {
-    ParameterSpec start = ParameterSpec.builder(INT, "start").build();
-    ParameterSpec end = ParameterSpec.builder(INT, "end").build();
-
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalList");
-
-    builder.beginControlFlow("if ($N >= $N.size())", start, positionalParameter)
-        .addStatement("return $T.emptyList()", Collections.class)
-        .endControlFlow();
-
-    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, end, ddIndexParameter, positionalParameter, ddIndexParameter);
-
-    builder.beginControlFlow("if ($N >= $N)", start, end)
-        .addStatement("return $T.emptyList()", Collections.class)
-        .endControlFlow();
-
-    builder.addStatement(
-        "return $N.subList($N, $N)",
-        positionalParameter,
-        start,
-        end);
-    return builder.addModifiers(STATIC)
-        .addParameters(Arrays.asList(start, positionalParameter, ddIndexParameter))
-        .returns(LIST_OF_STRING).build();
-  }
-
-  private static MethodSpec extractPositionalList2Method(
-      ParameterSpec positionalParameter,
-      ParameterSpec ddIndexParameter) {
-
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalList2");
-
-    builder.beginControlFlow("if ($N < 0)", ddIndexParameter)
-        .addStatement("return $T.emptyList()", Collections.class)
-        .endControlFlow();
-
-    builder.addStatement("return $N.subList($N, $N.size())",
-        positionalParameter, ddIndexParameter, positionalParameter);
-
-    return builder.addModifiers(STATIC)
-        .addParameters(Arrays.asList(ddIndexParameter, positionalParameter))
-        .returns(LIST_OF_STRING).build();
   }
 }
