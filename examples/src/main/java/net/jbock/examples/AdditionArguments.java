@@ -15,4 +15,8 @@ abstract class AdditionArguments {
 
   @Positional
   abstract OptionalInt c();
+
+  final int sum() {
+    return a() + b() + c().orElse(0);
+  }
 }

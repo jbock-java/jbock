@@ -26,4 +26,16 @@ public class AdditionArgumentsTest {
     assertThat(AdditionArguments_Parser.parse(new String[]{"1", "2", "3"}).c())
         .isEqualTo(OptionalInt.of(3));
   }
+
+  @Test
+  public void testSum() {
+    assertThat(AdditionArguments_Parser.parse(new String[]{"1", "-2", "3"}).sum())
+        .isEqualTo(2);
+    assertThat(AdditionArguments_Parser.parse(new String[]{"-1", "-2", "-3"}).sum())
+        .isEqualTo(-6);
+    assertThat(AdditionArguments_Parser.parse(new String[]{"-1", "-2", "3"}).sum())
+        .isEqualTo(0);
+    assertThat(AdditionArguments_Parser.parse(new String[]{"-1", "-2"}).sum())
+        .isEqualTo(-3);
+  }
 }
