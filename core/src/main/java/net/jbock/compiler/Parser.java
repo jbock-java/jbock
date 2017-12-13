@@ -68,6 +68,7 @@ final class Parser {
   private MethodSpec parseMethod() {
 
     ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
+    ParameterSpec tokens = ParameterSpec.builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec dd = ParameterSpec.builder(STRING, "dd").build();
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
@@ -75,25 +76,32 @@ final class Parser {
         .build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
 
-    CodeBlock.Builder builder = CodeBlock.builder();
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("parse")
+        .addParameter(args)
+        .returns(TypeName.get(context.sourceType.asType()))
+        .addModifiers(PUBLIC, STATIC);
 
-    builder.add("\n");
     builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
-    builder.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
+    builder.addStatement("$T $N = $T.asList($N)", LIST_OF_STRING, tokens, Arrays.class, args);
+
+    if (!context.stopword && context.paramTypes.isEmpty() && context.ignoreDashes) {
+      return builder
+          .addStatement("return $N.build($N, $L)", helper, tokens, -1)
+          .build();
+    }
+
+    builder.addStatement("$T $N = $N.iterator()", STRING_ITERATOR, it, tokens);
 
     if (context.stopword) {
-      builder.add("\n");
       builder.addStatement("$T $N = $S", dd.type, dd, "--");
     }
 
-    builder.add("\n");
     if (!context.positionalParameters.isEmpty()) {
       builder.addStatement("$T $N = new $T<>()",
           LIST_OF_STRING, this.helper.positionalParameter, ArrayList.class);
     }
 
     // Begin parsing loop
-    builder.add("\n");
     builder.beginControlFlow("while ($N.hasNext())", it);
 
     builder.addStatement("$T $N = $N.next()", STRING, token, it);
@@ -144,15 +152,8 @@ final class Parser {
     // End parsing loop
     builder.endControlFlow();
 
-    builder.add("\n");
     builder.addStatement(buildExpression(helper, CodeBlock.builder().add("$L", -1).build()));
-
-    return MethodSpec.methodBuilder("parse")
-        .addParameter(args)
-        .addCode(builder.build())
-        .returns(TypeName.get(context.sourceType.asType()))
-        .addModifiers(PUBLIC, STATIC)
-        .build();
+    return builder.build();
   }
 
   private CodeBlock buildExpression(ParameterSpec helper, CodeBlock param) {
