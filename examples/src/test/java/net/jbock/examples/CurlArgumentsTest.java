@@ -172,7 +172,7 @@ public class CurlArgumentsTest {
     assertThat(lines[5]).isEqualTo("  boolean for flags");
     assertThat(lines[6]).isEqualTo("-i, --include");
     assertThat(lines[7]).isEqualTo("  --- description goes here ---");
-    assertThat(lines[8]).isEqualTo("(positional arguments)");
+    assertThat(lines[8]).isEqualTo("URLS");
     assertThat(lines[9]).isEqualTo("  --- description goes here ---");
     assertThat(lines[10]).isEqualTo("");
   }

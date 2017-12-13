@@ -38,10 +38,4 @@ public class AdditionArgumentsTest {
     assertThat(AdditionArguments_Parser.parse(new String[]{"-1", "-2"}).sum())
         .isEqualTo(-3);
   }
-
-  @Test
-  public void testPrint() {
-    AdditionArguments_Parser.printUsage(System.out, 2);
-
-  }
 }
