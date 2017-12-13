@@ -7,6 +7,7 @@ import static net.jbock.compiler.Util.asDeclared;
 import static net.jbock.compiler.Util.asType;
 import static net.jbock.compiler.Util.equalsType;
 import static net.jbock.compiler.Util.methodToString;
+import static net.jbock.compiler.Util.snakeCase;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -286,11 +287,16 @@ final class Param {
   }
 
   String descriptionArgumentName() {
-    if (positionalType != null || paramType == Type.FLAG) {
+    if (paramType == Type.FLAG) {
       return null;
     }
-    return description() == null ?
-        "VAL" :
-        description().argumentName();
+    Description description = description();
+    if (description == null) {
+      if (positionalType == null) {
+        return "VAL";
+      }
+      return snakeCase(methodName());
+    }
+    return description.argumentName();
   }
 }

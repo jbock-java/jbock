@@ -69,7 +69,7 @@ final class Parser {
 
     ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    ParameterSpec stopword = ParameterSpec.builder(STRING, "dd").build();
+    ParameterSpec dd = ParameterSpec.builder(STRING, "dd").build();
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
     ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
         .build();
@@ -83,14 +83,13 @@ final class Parser {
 
     if (context.stopword) {
       builder.add("\n");
-      builder.addStatement("$T $N = $S", stopword.type, stopword, "--");
+      builder.addStatement("$T $N = $S", dd.type, dd, "--");
     }
 
     builder.add("\n");
     if (!context.positionalParameters.isEmpty()) {
       builder.addStatement("$T $N = new $T<>()",
           LIST_OF_STRING, this.helper.positionalParameter, ArrayList.class);
-      builder.addStatement("$T $N = $L", INT, this.helper.ddIndexParameter, -1);
     }
 
     // Begin parsing loop
@@ -100,47 +99,53 @@ final class Parser {
     builder.addStatement("$T $N = $N.next()", STRING, token, it);
 
     if (context.stopword) {
-      builder.beginControlFlow("if ($N.equals($N))", token, stopword)
-          .addStatement("$N = $N.size()", this.helper.ddIndexParameter, this.helper.positionalParameter)
+
+      builder.beginControlFlow("if ($N.equals($N))", dd, token)
+          .addStatement("$T $N = $N.size()", INT, this.helper.ddIndexParameter, this.helper.positionalParameter)
           .addStatement("$N.forEachRemaining($N::add)", it, this.helper.positionalParameter)
-          .addStatement(buildExpression(helper))
+          .addStatement(buildExpression(helper, CodeBlock.builder().add("$N", this.helper.ddIndexParameter).build()))
           .endControlFlow();
     }
 
-    // handle positional token
-    builder.addStatement("$T $N = $N.$N($N)", option.type, optionParam, helper, this.helper.readRegularOptionMethod, token);
-    builder.beginControlFlow("if ($N != null)", optionParam);
-    builder.addStatement("$N.$N($N, $N, $N)", helper, this.helper.readMethod, optionParam, token, it);
-    builder.endControlFlow();
+    if (context.paramTypes.isEmpty()) {
 
-    if (context.positionalParameters.isEmpty()) {
-
-      builder.beginControlFlow("else")
-          .addStatement("throw new $T($S + $N)",
-              IllegalArgumentException.class, "Invalid option: ", token)
-          .endControlFlow();
-
+      builder.addStatement("$N.add($N)", this.helper.positionalParameter, token);
     } else {
 
-      if (!context.ignoreDashes) {
-        builder.beginControlFlow("else if ($N.length() >= 1 && $N.charAt(0) == '-')",
-            token, token)
+      // handle positional token
+      builder.addStatement("$T $N = $N.$N($N)", option.type, optionParam, helper, this.helper.readRegularOptionMethod, token);
+      builder.beginControlFlow("if ($N != null)", optionParam);
+      builder.addStatement("$N.$N($N, $N, $N)", helper, this.helper.readMethod, optionParam, token, it);
+      builder.endControlFlow();
+
+      if (context.positionalParameters.isEmpty()) {
+
+        builder.beginControlFlow("else")
             .addStatement("throw new $T($S + $N)",
                 IllegalArgumentException.class, "Invalid option: ", token)
             .endControlFlow();
+
+      } else {
+
+        if (!context.ignoreDashes) {
+          builder.beginControlFlow("else if ($N.length() >= 1 && $N.charAt(0) == '-')",
+              token, token)
+              .addStatement("throw new $T($S + $N)",
+                  IllegalArgumentException.class, "Invalid option: ", token)
+              .endControlFlow();
+        }
+
+        builder.beginControlFlow("else")
+            .addStatement("$N.add($N)", this.helper.positionalParameter, token)
+            .endControlFlow();
       }
-
-      builder.beginControlFlow("else")
-          .addStatement("$N.add($N)", this.helper.positionalParameter, token)
-          .endControlFlow();
     }
-
 
     // End parsing loop
     builder.endControlFlow();
 
     builder.add("\n");
-    builder.addStatement(buildExpression(helper));
+    builder.addStatement(buildExpression(helper, CodeBlock.builder().add("$L", -1).build()));
 
     return MethodSpec.methodBuilder("parse")
         .addParameter(args)
@@ -150,15 +155,15 @@ final class Parser {
         .build();
   }
 
-  private CodeBlock buildExpression(ParameterSpec helper) {
+  private CodeBlock buildExpression(ParameterSpec helper, CodeBlock param) {
     if (context.positionalParameters.isEmpty()) {
       return CodeBlock.builder()
           .add("return $N.build()", helper)
           .build();
     }
     return CodeBlock.builder()
-        .add("return $N.build($N, $N)",
-            helper, this.helper.positionalParameter, this.helper.ddIndexParameter)
+        .add("return $N.build($N, $L)",
+            helper, this.helper.positionalParameter, param)
         .build();
   }
 

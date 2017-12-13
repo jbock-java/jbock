@@ -302,7 +302,7 @@ final class Option {
     }
     builder.beginControlFlow("if ($N.$N)",
         optionTypeField, optionType.isPositionalField)
-        .addStatement("return $N()", describeParamMethod)
+        .addStatement("return $N", argumentNameField)
         .endControlFlow();
     builder.addStatement("return $N() + ' ' + $N", describeParamMethod, argumentNameField);
     return MethodSpec.methodBuilder("describeNames")
