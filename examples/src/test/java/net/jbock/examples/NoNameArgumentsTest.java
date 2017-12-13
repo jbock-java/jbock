@@ -55,7 +55,7 @@ public class NoNameArgumentsTest {
   @Test
   public void errorUnknownToken() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Unknown token: blabla");
+    exception.expectMessage("Invalid option: blabla");
     NoNameArguments_Parser.parse(new String[]{"blabla"});
   }
 }

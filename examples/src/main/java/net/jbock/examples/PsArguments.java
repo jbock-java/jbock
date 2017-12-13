@@ -4,7 +4,7 @@ import java.util.OptionalInt;
 import net.jbock.CommandLineArguments;
 import net.jbock.ShortName;
 
-@CommandLineArguments(allowGrouping = true)
+@CommandLineArguments
 abstract class PsArguments {
 
   @ShortName('a')

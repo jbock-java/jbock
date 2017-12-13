@@ -48,71 +48,71 @@ public class CurlArgumentsTest {
   }
 
   @Test
-  public void testGrouping() {
+  public void someTests() {
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
         .headers()).isEqualTo(singletonList("1"));
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
         .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-H1"})
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H1"})
         .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-H1"})
+    assertThat(CurlArguments_Parser.parse(new String[]{"-i", "-v", "-H1"})
         .headers()).isEqualTo(singletonList("1"));
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
         .include()).isFalse();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-H1"})
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H1"})
         .include()).isTrue();
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
         .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "1"})
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "1"})
         .verbose()).isTrue();
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
         .include()).isFalse();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "1"})
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "1"})
         .include()).isTrue();
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H", "1", "-H2"})
         .headers()).isEqualTo(asList("1", "2"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-H", "1", "-H2"})
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H", "1", "-H2"})
         .headers()).isEqualTo(asList("1", "2"));
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H", "1", "-H2"})
         .include()).isFalse();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-H", "1", "-H2"})
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H", "1", "-H2"})
         .include()).isTrue();
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1", "-H2"})
         .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-H1", "-H2"})
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H1", "-H2"})
         .verbose()).isTrue();
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1", "-H2"})
         .include()).isFalse();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-H1", "-H2"})
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H1", "-H2"})
         .include()).isTrue();
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-XPOST"})
         .method()).isEqualTo(Optional.of("POST"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-XPOST"})
-        .verbose()).isTrue();
     assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-XPOST"})
         .include()).isFalse();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-vi", "-XPOST"})
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-XPOST"})
         .include()).isTrue();
+    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-XPOST"})
+        .verbose()).isTrue();
   }
 
   @Test
   public void errorInvalidGrouping() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: H");
+    exception.expectMessage("Invalid option: -vH1");
     CurlArguments_Parser.parse(new String[]{"-vH1"});
   }
 
   @Test
   public void errorInvalidGroupingLong() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: X");
+    exception.expectMessage("Invalid option: -vXPOST");
     CurlArguments_Parser.parse(new String[]{"-vXPOST"});
   }
 
   @Test
   public void errorGroupingDuplicateFlag() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option '-v' is not repeatable");
+    exception.expectMessage("Invalid option: -vH'Content-Type: application/xml'");
     CurlArguments_Parser.parse(new String[]{"-v", "-vH'Content-Type: application/xml'"});
   }
 

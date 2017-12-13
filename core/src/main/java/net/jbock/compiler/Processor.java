@@ -75,13 +75,11 @@ public final class Processor extends AbstractProcessor {
         }
         Set<Type> paramTypes = paramTypes(parameters);
         Set<PositionalType> positionalParamTypes = positionalParamTypes(parameters);
-        boolean grouping = paramTypes.contains(Type.FLAG);
         Context context = Context.create(
             sourceType,
             parameters,
             paramTypes,
-            positionalParamTypes,
-            grouping);
+            positionalParamTypes);
         if (!done.add(asType(sourceType).getQualifiedName().toString())) {
           continue;
         }

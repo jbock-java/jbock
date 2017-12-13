@@ -26,19 +26,16 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 final class Parser {
 
   private final Context context;
-  private final OptionType optionType;
   private final Option option;
   private final Helper helper;
   private final Impl impl;
 
   private Parser(
       Context context,
-      OptionType optionType,
       Option option,
       Helper helper,
       Impl impl) {
     this.context = context;
-    this.optionType = optionType;
     this.option = option;
     this.helper = helper;
     this.impl = impl;
@@ -50,8 +47,8 @@ final class Parser {
     OptionType optionType = OptionType.create(context);
     Option option = Option.create(context, optionType);
     Impl impl = Impl.create(context, implType);
-    Helper helper = Helper.create(context, impl, optionType, option);
-    return new Parser(context, optionType, option, helper, impl);
+    Helper helper = Helper.create(context, impl, option);
+    return new Parser(context, option, helper, impl);
   }
 
   TypeSpec define() {
@@ -59,7 +56,7 @@ final class Parser {
         .addType(helper.define())
         .addType(option.define())
         .addType(impl.define())
-        .addType(optionType.define())
+        .addType(option.optionType.define())
         .addMethod(parseMethod())
         .addMethod(printUsageMethod())
         .addMethod(privateConstructor())
@@ -72,7 +69,8 @@ final class Parser {
 
     ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    ParameterSpec stopword = ParameterSpec.builder(STRING, "stopword").build();
+    ParameterSpec stopword = ParameterSpec.builder(STRING, "dd").build();
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
     ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
         .build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
@@ -109,27 +107,34 @@ final class Parser {
           .endControlFlow();
     }
 
-
     // handle positional token
-    builder.beginControlFlow("if ($N.length() <= 1 || $N.charAt(0) != '-')", token, token);
-    if (!context.positionalParameters.isEmpty()) {
-      builder.addStatement("$N.add($N)", this.helper.positionalParameter, token);
-    } else {
-      builder.addStatement("throw new $T($S + $N)",
-          IllegalArgumentException.class, "Unknown token: ", token);
-    }
+    builder.addStatement("$T $N = $N.$N($N)", option.type, optionParam, helper, this.helper.readRegularOptionMethod, token);
+    builder.beginControlFlow("if ($N != null)", optionParam);
+    builder.addStatement("$N.$N($N, $N, $N)", helper, this.helper.readMethod, optionParam, token, it);
     builder.endControlFlow();
 
-    if (context.grouping) {
-      builder.beginControlFlow("else if ($N.$N($N))", helper, this.helper.looksLikeGroupMethod, token)
-          .addStatement("$N.$N($N)",
-              helper, this.helper.readGroupMethod, token)
+    if (context.positionalParameters.isEmpty()) {
+
+      builder.beginControlFlow("else")
+          .addStatement("throw new $T($S + $N)",
+              IllegalArgumentException.class, "Invalid option: ", token)
+          .endControlFlow();
+
+    } else {
+
+      if (!context.ignoreDashes) {
+        builder.beginControlFlow("else if ($N.length() >= 1 && $N.charAt(0) == '-')",
+            token, token)
+            .addStatement("throw new $T($S + $N)",
+                IllegalArgumentException.class, "Invalid option: ", token)
+            .endControlFlow();
+      }
+
+      builder.beginControlFlow("else")
+          .addStatement("$N.add($N)", this.helper.positionalParameter, token)
           .endControlFlow();
     }
 
-    builder.beginControlFlow("else")
-        .addStatement("$N.$N($N, $N)", helper, this.helper.readMethod, token, it)
-        .endControlFlow();
 
     // End parsing loop
     builder.endControlFlow();

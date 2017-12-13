@@ -17,21 +17,21 @@ public class TarArgumentsTest {
         .isTrue();
     assertThat(TarArguments_Parser.parse(new String[]{"-x", "-f", "foo.tar"}).file())
         .isEqualTo("foo.tar");
-    assertThat(TarArguments_Parser.parse(new String[]{"-vx", "-f", "foo.tar"}).verbose())
+    assertThat(TarArguments_Parser.parse(new String[]{"-v", "-x", "-f", "foo.tar"}).verbose())
         .isTrue();
   }
 
   @Test
   public void errorGroupIsNotTheFirstToken() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Unknown token: xf");
+    exception.expectMessage("Invalid option: xf");
     TarArguments_Parser.parse(new String[]{"-v", "xf", "foo.tar"});
   }
 
   @Test
   public void errorGroupIsNotTheFirstTokenHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: f");
+    exception.expectMessage("Invalid option: -xf");
     TarArguments_Parser.parse(new String[]{"-v", "-xf", "foo.tar"});
   }
 }

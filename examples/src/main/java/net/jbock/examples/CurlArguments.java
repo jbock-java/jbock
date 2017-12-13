@@ -8,7 +8,7 @@ import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
 
-@CommandLineArguments(allowGrouping = true)
+@CommandLineArguments
 abstract class CurlArguments {
 
   @ShortName('X')

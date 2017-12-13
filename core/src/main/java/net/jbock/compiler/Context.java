@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
+import net.jbock.CommandLineArguments;
 import net.jbock.com.squareup.javapoet.ClassName;
 
 final class Context {
@@ -26,11 +27,11 @@ final class Context {
   // the stopword is either "--" or null
   final boolean stopword;
 
+  // should positional parameters be allowed to start with dash
+  final boolean ignoreDashes;
+
   // true if upper-casing the method names would cause a naming conflict
   final boolean problematicOptionNames;
-
-  // true if option grouping is allowed in the first argument
-  final boolean grouping;
 
   // a set of only the non-positional param types in the sourceType
   final Set<Type> paramTypes;
@@ -45,7 +46,7 @@ final class Context {
       List<Param> positionalParameters,
       boolean stopword,
       boolean problematicOptionNames,
-      boolean grouping,
+      boolean ignoreDashes,
       Set<Type> paramTypes,
       Set<PositionalType> positionalParamTypes) {
     this.sourceType = sourceType;
@@ -54,7 +55,7 @@ final class Context {
     this.positionalParameters = positionalParameters;
     this.stopword = stopword;
     this.problematicOptionNames = problematicOptionNames;
-    this.grouping = grouping;
+    this.ignoreDashes = ignoreDashes;
     this.paramTypes = paramTypes;
     this.positionalParamTypes = positionalParamTypes;
   }
@@ -63,12 +64,12 @@ final class Context {
       TypeElement sourceType,
       List<Param> parameters,
       Set<Type> paramTypes,
-      Set<PositionalType> positionalParamTypes,
-      boolean grouping) {
+      Set<PositionalType> positionalParamTypes) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean problematicOptionNames = problematicOptionNames(parameters);
     boolean stopword = positionalParamTypes.contains(PositionalType.POSITIONAL_LIST_2);
     List<Param> positionalParameters = parameters.stream().filter(p -> p.positionalType != null).collect(toList());
+    boolean ignoreDashes = sourceType.getAnnotation(CommandLineArguments.class).ignoreDashes();
     return new Context(
         sourceType,
         generatedClass,
@@ -76,7 +77,7 @@ final class Context {
         positionalParameters,
         stopword,
         problematicOptionNames,
-        grouping,
+        ignoreDashes,
         paramTypes,
         positionalParamTypes);
   }

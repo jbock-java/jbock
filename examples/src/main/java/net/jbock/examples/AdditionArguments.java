@@ -4,7 +4,7 @@ import java.util.OptionalInt;
 import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
 
-@CommandLineArguments
+@CommandLineArguments(ignoreDashes = true)
 abstract class AdditionArguments {
 
   @Positional

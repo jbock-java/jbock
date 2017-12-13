@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
 
-@CommandLineArguments(allowGrouping = true)
+@CommandLineArguments
 abstract class EvilArguments {
 
   abstract String fancy();

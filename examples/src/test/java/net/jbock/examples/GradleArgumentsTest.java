@@ -56,63 +56,63 @@ public final class GradleArgumentsTest {
   @Test
   public void errorFlagWithTrailingGarbage() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: 1");
+    exception.expectMessage("Invalid option: -c1");
     GradleArguments_Parser.parse(new String[]{"-c1"});
   }
 
   @Test
   public void errorWeirdOptionGroupEmbeddedHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -");
+    exception.expectMessage("Invalid option: -c-v");
     GradleArguments_Parser.parse(new String[]{"-c-v"});
   }
 
   @Test
   public void errorWeirdOptionGroupTrailingHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -");
+    exception.expectMessage("Invalid option: -c-");
     GradleArguments_Parser.parse(new String[]{"-c-"});
   }
 
   @Test
   public void errorWeirdOptionGroupEmbeddedEquals() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: =");
+    exception.expectMessage("Invalid option: -c=v");
     GradleArguments_Parser.parse(new String[]{"-c=v"});
   }
 
   @Test
   public void errorWeirdOptionGroupTrailingEquals() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: =");
+    exception.expectMessage("Invalid option: -c=");
     GradleArguments_Parser.parse(new String[]{"-c="});
   }
 
   @Test
   public void errorWeirdOptionGroupAttemptToPassMethod() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: X");
+    exception.expectMessage("Invalid option: -cX=1");
     GradleArguments_Parser.parse(new String[]{"-cX=1"});
   }
 
   @Test
   public void errorInvalidOptionGroupRepeated() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option '-v' is not repeatable");
+    exception.expectMessage("Invalid option: -cvv");
     GradleArguments_Parser.parse(new String[]{"-cvv"});
   }
 
   @Test
   public void errorInvalidOptionGroupUnknownToken() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: x");
+    exception.expectMessage("Invalid option: -cvx");
     GradleArguments_Parser.parse(new String[]{"-cvx"});
   }
 
   @Test
   public void errorInvalidOptionGroupMissingToken() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: m");
+    exception.expectMessage("Invalid option: -cvm");
     GradleArguments_Parser.parse(new String[]{"-cvm"});
   }
 
@@ -126,10 +126,10 @@ public final class GradleArgumentsTest {
   @Test
   public void testInterestingTokens() {
     GradleArguments gradleArguments = GradleArguments_Parser.parse(
-        new String[]{"--message=hello", "-", "--", "->", "<=>", "", " "});
+        new String[]{"--message=hello", "b-a-b-a", "--", "->", "<=>", "", " "});
     assertThat(gradleArguments.message()).isEqualTo(Optional.of("hello"));
     assertThat(gradleArguments.otherTokens().size()).isEqualTo(1);
-    assertThat(gradleArguments.otherTokens().get(0)).isEqualTo("-");
+    assertThat(gradleArguments.otherTokens().get(0)).isEqualTo("b-a-b-a");
     assertThat(gradleArguments.ddTokens().size()).isEqualTo(4);
     assertThat(gradleArguments.ddTokens().get(0)).isEqualTo("->");
     assertThat(gradleArguments.ddTokens().get(1)).isEqualTo("<=>");
@@ -213,19 +213,19 @@ public final class GradleArgumentsTest {
   }
 
   @Test
-  public void testOptionGroup() {
-    assertThat(GradleArguments_Parser.parse(new String[]{"-cv"}).cmos())
+  public void someTests() {
+    assertThat(GradleArguments_Parser.parse(new String[]{"-c", "-v"}).cmos())
         .isTrue();
-    assertThat(GradleArguments_Parser.parse(new String[]{"-cv"}).verbose())
+    assertThat(GradleArguments_Parser.parse(new String[]{"-c", "-v"}).verbose())
         .isTrue();
-    assertThat(GradleArguments_Parser.parse(new String[]{"-cv"}).message())
+    assertThat(GradleArguments_Parser.parse(new String[]{"-c", "-v"}).message())
         .isEqualTo(Optional.empty());
   }
 
   @Test
   public void errorDoubleFlagWithAttachedOption() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: m");
+    exception.expectMessage("Invalid option: -cvm");
     GradleArguments_Parser.parse(new String[]{"-cvm", "hello"});
   }
 

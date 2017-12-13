@@ -12,14 +12,14 @@ public class SimpleArgumentsTest {
   @Test
   public void noGroupingOfFirstArgument() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Unknown token: xf");
+    exception.expectMessage("Invalid option: xf");
     SimpleArguments_Parser.parse(new String[]{"xf", "1"});
   }
 
   @Test
   public void noGroupingFirstArgumentHyphen() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: f");
+    exception.expectMessage("Invalid option: -xf");
     SimpleArguments_Parser.parse(new String[]{"-xf", "1"});
   }
 }

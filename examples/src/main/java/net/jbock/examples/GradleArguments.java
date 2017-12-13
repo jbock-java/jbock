@@ -9,7 +9,7 @@ import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
 
-@CommandLineArguments(allowGrouping = true)
+@CommandLineArguments
 abstract class GradleArguments {
 
   @ShortName('m')
@@ -44,16 +44,6 @@ abstract class GradleArguments {
 
   @CommandLineArguments
   static abstract class Bar {
-    abstract List<String> bar();
-  }
-
-  @CommandLineArguments(allowGrouping = true)
-  static abstract class GroupingFoo {
-    abstract Optional<String> bar();
-  }
-
-  @CommandLineArguments(allowGrouping = true)
-  static abstract class GroupingBar {
     abstract List<String> bar();
   }
 }
