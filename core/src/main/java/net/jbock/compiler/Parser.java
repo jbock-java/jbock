@@ -156,7 +156,7 @@ final class Parser {
     } else {
 
       if (!context.ignoreDashes) {
-        builder.beginControlFlow("else if ($N.length() >= 1 && $N.charAt(0) == '-')",
+        builder.beginControlFlow("else if (!$N.isEmpty() && $N.charAt(0) == '-')",
             token, token)
             .addStatement("throw new $T($S + $N)",
                 IllegalArgumentException.class, "Invalid option: ", token)

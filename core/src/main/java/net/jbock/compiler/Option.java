@@ -2,7 +2,6 @@ package net.jbock.compiler;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
@@ -39,16 +38,18 @@ final class Option {
   final OptionType optionType;
   final Context context;
 
+  final MethodSpec describeParamMethod;
+
   private final FieldSpec descriptionField;
   private final FieldSpec argumentNameField;
 
   private final MethodSpec describeNamesMethod;
-  private final MethodSpec describeParamMethod;
   private final MethodSpec descriptionBlockMethod;
 
   private final FieldSpec longNameField;
 
-  final FieldSpec shortNameField;
+  private final FieldSpec shortNameField;
+
   final FieldSpec typeField;
 
   final MethodSpec shortNameMapMethod;
@@ -76,11 +77,8 @@ final class Option {
     this.typeField = typeField;
     this.longNameMapMethod = longNameMapMethod;
     this.describeParamMethod = describeParamMethod(
-        context,
         longNameField,
-        shortNameField,
-        typeField,
-        optionType);
+        shortNameField);
     this.describeNamesMethod = describeNamesMethod(
         context,
         describeParamMethod,
@@ -146,7 +144,6 @@ final class Option {
     builder.addModifiers(PRIVATE)
         .addFields(Arrays.asList(longNameField, shortNameField, typeField, argumentNameField, descriptionField))
         .addMethod(describeMethod())
-        .addMethod(toStringMethod())
         .addMethod(describeNamesMethod)
         .addMethod(describeParamMethod)
         .addMethod(descriptionBlockMethod)
@@ -312,19 +309,10 @@ final class Option {
   }
 
   private static MethodSpec describeParamMethod(
-      Context context,
       FieldSpec longNameField,
-      FieldSpec shortNameField,
-      FieldSpec optionTypeField,
-      OptionType optionType) {
+      FieldSpec shortNameField) {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     CodeBlock.Builder builder = CodeBlock.builder();
-
-    if (!context.positionalParameters.isEmpty()) {
-      builder.beginControlFlow("if ($N.$N)", optionTypeField, optionType.isPositionalField)
-          .addStatement("return $S", "(positional arguments)")
-          .endControlFlow();
-    }
 
     builder.beginControlFlow("if ($N == null)", shortNameField)
         .addStatement("return $S + $N", "--", longNameField)
@@ -345,15 +333,6 @@ final class Option {
     return MethodSpec.methodBuilder("describeParam")
         .returns(STRING)
         .addCode(builder.build())
-        .build();
-  }
-
-  private MethodSpec toStringMethod() {
-    return MethodSpec.methodBuilder("toString")
-        .addAnnotation(Override.class)
-        .returns(STRING)
-        .addStatement("return name() + $S + $N() + $S", " (", describeParamMethod, ")")
-        .addModifiers(PUBLIC)
         .build();
   }
 }

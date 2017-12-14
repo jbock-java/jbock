@@ -176,13 +176,13 @@ final class Helper {
         addMethod,
         addFlagMethod);
 
-    MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(option.type, sMapField);
-    MethodSpec extractRequiredMethod = extractRequiredMethod(option.type, sMapField);
-    MethodSpec extractRequiredIntMethod = extractRequiredIntMethod(option.type, sMapField);
+    MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(option, sMapField);
+    MethodSpec extractRequiredMethod = extractRequiredMethod(option, sMapField);
+    MethodSpec extractRequiredIntMethod = extractRequiredIntMethod(option, sMapField);
     MethodSpec extractPositionalRequiredMethod = extractPositionalRequiredMethod(
-        option.type, positionalParameter, ddIndexParameter);
+        option, positionalParameter, ddIndexParameter);
     MethodSpec extractPositionalRequiredIntMethod = extractPositionalRequiredIntMethod(
-        option.type, positionalParameter, ddIndexParameter);
+        option, positionalParameter, ddIndexParameter);
     MethodSpec extractPositionalListMethod = extractPositionalListMethod(
         positionalParameter, ddIndexParameter);
     MethodSpec extractPositionalOptionalMethod = extractPositionalOptionalMethod(
@@ -296,8 +296,7 @@ final class Helper {
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
     builder.beginControlFlow("if (!$N.add($N))", flags, optionParam)
-        .addStatement("throw new $T($S + $N.$N + $S)", IllegalArgumentException.class,
-            "Option '-", optionParam, option.shortNameField, "' is not repeatable")
+        .addStatement(repetitionError(option, optionParam))
         .endControlFlow();
 
     return builder.addParameter(optionParam).build();
@@ -332,7 +331,7 @@ final class Helper {
     }
 
     builder.beginControlFlow("if ($N.containsKey($N))", sMap, optionParam)
-        .addStatement(repetitionError(optionParam))
+        .addStatement(repetitionError(option, optionParam))
         .endControlFlow();
 
     builder.addStatement("$N.put($N, $N)", sMap, optionParam, argument);
@@ -560,52 +559,54 @@ final class Helper {
   }
 
   private static MethodSpec extractRequiredMethod(
-      ClassName type,
+      Option option,
       FieldSpec sMapField) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(type, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractRequired");
 
-    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, option);
+    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, optionParam);
 
     builder.beginControlFlow("if ($N == null)", token)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Missing required option: ", option)
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Missing required option: ", optionParam)
         .endControlFlow();
 
     builder.addStatement("return $N", token);
-    return builder.addParameter(option)
+    return builder.addParameter(optionParam)
         .returns(STRING).build();
   }
 
   private static MethodSpec extractRequiredIntMethod(
-      ClassName type,
+      Option option,
       FieldSpec sMapField) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(type, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractRequiredInt");
 
-    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, option);
+    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, optionParam);
 
     builder.beginControlFlow("if ($N == null)", token)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Missing required option: ", option)
+        .addStatement("throw new $T($S + $L)", IllegalArgumentException.class,
+            "Missing required option: ", optionSummaryString(option, optionParam))
         .endControlFlow();
 
     builder.addStatement("return $T.parseInt($N)", Integer.class, token);
-    return builder.addParameter(option)
+    return builder.addParameter(optionParam)
         .returns(INT).build();
   }
 
   private static MethodSpec extractOptionalIntMethod(
-      ClassName type,
+      Option option,
       FieldSpec sMapField) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec option = ParameterSpec.builder(type, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractOptionalInt");
 
-    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, option);
+    builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, optionParam);
 
     builder.beginControlFlow("if ($N == null)", token)
         .addStatement("return $T.empty()", OptionalInt.class)
@@ -613,15 +614,15 @@ final class Helper {
 
     builder.addStatement("return $T.of($T.parseInt($N))",
         OptionalInt.class, Integer.class, token);
-    return builder.addParameter(option)
+    return builder.addParameter(optionParam)
         .returns(OptionalInt.class).build();
   }
 
   private static MethodSpec extractPositionalRequiredMethod(
-      ClassName type,
+      Option option,
       ParameterSpec positionalParameter,
       ParameterSpec ddIndexParameter) {
-    ParameterSpec option = ParameterSpec.builder(type, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
     ParameterSpec size = ParameterSpec.builder(INT, "size").build();
 
@@ -632,21 +633,21 @@ final class Helper {
 
     builder.beginControlFlow("if ($N >= $N)", index, size)
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing positional parameter: ", option)
+            "Missing positional parameter: ", optionParam)
         .endControlFlow();
 
     builder.addStatement("return $N.get($N)", positionalParameter, index);
 
-    return builder.addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, option))
+    return builder.addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, optionParam))
         .addModifiers(STATIC)
         .returns(STRING).build();
   }
 
   private static MethodSpec extractPositionalRequiredIntMethod(
-      ClassName type,
+      Option option,
       ParameterSpec positionalParameter,
       ParameterSpec ddIndexParameter) {
-    ParameterSpec option = ParameterSpec.builder(type, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
     ParameterSpec size = ParameterSpec.builder(INT, "size").build();
 
@@ -657,12 +658,12 @@ final class Helper {
 
     builder.beginControlFlow("if ($N >= $N)", index, size)
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing positional parameter: ", option)
+            "Missing positional parameter: ", optionParam)
         .endControlFlow();
 
     builder.addStatement("return $T.parseInt($N.get($N))", Integer.class, positionalParameter, index);
 
-    return builder.addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, option))
+    return builder.addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, optionParam))
         .addModifiers(STATIC)
         .returns(INT).build();
   }
@@ -760,12 +761,22 @@ final class Helper {
         .returns(LIST_OF_STRING).build();
   }
 
-  private static CodeBlock repetitionError(
-      ParameterSpec option) {
+  private static CodeBlock optionSummaryString(
+      Option option,
+      ParameterSpec optionParam) {
     return CodeBlock.builder()
-        .add("throw new $T($S +$N + $S)",
+        .add("$N.name() + $S + $N.$N() + $S",
+            optionParam, " (", optionParam, option.describeParamMethod, ")")
+        .build();
+  }
+
+  private static CodeBlock repetitionError(
+      Option option,
+      ParameterSpec optionParam) {
+    return CodeBlock.builder()
+        .add("throw new $T($S + $L + $S)",
             IllegalArgumentException.class,
-            "Option ", option, " is not repeatable")
+            "Option ", optionSummaryString(option, optionParam), " is not repeatable")
         .build();
   }
 }

@@ -53,4 +53,14 @@ public class CpArgumentsTest {
     exception.expectMessage("Excess option: c");
     CpArguments_Parser.parse(new String[]{"-r", "a", "b", "c"});
   }
+
+  @Test
+  public void flag() {
+    assertThat(CpArguments_Parser.parse(new String[]{"-r", "a", "b"}).source())
+        .isEqualTo("a");
+    assertThat(CpArguments_Parser.parse(new String[]{"a", "-r", "b"}).source())
+        .isEqualTo("a");
+    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "-r"}).source())
+        .isEqualTo("a");
+  }
 }
