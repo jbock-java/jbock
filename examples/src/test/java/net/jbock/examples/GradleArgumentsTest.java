@@ -50,7 +50,8 @@ public final class GradleArgumentsTest {
   @Test
   public void errorArrayIsNull() {
     exception.expect(NullPointerException.class);
-    GradleArguments_Parser.parse(null);
+    String[] args = null;
+    GradleArguments_Parser.parse(args);
   }
 
   @Test

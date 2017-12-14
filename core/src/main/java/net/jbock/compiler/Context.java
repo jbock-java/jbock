@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static net.jbock.compiler.Util.asType;
 
 import java.util.List;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 import javax.lang.model.element.TypeElement;
@@ -24,7 +25,7 @@ final class Context {
   // only the methods that have the Positional annotation (in source order, inheritance not considered)
   final List<Param> positionalParameters;
 
-  // the stopword is either "--" or null
+  // should "--" end option parsing
   final boolean stopword;
 
   // should positional parameters be allowed to start with dash
@@ -118,11 +119,14 @@ final class Context {
    * before doubledash.
    *
    * @return the maximum number of positional arguments,
-   *     or {@code -1} if there is no limit
+   *     or {@code OptionalInt.empty()} if there is no limit
    */
-  int maxPositional() {
+  OptionalInt maxPositional() {
+    if (positionalParameters.isEmpty()) {
+      return OptionalInt.empty();
+    }
     if (positionalParamTypes.contains(PositionalType.POSITIONAL_LIST)) {
-      return -1;
+      return OptionalInt.empty();
     }
     int count = 0;
     for (Param parameter : positionalParameters) {
@@ -130,6 +134,10 @@ final class Context {
         count++;
       }
     }
-    return count;
+    return OptionalInt.of(count);
+  }
+
+  boolean simplePositional() {
+    return !stopword && paramTypes.isEmpty() && ignoreDashes;
   }
 }

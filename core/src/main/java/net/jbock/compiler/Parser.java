@@ -12,6 +12,7 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.OptionalInt;
 import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
@@ -58,6 +59,7 @@ final class Parser {
         .addType(impl.define())
         .addType(option.optionType.define())
         .addMethod(parseMethod())
+        .addMethod(parseMethodListOverride())
         .addMethod(printUsageMethod())
         .addMethod(privateConstructor())
         .addModifiers(PUBLIC, FINAL)
@@ -66,30 +68,36 @@ final class Parser {
   }
 
   private MethodSpec parseMethod() {
+    ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
+        .build();
+    return MethodSpec.methodBuilder("parse")
+        .addParameter(args)
+        .returns(TypeName.get(context.sourceType.asType()))
+        .addModifiers(PUBLIC, STATIC)
+        .addStatement("return parse($T.asList($N))", Arrays.class, args)
+        .build();
+  }
+
+  private MethodSpec parseMethodListOverride() {
 
     ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
     ParameterSpec tokens = ParameterSpec.builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec dd = ParameterSpec.builder(STRING, "dd").build();
-    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
-    ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
-        .build();
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("parse")
-        .addParameter(args)
+        .addParameter(tokens)
         .returns(TypeName.get(context.sourceType.asType()))
         .addModifiers(PUBLIC, STATIC);
 
-    builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
-    builder.addStatement("$T $N = $T.asList($N)", LIST_OF_STRING, tokens, Arrays.class, args);
-
-    if (!context.stopword && context.paramTypes.isEmpty() && context.ignoreDashes) {
+    if (context.simplePositional()) {
       return builder
-          .addStatement("return $N.build($N, $L)", helper, tokens, -1)
+          .addStatement("return $T.build($N, $T.empty())",
+              helper.type, tokens, OptionalInt.class)
           .build();
     }
 
+    builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
     builder.addStatement("$T $N = $N.iterator()", STRING_ITERATOR, it, tokens);
 
     if (context.stopword) {
@@ -101,17 +109,33 @@ final class Parser {
           LIST_OF_STRING, this.helper.positionalParameter, ArrayList.class);
     }
 
-    // Begin parsing loop
-    builder.beginControlFlow("while ($N.hasNext())", it);
+    builder.beginControlFlow("while ($N.hasNext())", it)
+        .addCode(codeInsideParsingLoop(helper, it, dd))
+        .endControlFlow();
 
+    builder.addStatement(returnFromParseExpression(helper,
+        CodeBlock.builder().add("$T.empty()", OptionalInt.class).build()));
+    return builder.build();
+  }
+
+  private CodeBlock codeInsideParsingLoop(
+      ParameterSpec helper,
+      ParameterSpec it,
+      ParameterSpec dd) {
+
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+
+    CodeBlock.Builder builder = CodeBlock.builder();
     builder.addStatement("$T $N = $N.next()", STRING, token, it);
 
     if (context.stopword) {
 
       builder.beginControlFlow("if ($N.equals($N))", dd, token)
-          .addStatement("$T $N = $N.size()", INT, this.helper.ddIndexParameter, this.helper.positionalParameter)
+          .addStatement("$T $N = $T.of($N.size())", OptionalInt.class, this.helper.ddIndexParameter,
+              OptionalInt.class, this.helper.positionalParameter)
           .addStatement("$N.forEachRemaining($N::add)", it, this.helper.positionalParameter)
-          .addStatement(buildExpression(helper, CodeBlock.builder().add("$N", this.helper.ddIndexParameter).build()))
+          .addStatement(returnFromParseExpression(helper, CodeBlock.builder().add("$N", this.helper.ddIndexParameter).build()))
           .endControlFlow();
     }
 
@@ -148,15 +172,10 @@ final class Parser {
             .endControlFlow();
       }
     }
-
-    // End parsing loop
-    builder.endControlFlow();
-
-    builder.addStatement(buildExpression(helper, CodeBlock.builder().add("$L", -1).build()));
     return builder.build();
   }
 
-  private CodeBlock buildExpression(ParameterSpec helper, CodeBlock param) {
+  private CodeBlock returnFromParseExpression(ParameterSpec helper, CodeBlock param) {
     if (context.positionalParameters.isEmpty()) {
       return CodeBlock.builder()
           .add("return $N.build()", helper)

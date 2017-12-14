@@ -138,7 +138,7 @@ final class Helper {
       Option option) {
     ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional")
         .build();
-    ParameterSpec ddIndexParameter = ParameterSpec.builder(INT, "ddIndex").build();
+    ParameterSpec ddIndexParameter = ParameterSpec.builder(OptionalInt.class, "ddIndex").build();
     MethodSpec readNextMethod = readNextMethod();
     MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
     MethodSpec looksLikeLongMethod = looksLikeLongMethod();
@@ -225,9 +225,11 @@ final class Helper {
 
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.classBuilder(type)
-        .addModifiers(PRIVATE, STATIC, FINAL)
-        .addMethod(readMethod)
-        .addMethod(buildMethod());
+        .addModifiers(PRIVATE, STATIC, FINAL);
+    if (!context.simplePositional()) {
+      builder.addMethod(readMethod);
+    }
+    builder.addMethod(buildMethod());
     if (!context.paramTypes.isEmpty()) {
       builder.addMethod(readRegularOptionMethod);
       builder.addField(
@@ -532,24 +534,28 @@ final class Helper {
     ParameterSpec last = ParameterSpec.builder(INT, "size").build();
     ParameterSpec max = ParameterSpec.builder(INT, "max").build();
 
-    if (!option.context.positionalParameters.isEmpty()) {
-      int maxPositional = option.context.maxPositional();
-      if (maxPositional >= 0) {
-        builder.addStatement("$T $N = $L",
-            INT, max, maxPositional);
-        builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-            INT, last, ddIndexParameter, positionalParameter, ddIndexParameter);
+    option.context.maxPositional().ifPresent(maxPositional -> {
+      builder.addStatement("$T $N = $L",
+          INT, max, maxPositional);
+      builder.addStatement("$T $N = $N.orElse($N.size())",
+          INT, last, ddIndexParameter, positionalParameter);
 
-        builder.beginControlFlow("if ($N > $N)", last, max)
-            .addStatement("throw new $T($S + $N.get($N))", IllegalArgumentException.class,
-                "Excess option: ", positionalParameter, max)
-            .endControlFlow();
-      }
+      builder.beginControlFlow("if ($N > $N)", last, max)
+          .addStatement("throw new $T($S + $N.get($N))", IllegalArgumentException.class,
+              "Excess option: ", positionalParameter, max)
+          .endControlFlow();
+    });
+
+    if (!context.positionalParameters.isEmpty()) {
       builder.addParameter(positionalParameter);
       builder.addParameter(ddIndexParameter);
     }
 
     builder.addStatement("return new $T($L)", impl.type, args.build());
+
+    if (context.simplePositional()) {
+      builder.addModifiers(STATIC);
+    }
     return builder.returns(impl.type).build();
   }
 
@@ -621,8 +627,8 @@ final class Helper {
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalRequired");
 
-    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
+    builder.addStatement("$T $N = $N.orElse($N.size())",
+        INT, size, ddIndexParameter, positionalParameter);
 
     builder.beginControlFlow("if ($N >= $N)", index, size)
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
@@ -632,6 +638,7 @@ final class Helper {
     builder.addStatement("return $N.get($N)", positionalParameter, index);
 
     return builder.addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, option))
+        .addModifiers(STATIC)
         .returns(STRING).build();
   }
 
@@ -645,8 +652,8 @@ final class Helper {
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalRequiredInt");
 
-    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
+    builder.addStatement("$T $N = $N.orElse($N.size())",
+        INT, size, ddIndexParameter, positionalParameter);
 
     builder.beginControlFlow("if ($N >= $N)", index, size)
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
@@ -656,6 +663,7 @@ final class Helper {
     builder.addStatement("return $T.parseInt($N.get($N))", Integer.class, positionalParameter, index);
 
     return builder.addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, option))
+        .addModifiers(STATIC)
         .returns(INT).build();
   }
 
@@ -667,8 +675,8 @@ final class Helper {
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalOptional");
 
-    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
+    builder.addStatement("$T $N = $N.orElse($N.size())",
+        INT, size, ddIndexParameter, positionalParameter);
 
     builder.beginControlFlow("if ($N >= $N)", index, size)
         .addStatement("return $T.empty()", Optional.class)
@@ -678,6 +686,7 @@ final class Helper {
         Optional.class, positionalParameter, index);
 
     return builder.addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter))
+        .addModifiers(STATIC)
         .returns(OPTIONAL_STRING).build();
   }
 
@@ -689,8 +698,8 @@ final class Helper {
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalOptionalInt");
 
-    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, size, ddIndexParameter, positionalParameter, ddIndexParameter);
+    builder.addStatement("$T $N = $N.orElse($N.size())",
+        INT, size, ddIndexParameter, positionalParameter);
 
     builder.beginControlFlow("if ($N >= $N)", index, size)
         .addStatement("return $T.empty()", OptionalInt.class)
@@ -700,6 +709,7 @@ final class Helper {
         OptionalInt.class, Integer.class, positionalParameter, index);
 
     return builder.addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter))
+        .addModifiers(STATIC)
         .returns(OptionalInt.class).build();
   }
 
@@ -709,14 +719,15 @@ final class Helper {
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("extractPositionalList2");
 
-    builder.beginControlFlow("if ($N < 0)", ddIndexParameter)
+    builder.beginControlFlow("if (!$N.isPresent())", ddIndexParameter)
         .addStatement("return $T.emptyList()", Collections.class)
         .endControlFlow();
 
-    builder.addStatement("return $N.subList($N, $N.size())",
+    builder.addStatement("return $N.subList($N.getAsInt(), $N.size())",
         positionalParameter, ddIndexParameter, positionalParameter);
 
     return builder.addParameters(Arrays.asList(ddIndexParameter, positionalParameter))
+        .addModifiers(STATIC)
         .returns(LIST_OF_STRING).build();
   }
 
@@ -732,8 +743,8 @@ final class Helper {
         .addStatement("return $T.emptyList()", Collections.class)
         .endControlFlow();
 
-    builder.addStatement("$T $N = $N < 0 ? $N.size() : $N",
-        INT, end, ddIndexParameter, positionalParameter, ddIndexParameter);
+    builder.addStatement("$T $N = $N.orElse($N.size())",
+        INT, end, ddIndexParameter, positionalParameter);
 
     builder.beginControlFlow("if ($N >= $N)", start, end)
         .addStatement("return $T.emptyList()", Collections.class)
@@ -745,9 +756,9 @@ final class Helper {
         start,
         end);
     return builder.addParameters(Arrays.asList(start, positionalParameter, ddIndexParameter))
+        .addModifiers(STATIC)
         .returns(LIST_OF_STRING).build();
   }
-
 
   private static CodeBlock repetitionError(
       ParameterSpec option) {
