@@ -11,6 +11,7 @@ import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED;
 import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED_INT;
 
 import java.util.Collections;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
@@ -36,10 +37,15 @@ enum Type {
     }
 
     @Override
-    CodeBlock jsonExpression(Impl impl, int j) {
-      return CodeBlock.builder()
-          .add("$N", impl.fields.get(j))
-          .build();
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.beginControlFlow("if ($N)", impl.fields.get(j))
+          .addStatement("$N.add($S + $N)",
+              joiner,
+              enumKey(impl, j),
+              impl.fields.get(j))
+          .endControlFlow();
+      return builder.build();
     }
   },
 
@@ -56,12 +62,15 @@ enum Type {
     }
 
     @Override
-    CodeBlock jsonExpression(Impl impl, int j) {
-      ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-      return CodeBlock.builder()
-          .add("$N.map($N -> '\"' + $N + '\"').orElse(null)",
-              impl.fields.get(j), s, s)
-          .build();
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.beginControlFlow("if ($N.isPresent())", impl.fields.get(j))
+          .addStatement("$N.add($S + '\"' + $N.get() + '\"')",
+              joiner,
+              enumKey(impl, j),
+              impl.fields.get(j))
+          .endControlFlow();
+      return builder.build();
     }
   },
 
@@ -77,10 +86,15 @@ enum Type {
     }
 
     @Override
-    CodeBlock jsonExpression(Impl impl, int j) {
-      return CodeBlock.builder()
-          .add("$N.stream().boxed().findFirst().orElse(null)", impl.fields.get(j))
-          .build();
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.beginControlFlow("if ($N.isPresent())", impl.fields.get(j))
+          .addStatement("$N.add($S + $N.getAsInt())",
+              joiner,
+              enumKey(impl, j),
+              impl.fields.get(j))
+          .endControlFlow();
+      return builder.build();
     }
   },
 
@@ -96,10 +110,13 @@ enum Type {
     }
 
     @Override
-    CodeBlock jsonExpression(Impl impl, int j) {
-      return CodeBlock.builder()
-          .add("'\"' + $N + '\"'", impl.fields.get(j))
-          .build();
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.addStatement("$N.add($S + '\"' + $N + '\"')",
+          joiner,
+          enumKey(impl, j),
+          impl.fields.get(j));
+      return builder.build();
     }
   },
 
@@ -115,10 +132,13 @@ enum Type {
     }
 
     @Override
-    CodeBlock jsonExpression(Impl impl, int j) {
-      return CodeBlock.builder()
-          .add("$N", impl.fields.get(j))
-          .build();
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.addStatement("$N.add($S + $N)",
+          joiner,
+          enumKey(impl, j),
+          impl.fields.get(j));
+      return builder.build();
     }
   },
 
@@ -135,12 +155,14 @@ enum Type {
     }
 
     @Override
-    CodeBlock jsonExpression(Impl impl, int j) {
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
       ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-      return CodeBlock.builder()
-          .add("$N.stream().map($N -> '\"' + $N + '\"').collect($T.joining($S, $S, $S))",
-              impl.fields.get(j), s, s, Collectors.class, ", ", "[", "]")
-          .build();
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.addStatement("$N.add($S + $N.stream()\n.map($N -> '\"' + $N + '\"')\n.collect($T.joining($S, $S, $S)))",
+          joiner,
+          enumKey(impl, j),
+          impl.fields.get(j), s, s, Collectors.class, ", ", "[", "]");
+      return builder.build();
     }
   };
 
@@ -155,10 +177,14 @@ enum Type {
    */
   abstract CodeBlock extractExpression(Helper helper, int j);
 
-  abstract CodeBlock jsonExpression(Impl impl, int j);
+  abstract CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j);
 
   Type(TypeName returnType, PositionalType positionalType) {
     this.returnType = returnType;
     this.positionalType = positionalType;
+  }
+
+  private static String enumKey(Impl impl, int j) {
+    return '"' + impl.option.enumConstant(j).toLowerCase(Locale.US) + "\": ";
   }
 }

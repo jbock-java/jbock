@@ -32,14 +32,12 @@ public class CpArgumentsTest {
   public void minimal() {
     assertThat(readJson(CpArguments_Parser.parse(new String[]{"a", "b"})))
         .isEqualTo(expectedJson(
-            "SOURCE", "a",
-            "DEST", "b",
-            "RECURSIVE", false));
+            "source", "a",
+            "dest", "b"));
     assertThat(readJson(CpArguments_Parser.parse(new String[]{"b", "a"})))
         .isEqualTo(expectedJson(
-            "SOURCE", "b",
-            "DEST", "a",
-            "RECURSIVE", false));
+            "source", "b",
+            "dest", "a"));
   }
 
   @Test
@@ -66,9 +64,9 @@ public class CpArgumentsTest {
   @Test
   public void flag() {
     JsonNode expected = expectedJson(
-        "SOURCE", "a",
-        "DEST", "b",
-        "RECURSIVE", true);
+        "source", "a",
+        "dest", "b",
+        "recursive", true);
     assertThat(readJson(CpArguments_Parser.parse(new String[]{"-r", "a", "b"})))
         .isEqualTo(expected);
     assertThat(readJson(CpArguments_Parser.parse(new String[]{"a", "-r", "b"})))

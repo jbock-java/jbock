@@ -27,7 +27,7 @@ final class Impl {
 
   final List<FieldSpec> fields;
 
-  private final Option option;
+  final Option option;
 
   private Impl(
       ClassName type,
@@ -102,9 +102,7 @@ final class Impl {
 
     for (int i = 0; i < option.context.parameters.size(); i++) {
       Param param = option.context.parameters.get(i);
-      builder.addStatement("$N.add($S + $L)",
-          joiner, '"' + option.enumConstant(i) + "\": ",
-          param.paramType.jsonExpression(this, i));
+      builder.addCode(param.paramType.jsonStatement(this, joiner, i));
     }
     builder.addStatement("return $N.toString()", joiner);
 
