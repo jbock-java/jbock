@@ -1,7 +1,10 @@
 package net.jbock.examples;
 
+import static net.jbock.examples.fixture.JsonFixture.expectedJson;
+import static net.jbock.examples.fixture.JsonFixture.readJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -27,10 +30,16 @@ public class CpArgumentsTest {
 
   @Test
   public void minimal() {
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b"}).source())
-        .isEqualTo("a");
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b"}).dest())
-        .isEqualTo("b");
+    assertThat(readJson(CpArguments_Parser.parse(new String[]{"a", "b"})))
+        .isEqualTo(expectedJson(
+            "SOURCE", "a",
+            "DEST", "b",
+            "RECURSIVE", false));
+    assertThat(readJson(CpArguments_Parser.parse(new String[]{"b", "a"})))
+        .isEqualTo(expectedJson(
+            "SOURCE", "b",
+            "DEST", "a",
+            "RECURSIVE", false));
   }
 
   @Test
@@ -56,11 +65,15 @@ public class CpArgumentsTest {
 
   @Test
   public void flag() {
-    assertThat(CpArguments_Parser.parse(new String[]{"-r", "a", "b"}).source())
-        .isEqualTo("a");
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "-r", "b"}).source())
-        .isEqualTo("a");
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b", "-r"}).source())
-        .isEqualTo("a");
+    JsonNode expected = expectedJson(
+        "SOURCE", "a",
+        "DEST", "b",
+        "RECURSIVE", true);
+    assertThat(readJson(CpArguments_Parser.parse(new String[]{"-r", "a", "b"})))
+        .isEqualTo(expected);
+    assertThat(readJson(CpArguments_Parser.parse(new String[]{"a", "-r", "b"})))
+        .isEqualTo(expected);
+    assertThat(readJson(CpArguments_Parser.parse(new String[]{"a", "b", "-r"})))
+        .isEqualTo(expected);
   }
 }

@@ -13,8 +13,10 @@ import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED_INT;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.stream.Collectors;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 /**
@@ -32,6 +34,13 @@ enum Type {
           helper.option.enumConstant(j))
           .build();
     }
+
+    @Override
+    CodeBlock jsonExpression(Impl impl, int j) {
+      return CodeBlock.builder()
+          .add("$N", impl.fields.get(j))
+          .build();
+    }
   },
 
   OPTIONAL(OPTIONAL_STRING, POSITIONAL_OPTIONAL) {
@@ -43,6 +52,15 @@ enum Type {
           helper.sMapField,
           helper.option.type,
           helper.option.enumConstant(j))
+          .build();
+    }
+
+    @Override
+    CodeBlock jsonExpression(Impl impl, int j) {
+      ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+      return CodeBlock.builder()
+          .add("$N.map($N -> '\"' + $N + '\"').orElse(null)",
+              impl.fields.get(j), s, s)
           .build();
     }
   },
@@ -57,6 +75,13 @@ enum Type {
           helper.option.enumConstant(j))
           .build();
     }
+
+    @Override
+    CodeBlock jsonExpression(Impl impl, int j) {
+      return CodeBlock.builder()
+          .add("$N.stream().boxed().findFirst().orElse(null)", impl.fields.get(j))
+          .build();
+    }
   },
 
   REQUIRED(STRING, POSITIONAL_REQUIRED) {
@@ -69,6 +94,13 @@ enum Type {
           helper.option.enumConstant(j))
           .build();
     }
+
+    @Override
+    CodeBlock jsonExpression(Impl impl, int j) {
+      return CodeBlock.builder()
+          .add("'\"' + $N + '\"'", impl.fields.get(j))
+          .build();
+    }
   },
 
   REQUIRED_INT(TypeName.INT, POSITIONAL_REQUIRED_INT) {
@@ -79,6 +111,13 @@ enum Type {
           helper.extractRequiredIntMethod,
           helper.option.type,
           helper.option.enumConstant(j))
+          .build();
+    }
+
+    @Override
+    CodeBlock jsonExpression(Impl impl, int j) {
+      return CodeBlock.builder()
+          .add("$N", impl.fields.get(j))
           .build();
     }
   },
@@ -94,6 +133,15 @@ enum Type {
           Collections.class)
           .build();
     }
+
+    @Override
+    CodeBlock jsonExpression(Impl impl, int j) {
+      ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+      return CodeBlock.builder()
+          .add("$N.stream().map($N -> '\"' + $N + '\"').collect($T.joining($S, $S, $S))",
+              impl.fields.get(j), s, s, Collectors.class, ", ", "[", "]")
+          .build();
+    }
   };
 
   final TypeName returnType;
@@ -106,6 +154,8 @@ enum Type {
    *     which has the parameters listed in {@link Option} (see comment there).
    */
   abstract CodeBlock extractExpression(Helper helper, int j);
+
+  abstract CodeBlock jsonExpression(Impl impl, int j);
 
   Type(TypeName returnType, PositionalType positionalType) {
     this.returnType = returnType;

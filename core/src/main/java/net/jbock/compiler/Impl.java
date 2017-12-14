@@ -4,9 +4,11 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.STRING;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.StringJoiner;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
@@ -23,49 +25,50 @@ final class Impl {
 
   final ClassName type;
 
-  private final Context context;
+  final List<FieldSpec> fields;
 
-  private final List<FieldSpec> fields;
+  private final Option option;
 
   private Impl(
       ClassName type,
-      Context context,
+      Option option,
       List<FieldSpec> fields) {
     this.type = type;
-    this.context = context;
+    this.option = option;
     this.fields = fields;
   }
 
   static Impl create(
-      Context context,
+      Option option,
       ClassName implType) {
-    List<FieldSpec> fields = new ArrayList<>(context.parameters.size());
-    for (int j = 0; j < context.parameters.size(); j++) {
-      Param param = context.parameters.get(j);
+    List<FieldSpec> fields = new ArrayList<>(option.context.parameters.size());
+    for (int j = 0; j < option.context.parameters.size(); j++) {
+      Param param = option.context.parameters.get(j);
       fields.add(FieldSpec.builder(param.paramType.returnType, param.methodName())
           .addModifiers(PRIVATE, FINAL)
           .build());
     }
     return new Impl(
         implType,
-        context,
+        option,
         fields);
   }
 
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.classBuilder(type);
-    builder.superclass(TypeName.get(context.sourceType.asType()))
+    builder.superclass(TypeName.get(option.context.sourceType.asType()))
         .addFields(fields)
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(implConstructor())
+        .addMethod(toStringMethod())
         .addMethods(bindMethods());
     return builder.build();
   }
 
   private List<MethodSpec> bindMethods() {
-    List<MethodSpec> result = new ArrayList<>(context.parameters.size());
-    for (int j = 0; j < context.parameters.size(); j++) {
-      Param param = context.parameters.get(j);
+    List<MethodSpec> result = new ArrayList<>(option.context.parameters.size());
+    for (int j = 0; j < option.context.parameters.size(); j++) {
+      Param param = option.context.parameters.get(j);
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.methodName())
           .addModifiers(PUBLIC)
           .addAnnotation(Override.class)
@@ -88,5 +91,26 @@ final class Impl {
       builder.addParameter(param);
     }
     return builder.build();
+  }
+
+  private MethodSpec toStringMethod() {
+    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
+
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("toString");
+    builder.addStatement("$T $N = new $T($S, $S, $S)",
+        StringJoiner.class, joiner, StringJoiner.class, ", ", "{", "}");
+
+    for (int i = 0; i < option.context.parameters.size(); i++) {
+      Param param = option.context.parameters.get(i);
+      builder.addStatement("$N.add($S + $L)",
+          joiner, '"' + option.enumConstant(i) + "\": ",
+          param.paramType.jsonExpression(this, i));
+    }
+    builder.addStatement("return $N.toString()", joiner);
+
+    return builder.addModifiers(PUBLIC)
+        .addAnnotation(Override.class)
+        .returns(STRING)
+        .build();
   }
 }
