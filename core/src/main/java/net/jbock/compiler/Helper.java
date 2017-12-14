@@ -228,10 +228,10 @@ final class Helper {
         .addModifiers(PRIVATE, STATIC, FINAL);
     if (!context.simplePositional()) {
       builder.addMethod(readMethod);
+      builder.addMethod(readRegularOptionMethod);
     }
     builder.addMethod(buildMethod());
     if (!context.paramTypes.isEmpty()) {
-      builder.addMethod(readRegularOptionMethod);
       builder.addField(
           longNamesField.toBuilder()
               .initializer("$T.$N()", option.type, this.option.longNameMapMethod)

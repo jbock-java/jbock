@@ -6,8 +6,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-public class CpArgumentsTest {
-
+public class MvArgumentsTest {
   @Rule
   public final ExpectedException exception = ExpectedException.none();
 
@@ -15,42 +14,35 @@ public class CpArgumentsTest {
   public void errorMissingSource() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Missing positional parameter: SOURCE");
-    CpArguments_Parser.parse(new String[]{});
+    MvArguments_Parser.parse(new String[]{});
   }
 
   @Test
   public void errorMissingDest() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Missing positional parameter: DEST");
-    CpArguments_Parser.parse(new String[]{"a"});
+    MvArguments_Parser.parse(new String[]{"a"});
   }
 
   @Test
   public void minimal() {
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b"}).source())
+    assertThat(MvArguments_Parser.parse(new String[]{"a", "b"}).source())
         .isEqualTo("a");
-    assertThat(CpArguments_Parser.parse(new String[]{"a", "b"}).dest())
+    assertThat(MvArguments_Parser.parse(new String[]{"a", "b"}).dest())
         .isEqualTo("b");
   }
 
   @Test
   public void dashNotIgnored() {
     exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -a");
-    CpArguments_Parser.parse(new String[]{"-a", "b"});
+    exception.expectMessage("Invalid option: -aa");
+    MvArguments_Parser.parse(new String[]{"-aa", "b"});
   }
 
   @Test
   public void tooMany() {
     exception.expect(IllegalArgumentException.class);
     exception.expectMessage("Excess option: c");
-    CpArguments_Parser.parse(new String[]{"a", "b", "c"});
-  }
-
-  @Test
-  public void tooManyAndFlag() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Excess option: c");
-    CpArguments_Parser.parse(new String[]{"-r", "a", "b", "c"});
+    MvArguments_Parser.parse(new String[]{"a", "b", "c"});
   }
 }

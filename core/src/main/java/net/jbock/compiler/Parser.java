@@ -139,39 +139,35 @@ final class Parser {
           .endControlFlow();
     }
 
-    if (context.paramTypes.isEmpty()) {
+    builder.addStatement("$T $N = $N.$N($N)", option.type, optionParam, helper, this.helper.readRegularOptionMethod, token);
 
-      builder.addStatement("$N.add($N)", this.helper.positionalParameter, token);
+    builder.beginControlFlow("if ($N != null)", optionParam)
+        .addStatement("$N.$N($N, $N, $N)",
+            helper, this.helper.readMethod, optionParam, token, it)
+        .endControlFlow();
+
+    if (context.positionalParameters.isEmpty()) {
+
+      builder.beginControlFlow("else")
+          .addStatement("throw new $T($S + $N)",
+              IllegalArgumentException.class, "Invalid option: ", token)
+          .endControlFlow();
+
     } else {
 
-      // handle positional token
-      builder.addStatement("$T $N = $N.$N($N)", option.type, optionParam, helper, this.helper.readRegularOptionMethod, token);
-      builder.beginControlFlow("if ($N != null)", optionParam);
-      builder.addStatement("$N.$N($N, $N, $N)", helper, this.helper.readMethod, optionParam, token, it);
-      builder.endControlFlow();
-
-      if (context.positionalParameters.isEmpty()) {
-
-        builder.beginControlFlow("else")
+      if (!context.ignoreDashes) {
+        builder.beginControlFlow("else if ($N.length() >= 1 && $N.charAt(0) == '-')",
+            token, token)
             .addStatement("throw new $T($S + $N)",
                 IllegalArgumentException.class, "Invalid option: ", token)
             .endControlFlow();
-
-      } else {
-
-        if (!context.ignoreDashes) {
-          builder.beginControlFlow("else if ($N.length() >= 1 && $N.charAt(0) == '-')",
-              token, token)
-              .addStatement("throw new $T($S + $N)",
-                  IllegalArgumentException.class, "Invalid option: ", token)
-              .endControlFlow();
-        }
-
-        builder.beginControlFlow("else")
-            .addStatement("$N.add($N)", this.helper.positionalParameter, token)
-            .endControlFlow();
       }
+
+      builder.beginControlFlow("else")
+          .addStatement("$N.add($N)", this.helper.positionalParameter, token)
+          .endControlFlow();
     }
+
     return builder.build();
   }
 
