@@ -40,7 +40,7 @@ final class Param {
   // never null
   final Type paramType;
 
-  // non-null iff this param is positional
+  // non-null iff this param is positional; in that case, both names are null
   final PositionalType positionalType;
 
   // index in the list of all abstract methods (in source order, ignoring inheritance)
@@ -66,11 +66,11 @@ final class Param {
     this.paramType = paramType;
   }
 
-  CodeBlock extractExpression(Helper helper, int j) {
+  CodeBlock extractExpression(Helper helper) {
     if (positionalType == null) {
-      return paramType.extractExpression(helper, j);
+      return paramType.extractExpression(helper, this);
     }
-    return positionalType.extractExpression(helper, j);
+    return positionalType.extractExpression(helper, this);
   }
 
   private static Type checkNonpositionalType(ExecutableElement sourceMethod) {

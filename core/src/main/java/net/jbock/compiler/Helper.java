@@ -523,7 +523,7 @@ final class Helper {
     CodeBlock.Builder args = CodeBlock.builder().add("\n");
     for (int j = 0; j < option.context.parameters.size(); j++) {
       Param param = option.context.parameters.get(j);
-      args.add(param.extractExpression(this, j));
+      args.add(param.extractExpression(this));
       if (j < option.context.parameters.size() - 1) {
         args.add(",\n");
       }

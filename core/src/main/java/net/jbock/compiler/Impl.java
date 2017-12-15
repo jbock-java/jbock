@@ -24,10 +24,9 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 final class Impl {
 
   final ClassName type;
-
-  final List<FieldSpec> fields;
-
   final Option option;
+
+  private final List<FieldSpec> fields;
 
   private Impl(
       ClassName type,
@@ -102,9 +101,8 @@ final class Impl {
     builder.addStatement("$T $N = new $T($S, $S, $S)",
         StringJoiner.class, joiner, StringJoiner.class, ", ", "{", "}");
 
-    for (int i = 0; i < option.context.parameters.size(); i++) {
-      Param param = option.context.parameters.get(i);
-      builder.addCode(param.paramType.jsonStatement(this, joiner, i));
+    for (Param param : option.context.parameters) {
+      builder.addCode(param.paramType.jsonStatement(this, joiner, param));
     }
     builder.addStatement("return $N.toString()", joiner);
 
@@ -112,5 +110,9 @@ final class Impl {
         .addAnnotation(Override.class)
         .returns(STRING)
         .build();
+  }
+
+  FieldSpec field(Param param) {
+    return fields.get(param.index);
   }
 }

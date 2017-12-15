@@ -27,23 +27,23 @@ enum Type {
 
   FLAG(BOOLEAN, null, false) {
     @Override
-    CodeBlock extractExpression(Helper helper, int j) {
+    CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
           "$N.contains($T.$N)",
           helper.flagsField,
           helper.option.type,
-          helper.option.enumConstant(j))
+          helper.option.enumConstant(param))
           .build();
     }
 
     @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock.Builder builder = CodeBlock.builder();
-      builder.beginControlFlow("if ($N)", impl.fields.get(j))
+      builder.beginControlFlow("if ($N)", impl.field(param))
           .addStatement("$N.add($S + $N)",
               joiner,
-              enumKey(impl, j),
-              impl.fields.get(j))
+              enumKey(impl, param),
+              impl.field(param))
           .endControlFlow();
       return builder.build();
     }
@@ -51,24 +51,24 @@ enum Type {
 
   OPTIONAL(OPTIONAL_STRING, POSITIONAL_OPTIONAL, false) {
     @Override
-    CodeBlock extractExpression(Helper helper, int j) {
+    CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
           "$T.ofNullable($N.get($T.$L))",
           Optional.class,
           helper.sMapField,
           helper.option.type,
-          helper.option.enumConstant(j))
+          helper.option.enumConstant(param))
           .build();
     }
 
     @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock.Builder builder = CodeBlock.builder();
-      builder.beginControlFlow("if ($N.isPresent())", impl.fields.get(j))
+      builder.beginControlFlow("if ($N.isPresent())", impl.field(param))
           .addStatement("$N.add($S + '\"' + $N.get() + '\"')",
               joiner,
-              enumKey(impl, j),
-              impl.fields.get(j))
+              enumKey(impl, param),
+              impl.field(param))
           .endControlFlow();
       return builder.build();
     }
@@ -76,23 +76,23 @@ enum Type {
 
   OPTIONAL_INT(ClassName.get(OptionalInt.class), POSITIONAL_OPTIONAL_INT, false) {
     @Override
-    CodeBlock extractExpression(Helper helper, int j) {
+    CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
           "$N($T.$L)",
           helper.extractOptionalIntMethod,
           helper.option.type,
-          helper.option.enumConstant(j))
+          helper.option.enumConstant(param))
           .build();
     }
 
     @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock.Builder builder = CodeBlock.builder();
-      builder.beginControlFlow("if ($N.isPresent())", impl.fields.get(j))
+      builder.beginControlFlow("if ($N.isPresent())", impl.field(param))
           .addStatement("$N.add($S + $N.getAsInt())",
               joiner,
-              enumKey(impl, j),
-              impl.fields.get(j))
+              enumKey(impl, param),
+              impl.field(param))
           .endControlFlow();
       return builder.build();
     }
@@ -100,69 +100,69 @@ enum Type {
 
   REQUIRED(STRING, POSITIONAL_REQUIRED, true) {
     @Override
-    CodeBlock extractExpression(Helper helper, int j) {
+    CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
           "$N($T.$L)",
           helper.extractRequiredMethod,
           helper.option.type,
-          helper.option.enumConstant(j))
+          helper.option.enumConstant(param))
           .build();
     }
 
     @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock.Builder builder = CodeBlock.builder();
       builder.addStatement("$N.add($S + '\"' + $N + '\"')",
           joiner,
-          enumKey(impl, j),
-          impl.fields.get(j));
+          enumKey(impl, param),
+          impl.field(param));
       return builder.build();
     }
   },
 
   REQUIRED_INT(TypeName.INT, POSITIONAL_REQUIRED_INT, true) {
     @Override
-    CodeBlock extractExpression(Helper helper, int j) {
+    CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
           "$N($T.$L)",
           helper.extractRequiredIntMethod,
           helper.option.type,
-          helper.option.enumConstant(j))
+          helper.option.enumConstant(param))
           .build();
     }
 
     @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock.Builder builder = CodeBlock.builder();
       builder.addStatement("$N.add($S + $N)",
           joiner,
-          enumKey(impl, j),
-          impl.fields.get(j));
+          enumKey(impl, param),
+          impl.field(param));
       return builder.build();
     }
   },
 
   REPEATABLE(LIST_OF_STRING, POSITIONAL_LIST, false) {
     @Override
-    CodeBlock extractExpression(Helper helper, int j) {
+    CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
           "$N.getOrDefault($T.$L, $T.emptyList())",
           helper.optMapField,
           helper.option.type,
-          helper.option.enumConstant(j),
+          helper.option.enumConstant(param),
           Collections.class)
           .build();
     }
 
     @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
       CodeBlock.Builder builder = CodeBlock.builder();
-      builder.beginControlFlow("if (!$N.isEmpty())", impl.fields.get(j))
+      builder.beginControlFlow("if (!$N.isEmpty())", impl.field(param))
           .addStatement("$N.add($S + $N.stream()\n.map($N -> '\"' + $N + '\"')\n.collect($T.joining($S, $S, $S)))",
               joiner,
-              enumKey(impl, j),
-              impl.fields.get(j), s, s, Collectors.class, ", ", "[", "]")
+              enumKey(impl, param),
+              impl.field(param), s, s, Collectors.class, ", ", "[", "]")
           .endControlFlow();
       return builder.build();
     }
@@ -173,14 +173,11 @@ enum Type {
   final PositionalType positionalType;
 
   /**
-   * @param j an index in the Option enum
-   * @return An expression that returns the value of the parameter specified by {@code j}.
-   *     The expression will be used inside a static method,
-   *     which has the parameters listed in {@link Option} (see comment there).
+   * @return An expression that extracts the value of the given param from the helper state.
    */
-  abstract CodeBlock extractExpression(Helper helper, int j);
+  abstract CodeBlock extractExpression(Helper helper, Param param);
 
-  abstract CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j);
+  abstract CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param);
 
   Type(TypeName returnType, PositionalType positionalType, boolean required) {
     this.returnType = returnType;
@@ -188,7 +185,7 @@ enum Type {
     this.required = required;
   }
 
-  private static String enumKey(Impl impl, int j) {
-    return '"' + impl.option.enumConstant(j).toLowerCase(Locale.US) + "\": ";
+  private static String enumKey(Impl impl, Param param) {
+    return '"' + impl.option.enumConstant(param).toLowerCase(Locale.US) + "\": ";
   }
 }

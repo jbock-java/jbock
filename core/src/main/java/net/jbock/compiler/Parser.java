@@ -188,7 +188,7 @@ final class Parser {
   }
 
   private MethodSpec printUsageMethod() {
-    ParameterSpec optionParam = ParameterSpec.builder(this.option.type, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
     ParameterSpec out = ParameterSpec.builder(ClassName.get(PrintStream.class), "out").build();
     ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("printUsage");
@@ -208,7 +208,8 @@ final class Parser {
     }
 
     for (Param param : requiredParams) {
-//      builder.addStatement("$N.add($S)", joiner, "[OPTION]...");
+      builder.addStatement("$N.add($T.$L.$N())", joiner, option.type,
+          option.enumConstant(param), option.exampleMethod);
     }
 
     builder.addStatement("$N.println($N.toString())", out, joiner);

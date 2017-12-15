@@ -39,6 +39,7 @@ final class Option {
   final Context context;
 
   final MethodSpec describeParamMethod;
+  final MethodSpec exampleMethod;
   final FieldSpec descriptionField;
 
   private final FieldSpec argumentNameField;
@@ -64,8 +65,10 @@ final class Option {
       FieldSpec typeField,
       FieldSpec descriptionField,
       FieldSpec argumentNameField,
+      MethodSpec exampleMethod,
       MethodSpec shortNameMapMethod,
       MethodSpec longNameMapMethod) {
+    this.exampleMethod = exampleMethod;
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
     this.descriptionField = descriptionField;
@@ -96,6 +99,7 @@ final class Option {
     ClassName type = context.generatedClass.nestedClass("Option");
     MethodSpec shortNameMapMethod = shortNameMapMethod(type, shortNameField);
     MethodSpec longNameMapMethod = longNameMapMethod(type, longNameField);
+    MethodSpec exampleMethod = exampleMethod(longNameField, shortNameField);
     FieldSpec descriptionField = FieldSpec.builder(
         LIST_OF_STRING, "description", FINAL).build();
     FieldSpec argumentNameField = FieldSpec.builder(
@@ -110,25 +114,25 @@ final class Option {
         typeField,
         descriptionField,
         argumentNameField,
+        exampleMethod,
         shortNameMapMethod,
         longNameMapMethod);
   }
 
-  String enumConstant(int i) {
-    String result = snakeCase(context.parameters.get(i).methodName());
+  String enumConstant(Param param) {
+    String result = snakeCase(context.parameters.get(param.index).methodName());
     if (!context.problematicOptionNames) {
       return result;
     }
-    return result + '_' + i;
+    return result + '_' + param.index;
   }
 
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(type);
-    for (int i = 0; i < context.parameters.size(); i++) {
-      Param param = context.parameters.get(i);
+    for (Param param : context.parameters) {
       String[] desc = getText(param.description());
       String argumentName = param.descriptionArgumentName();
-      String enumConstant = enumConstant(i);
+      String enumConstant = enumConstant(param);
       String format = String.format("$S, $S, $T.$L, $S, new $T[] {\n    %s}",
           String.join(",\n    ", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
@@ -147,6 +151,7 @@ final class Option {
         .addMethod(describeNamesMethod)
         .addMethod(describeParamMethod)
         .addMethod(descriptionBlockMethod)
+        .addMethod(exampleMethod)
         .addMethod(privateConstructor());
     if (!context.paramTypes.isEmpty()) {
       builder.addMethod(shortNameMapMethod)
@@ -334,6 +339,26 @@ final class Option {
     builder.addStatement("return $N.toString()", sb);
 
     return MethodSpec.methodBuilder("describeParam")
+        .returns(STRING)
+        .addCode(builder.build())
+        .build();
+  }
+
+  private static MethodSpec exampleMethod(
+      FieldSpec longNameField,
+      FieldSpec shortNameField) {
+    ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+
+    builder.beginControlFlow("if ($N == null)", shortNameField)
+        .addStatement("return $T.format($S, $N, name())",
+            String.class, "--%s=%s", longNameField)
+        .endControlFlow();
+
+    builder.addStatement("return $T.format($S, $N, name())",
+        String.class, "-%s=%s", shortNameField);
+
+    return MethodSpec.methodBuilder("example")
         .returns(STRING)
         .addCode(builder.build())
         .build();
