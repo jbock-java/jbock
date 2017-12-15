@@ -1,6 +1,6 @@
 package net.jbock.examples;
 
-import static net.jbock.examples.fixture.JsonFixture.expectedJson;
+import static net.jbock.examples.fixture.JsonFixture.json;
 import static net.jbock.examples.fixture.JsonFixture.readJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -31,11 +31,11 @@ public class CpArgumentsTest {
   @Test
   public void minimal() {
     assertThat(readJson(CpArguments_Parser.parse(new String[]{"a", "b"})))
-        .isEqualTo(expectedJson(
+        .isEqualTo(json(
             "source", "a",
             "dest", "b"));
     assertThat(readJson(CpArguments_Parser.parse(new String[]{"b", "a"})))
-        .isEqualTo(expectedJson(
+        .isEqualTo(json(
             "source", "b",
             "dest", "a"));
   }
@@ -63,7 +63,7 @@ public class CpArgumentsTest {
 
   @Test
   public void flag() {
-    JsonNode expected = expectedJson(
+    JsonNode expected = json(
         "source", "a",
         "dest", "b",
         "recursive", true);

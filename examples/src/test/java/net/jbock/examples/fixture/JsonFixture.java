@@ -22,9 +22,12 @@ public final class JsonFixture {
     }
   }
 
-  public static JsonNode expectedJson(Object... kvs) {
+  public static JsonNode json(Object... kvs) {
     ObjectMapper mapper = new ObjectMapper();
     ObjectNode node = mapper.createObjectNode();
+    if (kvs.length % 2 != 0) {
+      throw new IllegalArgumentException("length must be even");
+    }
     for (int i = 0; i < kvs.length; i += 2) {
       String k = kvs[i].toString();
       Object v = kvs[i + 1];
@@ -39,8 +42,10 @@ public final class JsonFixture {
         node.put(k, (Boolean) v);
       } else if (v instanceof List) {
         ArrayNode array = node.putArray(k);
-        List v1 = (List) v;
-        array.addAll(v1);
+        List<String> v1 = (List) v;
+        for (String s : v1) {
+          array.add(s);
+        }
       }
     }
     return node;

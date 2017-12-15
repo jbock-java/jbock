@@ -158,10 +158,12 @@ enum Type {
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j) {
       ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
       CodeBlock.Builder builder = CodeBlock.builder();
-      builder.addStatement("$N.add($S + $N.stream()\n.map($N -> '\"' + $N + '\"')\n.collect($T.joining($S, $S, $S)))",
-          joiner,
-          enumKey(impl, j),
-          impl.fields.get(j), s, s, Collectors.class, ", ", "[", "]");
+      builder.beginControlFlow("if (!$N.isEmpty())", impl.fields.get(j))
+          .addStatement("$N.add($S + $N.stream()\n.map($N -> '\"' + $N + '\"')\n.collect($T.joining($S, $S, $S)))",
+              joiner,
+              enumKey(impl, j),
+              impl.fields.get(j), s, s, Collectors.class, ", ", "[", "]")
+          .endControlFlow();
       return builder.build();
     }
   };

@@ -1,13 +1,14 @@
 package net.jbock.examples;
 
 import static java.util.Arrays.asList;
-import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static net.jbock.examples.fixture.JsonFixture.json;
+import static net.jbock.examples.fixture.JsonFixture.readJson;
 import static org.assertj.core.api.Assertions.assertThat;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import java.util.Optional;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -17,82 +18,66 @@ public class CurlArgumentsTest {
   @Rule
   public final ExpectedException exception = ExpectedException.none();
 
+  private static JsonNode parse(String... args) {
+    return readJson(CurlArguments_Parser.parse(args));
+  }
+
   @Test
-  public void testNonRepeatable() {
-    assertThat(CurlArguments_Parser.parse(new String[]{}).method())
-        .isEqualTo(Optional.empty());
-    assertThat(CurlArguments_Parser.parse(new String[]{"--request="}).method())
-        .isEqualTo(Optional.of(""));
-    assertThat(CurlArguments_Parser.parse(new String[]{"--request= "}).method())
-        .isEqualTo(Optional.of(" "));
-    assertThat(CurlArguments_Parser.parse(new String[]{"--request", ""}).method())
-        .isEqualTo(Optional.of(""));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-X1"}).method())
-        .isEqualTo(Optional.of("1"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-X", "1"}).method())
-        .isEqualTo(Optional.of("1"));
+  public void testEmpty() {
+    assertThat(parse()).isEqualTo(json());
+  }
+
+  @Test
+  public void testOptional() {
+    assertThat(parse()).isEqualTo(json());
+    assertThat(parse("--request="))
+        .isEqualTo(json("method", ""));
+    assertThat(parse("--request= "))
+        .isEqualTo(json("method", " "));
+    assertThat(parse("--request", ""))
+        .isEqualTo(json("method", ""));
+    assertThat(parse("-XPUT"))
+        .isEqualTo(json("method", "PUT"));
+    assertThat(parse("-X", "PUT"))
+        .isEqualTo(json("method", "PUT"));
   }
 
   @Test
   public void testRepeatable() {
-    assertThat(CurlArguments_Parser.parse(new String[]{}).headers())
-        .isEqualTo(emptyList());
-    assertThat(CurlArguments_Parser.parse(new String[]{"-H1"}).headers())
-        .isEqualTo(singletonList("1"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-H1", "-H2"}).headers())
-        .isEqualTo(asList("1", "2"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-H", "1"}).headers())
-        .isEqualTo(singletonList("1"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-H", "1", "-H", "2"}).headers())
-        .isEqualTo(asList("1", "2"));
+    assertThat(parse("-H1"))
+        .isEqualTo(json("headers", singletonList("1")));
+    assertThat(parse("-H1", "-H2"))
+        .isEqualTo(json("headers", asList("1", "2")));
+    assertThat(parse("-H", "1"))
+        .isEqualTo(json("headers", singletonList("1")));
+    assertThat(parse("-H", "1", "-H", "2"))
+        .isEqualTo(json("headers", asList("1", "2")));
   }
 
   @Test
-  public void someTests() {
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
-        .headers()).isEqualTo(singletonList("1"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
-        .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H1"})
-        .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-i", "-v", "-H1"})
-        .headers()).isEqualTo(singletonList("1"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
-        .include()).isFalse();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H1"})
-        .include()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
-        .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "1"})
-        .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1"})
-        .include()).isFalse();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "1"})
-        .include()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H", "1", "-H2"})
-        .headers()).isEqualTo(asList("1", "2"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H", "1", "-H2"})
-        .headers()).isEqualTo(asList("1", "2"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H", "1", "-H2"})
-        .include()).isFalse();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H", "1", "-H2"})
-        .include()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1", "-H2"})
-        .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H1", "-H2"})
-        .verbose()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-H1", "-H2"})
-        .include()).isFalse();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-H1", "-H2"})
-        .include()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-XPOST"})
-        .method()).isEqualTo(Optional.of("POST"));
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-XPOST"})
-        .include()).isFalse();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-XPOST"})
-        .include()).isTrue();
-    assertThat(CurlArguments_Parser.parse(new String[]{"-v", "-i", "-XPOST"})
-        .verbose()).isTrue();
+  public void variousTests() {
+    assertThat(parse("-v", "-H1"))
+        .isEqualTo(json("verbose", true, "headers", singletonList("1")));
+    assertThat(parse("-v", "-i", "-H1"))
+        .isEqualTo(json("include", true, "verbose", true, "headers", singletonList("1")));
+    assertThat(parse("-i", "-v", "-H1"))
+        .isEqualTo(json("include", true, "verbose", true, "headers", singletonList("1")));
+    assertThat(parse("-v", "-i", "1"))
+        .isEqualTo(json("include", true, "verbose", true, "urls", singletonList("1")));
+    assertThat(parse("-v", "-H", "1", "-H2"))
+        .isEqualTo(json("verbose", true, "headers", asList("1", "2")));
+    assertThat(parse("-v", "-i", "-H", "1", "-H2"))
+        .isEqualTo(json("include", true, "verbose", true, "headers", asList("1", "2")));
+    assertThat(parse("-v", "-H1", "-H2"))
+        .isEqualTo(json("verbose", true, "headers", asList("1", "2")));
+    assertThat(parse("-v", "-i", "-H1", "-H2"))
+        .isEqualTo(json("include", true, "verbose", true, "headers", asList("1", "2")));
+    assertThat(parse("-v", "-XPOST"))
+        .isEqualTo(json("verbose", true, "method", "POST"));
+    assertThat(parse("-v", "-i", "-XPOST"))
+        .isEqualTo(json("verbose", true, "include", true, "method", "POST"));
+    assertThat(parse("-v", "-i", "-XPOST"))
+        .isEqualTo(json("verbose", true, "include", true, "method", "POST"));
   }
 
   @Test
