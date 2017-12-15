@@ -25,7 +25,7 @@ import net.jbock.com.squareup.javapoet.TypeName;
  */
 enum Type {
 
-  FLAG(BOOLEAN, null) {
+  FLAG(BOOLEAN, null, false) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -49,7 +49,7 @@ enum Type {
     }
   },
 
-  OPTIONAL(OPTIONAL_STRING, POSITIONAL_OPTIONAL) {
+  OPTIONAL(OPTIONAL_STRING, POSITIONAL_OPTIONAL, false) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -74,7 +74,7 @@ enum Type {
     }
   },
 
-  OPTIONAL_INT(ClassName.get(OptionalInt.class), POSITIONAL_OPTIONAL_INT) {
+  OPTIONAL_INT(ClassName.get(OptionalInt.class), POSITIONAL_OPTIONAL_INT, false) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -98,7 +98,7 @@ enum Type {
     }
   },
 
-  REQUIRED(STRING, POSITIONAL_REQUIRED) {
+  REQUIRED(STRING, POSITIONAL_REQUIRED, true) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -120,7 +120,7 @@ enum Type {
     }
   },
 
-  REQUIRED_INT(TypeName.INT, POSITIONAL_REQUIRED_INT) {
+  REQUIRED_INT(TypeName.INT, POSITIONAL_REQUIRED_INT, true) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -142,7 +142,7 @@ enum Type {
     }
   },
 
-  REPEATABLE(LIST_OF_STRING, POSITIONAL_LIST) {
+  REPEATABLE(LIST_OF_STRING, POSITIONAL_LIST, false) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -168,6 +168,7 @@ enum Type {
     }
   };
 
+  final boolean required;
   final TypeName returnType;
   final PositionalType positionalType;
 
@@ -181,9 +182,10 @@ enum Type {
 
   abstract CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, int j);
 
-  Type(TypeName returnType, PositionalType positionalType) {
+  Type(TypeName returnType, PositionalType positionalType, boolean required) {
     this.returnType = returnType;
     this.positionalType = positionalType;
+    this.required = required;
   }
 
   private static String enumKey(Impl impl, int j) {

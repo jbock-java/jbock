@@ -1,5 +1,6 @@
 package net.jbock.compiler;
 
+import static java.util.stream.Collectors.partitioningBy;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -12,7 +13,10 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.OptionalInt;
+import java.util.StringJoiner;
 import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
@@ -189,9 +193,47 @@ final class Parser {
     ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("printUsage");
 
-    // begin loop 1
+    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
+    builder.addStatement("$T $N = new $T($S)", joiner.type, joiner, joiner.type, " ");
+
+    Map<Boolean, List<Param>> partitioned = context.parameters.stream()
+        .filter(p -> p.positionalType == null)
+        .collect(partitioningBy(p -> p.paramType.required));
+
+    List<Param> requiredParams = partitioned.get(true);
+    List<Param> optionalParams = partitioned.get(false);
+
+    if (!optionalParams.isEmpty()) {
+      builder.addStatement("$N.add($S)", joiner, "[OPTION]...");
+    }
+
+    for (Param param : requiredParams) {
+//      builder.addStatement("$N.add($S)", joiner, "[OPTION]...");
+    }
+
+    builder.addStatement("$N.println($N.toString())", out, joiner);
+
     builder.beginControlFlow("for ($T $N: $T.values())",
-        optionParam.type, optionParam, optionParam.type);
+        optionParam.type, optionParam, optionParam.type)
+        .addCode(printUsagePositionalLoopCode(optionParam, out, indent))
+        .endControlFlow();
+
+    builder.beginControlFlow("for ($T $N: $T.values())",
+        optionParam.type, optionParam, optionParam.type)
+        .addCode(printUsageNonpositionalLoopCode(optionParam, out, indent))
+        .endControlFlow();
+
+    return builder
+        .addModifiers(STATIC, PUBLIC)
+        .addParameters(Arrays.asList(out, indent))
+        .build();
+  }
+
+  private CodeBlock printUsagePositionalLoopCode(
+      ParameterSpec optionParam,
+      ParameterSpec out,
+      ParameterSpec indent) {
+    CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if ($N.$N.$N && !$N.$N.isEmpty())",
         optionParam, option.typeField, option.optionType.isPositionalField,
@@ -199,25 +241,21 @@ final class Parser {
         .addStatement("$N.println($N.describe($N))", out, optionParam, indent)
         .endControlFlow();
 
-    // end loop 1
-    builder.endControlFlow();
+    return builder.build();
+  }
 
-    // begin loop 2
-    builder.beginControlFlow("for ($T $N: $T.values())",
-        optionParam.type, optionParam, optionParam.type);
+  private CodeBlock printUsageNonpositionalLoopCode(
+      ParameterSpec optionParam,
+      ParameterSpec out,
+      ParameterSpec indent) {
+    CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if (!$N.$N.$N)",
         optionParam, option.typeField, option.optionType.isPositionalField)
         .addStatement("$N.println($N.describe($N))", out, optionParam, indent)
         .endControlFlow();
 
-    // end loop 2
-    builder.endControlFlow();
-
-    return builder
-        .addModifiers(STATIC, PUBLIC)
-        .addParameters(Arrays.asList(out, indent))
-        .build();
+    return builder.build();
   }
 
   private CodeBlock javadoc() {

@@ -27,6 +27,7 @@ public class RmArgumentsTest {
     RmArguments_Parser.printUsage(new PrintStream(out), 2);
     String[] lines = new String(out.toByteArray()).split("\n", -1);
     assertThat(lines).isEqualTo(new String[]{
+        "[OPTION]...",
         "-r, --recursive",
         "-f, --force",
         ""});

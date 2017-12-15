@@ -163,6 +163,7 @@ public class CurlArgumentsTest {
     CurlArguments_Parser.printUsage(new PrintStream(out), 2);
     String[] lines = new String(out.toByteArray()).split("\n", -1);
     assertThat(lines, is(new String[]{
+        "[OPTION]...",
         "-X, --request VALUE",
         "  Optional<String> for regular arguments",
         "-H VALUE...",
