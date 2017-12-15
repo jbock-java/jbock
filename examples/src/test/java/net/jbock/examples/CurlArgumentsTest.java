@@ -163,17 +163,14 @@ public class CurlArgumentsTest {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     CurlArguments_Parser.printUsage(new PrintStream(out), 2);
     String[] lines = new String(out.toByteArray()).split("\n", -1);
-    assertThat(lines.length).isEqualTo(11);
-    assertThat(lines[0]).isEqualTo("-X, --request VAL");
-    assertThat(lines[1]).isEqualTo("  Optional<String> for regular arguments");
-    assertThat(lines[2]).isEqualTo("-H VAL");
-    assertThat(lines[3]).isEqualTo("  List<String> for repeatable arguments");
-    assertThat(lines[4]).isEqualTo("-v");
-    assertThat(lines[5]).isEqualTo("  boolean for flags");
-    assertThat(lines[6]).isEqualTo("-i, --include");
-    assertThat(lines[7]).isEqualTo("  --- description goes here ---");
-    assertThat(lines[8]).isEqualTo("URLS");
-    assertThat(lines[9]).isEqualTo("  --- description goes here ---");
-    assertThat(lines[10]).isEqualTo("");
+    assertThat(lines).isEqualTo(new String[]{
+        "-X, --request VALUE",
+        "  Optional<String> for regular arguments",
+        "-H VALUE...",
+        "  List<String> for repeatable arguments",
+        "-v",
+        "  boolean for flags",
+        "-i, --include",
+        ""});
   }
 }

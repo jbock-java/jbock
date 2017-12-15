@@ -1,12 +1,15 @@
 package net.jbock.compiler;
 
 import static java.util.stream.Collectors.toList;
+import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.compiler.Util.asType;
 
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import net.jbock.CommandLineArguments;
 import net.jbock.com.squareup.javapoet.ClassName;
@@ -34,6 +37,9 @@ final class Context {
   // true if upper-casing the method names would cause a naming conflict
   final boolean problematicOptionNames;
 
+  // true if the source type does not already define toString
+  final boolean generateToString;
+
   // a set of only the non-positional param types in the sourceType
   final Set<Type> paramTypes;
 
@@ -48,7 +54,7 @@ final class Context {
       boolean stopword,
       boolean problematicOptionNames,
       boolean ignoreDashes,
-      Set<Type> paramTypes,
+      boolean generateToString, Set<Type> paramTypes,
       Set<PositionalType> positionalParamTypes) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
@@ -57,6 +63,7 @@ final class Context {
     this.stopword = stopword;
     this.problematicOptionNames = problematicOptionNames;
     this.ignoreDashes = ignoreDashes;
+    this.generateToString = generateToString;
     this.paramTypes = paramTypes;
     this.positionalParamTypes = positionalParamTypes;
   }
@@ -71,6 +78,11 @@ final class Context {
     boolean stopword = positionalParamTypes.contains(PositionalType.POSITIONAL_LIST_2);
     List<Param> positionalParameters = parameters.stream().filter(p -> p.positionalType != null).collect(toList());
     boolean ignoreDashes = sourceType.getAnnotation(CommandLineArguments.class).ignoreDashes();
+    boolean generateToString = methodsIn(sourceType.getEnclosedElements()).stream()
+        .filter(method -> method.getParameters().isEmpty())
+        .map(ExecutableElement::getSimpleName)
+        .map(Name::toString)
+        .noneMatch(s -> s.equals("toString"));
     return new Context(
         sourceType,
         generatedClass,
@@ -79,6 +91,7 @@ final class Context {
         stopword,
         problematicOptionNames,
         ignoreDashes,
+        generateToString,
         paramTypes,
         positionalParamTypes);
   }

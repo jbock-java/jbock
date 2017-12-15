@@ -26,15 +26,9 @@ public class RmArgumentsTest {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     RmArguments_Parser.printUsage(new PrintStream(out), 2);
     String[] lines = new String(out.toByteArray()).split("\n", -1);
-    assertThat(lines.length).isEqualTo(9);
-    assertThat(lines[0]).isEqualTo("-r, --recursive");
-    assertThat(lines[1]).isEqualTo("  --- description goes here ---");
-    assertThat(lines[2]).isEqualTo("-f, --force");
-    assertThat(lines[3]).isEqualTo("  --- description goes here ---");
-    assertThat(lines[4]).isEqualTo("OTHER_TOKENS");
-    assertThat(lines[5]).isEqualTo("  --- description goes here ---");
-    assertThat(lines[6]).isEqualTo("DD_TOKENS");
-    assertThat(lines[7]).isEqualTo("  --- description goes here ---");
-    assertThat(lines[8]).isEqualTo("");
+    assertThat(lines).isEqualTo(new String[]{
+        "-r, --recursive",
+        "-f, --force",
+        ""});
   }
 }

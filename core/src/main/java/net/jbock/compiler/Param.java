@@ -100,7 +100,7 @@ final class Param {
     String message = String.format("Allowed return types: [" +
         String.join(", ", allowed) +
         "], but %s() returns %s", sourceMethod.getSimpleName(), type);
-    throw new ValidationException(sourceMethod, message);
+    throw ValidationException.create(sourceMethod, message);
   }
 
   static Param create(ExecutableElement sourceMethod, int index) {
@@ -113,7 +113,7 @@ final class Param {
     String longName = longName(sourceMethod);
     String shortName = shortName(sourceMethod);
     if (shortName == null && longName == null) {
-      throw new ValidationException(sourceMethod,
+      throw ValidationException.create(sourceMethod,
           "Neither long nor short name defined for method " + Util.methodToString(sourceMethod));
     }
     checkName(sourceMethod, shortName);
@@ -129,17 +129,17 @@ final class Param {
 
   private static void basicChecks(ExecutableElement sourceMethod) {
     if (!sourceMethod.getParameters().isEmpty()) {
-      throw new ValidationException(sourceMethod,
+      throw ValidationException.create(sourceMethod,
           "Method " + methodToString(sourceMethod) +
               " may not have parameters.");
     }
     if (!sourceMethod.getTypeParameters().isEmpty()) {
-      throw new ValidationException(sourceMethod,
+      throw ValidationException.create(sourceMethod,
           "Method " + methodToString(sourceMethod) +
               "may not have type parameters.");
     }
     if (!sourceMethod.getThrownTypes().isEmpty()) {
-      throw new ValidationException(sourceMethod,
+      throw ValidationException.create(sourceMethod,
           "Method " + methodToString(sourceMethod) +
               "may not declare any exceptions.");
     }
@@ -217,11 +217,11 @@ final class Param {
     }
     basicCheckName(sourceMethod, name);
     if (name.indexOf(0) == '-') {
-      throw new ValidationException(sourceMethod,
+      throw ValidationException.create(sourceMethod,
           "The name may not start with '-'");
     }
     if (name.indexOf('=') >= 0) {
-      throw new ValidationException(sourceMethod,
+      throw ValidationException.create(sourceMethod,
           "The name may not contain '='");
     }
   }
@@ -230,15 +230,15 @@ final class Param {
       ExecutableElement sourceMethod,
       String name) {
     if (name == null) {
-      throw new ValidationException(sourceMethod,
+      throw ValidationException.create(sourceMethod,
           "The name may not be null");
     }
     if (name.isEmpty()) {
-      throw new ValidationException(sourceMethod,
+      throw ValidationException.create(sourceMethod,
           "The name may not be empty");
     }
     if (WHITE_SPACE.matcher(name).matches()) {
-      throw new ValidationException(sourceMethod,
+      throw ValidationException.create(sourceMethod,
           "The name may not contain whitespace characters");
     }
   }
@@ -247,7 +247,7 @@ final class Param {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
     Type type = checkNonpositionalType(sourceMethod);
     if (type.positionalType == null) {
-      throw new ValidationException(sourceMethod,
+      throw ValidationException.create(sourceMethod,
           "A method that carries the Positional annotation " +
               "may not return " + type.returnType);
     }
@@ -291,12 +291,25 @@ final class Param {
       return null;
     }
     Description description = description();
-    if (description == null) {
-      if (positionalType == null) {
-        return "VAL";
-      }
+    if (description != null && !description.argumentName().isEmpty()) {
+      return description.argumentName();
+    }
+    if (positionalType != null) {
       return snakeCase(methodName());
     }
-    return description.argumentName();
+    switch (paramType) {
+      case REPEATABLE:
+        return "VALUE...";
+      case OPTIONAL_INT:
+        return "NUMBER";
+      case REQUIRED_INT:
+        return "NUMBER";
+      case REQUIRED:
+        return "VALUE";
+      case OPTIONAL:
+        return "VALUE";
+      default:
+        return "VALUE";
+    }
   }
 }

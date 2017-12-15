@@ -60,8 +60,10 @@ final class Impl {
         .addFields(fields)
         .addModifiers(PRIVATE, STATIC, FINAL)
         .addMethod(implConstructor())
-        .addMethod(toStringMethod())
         .addMethods(bindMethods());
+    if (option.context.generateToString) {
+      builder.addMethod(toStringMethod());
+    }
     return builder.build();
   }
 

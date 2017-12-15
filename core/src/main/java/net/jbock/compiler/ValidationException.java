@@ -15,7 +15,18 @@ final class ValidationException extends RuntimeException {
     this.about = about;
   }
 
-  ValidationException(Element about, String message) {
-    this(Diagnostic.Kind.ERROR, message, about);
+  static ValidationException create(Element about, String message) {
+    return new ValidationException(Diagnostic.Kind.ERROR, cleanMessage(message), about);
+  }
+
+  private static String cleanMessage(String message) {
+    if (!message.contains("java.")) {
+      return message;
+    }
+    message = message.replace("java.lang.String", "String");
+    message = message.replace("java.util.List", "List");
+    message = message.replace("java.util.Optional", "Optional");
+    message = message.replace("java.util.OptionalInt", "OptionalInt");
+    return message;
   }
 }

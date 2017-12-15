@@ -39,8 +39,8 @@ final class Option {
   final Context context;
 
   final MethodSpec describeParamMethod;
+  final FieldSpec descriptionField;
 
-  private final FieldSpec descriptionField;
   private final FieldSpec argumentNameField;
 
   private final MethodSpec describeNamesMethod;
@@ -239,7 +239,7 @@ final class Option {
 
   private static String[] getText(Description description) {
     if (description == null) {
-      return new String[]{"--- description goes here ---"};
+      return new String[0];
     }
     return description.value();
   }
@@ -270,17 +270,20 @@ final class Option {
   private MethodSpec describeMethod() {
     ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
-    CodeBlock codeBlock = CodeBlock.builder()
-        .addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("describe");
+
+    builder.beginControlFlow("if ($N.isEmpty())", descriptionField)
+        .addStatement("return $N()", describeNamesMethod)
+        .endControlFlow();
+
+    builder.addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
         .addStatement("$N.append($N())", sb, describeNamesMethod)
         .addStatement("$N.append($S)", sb, "\n")
         .addStatement("$N.append($N($N))", sb, descriptionBlockMethod, indent)
-        .addStatement("return $N.toString()", sb)
-        .build();
-    return MethodSpec.methodBuilder("describe")
+        .addStatement("return $N.toString()", sb);
+    return builder
         .returns(STRING)
         .addParameter(indent)
-        .addCode(codeBlock)
         .build();
   }
 

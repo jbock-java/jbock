@@ -10,10 +10,23 @@ import java.lang.annotation.Target;
  *   This annotation is used by the jbock annotation processor.
  * </p>
  *
- * <p>
- *   The annotated type must be an abstract class.
- *   Each abstract method in the annotated class must have an empty argument list.
- * </p>
+ * <ul>
+ *   <li>The annotated type must be an abstract class.</li>
+ *   <li>There must be at least one abstract method.</li>
+ *   <li>Each abstract method must have an empty argument list.</li>
+ *   <li>The class may not extend or implement anything, other than {@link java.lang.Object}.</li>
+ * </ul>
+ *
+ * <p>Each abstract method in the annotated class must return one of these types:</p>
+ *
+ * <ul>
+ *   <li>{@code boolean}</li>
+ *   <li>{@code String}</li>
+ *   <li>{@code Optional<String>}</li>
+ *   <li>{@code List<String>}</li>
+ *   <li>{@code int}</li>
+ *   <li>{@code OptionalInt}</li>
+ * </ul>
  *
  * @see <a href="https://github.com/h908714124/jbock">jbock on github</a>
  */

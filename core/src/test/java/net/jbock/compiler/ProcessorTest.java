@@ -125,7 +125,7 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("a() returns java.lang.StringBuilder");
+        .withErrorContaining("a() returns StringBuilder");
   }
 
   @Test
@@ -154,8 +154,103 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("@Positional java.util.List<java.lang.String> " +
-            "may not stand above @Positional java.lang.String");
+        .withErrorContaining("String may not stand below @Positional List<String>");
+  }
+
+  @Test
+  public void positionalListBeforeOptionalPositional() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Positional abstract List<String> a();",
+        "  @Positional abstract Optional<String> b();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Optional<String> may not stand below @Positional List<String>");
+  }
+
+  @Test
+  public void positionalOptionalBeforeRequiredPositional() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Positional abstract Optional<String> a();",
+        "  @Positional abstract String b();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("String may not stand below @Positional Optional<String>");
+  }
+
+  @Test
+  public void positionalOptionalsAnyOrder() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Positional abstract Optional<String> a();",
+        "  @Positional abstract OptionalInt b();",
+        "  @Positional abstract Optional<String> c();",
+        "  @Positional abstract OptionalInt d();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  public void toStringDefined() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @Positional abstract Optional<String> a();",
+        "  @Override public final String toString() {",
+        "    return null;",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  public void extendsNotAllowed() {
+    List<String> sourceLines = withImports(
+        "abstract class Outer {",
+        "",
+        "  @CommandLineArguments",
+        "  static abstract class InvalidArguments extends Outer {",
+        "    abstract String a();",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.Outer", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("may not extend");
+  }
+
+  @Test
+  public void implementsNotAllowed() {
+    List<String> sourceLines = withImports(
+        "interface Outer {",
+        "",
+        "  @CommandLineArguments",
+        "  abstract class InvalidArguments implements Outer {",
+        "    abstract String a();",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.Outer", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("may not implement");
   }
 
   @Test
@@ -226,21 +321,23 @@ public class ProcessorTest {
         .withWarningContaining("Skipping");
   }
 
-  private List<String> withImports(String... strings) {
-    List<String> result = new ArrayList<>(strings.length + 13);
-    result.addAll(Arrays.asList(
+  private List<String> withImports(String... lines) {
+    List<String> header = Arrays.asList(
         "package test;",
         "",
         "import java.util.List;",
         "import java.util.Optional;",
+        "import java.util.OptionalInt;",
         "",
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.Positional;",
         "import net.jbock.LongName;",
         "import net.jbock.ShortName;",
         "import net.jbock.Description;",
-        ""));
-    Collections.addAll(result, strings);
-    return result;
+        "");
+    List<String> moreLines = new ArrayList<>(lines.length + header.size());
+    moreLines.addAll(header);
+    Collections.addAll(moreLines, lines);
+    return moreLines;
   }
 }

@@ -10,10 +10,8 @@ import java.lang.annotation.Target;
  *   This annotation is used by the jbock annotation processor.
  * </p>
  *
- * <p>
- *   The annotated method must be abstract and have
- *   an empty argument list.
- * </p>
+ * <p>The annotated method must be abstract and have
+ *   an empty argument list.</p>
  *
  * <p>
  *   The enclosing class must be annotated with {@link CommandLineArguments}.
@@ -27,5 +25,5 @@ public @interface Description {
 
   String[] value();
 
-  String argumentName() default "VAL";
+  String argumentName() default "";
 }

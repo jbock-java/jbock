@@ -7,7 +7,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
  */
 enum PositionalType {
 
-  POSITIONAL_REQUIRED() {
+  POSITIONAL_REQUIRED(0) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -21,7 +21,7 @@ enum PositionalType {
     }
   },
 
-  POSITIONAL_REQUIRED_INT() {
+  POSITIONAL_REQUIRED_INT(0) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -35,7 +35,7 @@ enum PositionalType {
     }
   },
 
-  POSITIONAL_OPTIONAL() {
+  POSITIONAL_OPTIONAL(1) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -48,7 +48,7 @@ enum PositionalType {
     }
   },
 
-  POSITIONAL_OPTIONAL_INT() {
+  POSITIONAL_OPTIONAL_INT(1) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -61,7 +61,7 @@ enum PositionalType {
     }
   },
 
-  POSITIONAL_LIST() {
+  POSITIONAL_LIST(2) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -74,7 +74,7 @@ enum PositionalType {
     }
   },
 
-  POSITIONAL_LIST_2() {
+  POSITIONAL_LIST_2(2) {
     @Override
     CodeBlock extractExpression(Helper helper, int j) {
       return CodeBlock.builder().add(
@@ -85,6 +85,12 @@ enum PositionalType {
           .build();
     }
   };
+
+  final int order;
+
+  PositionalType(int order) {
+    this.order = order;
+  }
 
   /**
    * @param j an index in the Option enum

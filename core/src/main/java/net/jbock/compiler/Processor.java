@@ -5,6 +5,7 @@ import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
+import static net.jbock.compiler.Util.asDeclared;
 import static net.jbock.compiler.Util.asType;
 import static net.jbock.compiler.Util.methodToString;
 
@@ -26,6 +27,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -149,7 +151,7 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private List<Param> checkPositional(List<Param> params) {
+  private List<Param> checkPositionalOrder(List<Param> params) {
     List<Param> result = new ArrayList<>(params.size());
     int lists = 0;
     Param previous = null;
@@ -160,10 +162,10 @@ public final class Processor extends AbstractProcessor {
       }
       PositionalType positionalType = param.positionalType;
       if (previous != null) {
-        if (positionalType.ordinal() < previous.positionalType.ordinal()) {
-          throw new ValidationException(param.sourceMethod,
-              "@Positional " + previous.paramType.returnType +
-                  " may not stand above @Positional " + param.paramType.returnType);
+        if (positionalType.order < previous.positionalType.order) {
+          throw ValidationException.create(param.sourceMethod,
+              "@Positional " + param.paramType.returnType +
+                  " may not stand below @Positional " + previous.paramType.returnType);
         }
       }
       if (positionalType == PositionalType.POSITIONAL_LIST) {
@@ -173,7 +175,7 @@ public final class Processor extends AbstractProcessor {
         } else if (lists == 2) {
           result.add(param.asPositional2());
         } else {
-          throw new ValidationException(param.sourceMethod,
+          throw ValidationException.create(param.sourceMethod,
               "There can be at most 2 positional lists.");
         }
       } else {
@@ -186,21 +188,32 @@ public final class Processor extends AbstractProcessor {
 
   private List<Param> validate(TypeElement sourceType) {
     if (sourceType.getKind() == ElementKind.INTERFACE) {
-      throw new ValidationException(sourceType,
+      throw ValidationException.create(sourceType,
           sourceType.getSimpleName() + " must be an abstract class, not an interface");
     }
     if (!sourceType.getModifiers().contains(ABSTRACT)) {
-      throw new ValidationException(sourceType,
+      throw ValidationException.create(sourceType,
           sourceType.getSimpleName() + " must be abstract");
     }
     if (sourceType.getModifiers().contains(Modifier.PRIVATE)) {
-      throw new ValidationException(sourceType,
+      throw ValidationException.create(sourceType,
           sourceType.getSimpleName() + " may not be private");
     }
     if (sourceType.getNestingKind().isNested() &&
         !sourceType.getModifiers().contains(Modifier.STATIC)) {
-      throw new ValidationException(sourceType,
+      throw ValidationException.create(sourceType,
           "The nested class " + sourceType.getSimpleName() + " must be static");
+    }
+    if (!sourceType.getInterfaces().isEmpty()) {
+      throw ValidationException.create(sourceType,
+          sourceType.getSimpleName() + " may not implement " +
+              asDeclared(sourceType.getInterfaces().get(0)).asElement().getSimpleName());
+    }
+    if (sourceType.getSuperclass().getKind() == TypeKind.DECLARED &&
+        !Util.equalsType(sourceType.getSuperclass(), "java.lang.Object")) {
+      throw ValidationException.create(sourceType,
+          sourceType.getSimpleName() + " may not extend " +
+              asDeclared(sourceType.getSuperclass()).asElement().getSimpleName());
     }
     List<ExecutableElement> abstractMethods = sourceType.getEnclosedElements().stream()
         .filter(element -> element.getKind() == METHOD)
@@ -214,7 +227,7 @@ public final class Processor extends AbstractProcessor {
     }
     checkDistinctLongNames(parameters);
     checkDistinctShortNames(parameters);
-    return checkPositional(parameters);
+    return checkPositionalOrder(parameters);
   }
 
   private void checkDistinctShortNames(List<Param> params) {
@@ -224,7 +237,7 @@ public final class Processor extends AbstractProcessor {
       if (name != null) {
         boolean added = names.add(name);
         if (!added) {
-          throw new ValidationException(param.sourceMethod,
+          throw ValidationException.create(param.sourceMethod,
               "Duplicate short name: " + name);
         }
       }
@@ -238,7 +251,7 @@ public final class Processor extends AbstractProcessor {
       if (name != null) {
         boolean added = names.add(name);
         if (!added) {
-          throw new ValidationException(param.sourceMethod,
+          throw ValidationException.create(param.sourceMethod,
               "Duplicate long name: " + name);
         }
       }
@@ -251,7 +264,7 @@ public final class Processor extends AbstractProcessor {
       List<Class<? extends Annotation>> forbiddenAnnotations) {
     for (Class<? extends Annotation> annotation : forbiddenAnnotations) {
       if (executableElement.getAnnotation(annotation) != null) {
-        throw new ValidationException(executableElement,
+        throw ValidationException.create(executableElement,
             "@" + annotation.getSimpleName() +
                 " is conflicting with @" + cause.annotationType().getSimpleName());
       }

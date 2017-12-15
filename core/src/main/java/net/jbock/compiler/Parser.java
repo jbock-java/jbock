@@ -184,13 +184,37 @@ final class Parser {
   }
 
   private MethodSpec printUsageMethod() {
-    ParameterSpec option = ParameterSpec.builder(this.option.type, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(this.option.type, "option").build();
     ParameterSpec out = ParameterSpec.builder(ClassName.get(PrintStream.class), "out").build();
     ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
-    return MethodSpec.methodBuilder("printUsage")
-        .beginControlFlow("for ($T $N: $T.values())", option.type, option, option.type)
-        .addStatement("$N.println($N.describe($N))", out, option, indent)
-        .endControlFlow()
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("printUsage");
+
+    // begin loop 1
+    builder.beginControlFlow("for ($T $N: $T.values())",
+        optionParam.type, optionParam, optionParam.type);
+
+    builder.beginControlFlow("if ($N.$N.$N && !$N.$N.isEmpty())",
+        optionParam, option.typeField, option.optionType.isPositionalField,
+        optionParam, option.descriptionField)
+        .addStatement("$N.println($N.describe($N))", out, optionParam, indent)
+        .endControlFlow();
+
+    // end loop 1
+    builder.endControlFlow();
+
+    // begin loop 2
+    builder.beginControlFlow("for ($T $N: $T.values())",
+        optionParam.type, optionParam, optionParam.type);
+
+    builder.beginControlFlow("if (!$N.$N.$N)",
+        optionParam, option.typeField, option.optionType.isPositionalField)
+        .addStatement("$N.println($N.describe($N))", out, optionParam, indent)
+        .endControlFlow();
+
+    // end loop 2
+    builder.endControlFlow();
+
+    return builder
         .addModifiers(STATIC, PUBLIC)
         .addParameters(Arrays.asList(out, indent))
         .build();
