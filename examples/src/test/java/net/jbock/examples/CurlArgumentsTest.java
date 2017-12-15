@@ -2,13 +2,12 @@ package net.jbock.examples;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static net.jbock.examples.fixture.JsonFixture.json;
-import static net.jbock.examples.fixture.JsonFixture.readJson;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.hamcrest.CoreMatchers.is;
+import static org.junit.Assert.assertThat;
 
-import com.fasterxml.jackson.databind.JsonNode;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
+import net.jbock.examples.fixture.JsonFixture;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -18,66 +17,81 @@ public class CurlArgumentsTest {
   @Rule
   public final ExpectedException exception = ExpectedException.none();
 
-  private static JsonNode parse(String... args) {
-    return readJson(CurlArguments_Parser.parse(args));
-  }
+  private final JsonFixture f = JsonFixture.create(CurlArguments_Parser::parse);
 
   @Test
   public void testEmpty() {
-    assertThat(parse()).isEqualTo(json());
+    f.assertThat().isParsedAs();
   }
 
   @Test
   public void testOptional() {
-    assertThat(parse()).isEqualTo(json());
-    assertThat(parse("--request="))
-        .isEqualTo(json("method", ""));
-    assertThat(parse("--request= "))
-        .isEqualTo(json("method", " "));
-    assertThat(parse("--request", ""))
-        .isEqualTo(json("method", ""));
-    assertThat(parse("-XPUT"))
-        .isEqualTo(json("method", "PUT"));
-    assertThat(parse("-X", "PUT"))
-        .isEqualTo(json("method", "PUT"));
+    f.assertThat("--request=")
+        .isParsedAs("method", "");
+    f.assertThat("--request= ")
+        .isParsedAs("method", " ");
+    f.assertThat("--request", "")
+        .isParsedAs("method", "");
+    f.assertThat("-XPUT")
+        .isParsedAs("method", "PUT");
+    f.assertThat("-X", "PUT")
+        .isParsedAs("method", "PUT");
   }
 
   @Test
   public void testRepeatable() {
-    assertThat(parse("-H1"))
-        .isEqualTo(json("headers", singletonList("1")));
-    assertThat(parse("-H1", "-H2"))
-        .isEqualTo(json("headers", asList("1", "2")));
-    assertThat(parse("-H", "1"))
-        .isEqualTo(json("headers", singletonList("1")));
-    assertThat(parse("-H", "1", "-H", "2"))
-        .isEqualTo(json("headers", asList("1", "2")));
+    f.assertThat("-H1")
+        .isParsedAs("headers", singletonList("1"));
+    f.assertThat("-H1", "-H2")
+        .isParsedAs("headers", asList("1", "2"));
+    f.assertThat("-H", "1")
+        .isParsedAs("headers", singletonList("1"));
+    f.assertThat("-H", "1", "-H", "2")
+        .isParsedAs("headers", asList("1", "2"));
   }
 
   @Test
   public void variousTests() {
-    assertThat(parse("-v", "-H1"))
-        .isEqualTo(json("verbose", true, "headers", singletonList("1")));
-    assertThat(parse("-v", "-i", "-H1"))
-        .isEqualTo(json("include", true, "verbose", true, "headers", singletonList("1")));
-    assertThat(parse("-i", "-v", "-H1"))
-        .isEqualTo(json("include", true, "verbose", true, "headers", singletonList("1")));
-    assertThat(parse("-v", "-i", "1"))
-        .isEqualTo(json("include", true, "verbose", true, "urls", singletonList("1")));
-    assertThat(parse("-v", "-H", "1", "-H2"))
-        .isEqualTo(json("verbose", true, "headers", asList("1", "2")));
-    assertThat(parse("-v", "-i", "-H", "1", "-H2"))
-        .isEqualTo(json("include", true, "verbose", true, "headers", asList("1", "2")));
-    assertThat(parse("-v", "-H1", "-H2"))
-        .isEqualTo(json("verbose", true, "headers", asList("1", "2")));
-    assertThat(parse("-v", "-i", "-H1", "-H2"))
-        .isEqualTo(json("include", true, "verbose", true, "headers", asList("1", "2")));
-    assertThat(parse("-v", "-XPOST"))
-        .isEqualTo(json("verbose", true, "method", "POST"));
-    assertThat(parse("-v", "-i", "-XPOST"))
-        .isEqualTo(json("verbose", true, "include", true, "method", "POST"));
-    assertThat(parse("-v", "-i", "-XPOST"))
-        .isEqualTo(json("verbose", true, "include", true, "method", "POST"));
+    f.assertThat("-v", "-H1").isParsedAs(
+        "verbose", true,
+        "headers", singletonList("1"));
+    f.assertThat("-v", "-i", "-H1").isParsedAs(
+        "include", true,
+        "verbose", true,
+        "headers", singletonList("1"));
+    f.assertThat("-i", "-v", "-H1").isParsedAs(
+        "include", true,
+        "verbose", true,
+        "headers", singletonList("1"));
+    f.assertThat("-v", "-i", "1").isParsedAs(
+        "include", true,
+        "verbose", true,
+        "urls", singletonList("1"));
+    f.assertThat("-v", "-H", "1", "-H2").isParsedAs(
+        "verbose", true,
+        "headers", asList("1", "2"));
+    f.assertThat("-v", "-i", "-H", "1", "-H2").isParsedAs(
+        "include", true,
+        "verbose", true,
+        "headers", asList("1", "2"));
+    f.assertThat("-v", "-H1", "-H2").isParsedAs(
+        "verbose", true,
+        "headers", asList("1", "2"));
+    f.assertThat("-v", "-i", "-H1", "-H2").isParsedAs(
+        "include", true,
+        "verbose", true,
+        "headers", asList("1", "2"));
+    f.assertThat("-v", "-XPOST").isParsedAs(
+        "verbose", true,
+        "method", "POST");
+    f.assertThat("-v", "-i", "-XPOST").isParsedAs(
+        "verbose", true,
+        "include", true,
+        "method", "POST");
+    f.assertThat("-v", "-i", "-XPOST").isParsedAs(
+        "verbose", true,
+        "include", true,
+        "method", "POST");
   }
 
   @Test
@@ -148,7 +162,7 @@ public class CurlArgumentsTest {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     CurlArguments_Parser.printUsage(new PrintStream(out), 2);
     String[] lines = new String(out.toByteArray()).split("\n", -1);
-    assertThat(lines).isEqualTo(new String[]{
+    assertThat(lines, is(new String[]{
         "-X, --request VALUE",
         "  Optional<String> for regular arguments",
         "-H VALUE...",
@@ -156,6 +170,6 @@ public class CurlArgumentsTest {
         "-v",
         "  boolean for flags",
         "-i, --include",
-        ""});
+        ""}));
   }
 }

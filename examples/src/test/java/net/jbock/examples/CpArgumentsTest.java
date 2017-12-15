@@ -1,10 +1,6 @@
 package net.jbock.examples;
 
-import static net.jbock.examples.fixture.JsonFixture.json;
-import static net.jbock.examples.fixture.JsonFixture.readJson;
-import static org.assertj.core.api.Assertions.assertThat;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import net.jbock.examples.fixture.JsonFixture;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -13,6 +9,8 @@ public class CpArgumentsTest {
 
   @Rule
   public final ExpectedException exception = ExpectedException.none();
+
+  private final JsonFixture f = JsonFixture.create(CpArguments_Parser::parse);
 
   @Test
   public void errorMissingSource() {
@@ -30,14 +28,12 @@ public class CpArgumentsTest {
 
   @Test
   public void minimal() {
-    assertThat(readJson(CpArguments_Parser.parse(new String[]{"a", "b"})))
-        .isEqualTo(json(
-            "source", "a",
-            "dest", "b"));
-    assertThat(readJson(CpArguments_Parser.parse(new String[]{"b", "a"})))
-        .isEqualTo(json(
-            "source", "b",
-            "dest", "a"));
+    f.assertThat("a", "b").isParsedAs(
+        "source", "a",
+        "dest", "b");
+    f.assertThat("b", "a").isParsedAs(
+        "source", "b",
+        "dest", "a");
   }
 
   @Test
@@ -62,16 +58,16 @@ public class CpArgumentsTest {
   }
 
   @Test
-  public void flag() {
-    JsonNode expected = json(
+  public void flagInVariousPositions() {
+    Object[] expected = new Object[]{
         "source", "a",
         "dest", "b",
-        "recursive", true);
-    assertThat(readJson(CpArguments_Parser.parse(new String[]{"-r", "a", "b"})))
-        .isEqualTo(expected);
-    assertThat(readJson(CpArguments_Parser.parse(new String[]{"a", "-r", "b"})))
-        .isEqualTo(expected);
-    assertThat(readJson(CpArguments_Parser.parse(new String[]{"a", "b", "-r"})))
-        .isEqualTo(expected);
+        "recursive", true};
+    f.assertThat("-r", "a", "b")
+        .isParsedAs(expected);
+    f.assertThat("a", "-r", "b")
+        .isParsedAs(expected);
+    f.assertThat("a", "b", "-r")
+        .isParsedAs(expected);
   }
 }
