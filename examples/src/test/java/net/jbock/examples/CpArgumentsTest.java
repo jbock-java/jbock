@@ -1,21 +1,24 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.JsonFixture;
+import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
 public class CpArgumentsTest {
 
-  private final JsonFixture<CpArguments> f =
-      JsonFixture.create(CpArguments_Parser::parse);
+  private final ParserFixture<CpArguments> f =
+      ParserFixture.create(CpArguments_Parser::parse);
 
   @Test
   public void errorMissingSource() {
     f.assertThat().isInvalid("Missing positional parameter: SOURCE");
+    f.assertThat("-r").isInvalid("Missing positional parameter: SOURCE");
   }
 
   @Test
   public void errorMissingDest() {
     f.assertThat("a").isInvalid("Missing positional parameter: DEST");
+    f.assertThat("a", "-r").isInvalid("Missing positional parameter: DEST");
+    f.assertThat("-r", "a").isInvalid("Missing positional parameter: DEST");
   }
 
   @Test

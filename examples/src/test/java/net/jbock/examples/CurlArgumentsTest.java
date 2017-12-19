@@ -7,13 +7,13 @@ import static org.junit.Assert.assertThat;
 
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
-import net.jbock.examples.fixture.JsonFixture;
+import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
 public class CurlArgumentsTest {
 
-  private final JsonFixture<CurlArguments> f =
-      JsonFixture.create(CurlArguments_Parser::parse);
+  private final ParserFixture<CurlArguments> f =
+      ParserFixture.create(CurlArguments_Parser::parse);
 
   @Test
   public void testEmpty() {

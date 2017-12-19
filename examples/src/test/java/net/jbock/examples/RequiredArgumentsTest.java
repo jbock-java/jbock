@@ -1,54 +1,37 @@
 package net.jbock.examples;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.Rule;
+import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class RequiredArgumentsTest {
 
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
+  private final ParserFixture<RequiredArguments> f =
+      ParserFixture.create(RequiredArguments_Parser::parse);
 
   @Test
   public void success() {
-    RequiredArguments requiredArguments = RequiredArguments_Parser.parse(new String[]{"--dir", "A"});
-    assertThat(requiredArguments.dir()).isEqualTo("A");
+    f.assertThat("--dir", "A").isParsedAs("dir", "A");
   }
 
   @Test
   public void errorDirMissing() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing required option: DIR");
-    RequiredArguments_Parser.parse(new String[]{});
+    f.assertThat().isInvalid("Missing required option: DIR");
   }
 
   @Test
-  public void errorDetachedDetached() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option DIR (--dir) is not repeatable");
-    RequiredArguments_Parser.parse(new String[]{"--dir", "A", "--dir", "B"});
-  }
-
-  @Test
-  public void errorAttachedDetached() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option DIR (--dir) is not repeatable");
-    RequiredArguments_Parser.parse(new String[]{"--dir=A", "--dir", "B"});
-  }
-
-  @Test
-  public void errorAttachedAttached() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option DIR (--dir) is not repeatable");
-    RequiredArguments_Parser.parse(new String[]{"--dir=A", "--dir=B"});
+  public void errorRepeatedArgument() {
+    f.assertThat("--dir", "A", "--dir", "B").isInvalid(
+        "Option DIR (--dir) is not repeatable");
+    f.assertThat("--dir=A", "--dir", "B").isInvalid(
+        "Option DIR (--dir) is not repeatable");
+    f.assertThat("--dir=A", "--dir=B").isInvalid(
+        "Option DIR (--dir) is not repeatable");
+    f.assertThat("--dir", "A", "--dir=B").isInvalid(
+        "Option DIR (--dir) is not repeatable");
   }
 
   @Test
   public void errorDetachedAttached() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option DIR (--dir) is not repeatable");
-    RequiredArguments_Parser.parse(new String[]{"--dir", "A", "--dir=B"});
+    f.assertThat("--dir", "A", "--dir=B").isInvalid("Option DIR (--dir) is not repeatable");
   }
 }

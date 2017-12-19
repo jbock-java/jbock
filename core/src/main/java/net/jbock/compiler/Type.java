@@ -11,7 +11,6 @@ import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED;
 import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED_INT;
 
 import java.util.Collections;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
@@ -42,7 +41,7 @@ enum Type {
       builder.beginControlFlow("if ($N)", impl.field(param))
           .addStatement("$N.add($S + $N)",
               joiner,
-              enumKey(impl, param),
+              jsonKey(param),
               impl.field(param))
           .endControlFlow();
       return builder.build();
@@ -67,7 +66,7 @@ enum Type {
       builder.beginControlFlow("if ($N.isPresent())", impl.field(param))
           .addStatement("$N.add($S + '\"' + $N.get() + '\"')",
               joiner,
-              enumKey(impl, param),
+              jsonKey(param),
               impl.field(param))
           .endControlFlow();
       return builder.build();
@@ -91,7 +90,7 @@ enum Type {
       builder.beginControlFlow("if ($N.isPresent())", impl.field(param))
           .addStatement("$N.add($S + $N.getAsInt())",
               joiner,
-              enumKey(impl, param),
+              jsonKey(param),
               impl.field(param))
           .endControlFlow();
       return builder.build();
@@ -114,7 +113,7 @@ enum Type {
       CodeBlock.Builder builder = CodeBlock.builder();
       builder.addStatement("$N.add($S + '\"' + $N + '\"')",
           joiner,
-          enumKey(impl, param),
+          jsonKey(param),
           impl.field(param));
       return builder.build();
     }
@@ -136,7 +135,7 @@ enum Type {
       CodeBlock.Builder builder = CodeBlock.builder();
       builder.addStatement("$N.add($S + $N)",
           joiner,
-          enumKey(impl, param),
+          jsonKey(param),
           impl.field(param));
       return builder.build();
     }
@@ -161,8 +160,8 @@ enum Type {
       builder.beginControlFlow("if (!$N.isEmpty())", impl.field(param))
           .addStatement("$N.add($S + $N.stream()\n.map($N -> '\"' + $N + '\"')\n.collect($T.joining($S, $S, $S)))",
               joiner,
-              enumKey(impl, param),
-              impl.field(param), s, s, Collectors.class, ", ", "[", "]")
+              jsonKey(param),
+              impl.field(param), s, s, Collectors.class, ",", "[", "]")
           .endControlFlow();
       return builder.build();
     }
@@ -185,7 +184,7 @@ enum Type {
     this.required = required;
   }
 
-  private static String enumKey(Impl impl, Param param) {
-    return '"' + impl.option.enumConstant(param).toLowerCase(Locale.US) + "\": ";
+  private static String jsonKey(Param param) {
+    return '"' + param.methodName() + "\":";
   }
 }

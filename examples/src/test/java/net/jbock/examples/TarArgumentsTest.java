@@ -1,37 +1,27 @@
 package net.jbock.examples;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import org.junit.Rule;
+import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class TarArgumentsTest {
 
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
+  private final ParserFixture<TarArguments> f =
+      ParserFixture.create(TarArguments_Parser::parse);
 
   @Test
   public void testExtract() {
-    assertThat(TarArguments_Parser.parse(new String[]{"-x", "-f", "foo.tar"}).extract())
-        .isTrue();
-    assertThat(TarArguments_Parser.parse(new String[]{"-x", "-f", "foo.tar"}).file())
-        .isEqualTo("foo.tar");
-    assertThat(TarArguments_Parser.parse(new String[]{"-v", "-x", "-f", "foo.tar"}).verbose())
-        .isTrue();
+    f.assertThat("-x", "-f", "foo.tar").isParsedAs(
+        "extract", true,
+        "file", "foo.tar");
+    f.assertThat("-v", "-x", "-f", "foo.tar").isParsedAs(
+        "extract", true,
+        "file", "foo.tar",
+        "verbose", true);
   }
 
   @Test
-  public void errorGroupIsNotTheFirstToken() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: xf");
-    TarArguments_Parser.parse(new String[]{"-v", "xf", "foo.tar"});
-  }
-
-  @Test
-  public void errorGroupIsNotTheFirstTokenHyphen() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -xf");
-    TarArguments_Parser.parse(new String[]{"-v", "-xf", "foo.tar"});
+  public void noGrouping() {
+    f.assertThat("-v", "xf", "foo.tar").isInvalid("Invalid option: xf");
+    f.assertThat("-v", "-xf", "foo.tar").isInvalid("Invalid option: -xf");
   }
 }

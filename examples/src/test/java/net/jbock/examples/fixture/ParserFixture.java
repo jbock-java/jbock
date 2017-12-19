@@ -14,13 +14,13 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import org.junit.Assert;
 
-public final class JsonFixture<E> {
+public final class ParserFixture<E> {
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
   private final Function<String[], E> parse;
 
-  private JsonFixture(Function<String[], E> parse) {
+  private ParserFixture(Function<String[], E> parse) {
     this.parse = parse;
   }
 
@@ -63,8 +63,8 @@ public final class JsonFixture<E> {
     return node;
   }
 
-  public static <E> JsonFixture<E> create(Function<String[], E> fn) {
-    return new JsonFixture<>(fn);
+  public static <E> ParserFixture<E> create(Function<String[], E> fn) {
+    return new ParserFixture<>(fn);
   }
 
   public JsonAssert<E> assertThat(String... args) {
@@ -87,25 +87,19 @@ public final class JsonFixture<E> {
       this.e = e;
     }
 
-    private <X extends RuntimeException> void throwsException(
+    public <X extends RuntimeException> void throwsException(
         Class<X> expectedException,
         String expectedMessage) {
-      throwsException(expectedException);
-      Assert.assertThat(e.getMessage(), is(expectedMessage));
-    }
-
-    public void isInvalid(
-        String expectedMessage) {
-      throwsException(IllegalArgumentException.class, expectedMessage);
-    }
-
-    public <X extends RuntimeException> void throwsException(
-        Class<X> expectedException) {
       if (e == null) {
         Assert.fail("Expected " + expectedException.getSimpleName() +
             " but no exception was thrown");
       }
       Assert.assertThat(e, is(instanceOf(expectedException)));
+      Assert.assertThat(e.getMessage(), is(expectedMessage));
+    }
+
+    public void isInvalid(String expectedMessage) {
+      throwsException(IllegalArgumentException.class, expectedMessage);
     }
 
     public void satisfies(Predicate<E> predicate) {

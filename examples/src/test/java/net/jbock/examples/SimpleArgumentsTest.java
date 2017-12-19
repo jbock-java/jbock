@@ -1,25 +1,16 @@
 package net.jbock.examples;
 
-import org.junit.Rule;
+import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class SimpleArgumentsTest {
 
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
+  private final ParserFixture<SimpleArguments> f =
+      ParserFixture.create(SimpleArguments_Parser::parse);
 
   @Test
-  public void noGroupingOfFirstArgument() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: xf");
-    SimpleArguments_Parser.parse(new String[]{"xf", "1"});
-  }
-
-  @Test
-  public void noGroupingFirstArgumentHyphen() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -xf");
-    SimpleArguments_Parser.parse(new String[]{"-xf", "1"});
+  public void invalidOptions() {
+    f.assertThat("xf", "1").isInvalid("Invalid option: xf");
+    f.assertThat("-xf", "1").isInvalid("Invalid option: -xf");
   }
 }

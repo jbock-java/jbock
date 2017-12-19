@@ -1,61 +1,53 @@
 package net.jbock.examples;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.Arrays.asList;
 
-import java.util.Optional;
-import java.util.OptionalInt;
-import org.junit.Rule;
+import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class NoNameArgumentsTest {
 
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
+  private final ParserFixture<NoNameArguments> f =
+      ParserFixture.create(NoNameArguments_Parser::parse);
 
   @Test
-  public void basicTest() {
-    NoNameArguments noNameArguments = NoNameArguments_Parser.parse(new String[]{"--message=m", "--file=f", "--file=o",
-        "--file=o", "--cmos", "-n1"});
-    assertThat(noNameArguments.cmos()).isEqualTo(true);
-    assertThat(noNameArguments.message()).isEqualTo(Optional.of("m"));
-    assertThat(noNameArguments.file().size()).isEqualTo(3);
-    assertThat(noNameArguments.file().get(0)).isEqualTo("f");
-    assertThat(noNameArguments.file().get(1)).isEqualTo("o");
-    assertThat(noNameArguments.file().get(2)).isEqualTo("o");
-    assertThat(noNameArguments.number()).isEqualTo(1);
+  public void testDifferentOrder() {
+    Object[] expected = {
+        "message", "m",
+        "cmos", true,
+        "number", 1,
+        "file", asList("f", "o", "o")};
+    f.assertThat("--message=m", "--file=f", "--file=o", "--file=o", "--cmos", "-n1")
+        .isParsedAs(expected);
+    f.assertThat("-n1", "--cmos", "--message=m", "--file=f", "--file=o", "--file=o")
+        .isParsedAs(expected);
+    f.assertThat("--file", "f", "--message=m", "--file", "o", "--cmos", "-n1", "--file", "o")
+        .isParsedAs(expected);
   }
 
   @Test
   public void testFlag() {
-    NoNameArguments noNameArguments = NoNameArguments_Parser.parse(new String[]{"--cmos", "-n1"});
-    assertThat(noNameArguments.cmos()).isEqualTo(true);
-    assertThat(noNameArguments.number()).isEqualTo(1);
+    f.assertThat("--cmos", "-n1").isParsedAs(
+        "cmos", true,
+        "number", 1);
   }
 
   @Test
   public void testOptionalInt() {
-    assertThat(NoNameArguments_Parser.parse(new String[]{"-v", "1", "-n1"}).verbosity())
-        .isEqualTo(OptionalInt.of(1));
-    assertThat(NoNameArguments_Parser.parse(new String[]{"-v", "1", "-n1"}).number())
-        .isEqualTo(1);
-    assertThat(NoNameArguments_Parser.parse(new String[]{"-n1"}).verbosity())
-        .isEmpty();
-    assertThat(NoNameArguments_Parser.parse(new String[]{"-n1"}).number())
-        .isEqualTo(1);
+    f.assertThat("-v", "1", "-n1").isParsedAs(
+        "verbosity", 1,
+        "number", 1);
+    f.assertThat("-n1").isParsedAs(
+        "number", 1);
   }
 
   @Test
   public void errorMissingInt() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing required option: NUMBER (-n, --number)");
-    NoNameArguments_Parser.parse(new String[]{"--cmos"});
+    f.assertThat("--cmos").isInvalid("Missing required option: NUMBER (-n, --number)");
   }
 
   @Test
   public void errorUnknownToken() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: blabla");
-    NoNameArguments_Parser.parse(new String[]{"blabla"});
+    f.assertThat("blabla").isInvalid("Invalid option: blabla");
   }
 }

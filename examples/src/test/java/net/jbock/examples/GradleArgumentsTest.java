@@ -1,238 +1,122 @@
 package net.jbock.examples;
 
-import static org.assertj.core.api.Assertions.assertThat;
+import static java.util.Arrays.asList;
+import static java.util.Collections.singletonList;
 
-import java.util.Optional;
-import org.junit.Rule;
+import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public final class GradleArgumentsTest {
 
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
+  private final ParserFixture<GradleArguments> f =
+      ParserFixture.create(GradleArguments_Parser::parse);
 
   @Test
   public void errorShortLongConflict() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option MESSAGE (-m, --message) is not repeatable");
-    GradleArguments_Parser.parse(new String[]{"-m", "hello", "--message=goodbye"});
+    f.assertThat("-m", "hello", "--message=goodbye").isInvalid(
+        "Option MESSAGE (-m, --message) is not repeatable");
   }
 
   @Test
   public void errorMissingValue() {
     // there's nothing after -m
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing value after token: -m");
-    GradleArguments_Parser.parse(new String[]{"-m"});
+    f.assertThat("-m").isInvalid("Missing value after token: -m");
   }
 
   @Test
   public void errorLongShortConflict() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option MESSAGE (-m, --message) is not repeatable");
-    GradleArguments_Parser.parse(new String[]{"--message=hello", "-m", "goodbye"});
+    f.assertThat("--message=hello", "-m", "goodbye").isInvalid(
+        "Option MESSAGE (-m, --message) is not repeatable");
   }
 
   @Test
   public void errorLongLongConflict() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option MESSAGE (-m, --message) is not repeatable");
-    GradleArguments_Parser.parse(new String[]{"--message=hello", "--message=goodbye"});
+    f.assertThat("--message=hello", "--message=goodbye").isInvalid(
+        "Option MESSAGE (-m, --message) is not repeatable");
   }
 
   @Test
-  public void errorNullInArray() {
-    exception.expect(NullPointerException.class);
-    GradleArguments_Parser.parse(new String[]{null});
-  }
-
-  @Test
-  public void errorArrayIsNull() {
-    exception.expect(NullPointerException.class);
-    String[] args = null;
-    GradleArguments_Parser.parse(args);
-  }
-
-  @Test
-  public void errorFlagWithTrailingGarbage() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -c1");
-    GradleArguments_Parser.parse(new String[]{"-c1"});
-  }
-
-  @Test
-  public void errorWeirdOptionGroupEmbeddedHyphen() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -c-v");
-    GradleArguments_Parser.parse(new String[]{"-c-v"});
-  }
-
-  @Test
-  public void errorWeirdOptionGroupTrailingHyphen() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -c-");
-    GradleArguments_Parser.parse(new String[]{"-c-"});
-  }
-
-  @Test
-  public void errorWeirdOptionGroupEmbeddedEquals() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -c=v");
-    GradleArguments_Parser.parse(new String[]{"-c=v"});
-  }
-
-  @Test
-  public void errorWeirdOptionGroupTrailingEquals() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -c=");
-    GradleArguments_Parser.parse(new String[]{"-c="});
-  }
-
-  @Test
-  public void errorWeirdOptionGroupAttemptToPassMethod() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -cX=1");
-    GradleArguments_Parser.parse(new String[]{"-cX=1"});
-  }
-
-  @Test
-  public void errorInvalidOptionGroupRepeated() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -cvv");
-    GradleArguments_Parser.parse(new String[]{"-cvv"});
-  }
-
-  @Test
-  public void errorInvalidOptionGroupUnknownToken() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -cvx");
-    GradleArguments_Parser.parse(new String[]{"-cvx"});
-  }
-
-  @Test
-  public void errorInvalidOptionGroupMissingToken() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -cvm");
-    GradleArguments_Parser.parse(new String[]{"-cvm"});
+  public void errorInvalidOption() {
+    f.assertThat("-c1").isInvalid("Invalid option: -c1");
+    f.assertThat("-c-v").isInvalid("Invalid option: -c-v");
+    f.assertThat("-c-").isInvalid("Invalid option: -c-");
+    f.assertThat("-c=v").isInvalid("Invalid option: -c=v");
+    f.assertThat("-c=").isInvalid("Invalid option: -c=");
+    f.assertThat("-cX=1").isInvalid("Invalid option: -cX=1");
+    f.assertThat("-cvv").isInvalid("Invalid option: -cvv");
+    f.assertThat("-cvx").isInvalid("Invalid option: -cvx");
+    f.assertThat("-cvm").isInvalid("Invalid option: -cvm");
   }
 
   @Test
   public void testDetachedLong() {
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(
-        new String[]{"--message", "hello"});
-    assertThat(gradleArguments.message()).isEqualTo(Optional.of("hello"));
+    f.assertThat("--message", "hello").isParsedAs(
+        "message", "hello");
   }
 
   @Test
   public void testInterestingTokens() {
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(
-        new String[]{"--message=hello", "b-a-b-a", "--", "->", "<=>", "", " "});
-    assertThat(gradleArguments.message()).isEqualTo(Optional.of("hello"));
-    assertThat(gradleArguments.otherTokens().size()).isEqualTo(1);
-    assertThat(gradleArguments.otherTokens().get(0)).isEqualTo("b-a-b-a");
-    assertThat(gradleArguments.ddTokens().size()).isEqualTo(4);
-    assertThat(gradleArguments.ddTokens().get(0)).isEqualTo("->");
-    assertThat(gradleArguments.ddTokens().get(1)).isEqualTo("<=>");
-    assertThat(gradleArguments.ddTokens().get(2)).isEqualTo("");
-    assertThat(gradleArguments.ddTokens().get(3)).isEqualTo(" ");
+    f.assertThat("--message=hello", "b-a-b-a", "--", "->", "<=>", "", " ").isParsedAs(
+        "message", "hello",
+        "otherTokens", singletonList("b-a-b-a"),
+        "ddTokens", asList("->", "<=>", "", " "));
   }
 
   @Test
-  public void testEmptyVersusAbsent() {
-    assertThat(GradleArguments_Parser.parse(new String[]{"--message="}).message())
-        .isEqualTo(Optional.of(""));
-    assertThat(GradleArguments_Parser.parse(new String[0]).message())
-        .isEqualTo(Optional.empty());
+  public void testPassEmptyString() {
+    f.assertThat("-m", "").isParsedAs("message", "");
+    f.assertThat("--message=").isParsedAs("message", "");
+    f.assertThat("--message", "").isParsedAs("message", "");
   }
 
   @Test
-  public void testShortNonAtomic() {
-    String[] args = {"-m", "hello"};
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(args);
-    assertThat(gradleArguments.message()).isEqualTo(Optional.of("hello"));
-    assertThat(gradleArguments.cmos()).isEqualTo(false);
+  public void testAllForms() {
+    f.assertThat("-mhello").isParsedAs("message", "hello");
+    f.assertThat("-m", "hello").isParsedAs("message", "hello");
+    f.assertThat("--message=hello").isParsedAs("message", "hello");
+    f.assertThat("--message", "hello").isParsedAs("message", "hello");
   }
 
   @Test
-  public void testLongMessage() {
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(new String[]{"--message=hello"});
-    assertThat(gradleArguments.message()).isEqualTo(Optional.of("hello"));
-    assertThat(gradleArguments.cmos()).isEqualTo(false);
-  }
-
-  @Test
-  public void testShortAtomic() {
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(new String[]{"-fbar.txt"});
-    assertThat(gradleArguments.file().size()).isEqualTo(1);
-    assertThat(gradleArguments.file().get(0)).isEqualTo("bar.txt");
-  }
-
-  @Test
-  public void testLongShortAtomic() {
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(new String[]{"--message=hello", "-fbar.txt"});
-    assertThat(gradleArguments.file().size()).isEqualTo(1);
-    assertThat(gradleArguments.file().get(0)).isEqualTo("bar.txt");
-    assertThat(gradleArguments.message()).isEqualTo(Optional.of("hello"));
-  }
-
-  @Test
-  public void testAttachedFirstToken() {
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(new String[]{"-fbar.txt", "--message=hello"});
-    assertThat(gradleArguments.file().size()).isEqualTo(1);
-    assertThat(gradleArguments.file().get(0)).isEqualTo("bar.txt");
-    assertThat(gradleArguments.message()).isEqualTo(Optional.of("hello"));
+  public void testRepeatableShortAttached() {
+    f.assertThat("-fbar.txt").isParsedAs(
+        "file", singletonList("bar.txt"));
+    f.assertThat("-fbar.txt", "--message=hello").isParsedAs(
+        "message", "hello",
+        "file", singletonList("bar.txt"));
+    f.assertThat("--message=hello", "-fbar.txt").isParsedAs(
+        "message", "hello",
+        "file", singletonList("bar.txt"));
   }
 
   @Test
   public void testLongSuppressed() {
     // Long option --cmos is suppressed
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: --cmos");
-    GradleArguments_Parser.parse(new String[]{"--cmos"});
-  }
-
-  @Test
-  public void testLong() {
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(new String[]{"--dir=dir"});
-    assertThat(gradleArguments.dir()).isEqualTo(Optional.of("dir"));
+    f.assertThat("--cmos").isInvalid("Invalid option: --cmos");
   }
 
   @Test
   public void testFlag() {
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(new String[]{"-c", "hello"});
-    assertThat(gradleArguments.cmos()).isEqualTo(true);
-    assertThat(gradleArguments.otherTokens().size()).isEqualTo(1);
-    assertThat(gradleArguments.otherTokens().get(0)).isEqualTo("hello");
+    f.assertThat("-c", "hello").isParsedAs(
+        "cmos", true,
+        "otherTokens", singletonList("hello"));
   }
 
   @Test
-  public void testNonsense() {
-    // bogus options
-    GradleArguments gradleArguments = GradleArguments_Parser.parse(new String[]{"hello", "goodbye"});
-    assertThat(gradleArguments.otherTokens().size()).isEqualTo(2);
+  public void testPositionalOnly() {
+    f.assertThat("hello", "goodbye").isParsedAs(
+        "otherTokens", asList("hello", "goodbye"));
   }
 
   @Test
-  public void someTests() {
-    assertThat(GradleArguments_Parser.parse(new String[]{"-c", "-v"}).cmos())
-        .isTrue();
-    assertThat(GradleArguments_Parser.parse(new String[]{"-c", "-v"}).verbose())
-        .isTrue();
-    assertThat(GradleArguments_Parser.parse(new String[]{"-c", "-v"}).message())
-        .isEqualTo(Optional.empty());
+  public void twoFlags() {
+    f.assertThat("-c", "-v").isParsedAs(
+        "cmos", true,
+        "verbose", true);
   }
 
   @Test
-  public void errorDoubleFlagWithAttachedOption() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -cvm");
-    GradleArguments_Parser.parse(new String[]{"-cvm", "hello"});
-  }
-
-  @Test
-  public void testParserForNestedClass() {
-    GradleArguments.Foo foo = GradleArguments_Foo_Parser.parse(new String[]{"--bar=4"});
-    assertThat(foo.bar()).isEqualTo(Optional.of("4"));
+  public void errorSuspiciousInput() {
+    f.assertThat("-cvm", "hello").isInvalid("Invalid option: -cvm");
   }
 }

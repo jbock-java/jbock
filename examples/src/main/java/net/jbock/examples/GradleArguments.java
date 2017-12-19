@@ -3,6 +3,7 @@ package net.jbock.examples;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import net.jbock.CommandLineArguments;
 import net.jbock.Description;
 import net.jbock.LongName;
@@ -39,7 +40,7 @@ abstract class GradleArguments {
 
   @CommandLineArguments
   static abstract class Foo {
-    abstract Optional<String> bar();
+    abstract OptionalInt bar();
   }
 
   @CommandLineArguments

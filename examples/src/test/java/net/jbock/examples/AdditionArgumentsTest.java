@@ -1,12 +1,12 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.JsonFixture;
+import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
 public class AdditionArgumentsTest {
 
-  private final JsonFixture<AdditionArguments> f =
-      JsonFixture.create(AdditionArguments_Parser::parse);
+  private final ParserFixture<AdditionArguments> f =
+      ParserFixture.create(AdditionArguments_Parser::parse);
 
   @Test
   public void optionalAbsent() {
@@ -25,7 +25,8 @@ public class AdditionArgumentsTest {
 
   @Test
   public void wrongNumber() {
-    f.assertThat("-a", "2").throwsException(NumberFormatException.class);
+    f.assertThat("-a", "2").throwsException(NumberFormatException.class,
+        "For input string: \"-a\"");
   }
 
   @Test
