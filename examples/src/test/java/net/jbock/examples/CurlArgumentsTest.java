@@ -8,16 +8,12 @@ import static org.junit.Assert.assertThat;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import net.jbock.examples.fixture.JsonFixture;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class CurlArgumentsTest {
 
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
-
-  private final JsonFixture f = JsonFixture.create(CurlArguments_Parser::parse);
+  private final JsonFixture<CurlArguments> f =
+      JsonFixture.create(CurlArguments_Parser::parse);
 
   @Test
   public void testEmpty() {
@@ -96,65 +92,51 @@ public class CurlArgumentsTest {
 
   @Test
   public void errorInvalidGrouping() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -vH1");
-    CurlArguments_Parser.parse(new String[]{"-vH1"});
+    f.assertThat("-vH1").isInvalid("Invalid option: -vH1");
   }
 
   @Test
   public void errorInvalidGroupingLong() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -vXPOST");
-    CurlArguments_Parser.parse(new String[]{"-vXPOST"});
+    f.assertThat("-vXPOST").isInvalid("Invalid option: -vXPOST");
   }
 
   @Test
   public void errorGroupingDuplicateFlag() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -vH'Content-Type: application/xml'");
-    CurlArguments_Parser.parse(new String[]{"-v", "-vH'Content-Type: application/xml'"});
+    f.assertThat("-v", "-vH'Content-Type: application/xml'").isInvalid(
+        "Invalid option: -vH'Content-Type: application/xml'");
   }
 
   @Test
   public void errorMissingRepeatable() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing value after token: -H");
-    CurlArguments_Parser.parse(new String[]{"-H"});
+    f.assertThat("-H").isInvalid("Missing value after token: -H");
   }
 
   @Test
   public void errorMissingNonRepeatable() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing value after token: --request");
-    CurlArguments_Parser.parse(new String[]{"--request"});
+    f.assertThat("--request").isInvalid("Missing value after token: --request");
   }
 
   @Test
   public void errorDuplicateNonRepeatableLong() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option METHOD (-X, --request) is not repeatable");
-    CurlArguments_Parser.parse(new String[]{"--request", "GET", "--request", "POST"});
+    f.assertThat("--request", "GET", "--request", "POST").isInvalid(
+        "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   public void errorDuplicateNonRepeatableShort() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option METHOD (-X, --request) is not repeatable");
-    CurlArguments_Parser.parse(new String[]{"-X1", "-X2"});
+    f.assertThat("-X1", "-X2").isInvalid("Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   public void errorDuplicateNonRepeatableLongDetachedShortAttached() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option METHOD (-X, --request) is not repeatable");
-    CurlArguments_Parser.parse(new String[]{"--request", "1", "-X2"});
+    f.assertThat("--request", "1", "-X2").isInvalid(
+        "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   public void errorDuplicateNonRepeatableLongAttachedShortDetached() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Option METHOD (-X, --request) is not repeatable");
-    CurlArguments_Parser.parse(new String[]{"--request=1", "-X", "2"});
+    f.assertThat("--request=1", "-X", "2").isInvalid(
+        "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test

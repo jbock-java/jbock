@@ -1,29 +1,21 @@
 package net.jbock.examples;
 
 import net.jbock.examples.fixture.JsonFixture;
-import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class CpArgumentsTest {
 
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
-
-  private final JsonFixture f = JsonFixture.create(CpArguments_Parser::parse);
+  private final JsonFixture<CpArguments> f =
+      JsonFixture.create(CpArguments_Parser::parse);
 
   @Test
   public void errorMissingSource() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing positional parameter: SOURCE");
-    CpArguments_Parser.parse(new String[]{});
+    f.assertThat().isInvalid("Missing positional parameter: SOURCE");
   }
 
   @Test
   public void errorMissingDest() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Missing positional parameter: DEST");
-    CpArguments_Parser.parse(new String[]{"a"});
+    f.assertThat("a").isInvalid("Missing positional parameter: DEST");
   }
 
   @Test
@@ -38,23 +30,17 @@ public class CpArgumentsTest {
 
   @Test
   public void dashNotIgnored() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Invalid option: -a");
-    CpArguments_Parser.parse(new String[]{"-a", "b"});
+    f.assertThat("-a", "b").isInvalid("Invalid option: -a");
   }
 
   @Test
   public void tooMany() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Excess option: c");
-    CpArguments_Parser.parse(new String[]{"a", "b", "c"});
+    f.assertThat("a", "b", "c").isInvalid("Excess option: c");
   }
 
   @Test
   public void tooManyAndFlag() {
-    exception.expect(IllegalArgumentException.class);
-    exception.expectMessage("Excess option: c");
-    CpArguments_Parser.parse(new String[]{"-r", "a", "b", "c"});
+    f.assertThat("-r", "a", "b", "c").isInvalid("Excess option: c");
   }
 
   @Test

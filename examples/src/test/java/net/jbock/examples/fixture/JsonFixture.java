@@ -1,5 +1,6 @@
 package net.jbock.examples.fixture;
 
+import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
 
 import com.fasterxml.jackson.databind.JsonNode;
@@ -10,6 +11,7 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import org.junit.Assert;
 
 public final class JsonFixture<E> {
@@ -49,10 +51,12 @@ public final class JsonFixture<E> {
       } else if (v instanceof Boolean) {
         node.put(k, (Boolean) v);
       } else if (v instanceof List) {
-        ArrayNode array = node.putArray(k);
-        List<String> v1 = (List) v;
-        for (String s : v1) {
-          array.add(s);
+        List list = (List) v;
+        if (!list.isEmpty()) {
+          ArrayNode array = node.putArray(k);
+          for (Object s : list) {
+            array.add(s.toString());
+          }
         }
       }
     }
@@ -60,22 +64,62 @@ public final class JsonFixture<E> {
   }
 
   public static <E> JsonFixture<E> create(Function<String[], E> fn) {
-    return new JsonFixture(fn);
+    return new JsonFixture<>(fn);
   }
 
-  public JsonAssert assertThat(String... args) {
-    return new JsonAssert(readJson(parse.apply(args).toString()));
+  public JsonAssert<E> assertThat(String... args) {
+    try {
+      E parsed = parse.apply(args);
+      return new JsonAssert<>(parsed, null);
+    } catch (RuntimeException e) {
+      return new JsonAssert<>(null, e);
+    }
   }
 
-  public static final class JsonAssert {
-    private final JsonNode actual;
+  public static final class JsonAssert<E> {
 
-    private JsonAssert(JsonNode actual) {
-      this.actual = actual;
+    private final E parsed;
+
+    private final RuntimeException e;
+
+    private JsonAssert(E parsed, RuntimeException e) {
+      this.parsed = parsed;
+      this.e = e;
+    }
+
+    private <X extends RuntimeException> void throwsException(
+        Class<X> expectedException,
+        String expectedMessage) {
+      throwsException(expectedException);
+      Assert.assertThat(e.getMessage(), is(expectedMessage));
+    }
+
+    public void isInvalid(
+        String expectedMessage) {
+      throwsException(IllegalArgumentException.class, expectedMessage);
+    }
+
+    public <X extends RuntimeException> void throwsException(
+        Class<X> expectedException) {
+      if (e == null) {
+        Assert.fail("Expected " + expectedException.getSimpleName() +
+            " but no exception was thrown");
+      }
+      Assert.assertThat(e, is(instanceOf(expectedException)));
+    }
+
+    public void satisfies(Predicate<E> predicate) {
+      if (e != null) {
+        throw e;
+      }
+      Assert.assertTrue(predicate.test(parsed));
     }
 
     public void isParsedAs(Object... expected) {
-      Assert.assertThat(actual, is(parseJson(expected)));
+      if (e != null) {
+        throw e;
+      }
+      Assert.assertThat(readJson(parsed.toString()), is(parseJson(expected)));
     }
   }
 }

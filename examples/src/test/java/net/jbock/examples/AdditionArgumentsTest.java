@@ -1,53 +1,38 @@
 package net.jbock.examples;
 
-import static org.assertj.core.api.Assertions.assertThat;
-
-import java.util.OptionalInt;
-import org.junit.Rule;
+import net.jbock.examples.fixture.JsonFixture;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 
 public class AdditionArgumentsTest {
 
-  @Rule
-  public final ExpectedException exception = ExpectedException.none();
+  private final JsonFixture<AdditionArguments> f =
+      JsonFixture.create(AdditionArguments_Parser::parse);
 
   @Test
   public void optionalAbsent() {
-    assertThat(AdditionArguments_Parser.parse(new String[]{"1", "2"}).a())
-        .isEqualTo(1);
-    assertThat(AdditionArguments_Parser.parse(new String[]{"1", "2"}).b())
-        .isEqualTo(2);
-    assertThat(AdditionArguments_Parser.parse(new String[]{"1", "2"}).c())
-        .isEmpty();
+    f.assertThat("1", "2").isParsedAs(
+        "a", 1,
+        "b", 2);
   }
 
   @Test
   public void optionalPresent() {
-    assertThat(AdditionArguments_Parser.parse(new String[]{"1", "2", "3"}).a())
-        .isEqualTo(1);
-    assertThat(AdditionArguments_Parser.parse(new String[]{"1", "2", "3"}).b())
-        .isEqualTo(2);
-    assertThat(AdditionArguments_Parser.parse(new String[]{"1", "2", "3"}).c())
-        .isEqualTo(OptionalInt.of(3));
+    f.assertThat("1", "2", "3").isParsedAs(
+        "a", 1,
+        "b", 2,
+        "c", 3);
   }
 
   @Test
   public void wrongNumber() {
-    exception.expect(NumberFormatException.class);
-    assertThat(AdditionArguments_Parser.parse(new String[]{"-a", "2"}).a())
-        .isEqualTo(1);
+    f.assertThat("-a", "2").throwsException(NumberFormatException.class);
   }
 
   @Test
   public void dashesIgnored() {
-    assertThat(AdditionArguments_Parser.parse(new String[]{"1", "-2", "3"}).sum())
-        .isEqualTo(2);
-    assertThat(AdditionArguments_Parser.parse(new String[]{"-1", "-2", "-3"}).sum())
-        .isEqualTo(-6);
-    assertThat(AdditionArguments_Parser.parse(new String[]{"-1", "-2", "3"}).sum())
-        .isEqualTo(0);
-    assertThat(AdditionArguments_Parser.parse(new String[]{"-1", "-2"}).sum())
-        .isEqualTo(-3);
+    f.assertThat("1", "-2", "3").satisfies(e -> e.sum() == 2);
+    f.assertThat("-1", "-2", "-3").satisfies(e -> e.sum() == -6);
+    f.assertThat("-1", "-2", "3").satisfies(e -> e.sum() == 0);
+    f.assertThat("-1", "-2").satisfies(e -> e.sum() == -3);
   }
 }
