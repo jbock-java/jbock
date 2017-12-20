@@ -3,10 +3,79 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
 jbock is a simple annotation processor that generates a [getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired
-CLI parser. It can be used to define both short and long options, and supports option grouping.
+CLI parser. It understands both long and short options, and accepts either their attached or detached forms.
+
+jbock can also be used to read positional arguments, if any, in a structured way. See examples below.
 
 jbock generates an implementation of an abstract, user-defined class, similar to
 [auto-value](https://github.com/google/auto/tree/master/value).
+
+### Developing a command line interface from scratch
+
+We're going to write a simple command line utility that copies a file.
+This is how we might do it in Java:
+
+````java
+public class CopyFile {
+
+  public static void main(String[] args) throws IOException {
+    String src = args[0];
+    String dest = args[1];
+    Files.copy(Paths.get(src), Paths.get(dest));
+    System.out.printf("Done copying %s to %s%n", src, dest);
+  }
+}
+````
+
+This is what the program prints, when invoked without parameters:
+
+<pre><code>
+Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 0
+    at cli.tools.CopyFile.main(CopyFile.java:10)
+</code></pre>
+
+
+Let's use jbock to give the user a clearer error message.
+We define an abstract class `Args`:
+
+````java
+public class CopyFile {
+
+  @CommandLineArguments
+  static abstract class Args {
+    @Positional abstract String src();
+    @Positional abstract String dest();
+  }
+
+  public static void main(String[] args) throws IOException {
+    Args a = CopyFile_Args_Parser.parse(args);
+    Files.copy(Paths.get(a.src()), Paths.get(a.dest()));
+    System.out.printf("Done copying %s to %s%n", a.src(), a.dest());
+  }
+}
+````
+
+The order of the method declarations `src()` and `dest()` matters.
+`CopyFile_Args_Parser` is a generated class, a custom parser for the command line interface
+defined by `Args`.
+
+
+Now the error looks like this:
+
+<pre><code>
+Exception in thread "main" java.lang.IllegalArgumentException: Missing positional parameter: SRC
+	at cli.tools.CopyFile_Arguments_Parser$Helper.extractPositionalRequired(CopyFile_Arguments_Parser.java:85)
+	at cli.tools.CopyFile_Arguments_Parser$Helper.build(CopyFile_Arguments_Parser.java:77)
+	at cli.tools.CopyFile_Arguments_Parser.parse(CopyFile_Arguments_Parser.java:43)
+	at cli.tools.CopyFile_Arguments_Parser.parse(CopyFile_Arguments_Parser.java:23)
+	at cli.tools.CopyFile.main(CopyFile.java:18)
+</code></pre>
+
+
+
+
+
+
 
 ## Parser features
 
