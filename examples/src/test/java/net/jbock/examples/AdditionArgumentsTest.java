@@ -1,5 +1,7 @@
 package net.jbock.examples;
 
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
+
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -35,5 +37,17 @@ public class AdditionArgumentsTest {
     f.assertThat("-1", "-2", "-3").satisfies(e -> e.sum() == -6);
     f.assertThat("-1", "-2", "3").satisfies(e -> e.sum() == 0);
     f.assertThat("-1", "-2").satisfies(e -> e.sum() == -3);
+  }
+
+
+  @Test
+  public void testPrint() {
+    printFixture(AdditionArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  A B [C]",
+        "",
+        "DESCRIPTION",
+        "",
+        "");
   }
 }

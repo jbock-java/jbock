@@ -1,5 +1,7 @@
 package net.jbock.examples;
 
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
+
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -30,5 +32,16 @@ public class MvArgumentsTest {
     f.assertThat("a", "b").isParsedAs(
         "source", "a",
         "dest", "b");
+  }
+
+  @Test
+  public void testPrint() {
+    printFixture(MvArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  SOURCE DEST",
+        "",
+        "DESCRIPTION",
+        "",
+        "");
   }
 }

@@ -7,7 +7,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
  */
 enum PositionalType {
 
-  POSITIONAL_REQUIRED(0) {
+  POSITIONAL_REQUIRED(PositionalOrder.REQUIRED) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -21,7 +21,7 @@ enum PositionalType {
     }
   },
 
-  POSITIONAL_REQUIRED_INT(0) {
+  POSITIONAL_REQUIRED_INT(PositionalOrder.REQUIRED) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -36,7 +36,7 @@ enum PositionalType {
     }
   },
 
-  POSITIONAL_OPTIONAL(1) {
+  POSITIONAL_OPTIONAL(PositionalOrder.OPTIONAL) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -49,7 +49,7 @@ enum PositionalType {
     }
   },
 
-  POSITIONAL_OPTIONAL_INT(1) {
+  POSITIONAL_OPTIONAL_INT(PositionalOrder.OPTIONAL) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -62,7 +62,7 @@ enum PositionalType {
     }
   },
 
-  POSITIONAL_LIST(2) {
+  POSITIONAL_LIST(PositionalOrder.LIST) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -75,7 +75,7 @@ enum PositionalType {
     }
   },
 
-  POSITIONAL_LIST_2(2) {
+  POSITIONAL_LIST_2(PositionalOrder.LIST) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -87,10 +87,10 @@ enum PositionalType {
     }
   };
 
-  // order of methods must be ascending in the sourceType
-  final int order;
+  // order of positional methods must be ascending in the sourceType
+  final PositionalOrder order;
 
-  PositionalType(int order) {
+  PositionalType(PositionalOrder order) {
     this.order = order;
   }
 

@@ -154,7 +154,7 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("String may not stand below @Positional List<String>");
+        .withErrorContaining("REQUIRED method b() must come before LIST method a()");
   }
 
   @Test
@@ -169,7 +169,7 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Optional<String> may not stand below @Positional List<String>");
+        .withErrorContaining("OPTIONAL method b() must come before LIST method a()");
   }
 
   @Test
@@ -184,7 +184,7 @@ public class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("String may not stand below @Positional Optional<String>");
+        .withErrorContaining("REQUIRED method b() must come before OPTIONAL method a()");
   }
 
   @Test

@@ -1,5 +1,7 @@
 package net.jbock.examples;
 
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
+
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -23,5 +25,26 @@ public class TarArgumentsTest {
   public void noGrouping() {
     f.assertThat("-v", "xf", "foo.tar").isInvalid("Invalid option: xf");
     f.assertThat("-v", "-xf", "foo.tar").isInvalid("Invalid option: -xf");
+  }
+
+  @Test
+  public void testPrint() {
+    printFixture(TarArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  [OPTION]... -f FILE",
+        "",
+        "DESCRIPTION",
+        "",
+        "  -x, --extract",
+        "",
+        "  -c, --create",
+        "",
+        "  -v, --verbose",
+        "",
+        "  -z, --compress",
+        "",
+        "  -f, --file VALUE",
+        "",
+        "");
   }
 }

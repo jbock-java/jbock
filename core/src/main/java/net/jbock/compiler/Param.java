@@ -281,7 +281,7 @@ final class Param {
     return sourceMethod.getSimpleName().toString();
   }
 
-  Param asPositional2() {
+  Param promoteToPositionalList2() {
     return new Param(shortName, longName, index, paramType,
         PositionalType.POSITIONAL_LIST_2, sourceMethod);
   }

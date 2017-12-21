@@ -4,6 +4,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.compiler.Util.asType;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -46,6 +47,9 @@ final class Context {
   // a set of only the positional param types in the sourceType
   final Set<PositionalType> positionalParamTypes;
 
+  // general usage instructions
+  final List<String> description;
+
   private Context(
       TypeElement sourceType,
       ClassName generatedClass,
@@ -54,8 +58,10 @@ final class Context {
       boolean stopword,
       boolean problematicOptionNames,
       boolean ignoreDashes,
-      boolean generateToString, Set<Type> paramTypes,
-      Set<PositionalType> positionalParamTypes) {
+      boolean generateToString,
+      Set<Type> paramTypes,
+      Set<PositionalType> positionalParamTypes,
+      List<String> description) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -66,6 +72,7 @@ final class Context {
     this.generateToString = generateToString;
     this.paramTypes = paramTypes;
     this.positionalParamTypes = positionalParamTypes;
+    this.description = description;
   }
 
   static Context create(
@@ -83,6 +90,7 @@ final class Context {
         .map(ExecutableElement::getSimpleName)
         .map(Name::toString)
         .noneMatch(s -> s.equals("toString"));
+    List<String> description = Arrays.asList(sourceType.getAnnotation(CommandLineArguments.class).description());
     return new Context(
         sourceType,
         generatedClass,
@@ -93,7 +101,8 @@ final class Context {
         ignoreDashes,
         generateToString,
         paramTypes,
-        positionalParamTypes);
+        positionalParamTypes,
+        description);
   }
 
   private static boolean problematicOptionNames(List<Param> parameters) {

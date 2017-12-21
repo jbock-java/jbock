@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import static java.util.Collections.singletonList;
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
 
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
@@ -56,5 +57,16 @@ public class PositionalArgumentsTest {
     f.assertThat("a", "b").isParsedAs(
         "source", "a",
         "dest", "b");
+  }
+
+  @Test
+  public void testPrint() {
+    printFixture(PositionalArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  SOURCE DEST [OPT_STRING] [OTHER_TOKENS]... [-- DD_TOKENS...]",
+        "",
+        "DESCRIPTION",
+        "",
+        "");
   }
 }

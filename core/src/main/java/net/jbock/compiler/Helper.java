@@ -29,7 +29,8 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 /**
- * Defines the private *_Parser.Helper inner class.
+ * Defines the private *_Parser.Helper inner class,
+ * which accumulates the non-positional arguments in the input.
  *
  * @see Parser
  */

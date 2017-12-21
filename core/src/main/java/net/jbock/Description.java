@@ -23,7 +23,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.SOURCE)
 public @interface Description {
 
-  String[] value();
+  String[] value() default {};
 
   String argumentName() default "";
 }

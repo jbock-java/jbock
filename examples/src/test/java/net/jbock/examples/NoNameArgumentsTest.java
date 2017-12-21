@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import static java.util.Arrays.asList;
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
 
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
@@ -50,4 +51,27 @@ public class NoNameArgumentsTest {
   public void errorUnknownToken() {
     f.assertThat("blabla").isInvalid("Invalid option: blabla");
   }
+
+
+  @Test
+  public void testPrint() {
+    printFixture(NoNameArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  [OPTION]... -n NUMBER",
+        "",
+        "DESCRIPTION",
+        "",
+        "  --message VALUE",
+        "",
+        "  --file VALUE...",
+        "",
+        "  -v, --verbosity NUMBER",
+        "",
+        "  -n, --number NUMBER",
+        "",
+        "  --cmos",
+        "",
+        "");
+  }
+
 }

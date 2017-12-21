@@ -2,7 +2,6 @@ package net.jbock.compiler;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 
@@ -21,13 +20,13 @@ final class OptionType {
 
   final ClassName type;
 
-  private final Context context;
+  final Context context;
 
   final FieldSpec isPositionalField;
 
   private OptionType(Context context) {
     this.context = context;
-    this.isPositionalField = FieldSpec.builder(BOOLEAN, "positional", PRIVATE, FINAL)
+    this.isPositionalField = FieldSpec.builder(BOOLEAN, "positional", FINAL)
         .build();
     this.type = context.generatedClass.nestedClass("OptionType");
   }
@@ -44,7 +43,7 @@ final class OptionType {
     for (PositionalType optionType : context.positionalParamTypes) {
       addType(builder, optionType);
     }
-    return builder.addModifiers(PUBLIC)
+    return builder.addModifiers(PRIVATE)
         .addField(isPositionalField)
         .addMethod(privateConstructor())
         .build();

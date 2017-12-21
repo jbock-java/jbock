@@ -44,4 +44,6 @@ public @interface CommandLineArguments {
    * </p>
    */
   boolean ignoreDashes() default false;
+
+  String[] description() default {};
 }

@@ -1,5 +1,7 @@
 package net.jbock.examples;
 
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
+
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -33,5 +35,18 @@ public class RequiredArgumentsTest {
   @Test
   public void errorDetachedAttached() {
     f.assertThat("--dir", "A", "--dir=B").isInvalid("Option DIR (--dir) is not repeatable");
+  }
+
+  @Test
+  public void testPrint() {
+    printFixture(RequiredArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  --dir=DIR [OTHER_TOKENS]...",
+        "",
+        "DESCRIPTION",
+        "",
+        "  --dir VALUE",
+        "",
+        "");
   }
 }

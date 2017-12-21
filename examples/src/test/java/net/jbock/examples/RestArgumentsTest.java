@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import static java.util.Arrays.asList;
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
 
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
@@ -29,5 +30,18 @@ public class RestArgumentsTest {
     f.assertThat("--file=1", "--file", "2", "--", "a").isParsedAs(
         "file", asList("1", "2"),
         "rest", asList("--", "a"));
+  }
+
+  @Test
+  public void testPrint() {
+    printFixture(RestArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  [OPTION]... [REST]...",
+        "",
+        "DESCRIPTION",
+        "",
+        "  --file VALUE...",
+        "",
+        "");
   }
 }

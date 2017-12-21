@@ -8,7 +8,15 @@ import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
 
-@CommandLineArguments
+@CommandLineArguments(description = {
+    "curl  is  a  tool  to  transfer data from or to a server " +
+        "using one of the supported protocols",
+    "",
+    "curl offers a busload of useful tricks",
+    "",
+    "curl is powered by libcurl for all transfer-related features. " +
+        "See libcurl(3) for details."
+})
 abstract class CurlArguments {
 
   @ShortName('X')

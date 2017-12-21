@@ -2,11 +2,8 @@ package net.jbock.examples;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.hamcrest.CoreMatchers.is;
-import static org.junit.Assert.assertThat;
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -140,19 +137,29 @@ public class CurlArgumentsTest {
   }
 
   @Test
-  public void testPrintUsage() {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    CurlArguments_Parser.printUsage(new PrintStream(out), 2);
-    String[] lines = new String(out.toByteArray()).split("\n", -1);
-    assertThat(lines, is(new String[]{
-        "[OPTION]...",
-        "-X, --request VALUE",
-        "  Optional<String> for regular arguments",
-        "-H VALUE...",
-        "  List<String> for repeatable arguments",
-        "-v",
-        "  boolean for flags",
-        "-i, --include",
-        ""}));
+  public void testPrint() {
+    printFixture(CurlArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  [OPTION]... [URLS]...",
+        "",
+        "DESCRIPTION",
+        "  curl  is  a  tool  to  transfer data from or to a server using one of the supported protocols",
+        "",
+        "  curl offers a busload of useful tricks",
+        "",
+        "  curl is powered by libcurl for all transfer-related features. See libcurl(3) for details.",
+        "",
+        "  -X, --request VALUE",
+        "    Optional<String> for regular arguments",
+        "",
+        "  -H VALUE...",
+        "    List<String> for repeatable arguments",
+        "",
+        "  -v",
+        "    boolean for flags",
+        "",
+        "  -i, --include",
+        "",
+        "");
   }
 }

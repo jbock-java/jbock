@@ -1,5 +1,7 @@
 package net.jbock.examples;
 
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
+
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -58,5 +60,18 @@ public class CpArgumentsTest {
         .isParsedAs(expected);
     f.assertThat("a", "b", "-r")
         .isParsedAs(expected);
+  }
+
+  @Test
+  public void testPrint() {
+    printFixture(CpArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  [OPTION]... SOURCE DEST",
+        "",
+        "DESCRIPTION",
+        "",
+        "  -r, --recursive",
+        "",
+        "");
   }
 }

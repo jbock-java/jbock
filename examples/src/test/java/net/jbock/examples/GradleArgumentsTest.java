@@ -2,6 +2,7 @@ package net.jbock.examples;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
 
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
@@ -118,5 +119,32 @@ public final class GradleArgumentsTest {
   @Test
   public void errorSuspiciousInput() {
     f.assertThat("-cvm", "hello").isInvalid("Invalid option: -cvm");
+  }
+
+
+  @Test
+  public void testPrint() {
+    printFixture(GradleArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  [OPTION]... [OTHER_TOKENS]... [-- DD_TOKENS...]",
+        "",
+        "DESCRIPTION",
+        "",
+        "  -m, --message MESSAGE",
+        "    the message",
+        "    message goes here",
+        "",
+        "  -f, --file FILE",
+        "    the files",
+        "",
+        "  --dir DIR",
+        "    the dir",
+        "",
+        "  -c",
+        "    cmos flag",
+        "",
+        "  -v, --verbose",
+        "",
+        "");
   }
 }

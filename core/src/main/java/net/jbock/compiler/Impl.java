@@ -24,7 +24,8 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 final class Impl {
 
   final ClassName type;
-  final Option option;
+
+  private final Option option;
 
   private final List<FieldSpec> fields;
 
@@ -44,7 +45,7 @@ final class Impl {
     for (int j = 0; j < option.context.parameters.size(); j++) {
       Param param = option.context.parameters.get(j);
       fields.add(FieldSpec.builder(param.paramType.returnType, param.methodName())
-          .addModifiers(PRIVATE, FINAL)
+          .addModifiers(FINAL)
           .build());
     }
     return new Impl(

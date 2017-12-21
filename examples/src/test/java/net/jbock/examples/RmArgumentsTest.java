@@ -2,10 +2,8 @@ package net.jbock.examples;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static org.assertj.core.api.Assertions.assertThat;
+import static net.jbock.examples.fixture.PrintFixture.printFixture;
 
-import java.io.ByteArrayOutputStream;
-import java.io.PrintStream;
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -24,13 +22,16 @@ public class RmArgumentsTest {
 
   @Test
   public void testPrint() {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    RmArguments_Parser.printUsage(new PrintStream(out), 2);
-    String[] lines = new String(out.toByteArray()).split("\n", -1);
-    assertThat(lines).isEqualTo(new String[]{
-        "[OPTION]...",
-        "-r, --recursive",
-        "-f, --force",
-        ""});
+    printFixture(RmArguments_Parser::printUsage).assertPrints(
+        "SYNOPSIS",
+        "  [OPTION]... [OTHER_TOKENS]... [-- DD_TOKENS...]",
+        "",
+        "DESCRIPTION",
+        "",
+        "  -r, --recursive",
+        "",
+        "  -f, --force",
+        "",
+        "");
   }
 }

@@ -153,37 +153,49 @@ public final class Processor extends AbstractProcessor {
 
   private List<Param> checkPositionalOrder(List<Param> params) {
     List<Param> result = new ArrayList<>(params.size());
-    int lists = 0;
-    Param previous = null;
+    int positionalListCount = 0;
+    Param previousPositional = null;
     for (Param param : params) {
       if (param.positionalType == null) {
         result.add(param);
         continue;
       }
-      PositionalType positionalType = param.positionalType;
-      if (previous != null) {
-        if (positionalType.order < previous.positionalType.order) {
-          throw ValidationException.create(param.sourceMethod,
-              "@Positional " + param.paramType.returnType +
-                  " may not stand below @Positional " + previous.paramType.returnType);
-        }
+      validatePositionalOrder(previousPositional, param);
+      param = promotePositionalList(positionalListCount, param);
+      result.add(param);
+      if (param.positionalType.order == PositionalOrder.LIST) {
+        positionalListCount++;
       }
-      if (positionalType == PositionalType.POSITIONAL_LIST) {
-        lists++;
-        if (lists == 1) {
-          result.add(param);
-        } else if (lists == 2) {
-          result.add(param.asPositional2());
-        } else {
-          throw ValidationException.create(param.sourceMethod,
-              "There can be at most 2 positional lists.");
-        }
-      } else {
-        result.add(param);
-      }
-      previous = param;
+      previousPositional = param;
     }
     return result;
+  }
+
+  private Param promotePositionalList(int positionalListCount, Param param) {
+    if (param.positionalType != PositionalType.POSITIONAL_LIST) {
+      return param;
+    }
+    switch (positionalListCount) {
+      case 0:
+        return param;
+      case 1:
+        return param.promoteToPositionalList2();
+      default:
+        throw ValidationException.create(param.sourceMethod,
+            "There can be at most 2 positional lists.");
+    }
+  }
+
+  private void validatePositionalOrder(Param previous, Param param) {
+    if (previous == null) {
+      return;
+    }
+    if (param.positionalType.order.compareTo(previous.positionalType.order) < 0) {
+      throw ValidationException.create(param.sourceMethod,
+          String.format("Positional order: %s method %s() must come before %s method %s()",
+              param.positionalType.order, param.methodName(),
+              previous.positionalType.order, previous.methodName()));
+    }
   }
 
   private List<Param> validate(TypeElement sourceType) {

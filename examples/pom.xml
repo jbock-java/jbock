@@ -8,6 +8,11 @@
   <artifactId>jbock-examples</artifactId>
   <version>0-SNAPSHOT</version>
 
+  <description>
+    A collection of unit tests
+    for the jbock annotation processor.
+  </description>
+
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jbock.version>0-SNAPSHOT</jbock.version>
@@ -15,6 +20,7 @@
   </properties>
 
   <dependencies>
+
     <dependency>
       <groupId>${project.groupId}</groupId>
       <artifactId>jbock</artifactId>
@@ -30,28 +36,25 @@
     </dependency>
 
     <dependency>
-      <groupId>org.assertj</groupId>
-      <artifactId>assertj-core</artifactId>
-      <version>3.8.0</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
       <version>${jackson.version}</version>
       <scope>test</scope>
     </dependency>
+
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
       <version>${jackson.version}</version>
       <scope>test</scope>
     </dependency>
+
   </dependencies>
 
   <build>
+
     <plugins>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
@@ -59,7 +62,7 @@
         <configuration>
           <source>9</source>
           <target>9</target>
-          <!-- This is necessary until the following ticket is resolved: -->
+          <!-- Needed for Java 9 until MCOMPILER-310 is resolved! -->
           <!-- https://issues.apache.org/jira/browse/MCOMPILER-310 -->
           <annotationProcessorPaths>
             <dependency>
@@ -70,6 +73,7 @@
           </annotationProcessorPaths>
         </configuration>
       </plugin>
+
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-install-plugin</artifactId>
@@ -81,7 +85,9 @@
           </execution>
         </executions>
       </plugin>
+
     </plugins>
+
   </build>
 
 </project>
