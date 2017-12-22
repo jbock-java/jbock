@@ -41,6 +41,9 @@ final class Context {
   // true if the source type does not already define toString
   final boolean generateToString;
 
+  // true if help is disabled
+  final boolean helpDisabled;
+
   // a set of only the non-positional param types in the sourceType
   final Set<Type> paramTypes;
 
@@ -59,6 +62,7 @@ final class Context {
       boolean problematicOptionNames,
       boolean ignoreDashes,
       boolean generateToString,
+      boolean helpDisabled,
       Set<Type> paramTypes,
       Set<PositionalType> positionalParamTypes,
       List<String> description) {
@@ -70,6 +74,7 @@ final class Context {
     this.problematicOptionNames = problematicOptionNames;
     this.ignoreDashes = ignoreDashes;
     this.generateToString = generateToString;
+    this.helpDisabled = helpDisabled;
     this.paramTypes = paramTypes;
     this.positionalParamTypes = positionalParamTypes;
     this.description = description;
@@ -85,6 +90,7 @@ final class Context {
     boolean stopword = positionalParamTypes.contains(PositionalType.POSITIONAL_LIST_2);
     List<Param> positionalParameters = parameters.stream().filter(p -> p.positionalType != null).collect(toList());
     boolean ignoreDashes = sourceType.getAnnotation(CommandLineArguments.class).ignoreDashes();
+    boolean helpDisabled = sourceType.getAnnotation(CommandLineArguments.class).helpDisabled();
     boolean generateToString = methodsIn(sourceType.getEnclosedElements()).stream()
         .filter(method -> method.getParameters().isEmpty())
         .map(ExecutableElement::getSimpleName)
@@ -100,6 +106,7 @@ final class Context {
         problematicOptionNames,
         ignoreDashes,
         generateToString,
+        helpDisabled,
         paramTypes,
         positionalParamTypes,
         description);

@@ -28,6 +28,11 @@ import java.lang.annotation.Target;
  *   <li>{@code OptionalInt}</li>
  * </ul>
  *
+ * <p>
+ *   If the method carries the {@link Positional} annotation,
+ *   it may also not return {@code boolean}.
+ * </p>
+ *
  * @see <a href="https://github.com/h908714124/jbock">jbock on github</a>
  */
 @Target(ElementType.TYPE)
@@ -46,4 +51,6 @@ public @interface CommandLineArguments {
   boolean ignoreDashes() default false;
 
   String[] description() default {};
+
+  boolean helpDisabled() default false;
 }

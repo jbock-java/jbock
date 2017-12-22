@@ -66,8 +66,7 @@ public final class Processor extends AbstractProcessor {
     if (!checkValid(env)) {
       return false;
     }
-    List<TypeElement> typeElements = getAnnotatedClasses(env);
-    for (TypeElement sourceType : typeElements) {
+    for (TypeElement sourceType : getAnnotatedClasses(env)) {
       try {
         List<Param> parameters = validate(sourceType);
         if (parameters.isEmpty()) {
@@ -116,10 +115,9 @@ public final class Processor extends AbstractProcessor {
     return paramTypes;
   }
 
-  private List<TypeElement> getAnnotatedClasses(RoundEnvironment env) {
+  private Set<TypeElement> getAnnotatedClasses(RoundEnvironment env) {
     Set<? extends Element> annotated = env.getElementsAnnotatedWith(CommandLineArguments.class);
-    Set<TypeElement> typeElements = ElementFilter.typesIn(annotated);
-    return new ArrayList<>(typeElements);
+    return ElementFilter.typesIn(annotated);
   }
 
   private void handleException(
@@ -235,7 +233,12 @@ public final class Processor extends AbstractProcessor {
     List<Param> parameters = new ArrayList<>(abstractMethods.size());
     for (int index = 0; index < abstractMethods.size(); index++) {
       ExecutableElement method = abstractMethods.get(index);
-      parameters.add(Param.create(method, index));
+      Param param = Param.create(method, index);
+      if (Objects.equals("help", param.longName()) &&
+          !sourceType.getAnnotation(CommandLineArguments.class).helpDisabled()) {
+        throw ValidationException.create(method, "help is enabled, so '--help' is reserved");
+      }
+      parameters.add(param);
     }
     checkDistinctLongNames(parameters);
     checkDistinctShortNames(parameters);
