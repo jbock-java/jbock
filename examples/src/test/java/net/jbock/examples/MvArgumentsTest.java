@@ -12,8 +12,8 @@ public class MvArgumentsTest {
 
   @Test
   public void notEnoughArguments() {
-    f.assertThat().isInvalid("Missing positional parameter: SOURCE");
-    f.assertThat("a").isInvalid("Missing positional parameter: DEST");
+    f.assertThat().isInvalid("Missing parameter: SOURCE");
+    f.assertThat("a").isInvalid("Missing parameter: DEST");
   }
 
   @Test
@@ -24,7 +24,7 @@ public class MvArgumentsTest {
 
   @Test
   public void tooManyPositionalArguments() {
-    f.assertThat("a", "b", "c").isInvalid("Excess option: c");
+    f.assertThat("a", "b", "c").isInvalid("Invalid option: c");
   }
 
   @Test

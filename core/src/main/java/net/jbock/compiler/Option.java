@@ -43,6 +43,7 @@ final class Option {
 
   final MethodSpec describeParamMethod;
   final MethodSpec printUsageMethod;
+  final MethodSpec synopsisMethod;
 
   private final MethodSpec exampleMethod;
   private final FieldSpec descriptionField;
@@ -68,6 +69,7 @@ final class Option {
       ClassName type,
       OptionType optionType,
       MethodSpec printUsageMethod,
+      MethodSpec synopsisMethod,
       FieldSpec longNameField,
       FieldSpec shortNameField,
       FieldSpec typeField,
@@ -81,6 +83,7 @@ final class Option {
       MethodSpec describeNamesMethod,
       MethodSpec descriptionBlockMethod) {
     this.printUsageMethod = printUsageMethod;
+    this.synopsisMethod = synopsisMethod;
     this.spacesMethod = spacesMethod;
     this.exampleMethod = exampleMethod;
     this.longNameField = longNameField;
@@ -112,10 +115,11 @@ final class Option {
     FieldSpec argumentNameField = FieldSpec.builder(
         STRING, "descriptionArgumentName", FINAL).build();
     MethodSpec spacesMethod = spacesMethod();
+    MethodSpec synopsisMethod = synopsisMethod(context, exampleMethod);
     MethodSpec printUsageMethod = printUsageMethod(
         type,
         spacesMethod,
-        exampleMethod,
+        synopsisMethod,
         optionType,
         typeField,
         descriptionField);
@@ -136,6 +140,7 @@ final class Option {
         type,
         optionType,
         printUsageMethod,
+        synopsisMethod,
         longNameField,
         shortNameField,
         typeField,
@@ -177,6 +182,7 @@ final class Option {
         .addMethod(descriptionBlockMethod)
         .addMethod(exampleMethod)
         .addMethod(printUsageMethod)
+        .addMethod(synopsisMethod)
         .addMethod(privateConstructor());
     if (!context.paramTypes.isEmpty()) {
       builder.addMethod(shortNameMapMethod)
@@ -405,7 +411,7 @@ final class Option {
   private static MethodSpec printUsageMethod(
       ClassName type,
       MethodSpec spacesMethod,
-      MethodSpec exampleMethod,
+      MethodSpec synopsisMethod,
       OptionType optionType,
       FieldSpec typeField,
       FieldSpec descriptionField) {
@@ -414,7 +420,11 @@ final class Option {
     ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("printUsage");
 
-    builder.addCode(printSynopsisCode(out, indent, spacesMethod, exampleMethod, optionType.context));
+    // print synopsis
+    builder.addStatement("$N.println($S)", out, "SYNOPSIS")
+        .addStatement("$N.print($N($N))", out, spacesMethod, indent)
+        .addStatement("$N.println($N())", out, synopsisMethod)
+        .addStatement("$N.println()", out);
 
     builder.addStatement("$N.println($S)", out, "DESCRIPTION");
 
@@ -445,19 +455,17 @@ final class Option {
         .build();
   }
 
-  private static CodeBlock printSynopsisCode(
-      ParameterSpec out,
-      ParameterSpec indent,
-      MethodSpec spacesMethod,
-      MethodSpec exampleMethod,
-      Context context) {
-    CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
-    ParameterSpec spaces = ParameterSpec.builder(STRING, "spaces").build();
-    builder.addStatement("$T $N = $N($N)", STRING, spaces, spacesMethod, indent);
+  private static MethodSpec synopsisMethod(
+      Context context,
+      MethodSpec exampleMethod) {
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("synopsis")
+        .returns(STRING)
+        .addModifiers(STATIC);
 
-    builder.addStatement("$T $N = new $T($S, $N, $S)", joiner.type, joiner, joiner.type, " ",
-        spaces, "");
+    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
+
+    builder.addStatement("$T $N = new $T($S)",
+        StringJoiner.class, joiner, StringJoiner.class, " ");
 
     Map<Boolean, List<Param>> partitionedNonpos = context.parameters.stream()
         .filter(p -> p.positionalType == null)
@@ -503,9 +511,8 @@ final class Option {
       }
     }
 
-    builder.addStatement("$N.println($S)", out, "SYNOPSIS");
-    builder.addStatement("$N.println($N.toString())", out, joiner);
-    builder.addStatement("$N.println()", out);
+    builder.addStatement("return $N.toString()", joiner);
+
     return builder.build();
   }
 

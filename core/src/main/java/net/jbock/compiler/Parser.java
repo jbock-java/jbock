@@ -59,7 +59,7 @@ final class Parser {
         .addType(impl.define())
         .addType(option.optionType.define())
         .addMethod(parseMethod())
-        .addMethod(parseMethodListOverride())
+        .addMethod(parseMethodOverride())
         .addMethod(printUsageMethod())
         .addMethod(privateConstructor())
         .addModifiers(PUBLIC, FINAL)
@@ -78,7 +78,7 @@ final class Parser {
         .build();
   }
 
-  private MethodSpec parseMethodListOverride() {
+  private MethodSpec parseMethodOverride() {
 
     ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
     ParameterSpec tokens = ParameterSpec.builder(LIST_OF_STRING, "tokens").build();
@@ -149,8 +149,7 @@ final class Parser {
     if (context.positionalParameters.isEmpty()) {
 
       builder.beginControlFlow("else")
-          .addStatement("throw new $T($S + $N)",
-              IllegalArgumentException.class, "Invalid option: ", token)
+          .addStatement(throwInvalidOptionStatement(token))
           .endControlFlow();
 
     } else {
@@ -158,8 +157,7 @@ final class Parser {
       if (!context.ignoreDashes) {
         builder.beginControlFlow("else if (!$N.isEmpty() && $N.charAt(0) == '-')",
             token, token)
-            .addStatement("throw new $T($S + $N)",
-                IllegalArgumentException.class, "Invalid option: ", token)
+            .addStatement(throwInvalidOptionStatement(token))
             .endControlFlow();
       }
 
@@ -169,6 +167,14 @@ final class Parser {
     }
 
     return builder.build();
+  }
+
+  private CodeBlock throwInvalidOptionStatement(ParameterSpec token) {
+    return CodeBlock.builder()
+        .add("throw new $T($S + $T.$N() + $S + $N)", IllegalArgumentException.class,
+            "Usage: ", option.type, option.synopsisMethod,
+            "\nInvalid option: ", token)
+        .build();
   }
 
   private CodeBlock returnFromParseExpression(ParameterSpec helper, CodeBlock param) {

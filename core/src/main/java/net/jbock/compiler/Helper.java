@@ -140,7 +140,7 @@ final class Helper {
     ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional")
         .build();
     ParameterSpec ddIndexParameter = ParameterSpec.builder(OptionalInt.class, "ddIndex").build();
-    MethodSpec readNextMethod = readNextMethod();
+    MethodSpec readNextMethod = readNextMethod(option);
     MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
     MethodSpec looksLikeLongMethod = looksLikeLongMethod();
     FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
@@ -297,7 +297,7 @@ final class Helper {
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
     builder.beginControlFlow("if (!$N.add($N))", flags, optionParam)
-        .addStatement(repetitionError(option, optionParam))
+        .addStatement(throwRepetitionErrorStatement(option, optionParam))
         .endControlFlow();
 
     return builder.addParameter(optionParam).build();
@@ -332,7 +332,7 @@ final class Helper {
     }
 
     builder.beginControlFlow("if ($N.containsKey($N))", sMap, optionParam)
-        .addStatement(repetitionError(option, optionParam))
+        .addStatement(throwRepetitionErrorStatement(option, optionParam))
         .endControlFlow();
 
     builder.addStatement("$N.put($N, $N)", sMap, optionParam, argument);
@@ -432,8 +432,7 @@ final class Helper {
         .addParameters(asList(optionParam, token, it));
 
     if (option.context.paramTypes.isEmpty()) {
-      return builder.addStatement("throw new $T($S + $N)",
-          IllegalArgumentException.class, "Invalid option: ", token)
+      return builder.addStatement(throwInvalidOptionStatement(option, token))
           .build();
     }
 
@@ -486,14 +485,13 @@ final class Helper {
         .build();
   }
 
-  private static MethodSpec readNextMethod() {
+  private static MethodSpec readNextMethod(Option option) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if (!$N.hasNext())", it)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing value after token: ", token)
+        .addStatement(throwMissingValueAfterTokenStatement(option, token))
         .endControlFlow();
 
     builder.addStatement("return $N.next()", it);
@@ -541,8 +539,9 @@ final class Helper {
           INT, last, ddIndexParameter, positionalParameter);
 
       builder.beginControlFlow("if ($N > $N)", last, max)
-          .addStatement("throw new $T($S + $N.get($N))", IllegalArgumentException.class,
-              "Excess option: ", positionalParameter, max)
+          .addStatement("throw new $T($S + $T.$N() + $S + $N.get($N))", IllegalArgumentException.class,
+              "Usage: ", option.type, option.synopsisMethod,
+              "\nInvalid option: ", positionalParameter, max)
           .endControlFlow();
     });
 
@@ -570,8 +569,7 @@ final class Helper {
     builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, optionParam);
 
     builder.beginControlFlow("if ($N == null)", token)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing required option: ", optionParam)
+        .addStatement(throwMissingRequiredErrorStatement(option, optionParam))
         .endControlFlow();
 
     builder.addStatement("return $N", token);
@@ -590,8 +588,7 @@ final class Helper {
     builder.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, optionParam);
 
     builder.beginControlFlow("if ($N == null)", token)
-        .addStatement("throw new $T($S + $L)", IllegalArgumentException.class,
-            "Missing required option: ", optionSummaryString(option, optionParam))
+        .addStatement(throwMissingRequiredErrorStatement(option, optionParam))
         .endControlFlow();
 
     builder.addStatement("return $T.parseInt($N)", Integer.class, token);
@@ -633,8 +630,7 @@ final class Helper {
         INT, size, ddIndexParameter, positionalParameter);
 
     builder.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing positional parameter: ", optionParam)
+        .addStatement(throwMissingParameterStatement(option, optionParam))
         .endControlFlow();
 
     builder.addStatement("return $N.get($N)", positionalParameter, index);
@@ -658,8 +654,7 @@ final class Helper {
         INT, size, ddIndexParameter, positionalParameter);
 
     builder.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing positional parameter: ", optionParam)
+        .addStatement(throwMissingParameterStatement(option, optionParam))
         .endControlFlow();
 
     builder.addStatement("return $T.parseInt($N.get($N))", Integer.class, positionalParameter, index);
@@ -667,6 +662,15 @@ final class Helper {
     return builder.addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter, optionParam))
         .addModifiers(STATIC)
         .returns(INT).build();
+  }
+
+  private static CodeBlock throwMissingParameterStatement(
+      Option option, ParameterSpec optionParam) {
+    return CodeBlock.builder()
+        .add("throw new $T($S + $T.$N() + $S + $N)", IllegalArgumentException.class,
+            "Usage: ", option.type, option.synopsisMethod,
+            "\nMissing parameter: ", optionParam)
+        .build();
   }
 
   private static MethodSpec extractPositionalOptionalMethod(
@@ -762,7 +766,7 @@ final class Helper {
         .returns(LIST_OF_STRING).build();
   }
 
-  private static CodeBlock optionSummaryString(
+  private static CodeBlock optionSummaryCode(
       Option option,
       ParameterSpec optionParam) {
     return CodeBlock.builder()
@@ -771,13 +775,44 @@ final class Helper {
         .build();
   }
 
-  private static CodeBlock repetitionError(
+  private static CodeBlock throwInvalidOptionStatement(
+      Option option,
+      ParameterSpec token) {
+    return CodeBlock.builder()
+        .add("throw new $T($S + $T.$N() + $S + $N)", IllegalArgumentException.class,
+            "Usage: ", option.type, option.synopsisMethod,
+            "\nInvalid option: ", token)
+        .build();
+  }
+
+  private static CodeBlock throwMissingRequiredErrorStatement(
       Option option,
       ParameterSpec optionParam) {
     return CodeBlock.builder()
-        .add("throw new $T($S + $L + $S)",
+        .add("throw new $T($S + $T.$N() + $S + $L)", IllegalArgumentException.class,
+            "Usage: ", option.type, option.synopsisMethod,
+            "\nMissing required option: ", optionSummaryCode(option, optionParam))
+        .build();
+  }
+
+  private static CodeBlock throwRepetitionErrorStatement(
+      Option option,
+      ParameterSpec optionParam) {
+    return CodeBlock.builder()
+        .add("throw new $T($S + $T.$N() + $S + $L + $S)",
             IllegalArgumentException.class,
-            "Option ", optionSummaryString(option, optionParam), " is not repeatable")
+            "Usage: ", option.type, option.synopsisMethod,
+            "\nOption ", optionSummaryCode(option, optionParam), " is not repeatable")
+        .build();
+  }
+
+  private static CodeBlock throwMissingValueAfterTokenStatement(
+      Option option,
+      ParameterSpec token) {
+    return CodeBlock.builder()
+        .add("throw new $T($S + $T.$N() + $S + $N)", IllegalArgumentException.class,
+            "Usage: ", option.type, option.synopsisMethod,
+            "\nMissing value after token: ", token)
         .build();
   }
 }

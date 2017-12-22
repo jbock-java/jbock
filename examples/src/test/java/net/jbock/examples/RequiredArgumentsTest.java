@@ -17,7 +17,7 @@ public class RequiredArgumentsTest {
 
   @Test
   public void errorDirMissing() {
-    f.assertThat().isInvalid("Missing required option: DIR");
+    f.assertThat().isInvalid("Missing required option: DIR (--dir)");
   }
 
   @Test

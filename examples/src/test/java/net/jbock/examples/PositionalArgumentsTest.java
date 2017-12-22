@@ -13,8 +13,8 @@ public class PositionalArgumentsTest {
 
   @Test
   public void errorMissingParameters() {
-    f.assertThat().isInvalid("Missing positional parameter: SOURCE");
-    f.assertThat("a").isInvalid("Missing positional parameter: DEST");
+    f.assertThat().isInvalid("Missing parameter: SOURCE");
+    f.assertThat("a").isInvalid("Missing parameter: DEST");
   }
 
   @Test

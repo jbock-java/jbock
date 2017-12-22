@@ -2,6 +2,7 @@ package net.jbock.examples.fixture;
 
 import static org.hamcrest.CoreMatchers.instanceOf;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.startsWith;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -95,7 +96,13 @@ public final class ParserFixture<E> {
             " but no exception was thrown");
       }
       Assert.assertThat(e, is(instanceOf(expectedException)));
-      Assert.assertThat(e.getMessage(), is(expectedMessage));
+      if (!(e instanceof NumberFormatException)) {
+        Assert.assertThat(e.getMessage(), startsWith("Usage:"));
+        String actualMessage = e.getMessage().split("\\r?\\n", -1)[1];
+        Assert.assertThat(actualMessage, is(expectedMessage));
+      } else {
+        Assert.assertThat(e.getMessage(), is(expectedMessage));
+      }
     }
 
     public void isInvalid(String expectedMessage) {

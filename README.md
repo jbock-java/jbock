@@ -2,19 +2,19 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-jbock is a simple annotation processor that generates a 
-[getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired
+jbock is an annotation processor that generates a 
+[getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-like
 CLI parser, with an extra focus on positional parameters.
 
-The primary goals are:
+Its primary goals are:
  
-* Generate concise parser code from a command line interface that's declared via annotations.
-* Give the end user clear feedback via exceptions, if the input is invalid.
-* Generate usage text that looks similar to a GNU man page, including SYNOPSIS. 
+* To generate concise parser code from a command line interface that's declared via annotations.
+* To give the end user clear feedback via exceptions, if the input is invalid.
+* To print usage text that looks similar to a GNU man page.
 
 ### User feedback is hard!
 
-We're going to write a simple command line utility that copies a file.
+To clarify these goals, we're going to write a simple command line utility that copies a file.
 
 ````java
 public class CopyFile {
@@ -30,14 +30,13 @@ public class CopyFile {
 
 This is what the program prints, when invoked without parameters:
 
-<pre><code>
-Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 0
+<pre><code>Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 0
     at cli.tools.CopyFile.main(CopyFile.java:10)
 </code></pre>
 
 ### Excuse me?
 
-We will now use jbock to give the user a human readable error message.
+We will now use jbock to print a friendlier error message.
 We define an abstract class `Args`:
 
 ````java

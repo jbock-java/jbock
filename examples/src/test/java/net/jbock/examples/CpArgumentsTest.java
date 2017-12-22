@@ -12,15 +12,15 @@ public class CpArgumentsTest {
 
   @Test
   public void errorMissingSource() {
-    f.assertThat().isInvalid("Missing positional parameter: SOURCE");
-    f.assertThat("-r").isInvalid("Missing positional parameter: SOURCE");
+    f.assertThat().isInvalid("Missing parameter: SOURCE");
+    f.assertThat("-r").isInvalid("Missing parameter: SOURCE");
   }
 
   @Test
   public void errorMissingDest() {
-    f.assertThat("a").isInvalid("Missing positional parameter: DEST");
-    f.assertThat("a", "-r").isInvalid("Missing positional parameter: DEST");
-    f.assertThat("-r", "a").isInvalid("Missing positional parameter: DEST");
+    f.assertThat("a").isInvalid("Missing parameter: DEST");
+    f.assertThat("a", "-r").isInvalid("Missing parameter: DEST");
+    f.assertThat("-r", "a").isInvalid("Missing parameter: DEST");
   }
 
   @Test
@@ -40,12 +40,12 @@ public class CpArgumentsTest {
 
   @Test
   public void tooMany() {
-    f.assertThat("a", "b", "c").isInvalid("Excess option: c");
+    f.assertThat("a", "b", "c").isInvalid("Invalid option: c");
   }
 
   @Test
   public void tooManyAndFlag() {
-    f.assertThat("-r", "a", "b", "c").isInvalid("Excess option: c");
+    f.assertThat("-r", "a", "b", "c").isInvalid("Invalid option: c");
   }
 
   @Test
