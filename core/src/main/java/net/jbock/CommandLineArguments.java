@@ -36,11 +36,11 @@ public @interface CommandLineArguments {
 
   /**
    * <p>
-   *   {@code true} if unknown tokens should be read as positional arguments (if any are declared),
-   *   even if they start with the hyphen character.
+   *   Should unknown tokens should always be interpreted as positional arguments,
+   *   even if they start with a hyphen character?
    * </p><p>
-   *   If {@code false}, an unknown token that starts with a hyphen
-   *   (and is not bound to an option name) will raise an {@link IllegalArgumentException}.
+   *   If {@code false}, an unknown unbound token that starts with a hyphen
+   *   will always raise an {@link IllegalArgumentException}.
    * </p>
    */
   boolean ignoreDashes() default false;

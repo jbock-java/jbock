@@ -2,18 +2,19 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-jbock is a simple annotation processor that generates a [getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired
-CLI parser. It understands both long and short options, and accepts either their attached or detached forms.
+jbock is a simple annotation processor that generates a 
+[getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-inspired
+CLI parser, with an extra focus on positional parameters.
 
-jbock can also be used to read positional arguments, if any, in a structured way. See examples below.
+The primary goals are:
+ 
+* Generate concise parser code from a command line interface that's declared via annotations.
+* Give the end user clear feedback via exceptions, if the input is invalid.
+* Generate usage text that looks similar to a GNU man page, including SYNOPSIS. 
 
-jbock generates an implementation of an abstract, user-defined class, similar to
-[auto-value](https://github.com/google/auto/tree/master/value).
-
-### Developing a command line interface from scratch
+### User feedback is hard!
 
 We're going to write a simple command line utility that copies a file.
-This is how we might do it in Java:
 
 ````java
 public class CopyFile {
@@ -34,8 +35,9 @@ Exception in thread "main" java.lang.ArrayIndexOutOfBoundsException: 0
     at cli.tools.CopyFile.main(CopyFile.java:10)
 </code></pre>
 
+### Excuse me?
 
-Let's use jbock to give the user a clearer error message.
+We will now use jbock to give the user a human readable error message.
 We define an abstract class `Args`:
 
 ````java
@@ -58,7 +60,6 @@ public class CopyFile {
 The order of the method declarations `src()` and `dest()` matters.
 `CopyFile_Args_Parser` is a generated class, a custom parser for the command line interface
 defined by `Args`.
-
 
 Now the error looks like this:
 
