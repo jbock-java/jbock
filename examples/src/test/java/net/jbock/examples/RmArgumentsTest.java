@@ -2,7 +2,6 @@ package net.jbock.examples;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static net.jbock.examples.fixture.PrintFixture.printFixture;
 
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
@@ -14,7 +13,7 @@ public class RmArgumentsTest {
 
   @Test
   public void testRest() {
-    f.assertThat("-f", "a", "--", "-r", "--", "-f").isParsedAs(
+    f.assertThat("-f", "a", "--", "-r", "--", "-f").parsesTo(
         "force", true,
         "otherTokens", singletonList("a"),
         "ddTokens", asList("-r", "--", "-f"));
@@ -22,7 +21,7 @@ public class RmArgumentsTest {
 
   @Test
   public void testPrint() {
-    printFixture(RmArguments_Parser::printUsage).assertPrints(
+    f.assertPrints(
         "SYNOPSIS",
         "  [OPTION]... [OTHER_TOKENS]... [-- DD_TOKENS...]",
         "",

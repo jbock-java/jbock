@@ -7,9 +7,10 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.Util.optionalOf;
+import static net.jbock.compiler.Util.optionalOfSubtype;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -539,9 +540,8 @@ final class Helper {
           INT, last, ddIndexParameter, positionalParameter);
 
       builder.beginControlFlow("if ($N > $N)", last, max)
-          .addStatement("throw new $T($S + $T.$N() + $S + $N.get($N))", IllegalArgumentException.class,
-              "Usage: ", option.type, option.synopsisMethod,
-              "\nInvalid option: ", positionalParameter, max)
+          .addStatement("throw new $T($S + $N.get($N))", IllegalArgumentException.class,
+              "Invalid option: ", positionalParameter, max)
           .endControlFlow();
     });
 
@@ -550,12 +550,12 @@ final class Helper {
       builder.addParameter(ddIndexParameter);
     }
 
-    builder.addStatement("return new $T($L)", impl.type, args.build());
+    builder.addStatement("return $T.of(new $T($L))", Optional.class, impl.type, args.build());
 
     if (context.simplePositional()) {
       builder.addModifiers(STATIC);
     }
-    return builder.returns(impl.type).build();
+    return builder.returns(optionalOfSubtype(impl.type)).build();
   }
 
   private static MethodSpec extractRequiredMethod(
@@ -667,9 +667,8 @@ final class Helper {
   private static CodeBlock throwMissingParameterStatement(
       Option option, ParameterSpec optionParam) {
     return CodeBlock.builder()
-        .add("throw new $T($S + $T.$N() + $S + $N)", IllegalArgumentException.class,
-            "Usage: ", option.type, option.synopsisMethod,
-            "\nMissing parameter: ", optionParam)
+        .add("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Missing parameter: ", optionParam)
         .build();
   }
 
@@ -693,7 +692,7 @@ final class Helper {
 
     return builder.addParameters(Arrays.asList(index, positionalParameter, ddIndexParameter))
         .addModifiers(STATIC)
-        .returns(OPTIONAL_STRING).build();
+        .returns(optionalOf(STRING)).build();
   }
 
   private static MethodSpec extractPositionalOptionalIntMethod(
@@ -779,9 +778,8 @@ final class Helper {
       Option option,
       ParameterSpec token) {
     return CodeBlock.builder()
-        .add("throw new $T($S + $T.$N() + $S + $N)", IllegalArgumentException.class,
-            "Usage: ", option.type, option.synopsisMethod,
-            "\nInvalid option: ", token)
+        .add("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Invalid option: ", token)
         .build();
   }
 
@@ -789,9 +787,8 @@ final class Helper {
       Option option,
       ParameterSpec optionParam) {
     return CodeBlock.builder()
-        .add("throw new $T($S + $T.$N() + $S + $L)", IllegalArgumentException.class,
-            "Usage: ", option.type, option.synopsisMethod,
-            "\nMissing required option: ", optionSummaryCode(option, optionParam))
+        .add("throw new $T($S + $L)", IllegalArgumentException.class,
+            "Missing required option: ", optionSummaryCode(option, optionParam))
         .build();
   }
 
@@ -799,10 +796,9 @@ final class Helper {
       Option option,
       ParameterSpec optionParam) {
     return CodeBlock.builder()
-        .add("throw new $T($S + $T.$N() + $S + $L + $S)",
+        .add("throw new $T($S + $L + $S)",
             IllegalArgumentException.class,
-            "Usage: ", option.type, option.synopsisMethod,
-            "\nOption ", optionSummaryCode(option, optionParam), " is not repeatable")
+            "Option ", optionSummaryCode(option, optionParam), " is not repeatable")
         .build();
   }
 
@@ -810,9 +806,8 @@ final class Helper {
       Option option,
       ParameterSpec token) {
     return CodeBlock.builder()
-        .add("throw new $T($S + $T.$N() + $S + $N)", IllegalArgumentException.class,
-            "Usage: ", option.type, option.synopsisMethod,
-            "\nMissing value after token: ", token)
+        .add("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Missing value after token: ", token)
         .build();
   }
 }

@@ -167,6 +167,6 @@ final class Context {
   }
 
   boolean simplePositional() {
-    return !stopword && paramTypes.isEmpty() && ignoreDashes;
+    return helpDisabled && !stopword && paramTypes.isEmpty() && ignoreDashes;
   }
 }

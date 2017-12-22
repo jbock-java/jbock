@@ -1,7 +1,5 @@
 package net.jbock.examples;
 
-import static net.jbock.examples.fixture.PrintFixture.printFixture;
-
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -12,14 +10,14 @@ public class AdditionArgumentsTest {
 
   @Test
   public void optionalAbsent() {
-    f.assertThat("1", "2").isParsedAs(
+    f.assertThat("1", "2").parsesTo(
         "a", 1,
         "b", 2);
   }
 
   @Test
   public void optionalPresent() {
-    f.assertThat("1", "2", "3").isParsedAs(
+    f.assertThat("1", "2", "3").parsesTo(
         "a", 1,
         "b", 2,
         "c", 3);
@@ -27,7 +25,7 @@ public class AdditionArgumentsTest {
 
   @Test
   public void wrongNumber() {
-    f.assertThat("-a", "2").throwsException(NumberFormatException.class,
+    f.assertThat("-a", "2").fails(
         "For input string: \"-a\"");
   }
 
@@ -42,7 +40,7 @@ public class AdditionArgumentsTest {
 
   @Test
   public void testPrint() {
-    printFixture(AdditionArguments_Parser::printUsage).assertPrints(
+    f.assertPrints(
         "SYNOPSIS",
         "  A B [C]",
         "",

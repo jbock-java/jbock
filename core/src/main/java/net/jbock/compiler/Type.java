@@ -2,13 +2,13 @@ package net.jbock.compiler;
 
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.PositionalType.POSITIONAL_LIST;
 import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL;
 import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL_INT;
 import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED;
 import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED_INT;
+import static net.jbock.compiler.Util.optionalOf;
 
 import java.util.Collections;
 import java.util.Optional;
@@ -48,7 +48,7 @@ enum Type {
     }
   },
 
-  OPTIONAL(OPTIONAL_STRING, POSITIONAL_OPTIONAL, false) {
+  OPTIONAL(optionalOf(STRING), POSITIONAL_OPTIONAL, false) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(

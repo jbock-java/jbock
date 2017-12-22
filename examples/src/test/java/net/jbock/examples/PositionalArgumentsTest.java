@@ -1,7 +1,6 @@
 package net.jbock.examples;
 
 import static java.util.Collections.singletonList;
-import static net.jbock.examples.fixture.PrintFixture.printFixture;
 
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
@@ -13,20 +12,20 @@ public class PositionalArgumentsTest {
 
   @Test
   public void errorMissingParameters() {
-    f.assertThat().isInvalid("Missing parameter: SOURCE");
-    f.assertThat("a").isInvalid("Missing parameter: DEST");
+    f.assertThat().fails("Missing parameter: SOURCE");
+    f.assertThat("a").fails("Missing parameter: DEST");
   }
 
   @Test
   public void minimal() {
-    f.assertThat("a", "b").isParsedAs(
+    f.assertThat("a", "b").parsesTo(
         "source", "a",
         "dest", "b");
   }
 
   @Test
   public void otherTokens() {
-    f.assertThat("a", "b", "c", "d").isParsedAs(
+    f.assertThat("a", "b", "c", "d").parsesTo(
         "source", "a",
         "dest", "b",
         "optString", "c",
@@ -35,33 +34,33 @@ public class PositionalArgumentsTest {
 
   @Test
   public void ddTokens() {
-    f.assertThat("a", "b", "c", "d", "--", "e").isParsedAs(
+    f.assertThat("a", "b", "c", "d", "--", "e").parsesTo(
         "source", "a",
         "dest", "b",
         "optString", "c",
         "otherTokens", singletonList("d"),
         "ddTokens", singletonList("e"));
-    f.assertThat("a", "b", "c", "--", "e").isParsedAs(
+    f.assertThat("a", "b", "c", "--", "e").parsesTo(
         "source", "a",
         "dest", "b",
         "optString", "c",
         "ddTokens", singletonList("e"));
-    f.assertThat("a", "b", "c", "--").isParsedAs(
+    f.assertThat("a", "b", "c", "--").parsesTo(
         "source", "a",
         "dest", "b",
         "optString", "c");
-    f.assertThat("a", "b", "c").isParsedAs(
+    f.assertThat("a", "b", "c").parsesTo(
         "source", "a",
         "dest", "b",
         "optString", "c");
-    f.assertThat("a", "b").isParsedAs(
+    f.assertThat("a", "b").parsesTo(
         "source", "a",
         "dest", "b");
   }
 
   @Test
   public void testPrint() {
-    printFixture(PositionalArguments_Parser::printUsage).assertPrints(
+    f.assertPrints(
         "SYNOPSIS",
         "  SOURCE DEST [OPT_STRING] [OTHER_TOKENS]... [-- DD_TOKENS...]",
         "",

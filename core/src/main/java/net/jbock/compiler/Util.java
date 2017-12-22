@@ -1,7 +1,9 @@
 package net.jbock.compiler;
 
 import static java.util.Locale.US;
+import static net.jbock.com.squareup.javapoet.WildcardTypeName.subtypeOf;
 
+import java.util.Optional;
 import java.util.StringJoiner;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
@@ -11,6 +13,9 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
+import net.jbock.com.squareup.javapoet.TypeName;
 
 final class Util {
 
@@ -29,6 +34,14 @@ final class Util {
           return typeElement;
         }
       };
+
+  static ParameterizedTypeName optionalOf(TypeName typeName) {
+    return ParameterizedTypeName.get(ClassName.get(Optional.class), typeName);
+  }
+
+  static ParameterizedTypeName optionalOfSubtype(TypeName typeName) {
+    return ParameterizedTypeName.get(ClassName.get(Optional.class), subtypeOf(typeName));
+  }
 
   static DeclaredType asDeclared(TypeMirror mirror) {
     return mirror.accept(AS_DECLARED, null);

@@ -1,7 +1,6 @@
 package net.jbock.examples;
 
 import static java.util.Arrays.asList;
-import static net.jbock.examples.fixture.PrintFixture.printFixture;
 
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
@@ -19,43 +18,43 @@ public class NoNameArgumentsTest {
         "number", 1,
         "file", asList("f", "o", "o")};
     f.assertThat("--message=m", "--file=f", "--file=o", "--file=o", "--cmos", "-n1")
-        .isParsedAs(expected);
+        .parsesTo(expected);
     f.assertThat("-n1", "--cmos", "--message=m", "--file=f", "--file=o", "--file=o")
-        .isParsedAs(expected);
+        .parsesTo(expected);
     f.assertThat("--file", "f", "--message=m", "--file", "o", "--cmos", "-n1", "--file", "o")
-        .isParsedAs(expected);
+        .parsesTo(expected);
   }
 
   @Test
   public void testFlag() {
-    f.assertThat("--cmos", "-n1").isParsedAs(
+    f.assertThat("--cmos", "-n1").parsesTo(
         "cmos", true,
         "number", 1);
   }
 
   @Test
   public void testOptionalInt() {
-    f.assertThat("-v", "1", "-n1").isParsedAs(
+    f.assertThat("-v", "1", "-n1").parsesTo(
         "verbosity", 1,
         "number", 1);
-    f.assertThat("-n1").isParsedAs(
+    f.assertThat("-n1").parsesTo(
         "number", 1);
   }
 
   @Test
   public void errorMissingInt() {
-    f.assertThat("--cmos").isInvalid("Missing required option: NUMBER (-n, --number)");
+    f.assertThat("--cmos").fails("Missing required option: NUMBER (-n, --number)");
   }
 
   @Test
   public void errorUnknownToken() {
-    f.assertThat("blabla").isInvalid("Invalid option: blabla");
+    f.assertThat("blabla").fails("Invalid option: blabla");
   }
 
 
   @Test
   public void testPrint() {
-    printFixture(NoNameArguments_Parser::printUsage).assertPrints(
+    f.assertPrints(
         "SYNOPSIS",
         "  [OPTION]... -n NUMBER",
         "",

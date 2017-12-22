@@ -1,7 +1,5 @@
 package net.jbock.examples;
 
-import static net.jbock.examples.fixture.PrintFixture.printFixture;
-
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -12,13 +10,13 @@ public class SimpleArgumentsTest {
 
   @Test
   public void invalidOptions() {
-    f.assertThat("xf", "1").isInvalid("Invalid option: xf");
-    f.assertThat("-xf", "1").isInvalid("Invalid option: -xf");
+    f.assertThat("xf", "1").fails("Invalid option: xf");
+    f.assertThat("-xf", "1").fails("Invalid option: -xf");
   }
 
   @Test
   public void testPrint() {
-    printFixture(SimpleArguments_Parser::printUsage).assertPrints(
+    f.assertPrints(
         "SYNOPSIS",
         "  [OPTION]...",
         "",

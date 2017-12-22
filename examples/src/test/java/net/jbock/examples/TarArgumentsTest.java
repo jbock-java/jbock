@@ -1,7 +1,5 @@
 package net.jbock.examples;
 
-import static net.jbock.examples.fixture.PrintFixture.printFixture;
-
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -12,10 +10,10 @@ public class TarArgumentsTest {
 
   @Test
   public void testExtract() {
-    f.assertThat("-x", "-f", "foo.tar").isParsedAs(
+    f.assertThat("-x", "-f", "foo.tar").parsesTo(
         "extract", true,
         "file", "foo.tar");
-    f.assertThat("-v", "-x", "-f", "foo.tar").isParsedAs(
+    f.assertThat("-v", "-x", "-f", "foo.tar").parsesTo(
         "extract", true,
         "file", "foo.tar",
         "verbose", true);
@@ -23,13 +21,13 @@ public class TarArgumentsTest {
 
   @Test
   public void noGrouping() {
-    f.assertThat("-v", "xf", "foo.tar").isInvalid("Invalid option: xf");
-    f.assertThat("-v", "-xf", "foo.tar").isInvalid("Invalid option: -xf");
+    f.assertThat("-v", "xf", "foo.tar").fails("Invalid option: xf");
+    f.assertThat("-v", "-xf", "foo.tar").fails("Invalid option: -xf");
   }
 
   @Test
   public void testPrint() {
-    printFixture(TarArguments_Parser::printUsage).assertPrints(
+    f.assertPrints(
         "SYNOPSIS",
         "  [OPTION]... -f FILE",
         "",

@@ -1,28 +1,36 @@
 package net.jbock.examples.fixture;
 
-import static org.hamcrest.CoreMatchers.instanceOf;
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.startsWith;
+import static org.junit.Assert.assertArrayEquals;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Optional;
 import java.util.function.Predicate;
 import org.junit.Assert;
 
 public final class ParserFixture<E> {
 
+  public interface TriFunction<A, B, D> {
+    D apply(A a, B b, int c);
+  }
+
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
-  private final Function<String[], E> parse;
+  private final TriFunction<String[], PrintStream, Optional<E>> parseMethod;
 
-  private ParserFixture(Function<String[], E> parse) {
-    this.parse = parse;
+  private ParserFixture(
+      TriFunction<String[], PrintStream, Optional<E>> parseMethod) {
+    this.parseMethod = parseMethod;
   }
 
   private static JsonNode readJson(String json) {
@@ -64,63 +72,57 @@ public final class ParserFixture<E> {
     return node;
   }
 
-  public static <E> ParserFixture<E> create(Function<String[], E> fn) {
-    return new ParserFixture<>(fn);
+  public static <E> ParserFixture<E> create(
+      TriFunction<String[], PrintStream, Optional<E>> fn) {
+    return new ParserFixture(fn);
   }
 
   public JsonAssert<E> assertThat(String... args) {
-    try {
-      E parsed = parse.apply(args);
-      return new JsonAssert<>(parsed, null);
-    } catch (RuntimeException e) {
-      return new JsonAssert<>(null, e);
-    }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(baos);
+    Optional<E> parsed = parseMethod.apply(args, out, 2);
+    return new JsonAssert<>(parsed, new String(baos.toByteArray()));
+  }
+
+  public void assertPrints(String... expected) {
+    ByteArrayOutputStream out = new ByteArrayOutputStream();
+    Optional<E> result = parseMethod.apply(new String[]{"--help"}, new PrintStream(out), 2);
+    Assert.assertFalse(result.isPresent());
+    String[] actual = new String(out.toByteArray()).split("\\r?\\n", -1);
+    assertArrayEquals("Actual: " + Arrays.toString(actual), expected, actual);
   }
 
   public static final class JsonAssert<E> {
 
-    private final E parsed;
+    private final Optional<E> parsed;
 
-    private final RuntimeException e;
+    private final String e;
 
-    private JsonAssert(E parsed, RuntimeException e) {
+    private JsonAssert(Optional<E> parsed, String e) {
       this.parsed = parsed;
       this.e = e;
     }
 
-    public <X extends RuntimeException> void throwsException(
-        Class<X> expectedException,
-        String expectedMessage) {
-      if (e == null) {
-        Assert.fail("Expected " + expectedException.getSimpleName() +
-            " but no exception was thrown");
+    public void fails(String expectedMessage) {
+      if (parsed.isPresent()) {
+        Assert.fail("Expected a failure" +
+            " but parsing was successful");
       }
-      Assert.assertThat(e, is(instanceOf(expectedException)));
-      if (!(e instanceof NumberFormatException)) {
-        Assert.assertThat(e.getMessage(), startsWith("Usage:"));
-        String actualMessage = e.getMessage().split("\\r?\\n", -1)[1];
-        Assert.assertThat(actualMessage, is(expectedMessage));
-      } else {
-        Assert.assertThat(e.getMessage(), is(expectedMessage));
-      }
-    }
-
-    public void isInvalid(String expectedMessage) {
-      throwsException(IllegalArgumentException.class, expectedMessage);
+      Assert.assertThat(e, startsWith("Usage:"));
+      Assert.assertThat(e, containsString("\n"));
+      String actualMessage = e.split("\\r?\\n", -1)[1];
+      Assert.assertThat(actualMessage, is(expectedMessage));
     }
 
     public void satisfies(Predicate<E> predicate) {
-      if (e != null) {
-        throw e;
-      }
-      Assert.assertTrue(predicate.test(parsed));
+      Assert.assertTrue("Parsing was not successful", parsed.isPresent());
+      Assert.assertTrue(predicate.test(parsed.get()));
     }
 
-    public void isParsedAs(Object... expected) {
-      if (e != null) {
-        throw e;
-      }
-      Assert.assertThat(readJson(parsed.toString()), is(parseJson(expected)));
+    public void parsesTo(Object... expected) {
+      Assert.assertTrue("Parsing was not successful", parsed.isPresent());
+      Assert.assertThat(readJson(parsed.get().toString()),
+          is(parseJson(expected)));
     }
   }
 }

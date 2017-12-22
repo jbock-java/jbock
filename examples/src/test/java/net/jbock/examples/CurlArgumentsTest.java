@@ -2,7 +2,6 @@ package net.jbock.examples;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
-import static net.jbock.examples.fixture.PrintFixture.printFixture;
 
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
@@ -14,74 +13,74 @@ public class CurlArgumentsTest {
 
   @Test
   public void testEmpty() {
-    f.assertThat().isParsedAs();
+    f.assertThat().parsesTo();
   }
 
   @Test
   public void testOptional() {
     f.assertThat("--request=")
-        .isParsedAs("method", "");
+        .parsesTo("method", "");
     f.assertThat("--request= ")
-        .isParsedAs("method", " ");
+        .parsesTo("method", " ");
     f.assertThat("--request", "")
-        .isParsedAs("method", "");
+        .parsesTo("method", "");
     f.assertThat("-XPUT")
-        .isParsedAs("method", "PUT");
+        .parsesTo("method", "PUT");
     f.assertThat("-X", "PUT")
-        .isParsedAs("method", "PUT");
+        .parsesTo("method", "PUT");
   }
 
   @Test
   public void testRepeatable() {
     f.assertThat("-H1")
-        .isParsedAs("headers", singletonList("1"));
+        .parsesTo("headers", singletonList("1"));
     f.assertThat("-H1", "-H2")
-        .isParsedAs("headers", asList("1", "2"));
+        .parsesTo("headers", asList("1", "2"));
     f.assertThat("-H", "1")
-        .isParsedAs("headers", singletonList("1"));
+        .parsesTo("headers", singletonList("1"));
     f.assertThat("-H", "1", "-H", "2")
-        .isParsedAs("headers", asList("1", "2"));
+        .parsesTo("headers", asList("1", "2"));
   }
 
   @Test
   public void variousTests() {
-    f.assertThat("-v", "-H1").isParsedAs(
+    f.assertThat("-v", "-H1").parsesTo(
         "verbose", true,
         "headers", singletonList("1"));
-    f.assertThat("-v", "-i", "-H1").isParsedAs(
+    f.assertThat("-v", "-i", "-H1").parsesTo(
         "include", true,
         "verbose", true,
         "headers", singletonList("1"));
-    f.assertThat("-i", "-v", "-H1").isParsedAs(
+    f.assertThat("-i", "-v", "-H1").parsesTo(
         "include", true,
         "verbose", true,
         "headers", singletonList("1"));
-    f.assertThat("-v", "-i", "1").isParsedAs(
+    f.assertThat("-v", "-i", "1").parsesTo(
         "include", true,
         "verbose", true,
         "urls", singletonList("1"));
-    f.assertThat("-v", "-H", "1", "-H2").isParsedAs(
+    f.assertThat("-v", "-H", "1", "-H2").parsesTo(
         "verbose", true,
         "headers", asList("1", "2"));
-    f.assertThat("-v", "-i", "-H", "1", "-H2").isParsedAs(
+    f.assertThat("-v", "-i", "-H", "1", "-H2").parsesTo(
         "include", true,
         "verbose", true,
         "headers", asList("1", "2"));
-    f.assertThat("-v", "-H1", "-H2").isParsedAs(
+    f.assertThat("-v", "-H1", "-H2").parsesTo(
         "verbose", true,
         "headers", asList("1", "2"));
-    f.assertThat("-v", "-i", "-H1", "-H2").isParsedAs(
+    f.assertThat("-v", "-i", "-H1", "-H2").parsesTo(
         "include", true,
         "verbose", true,
         "headers", asList("1", "2"));
-    f.assertThat("-v", "-XPOST").isParsedAs(
+    f.assertThat("-v", "-XPOST").parsesTo(
         "verbose", true,
         "method", "POST");
-    f.assertThat("-v", "-i", "-XPOST").isParsedAs(
+    f.assertThat("-v", "-i", "-XPOST").parsesTo(
         "verbose", true,
         "include", true,
         "method", "POST");
-    f.assertThat("-v", "-i", "-XPOST").isParsedAs(
+    f.assertThat("-v", "-i", "-XPOST").parsesTo(
         "verbose", true,
         "include", true,
         "method", "POST");
@@ -89,56 +88,56 @@ public class CurlArgumentsTest {
 
   @Test
   public void errorInvalidGrouping() {
-    f.assertThat("-vH1").isInvalid("Invalid option: -vH1");
+    f.assertThat("-vH1").fails("Invalid option: -vH1");
   }
 
   @Test
   public void errorInvalidGroupingLong() {
-    f.assertThat("-vXPOST").isInvalid("Invalid option: -vXPOST");
+    f.assertThat("-vXPOST").fails("Invalid option: -vXPOST");
   }
 
   @Test
   public void errorGroupingDuplicateFlag() {
-    f.assertThat("-v", "-vH'Content-Type: application/xml'").isInvalid(
+    f.assertThat("-v", "-vH'Content-Type: application/xml'").fails(
         "Invalid option: -vH'Content-Type: application/xml'");
   }
 
   @Test
   public void errorMissingRepeatable() {
-    f.assertThat("-H").isInvalid("Missing value after token: -H");
+    f.assertThat("-H").fails("Missing value after token: -H");
   }
 
   @Test
   public void errorMissingNonRepeatable() {
-    f.assertThat("--request").isInvalid("Missing value after token: --request");
+    f.assertThat("--request").fails("Missing value after token: --request");
   }
 
   @Test
   public void errorDuplicateNonRepeatableLong() {
-    f.assertThat("--request", "GET", "--request", "POST").isInvalid(
+    f.assertThat("--request", "GET", "--request", "POST").fails(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   public void errorDuplicateNonRepeatableShort() {
-    f.assertThat("-X1", "-X2").isInvalid("Option METHOD (-X, --request) is not repeatable");
+    f.assertThat("-X1", "-X2").fails("Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   public void errorDuplicateNonRepeatableLongDetachedShortAttached() {
-    f.assertThat("--request", "1", "-X2").isInvalid(
+    f.assertThat("--request", "1", "-X2").fails(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   public void errorDuplicateNonRepeatableLongAttachedShortDetached() {
-    f.assertThat("--request=1", "-X", "2").isInvalid(
+    f.assertThat("--request=1", "-X", "2").fails(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   public void testPrint() {
-    printFixture(CurlArguments_Parser::printUsage).assertPrints(
+    f.assertPrints(
         "SYNOPSIS",
         "  [OPTION]... [URLS]...",
         "",

@@ -1,7 +1,5 @@
 package net.jbock.examples;
 
-import static net.jbock.examples.fixture.PrintFixture.printFixture;
-
 import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
@@ -12,40 +10,40 @@ public class CpArgumentsTest {
 
   @Test
   public void errorMissingSource() {
-    f.assertThat().isInvalid("Missing parameter: SOURCE");
-    f.assertThat("-r").isInvalid("Missing parameter: SOURCE");
+    f.assertThat().fails("Missing parameter: SOURCE");
+    f.assertThat("-r").fails("Missing parameter: SOURCE");
   }
 
   @Test
   public void errorMissingDest() {
-    f.assertThat("a").isInvalid("Missing parameter: DEST");
-    f.assertThat("a", "-r").isInvalid("Missing parameter: DEST");
-    f.assertThat("-r", "a").isInvalid("Missing parameter: DEST");
+    f.assertThat("a").fails("Missing parameter: DEST");
+    f.assertThat("a", "-r").fails("Missing parameter: DEST");
+    f.assertThat("-r", "a").fails("Missing parameter: DEST");
   }
 
   @Test
   public void minimal() {
-    f.assertThat("a", "b").isParsedAs(
+    f.assertThat("a", "b").parsesTo(
         "source", "a",
         "dest", "b");
-    f.assertThat("b", "a").isParsedAs(
+    f.assertThat("b", "a").parsesTo(
         "source", "b",
         "dest", "a");
   }
 
   @Test
   public void dashNotIgnored() {
-    f.assertThat("-a", "b").isInvalid("Invalid option: -a");
+    f.assertThat("-a", "b").fails("Invalid option: -a");
   }
 
   @Test
   public void tooMany() {
-    f.assertThat("a", "b", "c").isInvalid("Invalid option: c");
+    f.assertThat("a", "b", "c").fails("Invalid option: c");
   }
 
   @Test
   public void tooManyAndFlag() {
-    f.assertThat("-r", "a", "b", "c").isInvalid("Invalid option: c");
+    f.assertThat("-r", "a", "b", "c").fails("Invalid option: c");
   }
 
   @Test
@@ -55,16 +53,16 @@ public class CpArgumentsTest {
         "dest", "b",
         "recursive", true};
     f.assertThat("-r", "a", "b")
-        .isParsedAs(expected);
+        .parsesTo(expected);
     f.assertThat("a", "-r", "b")
-        .isParsedAs(expected);
+        .parsesTo(expected);
     f.assertThat("a", "b", "-r")
-        .isParsedAs(expected);
+        .parsesTo(expected);
   }
 
   @Test
   public void testPrint() {
-    printFixture(CpArguments_Parser::printUsage).assertPrints(
+    f.assertPrints(
         "SYNOPSIS",
         "  [OPTION]... SOURCE DEST",
         "",

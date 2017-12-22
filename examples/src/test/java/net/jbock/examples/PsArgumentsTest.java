@@ -1,14 +1,13 @@
 package net.jbock.examples;
 
-import static net.jbock.examples.fixture.PrintFixture.printFixture;
-
+import net.jbock.examples.fixture.ParserFixture;
 import org.junit.Test;
 
 public class PsArgumentsTest {
 
   @Test
   public void testPrint() {
-    printFixture(PsArguments_Parser::printUsage).assertPrints(
+    ParserFixture.create(PsArguments_Parser::parse).assertPrints(
         "SYNOPSIS",
         "  [OPTION]...",
         "",
