@@ -36,8 +36,9 @@ This is what the program prints, when invoked without parameters:
 
 ### That's cool, but we can do better
 
-Printing a stacktrace usually means that an unexpected condition that has caused our program to crash.
+Printing a stacktrace usually means that an unexpected condition has caused our program to crash.
 But there's no reason to crash here.
+
 We will now use jbock to print a better error message for the user.
 We start by defining an abstract class `Args`,
 which represents the two mandatory arguments to our program:
