@@ -50,8 +50,11 @@ final class Context {
   // a set of only the positional param types in the sourceType
   final Set<PositionalType> positionalParamTypes;
 
-  // general usage instructions
+  // general usage information
   final List<String> description;
+
+  // general usage information
+  final String programName;
 
   private Context(
       TypeElement sourceType,
@@ -65,7 +68,8 @@ final class Context {
       boolean helpDisabled,
       Set<Type> paramTypes,
       Set<PositionalType> positionalParamTypes,
-      List<String> description) {
+      List<String> description,
+      String programName) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -78,6 +82,7 @@ final class Context {
     this.paramTypes = paramTypes;
     this.positionalParamTypes = positionalParamTypes;
     this.description = description;
+    this.programName = programName;
   }
 
   static Context create(
@@ -96,7 +101,7 @@ final class Context {
         .map(ExecutableElement::getSimpleName)
         .map(Name::toString)
         .noneMatch(s -> s.equals("toString"));
-    List<String> description = Arrays.asList(sourceType.getAnnotation(CommandLineArguments.class).description());
+    List<String> description = Arrays.asList(sourceType.getAnnotation(CommandLineArguments.class).overview());
     return new Context(
         sourceType,
         generatedClass,
@@ -109,7 +114,8 @@ final class Context {
         helpDisabled,
         paramTypes,
         positionalParamTypes,
-        description);
+        description,
+        programName(sourceType));
   }
 
   private static boolean problematicOptionNames(List<Param> parameters) {
@@ -123,6 +129,19 @@ final class Context {
   private static ClassName parserClass(ClassName type) {
     String name = String.join("_", type.simpleNames()) + "_Parser";
     return type.topLevelClassName().peerClass(name);
+  }
+
+  private static String programName(TypeElement sourceType) {
+    CommandLineArguments annotation = sourceType.getAnnotation(CommandLineArguments.class);
+    if (!annotation.programName().isEmpty()) {
+      return annotation.programName();
+    }
+    switch (sourceType.getNestingKind()) {
+      case MEMBER:
+        return Util.asType(sourceType.getEnclosingElement()).getSimpleName().toString();
+      default:
+        return sourceType.getSimpleName().toString();
+    }
   }
 
   /**

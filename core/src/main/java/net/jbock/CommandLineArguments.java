@@ -57,16 +57,24 @@ public @interface CommandLineArguments {
 
   /**
    * General usage information that is printed when the user passes the {@code --help} parameter.
+   * The overview is printed in the {@code DESCRIPTION} section of the usage information, before
+   * the first option description.
    */
-  String[] description() default {};
+  String[] overview() default {};
 
   /**
-   * The program name that is printed if the command line arguments are invalid,
-   * or when the user passes the "--help" parameter.
-   * By default, this is the short name of the annotated java class.
-   * or if that class is an inner class, the short name its enclosing class.
+   * The name of the final executable program. It is printed when the user passes the
+   * {@code --help} parameter, in the {@code NAME} section of the usage information.
+   * By default, the program name is the short name of the annotated java class.
+   * If that class is an inner class, it is the short name its enclosing class.
    */
   String programName() default "";
+
+  /**
+   * A short, one-sentence summary of the program. It is printed when the user passes the
+   * {@code --help} parameter, in the {@code NAME} section of the usage information.
+   */
+  String missionStatement() default "";
 
   /**
    * <p>
