@@ -12,8 +12,8 @@ public class PositionalArgumentsTest {
 
   @Test
   public void errorMissingParameters() {
-    f.assertThat().fails("Missing parameter: SOURCE");
-    f.assertThat("a").fails("Missing parameter: DEST");
+    f.assertThat().failsWithLine1("Missing parameter: SOURCE");
+    f.assertThat("a").failsWithLine1("Missing parameter: DEST");
   }
 
   @Test

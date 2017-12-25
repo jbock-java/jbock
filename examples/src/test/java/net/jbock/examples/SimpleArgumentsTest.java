@@ -10,8 +10,8 @@ public class SimpleArgumentsTest {
 
   @Test
   public void invalidOptions() {
-    f.assertThat("xf", "1").fails("Invalid option: xf");
-    f.assertThat("-xf", "1").fails("Invalid option: -xf");
+    f.assertThat("xf", "1").failsWithLine1("Invalid option: xf");
+    f.assertThat("-xf", "1").failsWithLine1("Invalid option: -xf");
   }
 
   @Test

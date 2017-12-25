@@ -10,15 +10,15 @@ public class CpArgumentsTest {
 
   @Test
   public void errorMissingSource() {
-    f.assertThat().fails("Missing parameter: SOURCE");
-    f.assertThat("-r").fails("Missing parameter: SOURCE");
+    f.assertThat().failsWithLine1("Missing parameter: SOURCE");
+    f.assertThat("-r").failsWithLine1("Missing parameter: SOURCE");
   }
 
   @Test
   public void errorMissingDest() {
-    f.assertThat("a").fails("Missing parameter: DEST");
-    f.assertThat("a", "-r").fails("Missing parameter: DEST");
-    f.assertThat("-r", "a").fails("Missing parameter: DEST");
+    f.assertThat("a").failsWithLine1("Missing parameter: DEST");
+    f.assertThat("a", "-r").failsWithLine1("Missing parameter: DEST");
+    f.assertThat("-r", "a").failsWithLine1("Missing parameter: DEST");
   }
 
   @Test
@@ -33,17 +33,17 @@ public class CpArgumentsTest {
 
   @Test
   public void dashNotIgnored() {
-    f.assertThat("-a", "b").fails("Invalid option: -a");
+    f.assertThat("-a", "b").failsWithLine1("Invalid option: -a");
   }
 
   @Test
   public void tooMany() {
-    f.assertThat("a", "b", "c").fails("Invalid option: c");
+    f.assertThat("a", "b", "c").failsWithLine1("Invalid option: c");
   }
 
   @Test
   public void tooManyAndFlag() {
-    f.assertThat("-r", "a", "b", "c").fails("Invalid option: c");
+    f.assertThat("-r", "a", "b", "c").failsWithLine1("Invalid option: c");
   }
 
   @Test

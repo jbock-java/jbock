@@ -21,8 +21,8 @@ public class TarArgumentsTest {
 
   @Test
   public void noGrouping() {
-    f.assertThat("-v", "xf", "foo.tar").fails("Invalid option: xf");
-    f.assertThat("-v", "-xf", "foo.tar").fails("Invalid option: -xf");
+    f.assertThat("-v", "xf", "foo.tar").failsWithLine1("Invalid option: xf");
+    f.assertThat("-v", "-xf", "foo.tar").failsWithLine1("Invalid option: -xf");
   }
 
   @Test

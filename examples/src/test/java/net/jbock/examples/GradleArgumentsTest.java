@@ -13,39 +13,39 @@ public final class GradleArgumentsTest {
 
   @Test
   public void errorShortLongConflict() {
-    f.assertThat("-m", "hello", "--message=goodbye").fails(
+    f.assertThat("-m", "hello", "--message=goodbye").failsWithLine1(
         "Option MESSAGE (-m, --message) is not repeatable");
   }
 
   @Test
   public void errorMissingValue() {
     // there's nothing after -m
-    f.assertThat("-m").fails("Missing value after token: -m");
+    f.assertThat("-m").failsWithLine1("Missing value after token: -m");
   }
 
   @Test
   public void errorLongShortConflict() {
-    f.assertThat("--message=hello", "-m", "goodbye").fails(
+    f.assertThat("--message=hello", "-m", "goodbye").failsWithLine1(
         "Option MESSAGE (-m, --message) is not repeatable");
   }
 
   @Test
   public void errorLongLongConflict() {
-    f.assertThat("--message=hello", "--message=goodbye").fails(
+    f.assertThat("--message=hello", "--message=goodbye").failsWithLine1(
         "Option MESSAGE (-m, --message) is not repeatable");
   }
 
   @Test
   public void errorInvalidOption() {
-    f.assertThat("-c1").fails("Invalid option: -c1");
-    f.assertThat("-c-v").fails("Invalid option: -c-v");
-    f.assertThat("-c-").fails("Invalid option: -c-");
-    f.assertThat("-c=v").fails("Invalid option: -c=v");
-    f.assertThat("-c=").fails("Invalid option: -c=");
-    f.assertThat("-cX=1").fails("Invalid option: -cX=1");
-    f.assertThat("-cvv").fails("Invalid option: -cvv");
-    f.assertThat("-cvx").fails("Invalid option: -cvx");
-    f.assertThat("-cvm").fails("Invalid option: -cvm");
+    f.assertThat("-c1").failsWithLine1("Invalid option: -c1");
+    f.assertThat("-c-v").failsWithLine1("Invalid option: -c-v");
+    f.assertThat("-c-").failsWithLine1("Invalid option: -c-");
+    f.assertThat("-c=v").failsWithLine1("Invalid option: -c=v");
+    f.assertThat("-c=").failsWithLine1("Invalid option: -c=");
+    f.assertThat("-cX=1").failsWithLine1("Invalid option: -cX=1");
+    f.assertThat("-cvv").failsWithLine1("Invalid option: -cvv");
+    f.assertThat("-cvx").failsWithLine1("Invalid option: -cvx");
+    f.assertThat("-cvm").failsWithLine1("Invalid option: -cvm");
   }
 
   @Test
@@ -92,7 +92,7 @@ public final class GradleArgumentsTest {
   @Test
   public void testLongSuppressed() {
     // Long option --cmos is suppressed
-    f.assertThat("--cmos").fails("Invalid option: --cmos");
+    f.assertThat("--cmos").failsWithLine1("Invalid option: --cmos");
   }
 
   @Test
@@ -117,7 +117,7 @@ public final class GradleArgumentsTest {
 
   @Test
   public void errorSuspiciousInput() {
-    f.assertThat("-cvm", "hello").fails("Invalid option: -cvm");
+    f.assertThat("-cvm", "hello").failsWithLine1("Invalid option: -cvm");
   }
 
 

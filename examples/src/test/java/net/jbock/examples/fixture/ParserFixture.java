@@ -103,15 +103,24 @@ public final class ParserFixture<E> {
       this.e = e;
     }
 
-    public void fails(String expectedMessage) {
+    public void failsWithLine1(String expectedMessage) {
       if (parsed.isPresent()) {
-        Assert.fail("Expected a failure" +
+        Assert.fail("Expecting a failure" +
             " but parsing was successful");
       }
       Assert.assertThat(e, startsWith("Usage:"));
       Assert.assertThat(e, containsString("\n"));
       String actualMessage = e.split("\\r?\\n", -1)[1];
       Assert.assertThat(actualMessage, is(expectedMessage));
+    }
+
+    public void failsWithLines(String... expected) {
+      if (parsed.isPresent()) {
+        Assert.fail("Expecting a failure" +
+            " but parsing was successful");
+      }
+      String[] actualMessage = e.split("\\r?\\n", -1);
+      assertArrayEquals("Actual: " + Arrays.toString(actualMessage), expected, actualMessage);
     }
 
     public void satisfies(Predicate<E> predicate) {

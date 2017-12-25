@@ -10,19 +10,19 @@ public class MvArgumentsTest {
 
   @Test
   public void notEnoughArguments() {
-    f.assertThat().fails("Missing parameter: SOURCE");
-    f.assertThat("a").fails("Missing parameter: DEST");
+    f.assertThat().failsWithLine1("Missing parameter: SOURCE");
+    f.assertThat("a").failsWithLine1("Missing parameter: DEST");
   }
 
   @Test
   public void dashNotIgnored() {
     // see CommandLineArguments.ignoreDashes
-    f.assertThat("-aa", "b").fails("Invalid option: -aa");
+    f.assertThat("-aa", "b").failsWithLine1("Invalid option: -aa");
   }
 
   @Test
   public void tooManyPositionalArguments() {
-    f.assertThat("a", "b", "c").fails("Invalid option: c");
+    f.assertThat("a", "b", "c").failsWithLine1("Invalid option: c");
   }
 
   @Test

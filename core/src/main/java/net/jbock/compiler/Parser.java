@@ -97,13 +97,48 @@ final class Parser {
         .build();
     ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e")
         .build();
-    ParameterSpec result = ParameterSpec.builder(optionalOfSubtype(TypeName.get(context.sourceType.asType())), "result")
-        .build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("parse");
 
-    // begin try block
-    builder.beginControlFlow("try");
+    builder.beginControlFlow("try")
+        .addCode(parseMethodTryBlock(args, out, indent))
+        .endControlFlow();
 
+    builder.beginControlFlow("catch ($T $N)", IllegalArgumentException.class, e)
+        .addCode(parseMethodCatchBlock(out, indent, e))
+        .endControlFlow();
+
+    return builder
+        .addParameters(Arrays.asList(args, out, indent))
+        .returns(optionalOf(TypeName.get(context.sourceType.asType())))
+        .addModifiers(PUBLIC, STATIC)
+        .build();
+  }
+
+  private CodeBlock parseMethodCatchBlock(
+      ParameterSpec out,
+      ParameterSpec indent,
+      ParameterSpec e) {
+    CodeBlock.Builder builder = CodeBlock.builder();
+    if (context.helpDisabled) {
+      builder.addStatement("$T.$N($N, $N)", option.type, option.printUsageMethod, out, indent);
+      builder.addStatement("$N.println($N.getMessage())", out, e);
+    } else {
+      builder.addStatement("$N.print($S)", out, "Usage: ");
+      builder.addStatement("$N.println($T.$N())", out, option.type, option.synopsisMethod);
+      builder.addStatement("$N.println($N.getMessage())", out, e);
+      builder.addStatement("$N.println($S)", out, "Try '--help' for more information.");
+    }
+    builder.addStatement("return $T.empty()", Optional.class);
+    return builder.build();
+  }
+
+  private CodeBlock parseMethodTryBlock(
+      ParameterSpec args,
+      ParameterSpec out,
+      ParameterSpec indent) {
+    CodeBlock.Builder builder = CodeBlock.builder();
+    ParameterSpec result = ParameterSpec.builder(optionalOfSubtype(TypeName.get(context.sourceType.asType())), "result")
+        .build();
     builder.addStatement("$T $N = parse($T.asList($N))",
         result.type, result, Arrays.class, args);
 
@@ -113,29 +148,7 @@ final class Parser {
 
     builder.addStatement("return $N.map($T.identity())",
         result, Function.class);
-
-    // end try block
-    builder.endControlFlow();
-
-    // begin catch block
-    builder.beginControlFlow("catch ($T $N)", IllegalArgumentException.class, e);
-
-    builder.addStatement("$N.print($S)", out, "Usage: ");
-    builder.addStatement("$N.println($T.$N())", out, option.type, option.synopsisMethod);
-    builder.addStatement("$N.println($N.getMessage())", out, e);
-    if (!context.helpDisabled) {
-      builder.addStatement("$N.println($S)", out, "Try '--help' for more information.");
-    }
-    builder.addStatement("return $T.empty()", Optional.class);
-
-    // end catch block
-    builder.endControlFlow();
-
-    return builder
-        .addParameters(Arrays.asList(args, out, indent))
-        .returns(optionalOf(TypeName.get(context.sourceType.asType())))
-        .addModifiers(PUBLIC, STATIC)
-        .build();
+    return builder.build();
   }
 
   private MethodSpec parseMethodInternal() {

@@ -2,7 +2,7 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-jbock is an annotation processor that generates a 
+`jbock 2.3` is an annotation processor that generates a
 [getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-like
 CLI parser, with an extra focus on positional parameters.
 
@@ -34,18 +34,18 @@ This is what the program prints, when invoked without parameters:
     at cli.tools.CopyFile.main(CopyFile.java:10)
 </code></pre>
 
-### That's cool, but we can do better
+### A stacktrace isn't good enough
 
-Printing a stacktrace usually means that an unexpected condition has caused our program to crash.
-But there's no reason to crash here.
+Being invoked without any arguments is something we should expect,
+and instead of a stacktrace, we could use this opportunity to inform the user
+about our command line syntax. Let's see how this is done with `jbock 2.3`.
 
-We will now use jbock to print a better error message for the user.
 We start by defining an abstract class `Args`,
 which represents the two mandatory arguments to our program:
 
 ````java
 @CommandLineArguments
-abstract class Args {
+abstract static class Args {
   @Positional abstract String src();
   @Positional abstract String dest();
 }
