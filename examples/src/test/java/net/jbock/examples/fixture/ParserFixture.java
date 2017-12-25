@@ -74,7 +74,7 @@ public final class ParserFixture<E> {
 
   public static <E> ParserFixture<E> create(
       TriFunction<String[], PrintStream, Optional<E>> fn) {
-    return new ParserFixture(fn);
+    return new ParserFixture<>(fn);
   }
 
   public JsonAssert<E> assertThat(String... args) {

@@ -22,8 +22,11 @@ public class RmArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  RmArguments",
+        "",
         "SYNOPSIS",
-        "  [OPTION]... [OTHER_TOKENS]... [-- DD_TOKENS...]",
+        "  RmArguments [OPTION]... [OTHER_TOKENS]... [-- DD_TOKENS...]",
         "",
         "DESCRIPTION",
         "",

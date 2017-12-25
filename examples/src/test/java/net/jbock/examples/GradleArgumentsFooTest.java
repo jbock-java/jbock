@@ -17,8 +17,11 @@ public class GradleArgumentsFooTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  GradleArguments",
+        "",
         "SYNOPSIS",
-        "  [OPTION]...",
+        "  GradleArguments [OPTION]...",
         "",
         "DESCRIPTION",
         "",

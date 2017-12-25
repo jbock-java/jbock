@@ -11,8 +11,11 @@ public class HelplessArgumentsTest {
   @Test
   public void errorNoArguments() throws Exception {
     f.assertThat().failsWithLines(
+        "NAME",
+        "  HelplessArguments",
+        "",
         "SYNOPSIS",
-        "  [OPTION]... REQUIRED",
+        "  HelplessArguments [OPTION]... REQUIRED",
         "",
         "DESCRIPTION",
         "",

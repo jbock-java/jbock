@@ -124,8 +124,11 @@ public final class GradleArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  GradleArguments",
+        "",
         "SYNOPSIS",
-        "  [OPTION]... [OTHER_TOKENS]... [-- DD_TOKENS...]",
+        "  GradleArguments [OPTION]... [OTHER_TOKENS]... [-- DD_TOKENS...]",
         "",
         "DESCRIPTION",
         "",

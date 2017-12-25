@@ -38,8 +38,11 @@ public class RequiredArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  RequiredArguments",
+        "",
         "SYNOPSIS",
-        "  --dir=DIR [OTHER_TOKENS]...",
+        "  RequiredArguments --dir=DIR [OTHER_TOKENS]...",
         "",
         "DESCRIPTION",
         "",

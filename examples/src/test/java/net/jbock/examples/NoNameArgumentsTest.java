@@ -55,8 +55,11 @@ public class NoNameArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  NoNameArguments",
+        "",
         "SYNOPSIS",
-        "  [OPTION]... -n NUMBER",
+        "  NoNameArguments [OPTION]... -n NUMBER",
         "",
         "DESCRIPTION",
         "",

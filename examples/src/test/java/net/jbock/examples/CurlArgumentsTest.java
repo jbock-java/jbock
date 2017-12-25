@@ -138,8 +138,11 @@ public class CurlArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  curl - transfer a URL",
+        "",
         "SYNOPSIS",
-        "  [OPTION]... [URLS]...",
+        "  curl [OPTION]... [URLS]...",
         "",
         "DESCRIPTION",
         "  curl  is  a  tool  to  transfer data from or to a server using one of the supported protocols",

@@ -17,8 +17,11 @@ public class SimpleArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  SimpleArguments",
+        "",
         "SYNOPSIS",
-        "  [OPTION]...",
+        "  SimpleArguments [OPTION]...",
         "",
         "DESCRIPTION",
         "",

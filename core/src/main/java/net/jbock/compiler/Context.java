@@ -51,10 +51,13 @@ final class Context {
   final Set<PositionalType> positionalParamTypes;
 
   // general usage information
-  final List<String> description;
+  final List<String> overview;
 
   // general usage information
   final String programName;
+
+  // general usage information
+  final String missionStatement;
 
   private Context(
       TypeElement sourceType,
@@ -68,8 +71,9 @@ final class Context {
       boolean helpDisabled,
       Set<Type> paramTypes,
       Set<PositionalType> positionalParamTypes,
-      List<String> description,
-      String programName) {
+      List<String> overview,
+      String programName,
+      String missionStatement) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -81,8 +85,9 @@ final class Context {
     this.helpDisabled = helpDisabled;
     this.paramTypes = paramTypes;
     this.positionalParamTypes = positionalParamTypes;
-    this.description = description;
+    this.overview = overview;
     this.programName = programName;
+    this.missionStatement = missionStatement;
   }
 
   static Context create(
@@ -102,6 +107,7 @@ final class Context {
         .map(Name::toString)
         .noneMatch(s -> s.equals("toString"));
     List<String> description = Arrays.asList(sourceType.getAnnotation(CommandLineArguments.class).overview());
+    String missionStatement = sourceType.getAnnotation(CommandLineArguments.class).missionStatement();
     return new Context(
         sourceType,
         generatedClass,
@@ -115,7 +121,8 @@ final class Context {
         paramTypes,
         positionalParamTypes,
         description,
-        programName(sourceType));
+        programName(sourceType),
+        missionStatement);
   }
 
   private static boolean problematicOptionNames(List<Param> parameters) {

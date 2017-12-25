@@ -63,8 +63,11 @@ public class CpArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  CpArguments",
+        "",
         "SYNOPSIS",
-        "  [OPTION]... SOURCE DEST",
+        "  CpArguments [OPTION]... SOURCE DEST",
         "",
         "DESCRIPTION",
         "",

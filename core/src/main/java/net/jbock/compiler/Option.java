@@ -420,15 +420,28 @@ final class Option {
     ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("printUsage");
 
-    // print synopsis
-    builder.addStatement("$N.println($S)", out, "SYNOPSIS")
-        .addStatement("$N.print($N($N))", out, spacesMethod, indent)
-        .addStatement("$N.println($N())", out, synopsisMethod)
-        .addStatement("$N.println()", out);
+    builder.addStatement("$N.println($S)", out, "NAME");
+    builder.addStatement("$N.print($N($N))", out, spacesMethod, indent);
+    builder.addStatement("$N.print($S)", out, optionType.context.programName);
+    if (!optionType.context.missionStatement.isEmpty()) {
+      builder.addStatement("$N.print($S)", out, " - ");
+      builder.addStatement("$N.println($S)", out, optionType.context.missionStatement);
+      builder.addStatement("$N.println()", out);
+    } else {
+      builder.addStatement("$N.println()", out);
+      builder.addStatement("$N.println()", out);
+    }
+
+    builder.addStatement("$N.println($S)", out, "SYNOPSIS");
+    builder.addStatement("$N.print($N($N))", out, spacesMethod, indent);
+    builder.addStatement("$N.print($S)", out, optionType.context.programName);
+    builder.addStatement("$N.print($S)", out, " ");
+    builder.addStatement("$N.println($N())", out, synopsisMethod);
+    builder.addStatement("$N.println()", out);
 
     builder.addStatement("$N.println($S)", out, "DESCRIPTION");
 
-    for (String line : optionType.context.description) {
+    for (String line : optionType.context.overview) {
       if (line.isEmpty()) {
         builder.addStatement("$N.println()", out);
       } else {

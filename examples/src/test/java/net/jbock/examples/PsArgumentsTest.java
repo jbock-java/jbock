@@ -8,8 +8,11 @@ public class PsArgumentsTest {
   @Test
   public void testPrint() {
     ParserFixture.create(PsArguments_Parser::parse).assertPrints(
+        "NAME",
+        "  PsArguments",
+        "",
         "SYNOPSIS",
-        "  [OPTION]...",
+        "  PsArguments [OPTION]...",
         "",
         "DESCRIPTION",
         "",

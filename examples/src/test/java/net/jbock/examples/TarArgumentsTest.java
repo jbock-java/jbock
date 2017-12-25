@@ -28,8 +28,11 @@ public class TarArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  TarArguments",
+        "",
         "SYNOPSIS",
-        "  [OPTION]... -f FILE",
+        "  TarArguments [OPTION]... -f FILE",
         "",
         "DESCRIPTION",
         "",

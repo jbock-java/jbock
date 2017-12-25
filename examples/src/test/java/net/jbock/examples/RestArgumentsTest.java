@@ -34,8 +34,11 @@ public class RestArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  RestArguments",
+        "",
         "SYNOPSIS",
-        "  [OPTION]... [REST]...",
+        "  RestArguments [OPTION]... [REST]...",
         "",
         "DESCRIPTION",
         "",

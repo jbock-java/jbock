@@ -21,8 +21,11 @@ public class EvilArgumentsTest {
   @Test
   public void testPrint() {
     ParserFixture.create(EvilArguments_Parser::parse).assertPrints(
+        "NAME",
+        "  EvilArguments",
+        "",
         "SYNOPSIS",
-        "  --fancy=FANCY_0 --fAncy=F_ANCY_1 --f_ancy=F_ANCY_2 --blub=BLUB_3 --Blub=BLUB_4",
+        "  EvilArguments --fancy=FANCY_0 --fAncy=F_ANCY_1 --f_ancy=F_ANCY_2 --blub=BLUB_3 --Blub=BLUB_4",
         "",
         "DESCRIPTION",
         "",

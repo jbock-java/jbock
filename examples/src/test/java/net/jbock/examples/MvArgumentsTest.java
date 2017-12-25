@@ -35,8 +35,11 @@ public class MvArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  MvArguments",
+        "",
         "SYNOPSIS",
-        "  SOURCE DEST",
+        "  MvArguments SOURCE DEST",
         "",
         "DESCRIPTION",
         "",

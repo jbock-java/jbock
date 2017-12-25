@@ -41,32 +41,37 @@ public @interface CommandLineArguments {
 
   /**
    * <p>
-   *   Should unknown tokens be interpreted as positional arguments,
-   *   even if they start with a hyphen character?
+   * Should unknown tokens be interpreted as positional arguments,
+   * even if they start with a hyphen character?
    * </p><p>
-   *   If {@code false}, an unknown free token that starts with a hyphen
-   *   will cause the parsing to fail with an {@link IllegalArgumentException}.
+   * If {@code false}, an unknown free token that starts with a hyphen
+   * will cause the parsing to fail with an {@link IllegalArgumentException}.
    * </p><p>
-   *   If {@code true}, an unknown free token that starts with a hyphen
-   *   will be read as a positional argument.
-   *   For example, it is then possible to pass a negative number
-   *   as a positional argument.
+   * If {@code true}, an unknown free token that starts with a hyphen
+   * will be read as a positional argument.
+   * For example, it is then possible to pass a negative number
+   * as a positional argument.
    * </p>
    */
   boolean ignoreDashes() default false;
 
   /**
    * General usage information that is printed when the user passes the {@code --help} parameter.
-   * The overview is printed in the {@code DESCRIPTION} section of the usage information, before
-   * the first option description.
+   * The overview is printed at the beginning of the {@code DESCRIPTION} section of the usage information.
    */
   String[] overview() default {};
 
   /**
-   * The name of the final executable program. It is printed when the user passes the
+   * <p>
+   * The name of the final executable program.
+   * If the java program is usually invoked from a wrapper script,
+   * then this should be the file name of that script.
+   * </p><p>
+   * The program name is printed when the user passes the
    * {@code --help} parameter, in the {@code NAME} section of the usage information.
-   * By default, the program name is the short name of the annotated java class.
-   * If that class is an inner class, it is the short name its enclosing class.
+   * By default, the short name of the annotated java class is used as the program name.
+   * If that class is an inner class, the short name of its enclosing class is the default program name.
+   * </p>
    */
   String programName() default "";
 

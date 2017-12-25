@@ -41,8 +41,11 @@ public class AdditionArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  AdditionArguments",
+        "",
         "SYNOPSIS",
-        "  A B [C]",
+        "  AdditionArguments A B [C]",
         "",
         "DESCRIPTION",
         "",

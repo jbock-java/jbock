@@ -61,8 +61,11 @@ public class PositionalArgumentsTest {
   @Test
   public void testPrint() {
     f.assertPrints(
+        "NAME",
+        "  PositionalArguments",
+        "",
         "SYNOPSIS",
-        "  SOURCE DEST [OPT_STRING] [OTHER_TOKENS]... [-- DD_TOKENS...]",
+        "  PositionalArguments SOURCE DEST [OPT_STRING] [OTHER_TOKENS]... [-- DD_TOKENS...]",
         "",
         "DESCRIPTION",
         "",
