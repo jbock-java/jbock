@@ -3,7 +3,7 @@ package net.jbock.examples;
 import static java.util.Collections.singletonList;
 
 import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class PositionalArgumentsTest {
 

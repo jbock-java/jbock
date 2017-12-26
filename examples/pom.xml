@@ -17,6 +17,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jbock.version>0-SNAPSHOT</jbock.version>
     <jackson.version>2.9.3</jackson.version>
+    <junit.version>5.1.0-M1</junit.version>
   </properties>
 
   <dependencies>
@@ -26,13 +27,6 @@
       <artifactId>jbock</artifactId>
       <version>${jbock.version}</version>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <version>4.12</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>
@@ -49,6 +43,13 @@
       <scope>test</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <build>
@@ -62,8 +63,6 @@
         <configuration>
           <source>9</source>
           <target>9</target>
-          <!-- Needed for Java 9 until MCOMPILER-310 is resolved! -->
-          <!-- https://issues.apache.org/jira/browse/MCOMPILER-310 -->
           <annotationProcessorPaths>
             <dependency>
               <groupId>com.github.h908714124</groupId>
@@ -76,14 +75,20 @@
 
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-install-plugin</artifactId>
-        <version>2.5.2</version>
-        <executions>
-          <execution>
-            <id>default-install</id>
-            <phase>none</phase>
-          </execution>
-        </executions>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>2.19.1</version>
+        <dependencies>
+          <dependency>
+            <groupId>org.junit.platform</groupId>
+            <artifactId>junit-platform-surefire-provider</artifactId>
+            <version>1.0.1</version>
+          </dependency>
+          <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter-engine</artifactId>
+            <version>${junit.version}</version>
+          </dependency>
+        </dependencies>
       </plugin>
 
     </plugins>

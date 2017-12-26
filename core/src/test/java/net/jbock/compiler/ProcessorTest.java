@@ -10,7 +10,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import javax.tools.JavaFileObject;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 public class ProcessorTest {
 
