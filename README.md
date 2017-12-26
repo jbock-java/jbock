@@ -20,10 +20,10 @@ To clarify these goals, we're going to write a simple command line utility that 
 public class CopyFile {
 
   public static void main(String[] args) throws IOException {
-    String src = args[0];
+    String source = args[0];
     String dest = args[1];
-    Files.copy(Paths.get(src), Paths.get(dest));
-    System.out.printf("Done copying %s to %s%n", src, dest);
+    Files.copy(Paths.get(source), Paths.get(dest));
+    System.out.printf("Done copying %s to %s%n", source, dest);
   }
 }
 ````
@@ -39,37 +39,51 @@ Instead of showing a stacktrace, we could use this opportunity to inform the use
 about our command line options. Let's see how to do this with `jbock 2.3`.
 
 We start by defining an abstract class `Args`,
-which represents the two mandatory arguments `src` and `dest`:
+which represents the two mandatory arguments `source` and `dest`.
 
 ````java
 @CommandLineArguments
 abstract static class Args {
-  @Positional abstract String src();
+  @Positional abstract String source();
   @Positional abstract String dest();
 }
 ````
 
-Here, the source order of the method declarations `src()` and `dest()` matters.
+For brevity, we will sometimes omit the `static` keyword and the
+`@CommandLineArguments` annotation when we 
+talk about this class.
+
+Because they represent positional arguments,
+the source order of the method declarations `source()` and `dest()` matters.
+
 At compile time, the jbock processor will pick up the
 `@CommandLineArguments` annotation, and generate a class called 
 `CopyFile_Args_Parser` in the same package. Let's change
 our main method to use that instead.
-This is the complete code:
+This is the updated `CopyFile` class:
 
 ````java
 public class CopyFile {
 
   @CommandLineArguments
   abstract static class Args {
-    @Positional abstract String src();
+    @Positional abstract String source();
     @Positional abstract String dest();
   }
 
   public static void main(String[] args) {
     CopyFile_Args_Parser.parse(args, System.out)
         .ifPresentOrElse(
-            System.out::println,
+            CopyFile::run,
             () -> System.exit(1));
+  }
+
+  private static void run(Args args) {
+    try {
+      Files.copy(Paths.get(args.source()), Paths.get(args.dest()));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
   }
 }
 ````
@@ -82,7 +96,7 @@ Try '--help' for more information.
 </code></pre>
 
 This looks a lot better than the stacktrace already.
-Going forward, we should also add some metadata:
+Next, we add some metadata:
 
 ````java
 @CommandLineArguments(
@@ -90,7 +104,7 @@ Going forward, we should also add some metadata:
     missionStatement = "copy files and directories",
     overview = "There are no options yet.")
 abstract static class Args {
-  @Positional abstract String src();
+  @Positional abstract String source();
   @Positional abstract String dest();
 }
 ````
@@ -106,4 +120,112 @@ SYNOPSIS
 
 DESCRIPTION
        There are no options yet.
+</code></pre>
+
+To make things more interesting, we're now going to add more options.
+We start by adding the recursive flag.
+This is done by declaring another method in `Args`.
+A flag is declared by adding a method that returns `boolean`.
+
+````java
+abstract class Args {
+  @Positional abstract String source();
+  @Positional abstract String dest();
+  abstract boolean recursive();
+}
+````
+
+Since the `recursive` argument is not positional,
+it doesn't matter whether we declare `recursive()` 
+before or after `source()` and `dest()`, or between them.
+
+Because `--recursive` is such a common flag,
+we also add its usual short form:
+
+````java
+abstract class Args {
+  @Positional abstract String source();
+  @Positional abstract String dest();
+  @ShortName('r') abstract boolean recursive();
+}
+````
+
+Now let's also add the backup and suffix options.
+
+````java
+abstract class Args {
+  @Positional abstract String source();
+  @Positional abstract String dest();
+  @ShortName('r') abstract boolean recursive();
+  @ShortName('b') @LongName("") abstract boolean backup();
+  @ShortName('S') abstract Optional<String> suffix();
+}
+````
+
+For each non-positional option, the method name is the long name
+by default. This default can be overridden with the `@LongName` annotation,
+or disabled by passing the empty string.
+
+After these changes, the complete code looks as follows.
+The `run` method would become too long,
+so it has been replaced with a simple
+print statement here.
+
+````java
+public class CopyFile {
+
+  @CommandLineArguments(
+      programName = "cp",
+      missionStatement = "copy files and directories",
+      overview = "Copy SOURCE to DEST")
+  abstract static class Args {
+    @Positional abstract String source();
+    @Positional abstract String dest();
+
+    @ShortName('r')
+    @Description("copy directories recursively")
+    abstract boolean recursive();
+
+    @ShortName('b') @LongName("")
+    @Description("make a backup of each existing destination file")
+    abstract boolean backup();
+
+    @ShortName('S')
+    @Description("override the usual backup suffix")
+    abstract Optional<String> suffix();
+  }
+
+  public static void main(String[] args) {
+    CopyFile_Args_Parser.parse(args, System.out)
+        .ifPresentOrElse(
+            CopyFile::run,
+            () -> System.exit(1));
+  }
+
+  private static void run(Args args) {
+    System.out.println(args);
+  }
+}
+````
+
+The following is printed when the `--help`
+parameter is passed:
+
+<pre><code>NAME
+       cp - copy files and directories
+
+SYNOPSIS
+       cp [OPTION]... SOURCE DEST
+
+DESCRIPTION
+       Copy SOURCE to DEST
+
+       -r, --recursive
+              copy directories recursively
+
+       -b
+              make a backup of each existing destination file
+
+       -S, --suffix VALUE
+              override the usual backup suffix
 </code></pre>
