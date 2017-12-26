@@ -434,8 +434,6 @@ final class Option {
 
     builder.addStatement("$N.println($S)", out, "SYNOPSIS");
     builder.addStatement("$N.print($N($N))", out, spacesMethod, indent);
-    builder.addStatement("$N.print($S)", out, optionType.context.programName);
-    builder.addStatement("$N.print($S)", out, " ");
     builder.addStatement("$N.println($N())", out, synopsisMethod);
     builder.addStatement("$N.println()", out);
 
@@ -490,6 +488,8 @@ final class Option {
     List<Param> positional = context.parameters.stream()
         .filter(p -> p.positionalType != null)
         .collect(toList());
+
+    builder.addStatement("$N.add($S)", joiner, context.programName);
 
     if (!optionalNonpos.isEmpty()) {
       builder.addStatement("$N.add($S)", joiner, "[OPTION]...");

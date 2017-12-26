@@ -12,7 +12,7 @@ Its primary goals are:
 * To give the end user clear feedback via exceptions, if the input is invalid.
 * To print usage text that looks similar to a GNU man page.
 
-### User feedback is hard!
+### User feedback is important.
 
 To clarify these goals, we're going to write a simple command line utility that copies a file.
 
@@ -34,14 +34,12 @@ This is what the program prints, when invoked without parameters:
     at cli.tools.CopyFile.main(CopyFile.java:10)
 </code></pre>
 
-### A stacktrace isn't good enough
-
-Being invoked without any arguments is something we should expect,
-and instead of a stacktrace, we could use this opportunity to inform the user
-about our command line syntax. Let's see how this is done with `jbock 2.3`.
+Being invoked without any arguments is something we should be expecting.
+Instead of showing a stacktrace, we could use this opportunity to inform the user
+about our command line options. Let's see how to do this with `jbock 2.3`.
 
 We start by defining an abstract class `Args`,
-which represents the two mandatory arguments to our program:
+which represents the two mandatory arguments `src` and `dest`:
 
 ````java
 @CommandLineArguments
@@ -52,5 +50,33 @@ abstract static class Args {
 ````
 
 Here, the source order of the method declarations `src()` and `dest()` matters.
+At compile time, the jbock processor will pick up the
+`@CommandLineArguments` annotation, and generate a class called 
+`CopyFile_Args_Parser` in the same package. Let's change
+our main method to use that instead.
+This is the complete code:
 
-<pre><code>UNDER CONSTRUCTION</code></pre>
+````java
+public class CopyFile {
+
+  @CommandLineArguments
+  abstract static class Args {
+    @Positional abstract String src();
+    @Positional abstract String dest();
+  }
+
+  public static void main(String[] args) {
+    CopyFile_Args_Parser.parse(args, System.out)
+        .ifPresentOrElse(
+            System.out::println,
+            () -> System.exit(1));
+  }
+}
+````
+This is what the updated program prints, when invoked without
+any arguments:
+
+<pre><code>Usage: CopyFile SRC DEST
+Missing parameter: SRC
+Try '--help' for more information.
+</code></pre>
