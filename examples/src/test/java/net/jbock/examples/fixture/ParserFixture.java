@@ -128,7 +128,7 @@ public final class ParserFixture<E> {
       Assert.assertTrue(predicate.test(parsed.get()));
     }
 
-    public void parsesTo(Object... expected) {
+    public void succeeds(Object... expected) {
       Assert.assertTrue("Parsing was not successful", parsed.isPresent());
       Assert.assertThat(readJson(parsed.get().toString()),
           is(parseJson(expected)));

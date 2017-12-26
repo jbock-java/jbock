@@ -13,7 +13,7 @@ public class RmArgumentsTest {
 
   @Test
   public void testRest() {
-    f.assertThat("-f", "a", "--", "-r", "--", "-f").parsesTo(
+    f.assertThat("-f", "a", "--", "-r", "--", "-f").succeeds(
         "force", true,
         "otherTokens", singletonList("a"),
         "ddTokens", asList("-r", "--", "-f"));

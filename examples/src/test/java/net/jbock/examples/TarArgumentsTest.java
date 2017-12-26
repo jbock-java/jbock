@@ -10,10 +10,10 @@ public class TarArgumentsTest {
 
   @Test
   public void testExtract() {
-    f.assertThat("-x", "-f", "foo.tar").parsesTo(
+    f.assertThat("-x", "-f", "foo.tar").succeeds(
         "extract", true,
         "file", "foo.tar");
-    f.assertThat("-v", "-x", "-f", "foo.tar").parsesTo(
+    f.assertThat("-v", "-x", "-f", "foo.tar").succeeds(
         "extract", true,
         "file", "foo.tar",
         "verbose", true);

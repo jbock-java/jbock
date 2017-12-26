@@ -10,14 +10,14 @@ public class AdditionArgumentsTest {
 
   @Test
   public void optionalAbsent() {
-    f.assertThat("1", "2").parsesTo(
+    f.assertThat("1", "2").succeeds(
         "a", 1,
         "b", 2);
   }
 
   @Test
   public void optionalPresent() {
-    f.assertThat("1", "2", "3").parsesTo(
+    f.assertThat("1", "2", "3").succeeds(
         "a", 1,
         "b", 2,
         "c", 3);

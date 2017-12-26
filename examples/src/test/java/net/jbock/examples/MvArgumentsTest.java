@@ -27,7 +27,7 @@ public class MvArgumentsTest {
 
   @Test
   public void validInvocation() {
-    f.assertThat("a", "b").parsesTo(
+    f.assertThat("a", "b").succeeds(
         "source", "a",
         "dest", "b");
   }

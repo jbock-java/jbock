@@ -10,7 +10,7 @@ public class RequiredArgumentsTest {
 
   @Test
   public void success() {
-    f.assertThat("--dir", "A").parsesTo("dir", "A");
+    f.assertThat("--dir", "A").succeeds("dir", "A");
   }
 
   @Test

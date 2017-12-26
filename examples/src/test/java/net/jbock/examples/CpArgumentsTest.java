@@ -23,10 +23,10 @@ public class CpArgumentsTest {
 
   @Test
   public void minimal() {
-    f.assertThat("a", "b").parsesTo(
+    f.assertThat("a", "b").succeeds(
         "source", "a",
         "dest", "b");
-    f.assertThat("b", "a").parsesTo(
+    f.assertThat("b", "a").succeeds(
         "source", "b",
         "dest", "a");
   }
@@ -53,11 +53,11 @@ public class CpArgumentsTest {
         "dest", "b",
         "recursive", true};
     f.assertThat("-r", "a", "b")
-        .parsesTo(expected);
+        .succeeds(expected);
     f.assertThat("a", "-r", "b")
-        .parsesTo(expected);
+        .succeeds(expected);
     f.assertThat("a", "b", "-r")
-        .parsesTo(expected);
+        .succeeds(expected);
   }
 
   @Test

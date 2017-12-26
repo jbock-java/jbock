@@ -10,7 +10,7 @@ public class EvilArgumentsTest {
 
   @Test
   public void basicTest() {
-    f.assertThat("--fancy=1", "--fAncy=2", "--f_ancy=3", "--blub=4", "--Blub=5").parsesTo(
+    f.assertThat("--fancy=1", "--fAncy=2", "--f_ancy=3", "--blub=4", "--Blub=5").succeeds(
         "fancy", "1",
         "fAncy", "2",
         "f_ancy", "3",

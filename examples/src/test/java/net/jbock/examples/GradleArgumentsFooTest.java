@@ -10,7 +10,7 @@ public class GradleArgumentsFooTest {
 
   @Test
   public void testParserForNestedClass() {
-    f.assertThat("--bar=4").parsesTo("bar", 4);
+    f.assertThat("--bar=4").succeeds("bar", 4);
   }
 
 

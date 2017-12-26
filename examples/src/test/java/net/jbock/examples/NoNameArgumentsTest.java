@@ -18,26 +18,26 @@ public class NoNameArgumentsTest {
         "number", 1,
         "file", asList("f", "o", "o")};
     f.assertThat("--message=m", "--file=f", "--file=o", "--file=o", "--cmos", "-n1")
-        .parsesTo(expected);
+        .succeeds(expected);
     f.assertThat("-n1", "--cmos", "--message=m", "--file=f", "--file=o", "--file=o")
-        .parsesTo(expected);
+        .succeeds(expected);
     f.assertThat("--file", "f", "--message=m", "--file", "o", "--cmos", "-n1", "--file", "o")
-        .parsesTo(expected);
+        .succeeds(expected);
   }
 
   @Test
   public void testFlag() {
-    f.assertThat("--cmos", "-n1").parsesTo(
+    f.assertThat("--cmos", "-n1").succeeds(
         "cmos", true,
         "number", 1);
   }
 
   @Test
   public void testOptionalInt() {
-    f.assertThat("-v", "1", "-n1").parsesTo(
+    f.assertThat("-v", "1", "-n1").succeeds(
         "verbosity", 1,
         "number", 1);
-    f.assertThat("-n1").parsesTo(
+    f.assertThat("-n1").succeeds(
         "number", 1);
   }
 

@@ -126,7 +126,9 @@ final class Parser {
       builder.addStatement("$N.print($S)", out, "Usage: ");
       builder.addStatement("$N.println($T.$N())", out, option.type, option.synopsisMethod);
       builder.addStatement("$N.println($N.getMessage())", out, e);
-      builder.addStatement("$N.println($S)", out, "Try '--help' for more information.");
+      builder.addStatement("$N.print($S)", out, "Try '");
+      builder.addStatement("$N.print($S)", out, context.programName);
+      builder.addStatement("$N.println($S)", out, " --help' for more information.");
     }
     builder.addStatement("return $T.empty()", Optional.class);
     return builder.build();
@@ -157,6 +159,7 @@ final class Parser {
     ParameterSpec tokens = ParameterSpec.builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec dd = ParameterSpec.builder(STRING, "dd").build();
+    ParameterSpec count = ParameterSpec.builder(INT, "count").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("parse")
         .addParameter(tokens)
@@ -170,6 +173,7 @@ final class Parser {
           .build();
     }
 
+    builder.addStatement("$T $N = 0", INT, count);
     builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
     builder.addStatement("$T $N = $N.iterator()", STRING_ITERATOR, it, tokens);
 
@@ -183,7 +187,7 @@ final class Parser {
     }
 
     builder.beginControlFlow("while ($N.hasNext())", it)
-        .addCode(codeInsideParsingLoop(helper, it, dd))
+        .addCode(codeInsideParsingLoop(helper, it, dd, count))
         .endControlFlow();
 
     builder.addStatement(returnFromParseExpression(helper,
@@ -194,7 +198,8 @@ final class Parser {
   private CodeBlock codeInsideParsingLoop(
       ParameterSpec helper,
       ParameterSpec it,
-      ParameterSpec dd) {
+      ParameterSpec dd,
+      ParameterSpec count) {
 
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
@@ -203,7 +208,7 @@ final class Parser {
     builder.addStatement("$T $N = $N.next()", STRING, token, it);
 
     if (!context.helpDisabled) {
-      builder.beginControlFlow("if ($S.equals($N))", "--help", token)
+      builder.beginControlFlow("if ($N++ == 0 && !$N.hasNext() && $S.equals($N))", count, it, "--help", token)
           .addStatement("return $T.empty()", Optional.class)
           .endControlFlow();
     }

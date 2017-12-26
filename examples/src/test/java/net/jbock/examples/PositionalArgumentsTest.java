@@ -18,14 +18,14 @@ public class PositionalArgumentsTest {
 
   @Test
   public void minimal() {
-    f.assertThat("a", "b").parsesTo(
+    f.assertThat("a", "b").succeeds(
         "source", "a",
         "dest", "b");
   }
 
   @Test
   public void otherTokens() {
-    f.assertThat("a", "b", "c", "d").parsesTo(
+    f.assertThat("a", "b", "c", "d").succeeds(
         "source", "a",
         "dest", "b",
         "optString", "c",
@@ -34,26 +34,26 @@ public class PositionalArgumentsTest {
 
   @Test
   public void ddTokens() {
-    f.assertThat("a", "b", "c", "d", "--", "e").parsesTo(
+    f.assertThat("a", "b", "c", "d", "--", "e").succeeds(
         "source", "a",
         "dest", "b",
         "optString", "c",
         "otherTokens", singletonList("d"),
         "ddTokens", singletonList("e"));
-    f.assertThat("a", "b", "c", "--", "e").parsesTo(
+    f.assertThat("a", "b", "c", "--", "e").succeeds(
         "source", "a",
         "dest", "b",
         "optString", "c",
         "ddTokens", singletonList("e"));
-    f.assertThat("a", "b", "c", "--").parsesTo(
+    f.assertThat("a", "b", "c", "--").succeeds(
         "source", "a",
         "dest", "b",
         "optString", "c");
-    f.assertThat("a", "b", "c").parsesTo(
+    f.assertThat("a", "b", "c").succeeds(
         "source", "a",
         "dest", "b",
         "optString", "c");
-    f.assertThat("a", "b").parsesTo(
+    f.assertThat("a", "b").succeeds(
         "source", "a",
         "dest", "b");
   }

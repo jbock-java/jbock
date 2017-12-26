@@ -50,13 +50,13 @@ public final class GradleArgumentsTest {
 
   @Test
   public void testDetachedLong() {
-    f.assertThat("--message", "hello").parsesTo(
+    f.assertThat("--message", "hello").succeeds(
         "message", "hello");
   }
 
   @Test
   public void testInterestingTokens() {
-    f.assertThat("--message=hello", "b-a-b-a", "--", "->", "<=>", "", " ").parsesTo(
+    f.assertThat("--message=hello", "b-a-b-a", "--", "->", "<=>", "", " ").succeeds(
         "message", "hello",
         "otherTokens", singletonList("b-a-b-a"),
         "ddTokens", asList("->", "<=>", "", " "));
@@ -64,27 +64,27 @@ public final class GradleArgumentsTest {
 
   @Test
   public void testPassEmptyString() {
-    f.assertThat("-m", "").parsesTo("message", "");
-    f.assertThat("--message=").parsesTo("message", "");
-    f.assertThat("--message", "").parsesTo("message", "");
+    f.assertThat("-m", "").succeeds("message", "");
+    f.assertThat("--message=").succeeds("message", "");
+    f.assertThat("--message", "").succeeds("message", "");
   }
 
   @Test
   public void testAllForms() {
-    f.assertThat("-mhello").parsesTo("message", "hello");
-    f.assertThat("-m", "hello").parsesTo("message", "hello");
-    f.assertThat("--message=hello").parsesTo("message", "hello");
-    f.assertThat("--message", "hello").parsesTo("message", "hello");
+    f.assertThat("-mhello").succeeds("message", "hello");
+    f.assertThat("-m", "hello").succeeds("message", "hello");
+    f.assertThat("--message=hello").succeeds("message", "hello");
+    f.assertThat("--message", "hello").succeeds("message", "hello");
   }
 
   @Test
   public void testRepeatableShortAttached() {
-    f.assertThat("-fbar.txt").parsesTo(
+    f.assertThat("-fbar.txt").succeeds(
         "file", singletonList("bar.txt"));
-    f.assertThat("-fbar.txt", "--message=hello").parsesTo(
+    f.assertThat("-fbar.txt", "--message=hello").succeeds(
         "message", "hello",
         "file", singletonList("bar.txt"));
-    f.assertThat("--message=hello", "-fbar.txt").parsesTo(
+    f.assertThat("--message=hello", "-fbar.txt").succeeds(
         "message", "hello",
         "file", singletonList("bar.txt"));
   }
@@ -97,20 +97,20 @@ public final class GradleArgumentsTest {
 
   @Test
   public void testFlag() {
-    f.assertThat("-c", "hello").parsesTo(
+    f.assertThat("-c", "hello").succeeds(
         "cmos", true,
         "otherTokens", singletonList("hello"));
   }
 
   @Test
   public void testPositionalOnly() {
-    f.assertThat("hello", "goodbye").parsesTo(
+    f.assertThat("hello", "goodbye").succeeds(
         "otherTokens", asList("hello", "goodbye"));
   }
 
   @Test
   public void twoFlags() {
-    f.assertThat("-c", "-v").parsesTo(
+    f.assertThat("-c", "-v").succeeds(
         "cmos", true,
         "verbose", true);
   }
