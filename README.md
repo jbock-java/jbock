@@ -9,7 +9,7 @@ CLI parser, with an extra focus on positional parameters.
 Its primary goals are:
  
 * To generate concise parser code from a command line interface that's declared via annotations.
-* To give the end user clear feedback via exceptions, if the input is invalid.
+* To give the end user clear feedback if the input is invalid.
 * To print usage text that looks similar to a GNU man page.
 
 ### User feedback is important.
@@ -35,8 +35,8 @@ This is what the program prints, when invoked without parameters:
 </code></pre>
 
 Being invoked without any arguments is something we should be expecting.
-Instead of showing a stacktrace, we could use this opportunity to inform the user
-about our command line options. Let's see how to do this with `jbock 2.3`.
+Instead of a stacktrace, we could use the opportunity to show the user
+a summmary of our command line options. Let's see how to do this with `jbock 2.3`.
 
 We start by defining an abstract class `Args`,
 which represents the two mandatory arguments `source` and `dest`.
@@ -54,7 +54,8 @@ For brevity, we will sometimes omit the `static` keyword and the
 talk about this class.
 
 Because they represent positional arguments,
-the source order of the method declarations `source()` and `dest()` matters.
+the order of the method declarations `source()` and `dest()` matters.
+`source()` is declared first, because it represents the first argument.
 
 At compile time, the jbock processor will pick up the
 `@CommandLineArguments` annotation, and generate a class called 
@@ -166,10 +167,12 @@ For each non-positional option, the method name is the long name
 by default. This default can be overridden with the `@LongName` annotation,
 or disabled by passing the empty string.
 
-After these changes, the complete code looks as follows.
-The `run` method would become too long,
+After these changes, the complete code looks as follows:
+
+(The `run` method would become too long,
 so it has been replaced with a simple
-print statement here.
+print statement.
+Also, we've added some `@Description` annotations.)
 
 ````java
 public class CopyFile {
@@ -229,3 +232,6 @@ DESCRIPTION
        -S, --suffix VALUE
               override the usual backup suffix
 </code></pre>
+
+The full source code of this example can be found 
+[here](https://github.com/h908714124/CopyFile).
