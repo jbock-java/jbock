@@ -80,3 +80,30 @@ any arguments:
 Missing parameter: SRC
 Try '--help' for more information.
 </code></pre>
+
+This looks a lot better than the stacktrace already.
+Going forward, we should also add some metadata:
+
+````java
+@CommandLineArguments(
+    programName = "cp",
+    missionStatement = "copy files and directories",
+    overview = "There are no options yet.")
+abstract static class Args {
+  @Positional abstract String src();
+  @Positional abstract String dest();
+}
+````
+
+When the program is now invoked with the `--help` parameter,
+it will print something resembling a [man page](https://linux.die.net/man/1/cp):
+
+<pre><code>NAME
+       cp - copy files and directories
+
+SYNOPSIS
+       cp SRC DEST
+
+DESCRIPTION
+       There are no options yet.
+</code></pre>
