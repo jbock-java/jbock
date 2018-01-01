@@ -60,7 +60,7 @@ the order of the method declarations `source()` and `dest()` matters.
 At compile time, the jbock processor will pick up the
 `@CommandLineArguments` annotation, and generate a class called 
 `CopyFile_Args_Parser` in the same package. Let's change
-our main method to use that instead.
+our main method to use that.
 This is the updated `CopyFile` class:
 
 ````java
@@ -88,15 +88,15 @@ public class CopyFile {
   }
 }
 ````
-This is what the updated program prints, when invoked without
-any arguments:
+After this change, the program prints
+the following when invoked without any arguments:
 
 <pre><code>Usage: CopyFile SRC DEST
 Missing parameter: SRC
 Try '--help' for more information.
 </code></pre>
 
-This looks a lot better than the stacktrace already.
+This looks already a lot better than the stacktrace.
 Next, we add some metadata:
 
 ````java
@@ -123,10 +123,12 @@ DESCRIPTION
        There are no options yet.
 </code></pre>
 
-To make things more interesting, we're now going to add more options.
+To make things more interesting, we're going to add some options.
 We start by adding the recursive flag.
-This is done by declaring another method in `Args`.
-A flag is declared by adding a method that returns `boolean`.
+With jbock, an option is declared as an abstract method.
+A <em>flag</em> is a special kind of option,
+one that doesn't take a value.
+It is declared as a method that returns `boolean`.
 
 ````java
 abstract class Args {
@@ -136,11 +138,13 @@ abstract class Args {
 }
 ````
 
-Since the `recursive` argument is not positional,
-it doesn't matter whether we declare `recursive()` 
-before or after `source()` and `dest()`, or between them.
+The `recursive` argument is not positional:
+Its declaring method doesn't have a `@Positional` annotation.
+Because of this, it doesn't matter whether it 
+is declared before or after 
+the `source()` and `dest()` methods, or between them.
 
-Because `--recursive` is such a common flag,
+Since `--recursive` is such a common flag,
 we also add its usual short form:
 
 ````java
@@ -151,7 +155,7 @@ abstract class Args {
 }
 ````
 
-Now let's also add the backup and suffix options.
+Now let's also add the backup and suffix options:
 
 ````java
 abstract class Args {
@@ -233,5 +237,12 @@ DESCRIPTION
               override the usual backup suffix
 </code></pre>
 
-The full source code of this example can be found 
+The full source code of the <em>CopyFile</em>
+project can be found 
 [here](https://github.com/h908714124/CopyFile).
+
+While there is no formal specification of jbock yet,
+the
+[examples](https://github.com/h908714124/jbock/tree/master/examples)
+contain unit tests that demonstrate
+the most important features.
