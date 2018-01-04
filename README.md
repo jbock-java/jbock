@@ -10,7 +10,7 @@ Its primary goals are:
  
 * To generate concise parser code from a command line interface that's declared via annotations.
 * To give the end user clear feedback if the input is invalid.
-* To print usage text that looks similar to a GNU man page.
+* To print usage text that looks similar to a GNU man page, when the `--help` parameter is passed.
 
 ### User feedback is important.
 
