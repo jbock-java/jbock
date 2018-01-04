@@ -210,7 +210,7 @@ public class CopyFile {
   }
 
   private static void run(Args args) {
-    System.out.println(args);
+    System.out.println("Copying files: " + args);
   }
 }
 ````
