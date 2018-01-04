@@ -93,7 +93,7 @@ the following when invoked without any arguments:
 
 <pre><code>Usage: CopyFile SRC DEST
 Missing parameter: SRC
-Try '--help' for more information.
+Try 'CopyFile --help' for more information.
 </code></pre>
 
 This looks already a lot better than the stacktrace.
