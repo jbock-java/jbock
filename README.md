@@ -241,8 +241,8 @@ The full source code of the <em>CopyFile</em>
 project can be found 
 [here](https://github.com/h908714124/CopyFile).
 
-While there is no formal specification of jbock yet,
-the
+The
 [examples](https://github.com/h908714124/jbock/tree/master/examples)
-contain unit tests that demonstrate
-the most important features.
+contain unit tests for many parser features.
+
+More elaborate example: [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
