@@ -22,7 +22,11 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit.version>5.1.0-M1</junit.version>
+    <junit.version>5.1.0-M2</junit.version>
+    <compile-testing.version>0.15</compile-testing.version>
+    <surefire-provider.version>1.1.0-M2</surefire-provider.version>
+    <surefire.version>2.20.1</surefire.version>
+    <compiler-plugin.version>3.7.0</compiler-plugin.version>
   </properties>
 
   <dependencies>
@@ -30,7 +34,7 @@
     <dependency>
       <groupId>com.google.testing.compile</groupId>
       <artifactId>compile-testing</artifactId>
-      <version>0.14</version>
+      <version>${compile-testing.version}</version>
       <scope>test</scope>
     </dependency>
 
@@ -48,7 +52,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.7.0</version>
+        <version>${compiler-plugin.version}</version>
         <configuration>
           <source>9</source>
           <target>9</target>
@@ -59,12 +63,12 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>2.19.1</version>
+        <version>${surefire.version}</version>
         <dependencies>
           <dependency>
             <groupId>org.junit.platform</groupId>
             <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>1.0.1</version>
+            <version>${surefire-provider.version}</version>
           </dependency>
           <dependency>
             <groupId>org.junit.jupiter</groupId>
