@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import java.util.Arrays;
 import net.jbock.examples.fixture.ParserFixture;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class HelplessArgumentsTest {
 

@@ -2,8 +2,9 @@ package net.jbock.examples;
 
 import static java.util.Arrays.asList;
 
+import net.jbock.CommandLineArguments;
 import net.jbock.examples.fixture.ParserFixture;
-import org.junit.jupiter.api.Test;
+import org.junit.Test;
 
 public class NoNameArgumentsTest {
 

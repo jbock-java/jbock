@@ -1,5 +1,11 @@
 package net.jbock.examples.fixture;
 
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
+
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
@@ -11,7 +17,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import org.junit.jupiter.api.Assertions;
 
 public final class ParserFixture<E> {
 
@@ -82,9 +87,9 @@ public final class ParserFixture<E> {
   public void assertPrints(String... expected) {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
     Optional<E> result = parseMethod.apply(new String[]{"--help"}, new PrintStream(out), 2);
-    Assertions.assertFalse(result.isPresent());
+    assertFalse(result.isPresent());
     String[] actual = new String(out.toByteArray()).split("\\r?\\n", -1);
-    Assertions.assertArrayEquals(expected, actual, "Actual: " + Arrays.toString(actual));
+    assertArrayEquals("Actual: " + Arrays.toString(actual), expected, actual);
   }
 
   public static final class JsonAssert<E> {
@@ -100,32 +105,32 @@ public final class ParserFixture<E> {
 
     public void failsWithLine1(String expectedMessage) {
       if (parsed.isPresent()) {
-        Assertions.fail("Expecting a failure" +
+        fail("Expecting a failure" +
             " but parsing was successful");
       }
-      Assertions.assertTrue(e.startsWith("Usage:"));
-      Assertions.assertTrue(e.contains("\n"));
+      assertTrue(e.startsWith("Usage:"));
+      assertTrue(e.contains("\n"));
       String actualMessage = e.split("\\r?\\n", -1)[1];
-      Assertions.assertEquals(expectedMessage, actualMessage);
+      assertEquals(expectedMessage, actualMessage);
     }
 
     public void failsWithLines(String... expected) {
       if (parsed.isPresent()) {
-        Assertions.fail("Expecting a failure" +
+        fail("Expecting a failure" +
             " but parsing was successful");
       }
       String[] actualMessage = e.split("\\r?\\n", -1);
-      Assertions.assertArrayEquals(expected, actualMessage, "Actual: " + Arrays.toString(actualMessage));
+      assertArrayEquals("Actual: " + Arrays.toString(actualMessage), expected, actualMessage);
     }
 
     public void satisfies(Predicate<E> predicate) {
-      Assertions.assertTrue(parsed.isPresent(), "Parsing was not successful");
-      Assertions.assertTrue(predicate.test(parsed.get()));
+      assertTrue("Parsing was not successful", parsed.isPresent());
+      assertTrue(predicate.test(parsed.get()));
     }
 
     public void succeeds(Object... expected) {
-      Assertions.assertTrue(parsed.isPresent(), "Parsing was not successful");
-      Assertions.assertEquals(parseJson(expected),
+      assertTrue("Parsing was not successful", parsed.isPresent());
+      assertEquals(parseJson(expected),
           readJson(parsed.get().toString()));
     }
   }
