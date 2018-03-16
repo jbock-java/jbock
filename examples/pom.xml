@@ -17,8 +17,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jbock.version>0-SNAPSHOT</jbock.version>
     <jackson.version>2.9.4</jackson.version>
-    <junit.version>5.1.0</junit.version>
-    <surefire-provider.version>1.1.0</surefire-provider.version>
+    <junit.version>4.12</junit.version>
     <surefire.version>2.21.0</surefire.version>
     <compiler-plugin.version>3.7.0</compiler-plugin.version>
   </properties>
@@ -49,7 +48,7 @@
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>
-      <version>4.12</version>
+      <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
 
