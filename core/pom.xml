@@ -54,8 +54,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>${compiler-plugin.version}</version>
         <configuration>
-          <source>9</source>
-          <target>9</target>
+          <source>8</source>
+          <target>8</target>
           <compilerArgument>-proc:none</compilerArgument>
         </configuration>
       </plugin>

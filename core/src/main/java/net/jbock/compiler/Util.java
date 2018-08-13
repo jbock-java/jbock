@@ -20,7 +20,7 @@ import net.jbock.com.squareup.javapoet.TypeName;
 final class Util {
 
   private static final SimpleTypeVisitor8<DeclaredType, Void> AS_DECLARED =
-      new SimpleTypeVisitor8<>() {
+      new SimpleTypeVisitor8<DeclaredType, Void>() {
         @Override
         public DeclaredType visitDeclared(DeclaredType declaredType, Void _null) {
           return declaredType;
@@ -28,7 +28,7 @@ final class Util {
       };
 
   private static final SimpleElementVisitor8<TypeElement, Void> AS_TYPE_ELEMENT =
-      new SimpleElementVisitor8<>() {
+      new SimpleElementVisitor8<TypeElement, Void>() {
         @Override
         public TypeElement visitType(TypeElement typeElement, Void _null) {
           return typeElement;

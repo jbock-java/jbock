@@ -4,17 +4,18 @@
 
 `jbock 2.3` is an annotation processor that generates a
 [getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-like
-CLI parser, with an extra focus on positional parameters.
+command line parser.
 
-Its primary goals are:
+Its main purposes are:
  
-* To generate concise parser code from a command line interface that's declared via annotations.
-* To give the end user clear feedback if the input is invalid.
+* To generate readable parser code from Java annotations.
+* To give the user of the command line interface a good error message if the input is invalid.
+* To give the developer of the command line interface a good error message if there's a configuration problem.
 * To print usage text that looks similar to a GNU man page, when the `--help` parameter is passed.
 
-### User feedback is important.
+## Introduction
 
-To clarify these goals, we're going to write a simple command line utility that copies a file.
+For starters, let's write a program that copies a file.
 
 ````java
 public class CopyFile {
@@ -34,8 +35,8 @@ This is what the program prints, when invoked without parameters:
     at cli.tools.CopyFile.main(CopyFile.java:10)
 </code></pre>
 
-Being invoked without any arguments is something we should be expecting.
-Instead of a stacktrace, we could use the opportunity to show the user
+Being invoked without any parameters is something we should be expecting.
+Instead of a stacktrace, we could use the opportunity to show
 a summmary of our command line options. Let's see how to do this with `jbock 2.3`.
 
 We start by defining an abstract class `Args`,
@@ -53,9 +54,9 @@ For brevity, we will sometimes omit the `static` keyword and the
 `@CommandLineArguments` annotation when we 
 talk about this class.
 
-Because they represent positional arguments,
-the order of the method declarations `source()` and `dest()` matters.
-`source()` is declared first, because it represents the first argument.
+In  this case, the order of the method declarations `source()` and `dest()` matters,
+because they represent positional arguments.
+`source()` is declared first, so it represents the first argument.
 
 At compile time, the jbock processor will pick up the
 `@CommandLineArguments` annotation, and generate a class called 
@@ -96,7 +97,10 @@ Missing parameter: SRC
 Try 'CopyFile --help' for more information.
 </code></pre>
 
-This looks already a lot better than the stacktrace.
+This looks a lot better than the stacktrace already.
+
+## Improving the command line interface
+
 Next, we add some metadata:
 
 ````java
@@ -125,10 +129,11 @@ DESCRIPTION
 
 To make things more interesting, we're going to add some options.
 We start by adding the recursive flag.
-With jbock, an option is declared as an abstract method.
-A <em>flag</em> is a special kind of option,
-one that doesn't take a value.
-It is declared as a method that returns `boolean`.
+
+In jbock, an option is declared as an abstract method that doesn't take any parameters.
+
+A <em>flag</em> is declared as a method that returns `boolean`.
+This method will return true if the flag is present on the command line.
 
 ````java
 abstract class Args {
@@ -138,14 +143,14 @@ abstract class Args {
 }
 ````
 
-The `recursive` argument is not positional:
-Its declaring method doesn't have a `@Positional` annotation.
-Because of this, it doesn't matter whether it 
-is declared before or after 
+The `recursive` argument is not positional, because
+its declaring method doesn't have a `@Positional` annotation.
+It makes no difference whether it 
+is declared before or after
 the `source()` and `dest()` methods, or between them.
 
 Since `--recursive` is such a common flag,
-we also add its usual short form:
+we also allow the shortcut `-r`:
 
 ````java
 abstract class Args {
@@ -155,7 +160,8 @@ abstract class Args {
 }
 ````
 
-Now let's also add the backup and suffix options:
+Now let's add another flag called `--backup` or `-b`, 
+and an optional parameter called `--suffix` or `-s`:
 
 ````java
 abstract class Args {
@@ -167,16 +173,11 @@ abstract class Args {
 }
 ````
 
-For each non-positional option, the method name is the long name
-by default. This default can be overridden with the `@LongName` annotation,
-or disabled by passing the empty string.
+For each named (i.e. non-positional) parameter, the method name defines the long name. 
+This can be overridden with the `@LongName` annotation,
+or disabled by passing the empty string to the `@LongName` annotation.
 
-After these changes, the complete code looks as follows:
-
-(The `run` method would become too long,
-so it has been replaced with a simple
-print statement.
-Also, we've added some `@Description` annotations.)
+After adding some description text, the complete code looks as follows:
 
 ````java
 public class CopyFile {
@@ -215,8 +216,8 @@ public class CopyFile {
 }
 ````
 
-The following is printed when the `--help`
-parameter is passed:
+When the user passes the `--help`
+parameter on the command line, this program now prints the following:
 
 <pre><code>NAME
        cp - copy files and directories
@@ -245,4 +246,4 @@ The
 [examples](https://github.com/h908714124/jbock/tree/master/examples)
 contain unit tests for many parser features.
 
-More elaborate example: [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
+And here's another example: [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
