@@ -6,11 +6,11 @@
 [getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-like
 command line parser.
 
-Its main purposes are:
+Its goals are:
  
-* To generate readable parser code from Java annotations.
-* To give the user of the command line interface a good error message if the input is invalid.
-* To give the developer of the command line interface a good error message if there's a configuration problem.
+* To generate convenient, readable parser code from Java annotations.
+* To give the user of the command line interface a good error message, if the input is invalid.
+* To give the developer of the command line interface a good error message, if there is a configuration error.
 * To print usage text that looks similar to a GNU man page, when the `--help` parameter is passed.
 
 ## Introduction
@@ -59,9 +59,10 @@ because they represent positional arguments.
 `source()` is declared first, so it represents the first argument.
 
 At compile time, the jbock processor will pick up the
-`@CommandLineArguments` annotation, and generate a class called 
-`CopyFile_Args_Parser` in the same package. Let's change
+`@CommandLineArguments` annotation, and generate a class 
+`CopyFile_Args_Parser extends CopyFile.Args` in the same package. Let's change
 our main method to use that.
+
 This is the updated `CopyFile` class:
 
 ````java
@@ -74,10 +75,11 @@ public class CopyFile {
   }
 
   public static void main(String[] args) {
-    CopyFile_Args_Parser.parse(args, System.out)
-        .ifPresentOrElse(
-            CopyFile::run,
-            () -> System.exit(1));
+    Optional<Args> opt = CopyFile_Args_Parser.parse(args, System.err);
+    if (!opt.isPresent()) {
+      System.exit(1);
+    }
+    opt.ifPresent(CopyFile::run);
   }
 
   private static void run(Args args) {
@@ -89,7 +91,7 @@ public class CopyFile {
   }
 }
 ````
-After this change, the program prints
+After the change, the program prints
 the following when invoked without any arguments:
 
 <pre><code>Usage: CopyFile SRC DEST
@@ -204,10 +206,11 @@ public class CopyFile {
   }
 
   public static void main(String[] args) {
-    CopyFile_Args_Parser.parse(args, System.out)
-        .ifPresentOrElse(
-            CopyFile::run,
-            () -> System.exit(1));
+    Optional<Args> opt = CopyFile_Args_Parser.parse(args, System.err);
+    if (!opt.isPresent()) {
+      System.exit(1);
+    }
+    opt.ifPresent(CopyFile::run);
   }
 
   private static void run(Args args) {
