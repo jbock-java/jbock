@@ -1,25 +1,25 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class RequiredArgumentsTest {
+class RequiredArgumentsTest {
 
-  private final ParserFixture<RequiredArguments> f =
-      ParserFixture.create(RequiredArguments_Parser::parse);
+  private ParserTestFixture<RequiredArguments> f =
+      ParserTestFixture.create(RequiredArguments_Parser::parse);
 
   @Test
-  public void success() {
+  void success() {
     f.assertThat("--dir", "A").succeeds("dir", "A");
   }
 
   @Test
-  public void errorDirMissing() {
+  void errorDirMissing() {
     f.assertThat().failsWithLine1("Missing required option: DIR (--dir)");
   }
 
   @Test
-  public void errorRepeatedArgument() {
+  void errorRepeatedArgument() {
     f.assertThat("--dir", "A", "--dir", "B").failsWithLine1(
         "Option DIR (--dir) is not repeatable");
     f.assertThat("--dir=A", "--dir", "B").failsWithLine1(
@@ -31,12 +31,12 @@ public class RequiredArgumentsTest {
   }
 
   @Test
-  public void errorDetachedAttached() {
+  void errorDetachedAttached() {
     f.assertThat("--dir", "A", "--dir=B").failsWithLine1("Option DIR (--dir) is not repeatable");
   }
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  RequiredArguments",

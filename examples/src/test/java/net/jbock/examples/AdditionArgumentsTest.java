@@ -1,22 +1,22 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class AdditionArgumentsTest {
+class AdditionArgumentsTest {
 
-  private final ParserFixture<AdditionArguments> f =
-      ParserFixture.create(AdditionArguments_Parser::parse);
+  private ParserTestFixture<AdditionArguments> f =
+      ParserTestFixture.create(AdditionArguments_Parser::parse);
 
   @Test
-  public void optionalAbsent() {
+  void optionalAbsent() {
     f.assertThat("1", "2").succeeds(
         "a", 1,
         "b", 2);
   }
 
   @Test
-  public void optionalPresent() {
+  void optionalPresent() {
     f.assertThat("1", "2", "3").succeeds(
         "a", 1,
         "b", 2,
@@ -24,13 +24,13 @@ public class AdditionArgumentsTest {
   }
 
   @Test
-  public void wrongNumber() {
+  void wrongNumber() {
     f.assertThat("-a", "2").failsWithLine1(
         "For input string: \"-a\"");
   }
 
   @Test
-  public void dashesIgnored() {
+  void dashesIgnored() {
     f.assertThat("1", "-2", "3").satisfies(e -> e.sum() == 2);
     f.assertThat("-1", "-2", "-3").satisfies(e -> e.sum() == -6);
     f.assertThat("-1", "-2", "3").satisfies(e -> e.sum() == 0);
@@ -39,7 +39,7 @@ public class AdditionArgumentsTest {
 
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  AdditionArguments",

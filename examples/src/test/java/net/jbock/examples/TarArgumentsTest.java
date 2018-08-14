@@ -1,15 +1,15 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class TarArgumentsTest {
+class TarArgumentsTest {
 
-  private final ParserFixture<TarArguments> f =
-      ParserFixture.create(TarArguments_Parser::parse);
+  private ParserTestFixture<TarArguments> f =
+      ParserTestFixture.create(TarArguments_Parser::parse);
 
   @Test
-  public void testExtract() {
+  void testExtract() {
     f.assertThat("-x", "-f", "foo.tar").succeeds(
         "extract", true,
         "file", "foo.tar");
@@ -20,13 +20,13 @@ public class TarArgumentsTest {
   }
 
   @Test
-  public void noGrouping() {
+  void noGrouping() {
     f.assertThat("-v", "xf", "foo.tar").failsWithLine1("Invalid option: xf");
     f.assertThat("-v", "-xf", "foo.tar").failsWithLine1("Invalid option: -xf");
   }
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  TarArguments",

@@ -12,10 +12,10 @@ import java.util.List;
 import javax.tools.JavaFileObject;
 import org.junit.jupiter.api.Test;
 
-public class ProcessorTest {
+ class ProcessorTest {
 
   @Test
-  public void duplicateLongName() {
+  void duplicateLongName() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -30,7 +30,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void duplicateShortName() {
+  void duplicateShortName() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -45,7 +45,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void unknownReturnType() {
+  void unknownReturnType() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -59,7 +59,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void declaredException() {
+  void declaredException() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -73,7 +73,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void classNotAbstract() {
+  void classNotAbstract() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "class InvalidArguments {",
@@ -87,7 +87,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void interfaceNotClass() {
+  void interfaceNotClass() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "interface InvalidArguments {",
@@ -101,7 +101,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void whitespaceInName() {
+  void whitespaceInName() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -115,7 +115,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void positionalBadReturnTypeStringBuilder() {
+  void positionalBadReturnTypeStringBuilder() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -129,7 +129,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void positionalBadReturnTypeBoolean() {
+  void positionalBadReturnTypeBoolean() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -143,7 +143,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void positionalListBeforeRequiredPositional() {
+  void positionalListBeforeRequiredPositional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -158,7 +158,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void positionalListBeforeOptionalPositional() {
+  void positionalListBeforeOptionalPositional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -173,7 +173,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void positionalOptionalBeforeRequiredPositional() {
+  void positionalOptionalBeforeRequiredPositional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -188,7 +188,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void positionalOptionalsAnyOrder() {
+  void positionalOptionalsAnyOrder() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -204,7 +204,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void toStringDefined() {
+  void toStringDefined() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
@@ -220,7 +220,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void extendsNotAllowed() {
+  void extendsNotAllowed() {
     List<String> sourceLines = withImports(
         "abstract class Outer {",
         "",
@@ -237,7 +237,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void implementsNotAllowed() {
+  void implementsNotAllowed() {
     List<String> sourceLines = withImports(
         "interface Outer {",
         "",
@@ -254,7 +254,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void missingCommandLineArgumentsAnnotation() {
+  void missingCommandLineArgumentsAnnotation() {
     List<String> sourceLines = withImports(
         "abstract class InvalidArguments {",
         "  @LongName(\"a\") abstract String a();",
@@ -267,7 +267,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void noNames() {
+  void noNames() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -281,7 +281,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void annotatedMethodNotAbstract() {
+  void annotatedMethodNotAbstract() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -295,7 +295,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void abstractMethodHasParameter() {
+  void abstractMethodHasParameter() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -309,7 +309,7 @@ public class ProcessorTest {
   }
 
   @Test
-  public void warningNoMethods() {
+  void warningNoMethods() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",

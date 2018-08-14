@@ -1,28 +1,28 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class CpArgumentsTest {
+class CpArgumentsTest {
 
-  private final ParserFixture<CpArguments> f =
-      ParserFixture.create(CpArguments_Parser::parse);
+  private ParserTestFixture<CpArguments> f =
+      ParserTestFixture.create(CpArguments_Parser::parse);
 
   @Test
-  public void errorMissingSource() {
+  void errorMissingSource() {
     f.assertThat().failsWithLine1("Missing parameter: SOURCE");
     f.assertThat("-r").failsWithLine1("Missing parameter: SOURCE");
   }
 
   @Test
-  public void errorMissingDest() {
+  void errorMissingDest() {
     f.assertThat("a").failsWithLine1("Missing parameter: DEST");
     f.assertThat("a", "-r").failsWithLine1("Missing parameter: DEST");
     f.assertThat("-r", "a").failsWithLine1("Missing parameter: DEST");
   }
 
   @Test
-  public void minimal() {
+  void minimal() {
     f.assertThat("a", "b").succeeds(
         "source", "a",
         "dest", "b");
@@ -32,22 +32,22 @@ public class CpArgumentsTest {
   }
 
   @Test
-  public void dashNotIgnored() {
+  void dashNotIgnored() {
     f.assertThat("-a", "b").failsWithLine1("Invalid option: -a");
   }
 
   @Test
-  public void tooMany() {
+  void tooMany() {
     f.assertThat("a", "b", "c").failsWithLine1("Invalid option: c");
   }
 
   @Test
-  public void tooManyAndFlag() {
+  void tooManyAndFlag() {
     f.assertThat("-r", "a", "b", "c").failsWithLine1("Invalid option: c");
   }
 
   @Test
-  public void flagInVariousPositions() {
+  void flagInVariousPositions() {
     Object[] expected = new Object[]{
         "source", "a",
         "dest", "b",
@@ -61,7 +61,7 @@ public class CpArgumentsTest {
   }
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  CpArguments",

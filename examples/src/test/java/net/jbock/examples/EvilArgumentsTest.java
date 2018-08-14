@@ -1,15 +1,15 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class EvilArgumentsTest {
+class EvilArgumentsTest {
 
-  private final ParserFixture<EvilArguments> f =
-      ParserFixture.create(EvilArguments_Parser::parse);
+  private ParserTestFixture<EvilArguments> f =
+      ParserTestFixture.create(EvilArguments_Parser::parse);
 
   @Test
-  public void basicTest() {
+  void basicTest() {
     f.assertThat("--fancy=1", "--fAncy=2", "--f_ancy=3", "--blub=4", "--Blub=5").succeeds(
         "fancy", "1",
         "fAncy", "2",
@@ -19,8 +19,8 @@ public class EvilArgumentsTest {
   }
 
   @Test
-  public void testPrint() {
-    ParserFixture.create(EvilArguments_Parser::parse).assertPrints(
+  void testPrint() {
+    ParserTestFixture.create(EvilArguments_Parser::parse).assertPrints(
         "NAME",
         "  EvilArguments",
         "",

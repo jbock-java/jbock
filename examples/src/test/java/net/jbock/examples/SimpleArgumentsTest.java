@@ -1,26 +1,26 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class SimpleArgumentsTest {
+class SimpleArgumentsTest {
 
-  private final ParserFixture<SimpleArguments> f =
-      ParserFixture.create(SimpleArguments_Parser::parse);
+  private ParserTestFixture<SimpleArguments> f =
+      ParserTestFixture.create(SimpleArguments_Parser::parse);
 
   @Test
-  public void invalidOptions() {
+  void invalidOptions() {
     f.assertThat("xf", "1").failsWithLine1("Invalid option: xf");
     f.assertThat("-xf", "1").failsWithLine1("Invalid option: -xf");
   }
 
   @Test
-  public void success() {
+  void success() {
     f.assertThat("--file", "1").succeeds("file", "1");
   }
 
   @Test
-  public void errorHelpNotFirstArguent() {
+  void errorHelpNotFirstArguent() {
     f.assertThat("--file", "1", "--help").failsWithLines(
         "Usage: SimpleArguments [OPTION]...",
         "Invalid option: --help",
@@ -29,7 +29,7 @@ public class SimpleArgumentsTest {
   }
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  SimpleArguments",

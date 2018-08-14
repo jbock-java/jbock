@@ -1,21 +1,21 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class GradleArgumentsFooTest {
+class GradleArgumentsFooTest {
 
-  private final ParserFixture<GradleArguments.Foo> f =
-      ParserFixture.create(GradleArguments_Foo_Parser::parse);
+  private ParserTestFixture<GradleArguments.Foo> f =
+      ParserTestFixture.create(GradleArguments_Foo_Parser::parse);
 
   @Test
-  public void testParserForNestedClass() {
+  void testParserForNestedClass() {
     f.assertThat("--bar=4").succeeds("bar", 4);
   }
 
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  GradleArguments",

@@ -1,13 +1,13 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class PsArgumentsTest {
+class PsArgumentsTest {
 
   @Test
-  public void testPrint() {
-    ParserFixture.create(PsArguments_Parser::parse).assertPrints(
+  void testPrint() {
+    ParserTestFixture.create(PsArguments_Parser::parse).assertPrints(
         "NAME",
         "  PsArguments",
         "",

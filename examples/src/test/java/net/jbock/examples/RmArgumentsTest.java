@@ -3,16 +3,16 @@ package net.jbock.examples;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class RmArgumentsTest {
+class RmArgumentsTest {
 
-  private final ParserFixture<RmArguments> f =
-      ParserFixture.create(RmArguments_Parser::parse);
+  private ParserTestFixture<RmArguments> f =
+      ParserTestFixture.create(RmArguments_Parser::parse);
 
   @Test
-  public void testRest() {
+  void testRest() {
     f.assertThat("-f", "a", "--", "-r", "--", "-f").succeeds(
         "force", true,
         "otherTokens", singletonList("a"),
@@ -20,7 +20,7 @@ public class RmArgumentsTest {
   }
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  RmArguments",

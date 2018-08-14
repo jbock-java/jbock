@@ -1,15 +1,10 @@
 package net.jbock.examples.fixture;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
-
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
@@ -18,7 +13,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
 
-public final class ParserFixture<E> {
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
+
+public final class ParserTestFixture<E> {
 
   public interface TriFunction<A, B, D> {
     D apply(A a, B b, int c);
@@ -28,7 +29,7 @@ public final class ParserFixture<E> {
 
   private final TriFunction<String[], PrintStream, Optional<E>> parseMethod;
 
-  private ParserFixture(
+  private ParserTestFixture(
       TriFunction<String[], PrintStream, Optional<E>> parseMethod) {
     this.parseMethod = parseMethod;
   }
@@ -72,9 +73,9 @@ public final class ParserFixture<E> {
     return node;
   }
 
-  public static <E> ParserFixture<E> create(
+  public static <E> ParserTestFixture<E> create(
       TriFunction<String[], PrintStream, Optional<E>> fn) {
-    return new ParserFixture<>(fn);
+    return new ParserTestFixture<>(fn);
   }
 
   public JsonAssert<E> assertThat(String... args) {
@@ -89,7 +90,7 @@ public final class ParserFixture<E> {
     Optional<E> result = parseMethod.apply(new String[]{"--help"}, new PrintStream(out), 2);
     assertFalse(result.isPresent());
     String[] actual = new String(out.toByteArray()).split("\\r?\\n", -1);
-    assertArrayEquals("Actual: " + Arrays.toString(actual), expected, actual);
+    assertArrayEquals(expected, actual, "Actual: " + Arrays.toString(actual));
   }
 
   public static final class JsonAssert<E> {
@@ -120,16 +121,16 @@ public final class ParserFixture<E> {
             " but parsing was successful");
       }
       String[] actualMessage = e.split("\\r?\\n", -1);
-      assertArrayEquals("Actual: " + Arrays.toString(actualMessage), expected, actualMessage);
+      assertArrayEquals(expected, actualMessage, "Actual: " + Arrays.toString(actualMessage));
     }
 
     public void satisfies(Predicate<E> predicate) {
-      assertTrue("Parsing was not successful", parsed.isPresent());
+      assertTrue(parsed.isPresent(), "Parsing was not successful");
       assertTrue(predicate.test(parsed.get()));
     }
 
     public void succeeds(Object... expected) {
-      assertTrue("Parsing was not successful", parsed.isPresent());
+      assertTrue(parsed.isPresent(), "Parsing was not successful");
       assertEquals(parseJson(expected),
           readJson(parsed.get().toString()));
     }

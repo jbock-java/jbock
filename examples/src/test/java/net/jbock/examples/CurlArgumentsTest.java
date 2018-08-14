@@ -3,21 +3,21 @@ package net.jbock.examples;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class CurlArgumentsTest {
+class CurlArgumentsTest {
 
-  private final ParserFixture<CurlArguments> f =
-      ParserFixture.create(CurlArguments_Parser::parse);
+  private ParserTestFixture<CurlArguments> f =
+      ParserTestFixture.create(CurlArguments_Parser::parse);
 
   @Test
-  public void testEmpty() {
+  void testEmpty() {
     f.assertThat().succeeds();
   }
 
   @Test
-  public void testOptional() {
+  void testOptional() {
     f.assertThat("--request=")
         .succeeds("method", "");
     f.assertThat("--request= ")
@@ -31,7 +31,7 @@ public class CurlArgumentsTest {
   }
 
   @Test
-  public void testRepeatable() {
+  void testRepeatable() {
     f.assertThat("-H1")
         .succeeds("headers", singletonList("1"));
     f.assertThat("-H1", "-H2")
@@ -43,7 +43,7 @@ public class CurlArgumentsTest {
   }
 
   @Test
-  public void variousTests() {
+  void variousTests() {
     f.assertThat("-v", "-H1").succeeds(
         "verbose", true,
         "headers", singletonList("1"));
@@ -87,56 +87,56 @@ public class CurlArgumentsTest {
   }
 
   @Test
-  public void errorInvalidGrouping() {
+  void errorInvalidGrouping() {
     f.assertThat("-vH1").failsWithLine1("Invalid option: -vH1");
   }
 
   @Test
-  public void errorInvalidGroupingLong() {
+  void errorInvalidGroupingLong() {
     f.assertThat("-vXPOST").failsWithLine1("Invalid option: -vXPOST");
   }
 
   @Test
-  public void errorGroupingDuplicateFlag() {
+  void errorGroupingDuplicateFlag() {
     f.assertThat("-v", "-vH'Content-Type: application/xml'").failsWithLine1(
         "Invalid option: -vH'Content-Type: application/xml'");
   }
 
   @Test
-  public void errorMissingRepeatable() {
+  void errorMissingRepeatable() {
     f.assertThat("-H").failsWithLine1("Missing value after token: -H");
   }
 
   @Test
-  public void errorMissingNonRepeatable() {
+  void errorMissingNonRepeatable() {
     f.assertThat("--request").failsWithLine1("Missing value after token: --request");
   }
 
   @Test
-  public void errorDuplicateNonRepeatableLong() {
+  void errorDuplicateNonRepeatableLong() {
     f.assertThat("--request", "GET", "--request", "POST").failsWithLine1(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
-  public void errorDuplicateNonRepeatableShort() {
+  void errorDuplicateNonRepeatableShort() {
     f.assertThat("-X1", "-X2").failsWithLine1("Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
-  public void errorDuplicateNonRepeatableLongDetachedShortAttached() {
+  void errorDuplicateNonRepeatableLongDetachedShortAttached() {
     f.assertThat("--request", "1", "-X2").failsWithLine1(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
-  public void errorDuplicateNonRepeatableLongAttachedShortDetached() {
+  void errorDuplicateNonRepeatableLongAttachedShortDetached() {
     f.assertThat("--request=1", "-X", "2").failsWithLine1(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  curl - transfer a URL",

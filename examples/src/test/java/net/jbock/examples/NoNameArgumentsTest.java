@@ -2,17 +2,16 @@ package net.jbock.examples;
 
 import static java.util.Arrays.asList;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class NoNameArgumentsTest {
+class NoNameArgumentsTest {
 
-  private final ParserFixture<NoNameArguments> f =
-      ParserFixture.create(NoNameArguments_Parser::parse);
+  private ParserTestFixture<NoNameArguments> f =
+      ParserTestFixture.create(NoNameArguments_Parser::parse);
 
   @Test
-  public void testDifferentOrder() {
+  void testDifferentOrder() {
     Object[] expected = {
         "message", "m",
         "cmos", true,
@@ -27,14 +26,14 @@ public class NoNameArgumentsTest {
   }
 
   @Test
-  public void testFlag() {
+  void testFlag() {
     f.assertThat("--cmos", "-n1").succeeds(
         "cmos", true,
         "number", 1);
   }
 
   @Test
-  public void testOptionalInt() {
+  void testOptionalInt() {
     f.assertThat("-v", "1", "-n1").succeeds(
         "verbosity", 1,
         "number", 1);
@@ -43,18 +42,18 @@ public class NoNameArgumentsTest {
   }
 
   @Test
-  public void errorMissingInt() {
+  void errorMissingInt() {
     f.assertThat("--cmos").failsWithLine1("Missing required option: NUMBER (-n, --number)");
   }
 
   @Test
-  public void errorUnknownToken() {
+  void errorUnknownToken() {
     f.assertThat("blabla").failsWithLine1("Invalid option: blabla");
   }
 
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  NoNameArguments",

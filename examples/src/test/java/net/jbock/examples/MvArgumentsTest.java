@@ -1,39 +1,39 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class MvArgumentsTest {
+class MvArgumentsTest {
 
-  private final ParserFixture<MvArguments> f =
-      ParserFixture.create(MvArguments_Parser::parse);
+  private ParserTestFixture<MvArguments> f =
+      ParserTestFixture.create(MvArguments_Parser::parse);
 
   @Test
-  public void notEnoughArguments() {
+  void notEnoughArguments() {
     f.assertThat().failsWithLine1("Missing parameter: SOURCE");
     f.assertThat("a").failsWithLine1("Missing parameter: DEST");
   }
 
   @Test
-  public void dashNotIgnored() {
+  void dashNotIgnored() {
     // see CommandLineArguments.ignoreDashes
     f.assertThat("-aa", "b").failsWithLine1("Invalid option: -aa");
   }
 
   @Test
-  public void tooManyPositionalArguments() {
+  void tooManyPositionalArguments() {
     f.assertThat("a", "b", "c").failsWithLine1("Invalid option: c");
   }
 
   @Test
-  public void validInvocation() {
+  void validInvocation() {
     f.assertThat("a", "b").succeeds(
         "source", "a",
         "dest", "b");
   }
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  MvArguments",

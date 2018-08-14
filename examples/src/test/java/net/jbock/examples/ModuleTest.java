@@ -1,13 +1,13 @@
 package net.jbock.examples;
 
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
-public class ModuleTest {
+class ModuleTest {
 
-    @Ignore
+    @Disabled("This must wait until migration to Java 9")
     @Test
-    public void testModuleName() {
+    void testModuleName() {
 //    assertEquals("net.jbock", CommandLineArguments.class.getModule().getName());
     }
 }

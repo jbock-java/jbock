@@ -2,27 +2,27 @@ package net.jbock.examples;
 
 import static java.util.Arrays.asList;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class RestArgumentsTest {
+class RestArgumentsTest {
 
-  private final ParserFixture<RestArguments> f =
-      ParserFixture.create(RestArguments_Parser::parse);
+  private ParserTestFixture<RestArguments> f =
+      ParserTestFixture.create(RestArguments_Parser::parse);
 
   @Test
-  public void testDashAllowed() {
+  void testDashAllowed() {
     f.assertThat("-", "a").succeeds("rest", asList("-", "a"));
   }
 
   @Test
-  public void testDoubleDashAllowed() {
+  void testDoubleDashAllowed() {
     // -- has no special meaning, because there's only one positional list
     f.assertThat("--", "a").succeeds("rest", asList("--", "a"));
   }
 
   @Test
-  public void testMixed() {
+  void testMixed() {
     f.assertThat("--file=1", "--file", "2", "-", "a").succeeds(
         "file", asList("1", "2"),
         "rest", asList("-", "a"));
@@ -32,7 +32,7 @@ public class RestArgumentsTest {
   }
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  RestArguments",

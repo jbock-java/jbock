@@ -3,40 +3,40 @@ package net.jbock.examples;
 import static java.util.Arrays.asList;
 import static java.util.Collections.singletonList;
 
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public final class GradleArgumentsTest {
+class GradleArgumentsTest {
 
-  private final ParserFixture<GradleArguments> f =
-      ParserFixture.create(GradleArguments_Parser::parse);
+  private ParserTestFixture<GradleArguments> f =
+      ParserTestFixture.create(GradleArguments_Parser::parse);
 
   @Test
-  public void errorShortLongConflict() {
+  void errorShortLongConflict() {
     f.assertThat("-m", "hello", "--message=goodbye").failsWithLine1(
         "Option MESSAGE (-m, --message) is not repeatable");
   }
 
   @Test
-  public void errorMissingValue() {
+  void errorMissingValue() {
     // there's nothing after -m
     f.assertThat("-m").failsWithLine1("Missing value after token: -m");
   }
 
   @Test
-  public void errorLongShortConflict() {
+  void errorLongShortConflict() {
     f.assertThat("--message=hello", "-m", "goodbye").failsWithLine1(
         "Option MESSAGE (-m, --message) is not repeatable");
   }
 
   @Test
-  public void errorLongLongConflict() {
+  void errorLongLongConflict() {
     f.assertThat("--message=hello", "--message=goodbye").failsWithLine1(
         "Option MESSAGE (-m, --message) is not repeatable");
   }
 
   @Test
-  public void errorInvalidOption() {
+  void errorInvalidOption() {
     f.assertThat("-c1").failsWithLine1("Invalid option: -c1");
     f.assertThat("-c-v").failsWithLine1("Invalid option: -c-v");
     f.assertThat("-c-").failsWithLine1("Invalid option: -c-");
@@ -49,13 +49,13 @@ public final class GradleArgumentsTest {
   }
 
   @Test
-  public void testDetachedLong() {
+  void testDetachedLong() {
     f.assertThat("--message", "hello").succeeds(
         "message", "hello");
   }
 
   @Test
-  public void testInterestingTokens() {
+  void testInterestingTokens() {
     f.assertThat("--message=hello", "b-a-b-a", "--", "->", "<=>", "", " ").succeeds(
         "message", "hello",
         "otherTokens", singletonList("b-a-b-a"),
@@ -63,14 +63,14 @@ public final class GradleArgumentsTest {
   }
 
   @Test
-  public void testPassEmptyString() {
+  void testPassEmptyString() {
     f.assertThat("-m", "").succeeds("message", "");
     f.assertThat("--message=").succeeds("message", "");
     f.assertThat("--message", "").succeeds("message", "");
   }
 
   @Test
-  public void testAllForms() {
+  void testAllForms() {
     f.assertThat("-mhello").succeeds("message", "hello");
     f.assertThat("-m", "hello").succeeds("message", "hello");
     f.assertThat("--message=hello").succeeds("message", "hello");
@@ -78,7 +78,7 @@ public final class GradleArgumentsTest {
   }
 
   @Test
-  public void testRepeatableShortAttached() {
+  void testRepeatableShortAttached() {
     f.assertThat("-fbar.txt").succeeds(
         "file", singletonList("bar.txt"));
     f.assertThat("-fbar.txt", "--message=hello").succeeds(
@@ -90,39 +90,39 @@ public final class GradleArgumentsTest {
   }
 
   @Test
-  public void testLongSuppressed() {
+  void testLongSuppressed() {
     // Long option --cmos is suppressed
     f.assertThat("--cmos").failsWithLine1("Invalid option: --cmos");
   }
 
   @Test
-  public void testFlag() {
+  void testFlag() {
     f.assertThat("-c", "hello").succeeds(
         "cmos", true,
         "otherTokens", singletonList("hello"));
   }
 
   @Test
-  public void testPositionalOnly() {
+  void testPositionalOnly() {
     f.assertThat("hello", "goodbye").succeeds(
         "otherTokens", asList("hello", "goodbye"));
   }
 
   @Test
-  public void twoFlags() {
+  void twoFlags() {
     f.assertThat("-c", "-v").succeeds(
         "cmos", true,
         "verbose", true);
   }
 
   @Test
-  public void errorSuspiciousInput() {
+  void errorSuspiciousInput() {
     f.assertThat("-cvm", "hello").failsWithLine1("Invalid option: -cvm");
   }
 
 
   @Test
-  public void testPrint() {
+  void testPrint() {
     f.assertPrints(
         "NAME",
         "  GradleArguments",

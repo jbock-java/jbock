@@ -22,11 +22,11 @@
 
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <junit.version>5.1.0-M2</junit.version>
     <compile-testing.version>0.15</compile-testing.version>
-    <surefire-provider.version>1.1.0-M2</surefire-provider.version>
-    <surefire.version>2.20.1</surefire.version>
-    <compiler-plugin.version>3.7.0</compiler-plugin.version>
+    <junit.version>5.3.0-RC1</junit.version>
+    <surefire.version>2.22.0</surefire.version>
+    <compiler-plugin.version>3.8.0</compiler-plugin.version>
+    <javadoc-plugin.version>3.0.1</javadoc-plugin.version>
   </properties>
 
   <dependencies>
@@ -41,6 +41,13 @@
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit.version}</version>
       <scope>test</scope>
     </dependency>
@@ -64,18 +71,6 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
         <version>${surefire.version}</version>
-        <dependencies>
-          <dependency>
-            <groupId>org.junit.platform</groupId>
-            <artifactId>junit-platform-surefire-provider</artifactId>
-            <version>${surefire-provider.version}</version>
-          </dependency>
-          <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter-engine</artifactId>
-            <version>${junit.version}</version>
-          </dependency>
-        </dependencies>
       </plugin>
 
     </plugins>
@@ -89,7 +84,7 @@
           <plugin>
             <groupId>org.apache.maven.plugins</groupId>
             <artifactId>maven-javadoc-plugin</artifactId>
-            <version>3.0.0</version>
+            <version>${javadoc-plugin.version}</version>
           </plugin>
         </plugins>
       </build>

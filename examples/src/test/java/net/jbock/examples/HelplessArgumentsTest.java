@@ -1,15 +1,15 @@
 package net.jbock.examples;
 
 import java.util.Arrays;
-import net.jbock.examples.fixture.ParserFixture;
-import org.junit.Test;
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
 
-public class HelplessArgumentsTest {
+class HelplessArgumentsTest {
 
-  private final ParserFixture<HelplessArguments> f =
-      ParserFixture.create(HelplessArguments_Parser::parse);
+  private ParserTestFixture<HelplessArguments> f =
+      ParserTestFixture.create(HelplessArguments_Parser::parse);
 
-  private final String[] fullUsage = {
+  private String[] fullUsage = {
       "NAME",
       "  HelplessArguments",
       "",
@@ -22,19 +22,19 @@ public class HelplessArgumentsTest {
       ""};
 
   @Test
-  public void success() {
+  void success() {
     f.assertThat("x").succeeds("required", "x");
     f.assertThat("x", "--help").succeeds("required", "x", "help", true);
     f.assertThat("--help", "x").succeeds("required", "x", "help", true);
   }
 
   @Test
-  public void errorNoArguments() {
+  void errorNoArguments() {
     f.assertThat().failsWithLines(append(fullUsage, "Missing parameter: REQUIRED", ""));
   }
 
   @Test
-  public void errorInvalidOption() {
+  void errorInvalidOption() {
     f.assertThat("-p").failsWithLines(append(fullUsage, "Invalid option: -p", ""));
   }
 
