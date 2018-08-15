@@ -247,6 +247,9 @@ project can be found
 
 The
 [examples](https://github.com/h908714124/jbock/tree/master/examples)
-contain unit tests for many parser features.
+folder has demos of most parser features.
 
-And here's another example: [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
+More examples:
+
+* [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
+* [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
