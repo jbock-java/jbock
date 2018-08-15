@@ -20,7 +20,7 @@ class EvilArgumentsTest {
 
   @Test
   void testPrint() {
-    ParserTestFixture.create(EvilArguments_Parser::parse).assertPrints(
+    f.assertPrints(
         "NAME",
         "  EvilArguments",
         "",

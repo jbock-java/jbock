@@ -5,9 +5,12 @@ import org.junit.jupiter.api.Test;
 
 class PsArgumentsTest {
 
+  private ParserTestFixture<PsArguments> f =
+          ParserTestFixture.create(PsArguments_Parser::parse);
+
   @Test
   void testPrint() {
-    ParserTestFixture.create(PsArguments_Parser::parse).assertPrints(
+    f.assertPrints(
         "NAME",
         "  PsArguments",
         "",

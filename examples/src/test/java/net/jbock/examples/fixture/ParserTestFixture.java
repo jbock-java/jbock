@@ -19,6 +19,9 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
+/**
+ * Test util
+ */
 public final class ParserTestFixture<E> {
 
   public interface TriFunction<A, B, D> {
