@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import javax.lang.model.SourceVersion;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeParameterElement;
@@ -76,7 +77,7 @@ public final class MethodSpec {
 
   private boolean lastParameterIsArray(List<ParameterSpec> parameters) {
     return !parameters.isEmpty()
-        && TypeName.arrayComponent(parameters.get(parameters.size() - 1).type) != null;
+        && TypeName.asArray((parameters.get(parameters.size() - 1).type)) != null;
   }
 
   void emit(CodeWriter codeWriter, String enclosingName, Set<Modifier> implicitModifiers)
@@ -91,9 +92,9 @@ public final class MethodSpec {
     }
 
     if (isConstructor()) {
-      codeWriter.emit("$L(", enclosingName);
+      codeWriter.emit("$L($Z", enclosingName);
     } else {
-      codeWriter.emit("$T $L(", returnType, name);
+      codeWriter.emit("$T $L($Z", returnType, name);
     }
 
     boolean firstParameter = true;
@@ -161,7 +162,7 @@ public final class MethodSpec {
     StringBuilder out = new StringBuilder();
     try {
       CodeWriter codeWriter = new CodeWriter(out);
-      emit(codeWriter, "Constructor", Collections.<Modifier>emptySet());
+      emit(codeWriter, "Constructor", Collections.emptySet());
       return out.toString();
     } catch (IOException e) {
       throw new AssertionError();
@@ -188,6 +189,11 @@ public final class MethodSpec {
   public static Builder overriding(ExecutableElement method) {
     checkNotNull(method, "method == null");
 
+    Element enclosingClass = method.getEnclosingElement();
+    if (enclosingClass.getModifiers().contains(Modifier.FINAL)) {
+      throw new IllegalArgumentException("Cannot override method on final class " + enclosingClass);
+    }
+
     Set<Modifier> modifiers = method.getModifiers();
     if (modifiers.contains(Modifier.PRIVATE)
         || modifiers.contains(Modifier.FINAL)
@@ -202,7 +208,7 @@ public final class MethodSpec {
 
     modifiers = new LinkedHashSet<>(modifiers);
     modifiers.remove(Modifier.ABSTRACT);
-    modifiers.remove(Util.DEFAULT); // LinkedHashSet permits null as element for Java 7
+    modifiers.remove(Modifier.DEFAULT);
     methodBuilder.addModifiers(modifiers);
 
     for (TypeParameterElement typeParameterElement : method.getTypeParameters()) {
@@ -237,6 +243,7 @@ public final class MethodSpec {
       ExecutableElement method, DeclaredType enclosing, Types types) {
     ExecutableType executableType = (ExecutableType) types.asMemberOf(enclosing, method);
     List<? extends TypeMirror> resolvedParameterTypes = executableType.getParameterTypes();
+    List<? extends TypeMirror> resolvedThrownTypes = executableType.getThrownTypes();
     TypeMirror resolvedReturnType = executableType.getReturnType();
 
     Builder builder = overriding(method);
@@ -245,6 +252,10 @@ public final class MethodSpec {
       ParameterSpec parameter = builder.parameters.get(i);
       TypeName type = TypeName.get(resolvedParameterTypes.get(i));
       builder.parameters.set(i, parameter.toBuilder(type, parameter.name).build());
+    }
+    builder.exceptions.clear();
+    for (int i = 0, size = resolvedThrownTypes.size(); i < size; i++) {
+      builder.addException(TypeName.get(resolvedThrownTypes.get(i)));
     }
 
     return builder;

@@ -35,13 +35,13 @@ public final class ParameterizedTypeName extends TypeName {
 
   ParameterizedTypeName(ParameterizedTypeName enclosingType, ClassName rawType,
       List<TypeName> typeArguments) {
-    this(enclosingType, rawType, typeArguments, new ArrayList<AnnotationSpec>());
+    this(enclosingType, rawType, typeArguments, new ArrayList<>());
   }
 
   private ParameterizedTypeName(ParameterizedTypeName enclosingType, ClassName rawType,
       List<TypeName> typeArguments, List<AnnotationSpec> annotations) {
     super(annotations);
-    this.rawType = checkNotNull(rawType, "rawType == null");
+    this.rawType = checkNotNull(rawType, "rawType == null").annotated(annotations);
     this.enclosingType = enclosingType;
     this.typeArguments = Util.immutableList(typeArguments);
 
@@ -58,18 +58,22 @@ public final class ParameterizedTypeName extends TypeName {
         enclosingType, rawType, typeArguments, concatAnnotations(annotations));
   }
 
-  @Override public TypeName withoutAnnotations() {
+  @Override
+  public TypeName withoutAnnotations() {
     return new ParameterizedTypeName(
-        enclosingType, rawType, typeArguments, new ArrayList<AnnotationSpec>());
+        enclosingType, rawType.withoutAnnotations(), typeArguments, new ArrayList<>());
   }
 
   @Override CodeWriter emit(CodeWriter out) throws IOException {
     if (enclosingType != null) {
-      enclosingType.emitAnnotations(out);
       enclosingType.emit(out);
-      out.emit("." + rawType.simpleName());
+      out.emit(".");
+      if (isAnnotated()) {
+        out.emit(" ");
+        emitAnnotations(out);
+      }
+      out.emit(rawType.simpleName());
     } else {
-      rawType.emitAnnotations(out);
       rawType.emit(out);
     }
     if (!typeArguments.isEmpty()) {
@@ -77,7 +81,6 @@ public final class ParameterizedTypeName extends TypeName {
       boolean firstParameter = true;
       for (TypeName parameter : typeArguments) {
         if (!firstParameter) out.emitAndIndent(", ");
-        parameter.emitAnnotations(out);
         parameter.emit(out);
         firstParameter = false;
       }
@@ -92,8 +95,8 @@ public final class ParameterizedTypeName extends TypeName {
    */
   public ParameterizedTypeName nestedClass(String name) {
     checkNotNull(name, "name == null");
-    return new ParameterizedTypeName(this, rawType.nestedClass(name), new ArrayList<TypeName>(),
-        new ArrayList<AnnotationSpec>());
+    return new ParameterizedTypeName(this, rawType.nestedClass(name), new ArrayList<>(),
+        new ArrayList<>());
   }
 
   /**
@@ -103,7 +106,7 @@ public final class ParameterizedTypeName extends TypeName {
   public ParameterizedTypeName nestedClass(String name, List<TypeName> typeArguments) {
     checkNotNull(name, "name == null");
     return new ParameterizedTypeName(this, rawType.nestedClass(name), typeArguments,
-        new ArrayList<AnnotationSpec>());
+        new ArrayList<>());
   }
 
   /** Returns a parameterized type, applying {@code typeArguments} to {@code rawType}. */
@@ -118,7 +121,7 @@ public final class ParameterizedTypeName extends TypeName {
 
   /** Returns a parameterized type equivalent to {@code type}. */
   public static ParameterizedTypeName get(ParameterizedType type) {
-    return get(type, new LinkedHashMap<Type, TypeVariableName>());
+    return get(type, new LinkedHashMap<>());
   }
 
   /** Returns a parameterized type equivalent to {@code type}. */

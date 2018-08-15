@@ -33,8 +33,8 @@ import javax.lang.model.element.Modifier;
 import static net.jbock.com.squareup.javapoet.Util.checkArgument;
 import static net.jbock.com.squareup.javapoet.Util.checkNotNull;
 import static net.jbock.com.squareup.javapoet.Util.checkState;
-import static net.jbock.com.squareup.javapoet.Util.join;
 import static net.jbock.com.squareup.javapoet.Util.stringLiteralWithDoubleQuotes;
+import static java.lang.String.join;
 
 /**
  * Converts a {@link JavaFile} to a string suitable to both human- and javac-consumption. This
@@ -67,11 +67,11 @@ final class CodeWriter {
   int statementLine = -1;
 
   CodeWriter(Appendable out) {
-    this(out, "  ", Collections.<String>emptySet());
+    this(out, "  ", Collections.emptySet());
   }
 
   CodeWriter(Appendable out, String indent, Set<String> staticImports) {
-    this(out, indent, Collections.<String, ClassName>emptyMap(), staticImports);
+    this(out, indent, Collections.emptyMap(), staticImports);
   }
 
   CodeWriter(Appendable out, String indent, Map<String, ClassName> importedTypes,
@@ -116,7 +116,7 @@ final class CodeWriter {
   }
 
   public CodeWriter popPackage() {
-    checkState(this.packageName != NO_PACKAGE, "package already set: %s", this.packageName);
+    checkState(this.packageName != NO_PACKAGE, "package not set");
     this.packageName = NO_PACKAGE;
     return this;
   }
@@ -177,7 +177,7 @@ final class CodeWriter {
   }
 
   public void emitModifiers(Set<Modifier> modifiers) throws IOException {
-    emitModifiers(modifiers, Collections.<Modifier>emptySet());
+    emitModifiers(modifiers, Collections.emptySet());
   }
 
   /**
@@ -236,10 +236,6 @@ final class CodeWriter {
 
         case "$T":
           TypeName typeName = (TypeName) codeBlock.args.get(a++);
-          if (typeName.isAnnotated()) {
-            typeName.emitAnnotations(this);
-            typeName = typeName.withoutAnnotations();
-          }
           // defer "typeName.emit(this)" if next format part will be handled by the default case
           if (typeName instanceof ClassName && partIterator.hasNext()) {
             if (!codeBlock.formatParts.get(partIterator.nextIndex()).startsWith("$")) {
@@ -281,6 +277,10 @@ final class CodeWriter {
 
         case "$W":
           out.wrappingSpace(indentLevel + 2);
+          break;
+
+        case "$Z":
+          out.zeroWidthSpace(indentLevel + 2);
           break;
 
         default:
@@ -335,7 +335,7 @@ final class CodeWriter {
   private void emitLiteral(Object o) throws IOException {
     if (o instanceof TypeSpec) {
       TypeSpec typeSpec = (TypeSpec) o;
-      typeSpec.emit(this, null, Collections.<Modifier>emptySet());
+      typeSpec.emit(this, null, Collections.emptySet());
     } else if (o instanceof AnnotationSpec) {
       AnnotationSpec annotationSpec = (AnnotationSpec) o;
       annotationSpec.emit(this, true);
@@ -360,7 +360,7 @@ final class CodeWriter {
       ClassName resolved = resolve(c.simpleName());
       nameResolved = resolved != null;
 
-      if (Objects.equals(resolved, c)) {
+      if (resolved != null && Objects.equals(resolved.canonicalName, c.canonicalName)) {
         int suffixOffset = c.simpleNames().size() - 1;
         return join(".", className.simpleNames().subList(
             suffixOffset, className.simpleNames().size()));

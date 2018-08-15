@@ -22,6 +22,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collector;
+import java.util.stream.StreamSupport;
 import javax.lang.model.element.Element;
 import javax.lang.model.type.TypeMirror;
 
@@ -52,6 +54,7 @@ import static net.jbock.com.squareup.javapoet.Util.checkArgument;
  *   <li>{@code $$} emits a dollar sign.
  *   <li>{@code $W} emits a space or a newline, depending on its position on the line. This prefers
  *       to wrap lines before 100 columns.
+ *   <li>{@code $Z} acts as a zero-width space. This prefers to wrap lines before 100 columns.
  *   <li>{@code $>} increases the indentation level.
  *   <li>{@code $<} decreases the indentation level.
  *   <li>{@code $[} begins a statement. For multiline statements, every line after the first line
@@ -102,6 +105,46 @@ public final class CodeBlock {
     return new Builder().add(format, args).build();
   }
 
+  /**
+   * Joins {@code codeBlocks} into a single {@link CodeBlock}, each separated by {@code separator}.
+   * For example, joining {@code String s}, {@code Object o} and {@code int i} using {@code ", "}
+   * would produce {@code String s, Object o, int i}.
+   */
+  public static CodeBlock join(Iterable<CodeBlock> codeBlocks, String separator) {
+    return StreamSupport.stream(codeBlocks.spliterator(), false).collect(joining(separator));
+  }
+
+  /**
+   * A {@link Collector} implementation that joins {@link CodeBlock} instances together into one
+   * separated by {@code separator}. For example, joining {@code String s}, {@code Object o} and
+   * {@code int i} using {@code ", "} would produce {@code String s, Object o, int i}.
+   */
+  public static Collector<CodeBlock, ?, CodeBlock> joining(String separator) {
+    return Collector.of(
+        () -> new CodeBlockJoiner(separator, builder()),
+        CodeBlockJoiner::add,
+        CodeBlockJoiner::merge,
+        CodeBlockJoiner::join);
+  }
+
+  /**
+   * A {@link Collector} implementation that joins {@link CodeBlock} instances together into one
+   * separated by {@code separator}. For example, joining {@code String s}, {@code Object o} and
+   * {@code int i} using {@code ", "} would produce {@code String s, Object o, int i}.
+   */
+  public static Collector<CodeBlock, ?, CodeBlock> joining(
+      String separator, String prefix, String suffix) {
+    Builder builder = builder().add("$N", prefix);
+    return Collector.of(
+        () -> new CodeBlockJoiner(separator, builder),
+        CodeBlockJoiner::add,
+        CodeBlockJoiner::merge,
+        joiner -> {
+            builder.add(CodeBlock.of("$N", suffix));
+            return joiner.join();
+        });
+  }
+
   public static Builder builder() {
     return new Builder();
   }
@@ -118,6 +161,10 @@ public final class CodeBlock {
     final List<Object> args = new ArrayList<>();
 
     private Builder() {
+    }
+
+    public boolean isEmpty() {
+      return formatParts.isEmpty();
     }
 
     /**
@@ -217,7 +264,8 @@ public final class CodeBlock {
 
         // If 'c' doesn't take an argument, we're done.
         if (isNoArgPlaceholder(c)) {
-          checkArgument(indexStart == indexEnd, "$$, $>, $<, $[, $], and $W may not have an index");
+          checkArgument(
+              indexStart == indexEnd, "$$, $>, $<, $[, $], $W, and $Z may not have an index");
           formatParts.add("$" + c);
           continue;
         }
@@ -258,13 +306,13 @@ public final class CodeBlock {
           }
         }
         String s = unused.size() == 1 ? "" : "s";
-        checkArgument(unused.isEmpty(), "unused argument%s: %s", s, Util.join(", ", unused));
+        checkArgument(unused.isEmpty(), "unused argument%s: %s", s, String.join(", ", unused));
       }
       return this;
     }
 
     private boolean isNoArgPlaceholder(char c) {
-      return c == '$' || c == '>' || c == '<' || c == '[' || c == ']' || c == 'W';
+      return c == '$' || c == '>' || c == '<' || c == '[' || c == ']' || c == 'W' || c == 'Z';
     }
 
     private void addArgument(String format, char c, Object arg) {
@@ -378,6 +426,39 @@ public final class CodeBlock {
 
     public CodeBlock build() {
       return new CodeBlock(this);
+    }
+  }
+
+  private static final class CodeBlockJoiner {
+    private final String delimiter;
+    private final Builder builder;
+    private boolean first = true;
+
+    CodeBlockJoiner(String delimiter, Builder builder) {
+      this.delimiter = delimiter;
+      this.builder = builder;
+    }
+
+    CodeBlockJoiner add(CodeBlock codeBlock) {
+      if (!first) {
+        builder.add(delimiter);
+      }
+      first = false;
+
+      builder.add(codeBlock);
+      return this;
+    }
+
+    CodeBlockJoiner merge(CodeBlockJoiner other) {
+      CodeBlock otherBlock = other.builder.build();
+      if (!otherBlock.isEmpty()) {
+        add(otherBlock);
+      }
+      return this;
+    }
+
+    CodeBlock join() {
+      return builder.build();
     }
   }
 }

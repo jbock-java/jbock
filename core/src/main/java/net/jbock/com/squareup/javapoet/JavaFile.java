@@ -32,7 +32,6 @@ import java.util.Set;
 import java.util.TreeSet;
 import javax.annotation.processing.Filer;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.Modifier;
 import javax.tools.JavaFileObject;
 import javax.tools.JavaFileObject.Kind;
 import javax.tools.SimpleJavaFileObject;
@@ -146,7 +145,7 @@ public final class JavaFile {
     int importedTypesCount = 0;
     for (ClassName className : new TreeSet<>(codeWriter.importedTypes().values())) {
       if (skipJavaLangImports && className.packageName().equals("java.lang")) continue;
-      codeWriter.emit("import $L;\n", className);
+      codeWriter.emit("import $L;\n", className.withoutAnnotations());
       importedTypesCount++;
     }
 
@@ -154,7 +153,7 @@ public final class JavaFile {
       codeWriter.emit("\n");
     }
 
-    typeSpec.emit(codeWriter, null, Collections.<Modifier>emptySet());
+    typeSpec.emit(codeWriter, null, Collections.emptySet());
 
     codeWriter.popPackage();
   }

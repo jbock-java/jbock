@@ -36,7 +36,7 @@ import javax.lang.model.type.NoType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.SimpleTypeVisitor7;
+import javax.lang.model.util.SimpleTypeVisitor8;
 
 /**
  * Any type in Java's type system, plus {@code void}. This class is an identifier for primitive
@@ -44,7 +44,7 @@ import javax.lang.model.util.SimpleTypeVisitor7;
  * identifies composite types like {@code char[]} and {@code Set<Long>}.
  *
  * <p>Type names are dumb identifiers only and do not model the values they name. For example, the
- * type name for {@code java.lang.List} doesn't know about the {@code size()} method, the fact that
+ * type name for {@code java.util.List} doesn't know about the {@code size()} method, the fact that
  * lists are collections, or even that it accepts a single type parameter.
  *
  * <p>Instances of this class are immutable value objects that implement {@code equals()} and {@code
@@ -95,7 +95,7 @@ public class TypeName {
   private String cachedString;
 
   private TypeName(String keyword) {
-    this(keyword, new ArrayList<AnnotationSpec>());
+    this(keyword, new ArrayList<>());
   }
 
   private TypeName(String keyword, List<AnnotationSpec> annotations) {
@@ -209,7 +209,6 @@ public class TypeName {
       try {
         StringBuilder resultBuilder = new StringBuilder();
         CodeWriter codeWriter = new CodeWriter(resultBuilder);
-        emitAnnotations(codeWriter);
         emit(codeWriter);
         result = resultBuilder.toString();
         cachedString = result;
@@ -222,6 +221,11 @@ public class TypeName {
 
   CodeWriter emit(CodeWriter out) throws IOException {
     if (keyword == null) throw new AssertionError();
+
+    if (isAnnotated()) {
+      out.emit("");
+      emitAnnotations(out);
+    }
     return out.emitAndIndent(keyword);
   }
 
@@ -233,14 +237,15 @@ public class TypeName {
     return out;
   }
 
+
   /** Returns a type name equivalent to {@code mirror}. */
   public static TypeName get(TypeMirror mirror) {
-    return get(mirror, new LinkedHashMap<TypeParameterElement, TypeVariableName>());
+    return get(mirror, new LinkedHashMap<>());
   }
 
   static TypeName get(TypeMirror mirror,
       final Map<TypeParameterElement, TypeVariableName> typeVariables) {
-    return mirror.accept(new SimpleTypeVisitor7<TypeName, Void>() {
+    return mirror.accept(new SimpleTypeVisitor8<TypeName, Void>() {
       @Override public TypeName visitPrimitive(PrimitiveType t, Void p) {
         switch (t.getKind()) {
           case BOOLEAN:
@@ -315,7 +320,7 @@ public class TypeName {
 
   /** Returns a type name equivalent to {@code type}. */
   public static TypeName get(Type type) {
-    return get(type, new LinkedHashMap<Type, TypeVariableName>());
+    return get(type, new LinkedHashMap<>());
   }
 
   static TypeName get(Type type, Map<Type, TypeVariableName> map) {
@@ -352,7 +357,7 @@ public class TypeName {
 
   /** Converts an array of types to a list of type names. */
   static List<TypeName> list(Type[] types) {
-    return list(types, new LinkedHashMap<Type, TypeVariableName>());
+    return list(types, new LinkedHashMap<>());
   }
 
   static List<TypeName> list(Type[] types, Map<Type, TypeVariableName> map) {
@@ -369,4 +374,12 @@ public class TypeName {
         ? ((ArrayTypeName) type).componentType
         : null;
   }
+
+  /** Returns {@code type} as an array, or null if {@code type} is not an array. */
+  static ArrayTypeName asArray(TypeName type) {
+    return type instanceof ArrayTypeName
+        ? ((ArrayTypeName) type)
+        : null;
+  }
+
 }

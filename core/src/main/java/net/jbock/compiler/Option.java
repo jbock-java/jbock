@@ -161,8 +161,8 @@ final class Option {
       String[] desc = getText(param.description());
       String argumentName = param.descriptionArgumentName();
       String enumConstant = enumConstant(param);
-      String format = String.format("$S, $S, $T.$L, $S, new $T[] {\n    %s}",
-          String.join(",\n    ", Collections.nCopies(desc.length, "$S")));
+      String format = String.format("$S, $S, $T.$L, $S, new $T[]{$Z%s}",
+          String.join(",$Z", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
           Arrays.asList(param.longName(), param.shortName(), optionType.type,
               param.positionalType != null ? param.positionalType : param.paramType,
