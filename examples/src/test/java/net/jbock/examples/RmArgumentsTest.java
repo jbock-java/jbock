@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class RmArgumentsTest {
 
   private ParserTestFixture<RmArguments> f =
-      ParserTestFixture.create(RmArguments_Parser::parse);
+      ParserTestFixture.create(RmArguments_Parser.newBuilder());
 
   @Test
   void testRest() {

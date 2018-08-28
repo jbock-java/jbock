@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class CurlArgumentsTest {
 
   private ParserTestFixture<CurlArguments> f =
-      ParserTestFixture.create(CurlArguments_Parser::parse);
+      ParserTestFixture.create(CurlArguments_Parser.newBuilder());
 
   @Test
   void testEmpty() {

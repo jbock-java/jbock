@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class CpArgumentsTest {
 
   private ParserTestFixture<CpArguments> f =
-      ParserTestFixture.create(CpArguments_Parser::parse);
+      ParserTestFixture.create(CpArguments_Parser.newBuilder());
 
   @Test
   void errorMissingSource() {

@@ -20,19 +20,26 @@ import static net.jbock.compiler.Util.optionalOfSubtype;
  */
 final class Parser {
 
-  private static final int DEFAULT_INDENT = 7;
-
   private final Context context;
+  private final Builder builder;
   private final Option option;
   private final Helper helper;
   private final Impl impl;
 
+  private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out")
+      .addModifiers(PRIVATE, FINAL).build();
+  private final FieldSpec indent = FieldSpec.builder(INT, "indent")
+      .addModifiers(PRIVATE, FINAL).build();
+
+
   private Parser(
       Context context,
+      Builder builder,
       Option option,
       Helper helper,
       Impl impl) {
     this.context = context;
+    this.builder = builder;
     this.option = option;
     this.helper = helper;
     this.impl = impl;
@@ -42,71 +49,79 @@ final class Parser {
     ClassName implType = context.generatedClass.nestedClass(
         context.sourceType.getSimpleName() + "Impl");
     OptionType optionType = OptionType.create(context);
+    Builder builder = Builder.create(context);
     Option option = Option.create(context, optionType);
     Impl impl = Impl.create(option, implType);
     Helper helper = Helper.create(context, impl, option);
-    return new Parser(context, option, helper, impl);
+    return new Parser(context, builder, option, helper, impl);
   }
 
   TypeSpec define() {
     return TypeSpec.classBuilder(context.generatedClass)
+        .addType(builder.define())
         .addType(helper.define())
         .addType(option.define())
         .addType(impl.define())
         .addType(option.optionType.define())
-        .addMethod(parseMethodConvenience())
+        .addField(out)
+        .addField(indent)
         .addMethod(parseMethod())
         .addMethod(parseMethodInternal())
         .addMethod(privateConstructor())
+        .addMethod(newBuilderMethod())
         .addModifiers(FINAL)
         .addJavadoc(javadoc())
         .build();
   }
 
-  private MethodSpec parseMethodConvenience() {
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("parse");
-    ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
-        .build();
-    ParameterSpec out = ParameterSpec.builder(PrintStream.class, "out")
-        .build();
-    return builder
-        .addStatement("return parse($N, $N, $L)", args, out, DEFAULT_INDENT)
-        .addParameters(Arrays.asList(args, out))
-        .returns(optionalOf(TypeName.get(context.sourceType.asType())))
-        .addModifiers(STATIC)
+  private MethodSpec newBuilderMethod() {
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("newBuilder");
+    builder.addStatement("return new $T()", this.builder.type);
+    return builder.addModifiers(STATIC)
+        .returns(this.builder.type)
         .build();
   }
 
   private MethodSpec parseMethod() {
     ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
         .build();
-    ParameterSpec out = ParameterSpec.builder(PrintStream.class, "out")
-        .build();
-    ParameterSpec indent = ParameterSpec.builder(INT, "indent")
-        .build();
     ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e")
         .build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("parse");
 
     builder.beginControlFlow("try")
-        .addCode(parseMethodTryBlock(args, out, indent))
+        .addCode(parseMethodTryBlock(args))
         .endControlFlow();
 
     builder.beginControlFlow("catch ($T $N)", IllegalArgumentException.class, e)
-        .addCode(parseMethodCatchBlock(out, indent, e))
+        .addCode(parseMethodCatchBlock(e))
         .endControlFlow();
 
     return builder
-        .addParameters(Arrays.asList(args, out, indent))
+        .addParameter(args)
+        .addModifiers(PRIVATE)
         .returns(optionalOf(TypeName.get(context.sourceType.asType())))
-        .addModifiers(STATIC)
         .build();
   }
 
-  private CodeBlock parseMethodCatchBlock(
-      ParameterSpec out,
-      ParameterSpec indent,
-      ParameterSpec e) {
+  private CodeBlock parseMethodTryBlock(
+      ParameterSpec args) {
+    CodeBlock.Builder builder = CodeBlock.builder();
+    ParameterSpec result = ParameterSpec.builder(optionalOfSubtype(TypeName.get(context.sourceType.asType())), "result")
+        .build();
+    builder.addStatement("$T $N = parse($T.asList($N))",
+        result.type, result, Arrays.class, args);
+
+    builder.beginControlFlow("if (!$N.isPresent())", result)
+        .addStatement("$T.$N($N, $N)", option.type, option.printUsageMethod, out, indent)
+        .endControlFlow();
+
+    builder.addStatement("return $N.map($T.identity())",
+        result, Function.class);
+    return builder.build();
+  }
+
+  private CodeBlock parseMethodCatchBlock(ParameterSpec e) {
     CodeBlock.Builder builder = CodeBlock.builder();
     if (context.helpDisabled) {
       builder.addStatement("$T.$N($N, $N)", option.type, option.printUsageMethod, out, indent);
@@ -123,25 +138,6 @@ final class Parser {
     return builder.build();
   }
 
-  private CodeBlock parseMethodTryBlock(
-      ParameterSpec args,
-      ParameterSpec out,
-      ParameterSpec indent) {
-    CodeBlock.Builder builder = CodeBlock.builder();
-    ParameterSpec result = ParameterSpec.builder(optionalOfSubtype(TypeName.get(context.sourceType.asType())), "result")
-        .build();
-    builder.addStatement("$T $N = parse($T.asList($N))",
-        result.type, result, Arrays.class, args);
-
-    builder.beginControlFlow("if (!$N.isPresent())", result)
-        .addStatement("$T.$N($N, $N)", option.type, option.printUsageMethod, out, indent)
-        .endControlFlow();
-
-    builder.addStatement("return $N.map($T.identity())",
-        result, Function.class);
-    return builder.build();
-  }
-
   private MethodSpec parseMethodInternal() {
 
     ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
@@ -153,7 +149,7 @@ final class Parser {
     MethodSpec.Builder builder = MethodSpec.methodBuilder("parse")
         .addParameter(tokens)
         .returns(optionalOfSubtype(TypeName.get(context.sourceType.asType())))
-        .addModifiers(PRIVATE, STATIC);
+        .addModifiers(PRIVATE);
 
     builder.addStatement("$T $N = 0", INT, count);
     builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
@@ -261,7 +257,14 @@ final class Parser {
   }
 
   private MethodSpec privateConstructor() {
+    ParameterSpec outParam = ParameterSpec.builder(out.type, out.name).build();
+    ParameterSpec indentParam = ParameterSpec.builder(indent.type, indent.name).build();
+
     return MethodSpec.constructorBuilder()
+        .addStatement("this.$N = $N", out, outParam)
+        .addStatement("this.$N = $N", indent, indentParam)
+        .addParameter(outParam)
+        .addParameter(indentParam)
         .addModifiers(PRIVATE)
         .build();
   }

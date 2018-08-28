@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class PsArgumentsTest {
 
   private ParserTestFixture<PsArguments> f =
-          ParserTestFixture.create(PsArguments_Parser::parse);
+          ParserTestFixture.create(PsArguments_Parser.newBuilder());
 
   @Test
   void testPrint() {

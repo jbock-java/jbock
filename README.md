@@ -243,5 +243,6 @@ folder has demos of most parser features.
 
 More examples:
 
+* [aws-glacier-multipart-upload](https://github.com/h908714124/aws-glacier-multipart-upload)
 * [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)

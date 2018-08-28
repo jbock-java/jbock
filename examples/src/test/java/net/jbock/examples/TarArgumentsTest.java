@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class TarArgumentsTest {
 
   private ParserTestFixture<TarArguments> f =
-      ParserTestFixture.create(TarArguments_Parser::parse);
+      ParserTestFixture.create(TarArguments_Parser.newBuilder());
 
   @Test
   void testExtract() {

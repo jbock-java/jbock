@@ -8,6 +8,8 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Predicate;
 
@@ -18,17 +20,20 @@ import static org.junit.jupiter.api.Assertions.*;
  */
 public final class ParserTestFixture<E> {
 
-  public interface TriFunction<A, B, D> {
-    D apply(A a, B b, int c);
+  public interface Parser<E> {
+    Optional<E> parse(String[] args);
+
+    Parser<E> out(PrintStream out);
+
+    Parser<E> indent(int indent);
   }
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
 
-  private final TriFunction<String[], PrintStream, Optional<E>> parseMethod;
+  private final Parser<E> parser;
 
-  private ParserTestFixture(
-      TriFunction<String[], PrintStream, Optional<E>> parseMethod) {
-    this.parseMethod = parseMethod;
+  private ParserTestFixture(Parser<E> parser) {
+    this.parser = parser;
   }
 
   private static JsonNode readJson(String json) {
@@ -71,27 +76,64 @@ public final class ParserTestFixture<E> {
     return node;
   }
 
-  public static <E> ParserTestFixture<E> create(
-      TriFunction<String[], PrintStream, Optional<E>> fn) {
-    return new ParserTestFixture<>(fn);
+  public static <E> ParserTestFixture<E> create(Object builder) {
+    List<Parser<E>> parser = new ArrayList<>(1);
+    parser.add(new Parser<E>() {
+
+      @Override
+      public Optional<E> parse(String[] args) {
+        try {
+          Method parseMethod = builder.getClass().getDeclaredMethod("parse", args.getClass());
+          parseMethod.setAccessible(true);
+          return (Optional<E>) parseMethod.invoke(builder, new Object[]{args});
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      @Override
+      public Parser<E> out(PrintStream out) {
+        try {
+          Method outMethod = builder.getClass().getDeclaredMethod("out", PrintStream.class);
+          outMethod.setAccessible(true);
+          outMethod.invoke(builder, out);
+          return parser.get(0);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      @Override
+      public Parser<E> indent(int indent) {
+        try {
+          Method indentMethod = builder.getClass().getDeclaredMethod("indent", Integer.TYPE);
+          indentMethod.setAccessible(true);
+          indentMethod.invoke(builder, indent);
+          return parser.get(0);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+          throw new RuntimeException(e);
+        }
+      }
+    });
+    return new ParserTestFixture<>(parser.get(0));
   }
 
   public JsonAssert<E> assertThat(String... args) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(baos);
-    Optional<E> parsed = parseMethod.apply(args, out, 2);
+    Optional<E> parsed = parser.out(out).indent(2).parse(args);
     return new JsonAssert<>(parsed, new String(baos.toByteArray()));
   }
 
   public E parse(String... args) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(baos);
-    return parseMethod.apply(args, out, 2).get();
+    return parser.out(out).indent(2).parse(args).get();
   }
 
   public void assertPrints(String... expected) {
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    Optional<E> result = parseMethod.apply(new String[]{"--help"}, new PrintStream(out), 2);
+    Optional<E> result = parser.out(new PrintStream(out)).indent(2).parse(new String[]{"--help"});
     assertFalse(result.isPresent());
     String[] actual = new String(out.toByteArray()).split("\\r?\\n", -1);
     assertArrayEquals(expected, actual, "Actual: " + Arrays.toString(actual));
