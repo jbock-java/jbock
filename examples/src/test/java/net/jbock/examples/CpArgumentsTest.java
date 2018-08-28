@@ -25,10 +25,12 @@ class CpArgumentsTest {
   void minimal() {
     f.assertThat("a", "b").succeeds(
         "source", "a",
-        "dest", "b");
+        "dest", "b",
+        "recursive", false);
     f.assertThat("b", "a").succeeds(
         "source", "b",
-        "dest", "a");
+        "dest", "a",
+        "recursive", false);
   }
 
   @Test

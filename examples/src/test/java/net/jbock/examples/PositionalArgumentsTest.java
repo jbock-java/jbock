@@ -1,5 +1,6 @@
 package net.jbock.examples;
 
+import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
 import net.jbock.examples.fixture.ParserTestFixture;
@@ -19,8 +20,11 @@ class PositionalArgumentsTest {
   @Test
   void minimal() {
     f.assertThat("a", "b").succeeds(
+        "optString", null,
         "source", "a",
-        "dest", "b");
+        "dest", "b",
+        "otherTokens", emptyList(),
+        "ddTokens", emptyList());
   }
 
   @Test
@@ -29,7 +33,8 @@ class PositionalArgumentsTest {
         "source", "a",
         "dest", "b",
         "optString", "c",
-        "otherTokens", singletonList("d"));
+        "otherTokens", singletonList("d"),
+        "ddTokens", emptyList());
   }
 
   @Test
@@ -44,18 +49,26 @@ class PositionalArgumentsTest {
         "source", "a",
         "dest", "b",
         "optString", "c",
+        "otherTokens", emptyList(),
         "ddTokens", singletonList("e"));
     f.assertThat("a", "b", "c", "--").succeeds(
         "source", "a",
         "dest", "b",
-        "optString", "c");
+        "optString", "c",
+        "otherTokens", emptyList(),
+        "ddTokens", emptyList());
     f.assertThat("a", "b", "c").succeeds(
         "source", "a",
         "dest", "b",
-        "optString", "c");
+        "optString", "c",
+        "otherTokens", emptyList(),
+        "ddTokens", emptyList());
     f.assertThat("a", "b").succeeds(
+        "optString", null,
         "source", "a",
-        "dest", "b");
+        "dest", "b",
+        "otherTokens", emptyList(),
+        "ddTokens", emptyList());
   }
 
   @Test

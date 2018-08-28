@@ -191,8 +191,4 @@ final class Context {
     }
     return OptionalInt.of(count);
   }
-
-  boolean simplePositional() {
-    return helpDisabled && !stopword && paramTypes.isEmpty() && ignoreDashes;
-  }
 }

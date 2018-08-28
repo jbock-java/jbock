@@ -5,7 +5,7 @@ import net.jbock.CommandLineArguments;
 @CommandLineArguments
 abstract class EvilArguments {
 
-  abstract String fancy();
+  abstract protected String fancy();
 
   abstract String fAncy();
 

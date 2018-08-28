@@ -3,6 +3,8 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import static java.util.Collections.emptyList;
+
 class RequiredArgumentsTest {
 
   private ParserTestFixture<RequiredArguments> f =
@@ -10,7 +12,7 @@ class RequiredArgumentsTest {
 
   @Test
   void success() {
-    f.assertThat("--dir", "A").succeeds("dir", "A");
+    f.assertThat("--dir", "A").succeeds("otherTokens", emptyList(), "dir", "A");
   }
 
   @Test

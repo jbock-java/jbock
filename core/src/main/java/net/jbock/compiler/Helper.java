@@ -1,33 +1,17 @@
 package net.jbock.compiler;
 
+import net.jbock.com.squareup.javapoet.*;
+
+import java.util.*;
+
 import static java.util.Arrays.asList;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.Constants.*;
 import static net.jbock.compiler.Util.optionalOf;
 import static net.jbock.compiler.Util.optionalOfSubtype;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.Set;
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.CodeBlock;
-import net.jbock.com.squareup.javapoet.FieldSpec;
-import net.jbock.com.squareup.javapoet.MethodSpec;
-import net.jbock.com.squareup.javapoet.ParameterSpec;
-import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
-import net.jbock.com.squareup.javapoet.TypeSpec;
 
 /**
  * Defines the private *_Parser.Helper inner class,
@@ -55,10 +39,9 @@ final class Helper {
   final MethodSpec readRegularOptionMethod;
 
   private final MethodSpec addFlagMethod;
-  private final MethodSpec addMethod;
+  private final MethodSpec addArgumentMethod;
   private final MethodSpec readNextMethod;
   private final MethodSpec readLongMethod;
-  private final MethodSpec looksLikeLongMethod;
 
   private final MethodSpec readArgumentMethod;
 
@@ -86,11 +69,10 @@ final class Helper {
       FieldSpec flagsField,
       Option option,
       MethodSpec addFlagMethod,
-      MethodSpec addMethod,
+      MethodSpec addArgumentMethod,
       MethodSpec readMethod,
       MethodSpec readNextMethod,
       MethodSpec readLongMethod,
-      MethodSpec looksLikeLongMethod,
       MethodSpec readRegularOptionMethod,
       MethodSpec readArgumentMethod,
       ParameterSpec positionalParameter,
@@ -114,11 +96,10 @@ final class Helper {
     this.flagsField = flagsField;
     this.option = option;
     this.addFlagMethod = addFlagMethod;
-    this.addMethod = addMethod;
+    this.addArgumentMethod = addArgumentMethod;
     this.readMethod = readMethod;
     this.readNextMethod = readNextMethod;
     this.readLongMethod = readLongMethod;
-    this.looksLikeLongMethod = looksLikeLongMethod;
     this.readRegularOptionMethod = readRegularOptionMethod;
     this.readArgumentMethod = readArgumentMethod;
     this.positionalParameter = positionalParameter;
@@ -143,24 +124,21 @@ final class Helper {
     ParameterSpec ddIndexParameter = ParameterSpec.builder(OptionalInt.class, "ddIndex").build();
     MethodSpec readNextMethod = readNextMethod(option);
     MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
-    MethodSpec looksLikeLongMethod = looksLikeLongMethod();
     FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, option.type), "longNames")
-        .addModifiers(FINAL)
         .build();
     FieldSpec shortNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, option.type), "shortNames")
-        .addModifiers(FINAL)
         .build();
     ClassName helperClass = context.generatedClass.nestedClass("Helper");
     FieldSpec optMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        option.type, LIST_OF_STRING), "optMap", FINAL).build();
+        option.type, LIST_OF_STRING), "optMap").build();
     FieldSpec sMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        option.type, STRING), "sMap", FINAL).build();
+        option.type, STRING), "sMap").build();
     FieldSpec flagsField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
-        option.type), "flags", FINAL).build();
+        option.type), "flags").build();
     MethodSpec addFlagMethod = addFlagMethod(option, flagsField);
-    MethodSpec addMethod = addArgumentMethod(
+    MethodSpec addArgumentMethod = addArgumentMethod(
         context,
         option,
         optMapField,
@@ -175,7 +153,7 @@ final class Helper {
     MethodSpec readMethod = readMethod(
         readArgumentMethod,
         option,
-        addMethod,
+        addArgumentMethod,
         addFlagMethod);
 
     MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(option, sMapField);
@@ -205,11 +183,10 @@ final class Helper {
         flagsField,
         option,
         addFlagMethod,
-        addMethod,
+        addArgumentMethod,
         readMethod,
         readNextMethod,
         readLongMethod,
-        looksLikeLongMethod,
         readRegularOptionMethod,
         readArgumentMethod,
         positionalParameter,
@@ -227,39 +204,40 @@ final class Helper {
 
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.classBuilder(type)
-        .addModifiers(PRIVATE, STATIC, FINAL);
-    if (!context.simplePositional()) {
-      builder.addMethod(readMethod);
-      builder.addMethod(readRegularOptionMethod);
-    }
+        .addModifiers(PRIVATE, STATIC);
+    builder.addMethod(readMethod);
+    builder.addMethod(readRegularOptionMethod);
     builder.addMethod(buildMethod());
     if (!context.paramTypes.isEmpty()) {
       builder.addField(
           longNamesField.toBuilder()
-              .initializer("$T.$N()", option.type, this.option.longNameMapMethod)
+              .initializer("$T.unmodifiableMap($T.$N())", Collections.class, option.type, this.option.longNameMapMethod)
               .build());
       builder.addField(
           shortNamesField.toBuilder()
-              .initializer("$T.$N()", option.type, this.option.shortNameMapMethod)
-              .build());
-      builder.addField(
-          optMapField.toBuilder()
-              .initializer("new $T<>($T.class)", EnumMap.class, option.type)
+              .initializer("$T.unmodifiableMap($T.$N())", Collections.class, option.type, this.option.shortNameMapMethod)
               .build());
       builder.addField(
           sMapField.toBuilder()
               .initializer("new $T<>($T.class)", EnumMap.class, option.type)
               .build());
+      builder.addMethod(addArgumentMethod)
+          .addMethod(readArgumentMethod)
+          .addMethod(readNextMethod)
+          .addMethod(readLongMethod);
+    }
+    if (context.paramTypes.contains(Type.REPEATABLE)) {
+      builder.addField(
+          optMapField.toBuilder()
+              .initializer("new $T<>($T.class)", EnumMap.class, option.type)
+              .build());
+    }
+    if (context.paramTypes.contains(Type.FLAG)) {
       builder.addField(
           flagsField.toBuilder()
               .initializer("$T.noneOf($T.class)", EnumSet.class, option.type)
               .build());
-      builder.addMethod(addMethod)
-          .addMethod(addFlagMethod)
-          .addMethod(readArgumentMethod)
-          .addMethod(readNextMethod)
-          .addMethod(readLongMethod)
-          .addMethod(looksLikeLongMethod);
+      builder.addMethod(addFlagMethod);
     }
     if (context.paramTypes.contains(Type.REQUIRED)) {
       builder.addMethod(extractRequiredMethod);
@@ -310,7 +288,6 @@ final class Helper {
       FieldSpec optMap,
       FieldSpec sMap) {
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec argument = ParameterSpec.builder(STRING, "argument").build();
     ParameterSpec bucket = ParameterSpec.builder(LIST_OF_STRING, "bucket").build();
 
@@ -327,7 +304,7 @@ final class Helper {
           .endControlFlow();
 
       builder.addStatement("$N.add($N)", bucket, argument);
-      builder.addStatement("return $L", true);
+      builder.addStatement("return");
 
       builder.endControlFlow();
     }
@@ -338,10 +315,7 @@ final class Helper {
 
     builder.addStatement("$N.put($N, $N)", sMap, optionParam, argument);
 
-    builder.addStatement("return $L", true);
-
-    return builder.addParameters(asList(optionParam, token, argument))
-        .returns(BOOLEAN)
+    return builder.addParameters(asList(optionParam, argument))
         .build();
   }
 
@@ -421,7 +395,7 @@ final class Helper {
   private static MethodSpec readMethod(
       MethodSpec readArgumentMethod,
       Option option,
-      MethodSpec addMethod,
+      MethodSpec addArgumentMethod,
       MethodSpec addFlagMethod) {
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
@@ -438,19 +412,17 @@ final class Helper {
     }
 
     if (option.context.paramTypes.contains(Type.FLAG)) {
-      builder.addCode("\n");
       builder.beginControlFlow("if ($N.$N == $T.$L)",
           optionParam, option.typeField, option.optionType.type, Type.FLAG)
           .addStatement("$N($N)", addFlagMethod, optionParam)
           .addStatement("return")
           .endControlFlow();
-      builder.addCode("\n");
     }
 
     builder.addStatement("$T $N = $N($N, $N)",
         argument.type, argument, readArgumentMethod, token, it);
 
-    builder.addStatement("$N($N, $N, $N)", addMethod, optionParam, token, argument);
+    builder.addStatement("$N($N, $N)", addArgumentMethod, optionParam, argument);
 
     return builder.build();
   }
@@ -467,12 +439,10 @@ final class Helper {
     builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
 
     builder.beginControlFlow("if ($N && $N >= 0)", isLong, index)
-        .add("// attached long\n")
         .addStatement("return $N.substring($N + 1)", token, index)
         .endControlFlow();
 
     builder.beginControlFlow("if (!$N && $N.length() > 2)", isLong, token)
-        .add("// attached short\n")
         .addStatement("return $N.substring(2)", token)
         .endControlFlow();
 
@@ -505,27 +475,14 @@ final class Helper {
         .build();
   }
 
-  private static MethodSpec looksLikeLongMethod() {
-
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("looksLikeLong");
-
-    builder.addStatement("return $N.charAt(1) == '-'", token);
-
-    return builder.addParameter(token)
-        .addModifiers(STATIC)
-        .returns(BOOLEAN)
-        .build();
-  }
-
   private MethodSpec buildMethod() {
 
-    CodeBlock.Builder args = CodeBlock.builder().add("\n");
+    CodeBlock.Builder args = CodeBlock.builder();
     for (int j = 0; j < option.context.parameters.size(); j++) {
       Param param = option.context.parameters.get(j);
       args.add(param.extractExpression(this));
       if (j < option.context.parameters.size() - 1) {
-        args.add(",\n");
+        args.add(",$W");
       }
     }
     MethodSpec.Builder builder = MethodSpec.methodBuilder("build");
@@ -552,9 +509,6 @@ final class Helper {
 
     builder.addStatement("return $T.of(new $T($L))", Optional.class, impl.type, args.build());
 
-    if (context.simplePositional()) {
-      builder.addModifiers(STATIC);
-    }
     return builder.returns(optionalOfSubtype(impl.type)).build();
   }
 

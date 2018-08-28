@@ -15,6 +15,7 @@ class RmArgumentsTest {
   void testRest() {
     f.assertThat("-f", "a", "--", "-r", "--", "-f").succeeds(
         "force", true,
+        "recursive", false,
         "otherTokens", singletonList("a"),
         "ddTokens", asList("-r", "--", "-f"));
   }

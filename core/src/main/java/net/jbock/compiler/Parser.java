@@ -1,15 +1,6 @@
 package net.jbock.compiler;
 
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.com.squareup.javapoet.TypeName.INT;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.Util.optionalOf;
-import static net.jbock.compiler.Util.optionalOfSubtype;
+import net.jbock.com.squareup.javapoet.*;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -17,13 +8,12 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Function;
-import net.jbock.com.squareup.javapoet.ArrayTypeName;
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.CodeBlock;
-import net.jbock.com.squareup.javapoet.MethodSpec;
-import net.jbock.com.squareup.javapoet.ParameterSpec;
-import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.com.squareup.javapoet.TypeSpec;
+
+import static javax.lang.model.element.Modifier.*;
+import static net.jbock.com.squareup.javapoet.TypeName.INT;
+import static net.jbock.compiler.Constants.*;
+import static net.jbock.compiler.Util.optionalOf;
+import static net.jbock.compiler.Util.optionalOfSubtype;
 
 /**
  * Generates the *_Parser class.
@@ -67,9 +57,8 @@ final class Parser {
         .addMethod(parseMethodConvenience())
         .addMethod(parseMethod())
         .addMethod(parseMethodInternal())
-        .addMethod(printUsageMethod())
         .addMethod(privateConstructor())
-        .addModifiers(PUBLIC, FINAL)
+        .addModifiers(FINAL)
         .addJavadoc(javadoc())
         .build();
   }
@@ -84,7 +73,7 @@ final class Parser {
         .addStatement("return parse($N, $N, $L)", args, out, DEFAULT_INDENT)
         .addParameters(Arrays.asList(args, out))
         .returns(optionalOf(TypeName.get(context.sourceType.asType())))
-        .addModifiers(PUBLIC, STATIC)
+        .addModifiers(STATIC)
         .build();
   }
 
@@ -110,7 +99,7 @@ final class Parser {
     return builder
         .addParameters(Arrays.asList(args, out, indent))
         .returns(optionalOf(TypeName.get(context.sourceType.asType())))
-        .addModifiers(PUBLIC, STATIC)
+        .addModifiers(STATIC)
         .build();
   }
 
@@ -165,13 +154,6 @@ final class Parser {
         .addParameter(tokens)
         .returns(optionalOfSubtype(TypeName.get(context.sourceType.asType())))
         .addModifiers(PRIVATE, STATIC);
-
-    if (context.simplePositional()) {
-      return builder
-          .addStatement("return $T.build($N, $T.empty())",
-              helper.type, tokens, OptionalInt.class)
-          .build();
-    }
 
     builder.addStatement("$T $N = 0", INT, count);
     builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
@@ -269,17 +251,6 @@ final class Parser {
     return CodeBlock.builder()
         .add("return $N.build($N, $L)",
             helper, this.helper.positionalParameter, param)
-        .build();
-  }
-
-  private MethodSpec printUsageMethod() {
-    ParameterSpec out = ParameterSpec.builder(PrintStream.class, "out").build();
-    ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
-    return MethodSpec.methodBuilder("printUsage")
-        .addStatement("$T.$N($N, $N)",
-            option.type, option.printUsageMethod, out, indent)
-        .addModifiers(PRIVATE, STATIC)
-        .addParameters(Arrays.asList(out, indent))
         .build();
   }
 

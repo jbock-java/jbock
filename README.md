@@ -2,20 +2,12 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-`jbock 2.3` is an annotation processor that generates a
-[getopt_long](https://www.gnu.org/software/libc/manual/html_node/Getopt.html)-like
-command line parser.
-
-Its goals are:
- 
-* To generate convenient, readable parser code from Java annotations.
-* To give the user of the command line interface a good error message, if the input is invalid.
-* To give the developer of the command line interface a good error message, if there is a configuration error.
-* To print usage text that looks similar to a GNU man page, when the `--help` parameter is passed.
+`jbock 2.3` is a command line parser, similar to [jcommander](http://jcommander.org/), but doesn't use reflection.
+Instead, it generates the necessary source code via a mechanism called Java annotation processing.
 
 ## Introduction
 
-For starters, let's write a program that copies a file.
+Let's write a program that copies a file. This is what it might look like in Java:
 
 ````java
 public class CopyFile {

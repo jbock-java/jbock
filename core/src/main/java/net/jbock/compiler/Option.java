@@ -1,8 +1,13 @@
 package net.jbock.compiler;
 
+import net.jbock.Description;
+import net.jbock.com.squareup.javapoet.*;
+
+import java.io.PrintStream;
+import java.util.*;
+
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
@@ -10,25 +15,6 @@ import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.snakeCase;
-
-import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.StringJoiner;
-import net.jbock.Description;
-import net.jbock.com.squareup.javapoet.ArrayTypeName;
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.CodeBlock;
-import net.jbock.com.squareup.javapoet.FieldSpec;
-import net.jbock.com.squareup.javapoet.MethodSpec;
-import net.jbock.com.squareup.javapoet.ParameterSpec;
-import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
-import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.com.squareup.javapoet.TypeSpec;
 
 /**
  * Defines the *_Parser.Option enum.
@@ -102,18 +88,18 @@ final class Option {
   }
 
   static Option create(Context context, OptionType optionType) {
-    FieldSpec typeField = FieldSpec.builder(optionType.type, "type", FINAL).build();
-    FieldSpec longNameField = FieldSpec.builder(STRING, "longName", FINAL).build();
+    FieldSpec typeField = FieldSpec.builder(optionType.type, "type").build();
+    FieldSpec longNameField = FieldSpec.builder(STRING, "longName").build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
-        "shortName", FINAL).build();
+        "shortName").build();
     ClassName type = context.generatedClass.nestedClass("Option");
     MethodSpec shortNameMapMethod = shortNameMapMethod(type, shortNameField);
     MethodSpec longNameMapMethod = longNameMapMethod(type, longNameField);
     MethodSpec exampleMethod = exampleMethod(longNameField, shortNameField);
     FieldSpec descriptionField = FieldSpec.builder(
-        LIST_OF_STRING, "description", FINAL).build();
+        LIST_OF_STRING, "description").build();
     FieldSpec argumentNameField = FieldSpec.builder(
-        STRING, "descriptionArgumentName", FINAL).build();
+        STRING, "descriptionArgumentName").build();
     MethodSpec spacesMethod = spacesMethod();
     MethodSpec synopsisMethod = synopsisMethod(context, exampleMethod);
     MethodSpec printUsageMethod = printUsageMethod(
@@ -236,7 +222,6 @@ final class Option {
         shortNames.type, shortNames, HashMap.class, optionType);
 
     // begin iteration over options
-    builder.add("\n");
     builder.beginControlFlow("for ($T $N : $T.values())", optionType, option, optionType);
 
     builder.beginControlFlow("if ($N.$N != null)", option, shortNameField)
@@ -245,7 +230,7 @@ final class Option {
 
     // end iteration over options
     builder.endControlFlow();
-    builder.addStatement("return $T.unmodifiableMap($N)", Collections.class, shortNames);
+    builder.addStatement("return $N", shortNames);
 
     return MethodSpec.methodBuilder("shortNameMap")
         .addCode(builder.build())
@@ -267,7 +252,6 @@ final class Option {
         longNames.type, longNames, HashMap.class, optionType);
 
     // begin iteration over options
-    builder.add("\n");
     builder.beginControlFlow("for ($T $N : $T.values())", optionType, option, optionType);
 
     builder.beginControlFlow("if ($N.$N != null)", option, longNameField)
@@ -276,7 +260,7 @@ final class Option {
 
     // end iteration over options
     builder.endControlFlow();
-    builder.addStatement("return $T.unmodifiableMap($N)", Collections.class, longNames);
+    builder.addStatement("return $N", longNames);
 
     return MethodSpec.methodBuilder("longNameMap")
         .addCode(builder.build())
@@ -301,8 +285,8 @@ final class Option {
     ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
     CodeBlock.Builder builder = CodeBlock.builder();
     builder.addStatement("$T $N = $N(2 * $N)", STRING, spaces, spacesMethod, indent);
-    builder.addStatement("$T $N = new $T($S + $N, $N, $S)", joiner.type, joiner, joiner.type,
-        "\n", spaces, spaces, "");
+    builder.addStatement("$T $N = new $T($T.lineSeparator() + $N, $N, $S)", joiner.type, joiner, joiner.type,
+        System.class, spaces, spaces, "");
     builder.beginControlFlow("for ($T $N : $N)", STRING, line, descriptionField)
         .addStatement("$N.add($N)", joiner, line)
         .endControlFlow();
@@ -328,7 +312,7 @@ final class Option {
     builder.addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
         .addStatement("$N.append($N)", sb, spaces)
         .addStatement("$N.append($N())", sb, describeNamesMethod)
-        .addStatement("$N.append($S)", sb, "\n")
+        .addStatement("$N.append($T.lineSeparator())", sb, System.class)
         .addStatement("$N.append($N($N))", sb, descriptionBlockMethod, indent)
         .addStatement("return $N.toString()", sb);
     return builder

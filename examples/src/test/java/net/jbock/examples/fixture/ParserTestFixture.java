@@ -8,16 +8,10 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.assertArrayEquals;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
+import static org.junit.jupiter.api.Assertions.*;
 
 /**
  * Test util
@@ -46,13 +40,16 @@ public final class ParserTestFixture<E> {
   }
 
   private static JsonNode parseJson(Object... kvs) {
-    ObjectMapper mapper = new ObjectMapper();
-    ObjectNode node = mapper.createObjectNode();
+    ObjectNode node = MAPPER.createObjectNode();
     if (kvs.length % 2 != 0) {
       throw new IllegalArgumentException("length must be even: " + Arrays.toString(kvs));
     }
+    Set<String> keys = new HashSet<>();
     for (int i = 0; i < kvs.length; i += 2) {
       String k = kvs[i].toString();
+      if (!keys.add(k)) {
+        throw new IllegalArgumentException("duplicate key: " + k);
+      }
       Object v = kvs[i + 1];
       if (v == null) {
         node.put(k, (String) null);
@@ -65,11 +62,9 @@ public final class ParserTestFixture<E> {
         node.put(k, (Boolean) v);
       } else if (v instanceof List) {
         List list = (List) v;
-        if (!list.isEmpty()) {
-          ArrayNode array = node.putArray(k);
-          for (Object s : list) {
-            array.add(s.toString());
-          }
+        ArrayNode array = node.putArray(k);
+        for (Object s : list) {
+          array.add(s.toString());
         }
       }
     }
@@ -86,6 +81,12 @@ public final class ParserTestFixture<E> {
     PrintStream out = new PrintStream(baos);
     Optional<E> parsed = parseMethod.apply(args, out, 2);
     return new JsonAssert<>(parsed, new String(baos.toByteArray()));
+  }
+
+  public E parse(String... args) {
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    PrintStream out = new PrintStream(baos);
+    return parseMethod.apply(args, out, 2).get();
   }
 
   public void assertPrints(String... expected) {
@@ -134,8 +135,10 @@ public final class ParserTestFixture<E> {
 
     public void succeeds(Object... expected) {
       assertTrue(parsed.isPresent(), "Parsing was not successful");
-      assertEquals(parseJson(expected),
-          readJson(parsed.get().toString()));
+      String jsonString = parsed.get().toString();
+      JsonNode actualJson = readJson(jsonString);
+      JsonNode expectedJson = parseJson(expected);
+      assertEquals(expectedJson, actualJson);
     }
   }
 }

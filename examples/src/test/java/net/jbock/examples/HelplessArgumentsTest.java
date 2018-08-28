@@ -1,8 +1,9 @@
 package net.jbock.examples;
 
-import java.util.Arrays;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
+
+import java.util.Arrays;
 
 class HelplessArgumentsTest {
 
@@ -23,7 +24,7 @@ class HelplessArgumentsTest {
 
   @Test
   void success() {
-    f.assertThat("x").succeeds("required", "x");
+    f.assertThat("x").succeeds("required", "x", "help", false);
     f.assertThat("x", "--help").succeeds("required", "x", "help", true);
     f.assertThat("--help", "x").succeeds("required", "x", "help", true);
   }

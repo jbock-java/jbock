@@ -1,23 +1,18 @@
 package net.jbock.compiler;
 
-import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.PositionalType.POSITIONAL_LIST;
-import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL;
-import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL_INT;
-import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED;
-import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED_INT;
-import static net.jbock.compiler.Util.optionalOf;
-
-import java.util.Collections;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.stream.Collectors;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
+
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.PositionalType.*;
+import static net.jbock.compiler.Util.optionalOf;
 
 /**
  * The non-positional constants that {@link OptionType} defines.
@@ -38,12 +33,10 @@ enum Type {
     @Override
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock.Builder builder = CodeBlock.builder();
-      builder.beginControlFlow("if ($N)", impl.field(param))
-          .addStatement("$N.add($S + $N)",
-              joiner,
-              jsonKey(param),
-              impl.field(param))
-          .endControlFlow();
+      builder.addStatement("$N.add($S + $N)",
+          joiner,
+          jsonKey(param),
+          impl.field(param));
       return builder.build();
     }
   },
@@ -68,6 +61,11 @@ enum Type {
               joiner,
               jsonKey(param),
               impl.field(param))
+          .endControlFlow()
+          .beginControlFlow("else")
+          .addStatement("$N.add($S + null)",
+              joiner,
+              jsonKey(param))
           .endControlFlow();
       return builder.build();
     }
@@ -92,6 +90,11 @@ enum Type {
               joiner,
               jsonKey(param),
               impl.field(param))
+          .endControlFlow()
+          .beginControlFlow("else")
+          .addStatement("$N.add($S + null)",
+              joiner,
+              jsonKey(param))
           .endControlFlow();
       return builder.build();
     }
@@ -157,13 +160,21 @@ enum Type {
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
       CodeBlock.Builder builder = CodeBlock.builder();
-      builder.beginControlFlow("if (!$N.isEmpty())", impl.field(param))
-          .addStatement("$N.add($S + $N.stream()\n.map($N -> '\"' + $N + '\"')\n.collect($T.joining($S, $S, $S)))",
-              joiner,
-              jsonKey(param),
-              impl.field(param), s, s, Collectors.class, ",", "[", "]")
-          .endControlFlow();
-      return builder.build();
+      CodeBlock mapper = CodeBlock.builder()
+          .add("$N -> '\"' + $N + '\"'", s, s)
+          .build();
+      CodeBlock collector = CodeBlock.builder()
+          .add("$T.joining($S, $S, $S)", Collectors.class, ",", "[", "]")
+          .build();
+      Map<String, Object> map = new LinkedHashMap<>();
+      map.put("joiner", joiner);
+      map.put("key", jsonKey(param));
+      map.put("field", impl.field(param));
+      map.put("mapper", mapper);
+      map.put("collector", collector);
+      return builder.addStatement(
+          "$L", CodeBlock.builder().addNamed("$joiner:N.add($key:S + $field:N.stream()$Z.map($mapper:L)$Z.collect($collector:L))", map).build())
+          .build();
     }
   };
 

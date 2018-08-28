@@ -1,20 +1,11 @@
 package net.jbock.compiler;
 
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
-import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.STRING;
+import net.jbock.com.squareup.javapoet.*;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.StringJoiner;
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.FieldSpec;
-import net.jbock.com.squareup.javapoet.MethodSpec;
-import net.jbock.com.squareup.javapoet.ParameterSpec;
-import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.com.squareup.javapoet.TypeSpec;
+import java.util.*;
+
+import static javax.lang.model.element.Modifier.*;
+import static net.jbock.compiler.Constants.STRING;
 
 /**
  * Defines the *_Impl inner class.
@@ -58,7 +49,7 @@ final class Impl {
     TypeSpec.Builder builder = TypeSpec.classBuilder(type);
     builder.superclass(TypeName.get(option.context.sourceType.asType()))
         .addFields(fields)
-        .addModifiers(PRIVATE, STATIC, FINAL)
+        .addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor())
         .addMethods(bindMethods());
     if (option.context.generateToString) {
@@ -72,10 +63,15 @@ final class Impl {
     for (int j = 0; j < option.context.parameters.size(); j++) {
       Param param = option.context.parameters.get(j);
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.methodName())
-          .addModifiers(PUBLIC)
           .addAnnotation(Override.class)
           .returns(param.paramType.returnType)
           .addStatement("return $N", fields.get(j));
+      if (param.sourceMethod.getModifiers().contains(PUBLIC)) {
+        builder.addModifiers(PUBLIC);
+      }
+      if (param.sourceMethod.getModifiers().contains(PROTECTED)) {
+        builder.addModifiers(PROTECTED);
+      }
       result.add(builder.build());
     }
     return result;
@@ -83,12 +79,16 @@ final class Impl {
 
   private MethodSpec implConstructor() {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
-    for (FieldSpec field : fields) {
+    for (int i = 0; i < fields.size(); i++) {
+      Param p = option.context.parameters.get(i);
+      FieldSpec field = fields.get(i);
       ParameterSpec param = ParameterSpec.builder(field.type, field.name).build();
       if (field.type.isPrimitive()) {
         builder.addStatement("this.$N = $N", field, param);
+      } else if (p.paramType == Type.REPEATABLE) {
+        builder.addStatement("this.$N = $T.unmodifiableList($N)", field, Collections.class, param);
       } else {
-        builder.addStatement("this.$N = requireNonNull($N)", field, param);
+        builder.addStatement("this.$N = $T.requireNonNull($N)", field, Objects.class, param);
       }
       builder.addParameter(param);
     }

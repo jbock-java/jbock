@@ -1,9 +1,10 @@
 package net.jbock.examples;
 
-import static java.util.Arrays.asList;
-
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
 
 class NoNameArgumentsTest {
 
@@ -16,7 +17,8 @@ class NoNameArgumentsTest {
         "message", "m",
         "cmos", true,
         "number", 1,
-        "file", asList("f", "o", "o")};
+        "file", asList("f", "o", "o"),
+        "verbosity", null};
     f.assertThat("--message=m", "--file=f", "--file=o", "--file=o", "--cmos", "-n1")
         .succeeds(expected);
     f.assertThat("-n1", "--cmos", "--message=m", "--file=f", "--file=o", "--file=o")
@@ -28,17 +30,27 @@ class NoNameArgumentsTest {
   @Test
   void testFlag() {
     f.assertThat("--cmos", "-n1").succeeds(
+        "file", emptyList(),
+        "number", 1,
+        "message", null,
         "cmos", true,
-        "number", 1);
+        "verbosity", null);
   }
 
   @Test
   void testOptionalInt() {
     f.assertThat("-v", "1", "-n1").succeeds(
+        "cmos", false,
+        "message", null,
+        "file", emptyList(),
         "verbosity", 1,
         "number", 1);
     f.assertThat("-n1").succeeds(
-        "number", 1);
+        "cmos", false,
+        "message", null,
+        "file", emptyList(),
+        "number", 1,
+        "verbosity", null);
   }
 
   @Test

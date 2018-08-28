@@ -12,7 +12,8 @@ class AdditionArgumentsTest {
   void optionalAbsent() {
     f.assertThat("1", "2").succeeds(
         "a", 1,
-        "b", 2);
+        "b", 2,
+        "c", null);
   }
 
   @Test

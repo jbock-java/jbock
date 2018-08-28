@@ -85,9 +85,7 @@ public final class Processor extends AbstractProcessor {
           continue;
         }
         TypeSpec typeSpec = Parser.create(context).define();
-        boolean onlyPrimitives = parameters.stream()
-            .allMatch(p -> p.paramType.returnType.isPrimitive());
-        write(onlyPrimitives, context.generatedClass, typeSpec);
+        write(context.generatedClass, typeSpec);
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
@@ -131,13 +129,9 @@ public final class Processor extends AbstractProcessor {
   }
 
   private void write(
-      boolean onlyPrimitive,
       ClassName generatedType,
       TypeSpec typeSpec) throws IOException {
     JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), typeSpec);
-    if (!onlyPrimitive) {
-      builder.addStaticImport(Objects.class, "requireNonNull");
-    }
     JavaFile javaFile = builder
         .skipJavaLangImports(true)
         .build();

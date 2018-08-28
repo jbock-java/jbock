@@ -1,6 +1,8 @@
 package net.jbock.examples;
 
 import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
@@ -12,13 +14,13 @@ class RestArgumentsTest {
 
   @Test
   void testDashAllowed() {
-    f.assertThat("-", "a").succeeds("rest", asList("-", "a"));
+    f.assertThat("-", "a").succeeds("rest", asList("-", "a"), "file", emptyList());
   }
 
   @Test
   void testDoubleDashAllowed() {
     // -- has no special meaning, because there's only one positional list
-    f.assertThat("--", "a").succeeds("rest", asList("--", "a"));
+    f.assertThat("--", "a").succeeds("rest", asList("--", "a"), "file", emptyList());
   }
 
   @Test
