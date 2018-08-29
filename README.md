@@ -42,10 +42,6 @@ abstract static class Args {
 }
 ````
 
-For brevity, we will sometimes omit the `static` keyword and the
-`@CommandLineArguments` annotation when we 
-talk about this class.
-
 In  this case, the order of the method declarations `source()` and `dest()` matters,
 because they represent positional arguments.
 `source()` is declared first, so it represents the first argument.
@@ -66,20 +62,12 @@ public class CopyFile {
     @Positional abstract String dest();
   }
 
-  public static void main(String[] args) {
-    Optional<Args> opt = CopyFile_Args_Parser.parse(args, System.err);
-    if (!opt.isPresent()) {
-      System.exit(1);
-    }
-    opt.ifPresent(CopyFile::run);
+  public static void main(String[] args) throws IOException {
+    CopyFile.run(CopyFile_Args_Parser.create().parseOrExit(args));
   }
 
-  private static void run(Args args) {
-    try {
-      Files.copy(Paths.get(args.source()), Paths.get(args.dest()));
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+  private static void run(Args args) throws IOException {
+    Files.copy(Paths.get(args.source()), Paths.get(args.dest()));
   }
 }
 ````
@@ -171,43 +159,28 @@ For each named (i.e. non-positional) parameter, the method name defines the long
 This can be overridden with the `@LongName` annotation,
 or disabled by passing the empty string to the `@LongName` annotation.
 
-After adding some description text, the complete code looks as follows:
+After adding some description text, the Args class looks like this:
 
 ````java
-public class CopyFile {
+@CommandLineArguments(
+    programName = "cp",
+    missionStatement = "copy files and directories",
+    overview = "Copy SOURCE to DEST")
+abstract class Args {
+  @Positional abstract String source();
+  @Positional abstract String dest();
 
-  @CommandLineArguments(
-      programName = "cp",
-      missionStatement = "copy files and directories",
-      overview = "Copy SOURCE to DEST")
-  abstract static class Args {
-    @Positional abstract String source();
-    @Positional abstract String dest();
+  @ShortName('r')
+  @Description("copy directories recursively")
+  abstract boolean recursive();
 
-    @ShortName('r')
-    @Description("copy directories recursively")
-    abstract boolean recursive();
+  @ShortName('b') @LongName("")
+  @Description("make a backup of each existing destination file")
+  abstract boolean backup();
 
-    @ShortName('b') @LongName("")
-    @Description("make a backup of each existing destination file")
-    abstract boolean backup();
-
-    @ShortName('S')
-    @Description("override the usual backup suffix")
-    abstract Optional<String> suffix();
-  }
-
-  public static void main(String[] args) {
-    Optional<Args> opt = CopyFile_Args_Parser.parse(args, System.err);
-    if (!opt.isPresent()) {
-      System.exit(1);
-    }
-    opt.ifPresent(CopyFile::run);
-  }
-
-  private static void run(Args args) {
-    System.out.println("Copying files: " + args);
-  }
+  @ShortName('S')
+  @Description("override the usual backup suffix")
+  abstract Optional<String> suffix();
 }
 ````
 
@@ -239,9 +212,9 @@ project can be found
 
 The
 [examples](https://github.com/h908714124/jbock/tree/master/examples)
-folder has demos of most parser features.
+folder has demos and tests for most parser features.
 
-More examples:
+Some projects that use jbock:
 
 * [aws-glacier-multipart-upload](https://github.com/h908714124/aws-glacier-multipart-upload)
 * [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
