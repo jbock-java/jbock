@@ -2,7 +2,7 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-`jbock 2.3` is a command line parser, similar to [jcommander](http://jcommander.org/), but doesn't use reflection.
+`jbock` is a command line parser, similar to [jcommander](http://jcommander.org/), but doesn't use reflection.
 Instead, it generates the necessary source code via a mechanism called Java annotation processing.
 
 ## Introduction
