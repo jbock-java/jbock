@@ -299,7 +299,6 @@ final class Option {
   }
 
   private MethodSpec describeMethod() {
-    ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("describe");
     ParameterSpec spaces = ParameterSpec.builder(STRING, "spaces").build();
@@ -309,12 +308,8 @@ final class Option {
         .addStatement("return $N + $N()", spaces, describeNamesMethod)
         .endControlFlow();
 
-    builder.addStatement("$T $N = new $T()", StringBuilder.class, sb, StringBuilder.class)
-        .addStatement("$N.append($N)", sb, spaces)
-        .addStatement("$N.append($N())", sb, describeNamesMethod)
-        .addStatement("$N.append($T.lineSeparator())", sb, System.class)
-        .addStatement("$N.append($N($N))", sb, descriptionBlockMethod, indent)
-        .addStatement("return $N.toString()", sb);
+    builder.addStatement("return $N + $N() + $T.lineSeparator() + $N($N)",
+        spaces, describeNamesMethod, System.class, descriptionBlockMethod, indent);
     return builder
         .returns(STRING)
         .addParameter(indent)
@@ -348,7 +343,6 @@ final class Option {
   private static MethodSpec describeParamMethod(
       FieldSpec longNameField,
       FieldSpec shortNameField) {
-    ParameterSpec sb = ParameterSpec.builder(StringBuilder.class, "sb").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if ($N == null)", shortNameField)
@@ -359,13 +353,7 @@ final class Option {
         .addStatement("return $S + $N", "-", shortNameField)
         .endControlFlow();
 
-    builder.addStatement("$T $N = new $T($N.length() + 6)",
-        StringBuilder.class, sb, StringBuilder.class, longNameField);
-    builder.addStatement("$N.append('-').append($N)", sb, shortNameField);
-    builder.addStatement("$N.append(',').append(' ')", sb);
-    builder.addStatement("$N.append('-').append('-').append($N)", sb, longNameField);
-
-    builder.addStatement("return $N.toString()", sb);
+    builder.addStatement("return $S + $N + $S + $N", "-", shortNameField, ", --", longNameField);
 
     return MethodSpec.methodBuilder("describeParam")
         .returns(STRING)

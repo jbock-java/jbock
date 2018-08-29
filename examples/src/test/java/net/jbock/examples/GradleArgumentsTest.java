@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class GradleArgumentsTest {
 
   private ParserTestFixture<GradleArguments> f =
-      ParserTestFixture.create(GradleArguments_Parser.newBuilder());
+      ParserTestFixture.create(GradleArguments_Parser.create());
 
   @Test
   void errorShortLongConflict() {

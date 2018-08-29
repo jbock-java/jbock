@@ -9,7 +9,7 @@ import static java.util.Collections.emptyList;
 class NoNameArgumentsTest {
 
   private ParserTestFixture<NoNameArguments> f =
-      ParserTestFixture.create(NoNameArguments_Parser.newBuilder());
+      ParserTestFixture.create(NoNameArguments_Parser.create());
 
   @Test
   void testDifferentOrder() {

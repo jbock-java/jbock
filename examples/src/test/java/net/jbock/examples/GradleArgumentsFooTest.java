@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class GradleArgumentsFooTest {
 
   private ParserTestFixture<GradleArguments.Foo> f =
-      ParserTestFixture.create(GradleArguments_Foo_Parser.newBuilder());
+      ParserTestFixture.create(GradleArguments_Foo_Parser.create());
 
   @Test
   void testParserForNestedClass() {

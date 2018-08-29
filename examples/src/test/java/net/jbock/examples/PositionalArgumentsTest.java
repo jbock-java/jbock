@@ -9,7 +9,7 @@ import org.junit.jupiter.api.Test;
 class PositionalArgumentsTest {
 
   private ParserTestFixture<PositionalArguments> f =
-      ParserTestFixture.create(PositionalArguments_Parser.newBuilder());
+      ParserTestFixture.create(PositionalArguments_Parser.create());
 
   @Test
   void errorMissingParameters() {

@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class SimpleArgumentsTest {
 
   private ParserTestFixture<SimpleArguments> f =
-      ParserTestFixture.create(SimpleArguments_Parser.newBuilder());
+      ParserTestFixture.create(SimpleArguments_Parser.create());
 
   @Test
   void invalidOptions() {

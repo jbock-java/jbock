@@ -10,7 +10,7 @@ import org.junit.jupiter.api.Test;
 class RestArgumentsTest {
 
   private ParserTestFixture<RestArguments> f =
-      ParserTestFixture.create(RestArguments_Parser.newBuilder());
+      ParserTestFixture.create(RestArguments_Parser.create());
 
   @Test
   void testDashAllowed() {

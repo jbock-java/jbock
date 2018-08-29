@@ -8,7 +8,7 @@ import java.util.Arrays;
 class HelplessArgumentsTest {
 
   private ParserTestFixture<HelplessArguments> f =
-      ParserTestFixture.create(HelplessArguments_Parser.newBuilder());
+      ParserTestFixture.create(HelplessArguments_Parser.create());
 
   private String[] fullUsage = {
       "NAME",

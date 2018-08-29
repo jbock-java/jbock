@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class AdditionArgumentsTest {
 
   private ParserTestFixture<AdditionArguments> f =
-      ParserTestFixture.create(AdditionArguments_Parser.newBuilder());
+      ParserTestFixture.create(AdditionArguments_Parser.create());
 
   @Test
   void optionalAbsent() {
