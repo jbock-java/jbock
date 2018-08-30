@@ -4,8 +4,7 @@ import net.jbock.com.squareup.javapoet.*;
 
 import java.io.PrintStream;
 
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.element.Modifier.*;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.optionalOf;
@@ -59,22 +58,12 @@ final class Parser {
   }
 
   TypeSpec define() {
-    ParameterSpec outParam = ParameterSpec.builder(out.type, out.name).build();
-    ParameterSpec indentParam = ParameterSpec.builder(indent.type, indent.name).build();
-
-    return TypeSpec.classBuilder(context.generatedClass)
-        .addMethod(MethodSpec.methodBuilder("out")
-            .addParameter(outParam)
-            .addStatement("this.$N = $N", out, outParam)
-            .addStatement("return this")
-            .returns(context.generatedClass)
-            .build())
-        .addMethod(MethodSpec.methodBuilder("indent")
-            .addParameter(indentParam)
-            .addStatement("this.$N = $N", indent, indentParam)
-            .addStatement("return this")
-            .returns(context.generatedClass)
-            .build())
+    TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass);
+    if (context.sourceType.getModifiers().contains(PUBLIC)) {
+      spec.addModifiers(PUBLIC);
+    }
+    return spec.addMethod(addPublicIfNecessary(outMethod()))
+        .addMethod(addPublicIfNecessary(indentMethod()))
         .addType(builder.define())
         .addType(helper.define())
         .addType(option.define())
@@ -82,47 +71,61 @@ final class Parser {
         .addType(option.optionType.define())
         .addField(out)
         .addField(indent)
-        .addMethod(createMethod())
-        .addMethod(parseMethod())
-        .addMethod(parseOrExitMethodConvenience())
-        .addMethod(parseOrExitMethod())
+        .addMethod(addPublicIfNecessary(createMethod()))
+        .addMethod(addPublicIfNecessary(parseMethod()))
+        .addMethod(addPublicIfNecessary(parseOrExitMethodConvenience()))
+        .addMethod(addPublicIfNecessary(parseOrExitMethod()))
         .addMethod(MethodSpec.constructorBuilder().addModifiers(PRIVATE).build())
         .addJavadoc(javadoc())
         .build();
   }
 
-  private MethodSpec parseMethod() {
+  private MethodSpec.Builder indentMethod() {
+    ParameterSpec indentParam = ParameterSpec.builder(indent.type, indent.name).build();
+    return MethodSpec.methodBuilder("indent")
+        .addParameter(indentParam)
+        .addStatement("this.$N = $N", indent, indentParam)
+        .addStatement("return this")
+        .returns(context.generatedClass);
+  }
+
+  private MethodSpec.Builder outMethod() {
+    ParameterSpec outParam = ParameterSpec.builder(out.type, out.name).build();
+    return MethodSpec.methodBuilder("out")
+        .addParameter(outParam)
+        .addStatement("this.$N = $N", out, outParam)
+        .addStatement("return this")
+        .returns(context.generatedClass);
+  }
+
+  private MethodSpec.Builder parseMethod() {
 
     ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
         .build();
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("parse");
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
-    ParameterSpec parser = ParameterSpec.builder(this.builder.type, "parser").build();
-    builder.addStatement("$T $N = new $T($N, $N)", parser.type, parser, parser.type, out, indent);
-    builder.addStatement("return $N.parse($N)", parser, args);
+    ParameterSpec parser = ParameterSpec.builder(builder.type, "parser").build();
+    spec.addStatement("$T $N = new $T($N, $N)", parser.type, parser, parser.type, out, indent);
+    spec.addStatement("return $N.parse($N)", parser, args);
 
-    return builder
-        .addParameter(args)
-        .returns(optionalOf(TypeName.get(context.sourceType.asType())))
-        .build();
+    return spec.addParameter(args)
+        .returns(optionalOf(TypeName.get(context.sourceType.asType())));
   }
 
 
-  private MethodSpec parseOrExitMethodConvenience() {
+  private MethodSpec.Builder parseOrExitMethodConvenience() {
 
     ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
         .build();
-    MethodSpec.Builder builder = MethodSpec.methodBuilder(METHOD_NAME_PARSE_OR_EXIT);
+    MethodSpec.Builder spec = MethodSpec.methodBuilder(METHOD_NAME_PARSE_OR_EXIT);
 
-    builder.addStatement("return parseOrExit($N, $L)", args, DEFAULT_EXITCODE_ON_ERROR);
+    spec.addStatement("return parseOrExit($N, $L)", args, DEFAULT_EXITCODE_ON_ERROR);
 
-    return builder
-        .addParameter(args)
-        .returns(TypeName.get(context.sourceType.asType()))
-        .build();
+    return spec.addParameter(args)
+        .returns(TypeName.get(context.sourceType.asType()));
   }
 
-  private MethodSpec parseOrExitMethod() {
+  private MethodSpec.Builder parseOrExitMethod() {
 
     ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
         .build();
@@ -130,34 +133,31 @@ final class Parser {
         .build();
     ParameterSpec result = ParameterSpec.builder(optionalOf(TypeName.get(context.sourceType.asType())), "result")
         .build();
-    MethodSpec.Builder builder = MethodSpec.methodBuilder(METHOD_NAME_PARSE_OR_EXIT);
+    MethodSpec.Builder spec = MethodSpec.methodBuilder(METHOD_NAME_PARSE_OR_EXIT);
 
-    ParameterSpec parser = ParameterSpec.builder(this.builder.type, "parser").build();
+    ParameterSpec parser = ParameterSpec.builder(builder.type, "parser").build();
 
-    builder.addStatement("$T $N = new $T($N, $N)", parser.type, parser, parser.type, out, indent);
-    builder.addStatement("$T $N = $N.parse($N)", result.type, result, parser, args);
+    spec.addStatement("$T $N = new $T($N, $N)", parser.type, parser, parser.type, out, indent);
+    spec.addStatement("$T $N = $N.parse($N)", result.type, result, parser, args);
 
-    builder.beginControlFlow("if ($N.isPresent())", result)
+    spec.beginControlFlow("if ($N.isPresent())", result)
         .addStatement("return $N.get()", result)
         .endControlFlow();
 
-    builder.addStatement("$T.exit($N)", System.class, statusIfError);
-    builder.addStatement("throw new $T($S)", IllegalStateException.class, "We should never get here.");
+    spec.addStatement("$T.exit($N)", System.class, statusIfError);
+    spec.addStatement("throw new $T($S)", IllegalStateException.class, "We should never get here.");
 
-    return builder
-        .addParameter(args)
+    return spec.addParameter(args)
         .addParameter(statusIfError)
-        .returns(TypeName.get(context.sourceType.asType()))
-        .build();
+        .returns(TypeName.get(context.sourceType.asType()));
   }
 
 
-  private MethodSpec createMethod() {
+  private MethodSpec.Builder createMethod() {
     MethodSpec.Builder builder = MethodSpec.methodBuilder("create");
     builder.addStatement("return new $T()", context.generatedClass);
     return builder.addModifiers(STATIC)
-        .returns(context.generatedClass)
-        .build();
+        .returns(context.generatedClass);
   }
 
 
@@ -165,5 +165,12 @@ final class Parser {
     return CodeBlock.builder().add("Generated by $L\n\n" +
             "@see <a href=\"https://github.com/h908714124/jbock\">jbock on github</a>\n",
         Processor.class.getName()).build();
+  }
+
+  private MethodSpec addPublicIfNecessary(MethodSpec.Builder spec) {
+    if (context.sourceType.getModifiers().contains(PUBLIC)) {
+      return spec.addModifiers(PUBLIC).build();
+    }
+    return spec.build();
   }
 }

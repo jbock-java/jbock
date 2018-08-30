@@ -128,7 +128,7 @@ public final class ParserTestFixture<E> {
   public E parse(String... args) {
     ByteArrayOutputStream baos = new ByteArrayOutputStream();
     PrintStream out = new PrintStream(baos);
-    return parser.out(out).indent(2).parse(args).get();
+    return parser.out(out).indent(2).parse(args).orElseThrow(AssertionError::new);
   }
 
   public void assertPrints(String... expected) {
