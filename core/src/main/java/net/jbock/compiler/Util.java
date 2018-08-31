@@ -1,21 +1,23 @@
 package net.jbock.compiler;
 
-import static java.util.Locale.US;
-import static net.jbock.com.squareup.javapoet.WildcardTypeName.subtypeOf;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
+import net.jbock.com.squareup.javapoet.TypeName;
 
-import java.util.Optional;
-import java.util.StringJoiner;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
-import net.jbock.com.squareup.javapoet.TypeName;
+import java.util.Optional;
+import java.util.StringJoiner;
+
+import static java.util.Locale.US;
+import static net.jbock.com.squareup.javapoet.WildcardTypeName.subtypeOf;
 
 final class Util {
 
@@ -24,6 +26,14 @@ final class Util {
         @Override
         public DeclaredType visitDeclared(DeclaredType declaredType, Void _null) {
           return declaredType;
+        }
+      };
+
+  private static final SimpleTypeVisitor8<ArrayType, Void> AS_ARRAY =
+      new SimpleTypeVisitor8<ArrayType, Void>() {
+        @Override
+        public ArrayType visitArray(ArrayType t, Void aVoid) {
+          return t;
         }
       };
 
@@ -45,6 +55,10 @@ final class Util {
 
   static DeclaredType asDeclared(TypeMirror mirror) {
     return mirror.accept(AS_DECLARED, null);
+  }
+
+  static ArrayType asArray(TypeMirror mirror) {
+    return mirror.accept(AS_ARRAY, null);
   }
 
   static TypeElement asType(Element element) {

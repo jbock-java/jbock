@@ -1,30 +1,28 @@
 package net.jbock.compiler;
 
-import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
-import static net.jbock.compiler.Constants.JAVA_UTIL_OPTIONAL_INT;
-import static net.jbock.compiler.Processor.checkNotPresent;
-import static net.jbock.compiler.Util.asDeclared;
-import static net.jbock.compiler.Util.asType;
-import static net.jbock.compiler.Util.equalsType;
-import static net.jbock.compiler.Util.methodToString;
-import static net.jbock.compiler.Util.snakeCase;
-
-import java.util.Arrays;
-import java.util.Objects;
-import java.util.Set;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 import net.jbock.Description;
 import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
+
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
+import java.util.Arrays;
+import java.util.Objects;
+import java.util.Set;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
+import static net.jbock.compiler.Constants.JAVA_UTIL_OPTIONAL_INT;
+import static net.jbock.compiler.Processor.checkNotPresent;
+import static net.jbock.compiler.Util.*;
 
 /**
  * Internal representation of an abstract method in the source class.
@@ -168,6 +166,17 @@ final class Param {
 
   private static boolean isOptionalString(TypeMirror type) {
     return isXOfString(type, "java.util.Optional");
+  }
+
+  private static boolean isStringArray(TypeMirror type) {
+    if (type.getKind() != TypeKind.ARRAY) {
+      return false;
+    }
+    ArrayType arrayType = asArray(type);
+    if (arrayType == null) {
+      return false;
+    }
+    return isString(arrayType.getComponentType());
   }
 
   private static boolean isXOfString(
