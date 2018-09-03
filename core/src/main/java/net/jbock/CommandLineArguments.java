@@ -74,18 +74,26 @@ public @interface CommandLineArguments {
   boolean addHelp() default true;
 
   /**
-   * True if a double dash "--" stops option parsing.
+   * <p>
+   * True if a double dash "--" should stop option parsing.
    * The remaining tokens will be treated as positional.
+   * </p>
+   *
+   * <p>Note, this is treated as false unless a positional list is defined.</p>
    */
   boolean allowEscape() default true;
 
   /**
+   * <p>
    * True if unknown tokens that start with a dash should be permissible.
    * These tokens will then be treated as positional.
    * Otherwise these tokens are treated as bad input.
+   * </p>
    *
-   * Note that setting {@link #allowEscape()} makes the double dash "--" a known token.
+   * <p>Note that <em>any</em> unknown token is considered bad input, if not enough positional parameters are defined.
+   * A positional list is always enough.</p>
+   *
+   * <p>Note that setting {@link #allowEscape()} (and defining a positional list) makes the double dash "--" a known token.</p>
    */
   boolean strict() default true;
-
 }

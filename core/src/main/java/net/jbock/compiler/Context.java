@@ -31,7 +31,7 @@ final class Context {
   private final List<Param> positionalParameters;
 
   // should "--" end option parsing
-  final boolean stopword;
+  private final boolean allowEscape;
 
   // should unknown parameters that start with dash be forbidden
   final boolean strict;
@@ -65,7 +65,7 @@ final class Context {
       ClassName generatedClass,
       List<Param> parameters,
       List<Param> positionalParameters,
-      boolean stopword,
+      boolean allowEscape,
       boolean problematicOptionNames,
       boolean strict,
       boolean generateToString,
@@ -79,7 +79,7 @@ final class Context {
     this.generatedClass = generatedClass;
     this.parameters = parameters;
     this.positionalParameters = positionalParameters;
-    this.stopword = stopword;
+    this.allowEscape = allowEscape;
     this.problematicOptionNames = problematicOptionNames;
     this.strict = strict;
     this.generateToString = generateToString;
@@ -98,7 +98,7 @@ final class Context {
       Set<PositionalType> positionalParamTypes) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean problematicOptionNames = problematicOptionNames(parameters);
-    boolean stopword = sourceType.getAnnotation(CommandLineArguments.class).allowEscape();
+    boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscape();
     List<Param> positionalParameters = parameters.stream().filter(p -> p.positionalType != null).collect(toList());
     boolean strict = sourceType.getAnnotation(CommandLineArguments.class).strict();
     boolean addHelp = sourceType.getAnnotation(CommandLineArguments.class).addHelp();
@@ -114,7 +114,7 @@ final class Context {
         generatedClass,
         parameters,
         positionalParameters,
-        stopword,
+        allowEscape,
         problematicOptionNames,
         strict,
         generateToString,
@@ -187,7 +187,11 @@ final class Context {
     return OptionalInt.of(positionalParameters.size());
   }
 
-  public boolean hasPositional() {
+  boolean hasPositional() {
     return !positionalParameters.isEmpty();
+  }
+
+  boolean allowEscape() {
+    return allowEscape && positionalParamTypes.contains(PositionalType.POSITIONAL_LIST);
   }
 }

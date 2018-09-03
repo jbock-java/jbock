@@ -124,7 +124,7 @@ final class Tokenizer {
     builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
     builder.addStatement("$T $N = $N.iterator()", STRING_ITERATOR, it, tokens);
 
-    if (context.stopword) {
+    if (context.allowEscape()) {
       builder.addStatement("$T $N = $S", STRING, stopword, "--");
     }
 
@@ -159,7 +159,7 @@ final class Tokenizer {
           .endControlFlow();
     }
 
-    if (context.stopword) {
+    if (context.allowEscape()) {
       builder.beginControlFlow("if ($N.equals($N))", dd, token);
       if (context.hasPositional()) {
         builder.addStatement("$N.forEachRemaining($N::add)", it, this.helper.positionalParameter);
