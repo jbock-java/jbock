@@ -22,6 +22,7 @@ class FewerPositionalArgumentsTest {
 
   @Test
   void excessOptionDoubleDash() {
+    // even though escape is allowed, this fails because there's no positional list defined
     f.assertThat("a", "b", "--", "c").failsWithLine1("Invalid option: --");
   }
 }

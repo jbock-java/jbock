@@ -419,22 +419,22 @@ final class Helper {
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
     ParameterSpec isLong = ParameterSpec.builder(BOOLEAN, "isLong").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("readArgument");
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("readArgument");
 
-    spec.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
-    spec.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
+    builder.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
+    builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
 
-    spec.beginControlFlow("if ($N && $N >= 0)", isLong, index)
+    builder.beginControlFlow("if ($N && $N >= 0)", isLong, index)
         .addStatement("return $N.substring($N + 1)", token, index)
         .endControlFlow();
 
-    spec.beginControlFlow("if (!$N && $N.length() > 2)", isLong, token)
+    builder.beginControlFlow("if (!$N && $N.length() > 2)", isLong, token)
         .addStatement("return $N.substring(2)", token)
         .endControlFlow();
 
-    spec.addStatement("return $N($N, $N)", readNextMethod, token, it);
+    builder.addStatement("return $N($N, $N)", readNextMethod, token, it);
 
-    return spec.addParameters(asList(token, it))
+    return builder.addParameters(asList(token, it))
         .returns(STRING)
         .addModifiers(STATIC)
         .build();
@@ -443,18 +443,18 @@ final class Helper {
   private static MethodSpec readNextMethod() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    CodeBlock.Builder spec = CodeBlock.builder();
+    CodeBlock.Builder builder = CodeBlock.builder();
 
-    spec.beginControlFlow("if (!$N.hasNext())", it)
+    builder.beginControlFlow("if (!$N.hasNext())", it)
         .addStatement(throwMissingValueAfterTokenStatement(token))
         .endControlFlow();
 
-    spec.addStatement("return $N.next()", it);
+    builder.addStatement("return $N.next()", it);
 
     return MethodSpec.methodBuilder("readNext")
         .addParameters(asList(token, it))
         .returns(STRING)
-        .addCode(spec.build())
+        .addCode(builder.build())
         .addModifiers(STATIC)
         .build();
   }

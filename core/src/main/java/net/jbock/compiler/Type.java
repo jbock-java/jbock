@@ -7,10 +7,10 @@ import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.*;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.*;
 import static net.jbock.compiler.PositionalType.*;
 import static net.jbock.compiler.Util.optionalOf;
 
@@ -19,7 +19,7 @@ import static net.jbock.compiler.Util.optionalOf;
  */
 enum Type {
 
-  FLAG(BOOLEAN, null, false) {
+  FLAG(null, false) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -39,9 +39,19 @@ enum Type {
           impl.field(param));
       return builder.build();
     }
+
+    @Override
+    TypeName returnType(Param param) {
+      return BOOLEAN;
+    }
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(BOOLEAN);
+    }
   },
 
-  OPTIONAL(optionalOf(STRING), POSITIONAL_OPTIONAL, false) {
+  OPTIONAL(POSITIONAL_OPTIONAL, false) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -69,9 +79,19 @@ enum Type {
           .endControlFlow();
       return builder.build();
     }
+
+    @Override
+    TypeName returnType(Param param) {
+      return optionalOf(STRING);
+    }
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(optionalOf(STRING));
+    }
   },
 
-  OPTIONAL_INT(ClassName.get(OptionalInt.class), POSITIONAL_OPTIONAL_INT, false) {
+  OPTIONAL_INT(POSITIONAL_OPTIONAL_INT, false) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -98,9 +118,19 @@ enum Type {
           .endControlFlow();
       return builder.build();
     }
+
+    @Override
+    TypeName returnType(Param param) {
+      return ClassName.get(OptionalInt.class);
+    }
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(ClassName.get(OptionalInt.class));
+    }
   },
 
-  REQUIRED(STRING, POSITIONAL_REQUIRED, true) {
+  REQUIRED(POSITIONAL_REQUIRED, true) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -120,9 +150,19 @@ enum Type {
           impl.field(param));
       return builder.build();
     }
+
+    @Override
+    TypeName returnType(Param param) {
+      return STRING;
+    }
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(STRING);
+    }
   },
 
-  REQUIRED_INT(TypeName.INT, POSITIONAL_REQUIRED_INT, true) {
+  REQUIRED_INT(POSITIONAL_REQUIRED_INT, true) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -142,9 +182,19 @@ enum Type {
           impl.field(param));
       return builder.build();
     }
+
+    @Override
+    TypeName returnType(Param param) {
+      return TypeName.INT;
+    }
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(TypeName.INT);
+    }
   },
 
-  REPEATABLE(LIST_OF_STRING, POSITIONAL_LIST, false) {
+  REPEATABLE(POSITIONAL_LIST, false) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -176,10 +226,20 @@ enum Type {
           "$L", CodeBlock.builder().addNamed("$joiner:N.add($key:S + $field:N.stream()$Z.map($mapper:L)$Z.collect($collector:L))", map).build())
           .build();
     }
+
+    @Override
+    TypeName returnType(Param param) {
+      return param.array ? STRING_ARRAY : LIST_OF_STRING;
+    }
+
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(STRING_ARRAY, LIST_OF_STRING);
+    }
   };
 
   final boolean required;
-  final TypeName returnType;
   final PositionalType positionalType;
 
   /**
@@ -189,8 +249,7 @@ enum Type {
 
   abstract CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param);
 
-  Type(TypeName returnType, PositionalType positionalType, boolean required) {
-    this.returnType = returnType;
+  Type(PositionalType positionalType, boolean required) {
     this.positionalType = positionalType;
     this.required = required;
   }
@@ -198,4 +257,8 @@ enum Type {
   private static String jsonKey(Param param) {
     return '"' + param.methodName() + "\":";
   }
+
+  abstract TypeName returnType(Param param);
+
+  abstract Stream<TypeName> returnTypes();
 }

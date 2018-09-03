@@ -35,7 +35,7 @@ final class Impl {
     List<FieldSpec> fields = new ArrayList<>(option.context.parameters.size());
     for (int j = 0; j < option.context.parameters.size(); j++) {
       Param param = option.context.parameters.get(j);
-      fields.add(FieldSpec.builder(param.paramType.returnType, param.methodName())
+      fields.add(FieldSpec.builder(param.paramType == Type.REPEATABLE ? Constants.LIST_OF_STRING : param.returnType(), param.methodName())
           .addModifiers(FINAL)
           .build());
     }
@@ -64,8 +64,12 @@ final class Impl {
       Param param = option.context.parameters.get(j);
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.methodName())
           .addAnnotation(Override.class)
-          .returns(param.paramType.returnType)
-          .addStatement("return $N", fields.get(j));
+          .returns(param.returnType());
+      if (param.paramType == Type.REPEATABLE && param.array) {
+        builder.addStatement("return $N.toArray(new $T[$N.size()])", fields.get(j), STRING, fields.get(j));
+      } else {
+        builder.addStatement("return $N", fields.get(j));
+      }
       if (param.sourceMethod.getModifiers().contains(PUBLIC)) {
         builder.addModifiers(PUBLIC);
       }

@@ -1,9 +1,9 @@
 package net.jbock.examples;
 
-import java.util.List;
-import java.util.Optional;
 import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
+
+import java.util.Optional;
 
 @CommandLineArguments(allowEscape = true)
 abstract class PositionalArguments {
@@ -18,5 +18,5 @@ abstract class PositionalArguments {
   abstract Optional<String> optString();
 
   @Positional
-  abstract List<String> otherTokens();
+  abstract String[] otherTokens();
 }

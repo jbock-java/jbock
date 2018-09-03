@@ -47,6 +47,9 @@ final class Param {
   // never null
   final ExecutableElement sourceMethod;
 
+  // does it return string array
+  final boolean array;
+
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
   private Param(
@@ -55,13 +58,14 @@ final class Param {
       int index,
       Type paramType,
       PositionalType positionalType,
-      ExecutableElement sourceMethod) {
+      ExecutableElement sourceMethod, boolean array) {
     this.shortName = shortName;
     this.longName = longName;
     this.index = index;
     this.positionalType = positionalType;
     this.sourceMethod = sourceMethod;
     this.paramType = paramType;
+    this.array = array;
   }
 
   CodeBlock extractExpression(Helper helper) {
@@ -79,7 +83,7 @@ final class Param {
     if (type.getKind() == TypeKind.INT) {
       return Type.REQUIRED_INT;
     }
-    if (isListOfString(type)) {
+    if (isListOfString(type) || isStringArray(type)) {
       return Type.REPEATABLE;
     }
     if (isOptionalString(type)) {
@@ -92,7 +96,7 @@ final class Param {
       return Type.REQUIRED;
     }
     Set<String> allowed = Arrays.stream(Type.values())
-        .map(t -> t.returnType)
+        .flatMap(Type::returnTypes)
         .map(TypeName::toString)
         .collect(Collectors.toSet());
     String message = String.format("Allowed return types: [" +
@@ -103,11 +107,14 @@ final class Param {
 
   static Param create(ExecutableElement sourceMethod, int index) {
     basicChecks(sourceMethod);
-    Positional positional = sourceMethod.getAnnotation(Positional.class);
-
-    if (positional != null) {
+    if (sourceMethod.getAnnotation(Positional.class) == null) {
+      return createNonpositional(sourceMethod, index);
+    } else {
       return createPositional(sourceMethod, index);
     }
+  }
+
+  private static Param createNonpositional(ExecutableElement sourceMethod, int index) {
     String longName = longName(sourceMethod);
     String shortName = shortName(sourceMethod);
     if (shortName == null && longName == null) {
@@ -116,13 +123,40 @@ final class Param {
     }
     checkName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
+    Type type = checkNonpositionalType(sourceMethod);
+    boolean array = type == Type.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
     return new Param(
         shortName,
         longName,
         index,
-        checkNonpositionalType(sourceMethod),
+        type,
         null,
-        sourceMethod);
+        sourceMethod,
+        array);
+  }
+
+  private static Param createPositional(ExecutableElement sourceMethod, int index) {
+    Positional positional = sourceMethod.getAnnotation(Positional.class);
+    Type type = checkNonpositionalType(sourceMethod);
+    if (type.positionalType == null) {
+      throw ValidationException.create(sourceMethod,
+          "A method that carries the Positional annotation " +
+              "may not return " + TypeName.get(sourceMethod.getReturnType()));
+    }
+    boolean array = type == Type.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
+    checkNotPresent(sourceMethod,
+        positional,
+        Arrays.asList(
+            ShortName.class,
+            LongName.class));
+    return new Param(
+        null,
+        null,
+        index,
+        type,
+        type.positionalType,
+        sourceMethod,
+        array);
   }
 
   private static void basicChecks(ExecutableElement sourceMethod) {
@@ -252,28 +286,6 @@ final class Param {
     }
   }
 
-  private static Param createPositional(ExecutableElement sourceMethod, int index) {
-    Positional positional = sourceMethod.getAnnotation(Positional.class);
-    Type type = checkNonpositionalType(sourceMethod);
-    if (type.positionalType == null) {
-      throw ValidationException.create(sourceMethod,
-          "A method that carries the Positional annotation " +
-              "may not return " + type.returnType);
-    }
-    checkNotPresent(sourceMethod,
-        positional,
-        Arrays.asList(
-            ShortName.class,
-            LongName.class));
-    return new Param(
-        null,
-        null,
-        index,
-        type,
-        type.positionalType,
-        sourceMethod);
-  }
-
   String shortName() {
     return Objects.toString(shortName, null);
   }
@@ -319,5 +331,9 @@ final class Param {
 
   boolean isPositional() {
     return positionalType != null;
+  }
+
+  TypeName returnType() {
+    return paramType.returnType(this);
   }
 }
