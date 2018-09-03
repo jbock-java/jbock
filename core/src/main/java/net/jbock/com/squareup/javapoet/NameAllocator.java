@@ -15,12 +15,12 @@
  */
 package net.jbock.com.squareup.javapoet;
 
+import javax.lang.model.SourceVersion;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
-import javax.lang.model.SourceVersion;
 
 import static net.jbock.com.squareup.javapoet.Util.checkNotNull;
 

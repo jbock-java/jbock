@@ -15,6 +15,9 @@
  */
 package net.jbock.com.squareup.javapoet;
 
+import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -23,10 +26,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
 
 import static net.jbock.com.squareup.javapoet.Util.checkArgument;
 import static net.jbock.com.squareup.javapoet.Util.checkNotNull;

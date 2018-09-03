@@ -15,6 +15,8 @@
  */
 package net.jbock.com.squareup.javapoet;
 
+import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.TypeMirror;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.lang.reflect.WildcardType;
@@ -23,8 +25,6 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.TypeMirror;
 
 import static net.jbock.com.squareup.javapoet.Util.checkArgument;
 

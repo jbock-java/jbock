@@ -1,6 +1,10 @@
 package net.jbock.compiler;
 
-import net.jbock.*;
+import net.jbock.CommandLineArguments;
+import net.jbock.Description;
+import net.jbock.LongName;
+import net.jbock.Positional;
+import net.jbock.ShortName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.JavaFile;
 import net.jbock.com.squareup.javapoet.TypeSpec;
@@ -8,7 +12,11 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
@@ -16,7 +24,12 @@ import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.EnumSet;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
@@ -24,7 +37,9 @@ import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static net.jbock.compiler.Util.*;
+import static net.jbock.compiler.Util.asDeclared;
+import static net.jbock.compiler.Util.asType;
+import static net.jbock.compiler.Util.methodToString;
 
 public final class Processor extends AbstractProcessor {
 
@@ -193,7 +208,7 @@ public final class Processor extends AbstractProcessor {
     List<Param> parameters = new ArrayList<>(abstractMethods.size());
     for (int index = 0; index < abstractMethods.size(); index++) {
       ExecutableElement method = abstractMethods.get(index);
-      Param param = Param.create(method, index);
+      Param param = Param.create(parameters, method, index);
       if (Objects.equals("help", param.longName()) &&
           sourceType.getAnnotation(CommandLineArguments.class).addHelp()) {
         throw ValidationException.create(method, "'--help' is a special token, see CommandLineArguments#addHelp");

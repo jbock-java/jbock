@@ -5,13 +5,23 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
-import static net.jbock.compiler.Constants.*;
-import static net.jbock.compiler.PositionalType.*;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.STRING_ARRAY;
+import static net.jbock.compiler.PositionalType.POSITIONAL_LIST;
+import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL;
+import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL_INT;
+import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED;
+import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED_INT;
 import static net.jbock.compiler.Util.optionalOf;
 
 /**
@@ -26,7 +36,7 @@ enum Type {
           "$N.contains($T.$N)",
           helper.flagsField,
           helper.option.type,
-          helper.option.enumConstant(param))
+          param.enumConstant())
           .build();
     }
 
@@ -59,7 +69,7 @@ enum Type {
           Optional.class,
           helper.sMapField,
           helper.option.type,
-          helper.option.enumConstant(param))
+          param.enumConstant())
           .build();
     }
 
@@ -98,7 +108,7 @@ enum Type {
           "$N($T.$L)",
           helper.extractOptionalIntMethod,
           helper.option.type,
-          helper.option.enumConstant(param))
+          param.enumConstant())
           .build();
     }
 
@@ -137,7 +147,7 @@ enum Type {
           "$N($T.$L)",
           helper.extractRequiredMethod,
           helper.option.type,
-          helper.option.enumConstant(param))
+          param.enumConstant())
           .build();
     }
 
@@ -169,7 +179,7 @@ enum Type {
           "$N($T.$L)",
           helper.extractRequiredIntMethod,
           helper.option.type,
-          helper.option.enumConstant(param))
+          param.enumConstant())
           .build();
     }
 
@@ -201,7 +211,7 @@ enum Type {
           "$N.getOrDefault($T.$L, $T.emptyList())",
           helper.optMapField,
           helper.option.type,
-          helper.option.enumConstant(param),
+          param.enumConstant(),
           Collections.class)
           .build();
     }

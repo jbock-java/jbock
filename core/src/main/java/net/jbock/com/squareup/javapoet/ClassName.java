@@ -15,15 +15,15 @@
  */
 package net.jbock.com.squareup.javapoet;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.PackageElement;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.SimpleElementVisitor8;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.PackageElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.SimpleElementVisitor8;
 
 import static net.jbock.com.squareup.javapoet.Util.checkArgument;
 import static net.jbock.com.squareup.javapoet.Util.checkNotNull;

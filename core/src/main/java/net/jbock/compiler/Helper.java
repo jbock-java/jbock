@@ -1,15 +1,31 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.*;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.MethodSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
+import net.jbock.com.squareup.javapoet.TypeSpec;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.EnumSet;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
-import static net.jbock.compiler.Constants.*;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Util.optionalOf;
 import static net.jbock.compiler.Util.optionalOfSubtype;
 
@@ -601,8 +617,8 @@ final class Helper {
 
   private static CodeBlock throwMissingParameterStatement(ParameterSpec optionParam) {
     return CodeBlock.builder()
-        .add("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Missing parameter: ", optionParam)
+        .add("throw new $T($S + $N + $S)", IllegalArgumentException.class,
+            "Missing parameter: <", optionParam, ">")
         .build();
   }
 

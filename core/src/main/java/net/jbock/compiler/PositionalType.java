@@ -15,7 +15,8 @@ enum PositionalType {
           helper.extractPositionalRequiredMethod,
           helper.context.positionalIndex(param.index),
           helper.positionalParameter,
-          helper.option.type, helper.option.enumConstant(param))
+          helper.option.type,
+          param.enumConstant())
           .build();
     }
   },
@@ -29,7 +30,7 @@ enum PositionalType {
           helper.context.positionalIndex(param.index),
           helper.positionalParameter,
           helper.option.type,
-          helper.option.enumConstant(param))
+          param.enumConstant())
           .build();
     }
   },

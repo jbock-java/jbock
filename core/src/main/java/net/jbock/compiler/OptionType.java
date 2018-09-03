@@ -1,15 +1,15 @@
 package net.jbock.compiler;
 
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
-import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
-
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeSpec;
+
+import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
+import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
+import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 
 /**
  * Defines the *_Parser.OptionType enum.

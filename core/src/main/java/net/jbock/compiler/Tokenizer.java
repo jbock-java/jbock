@@ -1,6 +1,13 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.*;
+import net.jbock.com.squareup.javapoet.ArrayTypeName;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.MethodSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -8,9 +15,13 @@ import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static javax.lang.model.element.Modifier.*;
+import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
-import static net.jbock.compiler.Constants.*;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Util.optionalOf;
 import static net.jbock.compiler.Util.optionalOfSubtype;
 

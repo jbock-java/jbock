@@ -15,6 +15,11 @@
  */
 package net.jbock.com.squareup.javapoet;
 
+import javax.annotation.processing.Filer;
+import javax.lang.model.element.Element;
+import javax.tools.JavaFileObject;
+import javax.tools.JavaFileObject.Kind;
+import javax.tools.SimpleJavaFileObject;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
@@ -30,15 +35,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.TreeSet;
-import javax.annotation.processing.Filer;
-import javax.lang.model.element.Element;
-import javax.tools.JavaFileObject;
-import javax.tools.JavaFileObject.Kind;
-import javax.tools.SimpleJavaFileObject;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
 import static net.jbock.com.squareup.javapoet.Util.checkArgument;
 import static net.jbock.com.squareup.javapoet.Util.checkNotNull;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 /** A Java file containing a single top level class. */
 public final class JavaFile {

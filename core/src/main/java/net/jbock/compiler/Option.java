@@ -1,10 +1,24 @@
 package net.jbock.compiler;
 
 import net.jbock.Description;
-import net.jbock.com.squareup.javapoet.*;
+import net.jbock.com.squareup.javapoet.ArrayTypeName;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.MethodSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
+import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.io.PrintStream;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.StringJoiner;
 
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
@@ -14,7 +28,6 @@ import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Util.snakeCase;
 
 /**
  * Defines the *_Parser.Option enum.
@@ -146,7 +159,7 @@ final class Option {
     for (Param param : context.parameters) {
       String[] desc = getText(param.description());
       String argumentName = param.descriptionArgumentName();
-      String enumConstant = enumConstant(param);
+      String enumConstant = param.enumConstant();
       String format = String.format("$S, $S, $T.$L, $S, new $T[]{$Z%s}",
           String.join(",$Z", Collections.nCopies(desc.length, "$S")));
       List<Comparable<? extends Comparable<?>>> fixArgs =
@@ -175,18 +188,6 @@ final class Option {
           .addMethod(longNameMapMethod);
     }
     return builder.build();
-  }
-
-  String enumConstant(Param param) {
-    return enumConstant(context, param);
-  }
-
-  private static String enumConstant(Context context, Param param) {
-    String result = snakeCase(context.parameters.get(param.index).methodName());
-    if (!context.problematicOptionNames) {
-      return result;
-    }
-    return result + '_' + param.index;
   }
 
   private MethodSpec privateConstructor() {
@@ -368,11 +369,11 @@ final class Option {
 
     builder.beginControlFlow("if ($N == null)", shortNameField)
         .addStatement("return $T.format($S, $N, name())",
-            String.class, "--%s=%s", longNameField)
+            String.class, "--%s=<%s>", longNameField)
         .endControlFlow();
 
     builder.addStatement("return $T.format($S, $N, name())",
-        String.class, "-%s %s", shortNameField);
+        String.class, "-%s <%s>", shortNameField);
 
     return MethodSpec.methodBuilder("example")
         .returns(STRING)
@@ -464,27 +465,27 @@ final class Option {
     builder.addStatement("$N.add($S)", joiner, context.programName);
 
     if (!optionalNonpos.isEmpty()) {
-      builder.addStatement("$N.add($S)", joiner, "[OPTION]...");
+      builder.addStatement("$N.add($S)", joiner, "[<options>]");
     }
 
     for (Param param : requiredNonpos) {
       builder.addStatement("$N.add($L.$N())", joiner,
-          enumConstant(context, param), exampleMethod);
+          param.enumConstant(), exampleMethod);
     }
 
     for (Param param : positional) {
       switch (param.positionalType.order) {
         case REQUIRED:
-          builder.addStatement("$N.add($L.name())", joiner,
-              enumConstant(context, param));
+          builder.addStatement("$N.add($S + $L.name() + $S)", joiner, "<",
+              param.enumConstant(), ">");
           break;
         case OPTIONAL:
-          builder.addStatement("$N.add($S + $L + $S)", joiner, "[",
-              enumConstant(context, param), "]");
+          builder.addStatement("$N.add($S + $L + $S)", joiner, "[<",
+              param.enumConstant(), ">]");
           break;
         case LIST:
-          builder.addStatement("$N.add($S + $L + $S)", joiner, "[",
-              enumConstant(context, param), "]...");
+          builder.addStatement("$N.add($S + $L + $S)", joiner, context.allowEscape() ? "[[--] <" : "[<",
+              param.enumConstant(), ">...]");
           break;
         default:
           throw new AssertionError();

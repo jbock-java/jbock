@@ -16,7 +16,6 @@ import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import static java.util.Locale.US;
 import static net.jbock.com.squareup.javapoet.WildcardTypeName.subtypeOf;
 
 final class Util {
@@ -80,23 +79,25 @@ final class Util {
   }
 
   static String snakeCase(String input) {
-    if (Character.isUpperCase(input.charAt(0))) {
-      return input.toUpperCase(US);
-    }
-    if (input.indexOf('_') >= 0) {
-      return input.toUpperCase(US);
-    }
     StringBuilder sb = new StringBuilder();
+    int prevLower = 0;
+    int prevUpper = 0;
     for (int i = 0; i < input.length(); i++) {
       char c = input.charAt(i);
       if (Character.isUpperCase(c)) {
-        if (i > 0) {
+        if (prevLower >= 2) {
           sb.append('_');
         }
-        sb.append(c);
+        prevLower = 0;
+        prevUpper++;
       } else {
-        sb.append(Character.toUpperCase(c));
+        if (prevUpper >= 2) {
+          sb.append('_');
+        }
+        prevUpper = 0;
+        prevLower++;
       }
+      sb.append(Character.toLowerCase(c));
     }
     return sb.toString();
   }

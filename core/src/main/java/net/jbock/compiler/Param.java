@@ -14,6 +14,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
@@ -22,7 +23,12 @@ import java.util.stream.Collectors;
 import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
 import static net.jbock.compiler.Constants.JAVA_UTIL_OPTIONAL_INT;
 import static net.jbock.compiler.Processor.checkNotPresent;
-import static net.jbock.compiler.Util.*;
+import static net.jbock.compiler.Util.asArray;
+import static net.jbock.compiler.Util.asDeclared;
+import static net.jbock.compiler.Util.asType;
+import static net.jbock.compiler.Util.equalsType;
+import static net.jbock.compiler.Util.methodToString;
+import static net.jbock.compiler.Util.snakeCase;
 
 /**
  * Internal representation of an abstract method in the source class.
@@ -50,6 +56,19 @@ final class Param {
   // does it return string array
   final boolean array;
 
+  final String name;
+
+  private static String enumConstant(List<Param> params, String methodName, int index) {
+    String result = snakeCase(methodName);
+    for (Param param : params) {
+      if (param.name.equals(result)) {
+        return result + '_' + index;
+      }
+    }
+    return result;
+  }
+
+
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
   private Param(
@@ -58,7 +77,9 @@ final class Param {
       int index,
       Type paramType,
       PositionalType positionalType,
-      ExecutableElement sourceMethod, boolean array) {
+      ExecutableElement sourceMethod,
+      boolean array,
+      String name) {
     this.shortName = shortName;
     this.longName = longName;
     this.index = index;
@@ -66,6 +87,7 @@ final class Param {
     this.sourceMethod = sourceMethod;
     this.paramType = paramType;
     this.array = array;
+    this.name = name;
   }
 
   CodeBlock extractExpression(Helper helper) {
@@ -105,16 +127,16 @@ final class Param {
     throw ValidationException.create(sourceMethod, message);
   }
 
-  static Param create(ExecutableElement sourceMethod, int index) {
+  static Param create(List<Param> params, ExecutableElement sourceMethod, int index) {
     basicChecks(sourceMethod);
     if (sourceMethod.getAnnotation(Positional.class) == null) {
-      return createNonpositional(sourceMethod, index);
+      return createNonpositional(params, sourceMethod, index);
     } else {
-      return createPositional(sourceMethod, index);
+      return createPositional(params, sourceMethod, index);
     }
   }
 
-  private static Param createNonpositional(ExecutableElement sourceMethod, int index) {
+  private static Param createNonpositional(List<Param> params, ExecutableElement sourceMethod, int index) {
     String longName = longName(sourceMethod);
     String shortName = shortName(sourceMethod);
     if (shortName == null && longName == null) {
@@ -132,10 +154,11 @@ final class Param {
         type,
         null,
         sourceMethod,
-        array);
+        array,
+        enumConstant(params, sourceMethod.getSimpleName().toString(), index));
   }
 
-  private static Param createPositional(ExecutableElement sourceMethod, int index) {
+  private static Param createPositional(List<Param> params, ExecutableElement sourceMethod, int index) {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
     Type type = checkNonpositionalType(sourceMethod);
     if (type.positionalType == null) {
@@ -156,7 +179,8 @@ final class Param {
         type,
         type.positionalType,
         sourceMethod,
-        array);
+        array,
+        enumConstant(params, sourceMethod.getSimpleName().toString(), index));
   }
 
   private static void basicChecks(ExecutableElement sourceMethod) {
@@ -335,5 +359,9 @@ final class Param {
 
   TypeName returnType() {
     return paramType.returnType(this);
+  }
+
+  String enumConstant() {
+    return name.toUpperCase();
   }
 }

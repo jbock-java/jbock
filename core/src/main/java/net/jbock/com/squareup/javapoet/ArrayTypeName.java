@@ -15,6 +15,8 @@
  */
 package net.jbock.com.squareup.javapoet;
 
+import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.ArrayType;
 import java.io.IOException;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
@@ -22,8 +24,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.ArrayType;
 
 import static net.jbock.com.squareup.javapoet.Util.checkNotNull;
 
