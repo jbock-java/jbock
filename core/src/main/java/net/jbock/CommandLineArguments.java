@@ -67,8 +67,9 @@ public @interface CommandLineArguments {
 
   /**
    * <p>
-   * If {@code true}, a special parameter {@code --help} will be understood by the parser.
-   * In this case, it is an error to assign this long name anywhere.
+   * If {@code true}, a special parameter {@code --help} will be understood by the parser,
+   * if it is the very first argument.
+   * In this case, it is an error to assign the long name "help" to any other parameter.
    * </p>
    */
   boolean addHelp() default true;
