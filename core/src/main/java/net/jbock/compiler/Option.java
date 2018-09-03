@@ -483,13 +483,8 @@ final class Option {
               enumConstant(context, param), "]");
           break;
         case LIST:
-          if (param.positionalType == PositionalType.POSITIONAL_LIST_2) {
-            builder.addStatement("$N.add($S + $L + $S)", joiner, "[-- ",
-                enumConstant(context, param), "...]");
-          } else {
-            builder.addStatement("$N.add($S + $L + $S)", joiner, "[",
-                enumConstant(context, param), "]...");
-          }
+          builder.addStatement("$N.add($S + $L + $S)", joiner, "[",
+              enumConstant(context, param), "]...");
           break;
         default:
           throw new AssertionError();

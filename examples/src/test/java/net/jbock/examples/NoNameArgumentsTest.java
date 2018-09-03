@@ -63,7 +63,6 @@ class NoNameArgumentsTest {
     f.assertThat("blabla").failsWithLine1("Invalid option: blabla");
   }
 
-
   @Test
   void testPrint() {
     f.assertPrints(

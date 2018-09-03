@@ -4,8 +4,8 @@ import java.util.OptionalInt;
 import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
 
-// Allow arguments to start with a dash, so negative numbers can be passed.
-@CommandLineArguments(ignoreDashes = true)
+// Allow positional arguments to start with a dash, so negative numbers can be passed.
+@CommandLineArguments(strict = false)
 abstract class AdditionArguments {
 
   @Positional

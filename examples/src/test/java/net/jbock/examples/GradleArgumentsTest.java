@@ -1,11 +1,11 @@
 package net.jbock.examples;
 
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-
-import net.jbock.examples.fixture.ParserTestFixture;
-import org.junit.jupiter.api.Test;
 
 class GradleArgumentsTest {
 
@@ -57,8 +57,7 @@ class GradleArgumentsTest {
         "verbose", false,
         "message", "hello",
         "file", emptyList(),
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
   }
 
   @Test
@@ -68,8 +67,7 @@ class GradleArgumentsTest {
         "cmos", false,
         "verbose", false,
         "message", "hello",
-        "otherTokens", singletonList("b-a-b-a"),
-        "ddTokens", asList("->", "<=>", "", " "),
+        "otherTokens", asList("b-a-b-a", "->", "<=>", "", " "),
         "file", emptyList());
   }
 
@@ -81,30 +79,26 @@ class GradleArgumentsTest {
         "verbose", false,
         "message", "",
         "file", emptyList(),
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
     f.assertThat("--message=").succeeds(
         "dir", null,
         "cmos", false,
         "verbose", false,
         "message", "",
         "file", emptyList(),
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
     f.assertThat("--message", "").succeeds(
         "dir", null,
         "cmos", false,
         "verbose", false,
         "message", "",
         "file", emptyList(),
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
   }
 
   @Test
   void testAllForms() {
     Object[] expectation = {
-        "ddTokens", emptyList(),
         "otherTokens", emptyList(),
         "file", emptyList(),
         "message", "hello",
@@ -125,24 +119,21 @@ class GradleArgumentsTest {
         "cmos", false,
         "verbose", false,
         "file", singletonList("bar.txt"),
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
     f.assertThat("-fbar.txt", "--message=hello").succeeds(
         "message", "hello",
         "dir", null,
         "cmos", false,
         "verbose", false,
         "file", singletonList("bar.txt"),
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
     f.assertThat("--message=hello", "-fbar.txt").succeeds(
         "message", "hello",
         "dir", null,
         "cmos", false,
         "verbose", false,
         "file", singletonList("bar.txt"),
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
   }
 
   @Test
@@ -154,7 +145,6 @@ class GradleArgumentsTest {
   @Test
   void testFlag() {
     f.assertThat("-c", "hello").succeeds(
-        "ddTokens", emptyList(),
         "file", emptyList(),
         "cmos", true,
         "verbose", false,
@@ -171,8 +161,7 @@ class GradleArgumentsTest {
         "verbose", false,
         "message", null,
         "otherTokens", asList("hello", "goodbye"),
-        "file", emptyList(),
-        "ddTokens", emptyList());
+        "file", emptyList());
   }
 
   @Test
@@ -183,8 +172,7 @@ class GradleArgumentsTest {
         "verbose", true,
         "message", null,
         "file", emptyList(),
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
   }
 
   @Test
@@ -200,7 +188,7 @@ class GradleArgumentsTest {
         "  GradleArguments",
         "",
         "SYNOPSIS",
-        "  GradleArguments [OPTION]... [OTHER_TOKENS]... [-- DD_TOKENS...]",
+        "  GradleArguments [OPTION]... [OTHER_TOKENS]...",
         "",
         "DESCRIPTION",
         "",

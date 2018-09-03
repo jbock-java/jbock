@@ -1,11 +1,11 @@
 package net.jbock.examples;
 
+import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Test;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
-
-import net.jbock.examples.fixture.ParserTestFixture;
-import org.junit.jupiter.api.Test;
 
 class CurlArgumentsTest {
 

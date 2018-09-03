@@ -290,11 +290,6 @@ final class Param {
     return sourceMethod.getSimpleName().toString();
   }
 
-  Param promoteToPositionalList2() {
-    return new Param(shortName, longName, index, paramType,
-        PositionalType.POSITIONAL_LIST_2, sourceMethod);
-  }
-
   String descriptionArgumentName() {
     if (paramType == Type.FLAG) {
       return null;
@@ -320,5 +315,9 @@ final class Param {
       default:
         return "VALUE";
     }
+  }
+
+  boolean isPositional() {
+    return positionalType != null;
   }
 }

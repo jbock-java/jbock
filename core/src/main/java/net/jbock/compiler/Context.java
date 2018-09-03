@@ -1,19 +1,20 @@
 package net.jbock.compiler;
 
-import static java.util.stream.Collectors.toList;
-import static javax.lang.model.util.ElementFilter.methodsIn;
-import static net.jbock.compiler.Util.asType;
+import net.jbock.CommandLineArguments;
+import net.jbock.com.squareup.javapoet.ClassName;
 
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Name;
+import javax.lang.model.element.TypeElement;
 import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
-import net.jbock.CommandLineArguments;
-import net.jbock.com.squareup.javapoet.ClassName;
+
+import static java.util.stream.Collectors.toList;
+import static javax.lang.model.util.ElementFilter.methodsIn;
+import static net.jbock.compiler.Util.asType;
 
 final class Context {
 
@@ -27,13 +28,13 @@ final class Context {
   final List<Param> parameters;
 
   // only the methods that have the Positional annotation (in source order, inheritance not considered)
-  final List<Param> positionalParameters;
+  private final List<Param> positionalParameters;
 
   // should "--" end option parsing
   final boolean stopword;
 
-  // should positional parameters be allowed to start with dash
-  final boolean ignoreDashes;
+  // should unknown parameters that start with dash be forbidden
+  final boolean strict;
 
   // true if upper-casing the method names would cause a naming conflict
   final boolean problematicOptionNames;
@@ -41,8 +42,8 @@ final class Context {
   // true if the source type does not already define toString
   final boolean generateToString;
 
-  // true if help is disabled
-  final boolean helpDisabled;
+  // true if --help is a special token
+  final boolean addHelp;
 
   // a set of only the non-positional param types in the sourceType
   final Set<Type> paramTypes;
@@ -66,9 +67,9 @@ final class Context {
       List<Param> positionalParameters,
       boolean stopword,
       boolean problematicOptionNames,
-      boolean ignoreDashes,
+      boolean strict,
       boolean generateToString,
-      boolean helpDisabled,
+      boolean addHelp,
       Set<Type> paramTypes,
       Set<PositionalType> positionalParamTypes,
       List<String> overview,
@@ -80,9 +81,9 @@ final class Context {
     this.positionalParameters = positionalParameters;
     this.stopword = stopword;
     this.problematicOptionNames = problematicOptionNames;
-    this.ignoreDashes = ignoreDashes;
+    this.strict = strict;
     this.generateToString = generateToString;
-    this.helpDisabled = helpDisabled;
+    this.addHelp = addHelp;
     this.paramTypes = paramTypes;
     this.positionalParamTypes = positionalParamTypes;
     this.overview = overview;
@@ -97,10 +98,10 @@ final class Context {
       Set<PositionalType> positionalParamTypes) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean problematicOptionNames = problematicOptionNames(parameters);
-    boolean stopword = positionalParamTypes.contains(PositionalType.POSITIONAL_LIST_2);
+    boolean stopword = sourceType.getAnnotation(CommandLineArguments.class).allowEscape();
     List<Param> positionalParameters = parameters.stream().filter(p -> p.positionalType != null).collect(toList());
-    boolean ignoreDashes = sourceType.getAnnotation(CommandLineArguments.class).ignoreDashes();
-    boolean helpDisabled = sourceType.getAnnotation(CommandLineArguments.class).helpDisabled();
+    boolean strict = sourceType.getAnnotation(CommandLineArguments.class).strict();
+    boolean addHelp = sourceType.getAnnotation(CommandLineArguments.class).addHelp();
     boolean generateToString = methodsIn(sourceType.getEnclosedElements()).stream()
         .filter(method -> method.getParameters().isEmpty())
         .map(ExecutableElement::getSimpleName)
@@ -115,9 +116,9 @@ final class Context {
         positionalParameters,
         stopword,
         problematicOptionNames,
-        ignoreDashes,
+        strict,
         generateToString,
-        helpDisabled,
+        addHelp,
         paramTypes,
         positionalParamTypes,
         description,
@@ -174,7 +175,7 @@ final class Context {
    * before doubledash.
    *
    * @return the maximum number of positional arguments,
-   *     or {@code OptionalInt.empty()} if there is no limit
+   * or {@code OptionalInt.empty()} if there is no limit
    */
   OptionalInt maxPositional() {
     if (positionalParameters.isEmpty()) {
@@ -183,12 +184,10 @@ final class Context {
     if (positionalParamTypes.contains(PositionalType.POSITIONAL_LIST)) {
       return OptionalInt.empty();
     }
-    int count = 0;
-    for (Param parameter : positionalParameters) {
-      if (parameter.positionalType != PositionalType.POSITIONAL_LIST_2) {
-        count++;
-      }
-    }
-    return OptionalInt.of(count);
+    return OptionalInt.of(positionalParameters.size());
+  }
+
+  public boolean hasPositional() {
+    return !positionalParameters.isEmpty();
   }
 }

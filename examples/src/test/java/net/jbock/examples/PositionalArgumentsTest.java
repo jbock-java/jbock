@@ -1,10 +1,11 @@
 package net.jbock.examples;
 
-import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
-
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
+
+import static java.util.Arrays.asList;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 class PositionalArgumentsTest {
 
@@ -23,8 +24,7 @@ class PositionalArgumentsTest {
         "optString", null,
         "source", "a",
         "dest", "b",
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
   }
 
   @Test
@@ -33,8 +33,7 @@ class PositionalArgumentsTest {
         "source", "a",
         "dest", "b",
         "optString", "c",
-        "otherTokens", singletonList("d"),
-        "ddTokens", emptyList());
+        "otherTokens", singletonList("d"));
   }
 
   @Test
@@ -43,32 +42,27 @@ class PositionalArgumentsTest {
         "source", "a",
         "dest", "b",
         "optString", "c",
-        "otherTokens", singletonList("d"),
-        "ddTokens", singletonList("e"));
+        "otherTokens", asList("d", "e"));
     f.assertThat("a", "b", "c", "--", "e").succeeds(
         "source", "a",
         "dest", "b",
         "optString", "c",
-        "otherTokens", emptyList(),
-        "ddTokens", singletonList("e"));
+        "otherTokens", singletonList("e"));
     f.assertThat("a", "b", "c", "--").succeeds(
         "source", "a",
         "dest", "b",
         "optString", "c",
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
     f.assertThat("a", "b", "c").succeeds(
         "source", "a",
         "dest", "b",
         "optString", "c",
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
     f.assertThat("a", "b").succeeds(
         "optString", null,
         "source", "a",
         "dest", "b",
-        "otherTokens", emptyList(),
-        "ddTokens", emptyList());
+        "otherTokens", emptyList());
   }
 
   @Test
@@ -78,7 +72,7 @@ class PositionalArgumentsTest {
         "  PositionalArguments",
         "",
         "SYNOPSIS",
-        "  PositionalArguments SOURCE DEST [OPT_STRING] [OTHER_TOKENS]... [-- DD_TOKENS...]",
+        "  PositionalArguments SOURCE DEST [OPT_STRING] [OTHER_TOKENS]...",
         "",
         "DESCRIPTION",
         "",

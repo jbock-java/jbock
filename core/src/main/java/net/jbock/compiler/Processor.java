@@ -1,44 +1,30 @@
 package net.jbock.compiler;
 
+import net.jbock.*;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.JavaFile;
+import net.jbock.com.squareup.javapoet.TypeSpec;
+
+import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.RoundEnvironment;
+import javax.lang.model.SourceVersion;
+import javax.lang.model.element.*;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.util.ElementFilter;
+import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
+import java.io.IOException;
+import java.io.Writer;
+import java.lang.annotation.Annotation;
+import java.util.*;
+import java.util.stream.Stream;
+
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.ElementKind.METHOD;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static net.jbock.compiler.Util.asDeclared;
-import static net.jbock.compiler.Util.asType;
-import static net.jbock.compiler.Util.methodToString;
-
-import java.io.IOException;
-import java.io.Writer;
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.EnumSet;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Stream;
-import javax.annotation.processing.AbstractProcessor;
-import javax.annotation.processing.RoundEnvironment;
-import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.util.ElementFilter;
-import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
-import net.jbock.CommandLineArguments;
-import net.jbock.Description;
-import net.jbock.LongName;
-import net.jbock.Positional;
-import net.jbock.ShortName;
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.JavaFile;
-import net.jbock.com.squareup.javapoet.TypeSpec;
+import static net.jbock.compiler.Util.*;
 
 public final class Processor extends AbstractProcessor {
 
@@ -145,7 +131,6 @@ public final class Processor extends AbstractProcessor {
 
   private List<Param> checkPositionalOrder(List<Param> params) {
     List<Param> result = new ArrayList<>(params.size());
-    int positionalListCount = 0;
     Param previousPositional = null;
     for (Param param : params) {
       if (param.positionalType == null) {
@@ -153,29 +138,10 @@ public final class Processor extends AbstractProcessor {
         continue;
       }
       validatePositionalOrder(previousPositional, param);
-      param = promotePositionalList(positionalListCount, param);
       result.add(param);
-      if (param.positionalType.order == PositionalOrder.LIST) {
-        positionalListCount++;
-      }
       previousPositional = param;
     }
     return result;
-  }
-
-  private Param promotePositionalList(int positionalListCount, Param param) {
-    if (param.positionalType != PositionalType.POSITIONAL_LIST) {
-      return param;
-    }
-    switch (positionalListCount) {
-      case 0:
-        return param;
-      case 1:
-        return param.promoteToPositionalList2();
-      default:
-        throw ValidationException.create(param.sourceMethod,
-            "There can be at most 2 positional lists.");
-    }
   }
 
   private void validatePositionalOrder(Param previous, Param param) {
@@ -229,11 +195,12 @@ public final class Processor extends AbstractProcessor {
       ExecutableElement method = abstractMethods.get(index);
       Param param = Param.create(method, index);
       if (Objects.equals("help", param.longName()) &&
-          !sourceType.getAnnotation(CommandLineArguments.class).helpDisabled()) {
-        throw ValidationException.create(method, "help is enabled, so '--help' is reserved");
+          sourceType.getAnnotation(CommandLineArguments.class).addHelp()) {
+        throw ValidationException.create(method, "'--help' is a special token, see CommandLineArguments#addHelp");
       }
       parameters.add(param);
     }
+    checkOnlyOnePositionalList(parameters);
     checkDistinctLongNames(parameters);
     checkDistinctShortNames(parameters);
     return checkPositionalOrder(parameters);
@@ -249,6 +216,20 @@ public final class Processor extends AbstractProcessor {
           throw ValidationException.create(param.sourceMethod,
               "Duplicate short name: " + name);
         }
+      }
+    }
+  }
+
+  private void checkOnlyOnePositionalList(List<Param> params) {
+    boolean positionalListFound = false;
+    for (Param param : params) {
+      if (param.isPositional() &&
+          param.paramType == Type.REPEATABLE) {
+        if (positionalListFound) {
+          throw ValidationException.create(param.sourceMethod,
+              "Only one positional list allowed");
+        }
+        positionalListFound = true;
       }
     }
   }

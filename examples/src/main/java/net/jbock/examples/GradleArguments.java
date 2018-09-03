@@ -1,16 +1,13 @@
 package net.jbock.examples;
 
 
+import net.jbock.*;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import net.jbock.CommandLineArguments;
-import net.jbock.Description;
-import net.jbock.LongName;
-import net.jbock.Positional;
-import net.jbock.ShortName;
 
-@CommandLineArguments
+@CommandLineArguments(allowEscape = true)
 abstract class GradleArguments {
 
   @ShortName('m')
@@ -34,9 +31,6 @@ abstract class GradleArguments {
 
   @Positional
   abstract List<String> otherTokens();
-
-  @Positional
-  abstract List<String> ddTokens();
 
   @CommandLineArguments
   static abstract class Foo {

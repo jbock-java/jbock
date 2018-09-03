@@ -159,6 +159,21 @@ class ProcessorTest {
   }
 
   @Test
+  void twoPositionalLists() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Positional abstract List<String> a();",
+        "  @Positional abstract List<String> b();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Only one positional list allowed");
+  }
+
+  @Test
   void positionalListBeforeOptionalPositional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -320,6 +335,20 @@ class ProcessorTest {
         .processedWith(new Processor())
         .compilesWithoutError()
         .withWarningContaining("Skipping");
+  }
+
+  @Test
+  void twoLists() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  abstract List<String> a();",
+        "  @Positional abstract List<String> b();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
   }
 
   private List<String> withImports(String... lines) {

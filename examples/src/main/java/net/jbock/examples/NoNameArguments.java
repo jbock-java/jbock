@@ -1,11 +1,12 @@
 package net.jbock.examples;
 
 
+import net.jbock.CommandLineArguments;
+import net.jbock.ShortName;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import net.jbock.CommandLineArguments;
-import net.jbock.ShortName;
 
 @CommandLineArguments
 abstract class NoNameArguments {

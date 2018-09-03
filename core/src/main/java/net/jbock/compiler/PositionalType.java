@@ -11,11 +11,10 @@ enum PositionalType {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
-          "$N($L, $N, $N, $T.$L)",
+          "$N($L, $N, $T.$L)",
           helper.extractPositionalRequiredMethod,
           helper.context.positionalIndex(param.index),
           helper.positionalParameter,
-          helper.ddIndexParameter,
           helper.option.type, helper.option.enumConstant(param))
           .build();
     }
@@ -25,11 +24,10 @@ enum PositionalType {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
-          "$N($L, $N, $N, $T.$L)",
+          "$N($L, $N, $T.$L)",
           helper.extractPositionalRequiredIntMethod,
           helper.context.positionalIndex(param.index),
           helper.positionalParameter,
-          helper.ddIndexParameter,
           helper.option.type,
           helper.option.enumConstant(param))
           .build();
@@ -40,11 +38,10 @@ enum PositionalType {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
-          "$N($L, $N, $N)",
+          "$N($L, $N)",
           helper.extractPositionalOptionalMethod,
           helper.context.positionalIndex(param.index),
-          helper.positionalParameter,
-          helper.ddIndexParameter)
+          helper.positionalParameter)
           .build();
     }
   },
@@ -53,11 +50,10 @@ enum PositionalType {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
-          "$N($L, $N, $N)",
+          "$N($L, $N)",
           helper.extractPositionalOptionalIntMethod,
           helper.context.positionalIndex(param.index),
-          helper.positionalParameter,
-          helper.ddIndexParameter)
+          helper.positionalParameter)
           .build();
     }
   },
@@ -66,22 +62,9 @@ enum PositionalType {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
-          "$N($L, $N, $N)",
+          "$N($L, $N)",
           helper.extractPositionalListMethod,
           helper.context.positionalIndex(param.index),
-          helper.positionalParameter,
-          helper.ddIndexParameter)
-          .build();
-    }
-  },
-
-  POSITIONAL_LIST_2(PositionalOrder.LIST) {
-    @Override
-    CodeBlock extractExpression(Helper helper, Param param) {
-      return CodeBlock.builder().add(
-          "$N($N, $N)",
-          helper.extractPositionalList2Method,
-          helper.ddIndexParameter,
           helper.positionalParameter)
           .build();
     }
@@ -96,7 +79,7 @@ enum PositionalType {
 
   /**
    * @return An expression that extracts the value of the given param
-   *     from the positional and ddIndex params.
+   * from the positional and ddIndex params.
    */
   abstract CodeBlock extractExpression(Helper helper, Param param);
 }

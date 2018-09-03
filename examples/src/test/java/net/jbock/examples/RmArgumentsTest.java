@@ -1,10 +1,9 @@
 package net.jbock.examples;
 
-import static java.util.Arrays.asList;
-import static java.util.Collections.singletonList;
-
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
+
+import static java.util.Arrays.asList;
 
 class RmArgumentsTest {
 
@@ -16,8 +15,7 @@ class RmArgumentsTest {
     f.assertThat("-f", "a", "--", "-r", "--", "-f").succeeds(
         "force", true,
         "recursive", false,
-        "otherTokens", singletonList("a"),
-        "ddTokens", asList("-r", "--", "-f"));
+        "otherTokens", asList("a", "-r", "--", "-f"));
   }
 
   @Test
@@ -27,7 +25,7 @@ class RmArgumentsTest {
         "  RmArguments",
         "",
         "SYNOPSIS",
-        "  RmArguments [OPTION]... [OTHER_TOKENS]... [-- DD_TOKENS...]",
+        "  RmArguments [OPTION]... [OTHER_TOKENS]...",
         "",
         "DESCRIPTION",
         "",

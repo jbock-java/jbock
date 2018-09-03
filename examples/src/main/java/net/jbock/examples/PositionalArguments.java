@@ -5,7 +5,7 @@ import java.util.Optional;
 import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
 
-@CommandLineArguments
+@CommandLineArguments(allowEscape = true)
 abstract class PositionalArguments {
 
   @Positional
@@ -19,7 +19,4 @@ abstract class PositionalArguments {
 
   @Positional
   abstract List<String> otherTokens();
-
-  @Positional
-  abstract List<String> ddTokens();
 }

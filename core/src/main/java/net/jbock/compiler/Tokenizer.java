@@ -6,16 +6,11 @@ import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.function.Function;
 
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.element.Modifier.*;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.Constants.*;
 import static net.jbock.compiler.Util.optionalOf;
 import static net.jbock.compiler.Util.optionalOfSubtype;
 
@@ -49,7 +44,7 @@ final class Tokenizer {
     TypeSpec.Builder builder = TypeSpec.classBuilder(type)
         .addModifiers(STATIC, PRIVATE)
         .addMethod(parseMethod())
-        .addMethod(parseMethodInternal())
+        .addMethod(parseListMethod())
         .addMethod(privateConstructor())
         .addField(indent)
         .addField(out);
@@ -83,7 +78,7 @@ final class Tokenizer {
     CodeBlock.Builder builder = CodeBlock.builder();
     ParameterSpec result = ParameterSpec.builder(optionalOfSubtype(TypeName.get(context.sourceType.asType())), "result")
         .build();
-    builder.addStatement("$T $N = parse($T.asList($N))",
+    builder.addStatement("$T $N = parseList($T.asList($N))",
         result.type, result, Arrays.class, args);
 
     builder.beginControlFlow("if (!$N.isPresent())", result)
@@ -97,30 +92,30 @@ final class Tokenizer {
 
   private CodeBlock parseMethodCatchBlock(ParameterSpec e) {
     CodeBlock.Builder builder = CodeBlock.builder();
-    if (context.helpDisabled) {
-      builder.addStatement("$T.$N($N, $N)", option.type, option.printUsageMethod, out, indent);
-      builder.addStatement("$N.println($N.getMessage())", out, e);
-    } else {
+    if (context.addHelp) {
       builder.addStatement("$N.print($S)", out, "Usage: ");
       builder.addStatement("$N.println($T.$N())", out, option.type, option.synopsisMethod);
       builder.addStatement("$N.println($N.getMessage())", out, e);
       builder.addStatement("$N.print($S)", out, "Try '");
       builder.addStatement("$N.print($S)", out, context.programName);
       builder.addStatement("$N.println($S)", out, " --help' for more information.");
+    } else {
+      builder.addStatement("$T.$N($N, $N)", option.type, option.printUsageMethod, out, indent);
+      builder.addStatement("$N.println($N.getMessage())", out, e);
     }
     builder.addStatement("return $T.empty()", Optional.class);
     return builder.build();
   }
 
-  private MethodSpec parseMethodInternal() {
+  private MethodSpec parseListMethod() {
 
     ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
     ParameterSpec tokens = ParameterSpec.builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    ParameterSpec dd = ParameterSpec.builder(STRING, "dd").build();
+    ParameterSpec stopword = ParameterSpec.builder(STRING, "stopword").build();
     ParameterSpec count = ParameterSpec.builder(INT, "count").build();
 
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("parse")
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("parseList")
         .addParameter(tokens)
         .returns(optionalOfSubtype(TypeName.get(context.sourceType.asType())))
         .addModifiers(PRIVATE);
@@ -130,20 +125,19 @@ final class Tokenizer {
     builder.addStatement("$T $N = $N.iterator()", STRING_ITERATOR, it, tokens);
 
     if (context.stopword) {
-      builder.addStatement("$T $N = $S", dd.type, dd, "--");
+      builder.addStatement("$T $N = $S", STRING, stopword, "--");
     }
 
-    if (!context.positionalParameters.isEmpty()) {
+    if (context.hasPositional()) {
       builder.addStatement("$T $N = new $T<>()",
           LIST_OF_STRING, this.helper.positionalParameter, ArrayList.class);
     }
 
     builder.beginControlFlow("while ($N.hasNext())", it)
-        .addCode(codeInsideParsingLoop(helper, it, dd, count))
+        .addCode(codeInsideParsingLoop(helper, it, stopword, count))
         .endControlFlow();
 
-    builder.addStatement(returnFromParseExpression(helper,
-        CodeBlock.builder().add("$T.empty()", OptionalInt.class).build()));
+    builder.addStatement(returnFromParseExpression(helper));
     return builder.build();
   }
 
@@ -159,19 +153,18 @@ final class Tokenizer {
     CodeBlock.Builder builder = CodeBlock.builder();
     builder.addStatement("$T $N = $N.next()", STRING, token, it);
 
-    if (!context.helpDisabled) {
+    if (context.addHelp) {
       builder.beginControlFlow("if ($N++ == 0 && !$N.hasNext() && $S.equals($N))", count, it, "--help", token)
           .addStatement("return $T.empty()", Optional.class)
           .endControlFlow();
     }
 
     if (context.stopword) {
-
-      builder.beginControlFlow("if ($N.equals($N))", dd, token)
-          .addStatement("$T $N = $T.of($N.size())", OptionalInt.class, this.helper.ddIndexParameter,
-              OptionalInt.class, this.helper.positionalParameter)
-          .addStatement("$N.forEachRemaining($N::add)", it, this.helper.positionalParameter)
-          .addStatement(returnFromParseExpression(helper, CodeBlock.builder().add("$N", this.helper.ddIndexParameter).build()))
+      builder.beginControlFlow("if ($N.equals($N))", dd, token);
+      if (context.hasPositional()) {
+        builder.addStatement("$N.forEachRemaining($N::add)", it, this.helper.positionalParameter);
+      }
+      builder.addStatement(returnFromParseExpression(helper))
           .endControlFlow();
     }
 
@@ -182,25 +175,20 @@ final class Tokenizer {
             helper, this.helper.readMethod, optionParam, token, it)
         .endControlFlow();
 
-    if (context.positionalParameters.isEmpty()) {
-
-      builder.beginControlFlow("else")
+    builder.beginControlFlow("else");
+    // handle unknown token
+    if (context.strict) {
+      builder.beginControlFlow("if (!$N.isEmpty() && $N.charAt(0) == '-')",
+          token, token)
           .addStatement(throwInvalidOptionStatement(token))
           .endControlFlow();
-
-    } else {
-
-      if (!context.ignoreDashes) {
-        builder.beginControlFlow("else if (!$N.isEmpty() && $N.charAt(0) == '-')",
-            token, token)
-            .addStatement(throwInvalidOptionStatement(token))
-            .endControlFlow();
-      }
-
-      builder.beginControlFlow("else")
-          .addStatement("$N.add($N)", this.helper.positionalParameter, token)
-          .endControlFlow();
     }
+    if (context.hasPositional()) {
+      builder.addStatement("$N.add($N)", this.helper.positionalParameter, token);
+    } else {
+      builder.addStatement(throwInvalidOptionStatement(token));
+    }
+    builder.endControlFlow();
 
     return builder.build();
   }
@@ -212,16 +200,13 @@ final class Tokenizer {
         .build();
   }
 
-  private CodeBlock returnFromParseExpression(ParameterSpec helper, CodeBlock param) {
-    if (context.positionalParameters.isEmpty()) {
+  private CodeBlock returnFromParseExpression(ParameterSpec helper) {
+    if (context.hasPositional()) {
       return CodeBlock.builder()
-          .add("return $N.build()", helper)
+          .add("return $N.build($N)", helper, this.helper.positionalParameter)
           .build();
     }
-    return CodeBlock.builder()
-        .add("return $N.build($N, $L)",
-            helper, this.helper.positionalParameter, param)
-        .build();
+    return CodeBlock.builder().add("return $N.build()", helper).build();
   }
 
   private MethodSpec privateConstructor() {

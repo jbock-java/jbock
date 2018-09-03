@@ -1,10 +1,11 @@
 package net.jbock.examples;
 
-import java.util.List;
 import net.jbock.CommandLineArguments;
 import net.jbock.Positional;
 
-@CommandLineArguments(ignoreDashes = true)
+import java.util.List;
+
+@CommandLineArguments(strict = false, allowEscape = false)
 abstract class RestArguments {
 
   abstract List<String> file();
