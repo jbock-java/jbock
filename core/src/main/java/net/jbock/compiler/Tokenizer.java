@@ -171,8 +171,6 @@ final class Tokenizer {
       builder.addStatement("$N.decrementIndent()", out);
     }
 
-    builder.addStatement("$N.flush()", out);
-
     return builder.build();
   }
 
@@ -182,7 +180,19 @@ final class Tokenizer {
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
     ParameterSpec lineParam = ParameterSpec.builder(STRING, "line").build();
     spec.addParameter(optionParam);
-    spec.addStatement("$N.println($N.describeNames())", out, optionParam);
+
+    spec.beginControlFlow("if ($N.$N.$N)", optionParam, option.typeField, option.optionType.isPositionalField)
+        .addStatement("$N.println($N)", out, optionParam)
+        .endControlFlow();
+    if (context.nonpositionalParamTypes.contains(Type.FLAG)) {
+      spec.beginControlFlow("else if ($N.$N == $T.$L)", optionParam, option.typeField, option.optionType.type, Type.FLAG)
+          .addStatement("$N.println($N.describeParam($S))", out, optionParam, "")
+          .endControlFlow();
+    }
+    spec.beginControlFlow("else")
+        .addStatement("$N.println($N.describeParam($T.format($S, $N.$N)))", out, optionParam, String.class, " <%s>", optionParam, option.argumentNameField)
+        .endControlFlow();
+
     spec.addStatement("$N.incrementIndent()", out);
     spec.beginControlFlow("for ($T $N : $N.description)", STRING, lineParam, optionParam)
         .addStatement("$N.println($N)", out, lineParam)
@@ -256,6 +266,7 @@ final class Tokenizer {
 
     builder.beginControlFlow("if (!$N.isPresent())", result)
         .addStatement("printUsage()")
+        .addStatement("$N.flush()", out)
         .endControlFlow();
 
     builder.addStatement("return $N.map($T.identity())",
@@ -266,9 +277,18 @@ final class Tokenizer {
   private CodeBlock parseMethodCatchBlock(ParameterSpec e) {
     CodeBlock.Builder builder = CodeBlock.builder();
     if (context.addHelp) {
-      builder.addStatement("$N.println($S + synopsis())", out, "Usage: ");
+      builder.addStatement("$N.println($S)", out, "Usage:");
+      builder.addStatement("$N.incrementIndent()", out);
+      builder.addStatement("$N.println(synopsis())", out);
+      builder.addStatement("$N.decrementIndent()", out);
+      builder.addStatement("$N.println()", out);
+      builder.addStatement("$N.println($S)", out, "Error:");
+      builder.addStatement("$N.incrementIndent()", out);
       builder.addStatement("$N.println($N.getMessage())", out, e);
-      builder.addStatement("$N.println($S + $S + $S)", out, "Try '", context.programName, " --help' for more information.");
+      builder.addStatement("$N.decrementIndent()", out);
+      builder.addStatement("$N.println()", out);
+      builder.addStatement("$N.println($T.format($S, $S))", out, String.class, "Try '%s --help' for more information.", context.programName);
+      builder.addStatement("$N.println()", out);
     } else {
       builder.addStatement("printUsage()");
       builder.addStatement("$N.println($N.getMessage())", out, e);

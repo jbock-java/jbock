@@ -1,22 +1,23 @@
 package net.jbock.compiler;
 
 import net.jbock.Description;
-import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
+import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
+import static java.util.Arrays.asList;
+import static java.util.Collections.nCopies;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
@@ -39,9 +40,7 @@ final class Option {
   private final MethodSpec exampleMethod;
   private final FieldSpec descriptionField;
 
-  private final FieldSpec argumentNameField;
-
-  private final MethodSpec describeNamesMethod;
+  final FieldSpec argumentNameField;
 
   private final FieldSpec longNameField;
 
@@ -64,8 +63,7 @@ final class Option {
       MethodSpec exampleMethod,
       MethodSpec shortNameMapMethod,
       MethodSpec longNameMapMethod,
-      MethodSpec describeParamMethod,
-      MethodSpec describeNamesMethod) {
+      MethodSpec describeParamMethod) {
     this.exampleMethod = exampleMethod;
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
@@ -78,7 +76,6 @@ final class Option {
     this.typeField = typeField;
     this.longNameMapMethod = longNameMapMethod;
     this.describeParamMethod = describeParamMethod;
-    this.describeNamesMethod = describeNamesMethod;
   }
 
   static Option create(Context context, OptionType optionType) {
@@ -98,12 +95,6 @@ final class Option {
     MethodSpec describeParamMethod = describeParamMethod(
         longNameField,
         shortNameField);
-    MethodSpec describeNamesMethod = describeNamesMethod(
-        context,
-        describeParamMethod,
-        typeField,
-        argumentNameField,
-        optionType);
 
     return new Option(
         context,
@@ -117,8 +108,7 @@ final class Option {
         exampleMethod,
         shortNameMapMethod,
         longNameMapMethod,
-        describeParamMethod,
-        describeNamesMethod);
+        describeParamMethod);
   }
 
   TypeSpec define() {
@@ -127,21 +117,25 @@ final class Option {
       String[] desc = getText(param.description());
       String argumentName = param.descriptionArgumentName();
       String enumConstant = param.enumConstant();
-      String format = String.format("$S, $S, $T.$L, $S, new $T[]{$Z%s}",
-          String.join(",$Z", Collections.nCopies(desc.length, "$S")));
-      List<Comparable<? extends Comparable<?>>> fixArgs =
-          Arrays.asList(param.longName(), param.shortName(), optionType.type,
-              param.positionalType != null ? param.positionalType : param.paramType,
-              argumentName, STRING);
-      List<Object> args = new ArrayList<>(fixArgs.size() + desc.length);
-      args.addAll(fixArgs);
-      args.addAll(Arrays.asList(desc));
-      builder.addEnumConstant(enumConstant, anonymousClassBuilder(format,
-          args.toArray()).build());
+      Map<String, Object> map = new LinkedHashMap<>();
+      map.put("longName", param.longName());
+      map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
+      map.put("type", param.positionalType != null ? param.positionalType : param.paramType);
+      map.put("optionType", optionType.type);
+      map.put("argumentName", argumentName);
+      map.put("descExpression", descExpression(desc));
+      String format = String.join(", ",
+          "$longName:S",
+          "$shortName:L",
+          "$optionType:T.$type:L",
+          "$argumentName:S",
+          "$descExpression:L");
+      builder.addEnumConstant(enumConstant,
+          anonymousClassBuilder(CodeBlock.builder().addNamed(format, map).build())
+              .build());
     }
     builder.addModifiers(PRIVATE)
-        .addFields(Arrays.asList(longNameField, shortNameField, typeField, argumentNameField, descriptionField))
-        .addMethod(describeNamesMethod)
+        .addFields(asList(longNameField, shortNameField, typeField, argumentNameField, descriptionField))
         .addMethod(describeParamMethod)
         .addMethod(exampleMethod)
         .addMethod(privateConstructor());
@@ -152,22 +146,37 @@ final class Option {
     return builder.build();
   }
 
+  private CodeBlock descExpression(String[] desc) {
+    if (desc.length == 0) {
+      return CodeBlock.builder().add("$T.emptyList()", Collections.class).build();
+    } else if (desc.length == 1) {
+      return CodeBlock.builder().add("$T.singletonList($S)", Collections.class, desc[0]).build();
+    }
+    Object[] args = new Object[1 + desc.length];
+    args[0] = Arrays.class;
+    System.arraycopy(desc, 0, args, 1, desc.length);
+    return CodeBlock.builder()
+        .add(String.format("$T.asList($Z%s)",
+            String.join(",$Z", nCopies(desc.length, "$S"))), args)
+        .build();
+  }
+
   private MethodSpec privateConstructor() {
     ParameterSpec longName = ParameterSpec.builder(longNameField.type, longNameField.name).build();
-    ParameterSpec shortName = ParameterSpec.builder(STRING, shortNameField.name).build();
-    ParameterSpec optionType = ParameterSpec.builder(this.typeField.type, this.typeField.name).build();
-    ParameterSpec description = ParameterSpec.builder(ArrayTypeName.of(STRING), descriptionField.name).build();
+    ParameterSpec shortName = ParameterSpec.builder(shortNameField.type, shortNameField.name).build();
+    ParameterSpec optionType = ParameterSpec.builder(typeField.type, typeField.name).build();
+    ParameterSpec description = ParameterSpec.builder(descriptionField.type, descriptionField.name).build();
     ParameterSpec argumentName = ParameterSpec.builder(argumentNameField.type, argumentNameField.name).build();
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
 
     builder
         .addStatement("this.$N = $N", longNameField, longName)
-        .addStatement("this.$N = $N == null ? null : $N.charAt(0)", shortNameField, shortName, shortName)
-        .addStatement("this.$N = $N", this.typeField, optionType)
-        .addStatement("this.$N = $T.asList($N)", descriptionField, Arrays.class, description)
+        .addStatement("this.$N = $N", shortNameField, shortName)
+        .addStatement("this.$N = $N", typeField, optionType)
+        .addStatement("this.$N = $N", descriptionField, description)
         .addStatement("this.$N = $N", argumentNameField, argumentName);
 
-    builder.addParameters(Arrays.asList(
+    builder.addParameters(asList(
         longName, shortName, optionType, argumentName, description));
     return builder.build();
   }
@@ -176,7 +185,7 @@ final class Option {
       ClassName optionType,
       FieldSpec shortNameField) {
     ParameterSpec shortNames = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        STRING, optionType), "shortNames")
+        TypeName.get(Character.class), optionType), "shortNames")
         .build();
     ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
 
@@ -188,7 +197,7 @@ final class Option {
     builder.beginControlFlow("for ($T $N : $T.values())", optionType, option, optionType);
 
     builder.beginControlFlow("if ($N.$N != null)", option, shortNameField)
-        .addStatement("$N.put($N.$N.toString(), $N)", shortNames, option, shortNameField, option)
+        .addStatement("$N.put($N.$N, $N)", shortNames, option, shortNameField, option)
         .endControlFlow();
 
     // end iteration over options
@@ -237,32 +246,6 @@ final class Option {
       return new String[0];
     }
     return description.value();
-  }
-
-  private static MethodSpec describeNamesMethod(
-      Context context,
-      MethodSpec describeParamMethod,
-      FieldSpec optionTypeField,
-      FieldSpec argumentNameField,
-      OptionType optionType) {
-    CodeBlock.Builder builder = CodeBlock.builder();
-    if (context.nonpositionalParamTypes.contains(Type.FLAG)) {
-      builder.beginControlFlow("if ($N == $T.$L)",
-          optionTypeField, optionType.type, Type.FLAG)
-          .addStatement("return $N($S)", describeParamMethod, "")
-          .endControlFlow();
-    }
-    builder.beginControlFlow("if ($N.$N)",
-        optionTypeField, optionType.isPositionalField)
-        .addStatement("return name()")
-        .endControlFlow();
-
-    builder.addStatement("return $N($S + $N + $S)",
-        describeParamMethod, " <", argumentNameField, ">");
-    return MethodSpec.methodBuilder("describeNames")
-        .returns(STRING)
-        .addCode(builder.build())
-        .build();
   }
 
   private static MethodSpec describeParamMethod(

@@ -6,6 +6,7 @@ import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
+import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
@@ -133,19 +134,32 @@ final class Helper {
         .build();
     MethodSpec readNextMethod = readNextMethod();
     MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
+
+    // read-only lookups
     FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, option.type), "longNames")
+        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, option.type, option.longNameMapMethod)
         .build();
     FieldSpec shortNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        STRING, option.type), "shortNames")
+        TypeName.get(Character.class), option.type), "shortNames")
+        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, option.type, option.shortNameMapMethod)
         .build();
     ClassName helperClass = context.generatedClass.nestedClass("Helper");
+
+    // empty collections
     FieldSpec optMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        option.type, LIST_OF_STRING), "optMap").build();
+        option.type, LIST_OF_STRING), "optMap")
+        .initializer("new $T<>($T.class)", EnumMap.class, option.type)
+        .build();
     FieldSpec sMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        option.type, STRING), "sMap").build();
+        option.type, STRING), "sMap")
+        .initializer("new $T<>($T.class)", EnumMap.class, option.type)
+        .build();
     FieldSpec flagsField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
-        option.type), "flags").build();
+        option.type), "flags")
+        .initializer("$T.noneOf($T.class)", EnumSet.class, option.type)
+        .build();
+
     MethodSpec addFlagMethod = addFlagMethod(option, flagsField);
     MethodSpec addArgumentMethod = addArgumentMethod(
         context,
@@ -214,34 +228,19 @@ final class Helper {
     spec.addMethod(readRegularOptionMethod);
     spec.addMethod(buildMethod());
     if (!context.nonpositionalParamTypes.isEmpty()) {
-      spec.addField(
-          longNamesField.toBuilder()
-              .initializer("$T.unmodifiableMap($T.$N())", Collections.class, option.type, this.option.longNameMapMethod)
-              .build());
-      spec.addField(
-          shortNamesField.toBuilder()
-              .initializer("$T.unmodifiableMap($T.$N())", Collections.class, option.type, this.option.shortNameMapMethod)
-              .build());
-      spec.addField(
-          sMapField.toBuilder()
-              .initializer("new $T<>($T.class)", EnumMap.class, option.type)
-              .build());
+      spec.addField(longNamesField);
+      spec.addField(shortNamesField);
+      spec.addField(sMapField);
       spec.addMethod(addArgumentMethod)
           .addMethod(readArgumentMethod)
           .addMethod(readNextMethod)
           .addMethod(readLongMethod);
     }
     if (context.nonpositionalParamTypes.contains(Type.REPEATABLE)) {
-      spec.addField(
-          optMapField.toBuilder()
-              .initializer("new $T<>($T.class)", EnumMap.class, option.type)
-              .build());
+      spec.addField(optMapField);
     }
     if (context.nonpositionalParamTypes.contains(Type.FLAG)) {
-      spec.addField(
-          flagsField.toBuilder()
-              .initializer("$T.noneOf($T.class)", EnumSet.class, option.type)
-              .build());
+      spec.addField(flagsField);
       spec.addMethod(addFlagMethod);
     }
     if (context.nonpositionalParamTypes.contains(Type.REQUIRED)) {
@@ -343,15 +342,15 @@ final class Helper {
         .endControlFlow();
 
     if (!option.context.nonpositionalParamTypes.contains(Type.FLAG)) {
-      return spec.addStatement("return $N.get($T.toString($N.charAt(1)))",
-          shortNamesField, Character.class, token).build();
+      return spec.addStatement("return $N.get($N.charAt(1))",
+          shortNamesField, token).build();
     }
 
     ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
 
-    spec.addStatement("$T $N = $N.get($T.toString($N.charAt(1)))",
+    spec.addStatement("$T $N = $N.get($N.charAt(1))",
         option.type, optionParam,
-        shortNamesField, Character.class, token);
+        shortNamesField, token);
 
     spec.beginControlFlow("if ($N == null)", optionParam)
         .addStatement("return null")

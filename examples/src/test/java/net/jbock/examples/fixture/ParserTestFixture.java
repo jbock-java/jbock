@@ -163,10 +163,10 @@ public final class ParserTestFixture<E> {
     }
     for (int i = 0; i < actual.length; i++) {
       if (!Objects.equals(expected[i], actual[i])) {
-        System.out.println("Actual:");
+        System.err.println("Actual:");
         System.err.flush();
-        for (int j = 0; j < i; j++) {
-          System.err.format("%3d: %s %s%n", j, expected[j], actual[j]);
+        for (int j = 0; j <= i; j++) {
+          System.err.format("%3d: <%s> <%s>%n", j, expected[j], actual[j]);
           System.err.flush();
         }
         fail("Arrays differ at index " + i);
@@ -185,14 +185,13 @@ public final class ParserTestFixture<E> {
       this.e = e;
     }
 
-    public void failsWithLine1(String expectedMessage) {
+    public void failsWithLine4(String expectedMessage) {
       if (parsed.isPresent()) {
         fail("Expecting a failure" +
             " but parsing was successful");
       }
       assertTrue(e.startsWith("Usage:"));
-      assertTrue(e.contains("\n"));
-      String actualMessage = e.split("\\r?\\n", -1)[1];
+      String actualMessage = e.split("\\r?\\n", -1)[4].trim();
       assertEquals(expectedMessage, actualMessage);
     }
 

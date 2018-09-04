@@ -77,15 +77,13 @@ enum Type {
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock.Builder builder = CodeBlock.builder();
       builder.beginControlFlow("if ($N.isPresent())", impl.field(param))
-          .addStatement("$N.add($S + '\"' + $N.get() + '\"')",
+          .addStatement("$N.add($S + $N.get() + '\"')",
               joiner,
-              jsonKey(param),
+              jsonKey(param) +  '"',
               impl.field(param))
           .endControlFlow()
           .beginControlFlow("else")
-          .addStatement("$N.add($S + null)",
-              joiner,
-              jsonKey(param))
+          .addStatement("$N.add($S)", joiner, jsonKey(param) + "null")
           .endControlFlow();
       return builder.build();
     }
@@ -122,9 +120,7 @@ enum Type {
               impl.field(param))
           .endControlFlow()
           .beginControlFlow("else")
-          .addStatement("$N.add($S + null)",
-              joiner,
-              jsonKey(param))
+          .addStatement("$N.add($S)", joiner, jsonKey(param) + "null")
           .endControlFlow();
       return builder.build();
     }
@@ -154,10 +150,8 @@ enum Type {
     @Override
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock.Builder builder = CodeBlock.builder();
-      builder.addStatement("$N.add($S + '\"' + $N + '\"')",
-          joiner,
-          jsonKey(param),
-          impl.field(param));
+      builder.addStatement("$N.add($S + $N + '\"')",
+          joiner, jsonKey(param) + '"', impl.field(param));
       return builder.build();
     }
 

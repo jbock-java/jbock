@@ -26,7 +26,7 @@ class AdditionArgumentsTest {
 
   @Test
   void wrongNumber() {
-    f.assertThat("-a", "2").failsWithLine1(
+    f.assertThat("-a", "2").failsWithLine4(
         "For input string: \"-a\"");
   }
 

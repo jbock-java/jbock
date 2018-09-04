@@ -310,8 +310,8 @@ final class Param {
     }
   }
 
-  String shortName() {
-    return Objects.toString(shortName, null);
+  Character shortName() {
+    return shortName == null ? null : shortName.charAt(0);
   }
 
   String longName() {

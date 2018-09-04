@@ -10,8 +10,8 @@ class SimpleArgumentsTest {
 
   @Test
   void invalidOptions() {
-    f.assertThat("xf", "1").failsWithLine1("Invalid option: xf");
-    f.assertThat("-xf", "1").failsWithLine1("Invalid option: -xf");
+    f.assertThat("xf", "1").failsWithLine4("Invalid option: xf");
+    f.assertThat("-xf", "1").failsWithLine4("Invalid option: -xf");
   }
 
   @Test
@@ -22,9 +22,14 @@ class SimpleArgumentsTest {
   @Test
   void errorHelpNotFirstArgument() {
     f.assertThat("--file", "1", "--help").failsWithLines(
-        "Usage: SimpleArguments [<options>]",
-        "Invalid option: --help",
+        "Usage:",
+        "  SimpleArguments [<options>]",
+        "",
+        "Error:",
+        "  Invalid option: --help",
+        "",
         "Try 'SimpleArguments --help' for more information.",
+        "",
         "");
   }
 

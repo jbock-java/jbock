@@ -55,12 +55,12 @@ class NoNameArgumentsTest {
 
   @Test
   void errorMissingInt() {
-    f.assertThat("--cmos").failsWithLine1("Missing required option: NUMBER (-n, --number)");
+    f.assertThat("--cmos").failsWithLine4("Missing required option: NUMBER (-n, --number)");
   }
 
   @Test
   void errorUnknownToken() {
-    f.assertThat("blabla").failsWithLine1("Invalid option: blabla");
+    f.assertThat("blabla").failsWithLine4("Invalid option: blabla");
   }
 
   @Test

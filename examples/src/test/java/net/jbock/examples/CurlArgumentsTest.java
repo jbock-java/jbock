@@ -156,50 +156,50 @@ class CurlArgumentsTest {
 
   @Test
   void errorInvalidGrouping() {
-    f.assertThat("-vH1").failsWithLine1("Invalid option: -vH1");
+    f.assertThat("-vH1").failsWithLine4("Invalid option: -vH1");
   }
 
   @Test
   void errorInvalidGroupingLong() {
-    f.assertThat("-vXPOST").failsWithLine1("Invalid option: -vXPOST");
+    f.assertThat("-vXPOST").failsWithLine4("Invalid option: -vXPOST");
   }
 
   @Test
   void errorGroupingDuplicateFlag() {
-    f.assertThat("-v", "-vH'Content-Type: application/xml'").failsWithLine1(
+    f.assertThat("-v", "-vH'Content-Type: application/xml'").failsWithLine4(
         "Invalid option: -vH'Content-Type: application/xml'");
   }
 
   @Test
   void errorMissingRepeatable() {
-    f.assertThat("-H").failsWithLine1("Missing value after token: -H");
+    f.assertThat("-H").failsWithLine4("Missing value after token: -H");
   }
 
   @Test
   void errorMissingNonRepeatable() {
-    f.assertThat("--request").failsWithLine1("Missing value after token: --request");
+    f.assertThat("--request").failsWithLine4("Missing value after token: --request");
   }
 
   @Test
   void errorDuplicateNonRepeatableLong() {
-    f.assertThat("--request", "GET", "--request", "POST").failsWithLine1(
+    f.assertThat("--request", "GET", "--request", "POST").failsWithLine4(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   void errorDuplicateNonRepeatableShort() {
-    f.assertThat("-X1", "-X2").failsWithLine1("Option METHOD (-X, --request) is not repeatable");
+    f.assertThat("-X1", "-X2").failsWithLine4("Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   void errorDuplicateNonRepeatableLongDetachedShortAttached() {
-    f.assertThat("--request", "1", "-X2").failsWithLine1(
+    f.assertThat("--request", "1", "-X2").failsWithLine4(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   void errorDuplicateNonRepeatableLongAttachedShortDetached() {
-    f.assertThat("--request=1", "-X", "2").failsWithLine1(
+    f.assertThat("--request=1", "-X", "2").failsWithLine4(
         "Option METHOD (-X, --request) is not repeatable");
   }
 

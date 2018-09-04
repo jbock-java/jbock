@@ -222,9 +222,9 @@ public final class Processor extends AbstractProcessor {
   }
 
   private void checkDistinctShortNames(List<Param> params) {
-    Set<String> names = new HashSet<>(params.size());
+    Set<Character> names = new HashSet<>(params.size());
     for (Param param : params) {
-      String name = param.shortName();
+      Character name = param.shortName();
       if (name != null) {
         boolean added = names.add(name);
         if (!added) {
