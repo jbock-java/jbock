@@ -20,7 +20,6 @@ class HelplessArgumentsTest {
       "DESCRIPTION",
       "",
       "REQUIRED",
-      "  ",
       "",
       "OPTIONS",
       "  --help",

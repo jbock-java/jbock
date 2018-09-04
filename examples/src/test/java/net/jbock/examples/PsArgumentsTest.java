@@ -24,6 +24,11 @@ class PsArgumentsTest {
         "",
         "  -w <number>, --wide <number>",
         "",
+        "  --help",
+        "    Print this help page.",
+        "    The help flag may only be passed as the first argument.",
+        "    Any further arguments will be ignored.",
+        "",
         "");
   }
 }

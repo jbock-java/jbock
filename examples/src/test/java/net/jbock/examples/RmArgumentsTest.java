@@ -30,12 +30,16 @@ class RmArgumentsTest {
         "DESCRIPTION",
         "",
         "OTHER_TOKENS",
-        "  ",
         "",
         "OPTIONS",
         "  -r, --recursive",
         "",
         "  -f, --force",
+        "",
+        "  --help",
+        "    Print this help page.",
+        "    The help flag may only be passed as the first argument.",
+        "    Any further arguments will be ignored.",
         "",
         "");
   }

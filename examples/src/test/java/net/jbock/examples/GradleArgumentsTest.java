@@ -193,7 +193,6 @@ class GradleArgumentsTest {
         "DESCRIPTION",
         "",
         "OTHER_TOKENS",
-        "  ",
         "",
         "OPTIONS",
         "  -m <message>, --message <message>",
@@ -210,6 +209,11 @@ class GradleArgumentsTest {
         "    cmos flag",
         "",
         "  -v, --verbose",
+        "",
+        "  --help",
+        "    Print this help page.",
+        "    The help flag may only be passed as the first argument.",
+        "    Any further arguments will be ignored.",
         "",
         "");
   }

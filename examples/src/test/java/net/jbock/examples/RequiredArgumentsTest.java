@@ -49,10 +49,14 @@ class RequiredArgumentsTest {
         "DESCRIPTION",
         "",
         "OTHER_TOKENS",
-        "  ",
         "",
         "OPTIONS",
         "  --dir <DIR>",
+        "",
+        "  --help",
+        "    Print this help page.",
+        "    The help flag may only be passed as the first argument.",
+        "    Any further arguments will be ignored.",
         "",
         "");
   }

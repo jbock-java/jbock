@@ -8,23 +8,17 @@ import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
-import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.StringJoiner;
 
-import static java.util.stream.Collectors.partitioningBy;
-import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
@@ -41,18 +35,13 @@ final class Option {
   final Context context;
 
   final MethodSpec describeParamMethod;
-  final MethodSpec printUsageMethod;
-  final MethodSpec synopsisMethod;
 
   private final MethodSpec exampleMethod;
   private final FieldSpec descriptionField;
 
-  private final MethodSpec spacesMethod;
-
   private final FieldSpec argumentNameField;
 
   private final MethodSpec describeNamesMethod;
-  private final MethodSpec descriptionBlockMethod;
 
   private final FieldSpec longNameField;
 
@@ -67,23 +56,16 @@ final class Option {
       Context context,
       ClassName type,
       OptionType optionType,
-      MethodSpec printUsageMethod,
-      MethodSpec synopsisMethod,
       FieldSpec longNameField,
       FieldSpec shortNameField,
       FieldSpec typeField,
       FieldSpec descriptionField,
       FieldSpec argumentNameField,
-      MethodSpec spacesMethod,
       MethodSpec exampleMethod,
       MethodSpec shortNameMapMethod,
       MethodSpec longNameMapMethod,
       MethodSpec describeParamMethod,
-      MethodSpec describeNamesMethod,
-      MethodSpec descriptionBlockMethod) {
-    this.printUsageMethod = printUsageMethod;
-    this.synopsisMethod = synopsisMethod;
-    this.spacesMethod = spacesMethod;
+      MethodSpec describeNamesMethod) {
     this.exampleMethod = exampleMethod;
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
@@ -97,7 +79,6 @@ final class Option {
     this.longNameMapMethod = longNameMapMethod;
     this.describeParamMethod = describeParamMethod;
     this.describeNamesMethod = describeNamesMethod;
-    this.descriptionBlockMethod = descriptionBlockMethod;
   }
 
   static Option create(Context context, OptionType optionType) {
@@ -113,15 +94,6 @@ final class Option {
     MethodSpec exampleMethod = exampleMethod(longNameField, shortNameField, argumentNameField);
     FieldSpec descriptionField = FieldSpec.builder(
         LIST_OF_STRING, "description").build();
-    MethodSpec spacesMethod = spacesMethod();
-    MethodSpec synopsisMethod = synopsisMethod(context, exampleMethod);
-    MethodSpec printUsageMethod = printUsageMethod(
-        context,
-        type,
-        spacesMethod,
-        synopsisMethod,
-        optionType,
-        typeField);
 
     MethodSpec describeParamMethod = describeParamMethod(
         longNameField,
@@ -132,26 +104,21 @@ final class Option {
         typeField,
         argumentNameField,
         optionType);
-    MethodSpec descriptionBlockMethod = descriptionBlockMethod(spacesMethod, descriptionField);
 
     return new Option(
         context,
         type,
         optionType,
-        printUsageMethod,
-        synopsisMethod,
         longNameField,
         shortNameField,
         typeField,
         descriptionField,
         argumentNameField,
-        spacesMethod,
         exampleMethod,
         shortNameMapMethod,
         longNameMapMethod,
         describeParamMethod,
-        describeNamesMethod,
-        descriptionBlockMethod);
+        describeNamesMethod);
   }
 
   TypeSpec define() {
@@ -174,14 +141,9 @@ final class Option {
     }
     builder.addModifiers(PRIVATE)
         .addFields(Arrays.asList(longNameField, shortNameField, typeField, argumentNameField, descriptionField))
-        .addMethod(describeMethod())
-        .addMethod(spacesMethod)
         .addMethod(describeNamesMethod)
         .addMethod(describeParamMethod)
-        .addMethod(descriptionBlockMethod)
         .addMethod(exampleMethod)
-        .addMethod(printUsageMethod)
-        .addMethod(synopsisMethod)
         .addMethod(privateConstructor());
     if (!context.nonpositionalParamTypes.isEmpty()) {
       builder.addMethod(shortNameMapMethod)
@@ -277,46 +239,6 @@ final class Option {
     return description.value();
   }
 
-  private static MethodSpec descriptionBlockMethod(
-      MethodSpec spacesMethod,
-      FieldSpec descriptionField) {
-    ParameterSpec line = ParameterSpec.builder(STRING, "line").build();
-    ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
-    ParameterSpec spaces = ParameterSpec.builder(STRING, "spaces").build();
-    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = $N($N)", STRING, spaces, spacesMethod, indent);
-    builder.addStatement("$T $N = new $T($T.lineSeparator() + $N, $N, $S)", joiner.type, joiner, joiner.type,
-        System.class, spaces, spaces, "");
-    builder.beginControlFlow("for ($T $N : $N)", STRING, line, descriptionField)
-        .addStatement("$N.add($N)", joiner, line)
-        .endControlFlow();
-    builder.addStatement("return $N.toString()", joiner);
-    return MethodSpec.methodBuilder("descriptionBlock")
-        .addParameter(indent)
-        .returns(STRING)
-        .addCode(builder.build())
-        .build();
-  }
-
-  private MethodSpec describeMethod() {
-    ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("describe");
-    ParameterSpec spaces = ParameterSpec.builder(STRING, "spaces").build();
-    builder.addStatement("$T $N = spaces($N)", STRING, spaces, indent);
-
-    builder.beginControlFlow("if ($N.isEmpty())", descriptionField)
-        .addStatement("return $N + $N()", spaces, describeNamesMethod)
-        .endControlFlow();
-
-    builder.addStatement("return $N + $N() + $T.lineSeparator() + $N($L * $N)",
-        spaces, describeNamesMethod, System.class, descriptionBlockMethod, 2, indent);
-    return builder
-        .returns(STRING)
-        .addParameter(indent)
-        .build();
-  }
-
   private static MethodSpec describeNamesMethod(
       Context context,
       MethodSpec describeParamMethod,
@@ -383,182 +305,6 @@ final class Option {
         String.class, "-%s <%s>", shortNameField, argumentNameField);
 
     return MethodSpec.methodBuilder("example")
-        .returns(STRING)
-        .addCode(builder.build())
-        .build();
-  }
-
-  private static MethodSpec printUsageMethod(
-      Context context,
-      ClassName type,
-      MethodSpec spacesMethod,
-      MethodSpec synopsisMethod,
-      OptionType optionType,
-      FieldSpec typeField) {
-    ParameterSpec out = ParameterSpec.builder(ClassName.get(PrintStream.class), "out").build();
-    ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("printUsage");
-
-    builder.addStatement("$N.println($S)", out, "NAME");
-    builder.addStatement("$N.print($N($N))", out, spacesMethod, indent);
-    builder.addStatement("$N.print($S)", out, optionType.context.programName);
-    if (!optionType.context.missionStatement.isEmpty()) {
-      builder.addStatement("$N.print($S)", out, " - ");
-      builder.addStatement("$N.println($S)", out, optionType.context.missionStatement);
-      builder.addStatement("$N.println()", out);
-    } else {
-      builder.addStatement("$N.println()", out);
-      builder.addStatement("$N.println()", out);
-    }
-
-    builder.addStatement("$N.println($S)", out, "SYNOPSIS");
-    builder.addStatement("$N.print($N($N))", out, spacesMethod, indent);
-    builder.addStatement("$N.println($N())", out, synopsisMethod);
-    builder.addStatement("$N.println()", out);
-
-    builder.addStatement("$N.println($S)", out, "DESCRIPTION");
-
-    for (String line : optionType.context.overview) {
-      if (line.isEmpty()) {
-        builder.addStatement("$N.println()", out);
-      } else {
-        builder.addStatement("$N.println($N($N) + $S)", out, spacesMethod, indent, line);
-      }
-    }
-
-    builder.addStatement("$N.println()", out);
-    if (!context.positionalParamTypes.isEmpty()) {
-      ParameterSpec optionParam = ParameterSpec.builder(type, "option").build();
-      builder.beginControlFlow("for ($T $N: $T.values())",
-          optionParam.type, optionParam, optionParam.type)
-          .addCode(printUsagePositionalLoopCode(optionParam, out, indent, optionType, typeField))
-          .endControlFlow();
-    }
-
-    if (!context.nonpositionalParamTypes.isEmpty()) {
-      ParameterSpec optionParam = ParameterSpec.builder(type, "option").build();
-      builder.addStatement("$N.println($S)", out, "OPTIONS");
-      builder.beginControlFlow("for ($T $N: $T.values())",
-          optionParam.type, optionParam, optionParam.type)
-          .addCode(printUsageNonpositionalLoopCode(optionParam, out, indent, optionType, typeField))
-          .endControlFlow();
-    }
-
-    if (context.addHelp) {
-
-    }
-
-    builder.addStatement("$N.flush()", out);
-
-    return builder
-        .addModifiers(STATIC)
-        .addParameters(Arrays.asList(out, indent))
-        .build();
-  }
-
-  private static MethodSpec synopsisMethod(
-      Context context,
-      MethodSpec exampleMethod) {
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("synopsis")
-        .returns(STRING)
-        .addModifiers(STATIC);
-
-    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
-
-    builder.addStatement("$T $N = new $T($S)",
-        StringJoiner.class, joiner, StringJoiner.class, " ");
-
-    Map<Boolean, List<Param>> partitionedNonpos = context.parameters.stream()
-        .filter(p -> p.positionalType == null)
-        .collect(partitioningBy(p -> p.paramType.required));
-
-    List<Param> requiredNonpos = partitionedNonpos.get(true);
-    List<Param> optionalNonpos = partitionedNonpos.get(false);
-
-    List<Param> positional = context.parameters.stream()
-        .filter(p -> p.positionalType != null)
-        .collect(toList());
-
-    builder.addStatement("$N.add($S)", joiner, context.programName);
-
-    if (!optionalNonpos.isEmpty()) {
-      builder.addStatement("$N.add($S)", joiner, "[<options>]");
-    }
-
-    for (Param param : requiredNonpos) {
-      builder.addStatement("$N.add($L.$N())", joiner,
-          param.enumConstant(), exampleMethod);
-    }
-
-    for (Param param : positional) {
-      switch (param.positionalType.order) {
-        case REQUIRED:
-          builder.addStatement("$N.add($S + $S + $S)", joiner, "<",
-              param.descriptionArgumentName(), ">");
-          break;
-        case OPTIONAL:
-          builder.addStatement("$N.add($S + $S + $S)", joiner, "[<",
-              param.descriptionArgumentName(), ">]");
-          break;
-        case LIST:
-          builder.addStatement("$N.add($S + $S + $S)", joiner, context.allowEscape() ? "[[--] <" : "[<",
-              param.descriptionArgumentName(), ">]");
-          break;
-        default:
-          throw new AssertionError();
-      }
-    }
-
-    builder.addStatement("return $N.toString()", joiner);
-
-    return builder.build();
-  }
-
-  private static CodeBlock printUsagePositionalLoopCode(
-      ParameterSpec optionParam,
-      ParameterSpec out,
-      ParameterSpec indent,
-      OptionType optionType,
-      FieldSpec typeField) {
-    CodeBlock.Builder builder = CodeBlock.builder();
-
-    builder.beginControlFlow("if ($N.$N.$N)",
-        optionParam, typeField, optionType.isPositionalField)
-        .addStatement("$N.println($N)", out, optionParam)
-        .addStatement("$N.println($N.descriptionBlock($N))", out, optionParam, indent)
-        .addStatement("$N.println()", out)
-        .endControlFlow();
-
-    return builder.build();
-  }
-
-  private static CodeBlock printUsageNonpositionalLoopCode(
-      ParameterSpec optionParam,
-      ParameterSpec out,
-      ParameterSpec indent,
-      OptionType optionType,
-      FieldSpec typeField) {
-    CodeBlock.Builder builder = CodeBlock.builder();
-
-    builder.beginControlFlow("if (!$N.$N.$N)",
-        optionParam, typeField, optionType.isPositionalField)
-        .addStatement("$N.println($N.describe($N))", out, optionParam, indent)
-        .addStatement("$N.println()", out)
-        .endControlFlow();
-
-    return builder.build();
-  }
-
-  private static MethodSpec spacesMethod() {
-    ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
-    ParameterSpec sp = ParameterSpec.builder(ArrayTypeName.of(TypeName.CHAR), "sp").build();
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = new $T[$N]", sp.type, sp, TypeName.CHAR, indent);
-    builder.addStatement("$T.fill($N, ' ')", Arrays.class, sp);
-    builder.addStatement("return new $T($N)", STRING, sp);
-    return MethodSpec.methodBuilder("spaces")
-        .addParameter(indent)
-        .addModifiers(STATIC)
         .returns(STRING)
         .addCode(builder.build())
         .build();

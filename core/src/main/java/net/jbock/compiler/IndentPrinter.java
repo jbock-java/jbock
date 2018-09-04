@@ -23,16 +23,13 @@ import static net.jbock.com.squareup.javapoet.TypeSpec.classBuilder;
  */
 final class IndentPrinter {
 
-  private final Context context;
-
   final ClassName type;
 
   private final FieldSpec baseIndent;
   private final FieldSpec out;
   private final FieldSpec indentLevel;
 
-  private IndentPrinter(ClassName type, Context context, FieldSpec baseIndent, FieldSpec out, FieldSpec indentLevel) {
-    this.context = context;
+  private IndentPrinter(ClassName type, FieldSpec baseIndent, FieldSpec out, FieldSpec indentLevel) {
     this.type = type;
     this.baseIndent = baseIndent;
     this.out = out;
@@ -44,7 +41,7 @@ final class IndentPrinter {
     FieldSpec out = FieldSpec.builder(PrintWriter.class, "out", FINAL).build();
     FieldSpec indentLevel = FieldSpec.builder(INT, "indentLevel").build();
     ClassName type = context.generatedClass.nestedClass("IndentPrinter");
-    return new IndentPrinter(type, context, baseIndent, out, indentLevel);
+    return new IndentPrinter(type, baseIndent, out, indentLevel);
   }
 
   TypeSpec define() {

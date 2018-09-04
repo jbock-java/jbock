@@ -66,7 +66,7 @@ final class Parser {
     Option option = Option.create(context, optionType);
     Impl impl = Impl.create(option, implType);
     Helper helper = Helper.create(context, impl, option);
-    Tokenizer builder = Tokenizer.create(context, option, helper);
+    Tokenizer builder = Tokenizer.create(context, option, helper, indentPrinter);
     return new Parser(context, indentPrinter, builder, option, helper, impl);
   }
 
@@ -119,7 +119,8 @@ final class Parser {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
     ParameterSpec paramTokenizer = ParameterSpec.builder(tokenizer.type, "tokenizer").build();
-    spec.addStatement("$T $N = new $T($N, $N)", paramTokenizer.type, paramTokenizer, paramTokenizer.type, out, indent);
+    spec.addStatement("$T $N = new $T(new $T($N, $N))",
+        paramTokenizer.type, paramTokenizer, paramTokenizer.type, indentPrinter.type, out, indent);
     spec.addStatement("return $N.parse($N)", paramTokenizer, args);
 
     return spec.addParameter(args)
@@ -149,10 +150,11 @@ final class Parser {
         .build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder(METHOD_NAME_PARSE_OR_EXIT);
 
-    ParameterSpec parser = ParameterSpec.builder(tokenizer.type, "parser").build();
+    ParameterSpec paramTokenizer = ParameterSpec.builder(tokenizer.type, "tokenizer").build();
 
-    spec.addStatement("$T $N = new $T($N, $N)", parser.type, parser, parser.type, out, indent);
-    spec.addStatement("$T $N = $N.parse($N)", result.type, result, parser, args);
+    spec.addStatement("$T $N = new $T(new $T($N, $N))",
+        paramTokenizer.type, paramTokenizer, paramTokenizer.type, indentPrinter.type, out, indent);
+    spec.addStatement("$T $N = $N.parse($N)", result.type, result, paramTokenizer, args);
 
     spec.beginControlFlow("if ($N.isPresent())", result)
         .addStatement("return $N.get()", result)

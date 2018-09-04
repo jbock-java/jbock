@@ -141,11 +141,36 @@ public final class ParserTestFixture<E> {
     Optional<E> result = parser.out(new PrintStream(out)).indent(2).parse(new String[]{"--help"});
     assertFalse(result.isPresent());
     String[] actual = new String(out.toByteArray()).split("\\r?\\n", -1);
+    compareArrays(expected, actual);
+  }
+
+  private static void compareArrays(String[] expected, String[] actual) {
     if (expected.length != actual.length) {
-      assertArrayEquals(expected, actual, "Actual: " + Arrays.toString(actual));
+      System.err.println("Expected:");
+      System.err.flush();
+      for (int i = 0; i < expected.length; i++) {
+        System.err.format("%3d: %s%n", i, expected[i]);
+        System.err.flush();
+      }
+      System.err.println();
+      System.err.println("Actual:");
+      System.err.flush();
+      for (int i = 0; i < actual.length; i++) {
+        System.err.format("%3d: %s%n", i, actual[i]);
+        System.err.flush();
+      }
+      fail(String.format("Expected length: %d, actual length: %d", expected.length, actual.length));
     }
     for (int i = 0; i < actual.length; i++) {
-      assertEquals(expected[i], actual[i], "Arrays differ at index " + i);
+      if (!Objects.equals(expected[i], actual[i])) {
+        System.out.println("Actual:");
+        System.err.flush();
+        for (int j = 0; j < i; j++) {
+          System.err.format("%3d: %s %s%n", j, expected[j], actual[j]);
+          System.err.flush();
+        }
+        fail("Arrays differ at index " + i);
+      }
     }
   }
 
@@ -177,7 +202,7 @@ public final class ParserTestFixture<E> {
             " but parsing was successful");
       }
       String[] actualMessage = e.split("\\r?\\n", -1);
-      assertArrayEquals(expected, actualMessage, "Actual: " + Arrays.toString(actualMessage));
+      compareArrays(expected, actualMessage);
     }
 
     public void satisfies(Predicate<E> predicate) {

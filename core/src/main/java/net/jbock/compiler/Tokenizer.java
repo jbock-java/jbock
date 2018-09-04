@@ -9,12 +9,16 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.Function;
 
+import static java.util.stream.Collectors.partitioningBy;
+import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -35,22 +39,19 @@ final class Tokenizer {
 
   private final FieldSpec out;
 
-  private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out")
-      .addModifiers(FINAL).build();
-
-  private final FieldSpec indent = FieldSpec.builder(INT, "indent")
-      .addModifiers(FINAL).build();
-
-  private Tokenizer(ClassName type, Context context, Option option, Helper helper) {
+  private Tokenizer(ClassName type, Context context, Option option, Helper helper, FieldSpec out) {
+    this.out = out;
     this.type = type;
     this.context = context;
     this.option = option;
     this.helper = helper;
   }
 
-  static Tokenizer create(Context context, Option option, Helper helper) {
+  static Tokenizer create(Context context, Option option, Helper helper, IndentPrinter indentPrinter) {
     ClassName builderClass = context.generatedClass.nestedClass("Tokenizer");
-    return new Tokenizer(builderClass, context, option, helper);
+    FieldSpec out = FieldSpec.builder(indentPrinter.type, "out")
+        .addModifiers(FINAL).build();
+    return new Tokenizer(builderClass, context, option, helper, out);
   }
 
 
@@ -60,7 +61,9 @@ final class Tokenizer {
         .addMethod(parseMethod())
         .addMethod(parseListMethod())
         .addMethod(privateConstructor())
-        .addField(indent)
+        .addMethod(printUsageMethod())
+        .addMethod(synopsisMethod())
+        .addMethod(describeMethod())
         .addField(out);
     return builder.build();
   }
@@ -86,6 +89,163 @@ final class Tokenizer {
         .build();
   }
 
+  private MethodSpec printUsageMethod() {
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("printUsage");
+
+    // Name
+    builder.addStatement("$N.println($S)", out, "NAME");
+    builder.addStatement("$N.incrementIndent()", out);
+    if (context.missionStatement.isEmpty()) {
+      builder.addStatement("$N.println($S)", out, context.programName);
+    } else {
+      builder.addStatement("$N.println($T.format($S, $S, $S))",
+          out, String.class, "%s - %s", context.programName, context.missionStatement);
+    }
+    builder.addStatement("$N.println()", out);
+    builder.addStatement("$N.decrementIndent()", out);
+
+    // Synopsis
+    builder.addStatement("$N.println($S)", out, "SYNOPSIS");
+    builder.addStatement("$N.incrementIndent()", out);
+    builder.addStatement("$N.println(synopsis())", out);
+    builder.addStatement("$N.println()", out);
+    builder.addStatement("$N.decrementIndent()", out);
+
+    // Description
+    builder.addStatement("$N.println($S)", out, "DESCRIPTION");
+    if (!context.overview.isEmpty()) {
+      builder.addStatement("$N.incrementIndent()", out);
+      for (String line : context.overview) {
+        if (line.isEmpty()) {
+          builder.addStatement("$N.println()", out);
+        } else {
+          builder.addStatement("$N.println($S)", out, line);
+        }
+      }
+      builder.addStatement("$N.decrementIndent()", out);
+    }
+
+    // Positional parameters
+    builder.addStatement("$N.println()", out);
+    if (!context.positionalParamTypes.isEmpty()) {
+      ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
+      builder.beginControlFlow("for ($T $N: $T.values())",
+          optionParam.type, optionParam, optionParam.type)
+          .beginControlFlow("if ($N.$N.$N)",
+              optionParam, option.typeField, option.optionType.isPositionalField)
+          .addStatement("describe($N)", optionParam)
+          .addStatement("$N.println()", out)
+          .endControlFlow()
+          .endControlFlow();
+    }
+
+    // Options
+    if (!context.nonpositionalParamTypes.isEmpty() || context.addHelp) {
+      builder.addStatement("$N.println($S)", out, "OPTIONS");
+    }
+
+    if (!context.nonpositionalParamTypes.isEmpty()) {
+      ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
+      builder.beginControlFlow("for ($T $N: $T.values())",
+          optionParam.type, optionParam, optionParam.type)
+          .beginControlFlow("if (!$N.$N.$N)",
+              optionParam, option.typeField, option.optionType.isPositionalField)
+          .addStatement("$N.incrementIndent()", out)
+          .addStatement("describe($N)", optionParam)
+          .addStatement("$N.println()", out)
+          .addStatement("$N.decrementIndent()", out)
+          .endControlFlow()
+          .endControlFlow();
+    }
+
+    // Help
+    if (context.addHelp) {
+      builder.addStatement("$N.incrementIndent()", out);
+      builder.addStatement("$N.println($S)", out, "--help");
+      builder.addStatement("$N.incrementIndent()", out);
+      builder.addStatement("$N.println($S)", out, "Print this help page.");
+      builder.addStatement("$N.println($S)", out, "The help flag may only be passed as the first argument.");
+      builder.addStatement("$N.println($S)", out, "Any further arguments will be ignored.");
+      builder.addStatement("$N.println()", out);
+      builder.addStatement("$N.decrementIndent()", out);
+      builder.addStatement("$N.decrementIndent()", out);
+    }
+
+    builder.addStatement("$N.flush()", out);
+
+    return builder.build();
+  }
+
+
+  private MethodSpec describeMethod() {
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("describe");
+    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
+    ParameterSpec lineParam = ParameterSpec.builder(STRING, "line").build();
+    spec.addParameter(optionParam);
+    spec.addStatement("$N.println($N.describeNames())", out, optionParam);
+    spec.addStatement("$N.incrementIndent()", out);
+    spec.beginControlFlow("for ($T $N : $N.description)", STRING, lineParam, optionParam)
+        .addStatement("$N.println($N)", out, lineParam)
+        .endControlFlow();
+    spec.addStatement("$N.decrementIndent()", out);
+    return spec.build();
+  }
+
+  private MethodSpec synopsisMethod() {
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("synopsis")
+        .returns(STRING);
+
+    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
+
+    builder.addStatement("$T $N = new $T($S)",
+        StringJoiner.class, joiner, StringJoiner.class, " ");
+
+    Map<Boolean, List<Param>> partitionedNonpos = context.parameters.stream()
+        .filter(p -> p.positionalType == null)
+        .collect(partitioningBy(p -> p.paramType.required));
+
+    List<Param> requiredNonpos = partitionedNonpos.get(true);
+    List<Param> optionalNonpos = partitionedNonpos.get(false);
+
+    List<Param> positional = context.parameters.stream()
+        .filter(p -> p.positionalType != null)
+        .collect(toList());
+
+    builder.addStatement("$N.add($S)", joiner, context.programName);
+
+    if (!optionalNonpos.isEmpty()) {
+      builder.addStatement("$N.add($S)", joiner, "[<options>]");
+    }
+
+    for (Param param : requiredNonpos) {
+      builder.addStatement("$N.add($T.$L.example())", joiner,
+          option.type, param.enumConstant());
+    }
+
+    for (Param param : positional) {
+      switch (param.positionalType.order) {
+        case REQUIRED:
+          builder.addStatement("$N.add($S + $S + $S)", joiner, "<",
+              param.descriptionArgumentName(), ">");
+          break;
+        case OPTIONAL:
+          builder.addStatement("$N.add($S + $S + $S)", joiner, "[<",
+              param.descriptionArgumentName(), ">]");
+          break;
+        case LIST:
+          builder.addStatement("$N.add($S + $S + $S)", joiner, context.allowEscape() ? "[[--] <" : "[<",
+              param.descriptionArgumentName(), ">]");
+          break;
+        default:
+          throw new AssertionError();
+      }
+    }
+
+    builder.addStatement("return $N.toString()", joiner);
+
+    return builder.build();
+  }
+
   private CodeBlock parseMethodTryBlock(
       ParameterSpec args) {
     CodeBlock.Builder builder = CodeBlock.builder();
@@ -95,7 +255,7 @@ final class Tokenizer {
         result.type, result, Arrays.class, args);
 
     builder.beginControlFlow("if (!$N.isPresent())", result)
-        .addStatement("$T.$N($N, $N)", option.type, option.printUsageMethod, out, indent)
+        .addStatement("printUsage()")
         .endControlFlow();
 
     builder.addStatement("return $N.map($T.identity())",
@@ -106,14 +266,11 @@ final class Tokenizer {
   private CodeBlock parseMethodCatchBlock(ParameterSpec e) {
     CodeBlock.Builder builder = CodeBlock.builder();
     if (context.addHelp) {
-      builder.addStatement("$N.print($S)", out, "Usage: ");
-      builder.addStatement("$N.println($T.$N())", out, option.type, option.synopsisMethod);
+      builder.addStatement("$N.println($S + synopsis())", out, "Usage: ");
       builder.addStatement("$N.println($N.getMessage())", out, e);
-      builder.addStatement("$N.print($S)", out, "Try '");
-      builder.addStatement("$N.print($S)", out, context.programName);
-      builder.addStatement("$N.println($S)", out, " --help' for more information.");
+      builder.addStatement("$N.println($S + $S + $S)", out, "Try '", context.programName, " --help' for more information.");
     } else {
-      builder.addStatement("$T.$N($N, $N)", option.type, option.printUsageMethod, out, indent);
+      builder.addStatement("printUsage()");
       builder.addStatement("$N.println($N.getMessage())", out, e);
     }
     builder.addStatement("$N.flush()", out);
@@ -224,13 +381,10 @@ final class Tokenizer {
 
   private MethodSpec privateConstructor() {
     ParameterSpec outParam = ParameterSpec.builder(out.type, out.name).build();
-    ParameterSpec indentParam = ParameterSpec.builder(indent.type, indent.name).build();
 
     return MethodSpec.constructorBuilder()
         .addStatement("this.$N = $N", out, outParam)
-        .addStatement("this.$N = $N", indent, indentParam)
         .addParameter(outParam)
-        .addParameter(indentParam)
         .build();
   }
 }
