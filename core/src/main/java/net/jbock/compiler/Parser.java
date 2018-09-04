@@ -29,6 +29,7 @@ final class Parser {
   private static final String METHOD_NAME_PARSE_OR_EXIT = "parseOrExit";
 
   private final Context context;
+  private final IndentPrinter indentPrinter;
   private final Tokenizer tokenizer;
   private final Option option;
   private final Helper helper;
@@ -44,11 +45,13 @@ final class Parser {
 
   private Parser(
       Context context,
+      IndentPrinter indentPrinter,
       Tokenizer tokenizer,
       Option option,
       Helper helper,
       Impl impl) {
     this.context = context;
+    this.indentPrinter = indentPrinter;
     this.tokenizer = tokenizer;
     this.option = option;
     this.helper = helper;
@@ -58,12 +61,13 @@ final class Parser {
   static Parser create(Context context) {
     ClassName implType = context.generatedClass.nestedClass(
         context.sourceType.getSimpleName() + "Impl");
+    IndentPrinter indentPrinter = IndentPrinter.create(context);
     OptionType optionType = OptionType.create(context);
     Option option = Option.create(context, optionType);
     Impl impl = Impl.create(option, implType);
     Helper helper = Helper.create(context, impl, option);
     Tokenizer builder = Tokenizer.create(context, option, helper);
-    return new Parser(context, builder, option, helper, impl);
+    return new Parser(context, indentPrinter, builder, option, helper, impl);
   }
 
   TypeSpec define() {
@@ -78,6 +82,7 @@ final class Parser {
         .addType(option.define())
         .addType(impl.define())
         .addType(option.optionType.define())
+        .addType(indentPrinter.define())
         .addField(out)
         .addField(indent)
         .addMethod(addPublicIfNecessary(createMethod()))

@@ -332,7 +332,7 @@ final class Option {
     }
     builder.beginControlFlow("if ($N.$N)",
         optionTypeField, optionType.isPositionalField)
-        .addStatement("return $N", argumentNameField)
+        .addStatement("return name()")
         .endControlFlow();
 
     builder.addStatement("return $N($S + $N + $S)",
@@ -395,7 +395,6 @@ final class Option {
       MethodSpec synopsisMethod,
       OptionType optionType,
       FieldSpec typeField) {
-    ParameterSpec optionParam = ParameterSpec.builder(type, "option").build();
     ParameterSpec out = ParameterSpec.builder(ClassName.get(PrintStream.class), "out").build();
     ParameterSpec indent = ParameterSpec.builder(INT, "indent").build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("printUsage");
@@ -429,6 +428,7 @@ final class Option {
 
     builder.addStatement("$N.println()", out);
     if (!context.positionalParamTypes.isEmpty()) {
+      ParameterSpec optionParam = ParameterSpec.builder(type, "option").build();
       builder.beginControlFlow("for ($T $N: $T.values())",
           optionParam.type, optionParam, optionParam.type)
           .addCode(printUsagePositionalLoopCode(optionParam, out, indent, optionType, typeField))
@@ -436,6 +436,7 @@ final class Option {
     }
 
     if (!context.nonpositionalParamTypes.isEmpty()) {
+      ParameterSpec optionParam = ParameterSpec.builder(type, "option").build();
       builder.addStatement("$N.println($S)", out, "OPTIONS");
       builder.beginControlFlow("for ($T $N: $T.values())",
           optionParam.type, optionParam, optionParam.type)
@@ -443,6 +444,11 @@ final class Option {
           .endControlFlow();
     }
 
+    if (context.addHelp) {
+
+    }
+
+    builder.addStatement("$N.flush()", out);
 
     return builder
         .addModifiers(STATIC)

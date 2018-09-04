@@ -28,15 +28,18 @@ import static net.jbock.compiler.Util.optionalOfSubtype;
 final class Tokenizer {
 
   final ClassName type;
+
   private final Context context;
   private final Option option;
   private final Helper helper;
 
+  private final FieldSpec out;
+
   private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out")
-      .addModifiers(PRIVATE, FINAL).build();
+      .addModifiers(FINAL).build();
 
   private final FieldSpec indent = FieldSpec.builder(INT, "indent")
-      .addModifiers(PRIVATE, FINAL).build();
+      .addModifiers(FINAL).build();
 
   private Tokenizer(ClassName type, Context context, Option option, Helper helper) {
     this.type = type;
@@ -79,7 +82,6 @@ final class Tokenizer {
 
     return builder
         .addParameter(args)
-        .addModifiers(PRIVATE)
         .returns(optionalOf(TypeName.get(context.sourceType.asType())))
         .build();
   }
@@ -114,6 +116,7 @@ final class Tokenizer {
       builder.addStatement("$T.$N($N, $N)", option.type, option.printUsageMethod, out, indent);
       builder.addStatement("$N.println($N.getMessage())", out, e);
     }
+    builder.addStatement("$N.flush()", out);
     builder.addStatement("return $T.empty()", Optional.class);
     return builder.build();
   }
@@ -128,8 +131,7 @@ final class Tokenizer {
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("parseList")
         .addParameter(tokens)
-        .returns(optionalOfSubtype(TypeName.get(context.sourceType.asType())))
-        .addModifiers(PRIVATE);
+        .returns(optionalOfSubtype(TypeName.get(context.sourceType.asType())));
 
     builder.addStatement("$T $N = 0", INT, count);
     builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
@@ -229,7 +231,6 @@ final class Tokenizer {
         .addStatement("this.$N = $N", indent, indentParam)
         .addParameter(outParam)
         .addParameter(indentParam)
-        .addModifiers(PRIVATE)
         .build();
   }
 }

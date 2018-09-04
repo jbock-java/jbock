@@ -220,7 +220,6 @@ class CurlArgumentsTest {
         "  curl is powered by libcurl for all transfer-related features. See libcurl(3) for details.",
         "",
         "URLS",
-        "  ",
         "",
         "OPTIONS",
         "  -X <method>, --request <method>",
