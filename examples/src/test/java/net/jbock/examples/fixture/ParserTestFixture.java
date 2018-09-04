@@ -81,6 +81,7 @@ public final class ParserTestFixture<E> {
     parser.add(new Parser<E>() {
 
       @Override
+      @SuppressWarnings("unchecked")
       public Optional<E> parse(String[] args) {
         try {
           Method parseMethod = builder.getClass().getDeclaredMethod("parse", args.getClass());

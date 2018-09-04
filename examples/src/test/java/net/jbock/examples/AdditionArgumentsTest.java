@@ -46,7 +46,7 @@ class AdditionArgumentsTest {
         "  AdditionArguments",
         "",
         "SYNOPSIS",
-        "  AdditionArguments A B [C]",
+        "  AdditionArguments <A> <B> [<c>]",
         "",
         "DESCRIPTION",
         "",

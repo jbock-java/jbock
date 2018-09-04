@@ -10,15 +10,15 @@ class CpArgumentsTest {
 
   @Test
   void errorMissingSource() {
-    f.assertThat().failsWithLine1("Missing parameter: SOURCE");
-    f.assertThat("-r").failsWithLine1("Missing parameter: SOURCE");
+    f.assertThat().failsWithLine1("Missing parameter: <SOURCE>");
+    f.assertThat("-r").failsWithLine1("Missing parameter: <SOURCE>");
   }
 
   @Test
   void errorMissingDest() {
-    f.assertThat("a").failsWithLine1("Missing parameter: DEST");
-    f.assertThat("a", "-r").failsWithLine1("Missing parameter: DEST");
-    f.assertThat("-r", "a").failsWithLine1("Missing parameter: DEST");
+    f.assertThat("a").failsWithLine1("Missing parameter: <DEST>");
+    f.assertThat("a", "-r").failsWithLine1("Missing parameter: <DEST>");
+    f.assertThat("-r", "a").failsWithLine1("Missing parameter: <DEST>");
   }
 
   @Test
@@ -69,7 +69,7 @@ class CpArgumentsTest {
         "  CpArguments",
         "",
         "SYNOPSIS",
-        "  CpArguments [OPTION]... SOURCE DEST",
+        "  CpArguments [<options>] <SOURCE> <DEST>",
         "",
         "DESCRIPTION",
         "",

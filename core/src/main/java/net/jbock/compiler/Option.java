@@ -108,11 +108,11 @@ final class Option {
     ClassName type = context.generatedClass.nestedClass("Option");
     MethodSpec shortNameMapMethod = shortNameMapMethod(type, shortNameField);
     MethodSpec longNameMapMethod = longNameMapMethod(type, longNameField);
-    MethodSpec exampleMethod = exampleMethod(longNameField, shortNameField);
-    FieldSpec descriptionField = FieldSpec.builder(
-        LIST_OF_STRING, "description").build();
     FieldSpec argumentNameField = FieldSpec.builder(
         STRING, "descriptionArgumentName").build();
+    MethodSpec exampleMethod = exampleMethod(longNameField, shortNameField, argumentNameField);
+    FieldSpec descriptionField = FieldSpec.builder(
+        LIST_OF_STRING, "description").build();
     MethodSpec spacesMethod = spacesMethod();
     MethodSpec synopsisMethod = synopsisMethod(context, exampleMethod);
     MethodSpec printUsageMethod = printUsageMethod(
@@ -327,14 +327,16 @@ final class Option {
     if (context.paramTypes.contains(Type.FLAG)) {
       builder.beginControlFlow("if ($N == $T.$L)",
           optionTypeField, optionType.type, Type.FLAG)
-          .addStatement("return $N()", describeParamMethod)
+          .addStatement("return $N($S)", describeParamMethod, "")
           .endControlFlow();
     }
     builder.beginControlFlow("if ($N.$N)",
         optionTypeField, optionType.isPositionalField)
         .addStatement("return $N", argumentNameField)
         .endControlFlow();
-    builder.addStatement("return $N() + ' ' + $N", describeParamMethod, argumentNameField);
+
+    builder.addStatement("return $N($S + $N + $S)",
+        describeParamMethod, " <", argumentNameField, ">");
     return MethodSpec.methodBuilder("describeNames")
         .returns(STRING)
         .addCode(builder.build())
@@ -344,19 +346,23 @@ final class Option {
   private static MethodSpec describeParamMethod(
       FieldSpec longNameField,
       FieldSpec shortNameField) {
+
+    ParameterSpec argname = ParameterSpec.builder(STRING, "argname").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if ($N == null)", shortNameField)
-        .addStatement("return $S + $N", "--", longNameField)
+        .addStatement("return $S + $N + $N", "--", longNameField, argname)
         .endControlFlow();
 
     builder.beginControlFlow("if ($N == null)", longNameField)
-        .addStatement("return $S + $N", "-", shortNameField)
+        .addStatement("return $S + $N + $N", "-", shortNameField, argname)
         .endControlFlow();
 
-    builder.addStatement("return $S + $N + $S + $N", "-", shortNameField, ", --", longNameField);
+    builder.addStatement("return $S + $N + $N + $S + $N + $N", "-",
+        shortNameField, argname, ", --", longNameField, argname);
 
     return MethodSpec.methodBuilder("describeParam")
+        .addParameter(argname)
         .returns(STRING)
         .addCode(builder.build())
         .build();
@@ -364,16 +370,17 @@ final class Option {
 
   private static MethodSpec exampleMethod(
       FieldSpec longNameField,
-      FieldSpec shortNameField) {
+      FieldSpec shortNameField,
+      FieldSpec argumentNameField) {
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if ($N == null)", shortNameField)
-        .addStatement("return $T.format($S, $N, name())",
-            String.class, "--%s=<%s>", longNameField)
+        .addStatement("return $T.format($S, $N, $N)",
+            String.class, "--%s=<%s>", longNameField, argumentNameField)
         .endControlFlow();
 
-    builder.addStatement("return $T.format($S, $N, name())",
-        String.class, "-%s <%s>", shortNameField);
+    builder.addStatement("return $T.format($S, $N, $N)",
+        String.class, "-%s <%s>", shortNameField, argumentNameField);
 
     return MethodSpec.methodBuilder("example")
         .returns(STRING)
@@ -476,16 +483,16 @@ final class Option {
     for (Param param : positional) {
       switch (param.positionalType.order) {
         case REQUIRED:
-          builder.addStatement("$N.add($S + $L.name() + $S)", joiner, "<",
-              param.enumConstant(), ">");
+          builder.addStatement("$N.add($S + $S + $S)", joiner, "<",
+              param.descriptionArgumentName(), ">");
           break;
         case OPTIONAL:
-          builder.addStatement("$N.add($S + $L + $S)", joiner, "[<",
-              param.enumConstant(), ">]");
+          builder.addStatement("$N.add($S + $S + $S)", joiner, "[<",
+              param.descriptionArgumentName(), ">]");
           break;
         case LIST:
-          builder.addStatement("$N.add($S + $L + $S)", joiner, context.allowEscape() ? "[[--] <" : "[<",
-              param.enumConstant(), ">...]");
+          builder.addStatement("$N.add($S + $S + $S)", joiner, context.allowEscape() ? "[[--] <" : "[<",
+              param.descriptionArgumentName(), ">]");
           break;
         default:
           throw new AssertionError();

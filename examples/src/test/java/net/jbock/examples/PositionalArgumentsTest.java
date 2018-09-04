@@ -14,8 +14,8 @@ class PositionalArgumentsTest {
 
   @Test
   void errorMissingParameters() {
-    f.assertThat().failsWithLine1("Missing parameter: SOURCE");
-    f.assertThat("a").failsWithLine1("Missing parameter: DEST");
+    f.assertThat().failsWithLine1("Missing parameter: <SOURCE>");
+    f.assertThat("a").failsWithLine1("Missing parameter: <DEST>");
   }
 
   @Test
@@ -72,7 +72,7 @@ class PositionalArgumentsTest {
         "  PositionalArguments",
         "",
         "SYNOPSIS",
-        "  PositionalArguments SOURCE DEST [OPT_STRING] [OTHER_TOKENS]...",
+        "  PositionalArguments <SOURCE> <DEST> [<opt_string>] [[--] <other_tokens...>]",
         "",
         "DESCRIPTION",
         "",

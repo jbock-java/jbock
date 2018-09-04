@@ -15,13 +15,13 @@ class PsArgumentsTest {
         "  PsArguments",
         "",
         "SYNOPSIS",
-        "  PsArguments [OPTION]...",
+        "  PsArguments [<options>]",
         "",
         "DESCRIPTION",
         "",
         "  -a, --all",
         "",
-        "  -w, --wide NUMBER",
+        "  -w <number>, --wide <number>",
         "",
         "");
   }

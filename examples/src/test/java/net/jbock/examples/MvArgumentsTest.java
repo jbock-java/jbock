@@ -10,8 +10,8 @@ class MvArgumentsTest {
 
   @Test
   void notEnoughArguments() {
-    f.assertThat().failsWithLine1("Missing parameter: <source>");
-    f.assertThat("a").failsWithLine1("Missing parameter: <dest>");
+    f.assertThat().failsWithLine1("Missing parameter: <SOURCE>");
+    f.assertThat("a").failsWithLine1("Missing parameter: <DEST>");
   }
 
   @Test
@@ -39,7 +39,7 @@ class MvArgumentsTest {
         "  MvArguments",
         "",
         "SYNOPSIS",
-        "  MvArguments <source> <dest>",
+        "  MvArguments <SOURCE> <DEST>",
         "",
         "DESCRIPTION",
         "",

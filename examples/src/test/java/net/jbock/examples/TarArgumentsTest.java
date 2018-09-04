@@ -37,7 +37,7 @@ class TarArgumentsTest {
         "  TarArguments",
         "",
         "SYNOPSIS",
-        "  TarArguments [<options>] -f <file>",
+        "  TarArguments [<options>] -f <FILE>",
         "",
         "DESCRIPTION",
         "",
@@ -49,7 +49,7 @@ class TarArgumentsTest {
         "",
         "  -z, --compress",
         "",
-        "  -f, --file VALUE",
+        "  -f <FILE>, --file <FILE>",
         "",
         "");
   }

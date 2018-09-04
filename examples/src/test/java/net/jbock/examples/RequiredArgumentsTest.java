@@ -44,11 +44,11 @@ class RequiredArgumentsTest {
         "  RequiredArguments",
         "",
         "SYNOPSIS",
-        "  RequiredArguments --dir=DIR [OTHER_TOKENS]...",
+        "  RequiredArguments --dir=<DIR> [[--] <other_tokens...>]",
         "",
         "DESCRIPTION",
         "",
-        "  --dir VALUE",
+        "  --dir <DIR>",
         "",
         "");
   }

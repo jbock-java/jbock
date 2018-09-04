@@ -21,11 +21,11 @@ class GradleArgumentsFooTest {
         "  GradleArguments",
         "",
         "SYNOPSIS",
-        "  GradleArguments [OPTION]...",
+        "  GradleArguments [<options>]",
         "",
         "DESCRIPTION",
         "",
-        "  --bar NUMBER",
+        "  --bar <bar>",
         "",
         "");
   }

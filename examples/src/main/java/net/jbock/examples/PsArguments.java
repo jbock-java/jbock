@@ -1,8 +1,10 @@
 package net.jbock.examples;
 
-import java.util.OptionalInt;
 import net.jbock.CommandLineArguments;
+import net.jbock.Description;
 import net.jbock.ShortName;
+
+import java.util.OptionalInt;
 
 @CommandLineArguments
 abstract class PsArguments {
@@ -11,6 +13,6 @@ abstract class PsArguments {
   abstract boolean all();
 
   @ShortName('w')
+  @Description(argumentName = "number")
   abstract OptionalInt wide();
-
 }

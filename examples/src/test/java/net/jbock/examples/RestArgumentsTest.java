@@ -39,11 +39,11 @@ class RestArgumentsTest {
         "  RestArguments",
         "",
         "SYNOPSIS",
-        "  RestArguments [OPTION]... [REST]...",
+        "  RestArguments [<options>] [<rest...>]",
         "",
         "DESCRIPTION",
         "",
-        "  --file VALUE...",
+        "  --file <file...>",
         "",
         "");
   }

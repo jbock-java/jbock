@@ -686,8 +686,8 @@ final class Helper {
       Option option,
       ParameterSpec optionParam) {
     return CodeBlock.builder()
-        .add("$N.name() + $S + $N.$N() + $S",
-            optionParam, " (", optionParam, option.describeParamMethod, ")")
+        .add("$N.name() + $S + $N.$N($S) + $S",
+            optionParam, " (", optionParam, option.describeParamMethod, "", ")")
         .build();
   }
 

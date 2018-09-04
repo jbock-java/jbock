@@ -11,14 +11,14 @@ import java.util.OptionalInt;
 abstract class GradleArguments {
 
   @ShortName('m')
-  @Description(value = {"the message", "message goes here"}, argumentName = "MESSAGE")
+  @Description(value = {"the message", "message goes here"})
   abstract Optional<String> message();
 
   @ShortName('f')
-  @Description(value = "the files", argumentName = "FILE")
+  @Description(value = "the files")
   abstract List<String> file();
 
-  @Description(value = "the dir", argumentName = "DIR")
+  @Description(value = "the dir")
   abstract Optional<String> dir();
 
   @ShortName('c')

@@ -20,9 +20,9 @@ class SimpleArgumentsTest {
   }
 
   @Test
-  void errorHelpNotFirstArguent() {
+  void errorHelpNotFirstArgument() {
     f.assertThat("--file", "1", "--help").failsWithLines(
-        "Usage: SimpleArguments [OPTION]...",
+        "Usage: SimpleArguments [<options>]",
         "Invalid option: --help",
         "Try 'SimpleArguments --help' for more information.",
         "");
@@ -35,13 +35,13 @@ class SimpleArgumentsTest {
         "  SimpleArguments",
         "",
         "SYNOPSIS",
-        "  SimpleArguments [OPTION]...",
+        "  SimpleArguments [<options>]",
         "",
         "DESCRIPTION",
         "",
         "  -x, --extract",
         "",
-        "  --file VALUE",
+        "  --file <file>",
         "",
         "");
   }

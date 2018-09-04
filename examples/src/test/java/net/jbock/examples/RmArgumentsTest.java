@@ -25,7 +25,7 @@ class RmArgumentsTest {
         "  RmArguments",
         "",
         "SYNOPSIS",
-        "  RmArguments [OPTION]... [OTHER_TOKENS]...",
+        "  RmArguments [<options>] [[--] <other_tokens...>]",
         "",
         "DESCRIPTION",
         "",

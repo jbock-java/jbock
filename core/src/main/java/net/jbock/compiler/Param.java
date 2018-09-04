@@ -331,26 +331,18 @@ final class Param {
       return null;
     }
     Description description = description();
+    String result;
     if (description != null && !description.argumentName().isEmpty()) {
-      return description.argumentName();
+      result = description.argumentName();
+    } else if (paramType.required) {
+      result = name.toUpperCase();
+    } else {
+      result = name;
     }
-    if (positionalType != null) {
-      return snakeCase(methodName());
+    if (paramType == Type.REPEATABLE) {
+      result += "...";
     }
-    switch (paramType) {
-      case REPEATABLE:
-        return "VALUE...";
-      case OPTIONAL_INT:
-        return "NUMBER";
-      case REQUIRED_INT:
-        return "NUMBER";
-      case REQUIRED:
-        return "VALUE";
-      case OPTIONAL:
-        return "VALUE";
-      default:
-        return "VALUE";
-    }
+    return result;
   }
 
   boolean isPositional() {

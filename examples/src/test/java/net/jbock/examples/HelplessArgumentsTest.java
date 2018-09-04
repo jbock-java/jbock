@@ -15,7 +15,7 @@ class HelplessArgumentsTest {
       "  HelplessArguments",
       "",
       "SYNOPSIS",
-      "  HelplessArguments [OPTION]... REQUIRED",
+      "  HelplessArguments [<options>] <REQUIRED>",
       "",
       "DESCRIPTION",
       "",
@@ -31,7 +31,7 @@ class HelplessArgumentsTest {
 
   @Test
   void errorNoArguments() {
-    f.assertThat().failsWithLines(append(fullUsage, "Missing parameter: REQUIRED", ""));
+    f.assertThat().failsWithLines(append(fullUsage, "Missing parameter: <REQUIRED>", ""));
   }
 
   @Test
