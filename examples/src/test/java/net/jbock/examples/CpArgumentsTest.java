@@ -73,6 +73,13 @@ class CpArgumentsTest {
         "",
         "DESCRIPTION",
         "",
+        "SOURCE",
+        "  ",
+        "",
+        "DEST",
+        "  ",
+        "",
+        "OPTIONS",
         "  -r, --recursive",
         "",
         "");

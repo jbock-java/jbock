@@ -74,6 +74,7 @@ class NoNameArgumentsTest {
         "",
         "DESCRIPTION",
         "",
+        "OPTIONS",
         "  --message <message>",
         "",
         "  --file <file...>",

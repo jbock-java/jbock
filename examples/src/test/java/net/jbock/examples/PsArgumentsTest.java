@@ -19,6 +19,7 @@ class PsArgumentsTest {
         "",
         "DESCRIPTION",
         "",
+        "OPTIONS",
         "  -a, --all",
         "",
         "  -w <number>, --wide <number>",

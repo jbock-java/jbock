@@ -50,6 +50,15 @@ class AdditionArgumentsTest {
         "",
         "DESCRIPTION",
         "",
+        "A",
+        "  First argument",
+        "",
+        "B",
+        "  Second argument",
+        "",
+        "C",
+        "  Optional third argument",
+        "",
         "");
   }
 }

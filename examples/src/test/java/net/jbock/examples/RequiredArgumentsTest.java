@@ -48,6 +48,10 @@ class RequiredArgumentsTest {
         "",
         "DESCRIPTION",
         "",
+        "OTHER_TOKENS",
+        "  ",
+        "",
+        "OPTIONS",
         "  --dir <DIR>",
         "",
         "");

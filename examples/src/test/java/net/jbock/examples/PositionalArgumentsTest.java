@@ -76,6 +76,18 @@ class PositionalArgumentsTest {
         "",
         "DESCRIPTION",
         "",
+        "SOURCE",
+        "  ",
+        "",
+        "DEST",
+        "  ",
+        "",
+        "OPT_STRING",
+        "  ",
+        "",
+        "OTHER_TOKENS",
+        "  ",
+        "",
         "");
   }
 }

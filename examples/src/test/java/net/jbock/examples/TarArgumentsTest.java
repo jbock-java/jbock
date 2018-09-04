@@ -41,6 +41,7 @@ class TarArgumentsTest {
         "",
         "DESCRIPTION",
         "",
+        "OPTIONS",
         "  -x, --extract",
         "",
         "  -c, --create",

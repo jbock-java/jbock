@@ -43,6 +43,10 @@ class RestArgumentsTest {
         "",
         "DESCRIPTION",
         "",
+        "REST",
+        "  ",
+        "",
+        "OPTIONS",
         "  --file <file...>",
         "",
         "");

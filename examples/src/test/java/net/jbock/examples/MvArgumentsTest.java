@@ -43,6 +43,12 @@ class MvArgumentsTest {
         "",
         "DESCRIPTION",
         "",
+        "SOURCE",
+        "  ",
+        "",
+        "DEST",
+        "  ",
+        "",
         "");
   }
 }

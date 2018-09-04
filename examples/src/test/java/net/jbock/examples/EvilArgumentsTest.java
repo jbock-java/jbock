@@ -29,6 +29,7 @@ class EvilArgumentsTest {
         "",
         "DESCRIPTION",
         "",
+        "OPTIONS",
         "  --fancy <FANCY>",
         "",
         "  --fAncy <FANCY_1>",

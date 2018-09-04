@@ -37,7 +37,7 @@ final class OptionType {
 
   TypeSpec define() {
     TypeSpec.Builder builder = TypeSpec.enumBuilder(type);
-    for (Type optionType : context.paramTypes) {
+    for (Type optionType : context.nonpositionalParamTypes) {
       addType(builder, optionType);
     }
     for (PositionalType optionType : context.positionalParamTypes) {

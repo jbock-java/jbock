@@ -46,7 +46,7 @@ final class Context {
   final boolean addHelp;
 
   // a set of only the non-positional param types in the sourceType
-  final Set<Type> paramTypes;
+  final Set<Type> nonpositionalParamTypes;
 
   // a set of only the positional param types in the sourceType
   final Set<PositionalType> positionalParamTypes;
@@ -70,7 +70,7 @@ final class Context {
       boolean strict,
       boolean generateToString,
       boolean addHelp,
-      Set<Type> paramTypes,
+      Set<Type> nonpositionalParamTypes,
       Set<PositionalType> positionalParamTypes,
       List<String> overview,
       String programName,
@@ -84,7 +84,7 @@ final class Context {
     this.strict = strict;
     this.generateToString = generateToString;
     this.addHelp = addHelp;
-    this.paramTypes = paramTypes;
+    this.nonpositionalParamTypes = nonpositionalParamTypes;
     this.positionalParamTypes = positionalParamTypes;
     this.overview = overview;
     this.programName = programName;

@@ -141,7 +141,12 @@ public final class ParserTestFixture<E> {
     Optional<E> result = parser.out(new PrintStream(out)).indent(2).parse(new String[]{"--help"});
     assertFalse(result.isPresent());
     String[] actual = new String(out.toByteArray()).split("\\r?\\n", -1);
-    assertArrayEquals(expected, actual, "Actual: " + Arrays.toString(actual));
+    if (expected.length != actual.length) {
+      assertArrayEquals(expected, actual, "Actual: " + Arrays.toString(actual));
+    }
+    for (int i = 0; i < actual.length; i++) {
+      assertEquals(expected[i], actual[i], "Arrays differ at index " + i);
+    }
   }
 
   public static final class JsonAssert<E> {

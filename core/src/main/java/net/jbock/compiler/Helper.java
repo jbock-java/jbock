@@ -213,7 +213,7 @@ final class Helper {
     spec.addMethod(readMethod);
     spec.addMethod(readRegularOptionMethod);
     spec.addMethod(buildMethod());
-    if (!context.paramTypes.isEmpty()) {
+    if (!context.nonpositionalParamTypes.isEmpty()) {
       spec.addField(
           longNamesField.toBuilder()
               .initializer("$T.unmodifiableMap($T.$N())", Collections.class, option.type, this.option.longNameMapMethod)
@@ -231,26 +231,26 @@ final class Helper {
           .addMethod(readNextMethod)
           .addMethod(readLongMethod);
     }
-    if (context.paramTypes.contains(Type.REPEATABLE)) {
+    if (context.nonpositionalParamTypes.contains(Type.REPEATABLE)) {
       spec.addField(
           optMapField.toBuilder()
               .initializer("new $T<>($T.class)", EnumMap.class, option.type)
               .build());
     }
-    if (context.paramTypes.contains(Type.FLAG)) {
+    if (context.nonpositionalParamTypes.contains(Type.FLAG)) {
       spec.addField(
           flagsField.toBuilder()
               .initializer("$T.noneOf($T.class)", EnumSet.class, option.type)
               .build());
       spec.addMethod(addFlagMethod);
     }
-    if (context.paramTypes.contains(Type.REQUIRED)) {
+    if (context.nonpositionalParamTypes.contains(Type.REQUIRED)) {
       spec.addMethod(extractRequiredMethod);
     }
-    if (context.paramTypes.contains(Type.REQUIRED_INT)) {
+    if (context.nonpositionalParamTypes.contains(Type.REQUIRED_INT)) {
       spec.addMethod(extractRequiredIntMethod);
     }
-    if (context.paramTypes.contains(Type.OPTIONAL_INT)) {
+    if (context.nonpositionalParamTypes.contains(Type.OPTIONAL_INT)) {
       spec.addMethod(extractOptionalIntMethod);
     }
     if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_LIST)) {
@@ -295,7 +295,7 @@ final class Helper {
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("addArgument");
 
-    if (context.paramTypes.contains(Type.REPEATABLE)) {
+    if (context.nonpositionalParamTypes.contains(Type.REPEATABLE)) {
       spec.beginControlFlow("if ($N.type == $T.$L)", optionParam, option.optionType.type, Type.REPEATABLE);
 
       spec.addStatement("$T $N = $N.get($N)", bucket.type, bucket, optMap, optionParam);
@@ -330,7 +330,7 @@ final class Helper {
         .addParameter(token)
         .returns(option.type);
 
-    if (option.context.paramTypes.isEmpty()) {
+    if (option.context.nonpositionalParamTypes.isEmpty()) {
       return spec.addStatement("return null").build();
     }
 
@@ -342,7 +342,7 @@ final class Helper {
         .addStatement("return $N($N)", readLongMethod, token)
         .endControlFlow();
 
-    if (!option.context.paramTypes.contains(Type.FLAG)) {
+    if (!option.context.nonpositionalParamTypes.contains(Type.FLAG)) {
       return spec.addStatement("return $N.get($T.toString($N.charAt(1)))",
           shortNamesField, Character.class, token).build();
     }
@@ -408,12 +408,12 @@ final class Helper {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(optionParam, token, it));
 
-    if (option.context.paramTypes.isEmpty()) {
+    if (option.context.nonpositionalParamTypes.isEmpty()) {
       return spec.addStatement(throwInvalidOptionStatement(token))
           .build();
     }
 
-    if (option.context.paramTypes.contains(Type.FLAG)) {
+    if (option.context.nonpositionalParamTypes.contains(Type.FLAG)) {
       spec.beginControlFlow("if ($N.$N == $T.$L)",
           optionParam, option.typeField, option.optionType.type, Type.FLAG)
           .addStatement("$N($N)", addFlagMethod, optionParam)
@@ -686,7 +686,7 @@ final class Helper {
       Option option,
       ParameterSpec optionParam) {
     return CodeBlock.builder()
-        .add("$N.name() + $S + $N.$N($S) + $S",
+        .add("$N + $S + $N.$N($S) + $S",
             optionParam, " (", optionParam, option.describeParamMethod, "", ")")
         .build();
   }

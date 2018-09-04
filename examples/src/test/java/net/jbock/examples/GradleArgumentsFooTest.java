@@ -25,6 +25,7 @@ class GradleArgumentsFooTest {
         "",
         "DESCRIPTION",
         "",
+        "OPTIONS",
         "  --bar <bar>",
         "",
         "");
