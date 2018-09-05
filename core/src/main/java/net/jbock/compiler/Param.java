@@ -15,7 +15,6 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -44,9 +43,6 @@ final class Param {
   // never null
   final Type paramType;
 
-  // non-null iff this param is positional; in that case, both names are null
-  final PositionalType positionalType;
-
   // index in the list of all abstract methods (in source order, ignoring inheritance)
   final int index;
 
@@ -56,7 +52,9 @@ final class Param {
   // does it return string array
   final boolean array;
 
-  final String name;
+  private final String name;
+
+  private final boolean positional;
 
   private static String enumConstant(List<Param> params, String methodName, int index) {
     String result = snakeCase(methodName);
@@ -76,25 +74,28 @@ final class Param {
       String longName,
       int index,
       Type paramType,
-      PositionalType positionalType,
       ExecutableElement sourceMethod,
       boolean array,
-      String name) {
+      String name,
+      boolean positional) {
+    if (positional && paramType.positionalType == null) {
+      throw new AssertionError("positional, but positionalType is null");
+    }
     this.shortName = shortName;
     this.longName = longName;
     this.index = index;
-    this.positionalType = positionalType;
     this.sourceMethod = sourceMethod;
     this.paramType = paramType;
     this.array = array;
     this.name = name;
+    this.positional = positional;
   }
 
   CodeBlock extractExpression(Helper helper) {
-    if (positionalType == null) {
+    if (!positional) {
       return paramType.extractExpression(helper, this);
     }
-    return positionalType.extractExpression(helper, this);
+    return paramType.positionalType.extractExpression(helper, this);
   }
 
   private static Type checkNonpositionalType(ExecutableElement sourceMethod) {
@@ -152,10 +153,10 @@ final class Param {
         longName,
         index,
         type,
-        null,
         sourceMethod,
         array,
-        enumConstant(params, sourceMethod.getSimpleName().toString(), index));
+        enumConstant(params, sourceMethod.getSimpleName().toString(), index),
+        false);
   }
 
   private static Param createPositional(List<Param> params, ExecutableElement sourceMethod, int index) {
@@ -177,10 +178,10 @@ final class Param {
         null,
         index,
         type,
-        type.positionalType,
         sourceMethod,
         array,
-        enumConstant(params, sourceMethod.getSimpleName().toString(), index));
+        enumConstant(params, sourceMethod.getSimpleName().toString(), index),
+        true);
   }
 
   private static void basicChecks(ExecutableElement sourceMethod) {
@@ -345,15 +346,22 @@ final class Param {
     return result;
   }
 
-  boolean isPositional() {
-    return positionalType != null;
-  }
-
   TypeName returnType() {
     return paramType.returnType(this);
   }
 
   String enumConstant() {
     return name.toUpperCase();
+  }
+
+  PositionalType positionalType() {
+    if (!positional) {
+      throw new AssertionError("not positional");
+    }
+    return paramType.positionalType;
+  }
+
+  boolean isPositional() {
+    return positional;
   }
 }

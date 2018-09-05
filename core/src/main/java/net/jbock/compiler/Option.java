@@ -120,7 +120,7 @@ final class Option {
       Map<String, Object> map = new LinkedHashMap<>();
       map.put("longName", param.longName());
       map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
-      map.put("type", param.positionalType != null ? param.positionalType : param.paramType);
+      map.put("type", param.isPositional() ? param.positionalType() : param.paramType);
       map.put("optionType", optionType.type);
       map.put("argumentName", argumentName);
       map.put("descExpression", descExpression(desc));

@@ -75,7 +75,7 @@ public final class Processor extends AbstractProcessor {
               "Skipping code generation: No abstract methods found", sourceType);
           continue;
         }
-        Set<Type> paramTypes = paramTypes(parameters);
+        Set<Type> paramTypes = nonpositionalParamTypes(parameters);
         Set<PositionalType> positionalParamTypes = positionalParamTypes(parameters);
         Context context = Context.create(
             sourceType,
@@ -96,10 +96,10 @@ public final class Processor extends AbstractProcessor {
     return false;
   }
 
-  private static Set<Type> paramTypes(List<Param> parameters) {
+  private static Set<Type> nonpositionalParamTypes(List<Param> parameters) {
     Set<Type> paramTypes = EnumSet.noneOf(Type.class);
     parameters.stream()
-        .filter(p -> p.positionalType == null)
+        .filter(p -> !p.isPositional())
         .map(p -> p.paramType)
         .forEach(paramTypes::add);
     return paramTypes;
@@ -108,8 +108,8 @@ public final class Processor extends AbstractProcessor {
   private static Set<PositionalType> positionalParamTypes(List<Param> parameters) {
     Set<PositionalType> paramTypes = EnumSet.noneOf(PositionalType.class);
     parameters.stream()
-        .map(p -> p.positionalType)
-        .filter(Objects::nonNull)
+        .filter(Param::isPositional)
+        .map(Param::positionalType)
         .forEach(paramTypes::add);
     return paramTypes;
   }
@@ -148,7 +148,7 @@ public final class Processor extends AbstractProcessor {
     List<Param> result = new ArrayList<>(params.size());
     Param previousPositional = null;
     for (Param param : params) {
-      if (param.positionalType == null) {
+      if (!param.isPositional()) {
         result.add(param);
         continue;
       }
@@ -163,11 +163,11 @@ public final class Processor extends AbstractProcessor {
     if (previous == null) {
       return;
     }
-    if (param.positionalType.order.compareTo(previous.positionalType.order) < 0) {
+    if (param.positionalType().order.compareTo(previous.positionalType().order) < 0) {
       throw ValidationException.create(param.sourceMethod,
           String.format("Positional order: %s method %s() must come before %s method %s()",
-              param.positionalType.order, param.methodName(),
-              previous.positionalType.order, previous.methodName()));
+              param.positionalType().order, param.methodName(),
+              previous.positionalType().order, previous.methodName()));
     }
   }
 

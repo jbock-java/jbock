@@ -10,7 +10,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -35,9 +34,6 @@ final class Context {
 
   // should unknown parameters that start with dash be forbidden
   final boolean strict;
-
-  // true if upper-casing the method names would cause a naming conflict
-  final boolean problematicOptionNames;
 
   // true if the source type does not already define toString
   final boolean generateToString;
@@ -66,7 +62,6 @@ final class Context {
       List<Param> parameters,
       List<Param> positionalParameters,
       boolean allowEscape,
-      boolean problematicOptionNames,
       boolean strict,
       boolean generateToString,
       boolean addHelp,
@@ -80,7 +75,6 @@ final class Context {
     this.parameters = parameters;
     this.positionalParameters = positionalParameters;
     this.allowEscape = allowEscape;
-    this.problematicOptionNames = problematicOptionNames;
     this.strict = strict;
     this.generateToString = generateToString;
     this.addHelp = addHelp;
@@ -97,9 +91,8 @@ final class Context {
       Set<Type> paramTypes,
       Set<PositionalType> positionalParamTypes) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
-    boolean problematicOptionNames = problematicOptionNames(parameters);
     boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscape();
-    List<Param> positionalParameters = parameters.stream().filter(p -> p.positionalType != null).collect(toList());
+    List<Param> positionalParameters = parameters.stream().filter(Param::isPositional).collect(toList());
     boolean strict = sourceType.getAnnotation(CommandLineArguments.class).strict();
     boolean addHelp = sourceType.getAnnotation(CommandLineArguments.class).addHelp();
     boolean generateToString = methodsIn(sourceType.getEnclosedElements()).stream()
@@ -115,7 +108,6 @@ final class Context {
         parameters,
         positionalParameters,
         allowEscape,
-        problematicOptionNames,
         strict,
         generateToString,
         addHelp,
@@ -124,14 +116,6 @@ final class Context {
         description,
         programName(sourceType),
         missionStatement);
-  }
-
-  private static boolean problematicOptionNames(List<Param> parameters) {
-    Set<String> uppercaseArgumentNames = parameters.stream()
-        .map(Param::methodName)
-        .map(Util::snakeCase)
-        .collect(Collectors.toSet());
-    return uppercaseArgumentNames.size() < parameters.size();
   }
 
   private static ClassName parserClass(ClassName type) {
