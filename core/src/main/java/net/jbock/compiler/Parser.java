@@ -11,11 +11,14 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.io.PrintStream;
 
+import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Util.optionalOf;
 
 /**
@@ -35,6 +38,9 @@ final class Parser {
   private final Helper helper;
   private final Impl impl;
 
+  private final MethodSpec readNextMethod;
+  private final MethodSpec readArgumentMethod;
+
   private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out")
       .initializer("$T.out", System.class)
       .addModifiers(PRIVATE).build();
@@ -49,24 +55,30 @@ final class Parser {
       Tokenizer tokenizer,
       Option option,
       Helper helper,
-      Impl impl) {
+      Impl impl,
+      MethodSpec readNextMethod,
+      MethodSpec readArgumentMethod) {
     this.context = context;
     this.indentPrinter = indentPrinter;
     this.tokenizer = tokenizer;
     this.option = option;
     this.helper = helper;
     this.impl = impl;
+    this.readNextMethod = readNextMethod;
+    this.readArgumentMethod = readArgumentMethod;
   }
 
   static Parser create(Context context) {
     ClassName implType = context.generatedClass.nestedClass(
         context.sourceType.getSimpleName() + "Impl");
+    MethodSpec readNextMethod = readNextMethod();
+    MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
     IndentPrinter indentPrinter = IndentPrinter.create(context);
     Option option = Option.create(context);
     Impl impl = Impl.create(option, implType);
-    Helper helper = Helper.create(context, impl, option);
+    Helper helper = Helper.create(readArgumentMethod, readNextMethod, context, impl, option);
     Tokenizer builder = Tokenizer.create(context, option, helper, indentPrinter);
-    return new Parser(context, indentPrinter, builder, option, helper, impl);
+    return new Parser(context, indentPrinter, builder, option, helper, impl, readNextMethod, readArgumentMethod);
   }
 
   TypeSpec define() {
@@ -81,9 +93,15 @@ final class Parser {
         .addType(option.define())
         .addType(impl.define())
         .addType(OptionType.define(context))
+        .addType(OptionParser.define(context))
+        .addType(FlagOptionParser.define(context))
+        .addType(RegularOptionParser.define(context))
+        .addType(RepeatableOptionParser.define(context))
         .addType(indentPrinter.define())
         .addField(out)
         .addField(indent)
+        .addMethod(readArgumentMethod)
+        .addMethod(readNextMethod)
         .addMethod(addPublicIfNecessary(createMethod()))
         .addMethod(addPublicIfNecessary(parseMethod()))
         .addMethod(addPublicIfNecessary(parseOrExitMethodConvenience()))
@@ -190,4 +208,54 @@ final class Parser {
     }
     return spec.build();
   }
+
+  static MethodSpec readArgumentMethod(
+      MethodSpec readNextMethod) {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
+    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    ParameterSpec isLong = ParameterSpec.builder(BOOLEAN, "isLong").build();
+    MethodSpec.Builder builder = MethodSpec.methodBuilder("readArgument");
+
+    builder.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
+    builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
+
+    builder.beginControlFlow("if ($N && $N >= 0)", isLong, index)
+        .addStatement("return $N.substring($N + 1)", token, index)
+        .endControlFlow();
+
+    builder.beginControlFlow("if (!$N && $N.length() > 2)", isLong, token)
+        .addStatement("return $N.substring(2)", token)
+        .endControlFlow();
+
+    builder.addStatement("return $N($N, $N)", readNextMethod, token, it);
+
+    return builder.addParameters(asList(token, it))
+        .returns(STRING)
+        .addModifiers(STATIC, PRIVATE)
+        .build();
+  }
+
+  static MethodSpec readNextMethod() {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
+    CodeBlock.Builder builder = CodeBlock.builder();
+
+    builder.beginControlFlow("if (!$N.hasNext())", it)
+        .addStatement(CodeBlock.builder()
+            .add("throw new $T($S + $N)", IllegalArgumentException.class,
+                "Missing value after token: ", token)
+            .build())
+        .endControlFlow();
+
+    builder.addStatement("return $N.next()", it);
+
+    return MethodSpec.methodBuilder("readNext")
+        .addParameters(asList(token, it))
+        .returns(STRING)
+        .addCode(builder.build())
+        .addModifiers(STATIC, PRIVATE)
+        .build();
+  }
+
 }

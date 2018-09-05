@@ -2,7 +2,6 @@ package net.jbock.compiler;
 
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
-import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
@@ -33,7 +32,7 @@ enum OptionType {
       return CodeBlock.builder().add(
           "$N.contains($T.$N)",
           helper.flagsField,
-          helper.option.type,
+          helper.context.optionType(),
           param.enumConstant())
           .build();
     }
@@ -74,7 +73,7 @@ enum OptionType {
             "$T.ofNullable($N.get($T.$L))",
             Optional.class,
             helper.sMapField,
-            helper.option.type,
+            helper.context.optionType(),
             param.enumConstant())
             .build();
       }
@@ -120,7 +119,7 @@ enum OptionType {
         return CodeBlock.builder().add(
             "$N($T.$L)",
             helper.extractOptionalIntMethod,
-            helper.option.type,
+            helper.context.optionType(),
             param.enumConstant())
             .build();
       }
@@ -161,14 +160,14 @@ enum OptionType {
             helper.extractPositionalRequiredMethod,
             helper.context.positionalIndex(param.index),
             helper.positionalParameter,
-            helper.option.type,
+            helper.context.optionType(),
             param.enumConstant())
             .build();
       } else {
         return CodeBlock.builder().add(
             "$N($T.$L)",
             helper.extractRequiredMethod,
-            helper.option.type,
+            helper.context.optionType(),
             param.enumConstant())
             .build();
       }
@@ -202,14 +201,14 @@ enum OptionType {
             helper.extractPositionalRequiredIntMethod,
             helper.context.positionalIndex(param.index),
             helper.positionalParameter,
-            helper.option.type,
+            helper.context.optionType(),
             param.enumConstant())
             .build();
       } else {
         return CodeBlock.builder().add(
             "$N($T.$L)",
             helper.extractRequiredIntMethod,
-            helper.option.type,
+            helper.context.optionType(),
             param.enumConstant())
             .build();
       }
@@ -250,7 +249,7 @@ enum OptionType {
         return CodeBlock.builder().add(
             "$N.getOrDefault($T.$L, $T.emptyList())",
             helper.optMapField,
-            helper.option.type,
+            helper.context.optionType(),
             param.enumConstant(),
             Collections.class)
             .build();

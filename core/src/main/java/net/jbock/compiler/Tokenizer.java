@@ -128,7 +128,7 @@ final class Tokenizer {
     // Positional parameters
     builder.addStatement("$N.println()", out);
     if (!context.positionalParamTypes.isEmpty()) {
-      ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
+      ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
       builder.beginControlFlow("for ($T $N: $T.values())",
           optionParam.type, optionParam, optionParam.type)
           .beginControlFlow("if ($N.$N)",
@@ -145,7 +145,7 @@ final class Tokenizer {
     }
 
     if (!context.nonpositionalParamTypes.isEmpty()) {
-      ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
+      ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
       builder.beginControlFlow("for ($T $N: $T.values())",
           optionParam.type, optionParam, optionParam.type)
           .beginControlFlow("if (!$N.$N)",
@@ -177,7 +177,7 @@ final class Tokenizer {
 
   private MethodSpec describeMethod() {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("describe");
-    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     ParameterSpec lineParam = ParameterSpec.builder(STRING, "line").build();
     spec.addParameter(optionParam);
 
@@ -229,7 +229,7 @@ final class Tokenizer {
 
     for (Param param : requiredNonpos) {
       builder.addStatement("$N.add($T.$L.example())", joiner,
-          option.type, param.enumConstant());
+          context.optionType(), param.enumConstant());
     }
 
     for (Param param : positional) {
@@ -300,7 +300,7 @@ final class Tokenizer {
 
   private MethodSpec parseListMethod() {
 
-    ParameterSpec helper = ParameterSpec.builder(this.helper.type, "helper").build();
+    ParameterSpec helper = ParameterSpec.builder(context.helperType(), "helper").build();
     ParameterSpec tokens = ParameterSpec.builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec stopword = ParameterSpec.builder(STRING, "stopword").build();
@@ -337,7 +337,7 @@ final class Tokenizer {
       ParameterSpec dd,
       ParameterSpec count) {
 
-    ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
+    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
 
     CodeBlock.Builder builder = CodeBlock.builder();
@@ -358,7 +358,7 @@ final class Tokenizer {
           .endControlFlow();
     }
 
-    builder.addStatement("$T $N = $N.$N($N)", option.type, optionParam, helper, this.helper.readRegularOptionMethod, token);
+    builder.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, helper, this.helper.readRegularOptionMethod, token);
 
     builder.beginControlFlow("if ($N != null)", optionParam)
         .addStatement("$N.$N($N, $N, $N)",

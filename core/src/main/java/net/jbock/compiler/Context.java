@@ -57,6 +57,9 @@ final class Context {
   final String missionStatement;
 
   private final ClassName optionTypeType;
+  private final ClassName optionParserType;
+  private final ClassName optionType;
+  private final ClassName helperType;
 
   private Context(
       TypeElement sourceType,
@@ -72,7 +75,10 @@ final class Context {
       List<String> overview,
       String programName,
       String missionStatement,
-      ClassName optionTypeType) {
+      ClassName optionTypeType,
+      ClassName optionParserType,
+      ClassName optionType,
+      ClassName helperType) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -87,6 +93,9 @@ final class Context {
     this.programName = programName;
     this.missionStatement = missionStatement;
     this.optionTypeType = optionTypeType;
+    this.optionParserType = optionParserType;
+    this.optionType = optionType;
+    this.helperType = helperType;
   }
 
   static Context create(
@@ -107,6 +116,9 @@ final class Context {
     List<String> description = Arrays.asList(sourceType.getAnnotation(CommandLineArguments.class).overview());
     String missionStatement = sourceType.getAnnotation(CommandLineArguments.class).missionStatement();
     ClassName optionTypeType = generatedClass.nestedClass("OptionType");
+    ClassName optionType = generatedClass.nestedClass("Option");
+    ClassName helperType = generatedClass.nestedClass("Helper");
+    ClassName optionParserType = generatedClass.nestedClass("OptionParser");
     return new Context(
         sourceType,
         generatedClass,
@@ -121,7 +133,10 @@ final class Context {
         description,
         programName(sourceType),
         missionStatement,
-        optionTypeType);
+        optionTypeType,
+        optionParserType,
+        optionType,
+        helperType);
   }
 
   private static ClassName parserClass(ClassName type) {
@@ -187,5 +202,17 @@ final class Context {
 
   ClassName optionTypeType() {
     return optionTypeType;
+  }
+
+  ClassName optionParserType() {
+    return optionParserType;
+  }
+
+  ClassName optionType() {
+    return optionType;
+  }
+
+  ClassName helperType() {
+    return helperType;
   }
 }

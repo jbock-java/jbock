@@ -32,7 +32,6 @@ import static net.jbock.compiler.Constants.STRING;
  */
 final class Option {
 
-  final ClassName type;
   final Context context;
 
   final MethodSpec describeParamMethod;
@@ -55,7 +54,6 @@ final class Option {
 
   private Option(
       Context context,
-      ClassName type,
       FieldSpec longNameField,
       FieldSpec shortNameField,
       FieldSpec positionalField,
@@ -74,7 +72,6 @@ final class Option {
     this.argumentNameField = argumentNameField;
     this.shortNameMapMethod = shortNameMapMethod;
     this.context = context;
-    this.type = type;
     this.typeField = typeField;
     this.longNameMapMethod = longNameMapMethod;
     this.describeParamMethod = describeParamMethod;
@@ -86,9 +83,8 @@ final class Option {
     FieldSpec positionalField = FieldSpec.builder(BOOLEAN, "positional").build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
         "shortName").build();
-    ClassName type = context.generatedClass.nestedClass("Option");
-    MethodSpec shortNameMapMethod = shortNameMapMethod(type, shortNameField);
-    MethodSpec longNameMapMethod = longNameMapMethod(type, longNameField);
+    MethodSpec shortNameMapMethod = shortNameMapMethod(context.optionType(), shortNameField);
+    MethodSpec longNameMapMethod = longNameMapMethod(context.optionType(), longNameField);
     FieldSpec argumentNameField = FieldSpec.builder(
         STRING, "descriptionArgumentName").build();
     MethodSpec exampleMethod = exampleMethod(longNameField, shortNameField, argumentNameField);
@@ -101,7 +97,6 @@ final class Option {
 
     return new Option(
         context,
-        type,
         longNameField,
         shortNameField,
         positionalField,
@@ -115,7 +110,7 @@ final class Option {
   }
 
   TypeSpec define() {
-    TypeSpec.Builder builder = TypeSpec.enumBuilder(type);
+    TypeSpec.Builder builder = TypeSpec.enumBuilder(context.optionType());
     for (Param param : context.parameters) {
       String[] desc = getText(param.description());
       String argumentName = param.descriptionArgumentName();
