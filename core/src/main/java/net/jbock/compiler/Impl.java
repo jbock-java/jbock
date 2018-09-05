@@ -48,7 +48,7 @@ final class Impl {
     List<FieldSpec> fields = new ArrayList<>(option.context.parameters.size());
     for (int j = 0; j < option.context.parameters.size(); j++) {
       Param param = option.context.parameters.get(j);
-      fields.add(FieldSpec.builder(param.paramType == Type.REPEATABLE ? Constants.LIST_OF_STRING : param.returnType(), param.methodName())
+      fields.add(FieldSpec.builder(param.paramType == OptionType.REPEATABLE ? Constants.LIST_OF_STRING : param.returnType(), param.methodName())
           .addModifiers(FINAL)
           .build());
     }
@@ -78,7 +78,7 @@ final class Impl {
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.methodName())
           .addAnnotation(Override.class)
           .returns(param.returnType());
-      if (param.paramType == Type.REPEATABLE && param.array) {
+      if (param.paramType == OptionType.REPEATABLE && param.array) {
         builder.addStatement("return $N.toArray(new $T[$N.size()])", fields.get(j), STRING, fields.get(j));
       } else {
         builder.addStatement("return $N", fields.get(j));
@@ -102,7 +102,7 @@ final class Impl {
       ParameterSpec param = ParameterSpec.builder(field.type, field.name).build();
       if (field.type.isPrimitive()) {
         builder.addStatement("this.$N = $N", field, param);
-      } else if (p.paramType == Type.REPEATABLE) {
+      } else if (p.paramType == OptionType.REPEATABLE) {
         builder.addStatement("this.$N = $T.unmodifiableList($N)", field, Collections.class, param);
       } else {
         builder.addStatement("this.$N = $T.requireNonNull($N)", field, Objects.class, param);

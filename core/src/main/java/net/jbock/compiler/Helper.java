@@ -236,20 +236,20 @@ final class Helper {
           .addMethod(readNextMethod)
           .addMethod(readLongMethod);
     }
-    if (context.nonpositionalParamTypes.contains(Type.REPEATABLE)) {
+    if (context.nonpositionalParamTypes.contains(OptionType.REPEATABLE)) {
       spec.addField(optMapField);
     }
-    if (context.nonpositionalParamTypes.contains(Type.FLAG)) {
+    if (context.nonpositionalParamTypes.contains(OptionType.FLAG)) {
       spec.addField(flagsField);
       spec.addMethod(addFlagMethod);
     }
-    if (context.nonpositionalParamTypes.contains(Type.REQUIRED)) {
+    if (context.nonpositionalParamTypes.contains(OptionType.REQUIRED)) {
       spec.addMethod(extractRequiredMethod);
     }
-    if (context.nonpositionalParamTypes.contains(Type.REQUIRED_INT)) {
+    if (context.nonpositionalParamTypes.contains(OptionType.REQUIRED_INT)) {
       spec.addMethod(extractRequiredIntMethod);
     }
-    if (context.nonpositionalParamTypes.contains(Type.OPTIONAL_INT)) {
+    if (context.nonpositionalParamTypes.contains(OptionType.OPTIONAL_INT)) {
       spec.addMethod(extractOptionalIntMethod);
     }
     if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_LIST)) {
@@ -294,8 +294,8 @@ final class Helper {
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("addArgument");
 
-    if (context.nonpositionalParamTypes.contains(Type.REPEATABLE)) {
-      spec.beginControlFlow("if ($N.type == $T.$L)", optionParam, option.optionType.type, Type.REPEATABLE);
+    if (context.nonpositionalParamTypes.contains(OptionType.REPEATABLE)) {
+      spec.beginControlFlow("if ($N.type == $T.$L)", optionParam, context.optionTypeType(), OptionType.REPEATABLE);
 
       spec.addStatement("$T $N = $N.get($N)", bucket.type, bucket, optMap, optionParam);
 
@@ -341,7 +341,7 @@ final class Helper {
         .addStatement("return $N($N)", readLongMethod, token)
         .endControlFlow();
 
-    if (!option.context.nonpositionalParamTypes.contains(Type.FLAG)) {
+    if (!option.context.nonpositionalParamTypes.contains(OptionType.FLAG)) {
       return spec.addStatement("return $N.get($N.charAt(1))",
           shortNamesField, token).build();
     }
@@ -357,7 +357,7 @@ final class Helper {
         .endControlFlow();
 
     spec.beginControlFlow("if ($N.$N != $T.$L)",
-        optionParam, option.typeField, option.optionType.type, Type.FLAG)
+        optionParam, option.typeField, option.context.optionTypeType(), OptionType.FLAG)
         .addStatement("return $N", optionParam)
         .endControlFlow();
 
@@ -412,9 +412,9 @@ final class Helper {
           .build();
     }
 
-    if (option.context.nonpositionalParamTypes.contains(Type.FLAG)) {
+    if (option.context.nonpositionalParamTypes.contains(OptionType.FLAG)) {
       spec.beginControlFlow("if ($N.$N == $T.$L)",
-          optionParam, option.typeField, option.optionType.type, Type.FLAG)
+          optionParam, option.typeField, option.context.optionTypeType(), OptionType.FLAG)
           .addStatement("$N($N)", addFlagMethod, optionParam)
           .addStatement("return")
           .endControlFlow();

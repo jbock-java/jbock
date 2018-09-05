@@ -75,7 +75,7 @@ public final class Processor extends AbstractProcessor {
               "Skipping code generation: No abstract methods found", sourceType);
           continue;
         }
-        Set<Type> paramTypes = nonpositionalParamTypes(parameters);
+        Set<OptionType> paramTypes = nonpositionalParamTypes(parameters);
         Set<PositionalType> positionalParamTypes = positionalParamTypes(parameters);
         Context context = Context.create(
             sourceType,
@@ -96,8 +96,8 @@ public final class Processor extends AbstractProcessor {
     return false;
   }
 
-  private static Set<Type> nonpositionalParamTypes(List<Param> parameters) {
-    Set<Type> paramTypes = EnumSet.noneOf(Type.class);
+  private static Set<OptionType> nonpositionalParamTypes(List<Param> parameters) {
+    Set<OptionType> paramTypes = EnumSet.noneOf(OptionType.class);
     parameters.stream()
         .filter(p -> !p.isPositional())
         .map(p -> p.paramType)
@@ -239,7 +239,7 @@ public final class Processor extends AbstractProcessor {
     boolean positionalListFound = false;
     for (Param param : params) {
       if (param.isPositional() &&
-          param.paramType == Type.REPEATABLE) {
+          param.paramType == OptionType.REPEATABLE) {
         if (positionalListFound) {
           throw ValidationException.create(param.sourceMethod,
               "Only one positional list allowed");

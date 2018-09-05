@@ -62,8 +62,7 @@ final class Parser {
     ClassName implType = context.generatedClass.nestedClass(
         context.sourceType.getSimpleName() + "Impl");
     IndentPrinter indentPrinter = IndentPrinter.create(context);
-    OptionType optionType = OptionType.create(context);
-    Option option = Option.create(context, optionType);
+    Option option = Option.create(context);
     Impl impl = Impl.create(option, implType);
     Helper helper = Helper.create(context, impl, option);
     Tokenizer builder = Tokenizer.create(context, option, helper, indentPrinter);
@@ -81,7 +80,7 @@ final class Parser {
         .addType(helper.define())
         .addType(option.define())
         .addType(impl.define())
-        .addType(option.optionType.define())
+        .addType(OptionType.define(context))
         .addType(indentPrinter.define())
         .addField(out)
         .addField(indent)

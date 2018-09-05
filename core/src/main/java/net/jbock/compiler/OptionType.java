@@ -1,68 +1,284 @@
 package net.jbock.compiler;
 
 import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
-import static javax.lang.model.element.Modifier.FINAL;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import java.util.Optional;
+import java.util.OptionalInt;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
-import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.STRING_ARRAY;
+import static net.jbock.compiler.PositionalType.POSITIONAL_LIST;
+import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL;
+import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL_INT;
+import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED;
+import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED_INT;
+import static net.jbock.compiler.Util.optionalOf;
 
 /**
- * Defines the *_Parser.OptionType enum.
- *
- * @see Parser
+ * Defines the option type enum
  */
-final class OptionType {
+enum OptionType {
 
-  final ClassName type;
+  FLAG(null, false) {
+    @Override
+    CodeBlock extractExpression(Helper helper, Param param) {
+      return CodeBlock.builder().add(
+          "$N.contains($T.$N)",
+          helper.flagsField,
+          helper.option.type,
+          param.enumConstant())
+          .build();
+    }
 
-  final Context context;
+    @Override
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.addStatement("$N.add($S + $N)",
+          joiner,
+          jsonKey(param),
+          impl.field(param));
+      return builder.build();
+    }
 
-  final FieldSpec isPositionalField;
+    @Override
+    TypeName returnType(Param param) {
+      return BOOLEAN;
+    }
 
-  private OptionType(Context context) {
-    this.context = context;
-    this.isPositionalField = FieldSpec.builder(BOOLEAN, "positional", FINAL)
-        .build();
-    this.type = context.generatedClass.nestedClass("OptionType");
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(BOOLEAN);
+    }
+  },
+
+  OPTIONAL(POSITIONAL_OPTIONAL, false) {
+    @Override
+    CodeBlock extractExpression(Helper helper, Param param) {
+      return CodeBlock.builder().add(
+          "$T.ofNullable($N.get($T.$L))",
+          Optional.class,
+          helper.sMapField,
+          helper.option.type,
+          param.enumConstant())
+          .build();
+    }
+
+    @Override
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.beginControlFlow("if ($N.isPresent())", impl.field(param))
+          .addStatement("$N.add($S + $N.get() + '\"')",
+              joiner,
+              jsonKey(param) + '"',
+              impl.field(param))
+          .endControlFlow()
+          .beginControlFlow("else")
+          .addStatement("$N.add($S)", joiner, jsonKey(param) + "null")
+          .endControlFlow();
+      return builder.build();
+    }
+
+    @Override
+    TypeName returnType(Param param) {
+      return optionalOf(STRING);
+    }
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(optionalOf(STRING));
+    }
+  },
+
+  OPTIONAL_INT(POSITIONAL_OPTIONAL_INT, false) {
+    @Override
+    CodeBlock extractExpression(Helper helper, Param param) {
+      return CodeBlock.builder().add(
+          "$N($T.$L)",
+          helper.extractOptionalIntMethod,
+          helper.option.type,
+          param.enumConstant())
+          .build();
+    }
+
+    @Override
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.beginControlFlow("if ($N.isPresent())", impl.field(param))
+          .addStatement("$N.add($S + $N.getAsInt())",
+              joiner,
+              jsonKey(param),
+              impl.field(param))
+          .endControlFlow()
+          .beginControlFlow("else")
+          .addStatement("$N.add($S)", joiner, jsonKey(param) + "null")
+          .endControlFlow();
+      return builder.build();
+    }
+
+    @Override
+    TypeName returnType(Param param) {
+      return ClassName.get(OptionalInt.class);
+    }
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(ClassName.get(OptionalInt.class));
+    }
+  },
+
+  REQUIRED(POSITIONAL_REQUIRED, true) {
+    @Override
+    CodeBlock extractExpression(Helper helper, Param param) {
+      return CodeBlock.builder().add(
+          "$N($T.$L)",
+          helper.extractRequiredMethod,
+          helper.option.type,
+          param.enumConstant())
+          .build();
+    }
+
+    @Override
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.addStatement("$N.add($S + $N + '\"')",
+          joiner, jsonKey(param) + '"', impl.field(param));
+      return builder.build();
+    }
+
+    @Override
+    TypeName returnType(Param param) {
+      return STRING;
+    }
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(STRING);
+    }
+  },
+
+  REQUIRED_INT(POSITIONAL_REQUIRED_INT, true) {
+    @Override
+    CodeBlock extractExpression(Helper helper, Param param) {
+      return CodeBlock.builder().add(
+          "$N($T.$L)",
+          helper.extractRequiredIntMethod,
+          helper.option.type,
+          param.enumConstant())
+          .build();
+    }
+
+    @Override
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
+      CodeBlock.Builder builder = CodeBlock.builder();
+      builder.addStatement("$N.add($S + $N)",
+          joiner,
+          jsonKey(param),
+          impl.field(param));
+      return builder.build();
+    }
+
+    @Override
+    TypeName returnType(Param param) {
+      return TypeName.INT;
+    }
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(TypeName.INT);
+    }
+  },
+
+  REPEATABLE(POSITIONAL_LIST, false) {
+    @Override
+    CodeBlock extractExpression(Helper helper, Param param) {
+      return CodeBlock.builder().add(
+          "$N.getOrDefault($T.$L, $T.emptyList())",
+          helper.optMapField,
+          helper.option.type,
+          param.enumConstant(),
+          Collections.class)
+          .build();
+    }
+
+    @Override
+    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
+      ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+      CodeBlock.Builder builder = CodeBlock.builder();
+      CodeBlock mapper = CodeBlock.builder()
+          .add("$N -> '\"' + $N + '\"'", s, s)
+          .build();
+      CodeBlock collector = CodeBlock.builder()
+          .add("$T.joining($S, $S, $S)", Collectors.class, ",", "[", "]")
+          .build();
+      Map<String, Object> map = new LinkedHashMap<>();
+      map.put("joiner", joiner);
+      map.put("key", jsonKey(param));
+      map.put("field", impl.field(param));
+      map.put("mapper", mapper);
+      map.put("collector", collector);
+      return builder.addStatement(
+          "$L", CodeBlock.builder().addNamed("$joiner:N.add($key:S + $field:N.stream()$Z.map($mapper:L)$Z.collect($collector:L))", map).build())
+          .build();
+    }
+
+    @Override
+    TypeName returnType(Param param) {
+      return param.array ? STRING_ARRAY : LIST_OF_STRING;
+    }
+
+
+    @Override
+    Stream<TypeName> returnTypes() {
+      return Stream.of(STRING_ARRAY, LIST_OF_STRING);
+    }
+  };
+
+  final boolean required;
+  final PositionalType positionalType;
+
+  /**
+   * @return An expression that extracts the value of the given param from the helper state.
+   */
+  abstract CodeBlock extractExpression(Helper helper, Param param);
+
+  abstract CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param);
+
+  OptionType(PositionalType positionalType, boolean required) {
+    this.positionalType = positionalType;
+    this.required = required;
   }
 
-  static OptionType create(Context context) {
-    return new OptionType(context);
+  private static String jsonKey(Param param) {
+    return '"' + param.methodName() + "\":";
   }
 
-  TypeSpec define() {
-    TypeSpec.Builder builder = TypeSpec.enumBuilder(type);
-    for (Type optionType : context.nonpositionalParamTypes) {
-      addType(builder, optionType);
+  abstract TypeName returnType(Param param);
+
+  abstract Stream<TypeName> returnTypes();
+
+  static TypeSpec define(Context context) {
+    TypeSpec.Builder builder = TypeSpec.enumBuilder(context.optionTypeType());
+    for (OptionType optionType : context.nonpositionalParamTypes) {
+      builder.addEnumConstant(optionType.name()).build();
     }
     for (PositionalType optionType : context.positionalParamTypes) {
-      addType(builder, optionType);
+      builder.addEnumConstant(optionType.name()).build();
     }
     return builder.addModifiers(PRIVATE)
-        .addField(isPositionalField)
-        .addMethod(privateConstructor())
+        .addMethod(MethodSpec.constructorBuilder().build())
         .build();
-  }
-
-  private void addType(TypeSpec.Builder builder, Type optionType) {
-    builder.addEnumConstant(optionType.name(),
-        anonymousClassBuilder("$L", false).build());
-  }
-
-  private void addType(TypeSpec.Builder builder, PositionalType optionType) {
-    builder.addEnumConstant(optionType.name(),
-        anonymousClassBuilder("$L", true).build());
-  }
-
-  private MethodSpec privateConstructor() {
-    MethodSpec.Builder builder = MethodSpec.constructorBuilder();
-    ParameterSpec positional = ParameterSpec.builder(BOOLEAN, isPositionalField.name).build();
-    builder.addStatement("this.$N = $N", isPositionalField, positional);
-    return builder.addParameter(positional).build();
   }
 }

@@ -41,7 +41,7 @@ final class Param {
   private final String shortName;
 
   // never null
-  final Type paramType;
+  final OptionType paramType;
 
   // index in the list of all abstract methods (in source order, ignoring inheritance)
   final int index;
@@ -73,7 +73,7 @@ final class Param {
       String shortName,
       String longName,
       int index,
-      Type paramType,
+      OptionType paramType,
       ExecutableElement sourceMethod,
       boolean array,
       String name,
@@ -98,28 +98,28 @@ final class Param {
     return paramType.positionalType.extractExpression(helper, this);
   }
 
-  private static Type checkNonpositionalType(ExecutableElement sourceMethod) {
+  private static OptionType checkNonpositionalType(ExecutableElement sourceMethod) {
     TypeMirror type = sourceMethod.getReturnType();
     if (type.getKind() == TypeKind.BOOLEAN) {
-      return Type.FLAG;
+      return OptionType.FLAG;
     }
     if (type.getKind() == TypeKind.INT) {
-      return Type.REQUIRED_INT;
+      return OptionType.REQUIRED_INT;
     }
     if (isListOfString(type) || isStringArray(type)) {
-      return Type.REPEATABLE;
+      return OptionType.REPEATABLE;
     }
     if (isOptionalString(type)) {
-      return Type.OPTIONAL;
+      return OptionType.OPTIONAL;
     }
     if (isOptionalInt(type)) {
-      return Type.OPTIONAL_INT;
+      return OptionType.OPTIONAL_INT;
     }
     if (isString(type)) {
-      return Type.REQUIRED;
+      return OptionType.REQUIRED;
     }
-    Set<String> allowed = Arrays.stream(Type.values())
-        .flatMap(Type::returnTypes)
+    Set<String> allowed = Arrays.stream(OptionType.values())
+        .flatMap(OptionType::returnTypes)
         .map(TypeName::toString)
         .collect(Collectors.toSet());
     String message = String.format("Allowed return types: [" +
@@ -146,8 +146,8 @@ final class Param {
     }
     checkName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
-    Type type = checkNonpositionalType(sourceMethod);
-    boolean array = type == Type.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
+    OptionType type = checkNonpositionalType(sourceMethod);
+    boolean array = type == OptionType.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
     return new Param(
         shortName,
         longName,
@@ -161,13 +161,13 @@ final class Param {
 
   private static Param createPositional(List<Param> params, ExecutableElement sourceMethod, int index) {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
-    Type type = checkNonpositionalType(sourceMethod);
+    OptionType type = checkNonpositionalType(sourceMethod);
     if (type.positionalType == null) {
       throw ValidationException.create(sourceMethod,
           "A method that carries the Positional annotation " +
               "may not return " + TypeName.get(sourceMethod.getReturnType()));
     }
-    boolean array = type == Type.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
+    boolean array = type == OptionType.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
     checkNotPresent(sourceMethod,
         positional,
         Arrays.asList(
@@ -328,7 +328,7 @@ final class Param {
   }
 
   String descriptionArgumentName() {
-    if (paramType == Type.FLAG) {
+    if (paramType == OptionType.FLAG) {
       return null;
     }
     Description description = description();
@@ -340,7 +340,7 @@ final class Param {
     } else {
       result = name;
     }
-    if (paramType == Type.REPEATABLE) {
+    if (paramType == OptionType.REPEATABLE) {
       result += "...";
     }
     return result;

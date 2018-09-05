@@ -42,7 +42,7 @@ final class Context {
   final boolean addHelp;
 
   // a set of only the non-positional param types in the sourceType
-  final Set<Type> nonpositionalParamTypes;
+  final Set<OptionType> nonpositionalParamTypes;
 
   // a set of only the positional param types in the sourceType
   final Set<PositionalType> positionalParamTypes;
@@ -56,6 +56,8 @@ final class Context {
   // general usage information
   final String missionStatement;
 
+  private final ClassName optionTypeType;
+
   private Context(
       TypeElement sourceType,
       ClassName generatedClass,
@@ -65,11 +67,12 @@ final class Context {
       boolean strict,
       boolean generateToString,
       boolean addHelp,
-      Set<Type> nonpositionalParamTypes,
+      Set<OptionType> nonpositionalParamTypes,
       Set<PositionalType> positionalParamTypes,
       List<String> overview,
       String programName,
-      String missionStatement) {
+      String missionStatement,
+      ClassName optionTypeType) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -83,12 +86,13 @@ final class Context {
     this.overview = overview;
     this.programName = programName;
     this.missionStatement = missionStatement;
+    this.optionTypeType = optionTypeType;
   }
 
   static Context create(
       TypeElement sourceType,
       List<Param> parameters,
-      Set<Type> paramTypes,
+      Set<OptionType> paramTypes,
       Set<PositionalType> positionalParamTypes) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscape();
@@ -102,6 +106,7 @@ final class Context {
         .noneMatch(s -> s.equals("toString"));
     List<String> description = Arrays.asList(sourceType.getAnnotation(CommandLineArguments.class).overview());
     String missionStatement = sourceType.getAnnotation(CommandLineArguments.class).missionStatement();
+    ClassName optionTypeType = generatedClass.nestedClass("OptionType");
     return new Context(
         sourceType,
         generatedClass,
@@ -115,7 +120,8 @@ final class Context {
         positionalParamTypes,
         description,
         programName(sourceType),
-        missionStatement);
+        missionStatement,
+        optionTypeType);
   }
 
   private static ClassName parserClass(ClassName type) {
@@ -177,5 +183,9 @@ final class Context {
 
   boolean allowEscape() {
     return allowEscape && positionalParamTypes.contains(PositionalType.POSITIONAL_LIST);
+  }
+
+  ClassName optionTypeType() {
+    return optionTypeType;
   }
 }

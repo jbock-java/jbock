@@ -33,7 +33,6 @@ import static net.jbock.compiler.Constants.STRING;
 final class Option {
 
   final ClassName type;
-  final OptionType optionType;
   final Context context;
 
   final MethodSpec describeParamMethod;
@@ -47,7 +46,7 @@ final class Option {
 
   private final FieldSpec shortNameField;
 
-  private final FieldSpec positionalField;
+  final FieldSpec positionalField;
 
   final FieldSpec typeField;
 
@@ -57,7 +56,6 @@ final class Option {
   private Option(
       Context context,
       ClassName type,
-      OptionType optionType,
       FieldSpec longNameField,
       FieldSpec shortNameField,
       FieldSpec positionalField,
@@ -77,14 +75,13 @@ final class Option {
     this.shortNameMapMethod = shortNameMapMethod;
     this.context = context;
     this.type = type;
-    this.optionType = optionType;
     this.typeField = typeField;
     this.longNameMapMethod = longNameMapMethod;
     this.describeParamMethod = describeParamMethod;
   }
 
-  static Option create(Context context, OptionType optionType) {
-    FieldSpec typeField = FieldSpec.builder(optionType.type, "type").build();
+  static Option create(Context context) {
+    FieldSpec typeField = FieldSpec.builder(context.optionTypeType(), "type").build();
     FieldSpec longNameField = FieldSpec.builder(STRING, "longName").build();
     FieldSpec positionalField = FieldSpec.builder(BOOLEAN, "positional").build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
@@ -105,7 +102,6 @@ final class Option {
     return new Option(
         context,
         type,
-        optionType,
         longNameField,
         shortNameField,
         positionalField,
@@ -129,7 +125,7 @@ final class Option {
       map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
       map.put("type", param.isPositional() ? param.positionalType() : param.paramType);
       map.put("positional", param.isPositional());
-      map.put("optionType", optionType.type);
+      map.put("optionType", context.optionTypeType());
       map.put("argumentName", argumentName);
       map.put("descExpression", descExpression(desc));
       String format = String.join(", ",

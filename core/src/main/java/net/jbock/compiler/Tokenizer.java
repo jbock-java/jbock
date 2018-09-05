@@ -131,8 +131,8 @@ final class Tokenizer {
       ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
       builder.beginControlFlow("for ($T $N: $T.values())",
           optionParam.type, optionParam, optionParam.type)
-          .beginControlFlow("if ($N.$N.$N)",
-              optionParam, option.typeField, option.optionType.isPositionalField)
+          .beginControlFlow("if ($N.$N)",
+              optionParam, option.positionalField)
           .addStatement("describe($N)", optionParam)
           .addStatement("$N.println()", out)
           .endControlFlow()
@@ -148,8 +148,8 @@ final class Tokenizer {
       ParameterSpec optionParam = ParameterSpec.builder(option.type, "option").build();
       builder.beginControlFlow("for ($T $N: $T.values())",
           optionParam.type, optionParam, optionParam.type)
-          .beginControlFlow("if (!$N.$N.$N)",
-              optionParam, option.typeField, option.optionType.isPositionalField)
+          .beginControlFlow("if (!$N.$N)",
+              optionParam, option.positionalField)
           .addStatement("$N.incrementIndent()", out)
           .addStatement("describe($N)", optionParam)
           .addStatement("$N.println()", out)
@@ -181,11 +181,11 @@ final class Tokenizer {
     ParameterSpec lineParam = ParameterSpec.builder(STRING, "line").build();
     spec.addParameter(optionParam);
 
-    spec.beginControlFlow("if ($N.$N.$N)", optionParam, option.typeField, option.optionType.isPositionalField)
+    spec.beginControlFlow("if ($N.$N)", optionParam, option.positionalField)
         .addStatement("$N.println($N)", out, optionParam)
         .endControlFlow();
-    if (context.nonpositionalParamTypes.contains(Type.FLAG)) {
-      spec.beginControlFlow("else if ($N.$N == $T.$L)", optionParam, option.typeField, option.optionType.type, Type.FLAG)
+    if (context.nonpositionalParamTypes.contains(OptionType.FLAG)) {
+      spec.beginControlFlow("else if ($N.$N == $T.$L)", optionParam, option.typeField, context.optionTypeType(), OptionType.FLAG)
           .addStatement("$N.println($N.describeParam($S))", out, optionParam, "")
           .endControlFlow();
     }
