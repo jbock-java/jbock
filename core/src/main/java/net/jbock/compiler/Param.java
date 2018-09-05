@@ -78,7 +78,7 @@ final class Param {
       boolean array,
       String name,
       boolean positional) {
-    if (positional && paramType.positionalType == null) {
+    if (positional && paramType.positionalOrder == null) {
       throw new AssertionError("positional, but positionalType is null");
     }
     this.shortName = shortName;
@@ -92,10 +92,7 @@ final class Param {
   }
 
   CodeBlock extractExpression(Helper helper) {
-    if (!positional) {
-      return paramType.extractExpression(helper, this);
-    }
-    return paramType.positionalType.extractExpression(helper, this);
+    return paramType.extractExpression(helper, this);
   }
 
   private static OptionType checkNonpositionalType(ExecutableElement sourceMethod) {
@@ -162,7 +159,7 @@ final class Param {
   private static Param createPositional(List<Param> params, ExecutableElement sourceMethod, int index) {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
     OptionType type = checkNonpositionalType(sourceMethod);
-    if (type.positionalType == null) {
+    if (type.positionalOrder == null) {
       throw ValidationException.create(sourceMethod,
           "A method that carries the Positional annotation " +
               "may not return " + TypeName.get(sourceMethod.getReturnType()));
@@ -354,11 +351,11 @@ final class Param {
     return name.toUpperCase();
   }
 
-  PositionalType positionalType() {
+  OptionType positionalType() {
     if (!positional) {
       throw new AssertionError("not positional");
     }
-    return paramType.positionalType;
+    return paramType;
   }
 
   boolean isPositional() {

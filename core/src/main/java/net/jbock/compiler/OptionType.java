@@ -20,11 +20,6 @@ import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
-import static net.jbock.compiler.PositionalType.POSITIONAL_LIST;
-import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL;
-import static net.jbock.compiler.PositionalType.POSITIONAL_OPTIONAL_INT;
-import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED;
-import static net.jbock.compiler.PositionalType.POSITIONAL_REQUIRED_INT;
 import static net.jbock.compiler.Util.optionalOf;
 
 /**
@@ -64,16 +59,25 @@ enum OptionType {
     }
   },
 
-  OPTIONAL(POSITIONAL_OPTIONAL, false) {
+  OPTIONAL(PositionalOrder.OPTIONAL, false) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
-      return CodeBlock.builder().add(
-          "$T.ofNullable($N.get($T.$L))",
-          Optional.class,
-          helper.sMapField,
-          helper.option.type,
-          param.enumConstant())
-          .build();
+      if (param.isPositional()) {
+        return CodeBlock.builder().add(
+            "$N($L, $N)",
+            helper.extractPositionalOptionalMethod,
+            helper.context.positionalIndex(param.index),
+            helper.positionalParameter)
+            .build();
+      } else {
+        return CodeBlock.builder().add(
+            "$T.ofNullable($N.get($T.$L))",
+            Optional.class,
+            helper.sMapField,
+            helper.option.type,
+            param.enumConstant())
+            .build();
+      }
     }
 
     @Override
@@ -102,15 +106,24 @@ enum OptionType {
     }
   },
 
-  OPTIONAL_INT(POSITIONAL_OPTIONAL_INT, false) {
+  OPTIONAL_INT(PositionalOrder.OPTIONAL, false) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
-      return CodeBlock.builder().add(
-          "$N($T.$L)",
-          helper.extractOptionalIntMethod,
-          helper.option.type,
-          param.enumConstant())
-          .build();
+      if (param.isPositional()) {
+        return CodeBlock.builder().add(
+            "$N($L, $N)",
+            helper.extractPositionalOptionalIntMethod,
+            helper.context.positionalIndex(param.index),
+            helper.positionalParameter)
+            .build();
+      } else {
+        return CodeBlock.builder().add(
+            "$N($T.$L)",
+            helper.extractOptionalIntMethod,
+            helper.option.type,
+            param.enumConstant())
+            .build();
+      }
     }
 
     @Override
@@ -139,15 +152,26 @@ enum OptionType {
     }
   },
 
-  REQUIRED(POSITIONAL_REQUIRED, true) {
+  REQUIRED(PositionalOrder.REQUIRED, true) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
-      return CodeBlock.builder().add(
-          "$N($T.$L)",
-          helper.extractRequiredMethod,
-          helper.option.type,
-          param.enumConstant())
-          .build();
+      if (param.isPositional()) {
+        return CodeBlock.builder().add(
+            "$N($L, $N, $T.$L)",
+            helper.extractPositionalRequiredMethod,
+            helper.context.positionalIndex(param.index),
+            helper.positionalParameter,
+            helper.option.type,
+            param.enumConstant())
+            .build();
+      } else {
+        return CodeBlock.builder().add(
+            "$N($T.$L)",
+            helper.extractRequiredMethod,
+            helper.option.type,
+            param.enumConstant())
+            .build();
+      }
     }
 
     @Override
@@ -169,15 +193,26 @@ enum OptionType {
     }
   },
 
-  REQUIRED_INT(POSITIONAL_REQUIRED_INT, true) {
+  REQUIRED_INT(PositionalOrder.REQUIRED, true) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
-      return CodeBlock.builder().add(
-          "$N($T.$L)",
-          helper.extractRequiredIntMethod,
-          helper.option.type,
-          param.enumConstant())
-          .build();
+      if (param.isPositional()) {
+        return CodeBlock.builder().add(
+            "$N($L, $N, $T.$L)",
+            helper.extractPositionalRequiredIntMethod,
+            helper.context.positionalIndex(param.index),
+            helper.positionalParameter,
+            helper.option.type,
+            param.enumConstant())
+            .build();
+      } else {
+        return CodeBlock.builder().add(
+            "$N($T.$L)",
+            helper.extractRequiredIntMethod,
+            helper.option.type,
+            param.enumConstant())
+            .build();
+      }
     }
 
     @Override
@@ -201,16 +236,25 @@ enum OptionType {
     }
   },
 
-  REPEATABLE(POSITIONAL_LIST, false) {
+  REPEATABLE(PositionalOrder.LIST, false) {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
-      return CodeBlock.builder().add(
-          "$N.getOrDefault($T.$L, $T.emptyList())",
-          helper.optMapField,
-          helper.option.type,
-          param.enumConstant(),
-          Collections.class)
-          .build();
+      if (param.isPositional()) {
+        return CodeBlock.builder().add(
+            "$N($L, $N)",
+            helper.extractPositionalListMethod,
+            helper.context.positionalIndex(param.index),
+            helper.positionalParameter)
+            .build();
+      } else {
+        return CodeBlock.builder().add(
+            "$N.getOrDefault($T.$L, $T.emptyList())",
+            helper.optMapField,
+            helper.option.type,
+            param.enumConstant(),
+            Collections.class)
+            .build();
+      }
     }
 
     @Override
@@ -247,7 +291,7 @@ enum OptionType {
   };
 
   final boolean required;
-  final PositionalType positionalType;
+  final PositionalOrder positionalOrder;
 
   /**
    * @return An expression that extracts the value of the given param from the helper state.
@@ -256,8 +300,8 @@ enum OptionType {
 
   abstract CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param);
 
-  OptionType(PositionalType positionalType, boolean required) {
-    this.positionalType = positionalType;
+  OptionType(PositionalOrder positionalOrder, boolean required) {
+    this.positionalOrder = positionalOrder;
     this.required = required;
   }
 
@@ -274,11 +318,9 @@ enum OptionType {
     for (OptionType optionType : context.nonpositionalParamTypes) {
       builder.addEnumConstant(optionType.name()).build();
     }
-    for (PositionalType optionType : context.positionalParamTypes) {
+    for (OptionType optionType : context.positionalParamTypes) {
       builder.addEnumConstant(optionType.name()).build();
     }
-    return builder.addModifiers(PRIVATE)
-        .addMethod(MethodSpec.constructorBuilder().build())
-        .build();
+    return builder.addModifiers(PRIVATE).build();
   }
 }

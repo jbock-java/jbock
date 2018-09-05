@@ -45,7 +45,7 @@ final class Context {
   final Set<OptionType> nonpositionalParamTypes;
 
   // a set of only the positional param types in the sourceType
-  final Set<PositionalType> positionalParamTypes;
+  final Set<OptionType> positionalParamTypes;
 
   // general usage information
   final List<String> overview;
@@ -68,7 +68,7 @@ final class Context {
       boolean generateToString,
       boolean addHelp,
       Set<OptionType> nonpositionalParamTypes,
-      Set<PositionalType> positionalParamTypes,
+      Set<OptionType> positionalParamTypes,
       List<String> overview,
       String programName,
       String missionStatement,
@@ -93,7 +93,7 @@ final class Context {
       TypeElement sourceType,
       List<Param> parameters,
       Set<OptionType> paramTypes,
-      Set<PositionalType> positionalParamTypes) {
+      Set<OptionType> positionalParamTypes) {
     ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
     boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscape();
     List<Param> positionalParameters = parameters.stream().filter(Param::isPositional).collect(toList());
@@ -171,7 +171,7 @@ final class Context {
     if (positionalParameters.isEmpty()) {
       return OptionalInt.empty();
     }
-    if (positionalParamTypes.contains(PositionalType.POSITIONAL_LIST)) {
+    if (positionalParamTypes.contains(OptionType.REPEATABLE)) {
       return OptionalInt.empty();
     }
     return OptionalInt.of(positionalParameters.size());
@@ -182,7 +182,7 @@ final class Context {
   }
 
   boolean allowEscape() {
-    return allowEscape && positionalParamTypes.contains(PositionalType.POSITIONAL_LIST);
+    return allowEscape && positionalParamTypes.contains(OptionType.REPEATABLE);
   }
 
   ClassName optionTypeType() {

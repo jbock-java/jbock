@@ -252,19 +252,19 @@ final class Helper {
     if (context.nonpositionalParamTypes.contains(OptionType.OPTIONAL_INT)) {
       spec.addMethod(extractOptionalIntMethod);
     }
-    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_LIST)) {
+    if (context.positionalParamTypes.contains(OptionType.REPEATABLE)) {
       spec.addMethod(extractPositionalListMethod);
     }
-    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_OPTIONAL)) {
+    if (context.positionalParamTypes.contains(OptionType.OPTIONAL)) {
       spec.addMethod(extractPositionalOptionalMethod);
     }
-    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_OPTIONAL_INT)) {
+    if (context.positionalParamTypes.contains(OptionType.OPTIONAL_INT)) {
       spec.addMethod(extractPositionalOptionalIntMethod);
     }
-    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_REQUIRED)) {
+    if (context.positionalParamTypes.contains(OptionType.REQUIRED)) {
       spec.addMethod(extractPositionalRequiredMethod);
     }
-    if (context.positionalParamTypes.contains(PositionalType.POSITIONAL_REQUIRED_INT)) {
+    if (context.positionalParamTypes.contains(OptionType.REQUIRED_INT)) {
       spec.addMethod(extractPositionalRequiredIntMethod);
     }
     return spec.build();

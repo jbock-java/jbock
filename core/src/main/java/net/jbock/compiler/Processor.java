@@ -76,7 +76,7 @@ public final class Processor extends AbstractProcessor {
           continue;
         }
         Set<OptionType> paramTypes = nonpositionalParamTypes(parameters);
-        Set<PositionalType> positionalParamTypes = positionalParamTypes(parameters);
+        Set<OptionType> positionalParamTypes = positionalParamTypes(parameters);
         Context context = Context.create(
             sourceType,
             parameters,
@@ -105,11 +105,11 @@ public final class Processor extends AbstractProcessor {
     return paramTypes;
   }
 
-  private static Set<PositionalType> positionalParamTypes(List<Param> parameters) {
-    Set<PositionalType> paramTypes = EnumSet.noneOf(PositionalType.class);
+  private static Set<OptionType> positionalParamTypes(List<Param> parameters) {
+    Set<OptionType> paramTypes = EnumSet.noneOf(OptionType.class);
     parameters.stream()
         .filter(Param::isPositional)
-        .map(Param::positionalType)
+        .map(p -> p.paramType)
         .forEach(paramTypes::add);
     return paramTypes;
   }
@@ -163,11 +163,11 @@ public final class Processor extends AbstractProcessor {
     if (previous == null) {
       return;
     }
-    if (param.positionalType().order.compareTo(previous.positionalType().order) < 0) {
+    if (param.positionalType().positionalOrder.compareTo(previous.positionalType().positionalOrder) < 0) {
       throw ValidationException.create(param.sourceMethod,
           String.format("Positional order: %s method %s() must come before %s method %s()",
-              param.positionalType().order, param.methodName(),
-              previous.positionalType().order, previous.methodName()));
+              param.positionalType().positionalOrder, param.methodName(),
+              previous.positionalType().positionalOrder, previous.methodName()));
     }
   }
 

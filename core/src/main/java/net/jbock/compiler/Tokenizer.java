@@ -233,7 +233,7 @@ final class Tokenizer {
     }
 
     for (Param param : positional) {
-      switch (param.positionalType().order) {
+      switch (param.positionalType().positionalOrder) {
         case REQUIRED:
           builder.addStatement("$N.add($S + $S + $S)", joiner, "<",
               param.descriptionArgumentName(), ">");
