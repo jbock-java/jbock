@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static java.util.Arrays.asList;
+import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
@@ -79,16 +80,19 @@ final class Helper {
     FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, context.optionType()), "longNames")
         .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.longNameMapMethod)
+        .addModifiers(FINAL)
         .build();
     FieldSpec shortNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         TypeName.get(Character.class), context.optionType()), "shortNames")
         .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.shortNameMapMethod)
+        .addModifiers(FINAL)
         .build();
 
     // stateful parsers
     FieldSpec parsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         context.optionType(), context.optionParserType()), "parsers")
         .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.parsersMethod)
+        .addModifiers(FINAL)
         .build();
 
     MethodSpec readLongMethod = readLongMethod(longNamesField, context);
@@ -168,12 +172,8 @@ final class Helper {
         .addStatement("return null")
         .endControlFlow();
 
-    spec.beginControlFlow("if ($N.$N != $T.$L)",
-        optionParam, option.typeField, option.context.optionTypeType(), OptionType.FLAG)
-        .addStatement("return $N", optionParam)
-        .endControlFlow();
-
-    spec.beginControlFlow("if ($N.length() >= 3)", token)
+    spec.beginControlFlow("if (!$N.validShortToken($N))",
+        optionParam, token)
         .addStatement("return null")
         .endControlFlow();
 

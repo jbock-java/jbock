@@ -4,14 +4,12 @@ import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.stream.Stream;
 
-import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
@@ -306,17 +304,6 @@ enum OptionType {
   abstract TypeName returnType(Param param);
 
   abstract Stream<TypeName> returnTypes();
-
-  static TypeSpec define(Context context) {
-    TypeSpec.Builder builder = TypeSpec.enumBuilder(context.optionTypeType());
-    for (OptionType optionType : context.nonpositionalParamTypes) {
-      builder.addEnumConstant(optionType.name()).build();
-    }
-    for (OptionType optionType : context.positionalParamTypes) {
-      builder.addEnumConstant(optionType.name()).build();
-    }
-    return builder.addModifiers(PRIVATE).build();
-  }
 
   private static CodeBlock missingRequiredOptionMessage(Param param, ClassName className) {
     if (param.isPositional()) {

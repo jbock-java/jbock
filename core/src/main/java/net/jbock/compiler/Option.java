@@ -21,6 +21,8 @@ import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
+import static javax.lang.model.element.Modifier.ABSTRACT;
+import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
@@ -44,7 +46,7 @@ final class Option {
   private final MethodSpec exampleMethod;
   private final FieldSpec descriptionField;
 
-  final FieldSpec argumentNameField;
+  private final FieldSpec argumentNameField;
 
   private final FieldSpec longNameField;
 
@@ -52,9 +54,8 @@ final class Option {
 
   private final FieldSpec positionalIndexField;
 
-  final FieldSpec typeField;
-
   final MethodSpec shortNameMapMethod;
+
   final MethodSpec longNameMapMethod;
 
   final MethodSpec parsersMethod;
@@ -64,7 +65,6 @@ final class Option {
       FieldSpec longNameField,
       FieldSpec shortNameField,
       FieldSpec positionalIndexField,
-      FieldSpec typeField,
       FieldSpec descriptionField,
       FieldSpec argumentNameField,
       MethodSpec exampleMethod,
@@ -80,28 +80,26 @@ final class Option {
     this.argumentNameField = argumentNameField;
     this.shortNameMapMethod = shortNameMapMethod;
     this.context = context;
-    this.typeField = typeField;
     this.longNameMapMethod = longNameMapMethod;
     this.describeParamMethod = describeParamMethod;
     this.parsersMethod = parsersMethod;
   }
 
   static Option create(Context context) {
-    FieldSpec typeField = FieldSpec.builder(context.optionTypeType(), "type").build();
-    FieldSpec longNameField = FieldSpec.builder(STRING, "longName").build();
-    FieldSpec positionalIndexField = FieldSpec.builder(INT, "positionalIndex").build();
+    FieldSpec longNameField = FieldSpec.builder(STRING, "longName").addModifiers(FINAL).build();
+    FieldSpec positionalIndexField = FieldSpec.builder(INT, "positionalIndex").addModifiers(FINAL).build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
-        "shortName").build();
+        "shortName").addModifiers(FINAL).build();
     ParameterizedTypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class),
         context.optionType(), context.optionParserType());
     MethodSpec shortNameMapMethod = shortNameMapMethod(context.optionType(), shortNameField);
     MethodSpec longNameMapMethod = longNameMapMethod(context.optionType(), longNameField);
     MethodSpec parsersMethod = parsersMethod(parsersType, context);
     FieldSpec argumentNameField = FieldSpec.builder(
-        STRING, "descriptionArgumentName").build();
+        STRING, "descriptionArgumentName").addModifiers(FINAL).build();
     MethodSpec exampleMethod = exampleMethod(longNameField, shortNameField, argumentNameField);
     FieldSpec descriptionField = FieldSpec.builder(
-        LIST_OF_STRING, "description").build();
+        LIST_OF_STRING, "description").addModifiers(FINAL).build();
 
     MethodSpec describeParamMethod = describeParamMethod(
         longNameField,
@@ -112,7 +110,6 @@ final class Option {
         longNameField,
         shortNameField,
         positionalIndexField,
-        typeField,
         descriptionField,
         argumentNameField,
         exampleMethod,
@@ -130,7 +127,7 @@ final class Option {
       spec.addEnumConstant(enumConstant, optionEnumConstant(param, j));
     }
     spec.addModifiers(PRIVATE)
-        .addFields(asList(longNameField, shortNameField, positionalIndexField, typeField, argumentNameField, descriptionField))
+        .addFields(asList(longNameField, shortNameField, positionalIndexField, argumentNameField, descriptionField))
         .addMethod(positionalMethod())
         .addMethod(describeParamMethod)
         .addMethod(exampleMethod)
@@ -148,6 +145,8 @@ final class Option {
         .returns(context.optionParserType())
         .addStatement("throw new $T($S)", UnsupportedOperationException.class, "Bad stuff")
         .build());
+    spec.addMethod(validShortTokenMethod());
+    spec.addMethod(describeMethod());
     return spec.build();
   }
 
@@ -164,16 +163,13 @@ final class Option {
     Map<String, Object> map = new LinkedHashMap<>();
     map.put("longName", param.longName());
     map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
-    map.put("type", param.isPositional() ? param.positionalType() : param.paramType);
     map.put("positionalIndex", context.positionalIndex(j));
-    map.put("optionType", context.optionTypeType());
     map.put("argumentName", argumentName);
     map.put("descExpression", descExpression(desc));
     String format = String.join(", ",
         "$longName:S",
         "$shortName:L",
         "$positionalIndex:L",
-        "$optionType:T.$type:L",
         "$argumentName:S",
         "$descExpression:L");
 
@@ -181,6 +177,26 @@ final class Option {
     TypeSpec.Builder spec = anonymousClassBuilder(block);
     if (!param.isPositional()) {
       spec.addMethod(parserMethod(param));
+    }
+    if (param.paramType == OptionType.FLAG) {
+      spec.addMethod(validShortTokenOverride(param));
+      spec.addMethod(MethodSpec.methodBuilder("describe")
+          .returns(STRING)
+          .addStatement("return describeParam($S)", "")
+          .addAnnotation(Override.class)
+          .build());
+    } else if (param.isPositional()) {
+      spec.addMethod(MethodSpec.methodBuilder("describe")
+          .returns(STRING)
+          .addStatement("return name()")
+          .addAnnotation(Override.class)
+          .build());
+    } else {
+      spec.addMethod(MethodSpec.methodBuilder("describe")
+          .returns(STRING)
+          .addStatement("return describeParam($T.format($S, $N))", String.class, " <%s>", argumentNameField)
+          .addAnnotation(Override.class)
+          .build());
     }
     return spec.build();
   }
@@ -203,19 +219,17 @@ final class Option {
     ParameterSpec longName = ParameterSpec.builder(longNameField.type, longNameField.name).build();
     ParameterSpec shortName = ParameterSpec.builder(shortNameField.type, shortNameField.name).build();
     ParameterSpec positionalIndex = ParameterSpec.builder(positionalIndexField.type, positionalIndexField.name).build();
-    ParameterSpec optionType = ParameterSpec.builder(typeField.type, typeField.name).build();
     ParameterSpec description = ParameterSpec.builder(descriptionField.type, descriptionField.name).build();
     ParameterSpec argumentName = ParameterSpec.builder(argumentNameField.type, argumentNameField.name).build();
     MethodSpec.Builder spec = MethodSpec.constructorBuilder()
         .addStatement("this.$N = $N", longNameField, longName)
         .addStatement("this.$N = $N", shortNameField, shortName)
         .addStatement("this.$N = $N", positionalIndexField, positionalIndex)
-        .addStatement("this.$N = $N", typeField, optionType)
         .addStatement("this.$N = $N", descriptionField, description)
         .addStatement("this.$N = $N", argumentNameField, argumentName);
 
     spec.addParameters(asList(
-        longName, shortName, positionalIndex, optionType, argumentName, description));
+        longName, shortName, positionalIndex, argumentName, description));
     return spec.build();
   }
 
@@ -407,5 +421,31 @@ final class Option {
 
     return spec.addParameter(positionalParameter)
         .returns(optionalOf(STRING)).build();
+  }
+
+  private static MethodSpec validShortTokenMethod() {
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("validShortToken");
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    spec.addParameter(token);
+    spec.addStatement("return $N.length() >= 2 && $N.charAt(0) == '-'", token, token);
+    spec.returns(BOOLEAN);
+    return spec.build();
+  }
+
+  private static MethodSpec validShortTokenOverride(Param param) {
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("validShortToken");
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    spec.addParameter(token);
+    spec.addStatement("return $S.equals($N)", "-" + param.shortName(), token);
+    spec.addAnnotation(Override.class);
+    spec.returns(BOOLEAN);
+    return spec.build();
+  }
+
+  private static MethodSpec describeMethod() {
+    return MethodSpec.methodBuilder("describe")
+        .returns(STRING)
+        .addModifiers(ABSTRACT)
+        .build();
   }
 }

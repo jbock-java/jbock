@@ -93,7 +93,6 @@ final class Parser {
         .addType(helper.define())
         .addType(option.define())
         .addType(impl.define())
-        .addType(OptionType.define(context))
         .addType(OptionParser.define(context))
         .addType(FlagOptionParser.define(context))
         .addType(RegularOptionParser.define(context))

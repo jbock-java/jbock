@@ -22,7 +22,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.com.squareup.javapoet.TypeName.INT;
+import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
@@ -63,7 +63,7 @@ final class Tokenizer {
         .addMethod(privateConstructor())
         .addMethod(printUsageMethod())
         .addMethod(synopsisMethod())
-        .addMethod(describeMethod())
+        .addMethod(printDescriptionMethod())
         .addField(out);
     return builder.build();
   }
@@ -131,7 +131,7 @@ final class Tokenizer {
       ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
       builder.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
       builder.beginControlFlow("if ($N.positional())", optionParam)
-          .addStatement("describe($N)", optionParam)
+          .addStatement("printDescription($N)", optionParam)
           .addStatement("$N.println()", out)
           .endControlFlow();
       builder.endControlFlow();
@@ -147,7 +147,7 @@ final class Tokenizer {
       builder.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
       builder.beginControlFlow("if (!$N.positional())", optionParam)
           .addStatement("$N.incrementIndent()", out)
-          .addStatement("describe($N)", optionParam)
+          .addStatement("printDescription($N)", optionParam)
           .addStatement("$N.println()", out)
           .addStatement("$N.decrementIndent()", out)
           .endControlFlow();
@@ -171,23 +171,13 @@ final class Tokenizer {
   }
 
 
-  private MethodSpec describeMethod() {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("describe");
+  private MethodSpec printDescriptionMethod() {
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("printDescription");
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     ParameterSpec lineParam = ParameterSpec.builder(STRING, "line").build();
     spec.addParameter(optionParam);
 
-    spec.beginControlFlow("if ($N.positional())", optionParam)
-        .addStatement("$N.println($N)", out, optionParam)
-        .endControlFlow();
-    if (context.nonpositionalParamTypes.contains(OptionType.FLAG)) {
-      spec.beginControlFlow("else if ($N.$N == $T.$L)", optionParam, option.typeField, context.optionTypeType(), OptionType.FLAG)
-          .addStatement("$N.println($N.describeParam($S))", out, optionParam, "")
-          .endControlFlow();
-    }
-    spec.beginControlFlow("else")
-        .addStatement("$N.println($N.describeParam($T.format($S, $N.$N)))", out, optionParam, String.class, " <%s>", optionParam, option.argumentNameField)
-        .endControlFlow();
+    spec.addStatement("$N.println($N.describe())", out, optionParam);
 
     spec.addStatement("$N.incrementIndent()", out);
     spec.beginControlFlow("for ($T $N : $N.description)", STRING, lineParam, optionParam)
@@ -299,20 +289,15 @@ final class Tokenizer {
     ParameterSpec helper = ParameterSpec.builder(context.helperType(), "helper").build();
     ParameterSpec tokens = ParameterSpec.builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    ParameterSpec stopword = ParameterSpec.builder(STRING, "stopword").build();
-    ParameterSpec count = ParameterSpec.builder(INT, "count").build();
+    ParameterSpec isFirst = ParameterSpec.builder(BOOLEAN, "first").build();
 
     MethodSpec.Builder builder = MethodSpec.methodBuilder("parseList")
         .addParameter(tokens)
         .returns(optionalOfSubtype(TypeName.get(context.sourceType.asType())));
 
-    builder.addStatement("$T $N = 0", INT, count);
+    builder.addStatement("$T $N = $L", BOOLEAN, isFirst, true);
     builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
     builder.addStatement("$T $N = $N.iterator()", STRING_ITERATOR, it, tokens);
-
-    if (context.allowEscape()) {
-      builder.addStatement("$T $N = $S", STRING, stopword, "--");
-    }
 
     if (context.hasPositional()) {
       builder.addStatement("$T $N = new $T<>()",
@@ -320,7 +305,7 @@ final class Tokenizer {
     }
 
     builder.beginControlFlow("while ($N.hasNext())", it)
-        .addCode(codeInsideParsingLoop(helper, it, stopword, count))
+        .addCode(codeInsideParsingLoop(helper, it, isFirst))
         .endControlFlow();
 
     builder.addStatement(returnFromParseExpression(helper));
@@ -328,10 +313,9 @@ final class Tokenizer {
   }
 
   private CodeBlock codeInsideParsingLoop(
-      ParameterSpec helper,
+      ParameterSpec helperParam,
       ParameterSpec it,
-      ParameterSpec dd,
-      ParameterSpec count) {
+      ParameterSpec isFirst) {
 
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
@@ -340,41 +324,52 @@ final class Tokenizer {
     builder.addStatement("$T $N = $N.next()", STRING, token, it);
 
     if (context.addHelp) {
-      builder.beginControlFlow("if ($N++ == 0 && !$N.hasNext() && $S.equals($N))", count, it, "--help", token)
+      builder.beginControlFlow("if ($N && $S.equals($N))", isFirst, "--help", token)
           .addStatement("return $T.empty()", Optional.class)
           .endControlFlow();
     }
 
+    builder.addStatement("$N = $L", isFirst, false);
+
     if (context.allowEscape()) {
-      builder.beginControlFlow("if ($N.equals($N))", dd, token);
+      builder.beginControlFlow("if ($S.equals($N))", "--", token);
       if (context.hasPositional()) {
-        builder.addStatement("$N.forEachRemaining($N::add)", it, this.helper.positionalParameter);
+        builder.addStatement("$N.forEachRemaining($N::add)", it, helper.positionalParameter);
       }
-      builder.addStatement(returnFromParseExpression(helper))
+      builder.addStatement(returnFromParseExpression(helperParam))
           .endControlFlow();
     }
 
-    builder.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, helper, this.helper.readRegularOptionMethod, token);
-
-    builder.beginControlFlow("if ($N != null)", optionParam)
-        .addStatement("$N.$N($N, $N, $N)",
-            helper, this.helper.readMethod, optionParam, token, it)
-        .endControlFlow();
-
-    builder.beginControlFlow("else");
-    // handle unknown token
-    if (context.strict) {
-      builder.beginControlFlow("if (!$N.isEmpty() && $N.charAt(0) == '-')",
-          token, token)
-          .addStatement(throwInvalidOptionStatement(token))
-          .endControlFlow();
-    }
+    // handle empty token
+    builder.beginControlFlow("if ($N.isEmpty())", token);
     if (context.hasPositional()) {
-      builder.addStatement("$N.add($N)", this.helper.positionalParameter, token);
+      builder.addStatement("$N.add($N)", helper.positionalParameter, token)
+          .addStatement("continue");
     } else {
       builder.addStatement(throwInvalidOptionStatement(token));
     }
     builder.endControlFlow();
+
+    builder.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, helperParam, this.helper.readRegularOptionMethod, token);
+
+    builder.beginControlFlow("if ($N != null)", optionParam)
+        .addStatement("$N.$N($N, $N, $N)",
+            helperParam, helper.readMethod, optionParam, token, it)
+        .addStatement("continue")
+        .endControlFlow();
+
+    // handle unknown token
+    if (context.strict) {
+      // disallow tokens that start with a dash
+      builder.beginControlFlow("if ($N.charAt(0) == '-')", token)
+          .addStatement(throwInvalidOptionStatement(token))
+          .endControlFlow();
+    }
+    if (context.hasPositional()) {
+      builder.addStatement("$N.add($N)", helper.positionalParameter, token);
+    } else {
+      builder.addStatement(throwInvalidOptionStatement(token));
+    }
 
     return builder.build();
   }

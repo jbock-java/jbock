@@ -63,7 +63,6 @@ final class Context {
   // general usage information
   final String missionStatement;
 
-  private final ClassName optionTypeType;
   private final ClassName optionParserType;
   private final ClassName flagOptionParserType;
   private final ClassName repeatableOptionParserType;
@@ -75,7 +74,7 @@ final class Context {
       ParameterizedTypeName.get(ClassName.get(Function.class), STRING, STRING), "quote").build();
   private final ParameterSpec toArray = ParameterSpec.builder(
       ParameterizedTypeName.get(ClassName.get(Collector.class),
-      TypeName.get(CharSequence.class), WildcardTypeName.subtypeOf(Object.class), STRING), "toArray").build();
+          TypeName.get(CharSequence.class), WildcardTypeName.subtypeOf(Object.class), STRING), "toArray").build();
 
   private Context(
       TypeElement sourceType,
@@ -91,7 +90,6 @@ final class Context {
       List<String> overview,
       String programName,
       String missionStatement,
-      ClassName optionTypeType,
       ClassName optionParserType,
       ClassName flagOptionParserType,
       ClassName repeatableOptionParserType,
@@ -111,7 +109,6 @@ final class Context {
     this.overview = overview;
     this.programName = programName;
     this.missionStatement = missionStatement;
-    this.optionTypeType = optionTypeType;
     this.optionParserType = optionParserType;
     this.flagOptionParserType = flagOptionParserType;
     this.repeatableOptionParserType = repeatableOptionParserType;
@@ -137,7 +134,6 @@ final class Context {
         .noneMatch(s -> s.equals("toString"));
     List<String> description = Arrays.asList(sourceType.getAnnotation(CommandLineArguments.class).overview());
     String missionStatement = sourceType.getAnnotation(CommandLineArguments.class).missionStatement();
-    ClassName optionTypeType = generatedClass.nestedClass("OptionType");
     ClassName optionType = generatedClass.nestedClass("Option");
     ClassName helperType = generatedClass.nestedClass("Helper");
     ClassName optionParserType = generatedClass.nestedClass("OptionParser");
@@ -158,7 +154,6 @@ final class Context {
         description,
         programName(sourceType),
         missionStatement,
-        optionTypeType,
         optionParserType,
         flagOptionParserType,
         repeatableOptionParserType,
@@ -225,10 +220,6 @@ final class Context {
 
   boolean allowEscape() {
     return allowEscape && positionalParamTypes.contains(OptionType.REPEATABLE);
-  }
-
-  ClassName optionTypeType() {
-    return optionTypeType;
   }
 
   ClassName optionParserType() {
