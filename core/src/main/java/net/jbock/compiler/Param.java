@@ -4,6 +4,7 @@ import net.jbock.Description;
 import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
+import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
 
@@ -15,9 +16,8 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Set;
+import java.util.Objects;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
 import static net.jbock.compiler.Constants.JAVA_UTIL_OPTIONAL_INT;
@@ -53,9 +53,13 @@ final class Param {
   // does it return string array
   final boolean array;
 
+  final boolean required;
+
   private final String name;
 
   private final boolean positional;
+
+  final Coercion coercion;
 
   private static String enumConstant(List<Param> params, String methodName, int index) {
     String result = snakeCase(methodName);
@@ -77,11 +81,11 @@ final class Param {
       OptionType paramType,
       ExecutableElement sourceMethod,
       boolean array,
-      String name,
-      boolean positional) {
-    if (positional && paramType.positionalOrder == null) {
-      throw new AssertionError("positional, but positionalType is null");
-    }
+      boolean required, String name,
+      boolean positional,
+      Coercion coercion) {
+    this.required = required;
+    this.coercion = coercion;
     this.shortName = shortName;
     this.longName = longName;
     this.index = index;
@@ -90,39 +94,62 @@ final class Param {
     this.array = array;
     this.name = name;
     this.positional = positional;
+    if (positional && positionalOrder() == null) {
+      throw new AssertionError("positional, but positionalType is null");
+    }
   }
 
   CodeBlock extractExpression(Helper helper) {
-    return paramType.extractExpression(helper, this);
+    CodeBlock.Builder builder = paramType.extractExpression(helper, this).toBuilder();
+    builder.add("$L", coercion.map());
+    if (required) {
+      builder.add("$L", orElseThrowMissing(helper.context));
+    }
+    return builder.build();
   }
 
-  private static OptionType checkNonpositionalType(ExecutableElement sourceMethod) {
+  private CodeBlock orElseThrowMissing(Context context) {
+    return CodeBlock.builder()
+        .add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
+            missingRequiredOptionMessage(context.optionType()))
+        .build();
+  }
+
+  private static class OptionTypePlus {
+    final OptionType type;
+    final boolean required;
+
+    OptionTypePlus(OptionType type, boolean required) {
+      this.type = Objects.requireNonNull(type);
+      this.required = required;
+    }
+  }
+
+  private static OptionTypePlus optionType(OptionType type, boolean required) {
+    return new OptionTypePlus(type, required);
+  }
+
+  private static OptionTypePlus checkNonpositionalType(ExecutableElement sourceMethod) {
     TypeMirror type = sourceMethod.getReturnType();
     if (type.getKind() == TypeKind.BOOLEAN) {
-      return OptionType.FLAG;
+      return optionType(OptionType.FLAG, false);
     }
     if (type.getKind() == TypeKind.INT) {
-      return OptionType.REQUIRED_INT;
+      return optionType(OptionType.OPTIONAL, true);
     }
     if (isListOfString(type) || isStringArray(type)) {
-      return OptionType.REPEATABLE;
+      return optionType(OptionType.REPEATABLE, false);
     }
     if (isOptionalString(type)) {
-      return OptionType.OPTIONAL;
+      return optionType(OptionType.OPTIONAL, false);
     }
     if (isOptionalInt(type)) {
-      return OptionType.OPTIONAL_INT;
+      return optionType(OptionType.OPTIONAL, false);
     }
     if (isString(type)) {
-      return OptionType.REQUIRED;
+      return optionType(OptionType.OPTIONAL, true);
     }
-    Set<String> allowed = Arrays.stream(OptionType.values())
-        .flatMap(OptionType::returnTypes)
-        .map(TypeName::toString)
-        .collect(Collectors.toSet());
-    String message = String.format("Allowed return types: [" +
-        String.join(", ", allowed) +
-        "], but %s() returns %s", sourceMethod.getSimpleName(), type);
+    String message = String.format("Not allowed: %s() returns %s", sourceMethod.getSimpleName(), type);
     throw ValidationException.create(sourceMethod, message);
   }
 
@@ -144,28 +171,30 @@ final class Param {
     }
     checkName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
-    OptionType type = checkNonpositionalType(sourceMethod);
-    boolean array = type == OptionType.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
+    OptionTypePlus type = checkNonpositionalType(sourceMethod);
+    boolean array = type.type == OptionType.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
     return new Param(
         shortName,
         longName,
         index,
-        type,
+        type.type,
         sourceMethod,
         array,
+        type.required,
         enumConstant(params, sourceMethod.getSimpleName().toString(), index),
-        false);
+        false,
+        Coercion.findCoercion(TypeName.get(sourceMethod.getReturnType())));
   }
 
   private static Param createPositional(List<Param> params, ExecutableElement sourceMethod, int index) {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
-    OptionType type = checkNonpositionalType(sourceMethod);
-    if (type.positionalOrder == null) {
+    OptionTypePlus type = checkNonpositionalType(sourceMethod);
+    if (type.type == OptionType.FLAG) {
       throw ValidationException.create(sourceMethod,
           "A method that carries the Positional annotation " +
               "may not return " + TypeName.get(sourceMethod.getReturnType()));
     }
-    boolean array = type == OptionType.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
+    boolean array = type.type == OptionType.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
     checkNotPresent(sourceMethod,
         positional,
         Arrays.asList(
@@ -175,11 +204,13 @@ final class Param {
         null,
         null,
         index,
-        type,
+        type.type,
         sourceMethod,
         array,
+        type.required,
         enumConstant(params, sourceMethod.getSimpleName().toString(), index),
-        true);
+        true,
+        Coercion.findCoercion(TypeName.get(sourceMethod.getReturnType())));
   }
 
   private static void basicChecks(ExecutableElement sourceMethod) {
@@ -337,7 +368,7 @@ final class Param {
     String result;
     if (description != null && !description.argumentName().isEmpty()) {
       result = description.argumentName();
-    } else if (paramType.required) {
+    } else if (required) {
       result = name.toUpperCase();
     } else {
       result = name;
@@ -349,7 +380,7 @@ final class Param {
   }
 
   TypeName returnType() {
-    return paramType.returnType(this);
+    return TypeName.get(sourceMethod.getReturnType());
   }
 
   String enumConstant() {
@@ -365,5 +396,37 @@ final class Param {
 
   boolean isPositional() {
     return positional;
+  }
+
+  private CodeBlock missingRequiredOptionMessage(ClassName className) {
+    if (positional) {
+      return CodeBlock.builder()
+          .add("$T.format($S,$W$T.$L)",
+              String.class,
+              "Missing parameter: <%s>",
+              className, enumConstant())
+          .build();
+    }
+    return CodeBlock.builder()
+        .add("$T.format($S,$W$T.$L,$W$T.$L.describeParam($S))",
+            String.class,
+            "Missing required option: %s (%s)",
+            className, enumConstant(),
+            className, enumConstant(),
+            "")
+        .build();
+  }
+
+  PositionalOrder positionalOrder() {
+    switch (paramType) {
+      case FLAG:
+        return null;
+      case OPTIONAL:
+        return required ? PositionalOrder.REQUIRED : PositionalOrder.OPTIONAL;
+      case REPEATABLE:
+        return PositionalOrder.LIST;
+      default:
+        throw new AssertionError();
+    }
   }
 }

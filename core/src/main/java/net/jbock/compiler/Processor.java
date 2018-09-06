@@ -163,11 +163,16 @@ public final class Processor extends AbstractProcessor {
     if (previous == null) {
       return;
     }
-    if (param.positionalType().positionalOrder.compareTo(previous.positionalType().positionalOrder) < 0) {
+    PositionalOrder paramOrder = param.positionalOrder();
+    PositionalOrder previousOrder = previous.positionalOrder();
+    if (paramOrder == null || previousOrder == null) {
+      throw new AssertionError();
+    }
+    if (paramOrder.compareTo(previousOrder) < 0) {
       throw ValidationException.create(param.sourceMethod,
           String.format("Positional order: %s method %s() must come before %s method %s()",
-              param.positionalType().positionalOrder, param.methodName(),
-              previous.positionalType().positionalOrder, previous.methodName()));
+              paramOrder, param.methodName(),
+              previousOrder, previous.methodName()));
     }
   }
 

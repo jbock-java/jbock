@@ -15,6 +15,7 @@ final class Constants {
   static final String JAVA_UTIL_OPTIONAL_INT = OptionalInt.class.getCanonicalName();
 
   static final ClassName STRING = ClassName.get(String.class);
+  static final ClassName INTEGER = ClassName.get(Integer.class);
 
   static final ParameterizedTypeName LIST_OF_STRING = ParameterizedTypeName.get(
       ClassName.get(List.class), STRING);

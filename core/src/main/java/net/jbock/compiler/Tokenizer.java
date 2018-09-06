@@ -198,7 +198,7 @@ final class Tokenizer {
 
     Map<Boolean, List<Param>> partitionedNonpos = context.parameters.stream()
         .filter(p -> !p.isPositional())
-        .collect(partitioningBy(p -> p.paramType.required));
+        .collect(partitioningBy(p -> p.required));
 
     List<Param> requiredNonpos = partitionedNonpos.get(true);
     List<Param> optionalNonpos = partitionedNonpos.get(false);
@@ -219,7 +219,11 @@ final class Tokenizer {
     }
 
     for (Param param : positional) {
-      switch (param.positionalType().positionalOrder) {
+      PositionalOrder positionalOrder = param.positionalOrder();
+      if (positionalOrder == null) {
+        continue;
+      }
+      switch (positionalOrder) {
         case REQUIRED:
           builder.addStatement("$N.add($S + $S + $S)", joiner, "<",
               param.descriptionArgumentName(), ">");

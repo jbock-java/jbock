@@ -1,27 +1,18 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.OptionalInt;
-import java.util.stream.Stream;
-
-import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ARRAY;
-import static net.jbock.compiler.Util.optionalOf;
 
 /**
- * Defines the option type enum
+ * Basic option types
  */
 enum OptionType {
 
-  FLAG(null, false) {
+  FLAG {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
@@ -41,19 +32,9 @@ enum OptionType {
           impl.field(param));
       return builder.build();
     }
-
-    @Override
-    TypeName returnType(Param param) {
-      return BOOLEAN;
-    }
-
-    @Override
-    Stream<TypeName> returnTypes() {
-      return Stream.of(BOOLEAN);
-    }
   },
 
-  OPTIONAL(PositionalOrder.OPTIONAL, false) {
+  OPTIONAL {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       if (param.isPositional()) {
@@ -75,6 +56,31 @@ enum OptionType {
 
     @Override
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
+      if (Constants.OPTIONAL_INT.equals(param.returnType())) {
+        CodeBlock.Builder builder = CodeBlock.builder();
+        builder.beginControlFlow("if ($N.isPresent())", impl.field(param))
+            .addStatement("$N.add($S + $N.getAsInt())",
+                joiner,
+                jsonKey(param),
+                impl.field(param))
+            .endControlFlow()
+            .beginControlFlow("else")
+            .addStatement("$N.add($S)", joiner, jsonKey(param) + "null")
+            .endControlFlow();
+        return builder.build();
+      } else if (TypeName.INT.equals(param.returnType())) {
+        CodeBlock.Builder builder = CodeBlock.builder();
+        builder.addStatement("$N.add($S + $N)",
+            joiner,
+            jsonKey(param),
+            impl.field(param));
+        return builder.build();
+      } else if (param.required) {
+        CodeBlock.Builder builder = CodeBlock.builder();
+        builder.addStatement("$N.add($S + $N + '\"')",
+            joiner, jsonKey(param) + '"', impl.field(param));
+        return builder.build();
+      }
       return CodeBlock.builder()
           .addStatement("$N.add($S + $N.map($N).orElse($S))",
               joiner,
@@ -84,153 +90,9 @@ enum OptionType {
               "null")
           .build();
     }
-
-    @Override
-    TypeName returnType(Param param) {
-      return optionalOf(STRING);
-    }
-
-    @Override
-    Stream<TypeName> returnTypes() {
-      return Stream.of(optionalOf(STRING));
-    }
   },
 
-  OPTIONAL_INT(PositionalOrder.OPTIONAL, false) {
-    @Override
-    CodeBlock extractExpression(Helper helper, Param param) {
-      if (param.isPositional()) {
-        return CodeBlock.builder().add(
-            "$T.$L.value($N)$L",
-            helper.context.optionType(),
-            param.enumConstant(),
-            helper.positionalParameter,
-            mapToInt())
-            .build();
-      } else {
-        return CodeBlock.builder().add(
-            "$N.get($T.$L).value()$L",
-            helper.parsersField,
-            helper.context.optionType(),
-            param.enumConstant(),
-            mapToInt())
-            .build();
-      }
-    }
-
-    @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
-      CodeBlock.Builder builder = CodeBlock.builder();
-      builder.beginControlFlow("if ($N.isPresent())", impl.field(param))
-          .addStatement("$N.add($S + $N.getAsInt())",
-              joiner,
-              jsonKey(param),
-              impl.field(param))
-          .endControlFlow()
-          .beginControlFlow("else")
-          .addStatement("$N.add($S)", joiner, jsonKey(param) + "null")
-          .endControlFlow();
-      return builder.build();
-    }
-
-    @Override
-    TypeName returnType(Param param) {
-      return ClassName.get(OptionalInt.class);
-    }
-
-    @Override
-    Stream<TypeName> returnTypes() {
-      return Stream.of(ClassName.get(OptionalInt.class));
-    }
-  },
-
-  REQUIRED(PositionalOrder.REQUIRED, true) {
-    @Override
-    CodeBlock extractExpression(Helper helper, Param param) {
-      if (param.isPositional()) {
-        return CodeBlock.builder().add(
-            "$T.$L.value($N)$L",
-            helper.context.optionType(),
-            param.enumConstant(),
-            helper.positionalParameter,
-            orElseThrowMissing(helper.context.optionType(), param))
-            .build();
-      } else {
-        return CodeBlock.builder().add(
-            "$N.get($T.$L).value()$L",
-            helper.parsersField,
-            helper.context.optionType(),
-            param.enumConstant(),
-            orElseThrowMissing(helper.context.optionType(), param))
-            .build();
-      }
-    }
-
-    @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
-      CodeBlock.Builder builder = CodeBlock.builder();
-      builder.addStatement("$N.add($S + $N + '\"')",
-          joiner, jsonKey(param) + '"', impl.field(param));
-      return builder.build();
-    }
-
-    @Override
-    TypeName returnType(Param param) {
-      return STRING;
-    }
-
-    @Override
-    Stream<TypeName> returnTypes() {
-      return Stream.of(STRING);
-    }
-  },
-
-  REQUIRED_INT(PositionalOrder.REQUIRED, true) {
-    @Override
-    CodeBlock extractExpression(Helper helper, Param param) {
-      if (param.isPositional()) {
-        return CodeBlock.builder().add(
-            "$T.$L.value($N)$L$L",
-            helper.context.optionType(),
-            param.enumConstant(),
-            helper.positionalParameter,
-            mapToInt(),
-            orElseThrowMissing(helper.context.optionType(), param))
-            .build();
-      } else {
-        return CodeBlock.builder().add(
-            "$N.get($T.$L).value()$L$L",
-            helper.parsersField,
-            helper.context.optionType(),
-            param.enumConstant(),
-            mapToInt(),
-            orElseThrowMissing(helper.context.optionType(), param))
-            .build();
-      }
-    }
-
-    @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
-      CodeBlock.Builder builder = CodeBlock.builder();
-      builder.addStatement("$N.add($S + $N)",
-          joiner,
-          jsonKey(param),
-          impl.field(param));
-      return builder.build();
-    }
-
-    @Override
-    TypeName returnType(Param param) {
-      return TypeName.INT;
-    }
-
-    @Override
-    Stream<TypeName> returnTypes() {
-      return Stream.of(TypeName.INT);
-    }
-  },
-
-  REPEATABLE(PositionalOrder.LIST, false) {
+  REPEATABLE {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       if (param.isPositional()) {
@@ -269,21 +131,7 @@ enum OptionType {
               format, map).build())
           .build();
     }
-
-    @Override
-    TypeName returnType(Param param) {
-      return param.array ? STRING_ARRAY : LIST_OF_STRING;
-    }
-
-
-    @Override
-    Stream<TypeName> returnTypes() {
-      return Stream.of(STRING_ARRAY, LIST_OF_STRING);
-    }
   };
-
-  final boolean required;
-  final PositionalOrder positionalOrder;
 
   /**
    * @return An expression that extracts the value of the given param from the helper state.
@@ -292,46 +140,7 @@ enum OptionType {
 
   abstract CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param);
 
-  OptionType(PositionalOrder positionalOrder, boolean required) {
-    this.positionalOrder = positionalOrder;
-    this.required = required;
-  }
-
   private static String jsonKey(Param param) {
     return '"' + param.methodName() + "\":";
-  }
-
-  abstract TypeName returnType(Param param);
-
-  abstract Stream<TypeName> returnTypes();
-
-  private static CodeBlock missingRequiredOptionMessage(Param param, ClassName className) {
-    if (param.isPositional()) {
-      return CodeBlock.builder()
-          .add("$T.format($S,$W$T.$L)",
-              String.class,
-              "Missing parameter: <%s>",
-              className, param.enumConstant())
-          .build();
-    }
-    return CodeBlock.builder()
-        .add("$T.format($S,$W$T.$L,$W$T.$L.describeParam($S))",
-            String.class,
-            "Missing required option: %s (%s)",
-            className, param.enumConstant(),
-            className, param.enumConstant(),
-            "")
-        .build();
-  }
-
-  private static CodeBlock orElseThrowMissing(ClassName className, Param param) {
-    return CodeBlock.builder()
-        .add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
-            missingRequiredOptionMessage(param, className))
-        .build();
-  }
-
-  private static CodeBlock mapToInt() {
-    return CodeBlock.builder().add(".map($T::valueOf)", Integer.class).build();
   }
 }
