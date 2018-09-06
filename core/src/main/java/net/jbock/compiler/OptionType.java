@@ -61,9 +61,9 @@ enum OptionType {
     CodeBlock extractExpression(Helper helper, Param param) {
       if (param.isPositional()) {
         return CodeBlock.builder().add(
-            "$N($L, $N)",
-            helper.extractPositionalOptionalMethod,
-            helper.context.positionalIndex(param.index),
+            "$T.$L.value($N)",
+            helper.context.optionType(),
+            param.enumConstant(),
             helper.positionalParameter)
             .build();
       } else {
@@ -107,10 +107,11 @@ enum OptionType {
     CodeBlock extractExpression(Helper helper, Param param) {
       if (param.isPositional()) {
         return CodeBlock.builder().add(
-            "$N($L, $N)",
-            helper.extractPositionalOptionalIntMethod,
-            helper.context.positionalIndex(param.index),
-            helper.positionalParameter)
+            "$T.$L.value($N)$L",
+            helper.context.optionType(),
+            param.enumConstant(),
+            helper.positionalParameter,
+            mapToInt())
             .build();
       } else {
         return CodeBlock.builder().add(
@@ -154,12 +155,11 @@ enum OptionType {
     CodeBlock extractExpression(Helper helper, Param param) {
       if (param.isPositional()) {
         return CodeBlock.builder().add(
-            "$N($L, $N, $T.$L)",
-            helper.extractPositionalRequiredMethod,
-            helper.context.positionalIndex(param.index),
-            helper.positionalParameter,
+            "$T.$L.value($N)$L",
             helper.context.optionType(),
-            param.enumConstant())
+            param.enumConstant(),
+            helper.positionalParameter,
+            orElseThrowMissing(helper.context.optionType(), param))
             .build();
       } else {
         return CodeBlock.builder().add(
@@ -167,7 +167,7 @@ enum OptionType {
             helper.parsersField,
             helper.context.optionType(),
             param.enumConstant(),
-            orElseThrowMissing(helper.context.optionType(), param.enumConstant()))
+            orElseThrowMissing(helper.context.optionType(), param))
             .build();
       }
     }
@@ -196,12 +196,12 @@ enum OptionType {
     CodeBlock extractExpression(Helper helper, Param param) {
       if (param.isPositional()) {
         return CodeBlock.builder().add(
-            "$N($L, $N, $T.$L)",
-            helper.extractPositionalRequiredIntMethod,
-            helper.context.positionalIndex(param.index),
-            helper.positionalParameter,
+            "$T.$L.value($N)$L$L",
             helper.context.optionType(),
-            param.enumConstant())
+            param.enumConstant(),
+            helper.positionalParameter,
+            mapToInt(),
+            orElseThrowMissing(helper.context.optionType(), param))
             .build();
       } else {
         return CodeBlock.builder().add(
@@ -210,7 +210,7 @@ enum OptionType {
             helper.context.optionType(),
             param.enumConstant(),
             mapToInt(),
-            orElseThrowMissing(helper.context.optionType(), param.enumConstant()))
+            orElseThrowMissing(helper.context.optionType(), param))
             .build();
       }
     }
@@ -241,9 +241,9 @@ enum OptionType {
     CodeBlock extractExpression(Helper helper, Param param) {
       if (param.isPositional()) {
         return CodeBlock.builder().add(
-            "$N($L, $N)",
-            helper.extractPositionalListMethod,
-            helper.context.positionalIndex(param.index),
+            "$T.$L.values($N)",
+            helper.context.optionType(),
+            param.enumConstant(),
             helper.positionalParameter)
             .build();
       } else {
@@ -323,21 +323,29 @@ enum OptionType {
     return builder.addModifiers(PRIVATE).build();
   }
 
-  private static CodeBlock missingRequiredOptionMessage(ClassName className, String enumConstant) {
+  private static CodeBlock missingRequiredOptionMessage(Param param, ClassName className) {
+    if (param.isPositional()) {
+      return CodeBlock.builder()
+          .add("$T.format($S,$W$T.$L)",
+              String.class,
+              "Missing parameter: <%s>",
+              className, param.enumConstant())
+          .build();
+    }
     return CodeBlock.builder()
-        .add("$T.format($S,$W$T.$L, $T.$L.describeParam($S))",
+        .add("$T.format($S,$W$T.$L,$W$T.$L.describeParam($S))",
             String.class,
             "Missing required option: %s (%s)",
-            className, enumConstant,
-            className, enumConstant,
+            className, param.enumConstant(),
+            className, param.enumConstant(),
             "")
         .build();
   }
 
-  private static CodeBlock orElseThrowMissing(ClassName className, String enumConstant) {
+  private static CodeBlock orElseThrowMissing(ClassName className, Param param) {
     return CodeBlock.builder()
         .add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
-            missingRequiredOptionMessage(className, enumConstant))
+            missingRequiredOptionMessage(param, className))
         .build();
   }
 

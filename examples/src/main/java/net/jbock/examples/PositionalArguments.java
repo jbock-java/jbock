@@ -15,6 +15,9 @@ abstract class PositionalArguments {
   abstract String dest();
 
   @Positional
+  abstract int anotherInt();
+
+  @Positional
   abstract Optional<String> optString();
 
   @Positional

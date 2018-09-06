@@ -101,7 +101,7 @@ final class Impl {
       Param p = option.context.parameters.get(i);
       FieldSpec field = fields.get(i);
       TypeName type;
-      if (p.paramType == OptionType.OPTIONAL_INT) {
+      if (p.isOptionalInt()) {
         type = optionalOf(TypeName.get(Integer.class));
       } else {
         type = field.type;
@@ -111,7 +111,7 @@ final class Impl {
         builder.addStatement("this.$N = $N", field, param);
       } else if (p.paramType == OptionType.REPEATABLE) {
         builder.addStatement("this.$N = $T.unmodifiableList($N)", field, Collections.class, param);
-      } else if (p.paramType == OptionType.OPTIONAL_INT) {
+      } else if (p.isOptionalInt()) {
         builder.addStatement("this.$N = mapOptionalInt($N)", field, param);
       } else {
         builder.addStatement("this.$N = $T.requireNonNull($N)", field, Objects.class, param);

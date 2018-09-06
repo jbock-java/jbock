@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 
 import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
 import static net.jbock.compiler.Constants.JAVA_UTIL_OPTIONAL_INT;
+import static net.jbock.compiler.Constants.OPTIONAL_INT;
 import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.asArray;
 import static net.jbock.compiler.Util.asDeclared;
@@ -260,6 +261,10 @@ final class Param {
   private static boolean isOptionalInt(
       TypeMirror type) {
     return isSimpleType(type, JAVA_UTIL_OPTIONAL_INT);
+  }
+
+  boolean isOptionalInt() {
+    return OPTIONAL_INT.equals(returnType());
   }
 
   private static boolean isSimpleType(TypeMirror type, String qname) {

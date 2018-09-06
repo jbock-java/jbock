@@ -177,16 +177,16 @@ final class Context {
    */
   int positionalIndex(int j) {
     Param param = parameters.get(j);
+    if (!param.isPositional()) {
+      return -1;
+    }
     for (int i = 0; i < positionalParameters.size(); i++) {
       Param p = positionalParameters.get(i);
       if (p.index == param.index) {
         return i;
       }
     }
-    // j is not the Option index of a positional param.
-    // Calling this method with such an argument is not allowed.
-    throw new IllegalArgumentException(
-        "Not a positional parameter: " + j);
+    return -1;
   }
 
   /**

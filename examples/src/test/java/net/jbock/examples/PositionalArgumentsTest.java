@@ -16,52 +16,54 @@ class PositionalArgumentsTest {
   void errorMissingParameters() {
     f.assertThat().failsWithLine4("Missing parameter: <SOURCE>");
     f.assertThat("a").failsWithLine4("Missing parameter: <DEST>");
+    f.assertThat("a", "b").failsWithLine4("Missing parameter: <ANOTHER_INT>");
   }
 
   @Test
   void minimal() {
-    f.assertThat("a", "b").succeeds(
+    f.assertThat("a", "b", "1").succeeds(
         "optString", null,
         "source", "a",
         "dest", "b",
+        "anotherInt", 1,
         "otherTokens", emptyList());
   }
 
   @Test
   void otherTokens() {
-    f.assertThat("a", "b", "c", "d").succeeds(
+    f.assertThat("a", "b", "1", "c", "d").succeeds(
         "source", "a",
         "dest", "b",
+        "anotherInt", 1,
         "optString", "c",
         "otherTokens", singletonList("d"));
   }
 
   @Test
   void ddTokens() {
-    f.assertThat("a", "b", "c", "d", "--", "e").succeeds(
+    f.assertThat("a", "b", "1", "c", "d", "--", "e").succeeds(
         "source", "a",
         "dest", "b",
+        "anotherInt", 1,
         "optString", "c",
         "otherTokens", asList("d", "e"));
-    f.assertThat("a", "b", "c", "--", "e").succeeds(
+    f.assertThat("a", "b", "1", "c", "--", "e").succeeds(
         "source", "a",
         "dest", "b",
+        "anotherInt", 1,
         "optString", "c",
         "otherTokens", singletonList("e"));
-    f.assertThat("a", "b", "c", "--").succeeds(
+    f.assertThat("a", "b", "1", "c", "--").succeeds(
         "source", "a",
         "dest", "b",
+        "anotherInt", 1,
         "optString", "c",
         "otherTokens", emptyList());
-    f.assertThat("a", "b", "c").succeeds(
+    f.assertThat("a", "b", "1", "c").succeeds(
         "source", "a",
         "dest", "b",
+        "anotherInt", 1,
         "optString", "c",
-        "otherTokens", emptyList());
-    f.assertThat("a", "b").succeeds(
-        "optString", null,
-        "source", "a",
-        "dest", "b",
         "otherTokens", emptyList());
   }
 
@@ -72,13 +74,15 @@ class PositionalArgumentsTest {
         "  PositionalArguments",
         "",
         "SYNOPSIS",
-        "  PositionalArguments <SOURCE> <DEST> [<opt_string>] [[--] <other_tokens...>]",
+        "  PositionalArguments <SOURCE> <DEST> <ANOTHER_INT> [<opt_string>] [[--] <other_tokens...>]",
         "",
         "DESCRIPTION",
         "",
         "SOURCE",
         "",
         "DEST",
+        "",
+        "ANOTHER_INT",
         "",
         "OPT_STRING",
         "",

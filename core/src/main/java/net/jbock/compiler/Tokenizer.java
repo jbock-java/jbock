@@ -129,14 +129,12 @@ final class Tokenizer {
     builder.addStatement("$N.println()", out);
     if (!context.positionalParamTypes.isEmpty()) {
       ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-      builder.beginControlFlow("for ($T $N: $T.values())",
-          optionParam.type, optionParam, optionParam.type)
-          .beginControlFlow("if ($N.$N)",
-              optionParam, option.positionalField)
+      builder.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
+      builder.beginControlFlow("if ($N.positional())", optionParam)
           .addStatement("describe($N)", optionParam)
           .addStatement("$N.println()", out)
-          .endControlFlow()
           .endControlFlow();
+      builder.endControlFlow();
     }
 
     // Options
@@ -146,29 +144,27 @@ final class Tokenizer {
 
     if (!context.nonpositionalParamTypes.isEmpty()) {
       ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-      builder.beginControlFlow("for ($T $N: $T.values())",
-          optionParam.type, optionParam, optionParam.type)
-          .beginControlFlow("if (!$N.$N)",
-              optionParam, option.positionalField)
+      builder.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
+      builder.beginControlFlow("if (!$N.positional())", optionParam)
           .addStatement("$N.incrementIndent()", out)
           .addStatement("describe($N)", optionParam)
           .addStatement("$N.println()", out)
           .addStatement("$N.decrementIndent()", out)
-          .endControlFlow()
           .endControlFlow();
+      builder.endControlFlow();
     }
 
     // Help
     if (context.addHelp) {
-      builder.addStatement("$N.incrementIndent()", out);
-      builder.addStatement("$N.println($S)", out, "--help");
-      builder.addStatement("$N.incrementIndent()", out);
-      builder.addStatement("$N.println($S)", out, "Print this help page.");
-      builder.addStatement("$N.println($S)", out, "The help flag may only be passed as the first argument.");
-      builder.addStatement("$N.println($S)", out, "Any further arguments will be ignored.");
-      builder.addStatement("$N.println()", out);
-      builder.addStatement("$N.decrementIndent()", out);
-      builder.addStatement("$N.decrementIndent()", out);
+      builder.addStatement("$N.incrementIndent()", out)
+          .addStatement("$N.println($S)", out, "--help")
+          .addStatement("$N.incrementIndent()", out)
+          .addStatement("$N.println($S)", out, "Print this help page.")
+          .addStatement("$N.println($S)", out, "The help flag may only be passed as the first argument.")
+          .addStatement("$N.println($S)", out, "Any further arguments will be ignored.")
+          .addStatement("$N.println()", out)
+          .addStatement("$N.decrementIndent()", out)
+          .addStatement("$N.decrementIndent()", out);
     }
 
     return builder.build();
@@ -181,7 +177,7 @@ final class Tokenizer {
     ParameterSpec lineParam = ParameterSpec.builder(STRING, "line").build();
     spec.addParameter(optionParam);
 
-    spec.beginControlFlow("if ($N.$N)", optionParam, option.positionalField)
+    spec.beginControlFlow("if ($N.positional())", optionParam)
         .addStatement("$N.println($N)", out, optionParam)
         .endControlFlow();
     if (context.nonpositionalParamTypes.contains(OptionType.FLAG)) {

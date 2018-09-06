@@ -15,16 +15,20 @@ import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
+import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Util.optionalOf;
 
 /**
  * Defines the *_Parser.Option enum.
@@ -46,7 +50,7 @@ final class Option {
 
   private final FieldSpec shortNameField;
 
-  final FieldSpec positionalField;
+  private final FieldSpec positionalIndexField;
 
   final FieldSpec typeField;
 
@@ -59,7 +63,7 @@ final class Option {
       Context context,
       FieldSpec longNameField,
       FieldSpec shortNameField,
-      FieldSpec positionalField,
+      FieldSpec positionalIndexField,
       FieldSpec typeField,
       FieldSpec descriptionField,
       FieldSpec argumentNameField,
@@ -68,7 +72,7 @@ final class Option {
       MethodSpec longNameMapMethod,
       MethodSpec describeParamMethod,
       MethodSpec parsersMethod) {
-    this.positionalField = positionalField;
+    this.positionalIndexField = positionalIndexField;
     this.exampleMethod = exampleMethod;
     this.longNameField = longNameField;
     this.shortNameField = shortNameField;
@@ -85,7 +89,7 @@ final class Option {
   static Option create(Context context) {
     FieldSpec typeField = FieldSpec.builder(context.optionTypeType(), "type").build();
     FieldSpec longNameField = FieldSpec.builder(STRING, "longName").build();
-    FieldSpec positionalField = FieldSpec.builder(BOOLEAN, "positional").build();
+    FieldSpec positionalIndexField = FieldSpec.builder(INT, "positionalIndex").build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
         "shortName").build();
     ParameterizedTypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class),
@@ -107,7 +111,7 @@ final class Option {
         context,
         longNameField,
         shortNameField,
-        positionalField,
+        positionalIndexField,
         typeField,
         descriptionField,
         argumentNameField,
@@ -119,12 +123,15 @@ final class Option {
 
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.enumBuilder(context.optionType());
-    for (Param param : context.parameters) {
+    List<Param> parameters = context.parameters;
+    for (int j = 0; j < parameters.size(); j++) {
+      Param param = parameters.get(j);
       String enumConstant = param.enumConstant();
-      spec.addEnumConstant(enumConstant, optionEnumConstant(param));
+      spec.addEnumConstant(enumConstant, optionEnumConstant(param, j));
     }
     spec.addModifiers(PRIVATE)
-        .addFields(asList(longNameField, shortNameField, positionalField, typeField, argumentNameField, descriptionField))
+        .addFields(asList(longNameField, shortNameField, positionalIndexField, typeField, argumentNameField, descriptionField))
+        .addMethod(positionalMethod())
         .addMethod(describeParamMethod)
         .addMethod(exampleMethod)
         .addMethod(privateConstructor());
@@ -133,6 +140,10 @@ final class Option {
           .addMethod(longNameMapMethod)
           .addMethod(parsersMethod);
     }
+    if (!context.positionalParamTypes.isEmpty()) {
+      spec.addMethod(positionalValuesMethod());
+      spec.addMethod(positionalValueMethod());
+    }
     spec.addMethod(MethodSpec.methodBuilder("parser")
         .returns(context.optionParserType())
         .addStatement("throw new $T($S)", UnsupportedOperationException.class, "Bad stuff")
@@ -140,21 +151,28 @@ final class Option {
     return spec.build();
   }
 
-  private TypeSpec optionEnumConstant(Param param) {
+  private MethodSpec positionalMethod() {
+    return MethodSpec.methodBuilder("positional")
+        .addStatement("return $N >= 0", positionalIndexField)
+        .returns(BOOLEAN)
+        .build();
+  }
+
+  private TypeSpec optionEnumConstant(Param param, int j) {
     String[] desc = getText(param.description());
     String argumentName = param.descriptionArgumentName();
     Map<String, Object> map = new LinkedHashMap<>();
     map.put("longName", param.longName());
     map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
     map.put("type", param.isPositional() ? param.positionalType() : param.paramType);
-    map.put("positional", param.isPositional());
+    map.put("positionalIndex", context.positionalIndex(j));
     map.put("optionType", context.optionTypeType());
     map.put("argumentName", argumentName);
     map.put("descExpression", descExpression(desc));
     String format = String.join(", ",
         "$longName:S",
         "$shortName:L",
-        "$positional:L",
+        "$positionalIndex:L",
         "$optionType:T.$type:L",
         "$argumentName:S",
         "$descExpression:L");
@@ -184,20 +202,20 @@ final class Option {
   private MethodSpec privateConstructor() {
     ParameterSpec longName = ParameterSpec.builder(longNameField.type, longNameField.name).build();
     ParameterSpec shortName = ParameterSpec.builder(shortNameField.type, shortNameField.name).build();
-    ParameterSpec positional = ParameterSpec.builder(positionalField.type, positionalField.name).build();
+    ParameterSpec positionalIndex = ParameterSpec.builder(positionalIndexField.type, positionalIndexField.name).build();
     ParameterSpec optionType = ParameterSpec.builder(typeField.type, typeField.name).build();
     ParameterSpec description = ParameterSpec.builder(descriptionField.type, descriptionField.name).build();
     ParameterSpec argumentName = ParameterSpec.builder(argumentNameField.type, argumentNameField.name).build();
     MethodSpec.Builder spec = MethodSpec.constructorBuilder()
         .addStatement("this.$N = $N", longNameField, longName)
         .addStatement("this.$N = $N", shortNameField, shortName)
-        .addStatement("this.$N = $N", positionalField, positional)
+        .addStatement("this.$N = $N", positionalIndexField, positionalIndex)
         .addStatement("this.$N = $N", typeField, optionType)
         .addStatement("this.$N = $N", descriptionField, description)
         .addStatement("this.$N = $N", argumentNameField, argumentName);
 
     spec.addParameters(asList(
-        longName, shortName, positional, optionType, argumentName, description));
+        longName, shortName, positionalIndex, optionType, argumentName, description));
     return spec.build();
   }
 
@@ -344,7 +362,7 @@ final class Option {
     // begin iteration over options
     builder.beginControlFlow("for ($T $N : $T.values())", context.optionType(), option, context.optionType());
 
-    builder.beginControlFlow("if (!$N.positional)", option)
+    builder.beginControlFlow("if (!$N.positional())", option)
         .addStatement("$N.put($N, $N.parser())", parsers, option, option)
         .endControlFlow();
 
@@ -357,5 +375,37 @@ final class Option {
         .returns(parsers.type)
         .addModifiers(STATIC)
         .build();
+  }
+
+  private MethodSpec positionalValuesMethod() {
+
+    ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional").build();
+
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("values");
+
+    spec.beginControlFlow("if ($N >= $N.size())", positionalIndexField, positionalParameter)
+        .addStatement("return $T.emptyList()", Collections.class)
+        .endControlFlow();
+
+    spec.addStatement("return $N.subList($N, $N.size())", positionalParameter, positionalIndexField, positionalParameter);
+    return spec.addParameter(positionalParameter)
+        .returns(LIST_OF_STRING).build();
+  }
+
+  private MethodSpec positionalValueMethod() {
+
+    ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional").build();
+
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("value");
+
+    spec.beginControlFlow("if ($N >= $N.size())", positionalIndexField, positionalParameter)
+        .addStatement("return $T.empty()", Optional.class)
+        .endControlFlow();
+
+    spec.addStatement("return $T.of($N.get($N))",
+        Optional.class, positionalParameter, positionalIndexField);
+
+    return spec.addParameter(positionalParameter)
+        .returns(optionalOf(STRING)).build();
   }
 }

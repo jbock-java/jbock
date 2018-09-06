@@ -22,4 +22,6 @@ final class Constants {
   static final ArrayTypeName STRING_ARRAY = ArrayTypeName.of(STRING);
 
   static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
+
+  static final TypeName OPTIONAL_INT = TypeName.get(OptionalInt.class);
 }

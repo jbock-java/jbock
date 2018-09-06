@@ -9,11 +9,9 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -22,7 +20,6 @@ import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.Util.optionalOf;
 import static net.jbock.compiler.Util.optionalOfSubtype;
 
 /**
@@ -47,12 +44,6 @@ final class Helper {
 
   private final MethodSpec readLongMethod;
 
-  final MethodSpec extractPositionalRequiredMethod;
-  final MethodSpec extractPositionalRequiredIntMethod;
-  final MethodSpec extractPositionalOptionalMethod;
-  final MethodSpec extractPositionalOptionalIntMethod;
-  final MethodSpec extractPositionalListMethod;
-
   final ParameterSpec positionalParameter;
 
   private Helper(
@@ -64,12 +55,7 @@ final class Helper {
       MethodSpec readMethod,
       MethodSpec readLongMethod,
       MethodSpec readRegularOptionMethod,
-      ParameterSpec positionalParameter,
-      MethodSpec extractPositionalRequiredMethod,
-      MethodSpec extractPositionalRequiredIntMethod,
-      MethodSpec extractPositionalOptionalIntMethod,
-      MethodSpec extractPositionalListMethod,
-      MethodSpec extractPositionalOptionalMethod) {
+      ParameterSpec positionalParameter) {
     this.context = context;
     this.impl = impl;
     this.longNamesField = longNamesField;
@@ -80,11 +66,6 @@ final class Helper {
     this.readLongMethod = readLongMethod;
     this.readRegularOptionMethod = readRegularOptionMethod;
     this.positionalParameter = positionalParameter;
-    this.extractPositionalRequiredMethod = extractPositionalRequiredMethod;
-    this.extractPositionalRequiredIntMethod = extractPositionalRequiredIntMethod;
-    this.extractPositionalOptionalIntMethod = extractPositionalOptionalIntMethod;
-    this.extractPositionalListMethod = extractPositionalListMethod;
-    this.extractPositionalOptionalMethod = extractPositionalOptionalMethod;
   }
 
   static Helper create(
@@ -122,17 +103,6 @@ final class Helper {
         parsersField,
         context);
 
-    MethodSpec extractPositionalRequiredMethod = extractPositionalRequiredMethod(
-        context, positionalParameter);
-    MethodSpec extractPositionalRequiredIntMethod = extractPositionalRequiredIntMethod(
-        context, positionalParameter);
-    MethodSpec extractPositionalListMethod = extractPositionalListMethod(
-        positionalParameter);
-    MethodSpec extractPositionalOptionalMethod = extractPositionalOptionalMethod(
-        positionalParameter);
-    MethodSpec extractPositionalOptionalIntMethod = extractPositionalOptionalIntMethod(
-        positionalParameter);
-
     return new Helper(
         context,
         impl,
@@ -143,12 +113,7 @@ final class Helper {
         readMethod,
         readLongMethod,
         readRegularOptionMethod,
-        positionalParameter,
-        extractPositionalRequiredMethod,
-        extractPositionalRequiredIntMethod,
-        extractPositionalOptionalIntMethod,
-        extractPositionalListMethod,
-        extractPositionalOptionalMethod);
+        positionalParameter);
   }
 
   TypeSpec define() {
@@ -162,21 +127,6 @@ final class Helper {
           .addField(shortNamesField)
           .addField(parsersField);
       spec.addMethod(readLongMethod);
-    }
-    if (context.positionalParamTypes.contains(OptionType.REPEATABLE)) {
-      spec.addMethod(extractPositionalListMethod);
-    }
-    if (context.positionalParamTypes.contains(OptionType.OPTIONAL)) {
-      spec.addMethod(extractPositionalOptionalMethod);
-    }
-    if (context.positionalParamTypes.contains(OptionType.OPTIONAL_INT)) {
-      spec.addMethod(extractPositionalOptionalIntMethod);
-    }
-    if (context.positionalParamTypes.contains(OptionType.REQUIRED)) {
-      spec.addMethod(extractPositionalRequiredMethod);
-    }
-    if (context.positionalParamTypes.contains(OptionType.REQUIRED_INT)) {
-      spec.addMethod(extractPositionalRequiredIntMethod);
     }
     return spec.build();
   }
@@ -307,120 +257,6 @@ final class Helper {
     spec.addStatement("return $T.of(new $T($L))", Optional.class, impl.type, args.build());
 
     return spec.returns(optionalOfSubtype(impl.type)).build();
-  }
-
-  private static MethodSpec extractPositionalRequiredMethod(
-      Context context,
-      ParameterSpec positionalParameter) {
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("extractPositionalRequired");
-
-    spec.addStatement("$T $N = $N.size()",
-        INT, size, positionalParameter);
-
-    spec.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement(throwMissingParameterStatement(optionParam))
-        .endControlFlow();
-
-    spec.addStatement("return $N.get($N)", positionalParameter, index);
-
-    return spec.addParameters(Arrays.asList(index, positionalParameter, optionParam))
-        .addModifiers(STATIC)
-        .returns(STRING).build();
-  }
-
-  private static MethodSpec extractPositionalRequiredIntMethod(
-      Context context,
-      ParameterSpec positionalParameter) {
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("extractPositionalRequiredInt");
-
-    spec.addStatement("$T $N = $N.size()",
-        INT, size, positionalParameter);
-
-    spec.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement(throwMissingParameterStatement(optionParam))
-        .endControlFlow();
-
-    spec.addStatement("return $T.parseInt($N.get($N))", Integer.class, positionalParameter, index);
-
-    return spec.addParameters(Arrays.asList(index, positionalParameter, optionParam))
-        .addModifiers(STATIC)
-        .returns(INT).build();
-  }
-
-  private static CodeBlock throwMissingParameterStatement(ParameterSpec optionParam) {
-    return CodeBlock.builder()
-        .add("throw new $T($S + $N + $S)", IllegalArgumentException.class,
-            "Missing parameter: <", optionParam, ">")
-        .build();
-  }
-
-  private static MethodSpec extractPositionalOptionalMethod(
-      ParameterSpec positionalParameter) {
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("extractPositionalOptional");
-
-    spec.addStatement("$T $N = $N.size()",
-        INT, size, positionalParameter);
-
-    spec.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement("return $T.empty()", Optional.class)
-        .endControlFlow();
-
-    spec.addStatement("return $T.of($N.get($N))",
-        Optional.class, positionalParameter, index);
-
-    return spec.addParameters(Arrays.asList(index, positionalParameter))
-        .addModifiers(STATIC)
-        .returns(optionalOf(STRING)).build();
-  }
-
-  private static MethodSpec extractPositionalOptionalIntMethod(
-      ParameterSpec positionalParameter) {
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    ParameterSpec size = ParameterSpec.builder(INT, "size").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("extractPositionalOptionalInt");
-
-    spec.addStatement("$T $N = $N.size()",
-        INT, size, positionalParameter);
-
-    spec.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement("return $T.empty()", Optional.class)
-        .endControlFlow();
-
-    spec.addStatement("return $T.of($T.valueOf($N.get($N)))",
-        Optional.class, Integer.class, positionalParameter, index);
-
-    return spec.addParameters(Arrays.asList(index, positionalParameter))
-        .addModifiers(STATIC)
-        .returns(optionalOf(TypeName.get(Integer.class)))
-        .build();
-  }
-
-  private static MethodSpec extractPositionalListMethod(
-      ParameterSpec positionalParameter) {
-    ParameterSpec start = ParameterSpec.builder(INT, "start").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("extractPositionalList");
-
-    spec.beginControlFlow("if ($N >= $N.size())", start, positionalParameter)
-        .addStatement("return $T.emptyList()", Collections.class)
-        .endControlFlow();
-
-    spec.addStatement("return $N.subList($N, $N.size())", positionalParameter, start, positionalParameter);
-    return spec.addParameters(Arrays.asList(start, positionalParameter))
-        .addModifiers(STATIC)
-        .returns(LIST_OF_STRING).build();
   }
 
   private static CodeBlock optionSummaryCode(
