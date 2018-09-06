@@ -58,6 +58,9 @@ final class Context {
 
   private final ClassName optionTypeType;
   private final ClassName optionParserType;
+  private final ClassName flagOptionParserType;
+  private final ClassName repeatableOptionParserType;
+  private final ClassName regularOptionParserType;
   private final ClassName optionType;
   private final ClassName helperType;
 
@@ -77,6 +80,9 @@ final class Context {
       String missionStatement,
       ClassName optionTypeType,
       ClassName optionParserType,
+      ClassName flagOptionParserType,
+      ClassName repeatableOptionParserType,
+      ClassName regularOptionParserType,
       ClassName optionType,
       ClassName helperType) {
     this.sourceType = sourceType;
@@ -94,6 +100,9 @@ final class Context {
     this.missionStatement = missionStatement;
     this.optionTypeType = optionTypeType;
     this.optionParserType = optionParserType;
+    this.flagOptionParserType = flagOptionParserType;
+    this.repeatableOptionParserType = repeatableOptionParserType;
+    this.regularOptionParserType = regularOptionParserType;
     this.optionType = optionType;
     this.helperType = helperType;
   }
@@ -119,6 +128,9 @@ final class Context {
     ClassName optionType = generatedClass.nestedClass("Option");
     ClassName helperType = generatedClass.nestedClass("Helper");
     ClassName optionParserType = generatedClass.nestedClass("OptionParser");
+    ClassName flagOptionParserType = generatedClass.nestedClass("FlagOptionParser");
+    ClassName repeatableOptionParserType = generatedClass.nestedClass("RepeatableOptionParser");
+    ClassName regularOptionParserType = generatedClass.nestedClass("RegularOptionParser");
     return new Context(
         sourceType,
         generatedClass,
@@ -135,7 +147,9 @@ final class Context {
         missionStatement,
         optionTypeType,
         optionParserType,
-        optionType,
+        flagOptionParserType,
+        repeatableOptionParserType,
+        regularOptionParserType, optionType,
         helperType);
   }
 
@@ -206,6 +220,18 @@ final class Context {
 
   ClassName optionParserType() {
     return optionParserType;
+  }
+
+  ClassName repeatableOptionParserType() {
+    return repeatableOptionParserType;
+  }
+
+  ClassName flagOptionParserType() {
+    return flagOptionParserType;
+  }
+
+  ClassName regularOptionParserType() {
+    return regularOptionParserType;
   }
 
   ClassName optionType() {

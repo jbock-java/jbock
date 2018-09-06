@@ -21,7 +21,7 @@ final class RegularOptionParser {
 
   static TypeSpec define(Context context) {
     FieldSpec value = FieldSpec.builder(STRING, "value").build();
-    return TypeSpec.classBuilder(context.generatedClass.nestedClass("RegularOptionParser"))
+    return TypeSpec.classBuilder(context.regularOptionParserType())
         .superclass(context.optionParserType())
         .addMethod(readMethod(context, value))
         .addMethod(MethodSpec.methodBuilder("value")

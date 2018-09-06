@@ -12,6 +12,7 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -34,7 +35,7 @@ final class Option {
 
   final Context context;
 
-  final MethodSpec describeParamMethod;
+  private final MethodSpec describeParamMethod;
 
   private final MethodSpec exampleMethod;
   private final FieldSpec descriptionField;
@@ -52,6 +53,8 @@ final class Option {
   final MethodSpec shortNameMapMethod;
   final MethodSpec longNameMapMethod;
 
+  final MethodSpec parsersMethod;
+
   private Option(
       Context context,
       FieldSpec longNameField,
@@ -63,7 +66,8 @@ final class Option {
       MethodSpec exampleMethod,
       MethodSpec shortNameMapMethod,
       MethodSpec longNameMapMethod,
-      MethodSpec describeParamMethod) {
+      MethodSpec describeParamMethod,
+      MethodSpec parsersMethod) {
     this.positionalField = positionalField;
     this.exampleMethod = exampleMethod;
     this.longNameField = longNameField;
@@ -75,6 +79,7 @@ final class Option {
     this.typeField = typeField;
     this.longNameMapMethod = longNameMapMethod;
     this.describeParamMethod = describeParamMethod;
+    this.parsersMethod = parsersMethod;
   }
 
   static Option create(Context context) {
@@ -83,8 +88,11 @@ final class Option {
     FieldSpec positionalField = FieldSpec.builder(BOOLEAN, "positional").build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
         "shortName").build();
+    ParameterizedTypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class),
+        context.optionType(), context.optionParserType());
     MethodSpec shortNameMapMethod = shortNameMapMethod(context.optionType(), shortNameField);
     MethodSpec longNameMapMethod = longNameMapMethod(context.optionType(), longNameField);
+    MethodSpec parsersMethod = parsersMethod(parsersType, context);
     FieldSpec argumentNameField = FieldSpec.builder(
         STRING, "descriptionArgumentName").build();
     MethodSpec exampleMethod = exampleMethod(longNameField, shortNameField, argumentNameField);
@@ -106,44 +114,71 @@ final class Option {
         exampleMethod,
         shortNameMapMethod,
         longNameMapMethod,
-        describeParamMethod);
+        describeParamMethod, parsersMethod);
   }
 
   TypeSpec define() {
-    TypeSpec.Builder builder = TypeSpec.enumBuilder(context.optionType());
+    TypeSpec.Builder spec = TypeSpec.enumBuilder(context.optionType());
     for (Param param : context.parameters) {
-      String[] desc = getText(param.description());
-      String argumentName = param.descriptionArgumentName();
       String enumConstant = param.enumConstant();
-      Map<String, Object> map = new LinkedHashMap<>();
-      map.put("longName", param.longName());
-      map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
-      map.put("type", param.isPositional() ? param.positionalType() : param.paramType);
-      map.put("positional", param.isPositional());
-      map.put("optionType", context.optionTypeType());
-      map.put("argumentName", argumentName);
-      map.put("descExpression", descExpression(desc));
-      String format = String.join(", ",
-          "$longName:S",
-          "$shortName:L",
-          "$positional:L",
-          "$optionType:T.$type:L",
-          "$argumentName:S",
-          "$descExpression:L");
-      builder.addEnumConstant(enumConstant,
-          anonymousClassBuilder(CodeBlock.builder().addNamed(format, map).build())
-              .build());
+      spec.addEnumConstant(enumConstant, optionEnumConstant(param));
     }
-    builder.addModifiers(PRIVATE)
+    spec.addModifiers(PRIVATE)
         .addFields(asList(longNameField, shortNameField, positionalField, typeField, argumentNameField, descriptionField))
         .addMethod(describeParamMethod)
         .addMethod(exampleMethod)
         .addMethod(privateConstructor());
     if (!context.nonpositionalParamTypes.isEmpty()) {
-      builder.addMethod(shortNameMapMethod)
-          .addMethod(longNameMapMethod);
+      spec.addMethod(shortNameMapMethod)
+          .addMethod(longNameMapMethod)
+          .addMethod(parsersMethod);
     }
-    return builder.build();
+    spec.addMethod(MethodSpec.methodBuilder("parser")
+        .returns(context.optionParserType())
+        .addStatement("throw new $T($S)", UnsupportedOperationException.class, "Bad stuff")
+        .build());
+    return spec.build();
+  }
+
+  private TypeSpec optionEnumConstant(Param param) {
+    String[] desc = getText(param.description());
+    String argumentName = param.descriptionArgumentName();
+    Map<String, Object> map = new LinkedHashMap<>();
+    map.put("longName", param.longName());
+    map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
+    map.put("type", param.isPositional() ? param.positionalType() : param.paramType);
+    map.put("positional", param.isPositional());
+    map.put("optionType", context.optionTypeType());
+    map.put("argumentName", argumentName);
+    map.put("descExpression", descExpression(desc));
+    String format = String.join(", ",
+        "$longName:S",
+        "$shortName:L",
+        "$positional:L",
+        "$optionType:T.$type:L",
+        "$argumentName:S",
+        "$descExpression:L");
+
+    CodeBlock block = CodeBlock.builder().addNamed(format, map).build();
+    TypeSpec.Builder spec = anonymousClassBuilder(block);
+    if (!param.isPositional()) {
+      spec.addMethod(parserMethod(param));
+    }
+    return spec.build();
+  }
+
+  private MethodSpec parserMethod(Param param) {
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("parser")
+        .addAnnotation(Override.class)
+        .returns(context.optionParserType());
+    if (param.paramType == OptionType.REPEATABLE) {
+      spec.addStatement("return new $T(this)", context.repeatableOptionParserType());
+    } else if (param.paramType == OptionType.FLAG) {
+      spec.addStatement("return new $T(this)", context.flagOptionParserType());
+    } else {
+      spec.addStatement("return new $T(this)", context.regularOptionParserType());
+    }
+    return spec.build();
   }
 
   private MethodSpec privateConstructor() {
@@ -291,6 +326,36 @@ final class Option {
     return MethodSpec.methodBuilder("example")
         .returns(STRING)
         .addCode(builder.build())
+        .build();
+  }
+
+
+  private static MethodSpec parsersMethod(
+      ParameterizedTypeName parsersType,
+      Context context) {
+    ParameterSpec parsers = ParameterSpec.builder(parsersType, "parsers")
+        .build();
+    ParameterSpec option = ParameterSpec.builder(context.optionType(), "option").build();
+
+    CodeBlock.Builder builder = CodeBlock.builder();
+    builder.addStatement("$T $N = new $T<>($T.class)",
+        parsers.type, parsers, EnumMap.class, context.optionType());
+
+    // begin iteration over options
+    builder.beginControlFlow("for ($T $N : $T.values())", context.optionType(), option, context.optionType());
+
+    builder.beginControlFlow("if (!$N.positional)", option)
+        .addStatement("$N.put($N, $N.parser())", parsers, option, option)
+        .endControlFlow();
+
+    // end iteration over options
+    builder.endControlFlow();
+    builder.addStatement("return $N", parsers);
+
+    return MethodSpec.methodBuilder("parsers")
+        .addCode(builder.build())
+        .returns(parsers.type)
+        .addModifiers(STATIC)
         .build();
   }
 }

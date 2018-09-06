@@ -20,7 +20,7 @@ final class RepeatableOptionParser {
 
   static TypeSpec define(Context context) {
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values").build();
-    return TypeSpec.classBuilder(context.generatedClass.nestedClass("RepeatableOptionParser"))
+    return TypeSpec.classBuilder(context.repeatableOptionParserType())
         .superclass(context.optionParserType())
         .addMethod(readMethod(values))
         .addMethod(MethodSpec.methodBuilder("values")

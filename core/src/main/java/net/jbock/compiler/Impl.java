@@ -19,6 +19,7 @@ import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Util.optionalOf;
 
 /**
  * Defines the *_Impl inner class.
@@ -99,11 +100,19 @@ final class Impl {
     for (int i = 0; i < fields.size(); i++) {
       Param p = option.context.parameters.get(i);
       FieldSpec field = fields.get(i);
-      ParameterSpec param = ParameterSpec.builder(field.type, field.name).build();
+      TypeName type;
+      if (p.paramType == OptionType.OPTIONAL_INT) {
+        type = optionalOf(TypeName.get(Integer.class));
+      } else {
+        type = field.type;
+      }
+      ParameterSpec param = ParameterSpec.builder(type, field.name).build();
       if (field.type.isPrimitive()) {
         builder.addStatement("this.$N = $N", field, param);
       } else if (p.paramType == OptionType.REPEATABLE) {
         builder.addStatement("this.$N = $T.unmodifiableList($N)", field, Collections.class, param);
+      } else if (p.paramType == OptionType.OPTIONAL_INT) {
+        builder.addStatement("this.$N = mapOptionalInt($N)", field, param);
       } else {
         builder.addStatement("this.$N = $T.requireNonNull($N)", field, Objects.class, param);
       }

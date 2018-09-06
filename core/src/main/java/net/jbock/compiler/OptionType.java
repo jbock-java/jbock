@@ -6,10 +6,8 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -30,8 +28,8 @@ enum OptionType {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
-          "$N.contains($T.$N)",
-          helper.flagsField,
+          "$N.get($T.$N).flag()",
+          helper.parsersField,
           helper.context.optionType(),
           param.enumConstant())
           .build();
@@ -70,9 +68,8 @@ enum OptionType {
             .build();
       } else {
         return CodeBlock.builder().add(
-            "$T.ofNullable($N.get($T.$L))",
-            Optional.class,
-            helper.sMapField,
+            "$N.get($T.$L).value()",
+            helper.parsersField,
             helper.context.optionType(),
             param.enumConstant())
             .build();
@@ -117,10 +114,11 @@ enum OptionType {
             .build();
       } else {
         return CodeBlock.builder().add(
-            "$N($T.$L)",
-            helper.extractOptionalIntMethod,
+            "$N.get($T.$L).value()$L",
+            helper.parsersField,
             helper.context.optionType(),
-            param.enumConstant())
+            param.enumConstant(),
+            mapToInt())
             .build();
       }
     }
@@ -165,10 +163,11 @@ enum OptionType {
             .build();
       } else {
         return CodeBlock.builder().add(
-            "$N($T.$L)",
-            helper.extractRequiredMethod,
+            "$N.get($T.$L).value()$L",
+            helper.parsersField,
             helper.context.optionType(),
-            param.enumConstant())
+            param.enumConstant(),
+            orElseThrowMissing(helper.context.optionType(), param.enumConstant()))
             .build();
       }
     }
@@ -206,10 +205,12 @@ enum OptionType {
             .build();
       } else {
         return CodeBlock.builder().add(
-            "$N($T.$L)",
-            helper.extractRequiredIntMethod,
+            "$N.get($T.$L).value()$L$L",
+            helper.parsersField,
             helper.context.optionType(),
-            param.enumConstant())
+            param.enumConstant(),
+            mapToInt(),
+            orElseThrowMissing(helper.context.optionType(), param.enumConstant()))
             .build();
       }
     }
@@ -247,11 +248,10 @@ enum OptionType {
             .build();
       } else {
         return CodeBlock.builder().add(
-            "$N.getOrDefault($T.$L, $T.emptyList())",
-            helper.optMapField,
+            "$N.get($T.$L).values()",
+            helper.parsersField,
             helper.context.optionType(),
-            param.enumConstant(),
-            Collections.class)
+            param.enumConstant())
             .build();
       }
     }
@@ -321,5 +321,27 @@ enum OptionType {
       builder.addEnumConstant(optionType.name()).build();
     }
     return builder.addModifiers(PRIVATE).build();
+  }
+
+  private static CodeBlock missingRequiredOptionMessage(ClassName className, String enumConstant) {
+    return CodeBlock.builder()
+        .add("$T.format($S,$W$T.$L, $T.$L.describeParam($S))",
+            String.class,
+            "Missing required option: %s (%s)",
+            className, enumConstant,
+            className, enumConstant,
+            "")
+        .build();
+  }
+
+  private static CodeBlock orElseThrowMissing(ClassName className, String enumConstant) {
+    return CodeBlock.builder()
+        .add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
+            missingRequiredOptionMessage(className, enumConstant))
+        .build();
+  }
+
+  private static CodeBlock mapToInt() {
+    return CodeBlock.builder().add(".map($T::valueOf)", Integer.class).build();
   }
 }

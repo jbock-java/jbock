@@ -20,7 +20,7 @@ final class FlagOptionParser {
 
   static TypeSpec define(Context context) {
     FieldSpec flag = FieldSpec.builder(TypeName.BOOLEAN, "flag").build();
-    return TypeSpec.classBuilder(context.generatedClass.nestedClass("FlagOptionParser"))
+    return TypeSpec.classBuilder(context.flagOptionParserType())
         .superclass(context.optionParserType())
         .addMethod(readMethod(context, flag))
         .addMethod(MethodSpec.methodBuilder("flag")

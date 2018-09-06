@@ -9,15 +9,11 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Set;
 
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -40,25 +36,17 @@ final class Helper {
   final Context context;
   final Option option;
 
-  final FieldSpec optMapField;
-  final FieldSpec sMapField;
-  final FieldSpec flagsField;
-
   private final FieldSpec longNamesField;
   private final FieldSpec shortNamesField;
+  final FieldSpec parsersField;
 
   private final Impl impl;
 
   final MethodSpec readMethod;
   final MethodSpec readRegularOptionMethod;
 
-  private final MethodSpec addFlagMethod;
-  private final MethodSpec addArgumentMethod;
   private final MethodSpec readLongMethod;
 
-  final MethodSpec extractRequiredMethod;
-  final MethodSpec extractRequiredIntMethod;
-  final MethodSpec extractOptionalIntMethod;
   final MethodSpec extractPositionalRequiredMethod;
   final MethodSpec extractPositionalRequiredIntMethod;
   final MethodSpec extractPositionalOptionalMethod;
@@ -72,19 +60,11 @@ final class Helper {
       Impl impl,
       FieldSpec longNamesField,
       FieldSpec shortNamesField,
-      FieldSpec optMapField,
-      FieldSpec sMapField,
-      FieldSpec flagsField,
-      Option option,
-      MethodSpec addFlagMethod,
-      MethodSpec addArgumentMethod,
+      FieldSpec parsersField, Option option,
       MethodSpec readMethod,
       MethodSpec readLongMethod,
       MethodSpec readRegularOptionMethod,
       ParameterSpec positionalParameter,
-      MethodSpec extractRequiredMethod,
-      MethodSpec extractRequiredIntMethod,
-      MethodSpec extractOptionalIntMethod,
       MethodSpec extractPositionalRequiredMethod,
       MethodSpec extractPositionalRequiredIntMethod,
       MethodSpec extractPositionalOptionalIntMethod,
@@ -94,19 +74,12 @@ final class Helper {
     this.impl = impl;
     this.longNamesField = longNamesField;
     this.shortNamesField = shortNamesField;
-    this.optMapField = optMapField;
-    this.sMapField = sMapField;
-    this.flagsField = flagsField;
+    this.parsersField = parsersField;
     this.option = option;
-    this.addFlagMethod = addFlagMethod;
-    this.addArgumentMethod = addArgumentMethod;
     this.readMethod = readMethod;
     this.readLongMethod = readLongMethod;
     this.readRegularOptionMethod = readRegularOptionMethod;
     this.positionalParameter = positionalParameter;
-    this.extractRequiredMethod = extractRequiredMethod;
-    this.extractRequiredIntMethod = extractRequiredIntMethod;
-    this.extractOptionalIntMethod = extractOptionalIntMethod;
     this.extractPositionalRequiredMethod = extractPositionalRequiredMethod;
     this.extractPositionalRequiredIntMethod = extractPositionalRequiredIntMethod;
     this.extractPositionalOptionalIntMethod = extractPositionalOptionalIntMethod;
@@ -115,8 +88,6 @@ final class Helper {
   }
 
   static Helper create(
-      MethodSpec readArgumentMethod,
-      MethodSpec readNextMethod,
       Context context,
       Impl impl,
       Option option) {
@@ -133,29 +104,12 @@ final class Helper {
         .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.shortNameMapMethod)
         .build();
 
-    // empty collections
-    FieldSpec optMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        context.optionType(), LIST_OF_STRING), "optMap")
-        .initializer("new $T<>($T.class)", EnumMap.class, context.optionType())
-        .build();
-    FieldSpec sMapField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        context.optionType(), STRING), "sMap")
-        .initializer("new $T<>($T.class)", EnumMap.class, context.optionType())
-        .build();
-    FieldSpec flagsField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Set.class),
-        context.optionType()), "flags")
-        .initializer("$T.noneOf($T.class)", EnumSet.class, context.optionType())
+    // stateful parsers
+    FieldSpec parsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        context.optionType(), context.optionParserType()), "parsers")
+        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.parsersMethod)
         .build();
 
-    MethodSpec addFlagMethod = addFlagMethod(
-        option,
-        context,
-        flagsField);
-    MethodSpec addArgumentMethod = addArgumentMethod(
-        context,
-        option,
-        optMapField,
-        sMapField);
     MethodSpec readLongMethod = readLongMethod(longNamesField, context);
 
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(
@@ -165,19 +119,13 @@ final class Helper {
         readLongMethod);
 
     MethodSpec readMethod = readMethod(
-        readArgumentMethod,
-        context,
-        option,
-        addArgumentMethod,
-        addFlagMethod);
+        parsersField,
+        context);
 
-    MethodSpec extractOptionalIntMethod = extractOptionalIntMethod(context, option, sMapField);
-    MethodSpec extractRequiredMethod = extractRequiredMethod(context, option, sMapField);
-    MethodSpec extractRequiredIntMethod = extractRequiredIntMethod(context, option, sMapField);
     MethodSpec extractPositionalRequiredMethod = extractPositionalRequiredMethod(
-        context, option, positionalParameter);
+        context, positionalParameter);
     MethodSpec extractPositionalRequiredIntMethod = extractPositionalRequiredIntMethod(
-        context, option, positionalParameter);
+        context, positionalParameter);
     MethodSpec extractPositionalListMethod = extractPositionalListMethod(
         positionalParameter);
     MethodSpec extractPositionalOptionalMethod = extractPositionalOptionalMethod(
@@ -190,19 +138,12 @@ final class Helper {
         impl,
         longNamesField,
         shortNamesField,
-        optMapField,
-        sMapField,
-        flagsField,
+        parsersField,
         option,
-        addFlagMethod,
-        addArgumentMethod,
         readMethod,
         readLongMethod,
         readRegularOptionMethod,
         positionalParameter,
-        extractRequiredMethod,
-        extractRequiredIntMethod,
-        extractOptionalIntMethod,
         extractPositionalRequiredMethod,
         extractPositionalRequiredIntMethod,
         extractPositionalOptionalIntMethod,
@@ -219,25 +160,8 @@ final class Helper {
     if (!context.nonpositionalParamTypes.isEmpty()) {
       spec.addField(longNamesField)
           .addField(shortNamesField)
-          .addField(sMapField);
-      spec.addMethod(addArgumentMethod)
-          .addMethod(readLongMethod);
-    }
-    if (context.nonpositionalParamTypes.contains(OptionType.REPEATABLE)) {
-      spec.addField(optMapField);
-    }
-    if (context.nonpositionalParamTypes.contains(OptionType.FLAG)) {
-      spec.addField(flagsField);
-      spec.addMethod(addFlagMethod);
-    }
-    if (context.nonpositionalParamTypes.contains(OptionType.REQUIRED)) {
-      spec.addMethod(extractRequiredMethod);
-    }
-    if (context.nonpositionalParamTypes.contains(OptionType.REQUIRED_INT)) {
-      spec.addMethod(extractRequiredIntMethod);
-    }
-    if (context.nonpositionalParamTypes.contains(OptionType.OPTIONAL_INT)) {
-      spec.addMethod(extractOptionalIntMethod);
+          .addField(parsersField);
+      spec.addMethod(readLongMethod);
     }
     if (context.positionalParamTypes.contains(OptionType.REPEATABLE)) {
       spec.addMethod(extractPositionalListMethod);
@@ -255,57 +179,6 @@ final class Helper {
       spec.addMethod(extractPositionalRequiredIntMethod);
     }
     return spec.build();
-  }
-
-  private static MethodSpec addFlagMethod(
-      Option option,
-      Context context,
-      FieldSpec flags) {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("addFlag");
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-
-    spec.beginControlFlow("if (!$N.add($N))", flags, optionParam)
-        .addStatement(throwRepetitionErrorStatement(optionParam))
-        .endControlFlow();
-
-    return spec.addParameter(optionParam).build();
-  }
-
-  private static MethodSpec addArgumentMethod(
-      Context context,
-      Option option,
-      FieldSpec optMap,
-      FieldSpec sMap) {
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-    ParameterSpec argument = ParameterSpec.builder(STRING, "argument").build();
-    ParameterSpec bucket = ParameterSpec.builder(LIST_OF_STRING, "bucket").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("addArgument");
-
-    if (context.nonpositionalParamTypes.contains(OptionType.REPEATABLE)) {
-      spec.beginControlFlow("if ($N.type == $T.$L)", optionParam, context.optionTypeType(), OptionType.REPEATABLE);
-
-      spec.addStatement("$T $N = $N.get($N)", bucket.type, bucket, optMap, optionParam);
-
-      spec.beginControlFlow("if ($N == null)", bucket)
-          .addStatement("$N = new $T<>()", bucket, ArrayList.class)
-          .addStatement("$N.put($N, $N)", optMap, optionParam, bucket)
-          .endControlFlow();
-
-      spec.addStatement("$N.add($N)", bucket, argument);
-      spec.addStatement("return");
-
-      spec.endControlFlow();
-    }
-
-    spec.beginControlFlow("if ($N.containsKey($N))", sMap, optionParam)
-        .addStatement(throwRepetitionErrorStatement(optionParam))
-        .endControlFlow();
-
-    spec.addStatement("$N.put($N, $N)", sMap, optionParam, argument);
-
-    return spec.addParameters(asList(optionParam, argument))
-        .build();
   }
 
   private static MethodSpec readRegularOptionMethod(
@@ -383,49 +256,31 @@ final class Helper {
   }
 
   private static MethodSpec readMethod(
-      MethodSpec readArgumentMethod,
-      Context context,
-      Option option,
-      MethodSpec addArgumentMethod,
-      MethodSpec addFlagMethod) {
+      FieldSpec parsersField,
+      Context context) {
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    ParameterSpec argument = ParameterSpec.builder(STRING, "argument").build();
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(optionParam, token, it));
 
-    if (option.context.nonpositionalParamTypes.isEmpty()) {
-      return spec.addStatement(throwInvalidOptionStatement(token))
-          .build();
+    if (!context.nonpositionalParamTypes.isEmpty()) {
+      spec.addStatement("$N.get($N).read($N, $N)", parsersField, optionParam, token, it);
     }
-
-    if (option.context.nonpositionalParamTypes.contains(OptionType.FLAG)) {
-      spec.beginControlFlow("if ($N.$N == $T.$L)",
-          optionParam, option.typeField, option.context.optionTypeType(), OptionType.FLAG)
-          .addStatement("$N($N)", addFlagMethod, optionParam)
-          .addStatement("return")
-          .endControlFlow();
-    }
-
-    spec.addStatement("$T $N = $N($N, $N)",
-        argument.type, argument, readArgumentMethod, token, it);
-
-    spec.addStatement("$N($N, $N)", addArgumentMethod, optionParam, argument);
 
     return spec.build();
   }
 
   private MethodSpec buildMethod() {
 
-    CodeBlock.Builder args = CodeBlock.builder();
+    CodeBlock.Builder args = CodeBlock.builder().add("\n");
     for (int j = 0; j < option.context.parameters.size(); j++) {
       Param param = option.context.parameters.get(j);
       args.add(param.extractExpression(this));
       if (j < option.context.parameters.size() - 1) {
-        args.add(",$W");
+        args.add(",\n");
       }
     }
     MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
@@ -454,70 +309,8 @@ final class Helper {
     return spec.returns(optionalOfSubtype(impl.type)).build();
   }
 
-  private static MethodSpec extractRequiredMethod(
-      Context context,
-      Option option,
-      FieldSpec sMapField) {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("extractRequired");
-
-    spec.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, optionParam);
-
-    spec.beginControlFlow("if ($N == null)", token)
-        .addStatement(throwMissingRequiredErrorStatement(optionParam))
-        .endControlFlow();
-
-    spec.addStatement("return $N", token);
-    return spec.addParameter(optionParam)
-        .returns(STRING).build();
-  }
-
-  private static MethodSpec extractRequiredIntMethod(
-      Context context,
-      Option option,
-      FieldSpec sMapField) {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("extractRequiredInt");
-
-    spec.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, optionParam);
-
-    spec.beginControlFlow("if ($N == null)", token)
-        .addStatement(throwMissingRequiredErrorStatement(optionParam))
-        .endControlFlow();
-
-    spec.addStatement("return $T.parseInt($N)", Integer.class, token);
-    return spec.addParameter(optionParam)
-        .returns(INT).build();
-  }
-
-  private static MethodSpec extractOptionalIntMethod(
-      Context context,
-      Option option,
-      FieldSpec sMapField) {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("extractOptionalInt");
-
-    spec.addStatement("$T $N = $N.get($N)", STRING, token, sMapField, optionParam);
-
-    spec.beginControlFlow("if ($N == null)", token)
-        .addStatement("return $T.empty()", OptionalInt.class)
-        .endControlFlow();
-
-    spec.addStatement("return $T.of($T.parseInt($N))",
-        OptionalInt.class, Integer.class, token);
-    return spec.addParameter(optionParam)
-        .returns(OptionalInt.class).build();
-  }
-
   private static MethodSpec extractPositionalRequiredMethod(
       Context context,
-      Option option,
       ParameterSpec positionalParameter) {
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
@@ -541,7 +334,6 @@ final class Helper {
 
   private static MethodSpec extractPositionalRequiredIntMethod(
       Context context,
-      Option option,
       ParameterSpec positionalParameter) {
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
@@ -603,15 +395,16 @@ final class Helper {
         INT, size, positionalParameter);
 
     spec.beginControlFlow("if ($N >= $N)", index, size)
-        .addStatement("return $T.empty()", OptionalInt.class)
+        .addStatement("return $T.empty()", Optional.class)
         .endControlFlow();
 
-    spec.addStatement("return $T.of($T.parseInt($N.get($N)))",
-        OptionalInt.class, Integer.class, positionalParameter, index);
+    spec.addStatement("return $T.of($T.valueOf($N.get($N)))",
+        Optional.class, Integer.class, positionalParameter, index);
 
     return spec.addParameters(Arrays.asList(index, positionalParameter))
         .addModifiers(STATIC)
-        .returns(OptionalInt.class).build();
+        .returns(optionalOf(TypeName.get(Integer.class)))
+        .build();
   }
 
   private static MethodSpec extractPositionalListMethod(
@@ -635,22 +428,6 @@ final class Helper {
     return CodeBlock.builder()
         .add("$N + $S + $N.describeParam($S) + $S",
             optionParam, " (", optionParam, "", ")")
-        .build();
-  }
-
-  private static CodeBlock throwInvalidOptionStatement(
-      ParameterSpec token) {
-    return CodeBlock.builder()
-        .add("throw new $T($S + $N)", IllegalArgumentException.class,
-            "Invalid option: ", token)
-        .build();
-  }
-
-  private static CodeBlock throwMissingRequiredErrorStatement(
-      ParameterSpec optionParam) {
-    return CodeBlock.builder()
-        .add("throw new $T($S + $L)", IllegalArgumentException.class,
-            "Missing required option: ", optionSummaryCode(optionParam))
         .build();
   }
 
