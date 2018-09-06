@@ -2,6 +2,10 @@ package net.jbock.compiler;
 
 import net.jbock.CommandLineArguments;
 import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
+import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.com.squareup.javapoet.WildcardTypeName;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
@@ -10,9 +14,12 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.Function;
+import java.util.stream.Collector;
 
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.util.ElementFilter.methodsIn;
+import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.asType;
 
 final class Context {
@@ -63,6 +70,12 @@ final class Context {
   private final ClassName regularOptionParserType;
   private final ClassName optionType;
   private final ClassName helperType;
+
+  private final ParameterSpec quote = ParameterSpec.builder(
+      ParameterizedTypeName.get(ClassName.get(Function.class), STRING, STRING), "quote").build();
+  private final ParameterSpec toArray = ParameterSpec.builder(
+      ParameterizedTypeName.get(ClassName.get(Collector.class),
+      TypeName.get(CharSequence.class), WildcardTypeName.subtypeOf(Object.class), STRING), "toArray").build();
 
   private Context(
       TypeElement sourceType,
@@ -240,5 +253,13 @@ final class Context {
 
   ClassName helperType() {
     return helperType;
+  }
+
+  ParameterSpec quoteParam() {
+    return quote;
+  }
+
+  ParameterSpec toArrayParam() {
+    return toArray;
   }
 }

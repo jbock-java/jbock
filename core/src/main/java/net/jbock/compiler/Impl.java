@@ -12,6 +12,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.StringJoiner;
+import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -19,6 +20,7 @@ import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.OptionType.REPEATABLE;
 import static net.jbock.compiler.Util.optionalOf;
 
 /**
@@ -30,7 +32,7 @@ final class Impl {
 
   final ClassName type;
 
-  private final Option option;
+  final Option option;
 
   private final List<FieldSpec> fields;
 
@@ -49,7 +51,7 @@ final class Impl {
     List<FieldSpec> fields = new ArrayList<>(option.context.parameters.size());
     for (int j = 0; j < option.context.parameters.size(); j++) {
       Param param = option.context.parameters.get(j);
-      fields.add(FieldSpec.builder(param.paramType == OptionType.REPEATABLE ? Constants.LIST_OF_STRING : param.returnType(), param.methodName())
+      fields.add(FieldSpec.builder(param.paramType == REPEATABLE ? Constants.LIST_OF_STRING : param.returnType(), param.methodName())
           .addModifiers(FINAL)
           .build());
     }
@@ -79,7 +81,7 @@ final class Impl {
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.methodName())
           .addAnnotation(Override.class)
           .returns(param.returnType());
-      if (param.paramType == OptionType.REPEATABLE && param.array) {
+      if (param.paramType == REPEATABLE && param.array) {
         builder.addStatement("return $N.toArray(new $T[$N.size()])", fields.get(j), STRING, fields.get(j));
       } else {
         builder.addStatement("return $N", fields.get(j));
@@ -109,7 +111,7 @@ final class Impl {
       ParameterSpec param = ParameterSpec.builder(type, field.name).build();
       if (field.type.isPrimitive()) {
         builder.addStatement("this.$N = $N", field, param);
-      } else if (p.paramType == OptionType.REPEATABLE) {
+      } else if (p.paramType == REPEATABLE) {
         builder.addStatement("this.$N = $T.unmodifiableList($N)", field, Collections.class, param);
       } else if (p.isOptionalInt()) {
         builder.addStatement("this.$N = mapOptionalInt($N)", field, param);
@@ -127,6 +129,23 @@ final class Impl {
     MethodSpec.Builder builder = MethodSpec.methodBuilder("toString");
     builder.addStatement("$T $N = new $T($S, $S, $S)",
         StringJoiner.class, joiner, StringJoiner.class, ", ", "{", "}");
+
+    if (option.context.positionalParamTypes.contains(REPEATABLE) ||
+        option.context.nonpositionalParamTypes.contains(REPEATABLE) ||
+        option.context.nonpositionalParamTypes.contains(OptionType.OPTIONAL) ||
+        option.context.positionalParamTypes.contains(OptionType.OPTIONAL)) {
+      ParameterSpec quote = option.context.quoteParam();
+      ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+      builder.addStatement("$T $N = $N -> $T.format($S, $N)",
+          quote.type, quote, s, String.class, "\"%s\"", s);
+    }
+
+    if (option.context.positionalParamTypes.contains(REPEATABLE) ||
+        option.context.nonpositionalParamTypes.contains(REPEATABLE)) {
+      ParameterSpec collect = option.context.toArrayParam();
+      builder.addStatement("$T $N = $T.joining($S, $S, $S)",
+          collect.type, collect, Collectors.class, ",", "[", "]");
+    }
 
     for (Param param : option.context.parameters) {
       builder.addCode(param.paramType.jsonStatement(this, joiner, param));

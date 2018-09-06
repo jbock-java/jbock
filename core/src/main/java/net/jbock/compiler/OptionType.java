@@ -9,7 +9,6 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.OptionalInt;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -78,17 +77,14 @@ enum OptionType {
 
     @Override
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
-      CodeBlock.Builder builder = CodeBlock.builder();
-      builder.beginControlFlow("if ($N.isPresent())", impl.field(param))
-          .addStatement("$N.add($S + $N.get() + '\"')",
+      return CodeBlock.builder()
+          .addStatement("$N.add($S + $N.map($N).orElse($S))",
               joiner,
-              jsonKey(param) + '"',
-              impl.field(param))
-          .endControlFlow()
-          .beginControlFlow("else")
-          .addStatement("$N.add($S)", joiner, jsonKey(param) + "null")
-          .endControlFlow();
-      return builder.build();
+              jsonKey(param),
+              impl.field(param),
+              impl.option.context.quoteParam(),
+              "null")
+          .build();
     }
 
     @Override
@@ -258,22 +254,21 @@ enum OptionType {
 
     @Override
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
-      ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
       CodeBlock.Builder builder = CodeBlock.builder();
-      CodeBlock mapper = CodeBlock.builder()
-          .add("$N -> '\"' + $N + '\"'", s, s)
-          .build();
-      CodeBlock collector = CodeBlock.builder()
-          .add("$T.joining($S, $S, $S)", Collectors.class, ",", "[", "]")
-          .build();
       Map<String, Object> map = new LinkedHashMap<>();
       map.put("joiner", joiner);
       map.put("key", jsonKey(param));
       map.put("field", impl.field(param));
-      map.put("mapper", mapper);
-      map.put("collector", collector);
+      map.put("mapper", impl.option.context.quoteParam());
+      map.put("collector", impl.option.context.toArrayParam());
+      String format = "$joiner:N.add(" +
+          "$key:S + " +
+          "$field:N.stream()$Z" +
+          ".map($mapper:N)$Z" +
+          ".collect($collector:N))";
       return builder.addStatement(
-          "$L", CodeBlock.builder().addNamed("$joiner:N.add($key:S + $field:N.stream()$Z.map($mapper:L)$Z.collect($collector:L))", map).build())
+          "$L", CodeBlock.builder().addNamed(
+              format, map).build())
           .build();
     }
 

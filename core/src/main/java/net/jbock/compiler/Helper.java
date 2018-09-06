@@ -259,21 +259,14 @@ final class Helper {
     return spec.returns(optionalOfSubtype(impl.type)).build();
   }
 
-  private static CodeBlock optionSummaryCode(
-      Object optionParam) {
-    return CodeBlock.builder()
-        .add("$N + $S + $N.describeParam($S) + $S",
-            optionParam, " (", optionParam, "", ")")
-        .build();
-  }
-
-  // TODO param should be FieldSpec
   static CodeBlock throwRepetitionErrorStatement(
-      Object optionParam) {
+      FieldSpec optionParam) {
     return CodeBlock.builder()
-        .add("throw new $T($S + $L + $S)",
+        .add("throw new $T($T.format($S, $N, $N.describeParam($S)))",
             IllegalArgumentException.class,
-            "Option ", optionSummaryCode(optionParam), " is not repeatable")
+            String.class,
+            "Option %s (%s) is not repeatable",
+            optionParam, optionParam, "")
         .build();
   }
 
