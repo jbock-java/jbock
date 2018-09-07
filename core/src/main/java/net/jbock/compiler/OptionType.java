@@ -34,7 +34,7 @@ enum OptionType {
     }
   },
 
-  OPTIONAL {
+  REGULAR {
     @Override
     CodeBlock extractExpression(Helper helper, Param param) {
       if (param.isPositional()) {

@@ -132,8 +132,8 @@ final class Impl {
 
     if (option.context.positionalParamTypes.contains(REPEATABLE) ||
         option.context.nonpositionalParamTypes.contains(REPEATABLE) ||
-        option.context.nonpositionalParamTypes.contains(OptionType.OPTIONAL) ||
-        option.context.positionalParamTypes.contains(OptionType.OPTIONAL)) {
+        option.context.nonpositionalParamTypes.contains(OptionType.REGULAR) ||
+        option.context.positionalParamTypes.contains(OptionType.REGULAR)) {
       ParameterSpec quote = option.context.quoteParam();
       ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
       builder.addStatement("$T $N = $N -> $T.format($S, $N)",

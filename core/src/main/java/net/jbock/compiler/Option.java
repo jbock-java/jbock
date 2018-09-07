@@ -21,7 +21,6 @@ import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
-import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -115,7 +114,8 @@ final class Option {
         exampleMethod,
         shortNameMapMethod,
         longNameMapMethod,
-        describeParamMethod, parsersMethod);
+        describeParamMethod,
+        parsersMethod);
   }
 
   TypeSpec define() {
@@ -141,12 +141,9 @@ final class Option {
       spec.addMethod(positionalValuesMethod());
       spec.addMethod(positionalValueMethod());
     }
-    spec.addMethod(MethodSpec.methodBuilder("parser")
-        .returns(context.optionParserType())
-        .addStatement("throw new $T($S)", UnsupportedOperationException.class, "Bad stuff")
-        .build());
     spec.addMethod(validShortTokenMethod());
     spec.addMethod(describeMethod());
+    spec.addMethod(parserMethod());
     return spec.build();
   }
 
@@ -175,7 +172,8 @@ final class Option {
 
     CodeBlock block = CodeBlock.builder().addNamed(format, map).build();
     TypeSpec.Builder spec = anonymousClassBuilder(block);
-    if (!param.isPositional()) {
+    if (!param.isPositional() &&
+        param.paramType != OptionType.REGULAR) {
       spec.addMethod(parserMethod(param));
     }
     if (param.paramType == OptionType.FLAG) {
@@ -189,12 +187,6 @@ final class Option {
       spec.addMethod(MethodSpec.methodBuilder("describe")
           .returns(STRING)
           .addStatement("return name()")
-          .addAnnotation(Override.class)
-          .build());
-    } else {
-      spec.addMethod(MethodSpec.methodBuilder("describe")
-          .returns(STRING)
-          .addStatement("return describeParam($T.format($S, $N))", String.class, " <%s>", argumentNameField)
           .addAnnotation(Override.class)
           .build());
     }
@@ -442,10 +434,17 @@ final class Option {
     return spec.build();
   }
 
-  private static MethodSpec describeMethod() {
+  private MethodSpec describeMethod() {
     return MethodSpec.methodBuilder("describe")
         .returns(STRING)
-        .addModifiers(ABSTRACT)
+        .addStatement("return describeParam($T.format($S, $N))", String.class, " <%s>", argumentNameField)
+        .build();
+  }
+
+  private MethodSpec parserMethod() {
+    return MethodSpec.methodBuilder("parser")
+        .returns(context.optionParserType())
+        .addStatement("return new $T(this)", context.regularOptionParserType())
         .build();
   }
 }

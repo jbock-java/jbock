@@ -135,19 +135,19 @@ final class Param {
       return optionType(OptionType.FLAG, false);
     }
     if (type.getKind() == TypeKind.INT) {
-      return optionType(OptionType.OPTIONAL, true);
+      return optionType(OptionType.REGULAR, true);
     }
     if (isListOfString(type) || isStringArray(type)) {
       return optionType(OptionType.REPEATABLE, false);
     }
     if (isOptionalString(type)) {
-      return optionType(OptionType.OPTIONAL, false);
+      return optionType(OptionType.REGULAR, false);
     }
     if (isOptionalInt(type)) {
-      return optionType(OptionType.OPTIONAL, false);
+      return optionType(OptionType.REGULAR, false);
     }
     if (isString(type)) {
-      return optionType(OptionType.OPTIONAL, true);
+      return optionType(OptionType.REGULAR, true);
     }
     String message = String.format("Not allowed: %s() returns %s", sourceMethod.getSimpleName(), type);
     throw ValidationException.create(sourceMethod, message);
@@ -421,7 +421,7 @@ final class Param {
     switch (paramType) {
       case FLAG:
         return null;
-      case OPTIONAL:
+      case REGULAR:
         return required ? PositionalOrder.REQUIRED : PositionalOrder.OPTIONAL;
       case REPEATABLE:
         return PositionalOrder.LIST;
