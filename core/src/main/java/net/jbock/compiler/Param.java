@@ -5,6 +5,7 @@ import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.CoercionProvider;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
@@ -188,7 +189,7 @@ final class Param {
         type.required,
         enumConstant(params, sourceMethod.getSimpleName().toString(), index),
         false,
-        Coercion.findCoercion(TypeName.get(sourceMethod.getReturnType())));
+        CoercionProvider.getInstance().findCoercion(sourceMethod));
   }
 
   private static Param createPositional(List<Param> params, ExecutableElement sourceMethod, int index) {
@@ -215,7 +216,7 @@ final class Param {
         type.required,
         enumConstant(params, sourceMethod.getSimpleName().toString(), index),
         true,
-        Coercion.findCoercion(TypeName.get(sourceMethod.getReturnType())));
+        CoercionProvider.getInstance().findCoercion(sourceMethod));
   }
 
   private static void basicChecks(ExecutableElement sourceMethod) {

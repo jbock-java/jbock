@@ -3,7 +3,7 @@ package net.jbock.compiler;
 import javax.lang.model.element.Element;
 import javax.tools.Diagnostic;
 
-final class ValidationException extends RuntimeException {
+public final class ValidationException extends RuntimeException {
 
   private static final long serialVersionUID = 0;
   final Diagnostic.Kind kind;
@@ -15,7 +15,7 @@ final class ValidationException extends RuntimeException {
     this.about = about;
   }
 
-  static ValidationException create(Element about, String message) {
+  public static ValidationException create(Element about, String message) {
     return new ValidationException(Diagnostic.Kind.ERROR, cleanMessage(message), about);
   }
 
