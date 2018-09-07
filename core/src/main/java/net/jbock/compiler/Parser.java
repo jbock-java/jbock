@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
@@ -19,6 +18,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Util.optionalOf;
 
@@ -146,7 +146,7 @@ final class Parser {
 
   private MethodSpec.Builder parseMethod() {
 
-    ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
+    ParameterSpec args = ParameterSpec.builder(STRING_ARRAY, "args")
         .build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
@@ -162,7 +162,7 @@ final class Parser {
 
   private MethodSpec.Builder parseOrExitMethodConvenience() {
 
-    ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
+    ParameterSpec args = ParameterSpec.builder(STRING_ARRAY, "args")
         .build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder(METHOD_NAME_PARSE_OR_EXIT);
 
@@ -174,7 +174,7 @@ final class Parser {
 
   private MethodSpec.Builder parseOrExitMethod() {
 
-    ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
+    ParameterSpec args = ParameterSpec.builder(STRING_ARRAY, "args")
         .build();
     ParameterSpec statusIfError = ParameterSpec.builder(TypeName.INT, "statusIfError")
         .build();

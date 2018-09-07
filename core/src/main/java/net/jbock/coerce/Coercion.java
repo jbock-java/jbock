@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
@@ -7,39 +7,39 @@ import static net.jbock.com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.INTEGER;
 import static net.jbock.compiler.Constants.OPTIONAL_INT;
 
-enum Coercion {
+public enum Coercion {
 
   NONE {
     @Override
-    CodeBlock map() {
+    public CodeBlock map() {
       return CodeBlock.builder().build();
     }
 
     @Override
-    boolean triggeredBy(TypeName typeName) {
+    public boolean triggeredBy(TypeName typeName) {
       return false;
     }
   },
 
   INT_COERCION {
     @Override
-    CodeBlock map() {
+    public CodeBlock map() {
       return CodeBlock.builder().add(".map($T::valueOf)", Integer.class).build();
     }
 
     @Override
-    boolean triggeredBy(TypeName typeName) {
+    public  boolean triggeredBy(TypeName typeName) {
       return OPTIONAL_INT.equals(typeName) ||
           INT.equals(typeName) ||
           INTEGER.equals(typeName);
     }
   };
 
-  abstract CodeBlock map();
+  public abstract CodeBlock map();
 
-  abstract boolean triggeredBy(TypeName typeName);
+  public abstract boolean triggeredBy(TypeName typeName);
 
-  static Coercion findCoercion(TypeName typeName) {
+  public static Coercion findCoercion(TypeName typeName) {
     for (Coercion value : values()) {
       if (value.triggeredBy(typeName)) {
         return value;

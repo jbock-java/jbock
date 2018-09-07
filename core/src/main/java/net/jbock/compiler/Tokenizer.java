@@ -69,7 +69,7 @@ final class Tokenizer {
   }
 
   private MethodSpec parseMethod() {
-    ParameterSpec args = ParameterSpec.builder(ArrayTypeName.of(STRING), "args")
+    ParameterSpec args = ParameterSpec.builder(Constants.STRING_ARRAY, "args")
         .build();
     ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e")
         .build();

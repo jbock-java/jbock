@@ -4,6 +4,7 @@ import net.jbock.Description;
 import net.jbock.LongName;
 import net.jbock.Positional;
 import net.jbock.ShortName;
+import net.jbock.coerce.Coercion;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
@@ -19,6 +20,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
 
+import static java.util.stream.Collectors.toList;
 import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
 import static net.jbock.compiler.Constants.JAVA_UTIL_OPTIONAL_INT;
 import static net.jbock.compiler.Constants.OPTIONAL_INT;
@@ -149,7 +151,10 @@ final class Param {
     if (isString(type)) {
       return optionType(OptionType.REGULAR, true);
     }
-    String message = String.format("Not allowed: %s() returns %s", sourceMethod.getSimpleName(), type);
+    List<String> allowed = AllowedTypes.getAllowed().stream().map(TypeName::toString).collect(toList());
+    String message = String.format("Allowed return types: [" +
+        String.join(", ", allowed) +
+        "], but %s() returns %s", sourceMethod.getSimpleName(), type);
     throw ValidationException.create(sourceMethod, message);
   }
 
