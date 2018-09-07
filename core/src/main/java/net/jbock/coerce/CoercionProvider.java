@@ -3,6 +3,7 @@ package net.jbock.coerce;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.compiler.Constants;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
@@ -24,7 +25,6 @@ public class CoercionProvider {
       new IntCoercion(),
       new BooleanObjectCoercion(),
       new BooleanPrimitiveCoercion(),
-      new StringArrayCoercion(),
       new OptionalIntCoercion());
 
   private static CoercionProvider instance;
@@ -52,6 +52,9 @@ public class CoercionProvider {
 
   public Coercion findCoercion(ExecutableElement sourceMethod) {
     TypeName typeName = TypeName.get(sourceMethod.getReturnType());
+    if (typeName.equals(Constants.STRING_ARRAY)) {
+      return coercions.get(Constants.STRING);
+    }
     if (typeName instanceof ParameterizedTypeName) {
       return findParameterizedCoercion(sourceMethod, (ParameterizedTypeName) typeName);
     }

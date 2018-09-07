@@ -6,7 +6,7 @@ import net.jbock.com.squareup.javapoet.TypeName;
 class BooleanObjectCoercion extends BasicBooleanCoercion {
 
   @Override
-  TypeName trigger() {
+  public TypeName trigger() {
     return ClassName.get(Boolean.class);
   }
 }

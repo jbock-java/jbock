@@ -7,12 +7,12 @@ import static net.jbock.com.squareup.javapoet.TypeName.INT;
 class IntCoercion extends BasicIntegerCoercion {
 
   @Override
-  TypeName trigger() {
+  public TypeName trigger() {
     return INT;
   }
 
   @Override
-  boolean special() {
+  public boolean special() {
     return true;
   }
 }

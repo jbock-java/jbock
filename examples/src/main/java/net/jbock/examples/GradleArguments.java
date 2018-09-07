@@ -1,7 +1,11 @@
 package net.jbock.examples;
 
 
-import net.jbock.*;
+import net.jbock.CommandLineArguments;
+import net.jbock.Description;
+import net.jbock.LongName;
+import net.jbock.Positional;
+import net.jbock.ShortName;
 
 import java.util.List;
 import java.util.Optional;
@@ -16,7 +20,7 @@ abstract class GradleArguments {
 
   @ShortName('f')
   @Description(value = "the files")
-  abstract List<String> file();
+  abstract String[] file();
 
   @Description(value = "the dir")
   abstract Optional<String> dir();

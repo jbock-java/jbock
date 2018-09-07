@@ -14,7 +14,6 @@ import java.util.Objects;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -49,16 +48,10 @@ final class Impl {
       Option option,
       ClassName implType) {
     List<FieldSpec> fields = new ArrayList<>(option.context.parameters.size());
-    for (int j = 0; j < option.context.parameters.size(); j++) {
-      Param param = option.context.parameters.get(j);
-      fields.add(FieldSpec.builder(param.paramType == REPEATABLE ? Constants.LIST_OF_STRING : param.returnType(), param.methodName())
-          .addModifiers(FINAL)
-          .build());
+    for (Param param : option.context.parameters) {
+      fields.add(param.field());
     }
-    return new Impl(
-        implType,
-        option,
-        fields);
+    return new Impl(implType, option, fields);
   }
 
   TypeSpec define() {
@@ -156,9 +149,5 @@ final class Impl {
         .addAnnotation(Override.class)
         .returns(STRING)
         .build();
-  }
-
-  FieldSpec field(Param param) {
-    return fields.get(param.index);
   }
 }

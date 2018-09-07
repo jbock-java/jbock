@@ -1,17 +1,28 @@
 package net.jbock.coerce;
 
+import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Constants;
 
 class OptionalIntCoercion extends BasicIntegerCoercion {
 
   @Override
-  TypeName trigger() {
+  public TypeName trigger() {
     return Constants.OPTIONAL_INT;
   }
 
   @Override
-  boolean special() {
+  public boolean special() {
     return true;
+  }
+
+  @Override
+  public CodeBlock jsonExpr(String param) {
+    return CodeBlock.builder()
+        .add("($L.isPresent() ? $L.getAsInt() : $S)",
+            param,
+            param,
+            "null")
+        .build();
   }
 }

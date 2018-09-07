@@ -10,7 +10,12 @@ abstract class BasicBooleanCoercion extends Coercion {
   }
 
   @Override
-  final boolean special() {
+  public final boolean special() {
     return true;
+  }
+
+  @Override
+  public CodeBlock jsonExpr(String param) {
+    return CodeBlock.builder().add("$L", param).build();
   }
 }

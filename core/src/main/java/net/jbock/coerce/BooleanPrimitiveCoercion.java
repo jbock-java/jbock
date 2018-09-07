@@ -5,7 +5,7 @@ import net.jbock.com.squareup.javapoet.TypeName;
 class BooleanPrimitiveCoercion extends BasicBooleanCoercion {
 
   @Override
-  TypeName trigger() {
+  public TypeName trigger() {
     return TypeName.BOOLEAN;
   }
 }

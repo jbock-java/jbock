@@ -8,6 +8,8 @@ import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.ExecutableElement;
@@ -22,9 +24,11 @@ import java.util.Objects;
 import java.util.regex.Pattern;
 
 import static java.util.stream.Collectors.toList;
+import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
 import static net.jbock.compiler.Constants.JAVA_UTIL_OPTIONAL_INT;
 import static net.jbock.compiler.Constants.OPTIONAL_INT;
+import static net.jbock.compiler.OptionType.REPEATABLE;
 import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.asArray;
 import static net.jbock.compiler.Util.asDeclared;
@@ -36,7 +40,7 @@ import static net.jbock.compiler.Util.snakeCase;
 /**
  * Internal representation of an abstract method in the source class.
  */
-final class Param {
+public final class Param {
 
   // can be null
   private final String longName;
@@ -62,7 +66,9 @@ final class Param {
 
   private final boolean positional;
 
-  final Coercion coercion;
+  private final Coercion coercion;
+
+  private final FieldSpec fieldSpec;
 
   private static String enumConstant(List<Param> params, String methodName, int index) {
     String result = snakeCase(methodName);
@@ -86,7 +92,8 @@ final class Param {
       boolean array,
       boolean required, String name,
       boolean positional,
-      Coercion coercion) {
+      Coercion coercion,
+      FieldSpec fieldSpec) {
     this.required = required;
     this.coercion = coercion;
     this.shortName = shortName;
@@ -97,6 +104,7 @@ final class Param {
     this.array = array;
     this.name = name;
     this.positional = positional;
+    this.fieldSpec = fieldSpec;
     if (positional && positionalOrder() == null) {
       throw new AssertionError("positional, but positionalType is null");
     }
@@ -116,6 +124,14 @@ final class Param {
         .add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
             missingRequiredOptionMessage(context.optionType()))
         .build();
+  }
+
+  public FieldSpec field() {
+    return fieldSpec;
+  }
+
+  Coercion coercion() {
+    return coercion;
   }
 
   private static class OptionTypePlus {
@@ -179,6 +195,13 @@ final class Param {
     checkName(sourceMethod, longName);
     OptionTypePlus type = checkNonpositionalType(sourceMethod);
     boolean array = type.type == OptionType.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
+    Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod);
+    FieldSpec fieldSpec = FieldSpec.builder(type.type == REPEATABLE ?
+            ParameterizedTypeName.get(ClassName.get(List.class), coercion.trigger()) :
+            TypeName.get(sourceMethod.getReturnType()),
+        sourceMethod.getSimpleName().toString())
+        .addModifiers(FINAL)
+        .build();
     return new Param(
         shortName,
         longName,
@@ -189,7 +212,8 @@ final class Param {
         type.required,
         enumConstant(params, sourceMethod.getSimpleName().toString(), index),
         false,
-        CoercionProvider.getInstance().findCoercion(sourceMethod));
+        coercion,
+        fieldSpec);
   }
 
   private static Param createPositional(List<Param> params, ExecutableElement sourceMethod, int index) {
@@ -206,6 +230,13 @@ final class Param {
         Arrays.asList(
             ShortName.class,
             LongName.class));
+    Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod);
+    FieldSpec fieldSpec = FieldSpec.builder(type.type == REPEATABLE ?
+            ParameterizedTypeName.get(ClassName.get(List.class), coercion.trigger()) :
+            TypeName.get(sourceMethod.getReturnType()),
+        sourceMethod.getSimpleName().toString())
+        .addModifiers(FINAL)
+        .build();
     return new Param(
         null,
         null,
@@ -216,7 +247,8 @@ final class Param {
         type.required,
         enumConstant(params, sourceMethod.getSimpleName().toString(), index),
         true,
-        CoercionProvider.getInstance().findCoercion(sourceMethod));
+        coercion,
+        fieldSpec);
   }
 
   private static void basicChecks(ExecutableElement sourceMethod) {
