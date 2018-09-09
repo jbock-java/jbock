@@ -7,21 +7,27 @@ import net.jbock.com.squareup.javapoet.TypeName;
 public abstract class Coercion {
 
   /**
-   * Map from String to trigger
+   * Maps from String to trigger type
    */
   public abstract CodeBlock map();
 
+  /**
+   * Type that triggers this coercion (could be wrapped in Optional or List)
+   */
   public abstract TypeName trigger();
 
+  // toString stuff (the gen class overrides toString if possible)
   public final CodeBlock jsonExpr(FieldSpec field) {
     return jsonExpr(field.name);
   }
 
-  public abstract CodeBlock jsonExpr(String param);
+  // toString stuff
+  abstract CodeBlock jsonExpr(String param);
 
+  // toString stuff
   public CodeBlock mapJsonExpr(FieldSpec field) {
-    return CodeBlock.builder().add("$N -> $L",
-        field, jsonExpr("e")).build();
+    return CodeBlock.builder().add("$L -> $L",
+        "e", jsonExpr("e")).build();
   }
 
   /**

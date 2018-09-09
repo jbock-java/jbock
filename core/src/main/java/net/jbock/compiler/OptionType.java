@@ -3,9 +3,6 @@ package net.jbock.compiler;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 
-import java.util.LinkedHashMap;
-import java.util.Map;
-
 /**
  * Basic option types
  */
@@ -97,20 +94,14 @@ enum OptionType {
 
     @Override
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
-      CodeBlock.Builder builder = CodeBlock.builder();
-      Map<String, Object> map = new LinkedHashMap<>();
-      map.put("joiner", joiner);
-      map.put("key", jsonKey(param));
-      map.put("mapExpr", param.coercion().mapJsonExpr(param.field()));
-      map.put("field", param.field());
-      String format = "$joiner:N.add(" +
-          "$key:S + " +
-          "$field:N.stream()$Z" +
-          ".map($mapExpr:L)$Z" +
-          ".collect(toArray))";
-      return builder.addStatement(
-          "$L", CodeBlock.builder().addNamed(
-              format, map).build())
+      CodeBlock valueExpr = CodeBlock.builder()
+          .add("$N.stream().map($L).collect(toArray)",
+              param.field(), param.coercion().mapJsonExpr(param.field())).build();
+      return CodeBlock.builder()
+          .addStatement("$N.add($S + $L)",
+              joiner,
+              jsonKey(param),
+              valueExpr)
           .build();
     }
   };

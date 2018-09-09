@@ -24,7 +24,7 @@ class StringCoercion extends Coercion {
   }
 
   @Override
-  public CodeBlock jsonExpr(String param) {
+  CodeBlock jsonExpr(String param) {
     return CodeBlock.builder().add("quote.apply($L)", param).build();
   }
 

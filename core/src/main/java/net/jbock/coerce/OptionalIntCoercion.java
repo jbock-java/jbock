@@ -17,7 +17,7 @@ class OptionalIntCoercion extends BasicIntegerCoercion {
   }
 
   @Override
-  public CodeBlock jsonExpr(String param) {
+  CodeBlock jsonExpr(String param) {
     return CodeBlock.builder()
         .add("($L.isPresent() ? $L.getAsInt() : $S)",
             param,

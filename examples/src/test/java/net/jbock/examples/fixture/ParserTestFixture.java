@@ -10,10 +10,19 @@ import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 /**
  * Test util
@@ -69,7 +78,11 @@ public final class ParserTestFixture<E> {
         List list = (List) v;
         ArrayNode array = node.putArray(k);
         for (Object s : list) {
-          array.add(s.toString());
+          if (s instanceof Integer) {
+            array.add(((Integer) s));
+          } else {
+            array.add(s.toString());
+          }
         }
       }
     }

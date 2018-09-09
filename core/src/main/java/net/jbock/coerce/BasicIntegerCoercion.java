@@ -1,6 +1,9 @@
 package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.FieldSpec;
+
+import java.util.Objects;
 
 abstract class BasicIntegerCoercion extends Coercion {
 
@@ -10,7 +13,12 @@ abstract class BasicIntegerCoercion extends Coercion {
   }
 
   @Override
-  public CodeBlock jsonExpr(String param) {
+  CodeBlock jsonExpr(String param) {
     return CodeBlock.builder().add("$L", param).build();
+  }
+
+  @Override
+  public CodeBlock mapJsonExpr(FieldSpec field) {
+    return CodeBlock.builder().add("$T::toString", Objects.class).build();
   }
 }

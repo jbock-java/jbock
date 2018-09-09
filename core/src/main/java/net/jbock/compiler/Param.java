@@ -6,6 +6,7 @@ import net.jbock.Positional;
 import net.jbock.ShortName;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
+import net.jbock.coerce.TypeInfo;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
@@ -14,23 +15,18 @@ import net.jbock.com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
-import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
-import static net.jbock.compiler.Constants.JAVA_UTIL_OPTIONAL_INT;
 import static net.jbock.compiler.Constants.OPTIONAL_INT;
 import static net.jbock.compiler.OptionType.REPEATABLE;
 import static net.jbock.compiler.Processor.checkNotPresent;
-import static net.jbock.compiler.Util.asArray;
 import static net.jbock.compiler.Util.asDeclared;
 import static net.jbock.compiler.Util.asType;
 import static net.jbock.compiler.Util.equalsType;
@@ -112,7 +108,13 @@ public final class Param {
 
   CodeBlock extractExpression(Helper helper) {
     CodeBlock.Builder builder = paramType.extractExpression(helper, this).toBuilder();
+    if (paramType == REPEATABLE) {
+      builder.add(".stream()");
+    }
     builder.add("$L", coercion.map());
+    if (paramType == REPEATABLE) {
+      builder.add(".collect($T.toList())", Collectors.class);
+    }
     if (required) {
       builder.add("$L", orElseThrowMissing(helper.context));
     }
@@ -134,47 +136,6 @@ public final class Param {
     return coercion;
   }
 
-  private static class OptionTypePlus {
-    final OptionType type;
-    final boolean required;
-
-    OptionTypePlus(OptionType type, boolean required) {
-      this.type = Objects.requireNonNull(type);
-      this.required = required;
-    }
-  }
-
-  private static OptionTypePlus optionType(OptionType type, boolean required) {
-    return new OptionTypePlus(type, required);
-  }
-
-  private static OptionTypePlus checkNonpositionalType(ExecutableElement sourceMethod) {
-    TypeMirror type = sourceMethod.getReturnType();
-    if (type.getKind() == TypeKind.BOOLEAN) {
-      return optionType(OptionType.FLAG, false);
-    }
-    if (type.getKind() == TypeKind.INT) {
-      return optionType(OptionType.REGULAR, true);
-    }
-    if (isListOfString(type) || isStringArray(type)) {
-      return optionType(OptionType.REPEATABLE, false);
-    }
-    if (isOptionalString(type)) {
-      return optionType(OptionType.REGULAR, false);
-    }
-    if (isOptionalInt(type)) {
-      return optionType(OptionType.REGULAR, false);
-    }
-    if (isString(type)) {
-      return optionType(OptionType.REGULAR, true);
-    }
-    List<String> allowed = AllowedTypes.getAllowed().stream().map(TypeName::toString).collect(toList());
-    String message = String.format("Allowed return types: [" +
-        String.join(", ", allowed) +
-        "], but %s() returns %s", sourceMethod.getSimpleName(), type);
-    throw ValidationException.create(sourceMethod, message);
-  }
-
   static Param create(List<Param> params, ExecutableElement sourceMethod, int index) {
     basicChecks(sourceMethod);
     if (sourceMethod.getAnnotation(Positional.class) == null) {
@@ -193,11 +154,10 @@ public final class Param {
     }
     checkName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
-    OptionTypePlus type = checkNonpositionalType(sourceMethod);
-    boolean array = type.type == OptionType.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
-    Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod);
-    FieldSpec fieldSpec = FieldSpec.builder(type.type == REPEATABLE ?
-            ParameterizedTypeName.get(ClassName.get(List.class), coercion.trigger()) :
+    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod);
+    OptionType type = optionType(typeInfo);
+    FieldSpec fieldSpec = FieldSpec.builder(type == REPEATABLE ?
+            ParameterizedTypeName.get(ClassName.get(List.class), typeInfo.coercion().trigger()) :
             TypeName.get(sourceMethod.getReturnType()),
         sourceMethod.getSimpleName().toString())
         .addModifiers(FINAL)
@@ -206,33 +166,42 @@ public final class Param {
         shortName,
         longName,
         index,
-        type.type,
+        type,
         sourceMethod,
-        array,
-        type.required,
+        typeInfo.array(),
+        typeInfo.required(),
         enumConstant(params, sourceMethod.getSimpleName().toString(), index),
         false,
-        coercion,
+        typeInfo.coercion(),
         fieldSpec);
+  }
+
+  private static OptionType optionType(TypeInfo info) {
+    if (info.flag()) {
+      return OptionType.FLAG;
+    }
+    if (info.repeatable()) {
+      return OptionType.REPEATABLE;
+    }
+    return OptionType.REGULAR;
   }
 
   private static Param createPositional(List<Param> params, ExecutableElement sourceMethod, int index) {
     Positional positional = sourceMethod.getAnnotation(Positional.class);
-    OptionTypePlus type = checkNonpositionalType(sourceMethod);
-    if (type.type == OptionType.FLAG) {
+    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod);
+    OptionType type = optionType(typeInfo);
+    if (type == OptionType.FLAG) {
       throw ValidationException.create(sourceMethod,
           "A method that carries the Positional annotation " +
               "may not return " + TypeName.get(sourceMethod.getReturnType()));
     }
-    boolean array = type.type == OptionType.REPEATABLE && sourceMethod.getReturnType().getKind() == TypeKind.ARRAY;
     checkNotPresent(sourceMethod,
         positional,
         Arrays.asList(
             ShortName.class,
             LongName.class));
-    Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod);
-    FieldSpec fieldSpec = FieldSpec.builder(type.type == REPEATABLE ?
-            ParameterizedTypeName.get(ClassName.get(List.class), coercion.trigger()) :
+    FieldSpec fieldSpec = FieldSpec.builder(type == REPEATABLE ?
+            ParameterizedTypeName.get(ClassName.get(List.class), typeInfo.coercion().trigger()) :
             TypeName.get(sourceMethod.getReturnType()),
         sourceMethod.getSimpleName().toString())
         .addModifiers(FINAL)
@@ -241,13 +210,13 @@ public final class Param {
         null,
         null,
         index,
-        type.type,
+        type,
         sourceMethod,
-        array,
-        type.required,
+        typeInfo.array(),
+        typeInfo.required(),
         enumConstant(params, sourceMethod.getSimpleName().toString(), index),
         true,
-        coercion,
+        typeInfo.coercion(),
         fieldSpec);
   }
 
@@ -286,25 +255,6 @@ public final class Param {
     return longName.value();
   }
 
-  private static boolean isListOfString(TypeMirror type) {
-    return isXOfString(type, "java.util.List");
-  }
-
-  private static boolean isOptionalString(TypeMirror type) {
-    return isXOfString(type, "java.util.Optional");
-  }
-
-  private static boolean isStringArray(TypeMirror type) {
-    if (type.getKind() != TypeKind.ARRAY) {
-      return false;
-    }
-    ArrayType arrayType = asArray(type);
-    if (arrayType == null) {
-      return false;
-    }
-    return isString(arrayType.getComponentType());
-  }
-
   private static boolean isXOfString(
       TypeMirror type,
       String x) {
@@ -322,30 +272,8 @@ public final class Param {
             JAVA_LANG_STRING);
   }
 
-  private static boolean isString(
-      TypeMirror type) {
-    return isSimpleType(type, JAVA_LANG_STRING);
-  }
-
-  private static boolean isOptionalInt(
-      TypeMirror type) {
-    return isSimpleType(type, JAVA_UTIL_OPTIONAL_INT);
-  }
-
   boolean isOptionalInt() {
     return OPTIONAL_INT.equals(returnType());
-  }
-
-  private static boolean isSimpleType(TypeMirror type, String qname) {
-    DeclaredType declared = asDeclared(type);
-    if (declared == null) {
-      return false;
-    }
-    if (!declared.getTypeArguments().isEmpty()) {
-      return false;
-    }
-    TypeElement element = asType(declared.asElement());
-    return qname.equals(element.getQualifiedName().toString());
   }
 
   private static void checkName(
@@ -423,13 +351,6 @@ public final class Param {
 
   String enumConstant() {
     return name.toUpperCase();
-  }
-
-  OptionType positionalType() {
-    if (!positional) {
-      throw new AssertionError("not positional");
-    }
-    return paramType;
   }
 
   boolean isPositional() {

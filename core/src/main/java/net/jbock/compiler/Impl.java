@@ -96,6 +96,7 @@ final class Impl {
       Param p = option.context.parameters.get(i);
       FieldSpec field = fields.get(i);
       TypeName type;
+      // optional impl fields always use Optional, so all primitive optionals get special treatment here
       if (p.isOptionalInt()) {
         type = optionalOf(TypeName.get(Integer.class));
       } else {

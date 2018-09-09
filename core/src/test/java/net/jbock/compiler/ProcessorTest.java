@@ -56,7 +56,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("a() returns long");
+        .withErrorContaining("Bad return type: long");
   }
 
   @Test
@@ -126,7 +126,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("a() returns StringBuilder");
+        .withErrorContaining("Bad return type: StringBuilder");
   }
 
   @Test

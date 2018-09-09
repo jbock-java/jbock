@@ -15,6 +15,8 @@ import java.util.Optional;
 
 public class CoercionProvider {
 
+  // List and Optional are the only combinators.
+  // This knowledge is used in TypeInfo.findParameterizedTypeInfo.
   private static final List<ClassName> COMBINATORS = Arrays.asList(
       ClassName.get(Optional.class),
       ClassName.get(List.class));
@@ -50,32 +52,32 @@ public class CoercionProvider {
     return instance;
   }
 
-  public Coercion findCoercion(ExecutableElement sourceMethod) {
+  public TypeInfo findCoercion(ExecutableElement sourceMethod) {
     TypeName typeName = TypeName.get(sourceMethod.getReturnType());
     if (typeName.equals(Constants.STRING_ARRAY)) {
-      return coercions.get(Constants.STRING);
+      return TypeInfo.create(typeName, coercions.get(Constants.STRING));
     }
     if (typeName instanceof ParameterizedTypeName) {
-      return findParameterizedCoercion(sourceMethod, (ParameterizedTypeName) typeName);
+      return TypeInfo.create(typeName, findParameterizedCoercion(sourceMethod, (ParameterizedTypeName) typeName));
     }
     Coercion coercion = coercions.get(typeName);
     if (coercion == null) {
       throw ValidationException.create(sourceMethod, "Bad return type: " + typeName);
     }
-    return coercion;
+    return TypeInfo.create(typeName, coercion);
   }
 
   private Coercion findParameterizedCoercion(
       ExecutableElement sourceMethod,
-      ParameterizedTypeName parameterizedType) {
-    ClassName rawType = parameterizedType.rawType;
+      ParameterizedTypeName typeName) {
+    ClassName rawType = typeName.rawType;
     if (!COMBINATORS.contains(rawType)) {
-      throw ValidationException.create(sourceMethod, "Bad return type" + parameterizedType);
+      throw ValidationException.create(sourceMethod, "Bad return type: " + typeName);
     }
-    TypeName typeArgument = parameterizedType.typeArguments.get(0);
+    TypeName typeArgument = typeName.typeArguments.get(0);
     Coercion coercion = coercions.get(typeArgument);
     if (coercion.special()) {
-      throw ValidationException.create(sourceMethod, "Bad return type" + parameterizedType);
+      throw ValidationException.create(sourceMethod, "Bad return type: " + typeName);
     }
     return coercion;
   }
