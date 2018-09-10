@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.net.URI;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Optional;
 
@@ -24,6 +25,7 @@ class VariousArgumentsTest {
         "--offsetDateTime", "2018-09-10T15:03:22.874+02:00",
         "--zonedDateTime", "2018-09-10T15:04:00.938+02:00[Europe/Berlin]",
         "--uri", "http://localhost:8080",
+        "--charset", "UTF-8",
         "6.02214076e23",
         "60221407600000000000000",
         "/etc/hosts",
@@ -33,6 +35,7 @@ class VariousArgumentsTest {
         "2018-09-10T15:03:22.874+02:00",
         "2018-09-10T15:04:00.938+02:00[Europe/Berlin]",
         "http://localhost:8080",
+        "ISO-8859-1"
     });
     assertTrue(parsed.isPresent());
     VariousArguments args = parsed.get();
@@ -40,5 +43,7 @@ class VariousArgumentsTest {
     assertEquals(Optional.of(Paths.get("/home")), args.pathPos());
     assertEquals(URI.create("http://localhost:8080"), args.uri());
     assertEquals(Optional.of(URI.create("http://localhost:8080")), args.uriPos());
+    assertEquals(StandardCharsets.UTF_8, args.charset());
+    assertEquals(Optional.of(StandardCharsets.ISO_8859_1), args.charsetPos());
   }
 }

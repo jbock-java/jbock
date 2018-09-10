@@ -18,6 +18,7 @@ public final class Constants {
 
   public static final ClassName STRING = ClassName.get(String.class);
   public static final ClassName INTEGER = ClassName.get(Integer.class);
+  public static final ClassName CHARACTER = ClassName.get(Character.class);
 
   public static final ParameterizedTypeName LIST_OF_STRING = ParameterizedTypeName.get(
       ClassName.get(List.class), STRING);

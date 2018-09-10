@@ -281,4 +281,13 @@ final class Context {
   ParameterSpec toArrayParam() {
     return toArray;
   }
+
+  boolean containsType(TypeName typeName) {
+    for (Param parameter : parameters) {
+      if (parameter.returnType().equals(typeName)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }

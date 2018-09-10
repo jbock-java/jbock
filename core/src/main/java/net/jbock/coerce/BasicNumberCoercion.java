@@ -15,5 +15,4 @@ abstract class BasicNumberCoercion extends Coercion {
   public CodeBlock mapJsonExpr(FieldSpec field) {
     return CodeBlock.builder().add(".map($T::toString)", Objects.class).build();
   }
-
 }

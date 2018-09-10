@@ -72,6 +72,8 @@ public final class ParserTestFixture<E> {
       }
       if (v instanceof String) {
         node.put(k, (String) v);
+      } else if (v instanceof Character) {
+        node.put(k, v.toString());
       } else if (v instanceof Integer) {
         node.put(k, (Integer) v);
       } else if (v instanceof Long) {
@@ -86,7 +88,9 @@ public final class ParserTestFixture<E> {
         List list = (List) v;
         ArrayNode array = node.putArray(k);
         for (Object s : list) {
-          if (s instanceof Integer) {
+          if (s instanceof Character) {
+            array.add(Character.toString((Character) s));
+          } else if (s instanceof Integer) {
             array.add(((Integer) s));
           } else if (s instanceof Long) {
             array.add(((Long) s));

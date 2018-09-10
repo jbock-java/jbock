@@ -17,7 +17,9 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.com.squareup.javapoet.TypeName.CHAR;
 import static net.jbock.com.squareup.javapoet.TypeName.INT;
+import static net.jbock.compiler.Constants.CHARACTER;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
@@ -126,7 +128,27 @@ final class Helper {
           .addField(parsersField);
       spec.addMethod(readLongMethod);
     }
+    if (context.containsType(CHAR) || context.containsType(CHARACTER)) {
+      spec.addMethod(parseCharacterMethod());
+    }
     return spec.build();
+  }
+
+  private static MethodSpec parseCharacterMethod() {
+    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("parseCharacter")
+        .addParameter(s);
+    spec.beginControlFlow("if ($N.isEmpty())", s)
+        .addStatement("return null")
+        .endControlFlow();
+    spec.beginControlFlow("if ($N.length() >= 2)", s)
+        .addStatement("throw new $T($S + $N + $S)", IllegalArgumentException.class,
+            "Not a character: <", s, ">")
+        .endControlFlow();
+    spec.addStatement("return $N.charAt(0)", s);
+    return spec.addModifiers(STATIC)
+        .returns(ClassName.get(Character.class))
+        .build();
   }
 
   private static MethodSpec readRegularOptionMethod(

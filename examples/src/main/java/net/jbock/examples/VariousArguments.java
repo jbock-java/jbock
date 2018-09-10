@@ -7,6 +7,7 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -98,4 +99,13 @@ abstract class VariousArguments {
 
   @Positional
   abstract Optional<URI> uriPos();
+
+  abstract Charset charset();
+
+  abstract List<Charset> charsetList();
+
+  abstract Optional<Charset> charsetOpt();
+
+  @Positional
+  abstract Optional<Charset> charsetPos();
 }

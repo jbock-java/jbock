@@ -3,10 +3,10 @@ package net.jbock.coerce;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.TypeName;
 
-class BooleanObjectCoercion extends BasicBooleanCoercion {
+class ObjectCharacterCoercion extends BasicCharacterCoercion {
 
   @Override
   public TypeName trigger() {
-    return ClassName.get(Boolean.class);
+    return ClassName.get(Character.class);
   }
 }

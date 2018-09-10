@@ -22,7 +22,7 @@ public class CoercionProvider {
       ClassName.get(List.class));
 
   private static final List<Coercion> ALL_COERCIONS = Arrays.asList(
-      new StringCoercion(),
+      new CharsetCoercion(),
       new ObjectIntegerCoercion(),
       new PrimitiveIntCoercion(),
       new OptionalIntCoercion(),
@@ -34,7 +34,10 @@ public class CoercionProvider {
       new ObjectFloatCoercion(),
       new PrimitiveFloatCoercion(),
       new OptionalLongCoercion(),
-      new BooleanObjectCoercion(),
+      new ObjectCharacterCoercion(),
+      new PrimitiveCharacterCoercion(),
+      new ObjectBooleanCoercion(),
+      new PrimitiveBooleanCoercion(),
       new PathCoercion(),
       new FileCoercion(),
       new URICoercion(),
@@ -44,7 +47,7 @@ public class CoercionProvider {
       new LocalDateTimeCoercion(),
       new OffsetDateTimeCoercion(),
       new ZonedDateTimeCoercion(),
-      new BooleanPrimitiveCoercion());
+      new StringCoercion());
 
   private static CoercionProvider instance;
 
