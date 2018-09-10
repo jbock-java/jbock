@@ -9,7 +9,6 @@ import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.io.PrintStream;
-import java.util.OptionalInt;
 
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -102,27 +101,12 @@ final class Parser {
         .addField(indent)
         .addMethod(readArgumentMethod)
         .addMethod(readNextMethod)
-        .addMethod(mapOptionalIntMethod())
         .addMethod(addPublicIfNecessary(createMethod()))
         .addMethod(addPublicIfNecessary(parseMethod()))
         .addMethod(addPublicIfNecessary(parseOrExitMethodConvenience()))
         .addMethod(addPublicIfNecessary(parseOrExitMethod()))
         .addMethod(MethodSpec.constructorBuilder().addModifiers(PRIVATE).build())
         .addJavadoc(javadoc())
-        .build();
-  }
-
-  private MethodSpec mapOptionalIntMethod() {
-    ParameterSpec opt = ParameterSpec.builder(optionalOf(TypeName.get(Integer.class)), "opt").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("mapOptionalInt");
-    spec.beginControlFlow("if (!$N.isPresent())", opt)
-        .addStatement("return $T.empty()", OptionalInt.class)
-        .endControlFlow();
-    return spec
-        .addStatement("return $T.of($N.get())", OptionalInt.class, opt)
-        .returns(OptionalInt.class)
-        .addModifiers(PRIVATE, STATIC)
-        .addParameter(opt)
         .build();
   }
 

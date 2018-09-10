@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -96,7 +97,7 @@ final class Impl {
       Param p = option.context.parameters.get(i);
       FieldSpec field = fields.get(i);
       TypeName type;
-      // optional impl fields always use Optional, so all primitive optionals get special treatment here
+      // primitive optionals get special treatment here
       if (p.isOptionalInt()) {
         type = optionalOf(TypeName.get(Integer.class));
       } else {
@@ -108,7 +109,8 @@ final class Impl {
       } else if (p.paramType == REPEATABLE) {
         builder.addStatement("this.$N = $T.unmodifiableList($N)", field, Collections.class, param);
       } else if (p.isOptionalInt()) {
-        builder.addStatement("this.$N = mapOptionalInt($N)", field, param);
+        builder.addStatement("this.$N = $N.isPresent() ? $T.of($N.get()) : $T.empty()",
+            field, param, OptionalInt.class, param, OptionalInt.class);
       } else {
         builder.addStatement("this.$N = $T.requireNonNull($N)", field, Objects.class, param);
       }

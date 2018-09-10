@@ -128,7 +128,7 @@ public final class Param {
         .build();
   }
 
-  public FieldSpec field() {
+  FieldSpec field() {
     return fieldSpec;
   }
 
@@ -253,23 +253,6 @@ public final class Param {
       return null;
     }
     return longName.value();
-  }
-
-  private static boolean isXOfString(
-      TypeMirror type,
-      String x) {
-    DeclaredType declared = asDeclared(type);
-    if (declared == null) {
-      return false;
-    }
-    if (declared.getTypeArguments().size() != 1) {
-      return false;
-    }
-    TypeElement typeElement = asType(declared.asElement());
-    return x.equals(
-        typeElement.getQualifiedName().toString()) &&
-        equalsType(declared.getTypeArguments().get(0),
-            JAVA_LANG_STRING);
   }
 
   boolean isOptionalInt() {
