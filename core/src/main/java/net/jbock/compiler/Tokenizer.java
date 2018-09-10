@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
@@ -34,24 +33,26 @@ final class Tokenizer {
   final ClassName type;
 
   private final Context context;
-  private final Option option;
   private final Helper helper;
 
   private final FieldSpec out;
+  private final FieldSpec err;
 
-  private Tokenizer(ClassName type, Context context, Option option, Helper helper, FieldSpec out) {
+  private Tokenizer(ClassName type, Context context, Helper helper, FieldSpec out, FieldSpec err) {
     this.out = out;
     this.type = type;
     this.context = context;
-    this.option = option;
     this.helper = helper;
+    this.err = err;
   }
 
-  static Tokenizer create(Context context, Option option, Helper helper, IndentPrinter indentPrinter) {
+  static Tokenizer create(Context context, Helper helper) {
     ClassName builderClass = context.generatedClass.nestedClass("Tokenizer");
-    FieldSpec out = FieldSpec.builder(indentPrinter.type, "out")
+    FieldSpec out = FieldSpec.builder(context.indentPrinterType(), "out")
         .addModifiers(FINAL).build();
-    return new Tokenizer(builderClass, context, option, helper, out);
+    FieldSpec err = FieldSpec.builder(context.indentPrinterType(), "err")
+        .addModifiers(FINAL).build();
+    return new Tokenizer(builderClass, context, helper, out, err);
   }
 
 
@@ -64,7 +65,8 @@ final class Tokenizer {
         .addMethod(printUsageMethod())
         .addMethod(synopsisMethod())
         .addMethod(printDescriptionMethod())
-        .addField(out);
+        .addField(out)
+        .addField(err);
     return builder.build();
   }
 
@@ -91,100 +93,103 @@ final class Tokenizer {
 
   private MethodSpec printUsageMethod() {
     MethodSpec.Builder builder = MethodSpec.methodBuilder("printUsage");
+    ParameterSpec outStream = ParameterSpec.builder(context.indentPrinterType(), "outStream").build();
 
     // Name
-    builder.addStatement("$N.println($S)", out, "NAME");
-    builder.addStatement("$N.incrementIndent()", out);
+    builder.addStatement("$N.println($S)", outStream, "NAME");
+    builder.addStatement("$N.incrementIndent()", outStream);
     if (context.missionStatement.isEmpty()) {
-      builder.addStatement("$N.println($S)", out, context.programName);
+      builder.addStatement("$N.println($S)", outStream, context.programName);
     } else {
       builder.addStatement("$N.println($T.format($S, $S, $S))",
-          out, String.class, "%s - %s", context.programName, context.missionStatement);
+          outStream, String.class, "%s - %s", context.programName, context.missionStatement);
     }
-    builder.addStatement("$N.println()", out);
-    builder.addStatement("$N.decrementIndent()", out);
+    builder.addStatement("$N.println()", outStream);
+    builder.addStatement("$N.decrementIndent()", outStream);
 
     // Synopsis
-    builder.addStatement("$N.println($S)", out, "SYNOPSIS");
-    builder.addStatement("$N.incrementIndent()", out);
-    builder.addStatement("$N.println(synopsis())", out);
-    builder.addStatement("$N.println()", out);
-    builder.addStatement("$N.decrementIndent()", out);
+    builder.addStatement("$N.println($S)", outStream, "SYNOPSIS");
+    builder.addStatement("$N.incrementIndent()", outStream);
+    builder.addStatement("$N.println(synopsis())", outStream);
+    builder.addStatement("$N.println()", outStream);
+    builder.addStatement("$N.decrementIndent()", outStream);
 
     // Description
-    builder.addStatement("$N.println($S)", out, "DESCRIPTION");
+    builder.addStatement("$N.println($S)", outStream, "DESCRIPTION");
     if (!context.overview.isEmpty()) {
-      builder.addStatement("$N.incrementIndent()", out);
+      builder.addStatement("$N.incrementIndent()", outStream);
       for (String line : context.overview) {
         if (line.isEmpty()) {
-          builder.addStatement("$N.println()", out);
+          builder.addStatement("$N.println()", outStream);
         } else {
-          builder.addStatement("$N.println($S)", out, line);
+          builder.addStatement("$N.println($S)", outStream, line);
         }
       }
-      builder.addStatement("$N.decrementIndent()", out);
+      builder.addStatement("$N.decrementIndent()", outStream);
     }
 
     // Positional parameters
-    builder.addStatement("$N.println()", out);
+    builder.addStatement("$N.println()", outStream);
     if (!context.positionalParamTypes.isEmpty()) {
       ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
       builder.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
       builder.beginControlFlow("if ($N.positional())", optionParam)
-          .addStatement("printDescription($N)", optionParam)
-          .addStatement("$N.println()", out)
+          .addStatement("printDescription($N, $N)", outStream, optionParam)
+          .addStatement("$N.println()", outStream)
           .endControlFlow();
       builder.endControlFlow();
     }
 
     // Options
     if (!context.nonpositionalParamTypes.isEmpty() || context.addHelp) {
-      builder.addStatement("$N.println($S)", out, "OPTIONS");
+      builder.addStatement("$N.println($S)", outStream, "OPTIONS");
     }
 
     if (!context.nonpositionalParamTypes.isEmpty()) {
+      builder.addStatement("$N.incrementIndent()", outStream);
       ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
       builder.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
       builder.beginControlFlow("if (!$N.positional())", optionParam)
-          .addStatement("$N.incrementIndent()", out)
-          .addStatement("printDescription($N)", optionParam)
-          .addStatement("$N.println()", out)
-          .addStatement("$N.decrementIndent()", out)
+          .addStatement("printDescription($N, $N)", outStream, optionParam)
+          .addStatement("$N.println()", outStream)
           .endControlFlow();
       builder.endControlFlow();
+      builder.addStatement("$N.decrementIndent()", outStream);
     }
 
     // Help
     if (context.addHelp) {
-      builder.addStatement("$N.incrementIndent()", out)
-          .addStatement("$N.println($S)", out, "--help")
-          .addStatement("$N.incrementIndent()", out)
-          .addStatement("$N.println($S)", out, "Print this help page.")
-          .addStatement("$N.println($S)", out, "The help flag may only be passed as the first argument.")
-          .addStatement("$N.println($S)", out, "Any further arguments will be ignored.")
-          .addStatement("$N.println()", out)
-          .addStatement("$N.decrementIndent()", out)
-          .addStatement("$N.decrementIndent()", out);
+      builder.addStatement("$N.incrementIndent()", outStream)
+          .addStatement("$N.println($S)", outStream, "--help")
+          .addStatement("$N.incrementIndent()", outStream)
+          .addStatement("$N.println($S)", outStream, "Print this help page.")
+          .addStatement("$N.println($S)", outStream, "The help flag may only be passed as the first argument.")
+          .addStatement("$N.println($S)", outStream, "Any further arguments will be ignored.")
+          .addStatement("$N.println()", outStream)
+          .addStatement("$N.decrementIndent()", outStream)
+          .addStatement("$N.decrementIndent()", outStream);
     }
 
-    return builder.build();
+    return builder.addModifiers(STATIC).addParameter(outStream).build();
   }
 
 
   private MethodSpec printDescriptionMethod() {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("printDescription");
+    ParameterSpec outStream = ParameterSpec.builder(context.indentPrinterType(), "outStream").build();
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     ParameterSpec lineParam = ParameterSpec.builder(STRING, "line").build();
+    spec.addParameter(outStream);
     spec.addParameter(optionParam);
 
-    spec.addStatement("$N.println($N.describe())", out, optionParam);
+    spec.addStatement("$N.println($N.describe())", outStream, optionParam);
 
-    spec.addStatement("$N.incrementIndent()", out);
+    spec.addStatement("$N.incrementIndent()", outStream);
     spec.beginControlFlow("for ($T $N : $N.description)", STRING, lineParam, optionParam)
-        .addStatement("$N.println($N)", out, lineParam)
+        .addStatement("$N.println($N)", outStream, lineParam)
         .endControlFlow();
-    spec.addStatement("$N.decrementIndent()", out);
-    return spec.build();
+    spec.addStatement("$N.decrementIndent()", outStream);
+    return spec.addModifiers(STATIC).build();
   }
 
   private MethodSpec synopsisMethod() {
@@ -243,7 +248,7 @@ final class Tokenizer {
 
     builder.addStatement("return $N.toString()", joiner);
 
-    return builder.build();
+    return builder.addModifiers(STATIC).build();
   }
 
   private CodeBlock parseMethodTryBlock(
@@ -254,9 +259,10 @@ final class Tokenizer {
     builder.addStatement("$T $N = parseList($T.asList($N))",
         result.type, result, Arrays.class, args);
 
+    FieldSpec outStream = context.addHelp ? out : err;
     builder.beginControlFlow("if (!$N.isPresent())", result)
-        .addStatement("printUsage()")
-        .addStatement("$N.flush()", out)
+        .addStatement("printUsage($N)", outStream)
+        .addStatement("$N.flush()", outStream)
         .endControlFlow();
 
     builder.addStatement("return $N.map($T.identity())",
@@ -267,23 +273,23 @@ final class Tokenizer {
   private CodeBlock parseMethodCatchBlock(ParameterSpec e) {
     CodeBlock.Builder builder = CodeBlock.builder();
     if (context.addHelp) {
-      builder.addStatement("$N.println($S)", out, "Usage:");
-      builder.addStatement("$N.incrementIndent()", out);
-      builder.addStatement("$N.println(synopsis())", out);
-      builder.addStatement("$N.decrementIndent()", out);
-      builder.addStatement("$N.println()", out);
-      builder.addStatement("$N.println($S)", out, "Error:");
-      builder.addStatement("$N.incrementIndent()", out);
-      builder.addStatement("$N.println($N.getMessage())", out, e);
-      builder.addStatement("$N.decrementIndent()", out);
-      builder.addStatement("$N.println()", out);
-      builder.addStatement("$N.println($T.format($S, $S))", out, String.class, "Try '%s --help' for more information.", context.programName);
-      builder.addStatement("$N.println()", out);
+      builder.addStatement("$N.println($S)", err, "Usage:");
+      builder.addStatement("$N.incrementIndent()", err);
+      builder.addStatement("$N.println(synopsis())", err);
+      builder.addStatement("$N.decrementIndent()", err);
+      builder.addStatement("$N.println()", err);
+      builder.addStatement("$N.println($S)", err, "Error:");
+      builder.addStatement("$N.incrementIndent()", err);
+      builder.addStatement("$N.println($N.getMessage())", err, e);
+      builder.addStatement("$N.decrementIndent()", err);
+      builder.addStatement("$N.println()", err);
+      builder.addStatement("$N.println($T.format($S, $S))", err, String.class, "Try '%s --help' for more information.", context.programName);
+      builder.addStatement("$N.println()", err);
     } else {
-      builder.addStatement("printUsage()");
-      builder.addStatement("$N.println($N.getMessage())", out, e);
+      builder.addStatement("printUsage($N)", err);
+      builder.addStatement("$N.println($N.getMessage())", err, e);
     }
-    builder.addStatement("$N.flush()", out);
+    builder.addStatement("$N.flush()", err);
     builder.addStatement("return $T.empty()", Optional.class);
     return builder.build();
   }
@@ -396,10 +402,13 @@ final class Tokenizer {
 
   private MethodSpec privateConstructor() {
     ParameterSpec outParam = ParameterSpec.builder(out.type, out.name).build();
+    ParameterSpec errParam = ParameterSpec.builder(err.type, err.name).build();
 
     return MethodSpec.constructorBuilder()
         .addStatement("this.$N = $N", out, outParam)
+        .addStatement("this.$N = $N", err, errParam)
         .addParameter(outParam)
+        .addParameter(errParam)
         .build();
   }
 }

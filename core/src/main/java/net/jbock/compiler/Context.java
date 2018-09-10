@@ -69,6 +69,7 @@ final class Context {
   private final ClassName regularOptionParserType;
   private final ClassName optionType;
   private final ClassName helperType;
+  private final ClassName indentPrinterType;
 
   private final ParameterSpec quote = ParameterSpec.builder(
       ParameterizedTypeName.get(ClassName.get(Function.class), STRING, STRING), "quote").build();
@@ -95,7 +96,8 @@ final class Context {
       ClassName repeatableOptionParserType,
       ClassName regularOptionParserType,
       ClassName optionType,
-      ClassName helperType) {
+      ClassName helperType,
+      ClassName indentPrinterType) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -115,6 +117,7 @@ final class Context {
     this.regularOptionParserType = regularOptionParserType;
     this.optionType = optionType;
     this.helperType = helperType;
+    this.indentPrinterType = indentPrinterType;
   }
 
   static Context create(
@@ -140,6 +143,7 @@ final class Context {
     ClassName flagOptionParserType = generatedClass.nestedClass("FlagOptionParser");
     ClassName repeatableOptionParserType = generatedClass.nestedClass("RepeatableOptionParser");
     ClassName regularOptionParserType = generatedClass.nestedClass("RegularOptionParser");
+    ClassName indentPrinterType = generatedClass.nestedClass("IndentPrinter");
     return new Context(
         sourceType,
         generatedClass,
@@ -158,7 +162,8 @@ final class Context {
         flagOptionParserType,
         repeatableOptionParserType,
         regularOptionParserType, optionType,
-        helperType);
+        helperType,
+        indentPrinterType);
   }
 
   private static ClassName parserClass(ClassName type) {
@@ -244,6 +249,10 @@ final class Context {
 
   ClassName helperType() {
     return helperType;
+  }
+
+  ClassName indentPrinterType() {
+    return indentPrinterType;
   }
 
   ParameterSpec quoteParam() {

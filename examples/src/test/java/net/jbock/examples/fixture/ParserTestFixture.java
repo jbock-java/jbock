@@ -32,9 +32,11 @@ public final class ParserTestFixture<E> {
   public interface Parser<E> {
     Optional<E> parse(String[] args);
 
-    Parser<E> out(PrintStream out);
+    Parser<E> withOutputStream(PrintStream out);
 
-    Parser<E> indent(int indent);
+    Parser<E> withErrorStream(PrintStream out);
+
+    Parser<E> withIndent(int indent);
   }
 
   private static final ObjectMapper MAPPER = new ObjectMapper();
@@ -106,9 +108,9 @@ public final class ParserTestFixture<E> {
       }
 
       @Override
-      public Parser<E> out(PrintStream out) {
+      public Parser<E> withOutputStream(PrintStream out) {
         try {
-          Method outMethod = builder.getClass().getDeclaredMethod("out", PrintStream.class);
+          Method outMethod = builder.getClass().getDeclaredMethod("withOutputStream", PrintStream.class);
           outMethod.setAccessible(true);
           outMethod.invoke(builder, out);
           return parser.get(0);
@@ -118,9 +120,21 @@ public final class ParserTestFixture<E> {
       }
 
       @Override
-      public Parser<E> indent(int indent) {
+      public Parser<E> withErrorStream(PrintStream out) {
         try {
-          Method indentMethod = builder.getClass().getDeclaredMethod("indent", Integer.TYPE);
+          Method outMethod = builder.getClass().getDeclaredMethod("withErrorStream", PrintStream.class);
+          outMethod.setAccessible(true);
+          outMethod.invoke(builder, out);
+          return parser.get(0);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+          throw new RuntimeException(e);
+        }
+      }
+
+      @Override
+      public Parser<E> withIndent(int indent) {
+        try {
+          Method indentMethod = builder.getClass().getDeclaredMethod("withIndent", Integer.TYPE);
           indentMethod.setAccessible(true);
           indentMethod.invoke(builder, indent);
           return parser.get(0);
@@ -133,27 +147,31 @@ public final class ParserTestFixture<E> {
   }
 
   public JsonAssert<E> assertThat(String... args) {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(baos);
-    Optional<E> parsed = parser.out(out).indent(2).parse(args);
-    return new JsonAssert<>(parsed, new String(baos.toByteArray()));
+    TestOutputStream stdout = new TestOutputStream();
+    TestOutputStream stderr = new TestOutputStream();
+    Optional<E> parsed = parser.withOutputStream(stdout.out)
+        .withErrorStream(stderr.out).withIndent(2).parse(args);
+    return new JsonAssert<>(parsed, stdout.toString(), stderr.toString());
   }
 
   public E parse(String... args) {
-    ByteArrayOutputStream baos = new ByteArrayOutputStream();
-    PrintStream out = new PrintStream(baos);
-    Optional<E> result = parser.out(out).indent(2).parse(args);
+    TestOutputStream stdout = new TestOutputStream();
+    TestOutputStream stderr = new TestOutputStream();
+    Optional<E> result = parser.withOutputStream(stdout.out)
+        .withErrorStream(stderr.out).withIndent(2).parse(args);
     if (!result.isPresent()) {
-      throw new AssertionError(new String(baos.toByteArray()));
+      throw new AssertionError(stderr.toString());
     }
     return result.get();
   }
 
   public void assertPrints(String... expected) {
-    ByteArrayOutputStream out = new ByteArrayOutputStream();
-    Optional<E> result = parser.out(new PrintStream(out)).indent(2).parse(new String[]{"--help"});
+    TestOutputStream stdout = new TestOutputStream();
+    TestOutputStream stderr = new TestOutputStream();
+    Optional<E> result = parser.withOutputStream(stdout.out)
+        .withErrorStream(stderr.out).withIndent(2).parse(new String[]{"--help"});
     assertFalse(result.isPresent());
-    String[] actual = new String(out.toByteArray()).split("\\r?\\n", -1);
+    String[] actual = stdout.toString().split("\\r?\\n", -1);
     compareArrays(expected, actual);
   }
 
@@ -191,11 +209,14 @@ public final class ParserTestFixture<E> {
 
     private final Optional<E> parsed;
 
-    private final String e;
+    private final String stdout;
 
-    private JsonAssert(Optional<E> parsed, String e) {
+    private final String stderr;
+
+    private JsonAssert(Optional<E> parsed, String stdout, String stderr) {
       this.parsed = parsed;
-      this.e = e;
+      this.stdout = stdout;
+      this.stderr = stderr;
     }
 
     public void failsWithLine4(String expectedMessage) {
@@ -203,8 +224,9 @@ public final class ParserTestFixture<E> {
         fail("Expecting a failure" +
             " but parsing was successful");
       }
-      assertTrue(e.startsWith("Usage:"));
-      String actualMessage = e.split("\\r?\\n", -1)[4].trim();
+      assertTrue(stdout.isEmpty());
+      assertTrue(stderr.startsWith("Usage:"));
+      String actualMessage = stderr.split("\\r?\\n", -1)[4].trim();
       assertEquals(expectedMessage, actualMessage);
     }
 
@@ -213,7 +235,8 @@ public final class ParserTestFixture<E> {
         fail("Expecting a failure" +
             " but parsing was successful");
       }
-      String[] actualMessage = e.split("\\r?\\n", -1);
+      assertTrue(stdout.isEmpty());
+      String[] actualMessage = stderr.split("\\r?\\n", -1);
       compareArrays(expected, actualMessage);
     }
 
@@ -224,10 +247,24 @@ public final class ParserTestFixture<E> {
 
     public void succeeds(Object... expected) {
       assertTrue(parsed.isPresent(), "Parsing was not successful");
+      assertTrue(stdout.isEmpty());
+      assertTrue(stderr.isEmpty());
       String jsonString = parsed.get().toString();
       JsonNode actualJson = readJson(jsonString);
       JsonNode expectedJson = parseJson(expected);
       assertEquals(expectedJson, actualJson);
+    }
+  }
+
+  private static class TestOutputStream {
+
+    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+
+    final PrintStream out = new PrintStream(baos);
+
+    @Override
+    public String toString() {
+      return new String(baos.toByteArray());
     }
   }
 }

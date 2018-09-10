@@ -45,6 +45,10 @@ final class Parser {
       .initializer("$T.out", System.class)
       .addModifiers(PRIVATE).build();
 
+  private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err")
+      .initializer("$T.err", System.class)
+      .addModifiers(PRIVATE).build();
+
   private final FieldSpec indent = FieldSpec.builder(INT, "indent")
       .initializer("$L", DEFAULT_INDENT)
       .addModifiers(PRIVATE).build();
@@ -77,7 +81,7 @@ final class Parser {
     Option option = Option.create(context);
     Impl impl = Impl.create(option, implType);
     Helper helper = Helper.create(context, impl, option);
-    Tokenizer builder = Tokenizer.create(context, option, helper, indentPrinter);
+    Tokenizer builder = Tokenizer.create(context, helper);
     return new Parser(context, indentPrinter, builder, option, helper, impl, readNextMethod, readArgumentMethod);
   }
 
@@ -86,8 +90,10 @@ final class Parser {
     if (context.sourceType.getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
-    return spec.addMethod(addPublicIfNecessary(outMethod()))
-        .addMethod(addPublicIfNecessary(indentMethod()))
+    return spec
+        .addMethod(addPublicIfNecessary(withOutputStreamMethod()))
+        .addMethod(addPublicIfNecessary(withErrorStreamMethod()))
+        .addMethod(addPublicIfNecessary(withIndentMethod()))
         .addType(tokenizer.define())
         .addType(helper.define())
         .addType(option.define())
@@ -98,6 +104,7 @@ final class Parser {
         .addType(RepeatableOptionParser.define(context))
         .addType(indentPrinter.define())
         .addField(out)
+        .addField(err)
         .addField(indent)
         .addMethod(readArgumentMethod)
         .addMethod(readNextMethod)
@@ -110,20 +117,29 @@ final class Parser {
         .build();
   }
 
-  private MethodSpec.Builder indentMethod() {
+  private MethodSpec.Builder withIndentMethod() {
     ParameterSpec indentParam = ParameterSpec.builder(indent.type, indent.name).build();
-    return MethodSpec.methodBuilder("indent")
+    return MethodSpec.methodBuilder("withIndent")
         .addParameter(indentParam)
         .addStatement("this.$N = $N", indent, indentParam)
         .addStatement("return this")
         .returns(context.generatedClass);
   }
 
-  private MethodSpec.Builder outMethod() {
-    ParameterSpec outParam = ParameterSpec.builder(out.type, out.name).build();
-    return MethodSpec.methodBuilder("out")
-        .addParameter(outParam)
-        .addStatement("this.$N = $N", out, outParam)
+  private MethodSpec.Builder withOutputStreamMethod() {
+    return withPrintStreamMethod("withOutputStream", context, out);
+  }
+
+  private MethodSpec.Builder withErrorStreamMethod() {
+    return withPrintStreamMethod("withErrorStream", context, err);
+  }
+
+  private static MethodSpec.Builder withPrintStreamMethod(
+      String methodName, Context context, FieldSpec stream) {
+    ParameterSpec param = ParameterSpec.builder(stream.type, stream.name).build();
+    return MethodSpec.methodBuilder(methodName)
+        .addParameter(param)
+        .addStatement("this.$N = $N", stream, param)
         .addStatement("return this")
         .returns(context.generatedClass);
   }
@@ -135,8 +151,12 @@ final class Parser {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
     ParameterSpec paramTokenizer = ParameterSpec.builder(tokenizer.type, "tokenizer").build();
-    spec.addStatement("$T $N = new $T(new $T($N, $N))",
-        paramTokenizer.type, paramTokenizer, paramTokenizer.type, indentPrinter.type, out, indent);
+    ParameterSpec paramOutStream = ParameterSpec.builder(context.indentPrinterType(), "outStream").build();
+    ParameterSpec paramErrStream = ParameterSpec.builder(context.indentPrinterType(), "errStream").build();
+    spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramOutStream, context.indentPrinterType(), out, indent);
+    spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramErrStream, context.indentPrinterType(), err, indent);
+    spec.addStatement("$T $N = new $T($N, $N)",
+        paramTokenizer.type, paramTokenizer, paramTokenizer.type, paramOutStream, paramErrStream);
     spec.addStatement("return $N.parse($N)", paramTokenizer, args);
 
     return spec.addParameter(args)
@@ -166,11 +186,7 @@ final class Parser {
         .build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder(METHOD_NAME_PARSE_OR_EXIT);
 
-    ParameterSpec paramTokenizer = ParameterSpec.builder(tokenizer.type, "tokenizer").build();
-
-    spec.addStatement("$T $N = new $T(new $T($N, $N))",
-        paramTokenizer.type, paramTokenizer, paramTokenizer.type, indentPrinter.type, out, indent);
-    spec.addStatement("$T $N = $N.parse($N)", result.type, result, paramTokenizer, args);
+    spec.addStatement("$T $N = parse($N)", result.type, result, args);
 
     spec.beginControlFlow("if ($N.isPresent())", result)
         .addStatement("return $N.get()", result)
@@ -208,7 +224,7 @@ final class Parser {
     return spec.build();
   }
 
-  static MethodSpec readArgumentMethod(
+  private static MethodSpec readArgumentMethod(
       MethodSpec readNextMethod) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
@@ -223,7 +239,7 @@ final class Parser {
         .addStatement("return $N.substring($N + 1)", token, index)
         .endControlFlow();
 
-    builder.beginControlFlow("if (!$N && $N.length() > 2)", isLong, token)
+    builder.beginControlFlow("if (!$N && $N.length() >= 3)", isLong, token)
         .addStatement("return $N.substring(2)", token)
         .endControlFlow();
 
@@ -235,7 +251,7 @@ final class Parser {
         .build();
   }
 
-  static MethodSpec readNextMethod() {
+  private static MethodSpec readNextMethod() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     CodeBlock.Builder builder = CodeBlock.builder();
@@ -256,5 +272,4 @@ final class Parser {
         .addModifiers(STATIC, PRIVATE)
         .build();
   }
-
 }

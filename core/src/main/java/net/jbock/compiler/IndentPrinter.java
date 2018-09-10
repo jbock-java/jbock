@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
@@ -23,14 +22,13 @@ import static net.jbock.com.squareup.javapoet.TypeSpec.classBuilder;
  */
 final class IndentPrinter {
 
-  final ClassName type;
-
+  private final Context context;
   private final FieldSpec baseIndent;
   private final FieldSpec out;
   private final FieldSpec indentLevel;
 
-  private IndentPrinter(ClassName type, FieldSpec baseIndent, FieldSpec out, FieldSpec indentLevel) {
-    this.type = type;
+  private IndentPrinter(Context context, FieldSpec baseIndent, FieldSpec out, FieldSpec indentLevel) {
+    this.context = context;
     this.baseIndent = baseIndent;
     this.out = out;
     this.indentLevel = indentLevel;
@@ -40,12 +38,11 @@ final class IndentPrinter {
     FieldSpec baseIndent = FieldSpec.builder(INT, "baseIndent", FINAL).build();
     FieldSpec out = FieldSpec.builder(PrintWriter.class, "out", FINAL).build();
     FieldSpec indentLevel = FieldSpec.builder(INT, "indentLevel").build();
-    ClassName type = context.generatedClass.nestedClass("IndentPrinter");
-    return new IndentPrinter(type, baseIndent, out, indentLevel);
+    return new IndentPrinter(context, baseIndent, out, indentLevel);
   }
 
   TypeSpec define() {
-    return classBuilder(type)
+    return classBuilder(context.indentPrinterType())
         .addFields(asList(baseIndent, out, indentLevel))
         .addMethod(privateConstructor())
         .addMethod(methodBuilder("println")
