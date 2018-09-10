@@ -246,7 +246,7 @@ public final class ParserTestFixture<E> {
     }
 
     public void succeeds(Object... expected) {
-      assertTrue(parsed.isPresent(), "Parsing was not successful");
+      assertTrue(parsed.isPresent(), "Parsing was not successful: " + stderr);
       assertTrue(stdout.isEmpty());
       assertTrue(stderr.isEmpty());
       String jsonString = parsed.get().toString();
