@@ -35,6 +35,15 @@ public class CoercionProvider {
       new PrimitiveFloatCoercion(),
       new OptionalLongCoercion(),
       new BooleanObjectCoercion(),
+      new PathCoercion(),
+      new FileCoercion(),
+      new URICoercion(),
+      new BigDecimalCoercion(),
+      new BigIntegerCoercion(),
+      new LocalDateCoercion(),
+      new LocalDateTimeCoercion(),
+      new OffsetDateTimeCoercion(),
+      new ZonedDateTimeCoercion(),
       new BooleanPrimitiveCoercion());
 
   private static CoercionProvider instance;
