@@ -225,16 +225,17 @@ final class Tokenizer {
       }
       switch (positionalOrder) {
         case REQUIRED:
-          builder.addStatement("$N.add($S + $S + $S)", joiner, "<",
-              param.descriptionArgumentName(), ">");
+          builder.addStatement("$N.add($S)", joiner, "<" +
+              param.descriptionArgumentName() + ">");
           break;
         case OPTIONAL:
-          builder.addStatement("$N.add($S + $S + $S)", joiner, "[<",
-              param.descriptionArgumentName(), ">]");
+          builder.addStatement("$N.add($S)", joiner, "[<" +
+              param.descriptionArgumentName() + ">]");
           break;
         case LIST:
-          builder.addStatement("$N.add($S + $S + $S)", joiner, context.allowEscape() ? "[[--] <" : "[<",
-              param.descriptionArgumentName(), ">]");
+          builder.addStatement("$N.add($S)", joiner, context.allowEscape() ?
+              "[[--] <" + param.descriptionArgumentName() + ">]" :
+              "[<" + param.descriptionArgumentName() + ">]");
           break;
         default:
           throw new AssertionError();
