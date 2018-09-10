@@ -12,7 +12,7 @@ class RequiredArgumentsTest {
 
   @Test
   void success() {
-    f.assertThat("--dir", "A").succeeds("otherTokens", emptyList(), "dir", "A");
+    f.assertThat("--dir", "A").succeeds("dir", "A", "otherTokens", emptyList());
   }
 
   @Test

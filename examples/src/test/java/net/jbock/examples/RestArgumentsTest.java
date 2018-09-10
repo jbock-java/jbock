@@ -13,13 +13,13 @@ class RestArgumentsTest {
 
   @Test
   void testDashAllowed() {
-    f.assertThat("-", "a").succeeds("rest", asList("-", "a"), "file", emptyList());
+    f.assertThat("-", "a").succeeds("file", emptyList(), "rest", asList("-", "a"));
   }
 
   @Test
   void testDoubleDashAllowed() {
     // -- has no special meaning
-    f.assertThat("--", "a").succeeds("rest", asList("--", "a"), "file", emptyList());
+    f.assertThat("--", "a").succeeds("file", emptyList(), "rest", asList("--", "a"));
   }
 
   @Test

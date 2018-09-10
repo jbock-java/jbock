@@ -22,10 +22,10 @@ class PositionalArgumentsTest {
   @Test
   void minimal() {
     f.assertThat("a", "b", "1").succeeds(
-        "optString", null,
         "source", "a",
         "dest", "b",
         "anotherInt", 1,
+        "optString", null,
         "otherTokens", emptyList());
   }
 

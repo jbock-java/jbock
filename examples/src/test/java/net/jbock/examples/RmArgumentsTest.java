@@ -13,8 +13,8 @@ class RmArgumentsTest {
   @Test
   void testRest() {
     f.assertThat("-f", "a", "--", "-r", "--", "-f").succeeds(
-        "force", true,
         "recursive", false,
+        "force", true,
         "otherTokens", asList("a", "-r", "--", "-f"));
   }
 

@@ -12,16 +12,16 @@ class TarArgumentsTest {
   void testExtract() {
     f.assertThat("-x", "-f", "foo.tar").succeeds(
         "extract", true,
-        "file", "foo.tar",
         "create", false,
         "verbose", false,
-        "compress", false);
+        "compress", false,
+        "file", "foo.tar");
     f.assertThat("-v", "-x", "-f", "foo.tar").succeeds(
         "extract", true,
-        "file", "foo.tar",
         "create", false,
         "verbose", true,
-        "compress", false);
+        "compress", false,
+        "file", "foo.tar");
   }
 
   @Test

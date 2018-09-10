@@ -16,7 +16,7 @@ class SimpleArgumentsTest {
 
   @Test
   void success() {
-    f.assertThat("--file", "1").succeeds("file", "1", "extract", false);
+    f.assertThat("--file", "1").succeeds("extract", false, "file", "1");
   }
 
   @Test

@@ -12,7 +12,7 @@ class GitArgumentsTest {
   private ParserTestFixture<GitArguments> f =
       ParserTestFixture.create(GitArguments_Parser.create());
 
-  @RepeatedTest(200)
+  @RepeatedTest(10)
   void testRemaining() {
     String command = "add";
     String[] randomStrings = randomArgs();

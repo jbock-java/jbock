@@ -104,6 +104,8 @@ final class Impl {
         type = optionalOf(TypeName.get(Integer.class));
       } else if (p.isOptionalLong()) {
         type = optionalOf(TypeName.get(Long.class));
+      } else if (p.isOptionalDouble()) {
+        type = optionalOf(TypeName.get(Double.class));
       } else {
         type = field.type;
       }
@@ -118,6 +120,9 @@ final class Impl {
       } else if (p.isOptionalLong()) {
         builder.addStatement("this.$N = $N.isPresent() ? $T.of($N.get()) : $T.empty()",
             field, param, OptionalLong.class, param, OptionalLong.class);
+      } else if (p.isOptionalDouble()) {
+        builder.addStatement("this.$N = $N.isPresent() ? $T.of($N.get()) : $T.empty()",
+            field, param, OptionalDouble.class, param, OptionalDouble.class);
       } else {
         builder.addStatement("this.$N = $T.requireNonNull($N)", field, Objects.class, param);
       }

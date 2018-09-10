@@ -28,6 +28,11 @@ public class CoercionProvider {
       new OptionalIntCoercion(),
       new ObjectLongCoercion(),
       new PrimitiveLongCoercion(),
+      new OptionalDoubleCoercion(),
+      new ObjectDoubleCoercion(),
+      new PrimitiveDoubleCoercion(),
+      new ObjectFloatCoercion(),
+      new PrimitiveFloatCoercion(),
       new OptionalLongCoercion(),
       new BooleanObjectCoercion(),
       new BooleanPrimitiveCoercion());

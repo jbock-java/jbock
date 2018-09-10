@@ -24,13 +24,13 @@ class CpArgumentsTest {
   @Test
   void minimal() {
     f.assertThat("a", "b").succeeds(
+        "recursive", false,
         "source", "a",
-        "dest", "b",
-        "recursive", false);
+        "dest", "b");
     f.assertThat("b", "a").succeeds(
+        "recursive", false,
         "source", "b",
-        "dest", "a",
-        "recursive", false);
+        "dest", "a");
   }
 
   @Test
@@ -51,9 +51,9 @@ class CpArgumentsTest {
   @Test
   void flagInVariousPositions() {
     Object[] expected = new Object[]{
+        "recursive", true,
         "source", "a",
-        "dest", "b",
-        "recursive", true};
+        "dest", "b"};
     f.assertThat("-r", "a", "b")
         .succeeds(expected);
     f.assertThat("a", "-r", "b")

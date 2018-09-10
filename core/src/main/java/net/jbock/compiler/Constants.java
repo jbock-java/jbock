@@ -7,6 +7,7 @@ import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.Iterator;
 import java.util.List;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 
@@ -27,4 +28,5 @@ public final class Constants {
 
   public static final TypeName OPTIONAL_INT = TypeName.get(OptionalInt.class);
   public static final TypeName OPTIONAL_LONG = TypeName.get(OptionalLong.class);
+  public static final TypeName OPTIONAL_DOUBLE = TypeName.get(OptionalDouble.class);
 }

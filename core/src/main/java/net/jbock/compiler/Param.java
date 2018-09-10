@@ -20,6 +20,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.FINAL;
+import static net.jbock.compiler.Constants.OPTIONAL_DOUBLE;
 import static net.jbock.compiler.Constants.OPTIONAL_INT;
 import static net.jbock.compiler.Constants.OPTIONAL_LONG;
 import static net.jbock.compiler.OptionType.REPEATABLE;
@@ -255,6 +256,10 @@ public final class Param {
 
   boolean isOptionalLong() {
     return OPTIONAL_LONG.equals(returnType());
+  }
+
+  boolean isOptionalDouble() {
+    return OPTIONAL_DOUBLE.equals(returnType());
   }
 
   private static void checkName(

@@ -70,10 +70,16 @@ public final class ParserTestFixture<E> {
       if (v == null) {
         node.put(k, (String) null);
       }
-      if (v instanceof Integer) {
-        node.put(k, (Integer) v);
-      } else if (v instanceof String) {
+      if (v instanceof String) {
         node.put(k, (String) v);
+      } else if (v instanceof Integer) {
+        node.put(k, (Integer) v);
+      } else if (v instanceof Long) {
+        node.put(k, (Long) v);
+      } else if (v instanceof Float) {
+        node.put(k, (Float) v);
+      } else if (v instanceof Double) {
+        node.put(k, (Double) v);
       } else if (v instanceof Boolean) {
         node.put(k, (Boolean) v);
       } else if (v instanceof List) {
@@ -82,6 +88,12 @@ public final class ParserTestFixture<E> {
         for (Object s : list) {
           if (s instanceof Integer) {
             array.add(((Integer) s));
+          } else if (s instanceof Long) {
+            array.add(((Long) s));
+          } else if (s instanceof Float) {
+            array.add(((Float) s));
+          } else if (s instanceof Double) {
+            array.add(((Double) s));
           } else {
             array.add(s.toString());
           }
@@ -252,7 +264,7 @@ public final class ParserTestFixture<E> {
       String jsonString = parsed.get().toString();
       JsonNode actualJson = readJson(jsonString);
       JsonNode expectedJson = parseJson(expected);
-      assertEquals(expectedJson, actualJson);
+      assertEquals(expectedJson.toString(), actualJson.toString());
     }
   }
 
