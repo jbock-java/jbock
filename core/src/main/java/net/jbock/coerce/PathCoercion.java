@@ -18,9 +18,4 @@ class PathCoercion extends Coercion {
   public TypeName trigger() {
     return ClassName.get(Path.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

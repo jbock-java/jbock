@@ -9,9 +9,4 @@ class ObjectIntegerCoercion extends BasicIntegerCoercion {
   public TypeName trigger() {
     return ClassName.get(Integer.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

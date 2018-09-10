@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
+import net.jbock.Positional;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -23,11 +24,17 @@ abstract class VariousArguments {
 
   abstract Optional<BigDecimal> bigDecimalOpt();
 
+  @Positional
+  abstract Optional<BigDecimal> bigDecimalPos();
+
   abstract BigInteger bigInteger();
 
   abstract List<BigInteger> bigIntegerList();
 
   abstract Optional<BigInteger> bigIntegerOpt();
+
+  @Positional
+  abstract Optional<BigInteger> bigIntegerPos();
 
   abstract File file();
 
@@ -35,11 +42,17 @@ abstract class VariousArguments {
 
   abstract Optional<File> fileOpt();
 
+  @Positional
+  abstract Optional<File> filePos();
+
   abstract Path path();
 
   abstract List<Path> pathList();
 
   abstract Optional<Path> pathOpt();
+
+  @Positional
+  abstract Optional<Path> pathPos();
 
   abstract LocalDate localDate();
 
@@ -47,11 +60,17 @@ abstract class VariousArguments {
 
   abstract Optional<LocalDate> localDateOpt();
 
+  @Positional
+  abstract Optional<LocalDate> localDatePos();
+
   abstract LocalDateTime localDateTime();
 
   abstract List<LocalDateTime> localDateTimeList();
 
   abstract Optional<LocalDateTime> localDateTimeOpt();
+
+  @Positional
+  abstract Optional<LocalDateTime> localDateTimePos();
 
   abstract OffsetDateTime offsetDateTime();
 
@@ -59,15 +78,24 @@ abstract class VariousArguments {
 
   abstract Optional<OffsetDateTime> offsetDateTimeOpt();
 
+  @Positional
+  abstract Optional<OffsetDateTime> offsetDateTimePos();
+
   abstract ZonedDateTime zonedDateTime();
 
   abstract List<ZonedDateTime> zonedDateTimeList();
 
   abstract Optional<ZonedDateTime> zonedDateTimeOpt();
 
+  @Positional
+  abstract Optional<ZonedDateTime> zonedDateTimePos();
+
   abstract URI uri();
 
   abstract List<URI> uriList();
 
   abstract Optional<URI> uriOpt();
+
+  @Positional
+  abstract Optional<URI> uriPos();
 }

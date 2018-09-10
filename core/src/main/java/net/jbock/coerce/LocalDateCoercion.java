@@ -17,9 +17,4 @@ class LocalDateCoercion extends Coercion {
   public TypeName trigger() {
     return ClassName.get(LocalDate.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

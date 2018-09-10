@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
@@ -30,34 +29,30 @@ import static net.jbock.compiler.Util.optionalOfSubtype;
 
 final class Tokenizer {
 
-  final ClassName type;
-
   private final Context context;
   private final Helper helper;
 
   private final FieldSpec out;
   private final FieldSpec err;
 
-  private Tokenizer(ClassName type, Context context, Helper helper, FieldSpec out, FieldSpec err) {
+  private Tokenizer(Context context, Helper helper, FieldSpec out, FieldSpec err) {
     this.out = out;
-    this.type = type;
     this.context = context;
     this.helper = helper;
     this.err = err;
   }
 
   static Tokenizer create(Context context, Helper helper) {
-    ClassName builderClass = context.generatedClass.nestedClass("Tokenizer");
     FieldSpec out = FieldSpec.builder(context.indentPrinterType(), "out")
         .addModifiers(FINAL).build();
     FieldSpec err = FieldSpec.builder(context.indentPrinterType(), "err")
         .addModifiers(FINAL).build();
-    return new Tokenizer(builderClass, context, helper, out, err);
+    return new Tokenizer(context, helper, out, err);
   }
 
 
   TypeSpec define() {
-    TypeSpec.Builder builder = TypeSpec.classBuilder(type)
+    TypeSpec.Builder builder = TypeSpec.classBuilder(context.tokenizerType())
         .addModifiers(STATIC, PRIVATE)
         .addMethod(parseMethod())
         .addMethod(parseListMethod())

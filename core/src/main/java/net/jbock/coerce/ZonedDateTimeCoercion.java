@@ -17,9 +17,4 @@ class ZonedDateTimeCoercion extends Coercion {
   public TypeName trigger() {
     return ClassName.get(ZonedDateTime.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

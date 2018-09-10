@@ -17,9 +17,4 @@ class BigIntegerCoercion extends Coercion {
   public TypeName trigger() {
     return ClassName.get(BigInteger.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

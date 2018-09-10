@@ -1,6 +1,6 @@
 package net.jbock.compiler;
 
-public enum PositionalOrder {
+enum PositionalOrder {
 
   REQUIRED, OPTIONAL, LIST
 }

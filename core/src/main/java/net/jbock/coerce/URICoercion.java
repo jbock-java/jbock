@@ -17,9 +17,4 @@ class URICoercion extends Coercion {
   public TypeName trigger() {
     return ClassName.get(URI.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

@@ -14,6 +14,7 @@ abstract class BasicBooleanCoercion extends Coercion {
 
   @Override
   public final boolean special() {
+    // flags only
     return true;
   }
 

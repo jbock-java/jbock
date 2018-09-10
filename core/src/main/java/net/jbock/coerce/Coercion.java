@@ -36,5 +36,7 @@ public abstract class Coercion {
   /**
    * Specials can't be in Optional or List
    */
-  public abstract boolean special();
+  public boolean special() {
+    return false;
+  }
 }

@@ -9,9 +9,4 @@ class ObjectFloatCoercion extends BasicFloatCoercion {
   public TypeName trigger() {
     return ClassName.get(Float.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

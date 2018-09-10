@@ -9,9 +9,4 @@ class ObjectDoubleCoercion extends BasicDoubleCoercion {
   public TypeName trigger() {
     return ClassName.get(Double.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

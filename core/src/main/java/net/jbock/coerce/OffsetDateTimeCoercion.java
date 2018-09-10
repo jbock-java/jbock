@@ -17,9 +17,4 @@ class OffsetDateTimeCoercion extends Coercion {
   public TypeName trigger() {
     return ClassName.get(OffsetDateTime.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

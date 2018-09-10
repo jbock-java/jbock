@@ -38,8 +38,6 @@ final class Helper {
   private final FieldSpec shortNamesField;
   final FieldSpec parsersField;
 
-  private final Impl impl;
-
   final MethodSpec readMethod;
   final MethodSpec readRegularOptionMethod;
 
@@ -49,7 +47,6 @@ final class Helper {
 
   private Helper(
       Context context,
-      Impl impl,
       FieldSpec longNamesField,
       FieldSpec shortNamesField,
       FieldSpec parsersField, Option option,
@@ -58,7 +55,6 @@ final class Helper {
       MethodSpec readRegularOptionMethod,
       ParameterSpec positionalParameter) {
     this.context = context;
-    this.impl = impl;
     this.longNamesField = longNamesField;
     this.shortNamesField = shortNamesField;
     this.parsersField = parsersField;
@@ -71,7 +67,6 @@ final class Helper {
 
   static Helper create(
       Context context,
-      Impl impl,
       Option option) {
     ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional")
         .build();
@@ -109,7 +104,6 @@ final class Helper {
 
     return new Helper(
         context,
-        impl,
         longNamesField,
         shortNamesField,
         parsersField,
@@ -254,9 +248,9 @@ final class Helper {
       spec.addParameter(positionalParameter);
     }
 
-    spec.addStatement("return $T.of(new $T($L))", Optional.class, impl.type, args.build());
+    spec.addStatement("return $T.of(new $T($L))", Optional.class, context.implType(), args.build());
 
-    return spec.returns(optionalOfSubtype(impl.type)).build();
+    return spec.returns(optionalOfSubtype(context.implType())).build();
   }
 
   static CodeBlock throwRepetitionErrorStatement(

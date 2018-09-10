@@ -19,11 +19,6 @@ class StringCoercion extends Coercion {
   }
 
   @Override
-  public boolean special() {
-    return false;
-  }
-
-  @Override
   CodeBlock jsonExpr(String param) {
     return CodeBlock.builder().add("quote.apply($L)", param).build();
   }

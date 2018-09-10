@@ -17,9 +17,4 @@ class BigDecimalCoercion extends Coercion {
   public TypeName trigger() {
     return ClassName.get(BigDecimal.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

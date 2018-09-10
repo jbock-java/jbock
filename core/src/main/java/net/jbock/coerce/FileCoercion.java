@@ -17,9 +17,4 @@ class FileCoercion extends Coercion {
   public TypeName trigger() {
     return ClassName.get(File.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

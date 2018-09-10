@@ -70,6 +70,8 @@ final class Context {
   private final ClassName optionType;
   private final ClassName helperType;
   private final ClassName indentPrinterType;
+  private final ClassName implType;
+  private final ClassName tokenizerType;
 
   private final ParameterSpec quote = ParameterSpec.builder(
       ParameterizedTypeName.get(ClassName.get(Function.class), STRING, STRING), "quote").build();
@@ -97,7 +99,9 @@ final class Context {
       ClassName regularOptionParserType,
       ClassName optionType,
       ClassName helperType,
-      ClassName indentPrinterType) {
+      ClassName indentPrinterType,
+      ClassName implType,
+      ClassName tokenizerType) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -118,6 +122,8 @@ final class Context {
     this.optionType = optionType;
     this.helperType = helperType;
     this.indentPrinterType = indentPrinterType;
+    this.implType = implType;
+    this.tokenizerType = tokenizerType;
   }
 
   static Context create(
@@ -144,6 +150,9 @@ final class Context {
     ClassName repeatableOptionParserType = generatedClass.nestedClass("RepeatableOptionParser");
     ClassName regularOptionParserType = generatedClass.nestedClass("RegularOptionParser");
     ClassName indentPrinterType = generatedClass.nestedClass("IndentPrinter");
+    ClassName implType = generatedClass.nestedClass(sourceType.getSimpleName() + "Impl");
+    ClassName tokenizerType = generatedClass.nestedClass("Tokenizer");
+
     return new Context(
         sourceType,
         generatedClass,
@@ -163,7 +172,9 @@ final class Context {
         repeatableOptionParserType,
         regularOptionParserType, optionType,
         helperType,
-        indentPrinterType);
+        indentPrinterType,
+        implType,
+        tokenizerType);
   }
 
   private static ClassName parserClass(ClassName type) {
@@ -253,6 +264,14 @@ final class Context {
 
   ClassName indentPrinterType() {
     return indentPrinterType;
+  }
+
+  ClassName implType() {
+    return implType;
+  }
+
+  ClassName tokenizerType() {
+    return tokenizerType;
   }
 
   ParameterSpec quoteParam() {

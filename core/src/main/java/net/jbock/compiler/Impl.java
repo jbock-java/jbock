@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
@@ -32,34 +31,34 @@ import static net.jbock.compiler.Util.optionalOf;
  */
 final class Impl {
 
-  final ClassName type;
+  final Context context;
 
   final Option option;
 
   private final List<FieldSpec> fields;
 
   private Impl(
-      ClassName type,
+      Context context,
       Option option,
       List<FieldSpec> fields) {
-    this.type = type;
+    this.context = context;
     this.option = option;
     this.fields = fields;
   }
 
   static Impl create(
-      Option option,
-      ClassName implType) {
+      Context context,
+      Option option) {
     List<FieldSpec> fields = new ArrayList<>(option.context.parameters.size());
     for (Param param : option.context.parameters) {
       fields.add(param.field());
     }
-    return new Impl(implType, option, fields);
+    return new Impl(context, option, fields);
   }
 
   TypeSpec define() {
-    TypeSpec.Builder builder = TypeSpec.classBuilder(type);
-    builder.superclass(TypeName.get(option.context.sourceType.asType()))
+    TypeSpec.Builder builder = TypeSpec.classBuilder(context.implType());
+    builder.superclass(TypeName.get(context.sourceType.asType()))
         .addFields(fields)
         .addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor())

@@ -9,9 +9,4 @@ class ObjectLongCoercion extends BasicLongCoercion {
   public TypeName trigger() {
     return ClassName.get(Long.class);
   }
-
-  @Override
-  public boolean special() {
-    return false;
-  }
 }

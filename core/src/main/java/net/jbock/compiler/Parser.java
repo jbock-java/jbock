@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
@@ -53,6 +52,10 @@ final class Parser {
       .initializer("$L", DEFAULT_INDENT)
       .addModifiers(PRIVATE).build();
 
+  private final FieldSpec errorExitCode = FieldSpec.builder(INT, "errorExitCode")
+      .initializer("$L", DEFAULT_EXITCODE_ON_ERROR)
+      .addModifiers(PRIVATE).build();
+
   private Parser(
       Context context,
       IndentPrinter indentPrinter,
@@ -73,14 +76,12 @@ final class Parser {
   }
 
   static Parser create(Context context) {
-    ClassName implType = context.generatedClass.nestedClass(
-        context.sourceType.getSimpleName() + "Impl");
     MethodSpec readNextMethod = readNextMethod();
     MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
     IndentPrinter indentPrinter = IndentPrinter.create(context);
     Option option = Option.create(context);
-    Impl impl = Impl.create(option, implType);
-    Helper helper = Helper.create(context, impl, option);
+    Impl impl = Impl.create(context, option);
+    Helper helper = Helper.create(context, option);
     Tokenizer builder = Tokenizer.create(context, helper);
     return new Parser(context, indentPrinter, builder, option, helper, impl, readNextMethod, readArgumentMethod);
   }
@@ -94,6 +95,7 @@ final class Parser {
         .addMethod(addPublicIfNecessary(withOutputStreamMethod()))
         .addMethod(addPublicIfNecessary(withErrorStreamMethod()))
         .addMethod(addPublicIfNecessary(withIndentMethod()))
+        .addMethod(addPublicIfNecessary(withErrorExitCodeMethod()))
         .addType(tokenizer.define())
         .addType(helper.define())
         .addType(option.define())
@@ -106,11 +108,11 @@ final class Parser {
         .addField(out)
         .addField(err)
         .addField(indent)
+        .addField(errorExitCode)
         .addMethod(readArgumentMethod)
         .addMethod(readNextMethod)
         .addMethod(addPublicIfNecessary(createMethod()))
         .addMethod(addPublicIfNecessary(parseMethod()))
-        .addMethod(addPublicIfNecessary(parseOrExitMethodConvenience()))
         .addMethod(addPublicIfNecessary(parseOrExitMethod()))
         .addMethod(MethodSpec.constructorBuilder().addModifiers(PRIVATE).build())
         .addJavadoc(javadoc())
@@ -122,6 +124,15 @@ final class Parser {
     return MethodSpec.methodBuilder("withIndent")
         .addParameter(indentParam)
         .addStatement("this.$N = $N", indent, indentParam)
+        .addStatement("return this")
+        .returns(context.generatedClass);
+  }
+
+  private MethodSpec.Builder withErrorExitCodeMethod() {
+    ParameterSpec errorExitCodeParam = ParameterSpec.builder(errorExitCode.type, errorExitCode.name).build();
+    return MethodSpec.methodBuilder("withErrorExitCode")
+        .addParameter(errorExitCodeParam)
+        .addStatement("this.$N = $N", errorExitCode, errorExitCodeParam)
         .addStatement("return this")
         .returns(context.generatedClass);
   }
@@ -150,7 +161,7 @@ final class Parser {
         .build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
-    ParameterSpec paramTokenizer = ParameterSpec.builder(tokenizer.type, "tokenizer").build();
+    ParameterSpec paramTokenizer = ParameterSpec.builder(context.tokenizerType(), "tokenizer").build();
     ParameterSpec paramOutStream = ParameterSpec.builder(context.indentPrinterType(), "outStream").build();
     ParameterSpec paramErrStream = ParameterSpec.builder(context.indentPrinterType(), "errStream").build();
     spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramOutStream, context.indentPrinterType(), out, indent);
@@ -163,24 +174,9 @@ final class Parser {
         .returns(optionalOf(TypeName.get(context.sourceType.asType())));
   }
 
-
-  private MethodSpec.Builder parseOrExitMethodConvenience() {
-
-    ParameterSpec args = ParameterSpec.builder(STRING_ARRAY, "args")
-        .build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder(METHOD_NAME_PARSE_OR_EXIT);
-
-    spec.addStatement("return parseOrExit($N, $L)", args, DEFAULT_EXITCODE_ON_ERROR);
-
-    return spec.addParameter(args)
-        .returns(TypeName.get(context.sourceType.asType()));
-  }
-
   private MethodSpec.Builder parseOrExitMethod() {
 
     ParameterSpec args = ParameterSpec.builder(STRING_ARRAY, "args")
-        .build();
-    ParameterSpec statusIfError = ParameterSpec.builder(TypeName.INT, "statusIfError")
         .build();
     ParameterSpec result = ParameterSpec.builder(optionalOf(TypeName.get(context.sourceType.asType())), "result")
         .build();
@@ -192,11 +188,10 @@ final class Parser {
         .addStatement("return $N.get()", result)
         .endControlFlow();
 
-    spec.addStatement("$T.exit($N)", System.class, statusIfError);
+    spec.addStatement("$T.exit($N)", System.class, errorExitCode);
     spec.addStatement("throw new $T($S)", IllegalStateException.class, "We should never get here.");
 
     return spec.addParameter(args)
-        .addParameter(statusIfError)
         .returns(TypeName.get(context.sourceType.asType()));
   }
 

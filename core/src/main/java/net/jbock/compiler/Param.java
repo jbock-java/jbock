@@ -31,7 +31,7 @@ import static net.jbock.compiler.Util.snakeCase;
 /**
  * Internal representation of an abstract method in the source class.
  */
-public final class Param {
+final class Param {
 
   // can be null
   private final String longName;
