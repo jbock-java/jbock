@@ -29,6 +29,6 @@ class StringCoercion extends Coercion {
   }
 
   public CodeBlock mapJsonExpr(FieldSpec field) {
-    return CodeBlock.builder().add("quote").build();
+    return CodeBlock.builder().add(".map(quote)").build();
   }
 }

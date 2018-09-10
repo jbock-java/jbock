@@ -17,8 +17,7 @@ abstract class BasicIntegerCoercion extends Coercion {
     return CodeBlock.builder().add("$L", param).build();
   }
 
-  @Override
   public CodeBlock mapJsonExpr(FieldSpec field) {
-    return CodeBlock.builder().add("$T::toString", Objects.class).build();
+    return CodeBlock.builder().add(".map($T::toString)", Objects.class).build();
   }
 }

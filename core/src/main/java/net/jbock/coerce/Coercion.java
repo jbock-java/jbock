@@ -4,6 +4,8 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
+import java.util.Objects;
+
 public abstract class Coercion {
 
   /**
@@ -22,12 +24,13 @@ public abstract class Coercion {
   }
 
   // toString stuff
-  abstract CodeBlock jsonExpr(String param);
+  CodeBlock jsonExpr(String param) {
+    return CodeBlock.builder().add("quote.apply($T.toString($L))", Objects.class, param).build();
+  }
 
   // toString stuff
   public CodeBlock mapJsonExpr(FieldSpec field) {
-    return CodeBlock.builder().add("$L -> $L",
-        "e", jsonExpr("e")).build();
+    return CodeBlock.builder().add(".map($T::toString).map(quote)", Objects.class).build();
   }
 
   /**
