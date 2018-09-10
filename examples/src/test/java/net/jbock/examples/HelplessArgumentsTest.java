@@ -1,50 +1,72 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.ParserTestFixture;
+import net.jbock.examples.fixture.TestOutputStream;
 import org.junit.jupiter.api.Test;
 
-import java.util.Arrays;
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HelplessArgumentsTest {
 
-  private ParserTestFixture<HelplessArguments> f =
-      ParserTestFixture.create(HelplessArguments_Parser.create());
-
   private String[] fullUsage = {
       "NAME",
-      "  HelplessArguments",
+      "       HelplessArguments",
       "",
       "SYNOPSIS",
-      "  HelplessArguments [<options>] <REQUIRED>",
+      "       HelplessArguments [<options>] <REQUIRED>",
       "",
       "DESCRIPTION",
       "",
       "REQUIRED",
       "",
       "OPTIONS",
-      "  --help",
+      "       --help",
       ""};
 
   @Test
-  void success() {
-    f.assertThat("x").succeeds("required", "x", "help", false);
-    f.assertThat("x", "--help").succeeds("required", "x", "help", true);
-    f.assertThat("--help", "x").succeeds("required", "x", "help", true);
+  void success0() {
+    Optional<HelplessArguments> opt = HelplessArguments_Parser.create().parse(new String[]{"x"});
+    assertTrue(opt.isPresent());
+    HelplessArguments args = opt.get();
+    assertEquals("x", args.required());
+    assertEquals(false, args.help());
+  }
+
+  @Test
+  void success1() {
+    Optional<HelplessArguments> opt = HelplessArguments_Parser.create().parse(new String[]{"x", "--help"});
+    assertTrue(opt.isPresent());
+    HelplessArguments args = opt.get();
+    assertTrue(args.help());
+    assertEquals("x", args.required());
+  }
+
+  @Test
+  void success2() {
+    Optional<HelplessArguments> opt = HelplessArguments_Parser.create().parse(new String[]{"--help", "x"});
+    assertTrue(opt.isPresent());
+    HelplessArguments args = opt.get();
+    assertTrue(args.help());
+    assertEquals("x", args.required());
   }
 
   @Test
   void errorNoArguments() {
-    f.assertThat().failsWithLines(append(fullUsage, "Missing parameter: <REQUIRED>", ""));
+    TestOutputStream out = new TestOutputStream();
+    HelplessArguments_Parser.create().withErrorStream(out.out).parse(new String[]{});
+    String message = out.toString();
+    assertTrue(message.startsWith(String.join("\n", fullUsage)));
+    assertTrue(message.contains("Missing parameter: <REQUIRED>"));
   }
 
   @Test
   void errorInvalidOption() {
-    f.assertThat("-p").failsWithLines(append(fullUsage, "Invalid option: -p", ""));
-  }
-
-  private static String[] append(String[] fullUsage, String... lines) {
-    String[] result = Arrays.copyOf(fullUsage, fullUsage.length + lines.length);
-    System.arraycopy(lines, 0, result, fullUsage.length, lines.length);
-    return result;
+    TestOutputStream out = new TestOutputStream();
+    HelplessArguments_Parser.create().withErrorStream(out.out).parse(new String[]{"-p"});
+    String message = out.toString();
+    assertTrue(message.startsWith(String.join("\n", fullUsage)));
+    assertTrue(message.contains("Invalid option: -p"));
   }
 }

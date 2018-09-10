@@ -91,8 +91,10 @@ final class Parser {
     if (context.sourceType.getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
+    if (context.addHelp) {
+      spec.addMethod(addPublicIfNecessary(withOutputStreamMethod()));
+    }
     return spec
-        .addMethod(addPublicIfNecessary(withOutputStreamMethod()))
         .addMethod(addPublicIfNecessary(withErrorStreamMethod()))
         .addMethod(addPublicIfNecessary(withIndentMethod()))
         .addMethod(addPublicIfNecessary(withErrorExitCodeMethod()))

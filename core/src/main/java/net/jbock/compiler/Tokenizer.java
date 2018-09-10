@@ -52,7 +52,7 @@ final class Tokenizer {
 
 
   TypeSpec define() {
-    TypeSpec.Builder builder = TypeSpec.classBuilder(context.tokenizerType())
+    TypeSpec.Builder spec = TypeSpec.classBuilder(context.tokenizerType())
         .addModifiers(STATIC, PRIVATE)
         .addMethod(parseMethod())
         .addMethod(parseListMethod())
@@ -60,9 +60,11 @@ final class Tokenizer {
         .addMethod(printUsageMethod())
         .addMethod(synopsisMethod())
         .addMethod(printDescriptionMethod())
-        .addField(out)
         .addField(err);
-    return builder.build();
+    if (context.addHelp) {
+      spec.addField(out);
+    }
+    return spec.build();
   }
 
   private MethodSpec parseMethod() {
@@ -274,6 +276,7 @@ final class Tokenizer {
       builder.addStatement("$N.println(synopsis())", err);
       builder.addStatement("$N.decrementIndent()", err);
       builder.addStatement("$N.println()", err);
+
       builder.addStatement("$N.println($S)", err, "Error:");
       builder.addStatement("$N.incrementIndent()", err);
       builder.addStatement("$N.println($N.getMessage())", err, e);
@@ -400,11 +403,13 @@ final class Tokenizer {
     ParameterSpec outParam = ParameterSpec.builder(out.type, out.name).build();
     ParameterSpec errParam = ParameterSpec.builder(err.type, err.name).build();
 
-    return MethodSpec.constructorBuilder()
-        .addStatement("this.$N = $N", out, outParam)
-        .addStatement("this.$N = $N", err, errParam)
+    MethodSpec.Builder spec = MethodSpec.constructorBuilder();
+    spec.addStatement("this.$N = $N", err, errParam)
         .addParameter(outParam)
-        .addParameter(errParam)
-        .build();
+        .addParameter(errParam);
+    if (context.addHelp) {
+      spec.addStatement("this.$N = $N", out, outParam);
+    }
+    return spec.build();
   }
 }

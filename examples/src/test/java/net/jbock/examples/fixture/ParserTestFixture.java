@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
@@ -272,15 +271,4 @@ public final class ParserTestFixture<E> {
     }
   }
 
-  private static class TestOutputStream {
-
-    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-
-    final PrintStream out = new PrintStream(baos);
-
-    @Override
-    public String toString() {
-      return new String(baos.toByteArray());
-    }
-  }
 }
