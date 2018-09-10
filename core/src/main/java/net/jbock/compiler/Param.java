@@ -14,22 +14,16 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.FINAL;
-import static net.jbock.compiler.Constants.JAVA_LANG_STRING;
 import static net.jbock.compiler.Constants.OPTIONAL_INT;
+import static net.jbock.compiler.Constants.OPTIONAL_LONG;
 import static net.jbock.compiler.OptionType.REPEATABLE;
 import static net.jbock.compiler.Processor.checkNotPresent;
-import static net.jbock.compiler.Util.asDeclared;
-import static net.jbock.compiler.Util.asType;
-import static net.jbock.compiler.Util.equalsType;
 import static net.jbock.compiler.Util.methodToString;
 import static net.jbock.compiler.Util.snakeCase;
 
@@ -257,6 +251,10 @@ public final class Param {
 
   boolean isOptionalInt() {
     return OPTIONAL_INT.equals(returnType());
+  }
+
+  boolean isOptionalLong() {
+    return OPTIONAL_LONG.equals(returnType());
   }
 
   private static void checkName(

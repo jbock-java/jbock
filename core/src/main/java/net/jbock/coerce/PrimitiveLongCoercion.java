@@ -2,13 +2,11 @@ package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.TypeName;
 
-import static net.jbock.com.squareup.javapoet.TypeName.INT;
-
-class IntCoercion extends BasicIntegerCoercion {
+class PrimitiveLongCoercion extends BasicLongCoercion {
 
   @Override
   public TypeName trigger() {
-    return INT;
+    return TypeName.LONG;
   }
 
   @Override

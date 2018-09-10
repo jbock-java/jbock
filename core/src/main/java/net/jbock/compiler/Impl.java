@@ -11,7 +11,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalDouble;
 import java.util.OptionalInt;
+import java.util.OptionalLong;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -100,6 +102,8 @@ final class Impl {
       // primitive optionals get special treatment here
       if (p.isOptionalInt()) {
         type = optionalOf(TypeName.get(Integer.class));
+      } else if (p.isOptionalLong()) {
+        type = optionalOf(TypeName.get(Long.class));
       } else {
         type = field.type;
       }
@@ -111,6 +115,9 @@ final class Impl {
       } else if (p.isOptionalInt()) {
         builder.addStatement("this.$N = $N.isPresent() ? $T.of($N.get()) : $T.empty()",
             field, param, OptionalInt.class, param, OptionalInt.class);
+      } else if (p.isOptionalLong()) {
+        builder.addStatement("this.$N = $N.isPresent() ? $T.of($N.get()) : $T.empty()",
+            field, param, OptionalLong.class, param, OptionalLong.class);
       } else {
         builder.addStatement("this.$N = $T.requireNonNull($N)", field, Objects.class, param);
       }

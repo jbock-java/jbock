@@ -23,11 +23,14 @@ public class CoercionProvider {
 
   private static final List<Coercion> ALL_COERCIONS = Arrays.asList(
       new StringCoercion(),
-      new IntegerCoercion(),
-      new IntCoercion(),
+      new ObjectIntegerCoercion(),
+      new PrimitiveIntCoercion(),
+      new OptionalIntCoercion(),
+      new ObjectLongCoercion(),
+      new PrimitiveLongCoercion(),
+      new OptionalLongCoercion(),
       new BooleanObjectCoercion(),
-      new BooleanPrimitiveCoercion(),
-      new OptionalIntCoercion());
+      new BooleanPrimitiveCoercion());
 
   private static CoercionProvider instance;
 

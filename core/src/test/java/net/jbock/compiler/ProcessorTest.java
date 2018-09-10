@@ -50,13 +50,13 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  abstract long a();",
+        "  abstract StringBuilder a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Bad return type: long");
+        .withErrorContaining("Bad return type: StringBuilder");
   }
 
   @Test
