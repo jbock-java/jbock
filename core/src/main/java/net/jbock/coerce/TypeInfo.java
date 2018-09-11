@@ -102,7 +102,6 @@ public class TypeInfo {
     if (ClassName.get(List.class).equals(rawType)) {
       return createRepeatable(coercion, parameterizedType);
     }
-    throw new AssertionError("we should never get here (see COMBINATORS)");
+    throw new AssertionError("we should never get here");
   }
-
 }

@@ -135,17 +135,14 @@ final class Helper {
   }
 
   private static MethodSpec parseCharacterMethod() {
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parseCharacter")
-        .addParameter(s);
-    spec.beginControlFlow("if ($N.isEmpty())", s)
-        .addStatement("return null")
-        .endControlFlow();
-    spec.beginControlFlow("if ($N.length() >= 2)", s)
+        .addParameter(token);
+    spec.beginControlFlow("if ($N.length() != 1)", token)
         .addStatement("throw new $T($S + $N + $S)", IllegalArgumentException.class,
-            "Not a character: <", s, ">")
+            "Not a character: <", token, ">")
         .endControlFlow();
-    spec.addStatement("return $N.charAt(0)", s);
+    spec.addStatement("return $N.charAt(0)", token);
     return spec.addModifiers(STATIC)
         .returns(ClassName.get(Character.class))
         .build();
