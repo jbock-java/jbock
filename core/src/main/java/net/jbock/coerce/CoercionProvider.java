@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import net.jbock.coerce.warn.WarningProvider;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
@@ -23,6 +24,7 @@ public class CoercionProvider {
 
   private static final List<Coercion> ALL_COERCIONS = Arrays.asList(
       new CharsetCoercion(),
+      new PatternCoercion(),
       new ObjectIntegerCoercion(),
       new PrimitiveIntCoercion(),
       new OptionalIntCoercion(),
@@ -47,6 +49,7 @@ public class CoercionProvider {
       new LocalDateTimeCoercion(),
       new OffsetDateTimeCoercion(),
       new ZonedDateTimeCoercion(),
+      new InstantCoercion(),
       new StringCoercion());
 
   private static CoercionProvider instance;
@@ -73,32 +76,63 @@ public class CoercionProvider {
   }
 
   public TypeInfo findCoercion(ExecutableElement sourceMethod) {
-    TypeName typeName = TypeName.get(sourceMethod.getReturnType());
-    if (typeName.equals(Constants.STRING_ARRAY)) {
-      return TypeInfo.create(typeName, coercions.get(Constants.STRING));
+    try {
+      TypeName typeName = TypeName.get(sourceMethod.getReturnType());
+      if (typeName.equals(Constants.STRING_ARRAY)) {
+        return TypeInfo.create(typeName, coercions.get(Constants.STRING));
+      }
+      if (typeName instanceof ParameterizedTypeName) {
+        return TypeInfo.create(typeName, findParameterizedCoercion(sourceMethod, (ParameterizedTypeName) typeName));
+      }
+      Coercion coercion = coercions.get(typeName);
+      if (coercion == null) {
+        throw TmpException.create(sourceMethod, "Bad return type: " + typeName);
+      }
+      return TypeInfo.create(typeName, coercion);
+    } catch (TmpException e) {
+      String warning = WarningProvider.instance().findWarning(sourceMethod.getReturnType());
+      if (warning == null) {
+        throw e.asValidationException();
+      } else {
+        throw e.asValidationException(warning);
+      }
     }
-    if (typeName instanceof ParameterizedTypeName) {
-      return TypeInfo.create(typeName, findParameterizedCoercion(sourceMethod, (ParameterizedTypeName) typeName));
-    }
-    Coercion coercion = coercions.get(typeName);
-    if (coercion == null) {
-      throw ValidationException.create(sourceMethod, "Bad return type: " + typeName);
-    }
-    return TypeInfo.create(typeName, coercion);
   }
 
   private Coercion findParameterizedCoercion(
       ExecutableElement sourceMethod,
-      ParameterizedTypeName typeName) {
+      ParameterizedTypeName typeName) throws TmpException {
     ClassName rawType = typeName.rawType;
     if (!COMBINATORS.contains(rawType)) {
-      throw ValidationException.create(sourceMethod, "Bad return type: " + typeName);
+      throw TmpException.create(sourceMethod, "Bad return type: " + typeName);
     }
     TypeName typeArgument = typeName.typeArguments.get(0);
     Coercion coercion = coercions.get(typeArgument);
     if (coercion.special()) {
-      throw ValidationException.create(sourceMethod, "Bad return type: " + typeName);
+      throw TmpException.create(sourceMethod, "Bad return type: " + typeName);
     }
     return coercion;
+  }
+
+  private static class TmpException extends Exception {
+    final ExecutableElement sourceMethod;
+    final String message;
+
+    static TmpException create(ExecutableElement sourceMethod, String message) {
+      return new TmpException(sourceMethod, message);
+    }
+
+    TmpException(ExecutableElement sourceMethod, String message) {
+      this.sourceMethod = sourceMethod;
+      this.message = message;
+    }
+
+    ValidationException asValidationException() {
+      return ValidationException.create(sourceMethod, message);
+    }
+
+    ValidationException asValidationException(String newMessage) {
+      return ValidationException.create(sourceMethod, newMessage);
+    }
   }
 }

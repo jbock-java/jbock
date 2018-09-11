@@ -70,7 +70,7 @@ final class Tokenizer {
   private MethodSpec parseMethod() {
     ParameterSpec args = ParameterSpec.builder(Constants.STRING_ARRAY, "args")
         .build();
-    ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e")
+    ParameterSpec e = ParameterSpec.builder(RuntimeException.class, "e")
         .build();
     MethodSpec.Builder builder = MethodSpec.methodBuilder("parse");
 
@@ -78,7 +78,7 @@ final class Tokenizer {
         .addCode(parseMethodTryBlock(args))
         .endControlFlow();
 
-    builder.beginControlFlow("catch ($T $N)", IllegalArgumentException.class, e)
+    builder.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
         .addCode(parseMethodCatchBlock(e))
         .endControlFlow();
 

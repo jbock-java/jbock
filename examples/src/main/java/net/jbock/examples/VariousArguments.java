@@ -9,12 +9,14 @@ import java.math.BigInteger;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.OffsetDateTime;
 import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 @CommandLineArguments
 abstract class VariousArguments {
@@ -108,4 +110,22 @@ abstract class VariousArguments {
 
   @Positional
   abstract Optional<Charset> charsetPos();
+
+  abstract Pattern pattern();
+
+  abstract List<Pattern> patternList();
+
+  abstract Optional<Pattern> patternOpt();
+
+  @Positional
+  abstract Optional<Pattern> patternPos();
+
+  abstract Instant instant();
+
+  abstract List<Instant> instantList();
+
+  abstract Optional<Instant> instantOpt();
+
+  @Positional
+  abstract Optional<Instant> instantPos();
 }

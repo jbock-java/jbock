@@ -26,6 +26,8 @@ class VariousArgumentsTest {
         "--zonedDateTime", "2018-09-10T15:04:00.938+02:00[Europe/Berlin]",
         "--uri", "http://localhost:8080",
         "--charset", "UTF-8",
+        "--pattern", "^[abc]*$",
+        "--instant", "1970-01-01T00:00:00Z",
         "6.02214076e23",
         "60221407600000000000000",
         "/etc/hosts",
@@ -35,7 +37,9 @@ class VariousArgumentsTest {
         "2018-09-10T15:03:22.874+02:00",
         "2018-09-10T15:04:00.938+02:00[Europe/Berlin]",
         "http://localhost:8080",
-        "ISO-8859-1"
+        "ISO-8859-1",
+        "^[abc]*$",
+        "1970-01-01T00:00:00Z"
     });
     assertTrue(parsed.isPresent());
     VariousArguments args = parsed.get();
