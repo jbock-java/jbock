@@ -29,16 +29,19 @@ This is what the program prints, when invoked without parameters:
 
 Being invoked without any parameters is something we should be expecting.
 Instead of a stacktrace, we could use the opportunity to show
-a summmary of our command line options. Let's see how to do this with `jbock 2.3`.
+a summmary of our command line options. Let's see how to do this with jbock.
 
 We start by defining an abstract class `Args`,
 which represents the two mandatory arguments `source` and `dest`.
 
 ````java
+import net.jbock.*;
+import java.nio.file.Path;
+
 @CommandLineArguments
-abstract static class Args {
-  @Positional abstract String source();
-  @Positional abstract String dest();
+abstract class Args {
+  @Positional abstract Path source();
+  @Positional abstract Path dest();
 }
 ````
 
@@ -48,7 +51,7 @@ because they represent positional arguments.
 
 At compile time, the jbock processor will pick up the
 `@CommandLineArguments` annotation, and generate a class 
-`CopyFile_Args_Parser extends CopyFile.Args` in the same package. Let's change
+`Args_Parser extends Args` in the same package. Let's change
 our main method to use that.
 
 This is the updated `CopyFile` class:
@@ -56,18 +59,9 @@ This is the updated `CopyFile` class:
 ````java
 public class CopyFile {
 
-  @CommandLineArguments
-  abstract static class Args {
-    @Positional abstract String source();
-    @Positional abstract String dest();
-  }
-
-  public static void main(String[] args) throws IOException {
-    CopyFile.run(CopyFile_Args_Parser.create().parseOrExit(args));
-  }
-
-  private static void run(Args args) throws IOException {
-    Files.copy(Paths.get(args.source()), Paths.get(args.dest()));
+  public static void main(String[] input) {
+    Args args = Args_Parser.create().parseOrExit(input);
+    Files.copy(args.source(), args.dest());
   }
 }
 ````
@@ -90,9 +84,9 @@ Next, we add some metadata:
     programName = "cp",
     missionStatement = "copy files and directories",
     overview = "There are no options yet.")
-abstract static class Args {
-  @Positional abstract String source();
-  @Positional abstract String dest();
+abstract class Args {
+  @Positional abstract Path source();
+  @Positional abstract Path dest();
 }
 ````
 
@@ -118,9 +112,10 @@ A <em>flag</em> is declared as a method that returns `boolean`.
 This method will return true if the flag is present on the command line.
 
 ````java
+@CommandLineArguments
 abstract class Args {
-  @Positional abstract String source();
-  @Positional abstract String dest();
+  @Positional abstract Path source();
+  @Positional abstract Path dest();
   abstract boolean recursive();
 }
 ````
@@ -135,9 +130,10 @@ Since `--recursive` is such a common flag,
 we also allow the shortcut `-r`:
 
 ````java
+@CommandLineArguments
 abstract class Args {
-  @Positional abstract String source();
-  @Positional abstract String dest();
+  @Positional abstract Path source();
+  @Positional abstract Path dest();
   @ShortName('r') abstract boolean recursive();
 }
 ````
@@ -146,9 +142,10 @@ Now let's add another flag called `--backup` or `-b`,
 and an optional parameter called `--suffix` or `-s`:
 
 ````java
+@CommandLineArguments
 abstract class Args {
-  @Positional abstract String source();
-  @Positional abstract String dest();
+  @Positional abstract Path source();
+  @Positional abstract Path dest();
   @ShortName('r') abstract boolean recursive();
   @ShortName('b') @LongName("") abstract boolean backup();
   @ShortName('S') abstract Optional<String> suffix();
@@ -167,8 +164,8 @@ After adding some description text, the Args class looks like this:
     missionStatement = "copy files and directories",
     overview = "Copy SOURCE to DEST")
 abstract class Args {
-  @Positional abstract String source();
-  @Positional abstract String dest();
+  @Positional abstract Path source();
+  @Positional abstract Path dest();
 
   @ShortName('r')
   @Description("copy directories recursively")
@@ -219,3 +216,4 @@ Some projects that use jbock:
 * [aws-glacier-multipart-upload](https://github.com/h908714124/aws-glacier-multipart-upload)
 * [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
+
