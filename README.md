@@ -35,13 +35,19 @@ We start by defining an abstract class `Args`,
 which represents the two mandatory arguments `source` and `dest`.
 
 ````java
-import net.jbock.*;
+import net.jbock.PositionalParameter;
+import net.jbock.CommandLineArguments;
+
 import java.nio.file.Path;
 
 @CommandLineArguments
 abstract class Args {
-  @Positional abstract Path source();
-  @Positional abstract Path dest();
+
+  @PositionalParameter
+  abstract Path source();
+
+  @PositionalParameter
+  abstract Path dest();
 }
 ````
 
@@ -50,7 +56,7 @@ because they represent positional arguments.
 `source()` is declared first, so it represents the first argument.
 
 At compile time, the jbock processor will pick up the
-`@CommandLineArguments` annotation, and generate a class 
+`@CommandLineArguments` annotation, and generate a class
 `Args_Parser extends Args` in the same package. Let's change
 our main method to use that.
 
@@ -68,7 +74,7 @@ public class CopyFile {
 After the change, the program prints
 the following when invoked without any arguments:
 
-<pre><code>Usage: CopyFile SRC DEST
+<pre><code>Usage: CopyFile SOURCE DEST
 Missing parameter: SRC
 Try 'CopyFile --help' for more information.
 </code></pre>
@@ -80,24 +86,25 @@ This looks a lot better than the stacktrace already.
 Next, we add some metadata:
 
 ````java
+/**
+ * There are no options yet.
+ */
 @CommandLineArguments(
     programName = "cp",
-    missionStatement = "copy files and directories",
-    overview = "There are no options yet.")
+    missionStatement = "copy files and directories")
 abstract class Args {
-  @Positional abstract Path source();
-  @Positional abstract Path dest();
+  //[...]
 }
 ````
 
-When the program is now invoked with the `--help` parameter,
+When the program is invoked with the `--help` parameter,
 it will print something resembling a [man page](https://linux.die.net/man/1/cp):
 
 <pre><code>NAME
        cp - copy files and directories
 
 SYNOPSIS
-       cp SRC DEST
+       cp &lt;SOURCE&gt; &lt;DEST&gt;
 
 DESCRIPTION
        There are no options yet.
@@ -114,27 +121,25 @@ This method will return true if the flag is present on the command line.
 ````java
 @CommandLineArguments
 abstract class Args {
-  @Positional abstract Path source();
-  @Positional abstract Path dest();
+  //[...]
+  @Parameter
   abstract boolean recursive();
 }
 ````
 
-The `recursive` argument is not positional, because
-its declaring method doesn't have a `@Positional` annotation.
-It makes no difference whether it 
+The `recursive` argument is not positional. It makes no difference whether it
 is declared before or after
 the `source()` and `dest()` methods, or between them.
 
 Since `--recursive` is such a common flag,
-we also allow the shortcut `-r`:
+we also allow the usual shortcut `-r`:
 
 ````java
 @CommandLineArguments
 abstract class Args {
-  @Positional abstract Path source();
-  @Positional abstract Path dest();
-  @ShortName('r') abstract boolean recursive();
+  //[...]
+  @Parameter(shortName = 'r')
+  abstract boolean recursive();
 }
 ````
 
@@ -144,39 +149,62 @@ and an optional parameter called `--suffix` or `-s`:
 ````java
 @CommandLineArguments
 abstract class Args {
-  @Positional abstract Path source();
-  @Positional abstract Path dest();
-  @ShortName('r') abstract boolean recursive();
-  @ShortName('b') @LongName("") abstract boolean backup();
-  @ShortName('S') abstract Optional<String> suffix();
+  //[...]
+  @Parameter(shortName = 'b', longName = "")
+  abstract boolean backup();
+
+  @Parameter(shortName = 'S')
+  abstract Optional<String> suffix();
 }
 ````
 
 For each named (i.e. non-positional) parameter, the method name defines the long name. 
-This can be overridden with the `@LongName` annotation,
-or disabled by passing the empty string to the `@LongName` annotation.
+This can be overridden with the `longName` option,
+or disabled by passing `longName = ""`.
 
 After adding some description text, the Args class looks like this:
 
 ````java
+/**
+ * Copy SOURCE to DEST
+ */
 @CommandLineArguments(
     programName = "cp",
-    missionStatement = "copy files and directories",
-    overview = "Copy SOURCE to DEST")
+    missionStatement = "copy files and directories")
 abstract class Args {
-  @Positional abstract Path source();
-  @Positional abstract Path dest();
 
-  @ShortName('r')
-  @Description("copy directories recursively")
+  /**
+   * Path or file of directory to copy
+   *
+   * @return SOURCE
+   */
+  @PositionalParameter
+  abstract Path source();
+
+  /**
+   * Copy destination
+   *
+   * @return DEST
+   */
+  @PositionalParameter
+  abstract Path dest();
+
+  /**
+   * Copy directories recursively
+   */
+  @Parameter(shortName = 'r')
   abstract boolean recursive();
 
-  @ShortName('b') @LongName("")
-  @Description("make a backup of each existing destination file")
+  /**
+   * Make a backup of each existing destination file
+   */
+  @Parameter(shortName = 'b', longName = "")
   abstract boolean backup();
 
-  @ShortName('S')
-  @Description("override the usual backup suffix")
+  /**
+   * Override the usual backup suffix
+   */
+  @Parameter(shortName = 's')
   abstract Optional<String> suffix();
 }
 ````
@@ -188,19 +216,31 @@ parameter on the command line, this program now prints the following:
        cp - copy files and directories
 
 SYNOPSIS
-       cp [OPTION]... SOURCE DEST
+       cp [&lt;options&gt;] &lt;SOURCE&gt; &lt;DEST&gt;
 
 DESCRIPTION
        Copy SOURCE to DEST
 
+SOURCE
+       Path or file of directory to copy
+
+DEST
+       Copy destination
+
+OPTIONS
        -r, --recursive
-              copy directories recursively
+              Copy directories recursively
 
        -b
-              make a backup of each existing destination file
+              Make a backup of each existing destination file
 
-       -S, --suffix VALUE
-              override the usual backup suffix
+       -s <suffix>, --suffix <suffix>
+              Override the usual backup suffix
+
+       --help
+              Print this help page.
+              The help flag may only be passed as the first argument.
+              Any further arguments will be ignored.
 </code></pre>
 
 The full source code of the <em>CopyFile</em>
