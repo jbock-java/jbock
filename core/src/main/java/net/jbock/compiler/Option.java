@@ -242,19 +242,35 @@ final class Option {
         .build();
   }
 
-  private String[] cleanDesc(String[] desc) {
+  static String[] cleanDesc(String[] desc) {
     if (desc.length == 0) {
       return desc;
     }
     String[] result = new String[desc.length];
     int resultpos = 0;
-    for (int i = 0; i < desc.length; i++) {
-      String token = desc[i];
+    for (String token : desc) {
       if (!token.startsWith("@")) {
         result[resultpos++] = token;
       }
     }
-    return Arrays.copyOf(result, resultpos);
+    return trim(Arrays.copyOf(result, resultpos));
+  }
+
+  static String[] trim(String[] desc) {
+    int firstNonempty = 0, lastNonempty = desc.length - 1;
+    for (int i = 0; i < desc.length; i++) {
+      if (!desc[i].isEmpty()) {
+        firstNonempty = i;
+        break;
+      }
+    }
+    for (int j = desc.length - 1; j >= firstNonempty; j--) {
+      if (!desc[j].isEmpty()) {
+        lastNonempty = j;
+        break;
+      }
+    }
+    return Arrays.copyOfRange(desc, firstNonempty, lastNonempty + 1);
   }
 
   private static MethodSpec shortNameMapMethod(

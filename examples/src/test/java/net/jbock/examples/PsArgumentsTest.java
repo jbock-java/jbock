@@ -23,6 +23,7 @@ class PsArgumentsTest {
         "  -a, --all",
         "",
         "  -w <number>, --wide <number>",
+        "    This is the description.",
         "",
         "  --help",
         "    Print this help page.",

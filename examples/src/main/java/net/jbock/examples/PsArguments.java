@@ -12,6 +12,8 @@ abstract class PsArguments {
   abstract boolean all();
 
   /**
+   * This is the description.
+   *
    * @return number A number
    */
   @Parameter(shortName = 'w')
