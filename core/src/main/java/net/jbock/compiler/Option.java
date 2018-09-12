@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.Description;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
@@ -155,7 +154,7 @@ final class Option {
   }
 
   private TypeSpec optionEnumConstant(Param param, int j) {
-    String[] desc = getText(param.description());
+    String[] desc = param.description();
     String argumentName = param.descriptionArgumentName();
     Map<String, Object> map = new LinkedHashMap<>();
     map.put("longName", param.longName());
@@ -225,8 +224,8 @@ final class Option {
     return spec.build();
   }
 
-
   private CodeBlock descExpression(String[] desc) {
+    desc = cleanDesc(desc);
     if (desc.length == 0) {
       return CodeBlock.builder().add("$T.emptyList()", Collections.class).build();
     } else if (desc.length == 1) {
@@ -234,11 +233,28 @@ final class Option {
     }
     Object[] args = new Object[1 + desc.length];
     args[0] = Arrays.class;
-    System.arraycopy(desc, 0, args, 1, desc.length);
+    for (int i = 0; i < desc.length; i++) {
+      args[i + 1] = desc[i].trim();
+    }
     return CodeBlock.builder()
         .add(String.format("$T.asList($Z%s)",
             String.join(",$Z", nCopies(desc.length, "$S"))), args)
         .build();
+  }
+
+  private String[] cleanDesc(String[] desc) {
+    if (desc.length == 0) {
+      return desc;
+    }
+    String[] result = new String[desc.length];
+    int resultpos = 0;
+    for (int i = 0; i < desc.length; i++) {
+      String token = desc[i];
+      if (!token.startsWith("@")) {
+        result[resultpos++] = token;
+      }
+    }
+    return Arrays.copyOf(result, resultpos);
   }
 
   private static MethodSpec shortNameMapMethod(
@@ -299,13 +315,6 @@ final class Option {
         .returns(longNames.type)
         .addModifiers(STATIC)
         .build();
-  }
-
-  private static String[] getText(Description description) {
-    if (description == null) {
-      return new String[0];
-    }
-    return description.value();
   }
 
   private static MethodSpec describeParamMethod(

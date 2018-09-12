@@ -1,24 +1,30 @@
 package net.jbock.examples;
 
-import java.util.OptionalInt;
 import net.jbock.CommandLineArguments;
-import net.jbock.Description;
-import net.jbock.Positional;
+import net.jbock.PositionalParameter;
+
+import java.util.OptionalInt;
 
 // Allow positional arguments to start with a dash, so negative numbers can be passed.
 @CommandLineArguments(strict = false)
 public abstract class AdditionArguments {
 
-  @Positional
-  @Description("First argument")
+  /**
+   * First argument
+   */
+  @PositionalParameter
   abstract int a();
 
-  @Positional
-  @Description("Second argument")
+  /**
+   * Second argument
+   */
+  @PositionalParameter
   abstract int b();
 
-  @Positional
-  @Description("Optional third argument")
+  /**
+   * Optional third argument
+   */
+  @PositionalParameter
   abstract OptionalInt c();
 
   final int sum() {

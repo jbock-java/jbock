@@ -1,18 +1,19 @@
 package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.Description;
-import net.jbock.ShortName;
+import net.jbock.Parameter;
 
 import java.util.OptionalInt;
 
 @CommandLineArguments
 abstract class PsArguments {
 
-  @ShortName('a')
+  @Parameter(shortName = 'a')
   abstract boolean all();
 
-  @ShortName('w')
-  @Description(argumentName = "number")
+  /**
+   * @return number A number
+   */
+  @Parameter(shortName = 'w')
   abstract OptionalInt wide();
 }

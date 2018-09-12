@@ -1,7 +1,8 @@
 package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.Positional;
+import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -21,111 +22,147 @@ import java.util.regex.Pattern;
 @CommandLineArguments
 abstract class VariousArguments {
 
+  @Parameter
   abstract BigDecimal bigDecimal();
 
+  @Parameter
   abstract List<BigDecimal> bigDecimalList();
 
+  @Parameter
   abstract Optional<BigDecimal> bigDecimalOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<BigDecimal> bigDecimalPos();
 
+  @Parameter
   abstract BigInteger bigInteger();
 
+  @Parameter
   abstract List<BigInteger> bigIntegerList();
 
+  @Parameter
   abstract Optional<BigInteger> bigIntegerOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<BigInteger> bigIntegerPos();
 
+  @Parameter
   abstract File file();
 
+  @Parameter
   abstract List<File> fileList();
 
+  @Parameter
   abstract Optional<File> fileOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<File> filePos();
 
+  @Parameter
   abstract Path path();
 
+  @Parameter
   abstract List<Path> pathList();
 
+  @Parameter
   abstract Optional<Path> pathOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<Path> pathPos();
 
+  @Parameter
   abstract LocalDate localDate();
 
+  @Parameter
   abstract List<LocalDate> localDateList();
 
+  @Parameter
   abstract Optional<LocalDate> localDateOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<LocalDate> localDatePos();
 
+  @Parameter
   abstract LocalDateTime localDateTime();
 
+  @Parameter
   abstract List<LocalDateTime> localDateTimeList();
 
+  @Parameter
   abstract Optional<LocalDateTime> localDateTimeOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<LocalDateTime> localDateTimePos();
 
+  @Parameter
   abstract OffsetDateTime offsetDateTime();
 
+  @Parameter
   abstract List<OffsetDateTime> offsetDateTimeList();
 
+  @Parameter
   abstract Optional<OffsetDateTime> offsetDateTimeOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<OffsetDateTime> offsetDateTimePos();
 
+  @Parameter
   abstract ZonedDateTime zonedDateTime();
 
+  @Parameter
   abstract List<ZonedDateTime> zonedDateTimeList();
 
+  @Parameter
   abstract Optional<ZonedDateTime> zonedDateTimeOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<ZonedDateTime> zonedDateTimePos();
 
+  @Parameter
   abstract URI uri();
 
+  @Parameter
   abstract List<URI> uriList();
 
+  @Parameter
   abstract Optional<URI> uriOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<URI> uriPos();
 
+  @Parameter
   abstract Charset charset();
 
+  @Parameter
   abstract List<Charset> charsetList();
 
+  @Parameter
   abstract Optional<Charset> charsetOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<Charset> charsetPos();
 
+  @Parameter
   abstract Pattern pattern();
 
+  @Parameter
   abstract List<Pattern> patternList();
 
+  @Parameter
   abstract Optional<Pattern> patternOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<Pattern> patternPos();
 
+  @Parameter
   abstract Instant instant();
 
+  @Parameter
   abstract List<Instant> instantList();
 
+  @Parameter
   abstract Optional<Instant> instantOpt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<Instant> instantPos();
 }

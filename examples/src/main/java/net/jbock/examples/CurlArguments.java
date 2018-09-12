@@ -1,45 +1,47 @@
 package net.jbock.examples;
 
+import net.jbock.CommandLineArguments;
+import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
+
 import java.util.List;
 import java.util.Optional;
-import net.jbock.CommandLineArguments;
-import net.jbock.Description;
-import net.jbock.LongName;
-import net.jbock.Positional;
-import net.jbock.ShortName;
 
+/**
+ * curl  is  a  tool  to  transfer data from or to a server
+ * using one of the supported protocols.
+ *
+ * curl offers a busload of useful tricks.
+ *
+ * curl is powered by libcurl for all transfer-related features.
+ * See libcurl(3) for details.
+ */
 @CommandLineArguments(
     programName = "curl",
-    missionStatement = "transfer a URL",
-    overview = {
-        "curl  is  a  tool  to  transfer data from or to a server " +
-            "using one of the supported protocols",
-        "",
-        "curl offers a busload of useful tricks",
-        "",
-        "curl is powered by libcurl for all transfer-related features. " +
-            "See libcurl(3) for details."
-    })
+    missionStatement = "transfer a URL")
 abstract class CurlArguments {
 
-  @ShortName('X')
-  @LongName("request")
-  @Description("Optional<String> for regular arguments")
+  /**
+   * Optional<String> for regular arguments
+   */
+  @Parameter(shortName = 'X', longName = "request")
   abstract Optional<String> method();
 
-  @ShortName('H')
-  @LongName("")
-  @Description("List<String> for repeatable arguments")
+  /**
+   * List<String> for repeatable arguments
+   */
+  @Parameter(shortName = 'H', longName = "")
   abstract List<String> headers();
 
-  @ShortName('v')
-  @LongName("")
-  @Description("boolean for flags")
+  /**
+   * boolean for flags
+   */
+  @Parameter(shortName = 'v', longName = "")
   abstract boolean verbose();
 
-  @ShortName('i')
+  @Parameter(shortName = 'i')
   abstract boolean include();
 
-  @Positional
+  @PositionalParameter
   abstract List<String> urls();
 }

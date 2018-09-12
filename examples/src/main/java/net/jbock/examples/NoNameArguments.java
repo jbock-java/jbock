@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 
 import net.jbock.CommandLineArguments;
-import net.jbock.ShortName;
+import net.jbock.Parameter;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,15 +11,18 @@ import java.util.OptionalInt;
 @CommandLineArguments
 abstract class NoNameArguments {
 
+  @Parameter
   abstract Optional<String> message();
 
+  @Parameter
   abstract List<String> file();
 
-  @ShortName('v')
+  @Parameter(shortName = 'v')
   abstract OptionalInt verbosity();
 
-  @ShortName('n')
+  @Parameter(shortName = 'n')
   abstract int number();
 
+  @Parameter
   abstract boolean cmos();
 }

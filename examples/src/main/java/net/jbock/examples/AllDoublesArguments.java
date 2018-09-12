@@ -1,9 +1,8 @@
 package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.LongName;
-import net.jbock.Positional;
-import net.jbock.ShortName;
+import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,21 +11,21 @@ import java.util.OptionalDouble;
 @CommandLineArguments
 abstract class AllDoublesArguments {
 
-  @Positional
+  @PositionalParameter
   abstract List<Double> positional();
 
-  @ShortName('i')
+  @Parameter(shortName = 'i')
   abstract List<Double> listOfDoubles();
 
-  @LongName("opt")
+  @Parameter(longName = "opt")
   abstract Optional<Double> optionalDouble();
 
-  @LongName("optdouble")
+  @Parameter(longName = "optdouble")
   abstract OptionalDouble optionalPrimitiveDouble();
 
-  @LongName("obj")
+  @Parameter(longName = "obj")
   abstract Double doubleObject();
 
-  @LongName("prim")
+  @Parameter(longName = "prim")
   abstract double primitiveDouble();
 }

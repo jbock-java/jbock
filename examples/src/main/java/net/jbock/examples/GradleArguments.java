@@ -2,47 +2,58 @@ package net.jbock.examples;
 
 
 import net.jbock.CommandLineArguments;
-import net.jbock.Description;
-import net.jbock.LongName;
-import net.jbock.Positional;
-import net.jbock.ShortName;
+import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 
-@CommandLineArguments(allowEscape = true)
+@CommandLineArguments
 abstract class GradleArguments {
 
-  @ShortName('m')
-  @Description(value = {"the message", "message goes here"})
+  /**
+   * the message
+   * message goes here
+   */
+  @Parameter(shortName = 'm')
   abstract Optional<String> message();
 
-  @ShortName('f')
-  @Description(value = "the files")
+  /**
+   * the files
+   */
+  @Parameter(shortName = 'f')
   abstract String[] file();
 
-  @Description(value = "the dir")
+  /**
+   * the dir
+   */
+  @Parameter
   abstract Optional<String> dir();
 
-  @ShortName('c')
-  @LongName("")
-  @Description("cmos flag")
+  /**
+   * cmos flag
+   */
+  @Parameter(shortName = 'c', longName = "")
   abstract boolean cmos();
 
-  @ShortName('v')
+  @Parameter(shortName = 'v')
   abstract boolean verbose();
 
-  @Positional
+  @PositionalParameter
   abstract List<String> otherTokens();
 
   @CommandLineArguments
   static abstract class Foo {
+
+    @Parameter
     abstract OptionalInt bar();
   }
 
   @CommandLineArguments
   static abstract class Bar {
+
+    @Parameter
     abstract List<String> bar();
   }
 }

@@ -1,15 +1,18 @@
 package net.jbock.examples;
 
 
-import java.util.List;
 import net.jbock.CommandLineArguments;
-import net.jbock.Positional;
+import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
+
+import java.util.List;
 
 @CommandLineArguments
 abstract class RequiredArguments {
 
+  @Parameter
   abstract String dir();
 
-  @Positional
+  @PositionalParameter
   abstract List<String> otherTokens();
 }

@@ -1,14 +1,14 @@
 package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.Positional;
+import net.jbock.PositionalParameter;
 
 @CommandLineArguments
 abstract class MvArguments {
 
-  @Positional
+  @PositionalParameter
   abstract String source();
 
-  @Positional
+  @PositionalParameter
   abstract String dest();
 }

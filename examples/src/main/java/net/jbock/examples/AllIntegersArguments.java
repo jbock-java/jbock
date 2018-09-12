@@ -1,9 +1,8 @@
 package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.LongName;
-import net.jbock.Positional;
-import net.jbock.ShortName;
+import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,21 +11,21 @@ import java.util.OptionalInt;
 @CommandLineArguments
 abstract class AllIntegersArguments {
 
-  @Positional
+  @PositionalParameter
   abstract List<Integer> positional();
 
-  @ShortName('i')
+  @Parameter(shortName = 'i')
   abstract List<Integer> listOfIntegers();
 
-  @LongName("opt")
+  @Parameter(longName = "opt")
   abstract Optional<Integer> optionalInteger();
 
-  @LongName("optint")
+  @Parameter(longName = "optint")
   abstract OptionalInt optionalInt();
 
-  @LongName("obj")
+  @Parameter(longName = "obj")
   abstract Integer integer();
 
-  @LongName("prim")
+  @Parameter(longName = "prim")
   abstract int primitiveInt();
 }

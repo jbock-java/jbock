@@ -1,25 +1,25 @@
 package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.Positional;
+import net.jbock.PositionalParameter;
 
 import java.util.Optional;
 
-@CommandLineArguments(allowEscape = true)
+@CommandLineArguments
 abstract class PositionalArguments {
 
-  @Positional
+  @PositionalParameter
   abstract String source();
 
-  @Positional
+  @PositionalParameter
   abstract String dest();
 
-  @Positional
+  @PositionalParameter
   abstract int anotherInt();
 
-  @Positional
+  @PositionalParameter
   abstract Optional<String> optString();
 
-  @Positional
+  @PositionalParameter
   abstract String[] otherTokens();
 }

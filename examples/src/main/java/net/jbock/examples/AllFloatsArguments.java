@@ -1,9 +1,8 @@
 package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.LongName;
-import net.jbock.Positional;
-import net.jbock.ShortName;
+import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
 
 import java.util.List;
 import java.util.Optional;
@@ -11,18 +10,18 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class AllFloatsArguments {
 
-  @Positional
+  @PositionalParameter
   abstract List<Float> positional();
 
-  @ShortName('i')
+  @Parameter(shortName = 'i')
   abstract List<Float> listOfFloats();
 
-  @LongName("opt")
+  @Parameter(longName = "opt")
   abstract Optional<Float> optionalFloat();
 
-  @LongName("obj")
+  @Parameter(longName = "obj")
   abstract Float floatObject();
 
-  @LongName("prim")
+  @Parameter(longName = "prim")
   abstract float primitiveFloat();
 }

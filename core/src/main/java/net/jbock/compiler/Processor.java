@@ -1,10 +1,8 @@
 package net.jbock.compiler;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.Description;
-import net.jbock.LongName;
-import net.jbock.Positional;
-import net.jbock.ShortName;
+import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.JavaFile;
 import net.jbock.com.squareup.javapoet.TypeSpec;
@@ -25,6 +23,8 @@ import java.io.IOException;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
@@ -49,10 +49,8 @@ public final class Processor extends AbstractProcessor {
   public Set<String> getSupportedAnnotationTypes() {
     return Stream.of(
         CommandLineArguments.class,
-        Description.class,
-        LongName.class,
-        Positional.class,
-        ShortName.class)
+        Parameter.class,
+        PositionalParameter.class)
         .map(Class::getName)
         .collect(toSet());
   }
@@ -75,9 +73,11 @@ public final class Processor extends AbstractProcessor {
               "Skipping code generation: No abstract methods found", sourceType);
           continue;
         }
+
         Set<OptionType> paramTypes = nonpositionalParamTypes(parameters);
         Set<OptionType> positionalParamTypes = positionalParamTypes(parameters);
         Context context = Context.create(
+            getOverview(sourceType),
             sourceType,
             parameters,
             paramTypes,
@@ -213,7 +213,7 @@ public final class Processor extends AbstractProcessor {
     List<Param> parameters = new ArrayList<>(abstractMethods.size());
     for (int index = 0; index < abstractMethods.size(); index++) {
       ExecutableElement method = abstractMethods.get(index);
-      Param param = Param.create(parameters, method, index);
+      Param param = Param.create(parameters, method, index, getDescription(method));
       if (Objects.equals("help", param.longName()) &&
           sourceType.getAnnotation(CommandLineArguments.class).addHelp()) {
         throw ValidationException.create(method, "'--help' is a special token, see CommandLineArguments#addHelp");
@@ -224,6 +224,30 @@ public final class Processor extends AbstractProcessor {
     checkDistinctLongNames(parameters);
     checkDistinctShortNames(parameters);
     return checkPositionalOrder(parameters);
+  }
+
+  private List<String> getOverview(TypeElement sourceType) {
+    String docComment = processingEnv.getElementUtils().getDocComment(sourceType);
+    if (docComment == null) {
+      return Collections.emptyList();
+    }
+    return Arrays.asList(tokenize(docComment));
+  }
+
+  private String[] getDescription(ExecutableElement method) {
+    String docComment = processingEnv.getElementUtils().getDocComment(method);
+    if (docComment == null) {
+      return new String[0];
+    }
+    return tokenize(docComment);
+  }
+
+  private static String[] tokenize(String docComment) {
+    String[] tokens = docComment.trim().split("\\n", -1);
+    for (int i = 0; i < tokens.length; i++) {
+      tokens[i] = tokens[i].trim();
+    }
+    return tokens;
   }
 
   private void checkDistinctShortNames(List<Param> params) {
@@ -283,10 +307,8 @@ public final class Processor extends AbstractProcessor {
 
   private boolean checkValid(RoundEnvironment env) {
     List<ExecutableElement> methods = new ArrayList<>();
-    methods.addAll(methodsIn(env.getElementsAnnotatedWith(Description.class)));
-    methods.addAll(methodsIn(env.getElementsAnnotatedWith(LongName.class)));
-    methods.addAll(methodsIn(env.getElementsAnnotatedWith(Positional.class)));
-    methods.addAll(methodsIn(env.getElementsAnnotatedWith(ShortName.class)));
+    methods.addAll(methodsIn(env.getElementsAnnotatedWith(Parameter.class)));
+    methods.addAll(methodsIn(env.getElementsAnnotatedWith(PositionalParameter.class)));
     for (ExecutableElement method : methods) {
       Element enclosingElement = method.getEnclosingElement();
       if (enclosingElement.getAnnotation(CommandLineArguments.class) == null) {

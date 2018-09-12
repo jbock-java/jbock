@@ -1,14 +1,14 @@
 package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.Positional;
+import net.jbock.PositionalParameter;
 
 @CommandLineArguments(strict = false, allowEscape = false)
 abstract class GitArguments {
 
-  @Positional
+  @PositionalParameter
   abstract String command();
 
-  @Positional
+  @PositionalParameter
   abstract String[] remainingArgs();
 }

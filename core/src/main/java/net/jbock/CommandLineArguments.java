@@ -29,7 +29,7 @@ import java.lang.annotation.Target;
  * </ul>
  *
  * <p>
- * If the method carries the {@link Positional} annotation,
+ * If the method carries the {@link PositionalParameter} annotation,
  * it must not return {@code boolean}.
  * </p>
  *
@@ -38,12 +38,6 @@ import java.lang.annotation.Target;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
 public @interface CommandLineArguments {
-
-  /**
-   * General usage information that is printed when the user passes the {@code --help} parameter.
-   * The overview is printed at the beginning of the {@code DESCRIPTION} section of the usage information.
-   */
-  String[] overview() default {};
 
   /**
    * <p>

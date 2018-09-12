@@ -2,23 +2,23 @@ package net.jbock.examples;
 
 
 import net.jbock.CommandLineArguments;
-import net.jbock.ShortName;
+import net.jbock.Parameter;
 
 @CommandLineArguments
 abstract class TarArguments {
 
-  @ShortName('x')
+  @Parameter(shortName = 'x')
   abstract boolean extract();
 
-  @ShortName('c')
+  @Parameter(shortName = 'c')
   abstract boolean create();
 
-  @ShortName('v')
+  @Parameter(shortName = 'v')
   abstract boolean verbose();
 
-  @ShortName('z')
+  @Parameter(shortName = 'z')
   abstract boolean compress();
 
-  @ShortName('f')
+  @Parameter(shortName = 'f')
   abstract String file();
 }

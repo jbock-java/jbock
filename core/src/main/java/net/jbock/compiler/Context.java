@@ -130,6 +130,7 @@ final class Context {
   }
 
   static Context create(
+      List<String> description,
       TypeElement sourceType,
       List<Param> parameters,
       Set<OptionType> paramTypes,
@@ -144,7 +145,6 @@ final class Context {
         .map(ExecutableElement::getSimpleName)
         .map(Name::toString)
         .noneMatch(s -> s.equals("toString"));
-    List<String> description = Arrays.asList(sourceType.getAnnotation(CommandLineArguments.class).overview());
     String missionStatement = sourceType.getAnnotation(CommandLineArguments.class).missionStatement();
     ClassName optionType = generatedClass.nestedClass("Option");
     ClassName helperType = generatedClass.nestedClass("Helper");

@@ -1,19 +1,20 @@
 package net.jbock.examples;
 
-import java.util.List;
 import net.jbock.CommandLineArguments;
-import net.jbock.Positional;
-import net.jbock.ShortName;
+import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
+
+import java.util.List;
 
 @CommandLineArguments(allowEscape = true)
 abstract class RmArguments {
 
-  @ShortName('r')
+  @Parameter(shortName = 'r')
   abstract boolean recursive();
 
-  @ShortName('f')
+  @Parameter(shortName = 'f')
   abstract boolean force();
 
-  @Positional
+  @PositionalParameter
   abstract List<String> otherTokens();
 }

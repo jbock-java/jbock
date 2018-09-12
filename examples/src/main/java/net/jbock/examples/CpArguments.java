@@ -1,18 +1,18 @@
 package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.Positional;
-import net.jbock.ShortName;
+import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
 
 @CommandLineArguments
 abstract class CpArguments {
 
-  @ShortName('r')
+  @Parameter(shortName = 'r')
   abstract boolean recursive();
 
-  @Positional
+  @PositionalParameter
   abstract String source();
 
-  @Positional
+  @PositionalParameter
   abstract String dest();
 }
