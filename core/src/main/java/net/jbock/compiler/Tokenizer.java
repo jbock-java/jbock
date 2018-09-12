@@ -13,7 +13,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
-import java.util.function.Function;
 
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
@@ -24,7 +23,6 @@ import static net.jbock.com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.Util.optionalOf;
 import static net.jbock.compiler.Util.optionalOfSubtype;
 
 final class Tokenizer {
@@ -84,7 +82,7 @@ final class Tokenizer {
 
     return builder
         .addParameter(args)
-        .returns(optionalOf(TypeName.get(context.sourceType.asType())))
+        .returns(context.parseResultType())
         .build();
   }
 
@@ -258,13 +256,13 @@ final class Tokenizer {
         result.type, result, Arrays.class, args);
 
     FieldSpec outStream = context.addHelp ? out : err;
-    builder.beginControlFlow("if (!$N.isPresent())", result)
-        .addStatement("printUsage($N)", outStream)
-        .addStatement("$N.flush()", outStream)
+    builder.beginControlFlow("if ($N.isPresent())", result)
+        .addStatement("return new $T($N.get(), true)", context.parseResultType(), result)
         .endControlFlow();
 
-    builder.addStatement("return $N.map($T.identity())",
-        result, Function.class);
+    builder.addStatement("printUsage($N)", outStream)
+        .addStatement("$N.flush()", outStream)
+        .addStatement("return new $T(null, true)", context.parseResultType());
     return builder.build();
   }
 
@@ -289,7 +287,7 @@ final class Tokenizer {
       builder.addStatement("$N.println($N.getMessage())", err, e);
     }
     builder.addStatement("$N.flush()", err);
-    builder.addStatement("return $T.empty()", Optional.class);
+    builder.addStatement("return new $T(null, false)", context.parseResultType());
     return builder.build();
   }
 

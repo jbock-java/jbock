@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HelplessArgumentsTest {
@@ -27,27 +28,27 @@ class HelplessArgumentsTest {
 
   @Test
   void success0() {
-    Optional<HelplessArguments> opt = HelplessArguments_Parser.create().parse(new String[]{"x"});
-    assertTrue(opt.isPresent());
-    HelplessArguments args = opt.get();
+    HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"x"});
+    assertTrue(opt.result().isPresent());
+    HelplessArguments args = opt.result().get();
     assertEquals("x", args.required());
-    assertEquals(false, args.help());
+    assertFalse(args.help());
   }
 
   @Test
   void success1() {
-    Optional<HelplessArguments> opt = HelplessArguments_Parser.create().parse(new String[]{"x", "--help"});
-    assertTrue(opt.isPresent());
-    HelplessArguments args = opt.get();
+    HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"x", "--help"});
+    assertTrue(opt.result().isPresent());
+    HelplessArguments args = opt.result().get();
     assertTrue(args.help());
     assertEquals("x", args.required());
   }
 
   @Test
   void success2() {
-    Optional<HelplessArguments> opt = HelplessArguments_Parser.create().parse(new String[]{"--help", "x"});
-    assertTrue(opt.isPresent());
-    HelplessArguments args = opt.get();
+    HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"--help", "x"});
+    assertTrue(opt.result().isPresent());
+    HelplessArguments args = opt.result().get();
     assertTrue(args.help());
     assertEquals("x", args.required());
   }

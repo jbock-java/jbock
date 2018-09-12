@@ -116,7 +116,10 @@ public final class ParserTestFixture<E> {
         try {
           Method parseMethod = builder.getClass().getDeclaredMethod("parse", args.getClass());
           parseMethod.setAccessible(true);
-          return (Optional<E>) parseMethod.invoke(builder, new Object[]{args});
+          Object parseResult = parseMethod.invoke(builder, new Object[]{args});
+          Method resultMethod = parseResult.getClass().getDeclaredMethod("result");
+          resultMethod.setAccessible(true);
+          return (Optional<E>) resultMethod.invoke(parseResult);
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
           throw new RuntimeException(e);
         }

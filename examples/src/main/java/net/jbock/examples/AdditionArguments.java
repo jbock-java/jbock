@@ -7,7 +7,7 @@ import net.jbock.Positional;
 
 // Allow positional arguments to start with a dash, so negative numbers can be passed.
 @CommandLineArguments(strict = false)
-abstract class AdditionArguments {
+public abstract class AdditionArguments {
 
   @Positional
   @Description("First argument")

@@ -72,6 +72,7 @@ final class Context {
   private final ClassName indentPrinterType;
   private final ClassName implType;
   private final ClassName tokenizerType;
+  private final ClassName parseResultType;
 
   private final ParameterSpec quote = ParameterSpec.builder(
       ParameterizedTypeName.get(ClassName.get(Function.class), STRING, STRING), "quote").build();
@@ -101,7 +102,8 @@ final class Context {
       ClassName helperType,
       ClassName indentPrinterType,
       ClassName implType,
-      ClassName tokenizerType) {
+      ClassName tokenizerType,
+      ClassName parseResultType) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -124,6 +126,7 @@ final class Context {
     this.indentPrinterType = indentPrinterType;
     this.implType = implType;
     this.tokenizerType = tokenizerType;
+    this.parseResultType = parseResultType;
   }
 
   static Context create(
@@ -152,6 +155,7 @@ final class Context {
     ClassName indentPrinterType = generatedClass.nestedClass("IndentPrinter");
     ClassName implType = generatedClass.nestedClass(sourceType.getSimpleName() + "Impl");
     ClassName tokenizerType = generatedClass.nestedClass("Tokenizer");
+    ClassName parseResultType = generatedClass.nestedClass("ParseResult");
 
     return new Context(
         sourceType,
@@ -174,7 +178,8 @@ final class Context {
         helperType,
         indentPrinterType,
         implType,
-        tokenizerType);
+        tokenizerType,
+        parseResultType);
   }
 
   private static ClassName parserClass(ClassName type) {
@@ -272,6 +277,10 @@ final class Context {
 
   ClassName tokenizerType() {
     return tokenizerType;
+  }
+
+  ClassName parseResultType() {
+    return parseResultType;
   }
 
   ParameterSpec quoteParam() {

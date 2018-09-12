@@ -40,7 +40,7 @@ class VariousArgumentsTest {
         "ISO-8859-1",
         "^[abc]*$",
         "1970-01-01T00:00:00Z"
-    });
+    }).result();
     assertTrue(parsed.isPresent());
     VariousArguments args = parsed.get();
     assertEquals(new BigDecimal("3.14159265358979323846264338327950288419716939937510"), args.bigDecimal());

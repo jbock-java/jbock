@@ -36,6 +36,7 @@ final class Parser {
   private final Option option;
   private final Helper helper;
   private final Impl impl;
+  private final ParseResult parseResult;
 
   private final MethodSpec readNextMethod;
   private final MethodSpec readArgumentMethod;
@@ -63,6 +64,7 @@ final class Parser {
       Option option,
       Helper helper,
       Impl impl,
+      ParseResult parseResult,
       MethodSpec readNextMethod,
       MethodSpec readArgumentMethod) {
     this.context = context;
@@ -71,6 +73,7 @@ final class Parser {
     this.option = option;
     this.helper = helper;
     this.impl = impl;
+    this.parseResult = parseResult;
     this.readNextMethod = readNextMethod;
     this.readArgumentMethod = readArgumentMethod;
   }
@@ -82,8 +85,9 @@ final class Parser {
     Option option = Option.create(context);
     Impl impl = Impl.create(context, option);
     Helper helper = Helper.create(context, option);
+    ParseResult parseResult = ParseResult.create(context);
     Tokenizer builder = Tokenizer.create(context, helper);
-    return new Parser(context, indentPrinter, builder, option, helper, impl, readNextMethod, readArgumentMethod);
+    return new Parser(context, indentPrinter, builder, option, helper, impl, parseResult, readNextMethod, readArgumentMethod);
   }
 
   TypeSpec define() {
@@ -107,6 +111,7 @@ final class Parser {
         .addType(RegularOptionParser.define(context))
         .addType(RepeatableOptionParser.define(context))
         .addType(indentPrinter.define())
+        .addType(parseResult.define())
         .addField(out)
         .addField(err)
         .addField(indent)
@@ -173,7 +178,7 @@ final class Parser {
     spec.addStatement("return $N.parse($N)", paramTokenizer, args);
 
     return spec.addParameter(args)
-        .returns(optionalOf(TypeName.get(context.sourceType.asType())));
+        .returns(context.parseResultType());
   }
 
   private MethodSpec.Builder parseOrExitMethod() {
@@ -184,14 +189,14 @@ final class Parser {
         .build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder(METHOD_NAME_PARSE_OR_EXIT);
 
-    spec.addStatement("$T $N = parse($N)", result.type, result, args);
+    spec.addStatement("$T $N = parse($N)", context.parseResultType(), result, args);
 
-    spec.beginControlFlow("if ($N.isPresent())", result)
-        .addStatement("return $N.get()", result)
+    spec.beginControlFlow("if ($N.$N != null)", result, parseResult.result)
+        .addStatement("return $N.$N", result, parseResult.result)
         .endControlFlow();
 
-    spec.addStatement("$T.exit($N)", System.class, errorExitCode);
-    spec.addStatement("throw new $T($S)", IllegalStateException.class, "We should never get here.");
+    spec.addStatement("$T.exit($N.$N ? 0 : $N)", System.class, result, parseResult.success, errorExitCode);
+    spec.addStatement("throw new $T($S)", AssertionError.class, "We should never get here.");
 
     return spec.addParameter(args)
         .returns(TypeName.get(context.sourceType.asType()));
@@ -215,6 +220,10 @@ final class Parser {
   }
 
   private MethodSpec addPublicIfNecessary(MethodSpec.Builder spec) {
+    return addPublicIfNecessary(context, spec);
+  }
+
+  static MethodSpec addPublicIfNecessary(Context context, MethodSpec.Builder spec) {
     if (context.sourceType.getModifiers().contains(PUBLIC)) {
       return spec.addModifiers(PUBLIC).build();
     }
