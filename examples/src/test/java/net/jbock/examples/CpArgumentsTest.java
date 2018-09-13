@@ -24,13 +24,15 @@ class CpArgumentsTest {
   @Test
   void minimal() {
     f.assertThat("a", "b").succeeds(
-        "recursive", false,
         "source", "a",
-        "dest", "b");
-    f.assertThat("b", "a").succeeds(
+        "dest", "b",
         "recursive", false,
+        "suffix", null);
+    f.assertThat("b", "a").succeeds(
         "source", "b",
-        "dest", "a");
+        "dest", "a",
+        "recursive", false,
+        "suffix", null);
   }
 
   @Test
@@ -51,9 +53,10 @@ class CpArgumentsTest {
   @Test
   void flagInVariousPositions() {
     Object[] expected = new Object[]{
-        "recursive", true,
         "source", "a",
-        "dest", "b"};
+        "dest", "b",
+        "recursive", true,
+        "suffix", null};
     f.assertThat("-r", "a", "b")
         .succeeds(expected);
     f.assertThat("a", "-r", "b")
@@ -79,6 +82,9 @@ class CpArgumentsTest {
         "",
         "OPTIONS",
         "  -r, --recursive",
+        "",
+        "  -s <suffix>, --suffix <suffix>",
+        "    Override the usual backup suffix",
         "",
         "  --help",
         "    Print this help page.",

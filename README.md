@@ -234,7 +234,7 @@ OPTIONS
        -b
               Make a backup of each existing destination file
 
-       -s <suffix>, --suffix <suffix>
+       -s &lt;suffix&gt;, --suffix &lt;suffix&gt;
               Override the usual backup suffix
 
        --help
