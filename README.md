@@ -28,7 +28,7 @@ This is what the program prints, when invoked without parameters:
 </code></pre>
 
 Being invoked without any parameters is something we should be expecting.
-Instead of a stacktrace, we could use the opportunity to show
+Instead of a stacktrace, we could use the opportunity to print
 a summmary of our command line options. Let's see how to do this with jbock.
 
 We start by defining an abstract class `Args`,
@@ -75,7 +75,7 @@ After the change, the program prints
 the following when invoked without any arguments:
 
 <pre><code>Usage: CopyFile SOURCE DEST
-Missing parameter: SRC
+Missing parameter: SOURCE
 Try 'CopyFile --help' for more information.
 </code></pre>
 
@@ -113,10 +113,9 @@ DESCRIPTION
 To make things more interesting, we're going to add some options.
 We start by adding the recursive flag.
 
-In jbock, an option is declared as an abstract method that doesn't take any parameters.
-
-A <em>flag</em> is declared as a method that returns `boolean`.
-This method will return true if the flag is present on the command line.
+A <em>flag</em> is a parameter that doesn't take an argument.
+A method that returns `boolean` declares the flag.
+This method will return true if the `--recursive` parameter is present on the command line.
 
 ````java
 @CommandLineArguments
@@ -127,7 +126,7 @@ abstract class Args {
 }
 ````
 
-The `recursive` argument is not positional. It makes no difference whether it
+The `recursive` parameter is not positional, so it makes no difference whether it
 is declared before or after
 the `source()` and `dest()` methods, or between them.
 
@@ -153,7 +152,7 @@ abstract class Args {
   @Parameter(shortName = 'b', longName = "")
   abstract boolean backup();
 
-  @Parameter(shortName = 'S')
+  @Parameter(shortName = 's')
   abstract Optional<String> suffix();
 }
 ````
