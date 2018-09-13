@@ -256,3 +256,6 @@ Some projects that use jbock:
 * [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
 
+##### Which types are supported?
+
+Have a look [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
