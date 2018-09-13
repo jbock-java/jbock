@@ -299,8 +299,8 @@ public final class Processor extends AbstractProcessor {
     for (Class<? extends Annotation> annotation : forbiddenAnnotations) {
       if (executableElement.getAnnotation(annotation) != null) {
         throw ValidationException.create(executableElement,
-            "@" + annotation.getSimpleName() +
-                " is conflicting with @" + cause.annotationType().getSimpleName());
+            String.format("Cannot have both of %s and %s",
+                annotation.getSimpleName(), cause.annotationType().getSimpleName()));
       }
     }
   }

@@ -41,4 +41,13 @@ public @interface Parameter {
    * @return either space or a character that is not a dash
    */
   char shortName() default ' ';
+
+  /**
+   * <p>The argument name that's printed in the description.
+   * Has no effect if this is a boolean argument, i.e. a flag.</p>
+   *
+   * <p>An empty string is special syntax for automatic parameter name,
+   * which will be based on the method name.</p>
+   */
+  String argHandle() default "";
 }

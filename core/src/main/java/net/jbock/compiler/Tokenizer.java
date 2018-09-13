@@ -177,7 +177,12 @@ final class Tokenizer {
     spec.addParameter(outStream);
     spec.addParameter(optionParam);
 
-    spec.addStatement("$N.println($N.describe())", outStream, optionParam);
+    spec.beginControlFlow("if ($N.positional())", optionParam)
+        .addStatement("$N.println($N.describe().toUpperCase())", outStream, optionParam)
+        .endControlFlow()
+        .beginControlFlow("else")
+        .addStatement("$N.println($N.describe())", outStream, optionParam)
+        .endControlFlow();
 
     spec.addStatement("$N.incrementIndent()", outStream);
     spec.beginControlFlow("for ($T $N : $N.description)", STRING, lineParam, optionParam)
@@ -234,8 +239,8 @@ final class Tokenizer {
           break;
         case LIST:
           builder.addStatement("$N.add($S)", joiner, context.allowEscape() ?
-              "[[--] <" + param.descriptionArgumentName() + ">]" :
-              "[<" + param.descriptionArgumentName() + ">]");
+              "[[--] <" + param.descriptionArgumentNameWithDots() + ">]" :
+              "[<" + param.descriptionArgumentNameWithDots() + ">]");
           break;
         default:
           throw new AssertionError();

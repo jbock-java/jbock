@@ -432,7 +432,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("@Parameter is conflicting with @PositionalParameter");
+        .withErrorContaining("Cannot have both of Parameter and PositionalParameter");
   }
 
   @Test

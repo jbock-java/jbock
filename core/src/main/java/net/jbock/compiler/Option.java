@@ -42,6 +42,7 @@ final class Option {
   private final MethodSpec describeParamMethod;
 
   private final MethodSpec exampleMethod;
+
   private final FieldSpec descriptionField;
 
   private final FieldSpec argumentNameField;
@@ -154,7 +155,7 @@ final class Option {
   }
 
   private TypeSpec optionEnumConstant(Param param, int j) {
-    String[] desc = param.description();
+    List<String> desc = param.description();
     String argumentName = param.descriptionArgumentName();
     Map<String, Object> map = new LinkedHashMap<>();
     map.put("longName", param.longName());
@@ -177,19 +178,36 @@ final class Option {
     }
     if (param.paramType == OptionType.FLAG) {
       spec.addMethod(validShortTokenOverride(param));
-      spec.addMethod(MethodSpec.methodBuilder("describe")
-          .returns(STRING)
-          .addStatement("return describeParam($S)", "")
-          .addAnnotation(Override.class)
-          .build());
+      spec.addMethod(describeMethodFlagOverride());
     } else if (param.isPositional()) {
-      spec.addMethod(MethodSpec.methodBuilder("describe")
-          .returns(STRING)
-          .addStatement("return name()")
-          .addAnnotation(Override.class)
-          .build());
+      spec.addMethod(describeMethodPositionalOverride());
+    } else if (param.paramType == OptionType.REPEATABLE) {
+      spec.addMethod(describeMethodRepeatableOverride());
     }
     return spec.build();
+  }
+
+  private MethodSpec describeMethodFlagOverride() {
+    return MethodSpec.methodBuilder("describe")
+        .returns(STRING)
+        .addStatement("return describeParam($S)", "")
+        .addAnnotation(Override.class)
+        .build();
+  }
+
+  private MethodSpec describeMethodRepeatableOverride() {
+    return MethodSpec.methodBuilder("describe")
+        .returns(STRING)
+        .addStatement("return describeParam($T.format($S, $N))", String.class, " <%s...>", argumentNameField)
+        .build();
+  }
+
+  private MethodSpec describeMethodPositionalOverride() {
+    return MethodSpec.methodBuilder("describe")
+        .returns(STRING)
+        .addStatement("return $N", argumentNameField)
+        .addAnnotation(Override.class)
+        .build();
   }
 
   private MethodSpec parserMethod(Param param) {
@@ -224,53 +242,21 @@ final class Option {
     return spec.build();
   }
 
-  private CodeBlock descExpression(String[] desc) {
-    desc = cleanDesc(desc);
-    if (desc.length == 0) {
+  private CodeBlock descExpression(List<String> desc) {
+    if (desc.isEmpty()) {
       return CodeBlock.builder().add("$T.emptyList()", Collections.class).build();
-    } else if (desc.length == 1) {
-      return CodeBlock.builder().add("$T.singletonList($S)", Collections.class, desc[0]).build();
+    } else if (desc.size() == 1) {
+      return CodeBlock.builder().add("$T.singletonList($S)", Collections.class, desc.get(0)).build();
     }
-    Object[] args = new Object[1 + desc.length];
+    Object[] args = new Object[1 + desc.size()];
     args[0] = Arrays.class;
-    for (int i = 0; i < desc.length; i++) {
-      args[i + 1] = desc[i].trim();
+    for (int i = 0; i < desc.size(); i++) {
+      args[i + 1] = desc.get(i);
     }
     return CodeBlock.builder()
         .add(String.format("$T.asList($Z%s)",
-            String.join(",$Z", nCopies(desc.length, "$S"))), args)
+            String.join(",$Z", nCopies(desc.size(), "$S"))), args)
         .build();
-  }
-
-  static String[] cleanDesc(String[] desc) {
-    if (desc.length == 0) {
-      return desc;
-    }
-    String[] result = new String[desc.length];
-    int resultpos = 0;
-    for (String token : desc) {
-      if (!token.startsWith("@")) {
-        result[resultpos++] = token;
-      }
-    }
-    return trim(Arrays.copyOf(result, resultpos));
-  }
-
-  static String[] trim(String[] desc) {
-    int firstNonempty = 0, lastNonempty = desc.length - 1;
-    for (int i = 0; i < desc.length; i++) {
-      if (!desc[i].isEmpty()) {
-        firstNonempty = i;
-        break;
-      }
-    }
-    for (int j = desc.length - 1; j >= firstNonempty; j--) {
-      if (!desc[j].isEmpty()) {
-        lastNonempty = j;
-        break;
-      }
-    }
-    return Arrays.copyOfRange(desc, firstNonempty, lastNonempty + 1);
   }
 
   private static MethodSpec shortNameMapMethod(

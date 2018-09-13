@@ -12,6 +12,8 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.ExecutableElement;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -60,7 +62,9 @@ final class Param {
 
   private final FieldSpec fieldSpec;
 
-  private final String[] description;
+  private final List<String> description;
+
+  private final String descriptionArgumentName;
 
   private static String enumConstant(List<Param> params, String methodName, int index) {
     String result = snakeCase(methodName);
@@ -72,7 +76,6 @@ final class Param {
     return result;
   }
 
-
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
   private Param(
@@ -82,11 +85,13 @@ final class Param {
       OptionType paramType,
       ExecutableElement sourceMethod,
       boolean array,
-      boolean required, String name,
+      boolean required,
+      String name,
       boolean positional,
       Coercion coercion,
       FieldSpec fieldSpec,
-      String[] description) {
+      List<String> description,
+      String descriptionArgumentName) {
     this.required = required;
     this.coercion = coercion;
     this.shortName = shortName;
@@ -99,6 +104,8 @@ final class Param {
     this.positional = positional;
     this.fieldSpec = fieldSpec;
     this.description = description;
+    this.descriptionArgumentName = descriptionArgumentName == null ? null :
+        (required ? descriptionArgumentName.toUpperCase() : descriptionArgumentName.toLowerCase());
     if (positional && positionalOrder() == null) {
       throw new AssertionError("positional, but positionalType is null");
     }
@@ -150,9 +157,8 @@ final class Param {
       throw ValidationException.create(sourceMethod,
           "Neither long nor short name defined for method " + Util.methodToString(sourceMethod));
     }
-    checkNotPresent(sourceMethod,
-        sourceMethod.getAnnotation(Parameter.class),
-        singletonList(PositionalParameter.class));
+    Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
+    checkNotPresent(sourceMethod, parameter, singletonList(PositionalParameter.class));
     checkName(sourceMethod, Objects.toString(shortName, null));
     checkName(sourceMethod, longName);
     TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod);
@@ -163,6 +169,10 @@ final class Param {
         sourceMethod.getSimpleName().toString())
         .addModifiers(FINAL)
         .build();
+    String name = enumConstant(params, sourceMethod.getSimpleName().toString(), index);
+    String descriptionArgumentName = parameter.argHandle().isEmpty() ?
+        descriptionArgumentName(type, typeInfo.required(), name) :
+        parameter.argHandle();
     return new Param(
         shortName,
         longName,
@@ -171,25 +181,16 @@ final class Param {
         sourceMethod,
         typeInfo.array(),
         typeInfo.required(),
-        enumConstant(params, sourceMethod.getSimpleName().toString(), index),
+        name,
         false,
         typeInfo.coercion(),
         fieldSpec,
-        description);
-  }
-
-  private static OptionType optionType(TypeInfo info) {
-    if (info.flag()) {
-      return OptionType.FLAG;
-    }
-    if (info.repeatable()) {
-      return OptionType.REPEATABLE;
-    }
-    return OptionType.REGULAR;
+        cleanDesc(description),
+        descriptionArgumentName);
   }
 
   private static Param createPositional(List<Param> params, ExecutableElement sourceMethod, int index, String[] description) {
-    PositionalParameter positional = sourceMethod.getAnnotation(PositionalParameter.class);
+    PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod);
     OptionType type = optionType(typeInfo);
     if (type == OptionType.FLAG) {
@@ -197,15 +198,17 @@ final class Param {
           "A method that carries the Positional annotation " +
               "may not return " + TypeName.get(sourceMethod.getReturnType()));
     }
-    checkNotPresent(sourceMethod,
-        positional,
-        singletonList(Parameter.class));
+    checkNotPresent(sourceMethod, parameter, singletonList(Parameter.class));
     FieldSpec fieldSpec = FieldSpec.builder(type == REPEATABLE ?
             ParameterizedTypeName.get(ClassName.get(List.class), typeInfo.coercion().trigger()) :
             TypeName.get(sourceMethod.getReturnType()),
         sourceMethod.getSimpleName().toString())
         .addModifiers(FINAL)
         .build();
+    String name = enumConstant(params, sourceMethod.getSimpleName().toString(), index);
+    String descriptionArgumentName = parameter.argHandle().isEmpty() ?
+        descriptionArgumentName(type, typeInfo.required(), name) :
+        parameter.argHandle();
     return new Param(
         null,
         null,
@@ -214,11 +217,12 @@ final class Param {
         sourceMethod,
         typeInfo.array(),
         typeInfo.required(),
-        enumConstant(params, sourceMethod.getSimpleName().toString(), index),
+        name,
         true,
         typeInfo.coercion(),
         fieldSpec,
-        description);
+        cleanDesc(description),
+        descriptionArgumentName);
   }
 
   private static void basicChecks(ExecutableElement sourceMethod) {
@@ -325,7 +329,7 @@ final class Param {
     return longName;
   }
 
-  String[] description() {
+  List<String> description() {
     return description;
   }
 
@@ -334,32 +338,26 @@ final class Param {
   }
 
   String descriptionArgumentName() {
+    return descriptionArgumentName;
+  }
+
+  String descriptionArgumentNameWithDots() {
+    if (paramType == OptionType.REPEATABLE) {
+      return descriptionArgumentName + "...";
+    }
+    return descriptionArgumentName;
+  }
+
+  private static String descriptionArgumentName(
+      OptionType paramType, boolean required, String name) {
     if (paramType == OptionType.FLAG) {
       return null;
     }
-    String result = null;
-    if (!positional) {
-      for (String line : description) {
-        if (line.startsWith("@return")) {
-          String[] tokens = line.split("\\s+", 3);
-          if (tokens.length >= 2) {
-            result = tokens[1];
-            break;
-          }
-        }
-      }
+    if (required) {
+      return name.toUpperCase();
+    } else {
+      return name;
     }
-    if (result == null) {
-      if (required) {
-        result = name.toUpperCase();
-      } else {
-        result = name;
-      }
-    }
-    if (paramType == OptionType.REPEATABLE) {
-      result += "...";
-    }
-    return result;
   }
 
   TypeName returnType() {
@@ -404,5 +402,53 @@ final class Param {
       default:
         throw new AssertionError();
     }
+  }
+
+  // visible for testing
+  static List<String> cleanDesc(String[] desc) {
+    if (desc.length == 0) {
+      return Collections.emptyList();
+    }
+    String[] result = new String[desc.length];
+    int resultpos = 0;
+    for (String token : desc) {
+      if (!token.startsWith("@")) {
+        result[resultpos++] = token;
+      }
+    }
+    return Arrays.asList(trim(Arrays.copyOf(result, resultpos)));
+  }
+
+  // visible for testing
+  static String[] trim(String[] desc) {
+    int firstNonempty = 0, lastNonempty = desc.length - 1;
+    boolean nonemptyFound = false;
+    for (int i = 0; i < desc.length; i++) {
+      if (!desc[i].isEmpty()) {
+        firstNonempty = i;
+        nonemptyFound = true;
+        break;
+      }
+    }
+    if (!nonemptyFound) {
+      return new String[0];
+    }
+    for (int j = desc.length - 1; j >= firstNonempty; j--) {
+      if (!desc[j].isEmpty()) {
+        lastNonempty = j;
+        break;
+      }
+    }
+    return Arrays.copyOfRange(desc, firstNonempty, lastNonempty + 1);
+  }
+
+  private static OptionType optionType(TypeInfo info) {
+    if (info.flag()) {
+      return OptionType.FLAG;
+    }
+    if (info.repeatable()) {
+      return OptionType.REPEATABLE;
+    }
+    return OptionType.REGULAR;
   }
 }

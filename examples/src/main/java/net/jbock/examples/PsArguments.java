@@ -13,9 +13,7 @@ abstract class PsArguments {
 
   /**
    * This is the description.
-   *
-   * @return number A number
    */
-  @Parameter(shortName = 'w')
-  abstract OptionalInt wide();
+  @Parameter(shortName = 'w', argHandle = "number")
+  abstract OptionalInt width();
 }

@@ -24,4 +24,12 @@ import java.lang.annotation.Target;
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
 public @interface PositionalParameter {
+
+  /**
+   * <p>The argument name that's printed in the description.</p>
+   *
+   * <p>An empty string is special syntax for automatic parameter name,
+   * which will be based on the method name.</p>
+   */
+  String argHandle() default "";
 }
