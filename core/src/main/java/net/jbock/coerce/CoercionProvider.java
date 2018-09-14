@@ -7,6 +7,7 @@ import net.jbock.compiler.Util;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
@@ -16,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static net.jbock.compiler.Util.AS_DECLARED;
 import static net.jbock.compiler.Util.QUALIFIED_NAME;
 
 public class CoercionProvider {
@@ -118,8 +120,17 @@ public class CoercionProvider {
     }
   }
 
-  private Optional<Coercion> checkEnum(TypeMirror returnType) {
-    return Optional.empty();
+  private Optional<Coercion> checkEnum(TypeMirror mirror) {
+    if (mirror.getKind() != TypeKind.DECLARED) {
+      return Optional.empty();
+    }
+    DeclaredType declared = mirror.accept(AS_DECLARED, null);
+    TypeElement element = declared.asElement().accept(Util.AS_TYPE_ELEMENT, null);
+    TypeMirror superclass = element.getSuperclass();
+    if (!"java.lang.Enum".equals(superclass.accept(QUALIFIED_NAME, null))) {
+      return Optional.empty();
+    }
+    return Optional.of(EnumCoercion.create(TypeName.get(mirror)));
   }
 
   private Coercion findParameterizedCoercion(

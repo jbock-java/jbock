@@ -449,7 +449,6 @@ class ProcessorTest {
         .compilesWithoutError();
   }
 
-/*
   @Test
   void innerEnum() {
     List<String> sourceLines = withImports(
@@ -463,7 +462,6 @@ class ProcessorTest {
         .processedWith(new Processor())
         .compilesWithoutError();
   }
-*/
 
   private List<String> withImports(String... lines) {
     List<String> header = Arrays.asList(

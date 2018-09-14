@@ -104,8 +104,7 @@ final class Param {
     this.positional = positional;
     this.fieldSpec = fieldSpec;
     this.description = description;
-    this.descriptionArgumentName = descriptionArgumentName == null ? null :
-        (required ? descriptionArgumentName.toUpperCase() : descriptionArgumentName.toLowerCase());
+    this.descriptionArgumentName = descriptionArgumentName;
     if (positional && positionalOrder() == null) {
       throw new AssertionError("positional, but positionalType is null");
     }

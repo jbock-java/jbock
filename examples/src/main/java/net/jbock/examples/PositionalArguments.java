@@ -14,7 +14,7 @@ abstract class PositionalArguments {
   /**
    * Desc of dest.
    */
-  @PositionalParameter(argHandle = "destination")
+  @PositionalParameter(argHandle = "DESTINATION")
   abstract String dest();
 
   @PositionalParameter

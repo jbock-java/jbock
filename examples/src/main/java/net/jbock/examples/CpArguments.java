@@ -9,6 +9,13 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class CpArguments {
 
+  enum Control {
+    NONE,
+    NUMBERED,
+    EXISTING,
+    SIMPLE
+  }
+
   @PositionalParameter
   abstract String source();
 
@@ -17,6 +24,10 @@ abstract class CpArguments {
 
   @Parameter(shortName = 'r')
   abstract boolean recursive();
+
+  @Parameter(argHandle = "CONTROL")
+  abstract Optional<Control> backup();
+
 
   /**
    * Override the usual backup suffix

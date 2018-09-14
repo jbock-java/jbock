@@ -1,7 +1,12 @@
 package net.jbock.examples;
 
+import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CpArgumentsTest {
 
@@ -27,11 +32,13 @@ class CpArgumentsTest {
         "source", "a",
         "dest", "b",
         "recursive", false,
+        "backup", null,
         "suffix", null);
     f.assertThat("b", "a").succeeds(
         "source", "b",
         "dest", "a",
         "recursive", false,
+        "backup", null,
         "suffix", null);
   }
 
@@ -56,6 +63,7 @@ class CpArgumentsTest {
         "source", "a",
         "dest", "b",
         "recursive", true,
+        "backup", null,
         "suffix", null};
     f.assertThat("-r", "a", "b")
         .succeeds(expected);
@@ -63,6 +71,18 @@ class CpArgumentsTest {
         .succeeds(expected);
     f.assertThat("a", "b", "-r")
         .succeeds(expected);
+  }
+
+  @Test
+  void testEnum() {
+    assertEquals(Optional.of(Control.NUMBERED), f.parse("a", "b", "--backup=NUMBERED").backup());
+    f.assertThat("-r", "a", "b", "--backup", "SIMPLE")
+        .succeeds(
+            "source", "a",
+            "dest", "b",
+            "recursive", true,
+            "backup", "SIMPLE",
+            "suffix", null);
   }
 
   @Test
@@ -82,6 +102,8 @@ class CpArgumentsTest {
         "",
         "OPTIONS",
         "  -r, --recursive",
+        "",
+        "  --backup <CONTROL>",
         "",
         "  -s <suffix>, --suffix <suffix>",
         "    Override the usual backup suffix",
