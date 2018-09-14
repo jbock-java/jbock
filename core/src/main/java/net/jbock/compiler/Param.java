@@ -15,7 +15,6 @@ import javax.lang.model.element.ExecutableElement;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -26,7 +25,6 @@ import static net.jbock.compiler.Constants.OPTIONAL_INT;
 import static net.jbock.compiler.Constants.OPTIONAL_LONG;
 import static net.jbock.compiler.OptionType.REPEATABLE;
 import static net.jbock.compiler.Processor.checkNotPresent;
-import static net.jbock.compiler.Util.methodToString;
 import static net.jbock.compiler.Util.snakeCase;
 
 /**
@@ -38,25 +36,20 @@ final class Param {
   private final String longName;
 
   // can be null
-  private final Character shortName;
+  private final char shortName;
 
   // never null
   final OptionType paramType;
-
-  // index in the list of all abstract methods (in source order, ignoring inheritance)
-  final int index;
 
   // never null
   final ExecutableElement sourceMethod;
 
   // does it return string array
-  final boolean array;
+  final boolean isStringArray;
 
   final boolean required;
 
   private final String name;
-
-  private final boolean positional;
 
   private final Coercion coercion;
 
@@ -66,11 +59,15 @@ final class Param {
 
   private final String descriptionArgumentName;
 
-  private static String enumConstant(List<Param> params, String methodName, int index) {
+  private final int positionalIndex;
+
+  private static String enumConstant(
+      List<Param> params,
+      String methodName) {
     String result = snakeCase(methodName);
     for (Param param : params) {
       if (param.name.equals(result)) {
-        return result + '_' + index;
+        return result + '_' + params.size();
       }
     }
     return result;
@@ -79,32 +76,31 @@ final class Param {
   private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
   private Param(
-      Character shortName,
+      char shortName,
       String longName,
-      int index,
       OptionType paramType,
       ExecutableElement sourceMethod,
-      boolean array,
+      boolean isStringArray,
       boolean required,
       String name,
       boolean positional,
       Coercion coercion,
       FieldSpec fieldSpec,
       List<String> description,
-      String descriptionArgumentName) {
+      String descriptionArgumentName,
+      int positionalIndex) {
     this.required = required;
     this.coercion = coercion;
     this.shortName = shortName;
     this.longName = longName;
-    this.index = index;
     this.sourceMethod = sourceMethod;
     this.paramType = paramType;
-    this.array = array;
+    this.isStringArray = isStringArray;
     this.name = name;
-    this.positional = positional;
     this.fieldSpec = fieldSpec;
     this.description = description;
     this.descriptionArgumentName = descriptionArgumentName;
+    this.positionalIndex = positionalIndex;
     if (positional && positionalOrder() == null) {
       throw new AssertionError("positional, but positionalType is null");
     }
@@ -140,25 +136,27 @@ final class Param {
     return coercion;
   }
 
-  static Param create(List<Param> params, ExecutableElement sourceMethod, int index, String[] description) {
-    basicChecks(sourceMethod);
+  static Param create(List<Param> params, ExecutableElement sourceMethod, int positionalIndex, String[] description) {
     if (sourceMethod.getAnnotation(PositionalParameter.class) == null) {
-      return createNonpositional(params, sourceMethod, index, description);
+      return createNonpositional(params, sourceMethod, description);
     } else {
-      return createPositional(params, sourceMethod, index, description);
+      return createPositional(params, sourceMethod, positionalIndex, description);
     }
   }
 
-  private static Param createNonpositional(List<Param> params, ExecutableElement sourceMethod, int index, String[] description) {
-    String longName = longName(sourceMethod);
-    Character shortName = shortName(sourceMethod);
-    if (shortName == null && longName == null) {
+  private static Param createNonpositional(
+      List<Param> params,
+      ExecutableElement sourceMethod,
+      String[] description) {
+    String longName = longName(params, sourceMethod);
+    char shortName = shortName(params, sourceMethod);
+    if (shortName == ' ' && longName == null) {
       throw ValidationException.create(sourceMethod,
           "Neither long nor short name defined for method " + Util.methodToString(sourceMethod));
     }
     Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
     checkNotPresent(sourceMethod, parameter, singletonList(PositionalParameter.class));
-    checkName(sourceMethod, Objects.toString(shortName, null));
+    checkName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
     TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod);
     OptionType type = optionType(typeInfo);
@@ -168,14 +166,13 @@ final class Param {
         sourceMethod.getSimpleName().toString())
         .addModifiers(FINAL)
         .build();
-    String name = enumConstant(params, sourceMethod.getSimpleName().toString(), index);
+    String name = enumConstant(params, sourceMethod.getSimpleName().toString());
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
         descriptionArgumentName(type, typeInfo.required(), name) :
         parameter.argHandle();
     return new Param(
         shortName,
         longName,
-        index,
         type,
         sourceMethod,
         typeInfo.array(),
@@ -185,10 +182,15 @@ final class Param {
         typeInfo.coercion(),
         fieldSpec,
         cleanDesc(description),
-        descriptionArgumentName);
+        descriptionArgumentName,
+        -1);
   }
 
-  private static Param createPositional(List<Param> params, ExecutableElement sourceMethod, int index, String[] description) {
+  private static Param createPositional(
+      List<Param> params,
+      ExecutableElement sourceMethod,
+      int positionalIndex,
+      String[] description) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod);
     OptionType type = optionType(typeInfo);
@@ -204,14 +206,13 @@ final class Param {
         sourceMethod.getSimpleName().toString())
         .addModifiers(FINAL)
         .build();
-    String name = enumConstant(params, sourceMethod.getSimpleName().toString(), index);
+    String name = enumConstant(params, sourceMethod.getSimpleName().toString());
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
         descriptionArgumentName(type, typeInfo.required(), name) :
         parameter.argHandle();
     return new Param(
+        ' ',
         null,
-        null,
-        index,
         type,
         sourceMethod,
         typeInfo.array(),
@@ -221,40 +222,29 @@ final class Param {
         typeInfo.coercion(),
         fieldSpec,
         cleanDesc(description),
-        descriptionArgumentName);
+        descriptionArgumentName,
+        positionalIndex);
   }
 
-  private static void basicChecks(ExecutableElement sourceMethod) {
-    if (!sourceMethod.getParameters().isEmpty()) {
-      throw ValidationException.create(sourceMethod,
-          "Method " + methodToString(sourceMethod) +
-              " may not have parameters.");
-    }
-    if (!sourceMethod.getTypeParameters().isEmpty()) {
-      throw ValidationException.create(sourceMethod,
-          "Method " + methodToString(sourceMethod) +
-              "may not have type parameters.");
-    }
-    if (!sourceMethod.getThrownTypes().isEmpty()) {
-      throw ValidationException.create(sourceMethod,
-          "Method " + methodToString(sourceMethod) +
-              "may not declare any exceptions.");
-    }
-  }
-
-  private static Character shortName(ExecutableElement sourceMethod) {
+  private static char shortName(List<Param> params, ExecutableElement sourceMethod) {
     Parameter param = sourceMethod.getAnnotation(Parameter.class);
     if (param == null) {
-      return null;
+      return ' ';
     }
     if (param.shortName() == ' ') {
-      // space character indicates that no short name should be defined
-      return null;
+      return ' ';
     }
-    return param.shortName();
+    char c = param.shortName();
+    for (Param p : params) {
+      if (p.shortName == c) {
+        throw ValidationException.create(sourceMethod,
+            "Duplicate short name: " + c);
+      }
+    }
+    return c;
   }
 
-  private static String longName(ExecutableElement sourceMethod) {
+  private static String longName(List<Param> params, ExecutableElement sourceMethod) {
     Parameter param = sourceMethod.getAnnotation(Parameter.class);
     if (param == null) {
       if (sourceMethod.getAnnotation(PositionalParameter.class) == null) {
@@ -268,10 +258,19 @@ final class Param {
       // the empty string indicates that no long name should be defined
       return null;
     }
+    String longName;
     if (param.longName().equals("-")) {
-      return sourceMethod.getSimpleName().toString();
+      longName = sourceMethod.getSimpleName().toString();
+    } else {
+      longName = param.longName();
     }
-    return param.longName();
+    for (Param p : params) {
+      if (p.longName != null && p.longName.equals(longName)) {
+        throw ValidationException.create(sourceMethod,
+            "Duplicate long name: " + longName);
+      }
+    }
+    return longName;
   }
 
   boolean isOptionalInt() {
@@ -284,6 +283,15 @@ final class Param {
 
   boolean isOptionalDouble() {
     return OPTIONAL_DOUBLE.equals(returnType());
+  }
+
+  private static void checkName(
+      ExecutableElement sourceMethod,
+      char name) {
+    if (name == ' ') {
+      return;
+    }
+    checkName(sourceMethod, Character.toString(name));
   }
 
   private static void checkName(
@@ -321,7 +329,7 @@ final class Param {
   }
 
   Character shortName() {
-    return shortName;
+    return shortName == ' ' ? null : shortName;
   }
 
   String longName() {
@@ -368,11 +376,15 @@ final class Param {
   }
 
   boolean isPositional() {
-    return positional;
+    return positionalIndex >= 0;
+  }
+
+  int positionalIndex() {
+    return positionalIndex;
   }
 
   private CodeBlock missingRequiredOptionMessage(ClassName className) {
-    if (positional) {
+    if (isPositional()) {
       return CodeBlock.builder()
           .add("$T.format($S,$W$T.$L)",
               String.class,
@@ -451,3 +463,4 @@ final class Param {
     return OptionType.REGULAR;
   }
 }
+

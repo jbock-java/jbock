@@ -10,7 +10,6 @@ import net.jbock.com.squareup.javapoet.WildcardTypeName;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
-import java.util.Arrays;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -198,24 +197,6 @@ final class Context {
       default:
         return sourceType.getSimpleName().toString();
     }
-  }
-
-  /**
-   * @param j must be the Option index of a positional param
-   * @return the index in the list of all positional parameters, of the param that's specified by {@code j}.
-   */
-  int positionalIndex(int j) {
-    Param param = parameters.get(j);
-    if (!param.isPositional()) {
-      return -1;
-    }
-    for (int i = 0; i < positionalParameters.size(); i++) {
-      Param p = positionalParameters.get(i);
-      if (p.index == param.index) {
-        return i;
-      }
-    }
-    return -1;
   }
 
   /**

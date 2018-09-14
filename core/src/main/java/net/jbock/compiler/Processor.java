@@ -28,13 +28,11 @@ import java.util.Collections;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
-import static javax.lang.model.element.ElementKind.METHOD;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.compiler.Util.asDeclared;
@@ -51,7 +49,7 @@ public final class Processor extends AbstractProcessor {
         CommandLineArguments.class,
         Parameter.class,
         PositionalParameter.class)
-        .map(Class::getName)
+        .map(Class::getCanonicalName)
         .collect(toSet());
   }
 
@@ -62,7 +60,10 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-    if (!checkValid(env)) {
+    try {
+      checkAllAnnotatedMethodsValid(env);
+    } catch (ValidationException e) {
+      processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       return false;
     }
     for (TypeElement sourceType : getAnnotatedClasses(env)) {
@@ -144,38 +145,6 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private List<Param> checkPositionalOrder(List<Param> params) {
-    List<Param> result = new ArrayList<>(params.size());
-    Param previousPositional = null;
-    for (Param param : params) {
-      if (!param.isPositional()) {
-        result.add(param);
-        continue;
-      }
-      validatePositionalOrder(previousPositional, param);
-      result.add(param);
-      previousPositional = param;
-    }
-    return result;
-  }
-
-  private void validatePositionalOrder(Param previous, Param param) {
-    if (previous == null) {
-      return;
-    }
-    PositionalOrder paramOrder = param.positionalOrder();
-    PositionalOrder previousOrder = previous.positionalOrder();
-    if (paramOrder == null || previousOrder == null) {
-      throw new AssertionError();
-    }
-    if (paramOrder.compareTo(previousOrder) < 0) {
-      throw ValidationException.create(param.sourceMethod,
-          String.format("Positional order: %s method %s() must come before %s method %s()",
-              paramOrder, param.methodName(),
-              previousOrder, previous.methodName()));
-    }
-  }
-
   private List<Param> validate(TypeElement sourceType) {
     if (sourceType.getKind() == ElementKind.INTERFACE) {
       throw ValidationException.create(sourceType,
@@ -205,25 +174,29 @@ public final class Processor extends AbstractProcessor {
           sourceType.getSimpleName() + " may not extend " +
               asDeclared(sourceType.getSuperclass()).asElement().getSimpleName());
     }
-    List<ExecutableElement> abstractMethods = sourceType.getEnclosedElements().stream()
-        .filter(element -> element.getKind() == METHOD)
-        .map(method -> (ExecutableElement) method)
+    List<ExecutableElement> abstractMethods = methodsIn(sourceType.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
         .collect(toList());
     List<Param> parameters = new ArrayList<>(abstractMethods.size());
+    int positionalIndex = -1;
     for (int index = 0; index < abstractMethods.size(); index++) {
       ExecutableElement method = abstractMethods.get(index);
-      Param param = Param.create(parameters, method, index, getDescription(method));
-      if (Objects.equals("help", param.longName()) &&
-          sourceType.getAnnotation(CommandLineArguments.class).addHelp()) {
-        throw ValidationException.create(method, "'--help' is a special token, see CommandLineArguments#addHelp");
+      boolean isPositional = method.getAnnotation(PositionalParameter.class) != null;
+      if (!isPositional && method.getAnnotation(Parameter.class) == null) {
+        throw ValidationException.create(method, "Expecting either Parameter or PositionalParameter annotation");
       }
+      if (isPositional) {
+        positionalIndex++;
+      }
+      Param param = Param.create(parameters, method, positionalIndex, getDescription(method));
       parameters.add(param);
     }
+    if (sourceType.getAnnotation(CommandLineArguments.class).addHelp()) {
+      checkHelp(parameters);
+    }
     checkOnlyOnePositionalList(parameters);
-    checkDistinctLongNames(parameters);
-    checkDistinctShortNames(parameters);
-    return checkPositionalOrder(parameters);
+    checkPositionalOrder(parameters);
+    return parameters;
   }
 
   private List<String> getOverview(TypeElement sourceType) {
@@ -250,16 +223,13 @@ public final class Processor extends AbstractProcessor {
     return tokens;
   }
 
-  private void checkDistinctShortNames(List<Param> params) {
-    Set<Character> names = new HashSet<>(params.size());
-    for (Param param : params) {
-      Character name = param.shortName();
-      if (name != null) {
-        boolean added = names.add(name);
-        if (!added) {
-          throw ValidationException.create(param.sourceMethod,
-              "Duplicate short name: " + name);
-        }
+  private void checkHelp(List<Param> parameters) {
+    for (Param param : parameters) {
+      if ("help".equals(param.longName())) {
+        throw ValidationException.create(param.sourceMethod,
+            "'help' is reserved. " +
+                "Either disable the help feature " +
+                "or change the long name to something else.");
       }
     }
   }
@@ -278,17 +248,26 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void checkDistinctLongNames(List<Param> params) {
-    Set<String> names = new HashSet<>(params.size());
+  private void checkPositionalOrder(List<Param> params) {
+    Param previousPositional = null;
     for (Param param : params) {
-      String name = param.longName();
-      if (name != null) {
-        boolean added = names.add(name);
-        if (!added) {
+      if (!param.isPositional()) {
+        continue;
+      }
+      if (previousPositional != null) {
+        PositionalOrder paramOrder = param.positionalOrder();
+        PositionalOrder previousOrder = previousPositional.positionalOrder();
+        if (paramOrder == null || previousOrder == null) {
+          throw new AssertionError();
+        }
+        if (paramOrder.compareTo(previousOrder) < 0) {
           throw ValidationException.create(param.sourceMethod,
-              "Duplicate long name: " + name);
+              String.format("Positional order: %s method %s() must come before %s method %s()",
+                  paramOrder, param.methodName(),
+                  previousOrder, previousPositional.methodName()));
         }
       }
+      previousPositional = param;
     }
   }
 
@@ -305,25 +284,41 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private boolean checkValid(RoundEnvironment env) {
-    List<ExecutableElement> methods = new ArrayList<>();
-    methods.addAll(methodsIn(env.getElementsAnnotatedWith(Parameter.class)));
-    methods.addAll(methodsIn(env.getElementsAnnotatedWith(PositionalParameter.class)));
+  private void checkAllAnnotatedMethodsValid(RoundEnvironment env) {
+    Set<? extends Element> rawParams =
+        env.getElementsAnnotatedWith(Parameter.class);
+    Set<? extends Element> rawPositionalParams =
+        env.getElementsAnnotatedWith(PositionalParameter.class);
+    List<ExecutableElement> methods = new ArrayList<>(rawParams.size() + rawPositionalParams.size());
+    methods.addAll(methodsIn(rawParams));
+    methods.addAll(methodsIn(rawPositionalParams));
     for (ExecutableElement method : methods) {
       Element enclosingElement = method.getEnclosingElement();
       if (enclosingElement.getAnnotation(CommandLineArguments.class) == null) {
-        printError(method,
+        throw ValidationException.create(method,
             "The enclosing class " + enclosingElement.getSimpleName() + " must have the " +
                 CommandLineArguments.class.getSimpleName() + " annotation");
-        return false;
       }
       if (!method.getModifiers().contains(ABSTRACT)) {
-        printError(method,
+        throw ValidationException.create(method,
             "Method " + methodToString(method) + " must be abstract.");
-        return false;
+      }
+      if (!method.getParameters().isEmpty()) {
+        throw ValidationException.create(method,
+            "Method " + methodToString(method) +
+                " may not have parameters.");
+      }
+      if (!method.getTypeParameters().isEmpty()) {
+        throw ValidationException.create(method,
+            "Method " + methodToString(method) +
+                "may not have type parameters.");
+      }
+      if (!method.getThrownTypes().isEmpty()) {
+        throw ValidationException.create(method,
+            "Method " + methodToString(method) +
+                "may not declare any exceptions.");
       }
     }
-    return true;
   }
 
   private void printError(Element element, String message) {

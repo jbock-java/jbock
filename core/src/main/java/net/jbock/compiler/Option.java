@@ -121,10 +121,10 @@ final class Option {
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.enumBuilder(context.optionType());
     List<Param> parameters = context.parameters;
-    for (int j = 0; j < parameters.size(); j++) {
-      Param param = parameters.get(j);
+    for (int i = 0; i < parameters.size(); i++) {
+      Param param = parameters.get(i);
       String enumConstant = param.enumConstant();
-      spec.addEnumConstant(enumConstant, optionEnumConstant(param, j));
+      spec.addEnumConstant(enumConstant, optionEnumConstant(param, i));
     }
     spec.addModifiers(PRIVATE)
         .addFields(asList(longNameField, shortNameField, positionalIndexField, argumentNameField, descriptionField))
@@ -154,13 +154,13 @@ final class Option {
         .build();
   }
 
-  private TypeSpec optionEnumConstant(Param param, int j) {
+  private TypeSpec optionEnumConstant(Param param, int i) {
     List<String> desc = param.description();
     String argumentName = param.descriptionArgumentName();
     Map<String, Object> map = new LinkedHashMap<>();
     map.put("longName", param.longName());
     map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
-    map.put("positionalIndex", context.positionalIndex(j));
+    map.put("positionalIndex", param.positionalIndex());
     map.put("argumentName", argumentName);
     map.put("descExpression", descExpression(desc));
     String format = String.join(", ",

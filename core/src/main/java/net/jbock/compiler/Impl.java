@@ -76,7 +76,7 @@ final class Impl {
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.methodName())
           .addAnnotation(Override.class)
           .returns(param.returnType());
-      if (param.paramType == REPEATABLE && param.array) {
+      if (param.paramType == REPEATABLE && param.isStringArray) {
         builder.addStatement("return $N.toArray(new $T[$N.size()])", fields.get(j), STRING, fields.get(j));
       } else {
         builder.addStatement("return $N", fields.get(j));
