@@ -2,12 +2,14 @@ package net.jbock.coerce.warn;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
 
+import static net.jbock.coerce.CoercionProvider.isCombinator;
+import static net.jbock.compiler.Util.AS_DECLARED;
 import static net.jbock.compiler.Util.AS_TYPE_ELEMENT;
-import static net.jbock.compiler.Util.asDeclared;
 
 public class WarningProvider {
 
@@ -17,8 +19,6 @@ public class WarningProvider {
       new ArrayWarning(),
       new PrimitiveWarning(),
       new DateWarning());
-
-  private static final List<String> COMBINATORS = Arrays.asList("java.util.List", "java.util.Optional");
 
   private static WarningProvider instance;
 
@@ -30,19 +30,12 @@ public class WarningProvider {
   }
 
   public String findWarning(TypeMirror type) {
-    if (type.getKind().isPrimitive()) {
+    if (type.getKind() != TypeKind.DECLARED) {
       return findWarningSimple(type);
     }
-    DeclaredType declared = asDeclared(type);
-    if (declared == null) {
-      return findWarningSimple(type);
-    }
-    TypeElement typeElement = declared.asElement().accept(AS_TYPE_ELEMENT, null);
-    if (typeElement == null) {
-      return findWarningSimple(type);
-    }
-    if (!declared.getTypeArguments().isEmpty() &&
-        COMBINATORS.contains(typeElement.getQualifiedName().toString())) {
+    DeclaredType declared = type.accept(AS_DECLARED, null);
+    if (isCombinator(type) && !declared.getTypeArguments().isEmpty()) {
+      TypeElement typeElement = declared.asElement().accept(AS_TYPE_ELEMENT, null);
       return findWarningSimple(typeElement.getTypeParameters().get(0).asType());
     }
     return findWarningSimple(type);

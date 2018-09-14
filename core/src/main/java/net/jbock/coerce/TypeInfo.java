@@ -5,6 +5,7 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Constants;
 
+import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
@@ -46,7 +47,8 @@ public class TypeInfo {
     return new TypeInfo(typeName, coercion, false, false, true);
   }
 
-  static TypeInfo create(TypeName typeName, Coercion coercion) {
+  static TypeInfo create(TypeMirror returnType, Coercion coercion) {
+    TypeName typeName = TypeName.get(returnType);
     if (Constants.STRING_ARRAY.equals(typeName)) {
       return createRepeatable(coercion, typeName);
     }

@@ -449,6 +449,22 @@ class ProcessorTest {
         .compilesWithoutError();
   }
 
+/*
+  @Test
+  void innerEnum() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @Parameter abstract Foo foo();",
+        "  enum Foo { BAR; }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+*/
+
   private List<String> withImports(String... lines) {
     List<String> header = Arrays.asList(
         "package test;",

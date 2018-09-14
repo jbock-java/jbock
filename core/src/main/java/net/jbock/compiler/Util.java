@@ -5,11 +5,16 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.VariableElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.Optional;
@@ -19,7 +24,7 @@ import static net.jbock.com.squareup.javapoet.WildcardTypeName.subtypeOf;
 
 public final class Util {
 
-  private static final SimpleTypeVisitor8<DeclaredType, Void> AS_DECLARED =
+  public static final TypeVisitor<DeclaredType, Void> AS_DECLARED =
       new SimpleTypeVisitor8<DeclaredType, Void>() {
         @Override
         public DeclaredType visitDeclared(DeclaredType declaredType, Void _null) {
@@ -27,11 +32,37 @@ public final class Util {
         }
       };
 
-  public static final SimpleElementVisitor8<TypeElement, Void> AS_TYPE_ELEMENT =
+  public static final TypeVisitor<ArrayType, Void> AS_ARRAY =
+      new SimpleTypeVisitor8<ArrayType, Void>() {
+        @Override
+        public ArrayType visitArray(ArrayType t, Void _null) {
+          return t;
+        }
+      };
+
+  public static final ElementVisitor<TypeElement, Void> AS_TYPE_ELEMENT =
       new SimpleElementVisitor8<TypeElement, Void>() {
         @Override
         public TypeElement visitType(TypeElement typeElement, Void _null) {
           return typeElement;
+        }
+      };
+
+  public static final TypeVisitor<String, Void> QUALIFIED_NAME =
+      new SimpleTypeVisitor8<String, Void>() {
+        @Override
+        public String visitDeclared(DeclaredType declaredType, Void _null) {
+          return declaredType.asElement().accept(AS_TYPE_ELEMENT, null).getQualifiedName().toString();
+        }
+
+        @Override
+        public String visitPrimitive(PrimitiveType t, Void aVoid) {
+          return t.toString();
+        }
+
+        @Override
+        public String visitArray(ArrayType t, Void aVoid) {
+          return t.getComponentType().accept(this, null) + "[]";
         }
       };
 
@@ -43,7 +74,7 @@ public final class Util {
     return ParameterizedTypeName.get(ClassName.get(Optional.class), subtypeOf(typeName));
   }
 
-  public static DeclaredType asDeclared(TypeMirror mirror) {
+  static DeclaredType asDeclared(TypeMirror mirror) {
     return mirror.accept(AS_DECLARED, null);
   }
 
@@ -55,14 +86,19 @@ public final class Util {
     return result;
   }
 
-  static boolean equalsType(TypeMirror typeMirror, String qualified) {
-    DeclaredType declared = typeMirror.accept(AS_DECLARED, null);
-    if (declared == null) {
-      return false;
+  public static boolean equalsType(TypeMirror typeMirror, String qualified) {
+    return qualified.equals(typeMirror.accept(QUALIFIED_NAME, null));
+  }
+
+  public static DeclaredType asParameterized(TypeMirror mirror) {
+    if (mirror.getKind() != TypeKind.DECLARED) {
+      return null;
     }
-    TypeElement typeElement = declared.asElement().accept(AS_TYPE_ELEMENT, null);
-    return typeElement != null &&
-        typeElement.getQualifiedName().toString().equals(qualified);
+    DeclaredType declared = mirror.accept(AS_DECLARED, null);
+    if (declared.getTypeArguments().isEmpty()) {
+      return null;
+    }
+    return declared;
   }
 
   static String snakeCase(String input) {

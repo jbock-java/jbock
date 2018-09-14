@@ -2,27 +2,25 @@ package net.jbock.coerce.warn;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 
+import static net.jbock.compiler.Util.AS_DECLARED;
 import static net.jbock.compiler.Util.AS_TYPE_ELEMENT;
-import static net.jbock.compiler.Util.asDeclared;
 
 public class RawCombinatorWarning extends Warning {
 
   @Override
-  public String message(TypeMirror type) {
-    if (type.getKind().isPrimitive()) {
+  public String message(TypeMirror mirror) {
+    if (mirror.getKind() != TypeKind.DECLARED) {
       return null;
     }
-    DeclaredType declared = asDeclared(type);
-    if (declared == null) {
+    DeclaredType declared = mirror.accept(AS_DECLARED, null);
+    if (!declared.getTypeArguments().isEmpty()) {
       return null;
     }
     TypeElement typeElement = declared.asElement().accept(AS_TYPE_ELEMENT, null);
-    if (typeElement == null) {
-      return null;
-    }
-    if (!declared.getTypeArguments().isEmpty()) {
+    if (typeElement.getTypeParameters().isEmpty()) {
       return null;
     }
     String qname = typeElement.getQualifiedName().toString();

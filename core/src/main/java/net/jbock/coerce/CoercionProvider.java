@@ -1,26 +1,34 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.warn.WarningProvider;
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Constants;
+import net.jbock.compiler.Util;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static net.jbock.compiler.Util.QUALIFIED_NAME;
+
 public class CoercionProvider {
 
   // List and Optional are the only combinators.
   // This knowledge is used in TypeInfo.findParameterizedTypeInfo.
-  private static final List<ClassName> COMBINATORS = Arrays.asList(
-      ClassName.get(Optional.class),
-      ClassName.get(List.class));
+  private static final List<String> COMBINATORS = Arrays.asList(
+      "java.util.Optional",
+      "java.util.List");
+
+  public static boolean isCombinator(TypeMirror mirror) {
+    return COMBINATORS.contains(mirror.accept(QUALIFIED_NAME, null));
+  }
 
   private static final List<Coercion> ALL_COERCIONS = Arrays.asList(
       new CharsetCoercion(),
@@ -76,21 +84,20 @@ public class CoercionProvider {
   }
 
   public TypeInfo findCoercion(ExecutableElement sourceMethod) {
+    TypeMirror returnType = sourceMethod.getReturnType();
     try {
-      TypeName typeName = TypeName.get(sourceMethod.getReturnType());
-      if (typeName.equals(Constants.STRING_ARRAY)) {
-        return TypeInfo.create(typeName, coercions.get(Constants.STRING));
+      if (returnType.getKind() == TypeKind.ARRAY &&
+          Util.equalsType(returnType.accept(Util.AS_ARRAY, null).getComponentType(), "java.lang.String")) {
+        return TypeInfo.create(returnType, coercions.get(Constants.STRING));
       }
-      if (typeName instanceof ParameterizedTypeName) {
-        return TypeInfo.create(typeName, findParameterizedCoercion(sourceMethod, (ParameterizedTypeName) typeName));
+      DeclaredType parameterized = Util.asParameterized(returnType);
+      if (parameterized != null) {
+        return TypeInfo.create(returnType, findParameterizedCoercion(sourceMethod, parameterized));
       }
-      Coercion coercion = coercions.get(typeName);
-      if (coercion == null) {
-        throw TmpException.create(sourceMethod, "Bad return type: " + typeName);
-      }
-      return TypeInfo.create(typeName, coercion);
+      Coercion coercion = find(sourceMethod, returnType);
+      return TypeInfo.create(returnType, coercion);
     } catch (TmpException e) {
-      String warning = WarningProvider.instance().findWarning(sourceMethod.getReturnType());
+      String warning = WarningProvider.instance().findWarning(returnType);
       if (warning == null) {
         throw e.asValidationException();
       } else {
@@ -99,17 +106,34 @@ public class CoercionProvider {
     }
   }
 
+  private Coercion find(ExecutableElement sourceMethod, TypeMirror returnType) throws TmpException {
+    Optional<Coercion> enumCoercion = checkEnum(returnType);
+    if (enumCoercion.isPresent()) {
+      return enumCoercion.get();
+    } else {
+      if (coercions.get(TypeName.get(returnType)) == null) {
+        throw TmpException.create(sourceMethod, "Bad return type: " + returnType.accept(QUALIFIED_NAME, null));
+      }
+      return coercions.get(TypeName.get(returnType));
+    }
+  }
+
+  private Optional<Coercion> checkEnum(TypeMirror returnType) {
+    return Optional.empty();
+  }
+
   private Coercion findParameterizedCoercion(
       ExecutableElement sourceMethod,
-      ParameterizedTypeName typeName) throws TmpException {
-    ClassName rawType = typeName.rawType;
-    if (!COMBINATORS.contains(rawType)) {
-      throw TmpException.create(sourceMethod, "Bad return type: " + typeName);
+      DeclaredType parameterized) throws TmpException {
+    if (!isCombinator(parameterized)) {
+      throw TmpException.create(sourceMethod,
+          "Bad return type: " + parameterized.accept(QUALIFIED_NAME, null));
     }
-    TypeName typeArgument = typeName.typeArguments.get(0);
-    Coercion coercion = coercions.get(typeArgument);
+    TypeMirror typeArgument = parameterized.getTypeArguments().get(0);
+    Coercion coercion = find(sourceMethod, typeArgument);
     if (coercion.special()) {
-      throw TmpException.create(sourceMethod, "Bad return type: " + typeName);
+      throw TmpException.create(sourceMethod,
+          "Bad return type: " + parameterized.accept(QUALIFIED_NAME, null));
     }
     return coercion;
   }
