@@ -86,30 +86,45 @@ public class CoercionProvider {
     return instance;
   }
 
-  public TypeInfo findCoercion(ExecutableElement sourceMethod) {
+  public TypeInfo findCoercion(
+      ExecutableElement sourceMethod,
+      TypeElement mapperClass) {
     TypeMirror returnType = sourceMethod.getReturnType();
     try {
-      if (returnType.getKind() == TypeKind.ARRAY &&
-          Util.equalsType(returnType.accept(Util.AS_ARRAY, null).getComponentType(), "java.lang.String")) {
-        return TypeInfo.create(returnType, coercions.get(Constants.STRING));
-      }
-      DeclaredType parameterized = Util.asParameterized(returnType);
-      if (parameterized != null) {
-        return TypeInfo.create(returnType, findParameterizedCoercion(parameterized));
-      }
-      Coercion coercion = find(returnType);
+      Coercion coercion = handle(sourceMethod, mapperClass);
       return TypeInfo.create(returnType, coercion);
     } catch (TmpException e) {
       String warning = WarningProvider.instance().findWarning(returnType);
-      if (warning == null) {
-        throw e.asValidationException(sourceMethod);
-      } else {
+      if (warning != null) {
         throw e.asValidationException(sourceMethod, warning);
       }
+      throw e.asValidationException(sourceMethod);
     }
   }
 
-  private Coercion find(TypeMirror returnType) throws TmpException {
+  private Coercion handle(
+      ExecutableElement sourceMethod,
+      TypeElement mapperClass) throws TmpException {
+    if (mapperClass != null && !"java.util.Function".equals(mapperClass.getQualifiedName().toString())) {
+      return handleMapperClass(sourceMethod, mapperClass);
+    }
+    TypeMirror returnType = sourceMethod.getReturnType();
+    if (returnType.getKind() == TypeKind.ARRAY &&
+        Util.equalsType(returnType.accept(Util.AS_ARRAY, null).getComponentType(), "java.lang.String")) {
+      return coercions.get(Constants.STRING);
+    }
+    DeclaredType parameterized = Util.asParameterized(returnType);
+    if (parameterized != null) {
+      return handleParameterized(parameterized);
+    }
+    return handleDefault(returnType);
+  }
+
+  private Coercion handleMapperClass(ExecutableElement sourceMethod, TypeElement mapperClass) {
+    return null;
+  }
+
+  private Coercion handleDefault(TypeMirror returnType) throws TmpException {
     Optional<Coercion> enumCoercion = checkEnum(returnType);
     if (enumCoercion.isPresent()) {
       return enumCoercion.get();
@@ -137,14 +152,14 @@ public class CoercionProvider {
     return Optional.of(EnumCoercion.create(TypeName.get(mirror)));
   }
 
-  private Coercion findParameterizedCoercion(
+  private Coercion handleParameterized(
       DeclaredType parameterized) throws TmpException {
     if (!isCombinator(parameterized)) {
       throw TmpException.create(
           "Bad return type: " + parameterized.accept(QUALIFIED_NAME, null));
     }
     TypeMirror typeArgument = parameterized.getTypeArguments().get(0);
-    Coercion coercion = find(typeArgument);
+    Coercion coercion = handleDefault(typeArgument);
     if (coercion.special()) {
       throw TmpException.create(
           "Bad return type: " + parameterized.accept(QUALIFIED_NAME, null));

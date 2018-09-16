@@ -12,6 +12,7 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +24,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.compiler.Constants.OPTIONAL_DOUBLE;
 import static net.jbock.compiler.Constants.OPTIONAL_INT;
 import static net.jbock.compiler.Constants.OPTIONAL_LONG;
+import static net.jbock.compiler.MapperClassUtil.getMapperClass;
 import static net.jbock.compiler.OptionType.REPEATABLE;
 import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.snakeCase;
@@ -137,17 +139,21 @@ final class Param {
   }
 
   static Param create(List<Param> params, ExecutableElement sourceMethod, int positionalIndex, String[] description) {
-    if (sourceMethod.getAnnotation(PositionalParameter.class) == null) {
-      return createNonpositional(params, sourceMethod, description);
+    PositionalParameter positionalAnnotation = sourceMethod.getAnnotation(PositionalParameter.class);
+    if (positionalAnnotation != null) {
+      TypeElement mapperClass = getMapperClass(sourceMethod, PositionalParameter.class);
+      return createPositional(params, sourceMethod, positionalIndex, description, mapperClass);
     } else {
-      return createPositional(params, sourceMethod, positionalIndex, description);
+      TypeElement mapperClass = getMapperClass(sourceMethod, Parameter.class);
+      return createNonpositional(params, sourceMethod, description, mapperClass);
     }
   }
 
   private static Param createNonpositional(
       List<Param> params,
       ExecutableElement sourceMethod,
-      String[] description) {
+      String[] description,
+      TypeElement mapperClass) {
     String longName = longName(params, sourceMethod);
     char shortName = shortName(params, sourceMethod);
     if (shortName == ' ' && longName == null) {
@@ -158,7 +164,7 @@ final class Param {
     checkNotPresent(sourceMethod, parameter, singletonList(PositionalParameter.class));
     checkName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
-    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod);
+    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, mapperClass);
     OptionType type = optionType(typeInfo);
     FieldSpec fieldSpec = FieldSpec.builder(type == REPEATABLE ?
             ParameterizedTypeName.get(ClassName.get(List.class), typeInfo.coercion().trigger()) :
@@ -190,9 +196,10 @@ final class Param {
       List<Param> params,
       ExecutableElement sourceMethod,
       int positionalIndex,
-      String[] description) {
+      String[] description,
+      TypeElement mapperClass) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
-    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod);
+    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, mapperClass);
     OptionType type = optionType(typeInfo);
     if (type == OptionType.FLAG) {
       throw ValidationException.create(sourceMethod,
