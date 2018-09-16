@@ -463,6 +463,21 @@ class ProcessorTest {
         .compilesWithoutError();
   }
 
+  @Test
+  void privateEnum() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Parameter abstract Foo foo();",
+        "  private enum Foo { BAR; }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Private return type is not allowed");
+  }
+
   private List<String> withImports(String... lines) {
     List<String> header = Arrays.asList(
         "package test;",

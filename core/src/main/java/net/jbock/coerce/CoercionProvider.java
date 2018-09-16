@@ -7,6 +7,7 @@ import net.jbock.compiler.Util;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -94,33 +95,33 @@ public class CoercionProvider {
       }
       DeclaredType parameterized = Util.asParameterized(returnType);
       if (parameterized != null) {
-        return TypeInfo.create(returnType, findParameterizedCoercion(sourceMethod, parameterized));
+        return TypeInfo.create(returnType, findParameterizedCoercion(parameterized));
       }
-      Coercion coercion = find(sourceMethod, returnType);
+      Coercion coercion = find(returnType);
       return TypeInfo.create(returnType, coercion);
     } catch (TmpException e) {
       String warning = WarningProvider.instance().findWarning(returnType);
       if (warning == null) {
-        throw e.asValidationException();
+        throw e.asValidationException(sourceMethod);
       } else {
-        throw e.asValidationException(warning);
+        throw e.asValidationException(sourceMethod, warning);
       }
     }
   }
 
-  private Coercion find(ExecutableElement sourceMethod, TypeMirror returnType) throws TmpException {
+  private Coercion find(TypeMirror returnType) throws TmpException {
     Optional<Coercion> enumCoercion = checkEnum(returnType);
     if (enumCoercion.isPresent()) {
       return enumCoercion.get();
     } else {
       if (coercions.get(TypeName.get(returnType)) == null) {
-        throw TmpException.create(sourceMethod, "Bad return type: " + returnType.accept(QUALIFIED_NAME, null));
+        throw TmpException.create("Bad return type: " + returnType.accept(QUALIFIED_NAME, null));
       }
       return coercions.get(TypeName.get(returnType));
     }
   }
 
-  private Optional<Coercion> checkEnum(TypeMirror mirror) {
+  private Optional<Coercion> checkEnum(TypeMirror mirror) throws TmpException {
     if (mirror.getKind() != TypeKind.DECLARED) {
       return Optional.empty();
     }
@@ -130,43 +131,43 @@ public class CoercionProvider {
     if (!"java.lang.Enum".equals(superclass.accept(QUALIFIED_NAME, null))) {
       return Optional.empty();
     }
+    if (element.getModifiers().contains(Modifier.PRIVATE)) {
+      throw TmpException.create("Private return type is not allowed");
+    }
     return Optional.of(EnumCoercion.create(TypeName.get(mirror)));
   }
 
   private Coercion findParameterizedCoercion(
-      ExecutableElement sourceMethod,
       DeclaredType parameterized) throws TmpException {
     if (!isCombinator(parameterized)) {
-      throw TmpException.create(sourceMethod,
+      throw TmpException.create(
           "Bad return type: " + parameterized.accept(QUALIFIED_NAME, null));
     }
     TypeMirror typeArgument = parameterized.getTypeArguments().get(0);
-    Coercion coercion = find(sourceMethod, typeArgument);
+    Coercion coercion = find(typeArgument);
     if (coercion.special()) {
-      throw TmpException.create(sourceMethod,
+      throw TmpException.create(
           "Bad return type: " + parameterized.accept(QUALIFIED_NAME, null));
     }
     return coercion;
   }
 
   private static class TmpException extends Exception {
-    final ExecutableElement sourceMethod;
     final String message;
 
-    static TmpException create(ExecutableElement sourceMethod, String message) {
-      return new TmpException(sourceMethod, message);
+    static TmpException create(String message) {
+      return new TmpException(message);
     }
 
-    TmpException(ExecutableElement sourceMethod, String message) {
-      this.sourceMethod = sourceMethod;
+    TmpException(String message) {
       this.message = message;
     }
 
-    ValidationException asValidationException() {
+    ValidationException asValidationException(ExecutableElement sourceMethod) {
       return ValidationException.create(sourceMethod, message);
     }
 
-    ValidationException asValidationException(String newMessage) {
+    ValidationException asValidationException(ExecutableElement sourceMethod, String newMessage) {
       return ValidationException.create(sourceMethod, newMessage);
     }
   }
