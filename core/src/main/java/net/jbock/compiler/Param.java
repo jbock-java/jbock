@@ -12,6 +12,7 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -23,6 +24,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.compiler.Constants.OPTIONAL_DOUBLE;
 import static net.jbock.compiler.Constants.OPTIONAL_INT;
 import static net.jbock.compiler.Constants.OPTIONAL_LONG;
+import static net.jbock.compiler.MapperClassUtil.getMapperClass;
 import static net.jbock.compiler.OptionType.REPEATABLE;
 import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.snakeCase;
@@ -106,28 +108,6 @@ final class Param {
     }
   }
 
-  CodeBlock extractExpression(Helper helper) {
-    CodeBlock.Builder builder = paramType.extractExpression(helper, this).toBuilder();
-    if (paramType == REPEATABLE) {
-      builder.add(".stream()");
-    }
-    builder.add("$L", coercion.map());
-    if (paramType == REPEATABLE) {
-      builder.add(".collect($T.toList())", Collectors.class);
-    }
-    if (required) {
-      builder.add("$L", orElseThrowMissing(helper.context));
-    }
-    return builder.build();
-  }
-
-  private CodeBlock orElseThrowMissing(Context context) {
-    return CodeBlock.builder()
-        .add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
-            missingRequiredOptionMessage(context.optionType()))
-        .build();
-  }
-
   FieldSpec field() {
     return fieldSpec;
   }
@@ -137,17 +117,21 @@ final class Param {
   }
 
   static Param create(List<Param> params, ExecutableElement sourceMethod, int positionalIndex, String[] description) {
-    if (sourceMethod.getAnnotation(PositionalParameter.class) == null) {
-      return createNonpositional(params, sourceMethod, description);
+    PositionalParameter positionalAnnotation = sourceMethod.getAnnotation(PositionalParameter.class);
+    if (positionalAnnotation != null) {
+      TypeElement mapperClass = getMapperClass(sourceMethod, PositionalParameter.class);
+      return createPositional(params, sourceMethod, positionalIndex, description, mapperClass);
     } else {
-      return createPositional(params, sourceMethod, positionalIndex, description);
+      TypeElement mapperClass = getMapperClass(sourceMethod, Parameter.class);
+      return createNonpositional(params, sourceMethod, description, mapperClass);
     }
   }
 
   private static Param createNonpositional(
       List<Param> params,
       ExecutableElement sourceMethod,
-      String[] description) {
+      String[] description,
+      TypeElement mapperClass) {
     String longName = longName(params, sourceMethod);
     char shortName = shortName(params, sourceMethod);
     if (shortName == ' ' && longName == null) {
@@ -158,7 +142,8 @@ final class Param {
     checkNotPresent(sourceMethod, parameter, singletonList(PositionalParameter.class));
     checkName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
-    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod);
+    String name = enumConstant(params, sourceMethod.getSimpleName().toString());
+    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass);
     OptionType type = optionType(typeInfo);
     FieldSpec fieldSpec = FieldSpec.builder(type == REPEATABLE ?
             ParameterizedTypeName.get(ClassName.get(List.class), typeInfo.coercion().trigger()) :
@@ -166,7 +151,6 @@ final class Param {
         sourceMethod.getSimpleName().toString())
         .addModifiers(FINAL)
         .build();
-    String name = enumConstant(params, sourceMethod.getSimpleName().toString());
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
         descriptionArgumentName(type, typeInfo.required(), name) :
         parameter.argHandle();
@@ -190,9 +174,11 @@ final class Param {
       List<Param> params,
       ExecutableElement sourceMethod,
       int positionalIndex,
-      String[] description) {
+      String[] description,
+      TypeElement mapperClass) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
-    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod);
+    String name = enumConstant(params, sourceMethod.getSimpleName().toString());
+    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass);
     OptionType type = optionType(typeInfo);
     if (type == OptionType.FLAG) {
       throw ValidationException.create(sourceMethod,
@@ -206,7 +192,6 @@ final class Param {
         sourceMethod.getSimpleName().toString())
         .addModifiers(FINAL)
         .build();
-    String name = enumConstant(params, sourceMethod.getSimpleName().toString());
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
         descriptionArgumentName(type, typeInfo.required(), name) :
         parameter.argHandle();
@@ -381,25 +366,6 @@ final class Param {
 
   int positionalIndex() {
     return positionalIndex;
-  }
-
-  private CodeBlock missingRequiredOptionMessage(ClassName className) {
-    if (isPositional()) {
-      return CodeBlock.builder()
-          .add("$T.format($S,$W$T.$L)",
-              String.class,
-              "Missing parameter: <%s>",
-              className, enumConstant())
-          .build();
-    }
-    return CodeBlock.builder()
-        .add("$T.format($S,$W$T.$L,$W$T.$L.describeParam($S))",
-            String.class,
-            "Missing required option: %s (%s)",
-            className, enumConstant(),
-            className, enumConstant(),
-            "")
-        .build();
   }
 
   PositionalOrder positionalOrder() {

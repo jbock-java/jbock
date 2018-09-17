@@ -4,6 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.util.function.Function;
 
 /**
  * <p>This annotation is used by the jbock annotation processor.</p>
@@ -32,4 +33,6 @@ public @interface PositionalParameter {
    * which will be based on the method name.</p>
    */
   String argHandle() default "";
+
+  Class<? extends Function> mappedBy() default Function.class;
 }
