@@ -37,7 +37,6 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.compiler.Util.asDeclared;
 import static net.jbock.compiler.Util.asType;
-import static net.jbock.compiler.Util.methodToString;
 
 public final class Processor extends AbstractProcessor {
 
@@ -179,8 +178,7 @@ public final class Processor extends AbstractProcessor {
         .collect(toList());
     List<Param> parameters = new ArrayList<>(abstractMethods.size());
     int positionalIndex = -1;
-    for (int index = 0; index < abstractMethods.size(); index++) {
-      ExecutableElement method = abstractMethods.get(index);
+    for (ExecutableElement method : abstractMethods) {
       boolean isPositional = method.getAnnotation(PositionalParameter.class) != null;
       if (!isPositional && method.getAnnotation(Parameter.class) == null) {
         throw ValidationException.create(method, "Expecting either Parameter or PositionalParameter annotation");
@@ -295,28 +293,25 @@ public final class Processor extends AbstractProcessor {
     for (ExecutableElement method : methods) {
       Element enclosingElement = method.getEnclosingElement();
       if (enclosingElement.getAnnotation(CommandLineArguments.class) == null) {
-        throw ValidationException.create(method,
-            "The enclosing class " + enclosingElement.getSimpleName() + " must have the " +
-                CommandLineArguments.class.getSimpleName() + " annotation");
+        throw ValidationException.create(enclosingElement,
+            "The class must have the " +
+                CommandLineArguments.class.getSimpleName() + " annotation.");
       }
       if (!method.getModifiers().contains(ABSTRACT)) {
         throw ValidationException.create(method,
-            "Method " + methodToString(method) + " must be abstract.");
+            "The method must be abstract.");
       }
       if (!method.getParameters().isEmpty()) {
         throw ValidationException.create(method,
-            "Method " + methodToString(method) +
-                " may not have parameters.");
+            "The method may not have parameters.");
       }
       if (!method.getTypeParameters().isEmpty()) {
         throw ValidationException.create(method,
-            "Method " + methodToString(method) +
-                "may not have type parameters.");
+            "The method may not have type parameters.");
       }
       if (!method.getThrownTypes().isEmpty()) {
         throw ValidationException.create(method,
-            "Method " + methodToString(method) +
-                "may not declare any exceptions.");
+            "The method may not declare any exceptions.");
       }
     }
   }

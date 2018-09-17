@@ -56,7 +56,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Bad return type: StringBuilder");
+        .withErrorContaining("Bad return type");
   }
 
   @Test
@@ -196,7 +196,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Bad return type: StringBuilder");
+        .withErrorContaining("Bad return type");
   }
 
   @Test
@@ -377,7 +377,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("a() must be abstract");
+        .withErrorContaining("The method must be abstract.");
   }
 
   @Test
@@ -391,7 +391,21 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("a(int, int) may not have parameters");
+        .withErrorContaining("The method may not have parameters.");
+  }
+
+  @Test
+  void typeParameter() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Parameter abstract <E> String a();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("The method may not have type parameters.");
   }
 
   @Test
@@ -605,6 +619,72 @@ class ProcessorTest {
         "      return s;",
         "    }",
         "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Mapper class must implement Function<String, java.lang.Integer>");
+  }
+
+  @Test
+  void mapperValidStringFunction() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "  static class Mapper implements StringFunction<Integer> {",
+        "    public Integer apply(String s) {",
+        "      return 1;",
+        "    }",
+        "  }",
+        "  interface StringFunction<R> extends Function<String, R> {}",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mapperValidComplicatedTree() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "  static class Mapper implements Foo<String>, Xoxo<Integer>  {",
+        "    public Integer apply(String s) {",
+        "      return 1;",
+        "    }",
+        "  }",
+        "  interface Xi<A, T, B> extends Function<B, A> { }",
+        "  interface Zap<T, B, A> extends Xi<A, T, B> { }",
+        "  interface Foo<X> extends Zap<X, String, Integer> { }",
+        "  interface Bar<E extends Number> extends Function<String, E> { }",
+        "  interface Xoxo<X extends Number> extends Bar<X> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mapperInvalidComplicatedTree() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "  static class Mapper implements Foo<String>, Xoxo<Integer>  {",
+        "    public Integer apply(String s) {",
+        "      return 1;",
+        "    }",
+        "  }",
+        "  interface Xi<A, T, B> extends Function<A, B> { }",
+        "  interface Zap<T, B, A> extends Xi<A, T, B> { }",
+        "  interface Foo<X> extends Zap<X, String, Integer> { }",
+        "  interface Bar<E extends Number> extends Function<E, String> { }",
+        "  interface Xoxo<X extends Number> extends Bar<X> { }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
