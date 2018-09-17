@@ -1,8 +1,10 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.warn.WarningProvider;
+import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.InterfaceUtil;
@@ -22,7 +24,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
+import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.AS_DECLARED;
 import static net.jbock.compiler.Util.QUALIFIED_NAME;
 
@@ -118,14 +122,14 @@ public class CoercionProvider {
     TypeMirror returnType = sourceMethod.getReturnType();
     if (returnType.getKind() == TypeKind.ARRAY &&
         Util.equalsType(returnType.accept(Util.AS_ARRAY, null).getComponentType(), "java.lang.String")) {
-      return coercions.get(Constants.STRING);
+      return coercions.get(STRING);
     }
     return handleDefault(trigger(returnType));
   }
 
   private Coercion handleMapperClass(ExecutableElement sourceMethod, String paramName, TypeElement mapperClass) throws TmpException {
     TypeName mapperType = TypeName.get(mapperClass.asType());
-    ParameterSpec mapperParam = ParameterSpec.builder(mapperType, paramName + "Mapper").build();
+    ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
     TypeMirror triggerMirror = trigger(sourceMethod.getReturnType());
     TypeName trigger = TypeName.get(triggerMirror);
     validateMapperClass(mapperClass, triggerMirror);
@@ -145,7 +149,7 @@ public class CoercionProvider {
       @Override
       public Optional<CodeBlock> initMapper() {
         CodeBlock codeBlock = CodeBlock.builder()
-            .add("$T $N = new $T()", mapperType, mapperParam, mapperType)
+            .add("$T $N = new $T()", ParameterizedTypeName.get(ClassName.get(Function.class), STRING, trigger), mapperParam, mapperType)
             .build();
         return Optional.of(codeBlock);
       }
@@ -267,5 +271,23 @@ public class CoercionProvider {
     ValidationException asValidationException(ExecutableElement sourceMethod, String newMessage) {
       return ValidationException.create(sourceMethod, newMessage);
     }
+  }
+
+
+  private static String snakeToCamel(String s) {
+    StringBuilder sb = new StringBuilder();
+    boolean upcase = false;
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      if (c == '_') {
+        upcase = true;
+      } else if (upcase) {
+        sb.append(Character.toUpperCase(c));
+        upcase = false;
+      } else {
+        sb.append(Character.toLowerCase(c));
+      }
+    }
+    return sb.toString();
   }
 }
