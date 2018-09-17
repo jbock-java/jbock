@@ -12,6 +12,7 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -23,6 +24,7 @@ import static net.jbock.compiler.Constants.CHARACTER;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.OptionType.REPEATABLE;
 import static net.jbock.compiler.Util.optionalOfSubtype;
 
 /**
@@ -239,10 +241,10 @@ final class Helper {
   private MethodSpec buildMethod() {
 
     CodeBlock.Builder args = CodeBlock.builder().add("\n");
-    for (int j = 0; j < option.context.parameters.size(); j++) {
-      Param param = option.context.parameters.get(j);
-      args.add(param.extractExpression(this));
-      if (j < option.context.parameters.size() - 1) {
+    for (int j = 0; j < context.parameters.size(); j++) {
+      Param param = context.parameters.get(j);
+      args.add(extractExpression(param));
+      if (j < context.parameters.size() - 1) {
         args.add(",\n");
       }
     }
@@ -251,7 +253,7 @@ final class Helper {
     ParameterSpec last = ParameterSpec.builder(INT, "size").build();
     ParameterSpec max = ParameterSpec.builder(INT, "max").build();
 
-    option.context.maxPositional().ifPresent(maxPositional -> {
+    context.maxPositional().ifPresent(maxPositional -> {
       spec.addStatement("$T $N = $L",
           INT, max, maxPositional);
       spec.addStatement("$T $N = $N.size()",
@@ -263,6 +265,10 @@ final class Helper {
           .endControlFlow();
     });
 
+    for (Param param : context.parameters) {
+      param.coercion().initMapper().ifPresent(spec::addStatement);
+    }
+
     if (context.hasPositional()) {
       spec.addParameter(positionalParameter);
     }
@@ -270,6 +276,41 @@ final class Helper {
     spec.addStatement("return $T.of(new $T($L))", Optional.class, context.implType(), args.build());
 
     return spec.returns(optionalOfSubtype(context.implType())).build();
+  }
+
+  private CodeBlock extractExpression(Param param) {
+    CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
+    if (param.paramType == REPEATABLE) {
+      builder.add(".stream()");
+    }
+    builder.add("$L", param.coercion().map());
+    if (param.paramType == REPEATABLE) {
+      builder.add(".collect($T.toList())", Collectors.class);
+    }
+    if (param.required) {
+      builder.add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
+          missingRequiredOptionMessage(param, context.optionType()));
+    }
+    return builder.build();
+  }
+
+  private CodeBlock missingRequiredOptionMessage(Param param, ClassName className) {
+    if (param.isPositional()) {
+      return CodeBlock.builder()
+          .add("$T.format($S,$W$T.$L)",
+              String.class,
+              "Missing parameter: <%s>",
+              className, param.enumConstant())
+          .build();
+    }
+    return CodeBlock.builder()
+        .add("$T.format($S,$W$T.$L,$W$T.$L.describeParam($S))",
+            String.class,
+            "Missing required option: %s (%s)",
+            className, param.enumConstant(),
+            className, param.enumConstant(),
+            "")
+        .build();
   }
 
   static CodeBlock throwRepetitionErrorStatement(

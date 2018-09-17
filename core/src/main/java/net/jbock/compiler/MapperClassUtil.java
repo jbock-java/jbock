@@ -17,9 +17,9 @@ final class MapperClassUtil {
       // the source method doesn't have this annotation
       return null;
     }
-    AnnotationValue annotationValue = getAnnotationValue(mirror, "mapperClass");
+    AnnotationValue annotationValue = getAnnotationValue(mirror, "mappedBy");
     if (annotationValue == null) {
-      // if the default value of mapperClass is not overridden
+      // if the default value of mappedBy is not overridden
       return null;
     }
     Object annotationValueValue = annotationValue.getValue();

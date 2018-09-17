@@ -1,17 +1,22 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.warn.WarningProvider;
+import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Constants;
+import net.jbock.compiler.InterfaceUtil;
 import net.jbock.compiler.Util;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -88,10 +93,11 @@ public class CoercionProvider {
 
   public TypeInfo findCoercion(
       ExecutableElement sourceMethod,
+      String paramName,
       TypeElement mapperClass) {
     TypeMirror returnType = sourceMethod.getReturnType();
     try {
-      Coercion coercion = handle(sourceMethod, mapperClass);
+      Coercion coercion = handle(sourceMethod, paramName, mapperClass);
       return TypeInfo.create(returnType, coercion);
     } catch (TmpException e) {
       String warning = WarningProvider.instance().findWarning(returnType);
@@ -104,24 +110,100 @@ public class CoercionProvider {
 
   private Coercion handle(
       ExecutableElement sourceMethod,
+      String paramName,
       TypeElement mapperClass) throws TmpException {
     if (mapperClass != null && !"java.util.Function".equals(mapperClass.getQualifiedName().toString())) {
-      return handleMapperClass(sourceMethod, mapperClass);
+      return handleMapperClass(sourceMethod, paramName, mapperClass);
     }
     TypeMirror returnType = sourceMethod.getReturnType();
     if (returnType.getKind() == TypeKind.ARRAY &&
         Util.equalsType(returnType.accept(Util.AS_ARRAY, null).getComponentType(), "java.lang.String")) {
       return coercions.get(Constants.STRING);
     }
-    DeclaredType parameterized = Util.asParameterized(returnType);
-    if (parameterized != null) {
-      return handleParameterized(parameterized);
-    }
-    return handleDefault(returnType);
+    return handleDefault(trigger(returnType));
   }
 
-  private Coercion handleMapperClass(ExecutableElement sourceMethod, TypeElement mapperClass) {
-    return null;
+  private Coercion handleMapperClass(ExecutableElement sourceMethod, String paramName, TypeElement mapperClass) throws TmpException {
+    TypeName mapperType = TypeName.get(mapperClass.asType());
+    ParameterSpec mapperParam = ParameterSpec.builder(mapperType, paramName + "Mapper").build();
+    TypeMirror triggerMirror = trigger(sourceMethod.getReturnType());
+    TypeName trigger = TypeName.get(triggerMirror);
+    validateMapperClass(mapperClass, triggerMirror);
+
+    return new Coercion() {
+
+      @Override
+      public CodeBlock map() {
+        return CodeBlock.builder().add(".map($N)", mapperParam).build();
+      }
+
+      @Override
+      public TypeName trigger() {
+        return trigger;
+      }
+
+      @Override
+      public Optional<CodeBlock> initMapper() {
+        CodeBlock codeBlock = CodeBlock.builder()
+            .add("$T $N = new $T()", mapperType, mapperParam, mapperType)
+            .build();
+        return Optional.of(codeBlock);
+      }
+    };
+  }
+
+  private void validateMapperClass(TypeElement mapperClass, TypeMirror trigger) throws TmpException {
+    if (mapperClass.getNestingKind() == NestingKind.MEMBER && !mapperClass.getModifiers().contains(Modifier.STATIC)) {
+      throw new TmpException("Inner class " + mapperClass + " must be static");
+    }
+    if (mapperClass.getModifiers().contains(Modifier.PRIVATE)) {
+      throw new TmpException("Mapper class " + mapperClass + " must not be private");
+    }
+    if (!mapperClass.getTypeParameters().isEmpty()) {
+      throw new TmpException("Mapper class " + mapperClass + " must not have type parameters");
+    }
+    List<ExecutableElement> constructors = ElementFilter.constructorsIn(mapperClass.getEnclosedElements());
+    if (!constructors.isEmpty()) {
+      boolean constructorFound = false;
+      for (ExecutableElement constructor : constructors) {
+        if (constructor.getParameters().isEmpty()) {
+          if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
+            throw new TmpException("Mapper class " + mapperClass + " must have a package visible constructor");
+          }
+          if (!constructor.getThrownTypes().isEmpty()) {
+            throw new TmpException("The constructor of mapper class " + mapperClass + " may not declare any exceptions");
+          }
+          constructorFound = true;
+        }
+      }
+      if (!constructorFound) {
+        throw new TmpException("Mapper class " + mapperClass + " must have a default constructor");
+      }
+    }
+    List<TypeMirror> interfaces = InterfaceUtil.allInterfaces(mapperClass.asType());
+    String triggerName = trigger.accept(Util.QUALIFIED_NAME, null);
+    for (TypeMirror mirror : interfaces) {
+      if (mirror.getKind() != TypeKind.DECLARED) {
+        continue;
+      }
+      DeclaredType declared = mirror.accept(AS_DECLARED, null);
+      TypeElement typeElement = declared.asElement().accept(Util.AS_TYPE_ELEMENT, null);
+      if ("java.util.function.Function".equals(typeElement.getQualifiedName().toString())) {
+        if (declared.getTypeArguments().size() != 2) {
+          throw new TmpException(String.format("Mapper class must implement Function<String, %s>", trigger));
+        }
+        TypeMirror from = declared.getTypeArguments().get(0);
+        TypeMirror to = declared.getTypeArguments().get(1);
+        if (!from.accept(Util.QUALIFIED_NAME, null).equals("java.lang.String")) {
+          throw new TmpException(String.format("Mapper class must implement Function<String, %s>", trigger));
+        }
+        if (!to.accept(Util.QUALIFIED_NAME, null).equals(triggerName)) {
+          throw new TmpException(String.format("Mapper class must implement Function<String, %s>", trigger));
+        }
+        return;
+      }
+    }
+    throw new TmpException(String.format("Mapper class must implement Function<String, %s>", trigger));
   }
 
   private Coercion handleDefault(TypeMirror returnType) throws TmpException {
@@ -152,19 +234,19 @@ public class CoercionProvider {
     return Optional.of(EnumCoercion.create(TypeName.get(mirror)));
   }
 
-  private Coercion handleParameterized(
-      DeclaredType parameterized) throws TmpException {
+  private TypeMirror trigger(TypeMirror returnType) throws TmpException {
+    DeclaredType parameterized = Util.asParameterized(returnType);
+    if (parameterized == null) {
+      // not a combination, triggered by return type
+      return returnType;
+    }
     if (!isCombinator(parameterized)) {
+      // combinators are the only allowed parameterized types
       throw TmpException.create(
           "Bad return type: " + parameterized.accept(QUALIFIED_NAME, null));
     }
-    TypeMirror typeArgument = parameterized.getTypeArguments().get(0);
-    Coercion coercion = handleDefault(typeArgument);
-    if (coercion.special()) {
-      throw TmpException.create(
-          "Bad return type: " + parameterized.accept(QUALIFIED_NAME, null));
-    }
-    return coercion;
+    // combination, triggered by type argument of return type
+    return parameterized.getTypeArguments().get(0);
   }
 
   private static class TmpException extends Exception {

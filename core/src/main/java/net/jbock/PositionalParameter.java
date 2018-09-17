@@ -34,5 +34,5 @@ public @interface PositionalParameter {
    */
   String argHandle() default "";
 
-  Class<? extends Function> mapperClass() default Function.class;
+  Class<? extends Function> mappedBy() default Function.class;
 }
