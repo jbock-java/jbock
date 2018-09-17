@@ -1,10 +1,13 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.warn.WarningProvider;
+import net.jbock.com.squareup.javapoet.ClassName;
+import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.compiler.Constants;
+import net.jbock.compiler.HierarchyUtil;
 import net.jbock.compiler.Util;
-import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -17,7 +20,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
+import static net.jbock.coerce.MapperClassValidator.validateMapperClass;
+import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.AS_DECLARED;
 import static net.jbock.compiler.Util.QUALIFIED_NAME;
 
@@ -86,36 +92,77 @@ public class CoercionProvider {
     return instance;
   }
 
-  public TypeInfo findCoercion(ExecutableElement sourceMethod) {
+  public TypeInfo findCoercion(
+      ExecutableElement sourceMethod,
+      String paramName,
+      TypeElement mapperClass) {
     TypeMirror returnType = sourceMethod.getReturnType();
     try {
-      if (returnType.getKind() == TypeKind.ARRAY &&
-          Util.equalsType(returnType.accept(Util.AS_ARRAY, null).getComponentType(), "java.lang.String")) {
-        return TypeInfo.create(returnType, coercions.get(Constants.STRING));
-      }
-      DeclaredType parameterized = Util.asParameterized(returnType);
-      if (parameterized != null) {
-        return TypeInfo.create(returnType, findParameterizedCoercion(parameterized));
-      }
-      Coercion coercion = find(returnType);
+      Coercion coercion = handle(sourceMethod, paramName, mapperClass);
       return TypeInfo.create(returnType, coercion);
     } catch (TmpException e) {
       String warning = WarningProvider.instance().findWarning(returnType);
-      if (warning == null) {
-        throw e.asValidationException(sourceMethod);
-      } else {
+      if (warning != null) {
         throw e.asValidationException(sourceMethod, warning);
       }
+      throw e.asValidationException(sourceMethod);
     }
   }
 
-  private Coercion find(TypeMirror returnType) throws TmpException {
+  private Coercion handle(
+      ExecutableElement sourceMethod,
+      String paramName,
+      TypeElement mapperClass) throws TmpException {
+    if (mapperClass != null && !"java.util.Function".equals(mapperClass.getQualifiedName().toString())) {
+      return handleMapperClass(sourceMethod, paramName, mapperClass);
+    }
+    TypeMirror returnType = sourceMethod.getReturnType();
+    if (returnType.getKind() == TypeKind.ARRAY &&
+        Util.equalsType(returnType.accept(Util.AS_ARRAY, null).getComponentType(), "java.lang.String")) {
+      return coercions.get(STRING);
+    }
+    return handleDefault(trigger(returnType));
+  }
+
+  private Coercion handleMapperClass(ExecutableElement sourceMethod, String paramName, TypeElement mapperClass) throws TmpException {
+    TypeName mapperType = TypeName.get(mapperClass.asType());
+    ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
+    TypeMirror triggerMirror = trigger(sourceMethod.getReturnType());
+    if (triggerMirror.getKind() != TypeKind.DECLARED) {
+      throw TmpException.create("Bad return type");
+    }
+    validateMapperClass(mapperClass, HierarchyUtil.asTypeElement(triggerMirror));
+    TypeName trigger = TypeName.get(triggerMirror);
+
+    return new Coercion() {
+
+      @Override
+      public CodeBlock map() {
+        return CodeBlock.builder().add(".map($N)", mapperParam).build();
+      }
+
+      @Override
+      public TypeName trigger() {
+        return trigger;
+      }
+
+      @Override
+      public Optional<CodeBlock> initMapper() {
+        CodeBlock codeBlock = CodeBlock.builder()
+            .add("$T $N = new $T()", ParameterizedTypeName.get(ClassName.get(Function.class), STRING, trigger), mapperParam, mapperType)
+            .build();
+        return Optional.of(codeBlock);
+      }
+    };
+  }
+
+  private Coercion handleDefault(TypeMirror returnType) throws TmpException {
     Optional<Coercion> enumCoercion = checkEnum(returnType);
     if (enumCoercion.isPresent()) {
       return enumCoercion.get();
     } else {
       if (coercions.get(TypeName.get(returnType)) == null) {
-        throw TmpException.create("Bad return type: " + returnType.accept(QUALIFIED_NAME, null));
+        throw TmpException.create("Bad return type");
       }
       return coercions.get(TypeName.get(returnType));
     }
@@ -137,38 +184,39 @@ public class CoercionProvider {
     return Optional.of(EnumCoercion.create(TypeName.get(mirror)));
   }
 
-  private Coercion findParameterizedCoercion(
-      DeclaredType parameterized) throws TmpException {
+  private TypeMirror trigger(TypeMirror returnType) throws TmpException {
+    DeclaredType parameterized = Util.asParameterized(returnType);
+    if (parameterized == null) {
+      // not a combination, triggered by return type
+      return returnType;
+    }
     if (!isCombinator(parameterized)) {
-      throw TmpException.create(
-          "Bad return type: " + parameterized.accept(QUALIFIED_NAME, null));
+      // combinators are the only allowed parameterized types
+      throw TmpException.create("Bad return type");
     }
-    TypeMirror typeArgument = parameterized.getTypeArguments().get(0);
-    Coercion coercion = find(typeArgument);
-    if (coercion.special()) {
-      throw TmpException.create(
-          "Bad return type: " + parameterized.accept(QUALIFIED_NAME, null));
+    // combination, triggered by type argument of return type
+    TypeMirror typeMirror = parameterized.getTypeArguments().get(0);
+    if (typeMirror.getKind() != TypeKind.DECLARED) {
+      throw TmpException.create("Bad return type");
     }
-    return coercion;
+    return typeMirror;
   }
 
-  private static class TmpException extends Exception {
-    final String message;
 
-    static TmpException create(String message) {
-      return new TmpException(message);
+  private static String snakeToCamel(String s) {
+    StringBuilder sb = new StringBuilder();
+    boolean upcase = false;
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      if (c == '_') {
+        upcase = true;
+      } else if (upcase) {
+        sb.append(Character.toUpperCase(c));
+        upcase = false;
+      } else {
+        sb.append(Character.toLowerCase(c));
+      }
     }
-
-    TmpException(String message) {
-      this.message = message;
-    }
-
-    ValidationException asValidationException(ExecutableElement sourceMethod) {
-      return ValidationException.create(sourceMethod, message);
-    }
-
-    ValidationException asValidationException(ExecutableElement sourceMethod, String newMessage) {
-      return ValidationException.create(sourceMethod, newMessage);
-    }
+    return sb.toString();
   }
 }

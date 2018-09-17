@@ -5,6 +5,7 @@ import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.Objects;
+import java.util.Optional;
 
 public abstract class Coercion {
 
@@ -38,5 +39,9 @@ public abstract class Coercion {
    */
   public boolean special() {
     return false;
+  }
+
+  public Optional<CodeBlock> initMapper() {
+    return Optional.empty();
   }
 }
