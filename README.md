@@ -286,7 +286,6 @@ A <em>mapper class</em> for `X` is any class that implements `Function<String, X
 Here's a mapper for `Integer`: 
 
 ````java
-import java.math.BigInteger;
 import java.util.function.Function;
 
 class PositiveNumberMapper implements Function<String, Integer> {
@@ -302,8 +301,8 @@ class PositiveNumberMapper implements Function<String, Integer> {
 }
 ````
 
-`jbock`'s `Parameter` and `PositionalParameter` annotations each have a `mappedBy` 
-attribute that takes a class:
+The `Parameter` and `PositionalParameter` annotations both have an optional `mappedBy` 
+attribute, which takes a mapper class:
 
 ````java
 @Parameter(mappedBy = PositiveNumberMapper.class)
