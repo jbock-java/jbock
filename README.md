@@ -29,7 +29,7 @@ This is what the program prints, when invoked without parameters:
 
 Being invoked without any parameters is something we should be expecting.
 Instead of a stacktrace, we could use the opportunity to print
-a summmary of our command line options. Let's see how to do this with jbock.
+a summary of our command line options. Let's see how to do this with jbock.
 
 We start by defining an abstract class `Args`,
 which represents the two mandatory arguments `source` and `dest`.
@@ -51,19 +51,28 @@ abstract class Args {
 }
 ````
 
-In  this case, the order of the method declarations `source()` and `dest()` matters,
+The methods that carry the `Parameter` or `PositionalParameter` annotation must be abstract.
+They are called the <em>parameter methods</em>. 
+
+In  this case, the order of the parameter methods `source()` and `dest()` matters,
 because they represent positional arguments.
 `source()` is declared first, so it represents the first argument.
 
 At compile time, the jbock processor will pick up the
 `@CommandLineArguments` annotation, and generate a class
-`Args_Parser` in the same package.
-There's a basic rule about the generated class to keep in mind:
+`Args_Parser` that can be used to obtain an instance of `Args`.
 
-> None of the methods of jbock's implementation of the abstract class will ever, under any circumstances,
-return `null`.
+Before we move on, we should mention two important guarantees that jbock gives you about its implementation. 
 
-The typical usage is like this:
+#### The non-null pledge
+
+> None of the parameter methods will ever return `null`, regardless of the input to `parse` or `parseOrExit`.
+
+#### The no-exception pledge
+
+> `parse` or `parseOrExit` will never throw an exception or return `null`.
+
+Now let's move on with our copy tool. A typical jbock invocation looks like this:
 
 ````java
 public class CopyFile {
@@ -101,7 +110,8 @@ abstract class Args {
 ````
 
 When the program is invoked with the `--help` parameter,
-it will print something resembling a [man page](https://linux.die.net/man/1/cp):
+it will use the attributes and also the javadoc, 
+to print something resembling a [man page](https://linux.die.net/man/1/cp):
 
 <pre><code>NAME
        cp - copy files and directories
@@ -118,7 +128,8 @@ We start by adding the recursive flag.
 
 A <em>flag</em> is a parameter that doesn't take an argument.
 A method that returns `boolean` declares the flag.
-This method will return true if the `--recursive` parameter is present on the command line.
+This method will return `true` if the `--recursive` parameter is present on the command line,
+and `false` otherwise.
 
 ````java
 @CommandLineArguments
@@ -263,15 +274,16 @@ Some projects that use jbock:
 
 * A number of standard classes and primitives are supported out of the box. 
 See [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
-* Any non-private enum is supported.
-* A custom mapper can be written for most types that are not supported by default.
+* Any non-private enum is supported out of the box. Note, by default this uses the enum's `valueOf` method,
+so only the precise enum constant names are understood.
+* A custom mapper can be used for any non-primitive "simple" (no typevars) type.
 
 #### Custom mappers
 
-Let `X` be a class or interface.
- A <em>mapper class</em> for `X` is any class that implements `Function<String, X>`.
+Let `X` be a class or interface, with no declared type variables.
+A <em>mapper class</em> for `X` is any class that implements `Function<String, X>`.
  
- Here's a mapper for `Integer`: 
+Here's a mapper for `Integer`: 
 
 ````java
 import java.math.BigInteger;
@@ -298,10 +310,11 @@ attribute that takes a class:
 abstract Integer verbosity();
 ````
 
-Rules for mappers:
+#### Rules for mappers
 
 * A mapper for `X` can also be used on a method 
 that returns `Optional<X>` or `List<X>`.
 * The `String` that's passed to the mapper will never be `null`, so there's no need to check for that.
 * The mapper may throw any `RuntimeException` to signal a parsing failure.
 The generated code will catch it and print the message.
+* Even if the mapper returns `null`, the parameter method won't. See pledge above. 
