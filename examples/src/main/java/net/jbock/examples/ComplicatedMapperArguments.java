@@ -3,7 +3,9 @@ package net.jbock.examples;
 import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 
+import java.util.List;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 @CommandLineArguments
 abstract class ComplicatedMapperArguments {
@@ -11,8 +13,21 @@ abstract class ComplicatedMapperArguments {
   @Parameter(mappedBy = Mapper.class)
   abstract Integer number();
 
+  @Parameter(mappedBy = LazyNumberMapper.class)
+  abstract List<LazyNumber> numbers();
+
+  static class LazyNumberMapper implements Function<String, LazyNumber> {
+    @Override
+    public LazyNumber apply(String s) {
+      return () -> Integer.valueOf(s);
+    }
+  }
+
+  interface LazyNumber extends Supplier<Integer> {
+  }
+
   // parser must understand that this implements Function<String, Integer>
-  static class Mapper implements Foo<String>, Xoxo<Integer> {
+  static class Mapper implements Foo<String> {
     public Integer apply(String s) {
       return 1;
     }
@@ -25,11 +40,5 @@ abstract class ComplicatedMapperArguments {
   }
 
   interface Foo<X> extends Zap<X, String, Integer> {
-  }
-
-  interface Bar<E extends Number> extends Function<String, E> {
-  }
-
-  interface Xoxo<X extends Number> extends Bar<X> {
   }
 }

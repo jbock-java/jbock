@@ -280,7 +280,7 @@ so only the precise enum constant names are understood.
 
 #### Custom mappers
 
-Let `X` be a class or interface, with no declared type variables.
+Let `X` be a class or interface, with no direct type variables.
 A <em>mapper class</em> for `X` is any class that implements `Function<String, X>`.
  
 Here's a mapper for `Integer`: 
