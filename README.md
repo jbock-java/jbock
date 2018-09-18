@@ -57,10 +57,13 @@ because they represent positional arguments.
 
 At compile time, the jbock processor will pick up the
 `@CommandLineArguments` annotation, and generate a class
-`Args_Parser extends Args` in the same package. Let's change
-our main method to use that.
+`Args_Parser` in the same package.
+There's a basic rule about the generated class to keep in mind:
 
-This is the updated `CopyFile` class:
+> None of the methods of jbock's implementation of the abstract class will ever, under any circumstances,
+return `null`.
+
+The typical usage is like this:
 
 ````java
 public class CopyFile {
@@ -256,6 +259,49 @@ Some projects that use jbock:
 * [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
 
-##### Which types are supported?
+#### Which types are supported?
 
-Have a look [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
+* A number of standard classes and primitives are supported out of the box. 
+See [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
+* Any non-private enum is supported.
+* A custom mapper can be written for most types that are not supported by default.
+
+#### Custom mappers
+
+Let `X` be a class or interface.
+ A <em>mapper class</em> for `X` is any class that implements `Function<String, X>`.
+ 
+ Here's a mapper for `Integer`: 
+
+````java
+import java.math.BigInteger;
+import java.util.function.Function;
+
+class PositiveNumberMapper implements Function<String, Integer> {
+
+  @Override
+  public Integer apply(String s) {
+    Integer i = Integer.valueOf(s);
+    if (i < 0) {
+      throw new IllegalArgumentException("The value cannot be negative.");
+    }
+    return i;
+  }
+}
+````
+
+`jbock`'s `Parameter` and `PositionalParameter` annotations each have a `mappedBy` 
+attribute that takes a class:
+
+````java
+@Parameter(mappedBy = PositiveNumberMapper.class)
+abstract Integer verbosity();
+````
+
+Rules for mappers:
+
+* A mapper for `X` can also be used on a method 
+that returns `Optional<X>` or `List<X>`.
+* The `String` that's passed to the mapper will never be `null`, so there's no need to check for that.
+* The mapper may throw any `RuntimeException` to signal a parsing failure.
+The generated code will catch it and print the message.
