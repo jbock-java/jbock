@@ -628,6 +628,25 @@ class ProcessorTest {
   }
 
   @Test
+  void mapperInvalidTypevars() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Parameter(mappedBy = Mapper.class) abstract Supplier<String> string();",
+        "  static class Mapper implements Function<String, Supplier<String>> {",
+        "    public Supplier<String> apply(String s) {",
+        "      return () -> s;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Bad return type");
+  }
+
+  @Test
   void mapperValidStringFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -720,6 +739,7 @@ class ProcessorTest {
         "import java.util.Optional;",
         "import java.util.OptionalInt;",
         "import java.util.function.Function;",
+        "import java.util.function.Supplier;",
         "",
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.PositionalParameter;",
