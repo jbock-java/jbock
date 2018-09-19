@@ -3,13 +3,13 @@ package net.jbock.coerce;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.compiler.Constants;
+
+import java.util.OptionalInt;
 
 class OptionalIntCoercion extends BasicIntegerCoercion {
 
-  @Override
-  public TypeName trigger() {
-    return Constants.OPTIONAL_INT;
+  OptionalIntCoercion() {
+    super(OptionalInt.class);
   }
 
   @Override
@@ -31,5 +31,10 @@ class OptionalIntCoercion extends BasicIntegerCoercion {
             param,
             "null")
         .build();
+  }
+
+  @Override
+  public TypeName paramType() {
+    return TypeName.get(Integer.class);
   }
 }

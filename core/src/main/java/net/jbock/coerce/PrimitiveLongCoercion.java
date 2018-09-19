@@ -4,13 +4,17 @@ import net.jbock.com.squareup.javapoet.TypeName;
 
 class PrimitiveLongCoercion extends BasicLongCoercion {
 
-  @Override
-  public TypeName trigger() {
-    return TypeName.LONG;
+  PrimitiveLongCoercion() {
+    super(Long.TYPE);
   }
 
   @Override
   public boolean special() {
     return true;
+  }
+
+  @Override
+  public TypeName paramType() {
+    return TypeName.get(Long.class);
   }
 }

@@ -4,13 +4,17 @@ import net.jbock.com.squareup.javapoet.TypeName;
 
 class PrimitiveFloatCoercion extends BasicFloatCoercion {
 
-  @Override
-  public TypeName trigger() {
-    return TypeName.FLOAT;
+  PrimitiveFloatCoercion() {
+    super(Float.TYPE);
   }
 
   @Override
   public boolean special() {
     return true;
+  }
+
+  @Override
+  public TypeName paramType() {
+    return TypeName.get(Float.class);
   }
 }

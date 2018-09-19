@@ -9,6 +9,16 @@ import java.util.Optional;
 
 public abstract class Coercion {
 
+  private final TypeName trigger;
+
+  Coercion(Class<?> trigger) {
+    this(TypeName.get(trigger));
+  }
+
+  Coercion(TypeName trigger) {
+    this.trigger = trigger;
+  }
+
   /**
    * Maps from String to trigger type
    */
@@ -17,7 +27,9 @@ public abstract class Coercion {
   /**
    * Type that triggers this coercion (could be wrapped in Optional or List)
    */
-  public abstract TypeName trigger();
+  public final TypeName trigger() {
+    return trigger;
+  }
 
   // toString stuff (the gen class overrides toString if possible)
   public final CodeBlock jsonExpr(FieldSpec field) {
@@ -43,5 +55,13 @@ public abstract class Coercion {
 
   public Optional<CodeBlock> initMapper() {
     return Optional.empty();
+  }
+
+  public TypeName paramType() {
+    return trigger;
+  }
+
+  public TypeName fieldType() {
+    return trigger;
   }
 }

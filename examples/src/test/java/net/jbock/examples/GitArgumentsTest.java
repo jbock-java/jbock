@@ -20,7 +20,7 @@ class GitArgumentsTest {
     args[0] = command;
     System.arraycopy(randomStrings, 0, args, 1, randomStrings.length);
     GitArguments result = f.parse(args);
-    String[] remainingArgs = result.remainingArgs();
+    String[] remainingArgs = result.remainingArgs().toArray(new String[0]);
 
     // The parser should simply put everything after the command in the list.
     assertArrayEquals(randomStrings, remainingArgs);

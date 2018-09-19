@@ -7,6 +7,10 @@ import java.util.Objects;
 
 abstract class BasicNumberCoercion extends Coercion {
 
+  BasicNumberCoercion(Class<?> trigger) {
+    super(trigger);
+  }
+
   @Override
   CodeBlock jsonExpr(String param) {
     return CodeBlock.builder().add("$L", param).build();

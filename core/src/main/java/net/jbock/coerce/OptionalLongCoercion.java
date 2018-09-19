@@ -3,13 +3,13 @@ package net.jbock.coerce;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.compiler.Constants;
+
+import java.util.OptionalLong;
 
 class OptionalLongCoercion extends BasicLongCoercion {
 
-  @Override
-  public TypeName trigger() {
-    return Constants.OPTIONAL_LONG;
+  OptionalLongCoercion() {
+    super(OptionalLong.class);
   }
 
   @Override
@@ -31,5 +31,10 @@ class OptionalLongCoercion extends BasicLongCoercion {
             param,
             "null")
         .build();
+  }
+
+  @Override
+  public TypeName paramType() {
+    return TypeName.get(Long.class);
   }
 }

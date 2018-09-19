@@ -2,17 +2,19 @@ package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.TypeName;
 
-import static net.jbock.com.squareup.javapoet.TypeName.INT;
-
 class PrimitiveIntCoercion extends BasicIntegerCoercion {
 
-  @Override
-  public TypeName trigger() {
-    return INT;
+  PrimitiveIntCoercion() {
+    super(Integer.TYPE);
   }
 
   @Override
   public boolean special() {
     return true;
+  }
+
+  @Override
+  public TypeName paramType() {
+    return TypeName.get(Integer.class);
   }
 }

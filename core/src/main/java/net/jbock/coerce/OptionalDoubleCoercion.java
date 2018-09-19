@@ -3,13 +3,13 @@ package net.jbock.coerce;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.compiler.Constants;
+
+import java.util.OptionalDouble;
 
 class OptionalDoubleCoercion extends BasicDoubleCoercion {
 
-  @Override
-  public TypeName trigger() {
-    return Constants.OPTIONAL_DOUBLE;
+  OptionalDoubleCoercion() {
+    super(OptionalDouble.class);
   }
 
   @Override
@@ -31,5 +31,10 @@ class OptionalDoubleCoercion extends BasicDoubleCoercion {
             param,
             "null")
         .build();
+  }
+
+  @Override
+  public TypeName paramType() {
+    return TypeName.get(Double.class);
   }
 }

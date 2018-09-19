@@ -4,13 +4,17 @@ import net.jbock.com.squareup.javapoet.TypeName;
 
 class PrimitiveCharacterCoercion extends BasicCharacterCoercion {
 
-  @Override
-  public TypeName trigger() {
-    return TypeName.CHAR;
+  PrimitiveCharacterCoercion() {
+    super(Character.TYPE);
   }
 
   @Override
   public boolean special() {
     return true;
+  }
+
+  @Override
+  public TypeName paramType() {
+    return TypeName.get(Character.class);
   }
 }

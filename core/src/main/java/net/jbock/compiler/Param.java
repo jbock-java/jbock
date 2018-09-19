@@ -145,9 +145,7 @@ final class Param {
     String name = enumConstant(params, sourceMethod.getSimpleName().toString());
     TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass);
     OptionType type = optionType(typeInfo);
-    FieldSpec fieldSpec = FieldSpec.builder(type == REPEATABLE ?
-            ParameterizedTypeName.get(ClassName.get(List.class), typeInfo.coercion().trigger()) :
-            TypeName.get(sourceMethod.getReturnType()),
+    FieldSpec fieldSpec = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()),
         sourceMethod.getSimpleName().toString())
         .addModifiers(FINAL)
         .build();
@@ -186,9 +184,7 @@ final class Param {
               "may not return " + TypeName.get(sourceMethod.getReturnType()));
     }
     checkNotPresent(sourceMethod, parameter, singletonList(Parameter.class));
-    FieldSpec fieldSpec = FieldSpec.builder(type == REPEATABLE ?
-            ParameterizedTypeName.get(ClassName.get(List.class), typeInfo.coercion().trigger()) :
-            TypeName.get(sourceMethod.getReturnType()),
+    FieldSpec fieldSpec = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()),
         sourceMethod.getSimpleName().toString())
         .addModifiers(FINAL)
         .build();

@@ -117,9 +117,8 @@ public class CoercionProvider {
       return handleMapperClass(sourceMethod, paramName, mapperClass);
     }
     TypeMirror returnType = sourceMethod.getReturnType();
-    if (returnType.getKind() == TypeKind.ARRAY &&
-        Util.equalsType(returnType.accept(Util.AS_ARRAY, null).getComponentType(), "java.lang.String")) {
-      return coercions.get(STRING);
+    if (returnType.getKind() == TypeKind.ARRAY) {
+      throw new TmpException("Arrays are not supported. Use List instead.");
     }
     return handleDefault(trigger(returnType));
   }
@@ -134,16 +133,11 @@ public class CoercionProvider {
     validateMapperClass(mapperClass, HierarchyUtil.asTypeElement(triggerMirror));
     TypeName trigger = TypeName.get(triggerMirror);
 
-    return new Coercion() {
+    return new Coercion(trigger) {
 
       @Override
       public CodeBlock map() {
         return CodeBlock.builder().add(".map($N)", mapperParam).build();
-      }
-
-      @Override
-      public TypeName trigger() {
-        return trigger;
       }
 
       @Override

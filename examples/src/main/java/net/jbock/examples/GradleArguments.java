@@ -23,7 +23,7 @@ abstract class GradleArguments {
    * the files
    */
   @Parameter(shortName = 'f')
-  abstract String[] file();
+  abstract List<String> file();
 
   /**
    * the dir

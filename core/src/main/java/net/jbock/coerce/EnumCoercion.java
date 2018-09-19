@@ -5,10 +5,8 @@ import net.jbock.com.squareup.javapoet.TypeName;
 
 final class EnumCoercion extends Coercion {
 
-  private final TypeName trigger;
-
   private EnumCoercion(TypeName trigger) {
-    this.trigger = trigger;
+    super(trigger);
   }
 
   @Override
@@ -18,10 +16,5 @@ final class EnumCoercion extends Coercion {
 
   static EnumCoercion create(TypeName trigger) {
     return new EnumCoercion(trigger);
-  }
-
-  @Override
-  public TypeName trigger() {
-    return trigger;
   }
 }

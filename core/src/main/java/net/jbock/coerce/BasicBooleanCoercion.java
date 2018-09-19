@@ -2,10 +2,15 @@ package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.Objects;
 
 abstract class BasicBooleanCoercion extends Coercion {
+
+  BasicBooleanCoercion(Class<?> trigger) {
+    super(trigger);
+  }
 
   @Override
   public final CodeBlock map() {

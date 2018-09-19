@@ -140,7 +140,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Arrays are not supported, except String[]. Use List instead.");
+        .withErrorContaining("Arrays are not supported. Use List instead.");
   }
 
   @Test
