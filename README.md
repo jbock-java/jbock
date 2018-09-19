@@ -177,7 +177,15 @@ abstract class Args {
 }
 ````
 
-For each named (i.e. non-positional) parameter, the method name defines the long name. 
+Each option can have one of two possible names, or both.
+The <em>long name</em> is the name that starts with `--`. 
+It can be passed in attached `--key=value` or detached `--key value` form.
+The <em>short name</em> starts with a single dash, 
+followed by a <em>single</em> character. The attached form is `-kvalue`,
+and the detached form is `-k value`.
+
+For each option, the method name 
+automatically defines the long name. 
 This can be overridden with the `longName` option,
 or disabled by passing `longName = ""`.
 
