@@ -16,6 +16,9 @@ abstract class EvilArguments {
   abstract String f_ancy();
 
   @Parameter
+  abstract String f__ancy();
+
+  @Parameter
   abstract String blub();
 
   @Parameter

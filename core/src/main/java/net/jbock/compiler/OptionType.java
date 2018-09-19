@@ -59,7 +59,7 @@ enum OptionType {
         valueExpr = CodeBlock.builder()
             .add("$N$L.orElse($S)",
                 param.field(),
-                param.coercion().mapJsonExpr(param.field()),
+                param.coercion().mapJsonExpr(),
                 "null")
             .build();
       }
@@ -96,7 +96,7 @@ enum OptionType {
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock valueExpr = CodeBlock.builder()
           .add("$N.stream()$L.collect(toArray)",
-              param.field(), param.coercion().mapJsonExpr(param.field())).build();
+              param.field(), param.coercion().mapJsonExpr()).build();
       return CodeBlock.builder()
           .addStatement("$N.add($S + $L)",
               joiner,

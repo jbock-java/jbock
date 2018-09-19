@@ -3,6 +3,7 @@ package net.jbock.coerce;
 import net.jbock.coerce.warn.WarningProvider;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
@@ -22,6 +23,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.MapperClassValidator.validateMapperClass;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.AS_DECLARED;
@@ -97,9 +99,13 @@ public class CoercionProvider {
       String paramName,
       TypeElement mapperClass) {
     TypeMirror returnType = sourceMethod.getReturnType();
+    FieldSpec field = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()),
+        snakeToCamel(paramName))
+        .addModifiers(FINAL)
+        .build();
     try {
       CoercionFactory coercion = handle(sourceMethod, paramName, mapperClass);
-      return TypeInfo.create(returnType, coercion.getCoercion());
+      return TypeInfo.create(returnType, coercion.getCoercion(field));
     } catch (TmpException e) {
       String warning = WarningProvider.instance().findWarning(returnType);
       if (warning != null) {
@@ -197,18 +203,26 @@ public class CoercionProvider {
   }
 
 
-  private static String snakeToCamel(String s) {
+  static String snakeToCamel(String s) {
     StringBuilder sb = new StringBuilder();
     boolean upcase = false;
+    boolean underscore = false;
     for (int i = 0; i < s.length(); i++) {
       char c = s.charAt(i);
       if (c == '_') {
+        if (underscore) {
+          sb.append('_');
+        }
+        underscore = true;
         upcase = true;
-      } else if (upcase) {
-        sb.append(Character.toUpperCase(c));
-        upcase = false;
       } else {
-        sb.append(Character.toLowerCase(c));
+        underscore = false;
+        if (upcase) {
+          sb.append(Character.toUpperCase(c));
+          upcase = false;
+        } else {
+          sb.append(Character.toLowerCase(c));
+        }
       }
     }
     return sb.toString();

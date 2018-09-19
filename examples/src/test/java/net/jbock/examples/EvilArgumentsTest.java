@@ -10,10 +10,11 @@ class EvilArgumentsTest {
 
   @Test
   void basicTest() {
-    f.assertThat("--fancy=1", "--fAncy=2", "--f_ancy=3", "--blub=4", "--Blub=5").succeeds(
+    f.assertThat("--fancy=1", "--fAncy=2", "--f_ancy=3", "--f__ancy=3", "--blub=4", "--Blub=5").succeeds(
         "fancy", "1",
         "fAncy", "2",
         "f_ancy", "3",
+        "f__ancy", "3",
         "blub", "4",
         "Blub", "5");
   }
@@ -25,7 +26,7 @@ class EvilArgumentsTest {
         "  EvilArguments",
         "",
         "SYNOPSIS",
-        "  EvilArguments --fancy=<FANCY> --fAncy=<FANCY_1> --f_ancy=<F_ANCY> --blub=<BLUB> --Blub=<BLUB_4>",
+        "  EvilArguments --fancy=<FANCY> --fAncy=<FANCY_1> --f_ancy=<F_ANCY> --f__ancy=<F__ANCY> --blub=<BLUB> --Blub=<BLUB_5>",
         "",
         "DESCRIPTION",
         "",
@@ -36,9 +37,11 @@ class EvilArgumentsTest {
         "",
         "  --f_ancy <F_ANCY>",
         "",
+        "  --f__ancy <F__ANCY>",
+        "",
         "  --blub <BLUB>",
         "",
-        "  --Blub <BLUB_4>",
+        "  --Blub <BLUB_5>",
         "",
         "  --help",
         "    Print this help page.",

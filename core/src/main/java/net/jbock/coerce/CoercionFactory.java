@@ -61,19 +61,15 @@ abstract class CoercionFactory {
     return trigger;
   }
 
-  public TypeName fieldType() {
-    return trigger;
-  }
-
-  final Coercion getCoercion() {
-    return new Coercion(trigger, map(), special(), initMapper(), paramType(), fieldType()) {
+  final Coercion getCoercion(FieldSpec field) {
+    return new Coercion(trigger, map(), special(), initMapper(), paramType(), field) {
       @Override
       CodeBlock jsonExpr(String param) {
         return CoercionFactory.this.jsonExpr(param);
       }
 
       @Override
-      public CodeBlock mapJsonExpr(FieldSpec field) {
+      public CodeBlock mapJsonExpr() {
         return CoercionFactory.this.mapJsonExpr(field);
       }
     };

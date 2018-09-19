@@ -16,7 +16,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.singletonList;
-import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.compiler.Constants.OPTIONAL_DOUBLE;
 import static net.jbock.compiler.Constants.OPTIONAL_INT;
 import static net.jbock.compiler.Constants.OPTIONAL_LONG;
@@ -50,8 +49,6 @@ final class Param {
 
   private final Coercion coercion;
 
-  private final FieldSpec fieldSpec;
-
   private final List<String> description;
 
   private final String descriptionArgumentName;
@@ -82,7 +79,6 @@ final class Param {
       String name,
       boolean positional,
       Coercion coercion,
-      FieldSpec fieldSpec,
       List<String> description,
       String descriptionArgumentName,
       int positionalIndex) {
@@ -94,7 +90,6 @@ final class Param {
     this.paramType = paramType;
     this.isStringArray = isStringArray;
     this.name = name;
-    this.fieldSpec = fieldSpec;
     this.description = description;
     this.descriptionArgumentName = descriptionArgumentName;
     this.positionalIndex = positionalIndex;
@@ -104,7 +99,7 @@ final class Param {
   }
 
   FieldSpec field() {
-    return fieldSpec;
+    return coercion.field();
   }
 
   Coercion coercion() {
@@ -140,10 +135,6 @@ final class Param {
     String name = enumConstant(params, sourceMethod.getSimpleName().toString());
     TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass);
     OptionType type = optionType(typeInfo);
-    FieldSpec fieldSpec = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()),
-        sourceMethod.getSimpleName().toString())
-        .addModifiers(FINAL)
-        .build();
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
         descriptionArgumentName(type, typeInfo.required(), name) :
         parameter.argHandle();
@@ -157,7 +148,6 @@ final class Param {
         name,
         false,
         typeInfo.coercion(),
-        fieldSpec,
         cleanDesc(description),
         descriptionArgumentName,
         -1);
@@ -179,10 +169,6 @@ final class Param {
               "may not return " + TypeName.get(sourceMethod.getReturnType()));
     }
     checkNotPresent(sourceMethod, parameter, singletonList(Parameter.class));
-    FieldSpec fieldSpec = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()),
-        sourceMethod.getSimpleName().toString())
-        .addModifiers(FINAL)
-        .build();
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
         descriptionArgumentName(type, typeInfo.required(), name) :
         parameter.argHandle();
@@ -196,7 +182,6 @@ final class Param {
         name,
         true,
         typeInfo.coercion(),
-        fieldSpec,
         cleanDesc(description),
         descriptionArgumentName,
         positionalIndex);
