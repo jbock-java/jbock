@@ -87,8 +87,14 @@ public class CopyFile {
   }
 }
 ````
-After the change, the program prints
-the following when invoked without any arguments:
+
+The `parseOrExit` method is very convenient.
+If the input is not valid, it will print a helpful error message and shutdown the JVM,
+which is often the most helpful behaviour.
+If you want more control, you can use the `parse` method instead.
+
+When invoked without any arguments, 
+the program now prints the following message:
 
 <pre><code>Usage: CopyFile SOURCE DEST
 Missing parameter: SOURCE
@@ -97,7 +103,7 @@ Try 'CopyFile --help' for more information.
 
 This looks a lot better than the stacktrace already.
 
-## Improving the command line interface
+#### Adding metadata
 
 Next, we add some metadata:
 
@@ -127,14 +133,16 @@ DESCRIPTION
        There are no options yet.
 </code></pre>
 
-To make things more interesting, we're going to add some 
+#### Adding options
+
+To make things more interesting, we're going to add some
 non-positional parameters, a.k.a. options.
 We start by adding the recursive flag.
 
 A <em>flag</em> is an option that doesn't take an argument.
 A method that returns `boolean` declares the flag.
 
-This parameter method will return `true` if the `--recursive` option 
+This parameter method will return `true` if the `--recursive` option
 is present on the command line, and `false` otherwise:
 
 ````java
@@ -189,7 +197,10 @@ automatically defines the long name.
 This can be overridden with the `longName` option,
 or disabled by passing `longName = ""`.
 
-After adding some description text, the Args class looks like this:
+Each parameter method can also be documented with javadoc.
+This will show up in the help text if the user passes `--help`, or, if
+the help feature is disabled via `addHelp = false`,
+in the parser failure message.
 
 ````java
 /**
@@ -236,7 +247,7 @@ abstract class Args {
 }
 ````
 
-When the user passes the `--help`
+When the user passes the special `--help`
 parameter on the command line, this program now prints the following:
 
 <pre><code>NAME
@@ -271,33 +282,34 @@ OPTIONS
 </code></pre>
 
 The full source code of the <em>CopyFile</em>
-project can be found 
+project can be found
 [here](https://github.com/h908714124/CopyFile).
 
 The
 [examples](https://github.com/h908714124/jbock/tree/master/examples)
 folder has demos and tests for most parser features.
 
-Some projects that use jbock:
+#### Some projects that use jbock?
 
 * [aws-glacier-multipart-upload](https://github.com/h908714124/aws-glacier-multipart-upload)
 * [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
+* ...
 
-#### Which types are supported?
+## Supported types
 
-* A number of standard classes and primitives are supported out of the box. 
-See [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
+* A number of standard classes and primitives are supported out of the box.
+Complete list [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
 * Any non-private enum is supported out of the box. Note, by default this uses the enum's `valueOf` method,
 so only the precise enum constant names are understood.
 * A custom mapper can be used for any non-primitive "simple" (no typevars) type.
 
-#### Custom mappers
+## Custom mappers
 
 Let `X` be a class or interface, with no direct type variables.
 A <em>mapper class</em> for `X` is any class that implements `Function<String, X>`.
- 
-Here's a mapper for `Integer`: 
+
+Here's a mapper for `Integer`:
 
 ````java
 import java.util.function.Function;
@@ -330,4 +342,4 @@ that returns `Optional<X>` or `List<X>`.
 * The `String` that's passed to the mapper will never be `null`, so there's no need to check for that.
 * The mapper may throw any `RuntimeException` to signal a parsing failure.
 The generated code will catch it and print the message.
-* Even if the mapper returns `null`, the parameter method won't. See pledge above. 
+* Even if the mapper returns `null`, the parameter method won't. See pledge above.

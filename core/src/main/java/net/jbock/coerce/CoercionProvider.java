@@ -193,7 +193,6 @@ public class CoercionProvider {
     return kind.of(parameterized.getTypeArguments().get(0));
   }
 
-
   static String snakeToCamel(String s) {
     StringBuilder sb = new StringBuilder();
     boolean upcase = false;
