@@ -11,7 +11,7 @@ class PatternCoercion extends CoercionFactory {
   }
 
   @Override
-  public CodeBlock map() {
+  CodeBlock map() {
     return CodeBlock.builder().add(".map($T::compile)", Pattern.class).build();
   }
 }

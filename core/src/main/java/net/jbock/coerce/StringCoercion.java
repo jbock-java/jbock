@@ -10,7 +10,7 @@ class StringCoercion extends CoercionFactory {
   }
 
   @Override
-  public CodeBlock map() {
+  CodeBlock map() {
     return CodeBlock.builder().build();
   }
 
@@ -19,7 +19,7 @@ class StringCoercion extends CoercionFactory {
     return CodeBlock.builder().add("quote.apply($L)", param).build();
   }
 
-  public CodeBlock mapJsonExpr(FieldSpec field) {
+  CodeBlock mapJsonExpr(FieldSpec field) {
     return CodeBlock.builder().add(".map(quote)").build();
   }
 }

@@ -9,7 +9,7 @@ abstract class BasicCharacterCoercion extends CoercionFactory {
   }
 
   @Override
-  public final CodeBlock map() {
+  final CodeBlock map() {
     return CodeBlock.builder().add(".map(Helper::parseCharacter)").build();
   }
 }

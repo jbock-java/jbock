@@ -74,7 +74,7 @@ Before we move on, we should mention two important guarantees that jbock gives y
 
 It is now clear that any parameter method that doesn't return 
 some kind of `List` or `Optional` must represent a required argument.
-Otherwise it would be hard to fulfill the non-null promise.
+Otherwise it would hardly be possible to fulfill the non-null promise.
 
 Now let's move on with our copy tool. A typical jbock invocation looks like this:
 

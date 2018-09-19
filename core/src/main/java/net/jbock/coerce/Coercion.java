@@ -6,12 +6,14 @@ import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.Optional;
 
-public abstract class Coercion {
+public final class Coercion {
 
   private final TypeName trigger;
   private final CodeBlock map;
   private final boolean special;
   private final Optional<CodeBlock> initMapper;
+  private final CodeBlock jsonExpr;
+  private final CodeBlock mapJsonExpr;
   private final TypeName paramType;
   private final FieldSpec field;
 
@@ -20,12 +22,16 @@ public abstract class Coercion {
       CodeBlock map,
       boolean special,
       Optional<CodeBlock> initMapper,
+      CodeBlock jsonExpr,
+      CodeBlock mapJsonExpr,
       TypeName paramType,
       FieldSpec field) {
     this.trigger = trigger;
     this.map = map;
     this.special = special;
     this.initMapper = initMapper;
+    this.jsonExpr = jsonExpr;
+    this.mapJsonExpr = mapJsonExpr;
     this.paramType = paramType;
     this.field = field;
   }
@@ -33,48 +39,43 @@ public abstract class Coercion {
   /**
    * Maps from String to trigger type
    */
-  public final CodeBlock map() {
+  public CodeBlock map() {
     return map;
   }
 
   /**
    * Type that triggers this coercion (could be wrapped in Optional or List)
    */
-  public final TypeName trigger() {
+  public TypeName trigger() {
     return trigger;
   }
 
   // toString stuff (the gen class overrides toString if possible)
-  public final CodeBlock jsonExpr(FieldSpec field) {
-    return jsonExpr(field.name);
+  public CodeBlock jsonExpr() {
+    return jsonExpr;
   }
 
   // toString stuff
-  abstract CodeBlock jsonExpr(String param);
-
-  // toString stuff
-  public abstract CodeBlock mapJsonExpr();
+  public CodeBlock mapJsonExpr() {
+    return mapJsonExpr;
+  }
 
   /**
    * Specials can't be in Optional or List
    */
-  public final boolean special() {
+  public boolean special() {
     return special;
   }
 
-  public final Optional<CodeBlock> initMapper() {
+  public Optional<CodeBlock> initMapper() {
     return initMapper;
   }
 
-  public final TypeName paramType() {
-    return trigger;
+  public TypeName paramType() {
+    return paramType;
   }
 
-  public final TypeName fieldType() {
-    return field.type;
-  }
-
-  public final FieldSpec field() {
+  public FieldSpec field() {
     return field;
   }
 }

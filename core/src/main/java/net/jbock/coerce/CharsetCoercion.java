@@ -11,7 +11,7 @@ class CharsetCoercion extends CoercionFactory {
   }
 
   @Override
-  public CodeBlock map() {
+  CodeBlock map() {
     return CodeBlock.builder().add(".map($T::forName)", Charset.class).build();
   }
 }

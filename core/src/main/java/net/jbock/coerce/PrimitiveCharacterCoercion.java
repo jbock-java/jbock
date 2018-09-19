@@ -9,12 +9,12 @@ class PrimitiveCharacterCoercion extends BasicCharacterCoercion {
   }
 
   @Override
-  public boolean special() {
+  boolean special() {
     return true;
   }
 
   @Override
-  public TypeName paramType() {
+  TypeName paramType() {
     return TypeName.get(Character.class);
   }
 }

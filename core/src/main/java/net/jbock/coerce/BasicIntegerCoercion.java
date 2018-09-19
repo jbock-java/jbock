@@ -9,7 +9,7 @@ abstract class BasicIntegerCoercion extends BasicNumberCoercion {
   }
 
   @Override
-  public final CodeBlock map() {
+  final CodeBlock map() {
     return CodeBlock.builder().add(".map($T::valueOf)", Integer.class).build();
   }
 

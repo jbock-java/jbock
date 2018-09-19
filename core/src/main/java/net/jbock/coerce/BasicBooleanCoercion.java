@@ -12,12 +12,12 @@ abstract class BasicBooleanCoercion extends CoercionFactory {
   }
 
   @Override
-  public final CodeBlock map() {
+  final CodeBlock map() {
     return CodeBlock.builder().build();
   }
 
   @Override
-  public final boolean special() {
+  final boolean special() {
     // flags only
     return true;
   }
@@ -27,7 +27,7 @@ abstract class BasicBooleanCoercion extends CoercionFactory {
     return CodeBlock.builder().add("$L", param).build();
   }
 
-  public CodeBlock mapJsonExpr(FieldSpec field) {
+  CodeBlock mapJsonExpr(FieldSpec field) {
     return CodeBlock.builder().add(".map($T::toString)", Objects.class).build();
   }
 }

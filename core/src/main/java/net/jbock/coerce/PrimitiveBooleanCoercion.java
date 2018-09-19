@@ -9,7 +9,7 @@ class PrimitiveBooleanCoercion extends BasicBooleanCoercion {
   }
 
   @Override
-  public TypeName paramType() {
+  TypeName paramType() {
     return TypeName.get(Boolean.class);
   }
 }

@@ -16,7 +16,7 @@ abstract class BasicNumberCoercion extends CoercionFactory {
     return CodeBlock.builder().add("$L", param).build();
   }
 
-  public CodeBlock mapJsonExpr(FieldSpec field) {
+  CodeBlock mapJsonExpr(FieldSpec field) {
     return CodeBlock.builder().add(".map($T::toString)", Objects.class).build();
   }
 }

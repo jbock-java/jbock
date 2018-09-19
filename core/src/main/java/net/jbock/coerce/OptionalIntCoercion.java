@@ -13,12 +13,12 @@ class OptionalIntCoercion extends BasicIntegerCoercion {
   }
 
   @Override
-  public boolean special() {
+  boolean special() {
     return true;
   }
 
   @Override
-  public CodeBlock mapJsonExpr(FieldSpec field) {
+  CodeBlock mapJsonExpr(FieldSpec field) {
     return CodeBlock.builder().add(".map($L -> $L)",
         "e", jsonExpr("e")).build();
   }
@@ -34,7 +34,7 @@ class OptionalIntCoercion extends BasicIntegerCoercion {
   }
 
   @Override
-  public TypeName paramType() {
+  TypeName paramType() {
     return TypeName.get(Integer.class);
   }
 }

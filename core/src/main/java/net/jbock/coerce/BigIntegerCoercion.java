@@ -11,7 +11,7 @@ class BigIntegerCoercion extends CoercionFactory {
   }
 
   @Override
-  public CodeBlock map() {
+  CodeBlock map() {
     return CodeBlock.builder().add(".map($T::new)", BigInteger.class).build();
   }
 }

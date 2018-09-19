@@ -10,7 +10,7 @@ final class EnumCoercion extends CoercionFactory {
   }
 
   @Override
-  public final CodeBlock map() {
+  final CodeBlock map() {
     return CodeBlock.builder().add(".map($T::valueOf)", trigger()).build();
   }
 

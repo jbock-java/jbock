@@ -25,7 +25,7 @@ enum OptionType {
       builder.addStatement("$N.add($S + $L)",
           joiner,
           jsonKey(param),
-          param.coercion().jsonExpr(param.field()));
+          param.coercion().jsonExpr());
       return builder.build();
     }
   },
@@ -54,7 +54,7 @@ enum OptionType {
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock valueExpr;
       if (param.required || param.coercion().special()) {
-        valueExpr = param.coercion().jsonExpr(param.field());
+        valueExpr = param.coercion().jsonExpr();
       } else {
         valueExpr = CodeBlock.builder()
             .add("$N$L.orElse($S)",
