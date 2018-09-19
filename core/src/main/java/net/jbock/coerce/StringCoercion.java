@@ -3,7 +3,7 @@ package net.jbock.coerce;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 
-class StringCoercion extends Coercion {
+class StringCoercion extends CoercionFactory {
 
   StringCoercion() {
     super(String.class);

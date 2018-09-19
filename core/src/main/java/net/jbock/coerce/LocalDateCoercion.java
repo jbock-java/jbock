@@ -4,7 +4,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 
 import java.time.LocalDate;
 
-class LocalDateCoercion extends Coercion {
+class LocalDateCoercion extends CoercionFactory {
 
   LocalDateCoercion() {
     super(LocalDate.class);

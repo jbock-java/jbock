@@ -4,7 +4,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 
 import java.time.Instant;
 
-class InstantCoercion extends Coercion {
+class InstantCoercion extends CoercionFactory {
 
   InstantCoercion() {
     super(Instant.class);

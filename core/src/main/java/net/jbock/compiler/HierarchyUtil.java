@@ -8,10 +8,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static net.jbock.compiler.Util.AS_DECLARED;
-import static net.jbock.compiler.Util.AS_TYPE_ELEMENT;
-import static net.jbock.compiler.Util.asDeclared;
-
 public class HierarchyUtil {
 
   public static List<TypeElement> getFamilyTree(TypeMirror mirror) {

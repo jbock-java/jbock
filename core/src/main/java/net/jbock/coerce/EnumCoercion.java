@@ -3,7 +3,7 @@ package net.jbock.coerce;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
 
-final class EnumCoercion extends Coercion {
+final class EnumCoercion extends CoercionFactory {
 
   private EnumCoercion(TypeName trigger) {
     super(trigger);

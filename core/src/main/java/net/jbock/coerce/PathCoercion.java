@@ -5,7 +5,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-class PathCoercion extends Coercion {
+class PathCoercion extends CoercionFactory {
 
   PathCoercion() {
     super(Path.class);

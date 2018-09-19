@@ -39,7 +39,7 @@ public class CoercionProvider {
     return COMBINATORS.contains(mirror.accept(QUALIFIED_NAME, null));
   }
 
-  private static final List<Coercion> ALL_COERCIONS = Arrays.asList(
+  private static final List<CoercionFactory> ALL_COERCIONS = Arrays.asList(
       new CharsetCoercion(),
       new PatternCoercion(),
       new ObjectIntegerCoercion(),
@@ -71,12 +71,12 @@ public class CoercionProvider {
 
   private static CoercionProvider instance;
 
-  private final Map<TypeName, Coercion> coercions;
+  private final Map<TypeName, CoercionFactory> coercions;
 
   private CoercionProvider() {
     coercions = new HashMap<>();
-    for (Coercion coercion : ALL_COERCIONS) {
-      Coercion previous = this.coercions.put(coercion.trigger(), coercion);
+    for (CoercionFactory coercion : ALL_COERCIONS) {
+      CoercionFactory previous = this.coercions.put(coercion.trigger(), coercion);
       if (previous != null) {
         throw new IllegalStateException(String.format("Both triggered by %s : %s, %s",
             coercion.trigger(),
@@ -98,8 +98,8 @@ public class CoercionProvider {
       TypeElement mapperClass) {
     TypeMirror returnType = sourceMethod.getReturnType();
     try {
-      Coercion coercion = handle(sourceMethod, paramName, mapperClass);
-      return TypeInfo.create(returnType, coercion);
+      CoercionFactory coercion = handle(sourceMethod, paramName, mapperClass);
+      return TypeInfo.create(returnType, coercion.getCoercion());
     } catch (TmpException e) {
       String warning = WarningProvider.instance().findWarning(returnType);
       if (warning != null) {
@@ -109,7 +109,7 @@ public class CoercionProvider {
     }
   }
 
-  private Coercion handle(
+  private CoercionFactory handle(
       ExecutableElement sourceMethod,
       String paramName,
       TypeElement mapperClass) throws TmpException {
@@ -123,7 +123,7 @@ public class CoercionProvider {
     return handleDefault(trigger(returnType));
   }
 
-  private Coercion handleMapperClass(ExecutableElement sourceMethod, String paramName, TypeElement mapperClass) throws TmpException {
+  private CoercionFactory handleMapperClass(ExecutableElement sourceMethod, String paramName, TypeElement mapperClass) throws TmpException {
     TypeName mapperType = TypeName.get(mapperClass.asType());
     ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
     TypeMirror triggerMirror = trigger(sourceMethod.getReturnType());
@@ -133,7 +133,7 @@ public class CoercionProvider {
     validateMapperClass(mapperClass, HierarchyUtil.asTypeElement(triggerMirror));
     TypeName trigger = TypeName.get(triggerMirror);
 
-    return new Coercion(trigger) {
+    return new CoercionFactory(trigger) {
 
       @Override
       public CodeBlock map() {
@@ -150,8 +150,8 @@ public class CoercionProvider {
     };
   }
 
-  private Coercion handleDefault(TypeMirror returnType) throws TmpException {
-    Optional<Coercion> enumCoercion = checkEnum(returnType);
+  private CoercionFactory handleDefault(TypeMirror returnType) throws TmpException {
+    Optional<CoercionFactory> enumCoercion = checkEnum(returnType);
     if (enumCoercion.isPresent()) {
       return enumCoercion.get();
     } else {
@@ -162,7 +162,7 @@ public class CoercionProvider {
     }
   }
 
-  private Optional<Coercion> checkEnum(TypeMirror mirror) throws TmpException {
+  private Optional<CoercionFactory> checkEnum(TypeMirror mirror) throws TmpException {
     if (mirror.getKind() != TypeKind.DECLARED) {
       return Optional.empty();
     }

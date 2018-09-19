@@ -5,7 +5,7 @@ import net.jbock.com.squareup.javapoet.FieldSpec;
 
 import java.util.Objects;
 
-abstract class BasicNumberCoercion extends Coercion {
+abstract class BasicNumberCoercion extends CoercionFactory {
 
   BasicNumberCoercion(Class<?> trigger) {
     super(trigger);

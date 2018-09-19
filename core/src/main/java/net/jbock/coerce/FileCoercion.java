@@ -4,7 +4,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 
 import java.io.File;
 
-class FileCoercion extends Coercion {
+class FileCoercion extends CoercionFactory {
 
   FileCoercion() {
     super(File.class);

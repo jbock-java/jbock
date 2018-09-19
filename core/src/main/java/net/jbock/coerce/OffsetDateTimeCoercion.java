@@ -4,7 +4,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 
 import java.time.OffsetDateTime;
 
-class OffsetDateTimeCoercion extends Coercion {
+class OffsetDateTimeCoercion extends CoercionFactory {
 
   OffsetDateTimeCoercion() {
     super(OffsetDateTime.class);

@@ -4,7 +4,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 
 import java.time.ZonedDateTime;
 
-class ZonedDateTimeCoercion extends Coercion {
+class ZonedDateTimeCoercion extends CoercionFactory {
 
   ZonedDateTimeCoercion() {
     super(ZonedDateTime.class);

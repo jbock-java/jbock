@@ -4,7 +4,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 
 import java.util.regex.Pattern;
 
-class PatternCoercion extends Coercion {
+class PatternCoercion extends CoercionFactory {
 
   PatternCoercion() {
     super(Pattern.class);

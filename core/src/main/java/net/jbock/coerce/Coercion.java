@@ -4,30 +4,43 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
-import java.util.Objects;
 import java.util.Optional;
 
 public abstract class Coercion {
 
   private final TypeName trigger;
+  private final CodeBlock map;
+  private final boolean special;
+  private final Optional<CodeBlock> initMapper;
+  private final TypeName paramType;
+  private final TypeName fieldType;
 
-  Coercion(Class<?> trigger) {
-    this(TypeName.get(trigger));
-  }
-
-  Coercion(TypeName trigger) {
+  Coercion(
+      TypeName trigger,
+      CodeBlock map,
+      boolean special,
+      Optional<CodeBlock> initMapper,
+      TypeName paramType,
+      TypeName fieldType) {
     this.trigger = trigger;
+    this.map = map;
+    this.special = special;
+    this.initMapper = initMapper;
+    this.paramType = paramType;
+    this.fieldType = fieldType;
   }
 
   /**
    * Maps from String to trigger type
    */
-  public abstract CodeBlock map();
+  public CodeBlock map() {
+    return map;
+  }
 
   /**
    * Type that triggers this coercion (could be wrapped in Optional or List)
    */
-  public final TypeName trigger() {
+  public TypeName trigger() {
     return trigger;
   }
 
@@ -37,24 +50,20 @@ public abstract class Coercion {
   }
 
   // toString stuff
-  CodeBlock jsonExpr(String param) {
-    return CodeBlock.builder().add("quote.apply($T.toString($L))", Objects.class, param).build();
-  }
+  abstract CodeBlock jsonExpr(String param);
 
   // toString stuff
-  public CodeBlock mapJsonExpr(FieldSpec field) {
-    return CodeBlock.builder().add(".map($T::toString).map(quote)", Objects.class).build();
-  }
+  public abstract CodeBlock mapJsonExpr(FieldSpec field);
 
   /**
    * Specials can't be in Optional or List
    */
   public boolean special() {
-    return false;
+    return special;
   }
 
   public Optional<CodeBlock> initMapper() {
-    return Optional.empty();
+    return initMapper;
   }
 
   public TypeName paramType() {

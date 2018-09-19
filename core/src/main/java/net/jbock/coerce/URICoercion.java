@@ -4,7 +4,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 
 import java.net.URI;
 
-class URICoercion extends Coercion {
+class URICoercion extends CoercionFactory {
 
   URICoercion() {
     super(URI.class);

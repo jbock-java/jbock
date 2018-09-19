@@ -4,7 +4,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 
 import java.nio.charset.Charset;
 
-class CharsetCoercion extends Coercion {
+class CharsetCoercion extends CoercionFactory {
 
   CharsetCoercion() {
     super(Charset.class);

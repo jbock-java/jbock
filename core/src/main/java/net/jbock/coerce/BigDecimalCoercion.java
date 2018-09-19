@@ -4,7 +4,7 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 
 import java.math.BigDecimal;
 
-class BigDecimalCoercion extends Coercion {
+class BigDecimalCoercion extends CoercionFactory {
 
   BigDecimalCoercion() {
     super(BigDecimal.class);
