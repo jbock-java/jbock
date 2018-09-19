@@ -287,7 +287,7 @@ final class Helper {
     if (param.paramType == REPEATABLE) {
       builder.add(".collect($T.toList())", Collectors.class);
     }
-    if (param.required) {
+    if (param.required()) {
       builder.add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
           missingRequiredOptionMessage(param, context.optionType()));
     }

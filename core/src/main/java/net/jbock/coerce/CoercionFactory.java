@@ -9,7 +9,7 @@ import java.util.Optional;
 
 abstract class CoercionFactory {
 
-  private final TypeName trigger;
+  final TypeName trigger;
 
   CoercionFactory(Class<?> trigger) {
     this(TypeName.get(trigger));
@@ -56,7 +56,9 @@ abstract class CoercionFactory {
     return trigger;
   }
 
-  final Coercion getCoercion(FieldSpec field) {
+  final Coercion getCoercion(
+      FieldSpec field,
+      CoercionKind kind) {
     return new Coercion(
         trigger,
         map(),
@@ -65,6 +67,7 @@ abstract class CoercionFactory {
         jsonExpr(field.name),
         mapJsonExpr(field),
         paramType(),
-        field);
+        field,
+        kind);
   }
 }

@@ -7,7 +7,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
 
-import static net.jbock.coerce.CoercionProvider.isCombinator;
+import static net.jbock.coerce.CoercionKind.findKind;
 import static net.jbock.compiler.Util.AS_DECLARED;
 import static net.jbock.compiler.Util.AS_TYPE_ELEMENT;
 
@@ -34,7 +34,7 @@ public class WarningProvider {
       return findWarningSimple(type);
     }
     DeclaredType declared = type.accept(AS_DECLARED, null);
-    if (isCombinator(type) && !declared.getTypeArguments().isEmpty()) {
+    if (findKind(type).isCombination() && !declared.getTypeArguments().isEmpty()) {
       TypeElement typeElement = declared.asElement().accept(AS_TYPE_ELEMENT, null);
       return findWarningSimple(typeElement.getTypeParameters().get(0).asType());
     }

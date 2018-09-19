@@ -53,7 +53,7 @@ enum OptionType {
     @Override
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock valueExpr;
-      if (param.required || param.coercion().special()) {
+      if (param.required() || param.coercion().special()) {
         valueExpr = param.coercion().jsonExpr();
       } else {
         valueExpr = CodeBlock.builder()

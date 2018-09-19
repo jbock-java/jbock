@@ -1,13 +1,16 @@
 package net.jbock.coerce;
 
+import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.compiler.Constants;
 
 import java.util.Optional;
 
 public final class Coercion {
 
+  public static final ClassName BOOLEAN_CLASS = ClassName.get(Boolean.class);
   private final TypeName trigger;
   private final CodeBlock map;
   private final boolean special;
@@ -16,6 +19,7 @@ public final class Coercion {
   private final CodeBlock mapJsonExpr;
   private final TypeName paramType;
   private final FieldSpec field;
+  private final CoercionKind kind;
 
   Coercion(
       TypeName trigger,
@@ -25,7 +29,8 @@ public final class Coercion {
       CodeBlock jsonExpr,
       CodeBlock mapJsonExpr,
       TypeName paramType,
-      FieldSpec field) {
+      FieldSpec field,
+      CoercionKind kind) {
     this.trigger = trigger;
     this.map = map;
     this.special = special;
@@ -34,6 +39,7 @@ public final class Coercion {
     this.mapJsonExpr = mapJsonExpr;
     this.paramType = paramType;
     this.field = field;
+    this.kind = kind;
   }
 
   /**
@@ -77,5 +83,25 @@ public final class Coercion {
 
   public FieldSpec field() {
     return field;
+  }
+
+  public boolean flag() {
+    return field.type.equals(TypeName.BOOLEAN) || BOOLEAN_CLASS.equals(field.type);
+  }
+
+  public boolean repeatable() {
+    return kind == CoercionKind.LIST_COMBINATION;
+  }
+
+  public boolean required() {
+    if (flag()) {
+      return false;
+    }
+    if (field.type.equals(Constants.OPTIONAL_INT) ||
+        field.type.equals(Constants.OPTIONAL_DOUBLE) ||
+        field.type.equals(Constants.OPTIONAL_LONG)) {
+      return false;
+    }
+    return kind == CoercionKind.SIMPLE;
   }
 }

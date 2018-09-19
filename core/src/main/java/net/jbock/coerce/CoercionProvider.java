@@ -20,26 +20,18 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 
 import static javax.lang.model.element.Modifier.FINAL;
+import static net.jbock.coerce.CoercionKind.findKind;
 import static net.jbock.coerce.MapperClassValidator.validateMapperClass;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.AS_DECLARED;
 import static net.jbock.compiler.Util.QUALIFIED_NAME;
 
 public class CoercionProvider {
-
-  // List and Optional are the only combinators.
-  // This knowledge is used in TypeInfo.findParameterizedTypeInfo.
-  private static final List<String> COMBINATORS = Arrays.asList(
-      "java.util.Optional",
-      "java.util.List");
-
-  public static boolean isCombinator(TypeMirror mirror) {
-    return COMBINATORS.contains(mirror.accept(QUALIFIED_NAME, null));
-  }
 
   private static final List<CoercionFactory> ALL_COERCIONS = Arrays.asList(
       new CharsetCoercion(),
@@ -94,18 +86,13 @@ public class CoercionProvider {
     return instance;
   }
 
-  public TypeInfo findCoercion(
+  public Coercion findCoercion(
       ExecutableElement sourceMethod,
       String paramName,
       TypeElement mapperClass) {
     TypeMirror returnType = sourceMethod.getReturnType();
-    FieldSpec field = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()),
-        snakeToCamel(paramName))
-        .addModifiers(FINAL)
-        .build();
     try {
-      CoercionFactory coercion = handle(sourceMethod, paramName, mapperClass);
-      return TypeInfo.create(returnType, coercion.getCoercion(field));
+      return handle(sourceMethod, paramName, mapperClass);
     } catch (TmpException e) {
       String warning = WarningProvider.instance().findWarning(returnType);
       if (warning != null) {
@@ -115,31 +102,36 @@ public class CoercionProvider {
     }
   }
 
-  private CoercionFactory handle(
+  private Coercion handle(
       ExecutableElement sourceMethod,
       String paramName,
       TypeElement mapperClass) throws TmpException {
+    FieldSpec field = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()),
+        snakeToCamel(paramName))
+        .addModifiers(FINAL)
+        .build();
     if (mapperClass != null && !"java.util.Function".equals(mapperClass.getQualifiedName().toString())) {
-      return handleMapperClass(sourceMethod, paramName, mapperClass);
+      return handleMapperClass(sourceMethod, paramName, mapperClass, field);
     }
     TypeMirror returnType = sourceMethod.getReturnType();
     if (returnType.getKind() == TypeKind.ARRAY) {
       throw new TmpException("Arrays are not supported. Use List instead.");
     }
-    return handleDefault(trigger(returnType));
+    return handleDefault(trigger(returnType), field);
   }
 
-  private CoercionFactory handleMapperClass(ExecutableElement sourceMethod, String paramName, TypeElement mapperClass) throws TmpException {
+  private Coercion handleMapperClass(
+      ExecutableElement sourceMethod, String paramName, TypeElement mapperClass, FieldSpec field) throws TmpException {
     TypeName mapperType = TypeName.get(mapperClass.asType());
     ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
-    TypeMirror triggerMirror = trigger(sourceMethod.getReturnType());
-    if (triggerMirror.getKind() != TypeKind.DECLARED) {
+    Entry<CoercionKind, TypeMirror> triggerKind = trigger(sourceMethod.getReturnType());
+    final TypeMirror trigger = triggerKind.getValue();
+    if (trigger.getKind() != TypeKind.DECLARED) {
       throw TmpException.create("Bad return type");
     }
-    validateMapperClass(mapperClass, HierarchyUtil.asTypeElement(triggerMirror));
-    TypeName trigger = TypeName.get(triggerMirror);
+    validateMapperClass(mapperClass, HierarchyUtil.asTypeElement(trigger));
 
-    return new CoercionFactory(trigger) {
+    return new CoercionFactory(TypeName.get(trigger)) {
 
       @Override
       public CodeBlock map() {
@@ -153,18 +145,22 @@ public class CoercionProvider {
             .build();
         return Optional.of(codeBlock);
       }
-    };
+    }.getCoercion(field, triggerKind.getKey());
   }
 
-  private CoercionFactory handleDefault(TypeMirror returnType) throws TmpException {
-    Optional<CoercionFactory> enumCoercion = checkEnum(returnType);
+  private Coercion handleDefault(
+      Entry<CoercionKind, TypeMirror> triggerKind,
+      FieldSpec field) throws TmpException {
+    TypeMirror trigger = triggerKind.getValue();
+    CoercionKind kind = triggerKind.getKey();
+    Optional<CoercionFactory> enumCoercion = checkEnum(trigger);
     if (enumCoercion.isPresent()) {
-      return enumCoercion.get();
+      return enumCoercion.get().getCoercion(field, kind);
     } else {
-      if (coercions.get(TypeName.get(returnType)) == null) {
+      if (coercions.get(TypeName.get(trigger)) == null) {
         throw TmpException.create("Bad return type");
       }
-      return coercions.get(TypeName.get(returnType));
+      return coercions.get(TypeName.get(trigger)).getCoercion(field, kind);
     }
   }
 
@@ -184,22 +180,17 @@ public class CoercionProvider {
     return Optional.of(EnumCoercion.create(TypeName.get(mirror)));
   }
 
-  private TypeMirror trigger(TypeMirror returnType) throws TmpException {
+  private Entry<CoercionKind, TypeMirror> trigger(TypeMirror returnType) throws TmpException {
     DeclaredType parameterized = Util.asParameterized(returnType);
     if (parameterized == null) {
       // not a combination, triggered by return type
-      return returnType;
+      return CoercionKind.SIMPLE.of(returnType);
     }
-    if (!isCombinator(parameterized)) {
-      // combinators are the only allowed parameterized types
+    CoercionKind kind = findKind(parameterized);
+    if (!kind.isCombination()) {
       throw TmpException.create("Bad return type");
     }
-    // combination, triggered by type argument of return type
-    TypeMirror typeMirror = parameterized.getTypeArguments().get(0);
-    if (typeMirror.getKind() != TypeKind.DECLARED) {
-      throw TmpException.create("Bad return type");
-    }
-    return typeMirror;
+    return kind.of(parameterized.getTypeArguments().get(0));
   }
 
 

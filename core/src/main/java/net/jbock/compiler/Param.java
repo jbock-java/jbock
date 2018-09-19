@@ -4,7 +4,6 @@ import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
-import net.jbock.coerce.TypeInfo;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
@@ -40,11 +39,6 @@ final class Param {
   // never null
   final ExecutableElement sourceMethod;
 
-  // does it return string array
-  final boolean isStringArray;
-
-  final boolean required;
-
   private final String name;
 
   private final Coercion coercion;
@@ -74,21 +68,17 @@ final class Param {
       String longName,
       OptionType paramType,
       ExecutableElement sourceMethod,
-      boolean isStringArray,
-      boolean required,
       String name,
       boolean positional,
       Coercion coercion,
       List<String> description,
       String descriptionArgumentName,
       int positionalIndex) {
-    this.required = required;
     this.coercion = coercion;
     this.shortName = shortName;
     this.longName = longName;
     this.sourceMethod = sourceMethod;
     this.paramType = paramType;
-    this.isStringArray = isStringArray;
     this.name = name;
     this.description = description;
     this.descriptionArgumentName = descriptionArgumentName;
@@ -133,7 +123,7 @@ final class Param {
     checkName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
     String name = enumConstant(params, sourceMethod.getSimpleName().toString());
-    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass);
+    Coercion typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass);
     OptionType type = optionType(typeInfo);
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
         descriptionArgumentName(type, typeInfo.required(), name) :
@@ -143,11 +133,9 @@ final class Param {
         longName,
         type,
         sourceMethod,
-        typeInfo.array(),
-        typeInfo.required(),
         name,
         false,
-        typeInfo.coercion(),
+        typeInfo,
         cleanDesc(description),
         descriptionArgumentName,
         -1);
@@ -161,8 +149,8 @@ final class Param {
       TypeElement mapperClass) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     String name = enumConstant(params, sourceMethod.getSimpleName().toString());
-    TypeInfo typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass);
-    OptionType type = optionType(typeInfo);
+    Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass);
+    OptionType type = optionType(coercion);
     if (type == OptionType.FLAG) {
       throw ValidationException.create(sourceMethod,
           "A method that carries the Positional annotation " +
@@ -170,18 +158,16 @@ final class Param {
     }
     checkNotPresent(sourceMethod, parameter, singletonList(Parameter.class));
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
-        descriptionArgumentName(type, typeInfo.required(), name) :
+        descriptionArgumentName(type, coercion.required(), name) :
         parameter.argHandle();
     return new Param(
         ' ',
         null,
         type,
         sourceMethod,
-        typeInfo.array(),
-        typeInfo.required(),
         name,
         true,
-        typeInfo.coercion(),
+        coercion,
         cleanDesc(description),
         descriptionArgumentName,
         positionalIndex);
@@ -340,16 +326,22 @@ final class Param {
     return positionalIndex >= 0;
   }
 
+  boolean isOption() {
+    return !isPositional();
+  }
+
   int positionalIndex() {
     return positionalIndex;
   }
 
+  boolean required() {
+    return coercion.required();
+  }
+
   PositionalOrder positionalOrder() {
     switch (paramType) {
-      case FLAG:
-        return null;
       case REGULAR:
-        return required ? PositionalOrder.REQUIRED : PositionalOrder.OPTIONAL;
+        return coercion.required() ? PositionalOrder.REQUIRED : PositionalOrder.OPTIONAL;
       case REPEATABLE:
         return PositionalOrder.LIST;
       default:
@@ -395,11 +387,11 @@ final class Param {
     return Arrays.copyOfRange(desc, firstNonempty, lastNonempty + 1);
   }
 
-  private static OptionType optionType(TypeInfo info) {
-    if (info.flag()) {
+  private static OptionType optionType(Coercion coercion) {
+    if (coercion.flag()) {
       return OptionType.FLAG;
     }
-    if (info.repeatable()) {
+    if (coercion.repeatable()) {
       return OptionType.REPEATABLE;
     }
     return OptionType.REGULAR;
