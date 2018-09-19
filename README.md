@@ -72,6 +72,10 @@ Before we move on, we should mention two important guarantees that jbock gives y
 
 > `parse` or `parseOrExit` will never throw an exception or return `null`.
 
+It is now clear that any parameter method that doesn't return 
+some kind of `List` or `Optional` must represent a required argument.
+Otherwise it would be hard to fulfill the non-null promise.
+
 Now let's move on with our copy tool. A typical jbock invocation looks like this:
 
 ````java
@@ -123,13 +127,15 @@ DESCRIPTION
        There are no options yet.
 </code></pre>
 
-To make things more interesting, we're going to add some options.
+To make things more interesting, we're going to add some 
+non-positional parameters, a.k.a. options.
 We start by adding the recursive flag.
 
-A <em>flag</em> is a parameter that doesn't take an argument.
+A <em>flag</em> is an option that doesn't take an argument.
 A method that returns `boolean` declares the flag.
-This method will return `true` if the `--recursive` parameter is present on the command line,
-and `false` otherwise.
+
+This parameter method will return `true` if the `--recursive` option 
+is present on the command line, and `false` otherwise:
 
 ````java
 @CommandLineArguments
@@ -140,7 +146,7 @@ abstract class Args {
 }
 ````
 
-The `recursive` parameter is not positional, so it makes no difference whether it
+It makes no difference whether this new method
 is declared before or after
 the `source()` and `dest()` methods, or between them.
 
