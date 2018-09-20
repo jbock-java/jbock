@@ -318,12 +318,13 @@ depending on the the return type `X` of their parameter method `m`.
 
 If a type `A` is supported, 
 then `List<A>` and `Optional<A>` are also supported.
+The following types are permissible values of `A`:
 
 * A number of standard classes and primitives are supported out of the box.
 See the complete list [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
-* Any non-private enum is supported out of the box. Note, by default this uses the enum's `valueOf` method,
+* Any non-private enum is also supported out of the box. Note, by default this uses the enum's `valueOf` method,
 so only the precise enum constant names are understood.
-* A custom mapper can be used for any type, except (currently) `byte`.
+* A custom mapper can be used for almost any `A`.
 
 ## Custom mappers
 
