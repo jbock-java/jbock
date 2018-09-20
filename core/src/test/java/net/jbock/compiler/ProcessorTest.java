@@ -525,10 +525,10 @@ class ProcessorTest {
   }
 
   @Test
-  void mapperInvalidBytePrimitive() {
+  void mapperValidBytePrimitive() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract byte number();",
         "  static class Mapper implements Function<String, Byte> {",
         "    public Byte apply(String s) {",
@@ -536,11 +536,10 @@ class ProcessorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("This primitive is not supported.");
+        .compilesWithoutError();
   }
 
   @Test

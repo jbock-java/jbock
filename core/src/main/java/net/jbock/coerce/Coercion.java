@@ -19,7 +19,7 @@ public final class Coercion {
   private final TypeName trigger;
   private final CodeBlock map;
   private final boolean special;
-  private final Optional<CodeBlock> initMapper;
+  private final CodeBlock initMapper;
   private final CodeBlock jsonExpr;
   private final CodeBlock mapJsonExpr;
   private final CodeBlock extract;
@@ -31,7 +31,7 @@ public final class Coercion {
       TypeName trigger,
       CodeBlock map,
       boolean special,
-      Optional<CodeBlock> initMapper,
+      CodeBlock initMapper,
       CodeBlock jsonExpr,
       CodeBlock mapJsonExpr,
       CodeBlock extract,
@@ -81,7 +81,7 @@ public final class Coercion {
     return special;
   }
 
-  public Optional<CodeBlock> initMapper() {
+  public CodeBlock initMapper() {
     return initMapper;
   }
 
@@ -118,7 +118,7 @@ public final class Coercion {
   }
 
   Coercion withMapper(CodeBlock map, CodeBlock initMapper) {
-    return new Coercion(trigger, map, special, Optional.of(initMapper), jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+    return new Coercion(trigger, map, special, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 
   Coercion asOptional() {

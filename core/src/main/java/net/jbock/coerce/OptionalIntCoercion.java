@@ -43,7 +43,7 @@ class OptionalIntCoercion extends BasicIntegerCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.isPresent() ? $T.of($N.get()) : $T.empty()",
+    return CodeBlock.builder().add("$N.isPresent() ? $T.of($N.get().intValue()) : $T.empty()",
         param, OptionalInt.class, param, OptionalInt.class).build();
   }
 }

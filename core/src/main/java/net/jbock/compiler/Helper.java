@@ -266,7 +266,10 @@ final class Helper {
     });
 
     for (Param param : context.parameters) {
-      param.coercion().initMapper().ifPresent(spec::addStatement);
+      CodeBlock initMapper = param.coercion().initMapper();
+      if (!initMapper.isEmpty()) {
+        spec.addStatement(initMapper);
+      }
     }
 
     if (context.hasPositional()) {
@@ -281,11 +284,14 @@ final class Helper {
   private CodeBlock extractExpression(Param param) {
     CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
     if (param.paramType == REPEATABLE) {
-      builder.add(".stream()");
-    }
-    builder.add("$L", param.coercion().map());
-    if (param.paramType == REPEATABLE) {
-      builder.add(".collect($T.toList())", Collectors.class);
+      CodeBlock mapExpr = param.coercion().map();
+      if (!mapExpr.isEmpty()) {
+        builder.add(".stream()");
+        builder.add("$L", mapExpr);
+        builder.add(".collect($T.toList())", Collectors.class);
+      }
+    } else {
+      builder.add("$L", param.coercion().map());
     }
     if (param.required()) {
       builder.add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,

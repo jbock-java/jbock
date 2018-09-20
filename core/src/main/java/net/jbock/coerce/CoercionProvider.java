@@ -17,7 +17,6 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.CoercionKind.findKind;
@@ -47,6 +46,10 @@ public class CoercionProvider {
       new PrimitiveCharacterCoercion(),
       new ObjectBooleanCoercion(),
       new PrimitiveBooleanCoercion(),
+      new ObjectShortCoercion(),
+      new PrimitiveShortCoercion(),
+      new ObjectByteCoercion(),
+      new PrimitiveByteCoercion(),
       new PathCoercion(),
       new FileCoercion(),
       new URICoercion(),
@@ -161,31 +164,32 @@ public class CoercionProvider {
   private Coercion handleDefault(
       TriggerKind tk,
       FieldSpec field) throws TmpException {
-    Optional<CoercionFactory> enumCoercion = checkEnum(tk.trigger);
-    if (enumCoercion.isPresent()) {
-      return enumCoercion.get().getCoercion(field, tk.kind);
+    CoercionFactory enumCoercion = checkEnum(tk.trigger);
+    if (enumCoercion != null) {
+      return enumCoercion.getCoercion(field, tk.kind);
     } else {
-      if (coercions.get(TypeName.get(tk.trigger)) == null) {
+      CoercionFactory factory = coercions.get(TypeName.get(tk.trigger));
+      if (factory == null) {
         throw TmpException.create("Bad return type");
       }
-      return coercions.get(TypeName.get(tk.trigger)).getCoercion(field, tk.kind);
+      return factory.getCoercion(field, tk.kind);
     }
   }
 
-  private Optional<CoercionFactory> checkEnum(TypeMirror mirror) throws TmpException {
+  private CoercionFactory checkEnum(TypeMirror mirror) throws TmpException {
     if (mirror.getKind() != TypeKind.DECLARED) {
-      return Optional.empty();
+      return null;
     }
     DeclaredType declared = mirror.accept(AS_DECLARED, null);
     TypeElement element = declared.asElement().accept(Util.AS_TYPE_ELEMENT, null);
     TypeMirror superclass = element.getSuperclass();
     if (!"java.lang.Enum".equals(superclass.accept(QUALIFIED_NAME, null))) {
-      return Optional.empty();
+      return null;
     }
     if (element.getModifiers().contains(Modifier.PRIVATE)) {
       throw TmpException.create("Private return type is not allowed");
     }
-    return Optional.of(EnumCoercion.create(TypeName.get(mirror)));
+    return EnumCoercion.create(TypeName.get(mirror));
   }
 
   private TriggerKind trigger(TypeMirror returnType) throws TmpException {

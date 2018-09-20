@@ -6,7 +6,6 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.Objects;
-import java.util.Optional;
 
 abstract class CoercionFactory {
 
@@ -53,8 +52,8 @@ abstract class CoercionFactory {
     return false;
   }
 
-  Optional<CodeBlock> initMapper() {
-    return Optional.empty();
+  CodeBlock initMapper() {
+    return CodeBlock.builder().build();
   }
 
   TypeName paramType() {

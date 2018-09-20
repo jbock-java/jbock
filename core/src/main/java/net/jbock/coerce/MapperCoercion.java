@@ -8,7 +8,6 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static net.jbock.compiler.Constants.STRING;
@@ -34,8 +33,8 @@ final class MapperCoercion extends CoercionFactory {
   }
 
   @Override
-  public Optional<CodeBlock> initMapper() {
-    return Optional.of(mapperInit(trigger, mapperParam, mapperType));
+  public CodeBlock initMapper() {
+    return mapperInit(trigger, mapperParam, mapperType);
   }
 
   static CodeBlock mapperMap(ParameterSpec mapperParam) {
