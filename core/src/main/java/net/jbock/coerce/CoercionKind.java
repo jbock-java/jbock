@@ -1,8 +1,6 @@
 package net.jbock.coerce;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Map.Entry;
 
 import static net.jbock.compiler.Util.QUALIFIED_NAME;
 
@@ -18,8 +16,8 @@ public enum CoercionKind {
     this.combination = combination;
   }
 
-  Entry<CoercionKind, TypeMirror> of(TypeMirror mirror) {
-    return new SimpleImmutableEntry<>(this, mirror);
+  TriggerKind of(TypeMirror mirror) {
+    return new TriggerKind(this, mirror);
   }
 
   public boolean isCombination() {

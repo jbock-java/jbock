@@ -10,7 +10,8 @@ import java.util.Optional;
 
 public final class Coercion {
 
-  public static final ClassName BOOLEAN_CLASS = ClassName.get(Boolean.class);
+  private static final ClassName BOOLEAN_CLASS = ClassName.get(Boolean.class);
+
   private final TypeName trigger;
   private final CodeBlock map;
   private final boolean special;
@@ -103,5 +104,9 @@ public final class Coercion {
       return false;
     }
     return kind == CoercionKind.SIMPLE;
+  }
+
+  Coercion withMapper(CodeBlock map, CodeBlock initMapper) {
+    return new Coercion(trigger, map, special, Optional.of(initMapper), jsonExpr, mapJsonExpr, paramType, field, kind);
   }
 }

@@ -6,6 +6,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigInteger;
 import java.util.Date;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -20,11 +21,15 @@ class CustomMapperArgumentsTest {
         "--date", "1500000000000",
         "--optDate", "1500000000000",
         "--dateList", "1500000000000",
-        "--verbosity", "0x10");
+        "--verbosity", "0x10",
+        "--anInt", "50",
+        "--anOptionalInt", "51");
     assertEquals(1500000000000L, parsed.date().getTime());
     assertEquals(Optional.of(1500000000000L), parsed.optDate().map(Date::getTime));
     assertEquals(1500000000000L, parsed.dateList().get(0).getTime());
     assertEquals(Optional.of(16), parsed.verbosity().map(BigInteger::intValue));
+    assertEquals(50, parsed.anInt());
+    assertEquals(OptionalInt.of(51), parsed.anOptionalInt());
   }
 
   @Test
@@ -40,7 +45,7 @@ class CustomMapperArgumentsTest {
         "  CustomMapperArguments",
         "",
         "SYNOPSIS",
-        "  CustomMapperArguments [<options>] --date=<DATE>",
+        "  CustomMapperArguments [<options>] --date=<DATE> --anInt=<AN_INT>",
         "",
         "DESCRIPTION",
         "",
@@ -54,6 +59,10 @@ class CustomMapperArgumentsTest {
         "  --dateList <date_list...>",
         "",
         "  --verbosity <verbosity>",
+        "",
+        "  --anInt <AN_INT>",
+        "",
+        "  --anOptionalInt <an_optional_int>",
         "",
         "  --help",
         "    Print this help page.",

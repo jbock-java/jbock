@@ -497,9 +497,46 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "  @Parameter(mappedBy = Mapper.class) abstract int number();",
         "  static class Mapper implements Function<String, Integer> {",
         "    public Integer apply(String s) {",
+        "      return 1;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mapperInvalidBytePrimitive() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Parameter(mappedBy = Mapper.class) abstract byte number();",
+        "  static class Mapper implements Function<String, Byte> {",
+        "    public Byte apply(String s) {",
+        "      return 1;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("This primitive is not supported.");
+  }
+
+  @Test
+  void mapperValidByteBoxed() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @Parameter(mappedBy = Mapper.class) abstract Byte number();",
+        "  static class Mapper implements Function<String, Byte> {",
+        "    public Byte apply(String s) {",
         "      return 1;",
         "    }",
         "  }",

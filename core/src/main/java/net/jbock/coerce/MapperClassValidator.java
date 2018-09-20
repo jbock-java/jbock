@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.HierarchyUtil;
 import net.jbock.compiler.Util;
 
@@ -22,7 +23,7 @@ import static net.jbock.compiler.Util.QUALIFIED_NAME;
 
 final class MapperClassValidator {
 
-  static void validateMapperClass(TypeElement mapperClass, TypeElement trigger) throws TmpException {
+  static void validateMapperClass(TypeElement mapperClass, TypeName trigger) throws TmpException {
     if (mapperClass.getNestingKind() == NestingKind.MEMBER && !mapperClass.getModifiers().contains(Modifier.STATIC)) {
       throw new TmpException("Inner class " + mapperClass + " must be static");
     }
@@ -56,11 +57,11 @@ final class MapperClassValidator {
   /* Does the mapper implement Function<String, triggerClass>?
    * There can be a situation where this is not very easy. See ProcessorTest.
    */
-  private static void checkTree(TypeElement mapperClass, TypeElement trigger) throws TmpException {
+  private static void checkTree(TypeElement mapperClass, TypeName trigger) throws TmpException {
     List<TypeElement> family = HierarchyUtil.getFamilyTree(mapperClass.asType());
     Map<Integer, Predicate<TypeElement>> m = new LinkedHashMap<>();
     m.put(0, typeElement -> "java.lang.String".equals(typeElement.getQualifiedName().toString()));
-    m.put(1, typeElement -> trigger.getQualifiedName().toString().equals(typeElement.getQualifiedName().toString()));
+    m.put(1, typeElement -> trigger.equals(TypeName.get(typeElement.asType())));
     ExtensionFunction mask = new ExtensionFunction(m, trigger);
     String qname = "java.util.function.Function";
     while (mask != null) {
@@ -76,9 +77,9 @@ final class MapperClassValidator {
   private static class ExtensionFunction {
 
     final Map<Integer, Predicate<TypeElement>> m;
-    final TypeElement trigger;
+    final TypeName trigger;
 
-    ExtensionFunction(Map<Integer, Predicate<TypeElement>> m, TypeElement trigger) {
+    ExtensionFunction(Map<Integer, Predicate<TypeElement>> m, TypeName trigger) {
       this.m = m;
       this.trigger = trigger;
     }
