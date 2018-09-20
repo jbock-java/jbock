@@ -313,8 +313,8 @@ depending on the the return type `X` of their parameter method `m`.
 
 * If `X` is of the form `java.util.List<Y>`, then `X` declares a <em>repeatable</em> parameter.
 * If `X` is of the form `java.util.Optional<Y>`, then `X` declares an <em>optional, non-repeatable</em> parameter.
-* If `m` non-positional and `X` is `boolean` or `Boolean`, then `X` declares a <em>non-repeatable flag</em>.
-* Otherwise, `X` declares a <em>required, non-repeatable</em> argument.
+* If `m` is not positional and does not have a custom mapper, and `X` is `boolean` or `Boolean`, then `X` declares a <em>non-repeatable flag</em>.
+* Otherwise, `X` declares a <em>required, non-repeatable</em> parameter.
 
 If a type `A` is supported, 
 then `List<A>` and `Optional<A>` are also supported.

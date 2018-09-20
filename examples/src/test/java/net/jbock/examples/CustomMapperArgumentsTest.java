@@ -14,7 +14,6 @@ import java.util.OptionalInt;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CustomMapperArgumentsTest {
 
@@ -31,7 +30,7 @@ class CustomMapperArgumentsTest {
         "--anInt", "50",
         "--integerList", "1,2,3,4",
         "--enumSet", "FOO",
-        "--aBoolean", "true",
+        "true", "false", "true",
         "--stringArray", "A",
         "--anOptionalInt", "51");
     assertEquals(1500000000000L, parsed.date().getTime());
@@ -39,7 +38,7 @@ class CustomMapperArgumentsTest {
     assertEquals(1500000000000L, parsed.dateList().get(0).getTime());
     assertEquals(Optional.of(16), parsed.verbosity().map(BigInteger::intValue));
     assertEquals(50, parsed.anInt());
-    assertTrue(parsed.aBoolean().orElseThrow(AssertionFailedError::new));
+    assertEquals(Arrays.asList(true, false, true), parsed.booleanList());
     assertEquals(OptionalInt.of(51), parsed.anOptionalInt());
     assertEquals(Arrays.asList(1, 2, 3, 4), parsed.integerList().orElseThrow(AssertionFailedError::new));
     assertEquals(singleton(MyEnum.FOO), parsed.enumSet().orElseThrow(AssertionFailedError::new));
@@ -59,9 +58,11 @@ class CustomMapperArgumentsTest {
         "  CustomMapperArguments",
         "",
         "SYNOPSIS",
-        "  CustomMapperArguments [<options>] --date=<DATE> --anInt=<AN_INT>",
+        "  CustomMapperArguments [<options>] --date=<DATE> --anInt=<AN_INT> [[--] <boolean_list...>]",
         "",
         "DESCRIPTION",
+        "",
+        "BOOLEAN_LIST",
         "",
         "OPTIONS",
         "  --date <DATE>",
@@ -83,8 +84,6 @@ class CustomMapperArgumentsTest {
         "  --integerList <integer_list>",
         "",
         "  --enumSet <enum_set>",
-        "",
-        "  --aBoolean <aboolean>",
         "",
         "  --help",
         "    Print this help page.",

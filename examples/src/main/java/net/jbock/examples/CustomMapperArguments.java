@@ -2,6 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
+import net.jbock.PositionalParameter;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -47,8 +48,8 @@ abstract class CustomMapperArguments {
   @Parameter(mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
-  @Parameter(mappedBy = BooleanMapper.class)
-  abstract Optional<Boolean> aBoolean();
+  @PositionalParameter(mappedBy = BooleanMapper.class)
+  abstract List<Boolean> booleanList();
 
   static class DateMapper implements Function<String, Date> {
 
