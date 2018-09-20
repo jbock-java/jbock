@@ -324,7 +324,7 @@ The following types are permissible values of `A`:
 See the complete list [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
 * Any non-private enum is also supported out of the box. Note, by default this uses the enum's `valueOf` method,
 so only the precise enum constant names are understood.
-* A custom mapper can be used for almost any `A`.
+* A custom mapper can be used for pretty much anything.
 
 ## Custom mappers
 
@@ -361,13 +361,14 @@ abstract Integer verbosity();
 
 * A mapper for `X` can also be used on a method
 that returns `Optional<X>` or `List<X>`.
+* A mapper for `Integer` can also be used for `int` and `OptionalInt`, and so on for all primitives.
 * The `String` that's passed to the mapper will never be `null`, so there's no need to check for that.
 * The mapper may throw any `RuntimeException` to signal a parsing failure.
 The generated code will catch it and print the message.
 * Even if the mapper returns `null`, the parameter method won't. See pledge above.
 * Even with custom mappers, `List` and `Option` are still the <em>only</em> ways to declare non-required arguments.
 That means, for instance, that a parameter method that returns 
-`Set<Integer>` represents a required (and therefore non-repeatable) argument, 
+`Set<Integer>` represents a required, non-repeatable argument, 
 which is probably not what you want.
 The workaround here is to either use `List<Integer>` for a repeatable argument, or 
 `Optional<Set<Integer>>` for an optional non-repeatable argument instead. 
