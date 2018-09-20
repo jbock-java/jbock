@@ -17,6 +17,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
+import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 
@@ -66,8 +67,12 @@ public final class Util {
         }
       };
 
-  static ParameterizedTypeName optionalOf(TypeName typeName) {
+  public static ParameterizedTypeName optionalOf(TypeName typeName) {
     return ParameterizedTypeName.get(ClassName.get(Optional.class), typeName);
+  }
+
+  public static ParameterizedTypeName listOf(TypeName typeName) {
+    return ParameterizedTypeName.get(ClassName.get(List.class), typeName);
   }
 
   static ParameterizedTypeName optionalOfSubtype(TypeName typeName) {

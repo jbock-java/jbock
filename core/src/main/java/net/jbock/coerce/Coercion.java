@@ -3,9 +3,13 @@ package net.jbock.coerce;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Constants;
+import net.jbock.compiler.Util;
 
+import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 
 public final class Coercion {
@@ -18,6 +22,7 @@ public final class Coercion {
   private final Optional<CodeBlock> initMapper;
   private final CodeBlock jsonExpr;
   private final CodeBlock mapJsonExpr;
+  private final CodeBlock extract;
   private final TypeName paramType;
   private final FieldSpec field;
   private final CoercionKind kind;
@@ -29,6 +34,7 @@ public final class Coercion {
       Optional<CodeBlock> initMapper,
       CodeBlock jsonExpr,
       CodeBlock mapJsonExpr,
+      CodeBlock extract,
       TypeName paramType,
       FieldSpec field,
       CoercionKind kind) {
@@ -38,6 +44,7 @@ public final class Coercion {
     this.initMapper = initMapper;
     this.jsonExpr = jsonExpr;
     this.mapJsonExpr = mapJsonExpr;
+    this.extract = extract;
     this.paramType = paramType;
     this.field = field;
     this.kind = kind;
@@ -94,6 +101,10 @@ public final class Coercion {
     return kind == CoercionKind.LIST_COMBINATION;
   }
 
+  public CodeBlock extract() {
+    return extract;
+  }
+
   public boolean required() {
     if (flag()) {
       return false;
@@ -107,6 +118,22 @@ public final class Coercion {
   }
 
   Coercion withMapper(CodeBlock map, CodeBlock initMapper) {
-    return new Coercion(trigger, map, special, Optional.of(initMapper), jsonExpr, mapJsonExpr, paramType, field, kind);
+    return new Coercion(trigger, map, special, Optional.of(initMapper), jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+  }
+
+  Coercion asOptional() {
+    TypeName paramType = Util.optionalOf(this.paramType);
+    CodeBlock extract = CodeBlock.builder()
+        .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())
+        .build();
+    return new Coercion(trigger, map, special, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+  }
+
+  Coercion asList() {
+    TypeName paramType = Util.listOf(this.paramType);
+    CodeBlock extract = CodeBlock.builder()
+        .add("$T.unmodifiableList($N)", Collections.class, ParameterSpec.builder(paramType, field.name).build())
+        .build();
+    return new Coercion(trigger, map, special, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 }

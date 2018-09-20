@@ -2,9 +2,12 @@ package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.OptionalDouble;
+
+import static net.jbock.compiler.Util.optionalOf;
 
 class OptionalDoubleCoercion extends BasicDoubleCoercion {
 
@@ -35,6 +38,12 @@ class OptionalDoubleCoercion extends BasicDoubleCoercion {
 
   @Override
   TypeName paramType() {
-    return TypeName.get(Double.class);
+    return optionalOf(TypeName.get(Double.class));
+  }
+
+  @Override
+  CodeBlock extract(ParameterSpec param) {
+    return CodeBlock.builder().add("$N.isPresent() ? $T.of($N.get()) : $T.empty()",
+        param, OptionalDouble.class, param, OptionalDouble.class).build();
   }
 }

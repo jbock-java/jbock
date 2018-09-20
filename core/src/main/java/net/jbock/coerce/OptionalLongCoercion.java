@@ -2,9 +2,12 @@ package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.OptionalLong;
+
+import static net.jbock.compiler.Util.optionalOf;
 
 class OptionalLongCoercion extends BasicLongCoercion {
 
@@ -35,6 +38,12 @@ class OptionalLongCoercion extends BasicLongCoercion {
 
   @Override
   TypeName paramType() {
-    return TypeName.get(Long.class);
+    return optionalOf(TypeName.get(Long.class));
+  }
+
+  @Override
+  CodeBlock extract(ParameterSpec param) {
+    return CodeBlock.builder().add("$N.isPresent() ? $T.of($N.get()) : $T.empty()",
+        param, OptionalLong.class, param, OptionalLong.class).build();
   }
 }

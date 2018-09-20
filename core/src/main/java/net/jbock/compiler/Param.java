@@ -15,9 +15,6 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.singletonList;
-import static net.jbock.compiler.Constants.OPTIONAL_DOUBLE;
-import static net.jbock.compiler.Constants.OPTIONAL_INT;
-import static net.jbock.compiler.Constants.OPTIONAL_LONG;
 import static net.jbock.compiler.MapperClassUtil.getMapperClass;
 import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.snakeCase;
@@ -30,13 +27,11 @@ final class Param {
   // can be null
   private final String longName;
 
-  // can be null
+  // can be blank
   private final char shortName;
 
-  // never null
   final OptionType paramType;
 
-  // never null
   final ExecutableElement sourceMethod;
 
   private final String name;
@@ -218,18 +213,6 @@ final class Param {
       }
     }
     return longName;
-  }
-
-  boolean isOptionalInt() {
-    return OPTIONAL_INT.equals(returnType());
-  }
-
-  boolean isOptionalLong() {
-    return OPTIONAL_LONG.equals(returnType());
-  }
-
-  boolean isOptionalDouble() {
-    return OPTIONAL_DOUBLE.equals(returnType());
   }
 
   private static void checkName(

@@ -2,6 +2,7 @@ package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.Objects;
@@ -23,6 +24,10 @@ abstract class CoercionFactory {
    * Maps from String to trigger type
    */
   abstract CodeBlock map();
+
+  CodeBlock extract(ParameterSpec param) {
+    return CodeBlock.builder().add("$T.requireNonNull($N)", Objects.class, param).build();
+  }
 
   /**
    * Type that triggers this coercion (could be wrapped in Optional or List)
@@ -59,15 +64,26 @@ abstract class CoercionFactory {
   final Coercion getCoercion(
       FieldSpec field,
       CoercionKind kind) {
-    return new Coercion(
+    // primitive optionals get special treatment here
+    ParameterSpec param = ParameterSpec.builder(paramType(), field.name).build();
+    Coercion coercion = new Coercion(
         trigger,
         map(),
         special(),
         initMapper(),
         jsonExpr(field.name),
         mapJsonExpr(field),
+        extract(param),
         paramType(),
         field,
         kind);
+    switch (kind) {
+      case LIST_COMBINATION:
+        return coercion.asList();
+      case OPTIONAL_COMBINATION:
+        return coercion.asOptional();
+      default:
+        return coercion;
+    }
   }
 }

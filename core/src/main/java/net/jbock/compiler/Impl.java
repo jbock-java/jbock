@@ -7,12 +7,7 @@ import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
@@ -22,7 +17,6 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.OptionType.REPEATABLE;
-import static net.jbock.compiler.Util.optionalOf;
 
 /**
  * Defines the *_Impl inner class.
@@ -35,48 +29,41 @@ final class Impl {
 
   final Option option;
 
-  private final List<FieldSpec> fields;
-
   private Impl(
       Context context,
-      Option option,
-      List<FieldSpec> fields) {
+      Option option) {
     this.context = context;
     this.option = option;
-    this.fields = fields;
   }
 
   static Impl create(
       Context context,
       Option option) {
-    List<FieldSpec> fields = new ArrayList<>(option.context.parameters.size());
-    for (Param param : option.context.parameters) {
-      fields.add(param.field());
-    }
-    return new Impl(context, option, fields);
+    return new Impl(context, option);
   }
 
   TypeSpec define() {
-    TypeSpec.Builder builder = TypeSpec.classBuilder(context.implType());
-    builder.superclass(TypeName.get(context.sourceType.asType()))
-        .addFields(fields)
-        .addModifiers(PRIVATE, STATIC)
+    TypeSpec.Builder spec = TypeSpec.classBuilder(context.implType())
+        .superclass(TypeName.get(context.sourceType.asType()));
+    for (Param param : option.context.parameters) {
+      spec.addField(param.field());
+    }
+    spec.addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor())
         .addMethods(bindMethods());
     if (option.context.generateToString) {
-      builder.addMethod(toStringMethod());
+      spec.addMethod(toStringMethod());
     }
-    return builder.build();
+    return spec.build();
   }
 
   private List<MethodSpec> bindMethods() {
     List<MethodSpec> result = new ArrayList<>(option.context.parameters.size());
-    for (int j = 0; j < option.context.parameters.size(); j++) {
-      Param param = option.context.parameters.get(j);
+    for (Param param : option.context.parameters) {
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.methodName())
           .addAnnotation(Override.class)
           .returns(param.returnType());
-      builder.addStatement("return $N", fields.get(j));
+      builder.addStatement("return $N", param.field());
       if (param.sourceMethod.getModifiers().contains(PUBLIC)) {
         builder.addModifiers(PUBLIC);
       }
@@ -90,37 +77,10 @@ final class Impl {
 
   private MethodSpec implConstructor() {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
-    for (int i = 0; i < fields.size(); i++) {
-      Param p = option.context.parameters.get(i);
-      FieldSpec field = fields.get(i);
-      TypeName type;
-      // primitive optionals get special treatment here
-      if (p.isOptionalInt()) {
-        type = optionalOf(TypeName.get(Integer.class));
-      } else if (p.isOptionalLong()) {
-        type = optionalOf(TypeName.get(Long.class));
-      } else if (p.isOptionalDouble()) {
-        type = optionalOf(TypeName.get(Double.class));
-      } else {
-        type = field.type;
-      }
-      ParameterSpec param = ParameterSpec.builder(type, field.name).build();
-      if (field.type.isPrimitive()) {
-        builder.addStatement("this.$N = $N", field, param);
-      } else if (p.paramType == REPEATABLE) {
-        builder.addStatement("this.$N = $T.unmodifiableList($N)", field, Collections.class, param);
-      } else if (p.isOptionalInt()) {
-        builder.addStatement("this.$N = $N.isPresent() ? $T.of($N.get()) : $T.empty()",
-            field, param, OptionalInt.class, param, OptionalInt.class);
-      } else if (p.isOptionalLong()) {
-        builder.addStatement("this.$N = $N.isPresent() ? $T.of($N.get()) : $T.empty()",
-            field, param, OptionalLong.class, param, OptionalLong.class);
-      } else if (p.isOptionalDouble()) {
-        builder.addStatement("this.$N = $N.isPresent() ? $T.of($N.get()) : $T.empty()",
-            field, param, OptionalDouble.class, param, OptionalDouble.class);
-      } else {
-        builder.addStatement("this.$N = $T.requireNonNull($N)", field, Objects.class, param);
-      }
+    for (Param p : option.context.parameters) {
+      FieldSpec field = p.field();
+      ParameterSpec param = ParameterSpec.builder(p.coercion().paramType(), field.name).build();
+      builder.addStatement("this.$N = $L", field, p.coercion().extract());
       builder.addParameter(param);
     }
     return builder.build();

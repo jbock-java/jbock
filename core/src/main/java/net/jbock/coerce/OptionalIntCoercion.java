@@ -2,9 +2,12 @@ package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
+import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 
 import java.util.OptionalInt;
+
+import static net.jbock.compiler.Util.optionalOf;
 
 class OptionalIntCoercion extends BasicIntegerCoercion {
 
@@ -35,6 +38,12 @@ class OptionalIntCoercion extends BasicIntegerCoercion {
 
   @Override
   TypeName paramType() {
-    return TypeName.get(Integer.class);
+    return optionalOf(TypeName.get(Integer.class));
+  }
+
+  @Override
+  CodeBlock extract(ParameterSpec param) {
+    return CodeBlock.builder().add("$N.isPresent() ? $T.of($N.get()) : $T.empty()",
+        param, OptionalInt.class, param, OptionalInt.class).build();
   }
 }
