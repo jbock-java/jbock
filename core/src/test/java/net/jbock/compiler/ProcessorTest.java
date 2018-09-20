@@ -548,6 +548,24 @@ class ProcessorTest {
   }
 
   @Test
+  void mapperValidListOfSet() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @Parameter(mappedBy = Mapper.class) abstract List<Set<Integer>> sets();",
+        "  static class Mapper implements Function<String, Set<Integer>> {",
+        "    public Set<Integer> apply(String s) {",
+        "      return Collections.singleton(Integer.valueOf(s));",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void mapperInvalidPrivateConstructor() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -773,6 +791,8 @@ class ProcessorTest {
         "package test;",
         "",
         "import java.util.List;",
+        "import java.util.Set;",
+        "import java.util.Collections;",
         "import java.util.Optional;",
         "import java.util.OptionalInt;",
         "import java.util.function.Function;",

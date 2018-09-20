@@ -312,11 +312,11 @@ folder has demos and tests for most parser features.
 Complete list [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
 * Any non-private enum is supported out of the box. Note, by default this uses the enum's `valueOf` method,
 so only the precise enum constant names are understood.
-* A custom mapper can be used for any non-primitive "simple" (no typevars) type.
+* A custom mapper can be used for any type, except (currently) `byte`.
 
 ## Custom mappers
 
-Let `X` be a class or interface, with no direct type variables.
+Let `X` be a type.
 A <em>mapper class</em> for `X` is any class that implements `Function<String, X>`.
 
 Here's a mapper for `Integer`:
@@ -347,7 +347,7 @@ abstract Integer verbosity();
 
 #### Rules for mappers
 
-* A mapper for `X` can also be used on a method 
+* A mapper for `X` can also be used on a method
 that returns `Optional<X>` or `List<X>`.
 * The `String` that's passed to the mapper will never be `null`, so there's no need to check for that.
 * The mapper may throw any `RuntimeException` to signal a parsing failure.

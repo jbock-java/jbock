@@ -196,28 +196,25 @@ public final class ParserTestFixture<E> {
   private static void compareArrays(String[] expected, String[] actual) {
     if (expected.length != actual.length) {
       System.err.println("Expected:");
-      System.err.flush();
       for (int i = 0; i < expected.length; i++) {
         System.err.format("%3d: %s%n", i, expected[i]);
-        System.err.flush();
       }
       System.err.println();
       System.err.println("Actual:");
-      System.err.flush();
       for (int i = 0; i < actual.length; i++) {
         System.err.format("%3d: %s%n", i, actual[i]);
-        System.err.flush();
       }
+      System.err.flush();
       fail(String.format("Expected length: %d, actual length: %d", expected.length, actual.length));
     }
     for (int i = 0; i < actual.length; i++) {
       if (!Objects.equals(expected[i], actual[i])) {
         System.err.println("Actual:");
-        System.err.flush();
-        for (int j = 0; j <= i; j++) {
-          System.err.format("%3d: <%s> <%s>%n", j, expected[j], actual[j]);
-          System.err.flush();
+        for (int j = 0; j < i; j++) {
+          System.err.format("%3d: <%s>%n", j, expected[j]);
         }
+        System.err.format("%3d: <%s> != <%s>%n", i, expected[i], actual[i]);
+        System.err.flush();
         fail("Arrays differ at index " + i);
       }
     }

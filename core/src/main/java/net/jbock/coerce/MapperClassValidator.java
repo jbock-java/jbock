@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import static net.jbock.compiler.HierarchyUtil.asTypeElement;
 import static net.jbock.compiler.Util.QUALIFIED_NAME;
 
 final class MapperClassValidator {
@@ -59,9 +58,9 @@ final class MapperClassValidator {
    */
   private static void checkTree(TypeElement mapperClass, TypeName trigger) throws TmpException {
     List<TypeElement> family = HierarchyUtil.getFamilyTree(mapperClass.asType());
-    Map<Integer, Predicate<TypeElement>> m = new LinkedHashMap<>();
-    m.put(0, typeElement -> "java.lang.String".equals(typeElement.getQualifiedName().toString()));
-    m.put(1, typeElement -> trigger.equals(TypeName.get(typeElement.asType())));
+    Map<Integer, Predicate<TypeMirror>> m = new LinkedHashMap<>();
+    m.put(0, typeElement -> Util.equalsType(typeElement, "java.lang.String"));
+    m.put(1, typeElement -> trigger.equals(TypeName.get(typeElement)));
     ExtensionFunction mask = new ExtensionFunction(m, trigger);
     String qname = "java.util.function.Function";
     while (mask != null) {
@@ -76,10 +75,10 @@ final class MapperClassValidator {
 
   private static class ExtensionFunction {
 
-    final Map<Integer, Predicate<TypeElement>> m;
+    final Map<Integer, Predicate<TypeMirror>> m;
     final TypeName trigger;
 
-    ExtensionFunction(Map<Integer, Predicate<TypeElement>> m, TypeName trigger) {
+    ExtensionFunction(Map<Integer, Predicate<TypeMirror>> m, TypeName trigger) {
       this.m = m;
       this.trigger = trigger;
     }
@@ -87,8 +86,8 @@ final class MapperClassValidator {
     ExtensionFunction apply(Extension extension) throws TmpException {
       TypeElement b = extension.baseClass;
       DeclaredType x = extension.extensionClass;
-      Map<Integer, Predicate<TypeElement>> newMap = new LinkedHashMap<>();
-      for (Map.Entry<Integer, Predicate<TypeElement>> entry : m.entrySet()) {
+      Map<Integer, Predicate<TypeMirror>> newMap = new LinkedHashMap<>();
+      for (Map.Entry<Integer, Predicate<TypeMirror>> entry : m.entrySet()) {
         List<? extends TypeMirror> xargs = x.getTypeArguments();
         if (xargs.isEmpty()) {
           // raw type
@@ -103,7 +102,7 @@ final class MapperClassValidator {
             }
           }
         } else {
-          if (!entry.getValue().test(asTypeElement(typeMirror))) {
+          if (!entry.getValue().test(typeMirror)) {
             throw new TmpException(String.format("Mapper class must implement Function<String, %s>", trigger));
           }
         }

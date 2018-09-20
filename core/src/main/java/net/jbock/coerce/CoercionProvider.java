@@ -113,7 +113,12 @@ public class CoercionProvider {
     if (returnType.getKind() == TypeKind.ARRAY) {
       throw new TmpException("Arrays are not supported. Use List instead.");
     }
-    return handleDefault(trigger(returnType), field);
+    TriggerKind tk = trigger(returnType);
+    if (Util.asParameterized(tk.trigger) != null) {
+      // wrapped type can't have type arguments
+      throw TmpException.create("Bad return type");
+    }
+    return handleDefault(tk, field);
   }
 
   private Coercion handleMapper(
@@ -193,12 +198,7 @@ public class CoercionProvider {
     if (!kind.isCombination()) {
       throw TmpException.create("Bad return type");
     }
-    TypeMirror mirror = parameterized.getTypeArguments().get(0);
-    if (Util.asParameterized(mirror) != null) {
-      // wrapped type can't have type arguments
-      throw TmpException.create("Bad return type");
-    }
-    return kind.of(mirror);
+    return kind.of(parameterized.getTypeArguments().get(0));
   }
 
   static String snakeToCamel(String s) {

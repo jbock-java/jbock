@@ -1,13 +1,18 @@
 package net.jbock.examples;
 
+import net.jbock.examples.CustomMapperArguments.MyEnum;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
+import org.opentest4j.AssertionFailedError;
 
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.Optional;
 import java.util.OptionalInt;
 
+import static java.util.Collections.singleton;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CustomMapperArgumentsTest {
@@ -23,6 +28,9 @@ class CustomMapperArgumentsTest {
         "--dateList", "1500000000000",
         "--verbosity", "0x10",
         "--anInt", "50",
+        "--integerList", "1,2,3,4",
+        "--enumSet", "FOO",
+        "--stringArray", "A",
         "--anOptionalInt", "51");
     assertEquals(1500000000000L, parsed.date().getTime());
     assertEquals(Optional.of(1500000000000L), parsed.optDate().map(Date::getTime));
@@ -30,6 +38,9 @@ class CustomMapperArgumentsTest {
     assertEquals(Optional.of(16), parsed.verbosity().map(BigInteger::intValue));
     assertEquals(50, parsed.anInt());
     assertEquals(OptionalInt.of(51), parsed.anOptionalInt());
+    assertEquals(Arrays.asList(1, 2, 3, 4), parsed.integerList().orElseThrow(AssertionFailedError::new));
+    assertEquals(singleton(MyEnum.FOO), parsed.enumSet().orElseThrow(AssertionFailedError::new));
+    assertArrayEquals(new String[]{"A"}, parsed.stringArray().orElseThrow(AssertionFailedError::new));
   }
 
   @Test
@@ -63,6 +74,12 @@ class CustomMapperArgumentsTest {
         "  --anInt <AN_INT>",
         "",
         "  --anOptionalInt <an_optional_int>",
+        "",
+        "  --stringArray <string_array>",
+        "",
+        "  --integerList <integer_list>",
+        "",
+        "  --enumSet <enum_set>",
         "",
         "  --help",
         "    Print this help page.",
