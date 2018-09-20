@@ -66,15 +66,25 @@ Before we move on, we should mention two important guarantees that jbock gives y
 
 #### The non-null pledge
 
-> None of the parameter methods will ever return `null`, regardless of the input to `parse` or `parseOrExit`.
+> None of the parameter methods will ever throw an exception 
+or return `null`, regardless of the input to `parse` or `parseOrExit`.
+
+This means that jbock will either give you either a fully initialized 
+instance of your args class, or no instance at all. 
+This is ensured by the generated constructor, 
+which performs null checks for each non-primitive argument.
+
+This also implies that any parameter method that doesn't return 
+either `List` or `Optional` must represent a <em>required</em> argument,
+which means that failure to pass it on the command line will cause parsing to fail.
+Otherwise it would hardly be possible to fulfill this promise.
 
 #### The no-exception pledge
 
 > `parse` or `parseOrExit` will never throw an exception or return `null`.
 
-It is now clear that any parameter method that doesn't return 
-some kind of `List` or `Optional` must represent a required argument.
-Otherwise it would hardly be possible to fulfill the non-null promise.
+To be fair though, it should be mentioned that `parseOrExit` <em>will</em>
+shutdown the JVM if the input is invalid.
 
 Now let's move on with our copy tool. A typical jbock invocation looks like this:
 
