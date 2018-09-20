@@ -200,7 +200,7 @@ class ProcessorTest {
   }
 
   @Test
-  void positionalBadReturnTypeBoolean() {
+  void positionalBooleanPrimitive() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -211,6 +211,20 @@ class ProcessorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("may not return boolean");
+  }
+
+  @Test
+  void positionalBoolean() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @PositionalParameter abstract Boolean a();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("may not return java.lang.Boolean");
   }
 
   @Test

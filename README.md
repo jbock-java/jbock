@@ -308,8 +308,19 @@ folder has demos and tests for most parser features.
 
 ## Supported types
 
+There are 4 basic types of parameters, 
+depending on the the return type `X` of their parameter method `m`.
+
+* If `X` is of the form `java.util.List<Y>`, then `X` declares a <em>repeatable</em> parameter.
+* If `X` is of the form `java.util.Optional<Y>`, then `X` declares an <em>optional, non-repeatable</em> parameter.
+* If `m` non-positional and `X` is `boolean` or `Boolean`, then `X` declares a <em>non-repeatable flag</em>.
+* Otherwise, `X` declares a <em>required, non-repeatable</em> argument.
+
+If a type `A` is supported, 
+then `List<A>` and `Optional<A>` are also supported.
+
 * A number of standard classes and primitives are supported out of the box.
-Complete list [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
+See the complete list [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java).
 * Any non-private enum is supported out of the box. Note, by default this uses the enum's `valueOf` method,
 so only the precise enum constant names are understood.
 * A custom mapper can be used for any type, except (currently) `byte`.
@@ -353,3 +364,9 @@ that returns `Optional<X>` or `List<X>`.
 * The mapper may throw any `RuntimeException` to signal a parsing failure.
 The generated code will catch it and print the message.
 * Even if the mapper returns `null`, the parameter method won't. See pledge above.
+* Even with custom mappers, `List` and `Option` are still the <em>only</em> ways to declare non-required arguments.
+That means, for instance, that a parameter method that returns 
+`Set<Integer>` represents a required (and therefore non-repeatable) argument, 
+which is probably not what you want.
+The workaround here is to either use `List<Integer>` for a repeatable argument, or 
+`Optional<Set<Integer>>` for an optional non-repeatable argument instead. 

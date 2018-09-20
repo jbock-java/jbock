@@ -47,6 +47,9 @@ abstract class CustomMapperArguments {
   @Parameter(mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
+  @Parameter(mappedBy = BooleanMapper.class)
+  abstract Optional<Boolean> aBoolean();
+
   static class DateMapper implements Function<String, Date> {
 
     @Override
@@ -92,6 +95,14 @@ abstract class CustomMapperArguments {
       return Arrays.stream(s.split(",", -1))
           .map(MyEnum::valueOf)
           .collect(Collectors.toSet());
+    }
+  }
+
+  static class BooleanMapper implements Function<String, Boolean> {
+
+    @Override
+    public Boolean apply(String s) {
+      return Boolean.valueOf(s);
     }
   }
 
