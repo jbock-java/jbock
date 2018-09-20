@@ -19,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 import static javax.lang.model.element.Modifier.FINAL;
+import static net.jbock.coerce.CoercionKind.SIMPLE;
 import static net.jbock.coerce.CoercionKind.findKind;
 import static net.jbock.coerce.MapperClassValidator.validateMapperClass;
 import static net.jbock.coerce.MapperCoercion.mapperInit;
@@ -132,7 +133,7 @@ public class CoercionProvider {
     TypeName mapperType = TypeName.get(mapperClass.asType());
     ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
     TriggerKind tk = trigger(sourceMethod.getReturnType());
-    MapperSkew skew = mapperSkew(tk.trigger);
+    MapperSkew skew = mapperSkew(tk);
     if (skew != null) {
       validateMapperClass(mapperClass, skew.mapperReturnType);
       return coercions.get(skew.baseType).getCoercion(field, tk.kind)
@@ -143,8 +144,11 @@ public class CoercionProvider {
     }
   }
 
-  private MapperSkew mapperSkew(TypeMirror mirror) {
-    TypeName input = TypeName.get(mirror);
+  private MapperSkew mapperSkew(TriggerKind tk) {
+    if (tk.kind != SIMPLE) {
+      return null;
+    }
+    TypeName input = TypeName.get(tk.trigger);
     if (input.isPrimitive()) {
       if (!coercions.containsKey(input)) {
         return null;

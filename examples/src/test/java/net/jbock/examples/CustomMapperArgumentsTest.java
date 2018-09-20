@@ -31,6 +31,10 @@ class CustomMapperArgumentsTest {
         "--anInt", "50",
         "--notFlag", "true",
         "--integerList", "1,2,3,4",
+        "--optionalInts", "1",
+        "--optionalInts", "",
+        "--optionalInts", "3",
+        "--optionalInts", "4",
         "--enumSet", "FOO",
         "true", "false", "true",
         "--stringArray", "A",
@@ -43,6 +47,8 @@ class CustomMapperArgumentsTest {
     assertEquals(Arrays.asList(true, false, true), parsed.booleanList());
     assertEquals(OptionalInt.of(51), parsed.anOptionalInt());
     assertEquals(Arrays.asList(1, 2, 3, 4), parsed.integerList().orElseThrow(AssertionFailedError::new));
+    assertEquals(Arrays.asList(OptionalInt.of(1), OptionalInt.empty(), OptionalInt.of(3), OptionalInt.of(4)),
+        parsed.optionalInts());
     assertEquals(singleton(MyEnum.FOO), parsed.enumSet().orElseThrow(AssertionFailedError::new));
     assertArrayEquals(new String[]{"A"}, parsed.stringArray().orElseThrow(AssertionFailedError::new));
     assertTrue(parsed.notFlag());
@@ -87,6 +93,8 @@ class CustomMapperArgumentsTest {
         "  --integerList <integer_list>",
         "",
         "  --enumSet <enum_set>",
+        "",
+        "  --optionalInts <optional_ints...>",
         "",
         "  --notFlag <NOT_FLAG>",
         "",

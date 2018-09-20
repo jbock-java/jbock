@@ -51,7 +51,7 @@ abstract class CustomMapperArguments {
   @PositionalParameter(mappedBy = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
-  @PositionalParameter(mappedBy = OptionalIntMapper.class)
+  @Parameter(mappedBy = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
   @Parameter(mappedBy = BooleanMapper.class)
@@ -117,11 +117,10 @@ abstract class CustomMapperArguments {
 
     @Override
     public OptionalInt apply(String s) {
-      try {
-        return OptionalInt.of(Integer.parseInt(s));
-      } catch (NumberFormatException e) {
+      if (s.isEmpty()) {
         return OptionalInt.empty();
       }
+      return OptionalInt.of(Integer.parseInt(s));
     }
   }
 

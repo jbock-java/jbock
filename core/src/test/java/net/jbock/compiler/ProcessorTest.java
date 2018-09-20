@@ -511,10 +511,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract int number();",
-        "  static class Mapper implements Function<String, Integer> {",
-        "    public Integer apply(String s) {",
-        "      return 1;",
+        "  @Parameter(mappedBy = Mapper.class) abstract List<OptionalInt> numbers();",
+        "  static class Mapper implements Function<String, OptionalInt> {",
+        "    public OptionalInt apply(String s) {",
+        "      return OptionalInt.of(1);",
         "    }",
         "  }",
         "}");
