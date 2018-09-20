@@ -14,6 +14,7 @@ import java.util.OptionalInt;
 import static java.util.Collections.singleton;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CustomMapperArgumentsTest {
 
@@ -28,6 +29,7 @@ class CustomMapperArgumentsTest {
         "--dateList", "1500000000000",
         "--verbosity", "0x10",
         "--anInt", "50",
+        "--notFlag", "true",
         "--integerList", "1,2,3,4",
         "--enumSet", "FOO",
         "true", "false", "true",
@@ -43,6 +45,7 @@ class CustomMapperArgumentsTest {
     assertEquals(Arrays.asList(1, 2, 3, 4), parsed.integerList().orElseThrow(AssertionFailedError::new));
     assertEquals(singleton(MyEnum.FOO), parsed.enumSet().orElseThrow(AssertionFailedError::new));
     assertArrayEquals(new String[]{"A"}, parsed.stringArray().orElseThrow(AssertionFailedError::new));
+    assertTrue(parsed.notFlag());
   }
 
   @Test
@@ -58,7 +61,7 @@ class CustomMapperArgumentsTest {
         "  CustomMapperArguments",
         "",
         "SYNOPSIS",
-        "  CustomMapperArguments [<options>] --date=<DATE> --anInt=<AN_INT> [[--] <boolean_list...>]",
+        "  CustomMapperArguments [<options>] --date=<DATE> --anInt=<AN_INT> --notFlag=<NOT_FLAG> [[--] <boolean_list...>]",
         "",
         "DESCRIPTION",
         "",
@@ -84,6 +87,8 @@ class CustomMapperArgumentsTest {
         "  --integerList <integer_list>",
         "",
         "  --enumSet <enum_set>",
+        "",
+        "  --notFlag <NOT_FLAG>",
         "",
         "  --help",
         "    Print this help page.",

@@ -1,5 +1,6 @@
 package net.jbock.compiler;
 
+import net.jbock.coerce.CoercionKind;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 
@@ -53,15 +54,15 @@ enum OptionType {
     @Override
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock valueExpr;
-      if (param.required() || param.coercion().special()) {
-        valueExpr = param.coercion().jsonExpr();
-      } else {
+      if (param.coercion().kind() == CoercionKind.OPTIONAL_COMBINATION) {
         valueExpr = CodeBlock.builder()
             .add("$N$L.orElse($S)",
                 param.field(),
                 param.coercion().mapJsonExpr(),
                 "null")
             .build();
+      } else {
+        valueExpr = param.coercion().jsonExpr();
       }
       return CodeBlock.builder()
           .addStatement("$N.add($S + $L)",

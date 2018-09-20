@@ -11,11 +11,6 @@ class PrimitiveShortCoercion extends BasicShortCoercion {
   }
 
   @Override
-  boolean special() {
-    return true;
-  }
-
-  @Override
   TypeName paramType() {
     return TypeName.get(Short.class);
   }

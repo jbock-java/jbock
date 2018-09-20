@@ -10,7 +10,7 @@ public enum CoercionKind {
   LIST_COMBINATION(true),
   OPTIONAL_COMBINATION(true);
 
-  final boolean combination;
+  public final boolean combination;
 
   CoercionKind(boolean combination) {
     this.combination = combination;

@@ -17,12 +17,6 @@ abstract class BasicBooleanCoercion extends CoercionFactory {
   }
 
   @Override
-  final boolean special() {
-    // flags only
-    return true;
-  }
-
-  @Override
   CodeBlock jsonExpr(String param) {
     return CodeBlock.builder().add("$L", param).build();
   }

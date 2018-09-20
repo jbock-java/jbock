@@ -51,6 +51,12 @@ abstract class CustomMapperArguments {
   @PositionalParameter(mappedBy = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
+  @PositionalParameter(mappedBy = OptionalIntMapper.class)
+  abstract List<OptionalInt> optionalInts();
+
+  @Parameter(mappedBy = BooleanMapper.class)
+  abstract boolean notFlag(); // if it has a mapper, it's not a flag
+
   static class DateMapper implements Function<String, Date> {
 
     @Override
@@ -104,6 +110,18 @@ abstract class CustomMapperArguments {
     @Override
     public Boolean apply(String s) {
       return Boolean.valueOf(s);
+    }
+  }
+
+  static class OptionalIntMapper implements Function<String, OptionalInt> {
+
+    @Override
+    public OptionalInt apply(String s) {
+      try {
+        return OptionalInt.of(Integer.parseInt(s));
+      } catch (NumberFormatException e) {
+        return OptionalInt.empty();
+      }
     }
   }
 

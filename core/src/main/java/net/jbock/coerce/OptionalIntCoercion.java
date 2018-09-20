@@ -16,11 +16,6 @@ class OptionalIntCoercion extends BasicIntegerCoercion {
   }
 
   @Override
-  boolean special() {
-    return true;
-  }
-
-  @Override
   CodeBlock mapJsonExpr(FieldSpec field) {
     return CodeBlock.builder().add(".map($L -> $L)",
         "e", jsonExpr("e")).build();

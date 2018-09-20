@@ -11,11 +11,6 @@ class PrimitiveFloatCoercion extends BasicFloatCoercion {
   }
 
   @Override
-  boolean special() {
-    return true;
-  }
-
-  @Override
   TypeName paramType() {
     return TypeName.get(Float.class);
   }

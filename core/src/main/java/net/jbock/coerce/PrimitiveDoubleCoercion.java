@@ -11,11 +11,6 @@ class PrimitiveDoubleCoercion extends BasicDoubleCoercion {
   }
 
   @Override
-  boolean special() {
-    return true;
-  }
-
-  @Override
   TypeName paramType() {
     return TypeName.get(Double.class);
   }

@@ -45,13 +45,6 @@ abstract class CoercionFactory {
     return CodeBlock.builder().add(".map($T::toString).map(quote)", Objects.class).build();
   }
 
-  /**
-   * Specials can't be in Optional or List
-   */
-  boolean special() {
-    return false;
-  }
-
   CodeBlock initMapper() {
     return CodeBlock.builder().build();
   }
@@ -68,7 +61,6 @@ abstract class CoercionFactory {
     Coercion coercion = new Coercion(
         trigger,
         map(),
-        special(),
         initMapper(),
         jsonExpr(field.name),
         mapJsonExpr(field),

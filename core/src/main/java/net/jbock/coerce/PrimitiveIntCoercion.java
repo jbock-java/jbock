@@ -11,11 +11,6 @@ class PrimitiveIntCoercion extends BasicIntegerCoercion {
   }
 
   @Override
-  boolean special() {
-    return true;
-  }
-
-  @Override
   TypeName paramType() {
     return TypeName.get(Integer.class);
   }

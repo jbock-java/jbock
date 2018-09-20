@@ -11,11 +11,6 @@ class PrimitiveLongCoercion extends BasicLongCoercion {
   }
 
   @Override
-  boolean special() {
-    return true;
-  }
-
-  @Override
   TypeName paramType() {
     return TypeName.get(Long.class);
   }

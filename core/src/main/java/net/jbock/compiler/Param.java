@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.CoercionKind;
 import net.jbock.coerce.CoercionProvider;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
@@ -374,7 +375,7 @@ final class Param {
     if (coercion.flag()) {
       return OptionType.FLAG;
     }
-    if (coercion.repeatable()) {
+    if (coercion.kind() == CoercionKind.LIST_COMBINATION) {
       return OptionType.REPEATABLE;
     }
     return OptionType.REGULAR;

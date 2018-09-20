@@ -10,27 +10,39 @@ import net.jbock.compiler.Util;
 
 import java.util.Collections;
 import java.util.Objects;
-import java.util.Optional;
 
 public final class Coercion {
 
   private static final ClassName BOOLEAN_CLASS = ClassName.get(Boolean.class);
 
   private final TypeName trigger;
+
+  // helper.build
   private final CodeBlock map;
-  private final boolean special;
+
+  // helper.build
   private final CodeBlock initMapper;
+
+  // toString
   private final CodeBlock jsonExpr;
+
+  // toString
   private final CodeBlock mapJsonExpr;
+
+  // impl constructor
   private final CodeBlock extract;
+
+  // impl constructor
   private final TypeName paramType;
+
+  // impl
   private final FieldSpec field;
+
   private final CoercionKind kind;
 
   Coercion(
       TypeName trigger,
       CodeBlock map,
-      boolean special,
       CodeBlock initMapper,
       CodeBlock jsonExpr,
       CodeBlock mapJsonExpr,
@@ -40,7 +52,6 @@ public final class Coercion {
       CoercionKind kind) {
     this.trigger = trigger;
     this.map = map;
-    this.special = special;
     this.initMapper = initMapper;
     this.jsonExpr = jsonExpr;
     this.mapJsonExpr = mapJsonExpr;
@@ -74,13 +85,6 @@ public final class Coercion {
     return mapJsonExpr;
   }
 
-  /**
-   * Specials can't be in Optional or List
-   */
-  public boolean special() {
-    return special;
-  }
-
   public CodeBlock initMapper() {
     return initMapper;
   }
@@ -94,11 +98,8 @@ public final class Coercion {
   }
 
   public boolean flag() {
-    return field.type.equals(TypeName.BOOLEAN) || BOOLEAN_CLASS.equals(field.type);
-  }
-
-  public boolean repeatable() {
-    return kind == CoercionKind.LIST_COMBINATION;
+    return initMapper.isEmpty() &&
+        (TypeName.BOOLEAN.equals(field.type) || BOOLEAN_CLASS.equals(field.type));
   }
 
   public CodeBlock extract() {
@@ -118,7 +119,7 @@ public final class Coercion {
   }
 
   Coercion withMapper(CodeBlock map, CodeBlock initMapper) {
-    return new Coercion(trigger, map, special, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+    return new Coercion(trigger, map, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 
   Coercion asOptional() {
@@ -126,7 +127,7 @@ public final class Coercion {
     CodeBlock extract = CodeBlock.builder()
         .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())
         .build();
-    return new Coercion(trigger, map, special, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+    return new Coercion(trigger, map, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 
   Coercion asList() {
@@ -134,6 +135,10 @@ public final class Coercion {
     CodeBlock extract = CodeBlock.builder()
         .add("$T.unmodifiableList($N)", Collections.class, ParameterSpec.builder(paramType, field.name).build())
         .build();
-    return new Coercion(trigger, map, special, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+    return new Coercion(trigger, map, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+  }
+
+  public CoercionKind kind() {
+    return kind;
   }
 }

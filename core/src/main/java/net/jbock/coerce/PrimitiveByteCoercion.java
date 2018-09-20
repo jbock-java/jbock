@@ -11,11 +11,6 @@ class PrimitiveByteCoercion extends BasicByteCoercion {
   }
 
   @Override
-  boolean special() {
-    return true;
-  }
-
-  @Override
   TypeName paramType() {
     return TypeName.get(Byte.class);
   }
