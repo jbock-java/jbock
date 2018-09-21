@@ -363,8 +363,8 @@ abstract Integer verbosity();
 that returns `Optional<X>` or `List<X>`.
 * A mapper for `Integer` can also be used for `int` and `OptionalInt`, and so on for all primitives.
 * The `String` that's passed to the mapper will never be `null`, so there's no need to check for that.
-* The mapper may throw any `RuntimeException` to signal a parsing failure.
-The generated code will catch it and print the message.
+* Mappers can also perform validation:
+The mapper may throw any `RuntimeException` to signal a parsing failure.
 * Even if the mapper returns `null`, the parameter method won't. See pledge above.
 * Even with custom mappers, `List` and `Option` are still the <em>only</em> ways to declare non-required arguments.
 That means, for instance, that a parameter method that returns 
