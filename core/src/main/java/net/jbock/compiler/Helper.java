@@ -12,7 +12,6 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -270,6 +269,10 @@ final class Helper {
       if (!initMapper.isEmpty()) {
         spec.addStatement(initMapper);
       }
+      CodeBlock initCollector = param.coercion().initCollector();
+      if (!initCollector.isEmpty()) {
+        spec.addStatement(initCollector);
+      }
     }
 
     if (context.hasPositional()) {
@@ -284,12 +287,9 @@ final class Helper {
   private CodeBlock extractExpression(Param param) {
     CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
     if (param.paramType == REPEATABLE) {
-      CodeBlock mapExpr = param.coercion().map();
-      if (!mapExpr.isEmpty()) {
-        builder.add(".stream()");
-        builder.add("$L", mapExpr);
-        builder.add(".collect($T.toList())", Collectors.class);
-      }
+      builder.add(".stream()");
+      builder.add("$L", param.coercion().map());
+      builder.add(".collect($N)", param.coercion().collectorParam().get());
     } else {
       builder.add("$L", param.coercion().map());
     }

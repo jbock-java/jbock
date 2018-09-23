@@ -5,6 +5,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.util.function.Function;
+import java.util.stream.Collector;
 
 /**
  * <p>This annotation is used by the jbock annotation processor.</p>
@@ -53,4 +54,6 @@ public @interface Parameter {
   String argHandle() default "";
 
   Class<? extends Function> mappedBy() default Function.class;
+
+  Class<? extends Collector> collectedBy() default Collector.class;
 }

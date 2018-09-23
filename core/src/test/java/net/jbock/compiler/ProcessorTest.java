@@ -273,6 +273,19 @@ class ProcessorTest {
   }
 
   @Test
+  void validList() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @PositionalParameter abstract List<String> a();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void positionalOptionalBeforeRequiredPositional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",

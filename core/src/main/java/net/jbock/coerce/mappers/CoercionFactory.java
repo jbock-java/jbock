@@ -2,12 +2,18 @@ package net.jbock.coerce.mappers;
 
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionKind;
+import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
+import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.com.squareup.javapoet.WildcardTypeName;
 
 import java.util.Objects;
+import java.util.Optional;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 public abstract class CoercionFactory {
 
@@ -62,8 +68,10 @@ public abstract class CoercionFactory {
     ParameterSpec param = ParameterSpec.builder(paramType(), field.name).build();
     Coercion coercion = new Coercion(
         trigger,
+        Optional.ofNullable(collectorParam(field, kind)),
         map(),
         initMapper(),
+        initCollector(field, kind),
         jsonExpr(field.name),
         mapJsonExpr(field),
         extract(param),
@@ -78,5 +86,32 @@ public abstract class CoercionFactory {
       default:
         return coercion;
     }
+  }
+
+  private CodeBlock initCollector(
+      FieldSpec field,
+      CoercionKind kind) {
+    ParameterSpec collectorParam = collectorParam(field, kind);
+    if (collectorParam == null) {
+      return CodeBlock.builder().build();
+    }
+    return CodeBlock.builder()
+        .add("$T $N = $T.toList()", collectorParam.type, collectorParam, Collectors.class)
+        .build();
+
+  }
+
+  private ParameterSpec collectorParam(
+      FieldSpec field,
+      CoercionKind kind) {
+    if (kind != CoercionKind.LIST_COMBINATION) {
+      return null;
+    }
+    return ParameterSpec.builder(ParameterizedTypeName.get(
+        ClassName.get(Collector.class),
+        trigger,
+        WildcardTypeName.subtypeOf(Object.class),
+        field.type), field.name + "Collector")
+        .build();
   }
 }
