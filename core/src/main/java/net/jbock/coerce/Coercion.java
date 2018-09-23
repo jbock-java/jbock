@@ -40,7 +40,7 @@ public final class Coercion {
 
   private final CoercionKind kind;
 
-  Coercion(
+  public Coercion(
       TypeName trigger,
       CodeBlock map,
       CodeBlock initMapper,
@@ -118,11 +118,11 @@ public final class Coercion {
     return kind == CoercionKind.SIMPLE;
   }
 
-  Coercion withMapper(CodeBlock map, CodeBlock initMapper) {
+  public Coercion withMapper(CodeBlock map, CodeBlock initMapper) {
     return new Coercion(trigger, map, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 
-  Coercion asOptional() {
+  public Coercion asOptional() {
     TypeName paramType = Util.optionalOf(this.paramType);
     CodeBlock extract = CodeBlock.builder()
         .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())
@@ -130,7 +130,7 @@ public final class Coercion {
     return new Coercion(trigger, map, initMapper, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 
-  Coercion asList() {
+  public Coercion asList() {
     TypeName paramType = Util.listOf(this.paramType);
     CodeBlock extract = CodeBlock.builder()
         .add("$T.unmodifiableList($N)", Collections.class, ParameterSpec.builder(paramType, field.name).build())

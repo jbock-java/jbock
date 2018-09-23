@@ -2,10 +2,10 @@ package net.jbock.coerce;
 
 import javax.lang.model.type.TypeMirror;
 
-final class TriggerKind {
+public final class TriggerKind {
 
-  final CoercionKind kind;
-  final TypeMirror trigger;
+  public final CoercionKind kind;
+  public final TypeMirror trigger;
 
   TriggerKind(CoercionKind kind, TypeMirror trigger) {
     this.kind = kind;

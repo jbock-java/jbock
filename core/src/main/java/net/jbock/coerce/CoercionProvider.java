@@ -1,5 +1,9 @@
 package net.jbock.coerce;
 
+import net.jbock.coerce.mappers.AllCoercions;
+import net.jbock.coerce.mappers.CoercionFactory;
+import net.jbock.coerce.mappers.EnumCoercion;
+import net.jbock.coerce.mappers.MapperCoercion;
 import net.jbock.coerce.warn.WarningProvider;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
@@ -13,71 +17,18 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.CoercionKind.SIMPLE;
 import static net.jbock.coerce.CoercionKind.findKind;
 import static net.jbock.coerce.MapperClassValidator.validateMapperClass;
-import static net.jbock.coerce.MapperCoercion.mapperInit;
-import static net.jbock.coerce.MapperCoercion.mapperMap;
+import static net.jbock.coerce.mappers.MapperCoercion.mapperMap;
 import static net.jbock.compiler.Util.AS_DECLARED;
 import static net.jbock.compiler.Util.QUALIFIED_NAME;
 
 public class CoercionProvider {
 
-  private static final List<CoercionFactory> ALL_COERCIONS = Arrays.asList(
-      new CharsetCoercion(),
-      new PatternCoercion(),
-      new ObjectIntegerCoercion(),
-      new PrimitiveIntCoercion(),
-      new OptionalIntCoercion(),
-      new ObjectLongCoercion(),
-      new PrimitiveLongCoercion(),
-      new OptionalDoubleCoercion(),
-      new ObjectDoubleCoercion(),
-      new PrimitiveDoubleCoercion(),
-      new ObjectFloatCoercion(),
-      new PrimitiveFloatCoercion(),
-      new OptionalLongCoercion(),
-      new ObjectCharacterCoercion(),
-      new PrimitiveCharacterCoercion(),
-      new ObjectBooleanCoercion(),
-      new PrimitiveBooleanCoercion(),
-      new ObjectShortCoercion(),
-      new PrimitiveShortCoercion(),
-      new ObjectByteCoercion(),
-      new PrimitiveByteCoercion(),
-      new PathCoercion(),
-      new FileCoercion(),
-      new URICoercion(),
-      new BigDecimalCoercion(),
-      new BigIntegerCoercion(),
-      new LocalDateCoercion(),
-      new LocalDateTimeCoercion(),
-      new OffsetDateTimeCoercion(),
-      new ZonedDateTimeCoercion(),
-      new InstantCoercion(),
-      new StringCoercion());
-
   private static CoercionProvider instance;
-
-  private final Map<TypeName, CoercionFactory> coercions;
-
-  private CoercionProvider() {
-    coercions = new HashMap<>();
-    for (CoercionFactory coercion : ALL_COERCIONS) {
-      CoercionFactory previous = this.coercions.put(coercion.trigger(), coercion);
-      if (previous != null) {
-        throw new IllegalStateException(String.format("Both triggered by %s : %s, %s",
-            coercion.trigger(),
-            coercion.getClass().getSimpleName(), previous.getClass().getSimpleName()));
-      }
-    }
-  }
 
   public static CoercionProvider getInstance() {
     if (instance == null) {
@@ -136,8 +87,8 @@ public class CoercionProvider {
     MapperSkew skew = mapperSkew(tk);
     if (skew != null) {
       validateMapperClass(mapperClass, skew.mapperReturnType);
-      return coercions.get(skew.baseType).getCoercion(field, tk.kind)
-          .withMapper(mapperMap(mapperParam), mapperInit(skew.mapperReturnType, mapperParam, mapperType));
+      return AllCoercions.get(skew.baseType).getCoercion(field, tk.kind)
+          .withMapper(mapperMap(mapperParam), MapperCoercion.mapperInit(skew.mapperReturnType, mapperParam, mapperType));
     } else {
       validateMapperClass(mapperClass, TypeName.get(tk.trigger));
       return MapperCoercion.create(tk, mapperParam, mapperType, field);
@@ -150,7 +101,7 @@ public class CoercionProvider {
     }
     TypeName input = TypeName.get(tk.trigger);
     if (input.isPrimitive()) {
-      if (!coercions.containsKey(input)) {
+      if (!AllCoercions.containsKey(input)) {
         return null;
       }
       return new MapperSkew(input.box(), input.box());
@@ -172,7 +123,7 @@ public class CoercionProvider {
     if (enumCoercion != null) {
       return enumCoercion.getCoercion(field, tk.kind);
     } else {
-      CoercionFactory factory = coercions.get(TypeName.get(tk.trigger));
+      CoercionFactory factory = AllCoercions.get(TypeName.get(tk.trigger));
       if (factory == null) {
         throw TmpException.create("Bad return type");
       }
