@@ -52,7 +52,7 @@ abstract class Args {
 ````
 
 The methods that carry the `Parameter` or `PositionalParameter` annotation must be abstract.
-They are called the <em>parameter methods</em>. 
+They are called the <em>parameter methods</em>.
 
 In  this case, the order of the parameter methods `source()` and `dest()` matters,
 because they represent positional arguments.
@@ -66,15 +66,15 @@ Before we move on, we should mention two important guarantees that jbock gives y
 
 #### The non-null pledge
 
-> None of the parameter methods will ever throw an exception 
+> None of the parameter methods will ever throw an exception
 or return `null`, regardless of the input to `parse` or `parseOrExit`.
 
-This means that jbock will either give you either a fully initialized 
-instance of your args class, or no instance at all. 
-This is ensured by the generated constructor, 
+This means that jbock will either give you a fully initialized
+instance of your args class, or no instance at all.
+This is ensured by the generated constructor,
 which performs null checks for each non-primitive argument.
 
-This also implies that any parameter method that doesn't return 
+This also implies that any parameter method that doesn't return
 either `List` or `Optional` must represent a <em>required</em> argument,
 which means that failure to pass it on the command line will cause parsing to fail.
 Otherwise it would hardly be possible to fulfill this promise.
@@ -100,10 +100,10 @@ public class CopyFile {
 
 The `parseOrExit` method is very convenient.
 If the input is not valid, it will print a helpful error message and shutdown the JVM,
-which is often the most helpful behaviour.
+which is often the desired behaviour.
 If you want more control, you can use the `parse` method instead.
 
-When invoked without any arguments, 
+When invoked without any arguments,
 the program now prints the following message:
 
 <pre><code>Usage: CopyFile SOURCE DEST
@@ -130,7 +130,7 @@ abstract class Args {
 ````
 
 When the program is invoked with the `--help` parameter,
-it will use the attributes and also the javadoc, 
+it will use the attributes and also the javadoc,
 to print something resembling a [man page](https://linux.die.net/man/1/cp):
 
 <pre><code>NAME
@@ -180,7 +180,7 @@ abstract class Args {
 }
 ````
 
-Now let's add another flag called `--backup` or `-b`, 
+Now let's add another flag called `--backup` or `-b`,
 and an optional parameter called `--suffix` or `-s`:
 
 ````java
@@ -196,14 +196,14 @@ abstract class Args {
 ````
 
 Each option can have one of two possible names, or both.
-The <em>long name</em> is the name that starts with `--`. 
+The <em>long name</em> is the name that starts with `--`.
 It can be passed in attached `--key=value` or detached `--key value` form.
-The <em>short name</em> starts with a single dash, 
+The <em>short name</em> starts with a single dash,
 followed by a <em>single</em> character. The attached form is `-kvalue`,
 and the detached form is `-k value`.
 
-For each option, the method name 
-automatically defines the long name. 
+For each option, the method name
+automatically defines the long name.
 This can be overridden with the `longName` option,
 or disabled by passing `longName = ""`.
 
@@ -308,7 +308,7 @@ folder has demos and tests for most parser features.
 
 ## Supported types
 
-There are 4 basic types of parameters, 
+There are 4 basic types of parameters,
 depending on the the return type `X` of their parameter method `m`.
 
 * If `X` is of the form `java.util.List<Y>`, then `X` declares a <em>repeatable</em> parameter.
@@ -316,7 +316,7 @@ depending on the the return type `X` of their parameter method `m`.
 * If `m` is not positional and does not have a custom mapper, and `X` is `boolean` or `Boolean`, then `X` declares a <em>non-repeatable flag</em>.
 * Otherwise, `X` declares a <em>required, non-repeatable</em> parameter.
 
-If a type `A` is supported, 
+If a type `A` is supported,
 then `List<A>` and `Optional<A>` are also supported.
 The following types are permissible values of `A`:
 
@@ -367,8 +367,8 @@ that returns `Optional<X>` or `List<X>`.
 The mapper may throw any `RuntimeException` to signal a parsing failure.
 * Even if the mapper returns `null`, the parameter method won't. See pledge above.
 * Even with custom mappers, `List` and `Option` are still the <em>only</em> ways to declare non-required arguments.
-That means, for instance, that a parameter method that returns 
-`Set<Integer>` represents a required, non-repeatable argument, 
+That means, for instance, that a parameter method that returns
+`Set<Integer>` represents a required, non-repeatable argument,
 which is probably not what you want.
 The workaround here is to either use `List<Integer>` for a repeatable argument, or 
-`Optional<Set<Integer>>` for an optional non-repeatable argument instead. 
+`Optional<Set<Integer>>` for an optional non-repeatable argument instead.
