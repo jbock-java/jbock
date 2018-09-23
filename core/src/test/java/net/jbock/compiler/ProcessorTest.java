@@ -796,7 +796,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Mapper class must implement Function<String, java.lang.Integer>");
+        .withErrorContaining("Raw types are not allowed");
   }
 
   private List<String> withImports(String... lines) {
