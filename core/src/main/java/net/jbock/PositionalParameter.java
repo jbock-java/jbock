@@ -4,8 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.function.Function;
-import java.util.stream.Collector;
+import java.util.function.Supplier;
 
 /**
  * <p>This annotation is used by the jbock annotation processor.</p>
@@ -35,7 +34,24 @@ public @interface PositionalParameter {
    */
   String argHandle() default "";
 
-  Class<? extends Function> mappedBy() default Function.class;
+  /**
+   * <p>The supplier must yield a mapper Function that maps string to the parameter method's return type.</p>
+   * <p>There are two exceptions to this rule:</p>
+   * <ol>
+   * <li>if the parameter is optional, then the mapper must return the element type of the Optional</li>
+   * <li>if the parameter is repeatable, then the mapper must return the element type of the List, or more generally,
+   * the input type of the associated collector</li>
+   * </ol>
+   */
+  Class<? extends Supplier> mappedBy() default Supplier.class;
 
-  Class<? extends Collector> collectedBy() default Collector.class;
+  /**
+   * <p>The supplier must yield a {@link java.util.stream.Collector}</p>
+   * <p>This only makes sense for repeatable arguments.</p>
+   */
+  Class<? extends Supplier> collectedBy() default Supplier.class;
+
+  boolean repeatable() default false;
+
+  boolean optional() default false;
 }

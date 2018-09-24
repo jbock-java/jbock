@@ -2,27 +2,31 @@ package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Util;
+import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import static java.util.Collections.singletonMap;
+
 final class MapperClassValidator {
 
-  static void validateMapperClass(TypeElement mapperClass, TypeName trigger) throws TmpException {
+  static void validateMapperClass(TypeElement mapperClass, TypeName trigger) {
     if (mapperClass.getNestingKind() == NestingKind.MEMBER && !mapperClass.getModifiers().contains(Modifier.STATIC)) {
-      throw new TmpException("Inner class " + mapperClass + " must be static");
+      throw ValidationException.create(mapperClass, "The inner class must be static");
     }
     if (mapperClass.getModifiers().contains(Modifier.PRIVATE)) {
-      throw new TmpException("Mapper class " + mapperClass + " must not be private");
+      throw ValidationException.create(mapperClass, "The class may not be private");
     }
     if (!mapperClass.getTypeParameters().isEmpty()) {
-      throw new TmpException("Mapper class " + mapperClass + " must not have type parameters");
+      throw ValidationException.create(mapperClass, "The class may not have type parameters");
     }
     List<ExecutableElement> constructors = ElementFilter.constructorsIn(mapperClass.getEnclosedElements());
     if (!constructors.isEmpty()) {
@@ -30,32 +34,37 @@ final class MapperClassValidator {
       for (ExecutableElement constructor : constructors) {
         if (constructor.getParameters().isEmpty()) {
           if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
-            throw new TmpException("Mapper class " + mapperClass + " must have a package visible constructor");
+            throw ValidationException.create(mapperClass, "The class must have a package visible constructor");
           }
           if (!constructor.getThrownTypes().isEmpty()) {
-            throw new TmpException("The constructor of mapper class " + mapperClass + " may not declare any exceptions");
+            throw ValidationException.create(mapperClass, "The constructor may not declare any exceptions");
           }
           constructorFound = true;
         }
       }
       if (!constructorFound) {
-        throw new TmpException("Mapper class " + mapperClass + " must have a default constructor");
+        throw ValidationException.create(mapperClass, "The class must have a default constructor");
       }
     }
     checkTree(mapperClass, trigger);
   }
 
-  /* Does the mapper implement Function<String, triggerClass>?
+  /* Does the mapper implement Supplier<Function<String, triggerClass>>?
    * There can be a situation where this is not very easy. See ProcessorTest.
    */
-  private static void checkTree(TypeElement mapperClass, TypeName trigger) throws TmpException {
-    Map<Integer, String> map = new LinkedHashMap<>();
-    map.put(0, "T");
-    map.put(1, "R");
-    Resolver resolver = Resolver.resolve("java.util.function.Function", map, mapperClass);
-    if (!resolver.satisfies("T", m -> Util.equalsType(m, "java.lang.String")) ||
-        !resolver.satisfies("R", m -> trigger.equals(TypeName.get(m)))) {
-      throw new TmpException(String.format("Mapper class must implement Function<String, %s>", trigger));
+  private static void checkTree(TypeElement mapperClass, TypeName trigger) {
+    Resolver supplier = Resolver.resolve("java.util.function.Supplier", singletonMap(0, "T"), mapperClass.asType());
+    TypeMirror suppliedType = supplier.getOrElseThrow("T",
+        () -> ValidationException.create(mapperClass, String.format("The class must implement Supplier<Function<String, %s>>", trigger)));
+    Map<Integer, String> functionTypeArgs = new LinkedHashMap<>();
+    functionTypeArgs.put(0, "T");
+    functionTypeArgs.put(1, "R");
+    Resolver function = Resolver.resolve("java.util.function.Function", functionTypeArgs, suppliedType);
+    if (!function.satisfies("T", m -> Util.equalsType(m, "java.lang.String")) ||
+        !function.satisfies("R", m -> trigger.equals(TypeName.get(m)))) {
+      TypeMirror t = function.get("T");
+      TypeMirror r = function.get("R");
+      throw ValidationException.create(mapperClass, String.format("The class must implement Supplier<Function<String, %s>>", trigger));
     }
   }
 }

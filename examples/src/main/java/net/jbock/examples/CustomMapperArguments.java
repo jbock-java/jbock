@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
+import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 @CommandLineArguments
@@ -57,70 +58,74 @@ abstract class CustomMapperArguments {
   @Parameter(mappedBy = BooleanMapper.class)
   abstract boolean notFlag(); // if it has a mapper, it's not a flag
 
-  static class DateMapper implements Function<String, Date> {
+  static class DateMapper implements Supplier<Function<String, Date>> {
 
     @Override
-    public Date apply(String s) {
-      return new Date(Long.parseLong(s));
+    public Function<String, Date> get() {
+      return s -> new Date(Long.parseLong(s));
     }
   }
 
-  static class PositiveNumberMapper implements Function<String, Integer> {
+  static class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
 
     @Override
-    public Integer apply(String s) {
-      Integer i = Integer.valueOf(s);
-      if (i < 0) {
-        throw new IllegalArgumentException("The value cannot be negative.");
-      }
-      return i;
+    public Function<String, Integer> get() {
+      return s -> {
+        Integer i = Integer.valueOf(s);
+        if (i < 0) {
+          throw new IllegalArgumentException("The value cannot be negative.");
+        }
+        return i;
+      };
     }
   }
 
-  static class ArrayMapper implements Function<String, String[]> {
+  static class ArrayMapper implements Supplier<Function<String, String[]>> {
 
     @Override
-    public String[] apply(String s) {
-      return new String[]{s};
+    public Function<String, String[]> get() {
+      return s -> new String[]{s};
     }
   }
 
-  static class IntegerListMapper implements Function<String, List<Integer>> {
+  static class IntegerListMapper implements Supplier<Function<String, List<Integer>>> {
 
     @Override
-    public List<Integer> apply(String s) {
-      return Arrays.stream(s.split(",", -1))
+    public Function<String, List<Integer>> get() {
+      return s -> Arrays.stream(s.split(",", -1))
           .map(Integer::valueOf)
           .collect(Collectors.toList());
     }
   }
 
-  static class EnumSetMapper implements Function<String, Set<MyEnum>> {
+  static class EnumSetMapper implements Supplier<Function<String, Set<MyEnum>>> {
 
     @Override
-    public Set<MyEnum> apply(String s) {
-      return Arrays.stream(s.split(",", -1))
+    public Function<String, Set<MyEnum>> get() {
+      return s -> Arrays.stream(s.split(",", -1))
           .map(MyEnum::valueOf)
           .collect(Collectors.toSet());
     }
   }
 
-  static class BooleanMapper implements Function<String, Boolean> {
+  static class BooleanMapper implements Supplier<Function<String, Boolean>> {
 
     @Override
-    public Boolean apply(String s) {
-      return Boolean.valueOf(s);
+    public Function<String, Boolean> get() {
+      return Boolean::valueOf;
     }
   }
 
-  static class OptionalIntMapper implements Function<String, OptionalInt> {
+  static class OptionalIntMapper implements Supplier<Function<String, OptionalInt>> {
 
     @Override
-    public OptionalInt apply(String s) {
-      if (s.isEmpty()) {
-        return OptionalInt.empty();
-      }
-      return OptionalInt.of(Integer.parseInt(s));
+    public Function<String, OptionalInt> get() {
+      return s -> {
+        if (s.isEmpty()) {
+          return OptionalInt.empty();
+        }
+        return OptionalInt.of(Integer.parseInt(s));
+      };
     }
   }
 

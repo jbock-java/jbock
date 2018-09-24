@@ -525,9 +525,9 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract List<OptionalInt> numbers();",
-        "  static class Mapper implements Function<String, OptionalInt> {",
-        "    public OptionalInt apply(String s) {",
-        "      return OptionalInt.of(1);",
+        "  static class Mapper implements Supplier<Function<String, OptionalInt>> {",
+        "    public Function<String, OptionalInt> get() {",
+        "      return s -> OptionalInt.of(1);",
         "    }",
         "  }",
         "}");
@@ -543,9 +543,9 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract byte number();",
-        "  static class Mapper implements Function<String, Byte> {",
-        "    public Byte apply(String s) {",
-        "      return 1;",
+        "  static class Mapper implements Supplier<Function<String, Byte>> {",
+        "    public Function<String, Byte> get() {",
+        "      return s -> 1;",
         "    }",
         "  }",
         "}");
@@ -561,9 +561,9 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Byte number();",
-        "  static class Mapper implements Function<String, Byte> {",
-        "    public Byte apply(String s) {",
-        "      return 1;",
+        "  static class Mapper implements Supplier<Function<String, Byte>> {",
+        "    public Function<String, Byte> get() {",
+        "      return s -> 1;",
         "    }",
         "  }",
         "}");
@@ -579,9 +579,9 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract List<Set<Integer>> sets();",
-        "  static class Mapper implements Function<String, Set<Integer>> {",
-        "    public Set<Integer> apply(String s) {",
-        "      return Collections.singleton(Integer.valueOf(s));",
+        "  static class Mapper implements Supplier<Function<String, Set<Integer>>> {",
+        "    public Function<String, Set<Integer>> get() {",
+        "      return s -> Collections.singleton(Integer.valueOf(s));",
         "    }",
         "  }",
         "}");
@@ -597,10 +597,10 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
-        "  static class Mapper implements Function<String, Integer> {",
+        "  static class Mapper implements Supplier<Function<String, Integer>> {",
         "    private Mapper() {}",
-        "    public Integer apply(String s) {",
-        "      return 1;",
+        "    public Function<String, Integer> get() {",
+        "      return s -> 1;",
         "    }",
         "  }",
         "}");
@@ -608,7 +608,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Mapper class test.InvalidArguments.Mapper must have a package visible constructor");
+        .withErrorContaining("The class must have a package visible constructor");
   }
 
   @Test
@@ -617,10 +617,10 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
-        "  static class Mapper implements Function<String, Integer> {",
+        "  static class Mapper implements Supplier<Function<String, Integer>> {",
         "    Mapper(int i) {}",
-        "    public Integer apply(String s) {",
-        "      return 1;",
+        "    public Function<String, Integer> get() {",
+        "      return s -> 1;",
         "    }",
         "  }",
         "}");
@@ -628,7 +628,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Mapper class test.InvalidArguments.Mapper must have a default constructor");
+        .withErrorContaining("The class must have a default constructor");
   }
 
   @Test
@@ -637,10 +637,10 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
-        "  static class Mapper implements Function<String, Integer> {",
+        "  static class Mapper implements Supplier<Function<String, Integer>> {",
         "    Mapper() throws IllegalStateException {}",
-        "    public Integer apply(String s) {",
-        "      return 1;",
+        "    public Function<String, Integer> get() {",
+        "      return s -> 1;",
         "    }",
         "  }",
         "}");
@@ -648,7 +648,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The constructor of mapper class test.InvalidArguments.Mapper may not declare any exceptions");
+        .withErrorContaining("The constructor may not declare any exceptions");
   }
 
   @Test
@@ -657,9 +657,9 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
-        "  class Mapper implements Function<String, Integer> {",
-        "    public Integer apply(String s) {",
-        "      return 1;",
+        "  class Mapper implements Supplier<Function<String, Integer>> {",
+        "    public Function<String, Integer> get() {",
+        "      return s -> 1;",
         "    }",
         "  }",
         "}");
@@ -667,7 +667,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Inner class test.InvalidArguments.Mapper must be static");
+        .withErrorContaining("The inner class must be static");
   }
 
   @Test
@@ -676,9 +676,9 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
-        "  static class Mapper implements Function<Integer, Integer> {",
-        "    public Integer apply(Integer s) {",
-        "      return s;",
+        "  static class Mapper implements Supplier<Function<Integer, Integer>> {",
+        "    public Function<Integer, Integer> get() {",
+        "      return s -> s;",
         "    }",
         "  }",
         "}");
@@ -686,7 +686,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Mapper class must implement Function<String, java.lang.Integer>");
+        .withErrorContaining("The class must implement Supplier<Function<String, java.lang.Integer>>");
   }
 
   @Test
@@ -695,9 +695,9 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
-        "  static class Mapper implements Function<String, String> {",
-        "    public String apply(String s) {",
-        "      return s;",
+        "  static class Mapper implements Supplier<Function<String, String>> {",
+        "    public Function<String, String> get() {",
+        "      return Function.identity();",
         "    }",
         "  }",
         "}");
@@ -705,26 +705,25 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Mapper class must implement Function<String, java.lang.Integer>");
+        .withErrorContaining("The class must implement Supplier<Function<String, java.lang.Integer>>");
   }
 
   @Test
-  void mapperInvalidTypevars() {
+  void mapperValidTypevars() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Supplier<String> string();",
-        "  static class Mapper implements Function<String, Supplier<String>> {",
-        "    public Supplier<String> apply(String s) {",
-        "      return () -> s;",
+        "  static class Mapper implements Supplier<Function<String, Supplier<String>>> {",
+        "    public Function<String, Supplier<String>> get() {",
+        "      return s -> () -> s;",
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Bad return type");
+        .compilesWithoutError();
   }
 
   @Test
@@ -733,9 +732,9 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
-        "  static class Mapper implements StringFunction<Integer> {",
-        "    public Integer apply(String s) {",
-        "      return 1;",
+        "  static class Mapper implements Supplier<StringFunction<Integer>> {",
+        "    public StringFunction<Integer> get() {",
+        "      return s -> 1;",
         "    }",
         "  }",
         "  interface StringFunction<R> extends Function<String, R> {}",
@@ -752,7 +751,13 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
-        "  static class Mapper implements Foo<String>, Xoxo<Integer>  {",
+        "  static class Mapper implements ZapperSupplier {",
+        "  public Zapper get() {",
+        "      return new Zapper();",
+        "    }",
+        "  }",
+        "  interface ZapperSupplier extends Supplier<Zapper> { }",
+        "  static class Zapper implements Foo<String>, Xoxo<Integer>  {",
         "    public Integer apply(String s) {",
         "      return 1;",
         "    }",
@@ -775,7 +780,13 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
-        "  static class Mapper implements Foo<String>, Xoxo<Integer>  {",
+        "  static class Mapper implements ZapperSupplier {",
+        "  public Zapper get() {",
+        "      return new Zapper();",
+        "    }",
+        "  }",
+        "  interface ZapperSupplier extends Supplier<Zapper> { }",
+        "  static class Zapper implements Foo<String>, Xoxo<Integer>  {",
         "    public Integer apply(String s) {",
         "      return 1;",
         "    }",
@@ -790,7 +801,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Mapper class must implement Function<String, java.lang.Integer>");
+        .withErrorContaining("The class must implement Supplier<Function<String, java.lang.Integer>>");
   }
 
   @Test
@@ -799,9 +810,9 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
-        "  static class Mapper implements Function {",
-        "    public Object apply(Object s) {",
-        "      return s;",
+        "  static class Mapper implements Supplier<Function> {",
+        "    public Function get() {",
+        "      return s -> s;",
         "    }",
         "  }",
         "}");
@@ -809,7 +820,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Raw types are not allowed");
+        .withErrorContaining("The class must implement Supplier<Function<String, java.lang.Integer>>");
   }
 
   private List<String> withImports(String... lines) {

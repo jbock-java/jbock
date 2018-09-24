@@ -49,7 +49,7 @@ public final class MapperCoercion extends CoercionFactory {
 
   public static CodeBlock mapperInit(TypeName trigger, ParameterSpec mapperParam, TypeName mapperType) {
     return CodeBlock.builder()
-        .add("$T $N = new $T()", ParameterizedTypeName.get(ClassName.get(Function.class), STRING, trigger), mapperParam, mapperType)
+        .add("$T $N = new $T().get()", ParameterizedTypeName.get(ClassName.get(Function.class), STRING, trigger), mapperParam, mapperType)
         .build();
   }
 }

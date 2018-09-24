@@ -10,7 +10,7 @@ import java.util.List;
 
 public class HierarchyUtil {
 
-  public static List<TypeElement> getFamilyTree(TypeMirror mirror) {
+  public static List<TypeElement> getTypeTree(TypeMirror mirror) {
     if (mirror == null || mirror.getKind() != TypeKind.DECLARED) {
       return Collections.emptyList();
     }

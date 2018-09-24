@@ -22,6 +22,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.CoercionKind.SIMPLE;
 import static net.jbock.coerce.CoercionKind.findKind;
 import static net.jbock.coerce.MapperClassValidator.validateMapperClass;
+import static net.jbock.coerce.mappers.MapperCoercion.mapperInit;
 import static net.jbock.coerce.mappers.MapperCoercion.mapperMap;
 import static net.jbock.compiler.Util.AS_DECLARED;
 import static net.jbock.compiler.Util.QUALIFIED_NAME;
@@ -88,7 +89,7 @@ public class CoercionProvider {
     if (skew != null) {
       validateMapperClass(mapperClass, skew.mapperReturnType);
       return AllCoercions.get(skew.baseType).getCoercion(field, tk.kind)
-          .withMapper(mapperMap(mapperParam), MapperCoercion.mapperInit(skew.mapperReturnType, mapperParam, mapperType));
+          .withMapper(mapperMap(mapperParam), mapperInit(skew.mapperReturnType, mapperParam, mapperType));
     } else {
       validateMapperClass(mapperClass, TypeName.get(tk.trigger));
       return MapperCoercion.create(tk, mapperParam, mapperType, field);
@@ -154,10 +155,10 @@ public class CoercionProvider {
       return CoercionKind.SIMPLE.of(returnType);
     }
     CoercionKind kind = findKind(parameterized);
-    if (!kind.isCombination()) {
-      throw TmpException.create("Bad return type");
+    if (kind.isCombination()) {
+      return kind.of(parameterized.getTypeArguments().get(0));
     }
-    return kind.of(parameterized.getTypeArguments().get(0));
+    return kind.of(parameterized);
   }
 
   static String snakeToCamel(String s) {
