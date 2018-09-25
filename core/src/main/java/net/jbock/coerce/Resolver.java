@@ -33,7 +33,7 @@ class Resolver {
   private Resolver step(Extension extension) {
     TypeElement b = extension.baseClass;
     DeclaredType x = extension.extensionClass;
-    Map<Integer, String> newMap = new LinkedHashMap<>();
+    Map<Integer, String> newNames = new LinkedHashMap<>();
     Map<String, TypeMirror> newResults = new LinkedHashMap<>(results);
     List<? extends TypeMirror> xParams = x.getTypeArguments();
     List<? extends TypeParameterElement> bParams = b.getTypeParameters();
@@ -42,19 +42,20 @@ class Resolver {
         // failure: raw type
         return new Resolver(names, emptyMap());
       }
-      TypeMirror typeMirror = xParams.get(entry.getKey());
-      if (typeMirror.getKind() == TypeKind.TYPEVAR) {
+      TypeMirror xParam = xParams.get(entry.getKey());
+      if (xParam.getKind() == TypeKind.TYPEVAR) {
         for (int i = 0; i < bParams.size(); i++) {
-          TypeParameterElement bvar = bParams.get(i);
-          if (bvar.toString().equals(typeMirror.toString())) {
-            newMap.put(i, entry.getValue());
+          TypeParameterElement bParam = bParams.get(i);
+          if (bParam.toString().equals(xParam.toString())) {
+            newNames.put(i, entry.getValue());
+            break;
           }
         }
       } else {
-        newResults.put(entry.getValue(), typeMirror);
+        newResults.put(entry.getValue(), xParam);
       }
     }
-    return new Resolver(newMap, newResults);
+    return new Resolver(newNames, newResults);
   }
 
   static Resolver resolve(
@@ -68,6 +69,10 @@ class Resolver {
     while ((extension = findExtension(family, tmpname)) != null) {
       resolver = resolver.step(extension);
       tmpname = extension.baseClass.getQualifiedName().toString();
+    }
+    if (resolver.names.isEmpty()) {
+      // everything resolved
+      return resolver;
     }
     if (!resolver.names.isEmpty() && tmpname.equals(m.accept(QUALIFIED_NAME, null))) {
       DeclaredType declaredType = Util.asParameterized(m);

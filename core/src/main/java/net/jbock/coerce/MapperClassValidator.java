@@ -62,8 +62,6 @@ final class MapperClassValidator {
     Resolver function = Resolver.resolve("java.util.function.Function", functionTypeArgs, suppliedType);
     if (!function.satisfies("T", m -> Util.equalsType(m, "java.lang.String")) ||
         !function.satisfies("R", m -> trigger.equals(TypeName.get(m)))) {
-      TypeMirror t = function.get("T");
-      TypeMirror r = function.get("R");
       throw ValidationException.create(mapperClass, String.format("The class must implement Supplier<Function<String, %s>>", trigger));
     }
   }
