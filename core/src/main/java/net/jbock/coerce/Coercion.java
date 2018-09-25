@@ -7,7 +7,6 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Constants;
 
-import java.util.Collections;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -17,6 +16,7 @@ public final class Coercion {
 
   private final TypeName trigger;
 
+  // only for repeatable
   private final Optional<ParameterSpec> collectorParam;
 
   // helper.build
@@ -120,6 +120,10 @@ public final class Coercion {
   }
 
   public boolean required() {
+    if (collectorParam.isPresent()) {
+      // repeatable
+      return false;
+    }
     if (flag()) {
       return false;
     }
@@ -143,12 +147,12 @@ public final class Coercion {
     return new Coercion(trigger, collectorParam, map, initMapper, initCollector, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 
-  public Coercion asList() {
+  public Coercion asList(CollectorInfo collectorInfo) {
     TypeName paramType = field.type;
     CodeBlock extract = CodeBlock.builder()
-        .add("$T.unmodifiableList($N)", Collections.class, ParameterSpec.builder(paramType, field.name).build())
+        .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())
         .build();
-    return new Coercion(trigger, collectorParam, map, initMapper, initCollector, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+    return new Coercion(trigger, collectorParam, map, initMapper, collectorInfo.collectorInit, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 
   public CoercionKind kind() {

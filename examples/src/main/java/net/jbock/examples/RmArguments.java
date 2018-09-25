@@ -15,6 +15,6 @@ abstract class RmArguments {
   @Parameter(shortName = 'f')
   abstract boolean force();
 
-  @PositionalParameter
+  @PositionalParameter(repeatable = true)
   abstract List<String> otherTokens();
 }

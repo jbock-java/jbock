@@ -4,8 +4,7 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.function.Function;
-import java.util.stream.Collector;
+import java.util.function.Supplier;
 
 /**
  * <p>This annotation is used by the jbock annotation processor.</p>
@@ -14,7 +13,7 @@ import java.util.stream.Collector;
  * <li>The annotated method must be abstract.</li>
  * <li>The annotated method must have an empty argument list.</li>
  * <li>The annotated method must not also carry the {@link PositionalParameter} annotation.</li>
- * <li>The enclosing class must be annotated with {@link CommandLineArguments}.</li>
+ * <li>The method's enclosing class must be annotated with {@link CommandLineArguments}.</li>
  * </ul>
  */
 @Target(ElementType.METHOD)
@@ -53,7 +52,36 @@ public @interface Parameter {
    */
   String argHandle() default "";
 
-  Class<? extends Function> mappedBy() default Function.class;
+  /**
+   * <p>The supplier must yield a {@link java.util.function.Function Function&lt;String, X&gt;}
+   * where {@code X} is called the <em>mapper type</em>.
+   * In many cases, the mapper type is the same as the parameter type.</p>
+   * <p>There are however two exceptions:</p>
+   * <ol>
+   *   <li>If the parameter is not repeatable and {@code X} is of the form {@link java.util.Optional Optional&lt;Y&gt;},
+   *   then the mapper must return {@code Y}</li>
+   *   <li>If the parameter is {@link #repeatable},
+   *   then the mapper must return the input type of the associated collector.
+   *   In most cases, the type of a repeatable parameter will be of the form
+   *   {@link java.util.List List&lt;E&gt;},
+   *   and the default collector {@link java.util.stream.Collectors#toList() toList}
+   *   will be used. Then the mapper must return {@code E}.</li>
+   * </ol>
+   */
+  Class<? extends Supplier> mappedBy() default Supplier.class;
 
-  Class<? extends Collector> collectedBy() default Collector.class;
+  /**
+   * <p>The supplier must yield a {@link java.util.stream.Collector Collector&lt;M, ?, X&gt;}
+   * where {@code X} is the parameter type, and {@code M} is the mapper type.
+   * </p>
+   * <p>This only makes sense for {@link #repeatable} arguments.</p>
+   * <p>The default collector is the one that's returned by
+   * {@link java.util.stream.Collectors#toList() Collectors.toList}.
+   */
+  Class<? extends Supplier> collectedBy() default Supplier.class;
+
+  /**
+   * <p>Declares this argument repeatable.</p>
+   */
+  boolean repeatable() default false;
 }

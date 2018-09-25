@@ -11,13 +11,16 @@ import java.util.Map;
 
 final class MapperClassUtil {
 
-  static TypeElement getMapperClass(ExecutableElement sourceMethod, Class<?> annotationClass) {
+  private static TypeElement get(
+      ExecutableElement sourceMethod,
+      Class<?> annotationClass,
+      String attributeName) {
     AnnotationMirror mirror = getAnnotationMirror(sourceMethod, annotationClass);
     if (mirror == null) {
       // the source method doesn't have this annotation
       return null;
     }
-    AnnotationValue annotationValue = getAnnotationValue(mirror, "mappedBy");
+    AnnotationValue annotationValue = getAnnotationValue(mirror, attributeName);
     if (annotationValue == null) {
       // if the default value of mappedBy is not overridden
       return null;
@@ -33,6 +36,15 @@ final class MapperClassUtil {
     }
     DeclaredType declaredType = typeMirror.accept(Util.AS_DECLARED, null);
     return declaredType.asElement().accept(Util.AS_TYPE_ELEMENT, null);
+  }
+
+
+  static TypeElement getMapperClass(ExecutableElement sourceMethod, Class<?> annotationClass) {
+    return get(sourceMethod, annotationClass, "mappedBy");
+  }
+
+  static TypeElement getCollectorClass(ExecutableElement sourceMethod, Class<?> annotationClass) {
+    return get(sourceMethod, annotationClass, "collectedBy");
   }
 
   private static AnnotationMirror getAnnotationMirror(ExecutableElement sourceMethod, Class<?> clazz) {

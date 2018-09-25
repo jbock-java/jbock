@@ -9,9 +9,9 @@ import java.util.List;
 @CommandLineArguments(strict = false, allowEscape = false)
 abstract class RestArguments {
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<String> file();
 
-  @PositionalParameter
+  @PositionalParameter(repeatable = true)
   abstract List<String> rest();
 }

@@ -13,13 +13,13 @@ abstract class ComplicatedMapperArguments {
   @Parameter(mappedBy = Mapper.class)
   abstract Integer number();
 
-  @Parameter(mappedBy = LazyNumberMapper.class)
+  @Parameter(repeatable = true, mappedBy = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();
 
-  static class LazyNumberMapper implements Function<String, LazyNumber> {
+  static class LazyNumberMapper implements Supplier<Function<String, LazyNumber>> {
     @Override
-    public LazyNumber apply(String s) {
-      return () -> Integer.valueOf(s);
+    public Function<String, LazyNumber> get() {
+      return s -> () -> Integer.valueOf(s);
     }
   }
 
@@ -27,7 +27,17 @@ abstract class ComplicatedMapperArguments {
   }
 
   // parser must understand that this implements Function<String, Integer>
-  static class Mapper implements Foo<String> {
+  static class Mapper implements ZapperSupplier {
+    @Override
+    public Zapper get() {
+      return new Zapper();
+    }
+  }
+
+  interface ZapperSupplier extends Supplier<Zapper> {
+  }
+
+  static class Zapper implements Foo<String> {
     public Integer apply(String s) {
       return 1;
     }

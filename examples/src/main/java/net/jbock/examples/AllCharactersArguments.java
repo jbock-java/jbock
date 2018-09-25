@@ -18,6 +18,6 @@ abstract class AllCharactersArguments {
   @Parameter
   abstract Optional<Character> charOpt();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<Character> charList();
 }

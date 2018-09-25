@@ -2,6 +2,7 @@ package net.jbock.coerce.mappers;
 
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionKind;
+import net.jbock.coerce.CollectorInfo;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
@@ -13,7 +14,6 @@ import net.jbock.com.squareup.javapoet.WildcardTypeName;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 public abstract class CoercionFactory {
 
@@ -63,24 +63,26 @@ public abstract class CoercionFactory {
 
   public final Coercion getCoercion(
       FieldSpec field,
-      CoercionKind kind) {
+      CoercionKind kind,
+      CollectorInfo collectorInfo) {
     // primitive optionals get special treatment here
     ParameterSpec param = ParameterSpec.builder(paramType(), field.name).build();
     Coercion coercion = new Coercion(
         trigger,
-        Optional.ofNullable(collectorParam(field, kind)),
+        Optional.ofNullable(collectorParam(field, collectorInfo)),
         map(),
         initMapper(),
-        initCollector(field, kind),
+        initCollector(field, collectorInfo),
         jsonExpr(field.name),
         mapJsonExpr(field),
         extract(param),
         paramType(),
         field,
         kind);
+    if (!collectorInfo.isEmpty()) {
+      return coercion.asList(collectorInfo);
+    }
     switch (kind) {
-      case LIST_COMBINATION:
-        return coercion.asList();
       case OPTIONAL_COMBINATION:
         return coercion.asOptional();
       default:
@@ -90,26 +92,24 @@ public abstract class CoercionFactory {
 
   private CodeBlock initCollector(
       FieldSpec field,
-      CoercionKind kind) {
-    ParameterSpec collectorParam = collectorParam(field, kind);
+      CollectorInfo collectorInfo) {
+    ParameterSpec collectorParam = collectorParam(field, collectorInfo);
     if (collectorParam == null) {
       return CodeBlock.builder().build();
     }
-    return CodeBlock.builder()
-        .add("$T $N = $T.toList()", collectorParam.type, collectorParam, Collectors.class)
-        .build();
+    return collectorInfo.collectorInit;
 
   }
 
   private ParameterSpec collectorParam(
       FieldSpec field,
-      CoercionKind kind) {
-    if (kind != CoercionKind.LIST_COMBINATION) {
+      CollectorInfo collectorInfo) {
+    if (collectorInfo.isEmpty()) {
       return null;
     }
     return ParameterSpec.builder(ParameterizedTypeName.get(
         ClassName.get(Collector.class),
-        trigger,
+        TypeName.get(collectorInfo.collectorInput),
         WildcardTypeName.subtypeOf(Object.class),
         field.type), field.name + "Collector")
         .build();
