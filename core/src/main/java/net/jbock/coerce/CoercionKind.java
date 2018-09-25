@@ -7,7 +7,6 @@ import static net.jbock.compiler.Util.QUALIFIED_NAME;
 public enum CoercionKind {
 
   SIMPLE(false),
-  LIST_COMBINATION(true),
   OPTIONAL_COMBINATION(true);
 
   public final boolean combination;
@@ -16,8 +15,8 @@ public enum CoercionKind {
     this.combination = combination;
   }
 
-  TriggerKind of(TypeMirror mirror) {
-    return new TriggerKind(this, mirror);
+  TriggerKind of(TypeMirror mirror, CoercionProvider.CollectorInfo collectorInfo) {
+    return new TriggerKind(this, mirror, collectorInfo);
   }
 
   public boolean isCombination() {
@@ -29,8 +28,6 @@ public enum CoercionKind {
     switch (qname) {
       case "java.util.Optional":
         return CoercionKind.OPTIONAL_COMBINATION;
-      case "java.util.List":
-        return CoercionKind.LIST_COMBINATION;
       default:
         return CoercionKind.SIMPLE;
     }

@@ -1,9 +1,9 @@
 package net.jbock.compiler;
 
+import com.sun.org.apache.regexp.internal.RE;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.CoercionKind;
 import net.jbock.coerce.CoercionProvider;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.regex.Pattern;
 
 import static java.util.Collections.singletonList;
+import static net.jbock.compiler.MapperClassUtil.getCollectorClass;
 import static net.jbock.compiler.MapperClassUtil.getMapperClass;
 import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.snakeCase;
@@ -96,10 +97,12 @@ final class Param {
     PositionalParameter positionalAnnotation = sourceMethod.getAnnotation(PositionalParameter.class);
     if (positionalAnnotation != null) {
       TypeElement mapperClass = getMapperClass(sourceMethod, PositionalParameter.class);
-      return createPositional(params, sourceMethod, positionalIndex, description, mapperClass);
+      TypeElement collectorClass = getCollectorClass(sourceMethod, PositionalParameter.class);
+      return createPositional(params, sourceMethod, positionalIndex, description, mapperClass, collectorClass);
     } else {
       TypeElement mapperClass = getMapperClass(sourceMethod, Parameter.class);
-      return createNonpositional(params, sourceMethod, description, mapperClass);
+      TypeElement collectorClass = getCollectorClass(sourceMethod, Parameter.class);
+      return createNonpositional(params, sourceMethod, description, mapperClass, collectorClass);
     }
   }
 
@@ -107,7 +110,8 @@ final class Param {
       List<Param> params,
       ExecutableElement sourceMethod,
       String[] description,
-      TypeElement mapperClass) {
+      TypeElement mapperClass,
+      TypeElement collectorClass) {
     String longName = longName(params, sourceMethod);
     char shortName = shortName(params, sourceMethod);
     if (shortName == ' ' && longName == null) {
@@ -119,7 +123,8 @@ final class Param {
     checkName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
     String name = enumConstant(params, sourceMethod.getSimpleName().toString());
-    Coercion typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass);
+    boolean repeatable = parameter.repeatable();
+    Coercion typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable);
     OptionType type = optionType(typeInfo);
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
         descriptionArgumentName(type, typeInfo.required(), name) :
@@ -142,10 +147,12 @@ final class Param {
       ExecutableElement sourceMethod,
       int positionalIndex,
       String[] description,
-      TypeElement mapperClass) {
+      TypeElement mapperClass,
+      TypeElement collectorClass) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     String name = enumConstant(params, sourceMethod.getSimpleName().toString());
-    Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass);
+    boolean repeatable = parameter.repeatable();
+    Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable);
     OptionType type = optionType(coercion);
     if (type == OptionType.FLAG) {
       throw ValidationException.create(sourceMethod,
@@ -319,6 +326,9 @@ final class Param {
   }
 
   boolean required() {
+    if (paramType == OptionType.REPEATABLE) {
+      return false;
+    }
     return coercion.required();
   }
 
@@ -372,11 +382,11 @@ final class Param {
   }
 
   private static OptionType optionType(Coercion coercion) {
+    if (coercion.collectorParam().isPresent()) {
+      return OptionType.REPEATABLE;
+    }
     if (coercion.flag()) {
       return OptionType.FLAG;
-    }
-    if (coercion.kind() == CoercionKind.LIST_COMBINATION) {
-      return OptionType.REPEATABLE;
     }
     return OptionType.REGULAR;
   }

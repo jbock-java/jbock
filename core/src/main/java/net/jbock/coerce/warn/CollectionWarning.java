@@ -10,7 +10,11 @@ public class CollectionWarning extends Warning {
   @Override
   public String message(TypeMirror type) {
     for (TypeElement mirror : getTypeTree(type)) {
-      if ("java.util.Collection".equals(mirror.getQualifiedName().toString())) {
+      String qname = mirror.getQualifiedName().toString();
+      if ("java.util.List".equals(qname)) {
+        return "Either declare this argument repeatable, or use a custom mapper.";
+      }
+      if ("java.util.Collection".equals(qname)) {
         return "This collection is not supported. Use List instead.";
       }
     }

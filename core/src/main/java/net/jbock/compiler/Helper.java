@@ -269,9 +269,9 @@ final class Helper {
       if (!initMapper.isEmpty()) {
         spec.addStatement(initMapper);
       }
-      CodeBlock initCollector = param.coercion().initCollector();
-      if (!initCollector.isEmpty()) {
-        spec.addStatement(initCollector);
+      if (param.coercion().collectorParam().isPresent()) {
+        CodeBlock initCollector = param.coercion().initCollector();
+        spec.addStatement("$T $N = $L", param.coercion().collectorParam().get().type, param.coercion().collectorParam().get(), initCollector);
       }
     }
 

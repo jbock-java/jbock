@@ -232,7 +232,7 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract List<String> a();",
+        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
         "  @PositionalParameter abstract String b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
@@ -247,8 +247,8 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract List<String> a();",
-        "  @PositionalParameter abstract List<String> b();",
+        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
+        "  @PositionalParameter(repeatable = true) abstract List<String> b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -262,7 +262,7 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract List<String> a();",
+        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
         "  @PositionalParameter abstract Optional<String> b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
@@ -277,7 +277,7 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @PositionalParameter abstract List<String> a();",
+        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -467,7 +467,7 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @PositionalParameter @Parameter abstract List<String> a();",
+        "  @PositionalParameter(repeatable = true) @Parameter(repeatable = true) abstract List<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -481,8 +481,8 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter abstract List<String> a();",
-        "  @PositionalParameter abstract List<String> b();",
+        "  @Parameter(repeatable = true) abstract List<String> a();",
+        "  @PositionalParameter(repeatable = true) abstract List<String> b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -524,7 +524,7 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract List<OptionalInt> numbers();",
+        "  @Parameter(repeatable = true, mappedBy = Mapper.class) abstract List<OptionalInt> numbers();",
         "  static class Mapper implements Supplier<Function<String, OptionalInt>> {",
         "    public Function<String, OptionalInt> get() {",
         "      return s -> OptionalInt.of(1);",
@@ -578,7 +578,7 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract List<Set<Integer>> sets();",
+        "  @Parameter(repeatable = true, mappedBy = Mapper.class) abstract List<Set<Integer>> sets();",
         "  static class Mapper implements Supplier<Function<String, Set<Integer>>> {",
         "    public Function<String, Set<Integer>> get() {",
         "      return s -> Collections.singleton(Integer.valueOf(s));",

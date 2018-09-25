@@ -26,7 +26,7 @@ public final class MapperCoercion extends CoercionFactory {
   }
 
   public static Coercion create(TriggerKind tk, ParameterSpec mapperParam, TypeName mapperType, FieldSpec field) {
-    return new MapperCoercion(tk.trigger, mapperParam, mapperType).getCoercion(field, tk.kind);
+    return new MapperCoercion(tk.trigger, mapperParam, mapperType).getCoercion(field, tk.kind, null);
   }
 
   @Override

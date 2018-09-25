@@ -5,6 +5,7 @@ import net.jbock.coerce.mappers.CoercionFactory;
 import net.jbock.coerce.mappers.EnumCoercion;
 import net.jbock.coerce.mappers.MapperCoercion;
 import net.jbock.coerce.warn.WarningProvider;
+import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
@@ -17,6 +18,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.CoercionKind.SIMPLE;
@@ -41,10 +43,12 @@ public class CoercionProvider {
   public Coercion findCoercion(
       ExecutableElement sourceMethod,
       String paramName,
-      TypeElement mapperClass) {
+      TypeElement mapperClass,
+      TypeElement collectorClass,
+      boolean repeatable) {
     TypeMirror returnType = sourceMethod.getReturnType();
     try {
-      return handle(sourceMethod, paramName, mapperClass);
+      return handle(sourceMethod, paramName, mapperClass, collectorClass, repeatable);
     } catch (TmpException e) {
       String warning = WarningProvider.instance().findWarning(returnType);
       if (warning != null) {
@@ -57,19 +61,21 @@ public class CoercionProvider {
   private Coercion handle(
       ExecutableElement sourceMethod,
       String paramName,
-      TypeElement mapperClass) throws TmpException {
+      TypeElement mapperClass,
+      TypeElement collectorClass,
+      boolean repeatable) throws TmpException {
     FieldSpec field = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()),
         snakeToCamel(paramName))
         .addModifiers(FINAL)
         .build();
-    if (mapperClass != null && !"java.util.Function".equals(mapperClass.getQualifiedName().toString())) {
-      return handleMapper(sourceMethod, paramName, mapperClass, field);
+    if (mapperClass != null && !"java.util.function.Supplier".equals(mapperClass.getQualifiedName().toString())) {
+      return handleMapper(sourceMethod, paramName, mapperClass, collectorClass, field, repeatable);
     }
     TypeMirror returnType = sourceMethod.getReturnType();
     if (returnType.getKind() == TypeKind.ARRAY) {
       throw new TmpException("Arrays are not supported. Use List instead.");
     }
-    TriggerKind tk = trigger(returnType);
+    TriggerKind tk = trigger(returnType, collectorClass, repeatable);
     if (Util.asParameterized(tk.trigger) != null) {
       // wrapped type can't have type arguments
       throw TmpException.create("Bad return type");
@@ -81,14 +87,16 @@ public class CoercionProvider {
       ExecutableElement sourceMethod,
       String paramName,
       TypeElement mapperClass,
-      FieldSpec field) throws TmpException {
+      TypeElement collectorClass,
+      FieldSpec field,
+      boolean repeatable) throws TmpException {
     TypeName mapperType = TypeName.get(mapperClass.asType());
     ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
-    TriggerKind tk = trigger(sourceMethod.getReturnType());
+    TriggerKind tk = trigger(sourceMethod.getReturnType(), collectorClass, repeatable);
     MapperSkew skew = mapperSkew(tk);
     if (skew != null) {
       validateMapperClass(mapperClass, skew.mapperReturnType);
-      return AllCoercions.get(skew.baseType).getCoercion(field, tk.kind)
+      return AllCoercions.get(skew.baseType).getCoercion(field, tk.kind, null)
           .withMapper(mapperMap(mapperParam), mapperInit(skew.mapperReturnType, mapperParam, mapperType));
     } else {
       validateMapperClass(mapperClass, TypeName.get(tk.trigger));
@@ -122,13 +130,13 @@ public class CoercionProvider {
       FieldSpec field) throws TmpException {
     CoercionFactory enumCoercion = checkEnum(tk.trigger);
     if (enumCoercion != null) {
-      return enumCoercion.getCoercion(field, tk.kind);
+      return enumCoercion.getCoercion(field, tk.kind, null);
     } else {
       CoercionFactory factory = AllCoercions.get(TypeName.get(tk.trigger));
       if (factory == null) {
         throw TmpException.create("Bad return type");
       }
-      return factory.getCoercion(field, tk.kind);
+      return factory.getCoercion(field, tk.kind, tk.collectorInfo);
     }
   }
 
@@ -148,17 +156,52 @@ public class CoercionProvider {
     return EnumCoercion.create(TypeName.get(mirror));
   }
 
-  private TriggerKind trigger(TypeMirror returnType) throws TmpException {
+  private TriggerKind trigger(
+      TypeMirror returnType,
+      TypeElement collectorClass,
+      boolean repeatable) throws TmpException {
+    if (repeatable) {
+      CollectorInfo collectorInput = collectorInput(collectorClass, returnType);
+      return CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
+    }
     DeclaredType parameterized = Util.asParameterized(returnType);
     if (parameterized == null) {
       // not a combination, triggered by return type
-      return CoercionKind.SIMPLE.of(returnType);
+      return CoercionKind.SIMPLE.of(returnType, null);
     }
     CoercionKind kind = findKind(parameterized);
     if (kind.isCombination()) {
-      return kind.of(parameterized.getTypeArguments().get(0));
+      return kind.of(parameterized.getTypeArguments().get(0), null);
     }
-    return kind.of(parameterized);
+    return kind.of(parameterized, null);
+  }
+
+  public static class CollectorInfo {
+
+    public final CodeBlock collectorInit;
+
+    public final TypeMirror collectorInput;
+
+    CollectorInfo(CodeBlock collectorInit, TypeMirror collectorInput) {
+      this.collectorInit = collectorInit;
+      this.collectorInput = collectorInput;
+    }
+  }
+
+  private CollectorInfo collectorInput(TypeElement collectorClass, TypeMirror returnType) throws TmpException {
+    if (collectorClass == null || "java.util.function.Supplier".equals(collectorClass.getQualifiedName().toString())) {
+      DeclaredType parameterized = Util.asParameterized(returnType);
+      if (parameterized == null) {
+        throw new TmpException("This repeatable method must either use a custom collector, or return List");
+      }
+      if (!"java.util.List".equals(parameterized.accept(Util.QUALIFIED_NAME, null))) {
+        throw new TmpException("This repeatable method must either use a custom collector, or return List");
+      }
+      TypeMirror input = parameterized.getTypeArguments().get(0);
+      CodeBlock collectorInit = CodeBlock.builder().add("$T.toList()", Collectors.class).build();
+      return new CollectorInfo(collectorInit, input);
+    }
+    return CollectorClassValidator.findInput(collectorClass);
   }
 
   static String snakeToCamel(String s) {
