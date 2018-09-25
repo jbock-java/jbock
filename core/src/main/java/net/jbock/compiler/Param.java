@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import com.sun.org.apache.regexp.internal.RE;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.Coercion;

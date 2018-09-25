@@ -13,7 +13,7 @@ abstract class ComplicatedMapperArguments {
   @Parameter(mappedBy = Mapper.class)
   abstract Integer number();
 
-  @Parameter(mappedBy = LazyNumberMapper.class)
+  @Parameter(repeatable = true, mappedBy = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();
 
   static class LazyNumberMapper implements Supplier<Function<String, LazyNumber>> {

@@ -17,6 +17,7 @@ import static net.jbock.compiler.Constants.STRING;
 public final class MapperCoercion extends CoercionFactory {
 
   private final ParameterSpec mapperParam;
+  
   private final TypeName mapperType;
 
   private MapperCoercion(TypeMirror trigger, ParameterSpec mapperParam, TypeName mapperType) {
@@ -26,7 +27,7 @@ public final class MapperCoercion extends CoercionFactory {
   }
 
   public static Coercion create(TriggerKind tk, ParameterSpec mapperParam, TypeName mapperType, FieldSpec field) {
-    return new MapperCoercion(tk.trigger, mapperParam, mapperType).getCoercion(field, tk.kind, null);
+    return new MapperCoercion(tk.trigger, mapperParam, mapperType).getCoercion(field, tk.kind, tk.collectorInfo);
   }
 
   @Override

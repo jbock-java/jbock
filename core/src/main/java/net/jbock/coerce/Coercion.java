@@ -147,7 +147,7 @@ public final class Coercion {
     return new Coercion(trigger, collectorParam, map, initMapper, initCollector, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 
-  public Coercion asList(CoercionProvider.CollectorInfo collectorInfo) {
+  public Coercion asList(CollectorInfo collectorInfo) {
     TypeName paramType = field.type;
     CodeBlock extract = CodeBlock.builder()
         .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())

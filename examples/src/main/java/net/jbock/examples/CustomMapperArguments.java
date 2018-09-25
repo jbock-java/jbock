@@ -28,7 +28,7 @@ abstract class CustomMapperArguments {
   @Parameter(mappedBy = DateMapper.class)
   abstract Optional<Date> optDate();
 
-  @Parameter(mappedBy = DateMapper.class)
+  @Parameter(repeatable = true, mappedBy = DateMapper.class)
   abstract List<Date> dateList();
 
   @Parameter(mappedBy = CustomBigIntegerMapper.class)
@@ -49,10 +49,10 @@ abstract class CustomMapperArguments {
   @Parameter(mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
-  @PositionalParameter(mappedBy = BooleanMapper.class)
+  @PositionalParameter(repeatable = true, mappedBy = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
-  @Parameter(mappedBy = OptionalIntMapper.class)
+  @Parameter(repeatable = true, mappedBy = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
   @Parameter(mappedBy = BooleanMapper.class)

@@ -30,7 +30,7 @@ abstract class CurlArguments {
   /**
    * List<String> for repeatable arguments
    */
-  @Parameter(shortName = 'H', longName = "")
+  @Parameter(repeatable = true, shortName = 'H', longName = "")
   abstract List<String> headers();
 
   /**
@@ -42,6 +42,6 @@ abstract class CurlArguments {
   @Parameter(shortName = 'i')
   abstract boolean include();
 
-  @PositionalParameter
+  @PositionalParameter(repeatable = true)
   abstract List<String> urls();
 }

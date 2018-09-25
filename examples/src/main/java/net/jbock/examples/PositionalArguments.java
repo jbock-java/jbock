@@ -24,6 +24,6 @@ abstract class PositionalArguments {
   @PositionalParameter
   abstract Optional<String> optString();
 
-  @PositionalParameter
+  @PositionalParameter(repeatable = true)
   abstract List<String> otherTokens();
 }

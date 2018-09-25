@@ -22,7 +22,7 @@ abstract class GradleArguments {
   /**
    * the files
    */
-  @Parameter(shortName = 'f')
+  @Parameter(repeatable = true, shortName = 'f')
   abstract List<String> file();
 
   /**
@@ -40,7 +40,7 @@ abstract class GradleArguments {
   @Parameter(shortName = 'v')
   abstract boolean verbose();
 
-  @PositionalParameter
+  @PositionalParameter(repeatable = true)
   abstract List<String> otherTokens();
 
   @CommandLineArguments
@@ -53,7 +53,7 @@ abstract class GradleArguments {
   @CommandLineArguments
   static abstract class Bar {
 
-    @Parameter
+    @Parameter(repeatable = true)
     abstract List<String> bar();
   }
 }

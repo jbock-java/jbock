@@ -94,18 +94,25 @@ public class CoercionProvider {
     ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
     TriggerKind tk = trigger(sourceMethod.getReturnType(), collectorClass, repeatable);
     MapperSkew skew = mapperSkew(tk);
-    if (skew != null) {
-      validateMapperClass(mapperClass, skew.mapperReturnType);
-      return AllCoercions.get(skew.baseType).getCoercion(field, tk.kind, null)
-          .withMapper(mapperMap(mapperParam), mapperInit(skew.mapperReturnType, mapperParam, mapperType));
-    } else {
-      validateMapperClass(mapperClass, TypeName.get(tk.trigger));
-      return MapperCoercion.create(tk, mapperParam, mapperType, field);
+    try {
+      if (skew != null) {
+        validateMapperClass(mapperClass, skew.mapperReturnType);
+        return AllCoercions.get(skew.baseType).getCoercion(field, tk.kind, tk.collectorInfo)
+            .withMapper(mapperMap(mapperParam), mapperInit(skew.mapperReturnType, mapperParam, mapperType));
+      } else {
+        validateMapperClass(mapperClass, TypeName.get(tk.trigger));
+        return MapperCoercion.create(tk, mapperParam, mapperType, field);
+      }
+    } catch (MapperClassValidator.MapperValidatorException e) {
+      throw TmpException.create(e.getMessage());
     }
   }
 
   private MapperSkew mapperSkew(TriggerKind tk) {
     if (tk.kind != SIMPLE) {
+      return null;
+    }
+    if (!tk.collectorInfo.collectorInit.isEmpty()) {
       return null;
     }
     TypeName input = TypeName.get(tk.trigger);
@@ -130,7 +137,7 @@ public class CoercionProvider {
       FieldSpec field) throws TmpException {
     CoercionFactory enumCoercion = checkEnum(tk.trigger);
     if (enumCoercion != null) {
-      return enumCoercion.getCoercion(field, tk.kind, null);
+      return enumCoercion.getCoercion(field, tk.kind, CollectorInfo.empty());
     } else {
       CoercionFactory factory = AllCoercions.get(TypeName.get(tk.trigger));
       if (factory == null) {
@@ -167,25 +174,13 @@ public class CoercionProvider {
     DeclaredType parameterized = Util.asParameterized(returnType);
     if (parameterized == null) {
       // not a combination, triggered by return type
-      return CoercionKind.SIMPLE.of(returnType, null);
+      return CoercionKind.SIMPLE.of(returnType, CollectorInfo.empty());
     }
     CoercionKind kind = findKind(parameterized);
     if (kind.isCombination()) {
-      return kind.of(parameterized.getTypeArguments().get(0), null);
+      return kind.of(parameterized.getTypeArguments().get(0), CollectorInfo.empty());
     }
-    return kind.of(parameterized, null);
-  }
-
-  public static class CollectorInfo {
-
-    public final CodeBlock collectorInit;
-
-    public final TypeMirror collectorInput;
-
-    CollectorInfo(CodeBlock collectorInit, TypeMirror collectorInput) {
-      this.collectorInit = collectorInit;
-      this.collectorInput = collectorInput;
-    }
+    return kind.of(parameterized, CollectorInfo.empty());
   }
 
   private CollectorInfo collectorInput(TypeElement collectorClass, TypeMirror returnType) throws TmpException {

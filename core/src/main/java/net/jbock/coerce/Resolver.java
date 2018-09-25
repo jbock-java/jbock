@@ -11,8 +11,8 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 import static java.util.Collections.emptyMap;
 import static net.jbock.compiler.HierarchyUtil.getTypeTree;
@@ -131,16 +131,8 @@ class Resolver {
     return m != null && predicate.test(m);
   }
 
-  TypeMirror get(String key) {
-    return results.get(key);
-  }
-
-  TypeMirror getOrElseThrow(String key, Supplier<? extends RuntimeException> exception) {
-    TypeMirror m = get(key);
-    if (m == null) {
-      throw exception.get();
-    }
-    return m;
+  Optional<TypeMirror> get(String key) {
+    return Optional.ofNullable(results.get(key));
   }
 
   @Override

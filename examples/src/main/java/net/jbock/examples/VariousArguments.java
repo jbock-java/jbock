@@ -25,7 +25,7 @@ abstract class VariousArguments {
   @Parameter
   abstract BigDecimal bigDecimal();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<BigDecimal> bigDecimalList();
 
   @Parameter
@@ -37,7 +37,7 @@ abstract class VariousArguments {
   @Parameter
   abstract BigInteger bigInteger();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<BigInteger> bigIntegerList();
 
   @Parameter
@@ -49,7 +49,7 @@ abstract class VariousArguments {
   @Parameter
   abstract File file();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<File> fileList();
 
   @Parameter
@@ -61,7 +61,7 @@ abstract class VariousArguments {
   @Parameter
   abstract Path path();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<Path> pathList();
 
   @Parameter
@@ -73,7 +73,7 @@ abstract class VariousArguments {
   @Parameter
   abstract LocalDate localDate();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<LocalDate> localDateList();
 
   @Parameter
@@ -85,7 +85,7 @@ abstract class VariousArguments {
   @Parameter
   abstract LocalDateTime localDateTime();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<LocalDateTime> localDateTimeList();
 
   @Parameter
@@ -97,7 +97,7 @@ abstract class VariousArguments {
   @Parameter
   abstract OffsetDateTime offsetDateTime();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<OffsetDateTime> offsetDateTimeList();
 
   @Parameter
@@ -109,7 +109,7 @@ abstract class VariousArguments {
   @Parameter
   abstract ZonedDateTime zonedDateTime();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<ZonedDateTime> zonedDateTimeList();
 
   @Parameter
@@ -121,7 +121,7 @@ abstract class VariousArguments {
   @Parameter
   abstract URI uri();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<URI> uriList();
 
   @Parameter
@@ -133,7 +133,7 @@ abstract class VariousArguments {
   @Parameter
   abstract Charset charset();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<Charset> charsetList();
 
   @Parameter
@@ -145,7 +145,7 @@ abstract class VariousArguments {
   @Parameter
   abstract Pattern pattern();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<Pattern> patternList();
 
   @Parameter
@@ -157,7 +157,7 @@ abstract class VariousArguments {
   @Parameter
   abstract Instant instant();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<Instant> instantList();
 
   @Parameter

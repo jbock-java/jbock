@@ -15,7 +15,7 @@ public enum CoercionKind {
     this.combination = combination;
   }
 
-  TriggerKind of(TypeMirror mirror, CoercionProvider.CollectorInfo collectorInfo) {
+  TriggerKind of(TypeMirror mirror, CollectorInfo collectorInfo) {
     return new TriggerKind(this, mirror, collectorInfo);
   }
 

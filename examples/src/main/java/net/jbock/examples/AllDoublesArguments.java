@@ -11,10 +11,10 @@ import java.util.OptionalDouble;
 @CommandLineArguments
 abstract class AllDoublesArguments {
 
-  @PositionalParameter
+  @PositionalParameter(repeatable = true)
   abstract List<Double> positional();
 
-  @Parameter(shortName = 'i')
+  @Parameter(repeatable = true, shortName = 'i')
   abstract List<Double> listOfDoubles();
 
   @Parameter(longName = "opt")

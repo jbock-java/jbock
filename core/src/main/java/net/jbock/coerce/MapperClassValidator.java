@@ -18,7 +18,7 @@ import static java.util.Collections.singletonMap;
 
 final class MapperClassValidator {
 
-  static void validateMapperClass(TypeElement mapperClass, TypeName trigger) {
+  static void validateMapperClass(TypeElement mapperClass, TypeName trigger) throws MapperValidatorException {
     if (mapperClass.getNestingKind() == NestingKind.MEMBER && !mapperClass.getModifiers().contains(Modifier.STATIC)) {
       throw ValidationException.create(mapperClass, "The inner class must be static");
     }
@@ -52,17 +52,27 @@ final class MapperClassValidator {
   /* Does the mapper implement Supplier<Function<String, triggerClass>>?
    * There can be a situation where this is not very easy. See ProcessorTest.
    */
-  private static void checkTree(TypeElement mapperClass, TypeName trigger) {
+  private static void checkTree(TypeElement mapperClass, TypeName trigger) throws MapperValidatorException {
     Resolver supplier = Resolver.resolve("java.util.function.Supplier", singletonMap(0, "T"), mapperClass.asType());
-    TypeMirror suppliedType = supplier.getOrElseThrow("T",
-        () -> ValidationException.create(mapperClass, String.format("The class must implement Supplier<Function<String, %s>>", trigger)));
+    TypeMirror suppliedType = supplier.get("T").orElseThrow(
+        () -> MapperValidatorException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", trigger)));
     Map<Integer, String> functionTypeArgs = new LinkedHashMap<>();
     functionTypeArgs.put(0, "T");
     functionTypeArgs.put(1, "R");
     Resolver function = Resolver.resolve("java.util.function.Function", functionTypeArgs, suppliedType);
     if (!function.satisfies("T", m -> Util.equalsType(m, "java.lang.String")) ||
         !function.satisfies("R", m -> trigger.equals(TypeName.get(m)))) {
-      throw ValidationException.create(mapperClass, String.format("The class must implement Supplier<Function<String, %s>>", trigger));
+      throw MapperValidatorException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", trigger));
+    }
+  }
+
+  static class MapperValidatorException extends Exception {
+    private MapperValidatorException(String message) {
+      super(message);
+    }
+
+    private static MapperValidatorException create(String message) {
+      return new MapperValidatorException(message);
     }
   }
 }

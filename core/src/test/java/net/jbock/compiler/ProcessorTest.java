@@ -686,7 +686,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class must implement Supplier<Function<String, java.lang.Integer>>");
+        .withErrorContaining("must implement Supplier<Function<String, java.lang.Integer>>");
   }
 
   @Test
@@ -705,7 +705,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class must implement Supplier<Function<String, java.lang.Integer>>");
+        .withErrorContaining("must implement Supplier<Function<String, java.lang.Integer>>");
   }
 
   @Test
@@ -801,7 +801,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class must implement Supplier<Function<String, java.lang.Integer>>");
+        .withErrorContaining("must implement Supplier<Function<String, java.lang.Integer>>");
   }
 
   @Test
@@ -820,7 +820,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class must implement Supplier<Function<String, java.lang.Integer>>");
+        .withErrorContaining("must implement Supplier<Function<String, java.lang.Integer>>");
   }
 
   private List<String> withImports(String... lines) {

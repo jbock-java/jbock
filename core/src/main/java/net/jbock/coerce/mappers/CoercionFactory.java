@@ -2,7 +2,7 @@ package net.jbock.coerce.mappers;
 
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionKind;
-import net.jbock.coerce.CoercionProvider.CollectorInfo;
+import net.jbock.coerce.CollectorInfo;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
@@ -79,7 +79,7 @@ public abstract class CoercionFactory {
         paramType(),
         field,
         kind);
-    if (collectorInfo != null) {
+    if (!collectorInfo.isEmpty()) {
       return coercion.asList(collectorInfo);
     }
     switch (kind) {
@@ -104,7 +104,7 @@ public abstract class CoercionFactory {
   private ParameterSpec collectorParam(
       FieldSpec field,
       CollectorInfo collectorInfo) {
-    if (collectorInfo == null) {
+    if (collectorInfo.isEmpty()) {
       return null;
     }
     return ParameterSpec.builder(ParameterizedTypeName.get(

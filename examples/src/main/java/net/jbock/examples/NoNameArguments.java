@@ -14,7 +14,7 @@ abstract class NoNameArguments {
   @Parameter
   abstract Optional<String> message();
 
-  @Parameter
+  @Parameter(repeatable = true)
   abstract List<String> file();
 
   @Parameter(shortName = 'v')
