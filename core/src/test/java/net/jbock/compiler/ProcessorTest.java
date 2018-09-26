@@ -845,6 +845,7 @@ class ProcessorTest {
     List<String> header = Arrays.asList(
         "package test;",
         "",
+        "import java.math.BigInteger;",
         "import java.util.List;",
         "import java.util.Set;",
         "import java.util.Collections;",
