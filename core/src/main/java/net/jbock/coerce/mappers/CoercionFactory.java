@@ -1,8 +1,8 @@
 package net.jbock.coerce.mappers;
 
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.CoercionKind;
 import net.jbock.coerce.CollectorInfo;
+import net.jbock.coerce.TriggerKind;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
@@ -63,26 +63,25 @@ public abstract class CoercionFactory {
 
   public final Coercion getCoercion(
       FieldSpec field,
-      CoercionKind kind,
-      CollectorInfo collectorInfo) {
+      TriggerKind tk) {
     // primitive optionals get special treatment here
     ParameterSpec param = ParameterSpec.builder(paramType(), field.name).build();
     Coercion coercion = new Coercion(
         trigger,
-        Optional.ofNullable(collectorParam(field, collectorInfo)),
+        Optional.ofNullable(collectorParam(field, tk.collectorInfo)),
         map(),
         initMapper(),
-        initCollector(field, collectorInfo),
+        initCollector(field, tk.collectorInfo),
         jsonExpr(field.name),
         mapJsonExpr(field),
         extract(param),
         paramType(),
         field,
-        kind);
-    if (!collectorInfo.isEmpty()) {
-      return coercion.asList(collectorInfo);
+        tk.kind);
+    if (!tk.collectorInfo.isEmpty()) {
+      return coercion.withCollector(tk.collectorInfo);
     }
-    switch (kind) {
+    switch (tk.kind) {
       case OPTIONAL_COMBINATION:
         return coercion.asOptional();
       default:

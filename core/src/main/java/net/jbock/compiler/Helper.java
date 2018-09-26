@@ -265,13 +265,16 @@ final class Helper {
     });
 
     for (Param param : context.parameters) {
+      if (param.coercion().skipMapCollect()) {
+        continue;
+      }
       CodeBlock initMapper = param.coercion().initMapper();
       if (!initMapper.isEmpty()) {
         spec.addStatement(initMapper);
       }
-      if (param.coercion().collectorParam().isPresent()) {
-        CodeBlock initCollector = param.coercion().initCollector();
-        spec.addStatement("$T $N = $L", param.coercion().collectorParam().get().type, param.coercion().collectorParam().get(), initCollector);
+      if (param.coercion().collectorParam().isPresent() && !param.coercion().isDefaultCollector()) {
+        ParameterSpec collectorParam = param.coercion().collectorParam().get();
+        spec.addStatement("$T $N = $L", collectorParam.type, collectorParam, param.coercion().initCollector());
       }
     }
 
@@ -287,9 +290,12 @@ final class Helper {
   private CodeBlock extractExpression(Param param) {
     CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
     if (param.paramType == REPEATABLE) {
-      builder.add(".stream()");
-      builder.add("$L", param.coercion().map());
-      builder.add(".collect($N)", param.coercion().collectorParam().get());
+      if (!param.coercion().skipMapCollect()) {
+        CodeBlock mapExpr = param.coercion().map();
+        builder.add(".stream()");
+        builder.add("$L", mapExpr);
+        builder.add(".collect($L)", param.coercion().collectExpr());
+      }
     } else {
       builder.add("$L", param.coercion().map());
     }

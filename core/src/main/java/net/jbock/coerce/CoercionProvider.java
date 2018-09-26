@@ -73,12 +73,13 @@ public class CoercionProvider {
     }
     TypeMirror returnType = sourceMethod.getReturnType();
     if (returnType.getKind() == TypeKind.ARRAY) {
-      throw new TmpException("Arrays are not supported. Use List instead.");
+      // there's no default mapper for array
+      throw new TmpException("Either switch to List and declare this parameter repeatable, or use a custom mapper.");
     }
     TriggerKind tk = trigger(returnType, collectorClass, repeatable);
     if (Util.asParameterized(tk.trigger) != null) {
-      // wrapped type can't have type arguments
-      throw TmpException.create("Bad return type");
+      // none of the default mappers can handle typevars
+      throw TmpException.create("Unknown parameter type. Use a custom mapper.");
     }
     return handleDefault(tk, field);
   }
@@ -97,7 +98,7 @@ public class CoercionProvider {
     try {
       if (skew != null) {
         validateMapperClass(mapperClass, skew.mapperReturnType);
-        return AllCoercions.get(skew.baseType).getCoercion(field, tk.kind, tk.collectorInfo)
+        return AllCoercions.get(skew.baseType).getCoercion(field, tk)
             .withMapper(mapperMap(mapperParam), mapperInit(skew.mapperReturnType, mapperParam, mapperType));
       } else {
         validateMapperClass(mapperClass, TypeName.get(tk.trigger));
@@ -137,13 +138,13 @@ public class CoercionProvider {
       FieldSpec field) throws TmpException {
     CoercionFactory enumCoercion = checkEnum(tk.trigger);
     if (enumCoercion != null) {
-      return enumCoercion.getCoercion(field, tk.kind, CollectorInfo.empty());
+      return enumCoercion.getCoercion(field, tk);
     } else {
       CoercionFactory factory = AllCoercions.get(TypeName.get(tk.trigger));
       if (factory == null) {
         throw TmpException.create("Bad return type");
       }
-      return factory.getCoercion(field, tk.kind, tk.collectorInfo);
+      return factory.getCoercion(field, tk);
     }
   }
 
@@ -193,8 +194,7 @@ public class CoercionProvider {
         throw new TmpException("This repeatable method must either use a custom collector, or return List");
       }
       TypeMirror input = parameterized.getTypeArguments().get(0);
-      CodeBlock collectorInit = CodeBlock.builder().add("$T.toList()", Collectors.class).build();
-      return new CollectorInfo(collectorInit, input);
+      return CollectorInfo.createWithStandardCollectorInit(input);
     }
     return CollectorClassValidator.findInput(collectorClass);
   }

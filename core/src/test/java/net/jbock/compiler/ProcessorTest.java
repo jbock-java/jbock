@@ -727,6 +727,24 @@ class ProcessorTest {
   }
 
   @Test
+  void mapperValidNestedTypevars() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @Parameter(mappedBy = Mapper.class) abstract Supplier<Optional<String>> string();",
+        "  static class Mapper implements Supplier<Function<String, Supplier<Optional<String>>>> {",
+        "    public Function<String, Supplier<Optional<String>>> get() {",
+        "      return s -> () -> Optional.of(s);",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void mapperValidStringFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",

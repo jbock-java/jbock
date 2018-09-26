@@ -135,7 +135,7 @@ public final class Coercion {
     return kind == CoercionKind.SIMPLE;
   }
 
-  public Coercion withMapper(CodeBlock map, CodeBlock initMapper) {
+  Coercion withMapper(CodeBlock map, CodeBlock initMapper) {
     return new Coercion(trigger, collectorParam, map, initMapper, initCollector, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 
@@ -147,7 +147,7 @@ public final class Coercion {
     return new Coercion(trigger, collectorParam, map, initMapper, initCollector, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
   }
 
-  public Coercion asList(CollectorInfo collectorInfo) {
+  public Coercion withCollector(CollectorInfo collectorInfo) {
     TypeName paramType = field.type;
     CodeBlock extract = CodeBlock.builder()
         .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())
@@ -162,5 +162,20 @@ public final class Coercion {
 
   public Optional<ParameterSpec> collectorParam() {
     return collectorParam;
+  }
+
+  public CodeBlock collectExpr() {
+    if (isDefaultCollector()) {
+      return CollectorInfo.standardCollectorInit();
+    }
+    return CodeBlock.builder().add("$N", collectorParam().get()).build();
+  }
+
+  public boolean skipMapCollect() {
+    return map.isEmpty() && isDefaultCollector();
+  }
+
+  public boolean isDefaultCollector() {
+    return initCollector.equals(CollectorInfo.standardCollectorInit());
   }
 }
