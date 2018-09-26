@@ -5,7 +5,6 @@ import net.jbock.coerce.mappers.CoercionFactory;
 import net.jbock.coerce.mappers.EnumCoercion;
 import net.jbock.coerce.mappers.MapperCoercion;
 import net.jbock.coerce.warn.WarningProvider;
-import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
@@ -18,7 +17,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.CoercionKind.SIMPLE;
@@ -77,10 +75,6 @@ public class CoercionProvider {
       throw new TmpException("Either switch to List and declare this parameter repeatable, or use a custom mapper.");
     }
     TriggerKind tk = trigger(returnType, collectorClass, repeatable);
-    if (Util.asParameterized(tk.trigger) != null) {
-      // none of the default mappers can handle typevars
-      throw TmpException.create("Unknown parameter type. Use a custom mapper.");
-    }
     return handleDefault(tk, field);
   }
 

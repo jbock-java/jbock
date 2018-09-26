@@ -841,7 +841,7 @@ class ProcessorTest {
         .withErrorContaining("must implement Supplier<Function<String, java.lang.Integer>>");
   }
 
-  private List<String> withImports(String... lines) {
+  static List<String> withImports(String... lines) {
     List<String> header = Arrays.asList(
         "package test;",
         "",
@@ -852,6 +852,8 @@ class ProcessorTest {
         "import java.util.OptionalInt;",
         "import java.util.function.Function;",
         "import java.util.function.Supplier;",
+        "import java.util.stream.Collector;",
+        "import java.util.stream.Collectors;",
         "",
         "import net.jbock.CommandLineArguments;",
         "import net.jbock.PositionalParameter;",
