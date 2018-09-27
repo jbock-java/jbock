@@ -22,7 +22,7 @@ abstract class CustomCollectorArguments {
       repeatable = true,
       shortName = 'M',
       mappedBy = CustomBigIntegerMapper.class,
-      collectedBy = MyBigIntegerCollector.class)
+      collectedBy = ToSetCollector.class)
   abstract Set<BigInteger> bigIntegers();
 
   static class MyStringCollector implements Supplier<Collector<String, ?, Set<String>>> {
@@ -48,4 +48,13 @@ abstract class CustomCollectorArguments {
       return Collectors.toSet();
     }
   }
+
+  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {
+
+    @Override
+    public Collector<E, ?, Set<E>> get() {
+      return Collectors.toSet();
+    }
+  }
+
 }
