@@ -17,4 +17,8 @@ class CollectorClassValidator {
     return CollectorInfo.create(collectorInput, collectorClass);
     // todo more validations
   }
+
+  static TypeMirror findCollectorInterface() {
+    return null;
+  }
 }

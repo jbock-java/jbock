@@ -1,6 +1,5 @@
 package net.jbock.coerce;
 
-import com.google.common.collect.ImmutableSet;
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
 import org.junit.runners.model.Statement;
@@ -11,6 +10,7 @@ import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import java.util.Collections;
 import java.util.Set;
 
 import static com.google.common.base.Preconditions.checkState;
@@ -28,29 +28,23 @@ final class EvaluatingProcessor extends AbstractProcessor {
   }
 
   static class Builder {
-    private final String name;
-    private String[] source;
+    private final String[] source;
 
-    Builder(String name) {
-      this.name = name;
-    }
-
-    Builder source(String... source) {
+    private Builder(String[] source) {
       this.source = source;
-      return this;
     }
 
     void run(ContextRunnable base) {
       EvaluatingProcessor evaluatingProcessor = new EvaluatingProcessor(base);
       Compilation compilation = javac().withProcessors(evaluatingProcessor).compile(
-          JavaFileObjects.forSourceLines(name, source));
+          JavaFileObjects.forSourceLines("Dummy", source));
       checkState(compilation.status().equals(SUCCESS), compilation);
       evaluatingProcessor.throwIfStatementThrew();
     }
   }
 
-  static Builder builder(String name) {
-    return new Builder(name);
+  static Builder source(String... source) {
+    return new Builder(source);
   }
 
   private EvaluatingProcessor(ContextRunnable base) {
@@ -64,7 +58,7 @@ final class EvaluatingProcessor extends AbstractProcessor {
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
-    return ImmutableSet.of("*");
+    return Collections.singleton("*");
   }
 
   @Override
