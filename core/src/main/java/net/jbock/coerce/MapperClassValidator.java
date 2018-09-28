@@ -19,14 +19,19 @@ import static java.util.Collections.singletonMap;
 final class MapperClassValidator {
 
   static void validateMapperClass(TypeElement mapperClass, TypeName trigger) throws MapperValidatorException {
+    commonChecks(mapperClass);
+    if (!mapperClass.getTypeParameters().isEmpty()) {
+      throw ValidationException.create(mapperClass, "The class may not have type parameters");
+    }
+    checkTree(mapperClass, trigger);
+  }
+
+  static void commonChecks(TypeElement mapperClass) {
     if (mapperClass.getNestingKind() == NestingKind.MEMBER && !mapperClass.getModifiers().contains(Modifier.STATIC)) {
       throw ValidationException.create(mapperClass, "The inner class must be static");
     }
     if (mapperClass.getModifiers().contains(Modifier.PRIVATE)) {
       throw ValidationException.create(mapperClass, "The class may not be private");
-    }
-    if (!mapperClass.getTypeParameters().isEmpty()) {
-      throw ValidationException.create(mapperClass, "The class may not have type parameters");
     }
     List<ExecutableElement> constructors = ElementFilter.constructorsIn(mapperClass.getEnclosedElements());
     if (!constructors.isEmpty()) {
@@ -46,7 +51,6 @@ final class MapperClassValidator {
         throw ValidationException.create(mapperClass, "The class must have a default constructor");
       }
     }
-    checkTree(mapperClass, trigger);
   }
 
   /* Does the mapper implement Supplier<Function<String, triggerClass>>?
