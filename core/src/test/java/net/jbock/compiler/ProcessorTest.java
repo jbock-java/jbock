@@ -608,7 +608,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class must have a package visible constructor");
+        .withErrorContaining("must have a package visible constructor");
   }
 
   @Test
@@ -628,7 +628,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class must have a default constructor");
+        .withErrorContaining("must have a default constructor");
   }
 
   @Test
@@ -648,7 +648,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The constructor may not declare any exceptions");
+        .withErrorContaining("may not declare any exceptions");
   }
 
   @Test
@@ -667,7 +667,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The inner class must be static");
+        .withErrorContaining("class must be static");
   }
 
   @Test

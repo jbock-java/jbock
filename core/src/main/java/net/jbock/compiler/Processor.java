@@ -67,6 +67,7 @@ public final class Processor extends AbstractProcessor {
     }
     for (TypeElement sourceType : getAnnotatedClasses(env)) {
       try {
+        TypeTool.setInstance(processingEnv.getTypeUtils());
         List<Param> parameters = validate(sourceType);
         if (parameters.isEmpty()) {
           processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
@@ -91,6 +92,8 @@ public final class Processor extends AbstractProcessor {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
         handleException(sourceType, e);
+      } finally {
+        TypeTool.unset();
       }
     }
     return false;

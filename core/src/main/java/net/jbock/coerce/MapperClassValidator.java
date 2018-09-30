@@ -19,19 +19,22 @@ import static java.util.Collections.singletonMap;
 final class MapperClassValidator {
 
   static void validateMapperClass(TypeElement mapperClass, TypeName trigger) throws MapperValidatorException {
-    commonChecks(mapperClass);
+    commonChecks(mapperClass, "mapper");
     if (!mapperClass.getTypeParameters().isEmpty()) {
-      throw ValidationException.create(mapperClass, "The class may not have type parameters");
+      throw ValidationException.create(mapperClass,
+          "The mapper class may not have type parameters");
     }
     checkTree(mapperClass, trigger);
   }
 
-  static void commonChecks(TypeElement mapperClass) {
+  static void commonChecks(TypeElement mapperClass, String name) {
     if (mapperClass.getNestingKind() == NestingKind.MEMBER && !mapperClass.getModifiers().contains(Modifier.STATIC)) {
-      throw ValidationException.create(mapperClass, "The inner class must be static");
+      throw ValidationException.create(mapperClass,
+          String.format("The nested %s class must be static", name));
     }
     if (mapperClass.getModifiers().contains(Modifier.PRIVATE)) {
-      throw ValidationException.create(mapperClass, "The class may not be private");
+      throw ValidationException.create(mapperClass,
+          String.format("The %s class may not be private", name));
     }
     List<ExecutableElement> constructors = ElementFilter.constructorsIn(mapperClass.getEnclosedElements());
     if (!constructors.isEmpty()) {
@@ -39,16 +42,19 @@ final class MapperClassValidator {
       for (ExecutableElement constructor : constructors) {
         if (constructor.getParameters().isEmpty()) {
           if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
-            throw ValidationException.create(mapperClass, "The class must have a package visible constructor");
+            throw ValidationException.create(mapperClass,
+                String.format("The %s class must have a package visible constructor", name));
           }
           if (!constructor.getThrownTypes().isEmpty()) {
-            throw ValidationException.create(mapperClass, "The constructor may not declare any exceptions");
+            throw ValidationException.create(mapperClass,
+                String.format("The %s constructor may not declare any exceptions", name));
           }
           constructorFound = true;
         }
       }
       if (!constructorFound) {
-        throw ValidationException.create(mapperClass, "The class must have a default constructor");
+        throw ValidationException.create(mapperClass,
+            String.format("The %s class must have a default constructor", name));
       }
     }
   }

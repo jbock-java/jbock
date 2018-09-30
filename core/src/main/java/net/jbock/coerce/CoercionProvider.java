@@ -10,6 +10,7 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Util;
+import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -44,6 +45,10 @@ public class CoercionProvider {
       TypeElement mapperClass,
       TypeElement collectorClass,
       boolean repeatable) {
+    if (collectorClass != null && !repeatable) {
+      throw ValidationException.create(sourceMethod,
+          "The parameter must be declared repeatable in order to have a collector.");
+    }
     TypeMirror returnType = sourceMethod.getReturnType();
     try {
       return handle(sourceMethod, paramName, mapperClass, collectorClass, repeatable);
@@ -66,8 +71,12 @@ public class CoercionProvider {
         snakeToCamel(paramName))
         .addModifiers(FINAL)
         .build();
-    if (mapperClass != null && !"java.util.function.Supplier".equals(mapperClass.getQualifiedName().toString())) {
-      return handleMapper(sourceMethod, paramName, mapperClass, collectorClass, field, repeatable);
+    boolean hasMapper = mapperClass != null;
+    if (repeatable && hasMapper) {
+      return handleRepeatable(sourceMethod, paramName, mapperClass, collectorClass, field);
+    }
+    if (hasMapper) {
+      return handleMapper(sourceMethod, paramName, mapperClass, collectorClass, field);
     }
     TypeMirror returnType = sourceMethod.getReturnType();
     if (returnType.getKind() == TypeKind.ARRAY) {
@@ -78,16 +87,34 @@ public class CoercionProvider {
     return handleDefault(tk, field);
   }
 
+  private Coercion handleRepeatable(
+      ExecutableElement sourceMethod,
+      String paramName,
+      TypeElement mapperClass,
+      TypeElement collectorClass,
+      FieldSpec field) throws TmpException {
+    TypeMirror returnType = sourceMethod.getReturnType();
+    CollectorInfo collectorInput = collectorInput(collectorClass, returnType);
+    TriggerKind tk = CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
+    TypeName mapperType = TypeName.get(mapperClass.asType());
+    ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
+    try {
+      validateMapperClass(mapperClass, TypeName.get(tk.trigger));
+      return MapperCoercion.create(tk, mapperParam, mapperType, field);
+    } catch (MapperClassValidator.MapperValidatorException e) {
+      throw TmpException.create(e.getMessage());
+    }
+  }
+
   private Coercion handleMapper(
       ExecutableElement sourceMethod,
       String paramName,
       TypeElement mapperClass,
       TypeElement collectorClass,
-      FieldSpec field,
-      boolean repeatable) throws TmpException {
+      FieldSpec field) throws TmpException {
     TypeName mapperType = TypeName.get(mapperClass.asType());
     ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
-    TriggerKind tk = trigger(sourceMethod.getReturnType(), collectorClass, repeatable);
+    TriggerKind tk = trigger(sourceMethod.getReturnType(), collectorClass, false);
     MapperSkew skew = mapperSkew(tk);
     try {
       if (skew != null) {

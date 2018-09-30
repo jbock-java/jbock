@@ -14,6 +14,25 @@ import static net.jbock.compiler.ProcessorTest.withImports;
 class CollectorTest {
 
   @Test
+  void notRepeatable() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @Parameter(collectedBy = MyCollector.class) abstract Set<String> strings();",
+        "  static class MyCollector implements Supplier<Collector<String, ?, Set<String>>> {",
+        "    public Collector<String, ?, Set<String>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("must be declared repeatable");
+  }
+
+  @Test
   void validCollector() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
