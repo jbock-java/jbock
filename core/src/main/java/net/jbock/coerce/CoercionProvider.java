@@ -102,8 +102,8 @@ public class CoercionProvider {
     TypeName mapperType = TypeName.get(mapperClass.asType());
     ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
     try {
-      validateMapperClass(mapperClass, TypeName.get(tk.trigger));
-      return MapperCoercion.create(tk, mapperParam, mapperType, field);
+      validateMapperClass(mapperClass, tk.trigger);
+      return MapperCoercion.create(tk, mapperParam, mapperClass.asType(), field);
     } catch (MapperClassValidator.MapperValidatorException e) {
       throw TmpException.create(e.getMessage());
     }
@@ -121,13 +121,13 @@ public class CoercionProvider {
     MapperSkew skew = mapperSkew(tk);
     try {
       if (skew != null) {
-        validateMapperClass(mapperClass, TypeName.get(skew.mapperReturnType));
-        CoercionFactory coercionFactory = AllCoercions.instance().get(skew.baseType);
+        validateMapperClass(mapperClass, skew.mapperReturnType);
+        CoercionFactory coercionFactory = AllCoercions.get(skew.baseType);
         return coercionFactory.getCoercion(field, tk)
-            .withMapper(mapperMap(mapperParam), mapperInit(skew.mapperReturnType, mapperParam, mapperType));
+            .withMapper(mapperMap(mapperParam), mapperInit(skew.mapperReturnType, mapperParam, mapperClass.asType()));
       } else {
-        validateMapperClass(mapperClass, TypeName.get(tk.trigger));
-        return MapperCoercion.create(tk, mapperParam, mapperType, field);
+        validateMapperClass(mapperClass, tk.trigger);
+        return MapperCoercion.create(tk, mapperParam, mapperClass.asType(), field);
       }
     } catch (MapperClassValidator.MapperValidatorException e) {
       throw TmpException.create(e.getMessage());
@@ -142,7 +142,7 @@ public class CoercionProvider {
       return null;
     }
     if (tk.trigger.getKind().isPrimitive()) {
-      if (!AllCoercions.instance().containsKey(tk.trigger)) {
+      if (!AllCoercions.containsKey(tk.trigger)) {
         return null;
       }
       return new MapperSkew(TypeTool.get().box(tk.trigger), TypeTool.get().box(tk.trigger));
@@ -171,7 +171,7 @@ public class CoercionProvider {
     if (enumCoercion != null) {
       return enumCoercion.getCoercion(field, tk);
     } else {
-      CoercionFactory factory = AllCoercions.instance().get(tk.trigger);
+      CoercionFactory factory = AllCoercions.get(tk.trigger);
       if (factory == null) {
         throw TmpException.create("Bad return type");
       }

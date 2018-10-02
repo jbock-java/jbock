@@ -6,6 +6,7 @@ import net.jbock.PositionalParameter;
 
 import java.math.BigInteger;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -54,6 +55,9 @@ abstract class CustomMapperArguments {
 
   @Parameter(repeatable = true, mappedBy = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
+
+  @Parameter(mappedBy = ListWrapperMapper.class)
+  abstract Optional<List<String>> listWrapper();
 
   @Parameter(mappedBy = BooleanMapper.class)
   abstract boolean notFlag(); // if it has a mapper, it's not a flag
@@ -113,6 +117,17 @@ abstract class CustomMapperArguments {
     @Override
     public Function<String, Boolean> get() {
       return Boolean::valueOf;
+    }
+  }
+
+  interface ListWrapperMapperInterface<E> extends Supplier<Function<E, List<E>>> {
+  }
+
+  static class ListWrapperMapper<E> implements ListWrapperMapperInterface<E> {
+
+    @Override
+    public Function<E, List<E>> get() {
+      return Collections::singletonList;
     }
   }
 

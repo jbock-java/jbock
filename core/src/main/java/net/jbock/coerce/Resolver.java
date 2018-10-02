@@ -7,6 +7,7 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -124,6 +125,10 @@ class Resolver {
     public String toString() {
       return String.format("%s extends %s", baseClass, extensionClass);
     }
+  }
+
+  public Map<String, TypeMirror> asMap() {
+    return Collections.unmodifiableMap(results);
   }
 
   boolean satisfies(String key, Predicate<TypeMirror> predicate) {

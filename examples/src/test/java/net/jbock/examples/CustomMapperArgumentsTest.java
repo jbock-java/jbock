@@ -12,6 +12,7 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import static java.util.Collections.singleton;
+import static java.util.Collections.singletonList;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -34,6 +35,7 @@ class CustomMapperArgumentsTest {
         "--optionalInts", "1",
         "--optionalInts", "",
         "--optionalInts", "3",
+        "--listWrapper", "foo",
         "--optionalInts", "4",
         "--enumSet", "FOO",
         "true", "false", "true",
@@ -50,6 +52,7 @@ class CustomMapperArgumentsTest {
     assertEquals(Arrays.asList(OptionalInt.of(1), OptionalInt.empty(), OptionalInt.of(3), OptionalInt.of(4)),
         parsed.optionalInts());
     assertEquals(singleton(MyEnum.FOO), parsed.enumSet().orElseThrow(AssertionFailedError::new));
+    assertEquals(Optional.of(singletonList("foo")), parsed.listWrapper());
     assertArrayEquals(new String[]{"A"}, parsed.stringArray().orElseThrow(AssertionFailedError::new));
     assertTrue(parsed.notFlag());
   }
@@ -95,6 +98,8 @@ class CustomMapperArgumentsTest {
         "  --enumSet <enum_set>",
         "",
         "  --optionalInts <optional_ints...>",
+        "",
+        "  --listWrapper <list_wrapper>",
         "",
         "  --notFlag <NOT_FLAG>",
         "",

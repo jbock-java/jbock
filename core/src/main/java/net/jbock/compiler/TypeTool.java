@@ -66,7 +66,7 @@ public class TypeTool {
     }
   }
 
-  private Optional<Map<String, DeclaredType>> unify(DeclaredType x, TypeMirror ym) {
+  public Optional<Map<String, DeclaredType>> unify(DeclaredType x, TypeMirror ym) {
     Map<String, DeclaredType> acc = new HashMap<>();
     boolean[] failure = new boolean[1];
     unify(x, ym, acc, failure);
@@ -76,7 +76,7 @@ public class TypeTool {
     return Optional.of(acc);
   }
 
-  private DeclaredType substitute(TypeMirror input, Map<String, DeclaredType> solution) {
+  public DeclaredType substitute(TypeMirror input, Map<String, DeclaredType> solution) {
     if (input.getKind() == TypeKind.TYPEVAR) {
       DeclaredType result = solution.get(input.toString());
       if (result == null) {
@@ -93,7 +93,7 @@ public class TypeTool {
     return types.getDeclaredType(erasure, args.toArray(new TypeMirror[0]));
   }
 
-  public boolean isAssignable(DeclaredType x, TypeMirror ym) {
+  boolean isAssignable(DeclaredType x, TypeMirror ym) {
     Optional<Map<String, DeclaredType>> solution = unify(x, ym);
     if (!solution.isPresent()) {
       return false;
@@ -119,6 +119,10 @@ public class TypeTool {
 
   private boolean isSameErasure(TypeMirror x, TypeMirror y) {
     return types.isSameType(types.erasure(x), types.erasure(y));
+  }
+
+  public TypeMirror erasure(TypeMirror typeMirror) {
+    return types.erasure(typeMirror);
   }
 
   public DeclaredType declared(String type) {

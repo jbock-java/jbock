@@ -8,6 +8,7 @@ import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.function.Function;
@@ -18,15 +19,15 @@ public final class MapperCoercion extends CoercionFactory {
 
   private final ParameterSpec mapperParam;
 
-  private final TypeName mapperType;
+  private final TypeMirror mapperType;
 
-  private MapperCoercion(TypeMirror trigger, ParameterSpec mapperParam, TypeName mapperType) {
+  private MapperCoercion(TypeMirror trigger, ParameterSpec mapperParam, TypeMirror mapperType) {
     super(trigger);
     this.mapperParam = mapperParam;
     this.mapperType = mapperType;
   }
 
-  public static Coercion create(TriggerKind tk, ParameterSpec mapperParam, TypeName mapperType, FieldSpec field) {
+  public static Coercion create(TriggerKind tk, ParameterSpec mapperParam, TypeMirror mapperType, FieldSpec field) {
     return new MapperCoercion(tk.trigger, mapperParam, mapperType).getCoercion(field, tk);
   }
 
@@ -44,13 +45,14 @@ public final class MapperCoercion extends CoercionFactory {
     return CodeBlock.builder().add(".map($N)", mapperParam).build();
   }
 
-  public static CodeBlock mapperInit(TypeMirror trigger, ParameterSpec mapperParam, TypeName mapperType) {
+  public static CodeBlock mapperInit(TypeMirror trigger, ParameterSpec mapperParam, TypeMirror mapperType) {
     return mapperInit(TypeName.get(trigger), mapperParam, mapperType);
   }
 
-  public static CodeBlock mapperInit(TypeName trigger, ParameterSpec mapperParam, TypeName mapperType) {
+  public static CodeBlock mapperInit(TypeName trigger, ParameterSpec mapperParam, TypeMirror mapperType) {
     return CodeBlock.builder()
-        .add("$T $N = new $T().get()", ParameterizedTypeName.get(ClassName.get(Function.class), STRING, trigger), mapperParam, mapperType)
+        .add("$T $N = new $T().get()", ParameterizedTypeName.get(ClassName.get(Function.class), STRING, trigger), mapperParam,
+            TypeTool.get().erasure(mapperType))
         .build();
   }
 }
