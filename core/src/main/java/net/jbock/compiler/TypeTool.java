@@ -92,7 +92,7 @@ public class TypeTool {
     return types.getDeclaredType(erasure, args.toArray(new TypeMirror[0]));
   }
 
-  boolean isAssignable(DeclaredType x, TypeMirror ym) {
+  public boolean isAssignable(DeclaredType x, TypeMirror ym) {
     Optional<Map<String, DeclaredType>> solution = unify(x, ym);
     if (!solution.isPresent()) {
       return false;
@@ -101,7 +101,7 @@ public class TypeTool {
   }
 
 
-  boolean isSameErasure(TypeMirror x, TypeMirror y) {
+  private boolean isSameErasure(TypeMirror x, TypeMirror y) {
     return types.isSameType(types.erasure(x), types.erasure(y));
   }
 

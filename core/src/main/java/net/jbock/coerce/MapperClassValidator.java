@@ -1,6 +1,7 @@
 package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.Util;
 import net.jbock.compiler.ValidationException;
 
@@ -62,7 +63,7 @@ final class MapperClassValidator {
   /* Does the mapper implement Supplier<Function<String, triggerClass>>?
    * There can be a situation where this is not very easy. See ProcessorTest.
    */
-  private static void checkTree(TypeElement mapperClass, TypeName trigger) throws MapperValidatorException {
+  private static TypeMirror checkTree(TypeElement mapperClass, TypeName trigger) throws MapperValidatorException {
     Resolver supplier = Resolver.resolve("java.util.function.Supplier", singletonMap(0, "T"), mapperClass.asType());
     TypeMirror suppliedType = supplier.get("T").orElseThrow(
         () -> MapperValidatorException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", trigger)));
@@ -74,6 +75,7 @@ final class MapperClassValidator {
         !function.satisfies("R", m -> trigger.equals(TypeName.get(m)))) {
       throw MapperValidatorException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", trigger));
     }
+    return function.get("R").orElseThrow(AssertionError::new);
   }
 
   static class MapperValidatorException extends Exception {

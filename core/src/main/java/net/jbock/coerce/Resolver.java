@@ -74,7 +74,7 @@ class Resolver {
       // everything resolved
       return resolver;
     }
-    if (!resolver.names.isEmpty() && tmpname.equals(m.accept(QUALIFIED_NAME, null))) {
+    if (tmpname.equals(m.accept(QUALIFIED_NAME, null))) {
       DeclaredType declaredType = Util.asParameterized(m);
       if (declaredType != null) {
         Map<String, TypeMirror> results = new LinkedHashMap<>();

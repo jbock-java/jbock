@@ -154,6 +154,13 @@ public class CoercionProvider {
     return null;
   }
 
+  private DeclaredType mapperOutput(ExecutableElement sourceMethod, TypeElement mapperClass) {
+    if (mapperClass != null) {
+
+    }
+    return null;
+  }
+
   private Coercion handleDefault(
       TriggerKind tk,
       FieldSpec field) throws TmpException {
