@@ -67,7 +67,7 @@ public final class Processor extends AbstractProcessor {
     }
     for (TypeElement sourceType : getAnnotatedClasses(env)) {
       try {
-        TypeTool.setInstance(processingEnv.getTypeUtils());
+        TypeTool.setInstance(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
         List<Param> parameters = validate(sourceType);
         if (parameters.isEmpty()) {
           processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,

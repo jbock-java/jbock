@@ -1,4 +1,4 @@
-package net.jbock.coerce;
+package net.jbock.compiler;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
@@ -28,6 +28,7 @@ final class EvaluatingProcessor extends AbstractProcessor {
   }
 
   static class Builder {
+
     private final String[] source;
 
     private Builder(String[] source) {
@@ -66,9 +67,12 @@ final class EvaluatingProcessor extends AbstractProcessor {
     // just run the test on the last round after compilation is over
     if (roundEnv.processingOver()) {
       try {
+        TypeTool.setInstance(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
         base.run(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
       } catch (Throwable e) {
         thrown = e;
+      } finally {
+        TypeTool.unset();
       }
     }
     return false;
