@@ -4,6 +4,7 @@ import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,18 +45,21 @@ public class AllCoercions {
       new InstantCoercion(),
       new StringCoercion());
 
+  private final Map<MapMirror, CoercionFactory> coercions;
+
   private static AllCoercions instance;
 
   private AllCoercions() {
-    Map<TypeMirror, CoercionFactory> _coercions = new HashMap<>();
+    Map<MapMirror, CoercionFactory> _coercions = new HashMap<>();
     for (CoercionFactory coercion : allCoercions) {
-      CoercionFactory previous = _coercions.put(coercion.trigger(), coercion);
+      CoercionFactory previous = _coercions.put(new MapMirror(coercion.trigger()), coercion);
       if (previous != null) {
         throw new IllegalStateException(String.format("Both triggered by %s : %s, %s",
             coercion.trigger(),
             coercion.getClass().getSimpleName(), previous.getClass().getSimpleName()));
       }
     }
+    coercions = Collections.unmodifiableMap(_coercions);
   }
 
   public static AllCoercions instance() {
@@ -69,17 +73,36 @@ public class AllCoercions {
     instance = null;
   }
 
-  public boolean containsKey(TypeMirror typeName) {
-    CoercionFactory factory = get(typeName);
-    return factory != null;
+  public static boolean containsKey(TypeMirror typeName) {
+    return instance().coercions.containsKey(new MapMirror(typeName));
   }
 
-  public CoercionFactory get(TypeMirror typeName) {
-    for (CoercionFactory coercion : instance().allCoercions) {
-      if (TypeTool.get().equals(typeName, coercion.trigger)) {
-        return coercion;
-      }
+  public static CoercionFactory get(TypeMirror typeName) {
+    return instance().coercions.get(new MapMirror(typeName));
+  }
+
+  private static final class MapMirror {
+
+    final TypeMirror typeMirror;
+
+    final int hashCode;
+
+    MapMirror(TypeMirror typeMirror) {
+      this.typeMirror = typeMirror;
+      this.hashCode = typeMirror.toString().hashCode();
     }
-    return null;
+
+    @Override
+    public boolean equals(Object o) {
+      if (this == o) return true;
+      if (o == null || getClass() != o.getClass()) return false;
+      MapMirror mapMirror = (MapMirror) o;
+      return TypeTool.get().equals(typeMirror, mapMirror.typeMirror);
+    }
+
+    @Override
+    public int hashCode() {
+      return hashCode;
+    }
   }
 }
