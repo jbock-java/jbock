@@ -3,9 +3,11 @@ package net.jbock.coerce.mappers;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.TypeName;
 
+import javax.lang.model.type.TypeMirror;
+
 public final class EnumCoercion extends CoercionFactory {
 
-  private EnumCoercion(TypeName trigger) {
+  private EnumCoercion(TypeMirror trigger) {
     super(trigger);
   }
 
@@ -14,7 +16,7 @@ public final class EnumCoercion extends CoercionFactory {
     return CodeBlock.builder().add(".map($T::valueOf)", trigger()).build();
   }
 
-  public static EnumCoercion create(TypeName trigger) {
+  public static EnumCoercion create(TypeMirror trigger) {
     return new EnumCoercion(trigger);
   }
 }

@@ -2,6 +2,7 @@ package net.jbock.compiler;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
@@ -100,9 +101,32 @@ public class TypeTool {
     return types.isSameType(x, substitute(ym, solution.get()));
   }
 
+  public boolean equals(TypeMirror mirror, Class<?> test) {
+    return types.isSameType(mirror, elements.getTypeElement(test.getCanonicalName()).asType());
+  }
+
+  public boolean equals(TypeMirror mirror, TypeMirror test) {
+    return types.isSameType(mirror, test);
+  }
+
+  public TypeMirror box(TypeMirror mirror) {
+    return types.boxedClass(((PrimitiveType) mirror)).asType();
+  }
+
+  public PrimitiveType primitive(TypeKind kind) {
+    return types.getPrimitiveType(kind);
+  }
 
   private boolean isSameErasure(TypeMirror x, TypeMirror y) {
     return types.isSameType(types.erasure(x), types.erasure(y));
+  }
+
+  public DeclaredType declared(String type) {
+    return types.getDeclaredType(elements.getTypeElement(type));
+  }
+
+  public DeclaredType declared(Class<?> type) {
+    return declared(type.getCanonicalName());
   }
 
   DeclaredType declared(String type, String typevar0) {

@@ -8,7 +8,7 @@ import net.jbock.coerce.warn.WarningProvider;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.compiler.Constants;
+import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.Util;
 import net.jbock.compiler.ValidationException;
 
@@ -18,6 +18,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.OptionalDouble;
+import java.util.OptionalInt;
+import java.util.OptionalLong;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.CoercionKind.SIMPLE;
@@ -118,8 +121,9 @@ public class CoercionProvider {
     MapperSkew skew = mapperSkew(tk);
     try {
       if (skew != null) {
-        validateMapperClass(mapperClass, skew.mapperReturnType);
-        return AllCoercions.get(skew.baseType).getCoercion(field, tk)
+        validateMapperClass(mapperClass, TypeName.get(skew.mapperReturnType));
+        CoercionFactory coercionFactory = AllCoercions.instance().get(skew.baseType);
+        return coercionFactory.getCoercion(field, tk)
             .withMapper(mapperMap(mapperParam), mapperInit(skew.mapperReturnType, mapperParam, mapperType));
       } else {
         validateMapperClass(mapperClass, TypeName.get(tk.trigger));
@@ -137,19 +141,18 @@ public class CoercionProvider {
     if (!tk.collectorInfo.collectorInit.isEmpty()) {
       return null;
     }
-    TypeName input = TypeName.get(tk.trigger);
-    if (input.isPrimitive()) {
-      if (!AllCoercions.containsKey(input)) {
+    if (tk.trigger.getKind().isPrimitive()) {
+      if (!AllCoercions.instance().containsKey(tk.trigger)) {
         return null;
       }
-      return new MapperSkew(input.box(), input.box());
+      return new MapperSkew(TypeTool.get().box(tk.trigger), TypeTool.get().box(tk.trigger));
     }
-    if (input.equals(Constants.OPTIONAL_INT)) {
-      return new MapperSkew(TypeName.get(Integer.class), Constants.OPTIONAL_INT);
-    } else if (input.equals(Constants.OPTIONAL_DOUBLE)) {
-      return new MapperSkew(TypeName.get(Double.class), Constants.OPTIONAL_DOUBLE);
-    } else if (input.equals(Constants.OPTIONAL_LONG)) {
-      return new MapperSkew(TypeName.get(Long.class), Constants.OPTIONAL_LONG);
+    if (TypeTool.get().equals(tk.trigger, OptionalInt.class)) {
+      return new MapperSkew(TypeTool.get().declared(Integer.class), tk.trigger);
+    } else if (TypeTool.get().equals(tk.trigger, OptionalDouble.class)) {
+      return new MapperSkew(TypeTool.get().declared(Double.class), tk.trigger);
+    } else if (TypeTool.get().equals(tk.trigger, OptionalLong.class)) {
+      return new MapperSkew(TypeTool.get().declared(Long.class), tk.trigger);
     }
     return null;
   }
@@ -168,7 +171,7 @@ public class CoercionProvider {
     if (enumCoercion != null) {
       return enumCoercion.getCoercion(field, tk);
     } else {
-      CoercionFactory factory = AllCoercions.get(TypeName.get(tk.trigger));
+      CoercionFactory factory = AllCoercions.instance().get(tk.trigger);
       if (factory == null) {
         throw TmpException.create("Bad return type");
       }
@@ -189,7 +192,7 @@ public class CoercionProvider {
     if (element.getModifiers().contains(Modifier.PRIVATE)) {
       throw TmpException.create("Private return type is not allowed");
     }
-    return EnumCoercion.create(TypeName.get(mirror));
+    return EnumCoercion.create(mirror);
   }
 
   private TriggerKind trigger(

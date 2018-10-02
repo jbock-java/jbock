@@ -18,12 +18,14 @@ abstract class CustomCollectorArguments {
   @Parameter(repeatable = true, shortName = 'B', collectedBy = MyIntegerCollector.class)
   abstract Set<Integer> integers();
 
+/*
   @Parameter(
       repeatable = true,
       shortName = 'M',
       mappedBy = CustomBigIntegerMapper.class,
       collectedBy = ToSetCollector.class)
   abstract Set<BigInteger> bigIntegers();
+*/
 
   static class MyStringCollector implements Supplier<Collector<String, ?, Set<String>>> {
 

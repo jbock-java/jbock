@@ -3,11 +3,16 @@ package net.jbock.coerce.mappers;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 
+import javax.lang.model.type.PrimitiveType;
 import java.util.Objects;
 
 abstract class BasicBooleanCoercion extends CoercionFactory {
 
   BasicBooleanCoercion(Class<?> trigger) {
+    super(trigger);
+  }
+
+  BasicBooleanCoercion(PrimitiveType trigger) {
     super(trigger);
   }
 

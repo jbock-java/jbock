@@ -17,11 +17,11 @@ import static net.jbock.compiler.Constants.STRING;
 public final class MapperCoercion extends CoercionFactory {
 
   private final ParameterSpec mapperParam;
-  
+
   private final TypeName mapperType;
 
   private MapperCoercion(TypeMirror trigger, ParameterSpec mapperParam, TypeName mapperType) {
-    super(TypeName.get(trigger));
+    super(trigger);
     this.mapperParam = mapperParam;
     this.mapperType = mapperType;
   }

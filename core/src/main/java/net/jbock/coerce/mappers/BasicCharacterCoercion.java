@@ -2,9 +2,15 @@ package net.jbock.coerce.mappers;
 
 import net.jbock.com.squareup.javapoet.CodeBlock;
 
+import javax.lang.model.type.PrimitiveType;
+
 abstract class BasicCharacterCoercion extends CoercionFactory {
 
   BasicCharacterCoercion(Class<?> trigger) {
+    super(trigger);
+  }
+
+  BasicCharacterCoercion(PrimitiveType trigger) {
     super(trigger);
   }
 

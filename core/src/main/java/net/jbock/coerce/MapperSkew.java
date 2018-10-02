@@ -1,14 +1,14 @@
 package net.jbock.coerce;
 
-import net.jbock.com.squareup.javapoet.TypeName;
+import javax.lang.model.type.TypeMirror;
 
 class MapperSkew {
 
-  final TypeName mapperReturnType;
+  final TypeMirror mapperReturnType;
 
-  final TypeName baseType;
+  final TypeMirror baseType;
 
-  MapperSkew(TypeName mapperReturnType, TypeName baseType) {
+  MapperSkew(TypeMirror mapperReturnType, TypeMirror baseType) {
     this.mapperReturnType = mapperReturnType;
     this.baseType = baseType;
   }

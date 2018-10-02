@@ -2,9 +2,15 @@ package net.jbock.coerce.mappers;
 
 import net.jbock.com.squareup.javapoet.CodeBlock;
 
+import javax.lang.model.type.PrimitiveType;
+
 abstract class BasicIntegerCoercion extends BasicNumberCoercion {
 
   BasicIntegerCoercion(Class<?> trigger) {
+    super(trigger);
+  }
+
+  BasicIntegerCoercion(PrimitiveType trigger) {
     super(trigger);
   }
 

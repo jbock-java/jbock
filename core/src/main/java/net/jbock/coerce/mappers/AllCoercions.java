@@ -1,16 +1,16 @@
 package net.jbock.coerce.mappers;
 
-import net.jbock.com.squareup.javapoet.TypeName;
+import net.jbock.compiler.TypeTool;
 
+import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class AllCoercions {
 
-  private static final List<CoercionFactory> ALL_COERCIONS = Arrays.asList(
+  private final List<CoercionFactory> allCoercions = Arrays.asList(
       new CharsetCoercion(),
       new PatternCoercion(),
       new ObjectIntegerCoercion(),
@@ -44,13 +44,11 @@ public class AllCoercions {
       new InstantCoercion(),
       new StringCoercion());
 
-  public final Map<TypeName, CoercionFactory> coercions;
-
   private static AllCoercions instance;
 
   private AllCoercions() {
-    Map<TypeName, CoercionFactory> _coercions = new HashMap<>();
-    for (CoercionFactory coercion : ALL_COERCIONS) {
+    Map<TypeMirror, CoercionFactory> _coercions = new HashMap<>();
+    for (CoercionFactory coercion : allCoercions) {
       CoercionFactory previous = _coercions.put(coercion.trigger(), coercion);
       if (previous != null) {
         throw new IllegalStateException(String.format("Both triggered by %s : %s, %s",
@@ -58,21 +56,30 @@ public class AllCoercions {
             coercion.getClass().getSimpleName(), previous.getClass().getSimpleName()));
       }
     }
-    coercions = Collections.unmodifiableMap(_coercions);
   }
 
-  private static AllCoercions instance() {
+  public static AllCoercions instance() {
     if (instance == null) {
       instance = new AllCoercions();
     }
     return instance;
   }
 
-  public static boolean containsKey(TypeName typeName) {
-    return instance().coercions.containsKey(typeName);
+  public static void unset() {
+    instance = null;
   }
 
-  public static CoercionFactory get(TypeName typeName) {
-    return instance().coercions.get(typeName);
+  public boolean containsKey(TypeMirror typeName) {
+    CoercionFactory factory = get(typeName);
+    return factory != null;
+  }
+
+  public CoercionFactory get(TypeMirror typeName) {
+    for (CoercionFactory coercion : instance().allCoercions) {
+      if (TypeTool.get().equals(typeName, coercion.trigger)) {
+        return coercion;
+      }
+    }
+    return null;
   }
 }

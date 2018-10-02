@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
+import net.jbock.coerce.mappers.AllCoercions;
 import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.JavaFile;
 import net.jbock.com.squareup.javapoet.TypeSpec;
@@ -94,6 +95,7 @@ public final class Processor extends AbstractProcessor {
         handleException(sourceType, e);
       } finally {
         TypeTool.unset();
+        AllCoercions.unset();
       }
     }
     return false;

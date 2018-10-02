@@ -10,20 +10,22 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.WildcardTypeName;
+import net.jbock.compiler.TypeTool;
 
+import javax.lang.model.type.TypeMirror;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collector;
 
 public abstract class CoercionFactory {
 
-  final TypeName trigger;
+  final TypeMirror trigger;
 
   CoercionFactory(Class<?> trigger) {
-    this(TypeName.get(trigger));
+    this(TypeTool.get().declared(trigger.getCanonicalName()));
   }
 
-  CoercionFactory(TypeName trigger) {
+  CoercionFactory(TypeMirror trigger) {
     this.trigger = trigger;
   }
 
@@ -39,7 +41,7 @@ public abstract class CoercionFactory {
   /**
    * Type that triggers this coercion (could be wrapped in Optional or List)
    */
-  final TypeName trigger() {
+  final TypeMirror trigger() {
     return trigger;
   }
 
@@ -58,7 +60,7 @@ public abstract class CoercionFactory {
   }
 
   TypeName paramType() {
-    return trigger;
+    return TypeName.get(trigger);
   }
 
   public final Coercion getCoercion(

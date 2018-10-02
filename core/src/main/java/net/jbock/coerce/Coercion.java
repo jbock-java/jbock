@@ -7,6 +7,7 @@ import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Constants;
 
+import javax.lang.model.type.TypeMirror;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -14,7 +15,7 @@ public final class Coercion {
 
   private static final ClassName BOOLEAN_CLASS = ClassName.get(Boolean.class);
 
-  private final TypeName trigger;
+  private final TypeMirror trigger;
 
   // only for repeatable
   private final Optional<ParameterSpec> collectorParam;
@@ -46,7 +47,7 @@ public final class Coercion {
   private final CoercionKind kind;
 
   public Coercion(
-      TypeName trigger,
+      TypeMirror trigger,
       Optional<ParameterSpec> collectorParam,
       CodeBlock map,
       CodeBlock initMapper,
@@ -81,7 +82,7 @@ public final class Coercion {
    * Type that triggers this coercion (could be wrapped in Optional or List)
    */
   public TypeName trigger() {
-    return trigger;
+    return TypeName.get(trigger);
   }
 
   // toString stuff (the gen class overrides toString if possible)
