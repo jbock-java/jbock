@@ -11,18 +11,15 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.singletonMap;
-
 final class MapperClassValidator {
 
-  static void validateMapperClass(TypeElement mapperClass, TypeMirror trigger) throws MapperValidatorException {
+  static TypeMirror validateMapperClass(TypeElement mapperClass) throws MapEx {
     commonChecks(mapperClass, "mapper");
-    checkTree(mapperClass, trigger);
+    return getFunctionReturnType(mapperClass);
   }
 
   static void commonChecks(TypeElement mapperClass, String name) {
@@ -57,59 +54,39 @@ final class MapperClassValidator {
     }
   }
 
-  /* Does the mapper implement Supplier<Function<String, triggerClass>>?
-   * There can be a situation where this is not very easy. See ProcessorTest.
-   */
-  private static TypeMirror checkTree(TypeElement mapperClass, TypeMirror trigger) throws MapperValidatorException {
-    Resolver supplier = Resolver.resolve("java.util.function.Supplier", singletonMap(0, "T"), mapperClass.asType());
-    TypeMirror suppliedType = supplier.get("T").orElseThrow(
-        () -> MapperValidatorException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", trigger)));
-    Map<String, TypeMirror> resolved = getResolved(mapperClass, trigger, suppliedType);
-    TypeMirror inputType = resolved.get("T");
-    TypeMirror resultType = resolved.get("R");
+  private static TypeMirror getFunctionReturnType(TypeElement mapperClass) throws MapEx {
+    Map<String, TypeMirror> supplierTypeargs = Resolver.resolve("java.util.function.Supplier", mapperClass.asType(), "T");
+    TypeMirror suppliedType = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapEx::boom);
+    Map<String, TypeMirror> functionTypeargs = resolveFunctionTypeargs(mapperClass, suppliedType);
+    TypeMirror inputType = functionTypeargs.get("T");
+    TypeMirror resultType = functionTypeargs.get("R");
     if (inputType == null || resultType == null ||
-        !TypeTool.get().equals(inputType, String.class) ||
-        !TypeTool.get().equals(resultType, trigger)) {
-      throw MapperValidatorException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", trigger));
+        !TypeTool.get().equals(inputType, String.class)) {
+      throw new MapEx();
     }
     return resultType;
   }
 
-  private static Map<String, TypeMirror> getResolved(
+  private static Map<String, TypeMirror> resolveFunctionTypeargs(
       TypeElement mapperClass,
-      TypeMirror trigger,
-      TypeMirror suppliedType) throws MapperValidatorException {
-    Map<Integer, String> functionTypeArgs = new LinkedHashMap<>();
-    functionTypeArgs.put(0, "T");
-    functionTypeArgs.put(1, "R");
-    Resolver resolver = Resolver.resolve("java.util.function.Function", functionTypeArgs, suppliedType);
-    Map<String, TypeMirror> resolved;
-    if (!mapperClass.getTypeParameters().isEmpty()) {
-      Optional<Map<String, DeclaredType>> solution = TypeTool.get().unify(TypeTool.get().declared(String.class), resolver.get("T").orElseThrow(
-          () -> MapperValidatorException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", trigger))));
-      if (!solution.isPresent()) {
-        throw MapperValidatorException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", trigger));
-      }
-      resolved = new HashMap<>();
-      resolved.put("R", TypeTool.get().substitute(resolver.get("R")
-              .orElseThrow(() -> MapperValidatorException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", trigger))),
-          solution.get()));
-      resolved.put("T", TypeTool.get().substitute(resolver.get("T")
-              .orElseThrow(() -> MapperValidatorException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", trigger))),
-          solution.get()));
-    } else {
-      resolved = resolver.asMap();
+      TypeMirror functionType) throws MapEx {
+    Map<String, TypeMirror> functionTypeargs = Resolver.resolve("java.util.function.Function", functionType, "T", "R");
+    if (mapperClass.getTypeParameters().isEmpty()) {
+      return functionTypeargs;
     }
+    TypeTool tool = TypeTool.get();
+    DeclaredType string = tool.declared(String.class);
+    TypeMirror t = Optional.ofNullable(functionTypeargs.get("T")).orElseThrow(MapEx::boom);
+    TypeMirror r = Optional.ofNullable(functionTypeargs.get("R")).orElseThrow(MapEx::boom);
+    Map<String, TypeMirror> resolved = new HashMap<>();
+    resolved.put("T", string);
+    resolved.put("R", tool.substitute(r, tool.unify(string, t).orElseThrow(MapEx::new)));
     return resolved;
   }
 
-  static class MapperValidatorException extends Exception {
-    private MapperValidatorException(String message) {
-      super(message);
-    }
-
-    private static MapperValidatorException create(String message) {
-      return new MapperValidatorException(message);
+  static class MapEx extends Exception {
+    static MapEx boom() {
+      return new MapEx();
     }
   }
 }

@@ -102,10 +102,13 @@ public class CoercionProvider {
     TypeName mapperType = TypeName.get(mapperClass.asType());
     ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
     try {
-      validateMapperClass(mapperClass, tk.trigger);
+      TypeMirror resultType = validateMapperClass(mapperClass);
+      if (!TypeTool.get().equals(resultType, tk.trigger)) {
+        throw TmpException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", tk.trigger));
+      }
       return MapperCoercion.create(tk, mapperParam, mapperClass.asType(), field);
-    } catch (MapperClassValidator.MapperValidatorException e) {
-      throw TmpException.create(e.getMessage());
+    } catch (MapperClassValidator.MapEx e) {
+      throw TmpException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", tk.trigger));
     }
   }
 
@@ -120,17 +123,22 @@ public class CoercionProvider {
     TriggerKind tk = trigger(sourceMethod.getReturnType(), collectorClass, false);
     MapperSkew skew = mapperSkew(tk);
     try {
+      TypeMirror resultType = validateMapperClass(mapperClass);
       if (skew != null) {
-        validateMapperClass(mapperClass, skew.mapperReturnType);
+        if (!TypeTool.get().equals(resultType, skew.mapperReturnType)) {
+          throw TmpException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", skew.mapperReturnType));
+        }
         CoercionFactory coercionFactory = AllCoercions.get(skew.baseType);
         return coercionFactory.getCoercion(field, tk)
             .withMapper(mapperMap(mapperParam), mapperInit(skew.mapperReturnType, mapperParam, mapperClass.asType()));
       } else {
-        validateMapperClass(mapperClass, tk.trigger);
+        if (!TypeTool.get().equals(resultType, tk.trigger)) {
+          throw TmpException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", tk.trigger));
+        }
         return MapperCoercion.create(tk, mapperParam, mapperClass.asType(), field);
       }
-    } catch (MapperClassValidator.MapperValidatorException e) {
-      throw TmpException.create(e.getMessage());
+    } catch (MapperClassValidator.MapEx e) {
+      throw TmpException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", skew != null ? skew.mapperReturnType : tk.trigger));
     }
   }
 
@@ -153,13 +161,6 @@ public class CoercionProvider {
       return new MapperSkew(TypeTool.get().declared(Double.class), tk.trigger);
     } else if (TypeTool.get().equals(tk.trigger, OptionalLong.class)) {
       return new MapperSkew(TypeTool.get().declared(Long.class), tk.trigger);
-    }
-    return null;
-  }
-
-  private DeclaredType mapperOutput(ExecutableElement sourceMethod, TypeElement mapperClass) {
-    if (mapperClass != null) {
-
     }
     return null;
   }

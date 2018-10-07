@@ -8,12 +8,11 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
-import java.util.function.Predicate;
 
 import static java.util.Collections.emptyMap;
 import static net.jbock.compiler.HierarchyUtil.getTypeTree;
@@ -59,7 +58,16 @@ class Resolver {
     return new Resolver(newNames, newResults);
   }
 
-  static Resolver resolve(
+  static Map<String, TypeMirror> resolve(String qname, TypeMirror m, String... typevars) {
+    Map<Integer, String> map = new HashMap<>();
+    for (int i = 0; i < typevars.length; i++) {
+      String typevar = typevars[i];
+      map.put(i, typevar);
+    }
+    return resolve(qname, map, m);
+  }
+
+  private static Map<String, TypeMirror> resolve(
       String qname,
       Map<Integer, String> map,
       TypeMirror m) {
@@ -73,7 +81,7 @@ class Resolver {
     }
     if (resolver.names.isEmpty()) {
       // everything resolved
-      return resolver;
+      return resolver.asMap();
     }
     if (tmpname.equals(m.accept(QUALIFIED_NAME, null))) {
       DeclaredType declaredType = Util.asParameterized(m);
@@ -86,7 +94,7 @@ class Resolver {
         resolver = new Resolver(emptyMap(), results);
       }
     }
-    return resolver;
+    return resolver.asMap();
   }
 
   private static Extension findExtension(List<TypeElement> family, String qname) {
@@ -127,17 +135,8 @@ class Resolver {
     }
   }
 
-  public Map<String, TypeMirror> asMap() {
+  private Map<String, TypeMirror> asMap() {
     return Collections.unmodifiableMap(results);
-  }
-
-  boolean satisfies(String key, Predicate<TypeMirror> predicate) {
-    TypeMirror m = results.get(key);
-    return m != null && predicate.test(m);
-  }
-
-  Optional<TypeMirror> get(String key) {
-    return Optional.ofNullable(results.get(key));
   }
 
   @Override
