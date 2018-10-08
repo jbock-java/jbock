@@ -22,16 +22,16 @@ abstract class CpArguments {
   @PositionalParameter
   abstract String dest();
 
-  @Parameter(shortName = 'r')
+  @Parameter(flag = true, shortName = 'r')
   abstract boolean recursive();
 
-  @Parameter(argHandle = "CONTROL")
+  @Parameter(optional = true, argHandle = "CONTROL")
   abstract Optional<Control> backup();
 
 
   /**
    * Override the usual backup suffix
    */
-  @Parameter(shortName = 's')
+  @Parameter(optional = true, shortName = 's')
   abstract Optional<String> suffix();
 }

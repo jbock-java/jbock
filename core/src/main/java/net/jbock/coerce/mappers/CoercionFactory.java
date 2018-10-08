@@ -19,6 +19,10 @@ import java.util.stream.Collector;
 
 public abstract class CoercionFactory {
 
+  public boolean handlesOptionalPrimitive() {
+    return false;
+  }
+
   final TypeMirror trigger;
 
   CoercionFactory(Class<?> trigger) {

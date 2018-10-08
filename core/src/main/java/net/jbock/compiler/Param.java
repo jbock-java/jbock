@@ -9,10 +9,13 @@ import net.jbock.com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 import static java.util.Collections.singletonList;
 import static net.jbock.compiler.MapperClassUtil.getCollectorClass;
@@ -45,6 +48,12 @@ final class Param {
 
   private final int positionalIndex;
 
+  private final boolean optional;
+
+  private final boolean repeatable;
+
+  final boolean flag;
+
   private static String enumConstant(
       List<Param> params,
       String methodName) {
@@ -69,7 +78,10 @@ final class Param {
       Coercion coercion,
       List<String> description,
       String descriptionArgumentName,
-      int positionalIndex) {
+      int positionalIndex,
+      boolean optional,
+      boolean repeatable,
+      boolean flag) {
     this.coercion = coercion;
     this.shortName = shortName;
     this.longName = longName;
@@ -79,9 +91,32 @@ final class Param {
     this.description = description;
     this.descriptionArgumentName = descriptionArgumentName;
     this.positionalIndex = positionalIndex;
+    this.optional = optional;
+    this.repeatable = repeatable;
+    this.flag = flag;
+    TypeTool tt = TypeTool.get();
+    TypeMirror returnType = sourceMethod.getReturnType();
+    boolean itsBoolean = tt.equals(returnType, tt.primitive(TypeKind.BOOLEAN)) ||
+        tt.equals(returnType, tt.declared(Boolean.class));
+    if (flag) {
+      if (!itsBoolean) {
+        throw ValidationException.create(sourceMethod, "Flag parameters must return boolean.");
+      }
+    } else if (positionalIndex < 0) {
+      if (itsBoolean && coercion.initMapper().isEmpty()) {
+        throw ValidationException.create(sourceMethod, "Declare a flag, or use a custom mapper.");
+      }
+    }
+    if (Stream.of(optional, repeatable, flag).mapToInt(Param::booleanToInt).sum() >= 2) {
+      throw ValidationException.create(sourceMethod, "Only one of optional, repeatable and flag can be true.");
+    }
     if (positional && positionalOrder() == null) {
       throw new AssertionError("positional, but positionalType is null");
     }
+  }
+
+  private static int booleanToInt(boolean b) {
+    return b ? 1 : 0;
   }
 
   FieldSpec field() {
@@ -123,10 +158,12 @@ final class Param {
     checkName(sourceMethod, longName);
     String name = enumConstant(params, sourceMethod.getSimpleName().toString());
     boolean repeatable = parameter.repeatable();
-    Coercion typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable);
-    OptionType type = optionType(typeInfo);
+    boolean optional = parameter.optional();
+    boolean flag = parameter.flag();
+    Coercion typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
+    OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
-        descriptionArgumentName(type, typeInfo.required(), name) :
+        descriptionArgumentName(type, !repeatable && !optional && !flag, name) :
         parameter.argHandle();
     return new Param(
         shortName,
@@ -138,7 +175,10 @@ final class Param {
         typeInfo,
         cleanDesc(description),
         descriptionArgumentName,
-        -1);
+        -1,
+        optional,
+        repeatable,
+        flag);
   }
 
   private static Param createPositional(
@@ -151,16 +191,12 @@ final class Param {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     String name = enumConstant(params, sourceMethod.getSimpleName().toString());
     boolean repeatable = parameter.repeatable();
-    Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable);
-    OptionType type = optionType(coercion);
-    if (type == OptionType.FLAG) {
-      throw ValidationException.create(sourceMethod,
-          "A method that carries the Positional annotation " +
-              "may not return " + TypeName.get(sourceMethod.getReturnType()));
-    }
+    boolean optional = parameter.optional();
+    Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
+    OptionType type = optionType(repeatable, false);
     checkNotPresent(sourceMethod, parameter, singletonList(Parameter.class));
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
-        descriptionArgumentName(type, coercion.required(), name) :
+        descriptionArgumentName(type, !repeatable && !optional, name) :
         parameter.argHandle();
     return new Param(
         ' ',
@@ -172,7 +208,10 @@ final class Param {
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
-        positionalIndex);
+        positionalIndex,
+        optional,
+        repeatable,
+        false);
   }
 
   private static char shortName(List<Param> params, ExecutableElement sourceMethod) {
@@ -325,21 +364,14 @@ final class Param {
   }
 
   boolean required() {
-    if (paramType == OptionType.REPEATABLE) {
-      return false;
-    }
-    return coercion.required();
+    return !repeatable && !optional && !flag;
   }
 
   PositionalOrder positionalOrder() {
-    switch (paramType) {
-      case REGULAR:
-        return coercion.required() ? PositionalOrder.REQUIRED : PositionalOrder.OPTIONAL;
-      case REPEATABLE:
-        return PositionalOrder.LIST;
-      default:
-        throw new AssertionError();
+    if (repeatable) {
+      return PositionalOrder.LIST;
     }
+    return optional ? PositionalOrder.OPTIONAL : PositionalOrder.REQUIRED;
   }
 
   // visible for testing
@@ -380,11 +412,11 @@ final class Param {
     return Arrays.copyOfRange(desc, firstNonempty, lastNonempty + 1);
   }
 
-  private static OptionType optionType(Coercion coercion) {
-    if (coercion.collectorParam().isPresent()) {
+  private static OptionType optionType(boolean repeatable, boolean flag) {
+    if (repeatable) {
       return OptionType.REPEATABLE;
     }
-    if (coercion.flag()) {
+    if (flag) {
       return OptionType.FLAG;
     }
     return OptionType.REGULAR;

@@ -9,10 +9,10 @@ import java.util.List;
 @CommandLineArguments(allowEscape = true)
 abstract class RmArguments {
 
-  @Parameter(shortName = 'r')
+  @Parameter(flag = true, shortName = 'r')
   abstract boolean recursive();
 
-  @Parameter(shortName = 'f')
+  @Parameter(flag = true, shortName = 'f')
   abstract boolean force();
 
   @PositionalParameter(repeatable = true)

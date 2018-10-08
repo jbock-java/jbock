@@ -37,6 +37,11 @@ class OptionalLongCoercion extends BasicLongCoercion {
   }
 
   @Override
+  public boolean handlesOptionalPrimitive() {
+    return true;
+  }
+
+  @Override
   CodeBlock extract(ParameterSpec param) {
     return CodeBlock.builder().add("$N.isPresent() ? $T.of($N.get().longValue()) : $T.empty()",
         param, OptionalLong.class, param, OptionalLong.class).build();

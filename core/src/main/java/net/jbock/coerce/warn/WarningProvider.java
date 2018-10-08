@@ -18,7 +18,8 @@ public class WarningProvider {
       new CollectionWarning(),
       new ArrayWarning(),
       new PrimitiveWarning(),
-      new DateWarning());
+      new DateWarning(),
+      new OptionalWarning());
 
   private static WarningProvider instance;
 
@@ -29,21 +30,21 @@ public class WarningProvider {
     return instance;
   }
 
-  public String findWarning(TypeMirror type) {
+  public String findWarning(TypeMirror type, boolean repeatable, boolean optional) {
     if (type.getKind() != TypeKind.DECLARED) {
-      return findWarningSimple(type);
+      return findWarningSimple(type, repeatable);
     }
     DeclaredType declared = type.accept(AS_DECLARED, null);
-    if (findKind(type).isCombination() && !declared.getTypeArguments().isEmpty()) {
+    if (optional && findKind(type).isCombination() && !declared.getTypeArguments().isEmpty()) {
       TypeElement typeElement = declared.asElement().accept(AS_TYPE_ELEMENT, null);
-      return findWarningSimple(typeElement.getTypeParameters().get(0).asType());
+      return findWarningSimple(typeElement.getTypeParameters().get(0).asType(), repeatable);
     }
-    return findWarningSimple(type);
+    return findWarningSimple(type, repeatable);
   }
 
-  private String findWarningSimple(TypeMirror type) {
+  private String findWarningSimple(TypeMirror type, boolean repeatable) {
     for (Warning warning : WARNINGS) {
-      String message = warning.message(type);
+      String message = warning.message(type, repeatable);
       if (message != null) {
         return message;
       }

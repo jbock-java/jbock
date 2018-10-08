@@ -17,10 +17,10 @@ abstract class AllLongsArguments {
   @Parameter(repeatable = true, shortName = 'i')
   abstract List<Long> listOfLongs();
 
-  @Parameter(longName = "opt")
+  @Parameter(optional = true, longName = "opt")
   abstract Optional<Long> optionalLong();
 
-  @Parameter(longName = "optlong")
+  @Parameter(optional = true, longName = "optlong")
   abstract OptionalLong optionalPrimitiveLong();
 
   @Parameter(longName = "obj")

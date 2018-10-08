@@ -120,13 +120,13 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter abstract java.util.Set<String> a();",
+        "  @Parameter(repeatable = true) abstract java.util.Set<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("This collection is not supported. Use List instead.");
+        .withErrorContaining("Define a custom collector. Alternatively, use List instead.");
   }
 
   @Test
@@ -134,13 +134,13 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter abstract int[] a();",
+        "  @Parameter(repeatable = true) abstract int[] a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Arrays are not supported. Use List instead.");
+        .withErrorContaining("Use List, or define a custom collector.");
   }
 
   @Test
@@ -200,7 +200,20 @@ class ProcessorTest {
   }
 
   @Test
-  void positionalBooleanPrimitive() {
+  void validPositionalBoolean() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @PositionalParameter abstract Boolean a();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void validPositionalboolean() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -209,22 +222,7 @@ class ProcessorTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("may not return boolean");
-  }
-
-  @Test
-  void positionalBoolean() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract Boolean a();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("may not return java.lang.Boolean");
+        .compilesWithoutError();
   }
 
   @Test
@@ -263,7 +261,7 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @PositionalParameter(repeatable = true) abstract List<String> a();",
-        "  @PositionalParameter abstract Optional<String> b();",
+        "  @PositionalParameter(optional = true) abstract Optional<String> b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -290,7 +288,7 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract Optional<String> a();",
+        "  @PositionalParameter(optional = true) abstract Optional<String> a();",
         "  @PositionalParameter abstract String b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
@@ -301,14 +299,42 @@ class ProcessorTest {
   }
 
   @Test
+  void mustDeclareAsOptional() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @PositionalParameter abstract Optional<Integer> a();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Declare this parameter optional.");
+  }
+
+  @Test
+  void mustDeclareAsOptionalInt() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "  @PositionalParameter abstract OptionalInt a();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Declare this parameter optional.");
+  }
+
+  @Test
   void positionalOptionalsAnyOrder() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract Optional<String> a();",
-        "  @PositionalParameter abstract OptionalInt b();",
-        "  @PositionalParameter abstract Optional<String> c();",
-        "  @PositionalParameter abstract OptionalInt d();",
+        "  @PositionalParameter(optional = true) abstract Optional<String> a();",
+        "  @PositionalParameter(optional = true) abstract OptionalInt b();",
+        "  @PositionalParameter(optional = true) abstract Optional<String> c();",
+        "  @PositionalParameter(optional = true) abstract OptionalInt d();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -321,7 +347,7 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @PositionalParameter abstract Optional<String> a();",
+        "  @PositionalParameter(optional = true) abstract Optional<String> a();",
         "  @Override public final String toString() {",
         "    return null;",
         "  }",

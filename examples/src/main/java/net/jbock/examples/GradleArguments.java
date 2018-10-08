@@ -16,7 +16,7 @@ abstract class GradleArguments {
    * the message
    * message goes here
    */
-  @Parameter(shortName = 'm')
+  @Parameter(optional = true, shortName = 'm')
   abstract Optional<String> message();
 
   /**
@@ -28,16 +28,16 @@ abstract class GradleArguments {
   /**
    * the dir
    */
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<String> dir();
 
   /**
    * cmos flag
    */
-  @Parameter(shortName = 'c', longName = "")
+  @Parameter(flag = true, shortName = 'c', longName = "")
   abstract boolean cmos();
 
-  @Parameter(shortName = 'v')
+  @Parameter(flag = true, shortName = 'v')
   abstract boolean verbose();
 
   @PositionalParameter(repeatable = true)
@@ -46,7 +46,7 @@ abstract class GradleArguments {
   @CommandLineArguments
   static abstract class Foo {
 
-    @Parameter
+    @Parameter(optional = true)
     abstract OptionalInt bar();
   }
 

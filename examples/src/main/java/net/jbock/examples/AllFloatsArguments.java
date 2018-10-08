@@ -16,7 +16,7 @@ abstract class AllFloatsArguments {
   @Parameter(repeatable = true, shortName = 'i')
   abstract List<Float> listOfFloats();
 
-  @Parameter(longName = "opt")
+  @Parameter(optional = true, longName = "opt")
   abstract Optional<Float> optionalFloat();
 
   @Parameter(longName = "obj")

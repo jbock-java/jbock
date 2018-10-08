@@ -26,28 +26,28 @@ abstract class CustomMapperArguments {
   @Parameter(mappedBy = DateMapper.class)
   abstract Date date();
 
-  @Parameter(mappedBy = DateMapper.class)
+  @Parameter(optional = true, mappedBy = DateMapper.class)
   abstract Optional<Date> optDate();
 
   @Parameter(repeatable = true, mappedBy = DateMapper.class)
   abstract List<Date> dateList();
 
-  @Parameter(mappedBy = CustomBigIntegerMapper.class)
+  @Parameter(optional = true, mappedBy = CustomBigIntegerMapper.class)
   abstract Optional<BigInteger> verbosity();
 
   @Parameter(mappedBy = PositiveNumberMapper.class)
   abstract int anInt();
 
-  @Parameter(mappedBy = PositiveNumberMapper.class)
+  @Parameter(optional = true, mappedBy = PositiveNumberMapper.class)
   abstract OptionalInt anOptionalInt();
 
-  @Parameter(mappedBy = ArrayMapper.class)
+  @Parameter(optional = true, mappedBy = ArrayMapper.class)
   abstract Optional<String[]> stringArray();
 
-  @Parameter(mappedBy = IntegerListMapper.class)
+  @Parameter(optional = true, mappedBy = IntegerListMapper.class)
   abstract Optional<List<Integer>> integerList();
 
-  @Parameter(mappedBy = EnumSetMapper.class)
+  @Parameter(optional = true, mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
   @PositionalParameter(repeatable = true, mappedBy = BooleanMapper.class)
@@ -56,7 +56,7 @@ abstract class CustomMapperArguments {
   @Parameter(repeatable = true, mappedBy = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
-  @Parameter(mappedBy = ListWrapperMapper.class)
+  @Parameter(optional = true, mappedBy = ListWrapperMapper.class)
   abstract Optional<List<String>> listWrapper();
 
   @Parameter(mappedBy = BooleanMapper.class)

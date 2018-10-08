@@ -11,18 +11,18 @@ import java.util.OptionalInt;
 @CommandLineArguments
 abstract class NoNameArguments {
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<String> message();
 
   @Parameter(repeatable = true)
   abstract List<String> file();
 
-  @Parameter(shortName = 'v')
+  @Parameter(optional = true, shortName = 'v')
   abstract OptionalInt verbosity();
 
   @Parameter(shortName = 'n')
   abstract int number();
 
-  @Parameter
+  @Parameter(flag = true)
   abstract boolean cmos();
 }

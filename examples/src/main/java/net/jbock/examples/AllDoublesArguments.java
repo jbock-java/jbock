@@ -17,10 +17,10 @@ abstract class AllDoublesArguments {
   @Parameter(repeatable = true, shortName = 'i')
   abstract List<Double> listOfDoubles();
 
-  @Parameter(longName = "opt")
+  @Parameter(optional = true, longName = "opt")
   abstract Optional<Double> optionalDouble();
 
-  @Parameter(longName = "optdouble")
+  @Parameter(optional = true, longName = "optdouble")
   abstract OptionalDouble optionalPrimitiveDouble();
 
   @Parameter(longName = "obj")

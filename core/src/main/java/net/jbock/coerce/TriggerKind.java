@@ -18,10 +18,6 @@ public final class TriggerKind {
     this.collectorInfo = requireNonNull(collectorInfo);
   }
 
-  TriggerKind withoutCollectorInfo() {
-    return new TriggerKind(kind, trigger, CollectorInfo.empty());
-  }
-
   @Override
   public String toString() {
     return kind + ", " + trigger;

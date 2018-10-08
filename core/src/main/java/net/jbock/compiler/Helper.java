@@ -296,7 +296,7 @@ final class Helper {
         builder.add("$L", mapExpr);
         builder.add(".collect($L)", param.coercion().collectExpr());
       }
-    } else {
+    } else if (!param.flag) {
       builder.add("$L", param.coercion().map());
     }
     if (param.required()) {

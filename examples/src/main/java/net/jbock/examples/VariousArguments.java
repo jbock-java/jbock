@@ -28,10 +28,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<BigDecimal> bigDecimalList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<BigDecimal> bigDecimalOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<BigDecimal> bigDecimalPos();
 
   @Parameter
@@ -40,10 +40,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<BigInteger> bigIntegerList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<BigInteger> bigIntegerOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<BigInteger> bigIntegerPos();
 
   @Parameter
@@ -52,10 +52,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<File> fileList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<File> fileOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<File> filePos();
 
   @Parameter
@@ -64,10 +64,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<Path> pathList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<Path> pathOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<Path> pathPos();
 
   @Parameter
@@ -76,10 +76,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<LocalDate> localDateList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<LocalDate> localDateOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<LocalDate> localDatePos();
 
   @Parameter
@@ -88,10 +88,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<LocalDateTime> localDateTimeList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<LocalDateTime> localDateTimeOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<LocalDateTime> localDateTimePos();
 
   @Parameter
@@ -100,10 +100,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<OffsetDateTime> offsetDateTimeList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<OffsetDateTime> offsetDateTimeOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<OffsetDateTime> offsetDateTimePos();
 
   @Parameter
@@ -112,10 +112,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<ZonedDateTime> zonedDateTimeList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<ZonedDateTime> zonedDateTimeOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<ZonedDateTime> zonedDateTimePos();
 
   @Parameter
@@ -124,10 +124,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<URI> uriList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<URI> uriOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<URI> uriPos();
 
   @Parameter
@@ -136,10 +136,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<Charset> charsetList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<Charset> charsetOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<Charset> charsetPos();
 
   @Parameter
@@ -148,10 +148,10 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<Pattern> patternList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<Pattern> patternOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<Pattern> patternPos();
 
   @Parameter
@@ -160,9 +160,9 @@ abstract class VariousArguments {
   @Parameter(repeatable = true)
   abstract List<Instant> instantList();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<Instant> instantOpt();
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<Instant> instantPos();
 }

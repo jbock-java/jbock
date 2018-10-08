@@ -8,7 +8,7 @@ import java.util.Set;
 abstract class PreciseTypeWarning extends Warning {
 
   @Override
-  public final String message(TypeMirror mirror) {
+  public final String message(TypeMirror mirror, boolean repeatable) {
     TypeName typeName = TypeName.get(mirror);
     if (types().contains(typeName)) {
       return message(typeName);

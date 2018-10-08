@@ -6,9 +6,13 @@ import javax.lang.model.type.TypeMirror;
 public class ArrayWarning extends Warning {
 
   @Override
-  public String message(TypeMirror type) {
+  public String message(TypeMirror type, boolean repeatable) {
     if (type.getKind() == TypeKind.ARRAY) {
-      return "Arrays are not supported. Use java.util.List instead.";
+      if (!repeatable) {
+        return "Declare this parameter repeatable.";
+      } else {
+        return "Use List, or define a custom collector.";
+      }
     }
     return null;
   }

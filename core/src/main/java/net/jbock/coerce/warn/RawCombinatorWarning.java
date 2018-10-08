@@ -11,7 +11,7 @@ import static net.jbock.compiler.Util.AS_TYPE_ELEMENT;
 public class RawCombinatorWarning extends Warning {
 
   @Override
-  public String message(TypeMirror mirror) {
+  public String message(TypeMirror mirror, boolean repeatable) {
     if (mirror.getKind() != TypeKind.DECLARED) {
       return null;
     }

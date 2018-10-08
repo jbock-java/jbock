@@ -17,10 +17,10 @@ abstract class AllIntegersArguments {
   @Parameter(repeatable = true, shortName = 'i')
   abstract List<Integer> listOfIntegers();
 
-  @Parameter(longName = "opt")
+  @Parameter(optional = true, longName = "opt")
   abstract Optional<Integer> optionalInteger();
 
-  @Parameter(longName = "optint")
+  @Parameter(optional = true, longName = "optint")
   abstract OptionalInt optionalInt();
 
   @Parameter(longName = "obj")

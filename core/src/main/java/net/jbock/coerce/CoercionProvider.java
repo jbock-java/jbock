@@ -25,7 +25,6 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 
 import static javax.lang.model.element.Modifier.FINAL;
-import static net.jbock.coerce.CoercionKind.SIMPLE;
 import static net.jbock.coerce.CoercionKind.findKind;
 import static net.jbock.coerce.MapperClassValidator.validateMapperClass;
 import static net.jbock.coerce.mappers.MapperCoercion.mapperInit;
@@ -49,16 +48,21 @@ public class CoercionProvider {
       String paramName,
       TypeElement mapperClass,
       TypeElement collectorClass,
-      boolean repeatable) {
+      boolean repeatable,
+      boolean optional) {
+    if (repeatable && optional) {
+      throw ValidationException.create(sourceMethod,
+          "The parameter can be repeatable or optional, but not both.");
+    }
     if (collectorClass != null && !repeatable) {
       throw ValidationException.create(sourceMethod,
           "The parameter must be declared repeatable in order to have a collector.");
     }
     TypeMirror returnType = sourceMethod.getReturnType();
     try {
-      return handle(sourceMethod, paramName, mapperClass, collectorClass, repeatable);
+      return handle(sourceMethod, paramName, mapperClass, collectorClass, repeatable, optional);
     } catch (TmpException e) {
-      String warning = WarningProvider.instance().findWarning(returnType);
+      String warning = WarningProvider.instance().findWarning(returnType, repeatable, optional);
       if (warning != null) {
         throw e.asValidationException(sourceMethod, warning);
       }
@@ -71,7 +75,8 @@ public class CoercionProvider {
       String paramName,
       TypeElement mapperClass,
       TypeElement collectorClass,
-      boolean repeatable) throws TmpException {
+      boolean repeatable,
+      boolean optional) throws TmpException {
     FieldSpec field = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()),
         snakeToCamel(paramName))
         .addModifiers(FINAL)
@@ -80,15 +85,15 @@ public class CoercionProvider {
       return handleRepeatable(sourceMethod, paramName, mapperClass, collectorClass, field);
     }
     if (mapperClass != null) {
-      return handleMapper(sourceMethod, paramName, mapperClass, collectorClass, field);
+      return handleMapper(sourceMethod, paramName, mapperClass, field, optional);
     }
     TypeMirror returnType = sourceMethod.getReturnType();
     if (returnType.getKind() == TypeKind.ARRAY) {
       // there's no default mapper for array
       throw new TmpException("Either switch to List and declare this parameter repeatable, or use a custom mapper.");
     }
-    TriggerKind tk = trigger(returnType, collectorClass, repeatable);
-    return handleDefault(tk, field);
+    TriggerKind tk = trigger(returnType, optional);
+    return handleDefault(tk, field, optional);
   }
 
   private Coercion handleRepeatable(
@@ -130,11 +135,11 @@ public class CoercionProvider {
       ExecutableElement sourceMethod,
       String paramName,
       TypeElement mapperClass,
-      TypeElement collectorClass,
-      FieldSpec field) throws TmpException {
+      FieldSpec field,
+      boolean optional) throws TmpException {
     TypeName mapperType = TypeName.get(mapperClass.asType());
     ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
-    TriggerKind tk = trigger(sourceMethod.getReturnType(), collectorClass, false);
+    TriggerKind tk = trigger(sourceMethod.getReturnType(), optional);
     MapperSkew skew = mapperSkew(tk);
     try {
       TypeMirror resultType = validateMapperClass(mapperClass);
@@ -157,31 +162,29 @@ public class CoercionProvider {
   }
 
   private MapperSkew mapperSkew(TriggerKind tk) {
-    if (tk.kind != SIMPLE) {
+    if (tk.kind == CoercionKind.OPTIONAL_COMBINATION) {
       return null;
     }
     if (!tk.collectorInfo.collectorInit.isEmpty()) {
       return null;
     }
     if (tk.trigger.getKind().isPrimitive()) {
-      if (!AllCoercions.containsKey(tk.trigger)) {
-        return null;
-      }
-      return new MapperSkew(TypeTool.get().box(tk.trigger), TypeTool.get().box(tk.trigger));
+      return MapperSkew.create(TypeTool.get().box(tk.trigger));
     }
     if (TypeTool.get().equals(tk.trigger, OptionalInt.class)) {
-      return new MapperSkew(TypeTool.get().declared(Integer.class), tk.trigger);
+      return MapperSkew.create(TypeTool.get().declared(Integer.class), tk.trigger);
     } else if (TypeTool.get().equals(tk.trigger, OptionalDouble.class)) {
-      return new MapperSkew(TypeTool.get().declared(Double.class), tk.trigger);
+      return MapperSkew.create(TypeTool.get().declared(Double.class), tk.trigger);
     } else if (TypeTool.get().equals(tk.trigger, OptionalLong.class)) {
-      return new MapperSkew(TypeTool.get().declared(Long.class), tk.trigger);
+      return MapperSkew.create(TypeTool.get().declared(Long.class), tk.trigger);
     }
     return null;
   }
 
   private Coercion handleDefault(
       TriggerKind tk,
-      FieldSpec field) throws TmpException {
+      FieldSpec field,
+      boolean optional) throws TmpException {
     CoercionFactory enumCoercion = checkEnum(tk.trigger);
     if (enumCoercion != null) {
       return enumCoercion.getCoercion(field, tk);
@@ -189,6 +192,9 @@ public class CoercionProvider {
       CoercionFactory factory = AllCoercions.get(tk.trigger);
       if (factory == null) {
         throw TmpException.create("Bad return type");
+      }
+      if (factory.handlesOptionalPrimitive() && !optional) {
+        throw TmpException.create("Declare this parameter optional.");
       }
       return factory.getCoercion(field, tk);
     }
@@ -212,19 +218,14 @@ public class CoercionProvider {
 
   private TriggerKind trigger(
       TypeMirror returnType,
-      TypeElement collectorClass,
-      boolean repeatable) throws TmpException {
-    if (repeatable) {
-      CollectorInfo collectorInput = collectorInput(collectorClass, returnType);
-      return CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
-    }
+      boolean optional) {
     DeclaredType parameterized = Util.asParameterized(returnType);
     if (parameterized == null) {
       // not a combination, triggered by return type
       return CoercionKind.SIMPLE.of(returnType, CollectorInfo.empty());
     }
     CoercionKind kind = findKind(parameterized);
-    if (kind.isCombination()) {
+    if (optional && kind.isCombination()) {
       return kind.of(parameterized.getTypeArguments().get(0), CollectorInfo.empty());
     }
     return kind.of(parameterized, CollectorInfo.empty());

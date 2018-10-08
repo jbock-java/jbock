@@ -93,15 +93,10 @@ final class Impl {
     builder.addStatement("$T $N = new $T($S, $S, $S)",
         StringJoiner.class, joiner, StringJoiner.class, ", ", "{", "}");
 
-    if (option.context.positionalParamTypes.contains(REPEATABLE) ||
-        option.context.nonpositionalParamTypes.contains(REPEATABLE) ||
-        option.context.nonpositionalParamTypes.contains(OptionType.REGULAR) ||
-        option.context.positionalParamTypes.contains(OptionType.REGULAR)) {
-      ParameterSpec quote = option.context.quoteParam();
-      ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-      builder.addStatement("$T $N = $N -> $T.format($S, $N)",
-          quote.type, quote, s, String.class, "\"%s\"", s);
-    }
+    ParameterSpec quote = option.context.quoteParam();
+    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    builder.addStatement("$T $N = $N -> $T.format($S, $N)",
+        quote.type, quote, s, String.class, "\"%s\"", s);
 
     if (option.context.positionalParamTypes.contains(REPEATABLE) ||
         option.context.nonpositionalParamTypes.contains(REPEATABLE)) {

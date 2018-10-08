@@ -4,7 +4,6 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 
 import javax.lang.model.type.PrimitiveType;
-import java.util.Objects;
 
 abstract class BasicBooleanCoercion extends CoercionFactory {
 
@@ -18,7 +17,7 @@ abstract class BasicBooleanCoercion extends CoercionFactory {
 
   @Override
   final CodeBlock map() {
-    return CodeBlock.builder().build();
+    return CodeBlock.builder().add(".map($T::valueOf)", Boolean.class).build();
   }
 
   @Override
@@ -27,6 +26,7 @@ abstract class BasicBooleanCoercion extends CoercionFactory {
   }
 
   CodeBlock mapJsonExpr(FieldSpec field) {
-    return CodeBlock.builder().add(".map($T::toString)", Objects.class).build();
+    return CodeBlock.builder().build();
   }
+
 }

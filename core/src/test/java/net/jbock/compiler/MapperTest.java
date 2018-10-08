@@ -19,7 +19,7 @@ class MapperTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @Parameter(mappedBy = ArrayMapper.class)",
+        "  @Parameter(optional = true, mappedBy = ArrayMapper.class)",
         "  abstract Optional<String[]> stringArray();",
         "",
         "  static class ArrayMapper implements Supplier<Function<String, String[]>> {",
@@ -29,6 +29,28 @@ class MapperTest {
         "  }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void validBooleanList() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @PositionalParameter(repeatable = true, mappedBy = BooleanMapper.class)",
+        "  abstract List<Boolean> booleanList();",
+        "",
+        "  static class BooleanMapper implements Supplier<Function<String, Boolean>> {",
+        "    @Override",
+        "    public Function<String, Boolean> get() {",
+        "      return Boolean::valueOf;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();

@@ -65,7 +65,12 @@ public @interface PositionalParameter {
   Class<? extends Supplier> collectedBy() default Supplier.class;
 
   /**
-   * <p>Declares this argument repeatable.</p>
+   * <p>Declares this parameter repeatable.</p>
    */
   boolean repeatable() default false;
+
+  /**
+   * <p>Declares this parameter optional.</p>
+   */
+  boolean optional() default false;
 }

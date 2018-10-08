@@ -8,9 +8,9 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class SimpleArguments {
 
-  @Parameter(shortName = 'x')
+  @Parameter(flag = true, shortName = 'x')
   abstract boolean extract();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<String> file();
 }

@@ -5,7 +5,6 @@ import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.compiler.Constants;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Objects;
@@ -111,29 +110,8 @@ public final class Coercion {
     return field;
   }
 
-  public boolean flag() {
-    return initMapper.isEmpty() &&
-        (TypeName.BOOLEAN.equals(field.type) || BOOLEAN_CLASS.equals(field.type));
-  }
-
   public CodeBlock extract() {
     return extract;
-  }
-
-  public boolean required() {
-    if (collectorParam.isPresent()) {
-      // repeatable
-      return false;
-    }
-    if (flag()) {
-      return false;
-    }
-    if (field.type.equals(Constants.OPTIONAL_INT) ||
-        field.type.equals(Constants.OPTIONAL_DOUBLE) ||
-        field.type.equals(Constants.OPTIONAL_LONG)) {
-      return false;
-    }
-    return kind == CoercionKind.SIMPLE;
   }
 
   Coercion withMapper(CodeBlock map, CodeBlock initMapper) {

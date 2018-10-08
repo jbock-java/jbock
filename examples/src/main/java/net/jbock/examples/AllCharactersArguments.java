@@ -15,7 +15,7 @@ abstract class AllCharactersArguments {
   @Parameter
   abstract Character bigChar();
 
-  @Parameter
+  @Parameter(optional = true)
   abstract Optional<Character> charOpt();
 
   @Parameter(repeatable = true)

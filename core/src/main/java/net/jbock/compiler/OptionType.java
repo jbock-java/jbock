@@ -23,8 +23,10 @@ enum OptionType {
     @Override
     CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
       CodeBlock.Builder builder = CodeBlock.builder();
-      builder.addStatement("$N.add($S + $L)",
+      builder.addStatement("$N.add($T.format($S, $L, $L))",
           joiner,
+          String.class,
+          "%s:%s",
           jsonKey(param),
           param.coercion().jsonExpr());
       return builder.build();
@@ -65,8 +67,10 @@ enum OptionType {
         valueExpr = param.coercion().jsonExpr();
       }
       return CodeBlock.builder()
-          .addStatement("$N.add($S + $L)",
+          .addStatement("$N.add($T.format($S, $L, $L))",
               joiner,
+              String.class,
+              "%s:%s",
               jsonKey(param),
               valueExpr)
           .build();
@@ -99,8 +103,10 @@ enum OptionType {
           .add("$N.stream()$L.collect(toArray)",
               param.field(), param.coercion().mapJsonExpr()).build();
       return CodeBlock.builder()
-          .addStatement("$N.add($S + $L)",
+          .addStatement("$N.add($T.format($S, $L, $L))",
               joiner,
+              String.class,
+              "%s:%s",
               jsonKey(param),
               valueExpr)
           .build();
@@ -114,7 +120,7 @@ enum OptionType {
 
   abstract CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param);
 
-  private static String jsonKey(Param param) {
-    return '"' + param.methodName() + "\":";
+  private static CodeBlock jsonKey(Param param) {
+    return CodeBlock.builder().add("quote.apply($S)", param.methodName()).build();
   }
 }
