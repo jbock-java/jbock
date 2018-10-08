@@ -8,6 +8,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class TypeTool {
     instance = null;
   }
 
-  private void unify(DeclaredType x, TypeMirror ym, Map<String, DeclaredType> acc, boolean[] failure) {
+  private void unify(TypeMirror x, TypeMirror ym, Map<String, TypeMirror> acc, boolean[] failure) {
     if (failure[0]) {
       return;
     }
@@ -53,7 +54,7 @@ public class TypeTool {
       return;
     }
     DeclaredType y = ym.accept(AS_DECLARED, null);
-    List<? extends TypeMirror> xargs = x.getTypeArguments();
+    List<? extends TypeMirror> xargs = x.accept(Util.GET_TYPEARGS, Collections.emptyList());
     List<? extends TypeMirror> yargs = y.getTypeArguments();
     if (xargs.size() != yargs.size()) {
       failure[0] = true;
@@ -66,19 +67,19 @@ public class TypeTool {
     }
   }
 
-  public Optional<Map<String, DeclaredType>> unify(DeclaredType x, TypeMirror ym) {
-    Map<String, DeclaredType> acc = new HashMap<>();
+  public Optional<Map<String, TypeMirror>> unify(TypeMirror concreteType, TypeMirror ym) {
+    Map<String, TypeMirror> acc = new HashMap<>();
     boolean[] failure = new boolean[1];
-    unify(x, ym, acc, failure);
+    unify(concreteType, ym, acc, failure);
     if (failure[0]) {
       return Optional.empty();
     }
     return Optional.of(acc);
   }
 
-  public DeclaredType substitute(TypeMirror input, Map<String, DeclaredType> solution) {
+  public TypeMirror substitute(TypeMirror input, Map<String, TypeMirror> solution) {
     if (input.getKind() == TypeKind.TYPEVAR) {
-      DeclaredType result = solution.get(input.toString());
+      TypeMirror result = solution.get(input.toString());
       if (result == null) {
         throw new IllegalArgumentException();
       }
@@ -94,7 +95,7 @@ public class TypeTool {
   }
 
   boolean isAssignable(DeclaredType x, TypeMirror ym) {
-    Optional<Map<String, DeclaredType>> solution = unify(x, ym);
+    Optional<Map<String, TypeMirror>> solution = unify(x, ym);
     if (!solution.isPresent()) {
       return false;
     }

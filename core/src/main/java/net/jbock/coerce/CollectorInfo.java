@@ -1,6 +1,7 @@
 package net.jbock.coerce;
 
 import net.jbock.com.squareup.javapoet.CodeBlock;
+import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -27,7 +28,7 @@ public class CollectorInfo {
 
   static CollectorInfo create(TypeMirror input, TypeElement collectorClass) {
     CodeBlock init = CodeBlock.builder()
-        .add("new $T().get()", collectorClass)
+        .add("new $T().get()", TypeTool.get().erasure(collectorClass.asType()))
         .build();
     return new CollectorInfo(init, input);
   }
@@ -38,6 +39,10 @@ public class CollectorInfo {
 
   static CodeBlock standardCollectorInit() {
     return STANDARD_INIT;
+  }
+
+  CollectorInfo withInput(TypeMirror collectorInput) {
+    return new CollectorInfo(collectorInit, collectorInput);
   }
 
   public boolean isEmpty() {

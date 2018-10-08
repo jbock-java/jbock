@@ -1,6 +1,7 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.Util;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
@@ -8,6 +9,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.HashMap;
@@ -62,6 +64,9 @@ final class MapperClassValidator {
     TypeMirror resultType = functionTypeargs.get("R");
     if (inputType == null || resultType == null ||
         !TypeTool.get().equals(inputType, String.class)) {
+      throw new MapEx();
+    }
+    if (resultType.getKind() != TypeKind.DECLARED && resultType.getKind() != TypeKind.ARRAY) {
       throw new MapEx();
     }
     return resultType;

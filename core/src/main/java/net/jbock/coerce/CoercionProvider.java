@@ -18,6 +18,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
@@ -74,11 +76,10 @@ public class CoercionProvider {
         snakeToCamel(paramName))
         .addModifiers(FINAL)
         .build();
-    boolean hasMapper = mapperClass != null;
-    if (repeatable && hasMapper) {
+    if (repeatable) {
       return handleRepeatable(sourceMethod, paramName, mapperClass, collectorClass, field);
     }
-    if (hasMapper) {
+    if (mapperClass != null) {
       return handleMapper(sourceMethod, paramName, mapperClass, collectorClass, field);
     }
     TypeMirror returnType = sourceMethod.getReturnType();
@@ -99,13 +100,26 @@ public class CoercionProvider {
     TypeMirror returnType = sourceMethod.getReturnType();
     CollectorInfo collectorInput = collectorInput(collectorClass, returnType);
     TriggerKind tk = CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
-    TypeName mapperType = TypeName.get(mapperClass.asType());
-    ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
+    if (mapperClass == null) {
+      CoercionFactory coercion = AllCoercions.get(collectorInput.collectorInput);
+      if (coercion == null) {
+        throw TmpException.create(String.format("Unknown collector input %s, please define a custom mapper.", collectorInput.collectorInput));
+      }
+      return coercion.getCoercion(field, tk);
+    }
     try {
       TypeMirror resultType = validateMapperClass(mapperClass);
-      if (!TypeTool.get().equals(resultType, tk.trigger)) {
+      Optional<Map<String, TypeMirror>> solution = TypeTool.get().unify(resultType, tk.trigger);
+      if (!solution.isPresent()) {
         throw TmpException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", tk.trigger));
       }
+      if (tk.trigger.getKind() == TypeKind.TYPEVAR) {
+        TypeMirror trigger = solution.get().get(tk.trigger.toString());
+        collectorInput = collectorInput.withInput(trigger);
+        tk = CoercionKind.SIMPLE.of(trigger, collectorInput);
+      }
+      TypeName mapperType = TypeName.get(mapperClass.asType());
+      ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
       return MapperCoercion.create(tk, mapperParam, mapperClass.asType(), field);
     } catch (MapperClassValidator.MapEx e) {
       throw TmpException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", tk.trigger));

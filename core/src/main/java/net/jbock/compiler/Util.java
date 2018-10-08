@@ -33,6 +33,14 @@ public final class Util {
         }
       };
 
+  public static final TypeVisitor<List<? extends TypeMirror>, List<? extends TypeMirror>> GET_TYPEARGS =
+      new SimpleTypeVisitor8<List<? extends TypeMirror>, List<? extends TypeMirror>>() {
+        @Override
+        public List<? extends TypeMirror> visitDeclared(DeclaredType declaredType, List<? extends TypeMirror> defaultValue) {
+          return declaredType.getTypeArguments();
+        }
+      };
+
   public static final TypeVisitor<ArrayType, Void> AS_ARRAY =
       new SimpleTypeVisitor8<ArrayType, Void>() {
         @Override
