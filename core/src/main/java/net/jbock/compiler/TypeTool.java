@@ -5,7 +5,9 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,6 +19,14 @@ import java.util.Optional;
 import static net.jbock.compiler.Util.AS_DECLARED;
 
 public class TypeTool {
+
+  private static final TypeVisitor<List<? extends TypeMirror>, List<? extends TypeMirror>> TYPEARGS =
+      new SimpleTypeVisitor8<List<? extends TypeMirror>, List<? extends TypeMirror>>() {
+        @Override
+        public List<? extends TypeMirror> visitDeclared(DeclaredType declaredType, List<? extends TypeMirror> defaultValue) {
+          return declaredType.getTypeArguments();
+        }
+      };
 
   private final Types types;
 
@@ -54,7 +64,7 @@ public class TypeTool {
       return;
     }
     DeclaredType y = ym.accept(AS_DECLARED, null);
-    List<? extends TypeMirror> xargs = x.accept(Util.GET_TYPEARGS, Collections.emptyList());
+    List<? extends TypeMirror> xargs = x.accept(TYPEARGS, Collections.emptyList());
     List<? extends TypeMirror> yargs = y.getTypeArguments();
     if (xargs.size() != yargs.size()) {
       failure[0] = true;

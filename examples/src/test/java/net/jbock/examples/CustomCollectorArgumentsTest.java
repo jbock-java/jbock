@@ -34,7 +34,6 @@ class CustomCollectorArgumentsTest {
     assertEquals(new HashSet<>(asList(1, 2)), parsed.integers());
   }
 
-/*
   @Test
   void testCustomMapper() {
     CustomCollectorArguments parsed = f.parse(
@@ -43,5 +42,4 @@ class CustomCollectorArgumentsTest {
         "-M", "10");
     assertEquals(Stream.of(5L, 10L).map(BigInteger::valueOf).collect(toSet()), parsed.bigIntegers());
   }
-*/
 }

@@ -33,22 +33,6 @@ public final class Util {
         }
       };
 
-  public static final TypeVisitor<List<? extends TypeMirror>, List<? extends TypeMirror>> GET_TYPEARGS =
-      new SimpleTypeVisitor8<List<? extends TypeMirror>, List<? extends TypeMirror>>() {
-        @Override
-        public List<? extends TypeMirror> visitDeclared(DeclaredType declaredType, List<? extends TypeMirror> defaultValue) {
-          return declaredType.getTypeArguments();
-        }
-      };
-
-  public static final TypeVisitor<ArrayType, Void> AS_ARRAY =
-      new SimpleTypeVisitor8<ArrayType, Void>() {
-        @Override
-        public ArrayType visitArray(ArrayType t, Void _null) {
-          return t;
-        }
-      };
-
   public static final ElementVisitor<TypeElement, Void> AS_TYPE_ELEMENT =
       new SimpleElementVisitor8<TypeElement, Void>() {
         @Override
@@ -79,10 +63,6 @@ public final class Util {
     return ParameterizedTypeName.get(ClassName.get(Optional.class), typeName);
   }
 
-  public static ParameterizedTypeName listOf(TypeName typeName) {
-    return ParameterizedTypeName.get(ClassName.get(List.class), typeName);
-  }
-
   static ParameterizedTypeName optionalOfSubtype(TypeName typeName) {
     return ParameterizedTypeName.get(ClassName.get(Optional.class), subtypeOf(typeName));
   }
@@ -99,7 +79,7 @@ public final class Util {
     return result;
   }
 
-  public static boolean equalsType(TypeMirror typeMirror, String qualified) {
+  static boolean equalsType(TypeMirror typeMirror, String qualified) {
     return qualified.equals(typeMirror.accept(QUALIFIED_NAME, null));
   }
 
