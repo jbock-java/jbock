@@ -3,6 +3,9 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.OptionalInt;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
@@ -16,8 +19,8 @@ class AllIntegersArgumentsTest {
     f.assertThat("-i1", "-i2", "-i2", "-i3", "--obj=1", "--prim=1").succeeds(
         "positional", emptyList(),
         "listOfIntegers", asList(1, 2, 2, 3),
-        "optionalInteger", null,
-        "optionalInt", null,
+        "optionalInteger", Optional.empty(),
+        "optionalInt", OptionalInt.empty(),
         "integer", 1,
         "primitiveInt", 1);
   }
@@ -27,8 +30,8 @@ class AllIntegersArgumentsTest {
     f.assertThat("--opt", "1", "--obj=1", "--prim=1").succeeds(
         "positional", emptyList(),
         "listOfIntegers", emptyList(),
-        "optionalInteger", 1,
-        "optionalInt", null,
+        "optionalInteger", Optional.of(1),
+        "optionalInt", OptionalInt.empty(),
         "integer", 1,
         "primitiveInt", 1);
   }
@@ -38,8 +41,8 @@ class AllIntegersArgumentsTest {
     f.assertThat("--obj=1", "--prim=1", "5", "3").succeeds(
         "positional", asList(5, 3),
         "listOfIntegers", emptyList(),
-        "optionalInteger", null,
-        "optionalInt", null,
+        "optionalInteger", Optional.empty(),
+        "optionalInt", OptionalInt.empty(),
         "integer", 1,
         "primitiveInt", 1);
   }

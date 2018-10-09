@@ -3,6 +3,8 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -15,7 +17,7 @@ class CurlArgumentsTest {
   @Test
   void testEmpty() {
     f.assertThat().succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", emptyList(),
         "verbose", false,
         "include", false,
@@ -25,31 +27,31 @@ class CurlArgumentsTest {
   @Test
   void testOptional() {
     f.assertThat("--request=").succeeds(
-        "method", "",
+        "method", Optional.of(""),
         "headers", emptyList(),
         "verbose", false,
         "include", false,
         "urls", emptyList());
     f.assertThat("--request= ").succeeds(
-        "method", " ",
+        "method", Optional.of(" "),
         "headers", emptyList(),
         "verbose", false,
         "include", false,
         "urls", emptyList());
     f.assertThat("--request", "").succeeds(
-        "method", "",
+        "method", Optional.of(""),
         "headers", emptyList(),
         "verbose", false,
         "include", false,
         "urls", emptyList());
     f.assertThat("-XPUT").succeeds(
-        "method", "PUT",
+        "method", Optional.of("PUT"),
         "headers", emptyList(),
         "verbose", false,
         "include", false,
         "urls", emptyList());
     f.assertThat("-X", "PUT").succeeds(
-        "method", "PUT",
+        "method", Optional.of("PUT"),
         "headers", emptyList(),
         "verbose", false,
         "include", false,
@@ -59,25 +61,25 @@ class CurlArgumentsTest {
   @Test
   void testRepeatable() {
     f.assertThat("-H1").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", singletonList("1"),
         "verbose", false,
         "include", false,
         "urls", emptyList());
     f.assertThat("-H1", "-H2").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", false,
         "include", false,
         "urls", emptyList());
     f.assertThat("-H", "1").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", singletonList("1"),
         "verbose", false,
         "include", false,
         "urls", emptyList());
     f.assertThat("-H", "1", "-H", "2").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", false,
         "include", false,
@@ -87,67 +89,67 @@ class CurlArgumentsTest {
   @Test
   void variousTests() {
     f.assertThat("-v", "-H1").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", singletonList("1"),
         "verbose", true,
         "include", false,
         "urls", emptyList());
     f.assertThat("-v", "-i", "-H1").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", singletonList("1"),
         "verbose", true,
         "include", true,
         "urls", emptyList());
     f.assertThat("-i", "-v", "-H1").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", singletonList("1"),
         "verbose", true,
         "include", true,
         "urls", emptyList());
     f.assertThat("-v", "-i", "1").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", emptyList(),
         "verbose", true,
         "include", true,
         "urls", singletonList("1"));
     f.assertThat("-v", "-H", "1", "-H2").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", true,
         "include", false,
         "urls", emptyList());
     f.assertThat("-v", "-i", "-H", "1", "-H2").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", true,
         "include", true,
         "urls", emptyList());
     f.assertThat("-v", "-H1", "-H2").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", true,
         "include", false,
         "urls", emptyList());
     f.assertThat("-v", "-i", "-H1", "-H2").succeeds(
-        "method", null,
+        "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", true,
         "include", true,
         "urls", emptyList());
     f.assertThat("-v", "-XPOST").succeeds(
-        "method", "POST",
+        "method", Optional.of("POST"),
         "headers", emptyList(),
         "verbose", true,
         "include", false,
         "urls", emptyList());
     f.assertThat("-v", "-i", "-XPOST").succeeds(
-        "method", "POST",
+        "method", Optional.of("POST"),
         "headers", emptyList(),
         "verbose", true,
         "include", true,
         "urls", emptyList());
     f.assertThat("-v", "-i", "-XPOST").succeeds(
-        "method", "POST",
+        "method", Optional.of("POST"),
         "headers", emptyList(),
         "verbose", true,
         "include", true,

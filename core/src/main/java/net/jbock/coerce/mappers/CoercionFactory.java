@@ -49,16 +49,6 @@ public abstract class CoercionFactory {
     return trigger;
   }
 
-  // toString stuff
-  CodeBlock jsonExpr(String param) {
-    return CodeBlock.builder().add("quote.apply($T.toString($L))", Objects.class, param).build();
-  }
-
-  // toString stuff
-  CodeBlock mapJsonExpr(FieldSpec field) {
-    return CodeBlock.builder().add(".map($T::toString).map(quote)", Objects.class).build();
-  }
-
   CodeBlock initMapper() {
     return CodeBlock.builder().build();
   }
@@ -72,14 +62,13 @@ public abstract class CoercionFactory {
       TriggerKind tk) {
     // primitive optionals get special treatment here
     ParameterSpec param = ParameterSpec.builder(paramType(), field.name).build();
+    CodeBlock initMapper = initMapper();
     Coercion coercion = new Coercion(
         trigger,
         Optional.ofNullable(collectorParam(field, tk.collectorInfo)),
         map(),
-        initMapper(),
+        initMapper,
         initCollector(field, tk.collectorInfo),
-        jsonExpr(field.name),
-        mapJsonExpr(field),
         extract(param),
         paramType(),
         field,

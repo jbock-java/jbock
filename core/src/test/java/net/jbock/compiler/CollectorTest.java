@@ -105,4 +105,34 @@ class CollectorTest {
         .processedWith(new Processor())
         .compilesWithoutError();
   }
+
+  @Test
+  void validMap() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(repeatable = true, shortName = 'T', mappedBy = MapEntryMapper.class, collectedBy = MapEntryCollector.class)",
+        "  abstract Map<String, LocalDate> map();",
+        "",
+        "  static class MapEntryMapper implements Supplier<Function<String, Map.Entry<String, LocalDate>>> {",
+        "    public Function<String, Map.Entry<String, LocalDate>> get() {",
+        "      return s -> {",
+        "        String[] tokens = s.split(\":\", 2);",
+        "        return new AbstractMap.SimpleImmutableEntry<>(tokens[0], LocalDate.parse(tokens[1]));",
+        "      };",
+        "    }",
+        "  }",
+        "",
+        "  static class MapEntryCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {",
+        "    public Collector<Map.Entry<K, V>, ?, Map<K, V>> get() {",
+        "      return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue);",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
 }

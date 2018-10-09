@@ -8,15 +8,11 @@ import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.StringJoiner;
-import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.OptionType.REPEATABLE;
 
 /**
  * Defines the *_Impl inner class.
@@ -51,9 +47,6 @@ final class Impl {
     spec.addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor())
         .addMethods(bindMethods());
-    if (option.context.generateToString) {
-      spec.addMethod(toStringMethod());
-    }
     return spec.build();
   }
 
@@ -84,35 +77,5 @@ final class Impl {
       builder.addParameter(param);
     }
     return builder.build();
-  }
-
-  private MethodSpec toStringMethod() {
-    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
-
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("toString");
-    builder.addStatement("$T $N = new $T($S, $S, $S)",
-        StringJoiner.class, joiner, StringJoiner.class, ", ", "{", "}");
-
-    ParameterSpec quote = option.context.quoteParam();
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-    builder.addStatement("$T $N = $N -> $T.format($S, $N)",
-        quote.type, quote, s, String.class, "\"%s\"", s);
-
-    if (option.context.positionalParamTypes.contains(REPEATABLE) ||
-        option.context.nonpositionalParamTypes.contains(REPEATABLE)) {
-      ParameterSpec collect = option.context.toArrayParam();
-      builder.addStatement("$T $N = $T.joining($S, $S, $S)",
-          collect.type, collect, Collectors.class, ",", "[", "]");
-    }
-
-    for (Param param : option.context.parameters) {
-      builder.addCode(param.paramType.jsonStatement(this, joiner, param));
-    }
-    builder.addStatement("return $N.toString()", joiner);
-
-    return builder.addModifiers(PUBLIC)
-        .addAnnotation(Override.class)
-        .returns(STRING)
-        .build();
   }
 }

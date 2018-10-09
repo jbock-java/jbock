@@ -16,8 +16,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jbock.version>0-SNAPSHOT</jbock.version>
-    <jackson.version>2.9.6</jackson.version>
-    <junit.version>5.3.0-RC1</junit.version>
+    <junit.version>5.3.1</junit.version>
     <surefire.version>2.22.0</surefire.version>
     <compiler-plugin.version>3.8.0</compiler-plugin.version>
   </properties>
@@ -29,20 +28,6 @@
       <artifactId>jbock</artifactId>
       <version>${jbock.version}</version>
       <scope>provided</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
-      <scope>test</scope>
     </dependency>
 
     <dependency>

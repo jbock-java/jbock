@@ -7,8 +7,6 @@ import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.WildcardTypeName;
 
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.OptionalInt;
@@ -17,7 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collector;
 
 import static java.util.stream.Collectors.toList;
-import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.asType;
 
@@ -40,9 +37,6 @@ final class Context {
 
   // should unknown parameters that start with dash be forbidden
   final boolean strict;
-
-  // true if the source type does not already define toString
-  final boolean generateToString;
 
   // true if --help is a special token
   final boolean addHelp;
@@ -87,7 +81,6 @@ final class Context {
       List<Param> positionalParameters,
       boolean allowEscape,
       boolean strict,
-      boolean generateToString,
       boolean addHelp,
       Set<OptionType> nonpositionalParamTypes,
       Set<OptionType> positionalParamTypes,
@@ -111,7 +104,6 @@ final class Context {
     this.positionalParameters = positionalParameters;
     this.allowEscape = allowEscape;
     this.strict = strict;
-    this.generateToString = generateToString;
     this.addHelp = addHelp;
     this.nonpositionalParamTypes = nonpositionalParamTypes;
     this.positionalParamTypes = positionalParamTypes;
@@ -142,11 +134,6 @@ final class Context {
     List<Param> positionalParameters = parameters.stream().filter(Param::isPositional).collect(toList());
     boolean strict = sourceType.getAnnotation(CommandLineArguments.class).strict();
     boolean addHelp = sourceType.getAnnotation(CommandLineArguments.class).addHelp();
-    boolean generateToString = methodsIn(sourceType.getEnclosedElements()).stream()
-        .filter(method -> method.getParameters().isEmpty())
-        .map(ExecutableElement::getSimpleName)
-        .map(Name::toString)
-        .noneMatch(s -> s.equals("toString"));
     String missionStatement = sourceType.getAnnotation(CommandLineArguments.class).missionStatement();
     ClassName optionType = generatedClass.nestedClass("Option");
     ClassName helperType = generatedClass.nestedClass("Helper");
@@ -167,7 +154,6 @@ final class Context {
         positionalParameters,
         allowEscape,
         strict,
-        generateToString,
         addHelp,
         paramTypes,
         positionalParamTypes,
@@ -271,14 +257,6 @@ final class Context {
 
   ClassName parseResultType() {
     return parseResultType;
-  }
-
-  ParameterSpec quoteParam() {
-    return quote;
-  }
-
-  ParameterSpec toArrayParam() {
-    return toArray;
   }
 
   boolean containsType(TypeName typeName) {

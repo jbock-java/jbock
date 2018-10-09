@@ -1,8 +1,6 @@
 package net.jbock.compiler;
 
-import net.jbock.coerce.CoercionKind;
 import net.jbock.com.squareup.javapoet.CodeBlock;
-import net.jbock.com.squareup.javapoet.ParameterSpec;
 
 /**
  * Basic option types
@@ -18,18 +16,6 @@ enum OptionType {
           helper.context.optionType(),
           param.enumConstant())
           .build();
-    }
-
-    @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
-      CodeBlock.Builder builder = CodeBlock.builder();
-      builder.addStatement("$N.add($T.format($S, $L, $L))",
-          joiner,
-          String.class,
-          "%s:%s",
-          jsonKey(param),
-          param.coercion().jsonExpr());
-      return builder.build();
     }
   },
 
@@ -52,29 +38,6 @@ enum OptionType {
             .build();
       }
     }
-
-    @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
-      CodeBlock valueExpr;
-      if (param.coercion().kind() == CoercionKind.OPTIONAL_COMBINATION) {
-        valueExpr = CodeBlock.builder()
-            .add("$N$L.orElse($S)",
-                param.field(),
-                param.coercion().mapJsonExpr(),
-                "null")
-            .build();
-      } else {
-        valueExpr = param.coercion().jsonExpr();
-      }
-      return CodeBlock.builder()
-          .addStatement("$N.add($T.format($S, $L, $L))",
-              joiner,
-              String.class,
-              "%s:%s",
-              jsonKey(param),
-              valueExpr)
-          .build();
-    }
   },
 
   REPEATABLE {
@@ -96,31 +59,11 @@ enum OptionType {
             .build();
       }
     }
-
-    @Override
-    CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param) {
-      CodeBlock valueExpr = CodeBlock.builder()
-          .add("$N.stream()$L.collect(toArray)",
-              param.field(), param.coercion().mapJsonExpr()).build();
-      return CodeBlock.builder()
-          .addStatement("$N.add($T.format($S, $L, $L))",
-              joiner,
-              String.class,
-              "%s:%s",
-              jsonKey(param),
-              valueExpr)
-          .build();
-    }
   };
 
   /**
    * @return An expression that extracts the value of the given param from the helper state.
+   * This expression will evaluate either to a {@link java.util.stream.Stream} or an {@link java.util.Optional}.
    */
   abstract CodeBlock extractExpression(Helper helper, Param param);
-
-  abstract CodeBlock jsonStatement(Impl impl, ParameterSpec joiner, Param param);
-
-  private static CodeBlock jsonKey(Param param) {
-    return CodeBlock.builder().add("quote.apply($S)", param.methodName()).build();
-  }
 }

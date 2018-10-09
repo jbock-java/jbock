@@ -3,6 +3,8 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
@@ -25,7 +27,7 @@ class PositionalArgumentsTest {
         "source", "a",
         "dest", "b",
         "anotherInt", 1,
-        "optString", null,
+        "optString", Optional.empty(),
         "otherTokens", emptyList());
   }
 
@@ -35,7 +37,7 @@ class PositionalArgumentsTest {
         "source", "a",
         "dest", "b",
         "anotherInt", 1,
-        "optString", "c",
+        "optString", Optional.of("c"),
         "otherTokens", singletonList("d"));
   }
 
@@ -45,25 +47,25 @@ class PositionalArgumentsTest {
         "source", "a",
         "dest", "b",
         "anotherInt", 1,
-        "optString", "c",
+        "optString", Optional.of("c"),
         "otherTokens", asList("d", "e"));
     f.assertThat("a", "b", "1", "c", "--", "e").succeeds(
         "source", "a",
         "dest", "b",
         "anotherInt", 1,
-        "optString", "c",
+        "optString", Optional.of("c"),
         "otherTokens", singletonList("e"));
     f.assertThat("a", "b", "1", "c", "--").succeeds(
         "source", "a",
         "dest", "b",
         "anotherInt", 1,
-        "optString", "c",
+        "optString", Optional.of("c"),
         "otherTokens", emptyList());
     f.assertThat("a", "b", "1", "c").succeeds(
         "source", "a",
         "dest", "b",
         "anotherInt", 1,
-        "optString", "c",
+        "optString", Optional.of("c"),
         "otherTokens", emptyList());
   }
 

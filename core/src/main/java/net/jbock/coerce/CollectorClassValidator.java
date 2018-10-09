@@ -8,14 +8,13 @@ import javax.lang.model.type.TypeMirror;
 
 class CollectorClassValidator {
 
-  static CollectorInfo findInput(TypeElement collectorClass) {
+  static TypeMirror findInput(TypeElement collectorClass) {
     MapperClassValidator.commonChecks(collectorClass, "collector");
     TypeMirror supplierInterface = collectorClass.getInterfaces().get(0);
     DeclaredType parameterized = Util.asParameterized(supplierInterface);
     TypeMirror collectorInterface = parameterized.getTypeArguments().get(0);
     DeclaredType collectorInterfaceParameterized = Util.asParameterized(collectorInterface);
-    TypeMirror collectorInput = collectorInterfaceParameterized.getTypeArguments().get(0);
-    return CollectorInfo.create(collectorInput, collectorClass);
+    return collectorInterfaceParameterized.getTypeArguments().get(0);
     // todo more validations
   }
 

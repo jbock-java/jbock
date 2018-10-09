@@ -33,7 +33,7 @@ public class CollectorInfo {
     return new CollectorInfo(init, input);
   }
 
-  static CollectorInfo createWithStandardCollectorInit(TypeMirror input) {
+  static CollectorInfo listCollector(TypeMirror input) {
     return new CollectorInfo(standardCollectorInit(), input);
   }
 

@@ -118,11 +118,9 @@ public class CoercionProvider {
       if (!solution.isPresent()) {
         throw TmpException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", tk.trigger));
       }
-      if (tk.trigger.getKind() == TypeKind.TYPEVAR) {
-        TypeMirror trigger = solution.get().get(tk.trigger.toString());
-        collectorInput = collectorInput.withInput(trigger);
-        tk = CoercionKind.SIMPLE.of(trigger, collectorInput);
-      }
+      TypeMirror trigger = TypeTool.get().substitute(collectorInput.collectorInput, solution.get());
+      collectorInput = collectorInput.withInput(trigger);
+      tk = CoercionKind.SIMPLE.of(trigger, collectorInput);
       TypeName mapperType = TypeName.get(mapperClass.asType());
       ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
       return MapperCoercion.create(tk, mapperParam, mapperClass.asType(), field);
@@ -241,9 +239,9 @@ public class CoercionProvider {
         throw new TmpException("This repeatable method must either use a custom collector, or return List");
       }
       TypeMirror input = parameterized.getTypeArguments().get(0);
-      return CollectorInfo.createWithStandardCollectorInit(input);
+      return CollectorInfo.listCollector(input);
     }
-    return CollectorClassValidator.findInput(collectorClass);
+    return CollectorInfo.create(CollectorClassValidator.findInput(collectorClass), collectorClass);
   }
 
   static String snakeToCamel(String s) {

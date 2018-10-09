@@ -5,6 +5,7 @@ import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.OptionalLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -32,14 +33,14 @@ class CpArgumentsTest {
         "source", "a",
         "dest", "b",
         "recursive", false,
-        "backup", null,
-        "suffix", null);
+        "backup", Optional.empty(),
+        "suffix", Optional.empty());
     f.assertThat("b", "a").succeeds(
         "source", "b",
         "dest", "a",
         "recursive", false,
-        "backup", null,
-        "suffix", null);
+        "backup", Optional.empty(),
+        "suffix", Optional.empty());
   }
 
   @Test
@@ -63,8 +64,8 @@ class CpArgumentsTest {
         "source", "a",
         "dest", "b",
         "recursive", true,
-        "backup", null,
-        "suffix", null};
+        "backup", Optional.empty(),
+        "suffix", Optional.empty()};
     f.assertThat("-r", "a", "b")
         .succeeds(expected);
     f.assertThat("a", "-r", "b")
@@ -81,8 +82,8 @@ class CpArgumentsTest {
             "source", "a",
             "dest", "b",
             "recursive", true,
-            "backup", "SIMPLE",
-            "suffix", null);
+            "backup", Optional.of(Control.SIMPLE),
+            "suffix", Optional.empty());
   }
 
   @Test

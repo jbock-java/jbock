@@ -1,21 +1,14 @@
 package net.jbock.examples.fixture;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import org.junit.jupiter.api.Assertions;
 
-import java.io.IOException;
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -38,72 +31,10 @@ public final class ParserTestFixture<E> {
     Parser<E> withIndent(int indent);
   }
 
-  private static final ObjectMapper MAPPER = new ObjectMapper();
-
   private final Parser<E> parser;
 
   private ParserTestFixture(Parser<E> parser) {
     this.parser = parser;
-  }
-
-  private static JsonNode readJson(String json) {
-    try {
-      return MAPPER.readTree(json);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private static JsonNode parseJson(Object... kvs) {
-    ObjectNode node = MAPPER.createObjectNode();
-    if (kvs.length % 2 != 0) {
-      throw new IllegalArgumentException("length must be even: " + Arrays.toString(kvs));
-    }
-    Set<String> keys = new HashSet<>();
-    for (int i = 0; i < kvs.length; i += 2) {
-      String k = kvs[i].toString();
-      if (!keys.add(k)) {
-        throw new IllegalArgumentException("duplicate key: " + k);
-      }
-      Object v = kvs[i + 1];
-      if (v == null) {
-        node.put(k, (String) null);
-      }
-      if (v instanceof String) {
-        node.put(k, (String) v);
-      } else if (v instanceof Character) {
-        node.put(k, v.toString());
-      } else if (v instanceof Integer) {
-        node.put(k, (Integer) v);
-      } else if (v instanceof Long) {
-        node.put(k, (Long) v);
-      } else if (v instanceof Float) {
-        node.put(k, (Float) v);
-      } else if (v instanceof Double) {
-        node.put(k, (Double) v);
-      } else if (v instanceof Boolean) {
-        node.put(k, (Boolean) v);
-      } else if (v instanceof List) {
-        List list = (List) v;
-        ArrayNode array = node.putArray(k);
-        for (Object s : list) {
-          if (s instanceof Character) {
-            array.add(Character.toString((Character) s));
-          } else if (s instanceof Integer) {
-            array.add(((Integer) s));
-          } else if (s instanceof Long) {
-            array.add(((Long) s));
-          } else if (s instanceof Float) {
-            array.add(((Float) s));
-          } else if (s instanceof Double) {
-            array.add(((Double) s));
-          } else {
-            array.add(s.toString());
-          }
-        }
-      }
-    }
-    return node;
   }
 
   public static <E> ParserTestFixture<E> create(Object builder) {
@@ -261,13 +192,23 @@ public final class ParserTestFixture<E> {
     }
 
     public void succeeds(Object... expected) {
-      assertTrue(parsed.isPresent(), "Parsing was not successful: " + stderr);
-      assertTrue(stdout.isEmpty());
-      assertTrue(stderr.isEmpty());
-      String jsonString = parsed.get().toString();
-      JsonNode actualJson = readJson(jsonString);
-      JsonNode expectedJson = parseJson(expected);
-      assertEquals(expectedJson.toString(), actualJson.toString());
+      try {
+        assertTrue(parsed.isPresent(), "Parsing was not successful: " + stderr);
+        assertTrue(stdout.isEmpty());
+        assertTrue(stderr.isEmpty());
+        E parsed = this.parsed.get();
+        for (int i = 0; i < expected.length; i += 2) {
+          String key = (String) expected[i];
+          Object expectedValue = expected[i + 1];
+          Method method = parsed.getClass().getDeclaredMethod(key);
+          method.setAccessible(true);
+          Object result = method.invoke(parsed);
+          assertEquals(expectedValue, result,
+              String.format("At `%s`: expecting %s but found %s", key, expectedValue, result));
+        }
+      } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+        Assertions.fail(e);
+      }
     }
   }
 

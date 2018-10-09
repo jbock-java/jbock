@@ -3,6 +3,8 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+
 class SimpleArgumentsTest {
 
   private ParserTestFixture<SimpleArguments> f =
@@ -16,7 +18,7 @@ class SimpleArgumentsTest {
 
   @Test
   void success() {
-    f.assertThat("--file", "1").succeeds("extract", false, "file", "1");
+    f.assertThat("--file", "1").succeeds("extract", false, "file", Optional.of("1"));
   }
 
   @Test

@@ -3,6 +3,9 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.Optional;
+import java.util.OptionalInt;
+
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 
@@ -14,9 +17,9 @@ class NoNameArgumentsTest {
   @Test
   void testDifferentOrder() {
     Object[] expected = {
-        "message", "m",
+        "message", Optional.of("m"),
         "file", asList("f", "o", "o"),
-        "verbosity", null,
+        "verbosity", OptionalInt.empty(),
         "number", 1,
         "cmos", true};
     f.assertThat("--message=m", "--file=f", "--file=o", "--file=o", "--cmos", "-n1")
@@ -30,9 +33,9 @@ class NoNameArgumentsTest {
   @Test
   void testFlag() {
     f.assertThat("--cmos", "-n1").succeeds(
-        "message", null,
+        "message", Optional.empty(),
         "file", emptyList(),
-        "verbosity", null,
+        "verbosity", OptionalInt.empty(),
         "number", 1,
         "cmos", true);
   }
@@ -40,15 +43,15 @@ class NoNameArgumentsTest {
   @Test
   void testOptionalInt() {
     f.assertThat("-v", "1", "-n1").succeeds(
-        "message", null,
+        "message", Optional.empty(),
         "file", emptyList(),
-        "verbosity", 1,
+        "verbosity", OptionalInt.of(1),
         "number", 1,
         "cmos", false);
     f.assertThat("-n1").succeeds(
-        "message", null,
+        "message", Optional.empty(),
         "file", emptyList(),
-        "verbosity", null,
+        "verbosity", OptionalInt.empty(),
         "number", 1,
         "cmos", false);
   }

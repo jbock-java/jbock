@@ -3,6 +3,8 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import java.util.OptionalInt;
+
 class AdditionArgumentsTest {
 
   private ParserTestFixture<AdditionArguments> f =
@@ -13,7 +15,7 @@ class AdditionArgumentsTest {
     f.assertThat("1", "2").succeeds(
         "a", 1,
         "b", 2,
-        "c", null);
+        "c", OptionalInt.empty());
   }
 
   @Test
@@ -21,7 +23,7 @@ class AdditionArgumentsTest {
     f.assertThat("1", "2", "3").succeeds(
         "a", 1,
         "b", 2,
-        "c", 3);
+        "c", OptionalInt.of(3));
   }
 
   @Test

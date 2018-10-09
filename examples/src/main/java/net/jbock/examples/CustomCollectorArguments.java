@@ -4,7 +4,11 @@ import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -17,6 +21,13 @@ abstract class CustomCollectorArguments {
 
   @Parameter(repeatable = true, shortName = 'B', collectedBy = MyIntegerCollector.class)
   abstract Set<Integer> integers();
+
+  @Parameter(
+      repeatable = true,
+      shortName = 'T',
+      mappedBy = MapEntryTokenizer.class,
+      collectedBy = ToMapCollector.class)
+  abstract Map<String, LocalDate> dateMap();
 
   @Parameter(
       repeatable = true,
@@ -33,11 +44,25 @@ abstract class CustomCollectorArguments {
     }
   }
 
-  static class MyBigIntegerCollector implements Supplier<Collector<BigInteger, ?, Set<BigInteger>>> {
+  static class MapEntryTokenizer implements Supplier<Function<String, Map.Entry<String, LocalDate>>> {
 
     @Override
-    public Collector<BigInteger, ?, Set<BigInteger>> get() {
-      return Collectors.toSet();
+    public Function<String, Map.Entry<String, LocalDate>> get() {
+      return s -> {
+        String[] tokens = s.split(":", 2);
+        if (tokens.length < 2) {
+          throw new IllegalArgumentException("Invalid pair");
+        }
+        return new AbstractMap.SimpleImmutableEntry<>(tokens[0], LocalDate.parse(tokens[1]));
+      };
+    }
+  }
+
+  static class ToMapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
+
+    @Override
+    public Collector<Map.Entry<K, V>, ?, Map<K, V>> get() {
+      return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue);
     }
   }
 

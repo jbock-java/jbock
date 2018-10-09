@@ -4,6 +4,7 @@ import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
+import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.stream.Stream;
 
@@ -41,5 +42,14 @@ class CustomCollectorArgumentsTest {
         "-M", "0xA",
         "-M", "10");
     assertEquals(Stream.of(5L, 10L).map(BigInteger::valueOf).collect(toSet()), parsed.bigIntegers());
+  }
+
+  @Test
+  void testMap() {
+    CustomCollectorArguments parsed = f.parse(
+        "-T", "A:2004-11-11",
+        "-T", "B:2018-11-12");
+    assertEquals(LocalDate.parse("2004-11-11"), parsed.dateMap().get("A"));
+    assertEquals(LocalDate.parse("2018-11-12"), parsed.dateMap().get("B"));
   }
 }

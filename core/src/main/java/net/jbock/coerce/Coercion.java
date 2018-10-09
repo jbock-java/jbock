@@ -1,6 +1,5 @@
 package net.jbock.coerce;
 
-import net.jbock.com.squareup.javapoet.ClassName;
 import net.jbock.com.squareup.javapoet.CodeBlock;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
@@ -11,8 +10,6 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class Coercion {
-
-  private static final ClassName BOOLEAN_CLASS = ClassName.get(Boolean.class);
 
   private final TypeMirror trigger;
 
@@ -27,12 +24,6 @@ public final class Coercion {
 
   // helper.build
   private final CodeBlock initCollector;
-
-  // toString
-  private final CodeBlock jsonExpr;
-
-  // toString
-  private final CodeBlock mapJsonExpr;
 
   // impl constructor
   private final CodeBlock extract;
@@ -51,8 +42,6 @@ public final class Coercion {
       CodeBlock map,
       CodeBlock initMapper,
       CodeBlock initCollector,
-      CodeBlock jsonExpr,
-      CodeBlock mapJsonExpr,
       CodeBlock extract,
       TypeName paramType,
       FieldSpec field,
@@ -62,8 +51,6 @@ public final class Coercion {
     this.map = map;
     this.initMapper = initMapper;
     this.initCollector = initCollector;
-    this.jsonExpr = jsonExpr;
-    this.mapJsonExpr = mapJsonExpr;
     this.extract = extract;
     this.paramType = paramType;
     this.field = field;
@@ -82,16 +69,6 @@ public final class Coercion {
    */
   public TypeName trigger() {
     return TypeName.get(trigger);
-  }
-
-  // toString stuff (the gen class overrides toString if possible)
-  public CodeBlock jsonExpr() {
-    return jsonExpr;
-  }
-
-  // toString stuff
-  public CodeBlock mapJsonExpr() {
-    return mapJsonExpr;
   }
 
   public CodeBlock initMapper() {
@@ -115,7 +92,7 @@ public final class Coercion {
   }
 
   Coercion withMapper(CodeBlock map, CodeBlock initMapper) {
-    return new Coercion(trigger, collectorParam, map, initMapper, initCollector, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+    return new Coercion(trigger, collectorParam, map, initMapper, initCollector, extract, paramType, field, kind);
   }
 
   public Coercion asOptional() {
@@ -123,7 +100,7 @@ public final class Coercion {
     CodeBlock extract = CodeBlock.builder()
         .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())
         .build();
-    return new Coercion(trigger, collectorParam, map, initMapper, initCollector, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+    return new Coercion(trigger, collectorParam, map, initMapper, initCollector, extract, paramType, field, kind);
   }
 
   public Coercion withCollector(CollectorInfo collectorInfo) {
@@ -131,7 +108,7 @@ public final class Coercion {
     CodeBlock extract = CodeBlock.builder()
         .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())
         .build();
-    return new Coercion(trigger, collectorParam, map, initMapper, collectorInfo.collectorInit, jsonExpr, mapJsonExpr, extract, paramType, field, kind);
+    return new Coercion(trigger, collectorParam, map, initMapper, collectorInfo.collectorInit, extract, paramType, field, kind);
   }
 
   public CoercionKind kind() {
