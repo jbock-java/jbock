@@ -69,6 +69,7 @@ final class Context {
   private final ClassName optionType;
   private final ClassName helperType;
   private final ClassName indentPrinterType;
+  private final ClassName messagesType;
   private final ClassName implType;
   private final ClassName tokenizerType;
   private final ClassName parseResultType;
@@ -100,6 +101,7 @@ final class Context {
       ClassName optionType,
       ClassName helperType,
       ClassName indentPrinterType,
+      ClassName messagesType,
       ClassName implType,
       ClassName tokenizerType,
       ClassName parseResultType) {
@@ -123,6 +125,7 @@ final class Context {
     this.optionType = optionType;
     this.helperType = helperType;
     this.indentPrinterType = indentPrinterType;
+    this.messagesType = messagesType;
     this.implType = implType;
     this.tokenizerType = tokenizerType;
     this.parseResultType = parseResultType;
@@ -152,6 +155,7 @@ final class Context {
     ClassName repeatableOptionParserType = generatedClass.nestedClass("RepeatableOptionParser");
     ClassName regularOptionParserType = generatedClass.nestedClass("RegularOptionParser");
     ClassName indentPrinterType = generatedClass.nestedClass("IndentPrinter");
+    ClassName messagesType = generatedClass.nestedClass("Messages");
     ClassName implType = generatedClass.nestedClass(sourceType.getSimpleName() + "Impl");
     ClassName tokenizerType = generatedClass.nestedClass("Tokenizer");
     ClassName parseResultType = generatedClass.nestedClass("ParseResult");
@@ -176,6 +180,7 @@ final class Context {
         regularOptionParserType, optionType,
         helperType,
         indentPrinterType,
+        messagesType,
         implType,
         tokenizerType,
         parseResultType);
@@ -250,6 +255,10 @@ final class Context {
 
   ClassName indentPrinterType() {
     return indentPrinterType;
+  }
+
+  ClassName messagesType() {
+    return messagesType;
   }
 
   ClassName implType() {

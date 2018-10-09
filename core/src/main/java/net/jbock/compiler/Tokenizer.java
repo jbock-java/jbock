@@ -28,16 +28,21 @@ import static net.jbock.compiler.Util.optionalOfSubtype;
 final class Tokenizer {
 
   private final Context context;
+
   private final Helper helper;
 
   private final FieldSpec out;
+
   private final FieldSpec err;
 
-  private Tokenizer(Context context, Helper helper, FieldSpec out, FieldSpec err) {
+  private final FieldSpec messages;
+
+  private Tokenizer(Context context, Helper helper, FieldSpec out, FieldSpec err, FieldSpec messages) {
     this.out = out;
     this.context = context;
     this.helper = helper;
     this.err = err;
+    this.messages = messages;
   }
 
   static Tokenizer create(Context context, Helper helper) {
@@ -45,7 +50,9 @@ final class Tokenizer {
         .addModifiers(FINAL).build();
     FieldSpec err = FieldSpec.builder(context.indentPrinterType(), "err")
         .addModifiers(FINAL).build();
-    return new Tokenizer(context, helper, out, err);
+    FieldSpec messages = FieldSpec.builder(context.messagesType(), "messages")
+        .addModifiers(FINAL).build();
+    return new Tokenizer(context, helper, out, err, messages);
   }
 
 
@@ -62,6 +69,7 @@ final class Tokenizer {
     if (context.addHelp) {
       spec.addField(out);
     }
+    spec.addField(messages);
     return spec.build();
   }
 
@@ -405,14 +413,17 @@ final class Tokenizer {
   private MethodSpec privateConstructor() {
     ParameterSpec outParam = ParameterSpec.builder(out.type, out.name).build();
     ParameterSpec errParam = ParameterSpec.builder(err.type, err.name).build();
+    ParameterSpec messagesParam = ParameterSpec.builder(messages.type, messages.name).build();
 
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
     spec.addStatement("this.$N = $N", err, errParam)
         .addParameter(outParam)
-        .addParameter(errParam);
+        .addParameter(errParam)
+        .addParameter(messagesParam);
     if (context.addHelp) {
       spec.addStatement("this.$N = $N", out, outParam);
     }
+    spec.addStatement("this.$N = $N", messages, messagesParam);
     return spec.build();
   }
 }

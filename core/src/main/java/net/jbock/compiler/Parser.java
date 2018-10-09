@@ -8,6 +8,7 @@ import net.jbock.com.squareup.javapoet.TypeName;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
 import java.io.PrintStream;
+import java.util.ResourceBundle;
 
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -31,7 +32,6 @@ final class Parser {
   private static final String METHOD_NAME_PARSE_OR_EXIT = "parseOrExit";
 
   private final Context context;
-  private final IndentPrinter indentPrinter;
   private final Tokenizer tokenizer;
   private final Option option;
   private final Helper helper;
@@ -57,9 +57,11 @@ final class Parser {
       .initializer("$L", DEFAULT_EXITCODE_ON_ERROR)
       .addModifiers(PRIVATE).build();
 
+  private final FieldSpec resourceBundle = FieldSpec.builder(ResourceBundle.class, "resourceBundle")
+      .addModifiers(PRIVATE).build();
+
   private Parser(
       Context context,
-      IndentPrinter indentPrinter,
       Tokenizer tokenizer,
       Option option,
       Helper helper,
@@ -68,7 +70,6 @@ final class Parser {
       MethodSpec readNextMethod,
       MethodSpec readArgumentMethod) {
     this.context = context;
-    this.indentPrinter = indentPrinter;
     this.tokenizer = tokenizer;
     this.option = option;
     this.helper = helper;
@@ -81,13 +82,12 @@ final class Parser {
   static Parser create(Context context) {
     MethodSpec readNextMethod = readNextMethod();
     MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
-    IndentPrinter indentPrinter = IndentPrinter.create(context);
     Option option = Option.create(context);
     Impl impl = Impl.create(context, option);
     Helper helper = Helper.create(context, option);
     ParseResult parseResult = ParseResult.create(context);
     Tokenizer builder = Tokenizer.create(context, helper);
-    return new Parser(context, indentPrinter, builder, option, helper, impl, parseResult, readNextMethod, readArgumentMethod);
+    return new Parser(context, builder, option, helper, impl, parseResult, readNextMethod, readArgumentMethod);
   }
 
   TypeSpec define() {
@@ -102,6 +102,7 @@ final class Parser {
         .addMethod(addPublicIfNecessary(withErrorStreamMethod()))
         .addMethod(addPublicIfNecessary(withIndentMethod()))
         .addMethod(addPublicIfNecessary(withErrorExitCodeMethod()))
+        .addMethod(addPublicIfNecessary(withResourceBundleMethod()))
         .addType(helper.define())
         .addType(impl.define())
         .addType(tokenizer.define())
@@ -110,12 +111,14 @@ final class Parser {
         .addType(FlagOptionParser.define(context))
         .addType(RegularOptionParser.define(context))
         .addType(RepeatableOptionParser.define(context))
-        .addType(indentPrinter.define())
+        .addType(IndentPrinter.create(context).define())
+        .addType(Messages.create(context).define())
         .addType(parseResult.define())
         .addField(out)
         .addField(err)
         .addField(indent)
         .addField(errorExitCode)
+        .addField(resourceBundle)
         .addMethod(readArgumentMethod)
         .addMethod(readNextMethod)
         .addMethod(addPublicIfNecessary(createMethod()))
@@ -140,6 +143,15 @@ final class Parser {
     return MethodSpec.methodBuilder("withErrorExitCode")
         .addParameter(errorExitCodeParam)
         .addStatement("this.$N = $N", errorExitCode, errorExitCodeParam)
+        .addStatement("return this")
+        .returns(context.generatedClass);
+  }
+
+  private MethodSpec.Builder withResourceBundleMethod() {
+    ParameterSpec resourceBundleParam = ParameterSpec.builder(resourceBundle.type, resourceBundle.name).build();
+    return MethodSpec.methodBuilder("withResourceBundle")
+        .addParameter(resourceBundleParam)
+        .addStatement("this.$N = $N", resourceBundle, resourceBundleParam)
         .addStatement("return this")
         .returns(context.generatedClass);
   }
@@ -171,10 +183,12 @@ final class Parser {
     ParameterSpec paramTokenizer = ParameterSpec.builder(context.tokenizerType(), "tokenizer").build();
     ParameterSpec paramOutStream = ParameterSpec.builder(context.indentPrinterType(), "outStream").build();
     ParameterSpec paramErrStream = ParameterSpec.builder(context.indentPrinterType(), "errStream").build();
+    ParameterSpec paramMessages = ParameterSpec.builder(context.messagesType(), "messages").build();
     spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramOutStream, context.indentPrinterType(), out, indent);
     spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramErrStream, context.indentPrinterType(), err, indent);
-    spec.addStatement("$T $N = new $T($N, $N)",
-        paramTokenizer.type, paramTokenizer, paramTokenizer.type, paramOutStream, paramErrStream);
+    spec.addStatement("$T $N = new $T($N)", context.messagesType(), paramMessages, context.messagesType(), resourceBundle);
+    spec.addStatement("$T $N = new $T($N, $N, $N)",
+        paramTokenizer.type, paramTokenizer, paramTokenizer.type, paramOutStream, paramErrStream, paramMessages);
     spec.addStatement("return $N.parse($N)", paramTokenizer, args);
 
     return spec.addParameter(args)
