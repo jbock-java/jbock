@@ -42,14 +42,14 @@ public @interface PositionalParameter {
    * In many cases, the mapper type is the same as the parameter type.</p>
    * <p>There are however two exceptions:</p>
    * <ol>
-   *   <li>If the parameter is not repeatable and {@code X} is of the form {@link java.util.Optional Optional&lt;Y&gt;},
-   *   then the mapper must return {@code Y}</li>
-   *   <li>If the parameter is {@link #repeatable},
-   *   then the mapper must return the input type of the associated collector.
-   *   In most cases, the type of a repeatable parameter will be of the form
-   *   {@link java.util.List List&lt;E&gt;},
-   *   and the default collector {@link java.util.stream.Collectors#toList() toList}
-   *   will be used. Then the mapper must return {@code E}.</li>
+   * <li>If the parameter is not repeatable and {@code X} is of the form {@link java.util.Optional Optional&lt;Y&gt;},
+   * then the mapper must return {@code Y}</li>
+   * <li>If the parameter is {@link #repeatable},
+   * then the mapper must return the input type of the associated collector.
+   * In most cases, the type of a repeatable parameter will be of the form
+   * {@link java.util.List List&lt;E&gt;},
+   * and the default collector {@link java.util.stream.Collectors#toList() toList}
+   * will be used. Then the mapper must return {@code E}.</li>
    * </ol>
    */
   Class<? extends Supplier> mappedBy() default Supplier.class;
@@ -73,4 +73,12 @@ public @interface PositionalParameter {
    * <p>Declares this parameter optional.</p>
    */
   boolean optional() default false;
+
+  /**
+   * The key used to find the command description in the resource bundle.
+   * By default, the lowercased method name is used as the key.
+   * If no bundle is defined, or this key is not in the bundle, then
+   * the parameter method's javadoc is used as the description.
+   */
+  String commandDescriptionKey() default "";
 }

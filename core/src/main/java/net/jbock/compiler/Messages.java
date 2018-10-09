@@ -1,11 +1,11 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.ArrayTypeName;
 import net.jbock.com.squareup.javapoet.FieldSpec;
 import net.jbock.com.squareup.javapoet.MethodSpec;
 import net.jbock.com.squareup.javapoet.ParameterSpec;
 import net.jbock.com.squareup.javapoet.TypeSpec;
 
+import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
@@ -14,8 +14,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.com.squareup.javapoet.MethodSpec.methodBuilder;
-import static net.jbock.com.squareup.javapoet.TypeName.INT;
-import static net.jbock.com.squareup.javapoet.TypeName.OBJECT;
 import static net.jbock.com.squareup.javapoet.TypeSpec.classBuilder;
 
 /**
@@ -29,7 +27,7 @@ final class Messages {
   private final Context context;
 
   private final FieldSpec br = FieldSpec.builder(Pattern.class, "br")
-      .initializer("$T.compile($S)", Pattern.class, "\\\\r?\\\\n")
+      .initializer("$T.compile($S)", Pattern.class, "\\r?\\n")
       .addModifiers(FINAL)
       .build();
 
@@ -50,16 +48,16 @@ final class Messages {
   }
 
   private MethodSpec getMessageMethod() {
-    ParameterSpec defaultValue = ParameterSpec.builder(ArrayTypeName.of(String.class), "defaultValue").build();
+    ParameterSpec defaultValue = ParameterSpec.builder(Constants.LIST_OF_STRING, "defaultValue").build();
     ParameterSpec key = ParameterSpec.builder(String.class, "key").build();
     return methodBuilder("getMessage")
         .addParameter(key)
         .addParameter(defaultValue)
-        .returns(ArrayTypeName.of(String.class))
+        .returns(Constants.LIST_OF_STRING)
         .beginControlFlow("if ($N == null || !$N.containsKey($N))", resourceBundle, resourceBundle, key)
         .addStatement("return $N", defaultValue)
         .endControlFlow()
-        .addStatement("return $N.split($N.getString($N), -1)", br, resourceBundle, key)
+        .addStatement("return $T.asList($N.split($N.getString($N), -1))", Arrays.class, br, resourceBundle, key)
         .build();
   }
 

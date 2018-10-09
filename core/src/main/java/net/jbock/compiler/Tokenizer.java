@@ -65,11 +65,9 @@ final class Tokenizer {
         .addMethod(printUsageMethod())
         .addMethod(synopsisMethod())
         .addMethod(printDescriptionMethod())
-        .addField(err);
-    if (context.addHelp) {
-      spec.addField(out);
-    }
-    spec.addField(messages);
+        .addField(err)
+        .addField(out)
+        .addField(messages);
     return spec.build();
   }
 
@@ -78,135 +76,139 @@ final class Tokenizer {
         .build();
     ParameterSpec e = ParameterSpec.builder(RuntimeException.class, "e")
         .build();
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("parse");
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
-    builder.beginControlFlow("try")
+    spec.beginControlFlow("try")
         .addCode(parseMethodTryBlock(args))
         .endControlFlow();
 
-    builder.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
+    spec.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
         .addCode(parseMethodCatchBlock(e))
         .endControlFlow();
 
-    return builder
+    spec.beginControlFlow("finally")
+        .addStatement("$N.flush()", err)
+        .addStatement("$N.flush()", out)
+        .endControlFlow();
+
+
+    return spec
         .addParameter(args)
         .returns(context.parseResultType())
         .build();
   }
 
   private MethodSpec printUsageMethod() {
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("printUsage");
-    ParameterSpec outStream = ParameterSpec.builder(context.indentPrinterType(), "outStream").build();
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("printUsage");
 
     // Name
-    builder.addStatement("$N.println($S)", outStream, "NAME");
-    builder.addStatement("$N.incrementIndent()", outStream);
+    spec.addStatement("$N.println($S)", out, "NAME");
+    spec.addStatement("$N.incrementIndent()", out);
     if (context.missionStatement.isEmpty()) {
-      builder.addStatement("$N.println($S)", outStream, context.programName);
+      spec.addStatement("$N.println($S)", out, context.programName);
     } else {
-      builder.addStatement("$N.println($T.format($S, $S, $S))",
-          outStream, String.class, "%s - %s", context.programName, context.missionStatement);
+      spec.addStatement("$N.println($T.format($S, $S, $S))",
+          out, String.class, "%s - %s", context.programName, context.missionStatement);
     }
-    builder.addStatement("$N.println()", outStream);
-    builder.addStatement("$N.decrementIndent()", outStream);
+    spec.addStatement("$N.println()", out);
+    spec.addStatement("$N.decrementIndent()", out);
 
     // Synopsis
-    builder.addStatement("$N.println($S)", outStream, "SYNOPSIS");
-    builder.addStatement("$N.incrementIndent()", outStream);
-    builder.addStatement("$N.println(synopsis())", outStream);
-    builder.addStatement("$N.println()", outStream);
-    builder.addStatement("$N.decrementIndent()", outStream);
+    spec.addStatement("$N.println($S)", out, "SYNOPSIS");
+    spec.addStatement("$N.incrementIndent()", out);
+    spec.addStatement("$N.println(synopsis())", out);
+    spec.addStatement("$N.println()", out);
+    spec.addStatement("$N.decrementIndent()", out);
 
     // Description
-    builder.addStatement("$N.println($S)", outStream, "DESCRIPTION");
+    spec.addStatement("$N.println($S)", out, "DESCRIPTION");
     if (!context.overview.isEmpty()) {
-      builder.addStatement("$N.incrementIndent()", outStream);
+      spec.addStatement("$N.incrementIndent()", out);
       for (String line : context.overview) {
         if (line.isEmpty()) {
-          builder.addStatement("$N.println()", outStream);
+          spec.addStatement("$N.println()", out);
         } else {
-          builder.addStatement("$N.println($S)", outStream, line);
+          spec.addStatement("$N.println($S)", out, line);
         }
       }
-      builder.addStatement("$N.decrementIndent()", outStream);
+      spec.addStatement("$N.decrementIndent()", out);
     }
 
     // Positional parameters
-    builder.addStatement("$N.println()", outStream);
+    spec.addStatement("$N.println()", out);
     if (!context.positionalParamTypes.isEmpty()) {
       ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-      builder.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
-      builder.beginControlFlow("if ($N.positional())", optionParam)
-          .addStatement("printDescription($N, $N)", outStream, optionParam)
-          .addStatement("$N.println()", outStream)
+      spec.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
+      spec.beginControlFlow("if ($N.positional())", optionParam)
+          .addStatement("printDescription($N)", optionParam)
+          .addStatement("$N.println()", out)
           .endControlFlow();
-      builder.endControlFlow();
+      spec.endControlFlow();
     }
 
     // Options
     if (!context.nonpositionalParamTypes.isEmpty() || context.addHelp) {
-      builder.addStatement("$N.println($S)", outStream, "OPTIONS");
+      spec.addStatement("$N.println($S)", out, "OPTIONS");
     }
 
     if (!context.nonpositionalParamTypes.isEmpty()) {
-      builder.addStatement("$N.incrementIndent()", outStream);
+      spec.addStatement("$N.incrementIndent()", out);
       ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-      builder.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
-      builder.beginControlFlow("if (!$N.positional())", optionParam)
-          .addStatement("printDescription($N, $N)", outStream, optionParam)
-          .addStatement("$N.println()", outStream)
+      spec.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
+      spec.beginControlFlow("if (!$N.positional())", optionParam)
+          .addStatement("printDescription($N)", optionParam)
+          .addStatement("$N.println()", out)
           .endControlFlow();
-      builder.endControlFlow();
-      builder.addStatement("$N.decrementIndent()", outStream);
+      spec.endControlFlow();
+      spec.addStatement("$N.decrementIndent()", out);
     }
 
     // Help
     if (context.addHelp) {
-      builder.addStatement("$N.incrementIndent()", outStream)
-          .addStatement("$N.println($S)", outStream, "--help")
-          .addStatement("$N.incrementIndent()", outStream)
-          .addStatement("$N.println($S)", outStream, "Print this help page.")
-          .addStatement("$N.println($S)", outStream, "The help flag may only be passed as the first argument.")
-          .addStatement("$N.println($S)", outStream, "Any further arguments will be ignored.")
-          .addStatement("$N.println()", outStream)
-          .addStatement("$N.decrementIndent()", outStream)
-          .addStatement("$N.decrementIndent()", outStream);
+      spec.addStatement("$N.incrementIndent()", out)
+          .addStatement("$N.println($S)", out, "--help")
+          .addStatement("$N.incrementIndent()", out)
+          .addStatement("$N.println($S)", out, "Print this help page.")
+          .addStatement("$N.println($S)", out, "The help flag may only be passed as the first argument.")
+          .addStatement("$N.println($S)", out, "Any further arguments will be ignored.")
+          .addStatement("$N.println()", out)
+          .addStatement("$N.decrementIndent()", out)
+          .addStatement("$N.decrementIndent()", out);
     }
 
-    return builder.addModifiers(STATIC).addParameter(outStream).build();
+    return spec.build();
   }
 
 
   private MethodSpec printDescriptionMethod() {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("printDescription");
-    ParameterSpec outStream = ParameterSpec.builder(context.indentPrinterType(), "outStream").build();
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     ParameterSpec lineParam = ParameterSpec.builder(STRING, "line").build();
-    spec.addParameter(outStream);
     spec.addParameter(optionParam);
 
     spec.beginControlFlow("if ($N.positional())", optionParam)
-        .addStatement("$N.println($N.describe().toUpperCase())", outStream, optionParam)
+        .addStatement("$N.println($N.describe().toUpperCase())", out, optionParam)
         .endControlFlow()
         .beginControlFlow("else")
-        .addStatement("$N.println($N.describe())", outStream, optionParam)
+        .addStatement("$N.println($N.describe())", out, optionParam)
         .endControlFlow();
 
-    spec.addStatement("$N.incrementIndent()", outStream);
-    spec.beginControlFlow("for ($T $N : $N.description)", STRING, lineParam, optionParam)
-        .addStatement("$N.println($N)", outStream, lineParam)
+    spec.addStatement("$N.incrementIndent()", out);
+    spec.beginControlFlow("for ($T $N : $N.getMessage($N.name().toLowerCase(), $N.description))",
+        STRING, lineParam, messages, optionParam, optionParam)
+        .addStatement("$N.println($N)", out, lineParam)
         .endControlFlow();
-    spec.addStatement("$N.decrementIndent()", outStream);
-    return spec.addModifiers(STATIC).build();
+    spec.addStatement("$N.decrementIndent()", out);
+    return spec.build();
   }
 
   private MethodSpec synopsisMethod() {
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("synopsis")
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("synopsis")
         .returns(STRING);
 
     ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
 
-    builder.addStatement("$T $N = new $T($S)",
+    spec.addStatement("$T $N = new $T($S)",
         StringJoiner.class, joiner, StringJoiner.class, " ");
 
     Map<Boolean, List<Param>> partitionedOptions = context.parameters.stream()
@@ -220,14 +222,14 @@ final class Tokenizer {
         .filter(Param::isPositional)
         .collect(toList());
 
-    builder.addStatement("$N.add($S)", joiner, context.programName);
+    spec.addStatement("$N.add($S)", joiner, context.programName);
 
     if (!optionalNonpos.isEmpty()) {
-      builder.addStatement("$N.add($S)", joiner, "[<options>]");
+      spec.addStatement("$N.add($S)", joiner, "[<options>]");
     }
 
     for (Param param : requiredNonpos) {
-      builder.addStatement("$N.add($T.$L.example())", joiner,
+      spec.addStatement("$N.add($T.$L.example())", joiner,
           context.optionType(), param.enumConstant());
     }
 
@@ -238,15 +240,15 @@ final class Tokenizer {
       }
       switch (positionalOrder) {
         case REQUIRED:
-          builder.addStatement("$N.add($S)", joiner, "<" +
+          spec.addStatement("$N.add($S)", joiner, "<" +
               param.descriptionArgumentName() + ">");
           break;
         case OPTIONAL:
-          builder.addStatement("$N.add($S)", joiner, "[<" +
+          spec.addStatement("$N.add($S)", joiner, "[<" +
               param.descriptionArgumentName() + ">]");
           break;
         case LIST:
-          builder.addStatement("$N.add($S)", joiner, context.allowEscape() ?
+          spec.addStatement("$N.add($S)", joiner, context.allowEscape() ?
               "[[--] <" + param.descriptionArgumentNameWithDots() + ">]" :
               "[<" + param.descriptionArgumentNameWithDots() + ">]");
           break;
@@ -255,53 +257,50 @@ final class Tokenizer {
       }
     }
 
-    builder.addStatement("return $N.toString()", joiner);
+    spec.addStatement("return $N.toString()", joiner);
 
-    return builder.addModifiers(STATIC).build();
+    return spec.addModifiers(STATIC).build();
   }
 
   private CodeBlock parseMethodTryBlock(
       ParameterSpec args) {
-    CodeBlock.Builder builder = CodeBlock.builder();
+    CodeBlock.Builder spec = CodeBlock.builder();
     ParameterSpec result = ParameterSpec.builder(optionalOfSubtype(TypeName.get(context.sourceType.asType())), "result")
         .build();
-    builder.addStatement("$T $N = parseList($T.asList($N))",
+    spec.addStatement("$T $N = parseList($T.asList($N))",
         result.type, result, Arrays.class, args);
 
-    FieldSpec outStream = context.addHelp ? out : err;
-    builder.beginControlFlow("if ($N.isPresent())", result)
+    spec.beginControlFlow("if ($N.isPresent())", result)
         .addStatement("return new $T($N.get(), true)", context.parseResultType(), result)
         .endControlFlow();
 
-    builder.addStatement("printUsage($N)", outStream)
-        .addStatement("$N.flush()", outStream)
+    spec.addStatement("printUsage()")
         .addStatement("return new $T(null, true)", context.parseResultType());
-    return builder.build();
+    return spec.build();
   }
 
   private CodeBlock parseMethodCatchBlock(ParameterSpec e) {
-    CodeBlock.Builder builder = CodeBlock.builder();
+    CodeBlock.Builder spec = CodeBlock.builder();
     if (context.addHelp) {
-      builder.addStatement("$N.println($S)", err, "Usage:");
-      builder.addStatement("$N.incrementIndent()", err);
-      builder.addStatement("$N.println(synopsis())", err);
-      builder.addStatement("$N.decrementIndent()", err);
-      builder.addStatement("$N.println()", err);
+      spec.addStatement("$N.println($S)", err, "Usage:");
+      spec.addStatement("$N.incrementIndent()", err);
+      spec.addStatement("$N.println(synopsis())", err);
+      spec.addStatement("$N.decrementIndent()", err);
+      spec.addStatement("$N.println()", err);
 
-      builder.addStatement("$N.println($S)", err, "Error:");
-      builder.addStatement("$N.incrementIndent()", err);
-      builder.addStatement("$N.println($N.getMessage())", err, e);
-      builder.addStatement("$N.decrementIndent()", err);
-      builder.addStatement("$N.println()", err);
-      builder.addStatement("$N.println($T.format($S, $S))", err, String.class, "Try '%s --help' for more information.", context.programName);
-      builder.addStatement("$N.println()", err);
+      spec.addStatement("$N.println($S)", err, "Error:");
+      spec.addStatement("$N.incrementIndent()", err);
+      spec.addStatement("$N.println($N.getMessage())", err, e);
+      spec.addStatement("$N.decrementIndent()", err);
+      spec.addStatement("$N.println()", err);
+      spec.addStatement("$N.println($T.format($S, $S))", err, String.class, "Try '%s --help' for more information.", context.programName);
+      spec.addStatement("$N.println()", err);
     } else {
-      builder.addStatement("printUsage($N)", err);
-      builder.addStatement("$N.println($N.getMessage())", err, e);
+      spec.addStatement("printUsage()");
+      spec.addStatement("$N.println($N.getMessage())", err, e);
     }
-    builder.addStatement("$N.flush()", err);
-    builder.addStatement("return new $T(null, false)", context.parseResultType());
-    return builder.build();
+    spec.addStatement("return new $T(null, false)", context.parseResultType());
+    return spec.build();
   }
 
   private MethodSpec parseListMethod() {
@@ -311,25 +310,25 @@ final class Tokenizer {
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec isFirst = ParameterSpec.builder(BOOLEAN, "first").build();
 
-    MethodSpec.Builder builder = MethodSpec.methodBuilder("parseList")
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("parseList")
         .addParameter(tokens)
         .returns(optionalOfSubtype(TypeName.get(context.sourceType.asType())));
 
-    builder.addStatement("$T $N = $L", BOOLEAN, isFirst, true);
-    builder.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
-    builder.addStatement("$T $N = $N.iterator()", STRING_ITERATOR, it, tokens);
+    spec.addStatement("$T $N = $L", BOOLEAN, isFirst, true);
+    spec.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
+    spec.addStatement("$T $N = $N.iterator()", STRING_ITERATOR, it, tokens);
 
     if (context.hasPositional()) {
-      builder.addStatement("$T $N = new $T<>()",
+      spec.addStatement("$T $N = new $T<>()",
           LIST_OF_STRING, this.helper.positionalParameter, ArrayList.class);
     }
 
-    builder.beginControlFlow("while ($N.hasNext())", it)
+    spec.beginControlFlow("while ($N.hasNext())", it)
         .addCode(codeInsideParsingLoop(helper, it, isFirst))
         .endControlFlow();
 
-    builder.addStatement(returnFromParseExpression(helper));
-    return builder.build();
+    spec.addStatement(returnFromParseExpression(helper));
+    return spec.build();
   }
 
   private CodeBlock codeInsideParsingLoop(
@@ -340,39 +339,39 @@ final class Tokenizer {
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
 
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = $N.next()", STRING, token, it);
+    CodeBlock.Builder spec = CodeBlock.builder();
+    spec.addStatement("$T $N = $N.next()", STRING, token, it);
 
     if (context.addHelp) {
-      builder.beginControlFlow("if ($N && $S.equals($N))", isFirst, "--help", token)
+      spec.beginControlFlow("if ($N && $S.equals($N))", isFirst, "--help", token)
           .addStatement("return $T.empty()", Optional.class)
           .endControlFlow();
     }
 
-    builder.addStatement("$N = $L", isFirst, false);
+    spec.addStatement("$N = $L", isFirst, false);
 
     if (context.allowEscape()) {
-      builder.beginControlFlow("if ($S.equals($N))", "--", token);
+      spec.beginControlFlow("if ($S.equals($N))", "--", token);
       if (context.hasPositional()) {
-        builder.addStatement("$N.forEachRemaining($N::add)", it, helper.positionalParameter);
+        spec.addStatement("$N.forEachRemaining($N::add)", it, helper.positionalParameter);
       }
-      builder.addStatement(returnFromParseExpression(helperParam))
+      spec.addStatement(returnFromParseExpression(helperParam))
           .endControlFlow();
     }
 
     // handle empty token
-    builder.beginControlFlow("if ($N.isEmpty())", token);
+    spec.beginControlFlow("if ($N.isEmpty())", token);
     if (context.hasPositional()) {
-      builder.addStatement("$N.add($N)", helper.positionalParameter, token)
+      spec.addStatement("$N.add($N)", helper.positionalParameter, token)
           .addStatement("continue");
     } else {
-      builder.addStatement(throwInvalidOptionStatement(token));
+      spec.addStatement(throwInvalidOptionStatement(token));
     }
-    builder.endControlFlow();
+    spec.endControlFlow();
 
-    builder.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, helperParam, this.helper.readRegularOptionMethod, token);
+    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, helperParam, this.helper.readRegularOptionMethod, token);
 
-    builder.beginControlFlow("if ($N != null)", optionParam)
+    spec.beginControlFlow("if ($N != null)", optionParam)
         .addStatement("$N.$N($N, $N, $N)",
             helperParam, helper.readMethod, optionParam, token, it)
         .addStatement("continue")
@@ -381,17 +380,17 @@ final class Tokenizer {
     // handle unknown token
     if (context.strict) {
       // disallow tokens that start with a dash
-      builder.beginControlFlow("if ($N.charAt(0) == '-')", token)
+      spec.beginControlFlow("if ($N.charAt(0) == '-')", token)
           .addStatement(throwInvalidOptionStatement(token))
           .endControlFlow();
     }
     if (context.hasPositional()) {
-      builder.addStatement("$N.add($N)", helper.positionalParameter, token);
+      spec.addStatement("$N.add($N)", helper.positionalParameter, token);
     } else {
-      builder.addStatement(throwInvalidOptionStatement(token));
+      spec.addStatement(throwInvalidOptionStatement(token));
     }
 
-    return builder.build();
+    return spec.build();
   }
 
   private CodeBlock throwInvalidOptionStatement(ParameterSpec token) {
@@ -417,13 +416,11 @@ final class Tokenizer {
 
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
     spec.addStatement("this.$N = $N", err, errParam)
+        .addStatement("this.$N = $N", out, outParam)
+        .addStatement("this.$N = $N", messages, messagesParam)
         .addParameter(outParam)
         .addParameter(errParam)
         .addParameter(messagesParam);
-    if (context.addHelp) {
-      spec.addStatement("this.$N = $N", out, outParam);
-    }
-    spec.addStatement("this.$N = $N", messages, messagesParam);
     return spec.build();
   }
 }

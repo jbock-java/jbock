@@ -94,4 +94,12 @@ public @interface Parameter {
    * <p>Declares a parameter that doesn't take an argument, like {@code -v}.</p>
    */
   boolean flag() default false;
+
+  /**
+   * The key used to find the command description in the resource bundle.
+   * By default, the lowercased method name is used as the key.
+   * If no bundle is defined, or this key is not in the bundle, then
+   * the parameter method's javadoc is used as the description.
+   */
+  String commandDescriptionKey() default "";
 }

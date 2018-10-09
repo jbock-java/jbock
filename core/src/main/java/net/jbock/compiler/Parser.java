@@ -99,14 +99,17 @@ final class Parser {
       spec.addMethod(addPublicIfNecessary(withOutputStreamMethod()));
     }
     return spec
+        .addMethod(addPublicIfNecessary(createMethod()))
+        .addMethod(addPublicIfNecessary(parseMethod()))
+        .addMethod(addPublicIfNecessary(parseOrExitMethod()))
         .addMethod(addPublicIfNecessary(withErrorStreamMethod()))
         .addMethod(addPublicIfNecessary(withIndentMethod()))
         .addMethod(addPublicIfNecessary(withErrorExitCodeMethod()))
         .addMethod(addPublicIfNecessary(withResourceBundleMethod()))
-        .addType(helper.define())
-        .addType(impl.define())
         .addType(tokenizer.define())
+        .addType(impl.define())
         .addType(option.define())
+        .addType(helper.define())
         .addType(OptionParser.define(context))
         .addType(FlagOptionParser.define(context))
         .addType(RegularOptionParser.define(context))
@@ -121,9 +124,6 @@ final class Parser {
         .addField(resourceBundle)
         .addMethod(readArgumentMethod)
         .addMethod(readNextMethod)
-        .addMethod(addPublicIfNecessary(createMethod()))
-        .addMethod(addPublicIfNecessary(parseMethod()))
-        .addMethod(addPublicIfNecessary(parseOrExitMethod()))
         .addMethod(MethodSpec.constructorBuilder().addModifiers(PRIVATE).build())
         .addJavadoc(javadoc())
         .build();
@@ -181,10 +181,15 @@ final class Parser {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
     ParameterSpec paramTokenizer = ParameterSpec.builder(context.tokenizerType(), "tokenizer").build();
-    ParameterSpec paramOutStream = ParameterSpec.builder(context.indentPrinterType(), "outStream").build();
     ParameterSpec paramErrStream = ParameterSpec.builder(context.indentPrinterType(), "errStream").build();
+    ParameterSpec paramOutStream;
+    if (context.addHelp) {
+      paramOutStream = ParameterSpec.builder(context.indentPrinterType(), "outStream").build();
+      spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramOutStream, context.indentPrinterType(), out, indent);
+    } else {
+      paramOutStream = paramErrStream;
+    }
     ParameterSpec paramMessages = ParameterSpec.builder(context.messagesType(), "messages").build();
-    spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramOutStream, context.indentPrinterType(), out, indent);
     spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramErrStream, context.indentPrinterType(), err, indent);
     spec.addStatement("$T $N = new $T($N)", context.messagesType(), paramMessages, context.messagesType(), resourceBundle);
     spec.addStatement("$T $N = new $T($N, $N, $N)",
