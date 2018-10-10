@@ -5,7 +5,7 @@ import java.io.PrintStream;
 
 public class TestOutputStream {
 
-  public final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+  private final ByteArrayOutputStream baos = new ByteArrayOutputStream();
 
   public final PrintStream out = new PrintStream(baos);
 

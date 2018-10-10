@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -28,6 +29,8 @@ public final class ParserTestFixture<E> {
 
     Parser<E> withErrorStream(PrintStream out);
 
+    Parser<E> withResourceBundle(ResourceBundle bundle);
+
     Parser<E> withIndent(int indent);
   }
 
@@ -40,6 +43,21 @@ public final class ParserTestFixture<E> {
   public static <E> ParserTestFixture<E> create(Object builder) {
     List<Parser<E>> parser = new ArrayList<>(1);
     parser.add(new Parser<E>() {
+
+      private Parser<E> callSetter(String methodName, Object parameter) {
+        return callSetter(methodName, parameter, parameter.getClass());
+      }
+
+      private Parser<E> callSetter(String methodName, Object parameter, Class<?> parameterType) {
+        try {
+          Method outMethod = builder.getClass().getDeclaredMethod(methodName, parameterType);
+          outMethod.setAccessible(true);
+          outMethod.invoke(builder, parameter);
+          return parser.get(0);
+        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+          throw new RuntimeException(e);
+        }
+      }
 
       @Override
       @SuppressWarnings("unchecked")
@@ -58,38 +76,22 @@ public final class ParserTestFixture<E> {
 
       @Override
       public Parser<E> withOutputStream(PrintStream out) {
-        try {
-          Method outMethod = builder.getClass().getDeclaredMethod("withOutputStream", PrintStream.class);
-          outMethod.setAccessible(true);
-          outMethod.invoke(builder, out);
-          return parser.get(0);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-          throw new RuntimeException(e);
-        }
+        return callSetter("withOutputStream", out);
       }
 
       @Override
-      public Parser<E> withErrorStream(PrintStream out) {
-        try {
-          Method outMethod = builder.getClass().getDeclaredMethod("withErrorStream", PrintStream.class);
-          outMethod.setAccessible(true);
-          outMethod.invoke(builder, out);
-          return parser.get(0);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-          throw new RuntimeException(e);
-        }
+      public Parser<E> withErrorStream(PrintStream err) {
+        return callSetter("withErrorStream", err);
+      }
+
+      @Override
+      public Parser<E> withResourceBundle(ResourceBundle bundle) {
+        return callSetter("withResourceBundle", bundle, ResourceBundle.class);
       }
 
       @Override
       public Parser<E> withIndent(int indent) {
-        try {
-          Method indentMethod = builder.getClass().getDeclaredMethod("withIndent", Integer.TYPE);
-          indentMethod.setAccessible(true);
-          indentMethod.invoke(builder, indent);
-          return parser.get(0);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-          throw new RuntimeException(e);
-        }
+        return callSetter("withIndent", indent, Integer.TYPE);
       }
     });
     return new ParserTestFixture<>(parser.get(0));
@@ -115,12 +117,8 @@ public final class ParserTestFixture<E> {
   }
 
   public void assertPrints(String... expected) {
-    TestOutputStream stdout = new TestOutputStream();
-    TestOutputStream stderr = new TestOutputStream();
-    Optional<E> result = parser.withOutputStream(stdout.out)
-        .withErrorStream(stderr.out).withIndent(2).parse(new String[]{"--help"});
-    assertFalse(result.isPresent());
-    String[] actual = stdout.toString().split("\\r?\\n", -1);
+    String stdout = getHelp(null);
+    String[] actual = stdout.split("\\r?\\n", -1);
     compareArrays(expected, actual);
   }
 
@@ -212,4 +210,18 @@ public final class ParserTestFixture<E> {
     }
   }
 
+  public String getHelp(ResourceBundle bundle) {
+    TestOutputStream stdout = new TestOutputStream();
+    TestOutputStream stderr = new TestOutputStream();
+    if (bundle != null) {
+      parser.withResourceBundle(bundle);
+    }
+    Optional<E> result = parser.withOutputStream(stdout.out)
+        .withErrorStream(stderr.out).withIndent(2).parse(new String[]{"--help"});
+    assertFalse(result.isPresent(), "Expecting empty result");
+    if (!stderr.toString().isEmpty()) {
+      throw new AssertionError("Unexpected output on stderr: " + stderr.toString());
+    }
+    return stdout.toString();
+  }
 }

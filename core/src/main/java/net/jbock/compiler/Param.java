@@ -11,12 +11,16 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.nio.charset.CharsetEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
+import static java.lang.Character.isLetter;
+import static java.lang.Character.isLowerCase;
+import static java.lang.Character.isWhitespace;
 import static java.util.Collections.singletonList;
 import static net.jbock.compiler.MapperClassUtil.getCollectorClass;
 import static net.jbock.compiler.MapperClassUtil.getMapperClass;
@@ -27,6 +31,8 @@ import static net.jbock.compiler.Util.snakeCase;
  * Internal representation of an abstract method in the source class.
  */
 final class Param {
+
+  private static final CharsetEncoder ASCII_ENCODER = StandardCharsets.US_ASCII.newEncoder();
 
   // can be null
   private final String longName;
@@ -56,17 +62,42 @@ final class Param {
 
   private static String enumConstant(
       List<Param> params,
-      String methodName) {
-    String result = snakeCase(methodName);
+      String bundleKey,
+      ExecutableElement sourceMethod) {
+    String methodName = sourceMethod.getSimpleName().toString();
+    String result;
+    if (!bundleKey.isEmpty()) {
+      if (bundleKey.contains("__")) {
+        throw ValidationException.create(sourceMethod,
+            "The bundle key may not contain two successive underscores.");
+      }
+      for (int i = 0; i < bundleKey.length(); i++) {
+        char c = bundleKey.charAt(i);
+        if (c == '_') {
+          continue;
+        }
+        if (ASCII_ENCODER.canEncode(c) && isLetter(c) && isLowerCase(c)) {
+          continue;
+        }
+        throw ValidationException.create(sourceMethod,
+            "The bundle key can only contain lowercase ASCII letters and underscores.");
+      }
+      result = bundleKey;
+    } else {
+      result = snakeCase(methodName);
+    }
     for (Param param : params) {
       if (param.name.equals(result)) {
-        return result + '_' + params.size();
+        if (!bundleKey.isEmpty()) {
+          throw ValidationException.create(sourceMethod,
+              "This bundle key is already taken.");
+        } else {
+          return result + '_' + params.size();
+        }
       }
     }
     return result;
   }
-
-  private static final Pattern WHITE_SPACE = Pattern.compile("^.*\\s+.*$");
 
   private Param(
       char shortName,
@@ -154,16 +185,16 @@ final class Param {
     }
     Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
     checkNotPresent(sourceMethod, parameter, singletonList(PositionalParameter.class));
-    checkName(sourceMethod, shortName);
+    checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
-    String name = enumConstant(params, sourceMethod.getSimpleName().toString());
+    String name = enumConstant(params, parameter.bundleKey(), sourceMethod);
     boolean repeatable = parameter.repeatable();
     boolean optional = parameter.optional();
     boolean flag = parameter.flag();
     Coercion typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
-        descriptionArgumentName(type, !repeatable && !optional && !flag, name) :
+        descriptionArgumentName(type, !repeatable && !optional && !flag, sourceMethod) :
         parameter.argHandle();
     return new Param(
         shortName,
@@ -189,14 +220,14 @@ final class Param {
       TypeElement mapperClass,
       TypeElement collectorClass) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
-    String name = enumConstant(params, sourceMethod.getSimpleName().toString());
+    String name = enumConstant(params, parameter.bundleKey(), sourceMethod);
     boolean repeatable = parameter.repeatable();
     boolean optional = parameter.optional();
     Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
     OptionType type = optionType(repeatable, false);
     checkNotPresent(sourceMethod, parameter, singletonList(Parameter.class));
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
-        descriptionArgumentName(type, !repeatable && !optional, name) :
+        descriptionArgumentName(type, !repeatable && !optional, sourceMethod) :
         parameter.argHandle();
     return new Param(
         ' ',
@@ -261,7 +292,7 @@ final class Param {
     return longName;
   }
 
-  private static void checkName(
+  private static void checkShortName(
       ExecutableElement sourceMethod,
       char name) {
     if (name == ' ') {
@@ -276,31 +307,24 @@ final class Param {
     if (name == null) {
       return;
     }
-    basicCheckName(sourceMethod, name);
-    if (name.indexOf(0) == '-') {
-      throw ValidationException.create(sourceMethod,
-          "The name may not start with '-'");
-    }
-    if (name.indexOf('=') >= 0) {
-      throw ValidationException.create(sourceMethod,
-          "The name may not contain '='");
-    }
-  }
-
-  private static void basicCheckName(
-      ExecutableElement sourceMethod,
-      String name) {
-    if (name == null) {
-      throw ValidationException.create(sourceMethod,
-          "The name may not be null");
-    }
     if (name.isEmpty()) {
       throw ValidationException.create(sourceMethod,
           "The name may not be empty");
     }
-    if (WHITE_SPACE.matcher(name).matches()) {
+    if (name.charAt(0) == '-') {
       throw ValidationException.create(sourceMethod,
-          "The name may not contain whitespace characters");
+          "The name may not start with '-'");
+    }
+    for (int i = 0; i < name.length(); i++) {
+      char c = name.charAt(i);
+      if (isWhitespace(c)) {
+        throw ValidationException.create(sourceMethod,
+            "The name may not contain whitespace characters");
+      }
+      if (c == '=') {
+        throw ValidationException.create(sourceMethod,
+            "The name may not contain '='");
+      }
     }
   }
 
@@ -332,7 +356,8 @@ final class Param {
   }
 
   private static String descriptionArgumentName(
-      OptionType paramType, boolean required, String name) {
+      OptionType paramType, boolean required, ExecutableElement sourceMethod) {
+    String name = snakeCase(sourceMethod.getSimpleName().toString());
     if (paramType == OptionType.FLAG) {
       return null;
     }

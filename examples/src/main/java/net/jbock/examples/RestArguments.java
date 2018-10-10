@@ -9,7 +9,10 @@ import java.util.List;
 @CommandLineArguments(strict = false, allowEscape = false)
 abstract class RestArguments {
 
-  @Parameter(repeatable = true)
+  /**
+   * This is the file.
+   */
+  @Parameter(bundleKey = "param_file", repeatable = true)
   abstract List<String> file();
 
   @PositionalParameter(repeatable = true)

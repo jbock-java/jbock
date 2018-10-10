@@ -2,20 +2,14 @@ package net.jbock.compiler;
 
 import net.jbock.CommandLineArguments;
 import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.ParameterSpec;
-import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.com.squareup.javapoet.TypeName;
-import net.jbock.com.squareup.javapoet.WildcardTypeName;
 
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.function.Function;
-import java.util.stream.Collector;
 
 import static java.util.stream.Collectors.toList;
-import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.asType;
 
 final class Context {
@@ -67,12 +61,6 @@ final class Context {
   private final ClassName implType;
   private final ClassName tokenizerType;
   private final ClassName parseResultType;
-
-  private final ParameterSpec quote = ParameterSpec.builder(
-      ParameterizedTypeName.get(ClassName.get(Function.class), STRING, STRING), "quote").build();
-  private final ParameterSpec toArray = ParameterSpec.builder(
-      ParameterizedTypeName.get(ClassName.get(Collector.class),
-          TypeName.get(CharSequence.class), WildcardTypeName.subtypeOf(Object.class), STRING), "toArray").build();
 
   private Context(
       TypeElement sourceType,
@@ -191,16 +179,10 @@ final class Context {
   }
 
   /**
-   * Determine how many positional arguments the user can specify at most,
-   * before doubledash.
-   *
    * @return the maximum number of positional arguments,
    * or {@code OptionalInt.empty()} if there is no limit
    */
   OptionalInt maxPositional() {
-    if (positionalParameters.isEmpty()) {
-      return OptionalInt.empty();
-    }
     if (positionalParamTypes.contains(OptionType.REPEATABLE)) {
       return OptionalInt.empty();
     }

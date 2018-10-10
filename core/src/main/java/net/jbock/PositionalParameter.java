@@ -80,5 +80,5 @@ public @interface PositionalParameter {
    * If no bundle is defined, or this key is not in the bundle, then
    * the parameter method's javadoc is used as the description.
    */
-  String commandDescriptionKey() default "";
+  String bundleKey() default "";
 }

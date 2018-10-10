@@ -252,17 +252,19 @@ final class Helper {
     ParameterSpec last = ParameterSpec.builder(INT, "size").build();
     ParameterSpec max = ParameterSpec.builder(INT, "max").build();
 
-    context.maxPositional().ifPresent(maxPositional -> {
-      spec.addStatement("$T $N = $L",
-          INT, max, maxPositional);
-      spec.addStatement("$T $N = $N.size()",
-          INT, last, positionalParameter);
+    if (context.hasPositional()) {
+      context.maxPositional().ifPresent(maxPositional -> {
+        spec.addStatement("$T $N = $L",
+            INT, max, maxPositional);
+        spec.addStatement("$T $N = $N.size()",
+            INT, last, positionalParameter);
 
-      spec.beginControlFlow("if ($N > $N)", last, max)
-          .addStatement("throw new $T($S + $N.get($N))", IllegalArgumentException.class,
-              "Invalid option: ", positionalParameter, max)
-          .endControlFlow();
-    });
+        spec.beginControlFlow("if ($N > $N)", last, max)
+            .addStatement("throw new $T($S + $N.get($N))", IllegalArgumentException.class,
+                "Invalid option: ", positionalParameter, max)
+            .endControlFlow();
+      });
+    }
 
     for (Param param : context.parameters) {
       if (param.coercion().skipMapCollect()) {
