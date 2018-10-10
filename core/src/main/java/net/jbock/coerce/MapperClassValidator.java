@@ -1,9 +1,7 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.ValidationException;
 
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
@@ -11,38 +9,38 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-final class MapperClassValidator extends SuppliedClassValidator {
+import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 
-  private final ExecutableElement sourceMethod;
+final class MapperClassValidator {
 
-  MapperClassValidator(ExecutableElement sourceMethod) {
-    super(sourceMethod);
-    this.sourceMethod = sourceMethod;
-  }
-
-  TypeMirror findReturnType(TypeElement supplierClass) {
+  static TypeMirror findReturnType(TypeElement supplierClass, TypeMirror goal) throws TmpException {
     commonChecks(supplierClass, "mapper");
     Map<String, TypeMirror> supplierTypeargs = Resolver.resolve("java.util.function.Supplier", supplierClass.asType(), "T");
-    TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(this::boom);
+    TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
     Map<String, TypeMirror> functionTypeargs = resolveFunctionTypeargs(functionClass);
-    return functionTypeargs.get("R");
+    TypeMirror returnType = functionTypeargs.get("R");
+    Optional<Map<String, TypeMirror>> solution = TypeTool.get().unify(returnType, goal);
+    if (!solution.isPresent()) {
+      throw TmpException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", goal));
+    }
+    return TypeTool.get().substitute(goal, solution.get());
   }
 
-  private Map<String, TypeMirror> resolveFunctionTypeargs(
-      TypeMirror functionType) {
+  private static Map<String, TypeMirror> resolveFunctionTypeargs(
+      TypeMirror functionType) throws TmpException {
     Map<String, TypeMirror> functionTypeargs = Resolver.resolve("java.util.function.Function", functionType, "T", "R");
     TypeTool tool = TypeTool.get();
     DeclaredType string = tool.declared(String.class);
-    TypeMirror t = Optional.ofNullable(functionTypeargs.get("T")).orElseThrow(this::boom);
-    TypeMirror r = Optional.ofNullable(functionTypeargs.get("R")).orElseThrow(this::boom);
-    Map<String, TypeMirror> solution = tool.unify(string, t).orElseThrow(this::boom);
+    TypeMirror t = Optional.ofNullable(functionTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
+    TypeMirror r = Optional.ofNullable(functionTypeargs.get("R")).orElseThrow(MapperClassValidator::boom);
+    Map<String, TypeMirror> solution = tool.unify(string, t).orElseThrow(MapperClassValidator::boom);
     Map<String, TypeMirror> resolved = new HashMap<>();
     resolved.put("T", string);
     resolved.put("R", tool.substitute(r, solution));
     return resolved;
   }
 
-  private ValidationException boom() {
-    return ValidationException.create(sourceMethod, "There is a problem with the mapper class.");
+  private static TmpException boom() {
+    return TmpException.create("There is a problem with the mapper class.");
   }
 }

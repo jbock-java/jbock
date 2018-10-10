@@ -20,11 +20,16 @@ import static net.jbock.compiler.Util.AS_DECLARED;
 
 public class TypeTool {
 
-  private static final TypeVisitor<List<? extends TypeMirror>, List<? extends TypeMirror>> TYPEARGS =
-      new SimpleTypeVisitor8<List<? extends TypeMirror>, List<? extends TypeMirror>>() {
+  private static final TypeVisitor<List<? extends TypeMirror>, Void> TYPEARGS =
+      new SimpleTypeVisitor8<List<? extends TypeMirror>, Void>() {
         @Override
-        public List<? extends TypeMirror> visitDeclared(DeclaredType declaredType, List<? extends TypeMirror> defaultValue) {
+        public List<? extends TypeMirror> visitDeclared(DeclaredType declaredType, Void _null) {
           return declaredType.getTypeArguments();
+        }
+
+        @Override
+        protected List<? extends TypeMirror> defaultAction(TypeMirror e, Void _null) {
+          return Collections.emptyList();
         }
       };
 
@@ -63,7 +68,7 @@ public class TypeTool {
       failure[0] = true;
       return;
     }
-    List<? extends TypeMirror> xargs = x.accept(TYPEARGS, Collections.emptyList());
+    List<? extends TypeMirror> xargs = x.accept(TYPEARGS, null);
     List<? extends TypeMirror> yargs = ym.accept(TYPEARGS, null);
     if (xargs.size() != yargs.size()) {
       failure[0] = true;

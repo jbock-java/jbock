@@ -1,47 +1,43 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.ValidationException;
 
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-class CollectorClassValidator extends SuppliedClassValidator {
+import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 
-  CollectorClassValidator(ExecutableElement sourceMethod) {
-    super(sourceMethod);
-  }
+class CollectorClassValidator {
 
-  TypeMirror findInputType(TypeElement supplierClass) {
+  static TypeMirror findInputType(TypeMirror returnType, TypeElement supplierClass) throws TmpException {
     commonChecks(supplierClass, "collector");
     Map<String, TypeMirror> supplierTypeargs = Resolver.resolve("java.util.function.Supplier", supplierClass.asType(), "T");
-    TypeMirror suppliedType = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(this::boom);
-    Map<String, TypeMirror> collectorTypeargs = resolveCollectorTypeargs(suppliedType);
+    TypeMirror suppliedType = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
+    Map<String, TypeMirror> collectorTypeargs = resolveCollectorTypeargs(returnType, suppliedType);
     TypeTool tool = TypeTool.get();
-    Optional<Map<String, TypeMirror>> solution = tool.unify(sourceMethod.getReturnType(), collectorTypeargs.get("R"));
+    Optional<Map<String, TypeMirror>> solution = tool.unify(returnType, collectorTypeargs.get("R"));
     if (!solution.isPresent()) {
       throw boom();
     }
     return tool.substitute(collectorTypeargs.get("T"), solution.get());
   }
 
-  private Map<String, TypeMirror> resolveCollectorTypeargs(TypeMirror suppliedType) {
-    Map<String, TypeMirror> collectorTypeargs = Resolver.resolve("java.util.stream.Collector", suppliedType, "T", "A", "R");
+  private static Map<String, TypeMirror> resolveCollectorTypeargs(TypeMirror returnType, TypeMirror collectorType) throws TmpException {
+    Map<String, TypeMirror> collectorTypeargs = Resolver.resolve("java.util.stream.Collector", collectorType, "T", "A", "R");
     TypeTool tool = TypeTool.get();
-    TypeMirror t = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(this::boom);
-    TypeMirror r = Optional.ofNullable(collectorTypeargs.get("R")).orElseThrow(this::boom);
-    Map<String, TypeMirror> solution = tool.unify(sourceMethod.getReturnType(), r).orElseThrow(this::boom);
+    TypeMirror t = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
+    TypeMirror r = Optional.ofNullable(collectorTypeargs.get("R")).orElseThrow(CollectorClassValidator::boom);
+    Map<String, TypeMirror> solution = tool.unify(returnType, r).orElseThrow(CollectorClassValidator::boom);
     Map<String, TypeMirror> resolved = new HashMap<>();
     resolved.put("T", tool.substitute(t, solution));
-    resolved.put("R", sourceMethod.getReturnType());
+    resolved.put("R", returnType);
     return resolved;
   }
 
-  private ValidationException boom() {
-    return ValidationException.create(sourceMethod, "There is a problem with the collector class.");
+  private static TmpException boom() {
+    return TmpException.create("There is a problem with the collector class.");
   }
 }
