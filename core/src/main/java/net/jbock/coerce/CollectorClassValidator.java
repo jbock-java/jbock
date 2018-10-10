@@ -10,38 +10,34 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-class CollectorClassValidator {
-
-  private final ExecutableElement sourceMethod;
+class CollectorClassValidator extends SuppliedClassValidator {
 
   CollectorClassValidator(ExecutableElement sourceMethod) {
-    this.sourceMethod = sourceMethod;
+    super(sourceMethod);
   }
 
-  TypeMirror findInput(TypeElement supplierClass, TypeMirror returnType) {
-    MapperClassValidator.commonChecks(sourceMethod, supplierClass, "collector");
+  TypeMirror findInputType(TypeElement supplierClass) {
+    commonChecks(supplierClass, "collector");
     Map<String, TypeMirror> supplierTypeargs = Resolver.resolve("java.util.function.Supplier", supplierClass.asType(), "T");
     TypeMirror suppliedType = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(this::boom);
-    Map<String, TypeMirror> collectorTypeargs = resolveCollectorTypeargs(suppliedType, returnType);
+    Map<String, TypeMirror> collectorTypeargs = resolveCollectorTypeargs(suppliedType);
     TypeTool tool = TypeTool.get();
-    Optional<Map<String, TypeMirror>> solution = tool.unify(returnType, collectorTypeargs.get("R"));
+    Optional<Map<String, TypeMirror>> solution = tool.unify(sourceMethod.getReturnType(), collectorTypeargs.get("R"));
     if (!solution.isPresent()) {
       throw boom();
     }
     return tool.substitute(collectorTypeargs.get("T"), solution.get());
   }
 
-  private Map<String, TypeMirror> resolveCollectorTypeargs(
-      TypeMirror suppliedType,
-      TypeMirror returnType) {
+  private Map<String, TypeMirror> resolveCollectorTypeargs(TypeMirror suppliedType) {
     Map<String, TypeMirror> collectorTypeargs = Resolver.resolve("java.util.stream.Collector", suppliedType, "T", "A", "R");
     TypeTool tool = TypeTool.get();
     TypeMirror t = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(this::boom);
     TypeMirror r = Optional.ofNullable(collectorTypeargs.get("R")).orElseThrow(this::boom);
-    Map<String, TypeMirror> solution = tool.unify(returnType, r).orElseThrow(this::boom);
+    Map<String, TypeMirror> solution = tool.unify(sourceMethod.getReturnType(), r).orElseThrow(this::boom);
     Map<String, TypeMirror> resolved = new HashMap<>();
     resolved.put("T", tool.substitute(t, solution));
-    resolved.put("R", returnType);
+    resolved.put("R", sourceMethod.getReturnType());
     return resolved;
   }
 
