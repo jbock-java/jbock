@@ -32,6 +32,7 @@ abstract class SuppliedClassValidator {
                 String.format("The %s's constructor may not declare any exceptions", name));
           }
           constructorFound = true;
+          break;
         }
       }
       if (!constructorFound) {

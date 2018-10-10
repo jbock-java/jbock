@@ -749,7 +749,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("must implement Supplier<Function<String, java.lang.Integer>>");
+        .withErrorContaining("There is a problem with the mapper class.");
   }
 
   @Test

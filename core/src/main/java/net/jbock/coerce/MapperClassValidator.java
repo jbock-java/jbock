@@ -19,11 +19,10 @@ final class MapperClassValidator {
     TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
     Map<String, TypeMirror> functionTypeargs = resolveFunctionTypeargs(functionClass);
     TypeMirror returnType = functionTypeargs.get("R");
-    Optional<Map<String, TypeMirror>> solution = TypeTool.get().unify(returnType, goal);
-    if (!solution.isPresent()) {
-      throw TmpException.create(String.format("The mapper class must implement Supplier<Function<String, %s>>", goal));
+    if (!TypeTool.get().equals(returnType, goal)) {
+      throw boom();
     }
-    return TypeTool.get().substitute(goal, solution.get());
+    return returnType;
   }
 
   private static Map<String, TypeMirror> resolveFunctionTypeargs(
