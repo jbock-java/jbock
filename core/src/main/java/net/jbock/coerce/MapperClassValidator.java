@@ -1,7 +1,6 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.Util;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
@@ -19,18 +18,24 @@ import java.util.Optional;
 
 final class MapperClassValidator {
 
-  static TypeMirror validateMapperClass(TypeElement mapperClass) throws MapEx {
-    commonChecks(mapperClass, "mapper");
+  private final ExecutableElement sourceMethod;
+
+  MapperClassValidator(ExecutableElement sourceMethod) {
+    this.sourceMethod = sourceMethod;
+  }
+
+  TypeMirror validateMapperClass(TypeElement mapperClass) {
+    commonChecks(sourceMethod, mapperClass, "mapper");
     return getFunctionReturnType(mapperClass);
   }
 
-  static void commonChecks(TypeElement mapperClass, String name) {
+  static void commonChecks(ExecutableElement sourceMethod, TypeElement mapperClass, String name) {
     if (mapperClass.getNestingKind() == NestingKind.MEMBER && !mapperClass.getModifiers().contains(Modifier.STATIC)) {
-      throw ValidationException.create(mapperClass,
+      throw ValidationException.create(sourceMethod,
           String.format("The nested %s class must be static", name));
     }
     if (mapperClass.getModifiers().contains(Modifier.PRIVATE)) {
-      throw ValidationException.create(mapperClass,
+      throw ValidationException.create(sourceMethod,
           String.format("The %s class may not be private", name));
     }
     List<ExecutableElement> constructors = ElementFilter.constructorsIn(mapperClass.getEnclosedElements());
@@ -39,59 +44,54 @@ final class MapperClassValidator {
       for (ExecutableElement constructor : constructors) {
         if (constructor.getParameters().isEmpty()) {
           if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
-            throw ValidationException.create(mapperClass,
+            throw ValidationException.create(sourceMethod,
                 String.format("The %s class must have a package visible constructor", name));
           }
           if (!constructor.getThrownTypes().isEmpty()) {
-            throw ValidationException.create(mapperClass,
+            throw ValidationException.create(sourceMethod,
                 String.format("The %s constructor may not declare any exceptions", name));
           }
           constructorFound = true;
         }
       }
       if (!constructorFound) {
-        throw ValidationException.create(mapperClass,
+        throw ValidationException.create(sourceMethod,
             String.format("The %s class must have a default constructor", name));
       }
     }
   }
 
-  private static TypeMirror getFunctionReturnType(TypeElement mapperClass) throws MapEx {
-    Map<String, TypeMirror> supplierTypeargs = Resolver.resolve("java.util.function.Supplier", mapperClass.asType(), "T");
-    TypeMirror suppliedType = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapEx::boom);
-    Map<String, TypeMirror> functionTypeargs = resolveFunctionTypeargs(mapperClass, suppliedType);
+  private TypeMirror getFunctionReturnType(TypeElement supplierClass) {
+    Map<String, TypeMirror> supplierTypeargs = Resolver.resolve("java.util.function.Supplier", supplierClass.asType(), "T");
+    TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(this::boom);
+    Map<String, TypeMirror> functionTypeargs = resolveFunctionTypeargs(functionClass);
     TypeMirror inputType = functionTypeargs.get("T");
     TypeMirror resultType = functionTypeargs.get("R");
     if (inputType == null || resultType == null ||
         !TypeTool.get().equals(inputType, String.class)) {
-      throw new MapEx();
+      throw boom();
     }
     if (resultType.getKind() != TypeKind.DECLARED && resultType.getKind() != TypeKind.ARRAY) {
-      throw new MapEx();
+      throw boom();
     }
     return resultType;
   }
 
-  private static Map<String, TypeMirror> resolveFunctionTypeargs(
-      TypeElement mapperClass,
-      TypeMirror functionType) throws MapEx {
+  private Map<String, TypeMirror> resolveFunctionTypeargs(
+      TypeMirror functionType) {
     Map<String, TypeMirror> functionTypeargs = Resolver.resolve("java.util.function.Function", functionType, "T", "R");
-    if (mapperClass.getTypeParameters().isEmpty()) {
-      return functionTypeargs;
-    }
     TypeTool tool = TypeTool.get();
     DeclaredType string = tool.declared(String.class);
-    TypeMirror t = Optional.ofNullable(functionTypeargs.get("T")).orElseThrow(MapEx::boom);
-    TypeMirror r = Optional.ofNullable(functionTypeargs.get("R")).orElseThrow(MapEx::boom);
+    TypeMirror t = Optional.ofNullable(functionTypeargs.get("T")).orElseThrow(this::boom);
+    TypeMirror r = Optional.ofNullable(functionTypeargs.get("R")).orElseThrow(this::boom);
+    Map<String, TypeMirror> solution = tool.unify(string, t).orElseThrow(this::boom);
     Map<String, TypeMirror> resolved = new HashMap<>();
     resolved.put("T", string);
-    resolved.put("R", tool.substitute(r, tool.unify(string, t).orElseThrow(MapEx::new)));
+    resolved.put("R", tool.substitute(r, solution));
     return resolved;
   }
 
-  static class MapEx extends Exception {
-    static MapEx boom() {
-      return new MapEx();
-    }
+  final ValidationException boom() {
+    return ValidationException.create(sourceMethod, "There is a problem with the mapper class");
   }
 }

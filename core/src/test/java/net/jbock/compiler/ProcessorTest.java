@@ -730,7 +730,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("must implement Supplier<Function<String, java.lang.Integer>>");
+        .withErrorContaining("There is a problem with the mapper class");
   }
 
   @Test
@@ -863,7 +863,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("must implement Supplier<Function<String, java.lang.Integer>>");
+        .withErrorContaining("There is a problem with the mapper class");
   }
 
   @Test
@@ -882,7 +882,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("must implement Supplier<Function<String, java.lang.Integer>>");
+        .withErrorContaining("There is a problem with the mapper class");
   }
 
   static List<String> withImports(String... lines) {

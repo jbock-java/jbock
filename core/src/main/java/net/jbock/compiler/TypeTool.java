@@ -63,9 +63,8 @@ public class TypeTool {
       failure[0] = true;
       return;
     }
-    DeclaredType y = ym.accept(AS_DECLARED, null);
     List<? extends TypeMirror> xargs = x.accept(TYPEARGS, Collections.emptyList());
-    List<? extends TypeMirror> yargs = y.getTypeArguments();
+    List<? extends TypeMirror> yargs = ym.accept(TYPEARGS, null);
     if (xargs.size() != yargs.size()) {
       failure[0] = true;
       return;
@@ -96,6 +95,9 @@ public class TypeTool {
       return result;
     }
     DeclaredType result = input.accept(AS_DECLARED, null);
+    if (result == null) {
+      return input;
+    }
     TypeElement erasure = result.asElement().accept(Util.AS_TYPE_ELEMENT, null);
     List<TypeMirror> args = new ArrayList<>();
     for (TypeMirror typeArgument : result.getTypeArguments()) {
