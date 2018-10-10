@@ -12,16 +12,15 @@ import java.util.function.Supplier;
  * <ul>
  * <li>The annotated method must be abstract.</li>
  * <li>The annotated method must have an empty argument list.</li>
- * <li>The annotated method must not also carry the {@link Parameter} annotation.</li>
+ * <li>The annotated method may not also carry the {@link Parameter} annotation.</li>
  * <li>The method's enclosing class must be annotated with {@link CommandLineArguments}.</li>
  * <li>When this annotation is used on more than one parameter,
  * then the lexical ordering of these methods in the source file is relevant.</li>
- * <li>A {@link #repeatable} positional parameter may only appear once.</li>
- * <li>A {@link #repeatable} positional parameter must be the last positional parameter,
- * in lexical order.</li>
- * <li>If the parameter type is of the form {@link java.util.Optional Optional&lt;X&gt;}, then this parameter must
- * appear, in lexical order, after all positional parameters that are not
- * {@link #repeatable} and not of this form.
+ * <li>There can only be one {@link #repeatable} positional parameter.</li>
+ * <li>The {@link #repeatable} positional parameter must be the last positional parameter,
+ * in the lexical order of the Java source file.</li>
+ * <li>An {@link #optional} positional parameter must
+ * appear, in lexical order, after any other non-{@link #repeatable} positional parameters.
  * </ul>
  */
 @Target(ElementType.METHOD)

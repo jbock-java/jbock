@@ -15,7 +15,8 @@ import java.lang.annotation.Target;
  * <li>None of the abstract methods may declare an exception.</li>
  * <li>Each abstract method must either be annotated with {@link Parameter}
  * or {@link PositionalParameter}, but not both.</li>
- * <li>The class may not extend or implement anything, other than {@link java.lang.Object}.</li>
+ * <li>The annotated class may not implement anything and may not extend anything other than
+ * {@link java.lang.Object Object}.</li>
  * </ul>
  */
 @Target(ElementType.TYPE)

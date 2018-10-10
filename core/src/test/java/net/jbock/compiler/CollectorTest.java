@@ -53,6 +53,27 @@ class CollectorTest {
   }
 
   @Test
+  void invalidReturnType() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(repeatable = true, collectedBy = MyCollector.class) abstract Set<String> strings();",
+        "",
+        "  static class MyCollector implements Supplier<Collector<String, ?, List<String>>> {",
+        "    public Collector<String, ?, List<String>> get() {",
+        "      return Collectors.toList();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("collector");
+  }
+
+  @Test
   void validBigIntegers() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",

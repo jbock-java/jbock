@@ -12,7 +12,7 @@ import java.util.function.Supplier;
  * <ul>
  * <li>The annotated method must be abstract.</li>
  * <li>The annotated method must have an empty argument list.</li>
- * <li>The annotated method must not also carry the {@link PositionalParameter} annotation.</li>
+ * <li>The annotated method may not also carry the {@link PositionalParameter} annotation.</li>
  * <li>The method's enclosing class must be annotated with {@link CommandLineArguments}.</li>
  * </ul>
  */
