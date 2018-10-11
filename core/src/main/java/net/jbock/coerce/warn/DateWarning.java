@@ -1,7 +1,7 @@
 package net.jbock.coerce.warn;
 
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 
 import java.util.Calendar;
 import java.util.Set;

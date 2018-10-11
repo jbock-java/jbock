@@ -1,6 +1,6 @@
 package net.jbock.coerce.mappers;
 
-import net.jbock.com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.CodeBlock;
 
 class StringCoercion extends CoercionFactory {
 

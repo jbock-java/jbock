@@ -1,6 +1,6 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.CodeBlock;
 
 /**
  * Basic option types

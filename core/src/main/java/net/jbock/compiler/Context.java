@@ -1,8 +1,8 @@
 package net.jbock.compiler;
 
 import net.jbock.CommandLineArguments;
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.TypeElement;
 import java.util.List;

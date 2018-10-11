@@ -1,8 +1,8 @@
 package net.jbock.compiler;
 
-import net.jbock.com.squareup.javapoet.ClassName;
-import net.jbock.com.squareup.javapoet.ParameterizedTypeName;
-import net.jbock.com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -21,7 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-import static net.jbock.com.squareup.javapoet.WildcardTypeName.subtypeOf;
+import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
 
 public final class Util {
 

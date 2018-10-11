@@ -1,8 +1,8 @@
 package net.jbock.coerce.mappers;
 
-import net.jbock.com.squareup.javapoet.CodeBlock;
-import net.jbock.com.squareup.javapoet.ParameterSpec;
-import net.jbock.com.squareup.javapoet.TypeName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 
 import java.util.OptionalInt;
 

@@ -12,7 +12,7 @@
   </parent>
 
   <groupId>com.github.h908714124</groupId>
-  <artifactId>jbock-processor</artifactId>
+  <artifactId>jbock</artifactId>
   <version>0-SNAPSHOT</version>
 
   <description>
@@ -28,9 +28,16 @@
     <javadoc-plugin.version>3.0.1</javadoc-plugin.version>
     <jar-plugin.version>3.1.0</jar-plugin.version>
     <jbock-annotations.version>2.0</jbock-annotations.version>
+    <javapoet.version>1.11.1</javapoet.version>
   </properties>
 
   <dependencies>
+
+    <dependency>
+      <groupId>com.squareup</groupId>
+      <artifactId>javapoet</artifactId>
+      <version>${javapoet.version}</version>
+    </dependency>
 
     <dependency>
       <groupId>${project.groupId}</groupId>

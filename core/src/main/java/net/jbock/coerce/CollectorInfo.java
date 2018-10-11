@@ -1,6 +1,6 @@
 package net.jbock.coerce;
 
-import net.jbock.com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.CodeBlock;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
