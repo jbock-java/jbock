@@ -126,7 +126,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Define a custom collector. Alternatively, use List instead.");
+        .withErrorContaining("Either define a custom collector, or return List");
   }
 
   @Test
@@ -140,7 +140,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Use List, or define a custom collector.");
+        .withErrorContaining("Either define a custom collector, or return List");
   }
 
   @Test
@@ -330,27 +330,37 @@ class ProcessorTest {
   void positionalOptionalsAnyOrder() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "  @PositionalParameter(optional = true) abstract Optional<String> a();",
         "  @PositionalParameter(optional = true) abstract OptionalInt b();",
         "  @PositionalParameter(optional = true) abstract Optional<String> c();",
         "  @PositionalParameter(optional = true) abstract OptionalInt d();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
   }
 
   @Test
-  void toStringDefined() {
+  void oneOptionalInt() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @Parameter(optional = true) abstract OptionalInt b();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void simpleOptional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "  @PositionalParameter(optional = true) abstract Optional<String> a();",
-        "  @Override public final String toString() {",
-        "    return null;",
-        "  }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))

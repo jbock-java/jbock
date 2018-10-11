@@ -97,18 +97,17 @@ public final class Coercion {
 
   public Coercion asOptional() {
     TypeName paramType = field.type;
-    CodeBlock extract = CodeBlock.builder()
-        .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())
-        .build();
+    ParameterSpec param = ParameterSpec.builder(paramType, field.name).build();
+    CodeBlock extract = CodeBlock.builder().add("$T.requireNonNull($N)", Objects.class, param).build();
     return new Coercion(trigger, collectorParam, map, initMapper, initCollector, extract, paramType, field, kind);
   }
 
-  public Coercion withCollector(CollectorInfo collectorInfo) {
+  public Coercion withCollector() {
     TypeName paramType = field.type;
     CodeBlock extract = CodeBlock.builder()
         .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())
         .build();
-    return new Coercion(trigger, collectorParam, map, initMapper, collectorInfo.collectorInit, extract, paramType, field, kind);
+    return new Coercion(trigger, collectorParam, map, initMapper, initCollector, extract, paramType, field, kind);
   }
 
   public CoercionKind kind() {

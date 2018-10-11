@@ -1,12 +1,12 @@
 package net.jbock.compiler;
 
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.JavaFile;
+import com.squareup.javapoet.TypeSpec;
 import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.mappers.AllCoercions;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.JavaFile;
-import com.squareup.javapoet.TypeSpec;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -42,6 +42,17 @@ import static net.jbock.compiler.Util.asType;
 public final class Processor extends AbstractProcessor {
 
   private final Set<String> done = new HashSet<>();
+
+  private final boolean debug;
+
+  public Processor() {
+    this(false);
+  }
+
+  // visible for testing
+  Processor(boolean debug) {
+    this.debug = debug;
+  }
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
@@ -145,7 +156,14 @@ public final class Processor extends AbstractProcessor {
         .createSourceFile(generatedType.toString(),
             javaFile.typeSpec.originatingElements.toArray(new Element[0]));
     try (Writer writer = sourceFile.openWriter()) {
-      writer.write(javaFile.toString());
+      String sourceCode = javaFile.toString();
+      writer.write(sourceCode);
+      if (debug) {
+        System.err.println("##############");
+        System.err.println("# Debug info #");
+        System.err.println("##############");
+        System.err.println(sourceCode);
+      }
     }
   }
 

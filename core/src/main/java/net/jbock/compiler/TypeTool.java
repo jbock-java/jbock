@@ -20,7 +20,7 @@ import static net.jbock.compiler.Util.AS_DECLARED;
 
 public class TypeTool {
 
-  private static final TypeVisitor<List<? extends TypeMirror>, Void> TYPEARGS =
+  public static final TypeVisitor<List<? extends TypeMirror>, Void> TYPEARGS =
       new SimpleTypeVisitor8<List<? extends TypeMirror>, Void>() {
         @Override
         public List<? extends TypeMirror> visitDeclared(DeclaredType declaredType, Void _null) {

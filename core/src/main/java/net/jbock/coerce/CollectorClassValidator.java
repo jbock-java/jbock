@@ -17,12 +17,7 @@ class CollectorClassValidator {
     Map<String, TypeMirror> supplierTypeargs = Resolver.resolve("java.util.function.Supplier", supplierClass.asType(), "T");
     TypeMirror suppliedType = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
     Map<String, TypeMirror> collectorTypeargs = resolveCollectorTypeargs(returnType, suppliedType);
-    TypeTool tool = TypeTool.get();
-    Optional<Map<String, TypeMirror>> solution = tool.unify(returnType, collectorTypeargs.get("R"));
-    if (!solution.isPresent()) {
-      throw boom();
-    }
-    return tool.substitute(collectorTypeargs.get("T"), solution.get());
+    return collectorTypeargs.get("T");
   }
 
   private static Map<String, TypeMirror> resolveCollectorTypeargs(TypeMirror returnType, TypeMirror collectorType) throws TmpException {
@@ -38,6 +33,6 @@ class CollectorClassValidator {
   }
 
   private static TmpException boom() {
-    return TmpException.create("There is a problem with the collector class.");
+    return TmpException.findWarning("There is a problem with the collector class.");
   }
 }

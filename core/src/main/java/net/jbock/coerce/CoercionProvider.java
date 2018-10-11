@@ -1,13 +1,13 @@
 package net.jbock.coerce;
 
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.mappers.AllCoercions;
 import net.jbock.coerce.mappers.CoercionFactory;
 import net.jbock.coerce.mappers.EnumCoercion;
 import net.jbock.coerce.mappers.MapperCoercion;
 import net.jbock.coerce.warn.WarningProvider;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.Util;
 import net.jbock.compiler.ValidationException;
@@ -18,6 +18,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
@@ -59,6 +60,9 @@ public class CoercionProvider {
     try {
       return handle(sourceMethod, paramName, mapperClass, collectorClass, repeatable, optional);
     } catch (TmpException e) {
+      if (!e.findWarning()) {
+        throw e.asValidationException(sourceMethod);
+      }
       String warning = WarningProvider.instance().findWarning(returnType, repeatable, optional);
       if (warning != null) {
         throw e.asValidationException(sourceMethod, warning);
@@ -84,10 +88,18 @@ public class CoercionProvider {
     if (mapperClass != null) {
       return handleMapper(sourceMethod, paramName, mapperClass, field, optional);
     }
+    return handleSimple(sourceMethod, optional, field);
+  }
+
+  // no mapper or collector
+  private Coercion handleSimple(
+      ExecutableElement sourceMethod,
+      boolean optional,
+      FieldSpec field) throws TmpException {
     TypeMirror returnType = sourceMethod.getReturnType();
     if (returnType.getKind() == TypeKind.ARRAY) {
       // there's no default mapper for array
-      throw new TmpException("Either switch to List and declare this parameter repeatable, or use a custom mapper.");
+      throw TmpException.create("Either switch to List and declare this parameter repeatable, or use a custom mapper.");
     }
     TriggerKind tk = trigger(returnType, optional);
     return handleDefault(tk, field, optional);
@@ -105,7 +117,7 @@ public class CoercionProvider {
     if (mapperClass == null) {
       CoercionFactory coercion = AllCoercions.get(collectorInput.collectorInput);
       if (coercion == null) {
-        throw TmpException.create(String.format("Unknown collector input %s, please define a custom mapper.", collectorInput.collectorInput));
+        throw TmpException.findWarning(String.format("Unknown collector input %s, please define a custom mapper.", collectorInput.collectorInput));
       }
       return coercion.getCoercion(field, tk);
     }
@@ -167,10 +179,10 @@ public class CoercionProvider {
     } else {
       CoercionFactory factory = AllCoercions.get(tk.trigger);
       if (factory == null) {
-        throw TmpException.create("Bad return type");
+        throw TmpException.findWarning("Bad return type");
       }
       if (factory.handlesOptionalPrimitive() && !optional) {
-        throw TmpException.create("Declare this parameter optional.");
+        throw TmpException.findWarning("Declare this parameter optional.");
       }
       return factory.getCoercion(field, tk);
     }
@@ -187,7 +199,7 @@ public class CoercionProvider {
       return null;
     }
     if (element.getModifiers().contains(Modifier.PRIVATE)) {
-      throw TmpException.create("Private return type is not allowed");
+      throw TmpException.findWarning("Private return type is not allowed");
     }
     return EnumCoercion.create(mirror);
   }
@@ -211,16 +223,16 @@ public class CoercionProvider {
       ExecutableElement sourceMethod,
       TypeElement collectorClass,
       TypeMirror returnType) throws TmpException {
-    if (collectorClass == null || "java.util.function.Supplier".equals(collectorClass.getQualifiedName().toString())) {
-      DeclaredType parameterized = Util.asParameterized(returnType);
-      if (parameterized == null) {
-        throw new TmpException("This repeatable method must either use a custom collector, or return List");
+    if (collectorClass == null) {
+      TypeTool tool = TypeTool.get();
+      if (!tool.equals(tool.erasure(returnType), tool.declared(List.class))) {
+        throw TmpException.create("Either define a custom collector, or return List");
       }
-      if (!"java.util.List".equals(parameterized.accept(Util.QUALIFIED_NAME, null))) {
-        throw new TmpException("This repeatable method must either use a custom collector, or return List");
+      List<? extends TypeMirror> typeParameters = returnType.accept(TypeTool.TYPEARGS, null);
+      if (typeParameters.isEmpty()) {
+        throw TmpException.create("Either define a custom collector, or return List");
       }
-      TypeMirror input = parameterized.getTypeArguments().get(0);
-      return CollectorInfo.listCollector(input);
+      return CollectorInfo.listCollector(typeParameters.get(0));
     }
     return CollectorInfo.create(CollectorClassValidator.findInputType(sourceMethod.getReturnType(), collectorClass), collectorClass);
   }
@@ -249,5 +261,4 @@ public class CoercionProvider {
     }
     return sb.toString();
   }
-
 }

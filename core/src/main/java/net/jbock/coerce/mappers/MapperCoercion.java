@@ -1,13 +1,13 @@
 package net.jbock.coerce.mappers;
 
-import net.jbock.coerce.Coercion;
-import net.jbock.coerce.TriggerKind;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.Coercion;
+import net.jbock.coerce.TriggerKind;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
@@ -27,7 +27,11 @@ public final class MapperCoercion extends CoercionFactory {
     this.mapperType = mapperType;
   }
 
-  public static Coercion create(TriggerKind tk, ParameterSpec mapperParam, TypeMirror mapperType, FieldSpec field) {
+  public static Coercion create(
+      TriggerKind tk,
+      ParameterSpec mapperParam,
+      TypeMirror mapperType,
+      FieldSpec field) {
     return new MapperCoercion(tk.trigger, mapperParam, mapperType).getCoercion(field, tk);
   }
 

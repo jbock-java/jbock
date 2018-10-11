@@ -11,11 +11,11 @@ abstract class SuppliedClassValidator {
 
   static void commonChecks(TypeElement classToCheck, String name) throws TmpException {
     if (classToCheck.getNestingKind() == NestingKind.MEMBER && !classToCheck.getModifiers().contains(Modifier.STATIC)) {
-      throw TmpException.create(
+      throw TmpException.findWarning(
           String.format("The nested %s class must be static", name));
     }
     if (classToCheck.getModifiers().contains(Modifier.PRIVATE)) {
-      throw TmpException.create(
+      throw TmpException.findWarning(
           String.format("The %s class may not be private", name));
     }
     List<ExecutableElement> constructors = ElementFilter.constructorsIn(classToCheck.getEnclosedElements());
@@ -24,11 +24,11 @@ abstract class SuppliedClassValidator {
       for (ExecutableElement constructor : constructors) {
         if (constructor.getParameters().isEmpty()) {
           if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
-            throw TmpException.create(
+            throw TmpException.findWarning(
                 String.format("The %s class must have a package visible constructor", name));
           }
           if (!constructor.getThrownTypes().isEmpty()) {
-            throw TmpException.create(
+            throw TmpException.findWarning(
                 String.format("The %s's constructor may not declare any exceptions", name));
           }
           constructorFound = true;
@@ -36,7 +36,7 @@ abstract class SuppliedClassValidator {
         }
       }
       if (!constructorFound) {
-        throw TmpException.create(
+        throw TmpException.findWarning(
             String.format("The %s class must have a default constructor", name));
       }
     }

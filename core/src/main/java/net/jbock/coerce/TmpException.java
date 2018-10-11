@@ -6,13 +6,20 @@ import javax.lang.model.element.ExecutableElement;
 
 class TmpException extends Exception {
 
-  final String message;
+  private final boolean findWarning;
 
-  static TmpException create(String message) {
-    return new TmpException(message);
+  private final String message;
+
+  static TmpException findWarning(String defaultMessage) {
+    return new TmpException(true, defaultMessage);
   }
 
-  TmpException(String message) {
+  static TmpException create(String message) {
+    return new TmpException(false, message);
+  }
+
+  private TmpException(boolean findWarning, String message) {
+    this.findWarning = findWarning;
     this.message = message;
   }
 
@@ -22,5 +29,9 @@ class TmpException extends Exception {
 
   ValidationException asValidationException(ExecutableElement sourceMethod, String newMessage) {
     return ValidationException.create(sourceMethod, newMessage);
+  }
+
+  public boolean findWarning() {
+    return findWarning;
   }
 }

@@ -18,7 +18,10 @@ class CollectorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(collectedBy = MyCollector.class) abstract Set<String> strings();",
+        "",
+        "  @Parameter(collectedBy = MyCollector.class)",
+        "  abstract Set<String> strings();",
+        "",
         "  static class MyCollector implements Supplier<Collector<String, ?, Set<String>>> {",
         "    public Collector<String, ?, Set<String>> get() {",
         "      return Collectors.toSet();",
@@ -30,6 +33,22 @@ class CollectorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("must be declared repeatable");
+  }
+
+  @Test
+  void collectorClassDoesntExist() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(repeatable = true, collectedBy = JustNotExist.class)",
+        "  abstract Set<String> strings();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Invalid value of 'collectedBy'.");
   }
 
   @Test
@@ -74,6 +93,61 @@ class CollectorTest {
   }
 
   @Test
+  void invalidMapperMismatch() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(repeatable = true, mappedBy = HexMapper.class, collectedBy = ToSetCollector.class)",
+        "  abstract Set<String> bigIntegers();",
+        "",
+        "  static class HexMapper implements Supplier<Function<String, BigInteger>> {",
+        "    public Function<String, BigInteger> get() {",
+        "      return s -> new BigInteger(s, 16);",
+        "    }",
+        "  }",
+        "",
+        "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
+        "    public Collector<E, ?, Set<E>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("problem");
+  }
+
+  @Test
+  void validMapperMatch() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(repeatable = true, mappedBy = HexMapper.class, collectedBy = ToSetCollector.class)",
+        "  abstract Set<String> bigIntegers();",
+        "",
+        "  static class HexMapper implements Supplier<Function<String, String>> {",
+        "    public Function<String, String> get() {",
+        "      return s -> s;",
+        "    }",
+        "  }",
+        "",
+        "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
+        "    public Collector<E, ?, Set<E>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void validBigIntegers() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -82,15 +156,15 @@ class CollectorTest {
         "  @Parameter(repeatable = true, mappedBy = HexMapper.class, collectedBy = MyCollector.class)",
         "  abstract Set<BigInteger> bigIntegers();",
         "",
-        "  static class MyCollector implements Supplier<Collector<BigInteger, ?, Set<BigInteger>>> {",
-        "    public Collector<BigInteger, ?, Set<BigInteger>> get() {",
-        "      return Collectors.toSet();",
-        "    }",
-        "  }",
-        "",
         "  static class HexMapper implements Supplier<Function<String, BigInteger>> {",
         "    public Function<String, BigInteger> get() {",
         "      return s -> new BigInteger(s, 16);",
+        "    }",
+        "  }",
+        "",
+        "  static class MyCollector implements Supplier<Collector<BigInteger, ?, Set<BigInteger>>> {",
+        "    public Collector<BigInteger, ?, Set<BigInteger>> get() {",
+        "      return Collectors.toSet();",
         "    }",
         "  }",
         "}");

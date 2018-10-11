@@ -2,14 +2,41 @@ package net.jbock.compiler;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
+import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 import java.util.Map;
 
 final class MapperClassUtil {
+
+  private static final class MapperClassUtilContext {
+
+    final ExecutableElement sourceMethod;
+    final String attributeName;
+
+    MapperClassUtilContext(ExecutableElement sourceMethod, String attributeName) {
+      this.sourceMethod = sourceMethod;
+      this.attributeName = attributeName;
+    }
+  }
+
+  private static final AnnotationValueVisitor<TypeMirror, MapperClassUtilContext> GET_TYPE = new SimpleAnnotationValueVisitor8<TypeMirror, MapperClassUtilContext>() {
+
+    @Override
+    protected TypeMirror defaultAction(Object o, MapperClassUtilContext utilContext) {
+      throw ValidationException.create(utilContext.sourceMethod,
+          String.format("Invalid value of '%s'.", utilContext.attributeName));
+    }
+
+    @Override
+    public TypeMirror visitType(TypeMirror mirror, MapperClassUtilContext utilContext) {
+      return mirror;
+    }
+  };
 
   private static TypeElement get(
       ExecutableElement sourceMethod,
@@ -17,22 +44,18 @@ final class MapperClassUtil {
       String attributeName) {
     AnnotationMirror mirror = getAnnotationMirror(sourceMethod, annotationClass);
     if (mirror == null) {
-      // the source method doesn't have this annotation
+      // if the source method doesn't have this annotation
       return null;
     }
     AnnotationValue annotationValue = getAnnotationValue(mirror, attributeName);
     if (annotationValue == null) {
-      // if the default value of mappedBy is not overridden
+      // if the default value is not overridden
       return null;
     }
-    Object annotationValueValue = annotationValue.getValue();
-    if (!(annotationValueValue instanceof TypeMirror)) {
-      // can't happen because mapperClass() returns Class
-      return null;
-    }
-    TypeMirror typeMirror = (TypeMirror) annotationValueValue;
+    TypeMirror typeMirror = annotationValue.accept(GET_TYPE, new MapperClassUtilContext(sourceMethod, attributeName));
     if (typeMirror.getKind() != TypeKind.DECLARED) {
-      return null;
+      throw ValidationException.create(sourceMethod,
+          String.format("Invalid value of '%s'.", attributeName));
     }
     DeclaredType declaredType = typeMirror.accept(Util.AS_DECLARED, null);
     return declaredType.asElement().accept(Util.AS_TYPE_ELEMENT, null);

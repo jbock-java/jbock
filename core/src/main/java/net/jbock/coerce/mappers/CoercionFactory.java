@@ -1,8 +1,5 @@
 package net.jbock.coerce.mappers;
 
-import net.jbock.coerce.Coercion;
-import net.jbock.coerce.CollectorInfo;
-import net.jbock.coerce.TriggerKind;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -10,6 +7,10 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
+import net.jbock.coerce.Coercion;
+import net.jbock.coerce.CoercionKind;
+import net.jbock.coerce.CollectorInfo;
+import net.jbock.coerce.TriggerKind;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
@@ -60,28 +61,27 @@ public abstract class CoercionFactory {
   public final Coercion getCoercion(
       FieldSpec field,
       TriggerKind tk) {
-    // primitive optionals get special treatment here
-    ParameterSpec param = ParameterSpec.builder(paramType(), field.name).build();
-    CodeBlock initMapper = initMapper();
-    Coercion coercion = new Coercion(
+    CodeBlock extract;
+    TypeName paramType;
+    if (tk.kind == CoercionKind.OPTIONAL_COMBINATION || !tk.collectorInfo.isEmpty()) {
+      ParameterSpec param = ParameterSpec.builder(field.type, field.name).build();
+      paramType = field.type;
+      extract = CodeBlock.builder().add("$T.requireNonNull($N)", Objects.class, param).build();
+    } else {
+      ParameterSpec param = ParameterSpec.builder(paramType(), field.name).build();
+      paramType = paramType();
+      extract = extract(param);
+    }
+    return new Coercion(
         trigger,
         Optional.ofNullable(collectorParam(field, tk.collectorInfo)),
         map(),
-        initMapper,
+        initMapper(),
         initCollector(field, tk.collectorInfo),
-        extract(param),
-        paramType(),
+        extract,
+        paramType,
         field,
         tk.kind);
-    if (!tk.collectorInfo.isEmpty()) {
-      return coercion.withCollector(tk.collectorInfo);
-    }
-    switch (tk.kind) {
-      case OPTIONAL_COMBINATION:
-        return coercion.asOptional();
-      default:
-        return coercion;
-    }
   }
 
   private CodeBlock initCollector(
