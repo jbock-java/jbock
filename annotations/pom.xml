@@ -12,11 +12,11 @@
   </parent>
 
   <groupId>com.github.h908714124</groupId>
-  <artifactId>jbock-processor</artifactId>
+  <artifactId>jbock-annotations</artifactId>
   <version>0-SNAPSHOT</version>
 
   <description>
-    The jbock annotation processor
+    Annotations for the jbock annotation processor
   </description>
 
   <properties>
@@ -27,39 +27,7 @@
     <compiler-plugin.version>3.8.0</compiler-plugin.version>
     <javadoc-plugin.version>3.0.1</javadoc-plugin.version>
     <jar-plugin.version>3.1.0</jar-plugin.version>
-    <jbock-annotations.version>2.0</jbock-annotations.version>
   </properties>
-
-  <dependencies>
-
-    <dependency>
-      <groupId>${project.groupId}</groupId>
-      <artifactId>jbock-annotations</artifactId>
-      <version>${jbock-annotations.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>com.google.testing.compile</groupId>
-      <artifactId>compile-testing</artifactId>
-      <version>${compile-testing.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-api</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-    <dependency>
-      <groupId>org.junit.jupiter</groupId>
-      <artifactId>junit-jupiter-engine</artifactId>
-      <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>
-
-  </dependencies>
 
   <build>
     <plugins>
@@ -72,12 +40,6 @@
           <target>8</target>
           <compilerArgument>-proc:none</compilerArgument>
         </configuration>
-      </plugin>
-
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire.version}</version>
       </plugin>
 
       <plugin>
