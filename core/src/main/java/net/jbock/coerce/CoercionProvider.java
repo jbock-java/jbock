@@ -111,22 +111,29 @@ public class CoercionProvider {
       TypeElement mapperClass,
       TypeElement collectorClass,
       FieldSpec field) throws TmpException {
-    TypeMirror returnType = sourceMethod.getReturnType();
-    CollectorInfo collectorInput = collectorInput(sourceMethod, collectorClass, returnType);
-    TriggerKind tk = CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
     if (mapperClass == null) {
-      CoercionFactory coercion = AllCoercions.get(collectorInput.collectorInput);
-      if (coercion == null) {
-        throw TmpException.findWarning(String.format("Unknown collector input %s, please define a custom mapper.", collectorInput.collectorInput));
-      }
-      return coercion.getCoercion(field, tk);
+      return handleRepeatableNoMapper(sourceMethod, collectorClass, field);
     }
+    CollectorInfo collectorInput = collectorInput(sourceMethod, collectorClass);
     MapperClassValidator.checkReturnType(mapperClass, collectorInput.collectorInput);
     collectorInput = collectorInput.withInput(collectorInput.collectorInput);
-    tk = CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
+    TriggerKind tk = CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
     TypeName mapperType = TypeName.get(mapperClass.asType());
     ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
     return MapperCoercion.create(tk, mapperParam, mapperClass.asType(), field);
+  }
+
+  private Coercion handleRepeatableNoMapper(
+      ExecutableElement sourceMethod,
+      TypeElement collectorClass,
+      FieldSpec field) throws TmpException {
+    CollectorInfo collectorInput = collectorInput(sourceMethod, collectorClass);
+    CoercionFactory coercion = AllCoercions.get(collectorInput.collectorInput);
+    if (coercion == null) {
+      throw TmpException.findWarning(String.format("Unknown collector input %s, please define a custom mapper.", collectorInput.collectorInput));
+    }
+    TriggerKind tk = CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
+    return coercion.getCoercion(field, tk);
   }
 
   private Coercion handleMapper(
@@ -239,14 +246,13 @@ public class CoercionProvider {
 
   private CollectorInfo collectorInput(
       ExecutableElement sourceMethod,
-      TypeElement collectorClass,
-      TypeMirror returnType) throws TmpException {
+      TypeElement collectorClass) throws TmpException {
     if (collectorClass == null) {
       TypeTool tool = TypeTool.get();
-      if (!tool.equals(tool.erasure(returnType), tool.declared(List.class))) {
+      if (!tool.equals(tool.erasure(sourceMethod.getReturnType()), tool.declared(List.class))) {
         throw TmpException.create("Either define a custom collector, or return List");
       }
-      List<? extends TypeMirror> typeParameters = returnType.accept(TypeTool.TYPEARGS, null);
+      List<? extends TypeMirror> typeParameters = sourceMethod.getReturnType().accept(TypeTool.TYPEARGS, null);
       if (typeParameters.isEmpty()) {
         throw TmpException.create("Either define a custom collector, or return List");
       }
