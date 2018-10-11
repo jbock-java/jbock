@@ -61,6 +61,14 @@ public abstract class CoercionFactory {
   public final Coercion getCoercion(
       FieldSpec field,
       TriggerKind tk) {
+    return getCoercion(field, tk, map(), initMapper());
+  }
+
+  public final Coercion getCoercion(
+      FieldSpec field,
+      TriggerKind tk,
+      CodeBlock map,
+      CodeBlock initMapper) {
     CodeBlock extract;
     TypeName paramType;
     if (tk.kind == CoercionKind.OPTIONAL_COMBINATION || !tk.collectorInfo.isEmpty()) {
@@ -75,8 +83,8 @@ public abstract class CoercionFactory {
     return new Coercion(
         trigger,
         Optional.ofNullable(collectorParam(field, tk.collectorInfo)),
-        map(),
-        initMapper(),
+        map,
+        initMapper,
         initCollector(field, tk.collectorInfo),
         extract,
         paramType,

@@ -14,7 +14,7 @@ import static net.jbock.compiler.ProcessorTest.withImports;
 class CollectorTest {
 
   @Test
-  void notRepeatable() {
+  void invalidNotRepeatable() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -36,7 +36,7 @@ class CollectorTest {
   }
 
   @Test
-  void collectorClassDoesntExist() {
+  void invalidCollectorClassDoesntExist() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -222,6 +222,33 @@ class CollectorTest {
         "  static class MapEntryCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {",
         "    public Collector<Map.Entry<K, V>, ?, Map<K, V>> get() {",
         "      return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue);",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void validBothMapperAndCollectorHaveTypeargs() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(repeatable = true, mappedBy = XMap.class, collectedBy = YCol.class)",
+        "  abstract List<String> map();",
+        "",
+        "  static class XMap<E> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() {",
+        "      return Function.identity();",
+        "    }",
+        "  }",
+        "",
+        "  static class YCol<E> implements Supplier<Collector<E, ?, List<E>>> {",
+        "    public Collector<E, ?, List<E>> get() {",
+        "      return Collectors.toList();",
         "    }",
         "  }",
         "}");

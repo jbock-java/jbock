@@ -70,12 +70,12 @@ public class AllCoercions {
     instance = null;
   }
 
-  public static boolean containsKey(TypeMirror typeName) {
-    return instance().coercions.containsKey(new MapMirror(typeName));
+  public static boolean containsKey(TypeMirror trigger) {
+    return instance().coercions.containsKey(new MapMirror(trigger));
   }
 
-  public static CoercionFactory get(TypeMirror typeName) {
-    return instance().coercions.get(new MapMirror(typeName));
+  public static CoercionFactory get(TypeMirror trigger) {
+    return instance().coercions.get(new MapMirror(trigger));
   }
 
   private static final class MapMirror {

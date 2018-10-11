@@ -26,13 +26,13 @@ class CollectorClassValidator {
     TypeMirror t = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
     TypeMirror r = Optional.ofNullable(collectorTypeargs.get("R")).orElseThrow(CollectorClassValidator::boom);
     Map<String, TypeMirror> solution = tool.unify(returnType, r).orElseThrow(CollectorClassValidator::boom);
-    Map<String, TypeMirror> resolved = new HashMap<>();
-    resolved.put("T", tool.substitute(t, solution));
-    resolved.put("R", returnType);
-    return resolved;
+    Map<String, TypeMirror> result = new HashMap<>();
+    result.put("T", tool.substitute(t, solution));
+    result.put("R", tool.substitute(r, solution));
+    return result;
   }
 
   private static TmpException boom() {
-    return TmpException.findWarning("There is a problem with the collector class.");
+    return TmpException.create("There is a problem with the collector class.");
   }
 }

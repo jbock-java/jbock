@@ -13,30 +13,28 @@ import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 
 final class MapperClassValidator {
 
-  static TypeMirror findReturnType(TypeElement supplierClass, TypeMirror goal) throws TmpException {
+  static void checkReturnType(TypeElement supplierClass, TypeMirror expectedReturnType) throws TmpException {
     commonChecks(supplierClass, "mapper");
     Map<String, TypeMirror> supplierTypeargs = Resolver.resolve("java.util.function.Supplier", supplierClass.asType(), "T");
     TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
     Map<String, TypeMirror> functionTypeargs = resolveFunctionTypeargs(functionClass);
     TypeMirror returnType = functionTypeargs.get("R");
-    if (!TypeTool.get().equals(returnType, goal)) {
+    if (!TypeTool.get().equals(returnType, expectedReturnType)) {
       throw boom();
     }
-    return returnType;
   }
 
-  private static Map<String, TypeMirror> resolveFunctionTypeargs(
-      TypeMirror functionType) throws TmpException {
+  private static Map<String, TypeMirror> resolveFunctionTypeargs(TypeMirror functionType) throws TmpException {
     Map<String, TypeMirror> functionTypeargs = Resolver.resolve("java.util.function.Function", functionType, "T", "R");
     TypeTool tool = TypeTool.get();
     DeclaredType string = tool.declared(String.class);
     TypeMirror t = Optional.ofNullable(functionTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
     TypeMirror r = Optional.ofNullable(functionTypeargs.get("R")).orElseThrow(MapperClassValidator::boom);
     Map<String, TypeMirror> solution = tool.unify(string, t).orElseThrow(MapperClassValidator::boom);
-    Map<String, TypeMirror> resolved = new HashMap<>();
-    resolved.put("T", string);
-    resolved.put("R", tool.substitute(r, solution));
-    return resolved;
+    Map<String, TypeMirror> result = new HashMap<>();
+    result.put("T", tool.substitute(t, solution));
+    result.put("R", tool.substitute(r, solution));
+    return result;
   }
 
   private static TmpException boom() {
