@@ -23,16 +23,11 @@ public class HierarchyUtil {
     if (mirror == null || mirror.getKind() != TypeKind.DECLARED) {
       return;
     }
-    TypeElement t = asTypeElement(mirror);
+    TypeElement t = TypeTool.get().asTypeElement(mirror);
     acc.add(t);
     for (TypeMirror inter : t.getInterfaces()) {
       accumulate(inter, acc);
     }
     accumulate(t.getSuperclass(), acc);
-  }
-
-  public static TypeElement asTypeElement(TypeMirror mirror) {
-    DeclaredType declared = mirror.accept(Util.AS_DECLARED, null);
-    return declared.asElement().accept(Util.AS_TYPE_ELEMENT, null);
   }
 }

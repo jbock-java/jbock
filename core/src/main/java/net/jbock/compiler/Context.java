@@ -1,8 +1,8 @@
 package net.jbock.compiler;
 
-import net.jbock.CommandLineArguments;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import net.jbock.CommandLineArguments;
 
 import javax.lang.model.element.TypeElement;
 import java.util.List;
@@ -10,7 +10,6 @@ import java.util.OptionalInt;
 import java.util.Set;
 
 import static java.util.stream.Collectors.toList;
-import static net.jbock.compiler.Util.asType;
 
 final class Context {
 
@@ -117,7 +116,7 @@ final class Context {
       List<Param> parameters,
       Set<OptionType> paramTypes,
       Set<OptionType> positionalParamTypes) {
-    ClassName generatedClass = parserClass(ClassName.get(asType(sourceType)));
+    ClassName generatedClass = parserClass(ClassName.get(sourceType));
     boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscape();
     List<Param> positionalParameters = parameters.stream().filter(Param::isPositional).collect(toList());
     boolean strict = sourceType.getAnnotation(CommandLineArguments.class).strict();
@@ -172,7 +171,7 @@ final class Context {
     }
     switch (sourceType.getNestingKind()) {
       case MEMBER:
-        return Util.asType(sourceType.getEnclosingElement()).getSimpleName().toString();
+        return sourceType.getEnclosingElement().getSimpleName().toString();
       default:
         return sourceType.getSimpleName().toString();
     }

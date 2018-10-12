@@ -1,15 +1,17 @@
 package net.jbock.coerce;
 
-import javax.lang.model.type.TypeMirror;
+import net.jbock.compiler.TypeTool;
 
-import static net.jbock.compiler.Util.QUALIFIED_NAME;
+import javax.lang.model.type.TypeMirror;
+import java.util.List;
+import java.util.Optional;
 
 public enum CoercionKind {
 
   SIMPLE(false),
   OPTIONAL_COMBINATION(true);
 
-  public final boolean combination;
+  private final boolean combination;
 
   CoercionKind(boolean combination) {
     this.combination = combination;
@@ -23,13 +25,14 @@ public enum CoercionKind {
     return combination;
   }
 
-  public static CoercionKind findKind(TypeMirror mirror) {
-    String qname = mirror.accept(QUALIFIED_NAME, null);
-    switch (qname) {
-      case "java.util.Optional":
-        return CoercionKind.OPTIONAL_COMBINATION;
-      default:
-        return CoercionKind.SIMPLE;
+  public static TriggerKind findKind(TypeMirror mirror) {
+    TypeTool tool = TypeTool.get();
+    if (tool.eql(tool.erasure(mirror), tool.declared(Optional.class))) {
+      List<? extends TypeMirror> typeArgs = tool.typeargs(mirror);
+      if (!typeArgs.isEmpty()) {
+        return OPTIONAL_COMBINATION.of(typeArgs.get(0), CollectorInfo.empty());
+      }
     }
+    return CoercionKind.SIMPLE.of(mirror, CollectorInfo.empty());
   }
 }

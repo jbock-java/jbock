@@ -1,5 +1,8 @@
 package net.jbock.compiler;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementVisitor;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
@@ -7,6 +10,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
 import java.util.ArrayList;
@@ -16,11 +20,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static net.jbock.compiler.Util.AS_DECLARED;
-
 public class TypeTool {
 
-  public static final TypeVisitor<List<? extends TypeMirror>, Void> TYPEARGS =
+  private static final TypeVisitor<List<? extends TypeMirror>, Void> TYPEARGS =
       new SimpleTypeVisitor8<List<? extends TypeMirror>, Void>() {
         @Override
         public List<? extends TypeMirror> visitDeclared(DeclaredType declaredType, Void _null) {
@@ -32,6 +34,26 @@ public class TypeTool {
           return Collections.emptyList();
         }
       };
+
+  private static final TypeVisitor<DeclaredType, Void> AS_DECLARED =
+      new SimpleTypeVisitor8<DeclaredType, Void>() {
+        @Override
+        public DeclaredType visitDeclared(DeclaredType declaredType, Void _null) {
+          return declaredType;
+        }
+      };
+
+  private static final ElementVisitor<TypeElement, Void> AS_TYPE_ELEMENT =
+      new SimpleElementVisitor8<TypeElement, Void>() {
+        @Override
+        public TypeElement visitType(TypeElement typeElement, Void _null) {
+          return typeElement;
+        }
+      };
+
+  public List<? extends TypeMirror> typeargs(TypeMirror mirror) {
+    return mirror.accept(TYPEARGS, null);
+  }
 
   private final Types types;
 
@@ -68,8 +90,8 @@ public class TypeTool {
       failure[0] = true;
       return;
     }
-    List<? extends TypeMirror> xargs = x.accept(TYPEARGS, null);
-    List<? extends TypeMirror> yargs = ym.accept(TYPEARGS, null);
+    List<? extends TypeMirror> xargs = typeargs(x);
+    List<? extends TypeMirror> yargs = typeargs(ym);
     if (xargs.size() != yargs.size()) {
       failure[0] = true;
       return;
@@ -77,7 +99,7 @@ public class TypeTool {
     for (int i = 0; i < yargs.size(); i++) {
       TypeMirror yarg = yargs.get(i);
       TypeMirror xarg = xargs.get(i);
-      unify(xarg.accept(AS_DECLARED, null), yarg, acc, failure);
+      unify(xarg, yarg, acc, failure);
     }
   }
 
@@ -103,7 +125,7 @@ public class TypeTool {
     if (result == null) {
       return input;
     }
-    TypeElement erasure = result.asElement().accept(Util.AS_TYPE_ELEMENT, null);
+    TypeElement erasure = result.asElement().accept(AS_TYPE_ELEMENT, null);
     List<TypeMirror> args = new ArrayList<>();
     for (TypeMirror typeArgument : result.getTypeArguments()) {
       args.add(substitute(typeArgument, solution));
@@ -119,11 +141,11 @@ public class TypeTool {
     return types.isSameType(x, substitute(ym, solution.get()));
   }
 
-  public boolean equals(TypeMirror mirror, Class<?> test) {
+  public boolean eql(TypeMirror mirror, Class<?> test) {
     return types.isSameType(mirror, elements.getTypeElement(test.getCanonicalName()).asType());
   }
 
-  public boolean equals(TypeMirror mirror, TypeMirror test) {
+  public boolean eql(TypeMirror mirror, TypeMirror test) {
     return types.isSameType(mirror, test);
   }
 
@@ -165,5 +187,37 @@ public class TypeTool {
     return types.getDeclaredType(elements.getTypeElement(type),
         elements.getTypeElement(typevar0).asType(),
         typevar1);
+  }
+
+  public List<? extends TypeMirror> getDirectSupertypes(TypeMirror mirror) {
+    return types.directSupertypes(mirror);
+  }
+
+  public boolean isPrivateType(TypeMirror mirror) {
+    Element element = types.asElement(mirror);
+    if (element == null) {
+      return false;
+    }
+    return element.getModifiers().contains(Modifier.PRIVATE);
+  }
+
+  TypeElement asTypeElement(TypeMirror mirror) {
+    Element element = types.asElement(mirror);
+    if (element == null) {
+      throw new IllegalArgumentException("no element: " + mirror);
+    }
+    TypeElement result = element.accept(AS_TYPE_ELEMENT, null);
+    if (result == null) {
+      throw new IllegalArgumentException("no type element: " + element);
+    }
+    return result;
+  }
+
+  public DeclaredType asDeclared(TypeMirror mirror) {
+    DeclaredType result = mirror.accept(AS_DECLARED, null);
+    if (result == null) {
+      throw new IllegalArgumentException("not declared: " + mirror);
+    }
+    return result;
   }
 }

@@ -3,19 +3,16 @@ package net.jbock.coerce;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.coerce.mappers.AllCoercions;
 import net.jbock.coerce.mappers.CoercionFactory;
 import net.jbock.coerce.mappers.EnumCoercion;
 import net.jbock.coerce.mappers.MapperCoercion;
+import net.jbock.coerce.mappers.StandardCoercions;
 import net.jbock.coerce.warn.WarningProvider;
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.Util;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
@@ -27,8 +24,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.CoercionKind.findKind;
 import static net.jbock.coerce.mappers.MapperCoercion.mapperInit;
 import static net.jbock.coerce.mappers.MapperCoercion.mapperMap;
-import static net.jbock.compiler.Util.AS_DECLARED;
-import static net.jbock.compiler.Util.QUALIFIED_NAME;
 
 public class CoercionProvider {
 
@@ -128,7 +123,7 @@ public class CoercionProvider {
       TypeElement collectorClass,
       FieldSpec field) throws TmpException {
     CollectorInfo collectorInput = collectorInput(sourceMethod, collectorClass);
-    CoercionFactory coercion = AllCoercions.get(collectorInput.collectorInput);
+    CoercionFactory coercion = StandardCoercions.get(collectorInput.collectorInput);
     if (coercion == null) {
       throw TmpException.findWarning(String.format("Unknown collector input %s, please define a custom mapper.", collectorInput.collectorInput));
     }
@@ -161,13 +156,13 @@ public class CoercionProvider {
     if (tk.trigger.getKind().isPrimitive()) {
       return skewedCoercion(tk, field, mapperParam, mapperClass, TypeTool.get().box(tk.trigger));
     }
-    if (TypeTool.get().equals(tk.trigger, OptionalInt.class)) {
+    if (TypeTool.get().eql(tk.trigger, OptionalInt.class)) {
       return skewedCoercion(tk, field, mapperParam, mapperClass, TypeTool.get().declared(Integer.class), tk.trigger);
     }
-    if (TypeTool.get().equals(tk.trigger, OptionalDouble.class)) {
+    if (TypeTool.get().eql(tk.trigger, OptionalDouble.class)) {
       return skewedCoercion(tk, field, mapperParam, mapperClass, TypeTool.get().declared(Double.class), tk.trigger);
     }
-    if (TypeTool.get().equals(tk.trigger, OptionalLong.class)) {
+    if (TypeTool.get().eql(tk.trigger, OptionalLong.class)) {
       return skewedCoercion(tk, field, mapperParam, mapperClass, TypeTool.get().declared(Long.class), tk.trigger);
     }
     return null;
@@ -190,7 +185,10 @@ public class CoercionProvider {
       TypeMirror mapperReturnType,
       TypeMirror baseType) throws TmpException {
     MapperClassValidator.checkReturnType(mapperClass, mapperReturnType);
-    CoercionFactory coercionFactory = AllCoercions.get(baseType);
+    CoercionFactory coercionFactory = StandardCoercions.get(baseType);
+    if (coercionFactory == null) {
+      return null;
+    }
     return coercionFactory.getCoercion(field, tk, mapperMap(mapperParam), mapperInit(mapperReturnType, mapperParam, mapperClass.asType()));
   }
 
@@ -202,7 +200,7 @@ public class CoercionProvider {
     if (enumCoercion != null) {
       return enumCoercion.getCoercion(field, tk);
     } else {
-      CoercionFactory factory = AllCoercions.get(tk.trigger);
+      CoercionFactory factory = StandardCoercions.get(tk.trigger);
       if (factory == null) {
         throw TmpException.findWarning("Bad return type");
       }
@@ -214,17 +212,19 @@ public class CoercionProvider {
   }
 
   private CoercionFactory checkEnum(TypeMirror mirror) throws TmpException {
-    if (mirror.getKind() != TypeKind.DECLARED) {
+    TypeTool tool = TypeTool.get();
+    List<? extends TypeMirror> supertypes = tool.getDirectSupertypes(mirror);
+    if (supertypes.isEmpty()) {
+      // not an enum
       return null;
     }
-    DeclaredType declared = mirror.accept(AS_DECLARED, null);
-    TypeElement element = declared.asElement().accept(Util.AS_TYPE_ELEMENT, null);
-    TypeMirror superclass = element.getSuperclass();
-    if (!"java.lang.Enum".equals(superclass.accept(QUALIFIED_NAME, null))) {
+    TypeMirror superclass = supertypes.get(0);
+    if (!tool.eql(tool.erasure(superclass), tool.declared(Enum.class))) {
+      // not an enum
       return null;
     }
-    if (element.getModifiers().contains(Modifier.PRIVATE)) {
-      throw TmpException.findWarning("Private return type is not allowed");
+    if (tool.isPrivateType(mirror)) {
+      throw TmpException.findWarning("The enum may not be private.");
     }
     return EnumCoercion.create(mirror);
   }
@@ -232,16 +232,10 @@ public class CoercionProvider {
   private TriggerKind trigger(
       TypeMirror returnType,
       boolean optional) {
-    DeclaredType parameterized = Util.asParameterized(returnType);
-    if (parameterized == null) {
-      // not a combination, triggered by return type
-      return CoercionKind.SIMPLE.of(returnType, CollectorInfo.empty());
+    if (optional) {
+      return findKind(returnType);
     }
-    CoercionKind kind = findKind(parameterized);
-    if (optional && kind.isCombination()) {
-      return kind.of(parameterized.getTypeArguments().get(0), CollectorInfo.empty());
-    }
-    return kind.of(parameterized, CollectorInfo.empty());
+    return CoercionKind.SIMPLE.of(returnType, CollectorInfo.empty());
   }
 
   private CollectorInfo collectorInput(
@@ -249,10 +243,10 @@ public class CoercionProvider {
       TypeElement collectorClass) throws TmpException {
     if (collectorClass == null) {
       TypeTool tool = TypeTool.get();
-      if (!tool.equals(tool.erasure(sourceMethod.getReturnType()), tool.declared(List.class))) {
+      if (!tool.eql(tool.erasure(sourceMethod.getReturnType()), tool.declared(List.class))) {
         throw TmpException.create("Either define a custom collector, or return List");
       }
-      List<? extends TypeMirror> typeParameters = sourceMethod.getReturnType().accept(TypeTool.TYPEARGS, null);
+      List<? extends TypeMirror> typeParameters = tool.typeargs(sourceMethod.getReturnType());
       if (typeParameters.isEmpty()) {
         throw TmpException.create("Either define a custom collector, or return List");
       }

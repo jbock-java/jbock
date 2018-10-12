@@ -22,8 +22,8 @@ import static java.lang.Character.isLetter;
 import static java.lang.Character.isLowerCase;
 import static java.lang.Character.isWhitespace;
 import static java.util.Collections.singletonList;
-import static net.jbock.compiler.MapperClassUtil.getCollectorClass;
-import static net.jbock.compiler.MapperClassUtil.getMapperClass;
+import static net.jbock.compiler.AnnotationUtil.getCollectorClass;
+import static net.jbock.compiler.AnnotationUtil.getMapperClass;
 import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.snakeCase;
 
@@ -127,8 +127,8 @@ final class Param {
     this.flag = flag;
     TypeTool tt = TypeTool.get();
     TypeMirror returnType = sourceMethod.getReturnType();
-    boolean itsBoolean = tt.equals(returnType, tt.primitive(TypeKind.BOOLEAN)) ||
-        tt.equals(returnType, tt.declared(Boolean.class));
+    boolean itsBoolean = tt.eql(returnType, tt.primitive(TypeKind.BOOLEAN)) ||
+        tt.eql(returnType, tt.declared(Boolean.class));
     if (flag) {
       if (!itsBoolean) {
         throw ValidationException.create(sourceMethod, "Flag parameters must return boolean.");

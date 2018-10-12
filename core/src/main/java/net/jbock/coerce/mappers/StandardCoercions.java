@@ -7,13 +7,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 
-public class AllCoercions {
+public class StandardCoercions {
 
   private final Map<MapMirror, CoercionFactory> coercions;
 
-  private static AllCoercions instance;
+  private static StandardCoercions instance;
 
-  private AllCoercions() {
+  private StandardCoercions() {
     Map<MapMirror, CoercionFactory> m = new HashMap<>();
     CoercionFactory[] allCoercions = new CoercionFactory[]{
         new CharsetCoercion(),
@@ -59,9 +59,9 @@ public class AllCoercions {
     coercions = Collections.unmodifiableMap(m);
   }
 
-  private static AllCoercions instance() {
+  private static StandardCoercions instance() {
     if (instance == null) {
-      instance = new AllCoercions();
+      instance = new StandardCoercions();
     }
     return instance;
   }
@@ -94,7 +94,7 @@ public class AllCoercions {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       MapMirror mapMirror = (MapMirror) o;
-      return TypeTool.get().equals(typeMirror, mapMirror.typeMirror);
+      return TypeTool.get().eql(typeMirror, mapMirror.typeMirror);
     }
 
     @Override

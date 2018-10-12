@@ -1,15 +1,13 @@
 package net.jbock.coerce.warn;
 
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
+import net.jbock.coerce.TriggerKind;
+
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
 
 import static net.jbock.coerce.CoercionKind.findKind;
-import static net.jbock.compiler.Util.AS_DECLARED;
-import static net.jbock.compiler.Util.AS_TYPE_ELEMENT;
 
 public class WarningProvider {
 
@@ -34,10 +32,11 @@ public class WarningProvider {
     if (type.getKind() != TypeKind.DECLARED) {
       return findWarningSimple(type, repeatable);
     }
-    DeclaredType declared = type.accept(AS_DECLARED, null);
-    if (optional && findKind(type).isCombination() && !declared.getTypeArguments().isEmpty()) {
-      TypeElement typeElement = declared.asElement().accept(AS_TYPE_ELEMENT, null);
-      return findWarningSimple(typeElement.getTypeParameters().get(0).asType(), repeatable);
+    if (optional) {
+      TriggerKind tk = findKind(type);
+      if (tk.kind.isCombination()) {
+        return findWarningSimple(tk.trigger, repeatable);
+      }
     }
     return findWarningSimple(type, repeatable);
   }

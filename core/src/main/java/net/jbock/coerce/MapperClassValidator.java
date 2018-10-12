@@ -22,7 +22,7 @@ final class MapperClassValidator {
     TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
     Map<String, TypeMirror> functionTypeargs = resolveFunctionTypeargs(functionClass);
     TypeMirror returnType = functionTypeargs.get("R");
-    if (!TypeTool.get().equals(returnType, expectedReturnType)) {
+    if (!TypeTool.get().eql(returnType, expectedReturnType)) {
       throw boom();
     }
   }

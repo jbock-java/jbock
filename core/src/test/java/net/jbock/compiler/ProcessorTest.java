@@ -98,7 +98,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Raw lists are not supported. Use List<X>.");
+        .withErrorContaining("Add a type parameter");
   }
 
   @Test
@@ -112,7 +112,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Raw optionals are not supported. Use Optional<X>.");
+        .withErrorContaining("Add a type parameter");
   }
 
   @Test
@@ -552,7 +552,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Private return type is not allowed");
+        .withErrorContaining("The enum may not be private.");
   }
 
   @Test

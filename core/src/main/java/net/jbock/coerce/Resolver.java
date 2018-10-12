@@ -1,7 +1,6 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.Util;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
@@ -84,8 +83,8 @@ class Resolver {
       // everything resolved
       return resolver.asMap();
     }
-    if (tool.equals(tmpname, tool.erasure(m))) {
-      List<? extends TypeMirror> typeargs = m.accept(TypeTool.TYPEARGS, null);
+    if (tool.eql(tmpname, tool.erasure(m))) {
+      List<? extends TypeMirror> typeargs = tool.typeargs(m);
       Map<String, TypeMirror> results = new LinkedHashMap<>();
       for (Entry<Integer, String> entry : resolver.names.entrySet()) {
         if (entry.getKey() < typeargs.size()) {
@@ -111,12 +110,12 @@ class Resolver {
   private static Extension findExtension(TypeElement typeElement, TypeMirror qname) {
     TypeTool tool = TypeTool.get();
     TypeMirror superclass = typeElement.getSuperclass();
-    if (superclass != null && tool.equals(qname, tool.erasure(superclass))) {
-      return new Extension(typeElement, superclass.accept(Util.AS_DECLARED, null));
+    if (superclass != null && tool.eql(qname, tool.erasure(superclass))) {
+      return new Extension(typeElement, tool.asDeclared(superclass));
     }
     for (TypeMirror mirror : typeElement.getInterfaces()) {
-      if (tool.equals(qname, tool.erasure(mirror))) {
-        return new Extension(typeElement, mirror.accept(Util.AS_DECLARED, null));
+      if (tool.eql(qname, tool.erasure(mirror))) {
+        return new Extension(typeElement, tool.asDeclared(mirror));
       }
     }
     return null;

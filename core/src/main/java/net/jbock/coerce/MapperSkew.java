@@ -24,6 +24,6 @@ class MapperSkew {
   }
 
   boolean isSkewed() {
-    return !TypeTool.get().equals(mapperReturnType, baseType);
+    return !TypeTool.get().eql(mapperReturnType, baseType);
   }
 }

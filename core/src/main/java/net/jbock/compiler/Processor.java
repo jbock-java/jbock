@@ -6,7 +6,7 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
-import net.jbock.coerce.mappers.AllCoercions;
+import net.jbock.coerce.mappers.StandardCoercions;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -16,7 +16,7 @@ import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -36,8 +36,6 @@ import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static net.jbock.compiler.Util.asDeclared;
-import static net.jbock.compiler.Util.asType;
 
 public final class Processor extends AbstractProcessor {
 
@@ -95,7 +93,7 @@ public final class Processor extends AbstractProcessor {
             parameters,
             paramTypes,
             positionalParamTypes);
-        if (!done.add(asType(sourceType).getQualifiedName().toString())) {
+        if (!done.add(sourceType.getQualifiedName().toString())) {
           continue;
         }
         TypeSpec typeSpec = Parser.create(context).define();
@@ -106,7 +104,7 @@ public final class Processor extends AbstractProcessor {
         handleException(sourceType, e);
       } finally {
         TypeTool.unset();
-        AllCoercions.unset();
+        StandardCoercions.unset();
       }
     }
     return false;
@@ -139,7 +137,7 @@ public final class Processor extends AbstractProcessor {
       TypeElement sourceType,
       Exception e) {
     String message = "Unexpected error while processing " +
-        ClassName.get(asType(sourceType)) +
+        ClassName.get(sourceType) +
         ": " + e.getMessage();
     e.printStackTrace();
     printError(sourceType, message);
@@ -187,15 +185,9 @@ public final class Processor extends AbstractProcessor {
     }
     if (!sourceType.getInterfaces().isEmpty()) {
       throw ValidationException.create(sourceType,
-          sourceType.getSimpleName() + " may not implement " +
-              asDeclared(sourceType.getInterfaces().get(0)).asElement().getSimpleName());
+          sourceType.getSimpleName() + " may not implement anything");
     }
-    if (sourceType.getSuperclass().getKind() == TypeKind.DECLARED &&
-        !Util.equalsType(sourceType.getSuperclass(), "java.lang.Object")) {
-      throw ValidationException.create(sourceType,
-          sourceType.getSimpleName() + " may not extend " +
-              asDeclared(sourceType.getSuperclass()).asElement().getSimpleName());
-    }
+    checkNoSuperclass(sourceType);
     List<ExecutableElement> abstractMethods = methodsIn(sourceType.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
         .collect(toList());
@@ -218,6 +210,14 @@ public final class Processor extends AbstractProcessor {
     checkOnlyOnePositionalList(parameters);
     checkPositionalOrder(parameters);
     return parameters;
+  }
+
+  private void checkNoSuperclass(TypeElement sourceType) {
+    TypeMirror objectType = processingEnv.getElementUtils().getTypeElement(Object.class.getCanonicalName()).asType();
+    if (!processingEnv.getTypeUtils().isSameType(sourceType.getSuperclass(), objectType)) {
+      throw ValidationException.create(sourceType,
+          sourceType.getSimpleName() + " may not extend anything");
+    }
   }
 
   private List<String> getOverview(TypeElement sourceType) {
