@@ -4,10 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.VariableElement;
 import java.util.Optional;
-import java.util.StringJoiner;
 
 import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
 
@@ -45,11 +42,28 @@ public final class Util {
     return sb.toString();
   }
 
-  static String methodToString(ExecutableElement method) {
-    StringJoiner joiner = new StringJoiner(", ", "(", ")");
-    for (VariableElement variableElement : method.getParameters()) {
-      joiner.add(variableElement.asType().toString());
+  public static String snakeToCamel(String s) {
+    StringBuilder sb = new StringBuilder();
+    boolean upcase = false;
+    boolean underscore = false;
+    for (int i = 0; i < s.length(); i++) {
+      char c = s.charAt(i);
+      if (c == '_') {
+        if (underscore) {
+          sb.append('_');
+        }
+        underscore = true;
+        upcase = true;
+      } else {
+        underscore = false;
+        if (upcase) {
+          sb.append(Character.toUpperCase(c));
+          upcase = false;
+        } else {
+          sb.append(Character.toLowerCase(c));
+        }
+      }
     }
-    return method.getSimpleName() + joiner.toString();
+    return sb.toString();
   }
 }

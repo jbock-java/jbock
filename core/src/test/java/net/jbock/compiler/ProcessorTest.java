@@ -27,7 +27,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Duplicate long name: x");
+        .withErrorContaining("Duplicate long name");
   }
 
   @Test
@@ -42,7 +42,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Duplicate short name: x");
+        .withErrorContaining("Duplicate short name");
   }
 
   @Test
@@ -50,7 +50,9 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter abstract StringBuilder a();",
+        "",
+        "  @Parameter(shortName = 'x')",
+        "  abstract StringBuilder a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -64,7 +66,9 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter abstract String a() throws IllegalArgumentException;",
+        "",
+        "  @Parameter(shortName = 'x')",
+        "  abstract String a() throws IllegalArgumentException;",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -78,13 +82,15 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "class InvalidArguments {",
-        "  abstract String a();",
+        "",
+        "  @Parameter(shortName = 'x')",
+        "  String a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("InvalidArguments must be abstract");
+        .withErrorContaining("The class must be abstract");
   }
 
   @Test
@@ -92,7 +98,9 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter abstract List a();",
+        "",
+        "  @Parameter(shortName = 'x')",
+        "  abstract List a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -106,7 +114,9 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter abstract Optional a();",
+        "",
+        "  @Parameter(shortName = 'x')",
+        "  abstract Optional a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -120,7 +130,9 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(repeatable = true) abstract java.util.Set<String> a();",
+        "",
+        "  @Parameter(shortName = 'x', repeatable = true)",
+        "  abstract java.util.Set<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -134,7 +146,9 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(repeatable = true) abstract int[] a();",
+        "",
+        "  @Parameter(shortName = 'x', repeatable = true)",
+        "  abstract int[] a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -148,7 +162,9 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter abstract java.util.Date a();",
+        "",
+        "  @Parameter(shortName = 'x')",
+        "  abstract java.util.Date a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -176,7 +192,8 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(longName = \"a \") abstract String a();",
+        "  @Parameter(longName = \"a \")",
+        "  abstract String a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -347,7 +364,9 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(optional = true) abstract OptionalInt b();",
+        "",
+        "  @Parameter(shortName = 'x', optional = true)",
+        "  abstract OptionalInt b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -360,7 +379,9 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @PositionalParameter(optional = true) abstract Optional<String> a();",
+        "",
+        "  @PositionalParameter(optional = true)",
+        "  abstract Optional<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -420,13 +441,15 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(longName = \"\") abstract String a();",
+        "",
+        "  @Parameter",
+        "  abstract String a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Neither long nor short name defined for method a()");
+        .withErrorContaining("Define either long name or a short name");
   }
 
   @Test
@@ -434,7 +457,9 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(shortName = 'x') String a();",
+        "",
+        "  @Parameter(shortName = 'x')",
+        "  String a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -489,13 +514,14 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
+        "",
         "  abstract List<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Expecting either Parameter or PositionalParameter annotation");
+        .withErrorContaining("Add Parameter or PositionalParameter annotation");
   }
 
   @Test
@@ -503,7 +529,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @PositionalParameter(repeatable = true) @Parameter(repeatable = true) abstract List<String> a();",
+        "",
+        "  @Parameter(shortName = 'x', repeatable = true)",
+        "  @PositionalParameter(repeatable = true)",
+        "  abstract List<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -517,8 +546,12 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(repeatable = true) abstract List<String> a();",
-        "  @PositionalParameter(repeatable = true) abstract List<String> b();",
+        "",
+        "  @Parameter(shortName = 'x', repeatable = true)",
+        "  abstract List<String> a();",
+        "",
+        "  @PositionalParameter(repeatable = true)",
+        "  abstract List<String> b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -531,8 +564,13 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter abstract Foo foo();",
-        "  enum Foo { BAR; }",
+        "",
+        "  @Parameter(shortName = 'x')",
+        "  abstract Foo foo();",
+        "",
+        "  enum Foo {",
+        "    BAR",
+        "   }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -545,8 +583,13 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter abstract Foo foo();",
-        "  private enum Foo { BAR; }",
+        "",
+        "  @Parameter(shortName = 'x')",
+        "  abstract Foo foo();",
+        "",
+        "  private enum Foo {",
+        "    BAR",
+        "   }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -560,7 +603,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract String string();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract String string();",
+        "",
         "  static class Mapper<E> implements Supplier<Function<E, E>> {",
         "    public Function<E, E> get() {",
         "      return Function.identity();",
@@ -578,7 +624,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(repeatable = true, mappedBy = Mapper.class) abstract List<OptionalInt> numbers();",
+        "",
+        "  @Parameter(shortName = 'x', repeatable = true, mappedBy = Mapper.class)",
+        "  abstract List<OptionalInt> numbers();",
+        "",
         "  static class Mapper implements Supplier<Function<String, OptionalInt>> {",
         "    public Function<String, OptionalInt> get() {",
         "      return s -> OptionalInt.of(1);",
@@ -596,7 +645,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract byte number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract byte number();",
+        "",
         "  static class Mapper implements Supplier<Function<String, Byte>> {",
         "    public Function<String, Byte> get() {",
         "      return s -> 1;",
@@ -614,7 +666,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Byte number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Byte number();",
+        "",
         "  static class Mapper implements Supplier<Function<String, Byte>> {",
         "    public Function<String, Byte> get() {",
         "      return s -> 1;",
@@ -632,7 +687,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(repeatable = true, mappedBy = Mapper.class) abstract List<Set<Integer>> sets();",
+        "",
+        "  @Parameter(shortName = 'x', repeatable = true, mappedBy = Mapper.class)",
+        "  abstract List<Set<Integer>> sets();",
+        "",
         "  static class Mapper implements Supplier<Function<String, Set<Integer>>> {",
         "    public Function<String, Set<Integer>> get() {",
         "      return s -> Collections.singleton(Integer.valueOf(s));",
@@ -650,9 +708,14 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
+        "",
         "    private Mapper() {}",
+        "",
         "    public Function<String, Integer> get() {",
         "      return s -> 1;",
         "    }",
@@ -670,9 +733,14 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
+        "",
         "    Mapper(int i) {}",
+        "",
         "    public Function<String, Integer> get() {",
         "      return s -> 1;",
         "    }",
@@ -690,9 +758,14 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
+        "",
         "    Mapper() throws IllegalStateException {}",
+        "",
         "    public Function<String, Integer> get() {",
         "      return s -> 1;",
         "    }",
@@ -710,7 +783,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
         "  class Mapper implements Supplier<Function<String, Integer>> {",
         "    public Function<String, Integer> get() {",
         "      return s -> 1;",
@@ -729,7 +805,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
         "  static class Mapper implements Supplier<Function<Integer, Integer>> {",
         "    public Function<Integer, Integer> get() {",
         "      return s -> s;",
@@ -748,7 +827,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
         "  static class Mapper implements Supplier<Function<String, String>> {",
         "    public Function<String, String> get() {",
         "      return Function.identity();",
@@ -767,7 +849,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Supplier<String> string();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Supplier<String> string();",
+        "",
         "  static class Mapper implements Supplier<Function<String, Supplier<String>>> {",
         "    public Function<String, Supplier<String>> get() {",
         "      return s -> () -> s;",
@@ -785,7 +870,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Supplier<Optional<String>> string();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Supplier<Optional<String>> string();",
+        "",
         "  static class Mapper implements Supplier<Function<String, Supplier<Optional<String>>>> {",
         "    public Function<String, Supplier<Optional<String>>> get() {",
         "      return s -> () -> Optional.of(s);",
@@ -803,13 +891,18 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
         "  static class Mapper implements Supplier<StringFunction<Integer>> {",
         "    public StringFunction<Integer> get() {",
         "      return s -> 1;",
         "    }",
         "  }",
+        "",
         "  interface StringFunction<R> extends Function<String, R> {}",
+        "",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -822,22 +915,31 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
         "  static class Mapper implements ZapperSupplier {",
-        "  public Zapper get() {",
+        "    public Zapper get() {",
         "      return new Zapper();",
         "    }",
         "  }",
+        "",
         "  interface ZapperSupplier extends Supplier<Zapper> { }",
         "  static class Zapper implements Foo<String>, Xoxo<Integer>  {",
         "    public Integer apply(String s) {",
         "      return 1;",
         "    }",
         "  }",
+        "",
         "  interface Xi<A, T, B> extends Function<B, A> { }",
+        "",
         "  interface Zap<T, B, A> extends Xi<A, T, B> { }",
+        "",
         "  interface Foo<X> extends Zap<X, String, Integer> { }",
+        "",
         "  interface Bar<E extends Number> extends Function<String, E> { }",
+        "",
         "  interface Xoxo<X extends Number> extends Bar<X> { }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
@@ -851,22 +953,32 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
         "  static class Mapper implements ZapperSupplier {",
-        "  public Zapper get() {",
+        "    public Zapper get() {",
         "      return new Zapper();",
         "    }",
         "  }",
+        "",
         "  interface ZapperSupplier extends Supplier<Zapper> { }",
+        "",
         "  static class Zapper implements Foo<String>, Xoxo<Integer>  {",
         "    public Integer apply(String s) {",
         "      return 1;",
         "    }",
         "  }",
+        "",
         "  interface Xi<A, T, B> extends Function<A, B> { }",
+        "",
         "  interface Zap<T, B, A> extends Xi<A, T, B> { }",
+        "",
         "  interface Foo<X> extends Zap<X, String, Integer> { }",
+        "",
         "  interface Bar<E extends Number> extends Function<E, String> { }",
+        "",
         "  interface Xoxo<X extends Number> extends Bar<X> { }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
@@ -881,7 +993,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @Parameter(mappedBy = Mapper.class) abstract Integer number();",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
         "  static class Mapper implements Supplier<Function> {",
         "    public Function get() {",
         "      return s -> s;",

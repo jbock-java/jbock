@@ -6,17 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>This annotation is used by the jbock annotation processor.</p>
+ * <h2>Marker for the class containing parameter methods</h2>
  *
  * <ul>
- * <li>The annotated type must be an abstract class.</li>
- * <li>There must be at least one abstract method.</li>
- * <li>Each abstract method must have an empty argument list.</li>
- * <li>None of the abstract methods may declare an exception.</li>
- * <li>Each abstract method must either be annotated with {@link Parameter}
- * or {@link PositionalParameter}, but not both.</li>
- * <li>The annotated class may not implement anything and may not extend anything other than
- * {@link java.lang.Object Object}.</li>
+ * <li>The annotated class must be abstract.</li>
+ * <li>The annotated class must be simple: It cannot have type parameters,
+ * and may not implement any interfaces and may not extend any other class</li>
+ * <li>Every abstract method must be annotated with {@link Parameter} or {@link PositionalParameter}.</li>
  * </ul>
  */
 @Target(ElementType.TYPE)
@@ -33,12 +29,16 @@ public @interface CommandLineArguments {
    * By default, the short name of the annotated java class is used as the program name.
    * If that class is an inner class,
    * then the short name of its enclosing class is the default program name</p>
+   *
+   * @return an optional program name
    */
   String programName() default "";
 
   /**
    * A short, single-sentence summary of the program. It is printed when the user passes the
    * {@code --help} parameter.
+   *
+   * @return an optional string
    */
   String missionStatement() default "";
 
@@ -46,12 +46,16 @@ public @interface CommandLineArguments {
    * <p>If {@code true}, a special parameter {@code --help} will be understood by the parser,
    * but only if it is the very first argument.
    * In this case, it is an error to assign the long name "help" to any other parameter.</p>
+   *
+   * @return false to disable the standard {@code --help} functionality
    */
   boolean addHelp() default true;
 
   /**
-   * <p>True if an isolated double dash "--" should stop option parsing.
+   * <p>True if an isolated double dash "--" should end option parsing.
    * The remaining tokens will then be treated as positional, regardless of their shape.</p>
+   *
+   * @return false to disable the standard <em>end of option parsing</em> escape sequence
    */
   boolean allowEscape() default true;
 
@@ -64,6 +68,8 @@ public @interface CommandLineArguments {
    * if no positional parameters are defined. See {@link PositionalParameter}.</p>
    *
    * <p>Note that setting {@link #allowEscape()} (and defining a positional list) makes the double dash "--" a known token.</p>
+   *
+   * @return false if tokens that start with a dash should be allowed as positional parameters
    */
   boolean strict() default true;
 }

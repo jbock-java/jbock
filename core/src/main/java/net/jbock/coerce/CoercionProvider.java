@@ -24,6 +24,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.CoercionKind.findKind;
 import static net.jbock.coerce.mappers.MapperCoercion.mapperInit;
 import static net.jbock.coerce.mappers.MapperCoercion.mapperMap;
+import static net.jbock.compiler.Util.snakeToCamel;
 
 public class CoercionProvider {
 
@@ -253,30 +254,5 @@ public class CoercionProvider {
       return CollectorInfo.listCollector(typeParameters.get(0));
     }
     return CollectorInfo.create(CollectorClassValidator.findInputType(sourceMethod.getReturnType(), collectorClass), collectorClass);
-  }
-
-  static String snakeToCamel(String s) {
-    StringBuilder sb = new StringBuilder();
-    boolean upcase = false;
-    boolean underscore = false;
-    for (int i = 0; i < s.length(); i++) {
-      char c = s.charAt(i);
-      if (c == '_') {
-        if (underscore) {
-          sb.append('_');
-        }
-        underscore = true;
-        upcase = true;
-      } else {
-        underscore = false;
-        if (upcase) {
-          sb.append(Character.toUpperCase(c));
-          upcase = false;
-        } else {
-          sb.append(Character.toLowerCase(c));
-        }
-      }
-    }
-    return sb.toString();
   }
 }

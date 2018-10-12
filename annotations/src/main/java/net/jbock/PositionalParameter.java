@@ -7,77 +7,71 @@ import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
 /**
- * <p>This annotation is used by the jbock annotation processor.</p>
+ * <h2>Marker for positional parameter methods</h2>
  *
  * <ul>
- * <li>The annotated method must be abstract.</li>
- * <li>The annotated method must have an empty argument list.</li>
- * <li>The annotated method may not also carry the {@link Parameter} annotation.</li>
- * <li>The method's enclosing class must be annotated with {@link CommandLineArguments}.</li>
- * <li>When this annotation is used on more than one parameter,
- * then the lexical ordering of these methods in the source file is relevant.</li>
- * <li>There can only be one {@link #repeatable} positional parameter.</li>
- * <li>The {@link #repeatable} positional parameter must be the last positional parameter,
- * in the lexical order of the Java source file.</li>
- * <li>An {@link #optional} positional parameter must
- * appear, in lexical order, after any other non-{@link #repeatable} positional parameters.
+ * <li>The annotated method must be abstract and have an empty argument list.</li>
+ * <li>The annotated method may not carry the {@link Parameter} annotation.</li>
+ * <li>If there is more than one positional parameter,
+ * then the lexical ordering of these methods in the source file is relevant!</li>
  * </ul>
+ * <p>
+ * For example, the following shell command contains a positional parameter:
+ * <pre>{@code
+ * ls .
+ * }</pre>
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
 public @interface PositionalParameter {
 
   /**
-   * <p>The argument name that's printed in the description.</p>
+   * see {@link Parameter#argHandle()}
    *
-   * <p>An empty string is special syntax for automatic parameter name,
-   * which will be based on the method name.</p>
+   * @return an optional arg handle
    */
   String argHandle() default "";
 
   /**
-   * <p>The supplier must yield a {@link java.util.function.Function Function&lt;String, X&gt;}
-   * where {@code X} is called the <em>mapper type</em>.
-   * In many cases, the mapper type is the same as the parameter type.</p>
-   * <p>There are however two exceptions:</p>
-   * <ol>
-   * <li>If the parameter is not repeatable and {@code X} is of the form {@link java.util.Optional Optional&lt;Y&gt;},
-   * then the mapper must return {@code Y}</li>
-   * <li>If the parameter is {@link #repeatable},
-   * then the mapper must return the input type of the associated collector.
-   * In most cases, the type of a repeatable parameter will be of the form
-   * {@link java.util.List List&lt;E&gt;},
-   * and the default collector {@link java.util.stream.Collectors#toList() toList}
-   * will be used. Then the mapper must return {@code E}.</li>
-   * </ol>
+   * Optional custom mapper.
+   * See {@link Parameter#mappedBy()}
+   *
+   * @return an optional mapper class
    */
   Class<? extends Supplier> mappedBy() default Supplier.class;
 
   /**
-   * <p>The supplier must yield a {@link java.util.stream.Collector Collector&lt;M, ?, X&gt;}
-   * where {@code X} is the parameter type, and {@code M} is the mapper type.
-   * </p>
-   * <p>This only makes sense for {@link #repeatable} arguments.</p>
-   * <p>The default collector is the one that's returned by
-   * {@link java.util.stream.Collectors#toList() Collectors.toList}.
+   * Optional custom collector.
+   * See {@link Parameter#collectedBy()}
+   *
+   * @return an optional collector class
    */
   Class<? extends Supplier> collectedBy() default Supplier.class;
 
   /**
    * <p>Declares this parameter repeatable.</p>
+   *
+   * <ul>
+   * <li>There can only be one positional repeatable parameter.</li>
+   * <li>The repeatable positional parameter must be the last positional parameter,
+   * in the lexical ordering of the Java source file.</li>
+   * </ul>
+   *
+   * @return true if this parameter is repeatable
    */
   boolean repeatable() default false;
 
   /**
    * <p>Declares this parameter optional.</p>
+   *
+   * @return true if this parameter is optional
    */
   boolean optional() default false;
 
   /**
-   * The key used to find the command description in the resource bundle.
-   * By default, the lowercased method name is used as the key.
-   * If no bundle is defined, or this key is not in the bundle, then
-   * the parameter method's javadoc is used as the description.
+   * see {@link Parameter#bundleKey()}
+   *
+   * @return an optional resource bundle key
    */
   String bundleKey() default "";
 }

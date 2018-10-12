@@ -196,7 +196,9 @@ public final class Processor extends AbstractProcessor {
     for (ExecutableElement method : abstractMethods) {
       boolean isPositional = method.getAnnotation(PositionalParameter.class) != null;
       if (!isPositional && method.getAnnotation(Parameter.class) == null) {
-        throw ValidationException.create(method, "Expecting either Parameter or PositionalParameter annotation");
+        throw ValidationException.create(method,
+            String.format("Add %s or %s annotation",
+                Parameter.class.getSimpleName(), PositionalParameter.class.getSimpleName()));
       }
       if (isPositional) {
         positionalIndex++;
@@ -319,6 +321,10 @@ public final class Processor extends AbstractProcessor {
         throw ValidationException.create(enclosingElement,
             "The class must have the " +
                 CommandLineArguments.class.getSimpleName() + " annotation.");
+      }
+      if (!enclosingElement.getModifiers().contains(ABSTRACT)) {
+        throw ValidationException.create(enclosingElement,
+            "The class must be abstract");
       }
       if (!method.getModifiers().contains(ABSTRACT)) {
         throw ValidationException.create(method,

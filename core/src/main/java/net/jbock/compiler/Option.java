@@ -18,14 +18,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.squareup.javapoet.TypeName.BOOLEAN;
+import static com.squareup.javapoet.TypeName.INT;
+import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static com.squareup.javapoet.TypeName.BOOLEAN;
-import static com.squareup.javapoet.TypeName.INT;
-import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.optionalOf;
@@ -51,6 +51,8 @@ final class Option {
 
   private final FieldSpec shortNameField;
 
+  private final FieldSpec bundleKeyField;
+
   private final FieldSpec positionalIndexField;
 
   final MethodSpec shortNameMapMethod;
@@ -63,6 +65,7 @@ final class Option {
       Context context,
       FieldSpec longNameField,
       FieldSpec shortNameField,
+      FieldSpec bundleKeyField,
       FieldSpec positionalIndexField,
       FieldSpec descriptionField,
       FieldSpec argumentNameField,
@@ -77,6 +80,7 @@ final class Option {
     this.shortNameField = shortNameField;
     this.descriptionField = descriptionField;
     this.argumentNameField = argumentNameField;
+    this.bundleKeyField = bundleKeyField;
     this.shortNameMapMethod = shortNameMapMethod;
     this.context = context;
     this.longNameMapMethod = longNameMapMethod;
@@ -89,6 +93,7 @@ final class Option {
     FieldSpec positionalIndexField = FieldSpec.builder(INT, "positionalIndex").addModifiers(FINAL).build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
         "shortName").addModifiers(FINAL).build();
+    FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").addModifiers(FINAL).build();
     ParameterizedTypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class),
         context.optionType(), context.optionParserType());
     MethodSpec shortNameMapMethod = shortNameMapMethod(context.optionType(), shortNameField);
@@ -108,6 +113,7 @@ final class Option {
         context,
         longNameField,
         shortNameField,
+        bundleKeyField,
         positionalIndexField,
         descriptionField,
         argumentNameField,
@@ -126,7 +132,12 @@ final class Option {
       spec.addEnumConstant(enumConstant, optionEnumConstant(param));
     }
     spec.addModifiers(PRIVATE)
-        .addFields(asList(longNameField, shortNameField, positionalIndexField, argumentNameField, descriptionField))
+        .addField(longNameField)
+        .addField(shortNameField)
+        .addField(bundleKeyField)
+        .addField(positionalIndexField)
+        .addField(argumentNameField)
+        .addField(descriptionField)
         .addMethod(positionalMethod())
         .addMethod(describeParamMethod)
         .addMethod(exampleMethod)
@@ -159,12 +170,14 @@ final class Option {
     Map<String, Object> map = new LinkedHashMap<>();
     map.put("longName", param.longName());
     map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
+    map.put("bundleKey", param.bundleKey().orElse("null"));
     map.put("positionalIndex", param.positionalIndex());
     map.put("argumentName", argumentName);
     map.put("descExpression", descExpression(desc));
     String format = String.join(", ",
         "$longName:S",
         "$shortName:L",
+        "$bundleKey:S",
         "$positionalIndex:L",
         "$argumentName:S",
         "$descExpression:L");
@@ -220,24 +233,6 @@ final class Option {
     } else {
       spec.addStatement("return new $T(this)", context.regularOptionParserType());
     }
-    return spec.build();
-  }
-
-  private MethodSpec privateConstructor() {
-    ParameterSpec longName = ParameterSpec.builder(longNameField.type, longNameField.name).build();
-    ParameterSpec shortName = ParameterSpec.builder(shortNameField.type, shortNameField.name).build();
-    ParameterSpec positionalIndex = ParameterSpec.builder(positionalIndexField.type, positionalIndexField.name).build();
-    ParameterSpec description = ParameterSpec.builder(descriptionField.type, descriptionField.name).build();
-    ParameterSpec argumentName = ParameterSpec.builder(argumentNameField.type, argumentNameField.name).build();
-    MethodSpec.Builder spec = MethodSpec.constructorBuilder()
-        .addStatement("this.$N = $N", longNameField, longName)
-        .addStatement("this.$N = $N", shortNameField, shortName)
-        .addStatement("this.$N = $N", positionalIndexField, positionalIndex)
-        .addStatement("this.$N = $N", descriptionField, description)
-        .addStatement("this.$N = $N", argumentNameField, argumentName);
-
-    spec.addParameters(asList(
-        longName, shortName, positionalIndex, argumentName, description));
     return spec.build();
   }
 
@@ -456,5 +451,25 @@ final class Option {
         .returns(context.optionParserType())
         .addStatement("return new $T(this)", context.regularOptionParserType())
         .build();
+  }
+
+  private MethodSpec privateConstructor() {
+    ParameterSpec longName = ParameterSpec.builder(longNameField.type, longNameField.name).build();
+    ParameterSpec shortName = ParameterSpec.builder(shortNameField.type, shortNameField.name).build();
+    ParameterSpec bundleKey = ParameterSpec.builder(bundleKeyField.type, bundleKeyField.name).build();
+    ParameterSpec positionalIndex = ParameterSpec.builder(positionalIndexField.type, positionalIndexField.name).build();
+    ParameterSpec description = ParameterSpec.builder(descriptionField.type, descriptionField.name).build();
+    ParameterSpec argumentName = ParameterSpec.builder(argumentNameField.type, argumentNameField.name).build();
+    MethodSpec.Builder spec = MethodSpec.constructorBuilder()
+        .addStatement("this.$N = $N", longNameField, longName)
+        .addStatement("this.$N = $N", shortNameField, shortName)
+        .addStatement("this.$N = $N", bundleKeyField, bundleKey)
+        .addStatement("this.$N = $N", positionalIndexField, positionalIndex)
+        .addStatement("this.$N = $N", descriptionField, description)
+        .addStatement("this.$N = $N", argumentNameField, argumentName);
+
+    spec.addParameters(asList(
+        longName, shortName, bundleKey, positionalIndex, argumentName, description));
+    return spec.build();
   }
 }

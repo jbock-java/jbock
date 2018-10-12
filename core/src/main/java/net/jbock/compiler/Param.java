@@ -1,25 +1,22 @@
 package net.jbock.compiler;
 
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.TypeName;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.nio.charset.CharsetEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.lang.Character.isLetter;
-import static java.lang.Character.isLowerCase;
 import static java.lang.Character.isWhitespace;
 import static java.util.Collections.singletonList;
 import static net.jbock.compiler.AnnotationUtil.getCollectorClass;
@@ -32,8 +29,6 @@ import static net.jbock.compiler.Util.snakeCase;
  */
 final class Param {
 
-  private static final CharsetEncoder ASCII_ENCODER = StandardCharsets.US_ASCII.newEncoder();
-
   // can be null
   private final String longName;
 
@@ -45,6 +40,8 @@ final class Param {
   final ExecutableElement sourceMethod;
 
   private final String name;
+
+  private final String bundleKey;
 
   private final Coercion coercion;
 
@@ -62,41 +59,53 @@ final class Param {
 
   private static String enumConstant(
       List<Param> params,
-      String bundleKey,
       ExecutableElement sourceMethod) {
     String methodName = sourceMethod.getSimpleName().toString();
-    String result;
-    if (!bundleKey.isEmpty()) {
-      if (bundleKey.contains("__")) {
-        throw ValidationException.create(sourceMethod,
-            "The bundle key may not contain two successive underscores.");
-      }
-      for (int i = 0; i < bundleKey.length(); i++) {
-        char c = bundleKey.charAt(i);
-        if (c == '_') {
-          continue;
-        }
-        if (ASCII_ENCODER.canEncode(c) && isLetter(c) && isLowerCase(c)) {
-          continue;
-        }
-        throw ValidationException.create(sourceMethod,
-            "The bundle key can only contain lowercase ASCII letters and underscores.");
-      }
-      result = bundleKey;
-    } else {
-      result = snakeCase(methodName);
-    }
+    String result = snakeCase(methodName);
     for (Param param : params) {
       if (param.name.equals(result)) {
-        if (!bundleKey.isEmpty()) {
-          throw ValidationException.create(sourceMethod,
-              "This bundle key is already taken.");
-        } else {
-          return result + '_' + params.size();
-        }
+        return result + '_' + params.size();
       }
     }
     return result;
+  }
+
+  private static void checkBundleKey(
+      String bundleKey,
+      List<Param> params,
+      ExecutableElement sourceMethod) {
+    if (bundleKey.isEmpty()) {
+      return;
+    }
+    for (int i = 0; i < bundleKey.length(); i++) {
+      char c = bundleKey.charAt(i);
+      if (Character.isWhitespace(c)) {
+        throw ValidationException.create(sourceMethod,
+            "The bundle key may not contain whitespace characters.");
+      }
+    }
+    for (Param param : params) {
+      if (param.bundleKey.isEmpty()) {
+        continue;
+      }
+      if (param.bundleKey.equals(bundleKey)) {
+        throw ValidationException.create(sourceMethod,
+            "This bundle key is already taken.");
+      }
+    }
+  }
+
+  private static String descriptionArgumentName(
+      OptionType paramType, boolean required, ExecutableElement sourceMethod) {
+    String name = snakeCase(sourceMethod.getSimpleName().toString());
+    if (paramType == OptionType.FLAG) {
+      return null;
+    }
+    if (required) {
+      return name.toUpperCase();
+    } else {
+      return name;
+    }
   }
 
   private Param(
@@ -106,13 +115,14 @@ final class Param {
       ExecutableElement sourceMethod,
       String name,
       boolean positional,
-      Coercion coercion,
+      String bundleKey, Coercion coercion,
       List<String> description,
       String descriptionArgumentName,
       int positionalIndex,
       boolean optional,
       boolean repeatable,
       boolean flag) {
+    this.bundleKey = bundleKey;
     this.coercion = coercion;
     this.shortName = shortName;
     this.longName = longName;
@@ -181,21 +191,23 @@ final class Param {
     char shortName = shortName(params, sourceMethod);
     if (shortName == ' ' && longName == null) {
       throw ValidationException.create(sourceMethod,
-          "Neither long nor short name defined for method " + Util.methodToString(sourceMethod));
+          "Define either long name or a short name");
     }
     Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
     checkNotPresent(sourceMethod, parameter, singletonList(PositionalParameter.class));
     checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
-    String name = enumConstant(params, parameter.bundleKey(), sourceMethod);
+    String name = enumConstant(params, sourceMethod);
     boolean repeatable = parameter.repeatable();
     boolean optional = parameter.optional();
     boolean flag = parameter.flag();
+    boolean required = !repeatable && !optional && !flag;
     Coercion typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
-        descriptionArgumentName(type, !repeatable && !optional && !flag, sourceMethod) :
+        descriptionArgumentName(type, required, sourceMethod) :
         parameter.argHandle();
+    checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
         shortName,
         longName,
@@ -203,6 +215,7 @@ final class Param {
         sourceMethod,
         name,
         false,
+        parameter.bundleKey(),
         typeInfo,
         cleanDesc(description),
         descriptionArgumentName,
@@ -220,15 +233,17 @@ final class Param {
       TypeElement mapperClass,
       TypeElement collectorClass) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
-    String name = enumConstant(params, parameter.bundleKey(), sourceMethod);
+    String name = enumConstant(params, sourceMethod);
     boolean repeatable = parameter.repeatable();
     boolean optional = parameter.optional();
+    boolean required = !repeatable && !optional;
     Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
     OptionType type = optionType(repeatable, false);
     checkNotPresent(sourceMethod, parameter, singletonList(Parameter.class));
     String descriptionArgumentName = parameter.argHandle().isEmpty() ?
-        descriptionArgumentName(type, !repeatable && !optional, sourceMethod) :
+        descriptionArgumentName(type, required, sourceMethod) :
         parameter.argHandle();
+    checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
         ' ',
         null,
@@ -236,6 +251,7 @@ final class Param {
         sourceMethod,
         name,
         true,
+        parameter.bundleKey(),
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
@@ -256,8 +272,7 @@ final class Param {
     char c = param.shortName();
     for (Param p : params) {
       if (p.shortName == c) {
-        throw ValidationException.create(sourceMethod,
-            "Duplicate short name: " + c);
+        throw ValidationException.create(sourceMethod, "Duplicate short name");
       }
     }
     return c;
@@ -266,27 +281,16 @@ final class Param {
   private static String longName(List<Param> params, ExecutableElement sourceMethod) {
     Parameter param = sourceMethod.getAnnotation(Parameter.class);
     if (param == null) {
-      if (sourceMethod.getAnnotation(PositionalParameter.class) == null) {
-        throw ValidationException.create(sourceMethod,
-            String.format("Expecting either %s or %s annotation",
-                Parameter.class.getSimpleName(), PositionalParameter.class.getSimpleName()));
-      }
       return null;
     }
-    if (param.longName().isEmpty()) {
+    String longName = param.longName();
+    if (longName.isEmpty()) {
       // the empty string indicates that no long name should be defined
       return null;
     }
-    String longName;
-    if (param.longName().equals("-")) {
-      longName = sourceMethod.getSimpleName().toString();
-    } else {
-      longName = param.longName();
-    }
     for (Param p : params) {
       if (p.longName != null && p.longName.equals(longName)) {
-        throw ValidationException.create(sourceMethod,
-            "Duplicate long name: " + longName);
+        throw ValidationException.create(sourceMethod, "Duplicate long name");
       }
     }
     return longName;
@@ -355,19 +359,6 @@ final class Param {
     return descriptionArgumentName;
   }
 
-  private static String descriptionArgumentName(
-      OptionType paramType, boolean required, ExecutableElement sourceMethod) {
-    String name = snakeCase(sourceMethod.getSimpleName().toString());
-    if (paramType == OptionType.FLAG) {
-      return null;
-    }
-    if (required) {
-      return name.toUpperCase();
-    } else {
-      return name;
-    }
-  }
-
   TypeName returnType() {
     return TypeName.get(sourceMethod.getReturnType());
   }
@@ -390,6 +381,10 @@ final class Param {
 
   boolean required() {
     return !repeatable && !optional && !flag;
+  }
+
+  Optional<String> bundleKey() {
+    return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);
   }
 
   PositionalOrder positionalOrder() {
