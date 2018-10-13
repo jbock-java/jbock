@@ -16,28 +16,41 @@ abstract class GradleArguments {
    * the message
    * message goes here
    */
-  @Parameter(optional = true, shortName = 'm')
+  @Parameter(
+      optional = true,
+      longName = "message",
+      shortName = 'm')
   abstract Optional<String> message();
 
   /**
    * the files
    */
-  @Parameter(repeatable = true, shortName = 'f')
+  @Parameter(
+      repeatable = true,
+      longName = "file",
+      shortName = 'f')
   abstract List<String> file();
 
   /**
    * the dir
    */
-  @Parameter(optional = true)
+  @Parameter(
+      longName = "dir",
+      optional = true)
   abstract Optional<String> dir();
 
   /**
    * cmos flag
    */
-  @Parameter(flag = true, shortName = 'c', longName = "")
+  @Parameter(
+      flag = true,
+      shortName = 'c')
   abstract boolean cmos();
 
-  @Parameter(flag = true, shortName = 'v')
+  @Parameter(
+      flag = true,
+      longName = "verbose",
+      shortName = 'v')
   abstract boolean verbose();
 
   @PositionalParameter(repeatable = true)
@@ -46,14 +59,18 @@ abstract class GradleArguments {
   @CommandLineArguments
   static abstract class Foo {
 
-    @Parameter(optional = true)
+    @Parameter(
+        longName = "bar",
+        optional = true)
     abstract OptionalInt bar();
   }
 
   @CommandLineArguments
   static abstract class Bar {
 
-    @Parameter(repeatable = true)
+    @Parameter(
+        longName = "bar",
+        repeatable = true)
     abstract List<String> bar();
   }
 }

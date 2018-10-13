@@ -10,10 +10,15 @@ import java.util.function.Supplier;
 @CommandLineArguments
 abstract class ComplicatedMapperArguments {
 
-  @Parameter(mappedBy = Mapper.class)
+  @Parameter(
+      longName = "number",
+      mappedBy = Mapper.class)
   abstract Integer number();
 
-  @Parameter(repeatable = true, mappedBy = LazyNumberMapper.class)
+  @Parameter(
+      longName = "numbers",
+      repeatable = true,
+      mappedBy = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();
 
   static class LazyNumberMapper implements Supplier<Function<String, LazyNumber>> {

@@ -23,44 +23,44 @@ abstract class CustomMapperArguments {
    * The mapper must be a Function from String to whatever-this-returns.
    * It must also have a package-visible no-arg constructor.
    */
-  @Parameter(mappedBy = DateMapper.class)
+  @Parameter(longName = "date", mappedBy = DateMapper.class)
   abstract Date date();
 
-  @Parameter(optional = true, mappedBy = DateMapper.class)
+  @Parameter(longName = "optDate", optional = true, mappedBy = DateMapper.class)
   abstract Optional<Date> optDate();
 
-  @Parameter(repeatable = true, mappedBy = DateMapper.class)
+  @Parameter(longName = "dateList", repeatable = true, mappedBy = DateMapper.class)
   abstract List<Date> dateList();
 
-  @Parameter(optional = true, mappedBy = CustomBigIntegerMapper.class)
+  @Parameter(longName = "verbosity", optional = true, mappedBy = CustomBigIntegerMapper.class)
   abstract Optional<BigInteger> verbosity();
 
-  @Parameter(mappedBy = PositiveNumberMapper.class)
+  @Parameter(longName = "anInt", mappedBy = PositiveNumberMapper.class)
   abstract int anInt();
 
-  @Parameter(optional = true, mappedBy = PositiveNumberMapper.class)
+  @Parameter(longName = "anOptionalInt", optional = true, mappedBy = PositiveNumberMapper.class)
   abstract OptionalInt anOptionalInt();
 
-  @Parameter(optional = true, mappedBy = ArrayMapper.class)
+  @Parameter(longName = "stringArray", optional = true, mappedBy = ArrayMapper.class)
   abstract Optional<String[]> stringArray();
 
-  @Parameter(optional = true, mappedBy = IntegerListMapper.class)
+  @Parameter(longName = "integerList", optional = true, mappedBy = IntegerListMapper.class)
   abstract Optional<List<Integer>> integerList();
 
-  @Parameter(optional = true, mappedBy = EnumSetMapper.class)
+  @Parameter(longName = "enumSet", optional = true, mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
   @PositionalParameter(repeatable = true, mappedBy = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
-  @Parameter(repeatable = true, mappedBy = OptionalIntMapper.class)
+  @Parameter(longName = "optionalInts", repeatable = true, mappedBy = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
-  @Parameter(optional = true, mappedBy = ListWrapperMapper.class)
+  @Parameter(longName = "listWrapper", optional = true, mappedBy = ListWrapperMapper.class)
   abstract Optional<List<String>> listWrapper();
 
-  @Parameter(mappedBy = BooleanMapper.class)
-  abstract boolean notFlag(); // if it has a mapper, it's not a flag
+  @Parameter(longName = "notFlag", mappedBy = BooleanMapper.class)
+  abstract boolean notFlag();
 
   static class DateMapper implements Supplier<Function<String, Date>> {
 

@@ -194,7 +194,7 @@ final class Tokenizer {
         .endControlFlow();
 
     spec.addStatement("$N.incrementIndent()", out);
-    spec.beginControlFlow("for ($T $N : $N.getMessage($N.name().toLowerCase(), $N.description))",
+    spec.beginControlFlow("for ($T $N : $N.getMessage($N.bundleKey.toLowerCase(), $N.description))",
         STRING, lineParam, messages, optionParam, optionParam)
         .addStatement("$N.println($N)", out, lineParam)
         .endControlFlow();

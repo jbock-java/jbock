@@ -232,7 +232,7 @@ class CurlArgumentsTest {
         "  -H <headers...>",
         "    List<String> for repeatable arguments",
         "",
-        "  -v",
+        "  -v, --verbose",
         "    boolean for flags",
         "",
         "  -i, --include",

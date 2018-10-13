@@ -11,6 +11,6 @@ abstract class SimpleArguments {
   @Parameter(flag = true, shortName = 'x')
   abstract boolean extract();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "file", optional = true)
   abstract Optional<String> file();
 }

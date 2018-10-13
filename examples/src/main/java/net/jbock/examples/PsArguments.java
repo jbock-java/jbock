@@ -8,12 +8,19 @@ import java.util.OptionalInt;
 @CommandLineArguments
 abstract class PsArguments {
 
-  @Parameter(flag = true, shortName = 'a')
+  @Parameter(
+      flag = true,
+      longName = "all",
+      shortName = 'a')
   abstract boolean all();
 
   /**
    * This is the description.
    */
-  @Parameter(optional = true, shortName = 'w', argHandle = "number")
+  @Parameter(
+      optional = true,
+      longName = "width",
+      shortName = 'w',
+      argHandle = "number")
   abstract OptionalInt width();
 }

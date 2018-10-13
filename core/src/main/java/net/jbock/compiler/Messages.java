@@ -9,12 +9,12 @@ import java.util.Arrays;
 import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
+import static com.squareup.javapoet.MethodSpec.methodBuilder;
+import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static com.squareup.javapoet.MethodSpec.methodBuilder;
-import static com.squareup.javapoet.TypeSpec.classBuilder;
 
 /**
  * Defines the inner class IndentPrinter.
@@ -54,6 +54,9 @@ final class Messages {
         .addParameter(key)
         .addParameter(defaultValue)
         .returns(Constants.LIST_OF_STRING)
+        .beginControlFlow("if ($N == null || $N.isEmpty())", key, key)
+        .addStatement("return $N", defaultValue)
+        .endControlFlow()
         .beginControlFlow("if ($N == null || !$N.containsKey($N))", resourceBundle, resourceBundle, key)
         .addStatement("return $N", defaultValue)
         .endControlFlow()

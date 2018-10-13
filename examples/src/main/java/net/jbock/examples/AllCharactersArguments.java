@@ -9,15 +9,15 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class AllCharactersArguments {
 
-  @Parameter
+  @Parameter(longName = "smallChar")
   abstract char smallChar();
 
-  @Parameter
+  @Parameter(longName = "bigChar")
   abstract Character bigChar();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "charOpt", optional = true)
   abstract Optional<Character> charOpt();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "charList", repeatable = true)
   abstract List<Character> charList();
 }

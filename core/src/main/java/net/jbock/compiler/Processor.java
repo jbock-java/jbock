@@ -78,7 +78,8 @@ public final class Processor extends AbstractProcessor {
     for (TypeElement sourceType : getAnnotatedClasses(env)) {
       try {
         TypeTool.setInstance(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
-        List<Param> parameters = validate(sourceType);
+        validateType(sourceType);
+        List<Param> parameters = getParams(sourceType);
         if (parameters.isEmpty()) {
           processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
               "Skipping code generation: No abstract methods found", sourceType);
@@ -165,28 +166,7 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private List<Param> validate(TypeElement sourceType) {
-    if (sourceType.getKind() == ElementKind.INTERFACE) {
-      throw ValidationException.create(sourceType,
-          sourceType.getSimpleName() + " must be an abstract class, not an interface");
-    }
-    if (!sourceType.getModifiers().contains(ABSTRACT)) {
-      throw ValidationException.create(sourceType,
-          sourceType.getSimpleName() + " must be abstract");
-    }
-    if (sourceType.getModifiers().contains(Modifier.PRIVATE)) {
-      throw ValidationException.create(sourceType,
-          sourceType.getSimpleName() + " may not be private");
-    }
-    if (sourceType.getNestingKind().isNested() &&
-        !sourceType.getModifiers().contains(Modifier.STATIC)) {
-      throw ValidationException.create(sourceType,
-          "The nested class " + sourceType.getSimpleName() + " must be static");
-    }
-    if (!sourceType.getInterfaces().isEmpty()) {
-      throw ValidationException.create(sourceType,
-          sourceType.getSimpleName() + " may not implement anything");
-    }
+  private List<Param> getParams(TypeElement sourceType) {
     checkNoSuperclass(sourceType);
     List<ExecutableElement> abstractMethods = methodsIn(sourceType.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
@@ -212,6 +192,38 @@ public final class Processor extends AbstractProcessor {
     checkOnlyOnePositionalList(parameters);
     checkPositionalOrder(parameters);
     return parameters;
+  }
+
+  private void validateType(TypeElement sourceType) {
+    if (sourceType.getKind() == ElementKind.INTERFACE) {
+      throw ValidationException.create(sourceType,
+          "Use an abstract class, not an interface.");
+    }
+    if (!sourceType.getModifiers().contains(ABSTRACT)) {
+      throw ValidationException.create(sourceType,
+          "Use an abstract class.");
+    }
+    if (sourceType.getModifiers().contains(Modifier.PRIVATE)) {
+      throw ValidationException.create(sourceType,
+          "The class cannot not be private.");
+    }
+    if (sourceType.getNestingKind().isNested() &&
+        !sourceType.getModifiers().contains(Modifier.STATIC)) {
+      throw ValidationException.create(sourceType,
+          "The nested class must be static.");
+    }
+    if (!sourceType.getInterfaces().isEmpty()) {
+      throw ValidationException.create(sourceType,
+          "The class cannot implement anything.");
+    }
+    if (!sourceType.getTypeParameters().isEmpty()) {
+      throw ValidationException.create(sourceType,
+          "The class cannot have type parameters.");
+    }
+    if (!Util.checkDefaultConstructorExists(sourceType)) {
+      throw ValidationException.create(sourceType,
+          "The class must have a default constructor.");
+    }
   }
 
   private void checkNoSuperclass(TypeElement sourceType) {

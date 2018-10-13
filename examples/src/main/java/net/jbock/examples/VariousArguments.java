@@ -22,145 +22,145 @@ import java.util.regex.Pattern;
 @CommandLineArguments
 abstract class VariousArguments {
 
-  @Parameter
+  @Parameter(longName = "bigDecimal")
   abstract BigDecimal bigDecimal();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "bigDecimalList", repeatable = true)
   abstract List<BigDecimal> bigDecimalList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "bigDecimalOpt", optional = true)
   abstract Optional<BigDecimal> bigDecimalOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<BigDecimal> bigDecimalPos();
 
-  @Parameter
+  @Parameter(longName = "bigInteger")
   abstract BigInteger bigInteger();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "bigIntegerList", repeatable = true)
   abstract List<BigInteger> bigIntegerList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "bigIntegerOpt", optional = true)
   abstract Optional<BigInteger> bigIntegerOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<BigInteger> bigIntegerPos();
 
-  @Parameter
+  @Parameter(longName = "file")
   abstract File file();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "fileList", repeatable = true)
   abstract List<File> fileList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "fileOpt", optional = true)
   abstract Optional<File> fileOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<File> filePos();
 
-  @Parameter
+  @Parameter(longName = "path")
   abstract Path path();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "pathList", repeatable = true)
   abstract List<Path> pathList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "pathOpt", optional = true)
   abstract Optional<Path> pathOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<Path> pathPos();
 
-  @Parameter
+  @Parameter(longName = "localDate")
   abstract LocalDate localDate();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "localDateList", repeatable = true)
   abstract List<LocalDate> localDateList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "localDateOpt", optional = true)
   abstract Optional<LocalDate> localDateOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<LocalDate> localDatePos();
 
-  @Parameter
+  @Parameter(longName = "localDateTime")
   abstract LocalDateTime localDateTime();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "localDateTimeList", repeatable = true)
   abstract List<LocalDateTime> localDateTimeList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "localDateTimeOpt", optional = true)
   abstract Optional<LocalDateTime> localDateTimeOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<LocalDateTime> localDateTimePos();
 
-  @Parameter
+  @Parameter(longName = "offsetDateTime")
   abstract OffsetDateTime offsetDateTime();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "offsetDateTimeList", repeatable = true)
   abstract List<OffsetDateTime> offsetDateTimeList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "offsetDateTimeOpt", optional = true)
   abstract Optional<OffsetDateTime> offsetDateTimeOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<OffsetDateTime> offsetDateTimePos();
 
-  @Parameter
+  @Parameter(longName = "zonedDateTime")
   abstract ZonedDateTime zonedDateTime();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "zonedDateTimeList", repeatable = true)
   abstract List<ZonedDateTime> zonedDateTimeList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "zonedDateTimeOpt", optional = true)
   abstract Optional<ZonedDateTime> zonedDateTimeOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<ZonedDateTime> zonedDateTimePos();
 
-  @Parameter
+  @Parameter(longName = "uri")
   abstract URI uri();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "uriList", repeatable = true)
   abstract List<URI> uriList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "uriOpt", optional = true)
   abstract Optional<URI> uriOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<URI> uriPos();
 
-  @Parameter
+  @Parameter(longName = "charset")
   abstract Charset charset();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "charsetList", repeatable = true)
   abstract List<Charset> charsetList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "charsetOpt", optional = true)
   abstract Optional<Charset> charsetOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<Charset> charsetPos();
 
-  @Parameter
+  @Parameter(longName = "pattern")
   abstract Pattern pattern();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "patternList", repeatable = true)
   abstract List<Pattern> patternList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "patternOpt", optional = true)
   abstract Optional<Pattern> patternOpt();
 
   @PositionalParameter(optional = true)
   abstract Optional<Pattern> patternPos();
 
-  @Parameter
+  @Parameter(longName = "instant")
   abstract Instant instant();
 
-  @Parameter(repeatable = true)
+  @Parameter(longName = "instantList", repeatable = true)
   abstract List<Instant> instantList();
 
-  @Parameter(optional = true)
+  @Parameter(longName = "instantOpt", optional = true)
   abstract Optional<Instant> instantOpt();
 
   @PositionalParameter(optional = true)

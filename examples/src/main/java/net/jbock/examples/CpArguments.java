@@ -25,7 +25,7 @@ abstract class CpArguments {
   @Parameter(flag = true, shortName = 'r')
   abstract boolean recursive();
 
-  @Parameter(optional = true, argHandle = "CONTROL")
+  @Parameter(longName = "backup", optional = true, argHandle = "CONTROL")
   abstract Optional<Control> backup();
 
 

@@ -184,7 +184,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("must be an abstract class, not an interface");
+        .withErrorContaining("abstract class");
   }
 
   @Test
@@ -420,7 +420,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("may not implement");
+        .withErrorContaining("implement");
   }
 
   @Test
@@ -725,7 +725,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("must have a package visible constructor");
+        .withErrorContaining("constructor");
   }
 
   @Test
@@ -775,7 +775,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("may not declare any exceptions");
+        .withErrorContaining("The mapper class must have a default constructor");
   }
 
   @Test

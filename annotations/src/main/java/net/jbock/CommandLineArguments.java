@@ -6,12 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <h2>Marker for the class containing parameter methods</h2>
+ * <h2>Marks a class as having parameter methods</h2>
  *
  * <ul>
  * <li>The annotated class must be abstract.</li>
- * <li>The annotated class must be simple: It cannot have type parameters,
- * and may not implement any interfaces and may not extend any other class</li>
+ * <li>The annotated class must be simple: It cannot have type parameters.
+ *  It also cannot implement any interfaces or extend any other class.</li>
  * <li>Every abstract method must be annotated with {@link Parameter} or {@link PositionalParameter}.</li>
  * </ul>
  */

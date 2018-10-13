@@ -24,22 +24,33 @@ abstract class CurlArguments {
   /**
    * Optional<String> for regular arguments
    */
-  @Parameter(optional = true, shortName = 'X', longName = "request")
+  @Parameter(
+      optional = true,
+      shortName = 'X',
+      longName = "request")
   abstract Optional<String> method();
 
   /**
    * List<String> for repeatable arguments
    */
-  @Parameter(repeatable = true, shortName = 'H', longName = "")
+  @Parameter(
+      repeatable = true,
+      shortName = 'H')
   abstract List<String> headers();
 
   /**
    * boolean for flags
    */
-  @Parameter(flag = true, shortName = 'v', longName = "")
+  @Parameter(
+      flag = true,
+      shortName = 'v',
+      longName = "verbose")
   abstract boolean verbose();
 
-  @Parameter(flag = true, shortName = 'i')
+  @Parameter(
+      flag = true,
+      shortName = 'i',
+      longName = "include")
   abstract boolean include();
 
   @PositionalParameter(repeatable = true)

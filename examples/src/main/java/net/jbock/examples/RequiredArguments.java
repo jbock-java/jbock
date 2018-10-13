@@ -10,7 +10,7 @@ import java.util.List;
 @CommandLineArguments
 abstract class RequiredArguments {
 
-  @Parameter
+  @Parameter(longName = "dir")
   abstract String dir();
 
   @PositionalParameter(repeatable = true)

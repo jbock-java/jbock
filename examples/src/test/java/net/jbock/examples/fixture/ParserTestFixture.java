@@ -136,16 +136,23 @@ public final class ParserTestFixture<E> {
       System.err.flush();
       fail(String.format("Expected length: %d, actual length: %d", expected.length, actual.length));
     }
+    int failIndex = -1;
     for (int i = 0; i < actual.length; i++) {
       if (!Objects.equals(expected[i], actual[i])) {
-        System.err.println("Actual:");
-        for (int j = 0; j < i; j++) {
-          System.err.format("%3d: <%s>%n", j, expected[j]);
-        }
-        System.err.format("%3d: <%s> != <%s>%n", i, expected[i], actual[i]);
-        System.err.flush();
-        fail("Arrays differ at index " + i);
+        failIndex = i;
+        break;
       }
+    }
+    if (failIndex >= 0) {
+      for (int j = 0; j < actual.length; j++) {
+        if (Objects.equals(expected[j], actual[j])) {
+          System.out.format("%3d: %s%n", j, expected[j]);
+        } else {
+          System.out.format("%3d: %s @@@@@<%s>@@@@@%n", j, expected[j], actual[j]);
+        }
+      }
+      System.out.flush();
+      fail("Arrays differ at index " + failIndex);
     }
   }
 

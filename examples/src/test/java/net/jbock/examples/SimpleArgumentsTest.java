@@ -47,7 +47,7 @@ class SimpleArgumentsTest {
         "DESCRIPTION",
         "",
         "OPTIONS",
-        "  -x, --extract",
+        "  -x",
         "",
         "  --file <file>",
         "",
