@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
 /**
- * <h2>Marker for parameter methods</h2>
+ * <h3>Marker for parameter methods</h3>
  *
  * <ul>
  * <li>The annotated method must be abstract and have an empty argument list.</li>
@@ -20,15 +20,26 @@ public @interface Parameter {
 
   /**
    * <p>Long names define 'gnu style' parameters that start with two dashes.</p>
-   * *
+   *
+   * <p>Example:</p>
+   *
+   * <pre>{@code
+   * date --iso-8601
+   * }</pre>
    *
    * @return a valid long name
    */
   String longName() default "";
 
   /**
-   * <p>Short names define arguments that start with a single dash followed
+   * <p>Short names define arguments that consist of a single dash followed
    * by a single character.</p>
+   *
+   * <p>Example:</p>
+   *
+   * <pre>{@code
+   * curl -X 'Accept: application/json'
+   * }</pre>
    *
    * @return an alphanumeric character
    */
@@ -104,13 +115,20 @@ public @interface Parameter {
   /**
    * <p>Declares this parameter optional.</p>
    *
+   * <p>
+   * <em>Note:</em>
+   * Parameters are required by default. However,
+   * {@link #repeatable()} and {@link #flag()}
+   * parameters are always optional.
+   *</p>
+   *
    * @return true if this parameter is optional
    */
   boolean optional() default false;
 
   /**
    * <p>Declares a parameter that doesn't take an argument.
-   * For example, the following shell command contains a flag:
+   * For example, the following shell command contains a flag:</p>
    *
    * <pre>{@code
    * ls -l
@@ -121,9 +139,14 @@ public @interface Parameter {
   boolean flag() default false;
 
   /**
-   * This key is used to find the parameter description in the resource bundle.
-   * By default, the bundle key will be based on the method name.
-   * If no bundle is used, the parameter method's javadoc is used as the description.
+   * <p>This key is used to find the parameter description in the resource bundle.</p>
+   *
+   * <p>The builder object that's returned by the
+   * generated {@code parse} method can be used
+   * to define the resource bundle at runtime.</p>
+   *
+   * <p>If no bundle key is defined, or no bundle is used,
+   * then the parameter method's javadoc is used as the description.</p>
    *
    * @return an optional resource bundle key
    */

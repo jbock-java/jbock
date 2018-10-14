@@ -7,7 +7,7 @@ import java.lang.annotation.Target;
 import java.util.function.Supplier;
 
 /**
- * <h2>Marker for positional parameter methods</h2>
+ * <h3>Marker for positional parameter methods</h3>
  *
  * <ul>
  * <li>The annotated method must be abstract and have an empty argument list.</li>
@@ -15,10 +15,13 @@ import java.util.function.Supplier;
  * <li>If there is more than one positional parameter,
  * then the lexical ordering of these methods in the source file is relevant!</li>
  * </ul>
+ *
  * <p>
- * For example, the following shell command contains a positional parameter:
+ * <p>For example, the following shell commands contain positional parameters:</p>
  * <pre>{@code
- * ls .
+ * ls ..
+ * git log
+ * echo 'First positional parameter' 'Second positional parameter'
  * }</pre>
  */
 @Target(ElementType.METHOD)
