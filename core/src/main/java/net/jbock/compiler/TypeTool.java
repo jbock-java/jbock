@@ -4,6 +4,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
@@ -131,6 +132,30 @@ public class TypeTool {
       args.add(substitute(typeArgument, solution));
     }
     return types.getDeclaredType(erasure, args.toArray(new TypeMirror[0]));
+  }
+
+  public Optional<TypeMirror> substituteFlat(TypeMirror type, Map<String, TypeMirror> solution) {
+    TypeElement typeElement = types.asElement(type).accept(AS_TYPE_ELEMENT, null);
+    if (typeElement == null) {
+      return Optional.of(type);
+    }
+    List<? extends TypeParameterElement> typeArguments = typeElement.getTypeParameters();
+    if (typeArguments.isEmpty()) {
+      return Optional.of(type);
+    }
+    TypeMirror[] result = new TypeMirror[typeArguments.size()];
+    for (int i = 0; i < typeArguments.size(); i++) {
+      TypeParameterElement typeArgument = typeArguments.get(i);
+      String key = typeArgument.toString();
+      result[i] = solution.get(key);
+      typeArgument.getBounds();
+      for (TypeMirror bound : typeArgument.getBounds()) {
+        if (!types.isAssignable(result[i], bound)) {
+          return Optional.empty();
+        }
+      }
+    }
+    return Optional.of(types.getDeclaredType(typeElement, result));
   }
 
   boolean isAssignable(DeclaredType x, TypeMirror ym) {

@@ -49,14 +49,22 @@ public final class MapperCoercion extends CoercionFactory {
     return CodeBlock.builder().add(".map($N)", mapperParam).build();
   }
 
-  public static CodeBlock mapperInit(TypeMirror trigger, ParameterSpec mapperParam, TypeMirror mapperType) {
+  public static CodeBlock mapperInit(
+      TypeMirror trigger,
+      ParameterSpec mapperParam,
+      TypeMirror mapperType) {
     return mapperInit(TypeName.get(trigger), mapperParam, mapperType);
   }
 
-  private static CodeBlock mapperInit(TypeName trigger, ParameterSpec mapperParam, TypeMirror mapperType) {
+  private static CodeBlock mapperInit(
+      TypeName trigger,
+      ParameterSpec mapperParam,
+      TypeMirror mapperType) {
     return CodeBlock.builder()
-        .add("$T $N = new $T().get()", ParameterizedTypeName.get(ClassName.get(Function.class), STRING, trigger), mapperParam,
-            TypeTool.get().erasure(mapperType))
+        .add("$T $N = new $T().get()",
+            ParameterizedTypeName.get(ClassName.get(Function.class), STRING, trigger),
+            mapperParam,
+            mapperType)
         .build();
   }
 }

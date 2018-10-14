@@ -57,4 +57,49 @@ class MapperTest {
         .processedWith(new Processor())
         .compilesWithoutError();
   }
+
+  @Test
+  void invalidBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @PositionalParameter(mappedBy = BoundMapper.class)",
+        "  abstract String a();",
+        "",
+        "  static class BoundMapper<E extends Integer> implements Supplier<Function<E, E>> {",
+        "    @Override",
+        "    public Function<E, E> get() {",
+        "      return Function.identity();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("mapper");
+  }
+
+  @Test
+  void validBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @PositionalParameter(mappedBy = BoundMapper.class)",
+        "  abstract String a();",
+        "",
+        "  static class BoundMapper<E extends String> implements Supplier<Function<E, E>> {",
+        "    @Override",
+        "    public Function<E, E> get() {",
+        "      return Function.identity();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
 }

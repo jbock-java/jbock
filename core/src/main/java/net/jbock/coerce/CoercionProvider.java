@@ -16,6 +16,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
@@ -114,9 +116,13 @@ public class CoercionProvider {
     MapperClassValidator.checkReturnType(mapperClass, collectorInput.collectorInput);
     collectorInput = collectorInput.withInput(collectorInput.collectorInput);
     TriggerKind tk = CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
-    TypeName mapperType = TypeName.get(mapperClass.asType());
-    ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
-    return MapperCoercion.create(tk, mapperParam, mapperClass.asType(), field);
+    ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
+    Map<String, TypeMirror> result = MapperClassValidator.checkReturnType(mapperClass, tk.trigger);
+    Optional<TypeMirror> mapperType = TypeTool.get().substituteFlat(mapperClass.asType(), result);
+    if (!mapperType.isPresent()) {
+      throw TmpException.create("There was a problem with the mapper class.");
+    }
+    return MapperCoercion.create(tk, mapperParam, mapperType.get(), field);
   }
 
   private Coercion handleRepeatableNoMapper(
@@ -138,15 +144,18 @@ public class CoercionProvider {
       TypeElement mapperClass,
       FieldSpec field,
       boolean optional) throws TmpException {
-    TypeName mapperType = TypeName.get(mapperClass.asType());
-    ParameterSpec mapperParam = ParameterSpec.builder(mapperType, snakeToCamel(paramName) + "Mapper").build();
+    ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
     TriggerKind tk = trigger(sourceMethod.getReturnType(), optional);
     Coercion skewedCoercion = skewedCoercion(tk, field, mapperParam, mapperClass);
     if (skewedCoercion != null) {
       return skewedCoercion;
     }
-    MapperClassValidator.checkReturnType(mapperClass, tk.trigger);
-    return MapperCoercion.create(tk, mapperParam, mapperClass.asType(), field);
+    Map<String, TypeMirror> result = MapperClassValidator.checkReturnType(mapperClass, tk.trigger);
+    Optional<TypeMirror> mapperType = TypeTool.get().substituteFlat(mapperClass.asType(), result);
+    if (!mapperType.isPresent()) {
+      throw TmpException.create("There was a problem with the mapper class.");
+    }
+    return MapperCoercion.create(tk, mapperParam, mapperType.get(), field);
   }
 
   private Coercion skewedCoercion(

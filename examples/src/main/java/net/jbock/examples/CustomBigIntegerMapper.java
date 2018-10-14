@@ -4,7 +4,7 @@ import java.math.BigInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-class CustomBigIntegerMapper implements Supplier<Function<String, BigInteger>> {
+public class CustomBigIntegerMapper implements Supplier<Function<String, BigInteger>> {
 
   @Override
   public Function<String, BigInteger> get() {

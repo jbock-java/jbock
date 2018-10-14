@@ -283,4 +283,35 @@ class CollectorTest {
         .processedWith(new Processor())
         .compilesWithoutError();
   }
+
+  @Test
+  void invalidBothMapperAndCollectorHaveTypeargs() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             mappedBy = XMap.class,",
+        "             collectedBy = YCol.class)",
+        "  abstract List<String> map();",
+        "",
+        "  static class XMap<E extends Integer> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() {",
+        "      return Function.identity();",
+        "    }",
+        "  }",
+        "",
+        "  static class YCol<E> implements Supplier<Collector<E, ?, List<E>>> {",
+        "    public Collector<E, ?, List<E>> get() {",
+        "      return Collectors.toList();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("mapper");
+  }
 }
