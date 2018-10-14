@@ -6,7 +6,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.Objects;
 import java.util.Optional;
 
 public final class Coercion {
@@ -34,8 +33,6 @@ public final class Coercion {
   // impl
   private final FieldSpec field;
 
-  private final CoercionKind kind;
-
   public Coercion(
       TypeMirror trigger,
       Optional<ParameterSpec> collectorParam,
@@ -44,8 +41,7 @@ public final class Coercion {
       CodeBlock initCollector,
       CodeBlock extract,
       TypeName paramType,
-      FieldSpec field,
-      CoercionKind kind) {
+      FieldSpec field) {
     this.trigger = trigger;
     this.collectorParam = collectorParam;
     this.map = map;
@@ -54,7 +50,6 @@ public final class Coercion {
     this.extract = extract;
     this.paramType = paramType;
     this.field = field;
-    this.kind = kind;
   }
 
   /**
@@ -89,29 +84,6 @@ public final class Coercion {
 
   public CodeBlock extract() {
     return extract;
-  }
-
-  Coercion withMapper(CodeBlock map, CodeBlock initMapper) {
-    return new Coercion(trigger, collectorParam, map, initMapper, initCollector, extract, paramType, field, kind);
-  }
-
-  public Coercion asOptional() {
-    TypeName paramType = field.type;
-    ParameterSpec param = ParameterSpec.builder(paramType, field.name).build();
-    CodeBlock extract = CodeBlock.builder().add("$T.requireNonNull($N)", Objects.class, param).build();
-    return new Coercion(trigger, collectorParam, map, initMapper, initCollector, extract, paramType, field, kind);
-  }
-
-  public Coercion withCollector() {
-    TypeName paramType = field.type;
-    CodeBlock extract = CodeBlock.builder()
-        .add("$T.requireNonNull($N)", Objects.class, ParameterSpec.builder(paramType, field.name).build())
-        .build();
-    return new Coercion(trigger, collectorParam, map, initMapper, initCollector, extract, paramType, field, kind);
-  }
-
-  public CoercionKind kind() {
-    return kind;
   }
 
 

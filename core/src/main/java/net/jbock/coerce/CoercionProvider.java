@@ -262,6 +262,7 @@ public class CoercionProvider {
       }
       return CollectorInfo.listCollector(typeParameters.get(0));
     }
-    return CollectorInfo.create(CollectorClassValidator.findInputType(sourceMethod.getReturnType(), collectorClass), collectorClass);
+    CollectorClassValidator.CollectorResult collectorResult = CollectorClassValidator.findInputType(sourceMethod.getReturnType(), collectorClass);
+    return CollectorInfo.create(collectorResult.inputType, collectorResult.collectorType);
   }
 }

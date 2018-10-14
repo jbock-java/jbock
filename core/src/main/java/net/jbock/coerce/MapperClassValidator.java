@@ -20,11 +20,11 @@ final class MapperClassValidator {
     TypeTool tool = TypeTool.get();
     Map<String, TypeMirror> supplierTypeargs = Resolver.resolve(tool.declared(Supplier.class), supplierClass.asType(), "T");
     TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
-    MapSolution functionTypeargs = resolveFunctionTypeargs(functionClass);
-    if (!TypeTool.get().eql(functionTypeargs.returnType, expectedReturnType)) {
+    MapSolution mapSolution = resolveFunctionTypeargs(functionClass);
+    if (!TypeTool.get().eql(mapSolution.returnType, expectedReturnType)) {
       throw boom();
     }
-    return functionTypeargs.solution;
+    return mapSolution.solution;
   }
 
   private static MapSolution resolveFunctionTypeargs(TypeMirror functionType) throws TmpException {

@@ -314,4 +314,28 @@ class CollectorTest {
         .failsToCompile()
         .withErrorContaining("mapper");
   }
+
+  @Test
+  void invalidBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             collectedBy = MyCollector.class)",
+        "  abstract Set<String> strings();",
+        "",
+        "  static class MyCollector<E extends Integer> implements Supplier<Collector<E, ?, Set<E>>> {",
+        "    public Collector<E, ?, Set<E>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("collector");
+  }
 }

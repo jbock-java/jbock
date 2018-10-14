@@ -88,8 +88,7 @@ public abstract class CoercionFactory {
         initCollector(field, tk.collectorInfo),
         extract,
         paramType,
-        field,
-        tk.kind);
+        field);
   }
 
   private CodeBlock initCollector(
