@@ -29,7 +29,7 @@ class CollectorClassValidator {
     Map<String, TypeMirror> collectorTypeargs = Resolver.resolve(tool.declared(Supplier.class), collectorClass.asType(), "T");
     TypeMirror collectorTypeWithTypeargs = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
     CollectSolution solution = resolveCollectorTypeargs(returnType, collectorTypeWithTypeargs);
-    Optional<TypeMirror> collectorType = TypeTool.get().substituteFlat(collectorClass.asType(), solution.solution);
+    Optional<TypeMirror> collectorType = TypeTool.get().substitute(collectorClass.asType(), solution.solution);
     if (!collectorType.isPresent()) {
       throw boom();
     }
@@ -42,7 +42,11 @@ class CollectorClassValidator {
     TypeMirror t = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
     TypeMirror r = Optional.ofNullable(collectorTypeargs.get("R")).orElseThrow(CollectorClassValidator::boom);
     Map<String, TypeMirror> solution = tool.unify(returnType, r).orElseThrow(CollectorClassValidator::boom);
-    return new CollectSolution(tool.substitute(t, solution), solution);
+    Optional<TypeMirror> inputType = tool.substitute(t, solution);
+    if (!inputType.isPresent()) {
+      throw boom();
+    }
+    return new CollectSolution(inputType.get(), solution);
   }
 
   private static class CollectSolution {

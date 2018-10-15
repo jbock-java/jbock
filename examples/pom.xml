@@ -16,6 +16,7 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <jbock.version>0-SNAPSHOT</jbock.version>
+    <jbock-annotations.version>2.1</jbock-annotations.version>
     <junit.version>5.3.1</junit.version>
     <surefire.version>2.22.0</surefire.version>
     <compiler-plugin.version>3.8.0</compiler-plugin.version>
@@ -25,8 +26,8 @@
 
     <dependency>
       <groupId>com.github.h908714124</groupId>
-      <artifactId>jbock</artifactId>
-      <version>${jbock.version}</version>
+      <artifactId>jbock-annotations</artifactId>
+      <version>${jbock-annotations.version}</version>
       <scope>provided</scope>
     </dependency>
 

@@ -5,7 +5,6 @@ import net.jbock.compiler.TypeTool;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -15,16 +14,20 @@ import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 
 final class MapperClassValidator {
 
-  static Map<String, TypeMirror> checkReturnType(TypeElement supplierClass, TypeMirror expectedReturnType) throws TmpException {
-    commonChecks(supplierClass, "mapper");
+  static TypeMirror checkReturnType(TypeElement mapperClass, TypeMirror expectedReturnType) throws TmpException {
+    commonChecks(mapperClass, "mapper");
     TypeTool tool = TypeTool.get();
-    Map<String, TypeMirror> supplierTypeargs = Resolver.resolve(tool.declared(Supplier.class), supplierClass.asType(), "T");
+    Map<String, TypeMirror> supplierTypeargs = Resolver.resolve(tool.declared(Supplier.class), mapperClass.asType(), "T");
     TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
     MapSolution mapSolution = resolveFunctionTypeargs(functionClass);
-    if (!TypeTool.get().eql(mapSolution.returnType, expectedReturnType)) {
+    if (!tool.eql(mapSolution.returnType, expectedReturnType)) {
       throw boom();
     }
-    return mapSolution.solution;
+    Optional<TypeMirror> mapperType = tool.substitute(mapperClass.asType(), mapSolution.solution);
+    if (!mapperType.isPresent()) {
+      throw boom();
+    }
+    return mapperType.get();
   }
 
   private static MapSolution resolveFunctionTypeargs(TypeMirror functionType) throws TmpException {
@@ -34,7 +37,11 @@ final class MapperClassValidator {
     TypeMirror t = Optional.ofNullable(functionTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
     TypeMirror r = Optional.ofNullable(functionTypeargs.get("R")).orElseThrow(MapperClassValidator::boom);
     Map<String, TypeMirror> solution = tool.unify(string, t).orElseThrow(MapperClassValidator::boom);
-    return new MapSolution(tool.substitute(r, solution), solution);
+    Optional<TypeMirror> returnType = tool.substitute(r, solution);
+    if (!returnType.isPresent()) {
+      throw boom();
+    }
+    return new MapSolution(returnType.get(), solution);
   }
 
   private static class MapSolution {
