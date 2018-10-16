@@ -11,18 +11,18 @@ public enum CoercionKind {
   SIMPLE(false),
   OPTIONAL_COMBINATION(true);
 
-  private final boolean combination;
+  private final boolean wrappedInOptional;
 
-  CoercionKind(boolean combination) {
-    this.combination = combination;
+  CoercionKind(boolean wrappedInOptional) {
+    this.wrappedInOptional = wrappedInOptional;
   }
 
   TriggerKind of(TypeMirror trigger, CollectorInfo collectorInfo) {
     return new TriggerKind(this, trigger, collectorInfo);
   }
 
-  public boolean isCombination() {
-    return combination;
+  public boolean isWrappedInOptional() {
+    return wrappedInOptional;
   }
 
   public static TriggerKind findKind(TypeMirror mirror) {

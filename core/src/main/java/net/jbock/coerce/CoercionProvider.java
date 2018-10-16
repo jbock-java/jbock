@@ -13,7 +13,6 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 
@@ -88,10 +87,6 @@ public class CoercionProvider {
       boolean optional,
       FieldSpec field) throws TmpException {
     TypeMirror returnType = sourceMethod.getReturnType();
-    if (returnType.getKind() == TypeKind.ARRAY) {
-      // there's no default mapper for array
-      throw TmpException.create("Either switch to List and declare this parameter repeatable, or use a custom mapper.");
-    }
     TriggerKind tk = trigger(returnType, optional);
     return handleDefault(tk, field, optional);
   }
@@ -136,6 +131,9 @@ public class CoercionProvider {
       boolean optional) throws TmpException {
     ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
     TriggerKind tk = trigger(sourceMethod.getReturnType(), optional);
+    if (optional && !tk.kind.isWrappedInOptional()) {
+      throw TmpException.create("Wrap the parameter type in Optional");
+    }
     TypeMirror mapperType = MapperClassValidator.checkReturnType(mapperClass, tk.trigger);
     return MapperCoercion.create(tk, mapperParam, mapperType, field);
   }
@@ -147,16 +145,18 @@ public class CoercionProvider {
     CoercionFactory enumCoercion = checkEnum(tk.trigger);
     if (enumCoercion != null) {
       return enumCoercion.getCoercion(field, tk);
-    } else {
-      CoercionFactory factory = StandardCoercions.get(tk.trigger);
-      if (factory == null) {
-        throw TmpException.findWarning("Bad return type");
-      }
-      if (factory.handlesOptionalPrimitive() && !optional) {
-        throw TmpException.findWarning("Declare this parameter optional.");
-      }
-      return factory.getCoercion(field, tk);
     }
+    CoercionFactory factory = StandardCoercions.get(tk.trigger);
+    if (factory == null) {
+      throw TmpException.findWarning("Bad return type");
+    }
+    if (factory.handlesOptionalPrimitive() && !optional) {
+      throw TmpException.findWarning("Declare this parameter optional.");
+    }
+    if (optional && !factory.handlesOptionalPrimitive() && !tk.kind.isWrappedInOptional()) {
+      throw TmpException.findWarning("Wrap the parameter type in Optional");
+    }
+    return factory.getCoercion(field, tk);
   }
 
   private CoercionFactory checkEnum(TypeMirror mirror) throws TmpException {

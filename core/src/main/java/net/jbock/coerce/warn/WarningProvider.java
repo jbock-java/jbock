@@ -34,7 +34,7 @@ public class WarningProvider {
     }
     if (optional) {
       TriggerKind tk = findKind(type);
-      if (tk.kind.isCombination()) {
+      if (tk.kind.isWrappedInOptional()) {
         return findWarningSimple(tk.trigger, repeatable);
       }
     }

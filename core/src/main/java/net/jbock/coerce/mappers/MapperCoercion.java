@@ -8,7 +8,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.TriggerKind;
-import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.function.Function;
