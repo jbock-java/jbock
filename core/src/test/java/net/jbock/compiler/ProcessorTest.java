@@ -699,6 +699,23 @@ class ProcessorTest {
         .withErrorContaining("Wrap the parameter type in Optional");
   }
 
+  @Test
+  void invalidPrimitiveReturnTypeNotOptional() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             optional = true)",
+        "  abstract int x();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Wrap the parameter type in Optional");
+  }
+
   static List<String> withImports(String... lines) {
     List<String> header = Arrays.asList(
         "package test;",

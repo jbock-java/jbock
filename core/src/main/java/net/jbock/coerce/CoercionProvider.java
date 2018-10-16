@@ -151,10 +151,10 @@ public class CoercionProvider {
       throw TmpException.findWarning("Bad return type");
     }
     if (factory.handlesOptionalPrimitive() && !optional) {
-      throw TmpException.findWarning("Declare this parameter optional.");
+      throw TmpException.create("Declare this parameter optional.");
     }
     if (optional && !factory.handlesOptionalPrimitive() && !tk.kind.isWrappedInOptional()) {
-      throw TmpException.findWarning("Wrap the parameter type in Optional");
+      throw TmpException.create("Wrap the parameter type in Optional");
     }
     return factory.getCoercion(field, tk);
   }
