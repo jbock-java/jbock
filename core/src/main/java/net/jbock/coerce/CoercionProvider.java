@@ -16,14 +16,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.CoercionKind.findKind;
-import static net.jbock.coerce.mappers.MapperCoercion.mapperInit;
-import static net.jbock.coerce.mappers.MapperCoercion.mapperMap;
 import static net.jbock.compiler.Util.snakeToCamel;
 
 public class CoercionProvider {
@@ -132,6 +127,7 @@ public class CoercionProvider {
     return coercion.getCoercion(field, tk);
   }
 
+  // mapper but no collector
   private Coercion handleMapper(
       ExecutableElement sourceMethod,
       String paramName,
@@ -140,56 +136,8 @@ public class CoercionProvider {
       boolean optional) throws TmpException {
     ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
     TriggerKind tk = trigger(sourceMethod.getReturnType(), optional);
-    Coercion skewedCoercion = skewedCoercion(tk, field, mapperParam, mapperClass);
-    if (skewedCoercion != null) {
-      return skewedCoercion;
-    }
     TypeMirror mapperType = MapperClassValidator.checkReturnType(mapperClass, tk.trigger);
     return MapperCoercion.create(tk, mapperParam, mapperType, field);
-  }
-
-  private Coercion skewedCoercion(
-      TriggerKind tk,
-      FieldSpec field,
-      ParameterSpec mapperParam,
-      TypeElement mapperClass) throws TmpException {
-    if (tk.trigger.getKind().isPrimitive()) {
-      return skewedCoercion(tk, field, mapperParam, mapperClass, TypeTool.get().box(tk.trigger));
-    }
-    if (TypeTool.get().eql(tk.trigger, OptionalInt.class)) {
-      return skewedCoercion(tk, field, mapperParam, mapperClass, TypeTool.get().declared(Integer.class), tk.trigger);
-    }
-    if (TypeTool.get().eql(tk.trigger, OptionalDouble.class)) {
-      return skewedCoercion(tk, field, mapperParam, mapperClass, TypeTool.get().declared(Double.class), tk.trigger);
-    }
-    if (TypeTool.get().eql(tk.trigger, OptionalLong.class)) {
-      return skewedCoercion(tk, field, mapperParam, mapperClass, TypeTool.get().declared(Long.class), tk.trigger);
-    }
-    return null;
-  }
-
-  private Coercion skewedCoercion(
-      TriggerKind tk,
-      FieldSpec field,
-      ParameterSpec mapperParam,
-      TypeElement mapperClass,
-      TypeMirror baseType) throws TmpException {
-    return skewedCoercion(tk, field, mapperParam, mapperClass, baseType, baseType);
-  }
-
-  private Coercion skewedCoercion(
-      TriggerKind tk,
-      FieldSpec field,
-      ParameterSpec mapperParam,
-      TypeElement mapperClass,
-      TypeMirror mapperReturnType,
-      TypeMirror baseType) throws TmpException {
-    MapperClassValidator.checkReturnType(mapperClass, mapperReturnType);
-    CoercionFactory coercionFactory = StandardCoercions.get(baseType);
-    if (coercionFactory == null) {
-      return null;
-    }
-    return coercionFactory.getCoercion(field, tk, mapperMap(mapperParam), mapperInit(mapperReturnType, mapperParam, mapperClass.asType()));
   }
 
   private Coercion handleDefault(

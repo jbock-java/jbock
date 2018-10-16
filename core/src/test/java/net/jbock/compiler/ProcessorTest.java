@@ -641,28 +641,7 @@ class ProcessorTest {
   }
 
   @Test
-  void mapperValidBytePrimitive() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class ValidArguments {",
-        "",
-        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
-        "  abstract byte number();",
-        "",
-        "  static class Mapper implements Supplier<Function<String, Byte>> {",
-        "    public Function<String, Byte> get() {",
-        "      return s -> 1;",
-        "    }",
-        "  }",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void mapperValidByteBoxed() {
+  void mapperValidByte() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",

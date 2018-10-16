@@ -35,11 +35,8 @@ abstract class CustomMapperArguments {
   @Parameter(longName = "verbosity", optional = true, mappedBy = CustomBigIntegerMapper.class)
   abstract Optional<BigInteger> verbosity();
 
-  @Parameter(longName = "anInt", mappedBy = PositiveNumberMapper.class)
-  abstract int anInt();
-
   @Parameter(longName = "anOptionalInt", optional = true, mappedBy = PositiveNumberMapper.class)
-  abstract OptionalInt anOptionalInt();
+  abstract Optional<Integer> anOptionalInt();
 
   @Parameter(longName = "stringArray", optional = true, mappedBy = ArrayMapper.class)
   abstract Optional<String[]> stringArray();
@@ -60,7 +57,7 @@ abstract class CustomMapperArguments {
   abstract Optional<List<String>> listWrapper();
 
   @Parameter(longName = "notFlag", mappedBy = BooleanMapper.class)
-  abstract boolean notFlag();
+  abstract Boolean notFlag();
 
   static class DateMapper implements Supplier<Function<String, Date>> {
 

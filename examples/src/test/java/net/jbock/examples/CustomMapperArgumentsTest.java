@@ -29,7 +29,6 @@ class CustomMapperArgumentsTest {
         "--optDate", "1500000000000",
         "--dateList", "1500000000000",
         "--verbosity", "0x10",
-        "--anInt", "50",
         "--notFlag", "true",
         "--integerList", "1,2,3,4",
         "--optionalInts", "1",
@@ -45,9 +44,8 @@ class CustomMapperArgumentsTest {
     assertEquals(Optional.of(1500000000000L), parsed.optDate().map(Date::getTime));
     assertEquals(1500000000000L, parsed.dateList().get(0).getTime());
     assertEquals(Optional.of(16), parsed.verbosity().map(BigInteger::intValue));
-    assertEquals(50, parsed.anInt());
     assertEquals(Arrays.asList(true, false, true), parsed.booleanList());
-    assertEquals(OptionalInt.of(51), parsed.anOptionalInt());
+    assertEquals(Optional.of(51), parsed.anOptionalInt());
     assertEquals(Arrays.asList(1, 2, 3, 4), parsed.integerList().orElseThrow(AssertionFailedError::new));
     assertEquals(Arrays.asList(OptionalInt.of(1), OptionalInt.empty(), OptionalInt.of(3), OptionalInt.of(4)),
         parsed.optionalInts());
@@ -70,7 +68,7 @@ class CustomMapperArgumentsTest {
         "  CustomMapperArguments",
         "",
         "SYNOPSIS",
-        "  CustomMapperArguments [<options>] --date=<DATE> --anInt=<AN_INT> --notFlag=<NOT_FLAG> [[--] <boolean_list...>]",
+        "  CustomMapperArguments [<options>] --date=<DATE> --notFlag=<NOT_FLAG> [[--] <boolean_list...>]",
         "",
         "DESCRIPTION",
         "",
@@ -86,8 +84,6 @@ class CustomMapperArgumentsTest {
         "  --dateList <date_list...>",
         "",
         "  --verbosity <verbosity>",
-        "",
-        "  --anInt <AN_INT>",
         "",
         "  --anOptionalInt <an_optional_int>",
         "",
