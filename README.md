@@ -1,9 +1,63 @@
-# jbock
+## jbock
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
 `jbock` is an annotation-driven command line parser, similar to [jcommander](http://jcommander.org/), but doesn't use reflection.
 Instead, it generates custom source code through a mechanism called Java annotation processing.
+
+### Overview
+
+An annotated class looks like this
+
+````java
+@CommandLineArguments
+abstract class LsArguments {
+
+  @PositionalParameter
+  abstract Optional<Path> path();
+  
+  @Parameter(optional = true, longName = "verbosity", shortName = 'v')
+  abstract OptionalInt verbosity();
+
+}
+````
+
+and then the generated class `LsArguments_Parser` can be used as followed
+
+````java
+String[] argv = { "-v", "2", "file.txt" };
+LsArguments = LsArguments_Parser.create().parseOrExit(args);
+
+Assert.assertEquals(args.verbosity(), 2);
+```` 
+
+## Optional parameters
+
+Parameters are <em>required by default</em>.
+Thats's unavoidable, because jbock's generated methods
+never return `null`.
+
+Optional parameters must use an optional type,
+like `Optional<String>`,
+and set the optional flag.
+
+## Repeatable parameters
+
+````java
+/**
+ * Parameter description
+ */
+@Parameter(repeatable = true, 
+           longName = "header",
+           shortName = 'X')
+abstract List<String> headers();
+
+````
+
+## Javadoc
+
+By default, the method's Javadoc is used as the parameter description. 
+Alternatively a resource bundle can be used.
 
 ## Introduction
 
