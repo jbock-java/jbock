@@ -239,13 +239,13 @@ final class Tokenizer {
         continue;
       }
       switch (positionalOrder) {
-        case REQUIRED:
-          spec.addStatement("$N.add($S)", joiner, "<" +
-              param.descriptionArgumentName() + ">");
-          break;
         case OPTIONAL:
           spec.addStatement("$N.add($S)", joiner, "[<" +
               param.descriptionArgumentName() + ">]");
+          break;
+        case REQUIRED:
+          spec.addStatement("$N.add($S)", joiner, "<" +
+              param.descriptionArgumentName() + ">");
           break;
         case LIST:
           spec.addStatement("$N.add($S)", joiner, context.allowEscape() ?

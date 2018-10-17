@@ -30,7 +30,8 @@ public @interface PositionalParameter {
    * Lower order parameters come first.</p>
    *
    * <ul>
-   * <li>Each parameter must have a unique position.</li>
+   * <li>Two parameters must have different position if they are either both required or
+   * both optional.</li>
    * <li>Gaps in the position numbers are allowed. Negative numbers are also allowed.</li>
    * <li>Required parameters must have the lowest positions.</li>
    * <li>There can only be one {@link #repeatable()} positional parameter, and it must have the highest position.</li>
@@ -38,7 +39,7 @@ public @interface PositionalParameter {
    *
    * @return parameter position
    */
-  int position();
+  int position() default 0;
 
   /**
    * Defines the description argument name.

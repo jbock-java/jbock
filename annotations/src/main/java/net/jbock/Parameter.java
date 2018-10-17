@@ -53,7 +53,7 @@ public @interface Parameter {
   String descriptionArgumentName() default "";
 
   /**
-   * <h3>Optional custom mapper</3>
+   * <h3>Optional custom mapper</h3>
    *
    * <p>
    * The mapper is a {@link java.util.function.Supplier Supplier} that returns a

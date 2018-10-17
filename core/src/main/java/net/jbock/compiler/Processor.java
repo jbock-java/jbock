@@ -22,21 +22,23 @@ import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
-import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumSet;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.stream.Collectors.groupingBy;
+import static java.util.stream.Collectors.partitioningBy;
+import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -174,42 +176,86 @@ public final class Processor extends AbstractProcessor {
   private static Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
       .comparingInt(e -> e.getAnnotation(PositionalParameter.class).position());
 
+  private PositionalOrder getPositionalOrder(ExecutableElement sourceMethod) {
+    PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
+    if (parameter.repeatable()) {
+      return PositionalOrder.LIST;
+    }
+    return parameter.optional() ? PositionalOrder.OPTIONAL : PositionalOrder.REQUIRED;
+  }
+
   private List<Param> getParams(TypeElement sourceType) {
     checkNoSuperclass(sourceType);
     List<ExecutableElement> abstractMethods = methodsIn(sourceType.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
         .collect(toList());
     checkExactlyOneAnnotation(abstractMethods);
-    Map<Boolean, List<ExecutableElement>> partition = abstractMethods.stream().collect(Collectors.partitioningBy(method -> method.getAnnotation(PositionalParameter.class) != null));
-    List<ExecutableElement> positional = new ArrayList<>(partition.getOrDefault(true, emptyList()));
-    List<ExecutableElement> nonpositional = partition.getOrDefault(false, emptyList());
-    positional.sort(POSITION_COMPARATOR);
-
-    List<Param> parameters = new ArrayList<>(abstractMethods.size());
-    for (ExecutableElement method : nonpositional) {
-      Param param = Param.create(parameters, method, OptionalInt.empty(), getDescription(method));
-      parameters.add(param);
+    Map<Boolean, List<ExecutableElement>> partition = abstractMethods.stream().collect(
+        partitioningBy(method -> method.getAnnotation(PositionalParameter.class) != null));
+    List<ExecutableElement> allNonpositional = partition.getOrDefault(false, emptyList());
+    List<ExecutableElement> allPositional = partition.getOrDefault(true, emptyList());
+    Map<PositionalOrder, List<ExecutableElement>> positionalGroups = allPositional.stream()
+        .collect(groupingBy(
+            this::getPositionalOrder,
+            HashMap::new,
+            toCollection(ArrayList::new)));
+    for (List<ExecutableElement> value : positionalGroups.values()) {
+      value.sort(POSITION_COMPARATOR);
     }
-    Integer previousPosition = null;
-    for (int i = 0; i < positional.size(); i++) {
-      ExecutableElement method = positional.get(i);
-      Integer position = method.getAnnotation(PositionalParameter.class).position();
-      if (Objects.equals(position, previousPosition)) {
-        throw ValidationException.create(method, "Duplicate position");
-      }
-      previousPosition = position;
-      Param param = Param.create(parameters, method, OptionalInt.of(i), getDescription(method));
-      parameters.add(param);
+
+    checkPositionalRepeatable(sourceType, positionalGroups);
+    checkPositionalOrderUnique(positionalGroups);
+    List<ExecutableElement> sortedPositional = getSortedPositional(positionalGroups);
+    List<Param> result = new ArrayList<>(abstractMethods.size());
+    for (int i = 0; i < sortedPositional.size(); i++) {
+      ExecutableElement method = sortedPositional.get(i);
+      Param param = Param.create(result, method, OptionalInt.of(i), getDescription(method));
+      result.add(param);
+    }
+    for (ExecutableElement method : allNonpositional) {
+      Param param = Param.create(result, method, OptionalInt.empty(), getDescription(method));
+      result.add(param);
     }
     if (sourceType.getAnnotation(CommandLineArguments.class).allowHelpOption()) {
-      checkHelp(parameters);
+      checkHelp(result);
     }
-    checkOnlyOnePositionalList(parameters);
-    checkPositionalOrder(parameters);
+    return result;
+  }
+
+  private List<ExecutableElement> getSortedPositional(Map<PositionalOrder, List<ExecutableElement>> positionalGroups) {
+    List<ExecutableElement> sortedPositional = new ArrayList<>();
+    for (PositionalOrder positionalOrder : PositionalOrder.values()) {
+      sortedPositional.addAll(positionalGroups.getOrDefault(positionalOrder, emptyList()));
+    }
+    return sortedPositional;
+  }
+
+  private void checkPositionalOrderUnique(Map<PositionalOrder, List<ExecutableElement>> positionalGroups) {
+    for (PositionalOrder positionalOrder : PositionalOrder.values()) {
+      Integer previousPosition = null;
+      List<ExecutableElement> positional = positionalGroups.getOrDefault(positionalOrder, emptyList());
+      for (ExecutableElement method : positional) {
+        Integer position = method.getAnnotation(PositionalParameter.class).position();
+        if (Objects.equals(position, previousPosition)) {
+          throw ValidationException.create(method, "Duplicate position");
+        }
+        previousPosition = position;
+      }
+    }
+  }
+
+  private void checkPositionalRepeatable(TypeElement sourceType, Map<PositionalOrder, List<ExecutableElement>> positionalGroups) {
+    List<ExecutableElement> positionalRepeatable = positionalGroups.getOrDefault(PositionalOrder.LIST, emptyList());
+    if (positionalRepeatable.size() >= 2) {
+      throw ValidationException.create(positionalRepeatable.get(1),
+          "There can only be one one repeatable positional parameter.");
+    }
     if (sourceType.getAnnotation(CommandLineArguments.class).allowEscapeSequence()) {
-      checkEscapeSequence(sourceType, positional);
+      if (positionalRepeatable.isEmpty()) {
+        throw ValidationException.create(sourceType,
+            "Define a repeatable positional parameter, or disable the escape sequence.");
+      }
     }
-    return parameters;
   }
 
   private void checkExactlyOneAnnotation(List<ExecutableElement> abstractMethods) {
@@ -299,66 +345,6 @@ public final class Processor extends AbstractProcessor {
             "'help' is reserved. " +
                 "Either disable the help feature " +
                 "or change the long name to something else.");
-      }
-    }
-  }
-
-  private void checkOnlyOnePositionalList(List<Param> params) {
-    boolean positionalListFound = false;
-    for (Param param : params) {
-      if (param.isPositional() &&
-          param.paramType == OptionType.REPEATABLE) {
-        if (positionalListFound) {
-          throw ValidationException.create(param.sourceMethod,
-              "Only one positional list allowed");
-        }
-        positionalListFound = true;
-      }
-    }
-  }
-
-  private void checkPositionalOrder(List<Param> params) {
-    Param previousPositional = null;
-    for (Param param : params) {
-      if (!param.isPositional()) {
-        continue;
-      }
-      if (previousPositional != null) {
-        PositionalOrder paramOrder = param.positionalOrder();
-        PositionalOrder previousOrder = previousPositional.positionalOrder();
-        if (paramOrder == null || previousOrder == null) {
-          throw new AssertionError();
-        }
-        if (paramOrder.compareTo(previousOrder) < 0) {
-          throw ValidationException.create(param.sourceMethod,
-              String.format("Positional order: %s method %s() must come before %s method %s()",
-                  paramOrder, param.methodName(),
-                  previousOrder, previousPositional.methodName()));
-        }
-      }
-      previousPositional = param;
-    }
-  }
-
-  private void checkEscapeSequence(TypeElement sourceType, List<ExecutableElement> params) {
-    for (ExecutableElement param : params) {
-      if (param.getAnnotation(PositionalParameter.class).repeatable()) {
-        return;
-      }
-    }
-    throw ValidationException.create(sourceType,
-        "Define a repeatable positional parameter, or disable the escape sequence.");
-  }
-
-  static void checkNotPresent(
-      ExecutableElement executableElement,
-      Annotation cause,
-      List<Class<? extends Annotation>> forbiddenAnnotations) {
-    for (Class<? extends Annotation> annotation : forbiddenAnnotations) {
-      if (executableElement.getAnnotation(annotation) != null) {
-        throw ValidationException.create(executableElement,
-            String.format("Cannot have both of %s and %s",
-                annotation.getSimpleName(), cause.annotationType().getSimpleName()));
       }
     }
   }

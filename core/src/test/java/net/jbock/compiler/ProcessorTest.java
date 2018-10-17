@@ -243,18 +243,34 @@ class ProcessorTest {
   }
 
   @Test
-  void positionalListBeforeRequiredPositional() {
+  void positionalDifferentTypes() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
+        "  @PositionalParameter abstract String b();",
+        "  @PositionalParameter(optional = true) abstract Optional<String> c();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void positionalPositionNotUnique() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @PositionalParameter(repeatable = true) abstract List<String> a();",
         "  @PositionalParameter abstract String b();",
+        "  @PositionalParameter abstract String c();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("REQUIRED method b() must come before LIST method a()");
+        .withErrorContaining("Duplicate position");
   }
 
   @Test
@@ -269,22 +285,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Only one positional list allowed");
-  }
-
-  @Test
-  void positionalListBeforeOptionalPositional() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
-        "  @PositionalParameter(optional = true) abstract Optional<String> b();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("OPTIONAL method b() must come before LIST method a()");
+        .withErrorContaining("There can only be one one repeatable positional parameter.");
   }
 
   @Test
@@ -298,21 +299,6 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
-  }
-
-  @Test
-  void positionalOptionalBeforeRequiredPositional() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @PositionalParameter(optional = true) abstract Optional<String> a();",
-        "  @PositionalParameter abstract String b();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("REQUIRED method b() must come before OPTIONAL method a()");
   }
 
   @Test
@@ -348,10 +334,10 @@ class ProcessorTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @PositionalParameter(optional = true) abstract Optional<String> a();",
-        "  @PositionalParameter(optional = true) abstract OptionalInt b();",
-        "  @PositionalParameter(optional = true) abstract Optional<String> c();",
-        "  @PositionalParameter(optional = true) abstract OptionalInt d();",
+        "  @PositionalParameter(position = 1, optional = true) abstract Optional<String> a();",
+        "  @PositionalParameter(position = 10, optional = true) abstract OptionalInt b();",
+        "  @PositionalParameter(position = 100, optional = true) abstract Optional<String> c();",
+        "  @PositionalParameter(position = 1000, optional = true) abstract OptionalInt d();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -538,7 +524,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Cannot have both of Parameter and PositionalParameter");
+        .withErrorContaining("Remove Parameter or PositionalParameter annotation");
   }
 
   @Test

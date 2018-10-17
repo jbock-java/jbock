@@ -19,10 +19,8 @@ import java.util.OptionalInt;
 import java.util.stream.Stream;
 
 import static java.lang.Character.isWhitespace;
-import static java.util.Collections.singletonList;
 import static net.jbock.compiler.AnnotationUtil.getCollectorClass;
 import static net.jbock.compiler.AnnotationUtil.getMapperClass;
-import static net.jbock.compiler.Processor.checkNotPresent;
 import static net.jbock.compiler.Util.snakeCase;
 
 /**
@@ -194,7 +192,6 @@ final class Param {
           "Define either long name or a short name");
     }
     Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
-    checkNotPresent(sourceMethod, parameter, singletonList(PositionalParameter.class));
     checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
     String name = enumConstant(params, sourceMethod);
@@ -239,7 +236,6 @@ final class Param {
     boolean required = !repeatable && !optional;
     Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
     OptionType type = optionType(repeatable, false);
-    checkNotPresent(sourceMethod, parameter, singletonList(Parameter.class));
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, sourceMethod) :
         parameter.descriptionArgumentName();
