@@ -46,23 +46,27 @@ public @interface Parameter {
   char shortName() default ' ';
 
   /**
-   * <p>The argument name that's printed in the example usage.</p>
+   * The argument name that's printed in the example usage.
    *
-   * @return an optional arg handle
+   * @return an optional name that's used in the parameter description
    */
-  String argHandle() default "";
+  String descriptionArgumentName() default "";
 
   /**
-   * <p>Optional custom mapper</p>
+   * <h3>Optional custom mapper</3>
    *
-   * <p>The mapper is a {@link java.util.function.Supplier Supplier} that returns a
+   * <p>
+   * The mapper is a {@link java.util.function.Supplier Supplier} that returns a
    * {@link java.util.function.Function Function&lt;String, X&gt;}.
    * The return value {@code X} is called the <em>mapper type</em>.
    * The parameter method must return {@code X}, or {@code Optional<X>} if the
    * parameter is {@link #optional()}, or {@code List<X>} if the parameter is
-   * {@link #repeatable()}. There are even more options if a custom collector is used.
+   * {@link #repeatable()}, unless a custom collector is also used.
+   * </p>
+   *
    * <p>
    * For example, the following mapper parses and validates a positive number:
+   * </p>
    *
    * <pre>{@code
    * class PositiveNumberMapper implements Supplier&lt;Function&lt;String, Integer&gt;&gt; {
@@ -84,13 +88,16 @@ public @interface Parameter {
   Class<? extends Supplier> mappedBy() default Supplier.class;
 
   /**
-   * <p>Optional custom collector</p>
+   * <h3>Optional custom collector</h3>
    *
-   * <p>The supplier must return a {@link java.util.stream.Collector Collector&lt;M, ?, X&gt;}
+   * <p>
+   * The supplier must return a {@link java.util.stream.Collector Collector&lt;M, ?, X&gt;}
    * where {@code X} is the parameter type, and {@code M} is the <em>mapper type</em>.
    * </p>
+   *
    * <p>
    * For example, the following collector creates a {@code Set}:
+   * </p>
    *
    * <pre>{@code
    * class ToSetCollector&lt;E&gt; implements Supplier&lt;Collector&lt;E, ?, Set&lt;E&gt;&gt;&gt; {

@@ -12,12 +12,9 @@ import java.util.function.Supplier;
  * <ul>
  * <li>The annotated method must be abstract and have an empty argument list.</li>
  * <li>The annotated method may not carry the {@link Parameter} annotation.</li>
- * <li>If there is more than one positional parameter,
- * then the lexical ordering of these methods in the source file is relevant!</li>
  * </ul>
  *
- * <p>
- * <p>For example, the following shell commands contain positional parameters:</p>
+ * <p>For example, the following shell commands are passing positional parameters:</p>
  * <pre>{@code
  * ls ..
  * git log
@@ -29,15 +26,31 @@ import java.util.function.Supplier;
 public @interface PositionalParameter {
 
   /**
-   * see {@link Parameter#argHandle()}
+   * <p>The parameter position in the sequence of all positional parameters.
+   * Lower order parameters come first.</p>
    *
-   * @return an optional arg handle
+   * <ul>
+   * <li>Each parameter must have a unique position.</li>
+   * <li>Gaps in the position numbers are allowed. Negative numbers are also allowed.</li>
+   * <li>Required parameters must have the lowest positions.</li>
+   * <li>There can only be one {@link #repeatable()} positional parameter, and it must have the highest position.</li>
+   * </ul>
+   *
+   * @return parameter position
    */
-  String argHandle() default "";
+  int position();
+
+  /**
+   * Defines the description argument name.
+   * See {@link Parameter#descriptionArgumentName()}.
+   *
+   * @return an optional name that's used in the parameter description
+   */
+  String descriptionArgumentName() default "";
 
   /**
    * Optional custom mapper.
-   * See {@link Parameter#mappedBy()}
+   * See {@link Parameter#mappedBy()}.
    *
    * @return an optional mapper class
    */
@@ -45,34 +58,31 @@ public @interface PositionalParameter {
 
   /**
    * Optional custom collector.
-   * See {@link Parameter#collectedBy()}
+   * See {@link Parameter#collectedBy()}.
    *
    * @return an optional collector class
    */
   Class<? extends Supplier> collectedBy() default Supplier.class;
 
   /**
-   * <p>Declares this parameter repeatable.</p>
-   *
-   * <ul>
-   * <li>There can only be one positional repeatable parameter.</li>
-   * <li>The repeatable positional parameter must be the last positional parameter,
-   * in the lexical ordering of the Java source file.</li>
-   * </ul>
+   * Declares this parameter repeatable.
+   * See {@link Parameter#repeatable()}.
    *
    * @return true if this parameter is repeatable
    */
   boolean repeatable() default false;
 
   /**
-   * <p>Declares this parameter optional.</p>
+   * Declares this parameter optional.
+   * See {@link Parameter#optional()}.
    *
    * @return true if this parameter is optional
    */
   boolean optional() default false;
 
   /**
-   * see {@link Parameter#bundleKey()}
+   * Defines a bundle key.
+   * See {@link Parameter#bundleKey()}.
    *
    * @return an optional resource bundle key
    */

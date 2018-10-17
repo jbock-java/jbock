@@ -20,56 +20,47 @@ import java.lang.annotation.Target;
 public @interface CommandLineArguments {
 
   /**
-   * <p>The name of the final executable program.
+   * <p>The name of the final executable.
    * If the java program is usually invoked from a wrapper script,
    * then this should be the file name of that script.</p>
    *
    * <p>The program name is printed when the user passes the
    * {@code --help} parameter, in the {@code NAME} section of the usage information.
-   * By default, the short name of the annotated java class is used as the program name.
-   * If that class is an inner class,
-   * then the short name of its enclosing class is the default program name</p>
+   * By default, the name of the annotated java class is used as the program name.</p>
    *
    * @return an optional program name
    */
   String programName() default "";
 
   /**
-   * A short, single-sentence summary of the program. It is printed when the user passes the
-   * {@code --help} parameter.
+   * A single-sentence summary of the program.
    *
-   * @return an optional string
+   * @return an optional mission statement
    */
   String missionStatement() default "";
 
   /**
-   * <p>If {@code true}, a special parameter {@code --help} will be understood by the parser,
-   * but only if it is the very first argument.
-   * In this case, it is an error to assign the long name "help" to any other parameter.</p>
+   * <p>If {@code true}, the special token {@code --help} will be understood by the parser,
+   * but only if it is the very first argument.</p>
    *
-   * @return false to disable the standard {@code --help} functionality
+   * @return false to disable the special meaning of the {@code --help} parameter
    */
-  boolean addHelp() default true;
+  boolean allowHelpOption() default true;
 
   /**
-   * <p>True if an isolated double dash "--" should end option parsing.
+   * <p>True if the special token {@code --} should end option parsing.
    * The remaining tokens will then be treated as positional, regardless of their shape.</p>
    *
-   * @return false to disable the standard <em>end of option parsing</em> escape sequence
+   * @return true to enable the special meaning of the <em>end of option parsing</em> escape sequence
    */
-  boolean allowEscape() default true;
+  boolean allowEscapeSequence() default false;
 
   /**
-   * <p>True if unknown tokens that start with a dash should be permissible.
-   * These tokens will then be treated as positional.
-   * Otherwise these tokens are treated as bad input, and parsing fails.</p>
+   * <p>True if unknown tokens that start with a dash should be allowed,
+   * and treated as positional.
+   * By default, these tokens are rejected.</p>
    *
-   * <p>Note that <em>any</em> unknown token is considered bad input,
-   * if no positional parameters are defined. See {@link PositionalParameter}.</p>
-   *
-   * <p>Note that setting {@link #allowEscape()} (and defining a positional list) makes the double dash "--" a known token.</p>
-   *
-   * @return false if tokens that start with a dash should be allowed as positional parameters
+   * @return true if tokens that start with a dash should be allowed as positional parameters
    */
-  boolean strict() default true;
+  boolean allowPrefixedTokens() default false;
 }

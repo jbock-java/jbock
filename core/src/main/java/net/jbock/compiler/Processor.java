@@ -25,13 +25,18 @@ import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -166,13 +171,48 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
+  private static Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
+      .comparingInt(e -> e.getAnnotation(PositionalParameter.class).position());
+
   private List<Param> getParams(TypeElement sourceType) {
     checkNoSuperclass(sourceType);
     List<ExecutableElement> abstractMethods = methodsIn(sourceType.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
         .collect(toList());
+    checkExactlyOneAnnotation(abstractMethods);
+    Map<Boolean, List<ExecutableElement>> partition = abstractMethods.stream().collect(Collectors.partitioningBy(method -> method.getAnnotation(PositionalParameter.class) != null));
+    List<ExecutableElement> positional = new ArrayList<>(partition.getOrDefault(true, emptyList()));
+    List<ExecutableElement> nonpositional = partition.getOrDefault(false, emptyList());
+    positional.sort(POSITION_COMPARATOR);
+
     List<Param> parameters = new ArrayList<>(abstractMethods.size());
-    int positionalIndex = -1;
+    for (ExecutableElement method : nonpositional) {
+      Param param = Param.create(parameters, method, OptionalInt.empty(), getDescription(method));
+      parameters.add(param);
+    }
+    Integer previousPosition = null;
+    for (int i = 0; i < positional.size(); i++) {
+      ExecutableElement method = positional.get(i);
+      Integer position = method.getAnnotation(PositionalParameter.class).position();
+      if (Objects.equals(position, previousPosition)) {
+        throw ValidationException.create(method, "Duplicate position");
+      }
+      previousPosition = position;
+      Param param = Param.create(parameters, method, OptionalInt.of(i), getDescription(method));
+      parameters.add(param);
+    }
+    if (sourceType.getAnnotation(CommandLineArguments.class).allowHelpOption()) {
+      checkHelp(parameters);
+    }
+    checkOnlyOnePositionalList(parameters);
+    checkPositionalOrder(parameters);
+    if (sourceType.getAnnotation(CommandLineArguments.class).allowEscapeSequence()) {
+      checkEscapeSequence(sourceType, positional);
+    }
+    return parameters;
+  }
+
+  private void checkExactlyOneAnnotation(List<ExecutableElement> abstractMethods) {
     for (ExecutableElement method : abstractMethods) {
       boolean isPositional = method.getAnnotation(PositionalParameter.class) != null;
       if (!isPositional && method.getAnnotation(Parameter.class) == null) {
@@ -180,18 +220,12 @@ public final class Processor extends AbstractProcessor {
             String.format("Add %s or %s annotation",
                 Parameter.class.getSimpleName(), PositionalParameter.class.getSimpleName()));
       }
-      if (isPositional) {
-        positionalIndex++;
+      if (isPositional && method.getAnnotation(Parameter.class) != null) {
+        throw ValidationException.create(method,
+            String.format("Remove %s or %s annotation",
+                Parameter.class.getSimpleName(), PositionalParameter.class.getSimpleName()));
       }
-      Param param = Param.create(parameters, method, positionalIndex, getDescription(method));
-      parameters.add(param);
     }
-    if (sourceType.getAnnotation(CommandLineArguments.class).addHelp()) {
-      checkHelp(parameters);
-    }
-    checkOnlyOnePositionalList(parameters);
-    checkPositionalOrder(parameters);
-    return parameters;
   }
 
   private void validateType(TypeElement sourceType) {
@@ -237,7 +271,7 @@ public final class Processor extends AbstractProcessor {
   private List<String> getOverview(TypeElement sourceType) {
     String docComment = processingEnv.getElementUtils().getDocComment(sourceType);
     if (docComment == null) {
-      return Collections.emptyList();
+      return emptyList();
     }
     return Arrays.asList(tokenize(docComment));
   }
@@ -304,6 +338,16 @@ public final class Processor extends AbstractProcessor {
       }
       previousPositional = param;
     }
+  }
+
+  private void checkEscapeSequence(TypeElement sourceType, List<ExecutableElement> params) {
+    for (ExecutableElement param : params) {
+      if (param.getAnnotation(PositionalParameter.class).repeatable()) {
+        return;
+      }
+    }
+    throw ValidationException.create(sourceType,
+        "Define a repeatable positional parameter, or disable the escape sequence.");
   }
 
   static void checkNotPresent(

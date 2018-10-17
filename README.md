@@ -11,7 +11,7 @@ An annotated class looks like this
 
 ````java
 @CommandLineArguments
-abstract class LsArguments {
+abstract class MyArguments {
 
   @PositionalParameter
   abstract Optional<Path> path();
@@ -25,39 +25,116 @@ abstract class LsArguments {
 and then the generated class `LsArguments_Parser` can be used as followed
 
 ````java
-String[] argv = { "-v", "2", "file.txt" };
-LsArguments = LsArguments_Parser.create().parseOrExit(args);
+String[] argv = { "--verbosity", "2", "file.txt" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
-Assert.assertEquals(args.verbosity(), 2);
-```` 
+assertEquals(OptionalInt.of(2), args.verbosity());
+````
 
-## Optional parameters
+### Required vs. Optional parameters
 
 Parameters are <em>required by default</em>.
-Thats's unavoidable, because jbock's generated methods
-never return `null`.
+You can only obtain an instance of `MyArguments` if `argv` contains all
+required parameters.
 
 Optional parameters must use an optional type,
 like `Optional<String>`,
 and set the optional flag.
 
-## Repeatable parameters
+### Showing help
+
+By default, the token `--help` has a special meaning. 
 
 ````java
-/**
- * Parameter description
- */
-@Parameter(repeatable = true, 
-           longName = "header",
-           shortName = 'X')
-abstract List<String> headers();
-
+String[] argv = { "--help" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 ````
 
-## Javadoc
+This will shutdown the JVM with an exit code of `0`, and print
+usage information to standard out.
+
+To disable the special meaning of the `--help` token:
+
+````java
+@CommandLineArguments(allowHelpOption = false)
+abstract class MyArguments {
+  //
+}
+````
+
+### Repeatable parameters
+
+````java
+@Parameter(repeatable = true, 
+           shortName = 'X')
+abstract List<String> headers();
+````
+
+
+````java
+String[] argv = { "-X", "Content-Type: application/json", "-X", "Content-Length: 200" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+
+assertEquals(List.of("Content-Type: application/json", "Content-Length: 200"), args.headers());
+````
+
+By default, a repeatable parameter method must return `List`.
+But it is also possible to collect repeatable parameters into other collections,
+like `Set` or even `Map`:
+
+````java
+@Parameter(repeatable = true, 
+           shortName = 'X',
+           mappedBy = MapTokenizer.class,
+           collectedBy = MapCollector.class)
+abstract List<String> headers();
+````
+
+````java
+static class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String>>> {
+
+  @Override
+  public Function<String, Map.Entry<String, String>> get() {
+    return s -> {
+      String[] tokens = s.split(":", 2);
+      if (tokens.length < 2) {
+        throw new IllegalArgumentException("Invalid pair: " + s);
+      }
+      return new AbstractMap.SimpleImmutableEntry<>(tokens[0].trim(), tokens[1].trim());
+    };
+  }
+}
+````
+
+````java
+static class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
+
+  @Override
+  public Collector<Map.Entry<K, V>, ?, Map<K, V>> get() {
+    return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue);
+  }
+}
+````
+
+## Parameter descriptions
 
 By default, the method's Javadoc is used as the parameter description. 
-Alternatively a resource bundle can be used.
+Alternatively a resource bundle can be used:
+
+````java
+MyArguments args = MyArguments_Parser.create()
+        .withResourceBundle(ResourceBundle.getBundle("MyBundle"))
+        .parseOrExit(argv);
+````
+
+The bundle keys must then be manually defined on the parameter methods:
+
+````java
+@Parameter(longName = 'url',
+           bundleKey = "headers")
+abstract String headers();
+
+````
 
 ## Introduction
 

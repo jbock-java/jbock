@@ -117,10 +117,10 @@ final class Context {
       Set<OptionType> paramTypes,
       Set<OptionType> positionalParamTypes) {
     ClassName generatedClass = parserClass(ClassName.get(sourceType));
-    boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscape();
+    boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
     List<Param> positionalParameters = parameters.stream().filter(Param::isPositional).collect(toList());
-    boolean strict = sourceType.getAnnotation(CommandLineArguments.class).strict();
-    boolean addHelp = sourceType.getAnnotation(CommandLineArguments.class).addHelp();
+    boolean strict = !sourceType.getAnnotation(CommandLineArguments.class).allowPrefixedTokens();
+    boolean addHelp = sourceType.getAnnotation(CommandLineArguments.class).allowHelpOption();
     String missionStatement = sourceType.getAnnotation(CommandLineArguments.class).missionStatement();
     ClassName optionType = generatedClass.nestedClass("Option");
     ClassName helperType = generatedClass.nestedClass("Helper");

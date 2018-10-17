@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.stream.Stream;
 
 import static java.lang.Character.isWhitespace;
@@ -168,12 +169,11 @@ final class Param {
     return coercion;
   }
 
-  static Param create(List<Param> params, ExecutableElement sourceMethod, int positionalIndex, String[] description) {
-    PositionalParameter positionalAnnotation = sourceMethod.getAnnotation(PositionalParameter.class);
-    if (positionalAnnotation != null) {
+  static Param create(List<Param> params, ExecutableElement sourceMethod, OptionalInt positionalIndex, String[] description) {
+    if (positionalIndex.isPresent()) {
       TypeElement mapperClass = getMapperClass(sourceMethod, PositionalParameter.class);
       TypeElement collectorClass = getCollectorClass(sourceMethod, PositionalParameter.class);
-      return createPositional(params, sourceMethod, positionalIndex, description, mapperClass, collectorClass);
+      return createPositional(params, sourceMethod, positionalIndex.getAsInt(), description, mapperClass, collectorClass);
     } else {
       TypeElement mapperClass = getMapperClass(sourceMethod, Parameter.class);
       TypeElement collectorClass = getCollectorClass(sourceMethod, Parameter.class);
@@ -204,9 +204,9 @@ final class Param {
     boolean required = !repeatable && !optional && !flag;
     Coercion typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
     OptionType type = optionType(repeatable, flag);
-    String descriptionArgumentName = parameter.argHandle().isEmpty() ?
+    String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, sourceMethod) :
-        parameter.argHandle();
+        parameter.descriptionArgumentName();
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
         shortName,
@@ -240,9 +240,9 @@ final class Param {
     Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
     OptionType type = optionType(repeatable, false);
     checkNotPresent(sourceMethod, parameter, singletonList(Parameter.class));
-    String descriptionArgumentName = parameter.argHandle().isEmpty() ?
+    String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, sourceMethod) :
-        parameter.argHandle();
+        parameter.descriptionArgumentName();
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
         ' ',
