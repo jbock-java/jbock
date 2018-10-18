@@ -57,7 +57,6 @@ MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 assertTrue(args.quiet());
 ````
 
-
 ### Showing help
 
 By default, the token `--help` has a special meaning. 
@@ -73,6 +72,12 @@ usage information to standard out.
 To disable the special meaning of the `--help` token, use
 `@CommandLineArguments(allowHelpOption = false)`. 
 
+### Standard types
+
+All enums, as well as some [standard types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java)
+are supported out of the box. These can be used without having
+to write a custom mapper.
+
 ### Repeatable parameters
 
 Repeatable parameters can appear several times in `argv`.
@@ -83,7 +88,6 @@ Repeatable parameters can appear several times in `argv`.
 abstract List<String> headers();
 ````
 
-
 ````java
 String[] argv = { "-X", "Content-Type: application/json", "-X", "Content-Length: 200" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
@@ -92,7 +96,7 @@ assertEquals(List.of("Content-Type: application/json", "Content-Length: 200"), a
 ````
 
 By default, a repeatable parameter must be a `List`.
-By using a custom collector, it is also possible to collect repeatable parameters into other collections,
+By using a custom mapper and collector, it is also possible to collect repeatable parameters into other collections,
 like `Set` or even `Map`. See example below:
 
 ````java
@@ -104,7 +108,7 @@ abstract List<String> headers();
 ````
 
 ````java
-static class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String>>> {
+class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String>>> {
 
   @Override
   public Function<String, Map.Entry<String, String>> get() {
@@ -120,7 +124,7 @@ static class MapTokenizer implements Supplier<Function<String, Map.Entry<String,
 ````
 
 ````java
-static class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
+class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
 
   @Override
   public Collector<Map.Entry<K, V>, ?, Map<K, V>> get() {
@@ -143,7 +147,7 @@ MyArguments args = MyArguments_Parser.create()
 The bundle keys must then be manually defined on the parameter methods:
 
 ````java
-@Parameter(longName = 'url',
+@Parameter(longName = "url",
            bundleKey = "headers")
 abstract String headers();
 
@@ -155,17 +159,66 @@ A custom mapper can be used for validation.
 The mapper may reject a token by throwing any `RuntimeException`.
 
 ````java
-import java.util.function.Function;
-
-class PositiveNumberMapper implements Function<String, Integer> {
+class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
 
   @Override
-  public Integer apply(String s) {
-    Integer i = Integer.valueOf(s);
-    if (i < 0) {
-      throw new IllegalArgumentException("The value cannot be negative.");
-    }
-    return i;
+  public Function<String, Integer> get() {
+    return s -> {
+      Integer i = Integer.valueOf(s);
+      if (i < 0) {
+        throw new IllegalArgumentException("The value cannot be negative.");
+      }
+      return i;
+    };
   }
 }
 ````
+
+### Maven setup
+
+The annotations are in a separate jar.
+They are not needed at runtime, so the scope can be `optional`
+or `provided`.
+
+````xml
+<dependencies>
+    <dependency>
+      <groupId>com.github.h908714124</groupId>
+      <artifactId>jbock-annotations</artifactId>
+      <version>2.2</version>
+      <scope>provided</scope>
+    </dependency>
+</dependencies>
+````
+
+The processor itself is only needed on the compiler classpath.
+
+````xml
+<build>
+  <plugins>
+    <plugin>
+      <groupId>org.apache.maven.plugins</groupId>
+      <artifactId>maven-compiler-plugin</artifactId>
+      <version>3.8.0</version>
+      <configuration>
+        <annotationProcessorPaths>
+          <dependency>
+            <groupId>com.github.h908714124</groupId>
+            <artifactId>jbock</artifactId>
+            <version>${jbock.version}</version>
+          </dependency>
+        </annotationProcessorPaths>
+      </configuration>
+    </plugin>
+  </plugins>
+</build>
+````
+
+There's also a gradle project in the samples.
+
+### Sample projects
+
+* [examples](https://github.com/h908714124/jbock/tree/master/examples)
+* [aws-glacier-multipart-upload](https://github.com/h908714124/aws-glacier-multipart-upload)
+* [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
+* [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
