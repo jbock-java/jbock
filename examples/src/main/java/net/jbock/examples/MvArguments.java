@@ -9,6 +9,6 @@ abstract class MvArguments {
   @PositionalParameter
   abstract String source();
 
-  @PositionalParameter
+  @PositionalParameter(position = 1)
   abstract String dest();
 }

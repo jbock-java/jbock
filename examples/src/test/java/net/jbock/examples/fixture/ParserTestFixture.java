@@ -22,6 +22,17 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 public final class ParserTestFixture<E> {
 
+  private static final String ANSI_RESET = "\u001B[0m";
+  private static final String ANSI_RED = "\u001B[31m";
+
+  private static void printErr(String text) {
+    System.out.println(ANSI_RED + text + ANSI_RESET);
+  }
+
+  private static void formatErr(String format, Object... args) {
+    System.out.print(ANSI_RED + String.format(format, args) + ANSI_RESET);
+  }
+
   public interface Parser<E> {
     Optional<E> parse(String[] args);
 
@@ -124,18 +135,22 @@ public final class ParserTestFixture<E> {
 
   private static void compareArrays(String[] expected, String[] actual) {
     if (expected.length != actual.length) {
-      System.err.println("Expected:");
-      for (int i = 0; i < expected.length; i++) {
-        System.err.format("%3d: %s%n", i, expected[i]);
-      }
-      System.err.println();
-      System.err.println("Actual:");
-      for (int i = 0; i < actual.length; i++) {
-        System.err.format("%3d: %s%n", i, actual[i]);
-      }
-      System.err.flush();
-      fail(String.format("Expected length: %d, actual length: %d", expected.length, actual.length));
+      failDifferentLength(expected, actual);
     }
+    int diffIndex = findIndexFirstDifference(expected, actual);
+    if (diffIndex < 0) {
+      return;
+    }
+    for (int j = 0; j < actual.length; j++) {
+      System.out.format("%3d: %s%n", j, expected[j]);
+      if (!Objects.equals(expected[j], actual[j])) {
+        formatErr("%3d: %s%n", j, actual[j]);
+      }
+    }
+    fail("Arrays differ at index " + diffIndex);
+  }
+
+  private static int findIndexFirstDifference(String[] expected, String[] actual) {
     int failIndex = -1;
     for (int i = 0; i < actual.length; i++) {
       if (!Objects.equals(expected[i], actual[i])) {
@@ -143,17 +158,20 @@ public final class ParserTestFixture<E> {
         break;
       }
     }
-    if (failIndex >= 0) {
-      for (int j = 0; j < actual.length; j++) {
-        if (Objects.equals(expected[j], actual[j])) {
-          System.out.format("%3d: %s%n", j, expected[j]);
-        } else {
-          System.out.format("%3d: %s @@@@@<%s>@@@@@%n", j, expected[j], actual[j]);
-        }
-      }
-      System.out.flush();
-      fail("Arrays differ at index " + failIndex);
+    return failIndex;
+  }
+
+  private static void failDifferentLength(String[] expected, String[] actual) {
+    printErr("Expected:");
+    for (int i = 0; i < expected.length; i++) {
+      formatErr("%3d: %s%n", i, expected[i]);
     }
+    System.out.println();
+    printErr("Actual:");
+    for (int i = 0; i < actual.length; i++) {
+      formatErr("%3d: %s%n", i, actual[i]);
+    }
+    fail(String.format("Expected length: %d, actual length: %d", expected.length, actual.length));
   }
 
   public static final class JsonAssert<E> {

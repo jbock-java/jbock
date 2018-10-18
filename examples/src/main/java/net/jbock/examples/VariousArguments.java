@@ -43,7 +43,7 @@ abstract class VariousArguments {
   @Parameter(longName = "bigIntegerOpt", optional = true)
   abstract Optional<BigInteger> bigIntegerOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 1)
   abstract Optional<BigInteger> bigIntegerPos();
 
   @Parameter(longName = "file")
@@ -55,7 +55,7 @@ abstract class VariousArguments {
   @Parameter(longName = "fileOpt", optional = true)
   abstract Optional<File> fileOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 2)
   abstract Optional<File> filePos();
 
   @Parameter(longName = "path")
@@ -67,7 +67,7 @@ abstract class VariousArguments {
   @Parameter(longName = "pathOpt", optional = true)
   abstract Optional<Path> pathOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 3)
   abstract Optional<Path> pathPos();
 
   @Parameter(longName = "localDate")
@@ -79,7 +79,7 @@ abstract class VariousArguments {
   @Parameter(longName = "localDateOpt", optional = true)
   abstract Optional<LocalDate> localDateOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 4)
   abstract Optional<LocalDate> localDatePos();
 
   @Parameter(longName = "localDateTime")
@@ -91,7 +91,7 @@ abstract class VariousArguments {
   @Parameter(longName = "localDateTimeOpt", optional = true)
   abstract Optional<LocalDateTime> localDateTimeOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 5)
   abstract Optional<LocalDateTime> localDateTimePos();
 
   @Parameter(longName = "offsetDateTime")
@@ -103,7 +103,7 @@ abstract class VariousArguments {
   @Parameter(longName = "offsetDateTimeOpt", optional = true)
   abstract Optional<OffsetDateTime> offsetDateTimeOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 6)
   abstract Optional<OffsetDateTime> offsetDateTimePos();
 
   @Parameter(longName = "zonedDateTime")
@@ -115,7 +115,7 @@ abstract class VariousArguments {
   @Parameter(longName = "zonedDateTimeOpt", optional = true)
   abstract Optional<ZonedDateTime> zonedDateTimeOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 7)
   abstract Optional<ZonedDateTime> zonedDateTimePos();
 
   @Parameter(longName = "uri")
@@ -127,7 +127,7 @@ abstract class VariousArguments {
   @Parameter(longName = "uriOpt", optional = true)
   abstract Optional<URI> uriOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 8)
   abstract Optional<URI> uriPos();
 
   @Parameter(longName = "charset")
@@ -139,7 +139,7 @@ abstract class VariousArguments {
   @Parameter(longName = "charsetOpt", optional = true)
   abstract Optional<Charset> charsetOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 9)
   abstract Optional<Charset> charsetPos();
 
   @Parameter(longName = "pattern")
@@ -151,7 +151,7 @@ abstract class VariousArguments {
   @Parameter(longName = "patternOpt", optional = true)
   abstract Optional<Pattern> patternOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 10)
   abstract Optional<Pattern> patternPos();
 
   @Parameter(longName = "instant")
@@ -163,6 +163,6 @@ abstract class VariousArguments {
   @Parameter(longName = "instantOpt", optional = true)
   abstract Optional<Instant> instantOpt();
 
-  @PositionalParameter(optional = true)
+  @PositionalParameter(optional = true, position = 11)
   abstract Optional<Instant> instantPos();
 }

@@ -6,7 +6,7 @@ import net.jbock.PositionalParameter;
 import java.util.List;
 import java.util.Optional;
 
-@CommandLineArguments
+@CommandLineArguments(allowEscapeSequence = true)
 abstract class PositionalArguments {
 
   @PositionalParameter
@@ -15,10 +15,10 @@ abstract class PositionalArguments {
   /**
    * Desc of dest.
    */
-  @PositionalParameter(argHandle = "DESTINATION")
+  @PositionalParameter(position = 1, descriptionArgumentName = "DESTINATION")
   abstract String dest();
 
-  @PositionalParameter
+  @PositionalParameter(position = 2)
   abstract int anotherInt();
 
   @PositionalParameter(optional = true)

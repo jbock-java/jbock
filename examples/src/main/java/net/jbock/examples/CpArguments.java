@@ -19,13 +19,13 @@ abstract class CpArguments {
   @PositionalParameter
   abstract String source();
 
-  @PositionalParameter
+  @PositionalParameter(position = 1)
   abstract String dest();
 
   @Parameter(flag = true, shortName = 'r')
   abstract boolean recursive();
 
-  @Parameter(longName = "backup", optional = true, argHandle = "CONTROL")
+  @Parameter(longName = "backup", optional = true, descriptionArgumentName = "CONTROL")
   abstract Optional<Control> backup();
 
 

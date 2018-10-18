@@ -58,20 +58,6 @@ abstract class CustomCollectorArguments {
     }
   }
 
-  static class MapEntryTokenizer implements Supplier<Function<String, Map.Entry<String, String>>> {
-
-    @Override
-    public Function<String, Map.Entry<String, String>> get() {
-      return s -> {
-        String[] tokens = s.split(":", 2);
-        if (tokens.length < 2) {
-          throw new IllegalArgumentException("Invalid pair: " + s);
-        }
-        return new AbstractMap.SimpleImmutableEntry<>(tokens[0].trim(), tokens[1].trim());
-      };
-    }
-  }
-
   static class ToMapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
 
     @Override

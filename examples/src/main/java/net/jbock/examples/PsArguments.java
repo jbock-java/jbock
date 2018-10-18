@@ -21,6 +21,6 @@ abstract class PsArguments {
       optional = true,
       longName = "width",
       shortName = 'w',
-      argHandle = "number")
+      descriptionArgumentName = "number")
   abstract OptionalInt width();
 }

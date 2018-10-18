@@ -7,7 +7,7 @@ import net.jbock.PositionalParameter;
 
 import java.util.List;
 
-@CommandLineArguments
+@CommandLineArguments(allowEscapeSequence = true)
 abstract class RequiredArguments {
 
   @Parameter(longName = "dir")

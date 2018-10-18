@@ -15,18 +15,34 @@ class MvArgumentsTest {
   }
 
   @Test
-  void dashNotIgnored() {
-    // see CommandLineArguments.ignoreDashes
+  void invalidOption() {
     f.assertThat("-aa", "b").failsWithLine4("Invalid option: -aa");
   }
 
   @Test
-  void tooManyPositionalArguments() {
+  void excessOption() {
     f.assertThat("a", "b", "c").failsWithLine4("Invalid option: c");
   }
 
   @Test
+  void invalidOptionEscapeSequenceSecond() {
+    f.assertThat("a", "--").failsWithLine4("Invalid option: --");
+  }
+
+  @Test
+  void invalidOptionEscapeSequenceThird() {
+    f.assertThat("a", "b", "--", "c").failsWithLine4("Invalid option: --");
+  }
+
+  @Test
   void validInvocation() {
+    f.assertThat("a", "b").succeeds(
+        "source", "a",
+        "dest", "b");
+  }
+
+  @Test
+  void valid() {
     f.assertThat("a", "b").succeeds(
         "source", "a",
         "dest", "b");

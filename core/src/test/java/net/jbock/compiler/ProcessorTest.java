@@ -258,19 +258,18 @@ class ProcessorTest {
   }
 
   @Test
-  void positionalPositionNotUnique() {
+  void positionalRequiredPositionNotUnique() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
-        "  @PositionalParameter abstract String b();",
-        "  @PositionalParameter abstract String c();",
+        "  @PositionalParameter abstract int a();",
+        "  @PositionalParameter abstract int b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Duplicate position");
+        .withErrorContaining("Define a unique position.");
   }
 
   @Test

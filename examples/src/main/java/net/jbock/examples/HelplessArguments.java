@@ -4,7 +4,7 @@ import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 
-@CommandLineArguments(addHelp = false)
+@CommandLineArguments(allowHelpOption = false)
 abstract class HelplessArguments {
 
   @PositionalParameter

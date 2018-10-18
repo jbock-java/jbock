@@ -68,7 +68,7 @@ class CustomMapperArgumentsTest {
         "  CustomMapperArguments",
         "",
         "SYNOPSIS",
-        "  CustomMapperArguments [<options>] --date=<DATE> --notFlag=<NOT_FLAG> [[--] <boolean_list...>]",
+        "  CustomMapperArguments [<options>] --date=<DATE> --notFlag=<NOT_FLAG> [<boolean_list...>]",
         "",
         "DESCRIPTION",
         "",

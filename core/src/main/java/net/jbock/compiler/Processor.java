@@ -237,7 +237,7 @@ public final class Processor extends AbstractProcessor {
       for (ExecutableElement method : positional) {
         Integer position = method.getAnnotation(PositionalParameter.class).position();
         if (Objects.equals(position, previousPosition)) {
-          throw ValidationException.create(method, "Duplicate position");
+          throw ValidationException.create(method, "Define a unique position.");
         }
         previousPosition = position;
       }
