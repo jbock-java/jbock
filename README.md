@@ -33,12 +33,13 @@ assertEquals(OptionalInt.of(2), args.verbosity());
 
 ### Required vs. Optional parameters
 
-All parameters are <em>required by default</em>.
+All parameters except <em>flags</em> and
+<em>repeatables</em> are, by default, required.
 You can only get an instance of `MyArguments` if `argv` contains all
 required parameters.
 
-Optional parameters must use an optional type,
-like `Optional<String>`,
+To declare an optional parameter, one must use 
+an optional type, like `Optional<String>`,
 and set `optional = true`.
 
 ### Flags
@@ -78,6 +79,46 @@ All enums, as well as some [standard types](https://github.com/h908714124/jbock-
 are supported out of the box. These can be used without having
 to write a custom mapper.
 
+### Custom mappers and parameter validation
+
+Mappers must be of the type `Supplier<Function<String, ?>>`,
+where `?` depends on the parameter it's used on.
+The mapper may reject a token by throwing any `RuntimeException`.
+
+````java
+class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
+
+  @Override
+  public Function<String, Integer> get() {
+    return s -> {
+      Integer i = Integer.valueOf(s);
+      if (i < 0) {
+        throw new IllegalArgumentException("The value cannot be negative.");
+      }
+      return i;
+    };
+  }
+}
+````
+
+This mapper can be used in three different ways:
+
+````java
+@Parameter(shortName = 'n', mappedBy = PositiveNumberMapper.class)
+abstract Integer requiredNumber();
+````
+
+````java
+@Parameter(shortName = 'o', mappedBy = PositiveNumberMapper.class, optional = true)
+abstract Optional<Integer> optionalNumber();
+````
+
+````java
+@Parameter(shortName = 'x', mappedBy = PositiveNumberMapper.class, repeatable = true)
+abstract List<Integer> numbers();
+````
+
+
 ### Repeatable parameters
 
 Repeatable parameters can appear several times in `argv`.
@@ -104,7 +145,7 @@ like `Set` or even `Map`. See example below:
            shortName = 'X',
            mappedBy = MapTokenizer.class,
            collectedBy = MapCollector.class)
-abstract List<String> headers();
+abstract Map<String, String> headers();
 ````
 
 ````java
@@ -150,29 +191,10 @@ The bundle keys must then be manually defined on the parameter methods:
 @Parameter(longName = "url",
            bundleKey = "headers")
 abstract String headers();
-
 ````
 
-### Parameter validation
-
-A custom mapper can be used for validation.
-The mapper may reject a token by throwing any `RuntimeException`.
-
-````java
-class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
-
-  @Override
-  public Function<String, Integer> get() {
-    return s -> {
-      Integer i = Integer.valueOf(s);
-      if (i < 0) {
-        throw new IllegalArgumentException("The value cannot be negative.");
-      }
-      return i;
-    };
-  }
-}
-````
+If there is a bundle, and a key is defined and is
+contained in the bundle, then that overrides the method's javadoc.
 
 ### Maven setup
 
@@ -218,7 +240,7 @@ There's also a gradle project in the samples.
 
 ### Sample projects
 
-* [examples](https://github.com/h908714124/jbock/tree/master/examples)
+* [examples (part of this repository)](https://github.com/h908714124/jbock/tree/master/examples)
 * [aws-glacier-multipart-upload](https://github.com/h908714124/aws-glacier-multipart-upload)
-* [wordlist-extendible](https://github.com/WordListChallenge/wordlist-extendible)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
+* [copy-file](https://github.com/h908714124/CopyFile)
