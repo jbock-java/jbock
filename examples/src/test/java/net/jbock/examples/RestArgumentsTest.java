@@ -60,7 +60,7 @@ class RestArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  RestArguments",
         "",

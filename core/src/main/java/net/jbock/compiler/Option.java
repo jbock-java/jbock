@@ -125,8 +125,10 @@ final class Option {
   }
 
   TypeSpec define() {
-    TypeSpec.Builder spec = TypeSpec.enumBuilder(context.optionType());
     List<Param> parameters = context.parameters;
+    TypeSpec.Builder spec = parameters.isEmpty() ?
+        TypeSpec.classBuilder(context.optionType()) :
+        TypeSpec.enumBuilder(context.optionType());
     for (Param param : parameters) {
       String enumConstant = param.enumConstant();
       spec.addEnumConstant(enumConstant, optionEnumConstant(param));

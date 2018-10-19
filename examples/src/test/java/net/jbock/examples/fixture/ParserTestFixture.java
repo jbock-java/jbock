@@ -127,7 +127,7 @@ public final class ParserTestFixture<E> {
     return result.get();
   }
 
-  public void assertPrints(String... expected) {
+  public void assertPrintsHelp(String... expected) {
     String stdout = getHelp(null);
     String[] actual = stdout.split("\\r?\\n", -1);
     compareArrays(expected, actual);

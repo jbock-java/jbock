@@ -21,7 +21,7 @@ class EvilArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  EvilArguments",
         "",

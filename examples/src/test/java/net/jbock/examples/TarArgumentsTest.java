@@ -32,7 +32,7 @@ class TarArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  TarArguments",
         "",

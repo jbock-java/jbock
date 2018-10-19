@@ -68,7 +68,7 @@ class NoNameArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  NoNameArguments",
         "",

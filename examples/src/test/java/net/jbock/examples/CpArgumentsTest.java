@@ -5,7 +5,6 @@ import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.OptionalLong;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -88,7 +87,7 @@ class CpArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  CpArguments",
         "",

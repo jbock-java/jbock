@@ -37,7 +37,7 @@ class SimpleArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  SimpleArguments",
         "",

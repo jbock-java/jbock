@@ -273,6 +273,32 @@ class ProcessorTest {
   }
 
   @Test
+  void noMethods() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void escapeAllowedButNoPositionalArgumentsDefined() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments(allowEscapeSequence = true)",
+        "abstract class InvalidArguments {",
+        "  @Parameter(shortName = 'a') abstract int a();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Define a positional parameter, or disable the escape sequence.");
+  }
+
+  @Test
   void twoPositionalLists() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -491,7 +517,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError()
-        .withWarningContaining("Skipping");
+        .withWarningContaining("Define at least one abstract method");
   }
 
   @Test

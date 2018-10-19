@@ -89,8 +89,7 @@ public final class Processor extends AbstractProcessor {
         List<Param> parameters = getParams(sourceType);
         if (parameters.isEmpty()) {
           processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
-              "Skipping code generation: No abstract methods found", sourceType);
-          continue;
+              "Define at least one abstract method", sourceType);
         }
 
         Set<OptionType> paramTypes = nonpositionalParamTypes(parameters);
@@ -250,10 +249,17 @@ public final class Processor extends AbstractProcessor {
       throw ValidationException.create(positionalRepeatable.get(1),
           "There can only be one one repeatable positional parameter.");
     }
-    if (sourceType.getAnnotation(CommandLineArguments.class).allowEscapeSequence()) {
-      if (positionalRepeatable.isEmpty()) {
+    CommandLineArguments annotation = sourceType.getAnnotation(CommandLineArguments.class);
+    if (annotation.allowEscapeSequence()) {
+      if (positionalGroups.values().stream().allMatch(List::isEmpty)) {
         throw ValidationException.create(sourceType,
-            "Define a repeatable positional parameter, or disable the escape sequence.");
+            "Define a positional parameter, or disable the escape sequence.");
+      }
+    }
+    if (annotation.allowPrefixedTokens()) {
+      if (positionalGroups.values().stream().allMatch(List::isEmpty)) {
+        throw ValidationException.create(sourceType,
+            "Define a positional parameter, or disallow prefixed tokens.");
       }
     }
   }

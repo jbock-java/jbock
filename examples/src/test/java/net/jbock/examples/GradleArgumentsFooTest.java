@@ -17,7 +17,7 @@ class GradleArgumentsFooTest {
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  GradleArguments",
         "",

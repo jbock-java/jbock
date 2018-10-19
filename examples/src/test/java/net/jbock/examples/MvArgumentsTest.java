@@ -50,7 +50,7 @@ class MvArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  MvArguments",
         "",

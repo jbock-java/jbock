@@ -207,7 +207,7 @@ class CurlArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  curl - transfer a URL",
         "",

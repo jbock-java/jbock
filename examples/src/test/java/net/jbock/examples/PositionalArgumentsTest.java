@@ -5,7 +5,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
-import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 
@@ -22,7 +21,7 @@ class PositionalArgumentsTest {
   }
 
   @Test
-  void minimal() {
+  void testRequiredOnly() {
     f.assertThat("a", "b", "1").succeeds(
         "source", "a",
         "dest", "b",
@@ -32,7 +31,7 @@ class PositionalArgumentsTest {
   }
 
   @Test
-  void otherTokens() {
+  void testNoEscape() {
     f.assertThat("a", "b", "1", "c", "d").succeeds(
         "source", "a",
         "dest", "b",
@@ -42,36 +41,48 @@ class PositionalArgumentsTest {
   }
 
   @Test
-  void ddTokens() {
-    f.assertThat("a", "b", "1", "c", "d", "--", "e").succeeds(
+  void testEscapeAllOPPositions() {
+    f.assertThat("--", "-a", "-b", "-1", "-c", "-e").succeeds(
+        "source", "-a",
+        "dest", "-b",
+        "anotherInt", -1,
+        "optString", Optional.of("-c"),
+        "otherTokens", singletonList("-e"));
+    f.assertThat("a", "--", "-b", "-1", "-c", "-e").succeeds(
+        "source", "a",
+        "dest", "-b",
+        "anotherInt", -1,
+        "optString", Optional.of("-c"),
+        "otherTokens", singletonList("-e"));
+    f.assertThat("a", "b", "--", "-1", "-c", "-e").succeeds(
+        "source", "a",
+        "dest", "b",
+        "anotherInt", -1,
+        "optString", Optional.of("-c"),
+        "otherTokens", singletonList("-e"));
+    f.assertThat("a", "b", "1", "--", "-c", "-e").succeeds(
+        "source", "a",
+        "dest", "b",
+        "anotherInt", 1,
+        "optString", Optional.of("-c"),
+        "otherTokens", singletonList("-e"));
+    f.assertThat("a", "b", "1", "c", "--", "-e").succeeds(
         "source", "a",
         "dest", "b",
         "anotherInt", 1,
         "optString", Optional.of("c"),
-        "otherTokens", asList("d", "e"));
-    f.assertThat("a", "b", "1", "c", "--", "e").succeeds(
+        "otherTokens", singletonList("-e"));
+    f.assertThat("a", "b", "1", "c", "e", "--").succeeds(
         "source", "a",
         "dest", "b",
         "anotherInt", 1,
         "optString", Optional.of("c"),
         "otherTokens", singletonList("e"));
-    f.assertThat("a", "b", "1", "c", "--").succeeds(
-        "source", "a",
-        "dest", "b",
-        "anotherInt", 1,
-        "optString", Optional.of("c"),
-        "otherTokens", emptyList());
-    f.assertThat("a", "b", "1", "c").succeeds(
-        "source", "a",
-        "dest", "b",
-        "anotherInt", 1,
-        "optString", Optional.of("c"),
-        "otherTokens", emptyList());
   }
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  PositionalArguments",
         "",

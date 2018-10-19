@@ -63,7 +63,7 @@ class CustomMapperArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrints(
+    f.assertPrintsHelp(
         "NAME",
         "  CustomMapperArguments",
         "",
