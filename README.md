@@ -196,6 +196,68 @@ abstract String headers();
 If there is a bundle, and a key is defined and is
 contained in the bundle, then that overrides the method's javadoc.
 
+### Escape sequence
+
+There can sometimes be ambiguity between positional
+and regular parameters. If the `allowEscapeSequence = true`
+flag is present, the special token
+`--` can be used to resolve this.
+
+````java
+@CommandLineArguments(allowEscapeSequence = true)
+abstract class MyArguments {
+  @PositionalParameter
+  abstract Optional<Path> file();
+  
+  @Parameter(shortName = '-q', flag = true)
+  abstract boolean quiet();
+}
+````
+
+The remaining tokens after `--` are always considered
+positional.
+
+
+````java
+String[] argv = { "-q" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+
+assertTrue(args.quiet());
+assertEquals(Optional.empty(), args.file());
+````
+
+````java
+String[] argv = { "--", "-q" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+
+assertFalse(args.quiet());
+assertEquals(Optional.of(Paths.get("-q")), args.file());
+````
+
+### Prefixed tokens
+
+Any unbound, unescaped token that begins with
+[hyphen-minus](https://en.wikipedia.org/wiki/Hyphen-minus)
+and isn't one of the defined parameter names, 
+is rejected.
+The `allowPrefixedTokens = true` flag changes this.
+
+````java
+@CommandLineArguments(allowPrefixedTokens = true)
+abstract class MyArguments {
+  
+  @PositionalParameter
+  abstract int possiblyNegativeNumber();
+}
+````
+
+````java
+String[] argv = { "-1" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+
+assertEquals(-1, args.possiblyNegativeNumber());
+````
+
 ### Maven setup
 
 The annotations are in a separate jar.
