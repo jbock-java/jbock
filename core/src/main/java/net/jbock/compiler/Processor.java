@@ -25,8 +25,8 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
+import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -175,12 +175,12 @@ public final class Processor extends AbstractProcessor {
   private static Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
       .comparingInt(e -> e.getAnnotation(PositionalParameter.class).position());
 
-  private PositionalOrder getPositionalOrder(ExecutableElement sourceMethod) {
+  private PositionalRank getPositionalOrder(ExecutableElement sourceMethod) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     if (parameter.repeatable()) {
-      return PositionalOrder.LIST;
+      return PositionalRank.LIST;
     }
-    return parameter.optional() ? PositionalOrder.OPTIONAL : PositionalOrder.REQUIRED;
+    return parameter.optional() ? PositionalRank.OPTIONAL : PositionalRank.REQUIRED;
   }
 
   private List<Param> getParams(TypeElement sourceType) {
@@ -193,17 +193,21 @@ public final class Processor extends AbstractProcessor {
         partitioningBy(method -> method.getAnnotation(PositionalParameter.class) != null));
     List<ExecutableElement> allNonpositional = partition.getOrDefault(false, emptyList());
     List<ExecutableElement> allPositional = partition.getOrDefault(true, emptyList());
-    Map<PositionalOrder, List<ExecutableElement>> positionalGroups = allPositional.stream()
+    EnumMap<PositionalRank, List<ExecutableElement>> positionalGroups = allPositional.stream()
         .collect(groupingBy(
             this::getPositionalOrder,
-            HashMap::new,
+            () -> new EnumMap<>(PositionalRank.class),
             toCollection(ArrayList::new)));
     for (List<ExecutableElement> value : positionalGroups.values()) {
       value.sort(POSITION_COMPARATOR);
     }
 
     checkPositionalRepeatable(sourceType, positionalGroups);
-    checkPositionalOrderUnique(positionalGroups);
+    checkPositionUniqueWithinRank(positionalGroups);
+    if (allPositional.stream().map(p -> p.getAnnotation(PositionalParameter.class))
+        .mapToInt(PositionalParameter::position).anyMatch(i -> i != 0)) {
+      checkPositionUnique(positionalGroups);
+    }
     List<ExecutableElement> sortedPositional = getSortedPositional(positionalGroups);
     List<Param> result = new ArrayList<>(abstractMethods.size());
     for (int i = 0; i < sortedPositional.size(); i++) {
@@ -221,19 +225,18 @@ public final class Processor extends AbstractProcessor {
     return result;
   }
 
-  private List<ExecutableElement> getSortedPositional(Map<PositionalOrder, List<ExecutableElement>> positionalGroups) {
+  private List<ExecutableElement> getSortedPositional(Map<PositionalRank, List<ExecutableElement>> positionalGroups) {
     List<ExecutableElement> sortedPositional = new ArrayList<>();
-    for (PositionalOrder positionalOrder : PositionalOrder.values()) {
-      sortedPositional.addAll(positionalGroups.getOrDefault(positionalOrder, emptyList()));
+    for (PositionalRank positionalRank : PositionalRank.values()) {
+      sortedPositional.addAll(positionalGroups.getOrDefault(positionalRank, emptyList()));
     }
     return sortedPositional;
   }
 
-  private void checkPositionalOrderUnique(Map<PositionalOrder, List<ExecutableElement>> positionalGroups) {
-    for (PositionalOrder positionalOrder : PositionalOrder.values()) {
+  private void checkPositionUniqueWithinRank(EnumMap<PositionalRank, List<ExecutableElement>> positionalGroups) {
+    for (List<ExecutableElement> methods : positionalGroups.values()) {
       Integer previousPosition = null;
-      List<ExecutableElement> positional = positionalGroups.getOrDefault(positionalOrder, emptyList());
-      for (ExecutableElement method : positional) {
+      for (ExecutableElement method : methods) {
         Integer position = method.getAnnotation(PositionalParameter.class).position();
         if (Objects.equals(position, previousPosition)) {
           throw ValidationException.create(method, "Define a unique position.");
@@ -243,8 +246,21 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void checkPositionalRepeatable(TypeElement sourceType, Map<PositionalOrder, List<ExecutableElement>> positionalGroups) {
-    List<ExecutableElement> positionalRepeatable = positionalGroups.getOrDefault(PositionalOrder.LIST, emptyList());
+  private void checkPositionUnique(EnumMap<PositionalRank, List<ExecutableElement>> positionalGroups) {
+    Integer previousPosition = null;
+    for (List<ExecutableElement> methods : positionalGroups.values()) {
+      for (ExecutableElement method : methods) {
+        Integer position = method.getAnnotation(PositionalParameter.class).position();
+        if (Objects.equals(position, previousPosition)) {
+          throw ValidationException.create(method, "Define a unique position.");
+        }
+        previousPosition = position;
+      }
+    }
+  }
+
+  private void checkPositionalRepeatable(TypeElement sourceType, Map<PositionalRank, List<ExecutableElement>> positionalGroups) {
+    List<ExecutableElement> positionalRepeatable = positionalGroups.getOrDefault(PositionalRank.LIST, emptyList());
     if (positionalRepeatable.size() >= 2) {
       throw ValidationException.create(positionalRepeatable.get(1),
           "There can only be one one repeatable positional parameter.");

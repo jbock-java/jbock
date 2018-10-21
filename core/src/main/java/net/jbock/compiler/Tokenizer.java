@@ -234,11 +234,11 @@ final class Tokenizer {
     }
 
     for (Param param : positional) {
-      PositionalOrder positionalOrder = param.positionalOrder();
-      if (positionalOrder == null) {
+      PositionalRank positionalRank = param.positionalOrder();
+      if (positionalRank == null) {
         continue;
       }
-      switch (positionalOrder) {
+      switch (positionalRank) {
         case OPTIONAL:
           spec.addStatement("$N.add($S)", joiner, "[<" +
               param.descriptionArgumentName() + ">]");

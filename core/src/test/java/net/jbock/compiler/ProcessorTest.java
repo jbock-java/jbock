@@ -58,7 +58,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Bad return type");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test
@@ -203,76 +203,6 @@ class ProcessorTest {
   }
 
   @Test
-  void positionalBadReturnTypeStringBuilder() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract StringBuilder a();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Bad return type");
-  }
-
-  @Test
-  void validPositionalBoolean() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class ValidArguments {",
-        "  @PositionalParameter abstract Boolean a();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void validPositionalboolean() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract boolean a();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void positionalDifferentTypes() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class ValidArguments {",
-        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
-        "  @PositionalParameter abstract String b();",
-        "  @PositionalParameter(optional = true) abstract Optional<String> c();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void positionalRequiredPositionNotUnique() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract int a();",
-        "  @PositionalParameter abstract int b();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Define a unique position.");
-  }
-
-  @Test
   void noMethods() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -299,78 +229,6 @@ class ProcessorTest {
   }
 
   @Test
-  void twoPositionalLists() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
-        "  @PositionalParameter(repeatable = true) abstract List<String> b();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There can only be one one repeatable positional parameter.");
-  }
-
-  @Test
-  void validList() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class ValidArguments {",
-        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void mustDeclareAsOptional() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract Optional<Integer> a();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Declare this parameter optional.");
-  }
-
-  @Test
-  void mustDeclareAsOptionalInt() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract OptionalInt a();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Declare this parameter optional.");
-  }
-
-  @Test
-  void positionalOptionalsAnyOrder() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class ValidArguments {",
-        "  @PositionalParameter(position = 1, optional = true) abstract Optional<String> a();",
-        "  @PositionalParameter(position = 10, optional = true) abstract OptionalInt b();",
-        "  @PositionalParameter(position = 100, optional = true) abstract Optional<String> c();",
-        "  @PositionalParameter(position = 1000, optional = true) abstract OptionalInt d();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
   void oneOptionalInt() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -378,21 +236,6 @@ class ProcessorTest {
         "",
         "  @Parameter(shortName = 'x', optional = true)",
         "  abstract OptionalInt b();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void simpleOptional() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class ValidArguments {",
-        "",
-        "  @PositionalParameter(optional = true)",
-        "  abstract Optional<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))

@@ -148,7 +148,7 @@ public class CoercionProvider {
     }
     CoercionFactory factory = StandardCoercions.get(tk.trigger);
     if (factory == null) {
-      throw TmpException.findWarning("Bad return type");
+      throw TmpException.findWarning("Unknown parameter type. Define a custom mapper.");
     }
     if (factory.handlesOptionalPrimitive() && !optional) {
       throw TmpException.create("Declare this parameter optional.");

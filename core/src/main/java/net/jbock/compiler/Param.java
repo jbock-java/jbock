@@ -383,11 +383,11 @@ final class Param {
     return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);
   }
 
-  PositionalOrder positionalOrder() {
+  PositionalRank positionalOrder() {
     if (repeatable) {
-      return PositionalOrder.LIST;
+      return PositionalRank.LIST;
     }
-    return optional ? PositionalOrder.OPTIONAL : PositionalOrder.REQUIRED;
+    return optional ? PositionalRank.OPTIONAL : PositionalRank.REQUIRED;
   }
 
   // visible for testing
