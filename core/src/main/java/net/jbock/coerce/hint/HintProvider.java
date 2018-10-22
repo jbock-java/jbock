@@ -8,7 +8,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-import static net.jbock.coerce.OptionalInfo.findKind;
+import static net.jbock.coerce.OptionalInfo.findOptionalInfo;
 
 
 public class HintProvider {
@@ -35,7 +35,7 @@ public class HintProvider {
       return findHintSimple(type, repeatable);
     }
     if (optional) {
-      OptionalInfo optionalInfo = findKind(type, true);
+      OptionalInfo optionalInfo = findOptionalInfo(type, true);
       if (optionalInfo.optional) {
         return findHintSimple(optionalInfo.baseType, repeatable);
       }

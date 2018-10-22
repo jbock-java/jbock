@@ -266,7 +266,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class.");
+        .withErrorContaining("The mapper should return java.lang.Integer but returns String");
   }
 
   @Test

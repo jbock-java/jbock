@@ -7,7 +7,6 @@ import java.math.BigInteger;
 import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.Map;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -22,6 +21,9 @@ abstract class CustomCollectorArguments {
 
   @Parameter(repeatable = true, shortName = 'B', collectedBy = MyIntegerCollector.class)
   abstract Set<Integer> integers();
+
+  @Parameter(repeatable = true, shortName = 'K', collectedBy = ToSetCollector.class)
+  abstract Set<Money> moneySet();
 
   @Parameter(
       repeatable = true,
@@ -67,6 +69,10 @@ abstract class CustomCollectorArguments {
     }
   }
 
+  enum Money {
+    PEANUTS, DECENT, BIG_TIME
+  }
+
   static class MyIntegerCollector implements Supplier<Collector<Integer, ?, Set<Integer>>> {
 
     @Override
@@ -75,11 +81,4 @@ abstract class CustomCollectorArguments {
     }
   }
 
-  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {
-
-    @Override
-    public Collector<E, ?, Set<E>> get() {
-      return Collectors.toSet();
-    }
-  }
 }

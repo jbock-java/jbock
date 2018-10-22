@@ -31,7 +31,8 @@ class CollectorClassValidator {
     Map<String, TypeMirror> collectorTypeargs = Resolver.resolve(tool.declared(Collector.class), collectorType, "T", "A", "R");
     TypeMirror t = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
     TypeMirror r = Optional.ofNullable(collectorTypeargs.get("R")).orElseThrow(CollectorClassValidator::boom);
-    Map<String, TypeMirror> solution = tool.unify(returnType, r).orElseThrow(CollectorClassValidator::boom);
+    Map<String, TypeMirror> solution = tool.unify(returnType, r).orElseThrow(() ->
+        boom(returnType.toString() + " can't be unified with " + r));
     Optional<TypeMirror> inputType = tool.substitute(t, solution);
     if (!inputType.isPresent()) {
       throw boom();
@@ -52,5 +53,9 @@ class CollectorClassValidator {
 
   private static TmpException boom() {
     return TmpException.create("There is a problem with the collector class.");
+  }
+
+  private static TmpException boom(String message) {
+    return TmpException.create("There is a problem with the collector class: " + message);
   }
 }

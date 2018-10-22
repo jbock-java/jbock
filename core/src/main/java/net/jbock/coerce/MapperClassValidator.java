@@ -21,7 +21,7 @@ final class MapperClassValidator {
     TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
     MapSolution mapSolution = resolveFunctionTypeargs(functionClass);
     if (!tool.eql(mapSolution.returnType, expectedReturnType)) {
-      throw boom();
+      throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, mapSolution.returnType));
     }
     Optional<TypeMirror> mapperType = tool.substitute(mapperClass.asType(), mapSolution.solution);
     if (!mapperType.isPresent()) {
@@ -57,5 +57,9 @@ final class MapperClassValidator {
 
   private static TmpException boom() {
     return TmpException.create("There is a problem with the mapper class.");
+  }
+
+  private static TmpException boom(String message) {
+    return TmpException.create("There is a problem with the mapper class: " + message);
   }
 }

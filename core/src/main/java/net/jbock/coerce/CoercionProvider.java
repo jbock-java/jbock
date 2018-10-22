@@ -16,7 +16,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
-import static net.jbock.coerce.OptionalInfo.findKind;
+import static net.jbock.coerce.OptionalInfo.findOptionalInfo;
 import static net.jbock.compiler.Util.snakeToCamel;
 
 public class CoercionProvider {
@@ -87,8 +87,22 @@ public class CoercionProvider {
       boolean optional,
       BasicInfo basicInfo) throws TmpException, SearchHintException {
     TypeMirror returnType = sourceMethod.getReturnType();
-    OptionalInfo optionalInfo = findKind(returnType, optional);
-    return handleDefault(optionalInfo, basicInfo, optional);
+    OptionalInfo optionalInfo = findOptionalInfo(returnType, optional);
+    CoercionFactory enumCoercion = checkEnum(optionalInfo.baseType);
+    if (enumCoercion != null) {
+      return enumCoercion.getCoercion(basicInfo, optionalInfo, Optional.empty());
+    }
+    CoercionFactory factory = StandardCoercions.get(optionalInfo.baseType);
+    if (factory == null) {
+      throw SearchHintException.create("Unknown parameter type. Define a custom mapper.");
+    }
+    if (factory.handlesOptionalPrimitive() && !optional) {
+      throw TmpException.create("Declare this parameter optional.");
+    }
+    if (optional && !factory.handlesOptionalPrimitive() && !optionalInfo.optional) {
+      throw TmpException.create("Wrap the parameter type in Optional");
+    }
+    return factory.getCoercion(basicInfo, optionalInfo, Optional.empty());
   }
 
   // mapper but no collector
@@ -99,7 +113,7 @@ public class CoercionProvider {
       BasicInfo basicInfo,
       boolean optional) throws TmpException {
     ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
-    OptionalInfo optionalInfo = findKind(sourceMethod.getReturnType(), optional);
+    OptionalInfo optionalInfo = findOptionalInfo(sourceMethod.getReturnType(), optional);
     if (optional && !optionalInfo.optional) {
       throw TmpException.create("Wrap the parameter type in Optional");
     }
@@ -128,31 +142,13 @@ public class CoercionProvider {
       BasicInfo basicInfo) throws TmpException {
     CollectorInfo collectorInfo = collectorInfo(sourceMethod, collectorClass);
     CoercionFactory coercion = StandardCoercions.get(collectorInfo.inputType);
+    if (coercion == null) {
+      coercion = checkEnum(collectorInfo.inputType);
+    }
     if (coercion == null || coercion.handlesOptionalPrimitive()) {
       throw TmpException.create(String.format("Define a mapper for %s", collectorInfo.inputType));
     }
     return coercion.getCoercion(basicInfo, OptionalInfo.simple(collectorInfo.inputType), Optional.of(collectorInfo));
-  }
-
-  private Coercion handleDefault(
-      OptionalInfo optionalInfo,
-      BasicInfo basicInfo,
-      boolean optional) throws TmpException, SearchHintException {
-    CoercionFactory enumCoercion = checkEnum(optionalInfo.baseType);
-    if (enumCoercion != null) {
-      return enumCoercion.getCoercion(basicInfo, optionalInfo, Optional.empty());
-    }
-    CoercionFactory factory = StandardCoercions.get(optionalInfo.baseType);
-    if (factory == null) {
-      throw SearchHintException.create("Unknown parameter type. Define a custom mapper.");
-    }
-    if (factory.handlesOptionalPrimitive() && !optional) {
-      throw TmpException.create("Declare this parameter optional.");
-    }
-    if (optional && !factory.handlesOptionalPrimitive() && !optionalInfo.optional) {
-      throw TmpException.create("Wrap the parameter type in Optional");
-    }
-    return factory.getCoercion(basicInfo, optionalInfo, Optional.empty());
   }
 
   private CoercionFactory checkEnum(TypeMirror mirror) throws TmpException {

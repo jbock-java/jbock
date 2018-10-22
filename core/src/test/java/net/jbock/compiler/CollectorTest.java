@@ -386,4 +386,55 @@ class CollectorTest {
         .failsToCompile()
         .withErrorContaining("collector");
   }
+
+  @Test
+  void validEnum() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(repeatable = true, shortName = 'x', collectedBy = ToSetCollector.class)",
+        "  abstract Set<Foo> foo();",
+        "",
+        "  enum Foo {",
+        "    BAR",
+        "   }",
+        "",
+        "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
+        "    public Collector<E, ?, Set<E>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void invalidEnum() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(repeatable = true, shortName = 'x', collectedBy = ToSetCollector.class)",
+        "  abstract Foo foo();",
+        "",
+        "  enum Foo {",
+        "    BAR",
+        "   }",
+        "",
+        "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
+        "    public Collector<E, ?, Set<E>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Foo can't be unified with java.util.Set<E>");
+  }
 }

@@ -25,7 +25,7 @@ public class OptionalInfo {
     return new OptionalInfo(true, baseType);
   }
 
-  public static OptionalInfo findKind(TypeMirror mirror, boolean optional) {
+  public static OptionalInfo findOptionalInfo(TypeMirror mirror, boolean optional) {
     if (!optional) {
       return OptionalInfo.simple(mirror);
     }
