@@ -2,11 +2,10 @@ package net.jbock.coerce.mappers;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
+import net.jbock.compiler.TypeTool;
 
+import javax.lang.model.type.TypeMirror;
 import java.util.OptionalDouble;
-
-import static net.jbock.compiler.Util.optionalOf;
 
 class OptionalDoubleCoercion extends BasicDoubleCoercion {
 
@@ -15,8 +14,8 @@ class OptionalDoubleCoercion extends BasicDoubleCoercion {
   }
 
   @Override
-  TypeName paramType() {
-    return optionalOf(TypeName.get(Double.class));
+  TypeMirror paramType() {
+    return TypeTool.get().optionalOf(Double.class);
   }
 
   @Override

@@ -1,4 +1,4 @@
-package net.jbock.coerce.warn;
+package net.jbock.coerce.hint;
 
 import net.jbock.compiler.TypeTool;
 
@@ -6,7 +6,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
-public class RawCombinatorWarning extends Warning {
+public class RawCombinatorHint extends Hint {
 
   @Override
   public String message(TypeMirror mirror, boolean repeatable) {

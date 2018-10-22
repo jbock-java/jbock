@@ -8,12 +8,12 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.Optional;
 
+import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static net.jbock.compiler.Parser.addPublicIfNecessary;
 import static net.jbock.compiler.Util.optionalOf;
 

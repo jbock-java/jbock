@@ -13,12 +13,12 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
+import static com.squareup.javapoet.TypeName.CHAR;
+import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static com.squareup.javapoet.TypeName.CHAR;
-import static com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.CHARACTER;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
@@ -274,7 +274,7 @@ final class Helper {
       if (!initMapper.isEmpty()) {
         spec.addStatement(initMapper);
       }
-      if (param.coercion().collectorParam().isPresent() && !param.coercion().isDefaultCollector()) {
+      if (param.paramType == REPEATABLE && !param.coercion().isDefaultCollector()) {
         ParameterSpec collectorParam = param.coercion().collectorParam().get();
         spec.addStatement("$T $N = $L", collectorParam.type, collectorParam, param.coercion().initCollector());
       }
@@ -291,15 +291,12 @@ final class Helper {
 
   private CodeBlock extractExpression(Param param) {
     CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
-    if (param.paramType == REPEATABLE) {
-      if (!param.coercion().skipMapCollect()) {
-        CodeBlock mapExpr = param.coercion().map();
-        builder.add(".stream()");
-        builder.add("$L", mapExpr);
-        builder.add(".collect($L)", param.coercion().collectExpr());
-      }
+    if (param.paramType == REPEATABLE && !param.coercion().skipMapCollect()) {
+      builder.add(".stream()");
+      builder.add("$L", param.coercion().mapExpr());
+      builder.add(".collect($L)", param.coercion().collectExpr().orElseThrow(IllegalStateException::new));
     } else if (!param.flag) {
-      builder.add("$L", param.coercion().map());
+      builder.add("$L", param.coercion().mapExpr());
     }
     if (param.required()) {
       builder.add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,

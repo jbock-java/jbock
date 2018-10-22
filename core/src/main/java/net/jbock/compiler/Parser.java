@@ -10,12 +10,12 @@ import com.squareup.javapoet.TypeSpec;
 import java.io.PrintStream;
 import java.util.ResourceBundle;
 
+import static com.squareup.javapoet.TypeName.BOOLEAN;
+import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
-import static com.squareup.javapoet.TypeName.BOOLEAN;
-import static com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;

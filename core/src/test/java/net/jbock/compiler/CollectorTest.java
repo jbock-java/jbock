@@ -285,6 +285,54 @@ class CollectorTest {
   }
 
   @Test
+  void invalidOptionalAuto() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             collectedBy = ToSetCollector.class)",
+        "  abstract Set<Optional<Integer>> optionalIntegers();",
+        "",
+        "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
+        "    public Collector<E, ?, Set<E>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Define a mapper");
+  }
+
+  @Test
+  void invalidOptionalIntAuto() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             collectedBy = ToSetCollector.class)",
+        "  abstract Set<OptionalInt> optionalInts();",
+        "",
+        "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
+        "    public Collector<E, ?, Set<E>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Define a mapper");
+  }
+
+  @Test
   void invalidBothMapperAndCollectorHaveTypeargs() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",

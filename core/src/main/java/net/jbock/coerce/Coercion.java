@@ -10,8 +10,6 @@ import java.util.Optional;
 
 public final class Coercion {
 
-  private final TypeMirror trigger;
-
   // only for repeatable
   private final Optional<ParameterSpec> collectorParam;
 
@@ -28,21 +26,19 @@ public final class Coercion {
   private final CodeBlock extract;
 
   // impl constructor
-  private final TypeName paramType;
+  private final TypeMirror paramType;
 
   // impl
   private final FieldSpec field;
 
-  public Coercion(
-      TypeMirror trigger,
+  private Coercion(
       Optional<ParameterSpec> collectorParam,
       CodeBlock map,
       CodeBlock initMapper,
       CodeBlock initCollector,
       CodeBlock extract,
-      TypeName paramType,
+      TypeMirror paramType,
       FieldSpec field) {
-    this.trigger = trigger;
     this.collectorParam = collectorParam;
     this.map = map;
     this.initMapper = initMapper;
@@ -52,18 +48,22 @@ public final class Coercion {
     this.field = field;
   }
 
-  /**
-   * Maps from String to trigger type
-   */
-  public CodeBlock map() {
-    return map;
+  public static Coercion create(
+      Optional<ParameterSpec> collectorParam,
+      CodeBlock map,
+      CodeBlock initMapper,
+      CodeBlock initCollector,
+      CodeBlock extract,
+      TypeMirror paramType,
+      BasicInfo basicInfo) {
+    return new Coercion(collectorParam, map, initMapper, initCollector, extract, paramType, basicInfo.fieldSpec());
   }
 
   /**
-   * Type that triggers this coercion (could be wrapped in Optional or List)
+   * Maps from String to trigger type
    */
-  public TypeName trigger() {
-    return TypeName.get(trigger);
+  public CodeBlock mapExpr() {
+    return map;
   }
 
   public CodeBlock initMapper() {
@@ -75,7 +75,7 @@ public final class Coercion {
   }
 
   public TypeName paramType() {
-    return paramType;
+    return TypeName.get(paramType);
   }
 
   public FieldSpec field() {
@@ -91,11 +91,14 @@ public final class Coercion {
     return collectorParam;
   }
 
-  public CodeBlock collectExpr() {
+  public Optional<CodeBlock> collectExpr() {
     if (isDefaultCollector()) {
-      return CollectorInfo.standardCollectorInit();
+      return Optional.of(CollectorInfo.standardCollectorInit());
     }
-    return CodeBlock.builder().add("$N", collectorParam().get()).build();
+    if (!collectorParam.isPresent()) {
+      return Optional.empty();
+    }
+    return Optional.of(CodeBlock.builder().add("$N", collectorParam.get()).build());
   }
 
   public boolean skipMapCollect() {

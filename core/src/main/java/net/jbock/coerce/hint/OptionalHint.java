@@ -1,4 +1,4 @@
-package net.jbock.coerce.warn;
+package net.jbock.coerce.hint;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -12,7 +12,7 @@ import java.util.stream.Stream;
 
 import static net.jbock.compiler.HierarchyUtil.getTypeTree;
 
-public class OptionalWarning extends Warning {
+public class OptionalHint extends Hint {
 
   private static final Set<String> NAMES = Stream.of(
       Optional.class,

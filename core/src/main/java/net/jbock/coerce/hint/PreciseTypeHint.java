@@ -1,11 +1,11 @@
-package net.jbock.coerce.warn;
+package net.jbock.coerce.hint;
 
 import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Set;
 
-abstract class PreciseTypeWarning extends Warning {
+abstract class PreciseTypeHint extends Hint {
 
   @Override
   public final String message(TypeMirror mirror, boolean repeatable) {

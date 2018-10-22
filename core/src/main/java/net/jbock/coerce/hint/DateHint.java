@@ -1,4 +1,4 @@
-package net.jbock.coerce.warn;
+package net.jbock.coerce.hint;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
@@ -8,7 +8,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DateWarning extends PreciseTypeWarning {
+public class DateHint extends PreciseTypeHint {
 
   @Override
   public Set<TypeName> types() {

@@ -1,7 +1,6 @@
 package net.jbock.coerce.mappers;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.type.TypeMirror;
 

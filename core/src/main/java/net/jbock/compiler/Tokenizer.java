@@ -14,12 +14,12 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;

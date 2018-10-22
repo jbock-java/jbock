@@ -13,17 +13,7 @@ import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 
 class CollectorClassValidator {
 
-  static class CollectorResult {
-    final TypeMirror inputType;
-    final TypeMirror collectorType;
-
-    CollectorResult(TypeMirror inputType, TypeMirror collectorType) {
-      this.inputType = inputType;
-      this.collectorType = collectorType;
-    }
-  }
-
-  static CollectorResult findInputType(TypeMirror returnType, TypeElement collectorClass) throws TmpException {
+  static CollectorInfo getCollectorInfo(TypeMirror returnType, TypeElement collectorClass) throws TmpException {
     commonChecks(collectorClass, "collector");
     TypeTool tool = TypeTool.get();
     Map<String, TypeMirror> collectorTypeargs = Resolver.resolve(tool.declared(Supplier.class), collectorClass.asType(), "T");
@@ -33,7 +23,7 @@ class CollectorClassValidator {
     if (!collectorType.isPresent()) {
       throw boom();
     }
-    return new CollectorResult(solution.inputType, collectorType.get());
+    return CollectorInfo.create(solution.inputType, collectorType.get());
   }
 
   private static CollectSolution resolveCollectorTypeargs(TypeMirror returnType, TypeMirror collectorType) throws TmpException {
@@ -59,7 +49,6 @@ class CollectorClassValidator {
       this.solution = solution;
     }
   }
-
 
   private static TmpException boom() {
     return TmpException.create("There is a problem with the collector class.");

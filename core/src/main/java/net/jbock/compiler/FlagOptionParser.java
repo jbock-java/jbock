@@ -6,10 +6,10 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.compiler.Helper.throwRepetitionErrorStatement;
 
 /**

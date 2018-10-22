@@ -3,52 +3,45 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 import java.util.stream.Collectors;
-
-import static java.util.Objects.requireNonNull;
 
 public class CollectorInfo {
 
   private static final CodeBlock STANDARD_INIT = CodeBlock.builder().add("$T.toList()", Collectors.class).build();
 
-  public final CodeBlock collectorInit;
+  public final TypeMirror inputType;
 
-  public final TypeMirror collectorInput;
+  private final Optional<TypeMirror> collectorType;
 
-  private CollectorInfo(CodeBlock collectorInit, TypeMirror collectorInput) {
-    this.collectorInit = requireNonNull(collectorInit);
-    this.collectorInput = collectorInput;
+  private CollectorInfo(TypeMirror inputType, Optional<TypeMirror> collectorType) {
+    this.inputType = inputType;
+    this.collectorType = collectorType;
   }
 
-  static CollectorInfo empty() {
-    return new CollectorInfo(CodeBlock.builder().build(), null);
+  static CollectorInfo create(TypeMirror inputType, TypeMirror collectorType) {
+    return new CollectorInfo(inputType, Optional.of(collectorType));
   }
 
-  static CollectorInfo create(TypeMirror input, TypeMirror collectorType) {
-    CodeBlock init = CodeBlock.builder()
-        .add("new $T().get()", collectorType)
+  static CollectorInfo listCollector(TypeMirror inputType) {
+    return new CollectorInfo(inputType, Optional.empty());
+  }
+
+  public CodeBlock collectorInit() {
+    if (!collectorType.isPresent()) {
+      return STANDARD_INIT;
+    }
+    return CodeBlock.builder()
+        .add("new $T().get()", collectorType.get())
         .build();
-    return new CollectorInfo(init, input);
-  }
-
-  static CollectorInfo listCollector(TypeMirror input) {
-    return new CollectorInfo(standardCollectorInit(), input);
   }
 
   static CodeBlock standardCollectorInit() {
     return STANDARD_INIT;
   }
 
-  CollectorInfo withInput(TypeMirror collectorInput) {
-    return new CollectorInfo(collectorInit, collectorInput);
-  }
-
-  public boolean isEmpty() {
-    return collectorInit.isEmpty();
-  }
-
   @Override
   public String toString() {
-    return "input: " + collectorInput;
+    return "input: " + inputType;
   }
 }

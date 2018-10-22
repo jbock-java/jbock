@@ -2,10 +2,10 @@ package net.jbock.coerce.mappers;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 class PrimitiveCharacterCoercion extends BasicCharacterCoercion {
 
@@ -14,8 +14,8 @@ class PrimitiveCharacterCoercion extends BasicCharacterCoercion {
   }
 
   @Override
-  TypeName paramType() {
-    return TypeName.get(Character.class);
+  TypeMirror paramType() {
+    return TypeTool.get().declared(Character.class);
   }
 
   @Override

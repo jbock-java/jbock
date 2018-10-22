@@ -2,14 +2,16 @@ package net.jbock.coerce.mappers;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.TriggerKind;
+import net.jbock.coerce.CollectorInfo;
+import net.jbock.coerce.OptionalInfo;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static net.jbock.compiler.Constants.STRING;
@@ -27,11 +29,30 @@ public final class MapperCoercion extends CoercionFactory {
   }
 
   public static Coercion create(
-      TriggerKind tk,
+      OptionalInfo optionalInfo,
+      CollectorInfo collectorInfo,
       ParameterSpec mapperParam,
       TypeMirror mapperType,
-      FieldSpec field) {
-    return new MapperCoercion(tk.trigger, mapperParam, mapperType).getCoercion(field, tk);
+      BasicInfo basicInfo) {
+    return create(optionalInfo, Optional.of(collectorInfo), mapperParam, mapperType, basicInfo);
+  }
+
+  public static Coercion create(
+      OptionalInfo optionalInfo,
+      ParameterSpec mapperParam,
+      TypeMirror mapperType,
+      BasicInfo basicInfo) {
+    return create(optionalInfo, Optional.empty(), mapperParam, mapperType, basicInfo);
+  }
+
+  private static Coercion create(
+      OptionalInfo optionalInfo,
+      Optional<CollectorInfo> collectorInfo,
+      ParameterSpec mapperParam,
+      TypeMirror mapperType,
+      BasicInfo basicInfo) {
+    return new MapperCoercion(optionalInfo.baseType, mapperParam, mapperType)
+        .getCoercion(basicInfo, optionalInfo, collectorInfo);
   }
 
   @Override
@@ -44,11 +65,11 @@ public final class MapperCoercion extends CoercionFactory {
     return mapperInit(trigger, mapperParam, mapperType);
   }
 
-  public static CodeBlock mapperMap(ParameterSpec mapperParam) {
+  private static CodeBlock mapperMap(ParameterSpec mapperParam) {
     return CodeBlock.builder().add(".map($N)", mapperParam).build();
   }
 
-  public static CodeBlock mapperInit(
+  private static CodeBlock mapperInit(
       TypeMirror trigger,
       ParameterSpec mapperParam,
       TypeMirror mapperType) {

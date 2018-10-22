@@ -8,14 +8,14 @@ import com.squareup.javapoet.TypeSpec;
 import java.io.PrintStream;
 import java.io.PrintWriter;
 
-import static java.util.Arrays.asList;
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeName.INT;
 import static com.squareup.javapoet.TypeName.OBJECT;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
+import static java.util.Arrays.asList;
+import static javax.lang.model.element.Modifier.FINAL;
+import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.STATIC;
 
 /**
  * Defines the inner class IndentPrinter.

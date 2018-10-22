@@ -1,4 +1,4 @@
-package net.jbock.coerce.warn;
+package net.jbock.coerce.hint;
 
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
@@ -8,7 +8,7 @@ import java.util.stream.Collectors;
 
 import static net.jbock.compiler.HierarchyUtil.getTypeTree;
 
-public class CollectionWarning extends Warning {
+public class CollectionHint extends Hint {
 
   @Override
   public String message(TypeMirror type, boolean repeatable) {

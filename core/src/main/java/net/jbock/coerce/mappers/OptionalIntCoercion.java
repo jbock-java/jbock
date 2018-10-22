@@ -2,11 +2,10 @@ package net.jbock.coerce.mappers;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
+import net.jbock.compiler.TypeTool;
 
+import javax.lang.model.type.TypeMirror;
 import java.util.OptionalInt;
-
-import static net.jbock.compiler.Util.optionalOf;
 
 class OptionalIntCoercion extends BasicIntegerCoercion {
 
@@ -15,8 +14,8 @@ class OptionalIntCoercion extends BasicIntegerCoercion {
   }
 
   @Override
-  TypeName paramType() {
-    return optionalOf(TypeName.get(Integer.class));
+  TypeMirror paramType() {
+    return TypeTool.get().optionalOf(Integer.class);
   }
 
   @Override

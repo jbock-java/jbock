@@ -1,13 +1,12 @@
 package net.jbock.coerce;
 
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.mappers.CoercionFactory;
 import net.jbock.coerce.mappers.EnumCoercion;
 import net.jbock.coerce.mappers.MapperCoercion;
 import net.jbock.coerce.mappers.StandardCoercions;
-import net.jbock.coerce.warn.WarningProvider;
+import net.jbock.coerce.hint.HintProvider;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -15,9 +14,9 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
+import java.util.Optional;
 
-import static javax.lang.model.element.Modifier.FINAL;
-import static net.jbock.coerce.CoercionKind.findKind;
+import static net.jbock.coerce.OptionalInfo.findKind;
 import static net.jbock.compiler.Util.snakeToCamel;
 
 public class CoercionProvider {
@@ -50,14 +49,11 @@ public class CoercionProvider {
     try {
       return handle(sourceMethod, paramName, mapperClass, collectorClass, repeatable, optional);
     } catch (TmpException e) {
-      if (!e.findWarning()) {
-        throw e.asValidationException(sourceMethod);
-      }
-      String warning = WarningProvider.instance().findWarning(returnType, repeatable, optional);
-      if (warning != null) {
-        throw e.asValidationException(sourceMethod, warning);
-      }
       throw e.asValidationException(sourceMethod);
+    } catch (SearchHintException e) {
+      Optional<String> hint = HintProvider.instance().findHint(returnType, repeatable, optional);
+      throw hint.map(m -> e.asValidationException(sourceMethod, m))
+          .orElseGet(() -> e.asValidationException(sourceMethod));
     }
   }
 
@@ -67,96 +63,96 @@ public class CoercionProvider {
       TypeElement mapperClass,
       TypeElement collectorClass,
       boolean repeatable,
-      boolean optional) throws TmpException {
-    FieldSpec field = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()),
-        snakeToCamel(paramName))
-        .addModifiers(FINAL)
-        .build();
+      boolean optional) throws TmpException, SearchHintException {
+    BasicInfo basicInfo = new BasicInfo(sourceMethod.getReturnType(), paramName);
+    boolean auto = mapperClass == null;
     if (repeatable) {
-      return handleRepeatable(sourceMethod, paramName, mapperClass, collectorClass, field);
+      if (auto) {
+        return handleRepeatableAuto(sourceMethod, collectorClass, basicInfo);
+      } else {
+        return handleRepeatable(sourceMethod, paramName, mapperClass, collectorClass, basicInfo);
+      }
+    } else {
+      if (auto) {
+        return handleSingleAuto(sourceMethod, optional, basicInfo);
+      } else {
+        return handleSingle(sourceMethod, paramName, mapperClass, basicInfo, optional);
+      }
     }
-    if (mapperClass != null) {
-      return handleMapper(sourceMethod, paramName, mapperClass, field, optional);
-    }
-    return handleSimple(sourceMethod, optional, field);
   }
 
   // no mapper or collector
-  private Coercion handleSimple(
+  private Coercion handleSingleAuto(
       ExecutableElement sourceMethod,
       boolean optional,
-      FieldSpec field) throws TmpException {
+      BasicInfo basicInfo) throws TmpException, SearchHintException {
     TypeMirror returnType = sourceMethod.getReturnType();
-    TriggerKind tk = trigger(returnType, optional);
-    return handleDefault(tk, field, optional);
+    OptionalInfo optionalInfo = findKind(returnType, optional);
+    return handleDefault(optionalInfo, basicInfo, optional);
   }
 
+  // mapper but no collector
+  private Coercion handleSingle(
+      ExecutableElement sourceMethod,
+      String paramName,
+      TypeElement mapperClass,
+      BasicInfo basicInfo,
+      boolean optional) throws TmpException {
+    ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
+    OptionalInfo optionalInfo = findKind(sourceMethod.getReturnType(), optional);
+    if (optional && !optionalInfo.optional) {
+      throw TmpException.create("Wrap the parameter type in Optional");
+    }
+    TypeMirror mapperType = MapperClassValidator.checkReturnType(mapperClass, optionalInfo.baseType);
+    return MapperCoercion.create(optionalInfo, mapperParam, mapperType, basicInfo);
+  }
+
+  // mapper and collector
   private Coercion handleRepeatable(
       ExecutableElement sourceMethod,
       String paramName,
       TypeElement mapperClass,
       TypeElement collectorClass,
-      FieldSpec field) throws TmpException {
-    if (mapperClass == null) {
-      return handleRepeatableNoMapper(sourceMethod, collectorClass, field);
-    }
-    CollectorInfo collectorInput = collectorInput(sourceMethod, collectorClass);
-    MapperClassValidator.checkReturnType(mapperClass, collectorInput.collectorInput);
-    collectorInput = collectorInput.withInput(collectorInput.collectorInput);
-    TriggerKind tk = CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
+      BasicInfo basicInfo) throws TmpException {
+    CollectorInfo collectorInfo = collectorInfo(sourceMethod, collectorClass);
+    MapperClassValidator.checkReturnType(mapperClass, collectorInfo.inputType);
     ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
-    TypeMirror mapperType = MapperClassValidator.checkReturnType(mapperClass, tk.trigger);
-    return MapperCoercion.create(tk, mapperParam, mapperType, field);
+    TypeMirror mapperType = MapperClassValidator.checkReturnType(mapperClass, collectorInfo.inputType);
+    return MapperCoercion.create(OptionalInfo.simple(collectorInfo.inputType), collectorInfo, mapperParam, mapperType, basicInfo);
   }
 
-  private Coercion handleRepeatableNoMapper(
+  // collector but no mapper
+  private Coercion handleRepeatableAuto(
       ExecutableElement sourceMethod,
       TypeElement collectorClass,
-      FieldSpec field) throws TmpException {
-    CollectorInfo collectorInput = collectorInput(sourceMethod, collectorClass);
-    CoercionFactory coercion = StandardCoercions.get(collectorInput.collectorInput);
-    if (coercion == null) {
-      throw TmpException.findWarning(String.format("Unknown collector input %s, please define a custom mapper.", collectorInput.collectorInput));
+      BasicInfo basicInfo) throws TmpException {
+    CollectorInfo collectorInfo = collectorInfo(sourceMethod, collectorClass);
+    CoercionFactory coercion = StandardCoercions.get(collectorInfo.inputType);
+    if (coercion == null || coercion.handlesOptionalPrimitive()) {
+      throw TmpException.create(String.format("Define a mapper for %s", collectorInfo.inputType));
     }
-    TriggerKind tk = CoercionKind.SIMPLE.of(collectorInput.collectorInput, collectorInput);
-    return coercion.getCoercion(field, tk);
-  }
-
-  // mapper but no collector
-  private Coercion handleMapper(
-      ExecutableElement sourceMethod,
-      String paramName,
-      TypeElement mapperClass,
-      FieldSpec field,
-      boolean optional) throws TmpException {
-    ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
-    TriggerKind tk = trigger(sourceMethod.getReturnType(), optional);
-    if (optional && !tk.kind.isWrappedInOptional()) {
-      throw TmpException.create("Wrap the parameter type in Optional");
-    }
-    TypeMirror mapperType = MapperClassValidator.checkReturnType(mapperClass, tk.trigger);
-    return MapperCoercion.create(tk, mapperParam, mapperType, field);
+    return coercion.getCoercion(basicInfo, OptionalInfo.simple(collectorInfo.inputType), Optional.of(collectorInfo));
   }
 
   private Coercion handleDefault(
-      TriggerKind tk,
-      FieldSpec field,
-      boolean optional) throws TmpException {
-    CoercionFactory enumCoercion = checkEnum(tk.trigger);
+      OptionalInfo optionalInfo,
+      BasicInfo basicInfo,
+      boolean optional) throws TmpException, SearchHintException {
+    CoercionFactory enumCoercion = checkEnum(optionalInfo.baseType);
     if (enumCoercion != null) {
-      return enumCoercion.getCoercion(field, tk);
+      return enumCoercion.getCoercion(basicInfo, optionalInfo, Optional.empty());
     }
-    CoercionFactory factory = StandardCoercions.get(tk.trigger);
+    CoercionFactory factory = StandardCoercions.get(optionalInfo.baseType);
     if (factory == null) {
-      throw TmpException.findWarning("Unknown parameter type. Define a custom mapper.");
+      throw SearchHintException.create("Unknown parameter type. Define a custom mapper.");
     }
     if (factory.handlesOptionalPrimitive() && !optional) {
       throw TmpException.create("Declare this parameter optional.");
     }
-    if (optional && !factory.handlesOptionalPrimitive() && !tk.kind.isWrappedInOptional()) {
+    if (optional && !factory.handlesOptionalPrimitive() && !optionalInfo.optional) {
       throw TmpException.create("Wrap the parameter type in Optional");
     }
-    return factory.getCoercion(field, tk);
+    return factory.getCoercion(basicInfo, optionalInfo, Optional.empty());
   }
 
   private CoercionFactory checkEnum(TypeMirror mirror) throws TmpException {
@@ -172,21 +168,12 @@ public class CoercionProvider {
       return null;
     }
     if (tool.isPrivateType(mirror)) {
-      throw TmpException.findWarning("The enum may not be private.");
+      throw TmpException.create("The enum may not be private.");
     }
     return EnumCoercion.create(mirror);
   }
 
-  private TriggerKind trigger(
-      TypeMirror returnType,
-      boolean optional) {
-    if (optional) {
-      return findKind(returnType);
-    }
-    return CoercionKind.SIMPLE.of(returnType, CollectorInfo.empty());
-  }
-
-  private CollectorInfo collectorInput(
+  private CollectorInfo collectorInfo(
       ExecutableElement sourceMethod,
       TypeElement collectorClass) throws TmpException {
     if (collectorClass == null) {
@@ -200,7 +187,6 @@ public class CoercionProvider {
       }
       return CollectorInfo.listCollector(typeParameters.get(0));
     }
-    CollectorClassValidator.CollectorResult collectorResult = CollectorClassValidator.findInputType(sourceMethod.getReturnType(), collectorClass);
-    return CollectorInfo.create(collectorResult.inputType, collectorResult.collectorType);
+    return CollectorClassValidator.getCollectorInfo(sourceMethod.getReturnType(), collectorClass);
   }
 }

@@ -1,8 +1,8 @@
-package net.jbock.coerce.warn;
+package net.jbock.coerce.hint;
 
 import javax.lang.model.type.TypeMirror;
 
-public class PrimitiveWarning extends Warning {
+public class PrimitiveHint extends Hint {
 
   @Override
   public String message(TypeMirror type, boolean repeatable) {

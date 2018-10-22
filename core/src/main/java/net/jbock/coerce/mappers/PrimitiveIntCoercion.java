@@ -2,10 +2,10 @@ package net.jbock.coerce.mappers;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 
 class PrimitiveIntCoercion extends BasicIntegerCoercion {
 
@@ -14,8 +14,8 @@ class PrimitiveIntCoercion extends BasicIntegerCoercion {
   }
 
   @Override
-  TypeName paramType() {
-    return TypeName.get(Integer.class);
+  TypeMirror paramType() {
+    return TypeTool.get().declared(Integer.class);
   }
 
   @Override
