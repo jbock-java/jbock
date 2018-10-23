@@ -3,8 +3,10 @@ package net.jbock.coerce;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -20,11 +22,16 @@ final class MapperClassValidator {
     Map<String, TypeMirror> supplierTypeargs = Resolver.resolve(tool.declared(Supplier.class), mapperClass.asType(), "T");
     TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
     MapSolution mapSolution = resolveFunctionTypeargs(functionClass, expectedReturnType);
+    checkConstraints(mapperClass, functionClass);
     Optional<TypeMirror> mapperType = tool.substitute(mapperClass.asType(), mapSolution.solution);
     if (!mapperType.isPresent()) {
       throw boom("Invalid bounds");
     }
     return mapperType.get();
+  }
+
+  private static void checkConstraints(TypeElement root, TypeMirror target) {
+    List<? extends TypeParameterElement> typeParameters = root.getTypeParameters();
   }
 
   private static MapSolution resolveFunctionTypeargs(
