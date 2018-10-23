@@ -81,7 +81,7 @@ public class CoercionProvider {
     }
   }
 
-  // no mapper or collector
+  // no mapper, not repeatable
   private Coercion handleSingleAuto(
       ExecutableElement sourceMethod,
       boolean optional,
@@ -105,7 +105,7 @@ public class CoercionProvider {
     return factory.getCoercion(basicInfo, optionalInfo, Optional.empty());
   }
 
-  // mapper but no collector
+  // mapper but not repeatable
   private Coercion handleSingle(
       ExecutableElement sourceMethod,
       String paramName,
@@ -121,7 +121,7 @@ public class CoercionProvider {
     return MapperCoercion.create(optionalInfo, mapperParam, mapperType, basicInfo);
   }
 
-  // mapper and collector
+  // repeatable with mapper
   private Coercion handleRepeatable(
       ExecutableElement sourceMethod,
       String paramName,
@@ -135,7 +135,7 @@ public class CoercionProvider {
     return MapperCoercion.create(OptionalInfo.simple(collectorInfo.inputType), collectorInfo, mapperParam, mapperType, basicInfo);
   }
 
-  // collector but no mapper
+  // repeatable without mapper
   private Coercion handleRepeatableAuto(
       ExecutableElement sourceMethod,
       TypeElement collectorClass,
@@ -148,7 +148,8 @@ public class CoercionProvider {
     if (coercion == null || coercion.handlesOptionalPrimitive()) {
       throw TmpException.create(String.format("Define a mapper for %s", collectorInfo.inputType));
     }
-    return coercion.getCoercion(basicInfo, OptionalInfo.simple(collectorInfo.inputType), Optional.of(collectorInfo));
+    OptionalInfo optionalInfo = OptionalInfo.simple(collectorInfo.inputType);
+    return coercion.getCoercion(basicInfo, optionalInfo, Optional.of(collectorInfo));
   }
 
   private CoercionFactory checkEnum(TypeMirror mirror) throws TmpException {
@@ -172,17 +173,17 @@ public class CoercionProvider {
   private CollectorInfo collectorInfo(
       ExecutableElement sourceMethod,
       TypeElement collectorClass) throws TmpException {
-    if (collectorClass == null) {
-      TypeTool tool = TypeTool.get();
-      if (!tool.eql(tool.erasure(sourceMethod.getReturnType()), tool.declared(List.class))) {
-        throw TmpException.create("Either define a custom collector, or return List");
-      }
-      List<? extends TypeMirror> typeParameters = tool.typeargs(sourceMethod.getReturnType());
-      if (typeParameters.isEmpty()) {
-        throw TmpException.create("Either define a custom collector, or return List");
-      }
-      return CollectorInfo.listCollector(typeParameters.get(0));
+    if (collectorClass != null) {
+      return CollectorClassValidator.getCollectorInfo(sourceMethod.getReturnType(), collectorClass);
     }
-    return CollectorClassValidator.getCollectorInfo(sourceMethod.getReturnType(), collectorClass);
+    TypeTool tool = TypeTool.get();
+    if (!tool.eql(tool.erasure(sourceMethod.getReturnType()), tool.declared(List.class))) {
+      throw TmpException.create("Either define a custom collector, or return List");
+    }
+    List<? extends TypeMirror> typeParameters = tool.typeargs(sourceMethod.getReturnType());
+    if (typeParameters.isEmpty()) {
+      throw TmpException.create("Either define a custom collector, or return List");
+    }
+    return CollectorInfo.listCollector(typeParameters.get(0));
   }
 }

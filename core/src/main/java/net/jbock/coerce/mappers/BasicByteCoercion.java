@@ -6,12 +6,12 @@ import javax.lang.model.type.PrimitiveType;
 
 abstract class BasicByteCoercion extends CoercionFactory {
 
-  BasicByteCoercion(Class<?> trigger) {
-    super(trigger);
+  BasicByteCoercion(Class<?> mapperReturnType) {
+    super(mapperReturnType);
   }
 
-  BasicByteCoercion(PrimitiveType trigger) {
-    super(trigger);
+  BasicByteCoercion(PrimitiveType mapperReturnType) {
+    super(mapperReturnType);
   }
 
   @Override

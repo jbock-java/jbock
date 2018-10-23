@@ -23,18 +23,18 @@ public abstract class CoercionFactory {
     return false;
   }
 
-  final TypeMirror trigger;
+  final TypeMirror mapperReturnType;
 
-  CoercionFactory(Class<?> trigger) {
-    this(TypeTool.get().declared(trigger.getCanonicalName()));
+  CoercionFactory(Class<?> mapperReturnType) {
+    this(TypeTool.get().declared(mapperReturnType.getCanonicalName()));
   }
 
-  CoercionFactory(TypeMirror trigger) {
-    this.trigger = trigger;
+  CoercionFactory(TypeMirror mapperReturnType) {
+    this.mapperReturnType = mapperReturnType;
   }
 
   /**
-   * Maps from String to trigger type
+   * Maps from String to mapperReturnType
    */
   abstract CodeBlock map();
 
@@ -42,11 +42,8 @@ public abstract class CoercionFactory {
     return CodeBlock.builder().add("$T.requireNonNull($N)", Objects.class, param).build();
   }
 
-  /**
-   * Type that triggers this coercion (could be wrapped in Optional or List)
-   */
-  final TypeMirror trigger() {
-    return trigger;
+  final TypeMirror mapperReturnType() {
+    return mapperReturnType;
   }
 
   CodeBlock initMapper() {
@@ -54,7 +51,7 @@ public abstract class CoercionFactory {
   }
 
   TypeMirror paramType() {
-    return trigger;
+    return mapperReturnType;
   }
 
   public final Coercion getCoercion(

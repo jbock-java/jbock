@@ -6,12 +6,12 @@ import javax.lang.model.type.PrimitiveType;
 
 abstract class BasicIntegerCoercion extends BasicNumberCoercion {
 
-  BasicIntegerCoercion(Class<?> trigger) {
-    super(trigger);
+  BasicIntegerCoercion(Class<?> mapperReturnType) {
+    super(mapperReturnType);
   }
 
-  BasicIntegerCoercion(PrimitiveType trigger) {
-    super(trigger);
+  BasicIntegerCoercion(PrimitiveType mapperReturnType) {
+    super(mapperReturnType);
   }
 
   @Override

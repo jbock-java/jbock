@@ -6,16 +6,16 @@ import javax.lang.model.type.TypeMirror;
 
 public final class EnumCoercion extends CoercionFactory {
 
-  private EnumCoercion(TypeMirror trigger) {
-    super(trigger);
+  private EnumCoercion(TypeMirror mapperReturnType) {
+    super(mapperReturnType);
   }
 
   @Override
   final CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::valueOf)", trigger()).build();
+    return CodeBlock.builder().add(".map($T::valueOf)", mapperReturnType()).build();
   }
 
-  public static EnumCoercion create(TypeMirror trigger) {
-    return new EnumCoercion(trigger);
+  public static EnumCoercion create(TypeMirror mapperReturnType) {
+    return new EnumCoercion(mapperReturnType);
   }
 }

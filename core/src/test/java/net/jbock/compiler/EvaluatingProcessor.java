@@ -81,7 +81,7 @@ final class EvaluatingProcessor extends AbstractProcessor {
   /**
    * Throws what the base {@link Statement} threw, if anything.
    */
-  void throwIfStatementThrew() {
+  private void throwIfStatementThrew() {
     if (thrown != null) {
       throw new RuntimeException(thrown);
     }

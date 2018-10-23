@@ -4,11 +4,11 @@ import javax.lang.model.type.PrimitiveType;
 
 abstract class BasicNumberCoercion extends CoercionFactory {
 
-  BasicNumberCoercion(Class<?> trigger) {
-    super(trigger);
+  BasicNumberCoercion(Class<?> mapperReturnType) {
+    super(mapperReturnType);
   }
 
-  BasicNumberCoercion(PrimitiveType trigger) {
-    super(trigger);
+  BasicNumberCoercion(PrimitiveType mapperReturnType) {
+    super(mapperReturnType);
   }
 }

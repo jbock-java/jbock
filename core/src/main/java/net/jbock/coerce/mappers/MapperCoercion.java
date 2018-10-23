@@ -22,8 +22,8 @@ public final class MapperCoercion extends CoercionFactory {
 
   private final TypeMirror mapperType;
 
-  private MapperCoercion(TypeMirror trigger, ParameterSpec mapperParam, TypeMirror mapperType) {
-    super(trigger);
+  private MapperCoercion(TypeMirror mapperReturnType, ParameterSpec mapperParam, TypeMirror mapperType) {
+    super(mapperReturnType);
     this.mapperParam = mapperParam;
     this.mapperType = mapperType;
   }
@@ -62,7 +62,7 @@ public final class MapperCoercion extends CoercionFactory {
 
   @Override
   public CodeBlock initMapper() {
-    return mapperInit(trigger, mapperParam, mapperType);
+    return mapperInit(mapperReturnType, mapperParam, mapperType);
   }
 
   private static CodeBlock mapperMap(ParameterSpec mapperParam) {
@@ -70,19 +70,19 @@ public final class MapperCoercion extends CoercionFactory {
   }
 
   private static CodeBlock mapperInit(
-      TypeMirror trigger,
+      TypeMirror mapperReturnType,
       ParameterSpec mapperParam,
       TypeMirror mapperType) {
-    return mapperInit(TypeName.get(trigger), mapperParam, mapperType);
+    return mapperInit(TypeName.get(mapperReturnType), mapperParam, mapperType);
   }
 
   private static CodeBlock mapperInit(
-      TypeName trigger,
+      TypeName mapperReturnType,
       ParameterSpec mapperParam,
       TypeMirror mapperType) {
     return CodeBlock.builder()
         .add("$T $N = new $T().get()",
-            ParameterizedTypeName.get(ClassName.get(Function.class), STRING, trigger),
+            ParameterizedTypeName.get(ClassName.get(Function.class), STRING, mapperReturnType),
             mapperParam,
             mapperType)
         .build();

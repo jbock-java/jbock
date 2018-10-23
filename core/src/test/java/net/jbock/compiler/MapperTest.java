@@ -109,7 +109,55 @@ class MapperTest {
   void validBounds() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
+        "",
+        "  @PositionalParameter(mappedBy = BoundMapper.class)",
+        "  abstract String a();",
+        "",
+        "  static class BoundMapper<E extends String> implements Fatzk<E> {",
+        "    @Override",
+        "    public Function<E, E> get() {",
+        "      return Function.identity();",
+        "    }",
+        "  }",
+        "",
+        "  static interface Fatzk<S extends String> extends Supplier<Function<S, S>> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void validBounds2() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @PositionalParameter(mappedBy = BoundMapper.class)",
+        "  abstract String a();",
+        "",
+        "  static class BoundMapper<E extends String> implements Fatzk<Function<E, E>> {",
+        "    @Override",
+        "    public Function<E, E> get() {",
+        "      return Function.identity();",
+        "    }",
+        "  }",
+        "",
+        "  static interface Fatzk<V> extends Supplier<V> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void validBounds3() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
         "",
         "  @PositionalParameter(mappedBy = BoundMapper.class)",
         "  abstract String a();",
@@ -121,12 +169,11 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
   }
-
 
   @Test
   void mapperInvalidPrivateConstructor() {
@@ -377,7 +424,7 @@ class MapperTest {
   void mapperInvalidComplicatedTree() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class InvalidArguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -410,7 +457,130 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class");
+        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument.");
+  }
+
+  @Test
+  void mapperInvalidNotFunction() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
+        "  static class Mapper implements ZapperSupplier {",
+        "    public String get() {",
+        "      return Integer.toString(1);",
+        "    }",
+        "  }",
+        "",
+        "  interface ZapperSupplier extends Supplier<String> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: The mapper must supply a Function.");
+  }
+
+  @Test
+  void mapperInvalidFunctionReturnType() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
+        "  static class Mapper implements ZapperSupplier {",
+        "    public Function<String, Long> get() {",
+        "      return s -> 1L;",
+        "    }",
+        "  }",
+        "",
+        "  interface ZapperSupplier extends Supplier<Function<String, Long>> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: The mapper should return java.lang.Integer but returns java.lang.Long");
+  }
+
+  @Test
+  void mapperInvalidBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
+        "  static class Mapper<E extends java.util.Date> implements ZapperSupplier<E> {",
+        "    public Function<String, E> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  interface ZapperSupplier<E> extends Supplier<Function<String, E>> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds");
+  }
+
+  @Test
+  void mapperInvalidBoundsLong() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
+        "  static class Mapper implements A<Long> {",
+        "    public Function<String, Long> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  interface A<Z> extends B<String, Z> { }",
+        "  interface B<V, W> extends C<V, W> { }",
+        "  interface C<P, Q> extends Supplier<Function<P, Q>> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds");
+  }
+
+  @Test
+  void mapperValidBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
+        "  static class Mapper<R extends Integer> implements A<R, String> {",
+        "    public Function<String, R> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  interface A<R, X> extends B<X, R> { }",
+        "  interface B<X, R> extends C<X, R> { }",
+        "  interface C<X, R> extends Supplier<Function<X, R>> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
   }
 
   @Test

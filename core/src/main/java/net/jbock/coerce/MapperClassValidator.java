@@ -19,29 +19,40 @@ final class MapperClassValidator {
     TypeTool tool = TypeTool.get();
     Map<String, TypeMirror> supplierTypeargs = Resolver.resolve(tool.declared(Supplier.class), mapperClass.asType(), "T");
     TypeMirror functionClass = Optional.ofNullable(supplierTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
-    MapSolution mapSolution = resolveFunctionTypeargs(functionClass);
-    if (!tool.eql(mapSolution.returnType, expectedReturnType)) {
-      throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, mapSolution.returnType));
-    }
+    MapSolution mapSolution = resolveFunctionTypeargs(functionClass, expectedReturnType);
     Optional<TypeMirror> mapperType = tool.substitute(mapperClass.asType(), mapSolution.solution);
     if (!mapperType.isPresent()) {
-      throw boom();
+      throw boom("Invalid bounds");
     }
     return mapperType.get();
   }
 
-  private static MapSolution resolveFunctionTypeargs(TypeMirror functionType) throws TmpException {
+  private static MapSolution resolveFunctionTypeargs(
+      TypeMirror functionType,
+      TypeMirror expectedReturnType) throws TmpException {
     TypeTool tool = TypeTool.get();
     Map<String, TypeMirror> functionTypeargs = Resolver.resolve(tool.declared(Function.class), functionType, "T", "R");
     DeclaredType string = tool.declared(String.class);
-    TypeMirror t = Optional.ofNullable(functionTypeargs.get("T")).orElseThrow(MapperClassValidator::boom);
-    TypeMirror r = Optional.ofNullable(functionTypeargs.get("R")).orElseThrow(MapperClassValidator::boom);
-    Map<String, TypeMirror> solution = tool.unify(string, t).orElseThrow(MapperClassValidator::boom);
+    TypeMirror t = Optional.ofNullable(functionTypeargs.get("T")).orElseThrow(() ->
+        boom("The mapper must supply a Function."));
+    TypeMirror r = Optional.ofNullable(functionTypeargs.get("R")).orElseThrow(() ->
+        boom("The mapper must supply a Function."));
+    Map<String, TypeMirror> solution = tool.unify(string, t).orElseThrow(() ->
+        boom("The supplied function must take a String argument."));
     Optional<TypeMirror> returnType = tool.substitute(r, solution);
-    if (!returnType.isPresent()) {
-      throw boom();
+    if (returnType.isPresent()) {
+      if (!tool.eql(returnType.get(), expectedReturnType)) {
+        throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, returnType.get()));
+      }
+      return new MapSolution(returnType.get(), solution);
     }
-    return new MapSolution(returnType.get(), solution);
+    Map<String, TypeMirror> solution2 = tool.unify(expectedReturnType, r).orElseThrow(() ->
+        boom("The supplied function must return x."));
+    Optional<TypeMirror> returnType2 = tool.substitute(r, solution2);
+    if (!returnType2.isPresent()) {
+      throw boom("Invalid bounds");
+    }
+    return new MapSolution(returnType2.get(), solution2);
   }
 
   private static class MapSolution {

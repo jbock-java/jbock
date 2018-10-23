@@ -49,10 +49,10 @@ public class StandardCoercions {
         new InstantCoercion(),
         new StringCoercion()};
     for (CoercionFactory coercion : allCoercions) {
-      CoercionFactory previous = m.put(new MapMirror(coercion.trigger()), coercion);
+      CoercionFactory previous = m.put(new MapMirror(coercion.mapperReturnType()), coercion);
       if (previous != null) {
         throw new IllegalStateException(String.format("Both triggered by %s : %s, %s",
-            coercion.trigger(),
+            coercion.mapperReturnType(),
             coercion.getClass().getSimpleName(), previous.getClass().getSimpleName()));
       }
     }
@@ -70,12 +70,8 @@ public class StandardCoercions {
     instance = null;
   }
 
-  public static boolean containsKey(TypeMirror trigger) {
-    return instance().coercions.containsKey(new MapMirror(trigger));
-  }
-
-  public static CoercionFactory get(TypeMirror trigger) {
-    return instance().coercions.get(new MapMirror(trigger));
+  public static CoercionFactory get(TypeMirror mapperReturnType) {
+    return instance().coercions.get(new MapMirror(mapperReturnType));
   }
 
   private static final class MapMirror {

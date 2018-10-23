@@ -6,11 +6,11 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TypeToolTest {
@@ -35,6 +35,16 @@ class TypeToolTest {
       assertTrue(solution.containsKey("E"));
       TypeMirror value = solution.get("E");
       assertTrue(types.isSameType(value, string.asType()));
+    });
+  }
+
+  @Test
+  void substituteTest() {
+
+    EvaluatingProcessor.source().run((elements, types) -> {
+      TypeElement string = elements.getTypeElement("java.lang.String");
+      Optional<TypeMirror> substitute = TypeTool.get().substitute(string.asType(), Collections.emptyMap());
+      assertTrue(substitute.isPresent());
     });
   }
 }
