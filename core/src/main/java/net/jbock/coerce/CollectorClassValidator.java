@@ -16,7 +16,8 @@ class CollectorClassValidator {
   static CollectorInfo getCollectorInfo(TypeMirror returnType, TypeElement collectorClass) throws TmpException {
     commonChecks(collectorClass, "collector");
     TypeTool tool = TypeTool.get();
-    Map<String, TypeMirror> collectorTypeargs = Resolver.resolve(tool.declared(Supplier.class), collectorClass.asType(), "T");
+    Resolver resolver = Resolver.resolve(tool.declared(Supplier.class), collectorClass.asType(), "T");
+    Map<String, TypeMirror> collectorTypeargs = resolver.asMap();
     TypeMirror collectorTypeWithTypeargs = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
     CollectSolution solution = resolveCollectorTypeargs(returnType, collectorTypeWithTypeargs);
     Optional<TypeMirror> collectorType = TypeTool.get().substitute(collectorClass.asType(), solution.solution);
@@ -28,7 +29,8 @@ class CollectorClassValidator {
 
   private static CollectSolution resolveCollectorTypeargs(TypeMirror returnType, TypeMirror collectorType) throws TmpException {
     TypeTool tool = TypeTool.get();
-    Map<String, TypeMirror> collectorTypeargs = Resolver.resolve(tool.declared(Collector.class), collectorType, "T", "A", "R");
+    Resolver resolver = Resolver.resolve(tool.declared(Collector.class), collectorType, "T", "A", "R");
+    Map<String, TypeMirror> collectorTypeargs = resolver.asMap();
     TypeMirror t = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
     TypeMirror r = Optional.ofNullable(collectorTypeargs.get("R")).orElseThrow(CollectorClassValidator::boom);
     Map<String, TypeMirror> solution = tool.unify(returnType, r).orElseThrow(() ->

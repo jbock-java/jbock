@@ -120,10 +120,10 @@ abstract class CustomMapperArguments {
   interface ListWrapperMapperInterface<E> extends Supplier<Function<E, List<E>>> {
   }
 
-  static class ListWrapperMapper<E> implements ListWrapperMapperInterface<E> {
+  static class ListWrapperMapper implements ListWrapperMapperInterface<String> {
 
     @Override
-    public Function<E, List<E>> get() {
+    public Function<String, List<String>> get() {
       return Collections::singletonList;
     }
   }

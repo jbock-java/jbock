@@ -7,6 +7,7 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -14,24 +15,39 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import static java.util.Collections.emptyMap;
 import static net.jbock.compiler.HierarchyUtil.getTypeTree;
 
 class Resolver {
 
   private final Map<Integer, String> names;
-  private final Map<String, TypeMirror> results;
+  private final Map<String, TypeMirror> results = new HashMap<>();
+  private final List<Extension> extensions = new ArrayList<>();
 
-  private Resolver(
-      Map<Integer, String> names,
-      Map<String, TypeMirror> results) {
+  private Resolver(Map<Integer, String> names) {
     this.names = names;
-    this.results = results;
   }
 
-  private Resolver step(Extension extension) {
-    TypeElement b = extension.baseClass;
-    DeclaredType x = extension.extensionClass;
+  void setResults(Map<String, TypeMirror> results) {
+    this.results.clear();
+    this.results.putAll(results);
+  }
+
+  void setNames(Map<Integer, String> names) {
+    this.names.clear();
+    this.names.putAll(names);
+  }
+
+  void clearResults() {
+    this.results.clear();
+  }
+
+  void clearNames() {
+    this.names.clear();
+  }
+
+  private void step(Extension extension) {
+    TypeElement b = extension.baseClass();
+    DeclaredType x = extension.extensionClass();
     Map<Integer, String> newNames = new LinkedHashMap<>();
     Map<String, TypeMirror> newResults = new LinkedHashMap<>(results);
     List<? extends TypeMirror> xParams = x.getTypeArguments();
@@ -39,7 +55,8 @@ class Resolver {
     for (Entry<Integer, String> entry : names.entrySet()) {
       if (xParams.isEmpty()) {
         // failure: raw type
-        return new Resolver(names, emptyMap());
+        results.clear();
+        return;
       }
       TypeMirror xParam = xParams.get(entry.getKey());
       if (xParam.getKind() == TypeKind.TYPEVAR) {
@@ -54,37 +71,39 @@ class Resolver {
         newResults.put(entry.getValue(), xParam);
       }
     }
-    return new Resolver(newNames, newResults);
+    setResults(newResults);
+    setNames(newNames);
   }
 
-  static Map<String, TypeMirror> resolve(TypeMirror qname, TypeMirror m, String... typevars) {
+  static Resolver resolve(TypeMirror goal, TypeMirror start, String... typevars) {
     Map<Integer, String> map = new HashMap<>();
     for (int i = 0; i < typevars.length; i++) {
       String typevar = typevars[i];
       map.put(i, typevar);
     }
-    return resolve(qname, map, m);
+    return resolve(goal, start, map);
   }
 
-  private static Map<String, TypeMirror> resolve(
-      TypeMirror qname,
-      Map<Integer, String> map,
-      TypeMirror m) {
-    List<TypeElement> family = getTypeTree(m);
-    Resolver resolver = new Resolver(map, emptyMap());
+  private static Resolver resolve(
+      TypeMirror goal,
+      TypeMirror start,
+      Map<Integer, String> names) {
+    List<TypeElement> family = getTypeTree(start);
+    Resolver resolver = new Resolver(names);
     Extension extension;
     TypeTool tool = TypeTool.get();
-    TypeMirror tmpname = tool.erasure(qname);
-    while ((extension = findExtension(family, tmpname)) != null) {
-      resolver = resolver.step(extension);
-      tmpname = tool.erasure(extension.baseClass.asType());
+    TypeMirror nextGoal = tool.erasure(goal);
+    while ((extension = findExtension(family, nextGoal)) != null) {
+      resolver.step(extension);
+      resolver.extensions.add(extension);
+      nextGoal = tool.erasure(extension.baseClass().asType());
     }
     if (resolver.names.isEmpty()) {
       // everything resolved
-      return resolver.asMap();
+      return resolver;
     }
-    if (tool.eql(tmpname, tool.erasure(m))) {
-      List<? extends TypeMirror> typeargs = tool.typeargs(m);
+    if (tool.eql(nextGoal, tool.erasure(start))) {
+      List<? extends TypeMirror> typeargs = tool.typeargs(start);
       Map<String, TypeMirror> results = new LinkedHashMap<>();
       for (Entry<Integer, String> entry : resolver.names.entrySet()) {
         if (entry.getKey() < typeargs.size()) {
@@ -92,9 +111,10 @@ class Resolver {
         }
       }
       results.putAll(resolver.results);
-      resolver = new Resolver(emptyMap(), results);
+      resolver.clearNames();
+      resolver.setResults(results);
     }
-    return resolver.asMap();
+    return resolver;
   }
 
   private static Extension findExtension(List<TypeElement> family, TypeMirror qname) {
@@ -121,23 +141,14 @@ class Resolver {
     return null;
   }
 
-  private static class Extension {
-    final TypeElement baseClass;
-    final DeclaredType extensionClass;
-
-    Extension(TypeElement baseClass, DeclaredType extensionClass) {
-      this.baseClass = baseClass;
-      this.extensionClass = extensionClass;
-    }
-
-    @Override
-    public String toString() {
-      return String.format("%s extends %s", baseClass, extensionClass);
-    }
+  Map<String, TypeMirror> asMap() {
+    return Collections.unmodifiableMap(results);
   }
 
-  private Map<String, TypeMirror> asMap() {
-    return Collections.unmodifiableMap(results);
+  List<Extension> extensions() {
+    List<Extension> copy = new ArrayList<>(this.extensions);
+    Collections.reverse(copy);
+    return Collections.unmodifiableList(copy);
   }
 
   @Override

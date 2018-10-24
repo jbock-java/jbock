@@ -187,6 +187,15 @@ public class TypeTool {
     return declared(type.getCanonicalName());
   }
 
+  public DeclaredType declared(Class<?> type, TypeMirror typeMirror1, TypeMirror typeMirror2) {
+    return types.getDeclaredType(elements.getTypeElement(type.getCanonicalName()),
+        typeMirror1, typeMirror2);
+  }
+
+  public DeclaredType declared(TypeElement type, TypeMirror typeMirror1) {
+    return types.getDeclaredType(type, typeMirror1);
+  }
+
   public List<? extends TypeMirror> getDirectSupertypes(TypeMirror mirror) {
     return types.directSupertypes(mirror);
   }

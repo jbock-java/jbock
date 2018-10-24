@@ -453,27 +453,6 @@ class ProcessorTest {
   }
 
   @Test
-  void identityMapperValid() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class ValidArguments {",
-        "",
-        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
-        "  abstract String string();",
-        "",
-        "  static class Mapper<E> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() {",
-        "      return Function.identity();",
-        "    }",
-        "  }",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
   void mapperValid() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
