@@ -101,7 +101,7 @@ class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
 }
 ````
 
-This mapper can be used in three different ways:
+The mapper can be used for required, optional or repeatable parameters:
 
 ````java
 @Parameter(shortName = 'n', mappedBy = PositiveNumberMapper.class)
