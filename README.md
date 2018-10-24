@@ -13,7 +13,7 @@ An annotated class looks like this
 @CommandLineArguments
 abstract class MyArguments {
 
-  @PositionalParameter
+  @PositionalParameter(optional = true)
   abstract Optional<Path> path();
   
   @Parameter(optional = true, longName = "verbosity", shortName = 'v')
