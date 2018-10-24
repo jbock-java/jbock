@@ -33,7 +33,7 @@ class CollectorClassValidator {
 
   private static TypeMirror getCollectorType(TypeElement collectorClass) throws TmpException {
     TypeTool tool = TypeTool.get();
-    Resolver resolver = Resolver.resolve(tool.declared(Supplier.class), collectorClass.asType(), "T");
+    Resolver resolver = Resolver.resolve(tool.declared(Supplier.class), collectorClass.asType());
     TypeMirror typeMirror = resolver.resolveTypevars().orElseThrow(() -> boom("not a Supplier"));
     if (tool.eql(typeMirror, tool.erasure(typeMirror))) {
       throw boom("the supplier must be parameterized");

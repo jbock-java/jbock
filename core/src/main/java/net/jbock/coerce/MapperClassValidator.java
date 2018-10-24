@@ -33,7 +33,7 @@ final class MapperClassValidator {
 
   private static TypeMirror getFunctionType(TypeElement mapperClass) throws TmpException {
     TypeTool tool = TypeTool.get();
-    Resolver resolver = Resolver.resolve(tool.declared(Supplier.class), mapperClass.asType(), "T");
+    Resolver resolver = Resolver.resolve(tool.declared(Supplier.class), mapperClass.asType());
     TypeMirror typeMirror = resolver.resolveTypevars().orElseThrow(() -> boom("not a Supplier"));
     if (tool.eql(typeMirror, tool.erasure(typeMirror))) {
       throw boom("the supplier must be parameterized");
@@ -50,7 +50,7 @@ final class MapperClassValidator {
 
   private static TypeMirror resolveFunctionType(TypeMirror functionType) throws TmpException {
     TypeTool tool = TypeTool.get();
-    Resolver resolver = Resolver.resolve(tool.declared(Function.class), functionType, "T", "R");
+    Resolver resolver = Resolver.resolve(tool.declared(Function.class), functionType);
     return resolver.resolveTypevars().orElseThrow(() -> boom("The supplier must supply a Function"));
   }
 
