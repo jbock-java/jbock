@@ -333,6 +333,32 @@ class CollectorTest {
   }
 
   @Test
+  void invalidBound() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             collectedBy = A.class)",
+        "  abstract Set<String> strings();",
+        "",
+        "  static class A implements ToSetCollector<Long> {",
+        "    public Collector<Long, ?, Set<Long>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "",
+        "  interface ToSetCollector<E> extends Supplier<Collector<E, ?, Set<E>>> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("The collector should return java.util.Set<java.lang.String> but returns java.util.Set<java.lang.Long>");
+  }
+
+  @Test
   void invalidBothMapperAndCollectorHaveTypeargs() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",

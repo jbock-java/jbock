@@ -171,7 +171,7 @@ class MapperTest {
         "    }",
         "  }",
         "",
-        "  static interface Katz<OR> extends Supplier<Function<OR, OR>> { }",
+        "  interface Katz<OR> extends Supplier<Function<OR, OR>> { }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -402,7 +402,8 @@ class MapperTest {
         "  }",
         "",
         "  interface ZapperSupplier extends Supplier<Zapper> { }",
-        "  static class Zapper implements Foo<String>, Xoxo<Integer>  {",
+        "",
+        "  static class Zapper implements Foo<String>  {",
         "    public Integer apply(String s) {",
         "      return 1;",
         "    }",
@@ -413,10 +414,6 @@ class MapperTest {
         "  interface Zap<T, B, A> extends Xi<A, T, B> { }",
         "",
         "  interface Foo<X> extends Zap<X, String, Integer> { }",
-        "",
-        "  interface Bar<E extends Number> extends Function<String, E> { }",
-        "",
-        "  interface Xoxo<X extends Number> extends Bar<X> { }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
