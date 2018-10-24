@@ -16,48 +16,39 @@ class CollectorClassValidator {
   static CollectorInfo getCollectorInfo(TypeMirror returnType, TypeElement collectorClass) throws TmpException {
     commonChecks(collectorClass, "collector");
     TypeTool tool = TypeTool.get();
-    Resolver resolver = Resolver.resolve(tool.declared(Supplier.class), collectorClass.asType(), "T");
-    Map<String, TypeMirror> collectorTypeargs = resolver.asMap();
-    TypeMirror collectorTypeWithTypeargs = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
-    CollectSolution solution = resolveCollectorTypeargs(returnType, collectorTypeWithTypeargs);
-    Optional<TypeMirror> collectorType = TypeTool.get().substitute(collectorClass.asType(), solution.solution);
-    if (!collectorType.isPresent()) {
-      throw boom();
+    TypeMirror collectorType = getCollectorType(collectorClass);
+    TypeMirror t = tool.asDeclared(collectorType).getTypeArguments().get(0);
+    TypeMirror r = tool.asDeclared(collectorType).getTypeArguments().get(2);
+    Optional<Map<String, TypeMirror>> maybeSolution = tool.unify(returnType, r);
+    if (!maybeSolution.isPresent()) {
+      throw boom(String.format("The collector should return %s but returns %s", returnType, r));
     }
-    return CollectorInfo.create(solution.inputType, collectorType.get());
+    Map<String, TypeMirror> solution = maybeSolution.get();
+    Optional<TypeMirror> collectorClassSolved = tool.substitute(collectorClass.asType(), solution);
+    if (!collectorClassSolved.isPresent()) {
+      throw boom("Invalid bounds");
+    }
+    return CollectorInfo.create(tool.substitute(t, solution).orElse(t), collectorClassSolved.get());
   }
 
-  private static CollectSolution resolveCollectorTypeargs(TypeMirror returnType, TypeMirror collectorType) throws TmpException {
+  private static TypeMirror getCollectorType(TypeElement collectorClass) throws TmpException {
     TypeTool tool = TypeTool.get();
-    Resolver resolver = Resolver.resolve(tool.declared(Collector.class), collectorType, "T", "A", "R");
-    Map<String, TypeMirror> collectorTypeargs = resolver.asMap();
-    TypeMirror t = Optional.ofNullable(collectorTypeargs.get("T")).orElseThrow(CollectorClassValidator::boom);
-    TypeMirror r = Optional.ofNullable(collectorTypeargs.get("R")).orElseThrow(CollectorClassValidator::boom);
-    Map<String, TypeMirror> solution = tool.unify(returnType, r).orElseThrow(() ->
-        boom(returnType.toString() + " can't be unified with " + r));
-    Optional<TypeMirror> inputType = tool.substitute(t, solution);
-    if (!inputType.isPresent()) {
-      throw boom();
+    Resolver resolver = Resolver.resolve(tool.declared(Supplier.class), collectorClass.asType(), "T");
+    TypeMirror typeMirror = resolver.resolveTypevars().orElseThrow(() -> boom("not a Supplier"));
+    if (tool.eql(typeMirror, tool.erasure(typeMirror))) {
+      throw boom("the supplier must be parameterized");
     }
-    return new CollectSolution(inputType.get(), solution);
-  }
-
-  private static class CollectSolution {
-
-    final TypeMirror inputType;
-    final Map<String, TypeMirror> solution;
-
-    CollectSolution(TypeMirror inputType, Map<String, TypeMirror> solution) {
-      this.inputType = inputType;
-      this.solution = solution;
+    TypeMirror collectorType = tool.asDeclared(typeMirror).getTypeArguments().get(0);
+    if (!tool.eql(tool.erasure(collectorType), tool.declared(Collector.class))) {
+      throw boom("the supplier must supply a Collector");
     }
-  }
-
-  private static TmpException boom() {
-    return TmpException.create("There is a problem with the collector class.");
+    if (tool.eql(collectorType, tool.erasure(collectorType))) {
+      throw boom("the collector type must be parameterized");
+    }
+    return collectorType;
   }
 
   private static TmpException boom(String message) {
-    return TmpException.create("There is a problem with the collector class: " + message);
+    return TmpException.create(String.format("There is a problem with the collector class: %s.", message));
   }
 }

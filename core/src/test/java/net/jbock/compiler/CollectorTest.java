@@ -305,7 +305,31 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Define a mapper");
+        .withErrorContaining("Define a mapper for Optional<java.lang.Integer>");
+  }
+
+  @Test
+  void invalidBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             collectedBy = ToSetCollector.class)",
+        "  abstract Set<Integer> integers();",
+        "",
+        "  static class ToSetCollector<E extends Long> implements Supplier<Collector<E, ?, Set<E>>> {",
+        "    public Collector<E, ?, Set<E>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds.");
   }
 
   @Test
@@ -355,7 +379,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The collector should return java.util.Set<java.lang.String> but returns java.util.Set<java.lang.Long>");
+        .withErrorContaining("The collector should return java.util.Set<String> but returns java.util.Set<java.lang.Long>");
   }
 
   @Test
@@ -387,30 +411,6 @@ class CollectorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("mapper");
-  }
-
-  @Test
-  void invalidBounds() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "",
-        "  @Parameter(shortName = 'x',",
-        "             repeatable = true,",
-        "             collectedBy = MyCollector.class)",
-        "  abstract Set<String> strings();",
-        "",
-        "  static class MyCollector<E extends Integer> implements Supplier<Collector<E, ?, Set<E>>> {",
-        "    public Collector<E, ?, Set<E>> get() {",
-        "      return Collectors.toSet();",
-        "    }",
-        "  }",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("collector");
   }
 
   @Test
@@ -461,6 +461,24 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Foo can't be unified with java.util.Set<E>");
+        .withErrorContaining("The collector should return test.InvalidArguments.Foo but returns java.util.Set<E>");
+  }
+
+  @Test
+  void collectorInvalidNotCollector() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(repeatable = true, shortName = 'x', collectedBy = ZapperSupplier.class)",
+        "  abstract String zap();",
+        "",
+        "  interface ZapperSupplier extends Supplier<String> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the collector class: the supplier must supply a Collector.");
   }
 }

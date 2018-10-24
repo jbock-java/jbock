@@ -476,7 +476,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper must supply a Function.");
+        .withErrorContaining("There is a problem with the mapper class: The supplier must supply a Function.");
   }
 
   @Test

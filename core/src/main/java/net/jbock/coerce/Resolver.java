@@ -14,6 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import static net.jbock.compiler.HierarchyUtil.getTypeTree;
 
@@ -27,21 +28,17 @@ class Resolver {
     this.names = names;
   }
 
-  void setResults(Map<String, TypeMirror> results) {
+  private void setResults(Map<String, TypeMirror> results) {
     this.results.clear();
     this.results.putAll(results);
   }
 
-  void setNames(Map<Integer, String> names) {
+  private void setNames(Map<Integer, String> names) {
     this.names.clear();
     this.names.putAll(names);
   }
 
-  void clearResults() {
-    this.results.clear();
-  }
-
-  void clearNames() {
+  private void clearNames() {
     this.names.clear();
   }
 
@@ -141,14 +138,33 @@ class Resolver {
     return null;
   }
 
-  Map<String, TypeMirror> asMap() {
-    return Collections.unmodifiableMap(results);
+  private List<Extension> reverseExtensions() {
+    List<Extension> reversed = new ArrayList<>(this.extensions);
+    Collections.reverse(reversed);
+    return reversed;
   }
 
-  List<Extension> extensions() {
-    List<Extension> copy = new ArrayList<>(this.extensions);
-    Collections.reverse(copy);
-    return Collections.unmodifiableList(copy);
+  Optional<TypeMirror> resolveTypevars() {
+    if (extensions.isEmpty()) {
+      return Optional.empty();
+    }
+    List<Extension> extensions = reverseExtensions();
+    TypeMirror x = extensions.get(0).extensionClass();
+    for (int i = 1; i < extensions.size(); i++) {
+      Extension extension = extensions.get(i);
+      x = resolveStep(x, extension);
+    }
+    return Optional.of(x);
+  }
+
+  private static TypeMirror resolveStep(TypeMirror x, Extension ex1) {
+    List<? extends TypeMirror> typeArguments = TypeTool.get().asDeclared(x).getTypeArguments();
+    List<? extends TypeParameterElement> typeParameters = ex1.baseClass().getTypeParameters();
+    Map<String, TypeMirror> resolution = new HashMap<>();
+    for (int i = 0; i < typeParameters.size(); i++) {
+      resolution.put(typeParameters.get(i).toString(), typeArguments.get(i));
+    }
+    return TypeTool.get().substitute(ex1.extensionClass(), resolution).orElse(ex1.extensionClass());
   }
 
   @Override
