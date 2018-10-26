@@ -1,7 +1,7 @@
 ## Why jbock
 
 Let's take a look at [jcommander](http://jcommander.org/)
-to understand my main motivation for creating yet another
+to understand my motivation for creating yet another
 command line tool.
 
 #### Unintended default values
@@ -61,21 +61,21 @@ which doesn't improve the overall mood.
 Part of the problem is that the user hasn't made it very clear 
 whether `verbosity` is supposed to be a required parameter or not.
 
-On the one hand, the types `int` or `Integer` were used, rather than
-`OptionalInt` or `Optional<Integer>`.
-Looks like they want a required parameter!
+On the one hand, the user chose the types `int` or `Integer`,
+rather than `OptionalInt` or `Optional<Integer>`.
+Seems like they wanted a required parameter!
 
-But on the other hand, the implicit default
-values of `0` or `null` don't make sense unless the
-parameter is optional.
+But on the other hand, it doesn't make sense to have default
+values, like `0` or `null`, unless the parameter is optional.
 
 Jbock builds on Java 8 and enforces the use of the 
 appropriate type, like `Optional<Integer>` or `OptionalInt`
-for an optional parameter.
+for an optional parameter. Its parameter annotations go on abstract
+methods, which don't have implicit default values in Java.
 
-However if `int` or `Integer` are used as the parameter type,
-then jbock will treat this parameter as required. In either case,
-jbock will never return a default value or `null`, and I like to
+If `int` or `Integer` are used as the parameter type,
+then jbock will treat that parameter as required. In either case,
+jbock will never return `null` or an implicit default value. I like to
 think that this behaviour is more "natural".
 
 So that's basically my motivation for writing jbock.
