@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import static net.jbock.compiler.HierarchyUtil.getTypeTree;
+import static net.jbock.compiler.TypeTool.asDeclared;
 
 class Resolver {
 
@@ -53,11 +54,11 @@ class Resolver {
     TypeTool tool = TypeTool.get();
     TypeMirror superclass = typeElement.getSuperclass();
     if (superclass != null && tool.eql(qname, tool.erasure(superclass))) {
-      return new Extension(typeElement, tool.asDeclared(superclass));
+      return new Extension(typeElement, asDeclared(superclass));
     }
     for (TypeMirror mirror : typeElement.getInterfaces()) {
       if (tool.eql(qname, tool.erasure(mirror))) {
-        return new Extension(typeElement, tool.asDeclared(mirror));
+        return new Extension(typeElement, asDeclared(mirror));
       }
     }
     return null;

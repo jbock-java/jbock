@@ -2,11 +2,11 @@ package net.jbock.coerce;
 
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.hint.HintProvider;
 import net.jbock.coerce.mappers.CoercionFactory;
 import net.jbock.coerce.mappers.EnumCoercion;
 import net.jbock.coerce.mappers.MapperCoercion;
 import net.jbock.coerce.mappers.StandardCoercions;
-import net.jbock.coerce.hint.HintProvider;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -64,7 +64,7 @@ public class CoercionProvider {
       TypeElement collectorClass,
       boolean repeatable,
       boolean optional) throws TmpException, SearchHintException {
-    BasicInfo basicInfo = new BasicInfo(sourceMethod.getReturnType(), paramName);
+    BasicInfo basicInfo = BasicInfo.create(sourceMethod.getReturnType(), paramName);
     boolean auto = mapperClass == null;
     if (repeatable) {
       if (auto) {

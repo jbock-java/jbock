@@ -10,6 +10,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
+import static net.jbock.compiler.TypeTool.asDeclared;
 
 class CollectorClassValidator {
 
@@ -17,8 +18,8 @@ class CollectorClassValidator {
     commonChecks(collectorClass, "collector");
     TypeTool tool = TypeTool.get();
     TypeMirror collectorType = getCollectorType(collectorClass);
-    TypeMirror t = tool.asDeclared(collectorType).getTypeArguments().get(0);
-    TypeMirror r = tool.asDeclared(collectorType).getTypeArguments().get(2);
+    TypeMirror t = asDeclared(collectorType).getTypeArguments().get(0);
+    TypeMirror r = asDeclared(collectorType).getTypeArguments().get(2);
     Optional<Map<String, TypeMirror>> maybeSolution = tool.unify(returnType, r);
     if (!maybeSolution.isPresent()) {
       throw boom(String.format("The collector should return %s but returns %s", returnType, r));
@@ -38,7 +39,7 @@ class CollectorClassValidator {
     if (tool.eql(typeMirror, tool.erasure(typeMirror))) {
       throw boom("the supplier must be parameterized");
     }
-    TypeMirror collectorType = tool.asDeclared(typeMirror).getTypeArguments().get(0);
+    TypeMirror collectorType = asDeclared(typeMirror).getTypeArguments().get(0);
     if (!tool.eql(tool.erasure(collectorType), tool.declared(Collector.class))) {
       throw boom("the supplier must supply a Collector");
     }

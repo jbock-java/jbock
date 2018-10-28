@@ -220,7 +220,7 @@ public class TypeTool {
     return result;
   }
 
-  public DeclaredType asDeclared(TypeMirror mirror) {
+  public static DeclaredType asDeclared(TypeMirror mirror) {
     DeclaredType result = mirror.accept(AS_DECLARED, null);
     if (result == null) {
       throw new IllegalArgumentException("not declared: " + mirror);

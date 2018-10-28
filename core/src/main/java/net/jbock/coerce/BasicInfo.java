@@ -14,19 +14,20 @@ public final class BasicInfo {
 
   private final String paramName;
 
-  BasicInfo(TypeMirror returnType, String paramName) {
+  private BasicInfo(TypeMirror returnType, String paramName) {
     this.returnType = returnType;
     this.paramName = paramName;
   }
 
+  static BasicInfo create(TypeMirror returnType, String paramName) {
+    return new BasicInfo(returnType, snakeToCamel(paramName));
+  }
+
   public String paramName() {
-    return snakeToCamel(paramName);
+    return paramName;
   }
 
   FieldSpec fieldSpec() {
-    return FieldSpec.builder(TypeName.get(returnType),
-        snakeToCamel(paramName))
-        .addModifiers(FINAL)
-        .build();
+    return FieldSpec.builder(TypeName.get(returnType), paramName, FINAL).build();
   }
 }

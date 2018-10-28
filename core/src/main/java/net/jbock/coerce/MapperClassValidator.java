@@ -9,6 +9,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
+import static net.jbock.compiler.TypeTool.asDeclared;
 
 final class MapperClassValidator {
 
@@ -20,8 +21,8 @@ final class MapperClassValidator {
     TypeTool tool = TypeTool.get();
     TypeMirror functionType = getFunctionType(mapperClass);
     DeclaredType string = tool.declared(String.class);
-    TypeMirror t = tool.asDeclared(functionType).getTypeArguments().get(0);
-    TypeMirror r = tool.asDeclared(functionType).getTypeArguments().get(1);
+    TypeMirror t = asDeclared(functionType).getTypeArguments().get(0);
+    TypeMirror r = asDeclared(functionType).getTypeArguments().get(1);
     if (!tool.unify(string, t).isPresent()) {
       throw boom(String.format("The supplied function must take a String argument, but takes %s", t));
     }
@@ -38,7 +39,7 @@ final class MapperClassValidator {
     if (tool.eql(typeMirror, tool.erasure(typeMirror))) {
       throw boom("the supplier must be parameterized");
     }
-    TypeMirror functionType = tool.asDeclared(typeMirror).getTypeArguments().get(0);
+    TypeMirror functionType = asDeclared(typeMirror).getTypeArguments().get(0);
     if (!tool.eql(tool.erasure(functionType), tool.declared(Function.class))) {
       functionType = resolveFunctionType(functionType);
     }

@@ -40,6 +40,11 @@ public class CollectorInfo {
     return STANDARD_INIT;
   }
 
+  // visible for testing
+  Optional<TypeMirror> collectorType() {
+    return collectorType;
+  }
+
   @Override
   public String toString() {
     return "input: " + inputType;
