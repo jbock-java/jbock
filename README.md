@@ -24,7 +24,7 @@ abstract class MyArguments {
 }
 ````
 
-and then the generated class `LsArguments_Parser` can be used as follows
+and then the generated class `MyArguments_Parser` can be used as follows
 
 ````java
 String[] argv = { "--verbosity", "2", "file.txt" };
@@ -209,7 +209,7 @@ flag is present, the special token
 @CommandLineArguments(allowEscapeSequence = true)
 abstract class MyArguments {
   @PositionalParameter
-  abstract Optional<Path> file();
+  abstract List<Path> files();
   
   @Parameter(shortName = '-q', flag = true)
   abstract boolean quiet();
@@ -225,7 +225,7 @@ String[] argv = { "-q" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
 assertTrue(args.quiet());
-assertEquals(Optional.empty(), args.file());
+assertEquals(Collections.emptyList(), args.files());
 ````
 
 ````java
@@ -233,7 +233,7 @@ String[] argv = { "--", "-q" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
 assertFalse(args.quiet());
-assertEquals(Optional.of(Paths.get("-q")), args.file());
+assertEquals(Collections.singletonList("-q"), args.files());
 ````
 
 ### Prefixed tokens
@@ -258,6 +258,51 @@ String[] argv = { "-1" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
 assertEquals(-1, args.possiblyNegativeNumber());
+````
+
+#### Attached and detached parameters
+
+Given a parameter like this
+
+````java
+@Parameter(longName = "file", shortName = 'f')
+abstract Path file();
+````
+
+then the following are all equivalent:
+
+````java
+argv = { "--file", "data.txt" }; // detached long
+argv = { "--file=data.txt" }; // attached long
+argv = { "-f", "data.txt" }; // detached short
+argv = { "-fdata.txt" }; // attached short
+````
+
+#### Positional parameters
+
+In a way these are the opposite of <em>flags</em>:
+whereas a flag is just a parameter name without a value after it,
+a positional parameter is a "naked" value without a
+preceding parameter name.
+
+````java
+@CommandLineArguments
+abstract class MyArguments {
+
+  @PositionalParameter(position = 0)
+  abstract Path source();
+  
+  @PositionalParameter(position = 1)
+  abstract Path target();
+  }
+}
+````
+
+````java
+String[] argv = { "a.txt", "b.txt" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+assertEquals(Paths.get("a.txt"), args.source());
+assertEquals(Paths.get("b.txt"), args.target());
 ````
 
 ### Maven setup
