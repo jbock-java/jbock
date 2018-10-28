@@ -22,13 +22,13 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <compile-testing.version>0.15</compile-testing.version>
-    <junit.version>5.3.0-RC1</junit.version>
-    <surefire.version>2.22.0</surefire.version>
-    <compiler-plugin.version>3.8.0</compiler-plugin.version>
+    <junit.version>5.3.1</junit.version>
     <javadoc-plugin.version>3.0.1</javadoc-plugin.version>
-    <jar-plugin.version>3.1.0</jar-plugin.version>
     <jbock-annotations.version>2.2</jbock-annotations.version>
     <javapoet.version>1.11.1</javapoet.version>
+    <surefire-plugin.version>2.22.1</surefire-plugin.version>
+    <compiler-plugin.version>3.8.0</compiler-plugin.version>
+    <jar-plugin.version>3.1.0</jar-plugin.version>
   </properties>
 
   <dependencies>
@@ -84,7 +84,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>${surefire.version}</version>
+        <version>${surefire-plugin.version}</version>
       </plugin>
 
       <plugin>
