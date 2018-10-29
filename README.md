@@ -20,7 +20,6 @@ abstract class MyArguments {
   
   @Parameter(optional = true, longName = "verbosity", shortName = 'v')
   abstract OptionalInt verbosity();
-
 }
 ````
 
@@ -208,6 +207,7 @@ flag is present, the special token
 ````java
 @CommandLineArguments(allowEscapeSequence = true)
 abstract class MyArguments {
+  
   @PositionalParameter
   abstract List<Path> files();
   
@@ -294,7 +294,6 @@ abstract class MyArguments {
   
   @PositionalParameter(position = 1)
   abstract Path target();
-  }
 }
 ````
 
