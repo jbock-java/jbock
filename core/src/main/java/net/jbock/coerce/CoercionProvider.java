@@ -117,8 +117,8 @@ public class CoercionProvider {
     if (optional && !optionalInfo.optional) {
       throw TmpException.create("Wrap the parameter type in Optional");
     }
-    TypeMirror mapperType = MapperClassValidator.checkReturnType(mapperClass, optionalInfo.baseType);
-    return MapperCoercion.create(optionalInfo, mapperParam, mapperType, basicInfo);
+    MapperClassValidator.checkReturnType(mapperClass, optionalInfo.baseType);
+    return MapperCoercion.create(optionalInfo, mapperParam, mapperClass.asType(), basicInfo);
   }
 
   // repeatable with mapper
@@ -131,8 +131,8 @@ public class CoercionProvider {
     CollectorInfo collectorInfo = collectorInfo(sourceMethod, collectorClass);
     MapperClassValidator.checkReturnType(mapperClass, collectorInfo.inputType);
     ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
-    TypeMirror mapperType = MapperClassValidator.checkReturnType(mapperClass, collectorInfo.inputType);
-    return MapperCoercion.create(OptionalInfo.simple(collectorInfo.inputType), collectorInfo, mapperParam, mapperType, basicInfo);
+    MapperClassValidator.checkReturnType(mapperClass, collectorInfo.inputType);
+    return MapperCoercion.create(OptionalInfo.simple(collectorInfo.inputType), collectorInfo, mapperParam, mapperClass.asType(), basicInfo);
   }
 
   // repeatable without mapper

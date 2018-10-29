@@ -13,7 +13,7 @@ import static net.jbock.compiler.TypeTool.asDeclared;
 
 final class MapperClassValidator {
 
-  static TypeMirror checkReturnType(TypeElement mapperClass, TypeMirror expectedReturnType) throws TmpException {
+  static void checkReturnType(TypeElement mapperClass, TypeMirror expectedReturnType) throws TmpException {
     commonChecks(mapperClass, "mapper");
     if (!mapperClass.getTypeParameters().isEmpty()) {
       throw boom("The mapper class may not have type parameters");
@@ -29,7 +29,6 @@ final class MapperClassValidator {
     if (!tool.unify(expectedReturnType, r).isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    return mapperClass.asType();
   }
 
   private static TypeMirror getFunctionType(TypeElement mapperClass) throws TmpException {

@@ -77,7 +77,7 @@ class Resolver {
   }
 
   private static TypeMirror resolveStep(TypeMirror x, Extension ex1) {
-    List<? extends TypeMirror> typeArguments = TypeTool.get().asDeclared(x).getTypeArguments();
+    List<? extends TypeMirror> typeArguments = asDeclared(x).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = ex1.baseClass().getTypeParameters();
     Map<String, TypeMirror> resolution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
