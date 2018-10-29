@@ -158,10 +158,6 @@ public class TypeTool {
     return types.isSameType(mirror, test);
   }
 
-  public TypeMirror box(TypeMirror mirror) {
-    return types.boxedClass(((PrimitiveType) mirror)).asType();
-  }
-
   public PrimitiveType primitive(TypeKind kind) {
     return types.getPrimitiveType(kind);
   }

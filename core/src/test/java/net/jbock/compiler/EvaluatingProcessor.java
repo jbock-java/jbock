@@ -2,6 +2,7 @@ package net.jbock.compiler;
 
 import com.google.testing.compile.Compilation;
 import com.google.testing.compile.JavaFileObjects;
+import org.junit.jupiter.api.Assertions;
 import org.junit.runners.model.Statement;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -9,6 +10,7 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.Collections;
@@ -36,6 +38,18 @@ public final class EvaluatingProcessor extends AbstractProcessor {
 
     public DeclaredType declared(String expr) {
       return TestExpr.parse(expr, elements, types);
+    }
+
+    public void assertSameType(TypeMirror t1, TypeMirror t2) {
+      boolean sameType = types.isSameType(t1, t2);
+      if (!sameType) {
+        Assertions.fail("Expecting " + t1 + " but found " + t2);
+      }
+    }
+
+    public void assertSameType(String expr, TypeMirror t2) {
+      TypeMirror t1 = declared(expr);
+      assertSameType(t1, t2);
     }
 
     public Elements elements() {

@@ -12,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static java.util.Collections.singletonList;
 import static net.jbock.compiler.TypeTool.asDeclared;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -60,9 +59,10 @@ class TypeToolTest {
       assertEquals(2, map.getTypeArguments().size());
       TypeMirror key = map.getTypeArguments().get(0);
       TypeMirror value = map.getTypeArguments().get(1);
-      assertEquals(context.types().erasure(context.elements().getTypeElement("java.util.List").asType()), context.types().erasure(key));
-      assertEquals(singletonList(context.types().getDeclaredType(context.elements().getTypeElement("java.lang.String"))), asDeclared(key).getTypeArguments());
-      assertEquals(context.types().getDeclaredType(context.elements().getTypeElement("java.lang.String")), value);
+      context.assertSameType(context.types().erasure(context.elements().getTypeElement("java.util.List").asType()), context.types().erasure(key));
+      assertEquals(1, asDeclared(key).getTypeArguments().size());
+      context.assertSameType(context.types().getDeclaredType(context.elements().getTypeElement("java.lang.String")), asDeclared(key).getTypeArguments().get(0));
+      context.assertSameType(context.types().getDeclaredType(context.elements().getTypeElement("java.lang.String")), value);
     });
   }
 }
