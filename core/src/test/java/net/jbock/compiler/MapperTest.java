@@ -37,10 +37,34 @@ class MapperTest {
   }
 
   @Test
+  void invalidFlagMapper() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             flag = true,",
+        "             mappedBy = FlagMapper.class)",
+        "  abstract Boolean flag();",
+        "",
+        "  static class FlagMapper implements Supplier<Function<String, Boolean>> {",
+        "    public Function<String, Boolean> get() {",
+        "      return s -> !s.isEmpty();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("flag parameter can't have a mapper");
+  }
+
+  @Test
   void invalidReturnTypeNotOptional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InalidArguments {",
+        "abstract class InvalidArguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             optional = true,",
@@ -53,7 +77,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()

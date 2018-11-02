@@ -1,10 +1,7 @@
 ## Why jbock
 
 Let's take a look at [jcommander](http://jcommander.org/)
-to understand my motivation for creating yet another
-command line tool.
-
-#### Unintended default values
+to understand the main reason why jbock was created.
 
 In jcommander, the parameter annotations go on fields.
 Like this:
@@ -29,11 +26,6 @@ assertEquals(0, args.verbosity);
 Because of the implicit default value of `0`,
 we cannot tell whether the user passed `{"-v", "0"}` or `{}`.
 
-We could have chosen a different default value, but we can't avoid
-having one unless we declare the parameter required.
-
-#### Null to the rescue. Really?
-
 The situation is slightly different if we use an `Integer` instead:
 
 ````java
@@ -51,32 +43,25 @@ JCommander.newBuilder().addObject(args).build().parse(argv);
 assertNull(args.verbosity);
 ````
 
-Good job! Now we have introduced a source of `null` values
-in our program, and we need to remember to check for this later on.
-We might also start worrying about input like `{"-v", ""}`,
-which doesn't improve the overall mood.
+This may seem better but now we have introduced a source of `null` values
+in our program.
 
-#### Let's do this correctly then.
+The `argv` array can never contain `null`. It doesn't feel
+right to convert it into something that can.
 
-Part of the problem is that the user hasn't made it very clear 
-whether `verbosity` is supposed to be a required parameter or not.
+#### It's the wrong type
 
-On the one hand, the user chose the types `int` or `Integer`,
-rather than `OptionalInt` or `Optional<Integer>`.
-Seems like they wanted a required parameter!
+`verbosity` is an optional parameter, so
+we should not be using the types `Integer`
+or `int`.
 
-But on the other hand, it doesn't make sense to have default
-values, like `0` or `null`, unless the parameter is optional.
-
-Jbock builds on Java 8 and enforces the use of the 
-appropriate type, like `Optional<Integer>` or `OptionalInt`
-for an optional parameter. Its parameter annotations go on abstract
-methods, which don't have implicit default values in Java.
+jbock enforces the use of the 
+appropriate type, like `Optional<Integer>` 
+for an optional parameter. Also, its parameter annotations go on abstract
+methods, rather than fields, which means we don't have 
+to deal with a field's default value.
 
 If `int` or `Integer` are used as the parameter type,
-then jbock will treat that parameter as required. In either case,
-jbock will never return `null` or an implicit default value. I like to
-think that this behaviour is more "natural".
-
-So that's basically my motivation for writing jbock.
-I hope you like it as much as I do.
+then jbock will treat that parameter as required.
+In either case, jbock will never return `null`
+as a parameter value.

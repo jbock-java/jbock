@@ -199,6 +199,10 @@ final class Param {
     boolean optional = parameter.optional();
     boolean flag = parameter.flag();
     boolean required = !repeatable && !optional && !flag;
+    if (flag && mapperClass != null) {
+      throw ValidationException.create(sourceMethod,
+          "A flag parameter can't have a mapper.");
+    }
     Coercion typeInfo = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
