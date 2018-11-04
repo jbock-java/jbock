@@ -5,7 +5,7 @@
 `jbock` is an annotation-driven command line parser, similar to [jcommander](http://jcommander.org/), but doesn't use reflection.
 Instead, it generates custom source code through a mechanism called Java annotation processing.
 
-[Wait, why?](https://github.com/h908714124/jbock/tree/master/MOTIVATION.md)
+Jbock [enforces optional types for optional parameters](https://github.com/h908714124/jbock/tree/master/MOTIVATION.md).
 
 ### Overview
 
