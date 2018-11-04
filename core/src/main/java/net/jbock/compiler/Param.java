@@ -11,12 +11,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
-import java.util.stream.Stream;
+import java.util.*;
 
 import static java.lang.Character.isWhitespace;
 import static net.jbock.compiler.AnnotationUtil.getCollectorClass;
@@ -113,7 +108,6 @@ final class Param {
       OptionType paramType,
       ExecutableElement sourceMethod,
       String name,
-      boolean positional,
       String bundleKey, Coercion coercion,
       List<String> description,
       String descriptionArgumentName,
@@ -147,16 +141,6 @@ final class Param {
         throw ValidationException.create(sourceMethod, "Declare a flag, or use a custom mapper.");
       }
     }
-    if (Stream.of(optional, repeatable, flag).mapToInt(Param::booleanToInt).sum() >= 2) {
-      throw ValidationException.create(sourceMethod, "Only one of optional, repeatable and flag can be true.");
-    }
-    if (positional && positionalOrder() == null) {
-      throw new AssertionError("positional, but positionalType is null");
-    }
-  }
-
-  private static int booleanToInt(boolean b) {
-    return b ? 1 : 0;
   }
 
   FieldSpec field() {
@@ -199,6 +183,15 @@ final class Param {
     boolean optional = parameter.optional();
     boolean flag = parameter.flag();
     boolean required = !repeatable && !optional && !flag;
+    if (optional && repeatable) {
+      throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");
+    }
+    if (optional && flag) {
+      throw ValidationException.create(sourceMethod, "A flag cannot be declared optional.");
+    }
+    if (repeatable && flag) {
+      throw ValidationException.create(sourceMethod, "A flag cannot be declared repeatable.");
+    }
     if (flag && mapperClass != null) {
       throw ValidationException.create(sourceMethod,
           "A flag parameter can't have a mapper.");
@@ -215,7 +208,6 @@ final class Param {
         type,
         sourceMethod,
         name,
-        false,
         parameter.bundleKey(),
         typeInfo,
         cleanDesc(description),
@@ -238,6 +230,9 @@ final class Param {
     boolean repeatable = parameter.repeatable();
     boolean optional = parameter.optional();
     boolean required = !repeatable && !optional;
+    if (optional && repeatable) {
+      throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");
+    }
     Coercion coercion = CoercionProvider.getInstance().findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
     OptionType type = optionType(repeatable, false);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
@@ -250,7 +245,6 @@ final class Param {
         type,
         sourceMethod,
         name,
-        true,
         parameter.bundleKey(),
         coercion,
         cleanDesc(description),
