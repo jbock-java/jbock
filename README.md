@@ -104,7 +104,7 @@ class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
 }
 ````
 
-The mapper can be used for required, optional or repeatable parameters:
+The same mapper can be used for required, optional and repeatable parameters:
 
 ````java
 @Parameter(shortName = 'n', mappedBy = PositiveNumberMapper.class)
@@ -262,7 +262,7 @@ MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 assertEquals(-1, args.possiblyNegativeNumber());
 ````
 
-#### Attached and detached parameters
+### Attached and detached parameters
 
 Given a parameter like this
 
@@ -280,7 +280,7 @@ argv = { "-f", "data.txt" }; // detached short
 argv = { "-fdata.txt" }; // attached short
 ````
 
-#### Positional parameters
+### Positional parameters
 
 In a way these are the opposite of <em>flags</em>:
 whereas a flag is just a parameter name without a value after it,
