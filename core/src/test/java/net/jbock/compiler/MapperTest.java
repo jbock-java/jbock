@@ -597,4 +597,67 @@ class MapperTest {
         .failsToCompile()
         .withErrorContaining("There is a problem with the mapper class: the function type must be parameterized.");
   }
+
+  @Test
+  void mapperValid() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', repeatable = true, mappedBy = Mapper.class)",
+        "  abstract List<OptionalInt> numbers();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, OptionalInt>> {",
+        "    public Function<String, OptionalInt> get() {",
+        "      return s -> OptionalInt.of(1);",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mapperValidByte() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Byte number();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, Byte>> {",
+        "    public Function<String, Byte> get() {",
+        "      return s -> 1;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mapperValidListOfSet() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', repeatable = true, mappedBy = Mapper.class)",
+        "  abstract List<Set<Integer>> sets();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, Set<Integer>>> {",
+        "    public Function<String, Set<Integer>> get() {",
+        "      return s -> Collections.singleton(Integer.valueOf(s));",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
 }

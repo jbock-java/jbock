@@ -10,12 +10,12 @@ import javax.lang.model.type.TypeMirror;
 class PrimitiveByteCoercion extends BasicByteCoercion {
 
   PrimitiveByteCoercion() {
-    super(TypeTool.get().primitive(TypeKind.BYTE));
+    super(TypeTool.get().getPrimitiveType(TypeKind.BYTE));
   }
 
   @Override
   TypeMirror paramType() {
-    return TypeTool.get().declared(Byte.class);
+    return TypeTool.get().asType(Byte.class);
   }
 
   @Override

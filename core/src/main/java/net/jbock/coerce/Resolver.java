@@ -40,9 +40,9 @@ class Resolver {
     return new Resolver(extensions);
   }
 
-  private static Extension findExtension(List<TypeElement> family, TypeMirror qname) {
+  private static Extension findExtension(List<TypeElement> family, TypeMirror goal) {
     for (TypeElement element : family) {
-      Extension extension = findExtension(element, qname);
+      Extension extension = findExtension(element, goal);
       if (extension != null) {
         return extension;
       }
@@ -50,14 +50,14 @@ class Resolver {
     return null;
   }
 
-  private static Extension findExtension(TypeElement typeElement, TypeMirror qname) {
+  private static Extension findExtension(TypeElement typeElement, TypeMirror goal) {
     TypeTool tool = TypeTool.get();
     TypeMirror superclass = typeElement.getSuperclass();
-    if (superclass != null && tool.eql(qname, tool.erasure(superclass))) {
+    if (superclass != null && tool.isSameType(goal, tool.erasure(superclass))) {
       return new Extension(typeElement, asDeclared(superclass));
     }
     for (TypeMirror mirror : typeElement.getInterfaces()) {
-      if (tool.eql(qname, tool.erasure(mirror))) {
+      if (tool.isSameType(goal, tool.erasure(mirror))) {
         return new Extension(typeElement, asDeclared(mirror));
       }
     }
@@ -68,22 +68,24 @@ class Resolver {
     if (extensions.isEmpty()) {
       return Optional.empty();
     }
-    TypeMirror x = extensions.get(0).extensionClass();
+    TypeMirror extensionClass = extensions.get(0).extensionClass();
     for (int i = 1; i < extensions.size(); i++) {
       Extension extension = extensions.get(i);
-      x = resolveStep(x, extension);
+      extensionClass = resolveStep(extensionClass, extension);
     }
-    return Optional.of(x);
+    return Optional.of(extensionClass);
   }
 
-  private static TypeMirror resolveStep(TypeMirror x, Extension ex1) {
+  private static TypeMirror resolveStep(TypeMirror x, Extension extension) {
     List<? extends TypeMirror> typeArguments = asDeclared(x).getTypeArguments();
-    List<? extends TypeParameterElement> typeParameters = ex1.baseClass().getTypeParameters();
+    List<? extends TypeParameterElement> typeParameters = extension.baseClass().getTypeParameters();
     Map<String, TypeMirror> resolution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
       resolution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
-    return TypeTool.get().substitute(ex1.extensionClass(), resolution).orElse(ex1.extensionClass());
+    TypeTool tool = TypeTool.get();
+    return tool.substitute(extension.extensionClass(), resolution)
+        .orElse(extension.extensionClass());
   }
 
   @Override

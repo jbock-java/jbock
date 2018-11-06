@@ -30,7 +30,7 @@ public class OptionalInfo {
       return OptionalInfo.simple(mirror);
     }
     TypeTool tool = TypeTool.get();
-    if (!tool.eql(tool.erasure(mirror), tool.declared(Optional.class))) {
+    if (!tool.isSameErasure(mirror, Optional.class)) {
       return OptionalInfo.simple(mirror);
     }
     List<? extends TypeMirror> typeArgs = tool.typeargs(mirror);

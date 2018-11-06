@@ -10,12 +10,12 @@ import javax.lang.model.type.TypeMirror;
 class PrimitiveIntCoercion extends BasicIntegerCoercion {
 
   PrimitiveIntCoercion() {
-    super(TypeTool.get().primitive(TypeKind.INT));
+    super(TypeTool.get().getPrimitiveType(TypeKind.INT));
   }
 
   @Override
   TypeMirror paramType() {
-    return TypeTool.get().declared(Integer.class);
+    return TypeTool.get().asType(Integer.class);
   }
 
   @Override

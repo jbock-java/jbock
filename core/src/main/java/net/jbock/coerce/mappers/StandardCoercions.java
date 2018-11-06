@@ -90,7 +90,7 @@ public class StandardCoercions {
       if (this == o) return true;
       if (o == null || getClass() != o.getClass()) return false;
       MapMirror mapMirror = (MapMirror) o;
-      return TypeTool.get().eql(typeMirror, mapMirror.typeMirror);
+      return TypeTool.get().isSameType(typeMirror, mapMirror.typeMirror);
     }
 
     @Override

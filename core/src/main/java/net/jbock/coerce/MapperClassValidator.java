@@ -3,7 +3,6 @@ package net.jbock.coerce;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -20,7 +19,7 @@ final class MapperClassValidator {
     }
     TypeTool tool = TypeTool.get();
     TypeMirror functionType = getFunctionType(mapperClass);
-    DeclaredType string = tool.declared(String.class);
+    TypeMirror string = tool.asType(String.class);
     TypeMirror t = asDeclared(functionType).getTypeArguments().get(0);
     TypeMirror r = asDeclared(functionType).getTypeArguments().get(1);
     if (!tool.unify(string, t).isPresent()) {
@@ -33,16 +32,16 @@ final class MapperClassValidator {
 
   private static TypeMirror getFunctionType(TypeElement mapperClass) throws TmpException {
     TypeTool tool = TypeTool.get();
-    Resolver resolver = Resolver.resolve(tool.declared(Supplier.class), mapperClass.asType());
+    Resolver resolver = Resolver.resolve(tool.asType(Supplier.class), mapperClass.asType());
     TypeMirror typeMirror = resolver.resolveTypevars().orElseThrow(() -> boom("not a Supplier"));
-    if (tool.eql(typeMirror, tool.erasure(typeMirror))) {
+    if (tool.isRawType(typeMirror)) {
       throw boom("the supplier must be parameterized");
     }
     TypeMirror functionType = asDeclared(typeMirror).getTypeArguments().get(0);
-    if (!tool.eql(tool.erasure(functionType), tool.declared(Function.class))) {
+    if (!tool.isSameErasure(functionType, Function.class)) {
       functionType = resolveFunctionType(functionType);
     }
-    if (tool.eql(functionType, tool.erasure(functionType))) {
+    if (tool.isRawType(functionType)) {
       throw boom("the function type must be parameterized");
     }
     return functionType;
@@ -50,7 +49,7 @@ final class MapperClassValidator {
 
   private static TypeMirror resolveFunctionType(TypeMirror functionType) throws TmpException {
     TypeTool tool = TypeTool.get();
-    Resolver resolver = Resolver.resolve(tool.declared(Function.class), functionType);
+    Resolver resolver = Resolver.resolve(tool.asType(Function.class), functionType);
     return resolver.resolveTypevars().orElseThrow(() -> boom("The supplier must supply a Function"));
   }
 

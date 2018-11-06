@@ -11,10 +11,10 @@ public class RawCombinatorHint extends Hint {
   @Override
   public String message(TypeMirror mirror, boolean repeatable) {
     TypeTool tool = TypeTool.get();
-    if (tool.eql(mirror, tool.declared(List.class))) {
+    if (tool.isSameType(mirror, tool.erasure(List.class))) {
       return "Add a type parameter";
     }
-    if (tool.eql(mirror, tool.declared(Optional.class))) {
+    if (tool.isSameType(mirror, tool.erasure(Optional.class))) {
       return "Add a type parameter";
     }
     return null;

@@ -26,7 +26,7 @@ public abstract class CoercionFactory {
   final TypeMirror mapperReturnType;
 
   CoercionFactory(Class<?> mapperReturnType) {
-    this(TypeTool.get().declared(mapperReturnType.getCanonicalName()));
+    this(TypeTool.get().getTypeElement(mapperReturnType).asType());
   }
 
   CoercionFactory(TypeMirror mapperReturnType) {

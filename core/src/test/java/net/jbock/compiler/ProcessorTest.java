@@ -126,6 +126,22 @@ class ProcessorTest {
   }
 
   @Test
+  void rawOptional2() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(optional = true, shortName = 'x')",
+        "  abstract Optional a();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Add a type parameter");
+  }
+
+  @Test
   void parameterizedSet() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -453,79 +469,16 @@ class ProcessorTest {
   }
 
   @Test
-  void mapperValid() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class ValidArguments {",
-        "",
-        "  @Parameter(shortName = 'x', repeatable = true, mappedBy = Mapper.class)",
-        "  abstract List<OptionalInt> numbers();",
-        "",
-        "  static class Mapper implements Supplier<Function<String, OptionalInt>> {",
-        "    public Function<String, OptionalInt> get() {",
-        "      return s -> OptionalInt.of(1);",
-        "    }",
-        "  }",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void mapperValidByte() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class ValidArguments {",
-        "",
-        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
-        "  abstract Byte number();",
-        "",
-        "  static class Mapper implements Supplier<Function<String, Byte>> {",
-        "    public Function<String, Byte> get() {",
-        "      return s -> 1;",
-        "    }",
-        "  }",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void mapperValidListOfSet() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class ValidArguments {",
-        "",
-        "  @Parameter(shortName = 'x', repeatable = true, mappedBy = Mapper.class)",
-        "  abstract List<Set<Integer>> sets();",
-        "",
-        "  static class Mapper implements Supplier<Function<String, Set<Integer>>> {",
-        "    public Function<String, Set<Integer>> get() {",
-        "      return s -> Collections.singleton(Integer.valueOf(s));",
-        "    }",
-        "  }",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
   void invalidReturnTypeNotOptional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InalidArguments {",
+        "abstract class InvalidArguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             optional = true)",
         "  abstract String plainString();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -536,13 +489,13 @@ class ProcessorTest {
   void invalidPrimitiveReturnTypeNotOptional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InalidArguments {",
+        "abstract class InvalidArguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             optional = true)",
         "  abstract int x();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()

@@ -10,12 +10,12 @@ import javax.lang.model.type.TypeMirror;
 class PrimitiveBooleanCoercion extends BasicBooleanCoercion {
 
   PrimitiveBooleanCoercion() {
-    super(TypeTool.get().primitive(TypeKind.BOOLEAN));
+    super(TypeTool.get().getPrimitiveType(TypeKind.BOOLEAN));
   }
 
   @Override
   TypeMirror paramType() {
-    return TypeTool.get().declared(Boolean.class);
+    return TypeTool.get().asType(Boolean.class);
   }
 
   @Override

@@ -150,46 +150,46 @@ public class TypeTool {
     return types.getDeclaredType(typeElement, result);
   }
 
-  public boolean eql(TypeMirror mirror, Class<?> test) {
-    return types.isSameType(mirror, elements.getTypeElement(test.getCanonicalName()).asType());
+  boolean isSameType(TypeMirror mirror, Class<?> test) {
+    return types.isSameType(mirror, getTypeElement(test).asType());
   }
 
-  public boolean eql(TypeMirror mirror, TypeMirror test) {
+  public boolean isSameType(TypeMirror mirror, TypeMirror test) {
     return types.isSameType(mirror, test);
   }
 
-  public PrimitiveType primitive(TypeKind kind) {
+  public boolean isRawType(TypeMirror mirror) {
+    return types.isSameType(mirror, types.erasure(mirror));
+  }
+
+  public PrimitiveType getPrimitiveType(TypeKind kind) {
     return types.getPrimitiveType(kind);
   }
 
-  private boolean isSameErasure(TypeMirror x, TypeMirror y) {
+  public boolean isSameErasure(TypeMirror x, TypeMirror y) {
     return types.isSameType(types.erasure(x), types.erasure(y));
+  }
+
+  public boolean isSameErasure(TypeMirror x, Class<?> y) {
+    return isSameErasure(x, erasure(y));
   }
 
   public TypeMirror erasure(TypeMirror typeMirror) {
     return types.erasure(typeMirror);
   }
 
-  public DeclaredType declared(String type) {
-    return types.getDeclaredType(elements.getTypeElement(type));
+  public TypeMirror erasure(Class<?> type) {
+    return erasure(asType(type));
+  }
+
+  public TypeMirror asType(Class<?> type) {
+    return elements.getTypeElement(type.getCanonicalName()).asType();
   }
 
   public TypeMirror optionalOf(Class<?> type) {
-    return types.getDeclaredType(elements.getTypeElement(Optional.class.getCanonicalName()),
-        elements.getTypeElement(type.getCanonicalName()).asType());
-  }
-
-  public DeclaredType declared(Class<?> type) {
-    return declared(type.getCanonicalName());
-  }
-
-  public DeclaredType declared(Class<?> type, TypeMirror typeMirror1, TypeMirror typeMirror2) {
-    return types.getDeclaredType(elements.getTypeElement(type.getCanonicalName()),
-        typeMirror1, typeMirror2);
-  }
-
-  public DeclaredType declared(TypeElement type, TypeMirror typeMirror1) {
-    return types.getDeclaredType(type, typeMirror1);
+    return types.getDeclaredType(
+        getTypeElement(Optional.class),
+        getTypeElement(type).asType());
   }
 
   public List<? extends TypeMirror> getDirectSupertypes(TypeMirror mirror) {
@@ -202,6 +202,10 @@ public class TypeTool {
       return false;
     }
     return element.getModifiers().contains(Modifier.PRIVATE);
+  }
+
+  public TypeElement getTypeElement(Class<?> clazz) {
+    return elements.getTypeElement(clazz.getCanonicalName());
   }
 
   TypeElement asTypeElement(TypeMirror mirror) {

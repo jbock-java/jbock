@@ -10,12 +10,12 @@ import javax.lang.model.type.TypeMirror;
 class PrimitiveCharacterCoercion extends BasicCharacterCoercion {
 
   PrimitiveCharacterCoercion() {
-    super(TypeTool.get().primitive(TypeKind.CHAR));
+    super(TypeTool.get().getPrimitiveType(TypeKind.CHAR));
   }
 
   @Override
   TypeMirror paramType() {
-    return TypeTool.get().declared(Character.class);
+    return TypeTool.get().asType(Character.class);
   }
 
   @Override

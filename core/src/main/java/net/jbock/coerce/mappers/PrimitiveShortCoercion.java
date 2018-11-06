@@ -10,12 +10,12 @@ import javax.lang.model.type.TypeMirror;
 class PrimitiveShortCoercion extends BasicShortCoercion {
 
   PrimitiveShortCoercion() {
-    super(TypeTool.get().primitive(TypeKind.SHORT));
+    super(TypeTool.get().getPrimitiveType(TypeKind.SHORT));
   }
 
   @Override
   TypeMirror paramType() {
-    return TypeTool.get().declared(Short.class);
+    return TypeTool.get().asType(Short.class);
   }
 
   @Override

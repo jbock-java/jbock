@@ -160,7 +160,7 @@ public class CoercionProvider {
       return null;
     }
     TypeMirror superclass = supertypes.get(0);
-    if (!tool.eql(tool.erasure(superclass), tool.declared(Enum.class))) {
+    if (!tool.isSameErasure(superclass, tool.asType(Enum.class))) {
       // not an enum
       return null;
     }
@@ -177,7 +177,7 @@ public class CoercionProvider {
       return CollectorClassValidator.getCollectorInfo(sourceMethod.getReturnType(), collectorClass);
     }
     TypeTool tool = TypeTool.get();
-    if (!tool.eql(tool.erasure(sourceMethod.getReturnType()), tool.declared(List.class))) {
+    if (!tool.isSameErasure(sourceMethod.getReturnType(), List.class)) {
       throw TmpException.create("Either define a custom collector, or return List");
     }
     List<? extends TypeMirror> typeParameters = tool.typeargs(sourceMethod.getReturnType());

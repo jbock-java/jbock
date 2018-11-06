@@ -10,12 +10,12 @@ import javax.lang.model.type.TypeMirror;
 class PrimitiveDoubleCoercion extends BasicDoubleCoercion {
 
   PrimitiveDoubleCoercion() {
-    super(TypeTool.get().primitive(TypeKind.DOUBLE));
+    super(TypeTool.get().getPrimitiveType(TypeKind.DOUBLE));
   }
 
   @Override
   TypeMirror paramType() {
-    return TypeTool.get().declared(Double.class);
+    return TypeTool.get().asType(Double.class);
   }
 
   @Override

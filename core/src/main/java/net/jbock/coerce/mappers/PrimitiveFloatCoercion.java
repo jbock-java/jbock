@@ -10,12 +10,12 @@ import javax.lang.model.type.TypeMirror;
 class PrimitiveFloatCoercion extends BasicFloatCoercion {
 
   PrimitiveFloatCoercion() {
-    super(TypeTool.get().primitive(TypeKind.FLOAT));
+    super(TypeTool.get().getPrimitiveType(TypeKind.FLOAT));
   }
 
   @Override
   TypeMirror paramType() {
-    return TypeTool.get().declared(Float.class);
+    return TypeTool.get().asType(Float.class);
   }
 
   @Override

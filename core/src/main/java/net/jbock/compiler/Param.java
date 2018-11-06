@@ -128,10 +128,10 @@ final class Param {
     this.optional = optional;
     this.repeatable = repeatable;
     this.flag = flag;
-    TypeTool tt = TypeTool.get();
+    TypeTool tool = TypeTool.get();
     TypeMirror returnType = sourceMethod.getReturnType();
-    boolean itsBoolean = tt.eql(returnType, tt.primitive(TypeKind.BOOLEAN)) ||
-        tt.eql(returnType, tt.declared(Boolean.class));
+    boolean itsBoolean = tool.isSameType(returnType, tool.getPrimitiveType(TypeKind.BOOLEAN)) ||
+        tool.isSameType(returnType, tool.asType(Boolean.class));
     if (flag) {
       if (!itsBoolean) {
         throw ValidationException.create(sourceMethod, "Flag parameters must return boolean.");
