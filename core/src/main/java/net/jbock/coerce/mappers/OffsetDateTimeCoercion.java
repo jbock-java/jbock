@@ -3,6 +3,7 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import java.time.OffsetDateTime;
+import java.util.Optional;
 
 class OffsetDateTimeCoercion extends CoercionFactory {
 
@@ -11,7 +12,7 @@ class OffsetDateTimeCoercion extends CoercionFactory {
   }
 
   @Override
-  CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::parse)", OffsetDateTime.class).build();
+  Optional<CodeBlock> mapExpr() {
+    return Optional.of(CodeBlock.builder().add("$T::parse", OffsetDateTime.class).build());
   }
 }

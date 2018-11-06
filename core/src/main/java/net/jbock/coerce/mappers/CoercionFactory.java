@@ -34,9 +34,9 @@ public abstract class CoercionFactory {
   }
 
   /**
-   * Maps from String to mapperReturnType
+   * An expression that maps from String to mapperReturnType
    */
-  abstract CodeBlock map();
+  abstract Optional<CodeBlock> mapExpr();
 
   CodeBlock extract(ParameterSpec param) {
     return CodeBlock.builder().add("$T.requireNonNull($N)", Objects.class, param).build();
@@ -58,14 +58,14 @@ public abstract class CoercionFactory {
       BasicInfo basicInfo,
       OptionalInfo optionalInfo,
       Optional<CollectorInfo> collectorInfo) {
-    return getCoercion(basicInfo, optionalInfo, collectorInfo, map(), initMapper());
+    return getCoercion(basicInfo, optionalInfo, collectorInfo, mapExpr(), initMapper());
   }
 
   private Coercion getCoercion(
       BasicInfo basicInfo,
       OptionalInfo optionalInfo,
       Optional<CollectorInfo> collectorInfo,
-      CodeBlock map,
+      Optional<CodeBlock> mapExpr,
       CodeBlock initMapper) {
     CodeBlock extract;
     TypeMirror paramType;
@@ -80,7 +80,7 @@ public abstract class CoercionFactory {
     }
     return Coercion.create(
         collectorParam(basicInfo, collectorInfo),
-        map,
+        mapExpr,
         initMapper,
         initCollector(collectorInfo),
         extract,

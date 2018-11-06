@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Optional;
 
 class PathCoercion extends CoercionFactory {
 
@@ -12,7 +13,7 @@ class PathCoercion extends CoercionFactory {
   }
 
   @Override
-  CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::get)", Paths.class).build();
+  Optional<CodeBlock> mapExpr() {
+    return Optional.of(CodeBlock.builder().add("$T::get", Paths.class).build());
   }
 }

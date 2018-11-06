@@ -3,6 +3,7 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import java.time.Instant;
+import java.util.Optional;
 
 class InstantCoercion extends CoercionFactory {
 
@@ -11,7 +12,7 @@ class InstantCoercion extends CoercionFactory {
   }
 
   @Override
-  CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::parse)", Instant.class).build();
+  Optional<CodeBlock> mapExpr() {
+    return Optional.of(CodeBlock.builder().add("$T::parse", Instant.class).build());
   }
 }

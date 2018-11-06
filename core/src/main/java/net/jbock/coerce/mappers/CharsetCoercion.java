@@ -3,6 +3,7 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import java.nio.charset.Charset;
+import java.util.Optional;
 
 class CharsetCoercion extends CoercionFactory {
 
@@ -11,7 +12,7 @@ class CharsetCoercion extends CoercionFactory {
   }
 
   @Override
-  CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::forName)", Charset.class).build();
+  Optional<CodeBlock> mapExpr() {
+    return Optional.of(CodeBlock.builder().add("$T::forName", Charset.class).build());
   }
 }

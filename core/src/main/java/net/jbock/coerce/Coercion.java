@@ -14,7 +14,7 @@ public final class Coercion {
   private final Optional<ParameterSpec> collectorParam;
 
   // helper.build
-  private final CodeBlock mapExpr;
+  private final Optional<CodeBlock> mapExpr;
 
   // helper.build
   private final CodeBlock initMapper;
@@ -33,7 +33,7 @@ public final class Coercion {
 
   private Coercion(
       Optional<ParameterSpec> collectorParam,
-      CodeBlock mapExpr,
+      Optional<CodeBlock> mapExpr,
       CodeBlock initMapper,
       CodeBlock initCollector,
       CodeBlock extract,
@@ -50,7 +50,7 @@ public final class Coercion {
 
   public static Coercion create(
       Optional<ParameterSpec> collectorParam,
-      CodeBlock mapExpr,
+      Optional<CodeBlock> mapExpr,
       CodeBlock initMapper,
       CodeBlock initCollector,
       CodeBlock extract,
@@ -62,7 +62,7 @@ public final class Coercion {
   /**
    * Maps from String to mapperReturnType
    */
-  public CodeBlock mapExpr() {
+  public Optional<CodeBlock> mapExpr() {
     return mapExpr;
   }
 
@@ -102,7 +102,7 @@ public final class Coercion {
   }
 
   public boolean skipMapCollect() {
-    return mapExpr.isEmpty() && isDefaultCollector();
+    return !mapExpr.isPresent() && isDefaultCollector();
   }
 
   public boolean isDefaultCollector() {

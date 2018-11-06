@@ -3,6 +3,7 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import java.net.URI;
+import java.util.Optional;
 
 class URICoercion extends CoercionFactory {
 
@@ -11,7 +12,7 @@ class URICoercion extends CoercionFactory {
   }
 
   @Override
-  CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::create)", URI.class).build();
+  Optional<CodeBlock> mapExpr() {
+    return Optional.of(CodeBlock.builder().add("$T::create", URI.class).build());
   }
 }

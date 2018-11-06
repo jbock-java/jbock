@@ -3,6 +3,7 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import java.math.BigInteger;
+import java.util.Optional;
 
 class BigIntegerCoercion extends CoercionFactory {
 
@@ -11,7 +12,7 @@ class BigIntegerCoercion extends CoercionFactory {
   }
 
   @Override
-  CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::new)", BigInteger.class).build();
+  Optional<CodeBlock> mapExpr() {
+    return Optional.of(CodeBlock.builder().add("$T::new", BigInteger.class).build());
   }
 }

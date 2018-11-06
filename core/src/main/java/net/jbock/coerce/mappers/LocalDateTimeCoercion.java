@@ -3,6 +3,7 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 class LocalDateTimeCoercion extends CoercionFactory {
 
@@ -11,7 +12,7 @@ class LocalDateTimeCoercion extends CoercionFactory {
   }
 
   @Override
-  CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::parse)", LocalDateTime.class).build();
+  Optional<CodeBlock> mapExpr() {
+    return Optional.of(CodeBlock.builder().add("$T::parse", LocalDateTime.class).build());
   }
 }

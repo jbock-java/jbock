@@ -3,6 +3,7 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import javax.lang.model.type.PrimitiveType;
+import java.util.Optional;
 
 abstract class BasicIntegerCoercion extends BasicNumberCoercion {
 
@@ -15,8 +16,8 @@ abstract class BasicIntegerCoercion extends BasicNumberCoercion {
   }
 
   @Override
-  final CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::valueOf)", Integer.class).build();
+  final Optional<CodeBlock> mapExpr() {
+    return Optional.of(CodeBlock.builder().add("$T::valueOf", Integer.class).build());
   }
 
 }

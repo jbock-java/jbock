@@ -293,10 +293,14 @@ final class Helper {
     CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
     if (param.paramType == REPEATABLE && !param.coercion().skipMapCollect()) {
       builder.add(".stream()");
-      builder.add("$L", param.coercion().mapExpr());
+      if (param.coercion().mapExpr().isPresent()) {
+        builder.add(".map($L)", param.coercion().mapExpr().get());
+      }
       builder.add(".collect($L)", param.coercion().collectExpr().orElseThrow(IllegalStateException::new));
     } else if (!param.flag) {
-      builder.add("$L", param.coercion().mapExpr());
+      if (param.coercion().mapExpr().isPresent()) {
+        builder.add(".map($L)", param.coercion().mapExpr().get());
+      }
     }
     if (param.required()) {
       builder.add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,

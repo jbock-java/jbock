@@ -3,6 +3,7 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import java.math.BigDecimal;
+import java.util.Optional;
 
 class BigDecimalCoercion extends CoercionFactory {
 
@@ -11,7 +12,7 @@ class BigDecimalCoercion extends CoercionFactory {
   }
 
   @Override
-  CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::new)", BigDecimal.class).build();
+  Optional<CodeBlock> mapExpr() {
+    return Optional.of(CodeBlock.builder().add("$T::new", BigDecimal.class).build());
   }
 }

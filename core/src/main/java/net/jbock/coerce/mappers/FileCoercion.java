@@ -3,6 +3,7 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import java.io.File;
+import java.util.Optional;
 
 class FileCoercion extends CoercionFactory {
 
@@ -11,7 +12,7 @@ class FileCoercion extends CoercionFactory {
   }
 
   @Override
-  CodeBlock map() {
-    return CodeBlock.builder().add(".map($T::new)", File.class).build();
+  Optional<CodeBlock> mapExpr() {
+    return Optional.of(CodeBlock.builder().add("$T::new", File.class).build());
   }
 }
