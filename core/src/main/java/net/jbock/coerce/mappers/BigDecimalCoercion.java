@@ -13,6 +13,6 @@ class BigDecimalCoercion extends CoercionFactory {
 
   @Override
   Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::new", BigDecimal.class).build());
+    return Optional.of(CodeBlock.of("$T::new", BigDecimal.class));
   }
 }

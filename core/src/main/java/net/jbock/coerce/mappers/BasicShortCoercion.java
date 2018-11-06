@@ -17,6 +17,6 @@ abstract class BasicShortCoercion extends CoercionFactory {
 
   @Override
   final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::valueOf", Short.class).build());
+    return Optional.of(CodeBlock.of("$T::valueOf", Short.class));
   }
 }

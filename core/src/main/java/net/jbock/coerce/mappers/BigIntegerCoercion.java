@@ -13,6 +13,6 @@ class BigIntegerCoercion extends CoercionFactory {
 
   @Override
   Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::new", BigInteger.class).build());
+    return Optional.of(CodeBlock.of("$T::new", BigInteger.class));
   }
 }

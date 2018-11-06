@@ -13,6 +13,6 @@ class LocalDateTimeCoercion extends CoercionFactory {
 
   @Override
   Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::parse", LocalDateTime.class).build());
+    return Optional.of(CodeBlock.of("$T::parse", LocalDateTime.class));
   }
 }

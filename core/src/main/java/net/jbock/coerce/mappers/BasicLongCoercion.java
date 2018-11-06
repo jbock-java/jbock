@@ -17,6 +17,6 @@ abstract class BasicLongCoercion extends BasicNumberCoercion {
 
   @Override
   final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::valueOf", Long.class).build());
+    return Optional.of(CodeBlock.of("$T::valueOf", Long.class));
   }
 }

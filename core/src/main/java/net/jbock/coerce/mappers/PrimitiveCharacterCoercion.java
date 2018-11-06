@@ -20,6 +20,6 @@ class PrimitiveCharacterCoercion extends BasicCharacterCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.charValue()", param).build();
+    return CodeBlock.of("$N.charValue()", param);
   }
 }

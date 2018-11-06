@@ -13,6 +13,6 @@ class OffsetDateTimeCoercion extends CoercionFactory {
 
   @Override
   Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::parse", OffsetDateTime.class).build());
+    return Optional.of(CodeBlock.of("$T::parse", OffsetDateTime.class));
   }
 }

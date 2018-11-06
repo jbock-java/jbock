@@ -20,6 +20,6 @@ class PrimitiveShortCoercion extends BasicShortCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.shortValue()", param).build();
+    return CodeBlock.of("$N.shortValue()", param);
   }
 }

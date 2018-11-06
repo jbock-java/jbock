@@ -39,7 +39,7 @@ public abstract class CoercionFactory {
   abstract Optional<CodeBlock> mapExpr();
 
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$T.requireNonNull($N)", Objects.class, param).build();
+    return CodeBlock.of("$T.requireNonNull($N)", Objects.class, param);
   }
 
   final TypeMirror mapperReturnType() {
@@ -72,7 +72,7 @@ public abstract class CoercionFactory {
     if (optionalInfo.optional || collectorInfo.isPresent()) {
       paramType = basicInfo.returnType;
       ParameterSpec param = ParameterSpec.builder(TypeName.get(paramType), basicInfo.paramName()).build();
-      extract = CodeBlock.builder().add("$T.requireNonNull($N)", Objects.class, param).build();
+      extract = CodeBlock.of("$T.requireNonNull($N)", Objects.class, param);
     } else {
       paramType = paramType();
       ParameterSpec param = ParameterSpec.builder(TypeName.get(paramType), basicInfo.paramName()).build();

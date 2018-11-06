@@ -13,6 +13,6 @@ class URICoercion extends CoercionFactory {
 
   @Override
   Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::create", URI.class).build());
+    return Optional.of(CodeBlock.of("$T::create", URI.class));
   }
 }

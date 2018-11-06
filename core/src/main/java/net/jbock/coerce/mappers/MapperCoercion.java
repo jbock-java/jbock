@@ -57,16 +57,14 @@ public final class MapperCoercion extends CoercionFactory {
 
   @Override
   public Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$N", mapperParam).build());
+    return Optional.of(CodeBlock.of("$N", mapperParam));
   }
 
   @Override
   public CodeBlock initMapper() {
-    return CodeBlock.builder()
-        .add("$T $N = new $T().get()",
-            ParameterizedTypeName.get(ClassName.get(Function.class), STRING, TypeName.get(mapperReturnType)),
-            mapperParam,
-            mapperType)
-        .build();
+    return CodeBlock.of("$T $N = new $T().get()",
+        ParameterizedTypeName.get(ClassName.get(Function.class), STRING, TypeName.get(mapperReturnType)),
+        mapperParam,
+        mapperType);
   }
 }

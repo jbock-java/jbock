@@ -20,6 +20,6 @@ class PrimitiveBooleanCoercion extends BasicBooleanCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.booleanValue()", param).build();
+    return CodeBlock.of("$N.booleanValue()", param);
   }
 }

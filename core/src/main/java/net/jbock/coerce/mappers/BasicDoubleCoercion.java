@@ -17,6 +17,6 @@ abstract class BasicDoubleCoercion extends BasicNumberCoercion {
 
   @Override
   final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::valueOf", Double.class).build());
+    return Optional.of(CodeBlock.of("$T::valueOf", Double.class));
   }
 }

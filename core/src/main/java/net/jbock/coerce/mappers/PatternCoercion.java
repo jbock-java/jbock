@@ -13,6 +13,6 @@ class PatternCoercion extends CoercionFactory {
 
   @Override
   Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::compile", Pattern.class).build());
+    return Optional.of(CodeBlock.of("$T::compile", Pattern.class));
   }
 }

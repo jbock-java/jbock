@@ -13,6 +13,6 @@ class ZonedDateTimeCoercion extends CoercionFactory {
 
   @Override
   Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::parse", ZonedDateTime.class).build());
+    return Optional.of(CodeBlock.of("$T::parse", ZonedDateTime.class));
   }
 }

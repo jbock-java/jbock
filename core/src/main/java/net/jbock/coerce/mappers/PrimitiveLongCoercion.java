@@ -20,6 +20,6 @@ class PrimitiveLongCoercion extends BasicLongCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.longValue()", param).build();
+    return CodeBlock.of("$N.longValue()", param);
   }
 }

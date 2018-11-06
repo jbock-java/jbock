@@ -25,7 +25,7 @@ class OptionalLongCoercion extends BasicLongCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.isPresent() ? $T.of($N.get().longValue()) : $T.empty()",
-        param, OptionalLong.class, param, OptionalLong.class).build();
+    return CodeBlock.of("$N.isPresent() ? $T.of($N.get().longValue()) : $T.empty()",
+        param, OptionalLong.class, param, OptionalLong.class);
   }
 }

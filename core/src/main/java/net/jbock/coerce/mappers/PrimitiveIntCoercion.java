@@ -20,6 +20,6 @@ class PrimitiveIntCoercion extends BasicIntegerCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.intValue()", param).build();
+    return CodeBlock.of("$N.intValue()", param);
   }
 }

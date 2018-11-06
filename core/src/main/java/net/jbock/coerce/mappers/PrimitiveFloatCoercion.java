@@ -20,6 +20,6 @@ class PrimitiveFloatCoercion extends BasicFloatCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.floatValue()", param).build();
+    return CodeBlock.of("$N.floatValue()", param);
   }
 }

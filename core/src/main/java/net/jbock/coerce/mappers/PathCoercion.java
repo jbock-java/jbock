@@ -14,6 +14,6 @@ class PathCoercion extends CoercionFactory {
 
   @Override
   Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::get", Paths.class).build());
+    return Optional.of(CodeBlock.of("$T::get", Paths.class));
   }
 }

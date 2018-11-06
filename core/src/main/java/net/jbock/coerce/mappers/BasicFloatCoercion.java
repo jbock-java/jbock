@@ -17,6 +17,6 @@ abstract class BasicFloatCoercion extends BasicNumberCoercion {
 
   @Override
   final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::valueOf", Float.class).build());
+    return Optional.of(CodeBlock.of("$T::valueOf", Float.class));
   }
 }

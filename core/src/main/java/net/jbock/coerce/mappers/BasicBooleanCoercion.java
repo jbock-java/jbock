@@ -17,6 +17,6 @@ abstract class BasicBooleanCoercion extends CoercionFactory {
 
   @Override
   final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::valueOf", Boolean.class).build());
+    return Optional.of(CodeBlock.of("$T::valueOf", Boolean.class));
   }
 }

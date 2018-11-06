@@ -13,6 +13,6 @@ class CharsetCoercion extends CoercionFactory {
 
   @Override
   Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::forName", Charset.class).build());
+    return Optional.of(CodeBlock.of("$T::forName", Charset.class));
   }
 }

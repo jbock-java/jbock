@@ -20,6 +20,6 @@ class PrimitiveByteCoercion extends BasicByteCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.byteValue()", param).build();
+    return CodeBlock.of("$N.byteValue()", param);
   }
 }

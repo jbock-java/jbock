@@ -17,6 +17,6 @@ abstract class BasicByteCoercion extends CoercionFactory {
 
   @Override
   final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::valueOf", Byte.class).build());
+    return Optional.of(CodeBlock.of("$T::valueOf", Byte.class));
   }
 }

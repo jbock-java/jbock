@@ -13,6 +13,6 @@ class FileCoercion extends CoercionFactory {
 
   @Override
   Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::new", File.class).build());
+    return Optional.of(CodeBlock.of("$T::new", File.class));
   }
 }

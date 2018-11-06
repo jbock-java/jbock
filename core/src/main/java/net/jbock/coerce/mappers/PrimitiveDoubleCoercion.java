@@ -20,6 +20,6 @@ class PrimitiveDoubleCoercion extends BasicDoubleCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.doubleValue()", param).build();
+    return CodeBlock.of("$N.doubleValue()", param);
   }
 }

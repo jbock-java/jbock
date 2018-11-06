@@ -25,7 +25,7 @@ class OptionalDoubleCoercion extends BasicDoubleCoercion {
 
   @Override
   CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.builder().add("$N.isPresent() ? $T.of($N.get().doubleValue()) : $T.empty()",
-        param, OptionalDouble.class, param, OptionalDouble.class).build();
+    return CodeBlock.of("$N.isPresent() ? $T.of($N.get().doubleValue()) : $T.empty()",
+        param, OptionalDouble.class, param, OptionalDouble.class);
   }
 }

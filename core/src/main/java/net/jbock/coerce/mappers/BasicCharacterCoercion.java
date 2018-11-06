@@ -17,6 +17,6 @@ abstract class BasicCharacterCoercion extends CoercionFactory {
 
   @Override
   final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("Helper::parseCharacter").build());
+    return Optional.of(CodeBlock.of("Helper::parseCharacter"));
   }
 }

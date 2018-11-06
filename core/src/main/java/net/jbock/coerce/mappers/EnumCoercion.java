@@ -13,7 +13,7 @@ public final class EnumCoercion extends CoercionFactory {
 
   @Override
   final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.builder().add("$T::valueOf", mapperReturnType()).build());
+    return Optional.of(CodeBlock.of("$T::valueOf", mapperReturnType()));
   }
 
   public static EnumCoercion create(TypeMirror mapperReturnType) {
