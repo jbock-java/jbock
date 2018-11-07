@@ -274,9 +274,10 @@ final class Helper {
       if (!initMapper.isEmpty()) {
         spec.addStatement(initMapper);
       }
-      if (param.paramType == REPEATABLE && !param.coercion().isDefaultCollector()) {
+      if (param.coercion().collectorParam().isPresent() &&
+          param.coercion().initCollector().isPresent()) {
         ParameterSpec collectorParam = param.coercion().collectorParam().get();
-        spec.addStatement("$T $N = $L", collectorParam.type, collectorParam, param.coercion().initCollector());
+        spec.addStatement("$T $N = $L", collectorParam.type, collectorParam, param.coercion().initCollector().get());
       }
     }
 
@@ -291,16 +292,15 @@ final class Helper {
 
   private CodeBlock extractExpression(Param param) {
     CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
-    if (param.paramType == REPEATABLE && !param.coercion().skipMapCollect()) {
+    boolean collected = param.paramType == REPEATABLE && !param.coercion().skipMapCollect();
+    if (collected) {
       builder.add(".stream()");
-      if (param.coercion().mapExpr().isPresent()) {
-        builder.add(".map($L)", param.coercion().mapExpr().get());
-      }
-      builder.add(".collect($L)", param.coercion().collectExpr().orElseThrow(IllegalStateException::new));
-    } else if (!param.flag) {
-      if (param.coercion().mapExpr().isPresent()) {
-        builder.add(".map($L)", param.coercion().mapExpr().get());
-      }
+    }
+    param.coercion().mapExpr().ifPresent(expr ->
+        builder.add(".map($L)", expr));
+    if (collected) {
+      param.coercion().collectExpr().ifPresent(expr ->
+          builder.add(".collect($L)", expr));
     }
     if (param.required()) {
       builder.add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,

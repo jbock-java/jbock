@@ -64,7 +64,7 @@ public class CoercionProvider {
       TypeElement collectorClass,
       boolean repeatable,
       boolean optional) throws TmpException, SearchHintException {
-    BasicInfo basicInfo = BasicInfo.create(sourceMethod.getReturnType(), paramName);
+    BasicInfo basicInfo = BasicInfo.create(repeatable, sourceMethod.getReturnType(), paramName);
     boolean auto = mapperClass == null;
     if (repeatable) {
       if (auto) {
@@ -131,8 +131,7 @@ public class CoercionProvider {
     CollectorInfo collectorInfo = collectorInfo(sourceMethod, collectorClass);
     MapperClassValidator.checkReturnType(mapperClass, collectorInfo.inputType);
     ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
-    MapperClassValidator.checkReturnType(mapperClass, collectorInfo.inputType);
-    return MapperCoercion.create(OptionalInfo.simple(collectorInfo.inputType), collectorInfo, mapperParam, mapperClass.asType(), basicInfo);
+    return MapperCoercion.create(OptionalInfo.simple(collectorInfo.inputType), collectorInfo.collectorType(), mapperParam, mapperClass.asType(), basicInfo);
   }
 
   // repeatable without mapper
@@ -149,7 +148,7 @@ public class CoercionProvider {
       throw TmpException.create(String.format("Define a mapper for %s", collectorInfo.inputType));
     }
     OptionalInfo optionalInfo = OptionalInfo.simple(collectorInfo.inputType);
-    return coercion.getCoercion(basicInfo, optionalInfo, Optional.of(collectorInfo));
+    return coercion.getCoercion(basicInfo, optionalInfo, collectorInfo.collectorType());
   }
 
   private CoercionFactory checkEnum(TypeMirror mirror) throws TmpException {

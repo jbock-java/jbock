@@ -192,6 +192,10 @@ public class TypeTool {
         getTypeElement(type).asType());
   }
 
+  public TypeMirror listOf(TypeMirror type) {
+    return types.getDeclaredType(getTypeElement(List.class), type);
+  }
+
   public List<? extends TypeMirror> getDirectSupertypes(TypeMirror mirror) {
     return types.directSupertypes(mirror);
   }
