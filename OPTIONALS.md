@@ -52,15 +52,13 @@ to our program.
 The `argv` array can never contain `null`. It doesn't feel
 right to convert it into something that can.
 
-#### Optional required
+#### Farewell to null
 
 `verbosity` is an optional parameter, and
  jbock will not allow using the types `Integer`
-or `int` for this. For optional parameters,
-`Optional<Integer>` or `OptionalInt` would
-be acceptable types.
+or `int` for this. The correct type is `Optional<Integer>`.
 
 If however `int` or `Integer` are used as the parameter type,
-then jbock will treat that parameter as required.
-In either case, jbock will <em>never</em> return `null`
+then jbock will treat this parameter as required.
+In any case, jbock will not return `null`
 as a parameter value.
