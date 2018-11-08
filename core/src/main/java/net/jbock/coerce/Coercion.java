@@ -25,11 +25,8 @@ public final class Coercion {
   // helper.build
   private final Optional<CodeBlock> initCollector;
 
-  // impl constructor
-  private final CodeBlock extract;
-
-  // impl constructor
-  private final TypeMirror paramType;
+  // impl constructor param
+  private final ParameterSpec constructorParam;
 
   // impl
   private final FieldSpec field;
@@ -41,16 +38,14 @@ public final class Coercion {
       Optional<CodeBlock> mapExpr,
       CodeBlock initMapper,
       Optional<CodeBlock> initCollector,
-      CodeBlock extract,
-      TypeMirror paramType,
+      ParameterSpec constructorParam,
       FieldSpec field,
       boolean isDefaultCollector) {
     this.collectorParam = collectorParam;
     this.mapExpr = mapExpr;
     this.initMapper = initMapper;
     this.initCollector = initCollector;
-    this.extract = extract;
-    this.paramType = paramType;
+    this.constructorParam = constructorParam;
     this.field = field;
     this.isDefaultCollector = isDefaultCollector;
   }
@@ -61,11 +56,12 @@ public final class Coercion {
       CodeBlock initMapper,
       TypeMirror mapperReturnType,
       Optional<CodeBlock> initCollector,
-      CodeBlock extract,
-      TypeMirror paramType,
+      TypeMirror constructorParamType,
       BasicInfo basicInfo) {
-    boolean isDefaultCollector = isDefaultCollector(initCollector, paramType, mapperReturnType);
-    return new Coercion(collectorParam, mapExpr, initMapper, initCollector, extract, paramType, basicInfo.fieldSpec(), isDefaultCollector);
+    boolean isDefaultCollector = isDefaultCollector(initCollector, constructorParamType, mapperReturnType);
+    ParameterSpec constructorParam = ParameterSpec.builder(
+        TypeName.get(constructorParamType), basicInfo.paramName()).build();
+    return new Coercion(collectorParam, mapExpr, initMapper, initCollector, constructorParam, basicInfo.fieldSpec(), isDefaultCollector);
   }
 
   /**
@@ -86,16 +82,12 @@ public final class Coercion {
     return initCollector;
   }
 
-  public TypeName paramType() {
-    return TypeName.get(paramType);
+  public ParameterSpec constructorParam() {
+    return constructorParam;
   }
 
   public FieldSpec field() {
     return field;
-  }
-
-  public CodeBlock extract() {
-    return extract;
   }
 
   public Optional<ParameterSpec> collectorParam() {

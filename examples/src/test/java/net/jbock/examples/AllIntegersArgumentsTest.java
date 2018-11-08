@@ -20,7 +20,6 @@ class AllIntegersArgumentsTest {
         "positional", emptyList(),
         "listOfIntegers", asList(1, 2, 2, 3),
         "optionalInteger", Optional.empty(),
-        "optionalInt", OptionalInt.empty(),
         "integer", 1,
         "primitiveInt", 1);
   }
@@ -31,7 +30,6 @@ class AllIntegersArgumentsTest {
         "positional", emptyList(),
         "listOfIntegers", emptyList(),
         "optionalInteger", Optional.of(1),
-        "optionalInt", OptionalInt.empty(),
         "integer", 1,
         "primitiveInt", 1);
   }
@@ -42,7 +40,6 @@ class AllIntegersArgumentsTest {
         "positional", asList(5, 3),
         "listOfIntegers", emptyList(),
         "optionalInteger", Optional.empty(),
-        "optionalInt", OptionalInt.empty(),
         "integer", 1,
         "primitiveInt", 1);
   }

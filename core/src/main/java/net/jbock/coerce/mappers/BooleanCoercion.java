@@ -5,14 +5,10 @@ import com.squareup.javapoet.CodeBlock;
 import javax.lang.model.type.PrimitiveType;
 import java.util.Optional;
 
-abstract class BasicBooleanCoercion extends CoercionFactory {
+final class BooleanCoercion extends CoercionFactory {
 
-  BasicBooleanCoercion(Class<?> mapperReturnType) {
-    super(mapperReturnType);
-  }
-
-  BasicBooleanCoercion(PrimitiveType mapperReturnType) {
-    super(mapperReturnType);
+  BooleanCoercion() {
+    super(Boolean.class);
   }
 
   @Override

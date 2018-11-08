@@ -20,9 +20,6 @@ abstract class AllLongsArguments {
   @Parameter(optional = true, longName = "opt")
   abstract Optional<Long> optionalLong();
 
-  @Parameter(optional = true, longName = "optlong")
-  abstract OptionalLong optionalPrimitiveLong();
-
   @Parameter(longName = "obj")
   abstract Long longObject();
 

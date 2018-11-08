@@ -296,8 +296,10 @@ final class Helper {
     if (collected) {
       builder.add(".stream()");
     }
-    param.coercion().mapExpr().ifPresent(expr ->
-        builder.add(".map($L)", expr));
+    if (!param.flag) {
+      param.coercion().mapExpr().ifPresent(expr ->
+          builder.add(".map($L)", expr));
+    }
     if (collected) {
       param.coercion().collectExpr().ifPresent(expr ->
           builder.add(".collect($L)", expr));

@@ -39,13 +39,13 @@ class CustomMapperArgumentsTest {
         "--enumSet", "FOO",
         "true", "false", "true",
         "--stringArray", "A",
-        "--anOptionalInt", "51");
+        "--aRequiredInt", "51");
     assertEquals(1500000000000L, parsed.date().getTime());
     assertEquals(Optional.of(1500000000000L), parsed.optDate().map(Date::getTime));
     assertEquals(1500000000000L, parsed.dateList().get(0).getTime());
     assertEquals(Optional.of(16), parsed.verbosity().map(BigInteger::intValue));
     assertEquals(Arrays.asList(true, false, true), parsed.booleanList());
-    assertEquals(Optional.of(51), parsed.anOptionalInt());
+    assertEquals(51, parsed.aRequiredInt());
     assertEquals(Arrays.asList(1, 2, 3, 4), parsed.integerList().orElseThrow(AssertionFailedError::new));
     assertEquals(Arrays.asList(OptionalInt.of(1), OptionalInt.empty(), OptionalInt.of(3), OptionalInt.of(4)),
         parsed.optionalInts());
@@ -68,7 +68,7 @@ class CustomMapperArgumentsTest {
         "  CustomMapperArguments",
         "",
         "SYNOPSIS",
-        "  CustomMapperArguments [<options>] --date=<DATE> --notFlag=<NOT_FLAG> [<boolean_list...>]",
+        "  CustomMapperArguments [<options>] --date=<DATE> --aRequiredInt=<A_REQUIRED_INT> --notFlag=<NOT_FLAG> [<boolean_list...>]",
         "",
         "DESCRIPTION",
         "",
@@ -85,7 +85,7 @@ class CustomMapperArgumentsTest {
         "",
         "  --verbosity <verbosity>",
         "",
-        "  --anOptionalInt <an_optional_int>",
+        "  --aRequiredInt <A_REQUIRED_INT>",
         "",
         "  --stringArray <string_array>",
         "",

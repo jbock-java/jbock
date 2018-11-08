@@ -34,7 +34,7 @@ class PositionalTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @PositionalParameter abstract OptionalInt a();",
+        "  @PositionalParameter abstract Optional<Integer> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -49,9 +49,9 @@ class PositionalTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "  @PositionalParameter(position = 1, optional = true) abstract Optional<String> a();",
-        "  @PositionalParameter(position = 10, optional = true) abstract OptionalInt b();",
+        "  @PositionalParameter(position = 10, optional = true) abstract Optional<Integer> b();",
         "  @PositionalParameter(position = 100, optional = true) abstract Optional<String> c();",
-        "  @PositionalParameter(position = 1000, optional = true) abstract OptionalInt d();",
+        "  @PositionalParameter(position = 1000, optional = true) abstract Optional<Integer> d();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -66,7 +66,7 @@ class PositionalTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "  @PositionalParameter abstract String a();",
-        "  @PositionalParameter(optional = true) abstract OptionalInt b();",
+        "  @PositionalParameter(optional = true) abstract Optional<Integer> b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -135,7 +135,6 @@ class PositionalTest {
         .processedWith(new Processor())
         .compilesWithoutError();
   }
-
 
   @Test
   void validPositionalBooleanPrimitive() {

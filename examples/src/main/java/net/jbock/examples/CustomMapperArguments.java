@@ -35,8 +35,8 @@ abstract class CustomMapperArguments {
   @Parameter(longName = "verbosity", optional = true, mappedBy = CustomBigIntegerMapper.class)
   abstract Optional<BigInteger> verbosity();
 
-  @Parameter(longName = "anOptionalInt", optional = true, mappedBy = PositiveNumberMapper.class)
-  abstract Optional<Integer> anOptionalInt();
+  @Parameter(longName = "aRequiredInt", mappedBy = PositiveNumberMapper.class)
+  abstract int aRequiredInt();
 
   @Parameter(longName = "stringArray", optional = true, mappedBy = ArrayMapper.class)
   abstract Optional<String[]> stringArray();

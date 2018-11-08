@@ -3,6 +3,7 @@ package net.jbock.examples;
 import net.jbock.CommandLineArguments;
 import net.jbock.PositionalParameter;
 
+import java.util.Optional;
 import java.util.OptionalInt;
 
 // Allow positional arguments to start with a dash, so negative numbers can be passed.
@@ -25,7 +26,7 @@ public abstract class AdditionArguments {
    * Optional third argument
    */
   @PositionalParameter(optional = true)
-  abstract OptionalInt c();
+  abstract Optional<Integer> c();
 
   final int sum() {
     return a() + b() + c().orElse(0);

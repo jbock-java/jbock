@@ -7,7 +7,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.OptionalInfo;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
@@ -28,20 +27,13 @@ public final class MapperCoercion extends CoercionFactory {
   }
 
   public static Coercion create(
-      OptionalInfo optionalInfo,
-      ParameterSpec mapperParam,
-      TypeMirror mapperType,
-      BasicInfo basicInfo) {
-    return create(optionalInfo, Optional.empty(), mapperParam, mapperType, basicInfo);
-  }
-
-  public static Coercion create(
-      OptionalInfo optionalInfo,
+      TypeMirror mapperReturnType,
+      Optional<TypeMirror> optionalInfo,
       Optional<TypeMirror> collectorType,
       ParameterSpec mapperParam,
       TypeMirror mapperType,
       BasicInfo basicInfo) {
-    return new MapperCoercion(optionalInfo.baseType, mapperParam, mapperType)
+    return new MapperCoercion(mapperReturnType, mapperParam, mapperType)
         .getCoercion(basicInfo, optionalInfo, collectorType);
   }
 

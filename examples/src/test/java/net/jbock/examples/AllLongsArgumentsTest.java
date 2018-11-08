@@ -20,7 +20,6 @@ class AllLongsArgumentsTest {
         "positional", emptyList(),
         "listOfLongs", asList(1L, 2L, 2L, 3L),
         "optionalLong", Optional.empty(),
-        "optionalPrimitiveLong", OptionalLong.empty(),
         "longObject", 1L,
         "primitiveLong", 1L);
   }
@@ -31,7 +30,6 @@ class AllLongsArgumentsTest {
         "positional", emptyList(),
         "listOfLongs", emptyList(),
         "optionalLong", Optional.of(1L),
-        "optionalPrimitiveLong", OptionalLong.empty(),
         "longObject", 1L,
         "primitiveLong", 1L);
   }
@@ -42,7 +40,6 @@ class AllLongsArgumentsTest {
         "positional", asList(5L, 3L),
         "listOfLongs", emptyList(),
         "optionalLong", Optional.empty(),
-        "optionalPrimitiveLong", OptionalLong.empty(),
         "longObject", 1L,
         "primitiveLong", 1L);
   }

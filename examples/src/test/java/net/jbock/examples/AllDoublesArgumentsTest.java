@@ -20,7 +20,6 @@ class AllDoublesArgumentsTest {
         "positional", emptyList(),
         "listOfDoubles", asList(1.5d, 2.5d, 2.5d, 3.5d),
         "optionalDouble", Optional.empty(),
-        "optionalPrimitiveDouble", OptionalDouble.empty(),
         "doubleObject", 1.5d,
         "primitiveDouble", 1.5d);
   }
@@ -31,7 +30,6 @@ class AllDoublesArgumentsTest {
         "positional", emptyList(),
         "listOfDoubles", emptyList(),
         "optionalDouble", Optional.of(1.5d),
-        "optionalPrimitiveDouble", OptionalDouble.empty(),
         "doubleObject", 1.5d,
         "primitiveDouble", 1.5d);
   }
@@ -42,9 +40,7 @@ class AllDoublesArgumentsTest {
         "positional", asList(5.5d, 3.5d),
         "listOfDoubles", emptyList(),
         "optionalDouble", Optional.empty(),
-        "optionalPrimitiveDouble", OptionalDouble.empty(),
         "doubleObject", 1.5d,
         "primitiveDouble", 1.5d);
   }
-
 }

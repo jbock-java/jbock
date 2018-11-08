@@ -6,38 +6,23 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
-public class OptionalInfo {
+public final class OptionalInfo {
 
-  public final boolean optional;
-
-  public final TypeMirror baseType;
-
-  private OptionalInfo(boolean optional, TypeMirror baseType) {
-    this.optional = optional;
-    this.baseType = baseType;
-  }
-
-  static OptionalInfo simple(TypeMirror baseType) {
-    return new OptionalInfo(false, baseType);
-  }
-
-  private static OptionalInfo optional(TypeMirror baseType) {
-    return new OptionalInfo(true, baseType);
-  }
-
-  public static OptionalInfo findOptionalInfo(TypeMirror mirror, boolean optional) {
+  // Returns empty unless the return type is of the form Optional<?>.
+  // Note, it can be return emtpy while basicInfo.optional is true,
+  // if the return type is e.g. OptionalInt.
+  public static Optional<TypeMirror> findOptionalInfo(TypeMirror mirror, boolean optional) {
     if (!optional) {
-      return OptionalInfo.simple(mirror);
+      return Optional.empty();
     }
     TypeTool tool = TypeTool.get();
     if (!tool.isSameErasure(mirror, Optional.class)) {
-      return OptionalInfo.simple(mirror);
+      return Optional.empty();
     }
     List<? extends TypeMirror> typeArgs = tool.typeargs(mirror);
     if (typeArgs.isEmpty()) {
-      return OptionalInfo.simple(mirror);
+      return Optional.empty();
     }
-    return OptionalInfo.optional(typeArgs.get(0));
+    return Optional.of(typeArgs.get(0));
   }
-
 }

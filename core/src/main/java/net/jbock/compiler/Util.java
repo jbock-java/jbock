@@ -40,27 +40,48 @@ public final class Util {
     return false;
   }
 
+  private enum CharType {
+    LOWER, UPPER, DIGIT, OTHER
+
+  }
+
+  private static CharType charType(char c) {
+    if (Character.isUpperCase(c)) {
+      return CharType.UPPER;
+    }
+    if (Character.isLowerCase(c)) {
+      return CharType.LOWER;
+    }
+    if (Character.isDigit(c)) {
+      return CharType.DIGIT;
+    }
+    return CharType.OTHER;
+  }
 
   static String snakeCase(String input) {
+    int length = input.length();
+    if (length < 2) {
+      return input;
+    }
     StringBuilder sb = new StringBuilder();
-    int prevLower = 0;
-    int prevUpper = 0;
-    for (int i = 0; i < input.length(); i++) {
+    CharType type0 = charType(input.charAt(0));
+    CharType type1 = charType(input.charAt(1));
+    sb.append(Character.toLowerCase(input.charAt(0)));
+    if (type0 != type1) {
+      sb.append('_');
+    }
+    sb.append(Character.toLowerCase(input.charAt(1)));
+    for (int i = 2; i < length; i++) {
       char c = input.charAt(i);
-      if (Character.isUpperCase(c)) {
-        if (prevLower >= 2) {
-          sb.append('_');
-        }
-        prevLower = 0;
-        prevUpper++;
-      } else {
-        if (prevUpper >= 2) {
-          sb.append('_');
-        }
-        prevUpper = 0;
-        prevLower++;
+      CharType type2 = charType(c);
+      if (c != '_' &&
+          type1 != type2 &&
+          (type0 == type1 || type0 != type2)) {
+        sb.append('_');
       }
       sb.append(Character.toLowerCase(c));
+      type0 = type1;
+      type1 = type2;
     }
     return sb.toString();
   }

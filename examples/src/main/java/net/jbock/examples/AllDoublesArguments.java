@@ -6,7 +6,6 @@ import net.jbock.PositionalParameter;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalDouble;
 
 @CommandLineArguments
 abstract class AllDoublesArguments {
@@ -19,9 +18,6 @@ abstract class AllDoublesArguments {
 
   @Parameter(optional = true, longName = "opt")
   abstract Optional<Double> optionalDouble();
-
-  @Parameter(optional = true, longName = "optdouble")
-  abstract OptionalDouble optionalPrimitiveDouble();
 
   @Parameter(longName = "obj")
   abstract Double doubleObject();

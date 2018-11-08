@@ -1,7 +1,5 @@
 package net.jbock.coerce.hint;
 
-import net.jbock.coerce.OptionalInfo;
-
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
@@ -15,6 +13,7 @@ public class HintProvider {
 
   private static final List<Hint> HINTS = Arrays.asList(
       new RawCombinatorHint(),
+      new OptionalPrimitiveHint(),
       new CollectionHint(),
       new ArrayHint(),
       new PrimitiveHint(),
@@ -35,9 +34,9 @@ public class HintProvider {
       return findHintSimple(type, repeatable);
     }
     if (optional) {
-      OptionalInfo optionalInfo = findOptionalInfo(type, true);
-      if (optionalInfo.optional) {
-        return findHintSimple(optionalInfo.baseType, repeatable);
+      Optional<TypeMirror> optionalInfo = findOptionalInfo(type, true);
+      if (optionalInfo.isPresent()) {
+        return findHintSimple(optionalInfo.get(), repeatable);
       }
     }
     return findHintSimple(type, repeatable);

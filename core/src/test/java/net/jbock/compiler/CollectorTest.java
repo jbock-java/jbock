@@ -305,7 +305,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Define a mapper for Optional<java.lang.Integer>");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test
@@ -353,7 +353,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Define a mapper");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test

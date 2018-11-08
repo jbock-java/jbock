@@ -8,19 +8,13 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.OptionalInfo;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collector;
 
 public abstract class CoercionFactory {
-
-  public boolean handlesOptionalPrimitive() {
-    return false;
-  }
 
   final TypeMirror mapperReturnType;
 
@@ -37,10 +31,6 @@ public abstract class CoercionFactory {
    */
   abstract Optional<CodeBlock> mapExpr();
 
-  CodeBlock extract(ParameterSpec param) {
-    return CodeBlock.of("$T.requireNonNull($N)", Objects.class, param);
-  }
-
   final TypeMirror mapperReturnType() {
     return mapperReturnType;
   }
@@ -49,61 +39,49 @@ public abstract class CoercionFactory {
     return CodeBlock.builder().build();
   }
 
-  TypeMirror paramType() {
-    return mapperReturnType;
-  }
-
   public final Coercion getCoercion(
       BasicInfo basicInfo,
-      OptionalInfo optionalInfo,
+      Optional<TypeMirror> optionalInfo,
       Optional<TypeMirror> collectorType) {
     return getCoercion(basicInfo, optionalInfo, collectorType, mapExpr(), initMapper());
   }
 
   private Coercion getCoercion(
       BasicInfo basicInfo,
-      OptionalInfo optionalInfo,
+      Optional<TypeMirror> optionalInfo,
       Optional<TypeMirror> collectorType,
       Optional<CodeBlock> mapExpr,
       CodeBlock initMapper) {
-    CodeBlock extract;
-    TypeMirror paramType;
-    if (optionalInfo.optional || basicInfo.repeatable) {
-      paramType = basicInfo.returnType;
-      ParameterSpec param = ParameterSpec.builder(TypeName.get(paramType), basicInfo.paramName()).build();
-      extract = CodeBlock.of("$T.requireNonNull($N)", Objects.class, param);
+    TypeMirror constructorParamType = getConstructorParamType(basicInfo, optionalInfo);
+    Optional<ParameterSpec> collectorParam;
+    if (!collectorType.isPresent()) {
+      collectorParam = Optional.empty();
     } else {
-      paramType = paramType();
-      ParameterSpec param = ParameterSpec.builder(TypeName.get(paramType), basicInfo.paramName()).build();
-      extract = extract(param);
+      collectorParam = collectorParam(basicInfo, mapperReturnType);
     }
     return Coercion.create(
-        collectorParam(basicInfo, mapperReturnType, collectorType),
+        collectorParam,
         mapExpr,
         initMapper,
         mapperReturnType,
-        initCollector(collectorType),
-        extract,
-        paramType,
+        collectorType.map(type -> CodeBlock.of("new $T().get()", type)),
+        constructorParamType,
         basicInfo);
   }
 
-  private Optional<CodeBlock> initCollector(
-      Optional<TypeMirror> collectorType) {
-    if (!collectorType.isPresent()) {
-      return Optional.empty();
+  private TypeMirror getConstructorParamType(
+      BasicInfo basicInfo,
+      Optional<TypeMirror> optionalInfo) {
+    boolean useReturnType = optionalInfo.isPresent() || basicInfo.repeatable;
+    if (useReturnType) {
+      return basicInfo.returnType;
     }
-    return Optional.of(CodeBlock.of(
-        "new $T().get()", collectorType.get()));
+    return mapperReturnType;
   }
 
   private Optional<ParameterSpec> collectorParam(
       BasicInfo basicInfo,
-      TypeMirror mapperReturnType,
-      Optional<TypeMirror> collectorType) {
-    if (!collectorType.isPresent()) {
-      return Optional.empty();
-    }
+      TypeMirror mapperReturnType) {
     TypeName t = TypeName.get(mapperReturnType);
     TypeName a = WildcardTypeName.subtypeOf(Object.class);
     TypeName r = TypeName.get(basicInfo.returnType);

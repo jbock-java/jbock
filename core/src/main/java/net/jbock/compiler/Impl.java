@@ -2,12 +2,12 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
@@ -72,9 +72,8 @@ final class Impl {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
     for (Param p : option.context.parameters) {
       FieldSpec field = p.field();
-      ParameterSpec param = ParameterSpec.builder(p.coercion().paramType(), field.name).build();
-      builder.addStatement("this.$N = $L", field, p.coercion().extract());
-      builder.addParameter(param);
+      builder.addStatement("this.$N = $T.requireNonNull($N)", field, Objects.class, p.coercion().constructorParam());
+      builder.addParameter(p.coercion().constructorParam());
     }
     return builder.build();
   }

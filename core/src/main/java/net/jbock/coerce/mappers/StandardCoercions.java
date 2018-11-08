@@ -2,7 +2,9 @@ package net.jbock.coerce.mappers;
 
 import net.jbock.compiler.TypeTool;
 
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -18,25 +20,14 @@ public class StandardCoercions {
     CoercionFactory[] allCoercions = new CoercionFactory[]{
         new CharsetCoercion(),
         new PatternCoercion(),
-        new ObjectIntegerCoercion(),
-        new PrimitiveIntCoercion(),
-        new OptionalIntCoercion(),
-        new ObjectLongCoercion(),
-        new PrimitiveLongCoercion(),
-        new OptionalDoubleCoercion(),
-        new ObjectDoubleCoercion(),
-        new PrimitiveDoubleCoercion(),
-        new ObjectFloatCoercion(),
-        new PrimitiveFloatCoercion(),
-        new OptionalLongCoercion(),
-        new ObjectCharacterCoercion(),
-        new PrimitiveCharacterCoercion(),
-        new ObjectBooleanCoercion(),
-        new PrimitiveBooleanCoercion(),
-        new ObjectShortCoercion(),
-        new PrimitiveShortCoercion(),
-        new ObjectByteCoercion(),
-        new PrimitiveByteCoercion(),
+        new IntegerCoercion(),
+        new LongCoercion(),
+        new DoubleCoercion(),
+        new FloatCoercion(),
+        new CharacterCoercion(),
+        new BooleanCoercion(),
+        new ShortCoercion(),
+        new ByteCoercion(),
         new PathCoercion(),
         new FileCoercion(),
         new URICoercion(),
@@ -55,6 +46,16 @@ public class StandardCoercions {
             coercion.mapperReturnType(),
             coercion.getClass().getSimpleName(), previous.getClass().getSimpleName()));
       }
+    }
+    TypeTool tool = TypeTool.get();
+    for (TypeKind typeKind : Arrays.asList(
+        TypeKind.INT, TypeKind.FLOAT,
+        TypeKind.LONG, TypeKind.DOUBLE,
+        TypeKind.BOOLEAN, TypeKind.BYTE,
+        TypeKind.SHORT, TypeKind.CHAR)) {
+      TypeMirror primitiveType = tool.getPrimitiveType(typeKind);
+      CoercionFactory factory = m.get(new MapMirror(tool.box(primitiveType)));
+      m.put(new MapMirror(primitiveType), factory);
     }
     coercions = Collections.unmodifiableMap(m);
   }

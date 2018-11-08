@@ -6,7 +6,6 @@ import net.jbock.Parameter;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 @CommandLineArguments
 abstract class NoNameArguments {
@@ -18,7 +17,7 @@ abstract class NoNameArguments {
   abstract List<String> file();
 
   @Parameter(optional = true, shortName = 'v', longName = "verbosity")
-  abstract OptionalInt verbosity();
+  abstract Optional<Integer> verbosity();
 
   @Parameter(shortName = 'n', longName = "number")
   abstract int number();

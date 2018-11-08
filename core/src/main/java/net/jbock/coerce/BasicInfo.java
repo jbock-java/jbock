@@ -12,18 +12,21 @@ public final class BasicInfo {
 
   public final boolean repeatable;
 
+  public final boolean optional;
+
   public final TypeMirror returnType;
 
   private final String paramName;
 
-  private BasicInfo(boolean repeatable, TypeMirror returnType, String paramName) {
+  private BasicInfo(boolean repeatable, boolean optional, TypeMirror returnType, String paramName) {
     this.repeatable = repeatable;
+    this.optional = optional;
     this.returnType = returnType;
     this.paramName = paramName;
   }
 
-  static BasicInfo create(boolean repeatable, TypeMirror returnType, String paramName) {
-    return new BasicInfo(repeatable, returnType, snakeToCamel(paramName));
+  static BasicInfo create(boolean repeatable, boolean optional, TypeMirror returnType, String paramName) {
+    return new BasicInfo(repeatable, optional, returnType, snakeToCamel(paramName));
   }
 
   public String paramName() {

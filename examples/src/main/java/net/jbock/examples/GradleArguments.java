@@ -62,7 +62,7 @@ abstract class GradleArguments {
     @Parameter(
         longName = "bar",
         optional = true)
-    abstract OptionalInt bar();
+    abstract Optional<Integer> bar();
   }
 
   @CommandLineArguments

@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 
-import java.util.OptionalInt;
+import java.util.Optional;
 
 @CommandLineArguments
 abstract class PsArguments {
@@ -22,5 +22,5 @@ abstract class PsArguments {
       longName = "width",
       shortName = 'w',
       descriptionArgumentName = "number")
-  abstract OptionalInt width();
+  abstract Optional<Integer> width();
 }

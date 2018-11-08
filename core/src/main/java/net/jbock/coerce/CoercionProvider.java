@@ -64,7 +64,7 @@ public class CoercionProvider {
       TypeElement collectorClass,
       boolean repeatable,
       boolean optional) throws TmpException, SearchHintException {
-    BasicInfo basicInfo = BasicInfo.create(repeatable, sourceMethod.getReturnType(), paramName);
+    BasicInfo basicInfo = BasicInfo.create(repeatable, optional, sourceMethod.getReturnType(), paramName);
     boolean auto = mapperClass == null;
     if (repeatable) {
       if (auto) {
@@ -87,38 +87,37 @@ public class CoercionProvider {
       boolean optional,
       BasicInfo basicInfo) throws TmpException, SearchHintException {
     TypeMirror returnType = sourceMethod.getReturnType();
-    OptionalInfo optionalInfo = findOptionalInfo(returnType, optional);
-    CoercionFactory enumCoercion = checkEnum(optionalInfo.baseType);
-    if (enumCoercion != null) {
-      return enumCoercion.getCoercion(basicInfo, optionalInfo, Optional.empty());
-    }
-    CoercionFactory factory = StandardCoercions.get(optionalInfo.baseType);
-    if (factory == null) {
-      throw SearchHintException.create("Unknown parameter type. Define a custom mapper.");
-    }
-    if (factory.handlesOptionalPrimitive() && !optional) {
+    Optional<TypeMirror> optionalInfo = findOptionalInfo(returnType, optional);
+    CoercionFactory factory = findCoercion(optionalInfo.orElse(returnType));
+    if (optionalInfo.isPresent() && !optional) {
       throw TmpException.create("Declare this parameter optional.");
     }
-    if (optional && !factory.handlesOptionalPrimitive() && !optionalInfo.optional) {
-      throw TmpException.create("Wrap the parameter type in Optional");
+    if (!optionalInfo.isPresent() && optional) {
+      throw TmpException.create("Wrap the parameter type in Optional.");
     }
     return factory.getCoercion(basicInfo, optionalInfo, Optional.empty());
   }
 
-  // mapper but not repeatable
+  // simple mapper
   private Coercion handleSingle(
       ExecutableElement sourceMethod,
       String paramName,
       TypeElement mapperClass,
       BasicInfo basicInfo,
       boolean optional) throws TmpException {
+    TypeMirror returnType = sourceMethod.getReturnType();
     ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
-    OptionalInfo optionalInfo = findOptionalInfo(sourceMethod.getReturnType(), optional);
-    if (optional && !optionalInfo.optional) {
-      throw TmpException.create("Wrap the parameter type in Optional");
+    Optional<TypeMirror> optionalInfo = findOptionalInfo(returnType, optional);
+    if (optionalInfo.isPresent() && !optional) {
+      throw TmpException.create("Declare this parameter optional.");
     }
-    MapperClassValidator.checkReturnType(mapperClass, optionalInfo.baseType);
-    return MapperCoercion.create(optionalInfo, mapperParam, mapperClass.asType(), basicInfo);
+    if (!optionalInfo.isPresent() && optional) {
+      throw TmpException.create("Wrap the parameter type in Optional.");
+    }
+    TypeMirror boxedReturnType = TypeTool.get().box(returnType);
+    TypeMirror mapperReturnType = optionalInfo.orElse(boxedReturnType);
+    MapperClassValidator.checkReturnType(mapperClass, mapperReturnType);
+    return MapperCoercion.create(mapperReturnType, optionalInfo, Optional.empty(), mapperParam, mapperClass.asType(), basicInfo);
   }
 
   // repeatable with mapper
@@ -131,42 +130,47 @@ public class CoercionProvider {
     CollectorInfo collectorInfo = collectorInfo(sourceMethod, collectorClass);
     MapperClassValidator.checkReturnType(mapperClass, collectorInfo.inputType);
     ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(paramName) + "Mapper").build();
-    return MapperCoercion.create(OptionalInfo.simple(collectorInfo.inputType), collectorInfo.collectorType(), mapperParam, mapperClass.asType(), basicInfo);
+    return MapperCoercion.create(collectorInfo.inputType, Optional.empty(), collectorInfo.collectorType(), mapperParam, mapperClass.asType(), basicInfo);
   }
 
   // repeatable without mapper
   private Coercion handleRepeatableAuto(
       ExecutableElement sourceMethod,
       TypeElement collectorClass,
-      BasicInfo basicInfo) throws TmpException {
+      BasicInfo basicInfo) throws TmpException, SearchHintException {
     CollectorInfo collectorInfo = collectorInfo(sourceMethod, collectorClass);
-    CoercionFactory coercion = StandardCoercions.get(collectorInfo.inputType);
-    if (coercion == null) {
-      coercion = checkEnum(collectorInfo.inputType);
-    }
-    if (coercion == null || coercion.handlesOptionalPrimitive()) {
-      throw TmpException.create(String.format("Define a mapper for %s", collectorInfo.inputType));
-    }
-    OptionalInfo optionalInfo = OptionalInfo.simple(collectorInfo.inputType);
-    return coercion.getCoercion(basicInfo, optionalInfo, collectorInfo.collectorType());
+    CoercionFactory coercion = findCoercion(collectorInfo.inputType);
+    return coercion.getCoercion(basicInfo, Optional.empty(), collectorInfo.collectorType());
   }
 
-  private CoercionFactory checkEnum(TypeMirror mirror) throws TmpException {
+  private CoercionFactory findCoercion(TypeMirror mirror) throws TmpException, SearchHintException {
+    CoercionFactory standardCoercion = StandardCoercions.get(mirror);
+    if (standardCoercion != null) {
+      return standardCoercion;
+    }
+    boolean isEnum = isEnumType(mirror);
+    if (!isEnum) {
+      throw SearchHintException.create("Unknown parameter type. Define a custom mapper.");
+    }
+    return EnumCoercion.create(mirror);
+  }
+
+  private boolean isEnumType(TypeMirror mirror) throws TmpException {
     TypeTool tool = TypeTool.get();
     List<? extends TypeMirror> supertypes = tool.getDirectSupertypes(mirror);
     if (supertypes.isEmpty()) {
       // not an enum
-      return null;
+      return false;
     }
     TypeMirror superclass = supertypes.get(0);
     if (!tool.isSameErasure(superclass, tool.asType(Enum.class))) {
       // not an enum
-      return null;
+      return false;
     }
     if (tool.isPrivateType(mirror)) {
       throw TmpException.create("The enum may not be private.");
     }
-    return EnumCoercion.create(mirror);
+    return true;
   }
 
   private CollectorInfo collectorInfo(

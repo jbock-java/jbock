@@ -641,6 +641,48 @@ class MapperTest {
   }
 
   @Test
+  void mapperValidBytePrimitive() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract byte number();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, Byte>> {",
+        "    public Function<String, Byte> get() {",
+        "      return s -> 1;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mapperValidOptionalInteger() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class, optional = true)",
+        "  abstract Optional<Integer> number();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, Integer>> {",
+        "    public Function<String, Integer> get() {",
+        "      return s -> 1;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void mapperValidListOfSet() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",

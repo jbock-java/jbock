@@ -43,6 +43,14 @@ public class TypeTool {
         }
       };
 
+  private static final TypeVisitor<PrimitiveType, Void> AS_PRIMITIVE =
+      new SimpleTypeVisitor8<PrimitiveType, Void>() {
+        @Override
+        public PrimitiveType visitPrimitive(PrimitiveType primitiveType, Void _null) {
+          return primitiveType;
+        }
+      };
+
   private static final ElementVisitor<TypeElement, Void> AS_TYPE_ELEMENT =
       new SimpleElementVisitor8<TypeElement, Void>() {
         @Override
@@ -206,6 +214,14 @@ public class TypeTool {
       return false;
     }
     return element.getModifiers().contains(Modifier.PRIVATE);
+  }
+
+  public TypeMirror box(TypeMirror mirror) {
+    PrimitiveType primitive = mirror.accept(AS_PRIMITIVE, null);
+    if (primitive == null) {
+      return mirror;
+    }
+    return types.boxedClass(primitive).asType();
   }
 
   public TypeElement getTypeElement(Class<?> clazz) {

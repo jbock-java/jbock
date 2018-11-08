@@ -20,9 +20,6 @@ abstract class AllIntegersArguments {
   @Parameter(optional = true, longName = "opt")
   abstract Optional<Integer> optionalInteger();
 
-  @Parameter(optional = true, longName = "optint")
-  abstract OptionalInt optionalInt();
-
   @Parameter(longName = "obj")
   abstract Integer integer();
 

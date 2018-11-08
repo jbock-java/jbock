@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
-import java.util.OptionalInt;
+import java.util.Optional;
 
 class GradleArgumentsFooTest {
 
@@ -12,7 +12,7 @@ class GradleArgumentsFooTest {
 
   @Test
   void testParserForNestedClass() {
-    f.assertThat("--bar=4").succeeds("bar", OptionalInt.of(4));
+    f.assertThat("--bar=4").succeeds("bar", Optional.of(4));
   }
 
   @Test

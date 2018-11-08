@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
-import java.util.OptionalInt;
+import java.util.Optional;
 
 class AdditionArgumentsTest {
 
@@ -15,7 +15,7 @@ class AdditionArgumentsTest {
     f.assertThat("1", "2").succeeds(
         "a", 1,
         "b", 2,
-        "c", OptionalInt.empty());
+        "c", Optional.empty());
   }
 
   @Test
@@ -23,7 +23,7 @@ class AdditionArgumentsTest {
     f.assertThat("1", "2", "3").succeeds(
         "a", 1,
         "b", 2,
-        "c", OptionalInt.of(3));
+        "c", Optional.of(3));
   }
 
   @Test
@@ -39,7 +39,6 @@ class AdditionArgumentsTest {
     f.assertThat("-1", "-2", "3").satisfies(e -> e.sum() == 0);
     f.assertThat("-1", "-2").satisfies(e -> e.sum() == -3);
   }
-
 
   @Test
   void testPrint() {

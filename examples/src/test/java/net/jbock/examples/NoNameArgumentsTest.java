@@ -4,7 +4,6 @@ import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.OptionalInt;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -19,7 +18,7 @@ class NoNameArgumentsTest {
     Object[] expected = {
         "message", Optional.of("m"),
         "file", asList("f", "o", "o"),
-        "verbosity", OptionalInt.empty(),
+        "verbosity", Optional.empty(),
         "number", 1,
         "cmos", true};
     f.assertThat("--message=m", "--file=f", "--file=o", "--file=o", "--cmos", "-n1")
@@ -35,7 +34,7 @@ class NoNameArgumentsTest {
     f.assertThat("--cmos", "-n1").succeeds(
         "message", Optional.empty(),
         "file", emptyList(),
-        "verbosity", OptionalInt.empty(),
+        "verbosity", Optional.empty(),
         "number", 1,
         "cmos", true);
   }
@@ -45,13 +44,13 @@ class NoNameArgumentsTest {
     f.assertThat("-v", "1", "-n1").succeeds(
         "message", Optional.empty(),
         "file", emptyList(),
-        "verbosity", OptionalInt.of(1),
+        "verbosity", Optional.of(1),
         "number", 1,
         "cmos", false);
     f.assertThat("-n1").succeeds(
         "message", Optional.empty(),
         "file", emptyList(),
-        "verbosity", OptionalInt.empty(),
+        "verbosity", Optional.empty(),
         "number", 1,
         "cmos", false);
   }
