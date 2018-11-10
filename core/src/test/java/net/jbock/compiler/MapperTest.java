@@ -150,7 +150,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper should return java.lang.Integer but returns java.lang.Long.");
+        .withErrorContaining("There is a problem with the mapper class: The mapper should return Integer but returns Long.");
   }
 
   @Test
@@ -176,7 +176,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper should return java.lang.Integer but returns java.lang.Long");
+        .withErrorContaining("There is a problem with the mapper class: The mapper should return Integer but returns Long.");
   }
 
   @Test
@@ -341,7 +341,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The mapper should return java.lang.Integer but returns String");
+        .withErrorContaining("The mapper should return Integer but returns String.");
   }
 
   @Test
@@ -476,7 +476,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes java.lang.Integer.");
+        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes Integer.");
   }
 
   @Test
@@ -524,7 +524,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper should return java.lang.Integer but returns java.lang.Long");
+        .withErrorContaining("There is a problem with the mapper class: The mapper should return Integer but returns Long.");
   }
 
   @Test
@@ -548,7 +548,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper should return java.lang.Integer but returns java.util.Date");
+        .withErrorContaining("There is a problem with the mapper class: The mapper should return Integer but returns java.util.Date");
   }
 
   @Test
@@ -681,6 +681,50 @@ class MapperTest {
         .processedWith(new Processor())
         .compilesWithoutError();
   }
+
+  @Test
+  void oneOptionalIntNotOptional() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract OptionalInt b();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, Integer>> {",
+        "    public Function<String, Integer> get() {",
+        "      return s -> 1;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Declare this parameter optional.");
+  }
+
+  @Test
+  void oneOptionalInt() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class, optional = true)",
+        "  abstract OptionalInt b();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, Integer>> {",
+        "    public Function<String, Integer> get() {",
+        "      return s -> 1;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
 
   @Test
   void mapperValidListOfSet() {

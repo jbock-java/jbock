@@ -18,7 +18,7 @@ abstract class SuppliedClassValidator {
       throw TmpException.create(
           String.format("The %s class may not be private.", name));
     }
-    if (!Util.checkDefaultConstructorExists(classToCheck)) {
+    if (!Util.hasDefaultConstructor(classToCheck)) {
       throw TmpException.create(
           String.format("The %s class must have a default constructor", name));
     }

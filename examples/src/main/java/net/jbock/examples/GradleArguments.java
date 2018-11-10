@@ -7,7 +7,6 @@ import net.jbock.PositionalParameter;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 
 @CommandLineArguments(allowEscapeSequence = true)
 abstract class GradleArguments {

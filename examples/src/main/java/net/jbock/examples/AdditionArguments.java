@@ -4,7 +4,6 @@ import net.jbock.CommandLineArguments;
 import net.jbock.PositionalParameter;
 
 import java.util.Optional;
-import java.util.OptionalInt;
 
 // Allow positional arguments to start with a dash, so negative numbers can be passed.
 @CommandLineArguments(allowPrefixedTokens = true)

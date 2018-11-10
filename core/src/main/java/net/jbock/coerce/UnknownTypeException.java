@@ -4,14 +4,16 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
 
-class SearchHintException extends Exception {
+class UnknownTypeException extends Exception {
 
-  static SearchHintException create(String message) {
-    return new SearchHintException(message);
+  private static final String DEFAULT_MESSAGE = "Unknown parameter type. Define a custom mapper.";
+
+  static UnknownTypeException create() {
+    return new UnknownTypeException();
   }
 
-  private SearchHintException(String message) {
-    super(message);
+  private UnknownTypeException() {
+    super(DEFAULT_MESSAGE);
   }
 
   ValidationException asValidationException(ExecutableElement sourceMethod) {

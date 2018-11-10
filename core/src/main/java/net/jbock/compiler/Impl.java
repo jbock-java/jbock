@@ -20,9 +20,9 @@ import static javax.lang.model.element.Modifier.STATIC;
  */
 final class Impl {
 
-  final Context context;
+  private final Context context;
 
-  final Option option;
+  private final Option option;
 
   private Impl(
       Context context,

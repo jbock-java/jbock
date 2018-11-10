@@ -3,7 +3,7 @@ package net.jbock.coerce;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 
-public class Extension {
+class Extension {
 
   private final TypeElement baseClass;
   private final DeclaredType extensionClass;
@@ -13,11 +13,11 @@ public class Extension {
     this.extensionClass = extensionClass;
   }
 
-  public TypeElement baseClass() {
+  TypeElement baseClass() {
     return baseClass;
   }
 
-  public DeclaredType extensionClass() {
+  DeclaredType extensionClass() {
     return extensionClass;
   }
 

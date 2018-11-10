@@ -8,10 +8,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class DateHint extends PreciseTypeHint {
+class DateHint extends PreciseTypeHint {
 
   @Override
-  public Set<TypeName> types() {
+  Set<TypeName> types() {
     return Stream.of(
         java.util.Date.class,
         java.sql.Date.class,
@@ -20,7 +20,7 @@ public class DateHint extends PreciseTypeHint {
   }
 
   @Override
-  public String message(TypeName typeName) {
+  String message(TypeName typeName) {
     return typeName + " is not supported. Use a type from java.time instead.";
   }
 }

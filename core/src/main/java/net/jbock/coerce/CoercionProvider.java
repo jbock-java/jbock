@@ -57,7 +57,7 @@ public class CoercionProvider {
       return handle(optionalInfo, basicInfo, paramName, mapperClass, collectorClass);
     } catch (TmpException e) {
       throw e.asValidationException(sourceMethod);
-    } catch (SearchHintException e) {
+    } catch (UnknownTypeException e) {
       Optional<String> hint = HintProvider.instance().findHint(optionalInfo, basicInfo);
       throw hint.map(m -> e.asValidationException(sourceMethod, m))
           .orElseGet(() -> e.asValidationException(sourceMethod));
@@ -69,7 +69,7 @@ public class CoercionProvider {
       BasicInfo basicInfo,
       String paramName,
       TypeElement mapperClass,
-      TypeElement collectorClass) throws TmpException, SearchHintException {
+      TypeElement collectorClass) throws TmpException, UnknownTypeException {
     boolean auto = mapperClass == null;
     if (basicInfo.repeatable) {
       if (auto) {
@@ -89,7 +89,7 @@ public class CoercionProvider {
   // no mapper, not repeatable
   private Coercion handleSingleAuto(
       Optional<TypeMirror> optionalInfo,
-      BasicInfo basicInfo) throws TmpException, SearchHintException {
+      BasicInfo basicInfo) throws TmpException, UnknownTypeException {
     CoercionFactory factory = findCoercion(optionalInfo.orElse(basicInfo.returnType()));
     return factory.getCoercion(basicInfo, optionalInfo, Optional.empty());
   }
@@ -122,20 +122,20 @@ public class CoercionProvider {
   // repeatable without mapper
   private Coercion handleRepeatableAuto(
       TypeElement collectorClass,
-      BasicInfo basicInfo) throws TmpException, SearchHintException {
+      BasicInfo basicInfo) throws TmpException, UnknownTypeException {
     CollectorInfo collectorInfo = collectorInfo(basicInfo.returnType(), collectorClass);
     CoercionFactory coercion = findCoercion(collectorInfo.inputType);
     return coercion.getCoercion(basicInfo, Optional.empty(), collectorInfo.collectorType());
   }
 
-  private CoercionFactory findCoercion(TypeMirror mirror) throws TmpException, SearchHintException {
+  private CoercionFactory findCoercion(TypeMirror mirror) throws TmpException, UnknownTypeException {
     CoercionFactory standardCoercion = StandardCoercions.get(mirror);
     if (standardCoercion != null) {
       return standardCoercion;
     }
     boolean isEnum = isEnumType(mirror);
     if (!isEnum) {
-      throw SearchHintException.create("Unknown parameter type. Define a custom mapper.");
+      throw UnknownTypeException.create();
     }
     return EnumCoercion.create(mirror);
   }
@@ -166,11 +166,11 @@ public class CoercionProvider {
     }
     TypeTool tool = TypeTool.get();
     if (!tool.isSameErasure(returnType, List.class)) {
-      throw TmpException.create("Either define a custom collector, or return List");
+      throw TmpException.create("Either define a custom collector, or return List.");
     }
     List<? extends TypeMirror> typeParameters = tool.typeargs(returnType);
     if (typeParameters.isEmpty()) {
-      throw TmpException.create("Either define a custom collector, or return List");
+      throw TmpException.create("Add a type parameter.");
     }
     return CollectorInfo.listCollector(typeParameters.get(0));
   }

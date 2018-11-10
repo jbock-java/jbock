@@ -2,7 +2,6 @@ package net.jbock.coerce.mappers;
 
 import com.squareup.javapoet.CodeBlock;
 
-import javax.lang.model.type.PrimitiveType;
 import java.util.Optional;
 
 final class BooleanCoercion extends CoercionFactory {

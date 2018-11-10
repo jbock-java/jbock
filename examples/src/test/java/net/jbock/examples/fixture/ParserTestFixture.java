@@ -128,7 +128,7 @@ public final class ParserTestFixture<E> {
   }
 
   public void assertPrintsHelp(String... expected) {
-    String stdout = getHelp(null);
+    String stdout = getHelp();
     String[] actual = stdout.split("\\r?\\n", -1);
     compareArrays(expected, actual);
   }
@@ -236,13 +236,18 @@ public final class ParserTestFixture<E> {
   }
 
   public String getHelp(ResourceBundle bundle) {
+    parser.withResourceBundle(bundle);
+    return getHelp();
+  }
+
+  private String getHelp() {
     TestOutputStream stdout = new TestOutputStream();
     TestOutputStream stderr = new TestOutputStream();
-    if (bundle != null) {
-      parser.withResourceBundle(bundle);
-    }
-    Optional<E> result = parser.withOutputStream(stdout.out)
-        .withErrorStream(stderr.out).withIndent(2).parse(new String[]{"--help"});
+    Optional<E> result = parser
+        .withOutputStream(stdout.out)
+        .withErrorStream(stderr.out)
+        .withIndent(2)
+        .parse(new String[]{"--help"});
     assertFalse(result.isPresent(), "Expecting empty result");
     if (!stderr.toString().isEmpty()) {
       throw new AssertionError("Unexpected output on stderr: " + stderr.toString());

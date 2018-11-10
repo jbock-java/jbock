@@ -106,6 +106,22 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
+        .withErrorContaining("Declare this parameter repeatable.");
+  }
+
+  @Test
+  void rawList2() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', repeatable = true)",
+        "  abstract List a();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
         .withErrorContaining("Add a type parameter");
   }
 
@@ -245,15 +261,31 @@ class ProcessorTest {
   }
 
   @Test
-  void oneOptionalInt() {
+  void oneOptionalIntNotOptional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "",
-        "  @Parameter(shortName = 'x', optional = true)",
+        "  @Parameter(shortName = 'x')",
         "  abstract OptionalInt b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Declare this parameter optional.");
+  }
+
+  @Test
+  void oneOptionalInt() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', optional = true)",
+        "  abstract OptionalInt b();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();

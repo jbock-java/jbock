@@ -11,7 +11,7 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
-public final class LiftedType {
+final class LiftedType {
 
   private final TypeMirror originalType;
 

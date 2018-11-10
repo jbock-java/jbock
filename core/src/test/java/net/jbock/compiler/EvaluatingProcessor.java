@@ -31,7 +31,7 @@ public final class EvaluatingProcessor extends AbstractProcessor {
     private final Elements elements;
     private final Types types;
 
-    public TestContext(Elements elements, Types types) {
+    TestContext(Elements elements, Types types) {
       this.elements = elements;
       this.types = types;
     }
@@ -40,7 +40,7 @@ public final class EvaluatingProcessor extends AbstractProcessor {
       return TestExpr.parse(expr, elements, types);
     }
 
-    public void assertSameType(TypeMirror t1, TypeMirror t2) {
+    void assertSameType(TypeMirror t1, TypeMirror t2) {
       boolean sameType = types.isSameType(t1, t2);
       if (!sameType) {
         Assertions.fail("Expecting " + t1 + " but found " + t2);

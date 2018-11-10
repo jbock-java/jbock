@@ -6,12 +6,12 @@ import java.util.Optional;
 
 import static net.jbock.compiler.HierarchyUtil.getTypeTree;
 
-public class OptionalHint extends Hint {
+class OptionalHint extends Hint {
 
   private static final String NAME = Optional.class.getCanonicalName();
 
   @Override
-  public String message(TypeMirror type, boolean repeatable) {
+  String message(TypeMirror type, boolean repeatable) {
     for (TypeElement mirror : getTypeTree(type)) {
       String qname = mirror.getQualifiedName().toString();
       if (NAME.equals(qname)) {

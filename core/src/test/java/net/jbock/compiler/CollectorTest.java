@@ -379,7 +379,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The collector should return java.util.Set<String> but returns java.util.Set<java.lang.Long>");
+        .withErrorContaining("The collector should return Set<String> but returns Set<Long>");
   }
 
   @Test
@@ -461,7 +461,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The collector should return test.InvalidArguments.Foo but returns java.util.Set<E>");
+        .withErrorContaining("The collector should return test.InvalidArguments.Foo but returns Set<E>");
   }
 
   @Test

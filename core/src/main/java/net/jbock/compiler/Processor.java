@@ -172,7 +172,7 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
+  private static final Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
       .comparingInt(e -> e.getAnnotation(PositionalParameter.class).position());
 
   private PositionalRank getPositionalOrder(ExecutableElement sourceMethod) {
@@ -322,7 +322,7 @@ public final class Processor extends AbstractProcessor {
       throw ValidationException.create(sourceType,
           "The class cannot have type parameters.");
     }
-    if (!Util.checkDefaultConstructorExists(sourceType)) {
+    if (!Util.hasDefaultConstructor(sourceType)) {
       throw ValidationException.create(sourceType,
           "The class must have a default constructor.");
     }

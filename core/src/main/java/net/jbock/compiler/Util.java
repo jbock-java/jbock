@@ -15,7 +15,7 @@ import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
 
 public final class Util {
 
-  public static ParameterizedTypeName optionalOf(TypeName typeName) {
+  static ParameterizedTypeName optionalOf(TypeName typeName) {
     return ParameterizedTypeName.get(ClassName.get(Optional.class), typeName);
   }
 
@@ -23,7 +23,7 @@ public final class Util {
     return ParameterizedTypeName.get(ClassName.get(Optional.class), subtypeOf(typeName));
   }
 
-  public static boolean checkDefaultConstructorExists(TypeElement classToCheck) {
+  public static boolean hasDefaultConstructor(TypeElement classToCheck) {
     List<ExecutableElement> constructors = ElementFilter.constructorsIn(classToCheck.getEnclosedElements());
     if (constructors.isEmpty()) {
       return true;

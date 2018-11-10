@@ -35,7 +35,6 @@ import static net.jbock.compiler.Util.optionalOfSubtype;
 final class Helper {
 
   final Context context;
-  final Option option;
 
   private final FieldSpec longNamesField;
   private final FieldSpec shortNamesField;
@@ -52,7 +51,7 @@ final class Helper {
       Context context,
       FieldSpec longNamesField,
       FieldSpec shortNamesField,
-      FieldSpec parsersField, Option option,
+      FieldSpec parsersField,
       MethodSpec readMethod,
       MethodSpec readLongMethod,
       MethodSpec readRegularOptionMethod,
@@ -61,7 +60,6 @@ final class Helper {
     this.longNamesField = longNamesField;
     this.shortNamesField = shortNamesField;
     this.parsersField = parsersField;
-    this.option = option;
     this.readMethod = readMethod;
     this.readLongMethod = readLongMethod;
     this.readRegularOptionMethod = readRegularOptionMethod;
@@ -110,7 +108,6 @@ final class Helper {
         longNamesField,
         shortNamesField,
         parsersField,
-        option,
         readMethod,
         readLongMethod,
         readRegularOptionMethod,

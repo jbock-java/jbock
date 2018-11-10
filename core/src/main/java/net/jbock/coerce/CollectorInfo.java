@@ -3,7 +3,7 @@ package net.jbock.coerce;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
-public class CollectorInfo {
+class CollectorInfo {
 
   final TypeMirror inputType;
 

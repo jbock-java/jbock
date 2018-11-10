@@ -6,7 +6,6 @@ import net.jbock.PositionalParameter;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalLong;
 
 @CommandLineArguments
 abstract class AllLongsArguments {

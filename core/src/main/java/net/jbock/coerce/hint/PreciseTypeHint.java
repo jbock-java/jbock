@@ -8,7 +8,7 @@ import java.util.Set;
 abstract class PreciseTypeHint extends Hint {
 
   @Override
-  public final String message(TypeMirror mirror, boolean repeatable) {
+  final String message(TypeMirror mirror, boolean repeatable) {
     TypeName typeName = TypeName.get(mirror);
     if (types().contains(typeName)) {
       return message(typeName);
