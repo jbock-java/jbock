@@ -158,7 +158,7 @@ public class TypeTool {
     return types.getDeclaredType(typeElement, result);
   }
 
-  boolean isSameType(TypeMirror mirror, Class<?> test) {
+  public boolean isSameType(TypeMirror mirror, Class<?> test) {
     return types.isSameType(mirror, getTypeElement(test).asType());
   }
 

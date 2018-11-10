@@ -74,7 +74,7 @@ public abstract class CoercionFactory {
       Optional<TypeMirror> optionalInfo) {
     boolean useReturnType = optionalInfo.isPresent() || basicInfo.repeatable;
     if (useReturnType) {
-      return basicInfo.returnType;
+      return basicInfo.returnType();
     }
     return mapperReturnType;
   }
@@ -84,7 +84,7 @@ public abstract class CoercionFactory {
       TypeMirror mapperReturnType) {
     TypeName t = TypeName.get(mapperReturnType);
     TypeName a = WildcardTypeName.subtypeOf(Object.class);
-    TypeName r = TypeName.get(basicInfo.returnType);
+    TypeName r = TypeName.get(basicInfo.returnType());
     return Optional.of(ParameterSpec.builder(ParameterizedTypeName.get(
         ClassName.get(Collector.class), t, a, r), basicInfo.paramName() + "Collector")
         .build());

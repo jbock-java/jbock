@@ -9,6 +9,7 @@ import net.jbock.compiler.TypeTool;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public final class Coercion {
@@ -31,6 +32,8 @@ public final class Coercion {
   // impl
   private final FieldSpec field;
 
+  private final Function<ParameterSpec, CodeBlock> extractExpr;
+
   private final boolean isDefaultCollector;
 
   private Coercion(
@@ -40,6 +43,7 @@ public final class Coercion {
       Optional<CodeBlock> initCollector,
       ParameterSpec constructorParam,
       FieldSpec field,
+      Function<ParameterSpec, CodeBlock> extractExpr,
       boolean isDefaultCollector) {
     this.collectorParam = collectorParam;
     this.mapExpr = mapExpr;
@@ -47,6 +51,7 @@ public final class Coercion {
     this.initCollector = initCollector;
     this.constructorParam = constructorParam;
     this.field = field;
+    this.extractExpr = extractExpr;
     this.isDefaultCollector = isDefaultCollector;
   }
 
@@ -61,7 +66,7 @@ public final class Coercion {
     boolean isDefaultCollector = isDefaultCollector(initCollector, constructorParamType, mapperReturnType);
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
-    return new Coercion(collectorParam, mapExpr, initMapper, initCollector, constructorParam, basicInfo.fieldSpec(), isDefaultCollector);
+    return new Coercion(collectorParam, mapExpr, initMapper, initCollector, constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr(), isDefaultCollector);
   }
 
   /**
@@ -126,5 +131,9 @@ public final class Coercion {
     }
     TypeTool tool = TypeTool.get();
     return tool.isSameType(paramType, tool.listOf(mapperReturnType));
+  }
+
+  public CodeBlock extractExpr() {
+    return extractExpr.apply(constructorParam);
   }
 }

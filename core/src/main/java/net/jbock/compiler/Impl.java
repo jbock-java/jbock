@@ -7,7 +7,6 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
@@ -72,7 +71,7 @@ final class Impl {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
     for (Param p : option.context.parameters) {
       FieldSpec field = p.field();
-      builder.addStatement("this.$N = $T.requireNonNull($N)", field, Objects.class, p.coercion().constructorParam());
+      builder.addStatement("this.$N = $L", field, p.coercion().extractExpr());
       builder.addParameter(p.coercion().constructorParam());
     }
     return builder.build();

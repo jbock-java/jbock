@@ -6,22 +6,29 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
-public final class OptionalInfo {
+final class OptionalInfo {
 
   // Returns empty unless the return type is of the form Optional<?>.
-  // Note, it can be return emtpy while basicInfo.optional is true,
-  // if the return type is e.g. OptionalInt.
-  public static Optional<TypeMirror> findOptionalInfo(TypeMirror mirror, boolean optional) {
-    if (!optional) {
-      return Optional.empty();
+  static Optional<TypeMirror> findOptionalInfo(BasicInfo basicInfo) throws TmpException {
+    Optional<TypeMirror> optionalInfo = findOptionalInfoInternal(basicInfo);
+    if (optionalInfo.isPresent() && !basicInfo.optional) {
+      throw TmpException.create("Declare this parameter optional.");
     }
+    if (!optionalInfo.isPresent() && basicInfo.optional) {
+      throw TmpException.create("Wrap the parameter type in Optional.");
+    }
+    return optionalInfo;
+  }
+
+  private static Optional<TypeMirror> findOptionalInfoInternal(BasicInfo basicInfo) throws TmpException {
     TypeTool tool = TypeTool.get();
-    if (!tool.isSameErasure(mirror, Optional.class)) {
+    TypeMirror returnType = basicInfo.returnType();
+    if (!tool.isSameErasure(returnType, Optional.class)) {
       return Optional.empty();
     }
-    List<? extends TypeMirror> typeArgs = tool.typeargs(mirror);
+    List<? extends TypeMirror> typeArgs = tool.typeargs(returnType);
     if (typeArgs.isEmpty()) {
-      return Optional.empty();
+      throw TmpException.create("Add a type parameter");
     }
     return Optional.of(typeArgs.get(0));
   }

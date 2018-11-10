@@ -256,8 +256,7 @@ class ProcessorTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Use Optional<Integer>");
+        .compilesWithoutError();
   }
 
   @Test
