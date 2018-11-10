@@ -54,7 +54,7 @@ has been added to our program.
 The `argv` array can never contain `null`; it doesn't feel
 right to convert it into something that can.
 
-#### Farewell to null
+#### A farewell to null
 
 `verbosity` is an optional parameter, and
  jbock will not allow using the types `Integer`

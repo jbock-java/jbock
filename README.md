@@ -2,8 +2,11 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-`jbock` is an annotation-driven command line parser, similar to [jcommander](http://jcommander.org/), but doesn't use reflection.
-Instead, it generates custom source code through a mechanism called Java annotation processing.
+`jbock` is an annotation-driven command line parser, similar to 
+[jcommander](http://jcommander.org/), but doesn't use reflection.
+Instead, it generates custom source code 
+through a mechanism called <em>annotation processing</em>,
+which is essentially Java's version of <em>compile-time macros</em>.
 
 Jbock's parameters are required by default,
 and it [enforces the use of optional types](https://github.com/h908714124/jbock/tree/master/OPTIONALS.md)
