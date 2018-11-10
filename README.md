@@ -21,7 +21,7 @@ abstract class MyArguments {
   abstract Optional<Path> path();
   
   @Parameter(optional = true, longName = "verbosity", shortName = 'v')
-  abstract Optional<Integer> verbosity();
+  abstract OptionalInt verbosity();
 }
 ````
 
@@ -31,7 +31,8 @@ and then the generated class `MyArguments_Parser` can be used as follows
 String[] argv = { "--verbosity", "2", "file.txt" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
-assertEquals(Optional.of(2), args.verbosity());
+assertEquals(OptionalInt.of(2), args.verbosity());
+assertEquals(Optional.of(Paths.get("file.txt")), args.path());
 ````
 
 ### Required vs. Optional parameters
