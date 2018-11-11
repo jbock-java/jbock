@@ -98,7 +98,7 @@
               <addDefaultSpecificationEntries>true</addDefaultSpecificationEntries>
             </manifest>
             <manifestEntries>
-              <Automatic-Module-Name>net.jbock</Automatic-Module-Name>
+              <Automatic-Module-Name>net.jbock.compiler</Automatic-Module-Name>
             </manifestEntries>
           </archive>
         </configuration>
