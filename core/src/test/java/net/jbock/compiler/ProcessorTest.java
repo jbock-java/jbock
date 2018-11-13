@@ -457,6 +457,38 @@ class ProcessorTest {
   }
 
   @Test
+  void flagNotDeclared() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'a')",
+        "  abstract boolean hello();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Declare a flag");
+  }
+
+  @Test
+  void flagNotBoolean() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(flag = true, shortName = 'a')",
+        "  abstract String hello();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Flag parameters must return boolean.");
+  }
+
+  @Test
   void doubleAnnotation() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
