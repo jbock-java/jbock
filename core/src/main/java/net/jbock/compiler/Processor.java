@@ -85,14 +85,19 @@ public final class Processor extends AbstractProcessor {
     if (!annotationsToProcess.contains(CommandLineArguments.class.getCanonicalName())) {
       return false;
     }
-    processAnnotatedTypes(getAnnotatedTypes(env));
+    try {
+      TypeTool.setInstance(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
+      processAnnotatedTypes(getAnnotatedTypes(env));
+    } finally {
+      TypeTool.unset();
+      StandardCoercions.unset();
+    }
     return false;
   }
 
   private void processAnnotatedTypes(Set<TypeElement> annotatedClasses) {
     for (TypeElement sourceType : annotatedClasses) {
       try {
-        TypeTool.setInstance(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
         validateType(sourceType);
         List<Param> parameters = getParams(sourceType);
         if (parameters.isEmpty()) {
@@ -100,13 +105,13 @@ public final class Processor extends AbstractProcessor {
               "Define at least one abstract method", sourceType);
         }
 
-        Set<OptionType> paramTypes = nonpositionalParamTypes(parameters);
+        Set<OptionType> nonpositionalParamTypes = nonpositionalParamTypes(parameters);
         Set<OptionType> positionalParamTypes = positionalParamTypes(parameters);
         Context context = Context.create(
             getOverview(sourceType),
             sourceType,
             parameters,
-            paramTypes,
+            nonpositionalParamTypes,
             positionalParamTypes);
         TypeSpec typeSpec = Parser.create(context).define();
         write(context.generatedClass, typeSpec);
@@ -114,9 +119,6 @@ public final class Processor extends AbstractProcessor {
         processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       } catch (Exception e) {
         handleException(sourceType, e);
-      } finally {
-        TypeTool.unset();
-        StandardCoercions.unset();
       }
     }
   }

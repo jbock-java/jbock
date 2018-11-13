@@ -114,7 +114,7 @@ final class Context {
       List<String> description,
       TypeElement sourceType,
       List<Param> parameters,
-      Set<OptionType> paramTypes,
+      Set<OptionType> nonpositionalParamTypes,
       Set<OptionType> positionalParamTypes) {
     ClassName generatedClass = parserClass(ClassName.get(sourceType));
     boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
@@ -142,7 +142,7 @@ final class Context {
         allowEscape,
         strict,
         addHelp,
-        paramTypes,
+        nonpositionalParamTypes,
         positionalParamTypes,
         description,
         programName(sourceType),
