@@ -15,6 +15,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
@@ -27,7 +28,6 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +36,7 @@ import java.util.Set;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
+import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toCollection;
@@ -45,8 +46,6 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 
 public final class Processor extends AbstractProcessor {
-
-  private final Set<String> done = new HashSet<>();
 
   private final boolean debug;
 
@@ -76,13 +75,22 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
+    Set<String> annotationsToProcess = annotations.stream().map(TypeElement::getQualifiedName).map(Name::toString).collect(toSet());
     try {
-      checkAllAnnotatedMethodsValid(env);
+      validateAnnotatedMethods(env, annotationsToProcess);
     } catch (ValidationException e) {
       processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
       return false;
     }
-    for (TypeElement sourceType : getAnnotatedClasses(env)) {
+    if (!annotationsToProcess.contains(CommandLineArguments.class.getCanonicalName())) {
+      return false;
+    }
+    processAnnotatedTypes(getAnnotatedTypes(env));
+    return false;
+  }
+
+  private void processAnnotatedTypes(Set<TypeElement> annotatedClasses) {
+    for (TypeElement sourceType : annotatedClasses) {
       try {
         TypeTool.setInstance(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
         validateType(sourceType);
@@ -100,9 +108,6 @@ public final class Processor extends AbstractProcessor {
             parameters,
             paramTypes,
             positionalParamTypes);
-        if (!done.add(sourceType.getQualifiedName().toString())) {
-          continue;
-        }
         TypeSpec typeSpec = Parser.create(context).define();
         write(context.generatedClass, typeSpec);
       } catch (ValidationException e) {
@@ -114,7 +119,6 @@ public final class Processor extends AbstractProcessor {
         StandardCoercions.unset();
       }
     }
-    return false;
   }
 
   private static Set<OptionType> nonpositionalParamTypes(List<Param> parameters) {
@@ -135,7 +139,7 @@ public final class Processor extends AbstractProcessor {
     return paramTypes;
   }
 
-  private Set<TypeElement> getAnnotatedClasses(RoundEnvironment env) {
+  private Set<TypeElement> getAnnotatedTypes(RoundEnvironment env) {
     Set<? extends Element> annotated = env.getElementsAnnotatedWith(CommandLineArguments.class);
     return ElementFilter.typesIn(annotated);
   }
@@ -371,14 +375,9 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void checkAllAnnotatedMethodsValid(RoundEnvironment env) {
-    Set<? extends Element> rawParams =
-        env.getElementsAnnotatedWith(Parameter.class);
-    Set<? extends Element> rawPositionalParams =
-        env.getElementsAnnotatedWith(PositionalParameter.class);
-    List<ExecutableElement> methods = new ArrayList<>(rawParams.size() + rawPositionalParams.size());
-    methods.addAll(methodsIn(rawParams));
-    methods.addAll(methodsIn(rawPositionalParams));
+  private void validateAnnotatedMethods(
+      RoundEnvironment env, Set<String> annotationsToProcess) {
+    List<ExecutableElement> methods = getAnnotatedMethods(env, annotationsToProcess);
     for (ExecutableElement method : methods) {
       Element enclosingElement = method.getEnclosingElement();
       if (enclosingElement.getAnnotation(CommandLineArguments.class) == null) {
@@ -407,6 +406,22 @@ public final class Processor extends AbstractProcessor {
             "The method may not declare any exceptions.");
       }
     }
+  }
+
+  private List<ExecutableElement> getAnnotatedMethods(
+      RoundEnvironment env, Set<String> annotationsToProcess) {
+    Set<? extends Element> parameters =
+        annotationsToProcess.contains(Parameter.class.getCanonicalName()) ?
+            env.getElementsAnnotatedWith(Parameter.class) :
+            emptySet();
+    Set<? extends Element> positionalParams =
+        annotationsToProcess.contains(PositionalParameter.class.getCanonicalName()) ?
+            env.getElementsAnnotatedWith(PositionalParameter.class) :
+            emptySet();
+    List<ExecutableElement> methods = new ArrayList<>(parameters.size() + positionalParams.size());
+    methods.addAll(methodsIn(parameters));
+    methods.addAll(methodsIn(positionalParams));
+    return methods;
   }
 
   private void printError(Element element, String message) {
