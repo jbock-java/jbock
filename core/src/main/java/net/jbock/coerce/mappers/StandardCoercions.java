@@ -8,6 +8,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public class StandardCoercions {
 
@@ -15,7 +16,7 @@ public class StandardCoercions {
 
   private static StandardCoercions instance;
 
-  private StandardCoercions() {
+  private StandardCoercions(TypeTool tool) {
     Map<MapMirror, CoercionFactory> m = new HashMap<>();
     CoercionFactory[] allCoercions = new CoercionFactory[]{
         new CharsetCoercion(),
@@ -47,7 +48,6 @@ public class StandardCoercions {
             coercion.getClass().getSimpleName(), previous.getClass().getSimpleName()));
       }
     }
-    TypeTool tool = TypeTool.get();
     for (TypeKind typeKind : Arrays.asList(
         TypeKind.INT, TypeKind.FLOAT,
         TypeKind.LONG, TypeKind.DOUBLE,
@@ -60,11 +60,12 @@ public class StandardCoercions {
     coercions = Collections.unmodifiableMap(m);
   }
 
+  public static void init(TypeTool tool) {
+    instance = new StandardCoercions(tool);
+  }
+
   private static StandardCoercions instance() {
-    if (instance == null) {
-      instance = new StandardCoercions();
-    }
-    return instance;
+    return Objects.requireNonNull(instance, "not initialized?");
   }
 
   public static void unset() {

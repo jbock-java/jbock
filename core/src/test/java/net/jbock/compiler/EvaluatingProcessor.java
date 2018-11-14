@@ -109,7 +109,7 @@ public final class EvaluatingProcessor extends AbstractProcessor {
     // just run the test on the last round after compilation is over
     if (roundEnv.processingOver()) {
       try {
-        TypeTool.setInstance(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
+        TypeTool.init(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
         base.run(new TestContext(processingEnv.getElementUtils(), processingEnv.getTypeUtils()));
       } catch (Throwable e) {
         thrown = e;

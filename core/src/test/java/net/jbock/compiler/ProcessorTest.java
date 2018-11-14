@@ -335,7 +335,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("may not extend");
+        .withErrorContaining("The class may not extend test.Outer");
   }
 
   @Test

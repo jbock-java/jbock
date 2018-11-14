@@ -17,7 +17,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -75,24 +74,29 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-    Set<String> annotationsToProcess = annotations.stream().map(TypeElement::getQualifiedName).map(Name::toString).collect(toSet());
     try {
-      validateAnnotatedMethods(env, annotationsToProcess);
-    } catch (ValidationException e) {
-      processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
-      return false;
-    }
-    if (!annotationsToProcess.contains(CommandLineArguments.class.getCanonicalName())) {
-      return false;
-    }
-    try {
-      TypeTool.setInstance(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
-      processAnnotatedTypes(getAnnotatedTypes(env));
+      TypeTool tool = TypeTool.init(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
+      StandardCoercions.init(tool);
+      processInternal(annotations, env);
     } finally {
       TypeTool.unset();
       StandardCoercions.unset();
     }
     return false;
+  }
+
+  private void processInternal(Set<? extends TypeElement> annotations, RoundEnvironment env) {
+    Set<String> annotationsToProcess = annotations.stream().map(TypeElement::getQualifiedName).map(Name::toString).collect(toSet());
+    try {
+      validateAnnotatedMethods(env, annotationsToProcess);
+    } catch (ValidationException e) {
+      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
+      return;
+    }
+    if (!annotationsToProcess.contains(CommandLineArguments.class.getCanonicalName())) {
+      return;
+    }
+    processAnnotatedTypes(getAnnotatedTypes(env));
   }
 
   private void processAnnotatedTypes(Set<TypeElement> annotatedClasses) {
@@ -114,11 +118,9 @@ public final class Processor extends AbstractProcessor {
             nonpositionalParamTypes,
             positionalParamTypes);
         TypeSpec typeSpec = Parser.create(context).define();
-        write(context.generatedClass, typeSpec);
+        write(sourceType, context.generatedClass, typeSpec);
       } catch (ValidationException e) {
-        processingEnv.getMessager().printMessage(e.kind, e.getMessage(), e.about);
-      } catch (Exception e) {
-        handleException(sourceType, e);
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
       }
     }
   }
@@ -146,35 +148,32 @@ public final class Processor extends AbstractProcessor {
     return ElementFilter.typesIn(annotated);
   }
 
-  private void handleException(
-      TypeElement sourceType,
-      Exception e) {
-    String message = "Unexpected error while processing " +
-        ClassName.get(sourceType) +
-        ": " + e.getMessage();
-    e.printStackTrace();
-    printError(sourceType, message);
-  }
-
   private void write(
+      TypeElement sourceType,
       ClassName generatedType,
-      TypeSpec typeSpec) throws IOException {
-    JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), typeSpec);
+      TypeSpec definedType) {
+    JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), definedType);
     JavaFile javaFile = builder
         .skipJavaLangImports(true)
         .build();
-    JavaFileObject sourceFile = processingEnv.getFiler()
-        .createSourceFile(generatedType.toString(),
-            javaFile.typeSpec.originatingElements.toArray(new Element[0]));
-    try (Writer writer = sourceFile.openWriter()) {
-      String sourceCode = javaFile.toString();
-      writer.write(sourceCode);
-      if (debug) {
-        System.err.println("##############");
-        System.err.println("# Debug info #");
-        System.err.println("##############");
-        System.err.println(sourceCode);
+    try {
+      JavaFileObject sourceFile = processingEnv.getFiler()
+          .createSourceFile(generatedType.toString(),
+              javaFile.typeSpec.originatingElements.toArray(new Element[0]));
+      try (Writer writer = sourceFile.openWriter()) {
+        String sourceCode = javaFile.toString();
+        writer.write(sourceCode);
+        if (debug) {
+          System.err.println("##############");
+          System.err.println("# Debug info #");
+          System.err.println("##############");
+          System.err.println(sourceCode);
+        }
+      } catch (IOException e) {
+        handleIOException(sourceType, e);
       }
+    } catch (IOException e) {
+      handleIOException(sourceType, e);
     }
   }
 
@@ -190,7 +189,6 @@ public final class Processor extends AbstractProcessor {
   }
 
   private List<Param> getParams(TypeElement sourceType) {
-    checkNoSuperclass(sourceType);
     List<ExecutableElement> abstractMethods = methodsIn(sourceType.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
         .collect(toList());
@@ -307,6 +305,10 @@ public final class Processor extends AbstractProcessor {
       throw ValidationException.create(sourceType,
           "Use an abstract class, not an interface.");
     }
+    if (!TypeTool.get().isSameType(sourceType.getSuperclass(), Object.class)) {
+      throw ValidationException.create(sourceType,
+          String.format("The class may not extend %s.", sourceType.getSuperclass()));
+    }
     if (!sourceType.getModifiers().contains(ABSTRACT)) {
       throw ValidationException.create(sourceType,
           "Use an abstract class.");
@@ -331,14 +333,6 @@ public final class Processor extends AbstractProcessor {
     if (!Util.hasDefaultConstructor(sourceType)) {
       throw ValidationException.create(sourceType,
           "The class must have a default constructor.");
-    }
-  }
-
-  private void checkNoSuperclass(TypeElement sourceType) {
-    TypeMirror objectType = processingEnv.getElementUtils().getTypeElement(Object.class.getCanonicalName()).asType();
-    if (!processingEnv.getTypeUtils().isSameType(sourceType.getSuperclass(), objectType)) {
-      throw ValidationException.create(sourceType,
-          sourceType.getSimpleName() + " may not extend anything");
     }
   }
 
@@ -426,7 +420,10 @@ public final class Processor extends AbstractProcessor {
     return methods;
   }
 
-  private void printError(Element element, String message) {
-    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, element);
+  private void handleIOException(
+      TypeElement sourceType,
+      IOException e) {
+    String message = String.format("JBOCK: Unexpected error while processing %s: %s", sourceType, e.getMessage());
+    processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, sourceType);
   }
 }

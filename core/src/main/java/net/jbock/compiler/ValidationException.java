@@ -28,18 +28,15 @@ public final class ValidationException extends RuntimeException {
       Collector.class,
       Function.class);
 
-  final Diagnostic.Kind kind;
-
   final Element about;
 
-  private ValidationException(Diagnostic.Kind kind, String message, Element about) {
+  private ValidationException(String message, Element about) {
     super(message);
-    this.kind = kind;
     this.about = about;
   }
 
   public static ValidationException create(Element about, String message) {
-    return new ValidationException(Diagnostic.Kind.ERROR, cleanMessage(message), about);
+    return new ValidationException(cleanMessage(message), about);
   }
 
   private static String cleanMessage(String message) {
