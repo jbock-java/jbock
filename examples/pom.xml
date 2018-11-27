@@ -58,6 +58,9 @@
         <configuration>
           <source>8</source>
           <target>8</target>
+          <compilerArgs>
+            <compilerArgument>-Xlint:unchecked</compilerArgument>
+          </compilerArgs>
           <annotationProcessorPaths>
             <dependency>
               <groupId>com.github.h908714124</groupId>
