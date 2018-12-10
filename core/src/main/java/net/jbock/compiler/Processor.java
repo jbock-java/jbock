@@ -102,7 +102,6 @@ public final class Processor extends AbstractProcessor {
   private void processAnnotatedTypes(Set<TypeElement> annotatedClasses) {
     for (TypeElement sourceType : annotatedClasses) {
       ClassName generatedClass = generatedClass(ClassName.get(sourceType));
-      String key = generatedClass.packageName() + '.' + generatedClass.simpleName();
       try {
         validateType(sourceType);
         List<Param> parameters = getParams(sourceType);
@@ -124,6 +123,8 @@ public final class Processor extends AbstractProcessor {
         write(sourceType, context.generatedClass, typeSpec);
       } catch (ValidationException e) {
         processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
+      } catch (AssertionError error) {
+        handleUnknownError(sourceType, error);
       }
     }
   }
@@ -173,10 +174,10 @@ public final class Processor extends AbstractProcessor {
           System.err.println(sourceCode);
         }
       } catch (IOException e) {
-        handleIOException(sourceType, e);
+        handleUnknownError(sourceType, e);
       }
     } catch (IOException e) {
-      handleIOException(sourceType, e);
+      handleUnknownError(sourceType, e);
     }
   }
 
@@ -426,9 +427,9 @@ public final class Processor extends AbstractProcessor {
     return type.topLevelClassName().peerClass(name);
   }
 
-  private void handleIOException(
+  private void handleUnknownError(
       TypeElement sourceType,
-      IOException e) {
+      Throwable e) {
     String message = String.format("JBOCK: Unexpected error while processing %s: %s", sourceType, e.getMessage());
     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, sourceType);
   }
