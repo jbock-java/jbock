@@ -101,6 +101,8 @@ public final class Processor extends AbstractProcessor {
 
   private void processAnnotatedTypes(Set<TypeElement> annotatedClasses) {
     for (TypeElement sourceType : annotatedClasses) {
+      ClassName generatedClass = generatedClass(ClassName.get(sourceType));
+      String key = generatedClass.packageName() + '.' + generatedClass.simpleName();
       try {
         validateType(sourceType);
         List<Param> parameters = getParams(sourceType);
@@ -112,6 +114,7 @@ public final class Processor extends AbstractProcessor {
         Set<OptionType> nonpositionalParamTypes = nonpositionalParamTypes(parameters);
         Set<OptionType> positionalParamTypes = positionalParamTypes(parameters);
         Context context = Context.create(
+            generatedClass,
             getOverview(sourceType),
             sourceType,
             parameters,
@@ -210,7 +213,7 @@ public final class Processor extends AbstractProcessor {
     checkPositionUniqueWithinRank(positionalGroups);
     if (allPositional.stream().map(p -> p.getAnnotation(PositionalParameter.class))
         .mapToInt(PositionalParameter::position).anyMatch(i -> i != 0)) {
-      checkPositionUnique(positionalGroups);
+      checkPositionUniqueGlobal(positionalGroups);
     }
     List<ExecutableElement> sortedPositional = getSortedPositional(positionalGroups);
     List<Param> result = new ArrayList<>(abstractMethods.size());
@@ -239,27 +242,25 @@ public final class Processor extends AbstractProcessor {
 
   private void checkPositionUniqueWithinRank(EnumMap<PositionalRank, List<ExecutableElement>> positionalGroups) {
     for (List<ExecutableElement> methods : positionalGroups.values()) {
-      Integer previousPosition = null;
-      for (ExecutableElement method : methods) {
-        Integer position = method.getAnnotation(PositionalParameter.class).position();
-        if (Objects.equals(position, previousPosition)) {
-          throw ValidationException.create(method, "Define a unique position.");
-        }
-        previousPosition = position;
-      }
+      checkPositionUnique(methods);
     }
   }
 
-  private void checkPositionUnique(EnumMap<PositionalRank, List<ExecutableElement>> positionalGroups) {
+  private void checkPositionUniqueGlobal(EnumMap<PositionalRank, List<ExecutableElement>> positionalGroups) {
+    List<ExecutableElement> allMethods = positionalGroups.values().stream()
+        .flatMap(List::stream)
+        .collect(toList());
+    checkPositionUnique(allMethods);
+  }
+
+  private void checkPositionUnique(List<ExecutableElement> methods) {
     Integer previousPosition = null;
-    for (List<ExecutableElement> methods : positionalGroups.values()) {
-      for (ExecutableElement method : methods) {
-        Integer position = method.getAnnotation(PositionalParameter.class).position();
-        if (Objects.equals(position, previousPosition)) {
-          throw ValidationException.create(method, "Define a unique position.");
-        }
-        previousPosition = position;
+    for (ExecutableElement method : methods) {
+      Integer position = method.getAnnotation(PositionalParameter.class).position();
+      if (Objects.equals(position, previousPosition)) {
+        throw ValidationException.create(method, "Define a unique position.");
       }
+      previousPosition = position;
     }
   }
 
@@ -418,6 +419,11 @@ public final class Processor extends AbstractProcessor {
     methods.addAll(methodsIn(parameters));
     methods.addAll(methodsIn(positionalParams));
     return methods;
+  }
+
+  private static ClassName generatedClass(ClassName type) {
+    String name = String.join("_", type.simpleNames()) + "_Parser";
+    return type.topLevelClassName().peerClass(name);
   }
 
   private void handleIOException(

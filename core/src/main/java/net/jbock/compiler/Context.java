@@ -111,12 +111,12 @@ final class Context {
   }
 
   static Context create(
+      ClassName generatedClass,
       List<String> description,
       TypeElement sourceType,
       List<Param> parameters,
       Set<OptionType> nonpositionalParamTypes,
       Set<OptionType> positionalParamTypes) {
-    ClassName generatedClass = parserClass(ClassName.get(sourceType));
     boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
     List<Param> positionalParameters = parameters.stream().filter(Param::isPositional).collect(toList());
     boolean strict = !sourceType.getAnnotation(CommandLineArguments.class).allowPrefixedTokens();
@@ -157,11 +157,6 @@ final class Context {
         implType,
         tokenizerType,
         parseResultType);
-  }
-
-  private static ClassName parserClass(ClassName type) {
-    String name = String.join("_", type.simpleNames()) + "_Parser";
-    return type.topLevelClassName().peerClass(name);
   }
 
   private static String programName(TypeElement sourceType) {
