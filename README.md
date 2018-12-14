@@ -181,7 +181,7 @@ class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K
 }
 ````
 
-### Parameter descriptions
+### Parameter descriptions and internationalization
 
 By default, the method's Javadoc is used as the parameter description. 
 Alternatively a resource bundle can be used:
@@ -200,8 +200,10 @@ The bundle keys must then be manually defined on the parameter methods:
 abstract String headers();
 ````
 
-If there is a bundle, and a key is defined and is
-contained in the bundle, then that overrides the method's javadoc.
+If a resource bundle is supplied at runtime (see <a href="#runtime-modifiers">Runtime modifiers</a>,
+and the method's `bundleKey` is defined and contained in that bundle,
+then the corresponding value will be used in the options summary page,
+rather than the method's javadoc.
 
 ### Escape sequence
 
