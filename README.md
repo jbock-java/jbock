@@ -310,6 +310,65 @@ assertEquals(Paths.get("a.txt"), args.source());
 assertEquals(Paths.get("b.txt"), args.target());
 ````
 
+### Handling failure
+
+There are several ways in which the user input can be wrong:
+
+* Repetition of non-repeatable parameters
+* Absence of required parameters
+* Unknown token
+* Missing value
+* Parsing error (for parameter types other than `String`)
+
+For example, let's say we have a required argument `-f`:
+
+````java
+@CommandLineArguments
+abstract class MyArguments {
+  @Parameter(shortName = 'f')
+  abstract Path file();
+}
+````
+
+then the empty array `argv = {}` would be invalid input,
+because the required argument `-f` is absent.
+
+jbock offers two different ways of handling invalid input.
+We've seen some examples using the `parseOrExit` method before, which simply shuts down the jvm.
+There's also `parse` which requires more effort, but is also more flexible:
+  
+````java
+String[] argv = {};
+MyArguments.ParseResult parseResult = MyArguments_Parser.create().parse(argv);
+if (parseResult.error()) {
+  System.out.println("Invalid input. This has already been printed to stderr.");
+}
+if (parseResult.helpPrinted()) {
+  System.out.println("The user has passed the --help param. Usage info has been printed to stdout.");
+}
+Optional<MyArguments> result = result.result();
+result.ifPresent(this::runTheBusinessLogicAlready);
+````
+
+### Runtime modifiers
+
+The output streams, as well as some other parameters can be changed before one of the parse methods is invoked.
+This example shows all the available options:
+
+````java
+String[] argv = {"-f hello.txt"};
+AdditionArguments_Parser.create()
+    .withErrorExitCode(2)                                           // default is 1
+    .withErrorStream(new PrintStream(new ByteArrayOutputStream()))  // default is System.err
+    .withOutputStream(new PrintStream(new ByteArrayOutputStream())) // default is System.out
+    .withIndent(2)                                                  // default is 7
+    .withResourceBundle(ResourceBundle.getBundle("UserOpts"))       // default is none
+    .parseOrExit(argv);
+````
+
+The `indent` is used when printing the usage page. Note that the output, if any, is printed to
+the error stream, unless `argv` is `{ "--help" }`, and `allowHelpOption` is `true`.
+
 ### Maven setup
 
 The annotations are in a separate jar.
