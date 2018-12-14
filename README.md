@@ -320,7 +320,7 @@ There are several ways in which the user input can be wrong:
 * Absence of required parameters
 * Unknown token
 * Missing value
-* Parsing error (for parameter types other than `String`)
+* Parsing error (for example: bad number format)
 
 For example, let's say we have a required argument `-f`:
 
