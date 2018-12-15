@@ -200,9 +200,9 @@ The bundle keys must then be manually defined on the parameter methods:
 abstract String headers();
 ````
 
-If a resource bundle is supplied at runtime (see <a href="#runtime-modifiers">Runtime modifiers</a>,
-and the method's `bundleKey` is defined and contained in that bundle,
-then the corresponding value will be used in the options summary page,
+If a resource bundle is supplied (see above),
+and the method's `bundleKey` is defined and contained in the bundle,
+then the corresponding text will be used in the help page,
 rather than the method's javadoc.
 
 ### Escape sequence
