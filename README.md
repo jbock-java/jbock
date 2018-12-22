@@ -82,9 +82,10 @@ To disable the special meaning of the `--help` token, use
 
 ### Standard types
 
-All enums, as well as some [standard types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java)
-are supported out of the box. These can be used without having
-to write a custom mapper.
+All non-private enums, as well as
+[some standard Java types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java)
+can immediately be used as parameter types, without having
+to write a custom mapper first.
 
 ### Custom mappers and parameter validation
 
