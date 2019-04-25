@@ -2,32 +2,30 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-Should be easy for [jcommander](http://jcommander.org/) users. Some of these points may
-or may not distinguish it from
+What might distinguish it from
 [other parsers](https://stackoverflow.com/questions/1524661/the-best-cli-parser-for-java):
 
-1. By default, all user-defined parameters are treated as required, except nullary boolean.
-1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required unary parameter.
-1. 2-ary (and up) parameters are not supported.
+1. By default, all parameters are treated as required, except flags.
+1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required parameter.
+1. Parameters are unary, except flags. Parameters with higher arity are not supported.
 1. There are some standard coercions, including numbers and dates. It is also possible to register custom converters.
 
 ### Overview
 
-An annotated class looks like this
-
+For example, here's a java model:
 ````java
 @CommandLineArguments
 abstract class MyArguments {
 
-  @PositionalParameter(optional = true)
-  abstract Optional<Path> path();
+  @PositionalParameter
+  abstract Path path();
   
   @Parameter(optional = true, longName = "verbosity", shortName = 'v')
   abstract OptionalInt verbosity();
 }
 ````
 
-and then the generated class `MyArguments_Parser` can be used as follows
+and the derived `MyArguments_Parser` can be used as follows
 
 ````java
 String[] argv = { "--verbosity", "2", "file.txt" };
@@ -39,14 +37,25 @@ assertEquals(Optional.of(Paths.get("file.txt")), args.path());
 
 ### Required vs. Optional parameters
 
-All parameters except <em>flags</em> and
-<em>repeatables</em> are, by default, required.
-You can only get an instance of `MyArguments` if `argv` contains all
-required parameters.
+All non-repeatable parameters, except flags, are treated as *required*
+unless specified otherwise.
+You can only get an instance of your model if
+the input array contains all required parameters.
 
-To declare an optional parameter, one must use 
-an optional type, like `Optional<String>`,
-and set `optional = true`.
+To declare an optional parameter, use
+an *optional type*,
+*and* set `optional = true`:
+
+````java
+@Parameter(optional = true)
+abstract OptionalInt verbosity();
+````
+
+The optional types are:
+[Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html),
+[OptionalInt](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalInt.html),
+[OptionalLong](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalLong.html) and
+[OptionalDouble](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalDouble.html).
 
 ### Nullary parameters
 
