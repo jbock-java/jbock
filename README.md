@@ -8,7 +8,7 @@ or may not distinguish it from
 
 1. By default, all user-defined parameters are treated as required, except nullary boolean.
 1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required unary parameter.
-1. 2-ary (and up) parameters are not supported. Parameters can be declared repeatable though.
+1. 2-ary (and up) parameters are not supported.
 1. There are some standard coercions, including numbers and dates. It is also possible to register custom converters.
 
 ### Overview
