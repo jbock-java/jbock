@@ -48,9 +48,13 @@ To declare an optional parameter, one must use
 an optional type, like `Optional<String>`,
 and set `optional = true`.
 
-### Flags
+### Nullary parameters
 
-Flags are parameters that don't take an argument.
+The nullary parameters that don't take an argument are
+called flags.
+Their type must be `boolean`.
+Their value will be `true` if one of their names
+appears on the command line.
 
 ````java
 @Parameter(flag = true, shortName = 'q')
@@ -79,12 +83,13 @@ usage information to standard out.
 To disable the special meaning of the `--help` token, use
 `@CommandLineArguments(allowHelpOption = false)`. 
 
-### Standard types
+### Standard coercions
 
 All non-private enums, as well as
 [some standard Java types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java)
-can immediately be used as parameter types, without having
-to write a custom mapper first.
+can be used as parameter types, without having
+to write a custom mapper first. Optional and Lists of these
+types are allowed too.
 
 ### Custom mappers and parameter validation
 
