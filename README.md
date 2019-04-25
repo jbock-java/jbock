@@ -2,15 +2,14 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-This is an annotation-driven command line parser, similar to 
-[jcommander](http://jcommander.org/), but doesn't use reflection.
-Instead, it generates custom source code 
-through a mechanism called <em>annotation processing</em>,
-which is essentially Java's version of <em>compile-time macros</em>.
+Should be easy for [jcommander](http://jcommander.org/) users. Some of these points may
+or may not distinguish it from
+[other parsers](https://stackoverflow.com/questions/1524661/the-best-cli-parser-for-java):
 
-Command line parameters are considered as required by default,
-the [use of optional types](https://github.com/h908714124/jbock/tree/master/OPTIONALS.md)
-is enforced.
+1. By default, all user-defined parameters are treated as required, except nullary boolean.
+1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required unary parameter.
+1. 2-ary (and up) parameters are not supported. Parameters can be declared repeatable though.
+1. There are some standard coercions, including numbers and dates. It is also possible to register custom converters.
 
 ### Overview
 
