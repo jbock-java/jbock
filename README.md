@@ -5,14 +5,14 @@
 How does it compare to
 [other parsers?](https://stackoverflow.com/questions/1524661/the-best-cli-parser-for-java)
 
-1. By default, all parameters are treated as required, except flags.
-1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required parameter.
-1. Parameters are unary, except flags. Parameters with higher arity are not supported.
-1. There are some standard coercions, including numbers and dates. It is also possible to register custom converters.
+1. In the annotated Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required parameter.
+1. All parameters are unary, except flags. Parameters with higher arity are not supported.
+1. There are standard coercions, including numbers and dates. It is also possible to register custom converters.
 
 ### Overview
 
-For example, here's a java model:
+Here's a Java model of a command line interface:
+
 ````java
 @CommandLineArguments
 abstract class MyArguments {
@@ -25,7 +25,7 @@ abstract class MyArguments {
 }
 ````
 
-and the derived `MyArguments_Parser` can be used as follows
+The derived class `MyArguments_Parser` can be used as follows
 
 ````java
 String[] argv = { "--verbosity", "2", "file.txt" };
