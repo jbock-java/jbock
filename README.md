@@ -22,7 +22,7 @@ abstract class MyArguments {
   @PositionalParameter
   abstract Path path();
   
-  @Parameter(longName = "verbosity", shortName = 'v')
+  @Parameter(shortName = 'v')
   abstract OptionalInt verbosity();
 }
 ````
@@ -30,7 +30,7 @@ abstract class MyArguments {
 The derived class `MyArguments_Parser` can be used as follows
 
 ````java
-String[] argv = { "--verbosity", "2", "file.txt" };
+String[] argv = { "-v2", "file.txt" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
 assertEquals(OptionalInt.of(2), args.verbosity());
