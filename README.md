@@ -2,10 +2,11 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
+jbock is an annotation-driven command line parser, implemented as an annotation processor.
 How does it compare to
 [other parsers?](https://stackoverflow.com/questions/1524661/the-best-cli-parser-for-java)
 
-1. In the annotated Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required parameter.
+1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required parameter.
 1. All parameters are unary, except flags. Parameters with higher arity are not supported.
 1. There are standard coercions, including numbers and dates. It is also possible to register custom converters.
 
