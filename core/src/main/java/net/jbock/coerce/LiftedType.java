@@ -2,11 +2,9 @@ package net.jbock.coerce;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import com.sun.tools.example.debug.tty.TTY;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -16,11 +14,11 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
-public final class LiftedType {
+final class LiftedType {
 
   private final TypeMirror originalType;
 
-  final TypeMirror liftedType;
+  private final TypeMirror liftedType;
 
   // how to go back from lifted to original type
   private final Function<ParameterSpec, CodeBlock> extract;
