@@ -81,8 +81,10 @@ String[] argv = { "--help" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 ````
 
-This will shutdown the JVM with an exit code of `0`, and print
+This time, `parseOrExit` will shut down the JVM with an exit code of `0`, and print
 usage information to standard out.
+
+This will only work if `--help` is the first (or only) element of the input array.
 
 To disable the special meaning of the `--help` token, use
 `@CommandLineArguments(allowHelpOption = false)`. 
