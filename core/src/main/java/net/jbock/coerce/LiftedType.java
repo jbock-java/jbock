@@ -23,7 +23,7 @@ public final class LiftedType {
 
   private boolean isLifted() {
     TypeTool tool = TypeTool.get();
-    return tool.isSameType(tool.box(originalType), originalType) &&
+    return !originalType.getKind().isPrimitive() &&
         !tool.isSameType(originalType, liftedType);
   }
 
@@ -65,9 +65,7 @@ public final class LiftedType {
     if (mirror.isLifted()) {
       return true;
     }
-    TypeTool tool = TypeTool.get();
-    return tool.isSameErasure(mirror.liftedType, Optional.class)
-        && tool.typeargs(mirror.liftedType).size() == 1;
+    return TypeTool.get().isSameErasure(mirror.liftedType, Optional.class);
   }
 
   private static CodeBlock convertToPrimitiveOptional(Class<?> primitiveOptional, ParameterSpec p) {
