@@ -3,6 +3,7 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
 jbock is an annotation-driven command line parser, implemented as an annotation processor.
+
 How does it compare to
 [other parsers?](https://stackoverflow.com/questions/1524661/the-best-cli-parser-for-java)
 
