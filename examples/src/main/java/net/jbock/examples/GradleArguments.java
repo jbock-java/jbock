@@ -40,12 +40,10 @@ abstract class GradleArguments {
    * cmos flag
    */
   @Parameter(
-      flag = true,
       shortName = 'c')
-  abstract boolean cmos();
+  abstract Boolean cmos();
 
   @Parameter(
-      flag = true,
       longName = "verbose",
       shortName = 'v')
   abstract boolean verbose();
