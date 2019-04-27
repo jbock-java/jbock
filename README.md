@@ -22,7 +22,7 @@ abstract class MyArguments {
   @PositionalParameter
   abstract Path path();
   
-  @Parameter(optional = true, longName = "verbosity", shortName = 'v')
+  @Parameter(longName = "verbosity", shortName = 'v')
   abstract OptionalInt verbosity();
 }
 ````
