@@ -167,6 +167,10 @@ public class TypeTool {
     return types.isSameType(mirror, test);
   }
 
+  public boolean isBooleanPrimitive(TypeMirror mirror) {
+    return isSameType(mirror, getPrimitiveType(TypeKind.BOOLEAN));
+  }
+
   public boolean isRawType(TypeMirror mirror) {
     return types.isSameType(mirror, types.erasure(mirror));
   }

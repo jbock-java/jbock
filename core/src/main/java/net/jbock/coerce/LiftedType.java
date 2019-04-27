@@ -2,9 +2,13 @@ package net.jbock.coerce;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import com.sun.tools.example.debug.tty.TTY;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalDouble;
@@ -16,12 +20,12 @@ public final class LiftedType {
 
   private final TypeMirror originalType;
 
-  private final TypeMirror liftedType;
+  final TypeMirror liftedType;
 
   // how to go back from lifted to original type
   private final Function<ParameterSpec, CodeBlock> extract;
 
-  private boolean isLifted() {
+  boolean isLifted() {
     TypeTool tool = TypeTool.get();
     return !originalType.getKind().isPrimitive() &&
         !tool.isSameType(originalType, liftedType);
@@ -42,30 +46,36 @@ public final class LiftedType {
         type);
   }
 
+  private static Map<Class<?>, Class<?>> OPT_MAP = createOptMap();
+
+  private static Map<Class<?>, Class<?>> createOptMap() {
+    Map<Class<?>, Class<?>> map = new LinkedHashMap<>(3);
+    map.put(Integer.class, OptionalInt.class);
+    map.put(Long.class, OptionalLong.class);
+    map.put(Double.class, OptionalDouble.class);
+    return map;
+  }
+
   static LiftedType lift(TypeMirror originalType) {
     TypeTool tool = TypeTool.get();
-    if (tool.isSameType(originalType, OptionalInt.class)) {
-      return new LiftedType(p -> convertToPrimitiveOptional(OptionalInt.class, p),
-          originalType, tool.optionalOf(Integer.class));
-    }
-    if (tool.isSameType(originalType, OptionalLong.class)) {
-      return new LiftedType(p -> convertToPrimitiveOptional(OptionalLong.class, p),
-          originalType, tool.optionalOf(Long.class));
-    }
-    if (tool.isSameType(originalType, OptionalDouble.class)) {
-      return new LiftedType(p -> convertToPrimitiveOptional(OptionalDouble.class, p),
-          originalType, tool.optionalOf(Double.class));
+    for (Map.Entry<Class<?>, Class<?>> e : OPT_MAP.entrySet()) {
+      if (tool.isSameType(originalType, e.getValue())) {
+        return new LiftedType(p -> convertToPrimitiveOptional(e.getValue(), p),
+            originalType, tool.optionalOf(e.getKey()));
+      }
     }
     TypeMirror type = tool.box(originalType);
     return keep(originalType, type);
   }
 
-  public static boolean isOptionalType(TypeMirror originalType) {
-    LiftedType mirror = lift(originalType);
-    if (mirror.isLifted()) {
-      return true;
+  static boolean liftsToOptional(TypeMirror originalType) {
+    TypeTool tool = TypeTool.get();
+    for (Map.Entry<Class<?>, Class<?>> e : OPT_MAP.entrySet()) {
+      if (tool.isSameType(originalType, e.getValue())) {
+        return true;
+      }
     }
-    return TypeTool.get().isSameErasure(mirror.liftedType, Optional.class);
+    return TypeTool.get().isSameErasure(originalType, Optional.class);
   }
 
   private static CodeBlock convertToPrimitiveOptional(Class<?> primitiveOptional, ParameterSpec p) {

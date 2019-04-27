@@ -106,7 +106,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Declare this parameter repeatable.");
+        .withErrorContaining("Add a type parameter.");
   }
 
   @Test
@@ -459,16 +459,15 @@ class ProcessorTest {
   void flagNotDeclared() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'a')",
         "  abstract boolean hello();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Declare a flag");
+        .compilesWithoutError();
   }
 
   @Test

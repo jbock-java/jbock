@@ -6,7 +6,7 @@ import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
-import net.jbock.coerce.LiftedType;
+import net.jbock.coerce.Infer;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -184,10 +184,10 @@ final class Param {
     checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
     String name = enumConstant(params, sourceMethod);
-    boolean repeatable = parameter.repeatable();
-    boolean optional = parameter.optional() ||
-        (mapperClass == null && collectorClass == null && LiftedType.isOptionalType(sourceMethod.getReturnType()));
-    boolean flag = parameter.flag();
+    Infer infer = Infer.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType());
+    boolean repeatable = infer.repeatable;
+    boolean optional = infer.optional;
+    boolean flag = Infer.isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType());
     boolean required = !repeatable && !optional && !flag;
     if (optional && repeatable) {
       throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");
@@ -233,9 +233,9 @@ final class Param {
       TypeElement collectorClass) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     String name = enumConstant(params, sourceMethod);
-    boolean repeatable = parameter.repeatable();
-    boolean optional = parameter.optional() ||
-        (mapperClass == null && collectorClass == null && LiftedType.isOptionalType(sourceMethod.getReturnType()));
+    Infer infer = Infer.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType());
+    boolean repeatable = infer.repeatable;
+    boolean optional = infer.optional;
     boolean required = !repeatable && !optional;
     if (optional && repeatable) {
       throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");
