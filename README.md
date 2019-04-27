@@ -44,17 +44,13 @@ unless specified otherwise.
 You can only get an instance of your model if
 the input array contains all required parameters.
 
-To declare an optional parameter, simply use
+To declare an optional parameter,
+make the corresponding model method return
 one of these four types:
 [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html),
 [OptionalInt](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalInt.html),
 [OptionalLong](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalLong.html) or
 [OptionalDouble](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalDouble.html).
-
-````java
-@Parameter
-abstract OptionalInt verbosity();
-````
 
 ### Flags
 
