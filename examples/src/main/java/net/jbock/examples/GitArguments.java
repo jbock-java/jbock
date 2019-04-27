@@ -11,6 +11,6 @@ abstract class GitArguments {
   @PositionalParameter
   abstract String command();
 
-  @PositionalParameter(repeatable = true)
+  @PositionalParameter(position = 1, repeatable = true)
   abstract List<String> remainingArgs();
 }

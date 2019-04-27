@@ -6,12 +6,13 @@ import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
-final class LiftedType {
+public final class LiftedType {
 
   private final TypeMirror originalType;
 
@@ -19,6 +20,12 @@ final class LiftedType {
 
   // how to go back from lifted to original type
   private final Function<ParameterSpec, CodeBlock> extract;
+
+  private boolean isLifted() {
+    TypeTool tool = TypeTool.get();
+    return tool.isSameType(tool.box(originalType), originalType) &&
+        !tool.isSameType(originalType, liftedType);
+  }
 
   private LiftedType(
       Function<ParameterSpec, CodeBlock> extract,
@@ -51,6 +58,16 @@ final class LiftedType {
     }
     TypeMirror type = tool.box(originalType);
     return keep(originalType, type);
+  }
+
+  public static boolean isOptionalType(TypeMirror originalType) {
+    LiftedType mirror = lift(originalType);
+    if (mirror.isLifted()) {
+      return true;
+    }
+    TypeTool tool = TypeTool.get();
+    return tool.isSameErasure(mirror.liftedType, Optional.class)
+        && tool.typeargs(mirror.liftedType).size() == 1;
   }
 
   private static CodeBlock convertToPrimitiveOptional(Class<?> primitiveOptional, ParameterSpec p) {

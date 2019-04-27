@@ -27,9 +27,9 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.EnumSet;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -201,7 +201,7 @@ public final class Processor extends AbstractProcessor {
         partitioningBy(method -> method.getAnnotation(PositionalParameter.class) != null));
     List<ExecutableElement> allNonpositional = partition.getOrDefault(false, emptyList());
     List<ExecutableElement> allPositional = partition.getOrDefault(true, emptyList());
-    EnumMap<PositionalRank, List<ExecutableElement>> positionalGroups = allPositional.stream()
+    Map<PositionalRank, List<ExecutableElement>> positionalGroups = allPositional.stream()
         .collect(groupingBy(
             this::getPositionalOrder,
             () -> new EnumMap<>(PositionalRank.class),
@@ -211,10 +211,8 @@ public final class Processor extends AbstractProcessor {
     }
 
     checkPositionalRepeatable(sourceType, positionalGroups);
-    checkPositionUniqueWithinRank(positionalGroups);
-    if (allPositional.stream().map(p -> p.getAnnotation(PositionalParameter.class))
-        .mapToInt(PositionalParameter::position).anyMatch(i -> i != 0)) {
-      checkPositionUniqueGlobal(positionalGroups);
+    if (allPositional.size() >= 2) {
+      checkPositionUnique(allPositional);
     }
     List<ExecutableElement> sortedPositional = getSortedPositional(positionalGroups);
     List<Param> result = new ArrayList<>(abstractMethods.size());
@@ -241,27 +239,13 @@ public final class Processor extends AbstractProcessor {
     return sortedPositional;
   }
 
-  private void checkPositionUniqueWithinRank(EnumMap<PositionalRank, List<ExecutableElement>> positionalGroups) {
-    for (List<ExecutableElement> methods : positionalGroups.values()) {
-      checkPositionUnique(methods);
-    }
-  }
-
-  private void checkPositionUniqueGlobal(EnumMap<PositionalRank, List<ExecutableElement>> positionalGroups) {
-    List<ExecutableElement> allMethods = positionalGroups.values().stream()
-        .flatMap(List::stream)
-        .collect(toList());
-    checkPositionUnique(allMethods);
-  }
-
-  private void checkPositionUnique(List<ExecutableElement> methods) {
-    Integer previousPosition = null;
-    for (ExecutableElement method : methods) {
+  private void checkPositionUnique(List<ExecutableElement> allPositional) {
+    Set<Integer> positions = new HashSet<>();
+    for (ExecutableElement method : allPositional) {
       Integer position = method.getAnnotation(PositionalParameter.class).position();
-      if (Objects.equals(position, previousPosition)) {
+      if (!positions.add(position)) {
         throw ValidationException.create(method, "Define a unique position.");
       }
-      previousPosition = position;
     }
   }
 

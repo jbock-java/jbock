@@ -16,7 +16,7 @@ abstract class AllLongsArguments {
   @Parameter(repeatable = true, shortName = 'i')
   abstract List<Long> listOfLongs();
 
-  @Parameter(optional = true, longName = "opt")
+  @Parameter(longName = "opt")
   abstract Optional<Long> optionalLong();
 
   @Parameter(longName = "obj")

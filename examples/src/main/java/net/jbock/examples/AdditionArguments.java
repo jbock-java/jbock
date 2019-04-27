@@ -24,7 +24,7 @@ public abstract class AdditionArguments {
   /**
    * Optional third argument
    */
-  @PositionalParameter(optional = true)
+  @PositionalParameter(position = 2)
   abstract Optional<Integer> c();
 
   final int sum() {

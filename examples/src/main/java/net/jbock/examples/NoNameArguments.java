@@ -10,13 +10,13 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class NoNameArguments {
 
-  @Parameter(longName = "message", optional = true)
+  @Parameter(longName = "message")
   abstract Optional<String> message();
 
   @Parameter(longName = "file", repeatable = true)
   abstract List<String> file();
 
-  @Parameter(optional = true, shortName = 'v', longName = "verbosity")
+  @Parameter(shortName = 'v', longName = "verbosity")
   abstract Optional<Integer> verbosity();
 
   @Parameter(shortName = 'n', longName = "number")

@@ -16,7 +16,6 @@ abstract class GradleArguments {
    * message goes here
    */
   @Parameter(
-      optional = true,
       longName = "message",
       shortName = 'm')
   abstract Optional<String> message();
@@ -34,8 +33,7 @@ abstract class GradleArguments {
    * the dir
    */
   @Parameter(
-      longName = "dir",
-      optional = true)
+      longName = "dir")
   abstract Optional<String> dir();
 
   /**

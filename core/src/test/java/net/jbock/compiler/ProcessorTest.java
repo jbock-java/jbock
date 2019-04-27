@@ -264,16 +264,15 @@ class ProcessorTest {
   void oneOptionalIntNotOptional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract OptionalInt b();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Declare this parameter optional.");
+        .compilesWithoutError();
   }
 
   @Test

@@ -684,9 +684,10 @@ class MapperTest {
 
   @Test
   void oneOptionalIntNotOptional() {
+    // when mapper or collector is present, optionality is never inferred
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract OptionalInt b();",

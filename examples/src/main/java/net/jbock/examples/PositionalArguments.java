@@ -21,7 +21,7 @@ abstract class PositionalArguments {
   @PositionalParameter(position = 2)
   abstract int anotherInt();
 
-  @PositionalParameter(position = 3, optional = true)
+  @PositionalParameter(position = 3)
   abstract Optional<String> optString();
 
   @PositionalParameter(position = 4, repeatable = true)

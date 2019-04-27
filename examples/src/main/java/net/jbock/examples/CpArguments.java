@@ -25,13 +25,13 @@ abstract class CpArguments {
   @Parameter(flag = true, shortName = 'r')
   abstract boolean recursive();
 
-  @Parameter(longName = "backup", optional = true, descriptionArgumentName = "CONTROL")
+  @Parameter(longName = "backup", descriptionArgumentName = "CONTROL")
   abstract Optional<Control> backup();
 
 
   /**
    * Override the usual backup suffix
    */
-  @Parameter(optional = true, shortName = 's')
+  @Parameter(shortName = 's')
   abstract Optional<String> suffix();
 }

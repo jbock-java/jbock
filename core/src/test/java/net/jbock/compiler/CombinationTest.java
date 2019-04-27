@@ -25,7 +25,7 @@ class CombinationTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("A flag cannot be declared repeatable.");
+        .withErrorContaining("A flag cannot be repeatable.");
   }
 
   @Test
@@ -40,7 +40,7 @@ class CombinationTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("A flag cannot be declared optional.");
+        .withErrorContaining("A flag cannot be optional.");
   }
 
   @Test

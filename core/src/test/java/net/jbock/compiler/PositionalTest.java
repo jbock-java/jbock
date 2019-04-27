@@ -30,17 +30,16 @@ class PositionalTest {
   }
 
   @Test
-  void mustDeclareAsOptionalInt() {
+  void mayNotDeclareAsOptionalInt() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "  @PositionalParameter abstract Optional<Integer> a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Declare this parameter optional.");
+        .compilesWithoutError();
   }
 
   @Test
@@ -48,10 +47,10 @@ class PositionalTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @PositionalParameter(position = 1, optional = true) abstract Optional<String> a();",
-        "  @PositionalParameter(position = 10, optional = true) abstract Optional<Integer> b();",
-        "  @PositionalParameter(position = 100, optional = true) abstract Optional<String> c();",
-        "  @PositionalParameter(position = 1000, optional = true) abstract Optional<Integer> d();",
+        "  @PositionalParameter(position = 1) abstract Optional<String> a();",
+        "  @PositionalParameter(position = 10) abstract Optional<Integer> b();",
+        "  @PositionalParameter(position = 100) abstract Optional<String> c();",
+        "  @PositionalParameter(position = 1000) abstract Optional<Integer> d();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -66,7 +65,7 @@ class PositionalTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "  @PositionalParameter abstract String a();",
-        "  @PositionalParameter(optional = true) abstract Optional<Integer> b();",
+        "  @PositionalParameter(position = 1) abstract Optional<Integer> b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -154,9 +153,9 @@ class PositionalTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
         "  @PositionalParameter abstract String b();",
-        "  @PositionalParameter(optional = true) abstract Optional<String> c();",
+        "  @PositionalParameter(position = 1) abstract Optional<String> c();",
+        "  @PositionalParameter(position = 2, repeatable = true) abstract List<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -192,18 +191,16 @@ class PositionalTest {
         .compilesWithoutError();
   }
 
-
   @Test
-  void mustDeclareAsOptional() {
+  void mayNotDeclareAsOptional() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "  @PositionalParameter abstract Optional<Integer> a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Declare this parameter optional.");
+        .compilesWithoutError();
   }
 }

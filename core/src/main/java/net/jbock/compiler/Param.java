@@ -6,6 +6,7 @@ import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
+import net.jbock.coerce.LiftedType;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -184,17 +185,18 @@ final class Param {
     checkName(sourceMethod, longName);
     String name = enumConstant(params, sourceMethod);
     boolean repeatable = parameter.repeatable();
-    boolean optional = parameter.optional();
+    boolean optional = parameter.optional() ||
+        (mapperClass == null && collectorClass == null && LiftedType.isOptionalType(sourceMethod.getReturnType()));
     boolean flag = parameter.flag();
     boolean required = !repeatable && !optional && !flag;
     if (optional && repeatable) {
       throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");
     }
     if (optional && flag) {
-      throw ValidationException.create(sourceMethod, "A flag cannot be declared optional.");
+      throw ValidationException.create(sourceMethod, "A flag cannot be optional.");
     }
     if (repeatable && flag) {
-      throw ValidationException.create(sourceMethod, "A flag cannot be declared repeatable.");
+      throw ValidationException.create(sourceMethod, "A flag cannot be repeatable.");
     }
     if (flag && mapperClass != null) {
       throw ValidationException.create(sourceMethod,
@@ -232,7 +234,8 @@ final class Param {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     String name = enumConstant(params, sourceMethod);
     boolean repeatable = parameter.repeatable();
-    boolean optional = parameter.optional();
+    boolean optional = parameter.optional() ||
+        (mapperClass == null && collectorClass == null && LiftedType.isOptionalType(sourceMethod.getReturnType()));
     boolean required = !repeatable && !optional;
     if (optional && repeatable) {
       throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");

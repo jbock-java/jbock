@@ -18,7 +18,6 @@ abstract class PsArguments {
    * This is the description.
    */
   @Parameter(
-      optional = true,
       longName = "width",
       shortName = 'w',
       descriptionArgumentName = "number")
