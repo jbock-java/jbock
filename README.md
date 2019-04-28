@@ -183,8 +183,8 @@ abstract Optional<Integer> optionalNumber();
 abstract List<Integer> numbers();
 ````
 
-When using a custom mapper, the attributes `repeatable`,
-`optional` and `flag` must be given explicitly.
+When using a custom mapper, the attributes `repeatable` and
+`optional` must be given explicitly.
 
 ### Repeatable parameters
 
@@ -259,7 +259,7 @@ class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K
 ````
 
 When using a custom mapper or collector, the attributes
-`repeatable`, `optional` and `flag` must be set explicitly.
+`repeatable` and `optional` must be set explicitly.
 
 ### Parameter descriptions and internationalization
 
