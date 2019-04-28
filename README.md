@@ -63,20 +63,23 @@ assertEquals(Optional.of(Paths.get("file.txt")), args.path());
 
 ### Required vs. Optional parameters
 
-All non-repeatable parameters, except flags, are treated as *required*
-unless specified otherwise.
+By default, a non-<a href="#repeatable-parameters">repeatable</a>
+parameter definition that is
+not a <a href="#flags">flag</a> is treated as *required*.
 You can only get an instance of your model if
-the input array contains all required parameters.
+the `String[] argv` input array contains all required parameters.
 
-To declare an optional parameter,
-make the corresponding model method return
+To declare an *optional* parameter,
+simply make the corresponding model method return
 one of these four types:
 [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html),
 [OptionalInt](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalInt.html),
 [OptionalLong](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalLong.html) or
 [OptionalDouble](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalDouble.html).
 
-You can also explicitly mark the parameter as `optional`.
+If you want to be more explicit,
+you can also set the `optional` flag
+in addition to that.
 
 ````java
 @Parameter(shortName = 'v', optional = true)
@@ -107,7 +110,9 @@ To declare a flag, simply
 make the corresponding model method return
 `boolean` or `Boolean`.
 
-You can also be more explicit:
+If you want, you can also be more
+be more explicit by setting the
+`flag` attribute:
 
 ````java
 @Parameter(shortName = 'q', flag = true)
@@ -200,7 +205,8 @@ assertEquals(List.of("Content-Type: application/json", "Content-Length: 200"), a
 To declare a repeatable parameter, simply
 make the corresponding model method return a `List`.
 
-You can also be more explicit by setting `repeatable = true`:
+You can also be more explicit by setting the
+`repeatable` attribute:
 
 ````java
 @Parameter(shortName = 'X', repeatable = true)
