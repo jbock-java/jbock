@@ -10,6 +10,6 @@ abstract class HelplessArguments {
   @PositionalParameter
   abstract String required();
 
-  @Parameter(longName = "help", flag = true)
+  @Parameter(longName = "help")
   abstract boolean help();
 }

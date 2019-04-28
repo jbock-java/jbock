@@ -25,7 +25,7 @@ abstract class VariousArguments {
   @Parameter(longName = "bigDecimal")
   abstract BigDecimal bigDecimal();
 
-  @Parameter(longName = "bigDecimalList", repeatable = true)
+  @Parameter(longName = "bigDecimalList")
   abstract List<BigDecimal> bigDecimalList();
 
   @Parameter(longName = "bigDecimalOpt")
@@ -37,7 +37,7 @@ abstract class VariousArguments {
   @Parameter(longName = "bigInteger")
   abstract BigInteger bigInteger();
 
-  @Parameter(longName = "bigIntegerList", repeatable = true)
+  @Parameter(longName = "bigIntegerList")
   abstract List<BigInteger> bigIntegerList();
 
   @Parameter(longName = "bigIntegerOpt")
@@ -49,7 +49,7 @@ abstract class VariousArguments {
   @Parameter(longName = "file")
   abstract File file();
 
-  @Parameter(longName = "fileList", repeatable = true)
+  @Parameter(longName = "fileList")
   abstract List<File> fileList();
 
   @Parameter(longName = "fileOpt")
@@ -61,7 +61,7 @@ abstract class VariousArguments {
   @Parameter(longName = "path")
   abstract Path path();
 
-  @Parameter(longName = "pathList", repeatable = true)
+  @Parameter(longName = "pathList")
   abstract List<Path> pathList();
 
   @Parameter(longName = "pathOpt")
@@ -73,7 +73,7 @@ abstract class VariousArguments {
   @Parameter(longName = "localDate")
   abstract LocalDate localDate();
 
-  @Parameter(longName = "localDateList", repeatable = true)
+  @Parameter(longName = "localDateList")
   abstract List<LocalDate> localDateList();
 
   @Parameter(longName = "localDateOpt")
@@ -85,7 +85,7 @@ abstract class VariousArguments {
   @Parameter(longName = "localDateTime")
   abstract LocalDateTime localDateTime();
 
-  @Parameter(longName = "localDateTimeList", repeatable = true)
+  @Parameter(longName = "localDateTimeList")
   abstract List<LocalDateTime> localDateTimeList();
 
   @Parameter(longName = "localDateTimeOpt")
@@ -97,7 +97,7 @@ abstract class VariousArguments {
   @Parameter(longName = "offsetDateTime")
   abstract OffsetDateTime offsetDateTime();
 
-  @Parameter(longName = "offsetDateTimeList", repeatable = true)
+  @Parameter(longName = "offsetDateTimeList")
   abstract List<OffsetDateTime> offsetDateTimeList();
 
   @Parameter(longName = "offsetDateTimeOpt")
@@ -109,7 +109,7 @@ abstract class VariousArguments {
   @Parameter(longName = "zonedDateTime")
   abstract ZonedDateTime zonedDateTime();
 
-  @Parameter(longName = "zonedDateTimeList", repeatable = true)
+  @Parameter(longName = "zonedDateTimeList")
   abstract List<ZonedDateTime> zonedDateTimeList();
 
   @Parameter(longName = "zonedDateTimeOpt")
@@ -121,7 +121,7 @@ abstract class VariousArguments {
   @Parameter(longName = "uri")
   abstract URI uri();
 
-  @Parameter(longName = "uriList", repeatable = true)
+  @Parameter(longName = "uriList")
   abstract List<URI> uriList();
 
   @Parameter(longName = "uriOpt")
@@ -133,7 +133,7 @@ abstract class VariousArguments {
   @Parameter(longName = "charset")
   abstract Charset charset();
 
-  @Parameter(longName = "charsetList", repeatable = true)
+  @Parameter(longName = "charsetList")
   abstract List<Charset> charsetList();
 
   @Parameter(longName = "charsetOpt")
@@ -145,7 +145,7 @@ abstract class VariousArguments {
   @Parameter(longName = "pattern")
   abstract Pattern pattern();
 
-  @Parameter(longName = "patternList", repeatable = true)
+  @Parameter(longName = "patternList")
   abstract List<Pattern> patternList();
 
   @Parameter(longName = "patternOpt")
@@ -157,7 +157,7 @@ abstract class VariousArguments {
   @Parameter(longName = "instant")
   abstract Instant instant();
 
-  @Parameter(longName = "instantList", repeatable = true)
+  @Parameter(longName = "instantList")
   abstract List<Instant> instantList();
 
   @Parameter(longName = "instantOpt")

@@ -9,12 +9,12 @@ import java.util.List;
 @CommandLineArguments(allowEscapeSequence = true)
 abstract class RmArguments {
 
-  @Parameter(flag = true, shortName = 'r')
+  @Parameter(shortName = 'r')
   abstract boolean recursive();
 
-  @Parameter(flag = true, shortName = 'f')
+  @Parameter(shortName = 'f')
   abstract boolean force();
 
-  @PositionalParameter(repeatable = true)
+  @PositionalParameter
   abstract List<String> otherTokens();
 }

@@ -6,13 +6,9 @@ import net.jbock.Parameter;
 @CommandLineArguments
 abstract class AllFlagsArguments {
 
-  @Parameter(
-      longName = "smallFlag",
-      flag = true)
+  @Parameter(longName = "smallFlag")
   abstract boolean smallFlag();
 
-  @Parameter(
-      longName = "bigFlag",
-      flag = true)
+  @Parameter(longName = "bigFlag")
   abstract Boolean bigFlag();
 }

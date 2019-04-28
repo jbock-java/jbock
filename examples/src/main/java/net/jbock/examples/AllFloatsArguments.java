@@ -10,10 +10,10 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class AllFloatsArguments {
 
-  @PositionalParameter(repeatable = true)
+  @PositionalParameter
   abstract List<Float> positional();
 
-  @Parameter(repeatable = true, shortName = 'i')
+  @Parameter(shortName = 'i')
   abstract List<Float> listOfFloats();
 
   @Parameter(longName = "opt")

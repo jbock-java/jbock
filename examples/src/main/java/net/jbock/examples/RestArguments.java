@@ -12,12 +12,9 @@ abstract class RestArguments {
   /**
    * This is the file.
    */
-  @Parameter(
-      longName = "file",
-      bundleKey = "param_file",
-      repeatable = true)
+  @Parameter(longName = "file", bundleKey = "param_file")
   abstract List<String> file();
 
-  @PositionalParameter(repeatable = true)
+  @PositionalParameter
   abstract List<String> rest();
 }

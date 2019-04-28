@@ -7,16 +7,16 @@ import net.jbock.Parameter;
 @CommandLineArguments
 abstract class TarArguments {
 
-  @Parameter(flag = true, shortName = 'x')
+  @Parameter(shortName = 'x')
   abstract boolean extract();
 
-  @Parameter(flag = true, shortName = 'c')
+  @Parameter(shortName = 'c')
   abstract boolean create();
 
-  @Parameter(flag = true, shortName = 'v')
+  @Parameter(shortName = 'v')
   abstract boolean verbose();
 
-  @Parameter(flag = true, shortName = 'z')
+  @Parameter(shortName = 'z')
   abstract boolean compress();
 
   @Parameter(shortName = 'f')

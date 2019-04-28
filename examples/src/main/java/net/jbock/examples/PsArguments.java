@@ -8,10 +8,7 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class PsArguments {
 
-  @Parameter(
-      flag = true,
-      longName = "all",
-      shortName = 'a')
+  @Parameter(longName = "all", shortName = 'a')
   abstract boolean all();
 
   /**

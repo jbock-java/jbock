@@ -24,7 +24,6 @@ abstract class GradleArguments {
    * the files
    */
   @Parameter(
-      repeatable = true,
       longName = "file",
       shortName = 'f')
   abstract List<String> file();
@@ -48,7 +47,7 @@ abstract class GradleArguments {
       shortName = 'v')
   abstract boolean verbose();
 
-  @PositionalParameter(repeatable = true)
+  @PositionalParameter
   abstract List<String> otherTokens();
 
   @CommandLineArguments

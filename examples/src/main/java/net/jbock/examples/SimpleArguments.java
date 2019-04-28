@@ -8,7 +8,7 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class SimpleArguments {
 
-  @Parameter(flag = true, shortName = 'x')
+  @Parameter(shortName = 'x')
   abstract boolean extract();
 
   @Parameter(longName = "file")

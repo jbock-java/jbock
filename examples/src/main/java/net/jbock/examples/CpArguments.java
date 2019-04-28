@@ -22,7 +22,7 @@ abstract class CpArguments {
   @PositionalParameter(position = 1)
   abstract String dest();
 
-  @Parameter(flag = true, shortName = 'r')
+  @Parameter(shortName = 'r')
   abstract boolean recursive();
 
   @Parameter(longName = "backup", descriptionArgumentName = "CONTROL")

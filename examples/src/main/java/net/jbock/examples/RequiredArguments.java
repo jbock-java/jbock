@@ -13,6 +13,6 @@ abstract class RequiredArguments {
   @Parameter(longName = "dir")
   abstract String dir();
 
-  @PositionalParameter(repeatable = true)
+  @PositionalParameter
   abstract List<String> otherTokens();
 }

@@ -10,10 +10,10 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class AllIntegersArguments {
 
-  @PositionalParameter(repeatable = true)
+  @PositionalParameter
   abstract List<Integer> positional();
 
-  @Parameter(repeatable = true, shortName = 'i')
+  @Parameter(shortName = 'i')
   abstract List<Integer> listOfIntegers();
 
   @Parameter(longName = "opt")

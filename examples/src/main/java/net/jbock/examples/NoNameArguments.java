@@ -13,7 +13,7 @@ abstract class NoNameArguments {
   @Parameter(longName = "message")
   abstract Optional<String> message();
 
-  @Parameter(longName = "file", repeatable = true)
+  @Parameter(longName = "file")
   abstract List<String> file();
 
   @Parameter(shortName = 'v', longName = "verbosity")
@@ -22,6 +22,6 @@ abstract class NoNameArguments {
   @Parameter(shortName = 'n', longName = "number")
   abstract int number();
 
-  @Parameter(longName = "cmos", flag = true)
+  @Parameter(longName = "cmos")
   abstract boolean cmos();
 }
