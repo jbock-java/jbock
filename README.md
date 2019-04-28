@@ -11,6 +11,30 @@ How does it compare to
 1. All parameters are unary, except flags. Parameters with higher arity are not supported.
 1. There are standard coercions, including numbers and dates. It is also possible to register custom converters.
 
+### Contents
+
+* <a href="#overview">Overview</a>
+* <a href="#required-vs-optional-parameters">Required
+  vs. Optional parameters</a>
+* <a href="#flags">Flags</a>
+* <a href="#showing-help">Showing help</a>
+* <a href="#standard-coercions">Standard coercions</a>
+* <a href="#custom-mappers-and-parameter-validation">Custom
+  mappers and parameter validation</a>
+* <a href="#repeatable-parameters">Repeatable parameters</a>
+* <a href="#custom-collectors">Custom collectors</a>
+* <a href="#parameter-descriptions-and-internationalization">Parameter
+  descriptions and internationalization</a>
+* <a href="#escape-sequence">Escape sequence</a>
+* <a href="#prefixed-tokens">Prefixed tokens</a>
+* <a href="#attached-and-detached-parameters">Attached
+  and detached parameters</a>
+* <a href="#positional-parameters">Positional parameters</a>
+* <a href="#handling-failure">Handling failure</a>
+* <a href="#runtime-modifiers">Runtime modifiers</a>
+* <a href="#maven-setup">Maven setup</a>
+* <a href="#sample-projects">Sample projects</a>
+
 ### Overview
 
 Here's a Java model of a command line interface:
@@ -176,7 +200,7 @@ assertEquals(List.of("Content-Type: application/json", "Content-Length: 200"), a
 To declare a repeatable parameter, simply
 make the corresponding model method return a `List`.
 
-You can also be more explicit:
+You can also be more explicit by setting `repeatable = true`:
 
 ````java
 @Parameter(shortName = 'X', repeatable = true)
@@ -259,48 +283,40 @@ rather than the method's javadoc.
 
 There can sometimes be ambiguity between positional
 and regular parameters. If the `allowEscapeSequence = true`
-flag is present, the special token
-`--` can be used to resolve this.
+flag is given, the special token `--` can be used to resolve this.
 
 ````java
 @CommandLineArguments(allowEscapeSequence = true)
 abstract class MyArguments {
   
   @PositionalParameter
-  abstract List<Path> files();
+  abstract Path file();
   
-  @Parameter(shortName = '-q', flag = true)
+  @Parameter(shortName = 'q')
   abstract boolean quiet();
 }
 ````
 
-The remaining tokens after `--` are always considered
-positional.
-
-
-````java
-String[] argv = { "-q" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-
-assertTrue(args.quiet());
-assertEquals(Collections.emptyList(), args.files());
-````
+The remaining tokens after the escape sequence `--` are treated as positional:
 
 ````java
 String[] argv = { "--", "-q" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
 assertFalse(args.quiet());
-assertEquals(Collections.singletonList("-q"), args.files());
+assertEquals(Paths.get("-q"), args.files());
 ````
 
 ### Prefixed tokens
 
-Any unbound, unescaped token that begins with
-[hyphen-minus](https://en.wikipedia.org/wiki/Hyphen-minus)
-and isn't one of the defined parameter names, 
-is rejected.
-The `allowPrefixedTokens = true` flag changes this.
+An unknown token that begins with
+[hyphen-minus](https://en.wikipedia.org/wiki/Hyphen-minus) 
+will cause a `RuntimeException`. No attempt is made to
+interpret it as a positional argument.
+Use `allowPrefixedTokens` to allow the user
+to pass, for example, a negative number,
+without forcing them to type the
+<a href="#escape-sequence">escape sequence</a>:
 
 ````java
 @CommandLineArguments(allowPrefixedTokens = true)
@@ -338,9 +354,9 @@ argv = { "-fdata.txt" }; // attached short
 
 ### Positional parameters
 
-In a way these are the opposite of <em>flags</em>:
-whereas a flag is just a parameter name without a value after it,
-a positional parameter is a "naked" value without a
+In a way these are dual to <a href="#flags">flags</a>.
+A flag is just a parameter name without a value after it.
+By contrast, a positional parameter is a "naked" value without a
 preceding parameter name.
 
 ````java
@@ -355,6 +371,11 @@ abstract class MyArguments {
 }
 ````
 
+Now the order of the arguments matters,
+as defined by the `position` attribute.
+The `source` parameter has the *lowest* position,
+so it will bind the *first* argument.
+
 ````java
 String[] argv = { "a.txt", "b.txt" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
@@ -366,11 +387,11 @@ assertEquals(Paths.get("b.txt"), args.target());
 
 There are several ways in which the user input can be wrong:
 
-* Repetition of non-repeatable parameters
+* Repetition of <a href="#repeatable-parameters">non-repeatable parameters</a>
 * Absence of required parameters
-* Unknown token
-* Missing value
-* Parsing error (for example: bad number format)
+* Unknown or unbound token
+* Missing value for a unary parameter
+* Coercion failure
 
 For example, let's say we have a required argument `-f`:
 
@@ -385,7 +406,6 @@ abstract class MyArguments {
 then the empty array `argv = {}` would be invalid input,
 because the required argument `-f` is absent.
 
-jbock offers two different ways of handling invalid input.
 We've seen some examples using the `parseOrExit` method before, which simply shuts down the jvm.
 There's also `parse` which requires more effort, but is also more flexible:
   
