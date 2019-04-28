@@ -154,6 +154,8 @@ abstract Optional<Integer> optionalNumber();
 abstract List<Integer> numbers();
 ````
 
+When using a custom mapper, the attributes `repeatable`,
+`optional` and `flag` must be given explicitly.
 
 ### Repeatable parameters
 
