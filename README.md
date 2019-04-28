@@ -52,6 +52,13 @@ one of these four types:
 [OptionalLong](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalLong.html) or
 [OptionalDouble](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalDouble.html).
 
+You can also explicitly mark the parameter as `optional`.
+
+````java
+@Parameter(shortName = 'v', optional = true)
+abstract OptionalInt verbosity();
+````
+
 ### Flags
 
 The nullary parameters that don't take an argument are
@@ -70,6 +77,17 @@ String[] argv = { "-q" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
 assertTrue(args.quiet());
+````
+
+To declare a flag, simply
+make the corresponding model method return
+`boolean` or `Boolean`.
+
+You can also be more explicit:
+
+````java
+@Parameter(shortName = 'q', flag = true)
+abstract boolean quiet();
 ````
 
 ### Showing help
@@ -142,8 +160,7 @@ abstract List<Integer> numbers();
 Repeatable parameters can appear several times in `argv`.
 
 ````java
-@Parameter(repeatable = true, 
-           shortName = 'X')
+@Parameter(shortName = 'X')
 abstract List<String> headers();
 ````
 
@@ -154,9 +171,20 @@ MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 assertEquals(List.of("Content-Type: application/json", "Content-Length: 200"), args.headers());
 ````
 
-By default, a repeatable parameter must be a `List`.
-By using a custom mapper and collector, it is also possible to collect repeatable parameters into other collections,
-like `Set` or even `Map`. See example below:
+To declare a repeatable parameter, simply
+make the corresponding model method return a `List`.
+
+You can also be more explicit:
+
+````java
+@Parameter(shortName = 'X', repeatable = true)
+abstract List<String> headers();
+````
+
+### Custom collectors
+
+By using a custom collector, it is possible to create a
+`Set`, or `Map` or other collections.
 
 ````java
 @Parameter(repeatable = true, 
@@ -165,6 +193,8 @@ like `Set` or even `Map`. See example below:
            collectedBy = MapCollector.class)
 abstract Map<String, String> headers();
 ````
+
+As before, the mapper class is a `Supplier<Function>`:
 
 ````java
 class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String>>> {
@@ -182,6 +212,10 @@ class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String
 }
 ````
 
+The collector class must be a `Supplier<Collector>`.
+Type variables can be used for here.
+
+
 ````java
 class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
 
@@ -191,6 +225,9 @@ class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K
   }
 }
 ````
+
+When using a custom mapper or collector, the attributes
+`repeatable`, `optional` and `flag` must be set explicitly.
 
 ### Parameter descriptions and internationalization
 
