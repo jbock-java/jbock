@@ -27,8 +27,8 @@ How does it compare to
   descriptions and internationalization</a>
 * <a href="#escape-sequence">Escape sequence</a>
 * <a href="#prefixed-tokens">Prefixed tokens</a>
-* <a href="#attached-and-detached-parameters">Attached
-  and detached parameters</a>
+* <a href="#attached-vs-detached-short-vs-long">Attached
+  vs detached, short vs long</a>
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#handling-failure">Handling failure</a>
 * <a href="#runtime-modifiers">Runtime modifiers</a>
@@ -88,10 +88,10 @@ abstract OptionalInt verbosity();
 
 ### Flags
 
-The nullary parameters that don't take an argument are
-called flags.
-Their type must be `boolean`.
-Their value will be `true` if one of their names
+The "nullary" parameters that don't take an argument are
+called flags. 
+They will resolve to `true`
+if their short or long name
 appears on the command line.
 
 ````java
@@ -340,7 +340,7 @@ MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 assertEquals(-1, args.possiblyNegativeNumber());
 ````
 
-### Attached and detached parameters
+### Attached vs detached, short vs long
 
 Given a parameter like this
 
@@ -357,6 +357,11 @@ argv = { "--file=data.txt" }; // attached long
 argv = { "-f", "data.txt" }; // detached short
 argv = { "-fdata.txt" }; // attached short
 ````
+
+Note that the long name is always preceded by
+*two* hyphen-minus characters, and the short name
+is always preceded by a *single* hyphen-minus.
+
 
 ### Positional parameters
 
