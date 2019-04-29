@@ -34,6 +34,7 @@ How does it compare to
 * <a href="#runtime-modifiers">Runtime modifiers</a>
 * <a href="#maven-setup">Maven setup</a>
 * <a href="#sample-projects">Sample projects</a>
+* <a href="#running-tests">Running tests</a>
 
 ### Overview
 
@@ -501,3 +502,10 @@ There's also a gradle project in the samples.
 * [aws-glacier-multipart-upload](https://github.com/h908714124/aws-glacier-multipart-upload)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
 * [copy-file](https://github.com/h908714124/CopyFile)
+
+### Running tests
+
+````sh
+gradle :core:test
+gradle :examples:test
+````
