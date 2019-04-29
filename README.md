@@ -288,8 +288,8 @@ rather than the method's javadoc.
 ### Escape sequence
 
 There can sometimes be ambiguity between positional
-and regular parameters. If the `allowEscapeSequence = true`
-flag is given, the special token `--` can be used to resolve this.
+and regular parameters. If the `allowEscapeSequence`
+flag is present, the special token `--` can be used to resolve this.
 
 ````java
 @CommandLineArguments(allowEscapeSequence = true)
