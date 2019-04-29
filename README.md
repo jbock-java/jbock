@@ -310,7 +310,7 @@ String[] argv = { "--", "-q" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
 assertFalse(args.quiet());
-assertEquals(Paths.get("-q"), args.files());
+assertEquals(Paths.get("-q"), args.file());
 ````
 
 ### Prefixed tokens
