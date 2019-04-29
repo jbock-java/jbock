@@ -3,3 +3,6 @@
 *.iml
 *~
 /dependency-reduced-pom.xml
+/.gradle
+/build
+/generated

@@ -1,6 +1,5 @@
 #!/bin/bash
 if [[ -z "$1" ]]; then echo arg: version; exit 1; fi
-cp pom.xml pom.backup.xml
-sed -i "s/<version>0-SNAPSHOT<\/version>/<version>$1<\/version>/" pom.xml
-mvn clean install -Psonatype-oss-release
-mv pom.backup.xml pom.xml
+echo "version=$1" >gradle.properties
+gradle clean test uploadArchives
+rm gradle.properties

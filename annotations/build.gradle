@@ -1,0 +1,88 @@
+plugins {
+    id 'java'
+    id 'maven'
+    id 'signing'
+}
+
+group = "com.github.h908714124"
+archivesBaseName = "jbock-annotations"
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.0-M1'
+}
+
+
+test {
+    useJUnitPlatform()
+    testLogging {
+        events "passed", "skipped", "failed"
+    }
+}
+
+task javadocJar(type: Jar) {
+    classifier = 'javadoc'
+    from javadoc
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.allSource
+}
+
+artifacts {
+    archives javadocJar, sourcesJar
+}
+
+signing {
+    sign configurations.archives
+}
+
+// https://central.sonatype.org/pages/gradle.html
+uploadArchives {
+    repositories {
+        mavenDeployer {
+            beforeDeployment { deployment -> signing.signPom(deployment) }
+
+            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
+                authentication(userName: project.properties['ossrhUsername'], password: project.properties['ossrhPassword'])
+            }
+
+            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
+                authentication(userName: project.properties['ossrhUsername'], password: project.properties['ossrhPassword'])
+            }
+
+            pom.project {
+                name 'jbock-annotations'
+                packaging 'jar'
+                artifactId 'jbock-annotations'
+                description 'Annotations for the jbock annotation processor'
+                url 'https://github.com/h908714124/jbock'
+
+                scm {
+                    connection 'scm:svn:https://github.com/h908714124/jbock.git'
+                    developerConnection 'scm:svn:https://github.com/h908714124/jbock.git'
+                    url 'https://github.com/h908714124/jbock'
+                }
+
+                licenses {
+                    license {
+                        name 'MIT License'
+                        url 'https://opensource.org/licenses/MIT'
+                    }
+                }
+
+                developers {
+                    developer {
+                        id 'h908714124'
+                        name 'h908714124'
+                        email 'kraftdurchblumen@gmx.de'
+                    }
+                }
+            }
+        }
+    }
+}
