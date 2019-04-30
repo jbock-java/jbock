@@ -60,7 +60,7 @@ String[] argv = { "-v2", "file.txt" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
 assertEquals(OptionalInt.of(2), args.verbosity());
-assertEquals(Optional.of(Paths.get("file.txt")), args.path());
+assertEquals(Paths.get("file.txt"), args.path());
 ````
 
 ### Parameters
