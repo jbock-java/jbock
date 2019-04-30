@@ -262,7 +262,7 @@ class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K
 This can be tested as follows
 
 ````java
-String[] argv = { "-Xhorse:12", "Xsheep:4" };
+String[] argv = { "-Xhorse:12", "-Xsheep:4" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
 assertEquals(2, args.headers());
