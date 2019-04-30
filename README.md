@@ -13,10 +13,11 @@ How does it compare to
 
 ### Contents
 
-* <a href="#overview">Overview</a>
+* <a href="#quick-overview">Quick Overview</a>
+* <a href="#parameters">Parameters</a>
+* <a href="#flags">Flags</a>
 * <a href="#required-vs-optional-parameters">Required
   vs. Optional parameters</a>
-* <a href="#flags">Flags</a>
 * <a href="#showing-help">Showing help</a>
 * <a href="#standard-coercions">Standard coercions</a>
 * <a href="#custom-mappers-and-parameter-validation">Custom
@@ -36,7 +37,7 @@ How does it compare to
 * <a href="#sample-projects">Sample projects</a>
 * <a href="#running-tests">Running tests</a>
 
-### Overview
+### Quick Overview
 
 Here's a Java model of a command line interface:
 
@@ -62,6 +63,47 @@ assertEquals(OptionalInt.of(2), args.verbosity());
 assertEquals(Optional.of(Paths.get("file.txt")), args.path());
 ````
 
+### Parameters
+
+Command line applications have access to an array `String[] argv`,
+the contents of which are usually examined at the start of the program.
+The tokens in this array, or (sometimes) certain pairs of tokens,
+are called *parameters*.
+
+### Flags
+
+The "nullary" parameters that don't take an argument are
+called *flags*. 
+
+To declare a flag, simply
+make the parameter's corresponding model method return
+`boolean` or `Boolean`.
+
+````java
+@Parameter(shortName = 'q', longName = "quiet")
+abstract boolean quiet();
+````
+
+At runtime, the flag parameter's model method will return `true`
+if its *short name* or *long name*
+appear on the command line.
+
+````java
+MyArguments args = MyArguments_Parser.create().parseOrExit(new String[]{ "-q" });
+assertTrue(args.quiet());
+args = MyArguments_Parser.create().parseOrExit(new String[]{ "--quiet" });
+assertTrue(args.quiet());
+````
+
+If you want, you can also be more
+be more explicit by setting the
+`flag` attribute:
+
+````java
+@Parameter(shortName = 'q', flag = true)
+abstract boolean quiet();
+````
+
 ### Required vs. Optional parameters
 
 By default, a non-<a href="#repeatable-parameters">repeatable</a>
@@ -85,39 +127,6 @@ in addition to that.
 ````java
 @Parameter(shortName = 'v', optional = true)
 abstract OptionalInt verbosity();
-````
-
-### Flags
-
-The "nullary" parameters that don't take an argument are
-called flags. 
-They will resolve to `true`
-if their short or long name
-appears on the command line.
-
-````java
-@Parameter(shortName = 'q')
-abstract boolean quiet();
-````
-
-````java
-String[] argv = { "-q" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-
-assertTrue(args.quiet());
-````
-
-To declare a flag, simply
-make the corresponding model method return
-`boolean` or `Boolean`.
-
-If you want, you can also be more
-be more explicit by setting the
-`flag` attribute:
-
-````java
-@Parameter(shortName = 'q', flag = true)
-abstract boolean quiet();
 ````
 
 ### Showing help
