@@ -217,7 +217,8 @@ abstract List<String> headers();
 ### Custom collectors
 
 By using a custom collector, it is possible to create a
-`Set`, or `Map` or other collections.
+`Set`, or `Map` or other collections. The following example
+builds a `Map`:
 
 ````java
 @Parameter(repeatable = true, 
@@ -227,7 +228,7 @@ By using a custom collector, it is possible to create a
 abstract Map<String, String> headers();
 ````
 
-As before, the mapper class is a `Supplier<Function>`:
+As before, the mapper class is a `Supplier<Function<...>>`:
 
 ````java
 class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String>>> {
@@ -245,9 +246,8 @@ class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String
 }
 ````
 
-The collector class must be a `Supplier<Collector>`.
-Type variables can be used for here.
-
+The collector class must be a `Supplier<Collector<...>>`.
+This class can have type variables for better reusability.
 
 ````java
 class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
@@ -259,8 +259,21 @@ class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K
 }
 ````
 
-When using a custom mapper or collector, the attributes
-`repeatable` and `optional` must be set explicitly.
+This can be tested as follows
+
+````java
+String[] argv = { "-Xhorse:12", "Xsheep:4" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+
+assertEquals(2, args.headers());
+assertEquals("12", args.headers().get("horse"));
+assertEquals("4", args.headers().get("sheep"));
+````
+
+
+*Note: If a parameter declares a custom mapper or collector, then the 
+attributes `repeatable` and `optional` are not inferred from the parameter type.
+They must be set explicitly.*
 
 ### Parameter descriptions and internationalization
 
