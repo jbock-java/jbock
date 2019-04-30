@@ -4,6 +4,8 @@ plugins {
     id 'signing'
 }
 
+sourceCompatibility = '1.8'
+
 group = "com.github.h908714124"
 archivesBaseName = "jbock-annotations"
 
@@ -15,6 +17,11 @@ dependencies {
     testImplementation 'org.junit.jupiter:junit-jupiter:5.5.0-M1'
 }
 
+jar {
+    manifest {
+        attributes('Automatic-Module-Name': 'net.jbock')
+    }
+}
 
 test {
     useJUnitPlatform()
