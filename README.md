@@ -16,7 +16,7 @@ How does it compare to
 * <a href="#quick-overview">Quick Overview</a>
 * <a href="#parameters">Parameters</a>
 * <a href="#flags">Flags</a>
-* <a href="#binding-parameter">Binding parameters</a>
+* <a href="#binding-parameters">Binding parameters</a>
 * <a href="#showing-help">Showing help</a>
 * <a href="#standard-coercions">Standard coercions</a>
 * <a href="#custom-mappers-and-parameter-validation">Custom
