@@ -328,7 +328,7 @@ rather than the method's javadoc.
 There can sometimes be ambiguity between
 <a href="#positional-parameters">positional</a>
 and regular parameters. If the `allowEscapeSequence`
-flag is present, the special token `--` can be used to resolve this.
+attribute is present, the special token `--` can be used to resolve this.
 
 ````java
 @CommandLineArguments(allowEscapeSequence = true)
