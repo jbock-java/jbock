@@ -28,8 +28,7 @@ How does it compare to
   descriptions and internationalization</a>
 * <a href="#escape-sequence">Escape sequence</a>
 * <a href="#prefixed-tokens">Prefixed tokens</a>
-* <a href="#attached-vs-detached-short-vs-long">Attached
-  vs detached, short vs long</a>
+* <a href="#parameter-shapes">Parameter shapes</a>
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#handling-failure">Handling failure</a>
 * <a href="#runtime-modifiers">Runtime modifiers</a>
@@ -67,13 +66,17 @@ assertEquals(Paths.get("file.txt"), args.path());
 
 Command line applications have access to an array `String[] argv`,
 the contents of which are usually examined at the start of the program.
-The tokens in this array, or (sometimes) certain pairs of tokens,
+The tokens in this array, or sometimes certain pairs of tokens,
 are called *parameters*.
+
+Parameters can have different <a href="#parameter-shapes">shapes</a>.
+It is also possible to define
+<a href="#positional-parameters">positional parameters,</a>
+which can have any shape.
 
 ### Flags
 
-The "nullary" parameters that don't take an argument are
-called *flags*. 
+These are the simplest non-positional parameters. 
 
 To declare a flag, simply
 make the parameter's corresponding model method return
@@ -86,7 +89,7 @@ abstract boolean quiet();
 
 At runtime, the flag parameter's model method will return `true`
 if its *short name* or *long name*
-appear on the command line.
+appear in `argv`.
 
 ````java
 MyArguments args = MyArguments_Parser.create().parseOrExit(new String[]{ "-q" });
@@ -104,13 +107,20 @@ be more explicit by setting the
 abstract boolean quiet();
 ````
 
-### Required vs. Optional parameters
+### Binding parameters
 
-By default, a non-<a href="#repeatable-parameters">repeatable</a>
-parameter definition that is
-not a <a href="#flags">flag</a> is treated as *required*.
-You can only get an instance of your model if
-the `String[] argv` input array contains all required parameters.
+A <a href="#positional-parameters">non-positional</a> parameter that is not a <a href="#flags">flag</a> is called a
+*binding parameter*. For example, the followig
+model method declares a *required* parameter.
+
+````java
+// a required parameter
+@Parameter(shortName = 'f')
+abstract String file();
+````
+
+It is not possible to get an instance
+of your model class unless `argv` contains all required parameters.
 
 To declare an *optional* parameter,
 simply make the corresponding model method return
@@ -120,13 +130,19 @@ one of these four types:
 [OptionalLong](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalLong.html) or
 [OptionalDouble](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalDouble.html).
 
+````java
+// an optional parameter
+@Parameter(shortName = 'f')
+abstract Optional<String> file();
+````
+
 If you want to be more explicit,
 you can also set the `optional` flag
-in addition to that.
+in addition to that:
 
 ````java
-@Parameter(shortName = 'v', optional = true)
-abstract OptionalInt verbosity();
+@Parameter(shortName = 'f', optional = true)
+abstract Optional<String> file();
 ````
 
 ### Showing help
@@ -339,13 +355,16 @@ assertEquals(Paths.get("-q"), args.file());
 
 ### Prefixed tokens
 
-An unknown token that begins with
+An token in `arvg` that begins with
 [hyphen-minus](https://en.wikipedia.org/wiki/Hyphen-minus) 
-will cause a `RuntimeException`. No attempt is made to
+but is not one of the declared parameter names,
+will cause a `RuntimeException`.
+No attempt is made to
 interpret it as a positional argument.
+
 Use `allowPrefixedTokens` to allow the user
 to pass, for example, a negative number,
-without forcing them to type the
+without having to type the
 <a href="#escape-sequence">escape sequence</a>:
 
 ````java
@@ -364,7 +383,7 @@ MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 assertEquals(-1, args.possiblyNegativeNumber());
 ````
 
-### Attached vs detached, short vs long
+### Parameter shapes
 
 Given a parameter like this
 
