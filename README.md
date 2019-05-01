@@ -109,7 +109,7 @@ abstract boolean quiet();
 ### Binding parameters
 
 A <a href="#positional-parameters">non-positional</a> parameter that is not a <a href="#flags">flag</a> is called a
-*binding parameter*. For example, the followig
+*binding parameter*. For example, the following
 model method declares a *required* parameter.
 
 ````java
