@@ -454,7 +454,7 @@ There are several ways in which the user input can be wrong:
 * Repetition of <a href="#repeatable-parameters">non-repeatable parameters</a>
 * Absence of a required parameter
 * Unknown token
-* Missing value of <a href="binding-parameters">binding parameter</a>
+* Missing value of <a href="#binding-parameters">binding parameter</a>
 * Coercion failed
 
 For example, let's say we have a required argument `-f`:
