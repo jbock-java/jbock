@@ -26,10 +26,10 @@ How does it compare to
 * <a href="#parameter-descriptions-and-internationalization">Parameter
   descriptions and internationalization</a>
 * <a href="#escape-sequence">Escape sequence</a>
-* <a href="#prefixed-tokens">Prefixed tokens</a>
 * <a href="#parameter-shapes">Parameter shapes</a>
 * <a href="#positional-parameters">Positional parameters</a>
-* <a href="#handling-failure">Handling failure</a>
+* <a href="#allowing-prefixed-tokens">Allowing prefixed tokens</a>
+* <a href="#parsing-failure">Parsing failure</a>
 * <a href="#runtime-modifiers">Runtime modifiers</a>
 * <a href="#maven-setup">Maven setup</a>
 * <a href="#sample-projects">Sample projects</a>
@@ -352,65 +352,48 @@ assertFalse(args.quiet());
 assertEquals(Paths.get("-q"), args.file());
 ````
 
-### Prefixed tokens
-
-An token in `arvg` that begins with
-[hyphen-minus](https://en.wikipedia.org/wiki/Hyphen-minus) 
-but is not one of the declared parameter names,
-will cause a `RuntimeException`.
-No attempt is made to
-interpret it as a positional argument.
-
-Use `allowPrefixedTokens` to allow the user
-to pass, for example, a negative number,
-without having to type the
-<a href="#escape-sequence">escape sequence</a>:
-
-````java
-@CommandLineArguments(allowPrefixedTokens = true)
-abstract class MyArguments {
-  
-  @PositionalParameter
-  abstract int possiblyNegativeNumber();
-}
-````
-
-````java
-String[] argv = { "-1" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-
-assertEquals(-1, args.possiblyNegativeNumber());
-````
-
 ### Parameter shapes
 
-Given a parameter like this
+Given a <a href="#binding-parameter">binding parameter</a> like this
 
 ````java
 @Parameter(longName = "file", shortName = 'f')
 abstract Path file();
 ````
 
-then the following are all equivalent:
+then we have the short and long forms, which are equivalent
 
 ````java
-argv = { "--file", "data.txt" }; // detached long
-argv = { "--file=data.txt" }; // attached long
-argv = { "-f", "data.txt" }; // detached short
-argv = { "-fdata.txt" }; // attached short
+String[] argv;
+argv = { "--file", "data.txt" }; // two hypens -> long form
+argv = { "-f", "data.txt" }; // one hyphen -> short form
 ````
 
-Note that the long name is always preceded by
-*two* hyphen-minus characters, and the short name
-is always preceded by a *single* hyphen-minus.
+Both can also be written in *attached* form as follows
 
+````
+String[] argv;
+argv = { "--file=data.txt" }; // attached long form
+argv = { "-fdata.txt" }; // attached short form
+````
+
+Thus if both `longName` and `shortName` are defined, there
+are four different ways to write a binding parameter.
+
+For a <a href="#flags">flag,</a> there are at most two ways:
+
+````java
+argv = { "--quiet" }; // two hyphens -> long flag
+argv = { "-q" }; // one hyphen -> short flag
+````
 
 ### Positional parameters
 
-In a way these are dual to <a href="#flags">flags</a>.
-A flag is just a parameter name without a value after it.
-By contrast, a positional parameter is a "naked" value without a
-preceding parameter name.
+A *positional* parameter is just a value without a
+preceding parameter name. The value is not allowed
+to start with a hyphen character, unless the
+<a href="#allowing-prefixed-tokens">allowPrefixedTokens</a>
+attribute is set.
 
 ````java
 @CommandLineArguments
@@ -436,15 +419,45 @@ assertEquals(Paths.get("a.txt"), args.source());
 assertEquals(Paths.get("b.txt"), args.target());
 ````
 
-### Handling failure
+### Allowing prefixed tokens
+
+By default, any token that begins with
+[hyphen-minus](https://en.wikipedia.org/wiki/Hyphen-minus) 
+and is not one of the defined parameter names,
+will cause a <a href="parsing-failure">parsing failure</a>.
+No attempt is made to interpret it as a positional argument.
+
+Use `allowPrefixedTokens` to change this and allow the user
+to pass, for instance, a negative number,
+without forcing them to type the
+<a href="#escape-sequence">escape sequence</a>:
+
+````java
+@CommandLineArguments(allowPrefixedTokens = true)
+abstract class MyArguments {
+  
+  @PositionalParameter
+  abstract int number();
+}
+````
+For example, `-1` can now be passed as a positional parameter.
+
+````java
+String[] argv = { "-1" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+
+assertEquals(-1, args.number());
+````
+
+### Parsing failure
 
 There are several ways in which the user input can be wrong:
 
 * Repetition of <a href="#repeatable-parameters">non-repeatable parameters</a>
-* Absence of required parameters
-* Unknown or unbound token
-* Missing value for a unary parameter
-* Coercion failure
+* Absence of a required parameter
+* Unknown token
+* Missing value of <a href="binding-parameters">binding parameter</a>
+* Coercion failed
 
 For example, let's say we have a required argument `-f`:
 
