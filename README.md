@@ -324,7 +324,7 @@ rather than the method's javadoc.
 
 ### Parameter shapes
 
-Given a <a href="#binding-parameter">binding parameter</a> like this
+Given a <a href="#binding-parameters">binding parameter</a> like this
 
 ````java
 @Parameter(longName = "file", shortName = 'f')
