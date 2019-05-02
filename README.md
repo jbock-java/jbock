@@ -341,8 +341,7 @@ argv = { "-f", "data.txt" }; // one hyphen -> short form
 
 Both can also be written in *attached* form as follows
 
-````
-String[] argv;
+````java
 argv = { "--file=data.txt" }; // attached long form
 argv = { "-fdata.txt" }; // attached short form
 ````
