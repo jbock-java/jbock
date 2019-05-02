@@ -8,7 +8,7 @@ How does it compare to
 [other parsers?](https://stackoverflow.com/questions/1524661/the-best-cli-parser-for-java)
 
 1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required parameter.
-1. All parameters are unary, except flags. Parameters with higher arity are not supported.
+1. All <a href="binding-parameters">binding parameters</a> are unary. Parameters with higher arity are not supported.
 1. There are standard coercions, including numbers and dates. It is also possible to register custom converters.
 
 ### Contents
@@ -31,7 +31,8 @@ How does it compare to
 * <a href="#allowing-prefixed-tokens">Allowing prefixed tokens</a>
 * <a href="#parsing-failure">Parsing failure</a>
 * <a href="#runtime-modifiers">Runtime modifiers</a>
-* <a href="#maven-setup">Maven setup</a>
+* <a href="#gradle-config">Gradle config</a>
+* <a href="#maven-config">Maven config</a>
 * <a href="#sample-projects">Sample projects</a>
 * <a href="#running-tests">Running tests</a>
 
@@ -505,7 +506,55 @@ AdditionArguments_Parser.create()
 The `indent` is used when printing the usage page. Note that the output, if any, is printed to
 the error stream, unless `argv` is `{ "--help" }`, and `allowHelpOption` is `true`.
 
-### Maven setup
+### Gradle config
+
+This is the basic configuration for projects using the `java` plugin
+
+````groovy
+dependencies {
+    compileOnly 'com.github.h908714124:jbock-annotations:2.2'
+    annotationProcessor 'com.github.h908714124:jbock:$jbockVersion'
+}
+````
+
+For `java-library` projects, `implementation` scope must be used for the annotations:
+
+````groovy
+dependencies {
+    implementation 'com.github.h908714124:jbock-annotations:2.2'
+    annotationProcessor 'com.github.h908714124:jbock:$jbockVersion'
+}
+````
+
+If Intellij doesn't "see" the generated classes,
+try setting up a `generated` folder as follows: 
+
+````groovy
+compileJava {
+    options.compilerArgs << "-s"
+    options.compilerArgs << "$projectDir/generated/java"
+
+    doFirst {
+        // make sure that directory exists
+        file(new File(projectDir, "/generated/java")).mkdirs()
+    }
+}
+
+clean.doLast {
+    // clean-up directory when necessary
+    file(new File(projectDir, "/generated")).deleteDir()
+}
+
+sourceSets {
+    generated {
+        java {
+            srcDir "$projectDir/generated/java"
+        }
+    }
+}
+````
+
+### Maven config
 
 The annotations are in a separate jar.
 They are not needed at runtime, so the scope can be `optional`
