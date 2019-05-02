@@ -422,7 +422,7 @@ assertEquals(Paths.get("-q"), args.file());
 By default, any token that begins with
 [hyphen-minus](https://en.wikipedia.org/wiki/Hyphen-minus) 
 and is not one of the defined parameter names,
-will cause a <a href="parsing-failure">parsing failure</a>.
+will cause a <a href="#parsing-failure">parsing failure</a>.
 No attempt is made to interpret it as a positional argument.
 
 Use `allowPrefixedTokens` to change this and allow the user
