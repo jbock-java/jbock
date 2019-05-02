@@ -70,8 +70,7 @@ are called *parameters*.
 
 Parameters can have different <a href="#parameter-shapes">shapes</a>.
 It is also possible to define
-<a href="#positional-parameters">positional parameters,</a>
-which can have any shape.
+<a href="#positional-parameters">positional parameters.</a>
 
 ### Flags
 
