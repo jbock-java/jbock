@@ -25,9 +25,9 @@ How does it compare to
 * <a href="#custom-collectors">Custom collectors</a>
 * <a href="#parameter-descriptions-and-internationalization">Parameter
   descriptions and internationalization</a>
-* <a href="#escape-sequence">Escape sequence</a>
 * <a href="#parameter-shapes">Parameter shapes</a>
 * <a href="#positional-parameters">Positional parameters</a>
+* <a href="#escape-sequence">Escape sequence</a>
 * <a href="#allowing-prefixed-tokens">Allowing prefixed tokens</a>
 * <a href="#parsing-failure">Parsing failure</a>
 * <a href="#runtime-modifiers">Runtime modifiers</a>
@@ -322,35 +322,6 @@ and the method's `bundleKey` is defined and contained in the bundle,
 then the corresponding text will be used in the help page,
 rather than the method's javadoc.
 
-### Escape sequence
-
-There can sometimes be ambiguity between
-<a href="#positional-parameters">positional</a>
-and regular parameters. If the `allowEscapeSequence`
-attribute is present, the special token `--` can be used to resolve this.
-
-````java
-@CommandLineArguments(allowEscapeSequence = true)
-abstract class MyArguments {
-  
-  @PositionalParameter
-  abstract Path file();
-  
-  @Parameter(shortName = 'q')
-  abstract boolean quiet();
-}
-````
-
-The remaining tokens after the escape sequence `--` are treated as positional:
-
-````java
-String[] argv = { "--", "-q" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-
-assertFalse(args.quiet());
-assertEquals(Paths.get("-q"), args.file());
-````
-
 ### Parameter shapes
 
 Given a <a href="#binding-parameter">binding parameter</a> like this
@@ -416,6 +387,35 @@ String[] argv = { "a.txt", "b.txt" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 assertEquals(Paths.get("a.txt"), args.source());
 assertEquals(Paths.get("b.txt"), args.target());
+````
+
+### Escape sequence
+
+There can sometimes be ambiguity between
+<a href="#positional-parameters">positional</a>
+and regular parameters. If the `allowEscapeSequence`
+attribute is present, the special token `--` can be used to resolve this.
+
+````java
+@CommandLineArguments(allowEscapeSequence = true)
+abstract class MyArguments {
+  
+  @PositionalParameter
+  abstract Path file();
+  
+  @Parameter(shortName = 'q')
+  abstract boolean quiet();
+}
+````
+
+The remaining tokens after the escape sequence `--` are treated as positional:
+
+````java
+String[] argv = { "--", "-q" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+
+assertFalse(args.quiet());
+assertEquals(Paths.get("-q"), args.file());
 ````
 
 ### Allowing prefixed tokens
