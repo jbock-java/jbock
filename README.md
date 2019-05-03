@@ -69,9 +69,10 @@ the contents of which are usually examined at the start of the program.
 The tokens in this array, or sometimes certain pairs of tokens,
 are called *parameters*.
 
-Parameters can have different <a href="#parameter-shapes">shapes</a>.
-It is also possible to define
-<a href="#positional-parameters">positional parameters.</a>
+Let's take a look at the three basic types of parameters:
+<a href="#flags">flags,</a>
+<a href="#positional-parameters">positional parameters</a> and
+<a href="#binding-parameters">binding parameters</a>.
 
 ### Flags
 
@@ -178,10 +179,13 @@ in addition to that:
 abstract Optional<String> file();
 ````
 
+Binding parameters can be also be passed in *attached*
+form; see <a href="#parameter-shapes">parameter shapes.</a>
+
 ### Repeatable parameters
 
 Repeatable parameters are <a href="#binding-parameters">binding parameters</a>
-that can appear any number of times in `argv`.
+that can appear not only once, but any number of times.
 
 ````java
 @Parameter(shortName = 'X')
@@ -256,7 +260,9 @@ MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 This time, `parseOrExit` will shut down the JVM with an exit code of `0`, and print
 usage information to standard out.
 
-This will only work if `--help` is the first (or only) element of the input array.
+This will only happen if `--help` is the *first*
+tokens of the input array. Then the remaining tokens, if any,
+are ignored.
 
 To disable the special meaning of the `--help` token, use
 `@CommandLineArguments(allowHelpOption = false)`. 
