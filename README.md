@@ -16,17 +16,17 @@ How does it compare to
 * <a href="#quick-overview">Quick Overview</a>
 * <a href="#parameters">Parameters</a>
 * <a href="#flags">Flags</a>
+* <a href="#positional-parameters">Positional parameters</a>
 * <a href="#binding-parameters">Binding parameters</a>
+* <a href="#repeatable-parameters">Repeatable parameters</a>
+* <a href="#parameter-shapes">Parameter shapes</a>
 * <a href="#showing-help">Showing help</a>
 * <a href="#standard-coercions">Standard coercions</a>
 * <a href="#custom-mappers-and-parameter-validation">Custom
   mappers and parameter validation</a>
-* <a href="#repeatable-parameters">Repeatable parameters</a>
 * <a href="#custom-collectors">Custom collectors</a>
 * <a href="#parameter-descriptions-and-internationalization">Parameter
   descriptions and internationalization</a>
-* <a href="#parameter-shapes">Parameter shapes</a>
-* <a href="#positional-parameters">Positional parameters</a>
 * <a href="#escape-sequence">Escape sequence</a>
 * <a href="#allowing-prefixed-tokens">Allowing prefixed tokens</a>
 * <a href="#parsing-failure">Parsing failure</a>
@@ -106,6 +106,40 @@ be more explicit by setting the
 abstract boolean quiet();
 ````
 
+### Positional parameters
+
+A *positional* parameter is just a value, without a
+preceding parameter name. The value is not allowed
+to start with a hyphen character, unless the
+<a href="#allowing-prefixed-tokens">allowPrefixedTokens</a>
+attribute is set.
+
+````java
+@CommandLineArguments
+abstract class MyArguments {
+
+  @PositionalParameter(position = 0)
+  abstract Path source();
+  
+  @PositionalParameter(position = 1)
+  abstract Path target();
+}
+````
+
+If we generate the parser `MyArguments_Parser`
+from this example, then `argv` must have length `2`,
+otherwise <a href="#parsing-failure">parsing will fail</a>.
+
+The `source` parameter has the *lowest* position,
+so it will bind the *first* argument.
+
+````java
+String[] argv = { "a.txt", "b.txt" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+assertEquals(Paths.get("a.txt"), args.source());
+assertEquals(Paths.get("b.txt"), args.target());
+````
+
 ### Binding parameters
 
 A <a href="#positional-parameters">non-positional</a> parameter that is not a <a href="#flags">flag</a> is called a
@@ -142,6 +176,72 @@ in addition to that:
 ````java
 @Parameter(shortName = 'f', optional = true)
 abstract Optional<String> file();
+````
+
+### Repeatable parameters
+
+Repeatable parameters are <a href="#binding-parameters">binding parameters</a>
+that can appear any number of times in `argv`.
+
+````java
+@Parameter(shortName = 'X')
+abstract List<String> headers();
+````
+
+The list will contain the headers in the same order
+in which they appear in `argv`.
+
+````java
+String[] argv = { "-X", "Content-Type: application/json", 
+                  "-X", "Content-Length: 200" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+assertEquals(List.of("Content-Type: application/json", 
+                     "Content-Length: 200"), args.headers());
+````
+
+To declare a repeatable parameter, simply
+make the corresponding model method return a `List`.
+
+You can also be more explicit by setting the
+`repeatable` attribute:
+
+````java
+@Parameter(shortName = 'X', repeatable = true)
+abstract List<String> headers();
+````
+
+### Parameter shapes
+
+Given a <a href="#binding-parameters">binding parameter</a> like this
+
+````java
+@Parameter(longName = "file", shortName = 'f')
+abstract Path file();
+````
+
+then we have the short and long forms, which are equivalent
+
+````java
+String[] argv;
+argv = { "--file", "data.txt" }; // two hypens -> long form
+argv = { "-f", "data.txt" }; // one hyphen -> short form
+````
+
+Both can also be written in *attached* form as follows
+
+````java
+argv = { "--file=data.txt" }; // attached long form
+argv = { "-fdata.txt" }; // attached short form
+````
+
+Thus if both `longName` and `shortName` are defined, there
+are at most *four* different ways to write a binding parameter.
+
+For a <a href="#flags">flag,</a> there are at most two ways:
+
+````java
+argv = { "--quiet" }; // two hyphens -> long flag
+argv = { "-q" }; // one hyphen -> short flag
 ````
 
 ### Showing help
@@ -210,33 +310,6 @@ abstract List<Integer> numbers();
 
 When using a custom mapper, the attributes `repeatable` and
 `optional` must be given explicitly.
-
-### Repeatable parameters
-
-Repeatable parameters can appear several times in `argv`.
-
-````java
-@Parameter(shortName = 'X')
-abstract List<String> headers();
-````
-
-````java
-String[] argv = { "-X", "Content-Type: application/json", "-X", "Content-Length: 200" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-
-assertEquals(List.of("Content-Type: application/json", "Content-Length: 200"), args.headers());
-````
-
-To declare a repeatable parameter, simply
-make the corresponding model method return a `List`.
-
-You can also be more explicit by setting the
-`repeatable` attribute:
-
-````java
-@Parameter(shortName = 'X', repeatable = true)
-abstract List<String> headers();
-````
 
 ### Custom collectors
 
@@ -322,72 +395,6 @@ If a resource bundle is supplied (see above),
 and the method's `bundleKey` is defined and contained in the bundle,
 then the corresponding text will be used in the help page,
 rather than the method's javadoc.
-
-### Parameter shapes
-
-Given a <a href="#binding-parameters">binding parameter</a> like this
-
-````java
-@Parameter(longName = "file", shortName = 'f')
-abstract Path file();
-````
-
-then we have the short and long forms, which are equivalent
-
-````java
-String[] argv;
-argv = { "--file", "data.txt" }; // two hypens -> long form
-argv = { "-f", "data.txt" }; // one hyphen -> short form
-````
-
-Both can also be written in *attached* form as follows
-
-````java
-argv = { "--file=data.txt" }; // attached long form
-argv = { "-fdata.txt" }; // attached short form
-````
-
-Thus if both `longName` and `shortName` are defined, there
-are four different ways to write a binding parameter.
-
-For a <a href="#flags">flag,</a> there are at most two ways:
-
-````java
-argv = { "--quiet" }; // two hyphens -> long flag
-argv = { "-q" }; // one hyphen -> short flag
-````
-
-### Positional parameters
-
-A *positional* parameter is just a value without a
-preceding parameter name. The value is not allowed
-to start with a hyphen character, unless the
-<a href="#allowing-prefixed-tokens">allowPrefixedTokens</a>
-attribute is set.
-
-````java
-@CommandLineArguments
-abstract class MyArguments {
-
-  @PositionalParameter(position = 0)
-  abstract Path source();
-  
-  @PositionalParameter(position = 1)
-  abstract Path target();
-}
-````
-
-Now the order of the arguments matters,
-as defined by the `position` attribute.
-The `source` parameter has the *lowest* position,
-so it will bind the *first* argument.
-
-````java
-String[] argv = { "a.txt", "b.txt" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-assertEquals(Paths.get("a.txt"), args.source());
-assertEquals(Paths.get("b.txt"), args.target());
-````
 
 ### Escape sequence
 
