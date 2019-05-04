@@ -146,7 +146,7 @@ abstract boolean quiet();
 A <a href="#positional-parameters">*non-positional*</a> parameter
 that is not a <a href="#flags">*flag*</a> is called a
 *binding parameter*. For example, the following
-model method declares a *required* parameter.
+model method declares a *required* binding parameter:
 
 ````java
 // a required parameter
@@ -157,7 +157,7 @@ abstract String file();
 It is not possible to get an instance
 of your model class unless `argv` contains all required parameters.
 
-To declare an *optional* parameter,
+To declare an *optional* binding parameter,
 simply make the corresponding model method return
 one of these four types:
 [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html),
