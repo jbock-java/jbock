@@ -511,7 +511,7 @@ Optional<MyArguments> result = result.result();
 result.ifPresent(this::runTheBusinessLogicAlready);
 ````
 
-Note that neither `parseOrExit` nor `parse` will *ever* throw an exception
+Note: Neither `parseOrExit` nor `parse` will ever throw an exception
 or return `null`.
 
 ### Runtime modifiers
