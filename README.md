@@ -8,15 +8,15 @@ How does it compare to
 [other parsers?](https://stackoverflow.com/questions/1524661/the-best-cli-parser-for-java)
 
 1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required parameter.
-1. All <a href="binding-parameters">binding parameters</a> are unary. Parameters with higher arity are not supported.
+1. All <a href="#binding-parameters">*binding parameters*</a> are unary. Parameters with higher arity are not supported.
 1. There are standard coercions, including numbers and dates. It is also possible to register custom converters.
 
 ### Contents
 
 * <a href="#quick-overview">Quick Overview</a>
 * <a href="#parameters">Parameters</a>
-* <a href="#flags">Flags</a>
 * <a href="#positional-parameters">Positional parameters</a>
+* <a href="#flags">Flags</a>
 * <a href="#binding-parameters">Binding parameters</a>
 * <a href="#repeatable-parameters">Repeatable parameters</a>
 * <a href="#parameter-shapes">Parameter shapes</a>
@@ -70,9 +70,43 @@ The tokens in this array, or sometimes certain pairs of tokens,
 are called *parameters*.
 
 Let's take a look at the three basic types of parameters:
-<a href="#flags">flags,</a>
-<a href="#positional-parameters">positional parameters</a> and
-<a href="#binding-parameters">binding parameters</a>.
+<a href="#positional-parameters">*positional parameters,*</a>
+<a href="#flags">*flags*</a> and
+<a href="#binding-parameters">*binding parameters*</a>.
+
+### Positional parameters
+
+A *positional* parameter is just a value, without a
+preceding parameter name. The value is not allowed
+to start with a hyphen character, unless the
+<a href="#allowing-prefixed-tokens">*allowPrefixedTokens*</a>
+attribute is set.
+
+````java
+@CommandLineArguments
+abstract class MyArguments {
+
+  @PositionalParameter(position = 0)
+  abstract Path source();
+  
+  @PositionalParameter(position = 1)
+  abstract Path target();
+}
+````
+
+If we generate the parser `MyArguments_Parser`
+from this example, then `argv` must have length `2`,
+otherwise <a href="#parsing-failure">*parsing will fail*</a>.
+
+The `source` parameter has the *lowest* position,
+so it will bind the *first positional* argument.
+
+````java
+String[] argv = { "a.txt", "b.txt" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+assertEquals(Paths.get("a.txt"), args.source());
+assertEquals(Paths.get("b.txt"), args.target());
+````
 
 ### Flags
 
@@ -89,7 +123,7 @@ abstract boolean quiet();
 
 At runtime, the flag parameter's model method will return `true`
 if its *short name* or *long name*
-appear in `argv`.
+are <a href="#parameter-shapes">*free*</a> in `argv`.
 
 ````java
 MyArguments args = MyArguments_Parser.create().parseOrExit(new String[]{ "-q" });
@@ -107,43 +141,10 @@ be more explicit by setting the
 abstract boolean quiet();
 ````
 
-### Positional parameters
-
-A *positional* parameter is just a value, without a
-preceding parameter name. The value is not allowed
-to start with a hyphen character, unless the
-<a href="#allowing-prefixed-tokens">allowPrefixedTokens</a>
-attribute is set.
-
-````java
-@CommandLineArguments
-abstract class MyArguments {
-
-  @PositionalParameter(position = 0)
-  abstract Path source();
-  
-  @PositionalParameter(position = 1)
-  abstract Path target();
-}
-````
-
-If we generate the parser `MyArguments_Parser`
-from this example, then `argv` must have length `2`,
-otherwise <a href="#parsing-failure">parsing will fail</a>.
-
-The `source` parameter has the *lowest* position,
-so it will bind the *first* argument.
-
-````java
-String[] argv = { "a.txt", "b.txt" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-assertEquals(Paths.get("a.txt"), args.source());
-assertEquals(Paths.get("b.txt"), args.target());
-````
-
 ### Binding parameters
 
-A <a href="#positional-parameters">non-positional</a> parameter that is not a <a href="#flags">flag</a> is called a
+A <a href="#positional-parameters">*non-positional*</a> parameter
+that is not a <a href="#flags">*flag*</a> is called a
 *binding parameter*. For example, the following
 model method declares a *required* parameter.
 
@@ -180,11 +181,11 @@ abstract Optional<String> file();
 ````
 
 Binding parameters can be also be passed in *attached*
-form; see <a href="#parameter-shapes">parameter shapes.</a>
+form; see <a href="#parameter-shapes">*parameter shapes.*</a>
 
 ### Repeatable parameters
 
-Repeatable parameters are <a href="#binding-parameters">binding parameters</a>
+Repeatable parameters are <a href="#binding-parameters">*binding parameters*</a>
 that can appear not only once, but any number of times.
 
 ````java
@@ -216,7 +217,7 @@ abstract List<String> headers();
 
 ### Parameter shapes
 
-Given a <a href="#binding-parameters">binding parameter</a> like this
+Given a <a href="#binding-parameters">*binding parameter*</a> like this
 
 ````java
 @Parameter(longName = "file", shortName = 'f')
@@ -231,7 +232,10 @@ argv = { "--file", "data.txt" }; // two hypens -> long form
 argv = { "-f", "data.txt" }; // one hyphen -> short form
 ````
 
-Both can also be written in *attached* form as follows
+The token following the parameter name is called a *bound* token.
+Any token that is not bound is called *free*.
+
+Binding parameters can also be written in *attached* form as follows
 
 ````java
 argv = { "--file=data.txt" }; // attached long form
@@ -241,7 +245,7 @@ argv = { "-fdata.txt" }; // attached short form
 Thus if both `longName` and `shortName` are defined, there
 are at most *four* different ways to write a binding parameter.
 
-For a <a href="#flags">flag,</a> there are at most two ways:
+For a <a href="#flags">*flag,*</a> there are at most two ways:
 
 ````java
 argv = { "--quiet" }; // two hyphens -> long flag
@@ -405,7 +409,7 @@ rather than the method's javadoc.
 ### Escape sequence
 
 There can sometimes be ambiguity between
-<a href="#positional-parameters">positional</a>
+<a href="#positional-parameters">*positional*</a>
 and regular parameters. If the `allowEscapeSequence`
 attribute is present, the special token `--` can be used to resolve this.
 
@@ -436,13 +440,13 @@ assertEquals(Paths.get("-q"), args.file());
 By default, any token that begins with
 [hyphen-minus](https://en.wikipedia.org/wiki/Hyphen-minus) 
 and is not one of the defined parameter names,
-will cause a <a href="#parsing-failure">parsing failure</a>.
+will cause a <a href="#parsing-failure">*parsing failure*</a>.
 No attempt is made to interpret it as a positional argument.
 
 Use `allowPrefixedTokens` to change this and allow the user
 to pass, for instance, a negative number,
 without forcing them to type the
-<a href="#escape-sequence">escape sequence</a>:
+<a href="#escape-sequence">*escape sequence*</a>:
 
 ````java
 @CommandLineArguments(allowPrefixedTokens = true)
@@ -465,10 +469,10 @@ assertEquals(-1, args.number());
 
 There are several ways in which the user input can be wrong:
 
-* Repetition of <a href="#repeatable-parameters">non-repeatable parameters</a>
+* Repetition of <a href="#repeatable-parameters">*non-repeatable parameters*</a>
 * Absence of a required parameter
 * Unknown token
-* Missing value of <a href="#binding-parameters">binding parameter</a>
+* Missing value of <a href="#binding-parameters">*binding parameter*</a>
 * Coercion failed
 
 For example, let's say we have a required argument `-f`:
