@@ -488,8 +488,14 @@ abstract class MyArguments {
 then the empty array `argv = {}` would be invalid input,
 because the required argument `-f` is absent.
 
-We've seen some examples using the `parseOrExit` method before, which simply shuts down the jvm.
-There's also `parse` which requires more effort, but is also more flexible:
+We've seen some examples using the `parseOrExit` method before,
+which either returns a model instance, or performs the following steps:
+
+* Print an error message to the configured <a href="#runtime-modifiers">*error stream*</a>
+* Shut down the JVM with the configured <a href="#runtime-modifiers">*error code*</a>
+
+If you need more control, you can also use the generated `parse` method,
+which returns something resembling an Optional: 
   
 ````java
 String[] argv = {};
@@ -498,11 +504,15 @@ if (parseResult.error()) {
   System.out.println("Invalid input. This has already been printed to stderr.");
 }
 if (parseResult.helpPrinted()) {
-  System.out.println("The user has passed the --help param. Usage info has been printed to stdout.");
+  System.out.println("The user has passed the --help param. " +
+   "Usage info has already been printed to stdout.");
 }
 Optional<MyArguments> result = result.result();
 result.ifPresent(this::runTheBusinessLogicAlready);
 ````
+
+Note that neither `parseOrExit` nor `parse` will *ever* throw an exception
+or return `null`.
 
 ### Runtime modifiers
 
@@ -520,8 +530,7 @@ AdditionArguments_Parser.create()
     .parseOrExit(argv);
 ````
 
-The `indent` is used when printing the usage page. Note that the output, if any, is printed to
-the error stream, unless `argv` is `{ "--help" }`, and `allowHelpOption` is `true`.
+The `indent` is used when printing the usage page.
 
 ### Gradle config
 
