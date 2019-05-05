@@ -642,7 +642,7 @@ There's also a gradle project in the samples.
 
 * [examples (part of this repository)](https://github.com/h908714124/jbock/tree/master/examples)
 * [aws-glacier-multipart-upload](https://github.com/h908714124/aws-glacier-multipart-upload)
-* [map example (described above)](https://github.com/h908714124/jbock-map-example)
+* [map example](https://github.com/h908714124/jbock-map-example) (described in <a href="#custom-collectors">*custom-collectors*</a>)
 * [maven example](https://github.com/h908714124/jbock-maven-example)
 
 ### Running tests
