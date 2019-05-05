@@ -8,6 +8,7 @@ How does it compare to
 [other parsers?](https://stackoverflow.com/questions/1524661/the-best-cli-parser-for-java)
 
 1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required parameter.
+   Model methods will not return `null`.
 1. All <a href="#binding-parameters">*binding parameters*</a> are unary. Parameters with higher arity are not supported.
 1. There are standard coercions, including numbers and dates. It is also possible to register custom converters.
 
@@ -18,6 +19,7 @@ How does it compare to
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#flags">Flags</a>
 * <a href="#binding-parameters">Binding parameters</a>
+* <a href="#required-and-optional-parameters">Required and optional parameters</a>
 * <a href="#repeatable-parameters">Repeatable parameters</a>
 * <a href="#parameter-shapes">Parameter shapes</a>
 * <a href="#showing-help">Showing help</a>
@@ -145,17 +147,33 @@ abstract boolean quiet();
 
 A <a href="#positional-parameters">*non-positional*</a> parameter
 that is not a <a href="#flags">*flag*</a> is called a
-*binding parameter*. For example, the following
-model method declares a *required* binding parameter:
+*binding parameter*. The following
+method declares binding parameter:
 
 ````java
-// a required parameter
+// example of a binding parameter
 @Parameter(shortName = 'f')
 abstract String file();
 ````
 
+The *parameter value* is the next token after the first occurrence of the
+token `-f`. The parameter value
+is an *arbitrary* string. For example, the value can start with a hyphen:
+
+````java
+String[] argv = { "-f", "-f" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+assertEquals("-f", args.file());
+````
+
+### Required and optional parameters
+
+In jbock, all <a href="#binding-parameters">*binding parameters*</a>
+are declared as *required* by default.
 It is not possible to get an instance
-of your model class unless `argv` contains all required parameters.
+of `MyArguments` unless the input array `String[] argv`
+contains all required parameters. Therefore, we can guarantee that none of your
+model methods will ever return `null`.
 
 To declare an *optional* binding parameter,
 simply make the corresponding model method return
@@ -172,7 +190,7 @@ abstract Optional<String> file();
 ````
 
 If you want to be more explicit,
-you can also set the `optional` flag
+you can also set the `optional` attribute
 in addition to that:
 
 ````java
@@ -180,8 +198,6 @@ in addition to that:
 abstract Optional<String> file();
 ````
 
-Binding parameters can be also be passed in *attached*
-form; see <a href="#parameter-shapes">*parameter shapes.*</a>
 
 ### Repeatable parameters
 
@@ -605,7 +621,7 @@ The processor itself is only needed on the compiler classpath.
     <plugin>
       <groupId>org.apache.maven.plugins</groupId>
       <artifactId>maven-compiler-plugin</artifactId>
-      <version>3.8.0</version>
+      <version>3.8.1</version>
       <configuration>
         <annotationProcessorPaths>
           <dependency>
