@@ -22,7 +22,10 @@ dependencies {
 
 jar {
     manifest {
-        attributes('Automatic-Module-Name': 'net.jbock.compiler')
+        attributes(
+                'Automatic-Module-Name': 'net.jbock.compiler',
+                'Implementation-Version': project.properties['version']
+        )
     }
 }
 
