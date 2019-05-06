@@ -297,9 +297,9 @@ types are allowed too.
 
 ### Custom mappers and parameter validation
 
-Mappers must be of the type `Supplier<Function<String, ?>>`,
+Mappers must implement [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html)`<`[Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html)`<`[String](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html)`, ?>>`,
 where `?` depends on the parameter it's used on.
-The mapper may reject a token by throwing any `RuntimeException`.
+The mapper may reject a token by throwing any [RuntimeException](https://docs.oracle.com/javase/8/docs/api/java/lang/RuntimeException.html).
 
 ````java
 class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
@@ -307,8 +307,10 @@ class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
   @Override
   public Function<String, Integer> get() {
     return s -> {
+      // try-catch is not necessary here: NumberFormatException is a RuntimeException 
       Integer i = Integer.valueOf(s);
       if (i < 0) {
+        // Perform additional validation by throwing IllegalArgumentException, which is a RuntimeException
         throw new IllegalArgumentException("The value cannot be negative.");
       }
       return i;
@@ -317,12 +319,11 @@ class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
 }
 ````
 
-The same mapper can be used for required, optional and repeatable parameters:
-
-````java
-@Parameter(shortName = 'n', mappedBy = PositiveNumberMapper.class)
-abstract Integer requiredNumber();
-````
+The same mapper can also be used for
+<a href="#required-and-optional-parameters">optional</a>
+and <a href="#repeatable-parameters">repeatable</a> parameters.
+In this case, the corresponding attribute (`optional` or `repeatable`)
+must be set explicitly.
 
 ````java
 @Parameter(shortName = 'o', mappedBy = PositiveNumberMapper.class, optional = true)
@@ -333,9 +334,6 @@ abstract Optional<Integer> optionalNumber();
 @Parameter(shortName = 'x', mappedBy = PositiveNumberMapper.class, repeatable = true)
 abstract List<Integer> numbers();
 ````
-
-When using a custom mapper, the attributes `repeatable` and
-`optional` must be given explicitly.
 
 ### Custom collectors
 
@@ -351,7 +349,7 @@ builds a `Map`:
 abstract Map<String, String> headers();
 ````
 
-As before, the mapper class is a `Supplier<Function<...>>`:
+As before, the mapper class is a `Supplier<Function<String, ?>>`:
 
 ````java
 class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String>>> {
@@ -369,7 +367,7 @@ class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String
 }
 ````
 
-The collector class must be a `Supplier<Collector<...>>`.
+The collector class must be a `Supplier<`[Collector](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html)`<...>>`.
 This class can have type variables for better reusability.
 
 ````java
@@ -393,10 +391,9 @@ assertEquals("12", args.headers().get("horse"));
 assertEquals("4", args.headers().get("sheep"));
 ````
 
-
-*Note: If a parameter declares a custom mapper or collector, then the 
+As mentioned before, if a parameter declares `mappedBy` or `collectedBy`, then the 
 attributes `repeatable` and `optional` are not inferred from the parameter type.
-They must be set explicitly.*
+They must be set explicitly.
 
 ### Parameter descriptions and internationalization
 
@@ -472,7 +469,7 @@ abstract class MyArguments {
   abstract int number();
 }
 ````
-For example, `-1` can now be passed as a positional parameter.
+For example, [negative one](https://en.wikipedia.org/wiki/%E2%88%921) can now be passed as a positional parameter.
 
 ````java
 String[] argv = { "-1" };
