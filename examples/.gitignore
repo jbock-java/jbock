@@ -5,4 +5,5 @@
 /dependency-reduced-pom.xml
 /.gradle
 /build
-/generated
+/src/main/generated
+/out

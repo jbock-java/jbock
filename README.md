@@ -574,27 +574,30 @@ try setting up a `generated` folder as follows:
 ````groovy
 compileJava {
     options.compilerArgs << "-s"
-    options.compilerArgs << "$projectDir/generated/java"
+    options.compilerArgs << "$projectDir/src/main/generated/java"
 
     doFirst {
-        // make sure that directory exists
-        file(new File(projectDir, "/generated/java")).mkdirs()
+        file(new File(projectDir, "/src/main/generated/java")).mkdirs()
     }
 }
 
 clean.doLast {
-    // clean-up directory when necessary
-    file(new File(projectDir, "/generated")).deleteDir()
+    file(new File(projectDir, "/src/main/generated")).deleteDir()
 }
 
 sourceSets {
     generated {
         java {
-            srcDir "$projectDir/generated/java"
+            srcDir "$projectDir/src/main/generated/java"
         }
     }
 }
 ````
+
+It may also be necessary to uncheck the `Create separate module per source set`
+option (`Settings -> Build, Execution, Deployment -> Gradle`),
+then run `gradle build` once, and mark the `src/main/generated` folder as *generated sources
+root* (right click on folder icon in project view, or via module settings).
 
 ### Maven config
 

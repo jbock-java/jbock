@@ -21,23 +21,23 @@ test {
 
 compileJava {
     options.compilerArgs << "-s"
-    options.compilerArgs << "$projectDir/generated/java"
+    options.compilerArgs << "$projectDir/src/main/generated/java"
 
     doFirst {
         // make sure that directory exists
-        file(new File(projectDir, "/generated/java")).mkdirs()
+        file(new File(projectDir, "/src/main/generated/java")).mkdirs()
     }
 }
 
 clean.doLast {
     // clean-up directory when necessary
-    file(new File(projectDir, "/generated")).deleteDir()
+    file(new File(projectDir, "/src/main/generated")).deleteDir()
 }
 
 sourceSets {
     generated {
         java {
-            srcDir "$projectDir/generated/java"
+            srcDir "$projectDir/src/main/generated/java"
         }
     }
 }
