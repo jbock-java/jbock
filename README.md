@@ -320,8 +320,8 @@ class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
 ````
 
 The same mapper can also be used for
-<a href="#required-and-optional-parameters">optional</a>
-and <a href="#repeatable-parameters">repeatable</a> parameters.
+<a href="#required-and-optional-parameters">*optional*</a>
+and <a href="#repeatable-parameters">*repeatable*</a> parameters.
 In this case, the corresponding attribute (`optional` or `repeatable`)
 must be set explicitly.
 
@@ -423,7 +423,7 @@ rather than the method's javadoc.
 
 There can sometimes be ambiguity between
 <a href="#positional-parameters">*positional*</a>
-and regular parameters. If the `allowEscapeSequence`
+and <a href="#binding-parameters">*binding*</a> parameters. If the `allowEscapeSequence`
 attribute is present, the special token `--` can be used to resolve this.
 
 ````java
