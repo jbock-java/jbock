@@ -350,7 +350,8 @@ abstract Map<String, String> headers();
 ````
 
 The mapper splits tokens of the form `a:b` into map entries,
-which means that it supplies a `Function<String, Entry<String, String>>`:
+which is expressed as a certain function from
+`String` to `Entry<String, String>`:
 
 ````java
 class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String>>> {
