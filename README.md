@@ -349,7 +349,8 @@ builds a `Map`:
 abstract Map<String, String> headers();
 ````
 
-As before, the mapper class is a `Supplier<Function<String, ?>>`:
+The mapper splits tokens of the form `a:b` into map entries,
+which means that it supplies a `Function<String, Entry<String, String>>`:
 
 ````java
 class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String>>> {
@@ -367,8 +368,11 @@ class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String
 }
 ````
 
-The collector class must be a `Supplier<`[Collector](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html)`<...>>`.
-This class can have type variables for better reusability.
+The collector class must be a `Supplier<`[Collector](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html)`<A, ?, B>>`
+where `A` is the output of the mapper, and `B` is the
+parameter type.
+
+This class may have type variables for better reusability.
 
 ````java
 class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
