@@ -156,7 +156,7 @@ method declares binding parameter:
 abstract String file();
 ````
 
-The *parameter value* is the next token after the first occurrence of the
+The *parameter value* (or *bound value*) is the next token after the first occurrence of the
 token `-f`. The parameter value
 is an *arbitrary* string. For example, the value can start with a hyphen:
 
@@ -450,7 +450,7 @@ assertEquals(Paths.get("-q"), args.file());
 
 ### Allowing prefixed tokens
 
-By default, any token that begins with
+By default, any <a href="#binding-parameters">unbound token</a> that begins with
 [hyphen-minus](https://en.wikipedia.org/wiki/Hyphen-minus) 
 and is not one of the defined parameter names,
 will cause a <a href="#parsing-failure">*parsing failure*</a>.
