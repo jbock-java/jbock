@@ -336,6 +336,8 @@ abstract Optional<Integer> optionalNumber();
 abstract List<Integer> numbers();
 ````
 
+*Note: The mapper class must have a no-argument constructor.*
+
 ### Custom collectors
 
 By using a custom collector, it is possible to create a
