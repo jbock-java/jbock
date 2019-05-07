@@ -126,7 +126,7 @@ abstract boolean quiet();
 
 At runtime, the flag parameter's model method will return `true`
 if its *short name* or *long name*
-are <a href="#parameter-shapes">*free*</a> in `argv`.
+are <a href="#binding-parameters">*free*</a> in `argv`.
 
 ````java
 MyArguments args = MyArguments_Parser.create().parseOrExit(new String[]{ "-q" });
@@ -166,6 +166,8 @@ String[] argv = { "-f", "-f" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 assertEquals("-f", args.file());
 ````
+
+Any input token that isn't bound by a binding parameter is called *free*.
 
 ### Required and optional parameters
 
