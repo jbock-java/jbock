@@ -10,7 +10,8 @@ How does it compare to
 1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required parameter.
    Model methods will not return `null`.
 1. All <a href="#binding-parameters">*binding parameters*</a> are unary. Parameters with higher arity are not supported.
-1. There are standard coercions, including numbers and dates. It is also possible to register custom converters.
+1. There are some <a href="#standard-coercions">*standard coercions,*</a>
+including numbers and dates. It is also possible to register <a href="#custom-mappers-and-parameter-validation">*custom converters.*</a>
 
 ### Contents
 
@@ -35,7 +36,7 @@ How does it compare to
 * <a href="#runtime-modifiers">Runtime modifiers</a>
 * <a href="#gradle-config">Gradle config</a>
 * <a href="#maven-config">Maven config</a>
-* <a href="#sample-projects">Sample projects</a>
+* <a href="#examples-and-other-links">Examples and other links</a>
 * <a href="#running-tests">Running tests</a>
 
 ### Quick Overview
@@ -643,12 +644,13 @@ The processor itself is only needed on the compiler classpath.
 
 There's also a gradle project in the samples.
 
-### Sample projects
+### Examples and other links
 
 * [examples (part of this repository)](https://github.com/h908714124/jbock/tree/master/examples)
 * [aws-glacier-multipart-upload](https://github.com/h908714124/aws-glacier-multipart-upload)
 * [map example](https://github.com/h908714124/jbock-map-example) (described in <a href="#custom-collectors">*custom-collectors*</a>)
 * [maven example](https://github.com/h908714124/jbock-maven-example)
+* [List of standard coercions](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java)
 
 ### Running tests
 
