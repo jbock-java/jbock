@@ -300,9 +300,11 @@ types are allowed too.
 
 ### Custom mappers and parameter validation
 
-Mappers must implement [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html)`<`[Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html)`<`[String](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html)`, ?>>`,
+Mappers (a.k.a. converters) must implement [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html)`<`[Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html)`<`[String](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html)`, ?>>`,
 where `?` depends on the parameter it's used on.
-The mapper may reject a token by throwing any [RuntimeException](https://docs.oracle.com/javase/8/docs/api/java/lang/RuntimeException.html).
+The mapper's input is the parameter's value, taken directly from `String[] argv`.
+If the parameter does not appear in `argv`, then the mapper is not invoked.
+The mapper may reject its input by throwing any [RuntimeException](https://docs.oracle.com/javase/8/docs/api/java/lang/RuntimeException.html).
 
 ````java
 class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
