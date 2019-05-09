@@ -546,7 +546,7 @@ This example shows all the available options:
 
 ````java
 String[] argv = {"-f hello.txt"};
-AdditionArguments_Parser.create()
+MyArguments_Parser.create()
     .withErrorExitCode(2)                                           // default is 1
     .withErrorStream(new PrintStream(new ByteArrayOutputStream()))  // default is System.err
     .withOutputStream(new PrintStream(new ByteArrayOutputStream())) // default is System.out
