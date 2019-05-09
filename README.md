@@ -533,6 +533,8 @@ if (parseResult.helpPrinted()) {
    "Usage info has already been printed to stdout.");
 }
 Optional<MyArguments> result = result.result();
+
+// if !error and !helpPrinted, the result will be present
 result.ifPresent(this::runTheBusinessLogicAlready);
 ````
 
