@@ -520,11 +520,11 @@ which either returns a model instance, or performs the following steps:
 * Shut down the JVM with the configured <a href="#runtime-modifiers">*error code*</a>
 
 If you need more control, you can also use the generated `parse` method,
-which returns something resembling an Optional: 
+which returns the generated class `MyArguments_Parser.ParseResult`: 
   
 ````java
 String[] argv = {};
-MyArguments.ParseResult parseResult = MyArguments_Parser.create().parse(argv);
+MyArguments_Parser.ParseResult parseResult = MyArguments_Parser.create().parse(argv);
 if (parseResult.error()) {
   System.out.println("Invalid input. This has already been printed to stderr.");
 }
