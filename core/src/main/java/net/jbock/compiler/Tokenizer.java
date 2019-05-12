@@ -27,6 +27,10 @@ import static net.jbock.compiler.Util.optionalOfSubtype;
 
 final class Tokenizer {
 
+  // special bundle keys that may not be used on a parameter
+  private static final String SPECIAL_KEY_DESCRIPTION = "jbock.description";
+  private static final String SPECIAL_KEY_MISSION = "jbock.mission";
+
   private final Context context;
 
   private final Helper helper;
@@ -101,14 +105,16 @@ final class Tokenizer {
   private MethodSpec printUsageMethod() {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("printUsage");
 
-    // Name
+    // Program Name
     spec.addStatement("$N.println($S)", out, "NAME");
     spec.addStatement("$N.incrementIndent()", out);
+
+    // Mission Statement
     if (context.missionStatement.isEmpty()) {
       spec.addStatement("$N.println($S)", out, context.programName);
     } else {
-      spec.addStatement("$N.println($T.format($S, $S, $S))",
-          out, String.class, "%s - %s", context.programName, context.missionStatement);
+      spec.addStatement("$N.println($T.format($S, $S, $N.getMessage($S, $S)))",
+          out, String.class, "%s - %s", context.programName, messages, SPECIAL_KEY_MISSION, context.missionStatement);
     }
     spec.addStatement("$N.println()", out);
     spec.addStatement("$N.decrementIndent()", out);
@@ -122,17 +128,18 @@ final class Tokenizer {
 
     // Description
     spec.addStatement("$N.println($S)", out, "DESCRIPTION");
-    if (!context.overview.isEmpty()) {
-      spec.addStatement("$N.incrementIndent()", out);
-      for (String line : context.overview) {
-        if (line.isEmpty()) {
-          spec.addStatement("$N.println()", out);
-        } else {
-          spec.addStatement("$N.println($S)", out, line);
-        }
-      }
-      spec.addStatement("$N.decrementIndent()", out);
+    spec.addStatement("$N.incrementIndent()", out);
+    ParameterSpec overview = ParameterSpec.builder(LIST_OF_STRING, "descriptionFromJavadoc").build();
+    spec.addStatement("$T $N = new $T<>()", overview.type, overview, ArrayList.class);
+    for (String line : context.description) {
+      spec.addStatement("$N.add($S)", overview, line);
     }
+    ParameterSpec line = ParameterSpec.builder(STRING, "line").build();
+    spec.beginControlFlow("for ($T $N : $N.getMessage($S, $N))",
+        line.type, line, messages, SPECIAL_KEY_DESCRIPTION, overview)
+        .addStatement("$N.println($S)", out, line)
+        .endControlFlow();
+    spec.addStatement("$N.decrementIndent()", out);
 
     // Positional parameters
     spec.addStatement("$N.println()", out);

@@ -21,6 +21,7 @@ import java.util.OptionalInt;
 import static java.lang.Character.isWhitespace;
 import static net.jbock.compiler.AnnotationUtil.getCollectorClass;
 import static net.jbock.compiler.AnnotationUtil.getMapperClass;
+import static net.jbock.compiler.Tokenizer.*;
 import static net.jbock.compiler.Util.snakeCase;
 
 /**
@@ -82,6 +83,10 @@ final class Param {
         throw ValidationException.create(sourceMethod,
             "The bundle key may not contain whitespace characters.");
       }
+    }
+    if (bundleKey.startsWith("jbock.")) {
+      throw ValidationException.create(sourceMethod,
+          "Bundle keys may not start with 'jbock.'.");
     }
     for (Param param : params) {
       if (param.bundleKey.isEmpty()) {

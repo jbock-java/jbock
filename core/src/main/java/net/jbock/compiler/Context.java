@@ -40,13 +40,13 @@ final class Context {
   // a set of only the positional param types in the sourceType
   final Set<OptionType> positionalParamTypes;
 
-  // general usage information
-  final List<String> overview;
+  // program description from javadoc, can be overridden with bundle key jbock.description
+  final List<String> description;
 
-  // general usage information
+  // program name from attribute
   final String programName;
 
-  // general usage information
+  // mission statement from attribute, can be overridden with bundle key jbock.mission
   final String missionStatement;
 
   private final ClassName optionParserType;
@@ -71,7 +71,7 @@ final class Context {
       boolean addHelp,
       Set<OptionType> nonpositionalParamTypes,
       Set<OptionType> positionalParamTypes,
-      List<String> overview,
+      List<String> description,
       String programName,
       String missionStatement,
       ClassName optionParserType,
@@ -94,7 +94,7 @@ final class Context {
     this.addHelp = addHelp;
     this.nonpositionalParamTypes = nonpositionalParamTypes;
     this.positionalParamTypes = positionalParamTypes;
-    this.overview = overview;
+    this.description = description;
     this.programName = programName;
     this.missionStatement = missionStatement;
     this.optionParserType = optionParserType;

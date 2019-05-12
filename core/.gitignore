@@ -6,3 +6,5 @@
 /.gradle
 /build
 /gradle.properties
+/out
+

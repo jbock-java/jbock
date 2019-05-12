@@ -262,24 +262,8 @@ final class Option {
         TypeName.get(Character.class), optionType), "shortNames")
         .build();
     ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
-
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = new $T<>($T.values().length)",
-        shortNames.type, shortNames, HashMap.class, optionType);
-
-    // begin iteration over options
-    builder.beginControlFlow("for ($T $N : $T.values())", optionType, option, optionType);
-
-    builder.beginControlFlow("if ($N.$N != null)", option, shortNameField)
-        .addStatement("$N.put($N.$N, $N)", shortNames, option, shortNameField, option)
-        .endControlFlow();
-
-    // end iteration over options
-    builder.endControlFlow();
-    builder.addStatement("return $N", shortNames);
-
     return MethodSpec.methodBuilder("shortNameMap")
-        .addCode(builder.build())
+        .addCode(nameMapCreationCode(shortNameField, shortNames, option))
         .returns(shortNames.type)
         .addModifiers(STATIC)
         .build();
@@ -292,27 +276,31 @@ final class Option {
         STRING, optionType), "longNames")
         .build();
     ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
+    return MethodSpec.methodBuilder("longNameMap")
+        .addCode(nameMapCreationCode(longNameField, longNames, option))
+        .returns(longNames.type)
+        .addModifiers(STATIC)
+        .build();
+  }
+
+  private static CodeBlock nameMapCreationCode(FieldSpec optionField, ParameterSpec resultMap, ParameterSpec option) {
 
     CodeBlock.Builder builder = CodeBlock.builder();
     builder.addStatement("$T $N = new $T<>($T.values().length)",
-        longNames.type, longNames, HashMap.class, optionType);
+        resultMap.type, resultMap, HashMap.class, option.type);
 
     // begin iteration over options
-    builder.beginControlFlow("for ($T $N : $T.values())", optionType, option, optionType);
+    builder.beginControlFlow("for ($T $N : $T.values())", option.type, option, option.type);
 
-    builder.beginControlFlow("if ($N.$N != null)", option, longNameField)
-        .addStatement("$N.put($N.$N, $N)", longNames, option, longNameField, option)
+    builder.beginControlFlow("if ($N.$N != null)", option, optionField)
+        .addStatement("$N.put($N.$N, $N)", resultMap, option, optionField, option)
         .endControlFlow();
 
     // end iteration over options
     builder.endControlFlow();
-    builder.addStatement("return $N", longNames);
+    builder.addStatement("return $N", resultMap);
 
-    return MethodSpec.methodBuilder("longNameMap")
-        .addCode(builder.build())
-        .returns(longNames.type)
-        .addModifiers(STATIC)
-        .build();
+    return builder.build();
   }
 
   private static MethodSpec describeParamMethod(
