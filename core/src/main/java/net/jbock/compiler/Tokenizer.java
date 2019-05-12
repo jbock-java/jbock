@@ -30,6 +30,7 @@ final class Tokenizer {
   // special bundle keys that may not be used on a parameter
   private static final String SPECIAL_KEY_DESCRIPTION = "jbock.description";
   private static final String SPECIAL_KEY_MISSION = "jbock.mission";
+  private static final String SPECIAL_KEY_HELP = "jbock.help";
 
   private final Context context;
 
@@ -110,12 +111,16 @@ final class Tokenizer {
     spec.addStatement("$N.incrementIndent()", out);
 
     // Mission Statement
-    if (context.missionStatement.isEmpty()) {
-      spec.addStatement("$N.println($S)", out, context.programName);
-    } else {
-      spec.addStatement("$N.println($T.format($S, $S, $N.getMessage($S, $S)))",
-          out, String.class, "%s - %s", context.programName, messages, SPECIAL_KEY_MISSION, context.missionStatement);
-    }
+    ParameterSpec missionStatement = ParameterSpec.builder(STRING, "missionStatement").build();
+    spec.addStatement("$T $N = $N.getMessage($S, $S)",
+        missionStatement.type, missionStatement, messages, SPECIAL_KEY_MISSION, context.missionStatement);
+    spec.beginControlFlow("if ($N.isEmpty())", missionStatement)
+        .addStatement("$N.println($S)", out, context.programName)
+        .endControlFlow();
+    spec.beginControlFlow("else")
+        .addStatement("$N.println($T.format($S, $S, $N))",
+            out, String.class, "%s - %s", context.programName, missionStatement)
+        .endControlFlow();
     spec.addStatement("$N.println()", out);
     spec.addStatement("$N.decrementIndent()", out);
 
@@ -137,7 +142,7 @@ final class Tokenizer {
     ParameterSpec line = ParameterSpec.builder(STRING, "line").build();
     spec.beginControlFlow("for ($T $N : $N.getMessage($S, $N))",
         line.type, line, messages, SPECIAL_KEY_DESCRIPTION, overview)
-        .addStatement("$N.println($S)", out, line)
+        .addStatement("$N.println($N)", out, line)
         .endControlFlow();
     spec.addStatement("$N.decrementIndent()", out);
 
@@ -172,18 +177,29 @@ final class Tokenizer {
 
     // Help
     if (context.addHelp) {
-      spec.addStatement("$N.incrementIndent()", out)
-          .addStatement("$N.println($S)", out, "--help")
-          .addStatement("$N.incrementIndent()", out)
-          .addStatement("$N.println($S)", out, "Print this help page.")
-          .addStatement("$N.println($S)", out, "The help flag may only be passed as the first argument.")
-          .addStatement("$N.println($S)", out, "Any further arguments will be ignored.")
-          .addStatement("$N.println()", out)
-          .addStatement("$N.decrementIndent()", out)
-          .addStatement("$N.decrementIndent()", out);
+      describeHelpParameter(spec);
     }
 
     return spec.build();
+  }
+
+  private void describeHelpParameter(MethodSpec.Builder spec) {
+    ParameterSpec defaultHelpText = ParameterSpec.builder(LIST_OF_STRING, "defaultHelp").build();
+    spec.addStatement("$T $N = new $T<>()", defaultHelpText.type, defaultHelpText, ArrayList.class);
+    spec.addStatement("$N.add($S)", defaultHelpText, "Print this help page.");
+    spec.addStatement("$N.add($S)", defaultHelpText, "The help flag may only be passed as the first argument.");
+    spec.addStatement("$N.add($S)", defaultHelpText, "Any further arguments will be ignored.");
+    spec.addStatement("$N.incrementIndent()", out);
+    spec.addStatement("$N.println($S)", out, "--help");
+    spec.addStatement("$N.incrementIndent()", out);
+    ParameterSpec line = ParameterSpec.builder(STRING, "line").build();
+    spec.beginControlFlow("for ($T $N : $N.getMessage($S, $N))",
+        line.type, line, messages, SPECIAL_KEY_HELP, defaultHelpText)
+        .addStatement("$N.println($N)", out, line)
+        .endControlFlow();
+    spec.addStatement("$N.println()", out);
+    spec.addStatement("$N.decrementIndent()", out);
+    spec.addStatement("$N.decrementIndent()", out);
   }
 
 

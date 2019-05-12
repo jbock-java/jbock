@@ -7,15 +7,16 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;
+import java.util.Objects;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeName.INT;
-import static com.squareup.javapoet.TypeName.OBJECT;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.STRING;
 
 /**
  * Defines the inner class IndentPrinter.
@@ -61,14 +62,18 @@ final class IndentPrinter {
   }
 
   private MethodSpec printlnMethod() {
-    ParameterSpec paramText = ParameterSpec.builder(OBJECT, "text").build();
+    ParameterSpec paramText = ParameterSpec.builder(STRING, "text").build();
     ParameterSpec i = ParameterSpec.builder(INT, "i").build();
-    return methodBuilder("println")
-        .beginControlFlow("for ($T $N = $L; $N < $N; $N++)", INT, i, 0, i, indentLevel, i)
+    MethodSpec.Builder spec = methodBuilder("println");
+    spec.beginControlFlow("if ($T.toString($N, $S).isEmpty())", Objects.class, paramText, "")
+        .addStatement("$N.println()", out)
+        .addStatement("return")
+        .endControlFlow();
+    spec.beginControlFlow("for ($T $N = $L; $N < $N; $N++)", INT, i, 0, i, indentLevel, i)
         .addStatement("$N.print(' ')", out)
-        .endControlFlow()
-        .addStatement("$N.println($N)", out, paramText)
-        .addParameter(paramText)
+        .endControlFlow();
+    spec.addStatement("$N.println($N)", out, paramText);
+    return spec.addParameter(paramText)
         .build();
   }
 
