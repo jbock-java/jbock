@@ -171,8 +171,8 @@ Any input token that isn't bound by a binding parameter is called *free*.
 
 ### Required and optional parameters
 
-In jbock, all <a href="#binding-parameters">*binding parameters*</a>
-are declared as *required* by default.
+All <a href="#binding-parameters">*binding parameters*</a>
+are treated as *required* unless declared otherwise.
 It is not possible to get an instance
 of `MyArguments` unless the input array `String[] argv`
 contains all required parameters. Therefore, we can guarantee that none of your
