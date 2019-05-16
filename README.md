@@ -9,7 +9,7 @@ How?
 
 1. In the Java model, <a href="#required-and-optional-parameters">*optional parameters*</a> correspond to methods that return [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html).
    This is fortunate, because there is no way to make a model method return `null`.
-1. <a href="#binding-parameters">*Binding parameters*</a> are [unary](https://en.wikipedia.org/wiki/Unary_operation).
+1. <a href="#binding-parameters">*Binding parameters*</a> are [unary:](https://en.wikipedia.org/wiki/Unary_operation)
     1. Each parameter name must be followed by a single argument.
     1. One such pair can also <a href="#parameter-shapes">*appear as a single token.*</a>
     1. Binding parameters can be repeatable. 
