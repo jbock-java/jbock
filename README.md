@@ -2,16 +2,22 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-jbock is an annotation-driven command line parser, implemented as a compile-time annotation processor.
+jbock is an annotation driven parser generator,
+which facilitates the generation and documentation of simple command line interfaces.
 
 How does it compare to
 [other parsers?](https://stackoverflow.com/questions/1524661/the-best-cli-parser-for-java)
 
-1. In the Java model, [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html) must be used for each non-required parameter.
-   Model methods will not return `null`.
-1. All <a href="#binding-parameters">*binding parameters*</a> are unary. Parameters with higher arity are not supported.
-1. There are some <a href="#standard-coercions">*standard coercions,*</a>
-including numbers and dates. It is also possible to register <a href="#custom-mappers-and-parameter-validation">*custom converters.*</a>
+1. In the Java model, <a href="#optional-required-parameters">optional parameters</a> correspond to methods that return [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html).
+   This is fortunate, because there is no way to make a model method return `null`
+1. <a href="#binding-parameters">*Binding parameters*</a> are [unary](https://en.wikipedia.org/wiki/Unary_operation).
+  1. Each parameter name must be followed by a single argument.
+  1. A name-value pair can also <a href="#parameter-shapes">*appear as a single token.*</a>
+  1. Binding parameters can be repeatable.
+  1. Repeatable parameters correspond to parameters of type [List](https://en.wikipedia.org/wiki/Java_collections_framework).
+1. There are some <a href="#standard-coercions">*standard coercions.*</a>
+Custom <a href="#custom-mappers-and-parameter-validation">*mappers*</a> and
+<a href="#custom-collectors">*collectors*</a> can be added.
 
 ### Contents
 
@@ -295,8 +301,8 @@ To disable the special meaning of the `--help` token, use
 All non-private enums, as well as
 [some standard Java types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java)
 can be used as parameter types, without having
-to write a custom mapper first. Optional and Lists of these
-types are allowed too.
+to write a custom mapper first. Optional and List of these
+types are also allowed.
 
 ### Custom mappers and parameter validation
 
