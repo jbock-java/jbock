@@ -2,8 +2,8 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-jbock is an annotation driven parser generator,
-which facilitates the generation and documentation of simple command line interfaces.
+Jbock strives to be an easy to use and well documented parser generator.
+It can be used to define and document simple command line interfaces.
 
 How does it compare to
 [other parsers?](https://stackoverflow.com/questions/1524661/the-best-cli-parser-for-java)
