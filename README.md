@@ -566,26 +566,15 @@ The `indent` is used when printing the usage page.
 
 ### Gradle config
 
-This is the basic configuration for projects using the `java` plugin
+Add two dependencies to `build.gradle`:
 
 ````groovy
-dependencies {
-    compileOnly 'com.github.h908714124:jbock-annotations:2.2'
-    annotationProcessor 'com.github.h908714124:jbock:$jbockVersion'
-}
+compileOnly 'com.github.h908714124:jbock-annotations:2.2'
+annotationProcessor 'com.github.h908714124:jbock:$jbockVersion'
 ````
 
-For `java-library` projects, `implementation` scope must be used for the annotations:
-
-````groovy
-dependencies {
-    implementation 'com.github.h908714124:jbock-annotations:2.2'
-    annotationProcessor 'com.github.h908714124:jbock:$jbockVersion'
-}
-````
-
-If Intellij doesn't "see" the generated classes,
-try setting up a `generated` folder as follows: 
+Now do `gradle build` once. If Intellij doesn't "see" the generated classes,
+try setting up a `generated` folder as follows:
 
 ````groovy
 compileJava {
@@ -632,7 +621,7 @@ or `provided`.
 </dependencies>
 ````
 
-The processor itself is only needed on the compiler classpath.
+The processor itself is only needed on the compiler classpath:
 
 ````xml
 <build>
@@ -654,8 +643,6 @@ The processor itself is only needed on the compiler classpath.
   </plugins>
 </build>
 ````
-
-There's also a gradle project in the samples.
 
 ### Examples and other links
 
