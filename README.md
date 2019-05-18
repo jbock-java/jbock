@@ -497,36 +497,24 @@ assertEquals(-1, args.number());
 
 ### Parsing failure
 
-There are several ways in which the user input can be wrong:
+There are several types of "bad input" which can cause the parsing process to fail:
 
 * Repetition of <a href="#repeatable-parameters">*non-repeatable parameters*</a>
-* Absence of a required parameter
-* Unknown token
-* Missing value of <a href="#binding-parameters">*binding parameter*</a>
-* Coercion failed
+* Absence of a <a href="#required-and-optional-parameters">*required parameter*</a>
+* Unknown token, after all <a href="#positional-parameters">*positional parameters*</a> are filled
+* Missing value after a <a href="#binding-parameters">*binding*</a> parameter
+* <a href="#standard-coercions">*Coercion*</a> failure
+* Failure in a <a href="#custom-mappers-and-parameter-validation">*mapper*</a> or
+  <a href="#custom-collectors">*collector*</a>
 
-For example, let's say we have a required argument `-f`:
-
-````java
-@CommandLineArguments
-abstract class MyArguments {
-  @Parameter(shortName = 'f')
-  abstract Path file();
-}
-````
-
-then the empty array `argv = {}` would be invalid input,
-because the required argument `-f` is absent.
-
-We've seen some examples using the `parseOrExit` method before,
-which either returns a model instance, or performs the following steps:
+The generated `parseOrExit` method performs the following steps if such a failure is encountered:
 
 * Print an error message to the configured <a href="#runtime-modifiers">*error stream*</a>
 * Shut down the JVM with the configured <a href="#runtime-modifiers">*error code*</a>
 
 If you need more control, you can also use the generated `parse` method,
-which returns the generated class `MyArguments_Parser.ParseResult`: 
-  
+which returns the generated class `MyArguments_Parser.ParseResult`:
+
 ````java
 String[] argv = {};
 MyArguments_Parser.ParseResult parseResult = MyArguments_Parser.create().parse(argv);
@@ -543,8 +531,7 @@ Optional<MyArguments> result = result.result();
 result.ifPresent(this::runTheBusinessLogicAlready);
 ````
 
-Note: Neither `parseOrExit` nor `parse` will ever throw an exception
-or return `null`.
+Note: Neither `parseOrExit` nor `parse` will throw an exception or return `null`.
 
 ### Runtime modifiers
 
