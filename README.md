@@ -512,8 +512,10 @@ The generated `parseOrExit` method performs the following steps if such a failur
 * Print an error message to the configured <a href="#runtime-modifiers">*error stream*</a>
 * Shut down the JVM with the configured <a href="#runtime-modifiers">*error code*</a>
 
-If you need more control, you can also use the generated `parse` method,
-which returns the generated class `MyArguments_Parser.ParseResult`:
+If you need to handle the failure manually,
+you should use the generated `parse` method,
+which returns the generated class `MyArguments_Parser.ParseResult`.
+As with `parseOrExit`, this method will not throw an exception or return `null`.
 
 ````java
 String[] argv = {};
@@ -530,8 +532,6 @@ Optional<MyArguments> result = result.result();
 // if !error and !helpPrinted, the result will be present
 result.ifPresent(this::runTheBusinessLogicAlready);
 ````
-
-Note: Neither `parseOrExit` nor `parse` will throw an exception or return `null`.
 
 ### Runtime modifiers
 
