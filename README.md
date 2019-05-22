@@ -317,7 +317,7 @@ class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
   @Override
   public Function<String, Integer> get() {
     return s -> {
-      // try-catch is not necessary here: NumberFormatException is a RuntimeException 
+      // try-catch is not needed here: NumberFormatException is a RuntimeException 
       Integer i = Integer.valueOf(s);
       if (i < 0) {
         // Perform additional validation by throwing IllegalArgumentException, which is a RuntimeException
@@ -375,7 +375,7 @@ class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String
       if (tokens.length < 2) {
         throw new IllegalArgumentException("Invalid pair: " + s);
       }
-      return new AbstractMap.SimpleImmutableEntry<>(tokens[0].trim(), tokens[1].trim());
+      return new AbstractMap.SimpleImmutableEntry<>(tokens[0], tokens[1]);
     };
   }
 }
@@ -415,7 +415,8 @@ They must be set explicitly.
 ### Parameter descriptions and internationalization
 
 By default, the method's Javadoc is used as the parameter description. 
-Alternatively a resource bundle can be used:
+Alternatively a resource bundle can be used, which overrides the
+javadoc if the bundle contains a translation for the JVM's locale:
 
 ````java
 MyArguments args = MyArguments_Parser.create()
@@ -431,10 +432,7 @@ The bundle keys must then be manually defined on the parameter methods:
 abstract String headers();
 ````
 
-If a resource bundle is supplied (see above),
-and the method's `bundleKey` is defined and contained in the bundle,
-then the corresponding text will be used in the help page,
-rather than the method's javadoc.
+See [jbock-map-example](https://github.com/h908714124/jbock-map-example) for further details.
 
 ### Escape sequence
 
