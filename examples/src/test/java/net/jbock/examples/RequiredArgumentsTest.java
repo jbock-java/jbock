@@ -17,24 +17,24 @@ class RequiredArgumentsTest {
 
   @Test
   void errorDirMissing() {
-    f.assertThat().failsWithLine4("Missing required option: DIR (--dir)");
+    f.assertThat().failsWithUsageMessage("Missing required option: DIR (--dir)");
   }
 
   @Test
   void errorRepeatedArgument() {
-    f.assertThat("--dir", "A", "--dir", "B").failsWithLine4(
+    f.assertThat("--dir", "A", "--dir", "B").failsWithUsageMessage(
         "Option DIR (--dir) is not repeatable");
-    f.assertThat("--dir=A", "--dir", "B").failsWithLine4(
+    f.assertThat("--dir=A", "--dir", "B").failsWithUsageMessage(
         "Option DIR (--dir) is not repeatable");
-    f.assertThat("--dir=A", "--dir=B").failsWithLine4(
+    f.assertThat("--dir=A", "--dir=B").failsWithUsageMessage(
         "Option DIR (--dir) is not repeatable");
-    f.assertThat("--dir", "A", "--dir=B").failsWithLine4(
+    f.assertThat("--dir", "A", "--dir=B").failsWithUsageMessage(
         "Option DIR (--dir) is not repeatable");
   }
 
   @Test
   void errorDetachedAttached() {
-    f.assertThat("--dir", "A", "--dir=B").failsWithLine4("Option DIR (--dir) is not repeatable");
+    f.assertThat("--dir", "A", "--dir=B").failsWithUsageMessage("Option DIR (--dir) is not repeatable");
   }
 
   @Test

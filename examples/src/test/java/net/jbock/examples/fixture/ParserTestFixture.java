@@ -6,6 +6,7 @@ import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -188,15 +189,22 @@ public final class ParserTestFixture<E> {
       this.stderr = stderr;
     }
 
-    public void failsWithLine4(String expectedMessage) {
+    public void failsWithUsageMessage(String expectedMessage) {
       if (parsed.isPresent()) {
         fail("Expecting a failure" +
             " but parsing was successful");
       }
       assertTrue(stdout.isEmpty());
-      assertTrue(stderr.startsWith("Usage:"));
-      String actualMessage = stderr.split("\\r?\\n", -1)[4].trim();
-      assertEquals(expectedMessage, actualMessage);
+      String[] tokens = stderr.split("\\r?\\n", -1);
+      for (int i = 0; i < tokens.length; i++) {
+        String token = tokens[i];
+        if (token.startsWith("Usage:")) {
+          String actualMessage = tokens[i + 4].trim();
+          assertEquals(expectedMessage, actualMessage);
+          return;
+        }
+      }
+      failsWithLines("Usage line not found");
     }
 
     public void failsWithLines(String... expected) {
@@ -206,7 +214,16 @@ public final class ParserTestFixture<E> {
       }
       assertTrue(stdout.isEmpty());
       String[] actualMessage = stderr.split("\\r?\\n", -1);
-      compareArrays(expected, actualMessage);
+      for (int i = 0; i < actualMessage.length; i++) {
+        String token = actualMessage[i];
+        if (token.startsWith("Usage:")) {
+          String[] copy = new String[actualMessage.length - i];
+          System.arraycopy(actualMessage, i, copy, 0, copy.length);
+          compareArrays(expected, copy);
+          return;
+        }
+      }
+      failsWithLines("Usage line not found");
     }
 
     public void satisfies(Predicate<E> predicate) {

@@ -33,7 +33,7 @@ class AllCharactersArgumentsTest {
         "--bigChar", "A",
         "--charOpt", "X",
         "--charList", "b",
-        "--charList", "c").failsWithLine4(
+        "--charList", "c").failsWithUsageMessage(
         "Not a character: <abc>");
   }
 }

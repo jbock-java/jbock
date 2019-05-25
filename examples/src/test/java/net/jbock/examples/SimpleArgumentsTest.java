@@ -12,8 +12,8 @@ class SimpleArgumentsTest {
 
   @Test
   void invalidOptions() {
-    f.assertThat("xf", "1").failsWithLine4("Invalid option: xf");
-    f.assertThat("-xf", "1").failsWithLine4("Invalid option: -xf");
+    f.assertThat("xf", "1").failsWithUsageMessage("Invalid option: xf");
+    f.assertThat("-xf", "1").failsWithUsageMessage("Invalid option: -xf");
   }
 
   @Test

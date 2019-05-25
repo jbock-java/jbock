@@ -10,28 +10,28 @@ class MvArgumentsTest {
 
   @Test
   void notEnoughArguments() {
-    f.assertThat().failsWithLine4("Missing parameter: <SOURCE>");
-    f.assertThat("a").failsWithLine4("Missing parameter: <DEST>");
+    f.assertThat().failsWithUsageMessage("Missing parameter: <SOURCE>");
+    f.assertThat("a").failsWithUsageMessage("Missing parameter: <DEST>");
   }
 
   @Test
   void invalidOption() {
-    f.assertThat("-aa", "b").failsWithLine4("Invalid option: -aa");
+    f.assertThat("-aa", "b").failsWithUsageMessage("Invalid option: -aa");
   }
 
   @Test
   void excessOption() {
-    f.assertThat("a", "b", "c").failsWithLine4("Invalid option: c");
+    f.assertThat("a", "b", "c").failsWithUsageMessage("Invalid option: c");
   }
 
   @Test
   void invalidOptionEscapeSequenceSecond() {
-    f.assertThat("a", "--").failsWithLine4("Invalid option: --");
+    f.assertThat("a", "--").failsWithUsageMessage("Invalid option: --");
   }
 
   @Test
   void invalidOptionEscapeSequenceThird() {
-    f.assertThat("a", "b", "--", "c").failsWithLine4("Invalid option: --");
+    f.assertThat("a", "b", "--", "c").failsWithUsageMessage("Invalid option: --");
   }
 
   @Test

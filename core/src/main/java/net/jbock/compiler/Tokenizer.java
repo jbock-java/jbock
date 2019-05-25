@@ -304,6 +304,7 @@ final class Tokenizer {
 
   private CodeBlock parseMethodCatchBlock(ParameterSpec e) {
     CodeBlock.Builder spec = CodeBlock.builder();
+    spec.addStatement("$N.printStackTrace($N.out)", e, err);
     if (context.addHelp) {
       spec.addStatement("$N.println($S)", err, "Usage:");
       spec.addStatement("$N.incrementIndent()", err);

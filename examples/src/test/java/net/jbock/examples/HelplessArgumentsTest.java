@@ -58,7 +58,7 @@ class HelplessArgumentsTest {
     TestOutputStream out = new TestOutputStream();
     HelplessArguments_Parser.create().withErrorStream(out.out).parse(new String[]{});
     String message = out.toString();
-    assertTrue(message.startsWith(String.join("\n", fullUsage)));
+    assertTrue(message.contains(String.join("\n", fullUsage)));
     assertTrue(message.contains("Missing parameter: <REQUIRED>"));
   }
 
@@ -67,7 +67,7 @@ class HelplessArgumentsTest {
     TestOutputStream out = new TestOutputStream();
     HelplessArguments_Parser.create().withErrorStream(out.out).parse(new String[]{"-p"});
     String message = out.toString();
-    assertTrue(message.startsWith(String.join("\n", fullUsage)));
+    assertTrue(message.contains(String.join("\n", fullUsage)));
     assertTrue(message.contains("Invalid option: -p"));
   }
 }

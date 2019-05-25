@@ -15,9 +15,9 @@ class PositionalArgumentsTest {
 
   @Test
   void errorMissingParameters() {
-    f.assertThat().failsWithLine4("Missing parameter: <SOURCE>");
-    f.assertThat("a").failsWithLine4("Missing parameter: <DEST>");
-    f.assertThat("a", "b").failsWithLine4("Missing parameter: <ANOTHER_INT>");
+    f.assertThat().failsWithUsageMessage("Missing parameter: <SOURCE>");
+    f.assertThat("a").failsWithUsageMessage("Missing parameter: <DEST>");
+    f.assertThat("a", "b").failsWithUsageMessage("Missing parameter: <ANOTHER_INT>");
   }
 
   @Test
