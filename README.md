@@ -5,23 +5,36 @@
 * generates parsers
 * helps building simple command line interfaces
 
-How?
+For starters, here's a Java model of a simple command line interface:
 
-1. In the Java model, <a href="#required-and-optional-parameters">*optional parameters*</a>
-   correspond to methods that return [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html).
-   Coincidentally, there is no way to make a parameter method return `null`.
-1. <a href="#binding-parameters">*Binding parameters*</a> are [unary:](https://en.wikipedia.org/wiki/Unary_operation)
-    1. Each parameter name must be followed by a single argument.
-    1. One such pair can also <a href="#parameter-shapes">*appear as a single token.*</a>
-    1. Binding parameters can be repeatable. 
-       Repeatable parameters correspond to methods that return [List](https://en.wikipedia.org/wiki/Java_collections_framework).
-1. There are some <a href="#standard-coercions">*standard coercions.*</a>
-Custom <a href="#custom-mappers-and-parameter-validation">*mappers*</a> and
-<a href="#custom-collectors">*collectors*</a> can be added.
+````java
+@CommandLineArguments
+abstract class MyArguments {
 
-### Contents
+  @PositionalParameter
+  abstract Path path();
 
-* <a href="#quick-overview">Quick Overview</a>
+  @Parameter(shortName = 'v')
+  abstract OptionalInt verbosity();
+}
+````
+
+Now **build once** to trigger the code generation; see also <a href="#gradle-config">*gradle*</a> or
+<a href="#maven-config">*maven*</a> config.
+The derived class `MyArguments_Parser` can then be used as follows:
+
+````java
+String[] argv = { "-v2", "file.txt" };
+MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+
+assertEquals(OptionalInt.of(2), args.verbosity());
+assertEquals(Paths.get("file.txt"), args.path());
+````
+
+
+### Big list of bullet points
+
+* <a href="#features-overview">Features overview</a>
 * <a href="#parameters">Parameters</a>
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#flags">Flags</a>
@@ -45,31 +58,24 @@ Custom <a href="#custom-mappers-and-parameter-validation">*mappers*</a> and
 * <a href="#examples-and-other-links">Examples and other links</a>
 * <a href="#running-tests">Running tests</a>
 
-### Quick Overview
+### Features overview
 
-Here's a Java model of a command line interface:
+Some of the features, especially the handling of optional parameters, may be unexpected
+for users of similar parsers:
 
-````java
-@CommandLineArguments
-abstract class MyArguments {
+1. In the Java model, <a href="#required-and-optional-parameters">*optional parameters*</a>
+   correspond to methods that return [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html).
+   Coincidentally, there is no way to make a parameter method return `null`.
+1. <a href="#binding-parameters">*Binding parameters*</a> are [unary:](https://en.wikipedia.org/wiki/Unary_operation)
+    1. Each parameter name must be followed by a single argument.
+    1. One such pair can also <a href="#parameter-shapes">*appear as a single token.*</a>
+    1. Binding parameters can be repeatable. 
+       Repeatable parameters correspond to methods that return [List](https://en.wikipedia.org/wiki/Java_collections_framework).
+1. There are some <a href="#standard-coercions">*standard coercions.*</a>
+Custom <a href="#custom-mappers-and-parameter-validation">*mappers*</a> and
+<a href="#custom-collectors">*collectors*</a> can be added.
 
-  @PositionalParameter
-  abstract Path path();
-  
-  @Parameter(shortName = 'v')
-  abstract OptionalInt verbosity();
-}
-````
-
-The derived class `MyArguments_Parser` can be used as follows
-
-````java
-String[] argv = { "-v2", "file.txt" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-
-assertEquals(OptionalInt.of(2), args.verbosity());
-assertEquals(Paths.get("file.txt"), args.path());
-````
+After this high level overview, let's look at some features in more detail.
 
 ### Parameters
 
