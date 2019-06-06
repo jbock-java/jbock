@@ -24,9 +24,10 @@ The derived class `MyArguments_Parser`, which has now been generated,
 can be used in your `main` method as follows:
 
 ````java
-String[] argv = { "-v2", "file.txt" };
+String[] argv = { "-v2", "file.txt" }; // for example
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
+// making sure this works as expected...
 assertEquals(OptionalInt.of(2), args.verbosity());
 assertEquals(Paths.get("file.txt"), args.path());
 ````
