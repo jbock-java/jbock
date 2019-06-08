@@ -82,7 +82,7 @@ uploadArchives {
                 name 'jbock'
                 packaging 'jar'
                 artifactId 'jbock'
-                description 'The jbock annotation processor'
+                description 'The jbock command line parser'
                 url 'https://github.com/h908714124/jbock'
 
                 scm {
