@@ -78,7 +78,7 @@ for users of similar parsers:
 Custom <a href="#custom-mappers-and-parameter-validation">*mappers*</a> and
 <a href="#custom-collectors">*collectors*</a> can be added.
 
-After this high level overview, let's look at some features in more detail.
+Now let's look at some features in more detail.
 
 ### Parameters
 
