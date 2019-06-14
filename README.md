@@ -36,7 +36,7 @@ assertEquals(Paths.get("file.txt"), args.path());
 ### Big list of bullet points
 
 * <a href="#features-overview">Features overview</a>
-* <a href="#parameters">Parameters</a>
+* <a href="#argument-vector">Argument vector</a>
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#flags">Flags</a>
 * <a href="#binding-parameters">Binding parameters</a>
@@ -80,12 +80,15 @@ Custom <a href="#custom-mappers-and-parameter-validation">*mappers*</a> and
 
 Now let's look at some features in more detail.
 
-### Parameters
+### Argument vector
 
-Command line applications have access to an array `String[] argv`,
-the contents of which are usually examined at the start of the program.
-The tokens in this array, or sometimes certain pairs of tokens,
-are called *parameters*.
+Command line applications have access to a special array of strings.
+The contents of this array are not known at compile time.
+At runtime, it contains the application's command line arguments.
+
+Some of the tokens in this array will be in the form of key-value pairs.
+Others are distinguished by their special form or position.
+Both the key-value pairs and the standalone tokens are called *parameters*.
 
 Let's take a look at the three basic types of parameters:
 <a href="#positional-parameters">*positional parameters,*</a>
@@ -96,7 +99,7 @@ Let's take a look at the three basic types of parameters:
 
 A *positional* parameter is just a value, without a
 preceding parameter name. The value is not allowed
-to start with a hyphen character, unless the
+to start with a "minus" character, unless the
 <a href="#allowing-prefixed-tokens">*allowPrefixedTokens*</a>
 attribute is set.
 
@@ -174,15 +177,13 @@ abstract String file();
 
 The *parameter value* (or *bound value*) is the next token after the first occurrence of the
 token `-f`. The parameter value
-is an *arbitrary* string. For example, the value can start with a hyphen:
+is an *arbitrary* string. For example, it's fine for the value to start with a "minus" character:
 
 ````java
 String[] argv = { "-f", "-f" };
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 assertEquals("-f", args.file());
 ````
-
-Any input token that isn't bound by a binding parameter is called *free*.
 
 ### Required and optional parameters
 
@@ -266,9 +267,6 @@ argv = { "--file", "data.txt" }; // two hypens -> long form
 argv = { "-f", "data.txt" }; // one hyphen -> short form
 ````
 
-The token following the parameter name is called a *bound* token.
-Any token that is not bound is called *free*.
-
 Binding parameters can also be written in *attached* form as follows
 
 ````java
@@ -276,10 +274,11 @@ argv = { "--file=data.txt" }; // attached long form
 argv = { "-fdata.txt" }; // attached short form
 ````
 
-Thus if both `longName` and `shortName` are defined, there
-are at most *four* different ways to write a binding parameter.
+Note: If both `longName` and `shortName` are defined, there
+are *four* different ways to write a binding parameter.
 
-For a <a href="#flags">*flag,*</a> there are at most two ways:
+On the other hand, if both names are defined,
+there are only *two* ways to write a <a href="#flags">*flag:*</a>
 
 ````java
 argv = { "--quiet" }; // two hyphens -> long flag
