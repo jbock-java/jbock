@@ -567,7 +567,8 @@ compileOnly 'com.github.h908714124:jbock-annotations:2.2'
 annotationProcessor 'com.github.h908714124:jbock:$jbockVersion'
 ````
 
-Now do `gradle build` once. If Intellij doesn't "see" the generated classes,
+Now add your model class and do `gradle build` once.
+If Intellij doesn't "see" the generated classes,
 try setting up a `generated` folder as follows:
 
 ````groovy
