@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -23,7 +22,7 @@ import static net.jbock.compiler.Constants.STRING_STRING_MAP;
 final class Messages {
 
   private final FieldSpec resourceBundle = FieldSpec.builder(
-      STRING_STRING_MAP, "resourceBundle")
+      STRING_STRING_MAP, "messages")
       .addModifiers(FINAL).build();
 
   private final Context context;
@@ -54,7 +53,9 @@ final class Messages {
     ParameterSpec defaultValue = ParameterSpec.builder(Constants.LIST_OF_STRING, "defaultValue").build();
     ParameterSpec key = ParameterSpec.builder(String.class, "key").build();
     MethodSpec.Builder spec = methodBuilder("getMessage");
-    spec.addCode(sanityChecks(defaultValue, key));
+    spec.beginControlFlow("if (!$N.containsKey($N))", resourceBundle, key)
+        .addStatement("return $N", defaultValue)
+        .endControlFlow();
     spec.addStatement("return $T.asList($N.split($N.get($N), -1))", Arrays.class, br, resourceBundle, key);
     return spec.addParameter(key)
         .addParameter(defaultValue)
@@ -66,27 +67,11 @@ final class Messages {
     ParameterSpec defaultValue = ParameterSpec.builder(Constants.STRING, "defaultValue").build();
     ParameterSpec key = ParameterSpec.builder(String.class, "key").build();
     MethodSpec.Builder spec = methodBuilder("getMessage");
-    spec.addCode(sanityChecks(defaultValue, key));
-    spec.addStatement("return $N.get($N)", resourceBundle, key);
+    spec.addStatement("return $N.getOrDefault($N, $N)", resourceBundle, key, defaultValue);
     return spec.addParameter(key)
         .addParameter(defaultValue)
         .returns(Constants.STRING)
         .build();
-  }
-
-
-  private CodeBlock sanityChecks(ParameterSpec defaultValue, ParameterSpec key) {
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.beginControlFlow("if ($N == null)", resourceBundle)
-        .addStatement("return $N", defaultValue)
-        .endControlFlow();
-    code.beginControlFlow("if ($N == null || $N.isEmpty())", key, key)
-        .addStatement("return $N", defaultValue)
-        .endControlFlow();
-    code.beginControlFlow("if (!$N.containsKey($N))", resourceBundle, key)
-        .addStatement("return $N", defaultValue)
-        .endControlFlow();
-    return code.build();
   }
 
   private MethodSpec privateConstructor() {

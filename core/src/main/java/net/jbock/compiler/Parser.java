@@ -7,10 +7,13 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Properties;
 import java.util.ResourceBundle;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
@@ -62,7 +65,7 @@ final class Parser {
       .initializer("$L", DEFAULT_EXITCODE_ON_ERROR)
       .addModifiers(PRIVATE).build();
 
-  private final FieldSpec resourceBundle = FieldSpec.builder(STRING_STRING_MAP, "resourceBundle")
+  private final FieldSpec messages = FieldSpec.builder(STRING_STRING_MAP, "messages")
       .addModifiers(PRIVATE).build();
 
   private Parser(
@@ -110,8 +113,9 @@ final class Parser {
     return spec.addMethod(addPublicIfNecessary(withErrorStreamMethod()))
         .addMethod(addPublicIfNecessary(withIndentMethod()))
         .addMethod(addPublicIfNecessary(withErrorExitCodeMethod()))
+        .addMethod(addPublicIfNecessary(withMessagesMethod()))
         .addMethod(addPublicIfNecessary(withResourceBundleMethod()))
-        .addMethod(addPublicIfNecessary(withResourceBundleMethodOverload()))
+        .addMethod(addPublicIfNecessary(withMessagesMethodInputStream()))
         .addType(tokenizer.define())
         .addType(impl.define())
         .addType(option.define())
@@ -127,7 +131,7 @@ final class Parser {
         .addField(err)
         .addField(indent)
         .addField(errorExitCode)
-        .addField(resourceBundle)
+        .addField(messages)
         .addMethod(readArgumentMethod)
         .addMethod(readNextMethod)
         .addMethod(MethodSpec.constructorBuilder().addModifiers(PRIVATE).build())
@@ -153,17 +157,20 @@ final class Parser {
         .returns(context.generatedClass);
   }
 
-  private MethodSpec.Builder withResourceBundleMethod() {
-    ParameterSpec resourceBundleParam = ParameterSpec.builder(resourceBundle.type, resourceBundle.name).build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("withResourceBundle");
+  private MethodSpec.Builder withMessagesMethod() {
+    ParameterSpec resourceBundleParam = ParameterSpec.builder(messages.type, "map").build();
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("withMessages");
+    spec.beginControlFlow("if ($N != null)", messages)
+        .addStatement("throw new $T($S)", IllegalStateException.class, "setting messages twice")
+        .endControlFlow();
     return spec.addParameter(resourceBundleParam)
-        .addStatement("this.$N = $T.requireNonNull($N)", resourceBundle, Objects.class, resourceBundleParam)
+        .addStatement("this.$N = $T.requireNonNull($N)", messages, Objects.class, resourceBundleParam)
         .addStatement("return this")
         .returns(context.generatedClass);
   }
 
-  private MethodSpec.Builder withResourceBundleMethodOverload() {
-    ParameterSpec bundle = ParameterSpec.builder(ResourceBundle.class, resourceBundle.name).build();
+  private MethodSpec.Builder withResourceBundleMethod() {
+    ParameterSpec bundle = ParameterSpec.builder(ResourceBundle.class, "bundle").build();
     ParameterSpec map = ParameterSpec.builder(STRING_STRING_MAP, "map").build();
     ParameterSpec name = ParameterSpec.builder(STRING, "name").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("withResourceBundle");
@@ -171,8 +178,36 @@ final class Parser {
     spec.beginControlFlow("for ($T $N :$T.list($N.getKeys()))", STRING, name, Collections.class, bundle)
         .addStatement("$N.put($N, $N.getString($N))", map, name, bundle, name)
         .endControlFlow();
-    spec.addStatement("return withResourceBundle($N)", map);
+    spec.addStatement("return withMessages($N)", map);
     return spec.addParameter(bundle)
+        .returns(context.generatedClass);
+  }
+
+  private MethodSpec.Builder withMessagesMethodInputStream() {
+    ParameterSpec stream = ParameterSpec.builder(InputStream.class, "stream").build();
+    ParameterSpec map = ParameterSpec.builder(STRING_STRING_MAP, "map").build();
+    ParameterSpec name = ParameterSpec.builder(STRING, "name").build();
+    ParameterSpec properties = ParameterSpec.builder(Properties.class, "properties").build();
+    ParameterSpec exception = ParameterSpec.builder(IOException.class, "exception").build();
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("withMessages");
+    spec.beginControlFlow("if ($N == null)", stream)
+        .addStatement("return withMessages($T.emptyMap())", Collections.class)
+        .endControlFlow();
+    spec.beginControlFlow("try");
+    // BEGIN TRY BODY
+    spec.addStatement("$T $N = new $T()", properties.type, properties, Properties.class)
+        .addStatement("$N.load($N)", properties, stream)
+        .addStatement("$T $N = new $T<>()", map.type, map, HashMap.class);
+    spec.beginControlFlow("for ($T $N : $N.stringPropertyNames())", STRING, name, properties)
+        .addStatement("$N.put($N, $N.getProperty($N))", map, name, properties, name)
+        .endControlFlow();
+    spec.addStatement("return withMessages($N)", map);
+    // END TRY BODY
+    spec.endControlFlow();
+    spec.beginControlFlow("catch ($T $N)", exception.type, exception)
+        .addStatement("throw new $T($N)", RuntimeException.class, exception)
+        .endControlFlow();
+    return spec.addParameter(stream)
         .returns(context.generatedClass);
   }
 
@@ -209,9 +244,9 @@ final class Parser {
     } else {
       paramOutStream = paramErrStream;
     }
-    ParameterSpec paramMessages = ParameterSpec.builder(context.messagesType(), "messages").build();
+    ParameterSpec paramMessages = ParameterSpec.builder(context.messagesType(), "msg").build();
     spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramErrStream, context.indentPrinterType(), err, indent);
-    spec.addStatement("$T $N = new $T($N)", context.messagesType(), paramMessages, context.messagesType(), resourceBundle);
+    spec.addStatement("$T $N = new $T($N == null ? $T.emptyMap() : $N)", context.messagesType(), paramMessages, context.messagesType(), messages, Collections.class, messages);
     spec.addStatement("$T $N = new $T($N, $N, $N)",
         paramTokenizer.type, paramTokenizer, paramTokenizer.type, paramOutStream, paramErrStream, paramMessages);
     spec.addStatement("return $N.parse($N)", paramTokenizer, args);
