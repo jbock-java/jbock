@@ -8,17 +8,22 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
 import java.io.PrintStream;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Objects;
 import java.util.ResourceBundle;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
+import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.Constants.STRING_STRING_MAP;
 import static net.jbock.compiler.Util.optionalOf;
 
 /**
@@ -57,7 +62,7 @@ final class Parser {
       .initializer("$L", DEFAULT_EXITCODE_ON_ERROR)
       .addModifiers(PRIVATE).build();
 
-  private final FieldSpec resourceBundle = FieldSpec.builder(ResourceBundle.class, "resourceBundle")
+  private final FieldSpec resourceBundle = FieldSpec.builder(STRING_STRING_MAP, "resourceBundle")
       .addModifiers(PRIVATE).build();
 
   private Parser(
@@ -92,6 +97,7 @@ final class Parser {
 
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass);
+    spec.addModifiers(FINAL);
     if (context.sourceType.getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
@@ -105,6 +111,7 @@ final class Parser {
         .addMethod(addPublicIfNecessary(withIndentMethod()))
         .addMethod(addPublicIfNecessary(withErrorExitCodeMethod()))
         .addMethod(addPublicIfNecessary(withResourceBundleMethod()))
+        .addMethod(addPublicIfNecessary(withResourceBundleMethodOverload()))
         .addType(tokenizer.define())
         .addType(impl.define())
         .addType(option.define())
@@ -148,10 +155,24 @@ final class Parser {
 
   private MethodSpec.Builder withResourceBundleMethod() {
     ParameterSpec resourceBundleParam = ParameterSpec.builder(resourceBundle.type, resourceBundle.name).build();
-    return MethodSpec.methodBuilder("withResourceBundle")
-        .addParameter(resourceBundleParam)
-        .addStatement("this.$N = $N", resourceBundle, resourceBundleParam)
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("withResourceBundle");
+    return spec.addParameter(resourceBundleParam)
+        .addStatement("this.$N = $T.requireNonNull($N)", resourceBundle, Objects.class, resourceBundleParam)
         .addStatement("return this")
+        .returns(context.generatedClass);
+  }
+
+  private MethodSpec.Builder withResourceBundleMethodOverload() {
+    ParameterSpec bundle = ParameterSpec.builder(ResourceBundle.class, resourceBundle.name).build();
+    ParameterSpec map = ParameterSpec.builder(STRING_STRING_MAP, "map").build();
+    ParameterSpec name = ParameterSpec.builder(STRING, "name").build();
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("withResourceBundle");
+    spec.addStatement("$T $N = new $T<>()", map.type, map, HashMap.class);
+    spec.beginControlFlow("for ($T $N :$T.list($N.getKeys()))", STRING, name, Collections.class, bundle)
+        .addStatement("$N.put($N, $N.getString($N))", map, name, bundle, name)
+        .endControlFlow();
+    spec.addStatement("return withResourceBundle($N)", map);
+    return spec.addParameter(bundle)
         .returns(context.generatedClass);
   }
 
@@ -168,7 +189,7 @@ final class Parser {
     ParameterSpec param = ParameterSpec.builder(stream.type, stream.name).build();
     return MethodSpec.methodBuilder(methodName)
         .addParameter(param)
-        .addStatement("this.$N = $N", stream, param)
+        .addStatement("this.$N = $T.requireNonNull($N)", stream, Objects.class, param)
         .addStatement("return this")
         .returns(context.generatedClass);
   }

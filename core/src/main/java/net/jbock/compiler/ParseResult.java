@@ -52,6 +52,7 @@ final class ParseResult {
     if (context.sourceType.getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
+    spec.addModifiers(FINAL);
     return spec.build();
   }
 

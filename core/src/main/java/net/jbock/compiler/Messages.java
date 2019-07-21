@@ -7,7 +7,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.Arrays;
-import java.util.ResourceBundle;
 import java.util.regex.Pattern;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
@@ -16,13 +15,15 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.STRING_STRING_MAP;
 
 /**
  * Defines the inner class Messages.
  */
 final class Messages {
 
-  private final FieldSpec resourceBundle = FieldSpec.builder(ResourceBundle.class, "resourceBundle")
+  private final FieldSpec resourceBundle = FieldSpec.builder(
+      STRING_STRING_MAP, "resourceBundle")
       .addModifiers(FINAL).build();
 
   private final Context context;
@@ -54,7 +55,7 @@ final class Messages {
     ParameterSpec key = ParameterSpec.builder(String.class, "key").build();
     MethodSpec.Builder spec = methodBuilder("getMessage");
     spec.addCode(sanityChecks(defaultValue, key));
-    spec.addStatement("return $T.asList($N.split($N.getString($N), -1))", Arrays.class, br, resourceBundle, key);
+    spec.addStatement("return $T.asList($N.split($N.get($N), -1))", Arrays.class, br, resourceBundle, key);
     return spec.addParameter(key)
         .addParameter(defaultValue)
         .returns(Constants.LIST_OF_STRING)
@@ -66,7 +67,7 @@ final class Messages {
     ParameterSpec key = ParameterSpec.builder(String.class, "key").build();
     MethodSpec.Builder spec = methodBuilder("getMessage");
     spec.addCode(sanityChecks(defaultValue, key));
-    spec.addStatement("return $N.getString($N)", resourceBundle, key);
+    spec.addStatement("return $N.get($N)", resourceBundle, key);
     return spec.addParameter(key)
         .addParameter(defaultValue)
         .returns(Constants.STRING)
