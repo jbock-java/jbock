@@ -2,9 +2,9 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 
-jbock can help you build a simple command line interface, in Java.
+jbock can help you build a simple and user-friendly command line interface.
 
-First, you write the Java model of such a command line interface:
+The command line options are defined via an annotated class:
 
 ````java
 @CommandLineArguments
@@ -18,16 +18,17 @@ abstract class MyArguments {
 }
 ````
 
-Now you **build once** to trigger the code generation; see also <a href="#gradle-config">*gradle*</a> or
+Now **build once** to trigger the code generation. See also <a href="#gradle-config">*gradle*</a> or
 <a href="#maven-config">*maven*</a> config.
-The derived class `MyArguments_Parser`, which has now been generated,
+
+The derived class `MyArguments_Parser`, the source of which has now been generated,
 can be used in your `main` method as follows:
 
 ````java
 String[] argv = { "-v2", "file.txt" }; // for example
 MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 
-// making sure this works as expected...
+// make sure this works as expected...
 assertEquals(OptionalInt.of(2), args.verbosity());
 assertEquals(Paths.get("file.txt"), args.path());
 ````
