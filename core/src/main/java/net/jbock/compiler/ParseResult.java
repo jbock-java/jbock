@@ -8,6 +8,9 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.Optional;
 
+import static com.squareup.javapoet.MethodSpec.constructorBuilder;
+import static com.squareup.javapoet.MethodSpec.methodBuilder;
+import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -57,29 +60,34 @@ final class ParseResult {
   }
 
   private MethodSpec.Builder errorMethod() {
-    return MethodSpec.methodBuilder("error")
+    return methodBuilder("error")
         .addStatement("return !$N", success)
         .returns(TypeName.BOOLEAN);
   }
 
   private MethodSpec.Builder helpPrintedMethod() {
-    return MethodSpec.methodBuilder("helpPrinted")
+    return methodBuilder("helpPrinted")
         .addStatement("return $N == null && $N", result, success)
         .returns(TypeName.BOOLEAN);
   }
 
   private MethodSpec.Builder resultMethod() {
-    return MethodSpec.methodBuilder("result")
+    return methodBuilder("result")
         .addStatement("return $T.ofNullable($N)", Optional.class, result)
         .returns(optionalOf(TypeName.get(context.sourceType.asType())));
   }
 
   private MethodSpec privateConstructor() {
-    ParameterSpec paramResult = ParameterSpec.builder(result.type, result.name).build();
-    ParameterSpec paramSuccess = ParameterSpec.builder(success.type, success.name).build();
-    return MethodSpec.constructorBuilder()
+    ParameterSpec paramResult = builder(result.type, result.name).build();
+    ParameterSpec paramSuccess = builder(success.type, success.name).build();
+    MethodSpec.Builder spec = constructorBuilder()
         .addParameter(paramResult)
-        .addParameter(paramSuccess)
+        .addParameter(paramSuccess);
+    spec.beginControlFlow("if ($N != null && !$N)", paramResult, paramSuccess)
+        .addComment("sanity check")
+        .addStatement("throw new $T($S)", IllegalArgumentException.class, "Parsing failed, there can't be a result")
+        .endControlFlow();
+    return spec
         .addStatement("this.$N = $N", result, paramResult)
         .addStatement("this.$N = $N", success, paramSuccess)
         .addModifiers(PRIVATE)
