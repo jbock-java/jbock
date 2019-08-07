@@ -6,19 +6,21 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import java.util.Optional;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Objects;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
-import static java.util.Arrays.asList;
+import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Parser.addPublicIfNecessary;
-import static net.jbock.compiler.Util.optionalOf;
 
 /**
  * Defines the inner class ParseResult.
@@ -27,69 +29,92 @@ final class ParseResult {
 
   private final Context context;
 
-  final FieldSpec result;
-  final FieldSpec success;
+  private final FieldSpec result;
+  private final FieldSpec message = FieldSpec.builder(STRING, "message", PRIVATE, FINAL).build();
 
-  private ParseResult(Context context, FieldSpec result, FieldSpec success) {
+  private ParseResult(Context context, FieldSpec result) {
     this.context = context;
     this.result = result;
-    this.success = success;
   }
 
   static ParseResult create(Context context) {
     FieldSpec result = FieldSpec.builder(TypeName.get(context.sourceType.asType()), "result",
         PRIVATE, FINAL).build();
-    FieldSpec success = FieldSpec.builder(TypeName.BOOLEAN, "success",
-        PRIVATE, FINAL).build();
-    return new ParseResult(context, result, success);
+    return new ParseResult(context, result);
   }
 
-  TypeSpec define() {
+  List<TypeSpec> define() {
     TypeSpec.Builder spec = classBuilder(context.parseResultType())
-        .addFields(asList(result, success))
-        .addMethod(addPublicIfNecessary(context, resultMethod()))
-        .addMethod(addPublicIfNecessary(context, errorMethod()))
-        .addMethod(addPublicIfNecessary(context, helpPrintedMethod()))
-        .addMethod(privateConstructor())
-        .addModifiers(STATIC);
+        .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
+        .addModifiers(STATIC, ABSTRACT)
+        .addJavadoc("This will be a sealed type in the future.\n");
     if (context.sourceType.getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
-    spec.addModifiers(FINAL);
+    return Arrays.asList(spec.build(),
+        definePrintHelpResult(),
+        defineErrorResult(),
+        defineSuccessResult());
+  }
+
+  private TypeSpec definePrintHelpResult() {
+    TypeSpec.Builder spec = classBuilder(context.helpPrintedParseResultType())
+        .superclass(context.parseResultType())
+        .addModifiers(STATIC, FINAL);
+    if (context.sourceType.getModifiers().contains(PUBLIC)) {
+      spec.addModifiers(PUBLIC);
+    }
     return spec.build();
   }
 
-  private MethodSpec.Builder errorMethod() {
-    return methodBuilder("error")
-        .addStatement("return !$N", success)
-        .returns(TypeName.BOOLEAN);
+  private TypeSpec defineErrorResult() {
+    ParameterSpec paramMessage = builder(STRING, message.name).build();
+    TypeSpec.Builder spec = classBuilder(context.errorParseResultType())
+        .superclass(context.parseResultType())
+        .addField(message)
+        .addMethod(constructorBuilder()
+            .addParameter(paramMessage)
+            .addStatement("this.$N = $T.requireNonNull($N)", message, Objects.class, paramMessage)
+            .addModifiers(PRIVATE).build())
+        .addModifiers(STATIC, FINAL);
+    if (context.sourceType.getModifiers().contains(PUBLIC)) {
+      spec.addModifiers(PUBLIC);
+    }
+    spec.addMethod(addPublicIfNecessary(context, messageMethod()));
+    return spec.build();
   }
 
-  private MethodSpec.Builder helpPrintedMethod() {
-    return methodBuilder("helpPrinted")
-        .addStatement("return $N == null && $N", result, success)
-        .returns(TypeName.BOOLEAN);
+  private TypeSpec defineSuccessResult() {
+    TypeSpec.Builder spec = classBuilder(context.successParseResultType())
+        .superclass(context.parseResultType())
+        .addField(result)
+        .addMethod(successConstructor())
+        .addModifiers(STATIC, FINAL);
+    if (context.sourceType.getModifiers().contains(PUBLIC)) {
+      spec.addModifiers(PUBLIC);
+    }
+    spec.addMethod(addPublicIfNecessary(context, resultMethod()));
+    return spec.build();
   }
 
   private MethodSpec.Builder resultMethod() {
     return methodBuilder("result")
-        .addStatement("return $T.ofNullable($N)", Optional.class, result)
-        .returns(optionalOf(TypeName.get(context.sourceType.asType())));
+        .addStatement("return $N", result)
+        .returns(TypeName.get(context.sourceType.asType()));
   }
 
-  private MethodSpec privateConstructor() {
+  private MethodSpec.Builder messageMethod() {
+    return methodBuilder("message")
+        .addStatement("return $N", message)
+        .returns(STRING);
+  }
+
+  private MethodSpec successConstructor() {
     ParameterSpec paramResult = builder(result.type, result.name).build();
-    ParameterSpec paramSuccess = builder(success.type, success.name).build();
     MethodSpec.Builder spec = constructorBuilder()
-        .addParameter(paramResult)
-        .addParameter(paramSuccess);
-    spec.beginControlFlow("if ($N != null && !$N)", paramResult, paramSuccess)
-        .addComment("sanity check")
-        .addStatement("throw new $T($S)", IllegalArgumentException.class, "Parsing failed, there can't be a result")
-        .endControlFlow();
+        .addParameter(paramResult);
     return spec
-        .addStatement("this.$N = $N", result, paramResult)
-        .addStatement("this.$N = $N", success, paramSuccess)
+        .addStatement("this.$N = $T.requireNonNull($N)", result, Objects.class, paramResult)
         .addModifiers(PRIVATE)
         .build();
   }

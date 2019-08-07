@@ -6,7 +6,6 @@ import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -80,9 +79,9 @@ public final class ParserTestFixture<E> {
           Object parseResult = parseMethod.invoke(builder, new Object[]{args});
           Method resultMethod = parseResult.getClass().getDeclaredMethod("result");
           resultMethod.setAccessible(true);
-          return (Optional<E>) resultMethod.invoke(parseResult);
+          return Optional.of((E) resultMethod.invoke(parseResult));
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-          throw new RuntimeException(e);
+          return Optional.empty();
         }
       }
 

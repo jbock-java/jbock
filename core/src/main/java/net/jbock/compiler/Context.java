@@ -60,6 +60,9 @@ final class Context {
   private final ClassName implType;
   private final ClassName tokenizerType;
   private final ClassName parseResultType;
+  private final ClassName successParseResultType;
+  private final ClassName errorParseResultType;
+  private final ClassName helpPrintedParseResultType;
 
   private Context(
       TypeElement sourceType,
@@ -84,7 +87,10 @@ final class Context {
       ClassName messagesType,
       ClassName implType,
       ClassName tokenizerType,
-      ClassName parseResultType) {
+      ClassName parseResultType,
+      ClassName successParseResultType,
+      ClassName errorParseResultType,
+      ClassName helpPrintedParseResultType) {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -108,6 +114,9 @@ final class Context {
     this.implType = implType;
     this.tokenizerType = tokenizerType;
     this.parseResultType = parseResultType;
+    this.successParseResultType = successParseResultType;
+    this.errorParseResultType = errorParseResultType;
+    this.helpPrintedParseResultType = helpPrintedParseResultType;
   }
 
   static Context create(
@@ -133,6 +142,9 @@ final class Context {
     ClassName implType = generatedClass.nestedClass(sourceType.getSimpleName() + "Impl");
     ClassName tokenizerType = generatedClass.nestedClass("Tokenizer");
     ClassName parseResultType = generatedClass.nestedClass("ParseResult");
+    ClassName successParseResultType = generatedClass.nestedClass("ParsingSuccess");
+    ClassName errorParseResultType = generatedClass.nestedClass("ParsingFailed");
+    ClassName helpPrintedParseResultType = generatedClass.nestedClass("HelpPrinted");
 
     return new Context(
         sourceType,
@@ -156,7 +168,10 @@ final class Context {
         messagesType,
         implType,
         tokenizerType,
-        parseResultType);
+        parseResultType,
+        successParseResultType,
+        errorParseResultType,
+        helpPrintedParseResultType);
   }
 
   private static String programName(TypeElement sourceType) {
@@ -233,6 +248,18 @@ final class Context {
 
   ClassName parseResultType() {
     return parseResultType;
+  }
+
+  ClassName successParseResultType() {
+    return successParseResultType;
+  }
+
+  ClassName errorParseResultType() {
+    return errorParseResultType;
+  }
+
+  ClassName helpPrintedParseResultType() {
+    return helpPrintedParseResultType;
   }
 
   boolean containsType(TypeName typeName) {

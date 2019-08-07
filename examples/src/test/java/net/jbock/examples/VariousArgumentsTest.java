@@ -15,7 +15,7 @@ class VariousArgumentsTest {
 
   @Test
   void bigDecimal() {
-    Optional<VariousArguments> parsed = VariousArguments_Parser.create().parse(new String[]{
+    VariousArguments_Parser.ParseResult parsed = VariousArguments_Parser.create().parse(new String[]{
         "--file", "/etc/hosts",
         "--bigDecimal", "3.14159265358979323846264338327950288419716939937510",
         "--bigInteger", "60221407600000000000000",
@@ -40,9 +40,9 @@ class VariousArgumentsTest {
         "ISO-8859-1",
         "^[abc]*$",
         "1970-01-01T00:00:00Z"
-    }).result();
-    assertTrue(parsed.isPresent());
-    VariousArguments args = parsed.get();
+    });
+    assertTrue(parsed instanceof VariousArguments_Parser.ParsingSuccess);
+    VariousArguments args = ((VariousArguments_Parser.ParsingSuccess) parsed).result();
     assertEquals(new BigDecimal("3.14159265358979323846264338327950288419716939937510"), args.bigDecimal());
     assertEquals(Optional.of(Paths.get("/home")), args.pathPos());
     assertEquals(URI.create("http://localhost:8080"), args.uri());
