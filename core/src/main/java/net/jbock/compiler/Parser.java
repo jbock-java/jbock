@@ -127,7 +127,7 @@ final class Parser {
         .addType(RepeatableOptionParser.define(context))
         .addType(IndentPrinter.create(context).define())
         .addType(Messages.create(context).define())
-        .addType(parseResult.define())
+        .addTypes(parseResult.define())
         .addField(out)
         .addField(err)
         .addField(indent)
@@ -264,24 +264,20 @@ final class Parser {
 
     spec.addStatement("$T $N = parse($N)", result.type, result, args);
 
-    // begin error handling
-    spec.beginControlFlow("if ($N.$N == null)", result, parseResult.result);
+    spec.beginControlFlow("if ($N instanceof $T)", result, context.successParseResultType())
+        .addStatement("return (($T) $N).result()", context.successParseResultType(), result)
+        .endControlFlow();
 
-    spec.beginControlFlow("if ($N.$N)", result, parseResult.success)
-        .addComment("--help was handled")
+    spec.beginControlFlow("if ($N instanceof $T)", result, context.helpPrintedParseResultType())
         .addStatement("$T.exit(0)", System.class)
         .endControlFlow();
-    spec.beginControlFlow("else")
-        .addComment("parsing failed")
+
+    spec.beginControlFlow("if ($N instanceof $T)", result, context.errorParseResultType())
         .addStatement("$T.exit($N)", System.class, errorExitCode)
         .endControlFlow();
 
+    spec.addComment("all cases handled");
     spec.addStatement("throw new $T($S)", AssertionError.class, "never thrown");
-
-    spec.endControlFlow();
-    // end error handling
-    
-    spec.addStatement("return $N.$N", result, parseResult.result);
 
     return spec.addParameter(args)
         .returns(TypeName.get(context.sourceType.asType()));

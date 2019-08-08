@@ -294,11 +294,11 @@ final class Tokenizer {
         result.type, result, Arrays.class, args);
 
     spec.beginControlFlow("if ($N.isPresent())", result)
-        .addStatement("return new $T($N.get(), true)", context.parseResultType(), result)
+        .addStatement("return new $T($N.get())", context.successParseResultType(), result)
         .endControlFlow();
 
     spec.addStatement("printUsage()")
-        .addStatement("return new $T(null, true)", context.parseResultType());
+        .addStatement("return new $T()", context.helpPrintedParseResultType());
     return spec.build();
   }
 
@@ -323,7 +323,7 @@ final class Tokenizer {
       spec.addStatement("printUsage()");
       spec.addStatement("$N.println($N.getMessage())", err, e);
     }
-    spec.addStatement("return new $T(null, false)", context.parseResultType());
+    spec.addStatement("return new $T($N.getMessage())", context.errorParseResultType(), e);
     return spec.build();
   }
 

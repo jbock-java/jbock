@@ -3,8 +3,6 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.TestOutputStream;
 import org.junit.jupiter.api.Test;
 
-import java.util.Optional;
-
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -29,8 +27,8 @@ class HelplessArgumentsTest {
   @Test
   void success0() {
     HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"x"});
-    assertTrue(opt.result().isPresent());
-    HelplessArguments args = opt.result().get();
+    assertTrue(opt instanceof HelplessArguments_Parser.ParsingSuccess);
+    HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).result();
     assertEquals("x", args.required());
     assertFalse(args.help());
   }
@@ -38,8 +36,8 @@ class HelplessArgumentsTest {
   @Test
   void success1() {
     HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"x", "--help"});
-    assertTrue(opt.result().isPresent());
-    HelplessArguments args = opt.result().get();
+    assertTrue(opt instanceof HelplessArguments_Parser.ParsingSuccess);
+    HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).result();
     assertTrue(args.help());
     assertEquals("x", args.required());
   }
@@ -47,8 +45,8 @@ class HelplessArgumentsTest {
   @Test
   void success2() {
     HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"--help", "x"});
-    assertTrue(opt.result().isPresent());
-    HelplessArguments args = opt.result().get();
+    assertTrue(opt instanceof HelplessArguments_Parser.ParsingSuccess);
+    HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).result();
     assertTrue(args.help());
     assertEquals("x", args.required());
   }
