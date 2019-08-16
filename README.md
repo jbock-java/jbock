@@ -526,26 +526,24 @@ The generated `parseOrExit` method performs the following steps if such a failur
 * Print an error message to the configured <a href="#runtime-modifiers">*error stream*</a>
 * Shut down the JVM with the configured <a href="#runtime-modifiers">*error code*</a>
 
-If you need to handle the failure manually,
+If you need to handle the cases manually,
 you should use the generated `parse` method,
-which returns the generated class `MyArguments_Parser.ParseResult`.
-As with `parseOrExit`, this method will not throw an exception or return `null`.
+which returns a `ParseResult`.
 
 ````java
-String[] argv = {};
 MyArguments_Parser.ParseResult parseResult = MyArguments_Parser.create().parse(argv);
-if (parseResult.error()) {
-  System.out.println("Invalid input. This has already been printed to stderr.");
+if (parseResult instanceof MyArguments_Parser.ParsingFailed) {
+  System.out.println("Invalid input. Usage info has been printed to stderr.");
+  System.exit(1);
+} else if (parseResult instanceof MyArguments_Parser.HelpPrinted) {
+  System.out.println("The user has passed the --help param. Usage info has been printed to stdout.");
+} else if (parseResult instanceof MyArguments_Parser.ParsingSuccess) {
+  MyArguments result = ((MyArguments_Parser.ParsingSuccess) parseResult).result();
+  runTheBusinessLogicAlready(result);
 }
-if (parseResult.helpPrinted()) {
-  System.out.println("The user has passed the --help param. " +
-   "Usage info has already been printed to stdout.");
-}
-Optional<MyArguments> result = result.result();
-
-// if !error and !helpPrinted, the result will be present
-result.ifPresent(this::runTheBusinessLogicAlready);
 ````
+
+Let's hope that this awkward case-handling becomes much nicer when java finally gets *sealed types*.
 
 ### Runtime modifiers
 
