@@ -543,7 +543,7 @@ if (parseResult instanceof MyArguments_Parser.ParsingFailed) {
 }
 ````
 
-Let's hope that this awkward case-handling gets nicer when java finally gets *sealed types*.
+Let's hope that this awkward case-handling gets nicer when java finally gets *sealed types.*
 
 ### Runtime modifiers
 
