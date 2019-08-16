@@ -528,7 +528,7 @@ The generated `parseOrExit` method performs the following steps if such a failur
 
 If you need to handle the cases manually,
 you should use the generated `parse` method,
-which returns a `ParseResult`.
+which returns `ParseResult`.
 
 ````java
 MyArguments_Parser.ParseResult parseResult = MyArguments_Parser.create().parse(argv);
