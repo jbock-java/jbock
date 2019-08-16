@@ -98,9 +98,9 @@ The tokens and key-value pairs in `argv` are called
 
 Let's take a look at three basic types of parameters:
 
-<a href="#positional-parameters">*positional parameters,*</a>
-<a href="#flags">*flags*</a> and
-<a href="#binding-parameters">*binding parameters*</a>.
+1. <a href="#positional-parameters">*positional parameters,*</a>
+1. <a href="#flags">*flags*</a>
+1. <a href="#binding-parameters">*binding parameters.*</a>
 
 ### Positional parameters
 
