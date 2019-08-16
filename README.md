@@ -18,6 +18,10 @@ abstract class MyArguments {
 }
 ````
 
+Note that `path` is a required parameter.
+This type-inferred optionality, which can also be made explicit,
+is easy to remember by the rule that *jbock never returns null*.
+
 Now **build once** to trigger the code generation. See also <a href="#gradle-config">*gradle*</a> or
 <a href="#maven-config">*maven*</a> config.
 
