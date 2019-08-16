@@ -87,15 +87,17 @@ Now let's look at some features in more detail.
 
 ### Argument vector
 
-Command line applications have access to a special array of strings.
-The contents of this array are not known at compile time.
-At runtime, it contains the application's command line arguments.
+Command line applications have access to a special array of strings,
+which is often called `args` or `argv`.
 
-Some of the tokens in this array will be in the form of key-value pairs.
-Others are distinguished by their special form or position.
-Both the key-value pairs and the standalone tokens are called *parameters*.
+Sometimes the tokens in this array are grouped into key-value pairs.
+Sometimes they are distinguished by their position or form.
+There can also be a mix of these kinds.
+The tokens and key-value pairs in `argv` are called
+*command line parameters,* or in short, *parameters.*
 
-Let's take a look at the three basic types of parameters:
+Let's take a look at three basic types of parameters:
+
 <a href="#positional-parameters">*positional parameters,*</a>
 <a href="#flags">*flags*</a> and
 <a href="#binding-parameters">*binding parameters*</a>.
