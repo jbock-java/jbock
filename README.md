@@ -18,7 +18,7 @@ abstract class MyArguments {
 }
 ````
 
-Note that `path` is a required parameter.
+Note that `path` is a required parameter, because its type is not `Optional`.
 This type-inferred optionality, which can also be made explicit,
 is easy to remember by the rule that *jbock never returns null*.
 
