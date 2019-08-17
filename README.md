@@ -533,13 +533,15 @@ which returns `ParseResult`.
 ````java
 MyArguments_Parser.ParseResult parseResult = MyArguments_Parser.create().parse(argv);
 if (parseResult instanceof MyArguments_Parser.ParsingFailed) {
-  System.out.println("Invalid input. Usage info has been printed to stderr.");
+  System.out.println("Parsing failed: " + ((MyArguments_Parser.ParsingFailed) parseResult).message();
+  System.out.println("Usage info has been printed to the output stream.");
   System.exit(1);
 } else if (parseResult instanceof MyArguments_Parser.HelpPrinted) {
-  System.out.println("The user has passed the --help param. Usage info has been printed to stdout.");
+  System.out.println("The user has passed the --help param.");
+  System.out.println("Usage info has been printed to the error stream.");
 } else if (parseResult instanceof MyArguments_Parser.ParsingSuccess) {
-  MyArguments result = ((MyArguments_Parser.ParsingSuccess) parseResult).result();
-  runTheBusinessLogicAlready(result);
+  MyArguments args = ((MyArguments_Parser.ParsingSuccess) parseResult).result();
+  runTheBusinessLogicAlready(args);
 }
 ````
 
