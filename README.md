@@ -533,7 +533,7 @@ which returns `ParseResult`.
 ````java
 MyArguments_Parser.ParseResult parseResult = MyArguments_Parser.create().parse(argv);
 if (parseResult instanceof MyArguments_Parser.ParsingFailed) {
-  System.out.println("Parsing failed: " + ((MyArguments_Parser.ParsingFailed) parseResult).message();
+  System.out.println("Parsing failed: " + ((MyArguments_Parser.ParsingFailed) parseResult).message());
   System.out.println("Usage info has been printed to the output stream.");
   System.exit(1);
 } else if (parseResult instanceof MyArguments_Parser.HelpPrinted) {
