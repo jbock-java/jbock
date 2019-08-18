@@ -75,7 +75,7 @@ public final class Processor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
     try {
-      TypeTool tool = TypeTool.init(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
+      TypeTool tool = TypeTool.init(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
       StandardCoercions.init(tool);
       processInternal(annotations, env);
     } finally {

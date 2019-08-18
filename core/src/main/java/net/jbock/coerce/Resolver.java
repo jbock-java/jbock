@@ -18,31 +18,32 @@ import static net.jbock.compiler.TypeTool.asDeclared;
 class Resolver {
 
   private final List<Extension> extensions;
+  private final TypeTool tool;
 
-  private Resolver(List<Extension> extensions) {
+  private Resolver(
+      List<Extension> extensions,
+      TypeTool tool) {
     List<Extension> reversed = new ArrayList<>(extensions);
     Collections.reverse(reversed);
     this.extensions = Collections.unmodifiableList(reversed);
+    this.tool = tool;
   }
 
-  static Resolver resolve(
-      TypeMirror goal,
-      TypeMirror start) {
-    List<TypeElement> family = getTypeTree(start);
+  static Resolver resolve(TypeMirror goal, TypeMirror start, TypeTool tool) {
+    List<TypeElement> family = getTypeTree(start, tool);
     Extension extension;
-    TypeTool tool = TypeTool.get();
     TypeMirror nextGoal = tool.erasure(goal);
     List<Extension> extensions = new ArrayList<>();
-    while ((extension = findExtension(family, nextGoal)) != null) {
+    while ((extension = findExtension(family, nextGoal, tool)) != null) {
       extensions.add(extension);
       nextGoal = tool.erasure(extension.baseClass().asType());
     }
-    return new Resolver(extensions);
+    return new Resolver(extensions, tool);
   }
 
-  private static Extension findExtension(List<TypeElement> family, TypeMirror goal) {
+  private static Extension findExtension(List<TypeElement> family, TypeMirror goal, TypeTool tool) {
     for (TypeElement element : family) {
-      Extension extension = findExtension(element, goal);
+      Extension extension = findExtension(element, goal, tool);
       if (extension != null) {
         return extension;
       }
@@ -50,8 +51,7 @@ class Resolver {
     return null;
   }
 
-  private static Extension findExtension(TypeElement typeElement, TypeMirror goal) {
-    TypeTool tool = TypeTool.get();
+  private static Extension findExtension(TypeElement typeElement, TypeMirror goal, TypeTool tool) {
     TypeMirror superclass = typeElement.getSuperclass();
     if (superclass != null && tool.isSameType(goal, tool.erasure(superclass))) {
       return new Extension(typeElement, asDeclared(superclass));
@@ -76,14 +76,13 @@ class Resolver {
     return Optional.of(extensionClass);
   }
 
-  private static TypeMirror resolveStep(TypeMirror x, Extension extension) {
+  private TypeMirror resolveStep(TypeMirror x, Extension extension) {
     List<? extends TypeMirror> typeArguments = asDeclared(x).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = extension.baseClass().getTypeParameters();
     Map<String, TypeMirror> resolution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
       resolution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
-    TypeTool tool = TypeTool.get();
     return tool.substitute(extension.extensionClass(), resolution)
         .orElse(extension.extensionClass());
   }

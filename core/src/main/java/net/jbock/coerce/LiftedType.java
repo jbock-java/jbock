@@ -23,12 +23,6 @@ final class LiftedType {
   // how to go back from lifted to original type
   private final Function<ParameterSpec, CodeBlock> extract;
 
-  boolean isLifted() {
-    TypeTool tool = TypeTool.get();
-    return !originalType.getKind().isPrimitive() &&
-        !tool.isSameType(originalType, liftedType);
-  }
-
   private LiftedType(
       Function<ParameterSpec, CodeBlock> extract,
       TypeMirror originalType,
@@ -55,7 +49,11 @@ final class LiftedType {
   }
 
   static LiftedType lift(TypeMirror originalType) {
-    TypeTool tool = TypeTool.get();
+    return lift(originalType, TypeTool.get());
+  }
+
+  // visible for testing
+  static LiftedType lift(TypeMirror originalType, TypeTool tool) {
     for (Map.Entry<Class<?>, Class<?>> e : OPT_MAP.entrySet()) {
       if (tool.isSameType(originalType, e.getValue())) {
         return new LiftedType(p -> convertToPrimitiveOptional(e.getValue(), p),
@@ -67,13 +65,17 @@ final class LiftedType {
   }
 
   static boolean liftsToOptional(TypeMirror originalType) {
-    TypeTool tool = TypeTool.get();
+    return liftsToOptional(originalType, TypeTool.get());
+  }
+
+  // visible for testing
+  static boolean liftsToOptional(TypeMirror originalType, TypeTool tool) {
     for (Map.Entry<Class<?>, Class<?>> e : OPT_MAP.entrySet()) {
       if (tool.isSameType(originalType, e.getValue())) {
         return true;
       }
     }
-    return TypeTool.get().isSameErasure(originalType, Optional.class);
+    return tool.isSameErasure(originalType, Optional.class);
   }
 
   private static CodeBlock convertToPrimitiveOptional(Class<?> primitiveOptional, ParameterSpec p) {

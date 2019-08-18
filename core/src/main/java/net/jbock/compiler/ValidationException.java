@@ -1,7 +1,6 @@
 package net.jbock.compiler;
 
 import javax.lang.model.element.Element;
-import javax.tools.Diagnostic;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;

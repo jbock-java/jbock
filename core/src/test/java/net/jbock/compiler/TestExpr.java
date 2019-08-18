@@ -11,7 +11,7 @@ import java.util.Objects;
 import java.util.stream.Collectors;
 
 // test util
-class TestExpr {
+public class TestExpr {
 
   private final String name;
   private final List<TestExpr> args;
@@ -49,7 +49,7 @@ class TestExpr {
     return sb.toString();
   }
 
-  static DeclaredType parse(String expr, Elements elements, Types types) {
+  public static DeclaredType parse(String expr, Elements elements, Types types) {
     return _parse(expr).toType(elements, types);
   }
 

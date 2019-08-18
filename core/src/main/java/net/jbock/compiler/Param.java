@@ -21,7 +21,6 @@ import java.util.OptionalInt;
 import static java.lang.Character.isWhitespace;
 import static net.jbock.compiler.AnnotationUtil.getCollectorClass;
 import static net.jbock.compiler.AnnotationUtil.getMapperClass;
-import static net.jbock.compiler.Tokenizer.*;
 import static net.jbock.compiler.Util.snakeCase;
 
 /**

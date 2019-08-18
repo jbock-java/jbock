@@ -9,7 +9,6 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -26,43 +25,20 @@ public final class EvaluatingProcessor extends AbstractProcessor {
 
   private Throwable thrown;
 
-  public static class TestContext {
-
-    private final Elements elements;
-    private final Types types;
-
-    TestContext(Elements elements, Types types) {
-      this.elements = elements;
-      this.types = types;
-    }
-
-    public DeclaredType declared(String expr) {
-      return TestExpr.parse(expr, elements, types);
-    }
-
-    void assertSameType(TypeMirror t1, TypeMirror t2) {
-      boolean sameType = types.isSameType(t1, t2);
-      if (!sameType) {
-        Assertions.fail("Expecting " + t1 + " but found " + t2);
-      }
-    }
-
-    public void assertSameType(String expr, TypeMirror t2) {
-      TypeMirror t1 = declared(expr);
-      assertSameType(t1, t2);
-    }
-
-    public Elements elements() {
-      return elements;
-    }
-
-    public Types types() {
-      return types;
+  static void assertSameType(TypeMirror t1, TypeMirror t2, Types types) {
+    boolean sameType = types.isSameType(t1, t2);
+    if (!sameType) {
+      Assertions.fail("Expecting " + t1 + " but found " + t2);
     }
   }
 
+  public static void assertSameType(String expr, TypeMirror t2, Elements elements, Types types) {
+    TypeMirror t1 = TestExpr.parse(expr, elements, types);
+    assertSameType(t1, t2, types);
+  }
+
   public interface ContextRunnable {
-    void run(TestContext context) throws Exception;
+    void run(Elements elements, Types types) throws Exception;
   }
 
   public static class Builder {
@@ -73,7 +49,7 @@ public final class EvaluatingProcessor extends AbstractProcessor {
       this.source = source;
     }
 
-    void run(ContextRunnable base) {
+    public void run(ContextRunnable base) {
       run("Dummy", base);
     }
 
@@ -109,8 +85,7 @@ public final class EvaluatingProcessor extends AbstractProcessor {
     // just run the test on the last round after compilation is over
     if (roundEnv.processingOver()) {
       try {
-        TypeTool.init(processingEnv.getTypeUtils(), processingEnv.getElementUtils());
-        base.run(new TestContext(processingEnv.getElementUtils(), processingEnv.getTypeUtils()));
+        base.run(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
       } catch (Throwable e) {
         thrown = e;
       } finally {

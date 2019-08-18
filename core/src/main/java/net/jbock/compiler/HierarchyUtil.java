@@ -9,24 +9,29 @@ import java.util.List;
 
 public class HierarchyUtil {
 
-  public static List<TypeElement> getTypeTree(TypeMirror mirror) {
+  public static List<TypeElement> getTypeTree(
+      TypeMirror mirror,
+      TypeTool tool) {
     if (mirror == null || mirror.getKind() != TypeKind.DECLARED) {
       return Collections.emptyList();
     }
     List<TypeElement> acc = new ArrayList<>();
-    accumulate(mirror, acc);
+    accumulate(mirror, acc, tool);
     return acc;
   }
 
-  private static void accumulate(TypeMirror mirror, List<TypeElement> acc) {
+  private static void accumulate(
+      TypeMirror mirror,
+      List<TypeElement> acc,
+      TypeTool tool) {
     if (mirror == null || mirror.getKind() != TypeKind.DECLARED) {
       return;
     }
-    TypeElement t = TypeTool.get().asTypeElement(mirror);
+    TypeElement t = tool.asTypeElement(mirror);
     acc.add(t);
     for (TypeMirror inter : t.getInterfaces()) {
-      accumulate(inter, acc);
+      accumulate(inter, acc, tool);
     }
-    accumulate(t.getSuperclass(), acc);
+    accumulate(t.getSuperclass(), acc, tool);
   }
 }

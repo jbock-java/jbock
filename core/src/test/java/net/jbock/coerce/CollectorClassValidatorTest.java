@@ -1,10 +1,13 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.EvaluatingProcessor;
+import net.jbock.compiler.TestExpr;
+import net.jbock.compiler.TypeTool;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.TypeElement;
 
+import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CollectorClassValidatorTest {
@@ -23,14 +26,16 @@ class CollectorClassValidatorTest {
         "    return Collectors.toSet();",
         "  }",
         "}"
-    ).run("ToSetCollector", context -> {
-      TypeElement collectorClass = context.elements().getTypeElement("ToSetCollector");
+    ).run("ToSetCollector", (elements, types) -> {
+      TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
       CollectorInfo collectorInfo = CollectorClassValidator.getCollectorInfo(
-          context.declared("java.util.Set<java.lang.String>"), collectorClass);
-      context.assertSameType("java.lang.String", collectorInfo.inputType);
+          TestExpr.parse("java.util.Set<java.lang.String>", elements, types),
+          collectorClass,
+          new TypeTool(elements, types));
+      assertSameType("java.lang.String", collectorInfo.inputType, elements, types);
       assertTrue(collectorInfo.collectorType().isPresent());
-      context.assertSameType("ToSetCollector<java.lang.String>",
-          collectorInfo.collectorType().get());
+      assertSameType("ToSetCollector<java.lang.String>",
+          collectorInfo.collectorType().get(), elements, types);
     });
   }
 }

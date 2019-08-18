@@ -1,5 +1,7 @@
 package net.jbock.coerce.hint;
 
+import net.jbock.compiler.TypeTool;
+
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
@@ -12,7 +14,7 @@ class OptionalHint extends Hint {
 
   @Override
   String message(TypeMirror type, boolean repeatable) {
-    for (TypeElement mirror : getTypeTree(type)) {
+    for (TypeElement mirror : getTypeTree(type, TypeTool.get())) {
       String qname = mirror.getQualifiedName().toString();
       if (NAME.equals(qname)) {
         return "Declare this parameter optional.";

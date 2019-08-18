@@ -14,10 +14,20 @@ import static net.jbock.compiler.TypeTool.asDeclared;
 
 class CollectorClassValidator {
 
-  static CollectorInfo getCollectorInfo(TypeMirror returnType, TypeElement collectorClass) throws TmpException {
-    commonChecks(collectorClass, "collector");
+  static CollectorInfo getCollectorInfo(
+      TypeMirror returnType,
+      TypeElement collectorClass) throws TmpException {
     TypeTool tool = TypeTool.get();
-    TypeMirror collectorType = getCollectorType(collectorClass);
+    return getCollectorInfo(returnType, collectorClass, tool);
+  }
+
+  // visible for testing
+  static CollectorInfo getCollectorInfo(
+      TypeMirror returnType,
+      TypeElement collectorClass,
+      TypeTool tool) throws TmpException {
+    commonChecks(collectorClass, "collector");
+    TypeMirror collectorType = getCollectorType(collectorClass, tool);
     TypeMirror t = asDeclared(collectorType).getTypeArguments().get(0);
     TypeMirror r = asDeclared(collectorType).getTypeArguments().get(2);
     Optional<Map<String, TypeMirror>> maybeSolution = tool.unify(returnType, r);
@@ -32,9 +42,8 @@ class CollectorClassValidator {
     return CollectorInfo.create(tool.substitute(t, solution).orElse(t), collectorClassSolved.get());
   }
 
-  private static TypeMirror getCollectorType(TypeElement collectorClass) throws TmpException {
-    TypeTool tool = TypeTool.get();
-    Resolver resolver = Resolver.resolve(tool.asType(Supplier.class), collectorClass.asType());
+  private static TypeMirror getCollectorType(TypeElement collectorClass, TypeTool tool) throws TmpException {
+    Resolver resolver = Resolver.resolve(tool.asType(Supplier.class), collectorClass.asType(), tool);
     TypeMirror typeMirror = resolver.resolveTypevars().orElseThrow(() -> boom("not a Supplier"));
     if (tool.isRawType(typeMirror)) {
       throw boom("the supplier must be parameterized");

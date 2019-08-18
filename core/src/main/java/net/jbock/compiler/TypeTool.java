@@ -69,7 +69,8 @@ public class TypeTool {
 
   private static TypeTool instance;
 
-  private TypeTool(Types types, Elements elements) {
+  // visible for testing
+  public TypeTool(Elements elements, Types types) {
     this.types = types;
     this.elements = elements;
   }
@@ -78,8 +79,8 @@ public class TypeTool {
     return instance;
   }
 
-  static TypeTool init(Types types, Elements elements) {
-    instance = new TypeTool(types, elements);
+  static TypeTool init(Elements elements, Types types) {
+    instance = new TypeTool(elements, types);
     return instance;
   }
 
