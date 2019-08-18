@@ -47,6 +47,17 @@ public class CoercionProvider {
     }
     TypeMirror returnType = sourceMethod.getReturnType();
     BasicInfo basicInfo = BasicInfo.create(repeatable, optional, returnType, paramName);
+    if (basicInfo.repeatable) {
+      try {
+        return handleRepeatable(basicInfo, paramName, mapperClass, collectorClass);
+      } catch (TmpException e) {
+        throw e.asValidationException(sourceMethod);
+      } catch (UnknownTypeException e) {
+        Optional<String> hint = HintProvider.instance().findHint(basicInfo);
+        throw hint.map(m -> e.asValidationException(sourceMethod, m))
+            .orElseGet(() -> e.asValidationException(sourceMethod));
+      }
+    }
     Optional<TypeMirror> optionalInfo;
     try {
       optionalInfo = repeatable ? Optional.empty() : findOptionalInfo(basicInfo);
@@ -54,7 +65,7 @@ public class CoercionProvider {
       throw e.asValidationException(sourceMethod);
     }
     try {
-      return handle(optionalInfo, basicInfo, paramName, mapperClass, collectorClass);
+      return handleNonRepeatable(optionalInfo, basicInfo, paramName, mapperClass);
     } catch (TmpException e) {
       throw e.asValidationException(sourceMethod);
     } catch (UnknownTypeException e) {
@@ -64,25 +75,29 @@ public class CoercionProvider {
     }
   }
 
-  private Coercion handle(
+  private Coercion handleNonRepeatable(
       Optional<TypeMirror> optionalInfo,
+      BasicInfo basicInfo,
+      String paramName,
+      TypeElement mapperClass) throws TmpException, UnknownTypeException {
+    boolean auto = mapperClass == null;
+    if (auto) {
+      return handleSingleAuto(optionalInfo, basicInfo);
+    } else {
+      return handleSingle(optionalInfo, paramName, mapperClass, basicInfo);
+    }
+  }
+
+  private Coercion handleRepeatable(
       BasicInfo basicInfo,
       String paramName,
       TypeElement mapperClass,
       TypeElement collectorClass) throws TmpException, UnknownTypeException {
     boolean auto = mapperClass == null;
-    if (basicInfo.repeatable) {
-      if (auto) {
-        return handleRepeatableAuto(collectorClass, basicInfo);
-      } else {
-        return handleRepeatable(paramName, mapperClass, collectorClass, basicInfo);
-      }
+    if (auto) {
+      return handleRepeatableAuto(collectorClass, basicInfo);
     } else {
-      if (auto) {
-        return handleSingleAuto(optionalInfo, basicInfo);
-      } else {
-        return handleSingle(optionalInfo, paramName, mapperClass, basicInfo);
-      }
+      return handleRepeatableNonAuto(paramName, mapperClass, collectorClass, basicInfo);
     }
   }
 
@@ -108,7 +123,7 @@ public class CoercionProvider {
   }
 
   // repeatable with mapper
-  private Coercion handleRepeatable(
+  private Coercion handleRepeatableNonAuto(
       String paramName,
       TypeElement mapperClass,
       TypeElement collectorClass,

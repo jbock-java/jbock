@@ -33,6 +33,10 @@ public class HintProvider {
     if (optionalInfo.isPresent()) {
       return findHintSimple(optionalInfo.get(), basicInfo.repeatable);
     }
+    return findHint(basicInfo);
+  }
+
+  public Optional<String> findHint(BasicInfo basicInfo) {
     return findHintSimple(basicInfo.originalReturnType(), basicInfo.repeatable);
   }
 
