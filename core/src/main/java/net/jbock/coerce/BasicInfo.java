@@ -9,6 +9,7 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static javax.lang.model.element.Modifier.FINAL;
@@ -20,6 +21,8 @@ public class BasicInfo {
 
   public final boolean optional;
 
+  private final Optional<TypeMirror> optionalInfo;
+
   private final LiftedType liftedType;
 
   private final String paramName;
@@ -28,9 +31,10 @@ public class BasicInfo {
 
   private final TypeTool tool;
 
-  private BasicInfo(boolean repeatable, boolean optional, LiftedType liftedType, String paramName, ExecutableElement sourceMethod, TypeTool tool) {
+  private BasicInfo(boolean repeatable, boolean optional, Optional<TypeMirror> optionalInfo, LiftedType liftedType, String paramName, ExecutableElement sourceMethod, TypeTool tool) {
     this.repeatable = repeatable;
     this.optional = optional;
+    this.optionalInfo = optionalInfo;
     this.liftedType = liftedType;
     this.paramName = paramName;
     this.sourceMethod = sourceMethod;
@@ -38,7 +42,14 @@ public class BasicInfo {
   }
 
   static BasicInfo create(boolean repeatable, boolean optional, TypeMirror returnType, String paramName, ExecutableElement sourceMethod, TypeTool tool) {
-    return new BasicInfo(repeatable, optional, LiftedType.lift(returnType), snakeToCamel(paramName), sourceMethod, tool);
+    LiftedType liftedType = LiftedType.lift(returnType);
+    Optional<TypeMirror> optionalInfo;
+    if (repeatable) {
+      optionalInfo = Optional.empty();
+    } else {
+      optionalInfo = OptionalInfo.findOptionalInfo(tool, optional, liftedType, sourceMethod);
+    }
+    return new BasicInfo(repeatable, optional, optionalInfo, liftedType, snakeToCamel(paramName), sourceMethod, tool);
   }
 
   public String paramName() {
@@ -67,5 +78,13 @@ public class BasicInfo {
 
   TypeTool tool() {
     return tool;
+  }
+
+  public Optional<TypeMirror> optionalInfo() {
+    return optionalInfo;
+  }
+
+  ExecutableElement sourceMethod() {
+    return sourceMethod;
   }
 }

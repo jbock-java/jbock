@@ -1,11 +1,6 @@
 package net.jbock.coerce.mappers;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.WildcardTypeName;
+import com.squareup.javapoet.*;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.compiler.TypeTool;
@@ -41,18 +36,16 @@ public abstract class CoercionFactory {
 
   public final Coercion getCoercion(
       BasicInfo basicInfo,
-      Optional<TypeMirror> optionalInfo,
       Optional<TypeMirror> collectorType) {
-    return getCoercion(basicInfo, optionalInfo, collectorType, mapExpr(), initMapper());
+    return getCoercion(basicInfo, collectorType, mapExpr(), initMapper());
   }
 
   private Coercion getCoercion(
       BasicInfo basicInfo,
-      Optional<TypeMirror> optionalInfo,
       Optional<TypeMirror> collectorType,
       Optional<CodeBlock> mapExpr,
       CodeBlock initMapper) {
-    TypeMirror constructorParamType = getConstructorParamType(basicInfo, optionalInfo);
+    TypeMirror constructorParamType = getConstructorParamType(basicInfo);
     Optional<ParameterSpec> collectorParam;
     if (!collectorType.isPresent()) {
       collectorParam = Optional.empty();
@@ -69,10 +62,8 @@ public abstract class CoercionFactory {
         basicInfo);
   }
 
-  private TypeMirror getConstructorParamType(
-      BasicInfo basicInfo,
-      Optional<TypeMirror> optionalInfo) {
-    boolean useReturnType = optionalInfo.isPresent() || basicInfo.repeatable;
+  private TypeMirror getConstructorParamType(BasicInfo basicInfo) {
+    boolean useReturnType = basicInfo.optionalInfo().isPresent() || basicInfo.repeatable;
     if (useReturnType) {
       return basicInfo.returnType();
     }
