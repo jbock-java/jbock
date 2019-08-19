@@ -8,18 +8,18 @@ import javax.lang.model.element.TypeElement;
 
 abstract class SuppliedClassValidator {
 
-  static void commonChecks(TypeElement classToCheck, String name) throws TmpException {
+  static void commonChecks(BasicInfo basicInfo, TypeElement classToCheck, String name) {
     if (classToCheck.getNestingKind() == NestingKind.MEMBER &&
         !classToCheck.getModifiers().contains(Modifier.STATIC)) {
-      throw TmpException.create(
+      throw basicInfo.asValidationException(
           String.format("The nested %s class must be static.", name));
     }
     if (classToCheck.getModifiers().contains(Modifier.PRIVATE)) {
-      throw TmpException.create(
+      throw basicInfo.asValidationException(
           String.format("The %s class may not be private.", name));
     }
     if (!Util.hasDefaultConstructor(classToCheck)) {
-      throw TmpException.create(
+      throw basicInfo.asValidationException(
           String.format("The %s class must have a default constructor", name));
     }
   }

@@ -9,6 +9,8 @@ import javax.lang.model.element.TypeElement;
 
 import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class CollectorClassValidatorTest {
 
@@ -27,11 +29,15 @@ class CollectorClassValidatorTest {
         "  }",
         "}"
     ).run("ToSetCollector", (elements, types) -> {
+
+      BasicInfo basicInfo = mock(BasicInfo.class);
+      when(basicInfo.tool()).thenReturn(new TypeTool(elements, types));
+      when(basicInfo.returnType()).thenReturn(TestExpr.parse("java.util.Set<java.lang.String>", elements, types));
+
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
       CollectorInfo collectorInfo = CollectorClassValidator.getCollectorInfo(
-          TestExpr.parse("java.util.Set<java.lang.String>", elements, types),
           collectorClass,
-          new TypeTool(elements, types));
+          basicInfo);
       assertSameType("java.lang.String", collectorInfo.inputType, elements, types);
       assertTrue(collectorInfo.collectorType().isPresent());
       assertSameType("ToSetCollector<java.lang.String>",

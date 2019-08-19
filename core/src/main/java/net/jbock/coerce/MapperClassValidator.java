@@ -1,6 +1,7 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -14,54 +15,47 @@ final class MapperClassValidator {
 
   static void checkReturnType(
       TypeElement mapperClass,
-      TypeMirror expectedReturnType) throws TmpException {
-    TypeTool tool = TypeTool.get();
-    checkReturnType(mapperClass, expectedReturnType, tool);
-  }
-
-  static void checkReturnType(
-      TypeElement mapperClass,
       TypeMirror expectedReturnType,
-      TypeTool tool) throws TmpException {
-    commonChecks(mapperClass, "mapper");
+      BasicInfo basicInfo) {
+    commonChecks(basicInfo, mapperClass, "mapper");
     if (!mapperClass.getTypeParameters().isEmpty()) {
-      throw boom("The mapper class may not have type parameters");
+      throw boom(basicInfo, "The mapper class may not have type parameters");
     }
-    TypeMirror functionType = getFunctionType(mapperClass, tool);
-    TypeMirror string = tool.asType(String.class);
+    TypeMirror functionType = getFunctionType(mapperClass, basicInfo);
+    TypeMirror string = basicInfo.tool().asType(String.class);
     TypeMirror t = asDeclared(functionType).getTypeArguments().get(0);
     TypeMirror r = asDeclared(functionType).getTypeArguments().get(1);
-    if (!tool.unify(string, t).isPresent()) {
-      throw boom(String.format("The supplied function must take a String argument, but takes %s", t));
+    if (!basicInfo.tool().unify(string, t).isPresent()) {
+      throw boom(basicInfo, String.format("The supplied function must take a String argument, but takes %s", t));
     }
-    if (!tool.unify(expectedReturnType, r).isPresent()) {
-      throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
+    if (!basicInfo.tool().unify(expectedReturnType, r).isPresent()) {
+      throw boom(basicInfo, String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
   }
 
-  private static TypeMirror getFunctionType(TypeElement mapperClass, TypeTool tool) throws TmpException {
-    Resolver resolver = Resolver.resolve(tool.asType(Supplier.class), mapperClass.asType(), tool);
-    TypeMirror typeMirror = resolver.resolveTypevars().orElseThrow(() -> boom("not a Supplier"));
-    if (tool.isRawType(typeMirror)) {
-      throw boom("the supplier must be parameterized");
+  private static TypeMirror getFunctionType(TypeElement mapperClass, BasicInfo basicInfo) {
+    Resolver resolver = Resolver.resolve(basicInfo.tool().asType(Supplier.class), mapperClass.asType(), basicInfo.tool());
+    TypeMirror typeMirror = resolver.resolveTypevars().orElseThrow(() -> boom(basicInfo, "not a Supplier"));
+    if (basicInfo.tool().isRawType(typeMirror)) {
+      throw boom(basicInfo, "the supplier must be parameterized");
     }
     TypeMirror functionType = asDeclared(typeMirror).getTypeArguments().get(0);
-    if (!tool.isSameErasure(functionType, Function.class)) {
-      functionType = resolveFunctionType(functionType);
+    if (!basicInfo.tool().isSameErasure(functionType, Function.class)) {
+      functionType = resolveFunctionType(basicInfo, functionType);
     }
-    if (tool.isRawType(functionType)) {
-      throw boom("the function type must be parameterized");
+    if (basicInfo.tool().isRawType(functionType)) {
+      throw boom(basicInfo, "the function type must be parameterized");
     }
     return functionType;
   }
 
-  private static TypeMirror resolveFunctionType(TypeMirror functionType) throws TmpException {
+  private static TypeMirror resolveFunctionType(BasicInfo basicInfo, TypeMirror functionType) {
     TypeTool tool = TypeTool.get();
     Resolver resolver = Resolver.resolve(tool.asType(Function.class), functionType, tool);
-    return resolver.resolveTypevars().orElseThrow(() -> boom("The supplier must supply a Function"));
+    return resolver.resolveTypevars().orElseThrow(() -> boom(basicInfo, "The supplier must supply a Function"));
   }
 
-  private static TmpException boom(String message) {
-    return TmpException.create(String.format("There is a problem with the mapper class: %s.", message));
+  private static ValidationException boom(BasicInfo basicInfo, String message) {
+    return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
   }
 }

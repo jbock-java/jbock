@@ -14,10 +14,11 @@ repositories {
 }
 
 dependencies {
-    compile 'com.squareup:javapoet:1.11.1'
+    implementation 'com.squareup:javapoet:1.11.1'
     compile 'com.github.h908714124:jbock-annotations:2.2'
-    testCompile 'com.google.testing.compile:compile-testing:0.17'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.0-M1'
+    testImplementation 'com.google.testing.compile:compile-testing:0.18'
+    testImplementation 'org.mockito:mockito-core:3.0.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.1'
 }
 
 jar {
@@ -58,8 +59,8 @@ signing {
 gradle.taskGraph.whenReady { taskGraph ->
     if (taskGraph.allTasks.any { it instanceof Sign }) {
         allprojects {
-            ext."signing.keyId" = System.getenv( 'SIGNING_KEY_ID' )
-            ext."signing.password" = System.getenv( 'SIGNING_PASSWORD' )
+            ext."signing.keyId" = System.getenv('SIGNING_KEY_ID')
+            ext."signing.password" = System.getenv('SIGNING_PASSWORD')
         }
     }
 }
@@ -71,11 +72,11 @@ uploadArchives {
             beforeDeployment { deployment -> signing.signPom(deployment) }
 
             repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: System.getenv( 'OSS_USER' ), password: System.getenv( 'OSS_PASS' ))
+                authentication(userName: System.getenv('OSS_USER'), password: System.getenv('OSS_PASS'))
             }
 
             snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: System.getenv( 'OSS_USER' ), password: System.getenv( 'OSS_PASS' ))
+                authentication(userName: System.getenv('OSS_USER'), password: System.getenv('OSS_PASS'))
             }
 
             pom.project {

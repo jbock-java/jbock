@@ -1,7 +1,5 @@
 package net.jbock.coerce;
 
-import net.jbock.compiler.TypeTool;
-
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
@@ -9,26 +7,25 @@ import java.util.Optional;
 final class OptionalInfo {
 
   // Returns empty unless the return type is of the form Optional<?>.
-  static Optional<TypeMirror> findOptionalInfo(BasicInfo basicInfo) throws TmpException {
+  static Optional<TypeMirror> findOptionalInfo(BasicInfo basicInfo) {
     Optional<TypeMirror> optionalInfo = findOptionalInfoInternal(basicInfo);
     if (optionalInfo.isPresent() && !basicInfo.optional) {
-      throw TmpException.create("Declare this parameter optional.");
+      throw basicInfo.asValidationException("Declare this parameter optional.");
     }
     if (!optionalInfo.isPresent() && basicInfo.optional) {
-      throw TmpException.create("Wrap the parameter type in Optional.");
+      throw basicInfo.asValidationException("Wrap the parameter type in Optional.");
     }
     return optionalInfo;
   }
 
-  private static Optional<TypeMirror> findOptionalInfoInternal(BasicInfo basicInfo) throws TmpException {
-    TypeTool tool = TypeTool.get();
+  private static Optional<TypeMirror> findOptionalInfoInternal(BasicInfo basicInfo) {
     TypeMirror returnType = basicInfo.returnType();
-    if (!tool.isSameErasure(returnType, Optional.class)) {
+    if (!basicInfo.tool().isSameErasure(returnType, Optional.class)) {
       return Optional.empty();
     }
-    List<? extends TypeMirror> typeArgs = tool.typeargs(returnType);
+    List<? extends TypeMirror> typeArgs = basicInfo.tool().typeargs(returnType);
     if (typeArgs.isEmpty()) {
-      throw TmpException.create("Add a type parameter");
+      throw basicInfo.asValidationException("Add a type parameter");
     }
     return Optional.of(typeArgs.get(0));
   }

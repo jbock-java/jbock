@@ -3,12 +3,15 @@ package net.jbock.coerce;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TestExpr;
 import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.ValidationException;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.TypeElement;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class MapperClassValidatorTest {
 
@@ -31,14 +34,17 @@ class MapperClassValidatorTest {
     ).run("Mapper", (elements, types) -> {
       TypeElement mapperClass = elements.getTypeElement("Mapper");
 
+      BasicInfo basicInfo = mock(BasicInfo.class);
+      when(basicInfo.tool()).thenReturn(new TypeTool(elements, types));
+      when(basicInfo.asValidationException(anyString())).thenReturn(ValidationException.create(null, ""));
+
       // no exception: mapper returns Integer indeed
       MapperClassValidator.checkReturnType(mapperClass,
-          TestExpr.parse("java.lang.Integer", elements, types), new TypeTool(elements, types));
+          TestExpr.parse("java.lang.Integer", elements, types), basicInfo);
 
       // exception: mapper doesn't return String
-      assertEquals("There is a problem with the mapper class: The mapper should return java.lang.String but returns java.lang.Integer.",
-          assertThrows(TmpException.class, () -> MapperClassValidator.checkReturnType(mapperClass,
-              TestExpr.parse("java.lang.String", elements, types), new TypeTool(elements, types))).getMessage());
+      assertThrows(ValidationException.class, () -> MapperClassValidator.checkReturnType(mapperClass,
+          TestExpr.parse("java.lang.String", elements, types), basicInfo)).getMessage();
     });
   }
 }
