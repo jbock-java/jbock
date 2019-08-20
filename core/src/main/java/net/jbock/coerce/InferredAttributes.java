@@ -1,5 +1,7 @@
 package net.jbock.coerce;
 
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -7,6 +9,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class InferredAttributes {
 
@@ -57,10 +60,10 @@ public class InferredAttributes {
       Object collectorClass,
       boolean repeatable, // user declared
       boolean optional, // user declared
-      TypeMirror mirror,
+      TypeMirror originalReturnType,
       ExecutableElement sourceMethod) {
 
-    LiftedType liftedType = LiftedType.lift(mirror, TypeTool.get());
+    LiftedType liftedType = LiftedType.lift(originalReturnType, TypeTool.get());
     Optional<TypeMirror> optionalInfo = findOptionalInfoInternal(TypeTool.get(), liftedType, sourceMethod);
     if (optional && !optionalInfo.isPresent()) {
       throw ValidationException.create(sourceMethod, "Wrap the parameter type in Optional.");
@@ -73,7 +76,7 @@ public class InferredAttributes {
       return new InferredAttributes(repeatable, optionalInfo, liftedType);
     }
     return new InferredAttributes(
-        repeatable || isInferredRepeatable(mirror),
+        repeatable || isInferredRepeatable(originalReturnType),
         optionalInfo, liftedType);
   }
 
@@ -100,8 +103,13 @@ public class InferredAttributes {
     return optionalInfo;
   }
 
-  LiftedType liftedType() {
-    return liftedType;
+  TypeMirror liftedType() {
+    return liftedType.liftedType();
+  }
+
+  // liftedType -> sourceMethod.returnType
+  Function<ParameterSpec, CodeBlock> extractExpr() {
+    return liftedType.extractExpr();
   }
 
   public boolean repeatable() {

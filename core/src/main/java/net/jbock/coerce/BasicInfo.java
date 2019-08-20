@@ -60,19 +60,19 @@ public class BasicInfo {
   }
 
   public TypeMirror returnType() {
-    return attributes.liftedType().liftedType();
+    return attributes.liftedType();
   }
 
   public TypeMirror originalReturnType() {
-    return attributes.liftedType().liftedType();
+    return sourceMethod.getReturnType();
   }
 
   Function<ParameterSpec, CodeBlock> extractExpr() {
-    return attributes.liftedType().extractExpr();
+    return attributes.extractExpr();
   }
 
   FieldSpec fieldSpec() {
-    return FieldSpec.builder(TypeName.get(attributes.liftedType().originalType()), paramName, FINAL).build();
+    return FieldSpec.builder(TypeName.get(originalReturnType()), paramName, FINAL).build();
   }
 
   ValidationException asValidationException(String message) {
