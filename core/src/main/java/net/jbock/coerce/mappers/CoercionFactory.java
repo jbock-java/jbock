@@ -34,17 +34,9 @@ public abstract class CoercionFactory {
     return CodeBlock.builder().build();
   }
 
-  public final Coercion getCoercion(
-      BasicInfo basicInfo,
-      Optional<TypeMirror> collectorType) {
-    return getCoercion(basicInfo, collectorType, mapExpr(), initMapper());
-  }
-
-  private Coercion getCoercion(
-      BasicInfo basicInfo,
-      Optional<TypeMirror> collectorType,
-      Optional<CodeBlock> mapExpr,
-      CodeBlock initMapper) {
+  public Coercion getCoercion(BasicInfo basicInfo, Optional<TypeMirror> collectorType) {
+    Optional<CodeBlock> mapExpr = mapExpr();
+    CodeBlock initMapper = initMapper();
     TypeMirror constructorParamType = getConstructorParamType(basicInfo);
     Optional<ParameterSpec> collectorParam;
     if (!collectorType.isPresent()) {
@@ -63,7 +55,7 @@ public abstract class CoercionFactory {
   }
 
   private TypeMirror getConstructorParamType(BasicInfo basicInfo) {
-    boolean useReturnType = basicInfo.optionalInfo().isPresent() || basicInfo.repeatable;
+    boolean useReturnType = basicInfo.isOptional() || basicInfo.isRepeatable();
     if (useReturnType) {
       return basicInfo.returnType();
     }

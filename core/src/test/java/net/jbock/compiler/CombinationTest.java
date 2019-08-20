@@ -34,7 +34,7 @@ class CombinationTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Parameter(shortName = 'x', optional = true, flag = true)",
-        "  abstract String a();",
+        "  abstract Optional<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -49,7 +49,7 @@ class CombinationTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @Parameter(shortName = 'x', repeatable = true, optional = true)",
-        " abstract String a();",
+        " abstract Optional<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -64,7 +64,7 @@ class CombinationTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @PositionalParameter(repeatable = true, optional = true)",
-        "  abstract String a();",
+        "  abstract Optional<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))

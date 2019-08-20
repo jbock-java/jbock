@@ -27,17 +27,11 @@ public class HintProvider {
     return instance;
   }
 
-  public Optional<String> findHint(
-      Optional<TypeMirror> optionalInfo,
-      BasicInfo basicInfo) {
-    if (optionalInfo.isPresent()) {
-      return findHintSimple(optionalInfo.get(), basicInfo.repeatable);
-    }
-    return findHint(basicInfo);
-  }
-
   public Optional<String> findHint(BasicInfo basicInfo) {
-    return findHintSimple(basicInfo.originalReturnType(), basicInfo.repeatable);
+    if (basicInfo.isOptional()) {
+      return findHintSimple(basicInfo.optionalInfo().get(), basicInfo.isRepeatable());
+    }
+    return findHintSimple(basicInfo.originalReturnType(), basicInfo.isRepeatable());
   }
 
   private Optional<String> findHintSimple(TypeMirror type, boolean repeatable) {

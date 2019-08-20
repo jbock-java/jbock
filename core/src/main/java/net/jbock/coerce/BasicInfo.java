@@ -8,6 +8,7 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.function.Function;
@@ -17,13 +18,7 @@ import static net.jbock.compiler.Util.snakeToCamel;
 
 public class BasicInfo {
 
-  public final boolean repeatable;
-
-  public final boolean optional;
-
-  private final Optional<TypeMirror> optionalInfo;
-
-  private final LiftedType liftedType;
+  private final InferredAttributes attributes;
 
   private final String paramName;
 
@@ -31,25 +26,33 @@ public class BasicInfo {
 
   private final TypeTool tool;
 
-  private BasicInfo(boolean repeatable, boolean optional, Optional<TypeMirror> optionalInfo, LiftedType liftedType, String paramName, ExecutableElement sourceMethod, TypeTool tool) {
-    this.repeatable = repeatable;
-    this.optional = optional;
-    this.optionalInfo = optionalInfo;
-    this.liftedType = liftedType;
+  private final Optional<TypeElement> mapperClass;
+
+  private final Optional<TypeElement> collectorClass;
+
+  private BasicInfo(
+      InferredAttributes attributes,
+      String paramName,
+      ExecutableElement sourceMethod,
+      TypeTool tool,
+      Optional<TypeElement> mapperClass,
+      Optional<TypeElement> collectorClass) {
+    this.attributes = attributes;
     this.paramName = paramName;
     this.sourceMethod = sourceMethod;
     this.tool = tool;
+    this.mapperClass = mapperClass;
+    this.collectorClass = collectorClass;
   }
 
-  static BasicInfo create(boolean repeatable, boolean optional, TypeMirror returnType, String paramName, ExecutableElement sourceMethod, TypeTool tool) {
-    LiftedType liftedType = LiftedType.lift(returnType);
-    Optional<TypeMirror> optionalInfo;
-    if (repeatable) {
-      optionalInfo = Optional.empty();
-    } else {
-      optionalInfo = OptionalInfo.findOptionalInfo(tool, optional, liftedType, sourceMethod);
-    }
-    return new BasicInfo(repeatable, optional, optionalInfo, liftedType, snakeToCamel(paramName), sourceMethod, tool);
+  static BasicInfo create(
+      TypeElement mapperClass,
+      TypeElement collectorClass,
+      InferredAttributes attributes,
+      String paramName,
+      ExecutableElement sourceMethod,
+      TypeTool tool) {
+    return new BasicInfo(attributes, snakeToCamel(paramName), sourceMethod, tool, Optional.ofNullable(mapperClass), Optional.ofNullable(collectorClass));
   }
 
   public String paramName() {
@@ -57,19 +60,19 @@ public class BasicInfo {
   }
 
   public TypeMirror returnType() {
-    return liftedType.liftedType();
+    return attributes.liftedType().liftedType();
   }
 
   public TypeMirror originalReturnType() {
-    return liftedType.liftedType();
+    return attributes.liftedType().liftedType();
   }
 
   Function<ParameterSpec, CodeBlock> extractExpr() {
-    return liftedType.extractExpr();
+    return attributes.liftedType().extractExpr();
   }
 
   FieldSpec fieldSpec() {
-    return FieldSpec.builder(TypeName.get(liftedType.originalType()), paramName, FINAL).build();
+    return FieldSpec.builder(TypeName.get(attributes.liftedType().originalType()), paramName, FINAL).build();
   }
 
   ValidationException asValidationException(String message) {
@@ -81,10 +84,26 @@ public class BasicInfo {
   }
 
   public Optional<TypeMirror> optionalInfo() {
-    return optionalInfo;
+    return attributes.optionalInfo();
   }
 
   ExecutableElement sourceMethod() {
     return sourceMethod;
+  }
+
+  public boolean isRepeatable() {
+    return attributes.repeatable();
+  }
+
+  public boolean isOptional() {
+    return optionalInfo().isPresent();
+  }
+
+  public Optional<TypeElement> mapperClass() {
+    return mapperClass;
+  }
+
+  public Optional<TypeElement> collectorClass() {
+    return collectorClass;
   }
 }

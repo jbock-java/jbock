@@ -11,33 +11,17 @@ import java.util.Optional;
 final class OptionalInfo {
 
   // Returns empty unless the return type is of the form Optional<?>.
-  static Optional<TypeMirror> findOptionalInfo(
-      TypeTool tool,
-      boolean optional,
-      LiftedType liftedType,
-      ExecutableElement sourceMethod) {
-    Optional<TypeMirror> optionalInfo = findOptionalInfoInternal(tool, liftedType, sourceMethod);
-    if (optionalInfo.isPresent() && !optional) {
-      throw ValidationException.create(sourceMethod, "Declare this parameter optional.");
-    }
-    if (!optionalInfo.isPresent() && optional) {
-      throw ValidationException.create(sourceMethod, "Wrap the parameter type in Optional.");
-    }
-    return optionalInfo;
-  }
-
-  private static Optional<TypeMirror> findOptionalInfoInternal(
+  static TypeMirror findOptionalInfo(
       TypeTool tool,
       LiftedType liftedType,
       ExecutableElement sourceMethod) {
-    TypeMirror returnType = liftedType.liftedType();
-    if (!tool.isSameErasure(returnType, Optional.class)) {
-      return Optional.empty();
+    if (!tool.isSameErasure(liftedType.liftedType(), Optional.class)) {
+      throw new AssertionError(); // TODO catch this earlier
     }
-    List<? extends TypeMirror> typeArgs = tool.typeargs(returnType);
+    List<? extends TypeMirror> typeArgs = tool.typeargs(liftedType.liftedType());
     if (typeArgs.isEmpty()) {
       throw ValidationException.create(sourceMethod, "Add a type parameter");
     }
-    return Optional.of(typeArgs.get(0));
+    return typeArgs.get(0);
   }
 }

@@ -6,17 +6,13 @@ import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
-import net.jbock.coerce.Infer;
+import net.jbock.coerce.InferredAttributes;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.OptionalInt;
+import java.util.*;
 
 import static java.lang.Character.isWhitespace;
 import static net.jbock.compiler.AnnotationUtil.getCollectorClass;
@@ -188,14 +184,12 @@ final class Param {
     checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
     String name = enumConstant(params, sourceMethod);
-    Infer infer = Infer.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType());
-    boolean repeatable = infer.repeatable;
-    boolean optional = infer.optional;
-    boolean flag = Infer.isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType());
+    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod);
+    boolean repeatable = attributes.repeatable();
+    boolean optional = attributes.optional();
+    boolean flag = InferredAttributes.isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType());
     boolean required = !repeatable && !optional && !flag;
-    if (optional && repeatable) {
-      throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");
-    }
+    ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
     if (optional && flag) {
       throw ValidationException.create(sourceMethod, "A flag cannot be optional.");
     }
@@ -206,7 +200,8 @@ final class Param {
       throw ValidationException.create(sourceMethod,
           "A flag parameter can't have a mapper.");
     }
-    Coercion typeInfo = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
+    ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
+    Coercion typeInfo = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes);
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, sourceMethod) :
@@ -228,6 +223,19 @@ final class Param {
         flag);
   }
 
+  private static void ensureNotOptionalAndRepeatable(ExecutableElement sourceMethod, boolean repeatable, boolean optional) {
+    if (optional && repeatable) {
+      throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");
+    }
+  }
+
+  private static void ensureRepeatableCollector(ExecutableElement sourceMethod, TypeElement collectorClass, boolean repeatable) {
+    if (collectorClass != null && !repeatable) {
+      throw ValidationException.create(sourceMethod,
+          "The parameter must be declared repeatable in order to have a collector.");
+    }
+  }
+
   private static Param createPositional(
       List<Param> params,
       ExecutableElement sourceMethod,
@@ -237,14 +245,13 @@ final class Param {
       TypeElement collectorClass) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     String name = enumConstant(params, sourceMethod);
-    Infer infer = Infer.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType());
-    boolean repeatable = infer.repeatable;
-    boolean optional = infer.optional;
+    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod);
+    boolean repeatable = attributes.repeatable();
+    boolean optional = attributes.optional();
     boolean required = !repeatable && !optional;
-    if (optional && repeatable) {
-      throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");
-    }
-    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, repeatable, optional);
+    ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
+    ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
+    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes);
     OptionType type = optionType(repeatable, false);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, sourceMethod) :

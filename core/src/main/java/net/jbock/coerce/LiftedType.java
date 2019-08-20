@@ -64,20 +64,6 @@ final class LiftedType {
     return keep(originalType, type);
   }
 
-  static boolean liftsToOptional(TypeMirror originalType) {
-    return liftsToOptional(originalType, TypeTool.get());
-  }
-
-  // visible for testing
-  static boolean liftsToOptional(TypeMirror originalType, TypeTool tool) {
-    for (Map.Entry<Class<?>, Class<?>> e : OPT_MAP.entrySet()) {
-      if (tool.isSameType(originalType, e.getValue())) {
-        return true;
-      }
-    }
-    return tool.isSameErasure(originalType, Optional.class);
-  }
-
   private static CodeBlock convertToPrimitiveOptional(Class<?> primitiveOptional, ParameterSpec p) {
     return CodeBlock.of("$N.isPresent() ? $T.of($N.get()) : $T.empty()",
         p, primitiveOptional, p, primitiveOptional);

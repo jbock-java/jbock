@@ -415,6 +415,7 @@ public final class Processor extends AbstractProcessor {
       TypeElement sourceType,
       Throwable e) {
     String message = String.format("JBOCK: Unexpected error while processing %s: %s", sourceType, e.getMessage());
+    e.printStackTrace(System.err);
     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, sourceType);
   }
 }
