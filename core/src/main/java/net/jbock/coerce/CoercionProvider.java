@@ -30,10 +30,11 @@ public class CoercionProvider {
       String paramName,
       TypeElement mapperClass,
       TypeElement collectorClass,
-      InferredAttributes attributes) {
+      InferredAttributes attributes,
+      TypeTool tool) {
     BasicInfo basicInfo = BasicInfo.create(
         mapperClass, collectorClass,
-        attributes, paramName, sourceMethod, TypeTool.get());
+        attributes, paramName, sourceMethod, tool);
     CoercionProvider coercionProvider = new CoercionProvider(basicInfo);
     return coercionProvider.run();
   }
@@ -108,18 +109,17 @@ public class CoercionProvider {
   }
 
   private boolean isEnumType(TypeMirror mirror) {
-    TypeTool tool = TypeTool.get();
-    List<? extends TypeMirror> supertypes = tool.getDirectSupertypes(mirror);
+    List<? extends TypeMirror> supertypes = tool().getDirectSupertypes(mirror);
     if (supertypes.isEmpty()) {
       // not an enum
       return false;
     }
     TypeMirror superclass = supertypes.get(0);
-    if (!tool.isSameErasure(superclass, tool.asType(Enum.class))) {
+    if (!tool().isSameErasure(superclass, tool().asType(Enum.class))) {
       // not an enum
       return false;
     }
-    if (tool.isPrivateType(mirror)) {
+    if (tool().isPrivateType(mirror)) {
       throw basicInfo.asValidationException("The enum may not be private.");
     }
     return true;
@@ -129,14 +129,17 @@ public class CoercionProvider {
     if (basicInfo.collectorClass().isPresent()) {
       return CollectorClassValidator.getCollectorInfo(basicInfo.collectorClass().get(), basicInfo);
     }
-    TypeTool tool = TypeTool.get();
-    if (!tool.isSameErasure(basicInfo.returnType(), List.class)) {
+    if (!tool().isSameErasure(basicInfo.returnType(), List.class)) {
       throw basicInfo.asValidationException("Either define a custom collector, or return List.");
     }
-    List<? extends TypeMirror> typeParameters = tool.typeargs(basicInfo.returnType());
+    List<? extends TypeMirror> typeParameters = tool().typeargs(basicInfo.returnType());
     if (typeParameters.isEmpty()) {
       throw basicInfo.asValidationException("Add a type parameter.");
     }
     return CollectorInfo.listCollector(typeParameters.get(0));
+  }
+
+  private TypeTool tool() {
+    return basicInfo.tool();
   }
 }

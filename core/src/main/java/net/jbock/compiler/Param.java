@@ -201,7 +201,8 @@ final class Param {
           "A flag parameter can't have a mapper.");
     }
     ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
-    Coercion typeInfo = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes);
+    TypeTool tool = TypeTool.get();
+    Coercion typeInfo = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, sourceMethod) :
@@ -251,7 +252,8 @@ final class Param {
     boolean required = !repeatable && !optional;
     ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
     ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
-    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes);
+    TypeTool tool = TypeTool.get();
+    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     OptionType type = optionType(repeatable, false);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, sourceMethod) :
