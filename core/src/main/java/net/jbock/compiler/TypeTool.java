@@ -92,6 +92,9 @@ public class TypeTool {
    * @return {@code true} means failure
    */
   private boolean unify(TypeMirror x, TypeMirror y, Map<String, TypeMirror> acc) {
+    if (x.getKind() == TypeKind.TYPEVAR) {
+      return true; // only y can have typevars
+    }
     if (y.getKind() == TypeKind.TYPEVAR) {
       acc.put(y.toString(), x);
       return false;
