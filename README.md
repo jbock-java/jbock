@@ -454,8 +454,8 @@ See [jbock-map-example](https://github.com/h908714124/jbock-map-example) for fur
 
 There can sometimes be ambiguity between
 <a href="#positional-parameters">*positional*</a>
-and <a href="#binding-parameters">*binding*</a> parameters. If the `allowEscapeSequence`
-attribute is present, the special token `--` can be used to resolve this.
+and <a href="#binding-parameters">*binding*</a> parameters.
+The `allowEscapeSequence = true` attribute enables the escape sequence `--`.
 
 ````java
 @CommandLineArguments(allowEscapeSequence = true)
@@ -469,7 +469,8 @@ abstract class MyArguments {
 }
 ````
 
-The remaining tokens after the escape sequence `--` are treated as positional parameters:
+The remaining tokens after the escape sequence `--` are now "blindly"
+treated as positional parameters:
 
 ````java
 String[] argv = { "--", "-q" };
