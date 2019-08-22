@@ -570,11 +570,11 @@ The `indent` is used when printing the usage page.
 Add two dependencies to `build.gradle`:
 
 ````groovy
-compileOnly 'com.github.h908714124:jbock-annotations:2.2'
-annotationProcessor 'com.github.h908714124:jbock:$jbockVersion'
+compileOnly "com.github.h908714124:jbock-annotations:2.2"
+annotationProcessor "com.github.h908714124:jbock:$jbockVersion"
 ````
 
-Now add your `@CommandLineArguments` class and do `gradle build` once.
+Now add your `@CommandLineArguments` class and do `gradle build` once, to trigger the code generation.
 
 ### Maven config
 
