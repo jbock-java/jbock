@@ -469,7 +469,7 @@ abstract class MyArguments {
 }
 ````
 
-The remaining tokens after the escape sequence `--` are treated as positional:
+The remaining tokens after the escape sequence `--` are treated as positional parameters:
 
 ````java
 String[] argv = { "--", "-q" };
