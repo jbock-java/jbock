@@ -8,7 +8,7 @@ repositories {
 
 dependencies {
     compileOnly 'com.github.h908714124:jbock-annotations:2.2'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.0-M1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.1'
     annotationProcessor project(':core')
 }
 
@@ -16,28 +16,5 @@ test {
     useJUnitPlatform()
     testLogging {
         events "passed", "skipped", "failed"
-    }
-}
-
-compileJava {
-    options.compilerArgs << "-s"
-    options.compilerArgs << "$projectDir/src/main/generated/java"
-
-    doFirst {
-        // make sure that directory exists
-        file(new File(projectDir, "/src/main/generated/java")).mkdirs()
-    }
-}
-
-clean.doLast {
-    // clean-up directory when necessary
-    file(new File(projectDir, "/src/main/generated")).deleteDir()
-}
-
-sourceSets {
-    generated {
-        java {
-            srcDir "$projectDir/src/main/generated/java"
-        }
     }
 }
