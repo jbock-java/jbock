@@ -88,39 +88,35 @@ public class TypeTool {
     instance = null;
   }
 
-  private void unify(TypeMirror x, TypeMirror ym, Map<String, TypeMirror> acc, boolean[] failure) {
-    if (failure[0]) {
-      return;
+  /**
+   * @return {@code true} means failure
+   */
+  private boolean unify(TypeMirror x, TypeMirror y, Map<String, TypeMirror> acc) {
+    if (y.getKind() == TypeKind.TYPEVAR) {
+      acc.put(y.toString(), x);
+      return false;
     }
-    if (ym.getKind() == TypeKind.TYPEVAR) {
-      acc.put(ym.toString(), x);
-      return;
-    }
-    if (!isSameErasure(x, ym)) {
-      failure[0] = true;
-      return;
+    if (!isSameErasure(x, y)) {
+      return true;
     }
     List<? extends TypeMirror> xargs = typeargs(x);
-    List<? extends TypeMirror> yargs = typeargs(ym);
+    List<? extends TypeMirror> yargs = typeargs(y);
     if (xargs.size() != yargs.size()) {
-      failure[0] = true;
-      return;
+      return true;
     }
     for (int i = 0; i < yargs.size(); i++) {
-      TypeMirror yarg = yargs.get(i);
-      TypeMirror xarg = xargs.get(i);
-      unify(xarg, yarg, acc, failure);
+      boolean failure = unify(xargs.get(i), yargs.get(i), acc);
+      if (failure) {
+        return true;
+      }
     }
+    return false;
   }
 
   public Optional<Map<String, TypeMirror>> unify(TypeMirror concreteType, TypeMirror ym) {
     Map<String, TypeMirror> acc = new HashMap<>();
-    boolean[] failure = new boolean[1];
-    unify(concreteType, ym, acc, failure);
-    if (failure[0]) {
-      return Optional.empty();
-    }
-    return Optional.of(acc);
+    boolean failure = unify(concreteType, ym, acc);
+    return failure ? Optional.empty() : Optional.of(acc);
   }
 
   public Optional<TypeMirror> substitute(TypeMirror input, Map<String, TypeMirror> solution) {
