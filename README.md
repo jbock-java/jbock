@@ -657,6 +657,5 @@ The processor itself is only needed on the compiler classpath:
 ### Running tests
 
 ````sh
-gradle :core:test
-gradle :examples:clean :examples:test
+gradle :core:test :examples:clean :examples:test
 ````

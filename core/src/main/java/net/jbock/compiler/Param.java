@@ -44,7 +44,7 @@ final class Param {
 
   private final String descriptionArgumentName;
 
-  private final int positionalIndex;
+  private final OptionalInt positionalIndex;
 
   private final boolean optional;
 
@@ -116,7 +116,7 @@ final class Param {
       String bundleKey, Coercion coercion,
       List<String> description,
       String descriptionArgumentName,
-      int positionalIndex,
+      OptionalInt positionalIndex,
       boolean optional,
       boolean repeatable,
       boolean flag) {
@@ -141,7 +141,7 @@ final class Param {
       if (!itsBoolean) {
         throw ValidationException.create(sourceMethod, "Flag parameters must return boolean.");
       }
-    } else if (positionalIndex < 0) {
+    } else if (!isPositional()) {
       if (itsBoolean && coercion.initMapper().isEmpty()) {
         throw ValidationException.create(sourceMethod, "Declare a flag, or use a custom mapper.");
       }
@@ -174,6 +174,7 @@ final class Param {
       String[] description,
       TypeElement mapperClass,
       TypeElement collectorClass) {
+    TypeTool tool = TypeTool.get();
     String longName = longName(params, sourceMethod);
     char shortName = shortName(params, sourceMethod);
     if (shortName == ' ' && longName == null) {
@@ -184,10 +185,10 @@ final class Param {
     checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
     String name = enumConstant(params, sourceMethod);
-    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod);
+    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod, tool);
     boolean repeatable = attributes.repeatable();
     boolean optional = attributes.optional();
-    boolean flag = InferredAttributes.isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType());
+    boolean flag = isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType(), tool);
     boolean required = !repeatable && !optional && !flag;
     ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
     if (optional && flag) {
@@ -201,7 +202,6 @@ final class Param {
           "A flag parameter can't have a mapper.");
     }
     ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
-    TypeTool tool = TypeTool.get();
     Coercion typeInfo = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
@@ -218,7 +218,7 @@ final class Param {
         typeInfo,
         cleanDesc(description),
         descriptionArgumentName,
-        -1,
+        OptionalInt.empty(),
         optional,
         repeatable,
         flag);
@@ -244,15 +244,15 @@ final class Param {
       String[] description,
       TypeElement mapperClass,
       TypeElement collectorClass) {
+    TypeTool tool = TypeTool.get();
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     String name = enumConstant(params, sourceMethod);
-    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod);
+    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod, tool);
     boolean repeatable = attributes.repeatable();
     boolean optional = attributes.optional();
     boolean required = !repeatable && !optional;
     ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
     ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
-    TypeTool tool = TypeTool.get();
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     OptionType type = optionType(repeatable, false);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
@@ -269,10 +269,30 @@ final class Param {
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
-        positionalIndex,
+        OptionalInt.of(positionalIndex),
         optional,
         repeatable,
         false);
+  }
+
+  /**
+   * Can infer {@code flag = true}?
+   */
+  private static boolean isInferredFlag(
+      Object mapperClass,
+      Object collectorClass,
+      boolean flag,
+      TypeMirror mirror,
+      TypeTool tool) {
+    if (mapperClass != null || collectorClass != null) {
+      // no inferring
+      return flag;
+    }
+    return flag || isInferredFlag(tool, mirror);
+  }
+
+  private static boolean isInferredFlag(TypeTool tool, TypeMirror mirror) {
+    return tool.isSameType(mirror, Boolean.class) || tool.isBooleanPrimitive(mirror);
   }
 
   private static char shortName(List<Param> params, ExecutableElement sourceMethod) {
@@ -382,14 +402,14 @@ final class Param {
   }
 
   boolean isPositional() {
-    return positionalIndex >= 0;
+    return positionalIndex.isPresent();
   }
 
   boolean isOption() {
     return !isPositional();
   }
 
-  int positionalIndex() {
+  OptionalInt positionalIndex() {
     return positionalIndex;
   }
 

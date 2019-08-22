@@ -9,13 +9,13 @@ import java.util.Optional;
 @CommandLineArguments(allowEscapeSequence = true)
 abstract class PositionalArguments {
 
-  @PositionalParameter
+  @PositionalParameter(position = -10)
   abstract String source();
 
   /**
    * Desc of dest.
    */
-  @PositionalParameter(position = 1, descriptionArgumentName = "DESTINATION")
+  @PositionalParameter(position = -1, descriptionArgumentName = "DESTINATION")
   abstract String dest();
 
   @PositionalParameter(position = 2)

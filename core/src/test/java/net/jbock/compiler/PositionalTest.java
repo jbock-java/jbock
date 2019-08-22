@@ -47,7 +47,7 @@ class PositionalTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @PositionalParameter(position = 1) abstract Optional<String> a();",
+        "  @PositionalParameter(position = -1) abstract Optional<String> a();",
         "  @PositionalParameter(position = 10) abstract Optional<Integer> b();",
         "  @PositionalParameter(position = 100) abstract Optional<String> c();",
         "  @PositionalParameter(position = 1000) abstract Optional<Integer> d();",

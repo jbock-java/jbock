@@ -1,31 +1,14 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.*;
 
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
-import static com.squareup.javapoet.TypeName.INT;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
-import static javax.lang.model.element.Modifier.FINAL;
-import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.element.Modifier.*;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.optionalOf;
@@ -90,7 +73,7 @@ final class Option {
 
   static Option create(Context context) {
     FieldSpec longNameField = FieldSpec.builder(STRING, "longName").addModifiers(FINAL).build();
-    FieldSpec positionalIndexField = FieldSpec.builder(INT, "positionalIndex").addModifiers(FINAL).build();
+    FieldSpec positionalIndexField = FieldSpec.builder(OptionalInt.class, "positionalIndex").addModifiers(FINAL).build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
         "shortName").addModifiers(FINAL).build();
     FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").addModifiers(FINAL).build();
@@ -161,7 +144,7 @@ final class Option {
 
   private MethodSpec positionalMethod() {
     return MethodSpec.methodBuilder("positional")
-        .addStatement("return $N >= 0", positionalIndexField)
+        .addStatement("return $N.isPresent()", positionalIndexField)
         .returns(BOOLEAN)
         .build();
   }
@@ -173,7 +156,9 @@ final class Option {
     map.put("longName", param.longName());
     map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
     map.put("bundleKey", param.bundleKey().orElse("null"));
-    map.put("positionalIndex", param.positionalIndex());
+    map.put("positionalIndex", param.positionalIndex().isPresent() ?
+        CodeBlock.of("$T.of($L)", OptionalInt.class, param.positionalIndex().getAsInt()) :
+        CodeBlock.of("$T.empty()", OptionalInt.class));
     map.put("argumentName", argumentName);
     map.put("descExpression", descExpression(desc));
     String format = String.join(", ",
@@ -384,11 +369,15 @@ final class Option {
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("values");
 
-    spec.beginControlFlow("if ($N >= $N.size())", positionalIndexField, positionalParameter)
+    spec.beginControlFlow("if (!$N.isPresent())", positionalIndexField)
         .addStatement("return $T.emptyList()", Collections.class)
         .endControlFlow();
 
-    spec.addStatement("return $N.subList($N, $N.size())", positionalParameter, positionalIndexField, positionalParameter);
+    spec.beginControlFlow("if ($N.getAsInt() >= $N.size())", positionalIndexField, positionalParameter)
+        .addStatement("return $T.emptyList()", Collections.class)
+        .endControlFlow();
+
+    spec.addStatement("return $N.subList($N.getAsInt(), $N.size())", positionalParameter, positionalIndexField, positionalParameter);
     return spec.addParameter(positionalParameter)
         .returns(LIST_OF_STRING).build();
   }
@@ -399,11 +388,15 @@ final class Option {
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("value");
 
-    spec.beginControlFlow("if ($N >= $N.size())", positionalIndexField, positionalParameter)
+    spec.beginControlFlow("if (!$N.isPresent())", positionalIndexField)
         .addStatement("return $T.empty()", Optional.class)
         .endControlFlow();
 
-    spec.addStatement("return $T.of($N.get($N))",
+    spec.beginControlFlow("if ($N.getAsInt() >= $N.size())", positionalIndexField, positionalParameter)
+        .addStatement("return $T.empty()", Optional.class)
+        .endControlFlow();
+
+    spec.addStatement("return $T.of($N.get($N.getAsInt()))",
         Optional.class, positionalParameter, positionalIndexField);
 
     return spec.addParameter(positionalParameter)

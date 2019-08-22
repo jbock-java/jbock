@@ -31,28 +31,8 @@ public class InferredAttributes {
   /**
    * Can infer {@code repeatable = true}?
    */
-  private static boolean isInferredRepeatable(TypeMirror originalType) {
-    return TypeTool.get().isSameErasure(originalType, List.class);
-  }
-
-  /**
-   * Can infer {@code flag = true}?
-   */
-  public static boolean isInferredFlag(
-      Object mapperClass,
-      Object collectorClass,
-      boolean flag,
-      TypeMirror mirror) {
-    if (mapperClass != null || collectorClass != null) {
-      // no inferring
-      return flag;
-    }
-    return flag || isInferredFlag(mirror);
-  }
-
-  private static boolean isInferredFlag(TypeMirror mirror) {
-    TypeTool tool = TypeTool.get();
-    return tool.isSameType(mirror, Boolean.class) || tool.isBooleanPrimitive(mirror);
+  private static boolean isInferredRepeatable(TypeTool tool, TypeMirror originalType) {
+    return tool.isSameErasure(originalType, List.class);
   }
 
   public static InferredAttributes infer(
@@ -61,10 +41,11 @@ public class InferredAttributes {
       boolean repeatable, // user declared
       boolean optional, // user declared
       TypeMirror originalReturnType,
-      ExecutableElement sourceMethod) {
+      ExecutableElement sourceMethod,
+      TypeTool tool) {
 
-    LiftedType liftedType = LiftedType.lift(originalReturnType, TypeTool.get());
-    Optional<TypeMirror> optionalInfo = findOptionalInfoInternal(TypeTool.get(), liftedType, sourceMethod);
+    LiftedType liftedType = LiftedType.lift(originalReturnType, tool);
+    Optional<TypeMirror> optionalInfo = findOptionalInfoInternal(tool, liftedType, sourceMethod);
     if (optional && !optionalInfo.isPresent()) {
       throw ValidationException.create(sourceMethod, "Wrap the parameter type in Optional.");
     }
@@ -76,7 +57,7 @@ public class InferredAttributes {
       return new InferredAttributes(repeatable, optionalInfo, liftedType);
     }
     return new InferredAttributes(
-        repeatable || isInferredRepeatable(originalReturnType),
+        repeatable || isInferredRepeatable(tool, originalReturnType),
         optionalInfo, liftedType);
   }
 
