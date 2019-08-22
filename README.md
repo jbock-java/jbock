@@ -574,37 +574,7 @@ compileOnly 'com.github.h908714124:jbock-annotations:2.2'
 annotationProcessor 'com.github.h908714124:jbock:$jbockVersion'
 ````
 
-Now add your model class and do `gradle build` once.
-If Intellij doesn't "see" the generated classes,
-try setting up a `generated` folder as follows:
-
-````groovy
-compileJava {
-    options.compilerArgs << "-s"
-    options.compilerArgs << "$projectDir/src/main/generated/java"
-
-    doFirst {
-        file(new File(projectDir, "/src/main/generated/java")).mkdirs()
-    }
-}
-
-clean.doLast {
-    file(new File(projectDir, "/src/main/generated")).deleteDir()
-}
-
-sourceSets {
-    generated {
-        java {
-            srcDir "$projectDir/src/main/generated/java"
-        }
-    }
-}
-````
-
-It may also be necessary to uncheck the `Create separate module per source set`
-option (`Settings -> Build, Execution, Deployment -> Gradle`),
-then run `gradle build` once, and mark the `src/main/generated` folder as *generated sources
-root* (right click on folder icon in project view, or via module settings).
+Now add your `@CommandLineArguments` class and do `gradle build` once.
 
 ### Maven config
 
