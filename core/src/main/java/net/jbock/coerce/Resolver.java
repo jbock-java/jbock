@@ -4,6 +4,7 @@ import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -71,10 +72,11 @@ class Resolver {
     TypeMirror extensionClass = extensions.get(0).extensionClass();
     for (int i = 1; i < extensions.size(); i++) {
       Extension extension = extensions.get(i);
-      extensionClass = resolveStep(extensionClass, extension);
+      TypeMirror stepResult = resolveStep(extensionClass, extension);
       if (extensionClass == null) {
         return Optional.empty();
       }
+      extensionClass = stepResult;
     }
     return Optional.of(extensionClass);
   }
@@ -82,11 +84,12 @@ class Resolver {
   private TypeMirror resolveStep(TypeMirror x, Extension extension) {
     List<? extends TypeMirror> typeArguments = asDeclared(x).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = extension.baseClass().getTypeParameters();
-    Map<String, TypeMirror> resolution = new HashMap<>();
+    Map<String, TypeMirror> solution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
-      resolution.put(typeParameters.get(i).toString(), typeArguments.get(i));
+      solution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
-    return tool.substitute(extension.extensionClass(), resolution);
+    DeclaredType input = extension.extensionClass();
+    return tool.substitute(input, solution);
   }
 
   @Override

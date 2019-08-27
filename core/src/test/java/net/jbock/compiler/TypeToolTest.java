@@ -15,7 +15,10 @@ import java.util.Optional;
 
 import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static net.jbock.compiler.TypeTool.asDeclared;
-import static org.junit.jupiter.api.Assertions.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TypeToolTest {
 
@@ -66,8 +69,7 @@ class TypeToolTest {
       TypeElement string = elements.getTypeElement("java.lang.String");
       TypeMirror result = tool.substitute(
           setOfE,
-          Collections.singletonMap("E", string.asType()),
-          Collections.emptyList());
+          Collections.singletonMap("E", string.asType()));
       assertNull(result);
     });
   }
@@ -85,8 +87,7 @@ class TypeToolTest {
       TypeElement boxInt = elements.getTypeElement("java.lang.Integer");
       DeclaredType result = tool.substitute(
           setOfE,
-          Collections.singletonMap("E", boxInt.asType()),
-          Collections.emptyList())
+          Collections.singletonMap("E", boxInt.asType()))
           .accept(new SimpleTypeVisitor8<DeclaredType, Void>() {
             @Override
             public DeclaredType visitDeclared(DeclaredType declaredType, Void _null) {

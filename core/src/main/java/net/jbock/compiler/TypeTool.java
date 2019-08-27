@@ -122,53 +122,76 @@ public class TypeTool {
     return failure ? Optional.empty() : Optional.of(acc);
   }
 
-  public TypeMirror substitute(TypeMirror input, Map<String, TypeMirror> solution) {
-    return substitute(input, solution, Collections.emptyList());
-  }
-
   /**
    * @param input a type
    * @param solution for solving typevars in the input
-   * @param bounds if input is a typevar, then this contains the upper bounds on that typevar
    * @return the input type, with all typevars resolved. Wildcards remain unchanged.
    */
-  TypeMirror substitute(
-      TypeMirror input,
-      Map<String, TypeMirror> solution,
-      List<? extends TypeMirror> bounds) {
-    if (input.getKind() == TypeKind.TYPEVAR) {
-      TypeMirror value = solution.get(input.toString());
-      if (value == null) {
-        return null; // no solution (can't happen if solution is valid)
+  public TypeMirror substitute(TypeMirror input, Map<String, TypeMirror> solution) {
+    TypeMirror result = subst(input, solution);
+    if (result == null) {
+      return null; // invalid
+    }
+    if (!isAssignableToTypeElement(result)) {
+      return null;
+    }
+    return result;
+  }
+
+  private boolean isAssignableToTypeElement(TypeMirror result) {
+    if (result.getKind() == TypeKind.WILDCARD ||
+        result.getKind() == TypeKind.TYPEVAR) {
+      return true;
+    }
+    DeclaredType declaredType = result.accept(AS_DECLARED, null);
+    TypeElement typeElement = declaredType.asElement().accept(AS_TYPE_ELEMENT, null);
+    List<? extends TypeParameterElement> typeParameters = typeElement.getTypeParameters();
+    List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+    if (typeArguments.size() != typeParameters.size()) {
+      return false;
+    }
+    for (int i = 0; i < typeParameters.size(); i++) {
+      TypeMirror argument = typeArguments.get(i);
+      if (argument.getKind() == TypeKind.WILDCARD) {
+        continue;
       }
-      for (TypeMirror bound : bounds) {
-        if (!types.isAssignable(value, bound)) {
-          return null; // invalid
+      for (TypeMirror bound : typeParameters.get(i).getBounds()) {
+        if (!types.isAssignable(argument, bound)) {
+          return false;
         }
       }
-      return value;
+      if (!isAssignableToTypeElement(argument)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  private TypeMirror subst(
+      TypeMirror input,
+      Map<String, TypeMirror> solution) {
+    if (input.getKind() == TypeKind.TYPEVAR) {
+      return solution.get(input.toString());
     }
     if (input.getKind() == TypeKind.WILDCARD) {
-      return input; // allow this
+      return input; // these can stay
     }
     DeclaredType declaredType = input.accept(AS_DECLARED, null);
     if (declaredType == null) {
       return null; // invalid input
     }
     List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
-    TypeElement typeElement = declaredType.asElement().accept(AS_TYPE_ELEMENT, null);
-    List<? extends TypeParameterElement> typeParameters = typeElement.getTypeParameters();
-    TypeMirror[] result = new TypeMirror[typeParameters.size()];
-    for (int i = 0; i < typeParameters.size(); i++) {
-      TypeParameterElement typeParameter = typeParameters.get(i);
+    TypeMirror[] result = new TypeMirror[typeArguments.size()];
+    for (int i = 0; i < typeArguments.size(); i++) {
       TypeMirror typeArgument = typeArguments.get(i);
-      TypeMirror opt = substitute(typeArgument, solution, typeParameter.getBounds());
+      TypeMirror opt = subst(typeArgument, solution);
       if (opt == null) {
-        return null;
+        return null; // error
       }
       result[i] = opt;
     }
-    return types.getDeclaredType(typeElement, result);
+    return types.getDeclaredType(declaredType.asElement()
+        .accept(AS_TYPE_ELEMENT, null), result);
   }
 
   public boolean isSameType(TypeMirror mirror, Class<?> test) {
