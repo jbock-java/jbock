@@ -486,23 +486,23 @@ class CollectorTest {
   @Test
   void invalidFlagCollector() {
     List<String> sourceLines = withImports(
-            "@CommandLineArguments",
-            "abstract class InvalidArguments {",
-            "",
-            "  @Parameter(shortName = 'x',",
-            "             flag = true,",
-            "             collectedBy = MyCollector.class)",
-            "  abstract Boolean myFlag();",
-            "",
-            "  static class MyCollector implements Supplier<Collector<String, ?, Boolean>> {",
-            "    public Collector<String, ?, Boolean> get() {",
-            "      return null;",
-            "    }",
-            "  }",
-            "}");
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             flag = true,",
+        "             collectedBy = MyCollector.class)",
+        "  abstract Boolean myFlag();",
+        "",
+        "  static class MyCollector implements Supplier<Collector<String, ?, Boolean>> {",
+        "    public Collector<String, ?, Boolean> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
-            .processedWith(new Processor())
-            .failsToCompile();
+        .processedWith(new Processor())
+        .failsToCompile();
   }
 }

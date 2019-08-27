@@ -12,10 +12,11 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import javax.tools.Diagnostic;
+import javax.tools.JavaFileObject;
 import java.util.Collections;
 import java.util.Set;
 
-import static com.google.common.base.Preconditions.checkState;
 import static com.google.testing.compile.Compilation.Status.SUCCESS;
 import static com.google.testing.compile.Compiler.javac;
 
@@ -57,7 +58,12 @@ public final class EvaluatingProcessor extends AbstractProcessor {
       EvaluatingProcessor evaluatingProcessor = new EvaluatingProcessor(base);
       Compilation compilation = javac().withProcessors(evaluatingProcessor).compile(
           JavaFileObjects.forSourceLines(className, source));
-      checkState(compilation.status().equals(SUCCESS), compilation);
+      if (!compilation.status().equals(SUCCESS)) {
+        for (Diagnostic<? extends JavaFileObject> error : compilation.errors()) {
+          System.out.println(error);
+        }
+        Assertions.fail(compilation.status().name());
+      }
       evaluatingProcessor.throwIfStatementThrew();
     }
   }

@@ -1,7 +1,5 @@
 package net.jbock.compiler;
 
-import org.junit.Ignore;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.ExecutableElement;
@@ -9,6 +7,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -16,8 +15,7 @@ import java.util.Optional;
 
 import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static net.jbock.compiler.TypeTool.asDeclared;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 class TypeToolTest {
 
@@ -50,20 +48,55 @@ class TypeToolTest {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement string = elements.getTypeElement("java.lang.String");
-      Optional<TypeMirror> substitute = tool.substitute(string.asType(), Collections.emptyMap());
-      assertTrue(substitute.isPresent());
+      TypeMirror substitute = tool.substitute(string.asType(), Collections.emptyMap());
+      assertNotNull(substitute);
     });
   }
 
-  @Disabled("how to create type with typevar, like Set<E>?")
   @Test
-  void substituteTestWithBounds() {
+  void substituteTestWithInvalidBounds() {
 
-    EvaluatingProcessor.source().run((elements, types) -> {
+    EvaluatingProcessor.source(
+        "package a;",
+        "",
+        "interface Set<E extends Number> {}"
+    ).run((elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
-      TypeElement string = elements.getTypeElement("java.util.Set<E>");
-      Optional<TypeMirror> substitute = tool.substitute(string.asType(), Collections.emptyMap());
-      assertTrue(substitute.isPresent());
+      TypeMirror setOfE = elements.getTypeElement("a.Set").asType();
+      TypeElement string = elements.getTypeElement("java.lang.String");
+      TypeMirror result = tool.substitute(
+          setOfE,
+          Collections.singletonMap("E", string.asType()),
+          Collections.emptyList());
+      assertNull(result);
+    });
+  }
+
+  @Test
+  void substituteTestWithValidBounds() {
+
+    EvaluatingProcessor.source(
+        "package a;",
+        "",
+        "interface Set<E extends Number> {}"
+    ).run((elements, types) -> {
+      TypeTool tool = new TypeTool(elements, types);
+      TypeMirror setOfE = elements.getTypeElement("a.Set").asType();
+      TypeElement boxInt = elements.getTypeElement("java.lang.Integer");
+      DeclaredType result = tool.substitute(
+          setOfE,
+          Collections.singletonMap("E", boxInt.asType()),
+          Collections.emptyList())
+          .accept(new SimpleTypeVisitor8<DeclaredType, Void>() {
+            @Override
+            public DeclaredType visitDeclared(DeclaredType declaredType, Void _null) {
+              return declaredType;
+            }
+          }, null);
+      assertNotNull(result);
+      assertTrue(types.isSameType(types.erasure(result), types.erasure(elements.getTypeElement("a.Set").asType())));
+      assertEquals(1, result.getTypeArguments().size());
+      assertTrue(types.isSameType(boxInt.asType(), result.getTypeArguments().get(0)));
     });
   }
 

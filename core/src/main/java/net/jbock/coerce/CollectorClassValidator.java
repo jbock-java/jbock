@@ -5,7 +5,6 @@ import net.jbock.compiler.ValidationException;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
@@ -22,16 +21,17 @@ class CollectorClassValidator {
     TypeMirror collectorType = getCollectorType(collectorClass, basicInfo);
     TypeMirror t = asDeclared(collectorType).getTypeArguments().get(0);
     TypeMirror r = asDeclared(collectorType).getTypeArguments().get(2);
-    Optional<Map<String, TypeMirror>> maybeSolution = basicInfo.tool().unify(basicInfo.returnType(), r);
-    if (!maybeSolution.isPresent()) {
-      throw boom(basicInfo, String.format("The collector should return %s but returns %s", basicInfo.returnType(), r));
-    }
-    Map<String, TypeMirror> solution = maybeSolution.get();
-    Optional<TypeMirror> collectorClassSolved = basicInfo.tool().substitute(collectorClass.asType(), solution);
-    if (!collectorClassSolved.isPresent()) {
+    Map<String, TypeMirror> solution = basicInfo.tool().unify(basicInfo.returnType(), r)
+        .orElseThrow(() -> boom(basicInfo, String.format("The collector should return %s but returns %s", basicInfo.returnType(), r)));
+    TypeMirror collectorClassSolved = basicInfo.tool().substitute(collectorClass.asType(), solution);
+    if (collectorClassSolved == null) {
       throw boom(basicInfo, "Invalid bounds");
     }
-    return CollectorInfo.create(basicInfo.tool().substitute(t, solution).orElse(t), collectorClassSolved.get());
+    TypeMirror substitute = basicInfo.tool().substitute(t, solution);
+    if (substitute == null) {
+      throw boom(basicInfo, "Unexpected: can solve R but not Collector<T, ?, R>");
+    }
+    return CollectorInfo.create(substitute, collectorClassSolved);
   }
 
   private static TypeMirror getCollectorType(TypeElement collectorClass, BasicInfo basicInfo) {

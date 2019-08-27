@@ -72,6 +72,9 @@ class Resolver {
     for (int i = 1; i < extensions.size(); i++) {
       Extension extension = extensions.get(i);
       extensionClass = resolveStep(extensionClass, extension);
+      if (extensionClass == null) {
+        return Optional.empty();
+      }
     }
     return Optional.of(extensionClass);
   }
@@ -83,8 +86,7 @@ class Resolver {
     for (int i = 0; i < typeParameters.size(); i++) {
       resolution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
-    return tool.substitute(extension.extensionClass(), resolution)
-        .orElse(extension.extensionClass());
+    return tool.substitute(extension.extensionClass(), resolution);
   }
 
   @Override

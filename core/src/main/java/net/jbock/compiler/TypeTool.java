@@ -122,10 +122,16 @@ public class TypeTool {
     return failure ? Optional.empty() : Optional.of(acc);
   }
 
-  public Optional<TypeMirror> substitute(TypeMirror input, Map<String, TypeMirror> solution) {
-    return Optional.ofNullable(substitute(input, solution, Collections.emptyList()));
+  public TypeMirror substitute(TypeMirror input, Map<String, TypeMirror> solution) {
+    return substitute(input, solution, Collections.emptyList());
   }
 
+  /**
+   * @param input a type
+   * @param solution for solving typevars in the input
+   * @param bounds if input is a typevar, then this contains the upper bounds on that typevar
+   * @return the input type, with all typevars resolved. Wildcards remain unchanged.
+   */
   TypeMirror substitute(
       TypeMirror input,
       Map<String, TypeMirror> solution,
@@ -133,18 +139,21 @@ public class TypeTool {
     if (input.getKind() == TypeKind.TYPEVAR) {
       TypeMirror value = solution.get(input.toString());
       if (value == null) {
-        return null; // invalid solution
+        return null; // no solution (can't happen if solution is valid)
       }
       for (TypeMirror bound : bounds) {
         if (!types.isAssignable(value, bound)) {
-          return null;
+          return null; // invalid
         }
       }
       return value;
     }
+    if (input.getKind() == TypeKind.WILDCARD) {
+      return input; // allow this
+    }
     DeclaredType declaredType = input.accept(AS_DECLARED, null);
     if (declaredType == null) {
-      return input;
+      return null; // invalid input
     }
     List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
     TypeElement typeElement = declaredType.asElement().accept(AS_TYPE_ELEMENT, null);

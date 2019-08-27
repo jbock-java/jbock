@@ -1,6 +1,10 @@
 package net.jbock.coerce.mappers;
 
-import com.squareup.javapoet.*;
+import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 
