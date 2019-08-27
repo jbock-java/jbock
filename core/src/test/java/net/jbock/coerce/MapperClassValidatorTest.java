@@ -1,7 +1,7 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.EvaluatingProcessor;
-import net.jbock.compiler.TestExpr;
+import net.jbock.compiler.TypeExpr;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 import org.junit.jupiter.api.Test;
@@ -40,11 +40,11 @@ class MapperClassValidatorTest {
 
       // no exception: mapper returns Integer indeed
       MapperClassValidator.checkReturnType(mapperClass,
-          TestExpr.parse("java.lang.Integer", elements, types), basicInfo);
+          TypeExpr.prepare(elements, types).parse("java.lang.Integer"), basicInfo);
 
       // exception: mapper doesn't return String
       assertThrows(ValidationException.class, () -> MapperClassValidator.checkReturnType(mapperClass,
-          TestExpr.parse("java.lang.String", elements, types), basicInfo)).getMessage();
+          TypeExpr.prepare(elements, types).parse("java.lang.String"), basicInfo)).getMessage();
     });
   }
 }

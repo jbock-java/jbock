@@ -126,7 +126,10 @@ public class TypeTool {
     return Optional.ofNullable(substitute(input, solution, Collections.emptyList()));
   }
 
-  private TypeMirror substitute(TypeMirror input, Map<String, TypeMirror> solution, List<? extends TypeMirror> bounds) {
+  TypeMirror substitute(
+      TypeMirror input,
+      Map<String, TypeMirror> solution,
+      List<? extends TypeMirror> bounds) {
     if (input.getKind() == TypeKind.TYPEVAR) {
       TypeMirror value = solution.get(input.toString());
       if (value == null) {
@@ -167,7 +170,7 @@ public class TypeTool {
     return types.isSameType(mirror, test);
   }
 
-  public boolean isBooleanPrimitive(TypeMirror mirror) {
+  boolean isBooleanPrimitive(TypeMirror mirror) {
     return isSameType(mirror, getPrimitiveType(TypeKind.BOOLEAN));
   }
 

@@ -1,5 +1,7 @@
 package net.jbock.compiler;
 
+import org.junit.Ignore;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.ExecutableElement;
@@ -53,10 +55,23 @@ class TypeToolTest {
     });
   }
 
+  @Disabled("how to create type with typevar, like Set<E>?")
+  @Test
+  void substituteTestWithBounds() {
+
+    EvaluatingProcessor.source().run((elements, types) -> {
+      TypeTool tool = new TypeTool(elements, types);
+      TypeElement string = elements.getTypeElement("java.util.Set<E>");
+      Optional<TypeMirror> substitute = tool.substitute(string.asType(), Collections.emptyMap());
+      assertTrue(substitute.isPresent());
+    });
+  }
+
   @Test
   void testToType() {
     EvaluatingProcessor.source().run((elements, types) -> {
-      DeclaredType map = TestExpr.parse("java.util.Map<java.util.List<java.lang.String>, java.lang.String>", elements, types);
+      DeclaredType map = TypeExpr.prepare(elements, types).parse(
+          "java.util.Map<java.util.List<java.lang.String>, java.lang.String>");
       assertEquals(types.erasure(elements.getTypeElement("java.util.Map").asType()), types.erasure(map));
       assertEquals(2, map.getTypeArguments().size());
       TypeMirror key = map.getTypeArguments().get(0);

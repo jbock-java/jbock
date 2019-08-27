@@ -33,7 +33,7 @@ public final class EvaluatingProcessor extends AbstractProcessor {
   }
 
   public static void assertSameType(String expr, TypeMirror t2, Elements elements, Types types) {
-    TypeMirror t1 = TestExpr.parse(expr, elements, types);
+    TypeMirror t1 = TypeExpr.prepare(elements, types).parse(expr);
     assertSameType(t1, t2, types);
   }
 

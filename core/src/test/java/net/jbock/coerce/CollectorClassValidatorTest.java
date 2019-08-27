@@ -1,7 +1,7 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.EvaluatingProcessor;
-import net.jbock.compiler.TestExpr;
+import net.jbock.compiler.TypeExpr;
 import net.jbock.compiler.TypeTool;
 import org.junit.jupiter.api.Test;
 
@@ -32,7 +32,8 @@ class CollectorClassValidatorTest {
 
       BasicInfo basicInfo = mock(BasicInfo.class);
       when(basicInfo.tool()).thenReturn(new TypeTool(elements, types));
-      when(basicInfo.returnType()).thenReturn(TestExpr.parse("java.util.Set<java.lang.String>", elements, types));
+      when(basicInfo.returnType()).thenReturn(TypeExpr.prepare(elements, types).parse(
+          "java.util.Set<java.lang.String>"));
 
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
       CollectorInfo collectorInfo = CollectorClassValidator.getCollectorInfo(
