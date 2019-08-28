@@ -4,7 +4,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.function.Supplier;
 
 /**
  * <h3>Marker for parameter methods</h3>
@@ -56,8 +55,8 @@ public @interface Parameter {
    * <h3>Optional custom mapper</h3>
    *
    * <p>
-   * The mapper is a {@link java.util.function.Supplier Supplier} that returns a
-   * {@link java.util.function.Function Function&lt;String, X&gt;}.
+   * The mapper is a either a {@link java.util.function.Function Function&lt;String, X&gt;}
+   * or a {@link java.util.function.Supplier Supplier} that returns such a function.
    * The return value {@code X} is called the <em>mapper type</em>.
    * The parameter method must return {@code X}, or {@code Optional<X>} if the
    * parameter is {@link #optional()}, or {@code List<X>} if the parameter is
@@ -69,30 +68,29 @@ public @interface Parameter {
    * </p>
    *
    * <pre>{@code
-   * class PositiveNumberMapper implements Supplier&lt;Function&lt;String, Integer&gt;&gt; {
+   * class PositiveNumberMapper implements Function<String, Integer> {
    *
-   *   public Function&lt;String, Integer&gt; get() {
-   *     return s -> {
-   *       Integer r = Integer.valueOf(s);
-   *       if (r <= 0) {
-   *         throw new IllegalArgumentException("Positive number expected");
-   *       }
-   *       return r;
+   *   public Integer apply(String s) {
+   *     Integer r = Integer.valueOf(s);
+   *     if (r <= 0) {
+   *       throw new IllegalArgumentException("Positive number expected");
    *     }
+   *     return r;
    *   }
    * }
    * }</pre>
    *
-   * @return an optional mapper class
+   * @return a mapper class
    */
-  Class<? extends Supplier> mappedBy() default Supplier.class;
+  Class<?> mappedBy() default Object.class;
 
   /**
    * <h3>Optional custom collector</h3>
    *
    * <p>
-   * The supplier must return a {@link java.util.stream.Collector Collector&lt;M, ?, X&gt;}
-   * where {@code X} is the parameter type, and {@code M} is the <em>mapper type</em>.
+   * This is either a {@link java.util.stream.Collector Collector&lt;M, ?, X&gt;}
+   * where {@code X} is the parameter type and {@code M} is the <em>mapper type</em>,
+   * or a {@link java.util.function.Supplier Supplier} that returns such a collector.
    * </p>
    *
    * <p>
@@ -100,27 +98,27 @@ public @interface Parameter {
    * </p>
    *
    * <pre>{@code
-   * class ToSetCollector&lt;E&gt; implements Supplier&lt;Collector&lt;E, ?, Set&lt;E&gt;&gt;&gt; {
+   * class ToSetCollector<E>; implements Supplier<Collector<E, ?, Set<E>>> {
    *
-   *   public Collector&lt;E, ?, Set&lt;E&gt;&gt; get() {
+   *   public Collector<E, ?, Set<E>> get() {
    *     return Collectors.toSet();
    *   }
    * }
    * }</pre>
    *
-   * @return an optional collector class
+   * @return an collector class
    */
-  Class<? extends Supplier> collectedBy() default Supplier.class;
+  Class<?> collectedBy() default Object.class;
 
   /**
-   * <p>Declares this parameter repeatable.</p>
+   * <p>Declares this parameter as repeatable.</p>
    *
    * @return true if this parameter is repeatable
    */
   boolean repeatable() default false;
 
   /**
-   * <p>Declares this parameter optional.</p>
+   * <p>Declares this parameter as optional.</p>
    *
    * <p>
    * <em>Note:</em>
@@ -135,7 +133,7 @@ public @interface Parameter {
 
   /**
    * <p>Declares a parameter that doesn't take an argument.
-   * For example, the following shell command contains a flag:</p>
+   * For example, the following shell command contains the flag {@code -l}:</p>
    *
    * <pre>{@code
    * ls -l
@@ -159,3 +157,4 @@ public @interface Parameter {
    */
   String bundleKey() default "";
 }
+

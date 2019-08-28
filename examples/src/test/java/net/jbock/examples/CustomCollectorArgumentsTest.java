@@ -45,6 +45,17 @@ class CustomCollectorArgumentsTest {
   }
 
   @Test
+  void testCustomEnum() {
+    CustomCollectorArguments parsed = f.parse(
+        "-K", "PEANUTS",
+        "-K", "BIG_TIME");
+    assertEquals(Stream.of(
+        CustomCollectorArguments.Money.PEANUTS,
+        CustomCollectorArguments.Money.BIG_TIME).collect(toSet()),
+        parsed.moneySet());
+  }
+
+  @Test
   void testMap() {
     CustomCollectorArguments parsed = f.parse(
         "-T", "A:2004-11-11",

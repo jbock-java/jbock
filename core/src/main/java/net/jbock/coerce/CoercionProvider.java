@@ -1,6 +1,8 @@
 package net.jbock.coerce;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.hint.HintProvider;
 import net.jbock.coerce.mappers.CoercionFactory;
@@ -14,7 +16,9 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
+import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.snakeToCamel;
 
 public class CoercionProvider {
@@ -44,7 +48,7 @@ public class CoercionProvider {
       if (basicInfo.isRepeatable()) {
         return handleRepeatable();
       } else {
-        return handle();
+        return handleNotRepeatable();
       }
     } catch (UnknownTypeException e) {
       Optional<String> hint = HintProvider.instance().findHint(basicInfo);
@@ -53,11 +57,11 @@ public class CoercionProvider {
     }
   }
 
-  private Coercion handle() throws UnknownTypeException {
+  private Coercion handleNotRepeatable() throws UnknownTypeException {
     if (basicInfo.mapperClass().isPresent()) {
-      return handleExplicitMapper(basicInfo.mapperClass().get());
+      return handleExplicitMapperNotRepeatable(basicInfo.mapperClass().get());
     } else {
-      return handleAutoMapper();
+      return handleAutoMapperNotRepeatable();
     }
   }
 
@@ -69,17 +73,24 @@ public class CoercionProvider {
     }
   }
 
-  private Coercion handleAutoMapper() throws UnknownTypeException {
+  private Coercion handleAutoMapperNotRepeatable() throws UnknownTypeException {
     CoercionFactory factory = findCoercion(basicInfo.optionalInfo().orElse(basicInfo.returnType()));
     return factory.getCoercion(basicInfo, Optional.empty());
   }
 
-  private Coercion handleExplicitMapper(TypeElement mapperClass) {
+  private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {
     TypeMirror returnType = basicInfo.returnType();
-    ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(basicInfo.paramName()) + "Mapper").build();
     TypeMirror mapperReturnType = basicInfo.optionalInfo().orElse(returnType);
-    MapperClassValidator.checkReturnType(mapperClass, mapperReturnType, basicInfo);
-    return MapperCoercion.create(mapperReturnType, Optional.empty(), mapperParam, mapperClass.asType(), basicInfo);
+    ParameterSpec mapperParam = mapperParam(mapperReturnType);
+    MapperType mapperType = new MapperClassValidator(basicInfo, mapperReturnType).checkReturnType(mapperClass);
+    return MapperCoercion.create(mapperReturnType, Optional.empty(), mapperParam, mapperType, basicInfo);
+  }
+
+  private ParameterSpec mapperParam(TypeMirror mapperOutputType) {
+    ParameterizedTypeName mapperParamType = ParameterizedTypeName.get(
+        ClassName.get(Function.class), STRING,
+        TypeName.get(mapperOutputType));
+    return ParameterSpec.builder(mapperParamType, snakeToCamel(basicInfo.paramName()) + "Mapper").build();
   }
 
   private Coercion handleRepeatableAutoMapper() throws UnknownTypeException {
@@ -91,9 +102,9 @@ public class CoercionProvider {
   private Coercion handleRepeatableExplicitMapper(
       TypeElement mapperClass) {
     CollectorInfo collectorInfo = collectorInfo();
-    MapperClassValidator.checkReturnType(mapperClass, collectorInfo.inputType, basicInfo);
-    ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(basicInfo.paramName()) + "Mapper").build();
-    return MapperCoercion.create(collectorInfo.inputType, collectorInfo.collectorType(), mapperParam, mapperClass.asType(), basicInfo);
+    MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType).checkReturnType(mapperClass);
+    ParameterSpec mapperParam = mapperParam(collectorInfo.inputType);
+    return MapperCoercion.create(collectorInfo.inputType, collectorInfo.collectorType(), mapperParam, mapperType, basicInfo);
   }
 
   private CoercionFactory findCoercion(TypeMirror mirror) throws UnknownTypeException {
@@ -127,7 +138,7 @@ public class CoercionProvider {
 
   private CollectorInfo collectorInfo() {
     if (basicInfo.collectorClass().isPresent()) {
-      return CollectorClassValidator.getCollectorInfo(basicInfo.collectorClass().get(), basicInfo);
+      return new CollectorClassValidator(basicInfo).getCollectorInfo(basicInfo.collectorClass().get());
     }
     if (!tool().isSameErasure(basicInfo.returnType(), List.class)) {
       throw basicInfo.asValidationException("Either define a custom collector, or return List.");

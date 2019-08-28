@@ -54,7 +54,7 @@ class CollectorTest {
   }
 
   @Test
-  void validCollector() {
+  void validCollectorSupplier() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
@@ -68,6 +68,31 @@ class CollectorTest {
         "    public Collector<String, ?, Set<String>> get() {",
         "      return Collectors.toSet();",
         "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void validCollector() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             collectedBy = MyCollector.class)",
+        "  abstract Set<String> strings();",
+        "",
+        "  static class MyCollector implements Collector<String, Set<String>, Set<String>> {",
+        "    public Supplier<Set<String>> supplier() { return null; }",
+        "    public BiConsumer<Set<String>, String> accumulator() { return null; }",
+        "    public BinaryOperator<Set<String>> combiner() { return null; }",
+        "    public Function<Set<String>, Set<String>> finisher() { return null; }",
+        "    public Set<Characteristics> characteristics() { return null; }",
         "  }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
@@ -357,7 +382,7 @@ class CollectorTest {
   }
 
   @Test
-  void invalidBound() {
+  void invalidBoundSupplier() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -383,10 +408,38 @@ class CollectorTest {
   }
 
   @Test
-  void invalidBothMapperAndCollectorHaveTypeargs() {
+  void invalidBound() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             collectedBy = A.class)",
+        "  abstract Set<String> strings();",
+        "",
+        "  static class A implements ToSetCollector<Long> {",
+        "    public Supplier<Set<Long>> supplier() { return null; }",
+        "    public BiConsumer<Set<Long>, Long> accumulator() { return null; }",
+        "    public BinaryOperator<Set<Long>> combiner() { return null; }",
+        "    public Function<Set<Long>, Set<Long>> finisher() { return null; }",
+        "    public Set<Characteristics> characteristics() { return null; }",
+        "  }",
+        "",
+        "  interface ToSetCollector<E> extends Collector<E, Set<E>, Set<E>> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor(true))
+        .failsToCompile()
+        .withErrorContaining("The collector should return Set<String> but returns Set<Long>");
+  }
+
+  @Test
+  void validBothMapperAndCollectorHaveTypeargsHard() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             repeatable = true,",
@@ -394,7 +447,7 @@ class CollectorTest {
         "             collectedBy = YCol.class)",
         "  abstract List<String> map();",
         "",
-        "  static class XMap<E extends Integer> implements Supplier<Function<E, E>> {",
+        "  static class XMap<E> implements Supplier<Function<E, E>> {",
         "    public Function<E, E> get() {",
         "      return Function.identity();",
         "    }",
@@ -406,11 +459,10 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("mapper");
+        .compilesWithoutError();
   }
 
   @Test
@@ -479,7 +531,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: the supplier must supply a Collector.");
+        .withErrorContaining("There is a problem with the collector class: must either implement Collector or Supplier<Collector>");
   }
 
 

@@ -4,7 +4,13 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVisitor;
+import javax.lang.model.util.SimpleTypeVisitor8;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -13,49 +19,79 @@ import static net.jbock.compiler.TypeTool.asDeclared;
 
 final class MapperClassValidator {
 
-  static void checkReturnType(
-      TypeElement mapperClass,
-      TypeMirror expectedReturnType,
-      BasicInfo basicInfo) {
+  private final BasicInfo basicInfo;
+  private final TypeMirror expectedReturnType;
+
+  private final TypeVisitor<Boolean, Void> isInvalidBound =
+      new SimpleTypeVisitor8<Boolean, Void>() {
+        @Override
+        protected Boolean defaultAction(TypeMirror e, Void _void) {
+          return false;
+        }
+
+        @Override
+        public Boolean visitDeclared(DeclaredType bound, Void _void) {
+          return !tool().isAssignable(expectedReturnType, bound);
+        }
+      };
+
+  MapperClassValidator(BasicInfo basicInfo, TypeMirror expectedReturnType) {
+    this.basicInfo = basicInfo;
+    this.expectedReturnType = expectedReturnType;
+  }
+
+  MapperType checkReturnType(
+      TypeElement mapperClass) {
     commonChecks(basicInfo, mapperClass, "mapper");
-    if (!mapperClass.getTypeParameters().isEmpty()) {
-      throw boom(basicInfo, "The mapper class may not have type parameters");
+    checkBound(mapperClass);
+    MapperType mapperType = getMapperType(mapperClass);
+    TypeMirror string = tool().asType(String.class);
+    TypeMirror t = asDeclared(mapperType.type()).getTypeArguments().get(0);
+    TypeMirror r = asDeclared(mapperType.type()).getTypeArguments().get(1);
+    if (!tool().unify(string, t).isPresent()) {
+      throw boom(String.format("The supplied function must take a String argument, but takes %s", t));
     }
-    TypeMirror functionType = getFunctionType(mapperClass, basicInfo);
-    TypeMirror string = basicInfo.tool().asType(String.class);
-    TypeMirror t = asDeclared(functionType).getTypeArguments().get(0);
-    TypeMirror r = asDeclared(functionType).getTypeArguments().get(1);
-    if (!basicInfo.tool().unify(string, t).isPresent()) {
-      throw boom(basicInfo, String.format("The supplied function must take a String argument, but takes %s", t));
+    if (!tool().unify(expectedReturnType, r).isPresent()) {
+      throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    if (!basicInfo.tool().unify(expectedReturnType, r).isPresent()) {
-      throw boom(basicInfo, String.format("The mapper should return %s but returns %s", expectedReturnType, r));
+    return mapperType;
+  }
+
+  private void checkBound(TypeElement mapperClass) {
+    for (TypeParameterElement typeParameter : mapperClass.getTypeParameters()) {
+      for (TypeMirror bound : typeParameter.getBounds()) {
+        if (bound.accept(isInvalidBound, null)) {
+          throw boom("Invalid bounds on the type parameters of the mapper class");
+        }
+      }
     }
   }
 
-  private static TypeMirror getFunctionType(TypeElement mapperClass, BasicInfo basicInfo) {
-    Resolver resolver = Resolver.resolve(basicInfo.tool().asType(Supplier.class), mapperClass.asType(), basicInfo.tool());
-    TypeMirror typeMirror = resolver.resolveTypevars().orElseThrow(() -> boom(basicInfo, "not a Supplier"));
-    if (basicInfo.tool().isRawType(typeMirror)) {
-      throw boom(basicInfo, "the supplier must be parameterized");
+  private MapperType getMapperType(TypeElement mapperClass) {
+    Optional<TypeMirror> supplier = Resolver.typecheck(
+        Supplier.class,
+        mapperClass.asType(),
+        basicInfo.tool());
+    if (supplier.isPresent()) {
+      List<? extends TypeMirror> typeArgs = asDeclared(supplier.get()).getTypeArguments();
+      if (typeArgs.isEmpty()) {
+        throw boom("raw Supplier type");
+      }
+      return MapperType.create(basicInfo, typeArgs.get(0), true, mapperClass);
     }
-    TypeMirror functionType = asDeclared(typeMirror).getTypeArguments().get(0);
-    if (!basicInfo.tool().isSameErasure(functionType, Function.class)) {
-      functionType = resolveFunctionType(basicInfo, functionType);
-    }
-    if (basicInfo.tool().isRawType(functionType)) {
-      throw boom(basicInfo, "the function type must be parameterized");
-    }
-    return functionType;
+    TypeMirror mapper = Resolver.typecheck(
+        Function.class,
+        mapperClass.asType(),
+        basicInfo.tool()).orElseThrow(() ->
+        boom("not a Function or Supplier<Function>"));
+    return MapperType.create(basicInfo, mapper, false, mapperClass);
   }
 
-  private static TypeMirror resolveFunctionType(BasicInfo basicInfo, TypeMirror functionType) {
-    TypeTool tool = TypeTool.get();
-    Resolver resolver = Resolver.resolve(tool.asType(Function.class), functionType, tool);
-    return resolver.resolveTypevars().orElseThrow(() -> boom(basicInfo, "The supplier must supply a Function"));
+  private TypeTool tool() {
+    return basicInfo.tool();
   }
 
-  private static ValidationException boom(BasicInfo basicInfo, String message) {
+  private ValidationException boom(String message) {
     return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
   }
 }

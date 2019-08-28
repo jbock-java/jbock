@@ -39,12 +39,14 @@ class MapperClassValidatorTest {
       when(basicInfo.asValidationException(anyString())).thenReturn(ValidationException.create(null, ""));
 
       // no exception: mapper returns Integer indeed
-      MapperClassValidator.checkReturnType(mapperClass,
-          TypeExpr.prepare(elements, types).parse("java.lang.Integer"), basicInfo);
+      new MapperClassValidator(basicInfo, TypeExpr.prepare(elements, types)
+          .parse("java.lang.Integer"))
+          .checkReturnType(mapperClass);
 
       // exception: mapper doesn't return String
-      assertThrows(ValidationException.class, () -> MapperClassValidator.checkReturnType(mapperClass,
-          TypeExpr.prepare(elements, types).parse("java.lang.String"), basicInfo)).getMessage();
+      assertThrows(ValidationException.class, () -> new MapperClassValidator(basicInfo, TypeExpr.prepare(elements, types)
+          .parse("java.lang.String"))
+          .checkReturnType(mapperClass)).getMessage();
     });
   }
 }

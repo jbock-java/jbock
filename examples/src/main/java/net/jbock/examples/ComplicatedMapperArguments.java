@@ -32,14 +32,11 @@ abstract class ComplicatedMapperArguments {
   }
 
   // parser must understand that this implements Function<String, Integer>
-  static class Mapper implements ZapperSupplier {
+  static class Mapper implements Supplier<Function<String, Integer>> {
     @Override
-    public Zapper get() {
+    public Function<String, Integer> get() {
       return new Zapper();
     }
-  }
-
-  interface ZapperSupplier extends Supplier<Zapper> {
   }
 
   static class Zapper implements Foo<String> {

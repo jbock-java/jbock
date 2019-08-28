@@ -167,6 +167,10 @@ public class TypeTool {
     return true;
   }
 
+  public boolean isAssignable(TypeMirror mirror, TypeMirror bound) {
+    return types.isAssignable(mirror, bound);
+  }
+
   private TypeMirror subst(
       TypeMirror input,
       Map<String, TypeMirror> solution) {
@@ -268,11 +272,15 @@ public class TypeTool {
     return elements.getTypeElement(clazz.getCanonicalName());
   }
 
-  TypeElement asTypeElement(TypeMirror mirror) {
+  public TypeElement asTypeElement(TypeMirror mirror) {
     Element element = types.asElement(mirror);
     if (element == null) {
       throw new IllegalArgumentException("no element: " + mirror);
     }
+    return asTypeElement(element);
+  }
+
+  public TypeElement asTypeElement(Element element) {
     TypeElement result = element.accept(AS_TYPE_ELEMENT, null);
     if (result == null) {
       throw new IllegalArgumentException("no type element: " + element);
