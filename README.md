@@ -336,7 +336,7 @@ class PositiveNumberMapper implements Function<String, Integer> {
     // try-catch is not needed here: NumberFormatException is a RuntimeException 
     Integer i = Integer.valueOf(s);
     if (i < 0) {
-    // Perform additional validation by throwing IllegalArgumentException, which is a RuntimeException
+      // Perform additional validation by throwing any RuntimeException
       throw new IllegalArgumentException("The value cannot be negative.");
     }
     return i;
