@@ -55,9 +55,10 @@ public abstract class CoercionFactory {
         mapExpr,
         initMapper,
         mapperReturnType,
-        collectorType.map(type -> CodeBlock.of(type.supplier() ?
-            "new $T().get()" :
-            "new $T()",
+        collectorType.map(type -> CodeBlock.of(
+            String.format("new $T%s()%s",
+                type.hasTypeParams() ? "" : "", // TODO "<>"
+                type.supplier() ? ".get()" : ""),
             type.collectorType())),
         constructorParamType,
         basicInfo);
@@ -78,7 +79,8 @@ public abstract class CoercionFactory {
     TypeName a = WildcardTypeName.subtypeOf(Object.class);
     TypeName r = TypeName.get(basicInfo.returnType());
     return Optional.of(ParameterSpec.builder(ParameterizedTypeName.get(
-        ClassName.get(Collector.class), t, a, r), basicInfo.paramName() + "Collector")
+        ClassName.get(Collector.class), t, a, r),
+        basicInfo.paramName() + "Collector")
         .build());
   }
 }

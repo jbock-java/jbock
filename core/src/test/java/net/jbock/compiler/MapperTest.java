@@ -60,10 +60,10 @@ class MapperTest {
   }
 
   @Test
-  void invalidMapperWithTypeParameters() {
+  void validMapperWithTypeParameters() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = IdentityMapper.class)",
@@ -75,11 +75,55 @@ class MapperTest {
         "    }",
         "  }",
         "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void invalidMapperTypeParameterWithBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             mappedBy = IdentityMapper.class)",
+        "  abstract String string();",
+        "",
+        "  static class IdentityMapper<E extends Integer> implements Function<E, E> {",
+        "    public E apply(E e) {",
+        "      return e;",
+        "    }",
+        "  }",
+        "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper class may not have type parameters.");
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds on the type parameters of the mapper class.");
+  }
+
+  @Test
+  void validMapperTypeParameterWithBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             mappedBy = IdentityMapper.class)",
+        "  abstract String string();",
+        "",
+        "  static class IdentityMapper<E extends java.lang.CharSequence> implements Function<E, E> {",
+        "    public E apply(E e) {",
+        "      return e;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
   }
 
   @Test

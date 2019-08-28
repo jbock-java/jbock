@@ -15,6 +15,7 @@ public class InferredAttributes {
 
   private final boolean repeatable;
 
+  // the X inside Optional<X>
   private final Optional<TypeMirror> optionalInfo;
 
   private final LiftedType liftedType;

@@ -436,10 +436,10 @@ class CollectorTest {
   }
 
   @Test
-  void invalidBothMapperAndCollectorHaveTypeargs() {
+  void validBothMapperAndCollectorHaveTypeargsHard() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             repeatable = true,",
@@ -447,7 +447,7 @@ class CollectorTest {
         "             collectedBy = YCol.class)",
         "  abstract List<String> map();",
         "",
-        "  static class XMap<E extends Integer> implements Supplier<Function<E, E>> {",
+        "  static class XMap<E> implements Supplier<Function<E, E>> {",
         "    public Function<E, E> get() {",
         "      return Function.identity();",
         "    }",
@@ -459,11 +459,10 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("mapper");
+        .compilesWithoutError();
   }
 
   @Test

@@ -48,6 +48,10 @@ public final class MapperType {
     return type;
   }
 
+  public boolean hasTypeParams() {
+    return !mapperClass.getTypeParameters().isEmpty();
+  }
+
   public boolean supplier() {
     return supplier;
   }

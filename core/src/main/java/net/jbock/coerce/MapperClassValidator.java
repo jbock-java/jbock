@@ -4,7 +4,11 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVisitor;
+import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -16,18 +20,30 @@ import static net.jbock.compiler.TypeTool.asDeclared;
 final class MapperClassValidator {
 
   private final BasicInfo basicInfo;
+  private final TypeMirror expectedReturnType;
 
-  MapperClassValidator(BasicInfo basicInfo) {
+  private final TypeVisitor<Boolean, Void> isInvalidBound =
+      new SimpleTypeVisitor8<Boolean, Void>() {
+        @Override
+        protected Boolean defaultAction(TypeMirror e, Void _void) {
+          return false;
+        }
+
+        @Override
+        public Boolean visitDeclared(DeclaredType bound, Void _void) {
+          return !tool().isAssignable(expectedReturnType, bound);
+        }
+      };
+
+  MapperClassValidator(BasicInfo basicInfo, TypeMirror expectedReturnType) {
     this.basicInfo = basicInfo;
+    this.expectedReturnType = expectedReturnType;
   }
 
   MapperType checkReturnType(
-      TypeElement mapperClass,
-      TypeMirror expectedReturnType) {
+      TypeElement mapperClass) {
     commonChecks(basicInfo, mapperClass, "mapper");
-    if (!mapperClass.getTypeParameters().isEmpty()) {
-      throw boom("The mapper class may not have type parameters");
-    }
+    checkBound(mapperClass);
     MapperType mapperType = getMapperType(mapperClass);
     TypeMirror string = tool().asType(String.class);
     TypeMirror t = asDeclared(mapperType.type()).getTypeArguments().get(0);
@@ -39,6 +55,16 @@ final class MapperClassValidator {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
     return mapperType;
+  }
+
+  private void checkBound(TypeElement mapperClass) {
+    for (TypeParameterElement typeParameter : mapperClass.getTypeParameters()) {
+      for (TypeMirror bound : typeParameter.getBounds()) {
+        if (bound.accept(isInvalidBound, null)) {
+          throw boom("Invalid bounds on the type parameters of the mapper class");
+        }
+      }
+    }
   }
 
   private MapperType getMapperType(TypeElement mapperClass) {

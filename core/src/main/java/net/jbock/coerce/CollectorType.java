@@ -44,6 +44,10 @@ public final class CollectorType {
     return tool.erasure(collectorClass.asType());
   }
 
+  public boolean hasTypeParams() {
+    return !collectorClass.getTypeParameters().isEmpty();
+  }
+
   public boolean supplier() {
     return supplier;
   }

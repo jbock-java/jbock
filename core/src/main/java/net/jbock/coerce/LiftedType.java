@@ -17,6 +17,7 @@ import java.util.function.Function;
 
 final class LiftedType {
 
+  // the parameter type, but not a primitive, also not OptionalInt
   private final TypeMirror liftedType;
 
   private final Function<ParameterSpec, CodeBlock> extract;
@@ -25,6 +26,9 @@ final class LiftedType {
       Function<ParameterSpec, CodeBlock> extract,
       TypeMirror liftedType) {
     this.extract = extract;
+    if (liftedType.getKind().isPrimitive()) {
+      throw new AssertionError("just checking");
+    }
     this.liftedType = liftedType;
   }
 
