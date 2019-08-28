@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
@@ -8,11 +9,14 @@ import java.util.function.Function;
 
 public final class MapperType {
 
+  private final TypeTool tool;
+
   private final TypeElement mapperClass; // implements Function or Supplier<Function>
   private final TypeMirror type; // subtype of Function
   private final boolean supplier; // wrapped in Supplier?
 
-  private MapperType(TypeElement mapperClass, TypeMirror type, boolean supplier) {
+  private MapperType(TypeTool tool, TypeElement mapperClass, TypeMirror type, boolean supplier) {
+    this.tool = tool;
     this.mapperClass = mapperClass;
     this.type = type;
     this.supplier = supplier;
@@ -29,7 +33,7 @@ public final class MapperType {
     if (basicInfo.tool().isRawType(type)) {
       throw boom(basicInfo, "the function type must be parameterized");
     }
-    return new MapperType(mapperClass, type, supplier);
+    return new MapperType(basicInfo.tool(), mapperClass, type, supplier);
   }
 
   private static ValidationException boom(BasicInfo basicInfo, String message) {
@@ -37,7 +41,7 @@ public final class MapperType {
   }
 
   public TypeMirror mapperType() {
-    return mapperClass.asType();
+    return tool.erasure(mapperClass.asType());
   }
 
   TypeMirror type() {

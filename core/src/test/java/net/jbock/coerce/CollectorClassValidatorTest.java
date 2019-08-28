@@ -40,8 +40,6 @@ class CollectorClassValidatorTest {
           .getCollectorInfo(collectorClass);
       assertSameType("java.lang.String", collectorInfo.inputType, elements, types);
       assertTrue(collectorInfo.collectorType().isPresent());
-      assertSameType("ToSetCollector<java.lang.String>",
-          collectorInfo.collectorType().get().type(), elements, types);
     });
   }
 }

@@ -30,15 +30,14 @@ class CollectorClassValidator {
     TypeMirror r = asDeclared(collectorType.type()).getTypeArguments().get(2);
     Map<String, TypeMirror> solution = tool().unify(basicInfo.returnType(), r)
         .orElseThrow(() -> boom(String.format("The collector should return %s but returns %s", basicInfo.returnType(), r)));
-    TypeMirror collectorClassSolved = tool().substitute(collectorClass.asType(), solution);
-    if (collectorClassSolved == null) {
+    if (tool().substitute(collectorClass.asType(), solution) == null) {
       throw boom("Invalid bounds");
     }
-    TypeMirror substitute = tool().substitute(t, solution);
-    if (substitute == null) {
+    TypeMirror collectorInput = tool().substitute(t, solution);
+    if (collectorInput == null) {
       throw boom("Unexpected: can solve R but not Collector<T, ?, R>");
     }
-    return CollectorInfo.create(substitute, collectorType.solve(collectorClassSolved));
+    return CollectorInfo.create(collectorInput, collectorType);
   }
 
   private CollectorType getCollectorType(TypeElement collectorClass) {
@@ -51,14 +50,14 @@ class CollectorClassValidator {
       if (typeArgs.isEmpty()) {
         throw boom("raw Supplier type");
       }
-      return CollectorType.create(basicInfo, typeArgs.get(0), true);
+      return CollectorType.create(basicInfo, typeArgs.get(0), true, collectorClass);
     }
     TypeMirror collector = Resolver.resolve(
         Collector.class,
         collectorClass.asType(),
         basicInfo.tool()).resolveTypevars().orElseThrow(() ->
         boom("not a Collector or Supplier<Collector>"));
-    return CollectorType.create(basicInfo, collector, false);
+    return CollectorType.create(basicInfo, collector, false, collectorClass);
   }
 
   private TypeTool tool() {

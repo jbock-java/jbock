@@ -55,8 +55,10 @@ public abstract class CoercionFactory {
         mapExpr,
         initMapper,
         mapperReturnType,
-        collectorType.map(type -> CodeBlock.of(
-            type.supplier() ? "new $T().get()" : "new $T()", type.type())),
+        collectorType.map(type -> CodeBlock.of(type.supplier() ?
+            "new $T().get()" :
+            "new $T()",
+            type.collectorType())),
         constructorParamType,
         basicInfo);
   }
