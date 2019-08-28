@@ -332,12 +332,10 @@ The mapper may reject its input by throwing any [RuntimeException](https://docs.
 class PositiveNumberMapper implements Function<String, Integer> {
 
   @Override
-  public Integer apply(String s) {
-    // exceptions are fine here, try-catch is not necessary 
-    Integer i = Integer.valueOf(s);
+  public Integer apply(String s) { // the input string will not be null
+    Integer i = Integer.valueOf(s); // exception are ok, no try-catch needed
     if (i < 0) {
-      // Perform additional validation by throwing any RuntimeException
-      throw new IllegalArgumentException("The value cannot be negative.");
+      throw new IllegalArgumentException("Keep it positive.");
     }
     return i;
   }
