@@ -321,26 +321,25 @@ types are also allowed.
 
 ### Custom mappers and parameter validation
 
-Mappers (a.k.a. converters) must implement [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html)`<`[Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html)`<`[String](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html)`, ?>>`,
+Mappers (a.k.a. converters) must implement [Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html)`<`[String](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html)`, ?>`,
+or a [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html) of such a function,
 where `?` depends on the parameter it's used on.
-The mapper's input is the parameter's value, taken directly from `String[] argv`.
+The mapper's input is the parameter value taken from the argument vector `String[] argv`.
 If the parameter does not appear in `argv`, then the mapper is not invoked.
 The mapper may reject its input by throwing any [RuntimeException](https://docs.oracle.com/javase/8/docs/api/java/lang/RuntimeException.html).
 
 ````java
-class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
+class PositiveNumberMapper implements Function<String, Integer> {
 
   @Override
-  public Function<String, Integer> get() {
-    return s -> {
-      // try-catch is not needed here: NumberFormatException is a RuntimeException 
-      Integer i = Integer.valueOf(s);
-      if (i < 0) {
-        // Perform additional validation by throwing IllegalArgumentException, which is a RuntimeException
-        throw new IllegalArgumentException("The value cannot be negative.");
-      }
-      return i;
-    };
+  public Integer apply(String s) {
+    // try-catch is not needed here: NumberFormatException is a RuntimeException 
+    Integer i = Integer.valueOf(s);
+    if (i < 0) {
+    // Perform additional validation by throwing IllegalArgumentException, which is a RuntimeException
+      throw new IllegalArgumentException("The value cannot be negative.");
+    }
+    return i;
   }
 }
 ````
@@ -382,22 +381,21 @@ which is expressed as a certain function from
 `String` to `Entry<String, String>`:
 
 ````java
-class MapTokenizer implements Supplier<Function<String, Map.Entry<String, String>>> {
+class MapTokenizer implements Function<String, Map.Entry<String, String>> {
 
   @Override
-  public Function<String, Map.Entry<String, String>> get() {
-    return s -> {
-      String[] tokens = s.split(":", 2);
-      if (tokens.length < 2) {
-        throw new IllegalArgumentException("Invalid pair: " + s);
-      }
-      return new AbstractMap.SimpleImmutableEntry<>(tokens[0], tokens[1]);
-    };
+  public Map.Entry<String, String> apply(String s) {
+    String[] tokens = s.split(":", 2);
+    if (tokens.length < 2) {
+      throw new IllegalArgumentException("Invalid pair: " + s);
+    }
+    return new AbstractMap.SimpleImmutableEntry<>(tokens[0], tokens[1]);
   }
 }
 ````
 
-The collector class must be a `Supplier<`[Collector](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html)`<A, ?, B>>`
+The collector class must be a [Collector](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html)`<A, ?, B>`,
+or a `Supplier` of such a collector,
 where `A` is the output of the mapper, and `B` is the
 parameter type.
 
@@ -571,7 +569,7 @@ The `indent` is used when printing the usage page.
 Add two dependencies to `build.gradle`:
 
 ````groovy
-compileOnly "com.github.h908714124:jbock-annotations:2.2"
+compileOnly "com.github.h908714124:jbock-annotations:2.3"
 annotationProcessor "com.github.h908714124:jbock:$jbockVersion"
 ````
 
@@ -588,7 +586,7 @@ or `provided`.
     <dependency>
       <groupId>com.github.h908714124</groupId>
       <artifactId>jbock-annotations</artifactId>
-      <version>2.2</version>
+      <version>2.3</version>
       <scope>provided</scope>
     </dependency>
 </dependencies>
