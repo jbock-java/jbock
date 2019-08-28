@@ -60,6 +60,29 @@ class MapperTest {
   }
 
   @Test
+  void invalidMapperWithTypeParameters() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             mappedBy = IdentityMapper.class)",
+        "  abstract String string();",
+        "",
+        "  static class IdentityMapper<E> implements Function<E, E> {",
+        "    public E apply(E e) {",
+        "      return e;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: The mapper class may not have type parameters.");
+  }
+
+  @Test
   void invalidFlagMapper() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
