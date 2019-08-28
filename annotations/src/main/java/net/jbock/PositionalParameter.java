@@ -53,20 +53,20 @@ public @interface PositionalParameter {
    * Optional custom mapper.
    * See {@link Parameter#mappedBy()}.
    *
-   * @return an optional mapper class
+   * @return a mapper class
    */
-  Class<? extends Supplier> mappedBy() default Supplier.class;
+  Class<?> mappedBy() default Object.class;
 
   /**
    * Optional custom collector.
    * See {@link Parameter#collectedBy()}.
    *
-   * @return an optional collector class
+   * @return a collector class
    */
-  Class<? extends Supplier> collectedBy() default Supplier.class;
+  Class<?> collectedBy() default Object.class;
 
   /**
-   * Declares this parameter repeatable.
+   * Declares this parameter as repeatable.
    * See {@link Parameter#repeatable()}.
    *
    * @return true if this parameter is repeatable
@@ -74,7 +74,7 @@ public @interface PositionalParameter {
   boolean repeatable() default false;
 
   /**
-   * Declares this parameter optional.
+   * Declares this parameter as optional.
    * See {@link Parameter#optional()}.
    *
    * @return true if this parameter is optional
@@ -89,3 +89,4 @@ public @interface PositionalParameter {
    */
   String bundleKey() default "";
 }
+
