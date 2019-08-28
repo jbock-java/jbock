@@ -333,11 +333,11 @@ class PositiveNumberMapper implements Function<String, Integer> {
 
   @Override
   public Integer apply(String s) { // the input string will not be null
-    Integer i = Integer.valueOf(s); // exception are ok, no try-catch needed
+    Integer i = Integer.valueOf(s); // exceptions are ok, no try-catch needed
     if (i <= 0) {
       throw new IllegalArgumentException("Try to keep it positive.");
     }
-    return i;
+    return i; // returning null is not recommended
   }
 }
 ````
