@@ -7,6 +7,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.CollectorType;
+import net.jbock.coerce.MapperType;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
@@ -18,9 +20,12 @@ public final class MapperCoercion extends CoercionFactory {
 
   private final ParameterSpec mapperParam;
 
-  private final TypeMirror mapperType;
+  private final MapperType mapperType;
 
-  private MapperCoercion(TypeMirror mapperReturnType, ParameterSpec mapperParam, TypeMirror mapperType) {
+  private MapperCoercion(
+      TypeMirror mapperReturnType,
+      ParameterSpec mapperParam,
+      MapperType mapperType) {
     super(mapperReturnType);
     this.mapperParam = mapperParam;
     this.mapperType = mapperType;
@@ -28,9 +33,9 @@ public final class MapperCoercion extends CoercionFactory {
 
   public static Coercion create(
       TypeMirror mapperReturnType,
-      Optional<TypeMirror> collectorType,
+      Optional<CollectorType> collectorType,
       ParameterSpec mapperParam,
-      TypeMirror mapperType,
+      MapperType mapperType,
       BasicInfo basicInfo) {
     return new MapperCoercion(mapperReturnType, mapperParam, mapperType)
         .getCoercion(basicInfo, collectorType);
@@ -43,9 +48,11 @@ public final class MapperCoercion extends CoercionFactory {
 
   @Override
   public CodeBlock initMapper() {
-    return CodeBlock.of("$T $N = new $T().get()",
+    return CodeBlock.of(mapperType.supplier() ?
+            "$T $N = new $T().get()" :
+            "$T $N = new $T()",
         ParameterizedTypeName.get(ClassName.get(Function.class), STRING, TypeName.get(mapperReturnType)),
         mapperParam,
-        mapperType);
+        mapperType.mapperType());
   }
 }

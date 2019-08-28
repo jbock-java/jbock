@@ -36,13 +36,12 @@ class CollectorClassValidatorTest {
           "java.util.Set<java.lang.String>"));
 
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
-      CollectorInfo collectorInfo = CollectorClassValidator.getCollectorInfo(
-          collectorClass,
-          basicInfo);
+      CollectorInfo collectorInfo = new CollectorClassValidator(basicInfo)
+          .getCollectorInfo(collectorClass);
       assertSameType("java.lang.String", collectorInfo.inputType, elements, types);
       assertTrue(collectorInfo.collectorType().isPresent());
       assertSameType("ToSetCollector<java.lang.String>",
-          collectorInfo.collectorType().get(), elements, types);
+          collectorInfo.collectorType().get().type(), elements, types);
     });
   }
 }

@@ -30,7 +30,10 @@ class Resolver {
     this.tool = tool;
   }
 
-  static Resolver resolve(TypeMirror goal, TypeMirror start, TypeTool tool) {
+  static Resolver resolve(
+      Class<?> goal,
+      TypeMirror start,
+      TypeTool tool) {
     List<TypeElement> family = getTypeTree(start, tool);
     Extension extension;
     TypeMirror nextGoal = tool.erasure(goal);

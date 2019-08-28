@@ -32,7 +32,7 @@ abstract class CustomMapperArguments {
   @Parameter(longName = "dateList", repeatable = true, mappedBy = DateMapper.class)
   abstract List<Date> dateList();
 
-  @Parameter(longName = "verbosity", optional = true, mappedBy = CustomBigIntegerMapper.class)
+  @Parameter(longName = "verbosity", optional = true, mappedBy = CustomBigIntegerMapperSupplier.class)
   abstract Optional<BigInteger> verbosity();
 
   @Parameter(longName = "aRequiredInt", mappedBy = PositiveNumberMapper.class)

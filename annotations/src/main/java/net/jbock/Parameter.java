@@ -85,7 +85,7 @@ public @interface Parameter {
    *
    * @return an optional mapper class
    */
-  Class<? extends Supplier> mappedBy() default Supplier.class;
+  Class<?> mappedBy() default Supplier.class;
 
   /**
    * <h3>Optional custom collector</h3>
@@ -110,7 +110,7 @@ public @interface Parameter {
    *
    * @return an optional collector class
    */
-  Class<? extends Supplier> collectedBy() default Supplier.class;
+  Class<?> collectedBy() default Supplier.class;
 
   /**
    * <p>Declares this parameter repeatable.</p>

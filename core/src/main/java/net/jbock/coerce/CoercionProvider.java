@@ -78,8 +78,8 @@ public class CoercionProvider {
     TypeMirror returnType = basicInfo.returnType();
     ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(basicInfo.paramName()) + "Mapper").build();
     TypeMirror mapperReturnType = basicInfo.optionalInfo().orElse(returnType);
-    MapperClassValidator.checkReturnType(mapperClass, mapperReturnType, basicInfo);
-    return MapperCoercion.create(mapperReturnType, Optional.empty(), mapperParam, mapperClass.asType(), basicInfo);
+    MapperType mapperType = new MapperClassValidator(basicInfo).checkReturnType(mapperClass, mapperReturnType);
+    return MapperCoercion.create(mapperReturnType, Optional.empty(), mapperParam, mapperType, basicInfo);
   }
 
   private Coercion handleRepeatableAutoMapper() throws UnknownTypeException {
@@ -91,9 +91,9 @@ public class CoercionProvider {
   private Coercion handleRepeatableExplicitMapper(
       TypeElement mapperClass) {
     CollectorInfo collectorInfo = collectorInfo();
-    MapperClassValidator.checkReturnType(mapperClass, collectorInfo.inputType, basicInfo);
+    MapperType mapperType = new MapperClassValidator(basicInfo).checkReturnType(mapperClass, collectorInfo.inputType);
     ParameterSpec mapperParam = ParameterSpec.builder(TypeName.get(mapperClass.asType()), snakeToCamel(basicInfo.paramName()) + "Mapper").build();
-    return MapperCoercion.create(collectorInfo.inputType, collectorInfo.collectorType(), mapperParam, mapperClass.asType(), basicInfo);
+    return MapperCoercion.create(collectorInfo.inputType, collectorInfo.collectorType(), mapperParam, mapperType, basicInfo);
   }
 
   private CoercionFactory findCoercion(TypeMirror mirror) throws UnknownTypeException {
@@ -127,7 +127,7 @@ public class CoercionProvider {
 
   private CollectorInfo collectorInfo() {
     if (basicInfo.collectorClass().isPresent()) {
-      return CollectorClassValidator.getCollectorInfo(basicInfo.collectorClass().get(), basicInfo);
+      return new CollectorClassValidator(basicInfo).getCollectorInfo(basicInfo.collectorClass().get());
     }
     if (!tool().isSameErasure(basicInfo.returnType(), List.class)) {
       throw basicInfo.asValidationException("Either define a custom collector, or return List.");

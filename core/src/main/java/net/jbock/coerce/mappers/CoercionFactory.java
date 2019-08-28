@@ -8,6 +8,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.CollectorType;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
@@ -39,7 +40,7 @@ public abstract class CoercionFactory {
     return CodeBlock.builder().build();
   }
 
-  public Coercion getCoercion(BasicInfo basicInfo, Optional<TypeMirror> collectorType) {
+  public Coercion getCoercion(BasicInfo basicInfo, Optional<CollectorType> collectorType) {
     Optional<CodeBlock> mapExpr = mapExpr();
     CodeBlock initMapper = initMapper();
     TypeMirror constructorParamType = getConstructorParamType(basicInfo);
@@ -54,7 +55,8 @@ public abstract class CoercionFactory {
         mapExpr,
         initMapper,
         mapperReturnType,
-        collectorType.map(type -> CodeBlock.of("new $T().get()", type)),
+        collectorType.map(type -> CodeBlock.of(
+            type.supplier() ? "new $T().get()" : "new $T()", type.type())),
         constructorParamType,
         basicInfo);
   }

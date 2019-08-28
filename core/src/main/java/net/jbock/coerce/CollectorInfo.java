@@ -3,18 +3,18 @@ package net.jbock.coerce;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
-class CollectorInfo {
+public class CollectorInfo {
 
   final TypeMirror inputType;
 
-  private final Optional<TypeMirror> collectorType;
+  private final Optional<CollectorType> collectorType;
 
-  private CollectorInfo(TypeMirror inputType, Optional<TypeMirror> collectorType) {
+  private CollectorInfo(TypeMirror inputType, Optional<CollectorType> collectorType) {
     this.inputType = inputType;
     this.collectorType = collectorType;
   }
 
-  static CollectorInfo create(TypeMirror inputType, TypeMirror collectorType) {
+  static CollectorInfo create(TypeMirror inputType, CollectorType collectorType) {
     return new CollectorInfo(inputType, Optional.of(collectorType));
   }
 
@@ -22,7 +22,7 @@ class CollectorInfo {
     return new CollectorInfo(inputType, Optional.empty());
   }
 
-  Optional<TypeMirror> collectorType() {
+  Optional<CollectorType> collectorType() {
     return collectorType;
   }
 

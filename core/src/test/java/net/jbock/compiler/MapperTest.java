@@ -14,7 +14,7 @@ import static net.jbock.compiler.ProcessorTest.withImports;
 class MapperTest {
 
   @Test
-  void validStringArray() {
+  void validStringArraySupplier() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
@@ -27,6 +27,29 @@ class MapperTest {
         "  static class ArrayMapper implements Supplier<Function<String, String[]>> {",
         "    public Function<String, String[]> get() {",
         "      return s -> new String[]{s};",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void validStringArray() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             optional = true,",
+        "             mappedBy = ArrayMapper.class)",
+        "  abstract Optional<String[]> stringArray();",
+        "",
+        "  static class ArrayMapper implements Function<String, String[]> {",
+        "    public String[] apply(String s) {",
+        "      return new String[]{s};",
         "    }",
         "  }",
         "}");
@@ -407,7 +430,8 @@ class MapperTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: must either implement Function or Supplier<Function>");
   }
 
   @Test
@@ -425,7 +449,7 @@ class MapperTest {
         "    }",
         "  }",
         "",
-        "  interface ZapperSupplier extends Supplier<Zapper> { }",
+        "  interface ZapperSupplier extends Supplier<Function<String, Integer>> { }",
         "",
         "  static class Zapper implements Foo<String>  {",
         "    public Integer apply(String s) {",
@@ -476,7 +500,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes Integer.");
+        .withErrorContaining("There is a problem with the mapper class: must either implement Function or Supplier<Function>");
   }
 
   @Test
@@ -500,7 +524,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The supplier must supply a Function.");
+        .withErrorContaining("There is a problem with the mapper class: must either implement Function or Supplier<Function>");
   }
 
   @Test
@@ -595,7 +619,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: the function type must be parameterized.");
+        .withErrorContaining("There is a problem with the mapper class: the function type must be parameterized");
   }
 
   @Test
