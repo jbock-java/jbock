@@ -127,6 +127,52 @@ class MapperTest {
   }
 
   @Test
+  void validMapperTypeParameterSupplierWithBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             mappedBy = IdentityMapper.class)",
+        "  abstract String string();",
+        "",
+        "  static class IdentityMapper<E extends java.lang.CharSequence> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void invalidMapperTypeParameterSupplierWithBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             mappedBy = IdentityMapper.class)",
+        "  abstract String string();",
+        "",
+        "  static class IdentityMapper<E extends Integer> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds on the type parameters of the mapper class.");
+  }
+
+
+  @Test
   void invalidFlagMapper() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",

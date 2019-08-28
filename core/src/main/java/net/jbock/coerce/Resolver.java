@@ -30,7 +30,19 @@ class Resolver {
     this.tool = tool;
   }
 
-  static Resolver resolve(
+  /**
+   * Check if {@code start} is a {@code goal}.
+   *
+   * @param goal a type
+   * @param start a type
+   * @param tool a tool
+   *
+   * @return the {@code goal} type, with typevars resolved
+   * as far as it can be inferred from {@code start},
+   * or {@link Optional#empty() empty} if {@code start}
+   * is not a {@code goal}.
+   */
+  static Optional<TypeMirror> typecheck(
       Class<?> goal,
       TypeMirror start,
       TypeTool tool) {
@@ -42,7 +54,7 @@ class Resolver {
       extensions.add(extension);
       nextGoal = tool.erasure(extension.baseClass().asType());
     }
-    return new Resolver(extensions, tool);
+    return new Resolver(extensions, tool).resolveTypevars();
   }
 
   private static Extension findExtension(List<TypeElement> family, TypeMirror goal, TypeTool tool) {
@@ -68,7 +80,7 @@ class Resolver {
     return null;
   }
 
-  Optional<TypeMirror> resolveTypevars() {
+  private Optional<TypeMirror> resolveTypevars() {
     if (extensions.isEmpty()) {
       return Optional.empty();
     }

@@ -68,10 +68,10 @@ final class MapperClassValidator {
   }
 
   private MapperType getMapperType(TypeElement mapperClass) {
-    Optional<TypeMirror> supplier = Resolver.resolve(
+    Optional<TypeMirror> supplier = Resolver.typecheck(
         Supplier.class,
         mapperClass.asType(),
-        basicInfo.tool()).resolveTypevars();
+        basicInfo.tool());
     if (supplier.isPresent()) {
       List<? extends TypeMirror> typeArgs = asDeclared(supplier.get()).getTypeArguments();
       if (typeArgs.isEmpty()) {
@@ -79,10 +79,10 @@ final class MapperClassValidator {
       }
       return MapperType.create(basicInfo, typeArgs.get(0), true, mapperClass);
     }
-    TypeMirror mapper = Resolver.resolve(
+    TypeMirror mapper = Resolver.typecheck(
         Function.class,
         mapperClass.asType(),
-        basicInfo.tool()).resolveTypevars().orElseThrow(() ->
+        basicInfo.tool()).orElseThrow(() ->
         boom("not a Function or Supplier<Function>"));
     return MapperType.create(basicInfo, mapper, false, mapperClass);
   }

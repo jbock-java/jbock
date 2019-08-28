@@ -41,10 +41,10 @@ class CollectorClassValidator {
   }
 
   private CollectorType getCollectorType(TypeElement collectorClass) {
-    Optional<TypeMirror> supplier = Resolver.resolve(
+    Optional<TypeMirror> supplier = Resolver.typecheck(
         Supplier.class,
         collectorClass.asType(),
-        basicInfo.tool()).resolveTypevars();
+        basicInfo.tool());
     if (supplier.isPresent()) {
       List<? extends TypeMirror> typeArgs = asDeclared(supplier.get()).getTypeArguments();
       if (typeArgs.isEmpty()) {
@@ -52,10 +52,10 @@ class CollectorClassValidator {
       }
       return CollectorType.create(basicInfo, typeArgs.get(0), true, collectorClass);
     }
-    TypeMirror collector = Resolver.resolve(
+    TypeMirror collector = Resolver.typecheck(
         Collector.class,
         collectorClass.asType(),
-        basicInfo.tool()).resolveTypevars().orElseThrow(() ->
+        basicInfo.tool()).orElseThrow(() ->
         boom("not a Collector or Supplier<Collector>"));
     return CollectorType.create(basicInfo, collector, false, collectorClass);
   }

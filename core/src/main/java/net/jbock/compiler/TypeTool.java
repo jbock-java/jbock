@@ -272,7 +272,7 @@ public class TypeTool {
     return elements.getTypeElement(clazz.getCanonicalName());
   }
 
-  TypeElement asTypeElement(TypeMirror mirror) {
+  public TypeElement asTypeElement(TypeMirror mirror) {
     Element element = types.asElement(mirror);
     if (element == null) {
       throw new IllegalArgumentException("no element: " + mirror);
