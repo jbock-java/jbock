@@ -345,7 +345,7 @@ class PositiveNumberMapper implements Function<String, Integer> {
 The same mapper can also be used for
 <a href="#required-and-optional-parameters">*optional*</a>
 and <a href="#repeatable-parameters">*repeatable*</a> parameters.
-In this case, the corresponding attribute (`optional` or `repeatable`)
+If a parameter has a mapper, the attribute `optional` or `repeatable`
 must be set explicitly.
 
 ````java
