@@ -333,7 +333,7 @@ class PositiveNumberMapper implements Function<String, Integer> {
 
   @Override
   public Integer apply(String s) {
-    // try-catch is not needed here: NumberFormatException is a RuntimeException 
+    // exceptions are fine here, try-catch is not necessary 
     Integer i = Integer.valueOf(s);
     if (i < 0) {
       // Perform additional validation by throwing any RuntimeException
