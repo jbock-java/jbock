@@ -374,9 +374,7 @@ builds a `Map`:
 abstract Map<String, String> headers();
 ````
 
-The mapper splits tokens of the form `a:b` into map entries,
-which is expressed as a certain function from
-`String` to `Entry<String, String>`:
+The mapper splits tokens of the form `a:b` into map entries
 
 ````java
 class MapTokenizer implements Function<String, Map.Entry<String, String>> {
@@ -396,8 +394,6 @@ The collector class must be a [Collector](https://docs.oracle.com/javase/8/docs/
 or a `Supplier` of such a collector,
 where `A` is the output of the mapper, and `B` is the
 parameter type.
-
-This class may have type variables for better reusability.
 
 ````java
 class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
@@ -419,10 +415,6 @@ assertEquals(2, args.headers());
 assertEquals("12", args.headers().get("horse"));
 assertEquals("4", args.headers().get("sheep"));
 ````
-
-As mentioned before, if a parameter declares `mappedBy` or `collectedBy`, then the 
-attributes `repeatable` and `optional` are not inferred from the parameter type.
-They must be set explicitly.
 
 ### Parameter descriptions and internationalization
 
