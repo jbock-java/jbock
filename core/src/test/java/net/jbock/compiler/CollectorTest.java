@@ -466,6 +466,37 @@ class CollectorTest {
   }
 
   @Test
+  void bothMapperAndCollectorHaveTypeargsInvalidBoundsOnCollector() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             mappedBy = XMap.class,",
+        "             collectedBy = YCol.class)",
+        "  abstract List<String> map();",
+        "",
+        "  static class XMap<E> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() {",
+        "      return Function.identity();",
+        "    }",
+        "  }",
+        "",
+        "  static class YCol<E extends Integer> implements Supplier<Collector<E, ?, List<E>>> {",
+        "    public Collector<E, ?, List<E>> get() {",
+        "      return Collectors.toList();",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds.");
+  }
+
+  @Test
   void validEnum() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
