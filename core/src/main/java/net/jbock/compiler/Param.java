@@ -205,6 +205,9 @@ final class Param {
       throw ValidationException.create(sourceMethod,
           "A flag parameter can't have a mapper.");
     }
+    if (flag && !parameter.descriptionArgumentName().isEmpty()) {
+      throw ValidationException.create(sourceMethod, "A flag cannot have a description argument name.");
+    }
     ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
     Coercion typeInfo = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     OptionType type = optionType(repeatable, flag);
