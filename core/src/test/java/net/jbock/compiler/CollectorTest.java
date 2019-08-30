@@ -447,7 +447,7 @@ class CollectorTest {
         "             collectedBy = YCol.class)",
         "  abstract List<Integer> map();",
         "",
-        "  static class XMap<F, E> implements Supplier<Function<E, F>> {",
+        "  static class XMap<F extends java.lang.Number, E extends java.lang.CharSequence> implements Supplier<Function<E, F>> {",
         "    public Function<E, F> get() {",
         "      return null;",
         "    }",

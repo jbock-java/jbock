@@ -82,7 +82,7 @@ public class CoercionProvider {
     TypeMirror returnType = basicInfo.returnType();
     TypeMirror mapperReturnType = basicInfo.optionalInfo().orElse(returnType);
     ParameterSpec mapperParam = mapperParam(mapperReturnType);
-    MapperType mapperType = new MapperClassValidator(basicInfo, mapperReturnType).checkReturnType(mapperClass);
+    MapperType mapperType = new MapperClassValidator(basicInfo, mapperReturnType, mapperClass).checkReturnType();
     return MapperCoercion.create(mapperReturnType, Optional.empty(), mapperParam, mapperType, basicInfo);
   }
 
@@ -102,7 +102,7 @@ public class CoercionProvider {
   private Coercion handleRepeatableExplicitMapper(
       TypeElement mapperClass) {
     CollectorInfo collectorInfo = collectorInfo();
-    MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType).checkReturnType(mapperClass);
+    MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType, mapperClass).checkReturnType();
     ParameterSpec mapperParam = mapperParam(collectorInfo.inputType);
     return MapperCoercion.create(collectorInfo.inputType, collectorInfo.collectorType(), mapperParam, mapperType, basicInfo);
   }

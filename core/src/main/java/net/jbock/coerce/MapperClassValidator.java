@@ -5,10 +5,7 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVisitor;
-import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,29 +20,35 @@ final class MapperClassValidator {
 
   private final BasicInfo basicInfo;
   private final TypeMirror expectedReturnType;
+  private final TypeElement mapperClass;
 
-  private final TypeVisitor<Boolean, Void> isInvalidBound =
-      new SimpleTypeVisitor8<Boolean, Void>() {
-        @Override
-        protected Boolean defaultAction(TypeMirror e, Void _void) {
-          return false;
-        }
-
-        @Override
-        public Boolean visitDeclared(DeclaredType bound, Void _void) {
-          return !tool().isAssignable(expectedReturnType, bound);
-        }
-      };
-
-  MapperClassValidator(BasicInfo basicInfo, TypeMirror expectedReturnType) {
-    this.basicInfo = basicInfo;
-    this.expectedReturnType = expectedReturnType;
+  private boolean isInvalidT(TypeParameterElement typeParameter) {
+    TypeMirror stringType = tool().asType(String.class);
+    for (TypeMirror bound : typeParameter.getBounds()) {
+      if (!tool().isAssignable(stringType, bound)) {
+        return true;
+      }
+    }
+    return false;
   }
 
-  MapperType checkReturnType(
-      TypeElement mapperClass) {
+  private boolean isInvalidR(TypeParameterElement typeParameter) {
+    for (TypeMirror bound : typeParameter.getBounds()) {
+      if (!tool().isAssignable(expectedReturnType, bound)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  MapperClassValidator(BasicInfo basicInfo, TypeMirror expectedReturnType, TypeElement mapperClass) {
+    this.basicInfo = basicInfo;
+    this.expectedReturnType = expectedReturnType;
+    this.mapperClass = mapperClass;
+  }
+
+  MapperType checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
-    checkBound(mapperClass);
     TmpMapperType mapperType = getMapperType(mapperClass);
     TypeMirror string = tool().asType(String.class);
     TypeMirror t = asDeclared(mapperType.type).getTypeArguments().get(0);
@@ -58,17 +61,7 @@ final class MapperClassValidator {
     if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    return mapperType.solve(basicInfo, t_result.get(), r_result.get());
-  }
-
-  private void checkBound(TypeElement mapperClass) {
-    for (TypeParameterElement typeParameter : mapperClass.getTypeParameters()) {
-      for (TypeMirror bound : typeParameter.getBounds()) {
-        if (bound.accept(isInvalidBound, null)) {
-          throw boom("Invalid bounds on the type parameters of the mapper class");
-        }
-      }
-    }
+    return solve(mapperType, t_result.get(), r_result.get());
   }
 
   private TmpMapperType getMapperType(TypeElement mapperClass) {
@@ -128,26 +121,36 @@ final class MapperClassValidator {
     private static ValidationException boom(BasicInfo basicInfo, String message) {
       return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s", message));
     }
+  }
 
-    MapperType solve(
-        BasicInfo basicInfo,
-        Map<String, TypeMirror> t_result,
-        Map<String, TypeMirror> r_result) {
-      List<? extends TypeParameterElement> typeParameters = mapperClass.getTypeParameters();
-      List<TypeMirror> solution = new ArrayList<>(typeParameters.size());
-      for (TypeParameterElement typeParameter : typeParameters) {
-        String param = typeParameter.toString();
-        TypeMirror tMirror = t_result.get(param);
-        TypeMirror rMirror = r_result.get(param);
-        if (tMirror != null) {
-          solution.add(tMirror);
-        } else if (rMirror != null) {
-          solution.add(rMirror);
-        } else {
-          throw boom(basicInfo, "could not resolve all type parameters");
+  private MapperType solve(
+      TmpMapperType mapperType,
+      Map<String, TypeMirror> t_result,
+      Map<String, TypeMirror> r_result) {
+    List<? extends TypeParameterElement> typeParameters = mapperType.mapperClass.getTypeParameters();
+    List<TypeMirror> solution = new ArrayList<>(typeParameters.size());
+    for (TypeParameterElement typeParameter : typeParameters) {
+      String param = typeParameter.toString();
+      TypeMirror tMirror = t_result.get(param);
+      TypeMirror rMirror = r_result.get(param);
+      TypeMirror s = null;
+      if (tMirror != null) {
+        if (isInvalidT(typeParameter)) {
+          throw boom("Invalid bounds on the type parameters of the mapper class");
         }
+        s = tMirror;
       }
-      return MapperType.create(basicInfo, supplier, mapperClass, solution);
+      if (rMirror != null) {
+        if (isInvalidR(typeParameter)) {
+          throw boom("Invalid bounds on the type parameters of the mapper class");
+        }
+        s = rMirror;
+      }
+      if (s == null) {
+        throw boom("could not resolve all type parameters");
+      }
+      solution.add(s);
     }
+    return MapperType.create(basicInfo, mapperType.supplier, mapperClass, solution);
   }
 }
