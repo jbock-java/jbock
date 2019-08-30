@@ -9,7 +9,9 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleTypeVisitor8;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -44,17 +46,19 @@ final class MapperClassValidator {
       TypeElement mapperClass) {
     commonChecks(basicInfo, mapperClass, "mapper");
     checkBound(mapperClass);
-    MapperType mapperType = getMapperType(mapperClass);
+    TmpMapperType mapperType = getMapperType(mapperClass);
     TypeMirror string = tool().asType(String.class);
-    TypeMirror t = asDeclared(mapperType.type()).getTypeArguments().get(0);
-    TypeMirror r = asDeclared(mapperType.type()).getTypeArguments().get(1);
-    if (!tool().unify(string, t).isPresent()) {
+    TypeMirror t = asDeclared(mapperType.type).getTypeArguments().get(0);
+    TypeMirror r = asDeclared(mapperType.type).getTypeArguments().get(1);
+    Optional<Map<String, TypeMirror>> t_result = tool().unify(string, t);
+    if (!t_result.isPresent()) {
       throw boom(String.format("The supplied function must take a String argument, but takes %s", t));
     }
-    if (!tool().unify(expectedReturnType, r).isPresent()) {
+    Optional<Map<String, TypeMirror>> r_result = tool().unify(expectedReturnType, r);
+    if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    return mapperType;
+    return mapperType.solve(basicInfo, t_result.get(), r_result.get());
   }
 
   private void checkBound(TypeElement mapperClass) {
@@ -67,7 +71,7 @@ final class MapperClassValidator {
     }
   }
 
-  private MapperType getMapperType(TypeElement mapperClass) {
+  private TmpMapperType getMapperType(TypeElement mapperClass) {
     Optional<TypeMirror> supplier = Resolver.typecheck(
         Supplier.class,
         mapperClass.asType(),
@@ -77,14 +81,14 @@ final class MapperClassValidator {
       if (typeArgs.isEmpty()) {
         throw boom("raw Supplier type");
       }
-      return MapperType.create(basicInfo, typeArgs.get(0), true, mapperClass);
+      return TmpMapperType.create(basicInfo, typeArgs.get(0), true, mapperClass);
     }
     TypeMirror mapper = Resolver.typecheck(
         Function.class,
         mapperClass.asType(),
         basicInfo.tool()).orElseThrow(() ->
         boom("not a Function or Supplier<Function>"));
-    return MapperType.create(basicInfo, mapper, false, mapperClass);
+    return TmpMapperType.create(basicInfo, mapper, false, mapperClass);
   }
 
   private TypeTool tool() {
@@ -93,5 +97,57 @@ final class MapperClassValidator {
 
   private ValidationException boom(String message) {
     return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
+  }
+
+  static final class TmpMapperType {
+
+    private final TypeElement mapperClass; // implements Function or Supplier<Function>
+    private final TypeMirror type; // subtype of Function
+    private final boolean supplier; // wrapped in Supplier?
+
+    private TmpMapperType(TypeElement mapperClass, TypeMirror type, boolean supplier) {
+      this.mapperClass = mapperClass;
+      this.type = type;
+      this.supplier = supplier;
+    }
+
+    static TmpMapperType create(
+        BasicInfo basicInfo,
+        TypeMirror type,
+        boolean supplier,
+        TypeElement mapperClass) {
+      if (!basicInfo.tool().isSameErasure(type, Function.class)) {
+        throw boom(basicInfo, "must either implement Function or Supplier<Function>");
+      }
+      if (basicInfo.tool().isRawType(type)) {
+        throw boom(basicInfo, "the function type must be parameterized");
+      }
+      return new TmpMapperType(mapperClass, type, supplier);
+    }
+
+    private static ValidationException boom(BasicInfo basicInfo, String message) {
+      return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s", message));
+    }
+
+    MapperType solve(
+        BasicInfo basicInfo,
+        Map<String, TypeMirror> t_result,
+        Map<String, TypeMirror> r_result) {
+      List<? extends TypeParameterElement> typeParameters = mapperClass.getTypeParameters();
+      List<TypeMirror> solution = new ArrayList<>(typeParameters.size());
+      for (TypeParameterElement typeParameter : typeParameters) {
+        String param = typeParameter.toString();
+        TypeMirror tMirror = t_result.get(param);
+        TypeMirror rMirror = r_result.get(param);
+        if (tMirror != null) {
+          solution.add(tMirror);
+        } else if (rMirror != null) {
+          solution.add(rMirror);
+        } else {
+          throw boom(basicInfo, "could not resolve all type parameters");
+        }
+      }
+      return MapperType.create(basicInfo, supplier, mapperClass, solution);
+    }
   }
 }

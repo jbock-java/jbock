@@ -8,6 +8,7 @@ import net.jbock.coerce.CollectorType;
 import net.jbock.coerce.MapperType;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
 import java.util.Optional;
 
 public final class MapperCoercion extends CoercionFactory {
@@ -42,11 +43,33 @@ public final class MapperCoercion extends CoercionFactory {
 
   @Override
   public CodeBlock initMapper() {
-    return CodeBlock.of(String.format("$T $N = new $T%s()%s",
-        this.mapperType.hasTypeParams() ? "" : "", // TODO "<>"
-        this.mapperType.supplier() ? ".get()" : ""),
+    CodeBlock.Builder typeParameterList = CodeBlock.builder();
+    if (mapperType.hasTypeParams()) {
+      if (!mapperType.supplier()) {
+        // new Mapper<>();
+        typeParameterList.add("<>()");
+      } else {
+        // compiler can't handle new Mapper<>().get();
+        // needs explicit type params
+        typeParameterList.add("<");
+        List<TypeMirror> solution = mapperType.solution();
+        for (int i = 0; i < solution.size(); i++) {
+          TypeMirror typeMirror = solution.get(i);
+          typeParameterList.add("$T", typeMirror);
+          if (i < solution.size() - 1) {
+            typeParameterList.add(", ");
+          }
+        }
+        typeParameterList.add(">().get()");
+      }
+    } else {
+      // new Mapper();
+      typeParameterList.add("()");
+    }
+    return CodeBlock.of("$T $N = new $T$L",
         mapperParam.type,
         mapperParam,
-        this.mapperType.mapperType());
+        mapperType.mapperType(),
+        typeParameterList.build());
   }
 }

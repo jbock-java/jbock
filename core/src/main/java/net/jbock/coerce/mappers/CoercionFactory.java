@@ -57,7 +57,7 @@ public abstract class CoercionFactory {
         mapperReturnType,
         collectorType.map(type -> CodeBlock.of(
             String.format("new $T%s()%s",
-                type.hasTypeParams() ? "" : "", // TODO "<>"
+                type.hasTypeParams() && !type.supplier() ? "<>" : "", // TODO "<>"
                 type.supplier() ? ".get()" : ""),
             type.collectorType())),
         constructorParamType,
