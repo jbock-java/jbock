@@ -1,4 +1,10 @@
 #!/bin/bash
-if [[ -z "$1" ]]; then echo arg: version; exit 1; fi
+if [[ -z "$1" ]]; then echo "arg: version;" exit 1; fi
 gradle "-Pversion=${1}" clean test uploadArchives 
+
+read -e -p "Upload successful. Also tag? [y/N]"
+if [[ "$REPLY" == [Yy]* ]]; then
+  git tag "v${1}"
+  git push origin --tags
+fi
 
