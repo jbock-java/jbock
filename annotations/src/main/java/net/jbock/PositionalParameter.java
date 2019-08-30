@@ -4,7 +4,6 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
-import java.util.function.Supplier;
 
 /**
  * <h3>Marker for positional parameter methods</h3>
@@ -14,11 +13,11 @@ import java.util.function.Supplier;
  * <li>The annotated method may not carry the {@link Parameter} annotation.</li>
  * </ul>
  *
- * <p>For example, the following shell commands are passing positional parameters:</p>
+ * <p>For example, the following shell commands are all using positional parameters:</p>
  * <pre>{@code
- * ls ..
+ * cd ..
  * git log
- * echo 'First positional parameter' 'Second positional parameter'
+ * echo "Hello world!"
  * }</pre>
  */
 @Target(ElementType.METHOD)
@@ -42,50 +41,44 @@ public @interface PositionalParameter {
   int position() default 0;
 
   /**
-   * Defines the description argument name.
-   * See {@link Parameter#descriptionArgumentName()}.
+   * @see Parameter#descriptionArgumentName
    *
-   * @return an optional name that's used in the parameter description
+   * @return a string
    */
   String descriptionArgumentName() default "";
 
   /**
-   * Optional custom mapper.
-   * See {@link Parameter#mappedBy()}.
+   * @see Parameter#mappedBy
    *
-   * @return a mapper class
+   * @return a class
    */
   Class<?> mappedBy() default Object.class;
 
   /**
-   * Optional custom collector.
-   * See {@link Parameter#collectedBy()}.
+   * @see Parameter#collectedBy
    *
-   * @return a collector class
+   * @return a class
    */
   Class<?> collectedBy() default Object.class;
 
   /**
-   * Declares this parameter as repeatable.
-   * See {@link Parameter#repeatable()}.
+   * @see Parameter#repeatable
    *
-   * @return true if this parameter is repeatable
+   * @return a boolean
    */
   boolean repeatable() default false;
 
   /**
-   * Declares this parameter as optional.
-   * See {@link Parameter#optional()}.
+   * @see Parameter#optional
    *
-   * @return true if this parameter is optional
+   * @return a boolean
    */
   boolean optional() default false;
 
   /**
-   * Defines a bundle key.
-   * See {@link Parameter#bundleKey()}.
+   * @see Parameter#bundleKey
    *
-   * @return an optional resource bundle key
+   * @return a string
    */
   String bundleKey() default "";
 }

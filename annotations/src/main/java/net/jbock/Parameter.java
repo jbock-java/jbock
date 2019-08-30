@@ -18,13 +18,13 @@ import java.lang.annotation.Target;
 public @interface Parameter {
 
   /**
-   * <p>Long names define 'gnu style' parameters that start with two dashes.</p>
+   * <p>Long names define 'gnu style' parameters that start with two dashes.
+   * Long parameters can be passed in two different forms:</p>
    *
-   * <p>Example:</p>
-   *
-   * <pre>{@code
-   * date --iso-8601
-   * }</pre>
+   * <ul>
+   * <li>Attached: {@code --file=foo.txt}</li>
+   * <li>Detached: {@code --file foo.txt}</li>
+   * </ul>
    *
    * @return a valid long name
    */
@@ -32,22 +32,24 @@ public @interface Parameter {
 
   /**
    * <p>Short names define arguments that consist of a single dash followed
-   * by a single character.</p>
+   * by a single character.
+   * The space character represents "no short name defined".
+   * Short parameters can be passed in two different forms:</p>
    *
-   * <p>Example:</p>
-   *
-   * <pre>{@code
-   * curl -X 'Accept: application/json'
-   * }</pre>
+   * <ul>
+   * <li>Attached: {@code -f=foo.txt}</li>
+   * <li>Detached: {@code -f foo.txt}</li>
+   * </ul>
    *
    * @return an alphanumeric character
    */
   char shortName() default ' ';
 
   /**
-   * The argument name that's printed in the example usage.
+   * The argument name that's printed in the example usage,
+   * when the user has passed the {@code --help} parameter.
    *
-   * @return an optional name that's used in the parameter description
+   * @return an example argument name for this parameter
    */
   String descriptionArgumentName() default "";
 
@@ -111,33 +113,43 @@ public @interface Parameter {
   Class<?> collectedBy() default Object.class;
 
   /**
-   * <p>Declares this parameter as repeatable.</p>
+   * <p>If {@code true}, or if {@link #mappedBy} or {@link #collectedBy} are set,
+   * declares that this parameter is repeatable.
+   * If {@code false} or unspecified, and neither {@link #collectedBy} nor  {@link #mappedBy} are set,
+   * the question whether or not this parameter is repeatable
+   * will be answered by looking at the parameter's type.</p>
    *
-   * @return true if this parameter is repeatable
+   * <p>In the second case, the only parameter type that will lead to a repeatable parameter is {@link java.util.List}.</p>
+   *
+   * @return true to ensure that this parameter is repeatable
    */
   boolean repeatable() default false;
 
   /**
-   * <p>Declares this parameter as optional.</p>
+   * <p>If {@code true}, or if {@link #mappedBy} or {@link #collectedBy} are set,
+   * declares whether this parameter is optional or required.
+   * If {@code false} or unspecified, and neither {@link #collectedBy} nor  {@link #mappedBy} are set,
+   * the question whether this parameter
+   * is optional or required will be answered by looking at the parameter's type.</p>
    *
-   * <p>
-   * <em>Note:</em>
-   * Parameters are required by default. However,
-   * {@link #repeatable()} and {@link #flag()}
-   * parameters are always optional.
-   *</p>
+   * <p>In the second case, these are all the parameter types that will lead to an optional parameter:</p>
    *
-   * @return true if this parameter is optional
+   * <ul>
+   * <li>{@link java.util.Optional}</li>
+   * <li>{@link java.util.OptionalInt}</li>
+   * <li>{@link java.util.OptionalLong}</li>
+   * <li>{@link java.util.OptionalDouble}</li>
+   * </ul>
+   *
+   * @return true to ensure that this parameter is optional
    */
   boolean optional() default false;
 
   /**
-   * <p>Declares a parameter that doesn't take an argument.
-   * For example, the following shell command contains the flag {@code -l}:</p>
-   *
-   * <pre>{@code
-   * ls -l
-   * }</pre>
+   * <p>If {@code true}, the parameter's type must be {@code boolean} or {@code Boolean}.
+   * It will then be treated as a "flag" parameter that doesn't take an argument.
+   * At runtime, the boolean value will indicate presence or absence of the parameter in the argument vector.
+   * Repeating or "grouping" of flag parameters is not supported.</p>
    *
    * @return true if this parameter is a flag
    */
