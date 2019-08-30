@@ -92,13 +92,13 @@ final class MapperClassValidator {
     return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
   }
 
-  static final class TmpMapperType {
+  private static class TmpMapperType {
 
-    private final TypeElement mapperClass; // implements Function or Supplier<Function>
-    private final TypeMirror type; // subtype of Function
-    private final boolean supplier; // wrapped in Supplier?
+    final TypeElement mapperClass; // implements Function or Supplier<Function>
+    final TypeMirror type; // subtype of Function
+    final boolean supplier; // wrapped in Supplier?
 
-    private TmpMapperType(TypeElement mapperClass, TypeMirror type, boolean supplier) {
+    TmpMapperType(TypeElement mapperClass, TypeMirror type, boolean supplier) {
       this.mapperClass = mapperClass;
       this.type = type;
       this.supplier = supplier;
@@ -118,7 +118,7 @@ final class MapperClassValidator {
       return new TmpMapperType(mapperClass, type, supplier);
     }
 
-    private static ValidationException boom(BasicInfo basicInfo, String message) {
+    static ValidationException boom(BasicInfo basicInfo, String message) {
       return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s", message));
     }
   }
@@ -136,13 +136,13 @@ final class MapperClassValidator {
       TypeMirror s = null;
       if (tMirror != null) {
         if (isInvalidT(typeParameter)) {
-          throw boom("Invalid bounds on the type parameters of the mapper class");
+          throw boom("invalid bounds");
         }
         s = tMirror;
       }
       if (rMirror != null) {
         if (isInvalidR(typeParameter)) {
-          throw boom("Invalid bounds on the type parameters of the mapper class");
+          throw boom("invalid bounds");
         }
         s = rMirror;
       }

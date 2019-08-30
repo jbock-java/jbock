@@ -36,7 +36,7 @@ class CollectorTest {
   }
 
   @Test
-  void invalidCollectorClassDoesntExist() {
+  void invalidCollectorClassDoesNotExist() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -354,7 +354,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds.");
+        .withErrorContaining("There is a problem with the collector class: invalid bounds.");
   }
 
   @Test
@@ -443,26 +443,89 @@ class CollectorTest {
         "",
         "  @Parameter(shortName = 'x',",
         "             repeatable = true,",
-        "             mappedBy = XMap.class,",
-        "             collectedBy = YCol.class)",
+        "             mappedBy = Map.class,",
+        "             collectedBy = Collect.class)",
         "  abstract List<Integer> map();",
         "",
-        "  static class XMap<F extends java.lang.Number, E extends java.lang.CharSequence> implements Supplier<Function<E, F>> {",
+        "  static class Map<F extends java.lang.Number, E extends java.lang.CharSequence> implements Supplier<Function<E, F>> {",
         "    public Function<E, F> get() {",
         "      return null;",
         "    }",
         "  }",
         "",
-        "  static class YCol<E> implements Supplier<Collector<E, ?, List<E>>> {",
+        "  static class Collect<E extends java.lang.Number> implements Supplier<Collector<E, ?, List<E>>> {",
         "    public Collector<E, ?, List<E>> get() {",
-        "      return Collectors.toList();",
+        "      return null;",
         "    }",
         "  }",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(new Processor(true))
         .compilesWithoutError();
+  }
+
+  @Test
+  void invalidBothMapperAndCollectorHaveTypeargsBadCollectorBounds() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             mappedBy = Map.class,",
+        "             collectedBy = Collect.class)",
+        "  abstract List<Integer> map();",
+        "",
+        "  static class Map<F extends java.lang.Number, E extends java.lang.CharSequence> implements Supplier<Function<E, F>> {",
+        "    public Function<E, F> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class Collect<E extends java.lang.Long> implements Supplier<Collector<E, ?, List<E>>> {",
+        "    public Collector<E, ?, List<E>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor(true))
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the collector class: invalid bounds.");
+  }
+
+  // TODO inferring collector input from mapper output is currently not supported
+  @Test
+  void invalidBothMapperAndCollectorHaveTypeargsUnresolvedCollectorTypearg() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             mappedBy = Map.class,",
+        "             collectedBy = Collect.class)",
+        "  abstract List<Integer> map();",
+        "",
+        "  static class Map<F extends java.lang.Number, E extends java.lang.CharSequence> implements Supplier<Function<E, F>> {",
+        "    public Function<E, F> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class Collect<F, E extends java.lang.Number> implements Supplier<Collector<F, ?, List<E>>> {",
+        "    public Collector<F, ?, List<E>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor(false))
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the collector class: could not resolve all type parameters.");
   }
 
   @Test
@@ -493,7 +556,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds.");
+        .withErrorContaining("There is a problem with the collector class: invalid bounds.");
   }
 
   @Test

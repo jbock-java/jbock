@@ -43,41 +43,46 @@ public final class MapperCoercion extends CoercionFactory {
 
   @Override
   public CodeBlock initMapper() {
-    CodeBlock typeParameters = getTypeParameters();
-    return CodeBlock.of("$T $N = new $T$L",
+    return CodeBlock.of("$T $N = $L",
         mapperParam.type,
         mapperParam,
-        mapperType.mapperType(),
-        typeParameters);
+        createMapper());
   }
 
-  private CodeBlock getTypeParameters() {
-    if (!mapperType.hasTypeParams()) {
-      if (!mapperType.supplier()) {
-        // new Mapper();
+  private CodeBlock createMapper() {
+    return CodeBlock.of("new $T$L",
+        mapperType.mapperType(),
+        getTypeParameters(mapperType.solution(), mapperType.supplier()));
+  }
+
+  static CodeBlock getTypeParameters(
+      List<TypeMirror> params,
+      boolean supplier) {
+    if (params.isEmpty()) {
+      if (!supplier) {
+        // new X();
         return CodeBlock.of("()");
       } else {
-        // new Mapper().get();
+        // new X().get();
         return CodeBlock.of("().get()");
       }
     }
-    if (!mapperType.supplier()) {
-      // new Mapper<>();
+    if (!supplier) {
+      // new X<>();
       return CodeBlock.of("<>()");
     }
-    CodeBlock.Builder typeParameterList = CodeBlock.builder();
-    // compiler can't handle new Mapper<>().get();
+    CodeBlock.Builder code = CodeBlock.builder();
+    // compiler can't handle new X<>().get();
     // needs explicit type params
-    typeParameterList.add("<");
-    List<TypeMirror> solution = mapperType.solution();
-    for (int i = 0; i < solution.size(); i++) {
-      TypeMirror typeMirror = solution.get(i);
-      typeParameterList.add("$T", typeMirror);
-      if (i < solution.size() - 1) {
-        typeParameterList.add(", ");
+    code.add("<");
+    for (int i = 0; i < params.size(); i++) {
+      TypeMirror typeMirror = params.get(i);
+      code.add("$T", typeMirror == null ? Object.class : typeMirror);
+      if (i < params.size() - 1) {
+        code.add(", ");
       }
     }
-    typeParameterList.add(">().get()");
-    return typeParameterList.build();
+    code.add(">().get()");
+    return code.build();
   }
 }

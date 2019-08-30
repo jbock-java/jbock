@@ -38,10 +38,6 @@ public final class MapperType {
     return tool.erasure(mapperClass.asType());
   }
 
-  public boolean hasTypeParams() {
-    return !mapperClass.getTypeParameters().isEmpty();
-  }
-
   public boolean supplier() {
     return supplier;
   }

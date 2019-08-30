@@ -15,9 +15,12 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.stream.Collector;
 
+import static net.jbock.coerce.mappers.MapperCoercion.getTypeParameters;
+
 public abstract class CoercionFactory {
 
-  final TypeMirror mapperReturnType;
+  // trigger for this factory
+  private final TypeMirror mapperReturnType;
 
   CoercionFactory(Class<?> mapperReturnType) {
     this(TypeTool.get().getTypeElement(mapperReturnType).asType());
@@ -40,7 +43,9 @@ public abstract class CoercionFactory {
     return CodeBlock.builder().build();
   }
 
-  public Coercion getCoercion(BasicInfo basicInfo, Optional<CollectorType> collectorType) {
+  public Coercion getCoercion(
+      BasicInfo basicInfo,
+      Optional<CollectorType> collectorType) {
     Optional<CodeBlock> mapExpr = mapExpr();
     CodeBlock initMapper = initMapper();
     TypeMirror constructorParamType = getConstructorParamType(basicInfo);
@@ -55,13 +60,15 @@ public abstract class CoercionFactory {
         mapExpr,
         initMapper,
         mapperReturnType,
-        collectorType.map(type -> CodeBlock.of(
-            String.format("new $T%s()%s",
-                type.hasTypeParams() && !type.supplier() ? "<>" : "", // TODO "<>"
-                type.supplier() ? ".get()" : ""),
-            type.collectorType())),
+        collectorType.map(this::createCollector),
         constructorParamType,
         basicInfo);
+  }
+
+  private CodeBlock createCollector(CollectorType collectorType) {
+    return CodeBlock.of("new $T$L",
+        collectorType.collectorType(),
+        getTypeParameters(collectorType.solution(), collectorType.supplier()));
   }
 
   private TypeMirror getConstructorParamType(BasicInfo basicInfo) {

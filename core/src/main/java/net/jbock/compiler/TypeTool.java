@@ -22,6 +22,19 @@ import java.util.Optional;
 
 public class TypeTool {
 
+  public static final TypeVisitor<Boolean, TypeTool> IS_JAVA_LANG_OBJECT = new SimpleTypeVisitor8<Boolean, TypeTool>() {
+    @Override
+    protected Boolean defaultAction(TypeMirror e, TypeTool tool) {
+      return false;
+    }
+
+    @Override
+    public Boolean visitDeclared(DeclaredType type, TypeTool tool) {
+      TypeElement element = tool.asTypeElement(type.asElement());
+      return "java.lang.Object".equals(element.getQualifiedName().toString());
+    }
+  };
+
   private static final TypeVisitor<List<? extends TypeMirror>, Void> TYPEARGS =
       new SimpleTypeVisitor8<List<? extends TypeMirror>, Void>() {
         @Override
@@ -138,7 +151,7 @@ public class TypeTool {
     return result;
   }
 
-  private boolean isAssignableToTypeElement(TypeMirror result) {
+  public boolean isAssignableToTypeElement(TypeMirror result) {
     if (result.getKind() == TypeKind.WILDCARD ||
         result.getKind() == TypeKind.TYPEVAR) {
       return true;
@@ -171,7 +184,7 @@ public class TypeTool {
     return types.isAssignable(mirror, bound);
   }
 
-  private TypeMirror subst(
+  public TypeMirror subst(
       TypeMirror input,
       Map<String, TypeMirror> solution) {
     if (input.getKind() == TypeKind.TYPEVAR) {

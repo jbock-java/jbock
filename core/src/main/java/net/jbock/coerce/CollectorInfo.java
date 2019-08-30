@@ -5,6 +5,7 @@ import java.util.Optional;
 
 public class CollectorInfo {
 
+  // the T in Collector<T, A, R>; this is clear from the return type of the mapper function
   final TypeMirror inputType;
 
   private final Optional<CollectorType> collectorType;

@@ -101,7 +101,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Invalid bounds on the type parameters of the mapper class.");
+        .withErrorContaining("There is a problem with the mapper class: invalid bounds.");
   }
 
   @Test
@@ -168,7 +168,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Invalid bounds on the type parameters of the mapper class.");
+        .withErrorContaining("There is a problem with the mapper class: invalid bounds.");
   }
 
 

@@ -5,12 +5,9 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
-import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.Map;
 
 final class AnnotationUtil {
@@ -40,20 +37,6 @@ final class AnnotationUtil {
     }
   };
 
-  private static final TypeVisitor<Boolean, TypeTool> IS_JAVA_LANG_OBJECT = new SimpleTypeVisitor8<Boolean, TypeTool>() {
-    @Override
-    protected Boolean defaultAction(TypeMirror e, TypeTool tool) {
-      return false;
-    }
-
-    @Override
-    public Boolean visitDeclared(DeclaredType type, TypeTool tool) {
-      TypeElement element = tool.asTypeElement(type.asElement());
-      return "java.lang.Object".equals(element.getQualifiedName().toString());
-    }
-  };
-
-
   private static TypeElement get(
       ExecutableElement sourceMethod,
       Class<?> annotationClass,
@@ -70,7 +53,7 @@ final class AnnotationUtil {
     }
     TypeMirror typeMirror = annotationValue.accept(GET_TYPE, new AnnotationUtilContext(sourceMethod, attributeName));
     TypeTool tool = TypeTool.get();
-    if (typeMirror.accept(IS_JAVA_LANG_OBJECT, tool)) {
+    if (typeMirror.accept(TypeTool.IS_JAVA_LANG_OBJECT, tool)) {
       // if the default value is not overridden
       return null;
     }

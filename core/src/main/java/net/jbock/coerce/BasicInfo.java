@@ -59,10 +59,12 @@ public class BasicInfo {
     return paramName;
   }
 
+  // lifted return type of the parameter method
   public TypeMirror returnType() {
     return attributes.liftedType();
   }
 
+  // return type of the parameter method
   public TypeMirror originalReturnType() {
     return sourceMethod.getReturnType();
   }
@@ -99,11 +101,11 @@ public class BasicInfo {
     return optionalInfo().isPresent();
   }
 
-  public Optional<TypeElement> mapperClass() {
+  Optional<TypeElement> mapperClass() {
     return mapperClass;
   }
 
-  public Optional<TypeElement> collectorClass() {
+  Optional<TypeElement> collectorClass() {
     return collectorClass;
   }
 }
