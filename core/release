@@ -2,6 +2,17 @@
 # 1. Define this key in ~/.gradle/gradle.properties: signing.secretKeyRingFile (full path to exported keyring, no ascii armor)
 # 2. Source / export these environment variables: OSS_USER, OSS_PASS (login for http://oss.sonatype.org/)
 # 3. Source / export these environment variables: SIGNING_KEY_ID, SIGNING_PASSWORD
-if [[ -z "$1" ]]; then echo arg: version; exit 1; fi
+set -e
+
+if [[ -z "$1" ]]; then echo "arg: version;" exit 1; fi
 gradle "-Pversion=${1}" clean test uploadArchives 
+
+echo "also tag? [y|n]"
+read response
+if [[ "$response" == [Yy]* ]]; then
+  git tag "v${1}"
+  git push origin --tags
+else
+  echo "tag v${1} not added"
+fi
 
