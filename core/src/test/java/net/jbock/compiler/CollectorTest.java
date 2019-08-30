@@ -430,7 +430,7 @@ class CollectorTest {
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor(true))
+        .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("The collector should return Set<String> but returns Set<Long>");
   }
@@ -461,7 +461,7 @@ class CollectorTest {
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor(true))
+        .processedWith(new Processor())
         .compilesWithoutError();
   }
 
@@ -491,7 +491,7 @@ class CollectorTest {
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor(true))
+        .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("There is a problem with the collector class: invalid bounds.");
   }
@@ -523,9 +523,41 @@ class CollectorTest {
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor(false))
+        .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("There is a problem with the collector class: could not resolve all type parameters.");
+  }
+
+  @Test
+  void validBothMapperCollectorAndResultTypeHaveTypeargs() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             mappedBy = Map.class,",
+        "             collectedBy = Collect.class)",
+        "  abstract List<List<Result<String>>> map();",
+        "",
+        "  static class Map<E, F> implements Supplier<Function<E, F>> {",
+        "    public Function<E, F> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class Collect<E extends List> implements Supplier<Collector<E, ?, List<E>>> {",
+        "    public Collector<E, ?, List<E>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class Result<E> {}",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
   }
 
   @Test
