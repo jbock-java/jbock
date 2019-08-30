@@ -22,10 +22,12 @@ Note that `path` is a required parameter, because its type is not `Optional`.
 This type-inferred optionality, which can also be made explicit,
 is easy to remember by the rule that *jbock never returns null*.
 
-Now **build once** to trigger the code generation. See also <a href="#gradle-config">*gradle*</a> or
+After adding such a model class to your project,
+you have to **build once** to trigger the code generation.
+See also <a href="#gradle-config">*gradle*</a> or
 <a href="#maven-config">*maven*</a> config.
 
-The derived class `MyArguments_Parser`, the source of which has now been generated,
+The derived class `MyArguments_Parser`, the source of which will then be generated,
 can be used in your `main` method as follows:
 
 ````java
