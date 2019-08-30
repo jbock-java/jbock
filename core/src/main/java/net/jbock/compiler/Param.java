@@ -195,18 +195,27 @@ final class Param {
     boolean flag = isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType(), tool);
     boolean required = !repeatable && !optional && !flag;
     ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
-    if (optional && flag) {
-      throw ValidationException.create(sourceMethod, "A flag cannot be optional.");
-    }
-    if (repeatable && flag) {
-      throw ValidationException.create(sourceMethod, "A flag cannot be repeatable.");
-    }
-    if (flag && mapperClass != null) {
-      throw ValidationException.create(sourceMethod,
-          "A flag parameter can't have a mapper.");
-    }
-    if (flag && !parameter.descriptionArgumentName().isEmpty()) {
-      throw ValidationException.create(sourceMethod, "A flag cannot have a description argument name.");
+    if (flag) {
+      if (parameter.optional()) {
+        throw ValidationException.create(sourceMethod,
+            "A flag cannot be optional.");
+      }
+      if (parameter.repeatable()) {
+        throw ValidationException.create(sourceMethod,
+            "A flag cannot be repeatable.");
+      }
+      if (mapperClass != null) {
+        throw ValidationException.create(sourceMethod,
+            "A flag parameter can't have a mapper.");
+      }
+      if (collectorClass != null) {
+        throw ValidationException.create(sourceMethod,
+            "A flag parameter can't have a collector.");
+      }
+      if (!parameter.descriptionArgumentName().isEmpty()) {
+        throw ValidationException.create(sourceMethod,
+            "A flag cannot have a description argument name.");
+      }
     }
     ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
     Coercion typeInfo = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
