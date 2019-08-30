@@ -19,8 +19,10 @@ abstract class MyArguments {
 ````
 
 Note that `path` is a required parameter, because its type is not `Optional`.
-This type-inferred optionality, which can also be made explicit,
-is easy to remember by the rule that *jbock never returns null*.
+This correspondence of optional parameters to optional types,
+and required parameters to all other types, can also be made explicit by setting the
+`optional` attribute.
+The general rule is easy to remember by the slogan that *jbock never returns null*.
 
 After adding such a model class to your project,
 you have to **build once** to trigger the code generation.
