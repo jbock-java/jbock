@@ -529,7 +529,7 @@ class CollectorTest {
   }
 
   @Test
-  void validBothMapperCollectorAndResultTypeHaveTypeargs() {
+  void validBothMapperCollectorAndResultHaveTypeargs() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
@@ -538,21 +538,21 @@ class CollectorTest {
         "             repeatable = true,",
         "             mappedBy = Map.class,",
         "             collectedBy = Collect.class)",
-        "  abstract List<List<Result<String>>> map();",
+        "  abstract List<Result<String>> map();",
         "",
-        "  static class Map<E, F> implements Supplier<Function<E, F>> {",
+        "  static class Map<E, F extends java.util.Collection> implements Supplier<Function<E, F>> {",
         "    public Function<E, F> get() {",
         "      return null;",
         "    }",
         "  }",
         "",
-        "  static class Collect<E extends List> implements Supplier<Collector<E, ?, List<E>>> {",
-        "    public Collector<E, ?, List<E>> get() {",
+        "  static class Collect<E extends Result> implements Supplier<Collector<Set<E>, ?, List<E>>> {",
+        "    public Collector<Set<E>, ?, List<E>> get() {",
         "      return null;",
         "    }",
         "  }",
         "",
-        "  static class Result<E> {}",
+        "  static class Result<E extends java.lang.CharSequence> {}",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
