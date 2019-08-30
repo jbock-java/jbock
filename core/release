@@ -7,12 +7,9 @@ set -e
 if [[ -z "$1" ]]; then echo "arg: version;" exit 1; fi
 gradle "-Pversion=${1}" clean test uploadArchives 
 
-echo "also tag? [y|n]"
-read response
-if [[ "$response" == [Yy]* ]]; then
+read -e -p "Upload successful. Also tag? [y/N]"
+if [[ "$REPLY" == [Yy]* ]]; then
   git tag "v${1}"
   git push origin --tags
-else
-  echo "tag v${1} not added"
 fi
 
