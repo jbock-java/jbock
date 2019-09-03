@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import net.jbock.coerce.collector.CustomCollector;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeExpr;
 import net.jbock.compiler.TypeTool;
@@ -8,7 +9,7 @@ import org.junit.jupiter.api.Test;
 import javax.lang.model.element.TypeElement;
 
 import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -36,10 +37,10 @@ class CollectorClassValidatorTest {
           "java.util.Set<java.lang.String>"));
 
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
-      CollectorInfo collectorInfo = new CollectorClassValidator(basicInfo)
+      CustomCollector collectorInfo = new CollectorClassValidator(basicInfo)
           .getCollectorInfo(collectorClass);
-      assertSameType("java.lang.String", collectorInfo.inputType, elements, types);
-      assertTrue(collectorInfo.collectorType().isPresent());
+      assertSameType("java.lang.String", collectorInfo.inputType(), elements, types);
+      assertNotNull(collectorInfo.collectorType());
     });
   }
 }

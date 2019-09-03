@@ -25,7 +25,7 @@ class PositionalTest {
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(new Processor(true))
         .compilesWithoutError();
   }
 
