@@ -67,7 +67,7 @@ public abstract class CoercionFactory {
 
   private CodeBlock createCollector(CollectorType collectorType) {
     return CodeBlock.of("new $T$L",
-        collectorType.collectorType(),
+        TypeTool.get().erasure(collectorType.collectorType()),
         getTypeParameters(collectorType.solution(), collectorType.supplier()));
   }
 

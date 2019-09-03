@@ -26,9 +26,4 @@ public class CollectorInfo {
   Optional<CollectorType> collectorType() {
     return collectorType;
   }
-
-  @Override
-  public String toString() {
-    return "input: " + inputType;
-  }
 }

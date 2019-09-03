@@ -123,6 +123,6 @@ class CollectorClassValidator {
       }
       solution.add(s);
     }
-    return CollectorType.create(basicInfo, collectorType.supplier, collectorType.collectorClass, solution);
+    return CollectorType.create(collectorType.supplier, collectorType.collectorClass, solution);
   }
 }
