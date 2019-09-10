@@ -4,6 +4,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.collector.AbstractCollector;
+import net.jbock.coerce.collector.DefaultCollector;
 import net.jbock.coerce.hint.HintProvider;
 import net.jbock.coerce.mappers.CoercionFactory;
 import net.jbock.coerce.mappers.EnumCoercion;
@@ -94,17 +96,17 @@ public class CoercionProvider {
   }
 
   private Coercion handleRepeatableAutoMapper() throws UnknownTypeException {
-    CollectorInfo collectorInfo = collectorInfo();
-    CoercionFactory coercion = findCoercion(collectorInfo.inputType);
-    return coercion.getCoercion(basicInfo, collectorInfo.collectorType());
+    AbstractCollector collectorInfo = collectorInfo();
+    CoercionFactory coercion = findCoercion(collectorInfo.inputType());
+    return coercion.getCoercion(basicInfo, Optional.of(collectorInfo));
   }
 
   private Coercion handleRepeatableExplicitMapper(
       TypeElement mapperClass) {
-    CollectorInfo collectorInfo = collectorInfo();
-    MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType, mapperClass).checkReturnType();
-    ParameterSpec mapperParam = mapperParam(collectorInfo.inputType);
-    return MapperCoercion.create(collectorInfo.inputType, collectorInfo.collectorType(), mapperParam, mapperType, basicInfo);
+    AbstractCollector collectorInfo = collectorInfo();
+    MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
+    ParameterSpec mapperParam = mapperParam(collectorInfo.inputType());
+    return MapperCoercion.create(collectorInfo.inputType(), Optional.of(collectorInfo), mapperParam, mapperType, basicInfo);
   }
 
   private CoercionFactory findCoercion(TypeMirror mirror) throws UnknownTypeException {
@@ -136,7 +138,7 @@ public class CoercionProvider {
     return true;
   }
 
-  private CollectorInfo collectorInfo() {
+  private AbstractCollector collectorInfo() {
     if (basicInfo.collectorClass().isPresent()) {
       return new CollectorClassValidator(basicInfo).getCollectorInfo(basicInfo.collectorClass().get());
     }
@@ -147,7 +149,7 @@ public class CoercionProvider {
     if (typeParameters.isEmpty()) {
       throw basicInfo.asValidationException("Add a type parameter.");
     }
-    return CollectorInfo.listCollector(typeParameters.get(0));
+    return new DefaultCollector(typeParameters.get(0));
   }
 
   private TypeTool tool() {

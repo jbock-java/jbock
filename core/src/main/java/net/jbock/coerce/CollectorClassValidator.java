@@ -1,5 +1,7 @@
 package net.jbock.coerce;
 
+import net.jbock.coerce.collector.CustomCollector;
+import net.jbock.coerce.collector.DefaultCollector;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -34,7 +36,7 @@ class CollectorClassValidator {
   }
 
   // visible for testing
-  CollectorInfo getCollectorInfo(TypeElement collectorClass) {
+  CustomCollector getCollectorInfo(TypeElement collectorClass) {
     commonChecks(basicInfo, collectorClass, "collector");
     TmpCollectorType collectorType = getCollectorType(collectorClass);
     TypeMirror t = asDeclared(collectorType.type).getTypeArguments().get(0);
@@ -44,11 +46,11 @@ class CollectorClassValidator {
     if (!tool().isAssignableToTypeElement(collectorClass.asType())) {
       throw boom("invalid bounds");
     }
-    TypeMirror collectorInput = tool().substitute(t, r_result);
-    if (collectorInput == null) {
+    TypeMirror inputType = tool().substitute(t, r_result);
+    if (inputType == null) {
       throw boom("could not resolve all type parameters");
     }
-    return CollectorInfo.create(collectorInput, solve(collectorType, r_result));
+    return solve(inputType, collectorType, r_result);
   }
 
   private TmpCollectorType getCollectorType(TypeElement collectorClass) {
@@ -106,7 +108,8 @@ class CollectorClassValidator {
     }
   }
 
-  private CollectorType solve(
+  private CustomCollector solve(
+      TypeMirror inputType,
       TmpCollectorType collectorType,
       Map<String, TypeMirror> r_result) {
     List<? extends TypeParameterElement> typeParameters = collectorType.collectorClass.getTypeParameters();
@@ -123,6 +126,6 @@ class CollectorClassValidator {
       }
       solution.add(s);
     }
-    return CollectorType.create(collectorType.supplier, collectorType.collectorClass, solution);
+    return new CustomCollector(inputType, collectorType.collectorClass, collectorType.supplier, solution);
   }
 }

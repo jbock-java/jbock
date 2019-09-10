@@ -8,7 +8,8 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.CollectorType;
+import net.jbock.coerce.collector.AbstractCollector;
+import net.jbock.coerce.collector.CustomCollector;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
@@ -45,30 +46,30 @@ public abstract class CoercionFactory {
 
   public Coercion getCoercion(
       BasicInfo basicInfo,
-      Optional<CollectorType> collectorType) {
+      Optional<AbstractCollector> collector) {
     Optional<CodeBlock> mapExpr = mapExpr();
     CodeBlock initMapper = initMapper();
     TypeMirror constructorParamType = getConstructorParamType(basicInfo);
-    Optional<ParameterSpec> collectorParam;
-    if (!collectorType.isPresent()) {
-      collectorParam = Optional.empty();
-    } else {
-      collectorParam = collectorParam(basicInfo, mapperReturnType);
-    }
+    Optional<ParameterSpec> collectorParam = collector.flatMap(collectorInfo ->
+        collectorParam(basicInfo, collectorInfo));
     return Coercion.create(
         collectorParam,
         mapExpr,
         initMapper,
         mapperReturnType,
-        collectorType.map(this::createCollector),
+        collector.flatMap(this::createCollector),
         constructorParamType,
         basicInfo);
   }
 
-  private CodeBlock createCollector(CollectorType collectorType) {
-    return CodeBlock.of("new $T$L",
-        TypeTool.get().erasure(collectorType.collectorType()),
-        getTypeParameters(collectorType.solution(), collectorType.supplier()));
+  private Optional<CodeBlock> createCollector(AbstractCollector collectorInfo) {
+    if (!(collectorInfo instanceof CustomCollector)) {
+      return Optional.empty();
+    }
+    CustomCollector collector = (CustomCollector) collectorInfo;
+    return Optional.of(CodeBlock.of("new $T$L",
+        TypeTool.get().erasure(collector.collectorType()),
+        getTypeParameters(collector.solution(), collector.supplier())));
   }
 
   private TypeMirror getConstructorParamType(BasicInfo basicInfo) {
@@ -79,10 +80,10 @@ public abstract class CoercionFactory {
     return mapperReturnType;
   }
 
-  private Optional<ParameterSpec> collectorParam(
+  private static Optional<ParameterSpec> collectorParam(
       BasicInfo basicInfo,
-      TypeMirror mapperReturnType) {
-    TypeName t = TypeName.get(mapperReturnType);
+      AbstractCollector collectorInfo) {
+    TypeName t = TypeName.get(collectorInfo.inputType());
     TypeName a = WildcardTypeName.subtypeOf(Object.class);
     TypeName r = TypeName.get(basicInfo.returnType());
     return Optional.of(ParameterSpec.builder(ParameterizedTypeName.get(
