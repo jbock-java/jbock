@@ -6,6 +6,7 @@ import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.MapperType;
 import net.jbock.coerce.collector.AbstractCollector;
+import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
@@ -54,7 +55,7 @@ public final class MapperCoercion extends CoercionFactory {
 
   private CodeBlock createMapper() {
     return CodeBlock.of("new $T$L",
-        mapperType.mapperType(),
+        TypeTool.get().erasure(mapperType.mapperType()),
         getTypeParameters(mapperType.solution(), mapperType.supplier()));
   }
 

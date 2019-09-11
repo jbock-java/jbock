@@ -1,7 +1,6 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.collector.CustomCollector;
-import net.jbock.coerce.collector.DefaultCollector;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -21,9 +20,11 @@ import static net.jbock.compiler.TypeTool.asDeclared;
 class CollectorClassValidator {
 
   private final BasicInfo basicInfo;
+  private final TypeElement collectorClass;
 
-  CollectorClassValidator(BasicInfo basicInfo) {
+  CollectorClassValidator(BasicInfo basicInfo, TypeElement collectorClass) {
     this.basicInfo = basicInfo;
+    this.collectorClass = collectorClass;
   }
 
   private boolean isInvalidR(TypeParameterElement typeParameter, TypeMirror value) {
@@ -36,11 +37,11 @@ class CollectorClassValidator {
   }
 
   // visible for testing
-  CustomCollector getCollectorInfo(TypeElement collectorClass) {
+  CustomCollector getCollectorInfo() {
     commonChecks(basicInfo, collectorClass, "collector");
-    TmpCollectorType collectorType = getCollectorType(collectorClass);
-    TypeMirror t = asDeclared(collectorType.type).getTypeArguments().get(0);
-    TypeMirror r = asDeclared(collectorType.type).getTypeArguments().get(2);
+    CollectorType collectorType = getCollectorType();
+    TypeMirror t = asDeclared(collectorType.collectorType).getTypeArguments().get(0);
+    TypeMirror r = asDeclared(collectorType.collectorType).getTypeArguments().get(2);
     Map<String, TypeMirror> r_result = tool().unify(basicInfo.returnType(), r)
         .orElseThrow(() -> boom(String.format("The collector should return %s but returns %s", basicInfo.returnType(), r)));
     if (!tool().isAssignableToTypeElement(collectorClass.asType())) {
@@ -53,7 +54,7 @@ class CollectorClassValidator {
     return solve(inputType, collectorType, r_result);
   }
 
-  private TmpCollectorType getCollectorType(TypeElement collectorClass) {
+  private CollectorType getCollectorType() {
     Optional<TypeMirror> supplier = Resolver.typecheck(
         Supplier.class,
         collectorClass.asType(),
@@ -63,14 +64,14 @@ class CollectorClassValidator {
       if (typeArgs.isEmpty()) {
         throw boom("raw Supplier type");
       }
-      return TmpCollectorType.create(basicInfo, typeArgs.get(0), true, collectorClass);
+      return collectorType(typeArgs.get(0), true);
     }
     TypeMirror collector = Resolver.typecheck(
         Collector.class,
         collectorClass.asType(),
         basicInfo.tool()).orElseThrow(() ->
         boom("not a Collector or Supplier<Collector>"));
-    return TmpCollectorType.create(basicInfo, collector, false, collectorClass);
+    return collectorType(collector, false);
   }
 
   private TypeTool tool() {
@@ -81,38 +82,32 @@ class CollectorClassValidator {
     return basicInfo.asValidationException(String.format("There is a problem with the collector class: %s.", message));
   }
 
-  private static final class TmpCollectorType {
+  private static final class CollectorType {
 
-    final TypeElement collectorClass; // implements Collector or Supplier<Collector>
-    final TypeMirror type; // subtype of Collector
+    final TypeMirror collectorType; // subtype of Collector
     final boolean supplier; // wrapped in Supplier?
 
-    TmpCollectorType(TypeElement collectorClass, TypeMirror type, boolean supplier) {
-      this.collectorClass = collectorClass;
-      this.type = type;
+    CollectorType(TypeMirror collectorType, boolean supplier) {
+      this.collectorType = collectorType;
       this.supplier = supplier;
     }
+  }
 
-    static TmpCollectorType create(BasicInfo basicInfo, TypeMirror type, boolean supplier, TypeElement collectorClass) {
-      if (!basicInfo.tool().isSameErasure(type, Collector.class)) {
-        throw boom(basicInfo, "must either implement Collector or Supplier<Collector>");
-      }
-      if (basicInfo.tool().isRawType(type)) {
-        throw boom(basicInfo, "the collector type must be parameterized");
-      }
-      return new TmpCollectorType(collectorClass, type, supplier);
+  private CollectorType collectorType(TypeMirror collectorType, boolean supplier) {
+    if (!tool().isSameErasure(collectorType, Collector.class)) {
+      throw boom("must either implement Collector or Supplier<Collector>");
     }
-
-    static ValidationException boom(BasicInfo basicInfo, String message) {
-      return basicInfo.asValidationException(String.format("There is a problem with the collector class: %s", message));
+    if (tool().isRawType(collectorType)) {
+      throw boom("the collector type must be parameterized");
     }
+    return new CollectorType(collectorType, supplier);
   }
 
   private CustomCollector solve(
       TypeMirror inputType,
-      TmpCollectorType collectorType,
+      CollectorType collectorType,
       Map<String, TypeMirror> r_result) {
-    List<? extends TypeParameterElement> typeParameters = collectorType.collectorClass.getTypeParameters();
+    List<? extends TypeParameterElement> typeParameters = collectorClass.getTypeParameters();
     List<TypeMirror> solution = new ArrayList<>(typeParameters.size());
     for (TypeParameterElement typeParameter : typeParameters) {
       String param = typeParameter.toString();
@@ -126,6 +121,6 @@ class CollectorClassValidator {
       }
       solution.add(s);
     }
-    return new CustomCollector(inputType, collectorType.collectorClass, collectorType.supplier, solution);
+    return new CustomCollector(inputType, collectorClass, collectorType.supplier, solution);
   }
 }

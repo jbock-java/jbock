@@ -140,7 +140,7 @@ public class CoercionProvider {
 
   private AbstractCollector collectorInfo() {
     if (basicInfo.collectorClass().isPresent()) {
-      return new CollectorClassValidator(basicInfo).getCollectorInfo(basicInfo.collectorClass().get());
+      return new CollectorClassValidator(basicInfo, basicInfo.collectorClass().get()).getCollectorInfo();
     }
     if (!tool().isSameErasure(basicInfo.returnType(), List.class)) {
       throw basicInfo.asValidationException("Either define a custom collector, or return List.");

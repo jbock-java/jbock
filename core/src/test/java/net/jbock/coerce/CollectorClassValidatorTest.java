@@ -37,8 +37,8 @@ class CollectorClassValidatorTest {
           "java.util.Set<java.lang.String>"));
 
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
-      CustomCollector collectorInfo = new CollectorClassValidator(basicInfo)
-          .getCollectorInfo(collectorClass);
+      CustomCollector collectorInfo = new CollectorClassValidator(basicInfo, collectorClass)
+          .getCollectorInfo();
       assertSameType("java.lang.String", collectorInfo.inputType(), elements, types);
       assertNotNull(collectorInfo.collectorType());
     });
