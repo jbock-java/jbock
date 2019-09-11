@@ -5,7 +5,7 @@ import java.math.BigDecimal;
 class BigDecimalCoercion extends SimpleCoercion {
 
   BigDecimalCoercion() {
-    super(BigDecimal.class, "$T::new");
+    super(BigDecimal.class, "new");
   }
 
 }

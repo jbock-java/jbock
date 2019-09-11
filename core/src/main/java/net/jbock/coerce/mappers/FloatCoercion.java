@@ -3,7 +3,7 @@ package net.jbock.coerce.mappers;
 final class FloatCoercion extends SimpleCoercion {
 
   FloatCoercion() {
-    super(Float.class, "$T::valueOf");
+    super(Float.class, "valueOf");
   }
 
 }

@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 class PatternCoercion extends SimpleCoercion {
 
   PatternCoercion() {
-    super(Pattern.class, "$T::compile");
+    super(Pattern.class, "compile");
   }
 
 }

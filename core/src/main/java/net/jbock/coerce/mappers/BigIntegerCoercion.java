@@ -5,7 +5,7 @@ import java.math.BigInteger;
 class BigIntegerCoercion extends SimpleCoercion {
 
   BigIntegerCoercion() {
-    super(BigInteger.class, "$T::new");
+    super(BigInteger.class, "new");
   }
 
 }

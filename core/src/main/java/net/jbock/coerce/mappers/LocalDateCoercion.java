@@ -5,7 +5,7 @@ import java.time.LocalDate;
 class LocalDateCoercion extends SimpleCoercion {
 
   LocalDateCoercion() {
-    super(LocalDate.class, "$T::parse");
+    super(LocalDate.class, "parse");
   }
 
 }

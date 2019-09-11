@@ -5,6 +5,6 @@ import java.io.File;
 class FileCoercion extends SimpleCoercion {
 
   FileCoercion() {
-    super(File.class, "$T::new");
+    super(File.class, "new");
   }
 }

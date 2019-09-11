@@ -5,7 +5,7 @@ import java.time.Instant;
 class InstantCoercion extends SimpleCoercion {
 
   InstantCoercion() {
-    super(Instant.class, "$T::parse");
+    super(Instant.class, "parse");
   }
 
 }

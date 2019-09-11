@@ -13,7 +13,7 @@ class SimpleCoercion extends CoercionFactory {
   private final CodeBlock mapExpr;
 
   SimpleCoercion(Class<?> mapperReturnType, String mapExpr) {
-    this(mapperReturnType, CodeBlock.of(mapExpr, mapperReturnType));
+    this(mapperReturnType, CodeBlock.of("$T::" + mapExpr, mapperReturnType));
   }
 
   SimpleCoercion(Class<?> mapperReturnType, CodeBlock mapExpr) {

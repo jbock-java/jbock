@@ -5,7 +5,7 @@ import java.time.ZonedDateTime;
 class ZonedDateTimeCoercion extends SimpleCoercion {
 
   ZonedDateTimeCoercion() {
-    super(ZonedDateTime.class, "$T::parse");
+    super(ZonedDateTime.class, "parse");
   }
 
 }
