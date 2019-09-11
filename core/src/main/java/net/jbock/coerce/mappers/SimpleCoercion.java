@@ -21,6 +21,14 @@ class SimpleCoercion extends CoercionFactory {
     this.mapExpr = mapExpr;
   }
 
+  static SimpleCoercion create(Class<?> mapperReturnType, String mapExpr) {
+    return new SimpleCoercion(mapperReturnType, CodeBlock.of("$T::" + mapExpr, mapperReturnType));
+  }
+
+  static SimpleCoercion create(Class<?> mapperReturnType, CodeBlock mapExpr) {
+    return new SimpleCoercion(mapperReturnType, mapExpr);
+  }
+
   @Override
   final TypeMirror mapperReturnType(TypeTool tool) {
     return tool.getTypeElement(mapperReturnType).asType();

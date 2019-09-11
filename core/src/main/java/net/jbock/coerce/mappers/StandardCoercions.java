@@ -1,14 +1,28 @@
 package net.jbock.coerce.mappers;
 
+import com.squareup.javapoet.CodeBlock;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.io.File;
+import java.math.BigDecimal;
+import java.math.BigInteger;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.OffsetDateTime;
+import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 
 public class StandardCoercions {
 
@@ -19,27 +33,27 @@ public class StandardCoercions {
   private StandardCoercions(TypeTool tool) {
     Map<MapMirror, CoercionFactory> m = new HashMap<>();
     CoercionFactory[] allCoercions = new CoercionFactory[]{
-        new CharsetCoercion(),
-        new PatternCoercion(),
-        new IntegerCoercion(),
-        new LongCoercion(),
-        new DoubleCoercion(),
-        new FloatCoercion(),
-        new CharacterCoercion(),
-        new BooleanCoercion(),
-        new ShortCoercion(),
-        new ByteCoercion(),
-        new PathCoercion(),
-        new FileCoercion(),
-        new URICoercion(),
-        new BigDecimalCoercion(),
-        new BigIntegerCoercion(),
-        new LocalDateCoercion(),
-        new LocalDateTimeCoercion(),
-        new OffsetDateTimeCoercion(),
-        new ZonedDateTimeCoercion(),
-        new InstantCoercion(),
-        new StringCoercion()};
+        new StringCoercion(),
+        SimpleCoercion.create(Integer.class, "valueOf"),
+        SimpleCoercion.create(Long.class, "valueOf"),
+        SimpleCoercion.create(File.class, "new"),
+        SimpleCoercion.create(Character.class, CodeBlock.of("Helper::parseCharacter")),
+        SimpleCoercion.create(Path.class, CodeBlock.of("$T::get", Paths.class)),
+        SimpleCoercion.create(URI.class, "create"),
+        SimpleCoercion.create(BigDecimal.class, "new"),
+        SimpleCoercion.create(BigInteger.class, "new"),
+        SimpleCoercion.create(Charset.class, "forName"),
+        SimpleCoercion.create(Pattern.class, "compile"),
+        SimpleCoercion.create(LocalDate.class, "parse"),
+        SimpleCoercion.create(Short.class, "valueOf"),
+        SimpleCoercion.create(Byte.class, "valueOf"),
+        SimpleCoercion.create(Double.class, "valueOf"),
+        SimpleCoercion.create(Float.class, "valueOf"),
+        SimpleCoercion.create(OffsetDateTime.class, "parse"),
+        SimpleCoercion.create(LocalDateTime.class, "parse"),
+        SimpleCoercion.create(ZonedDateTime.class, "parse"),
+        SimpleCoercion.create(Instant.class, "parse"),
+        SimpleCoercion.create(Boolean.class, "valueOf")};
     for (CoercionFactory coercion : allCoercions) {
       CoercionFactory previous = m.put(new MapMirror(coercion.mapperReturnType(tool)), coercion);
       if (previous != null) {
