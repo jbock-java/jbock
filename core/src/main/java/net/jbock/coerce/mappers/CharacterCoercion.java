@@ -2,16 +2,10 @@ package net.jbock.coerce.mappers;
 
 import com.squareup.javapoet.CodeBlock;
 
-import java.util.Optional;
-
-final class CharacterCoercion extends CoercionFactory {
+final class CharacterCoercion extends SimpleCoercion {
 
   CharacterCoercion() {
-    super(Character.class);
+    super(Character.class, CodeBlock.of("Helper::parseCharacter"));
   }
 
-  @Override
-  final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.of("Helper::parseCharacter"));
-  }
 }

@@ -1,18 +1,11 @@
 package net.jbock.coerce.mappers;
 
-import com.squareup.javapoet.CodeBlock;
-
-import java.util.Optional;
 import java.util.regex.Pattern;
 
-class PatternCoercion extends CoercionFactory {
+class PatternCoercion extends SimpleCoercion {
 
   PatternCoercion() {
-    super(Pattern.class);
+    super(Pattern.class, "$T::compile");
   }
 
-  @Override
-  Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.of("$T::compile", Pattern.class));
-  }
 }

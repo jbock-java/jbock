@@ -1,17 +1,9 @@
 package net.jbock.coerce.mappers;
 
-import com.squareup.javapoet.CodeBlock;
-
-import java.util.Optional;
-
-final class FloatCoercion extends CoercionFactory {
+final class FloatCoercion extends SimpleCoercion {
 
   FloatCoercion() {
-    super(Float.class);
+    super(Float.class, "$T::valueOf");
   }
 
-  @Override
-  final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.of("$T::valueOf", Float.class));
-  }
 }

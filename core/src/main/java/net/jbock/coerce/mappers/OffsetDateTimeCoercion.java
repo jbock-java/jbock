@@ -1,18 +1,11 @@
 package net.jbock.coerce.mappers;
 
-import com.squareup.javapoet.CodeBlock;
-
 import java.time.OffsetDateTime;
-import java.util.Optional;
 
-class OffsetDateTimeCoercion extends CoercionFactory {
+class OffsetDateTimeCoercion extends SimpleCoercion {
 
   OffsetDateTimeCoercion() {
-    super(OffsetDateTime.class);
+    super(OffsetDateTime.class, "$T::parse");
   }
 
-  @Override
-  Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.of("$T::parse", OffsetDateTime.class));
-  }
 }

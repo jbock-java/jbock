@@ -21,24 +21,12 @@ import static net.jbock.coerce.mappers.MapperCoercion.getTypeParameters;
 public abstract class CoercionFactory {
 
   // trigger for this factory
-  private final TypeMirror mapperReturnType;
-
-  CoercionFactory(Class<?> mapperReturnType) {
-    this(TypeTool.get().getTypeElement(mapperReturnType).asType());
-  }
-
-  CoercionFactory(TypeMirror mapperReturnType) {
-    this.mapperReturnType = mapperReturnType;
-  }
+  abstract TypeMirror mapperReturnType(TypeTool tool);
 
   /**
    * An expression that maps from String to mapperReturnType
    */
   abstract Optional<CodeBlock> mapExpr();
-
-  final TypeMirror mapperReturnType() {
-    return mapperReturnType;
-  }
 
   CodeBlock initMapper() {
     return CodeBlock.builder().build();
@@ -56,7 +44,7 @@ public abstract class CoercionFactory {
         collectorParam,
         mapExpr,
         initMapper,
-        mapperReturnType,
+        mapperReturnType(basicInfo.tool()),
         collector.flatMap(this::createCollector),
         constructorParamType,
         basicInfo);
@@ -77,7 +65,7 @@ public abstract class CoercionFactory {
     if (useReturnType) {
       return basicInfo.returnType();
     }
-    return mapperReturnType;
+    return mapperReturnType(basicInfo.tool());
   }
 
   private static Optional<ParameterSpec> collectorParam(

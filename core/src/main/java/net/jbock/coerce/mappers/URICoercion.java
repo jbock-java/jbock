@@ -1,18 +1,11 @@
 package net.jbock.coerce.mappers;
 
-import com.squareup.javapoet.CodeBlock;
-
 import java.net.URI;
-import java.util.Optional;
 
-class URICoercion extends CoercionFactory {
+class URICoercion extends SimpleCoercion {
 
   URICoercion() {
-    super(URI.class);
+    super(URI.class, "$T::create");
   }
 
-  @Override
-  Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.of("$T::create", URI.class));
-  }
 }

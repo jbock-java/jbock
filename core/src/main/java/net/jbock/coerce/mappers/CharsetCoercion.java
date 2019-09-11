@@ -1,18 +1,11 @@
 package net.jbock.coerce.mappers;
 
-import com.squareup.javapoet.CodeBlock;
-
 import java.nio.charset.Charset;
-import java.util.Optional;
 
-class CharsetCoercion extends CoercionFactory {
+class CharsetCoercion extends SimpleCoercion {
 
   CharsetCoercion() {
-    super(Charset.class);
+    super(Charset.class, "$T::forName");
   }
 
-  @Override
-  Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.of("$T::forName", Charset.class));
-  }
 }

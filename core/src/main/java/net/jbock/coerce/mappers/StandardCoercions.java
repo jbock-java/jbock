@@ -41,10 +41,10 @@ public class StandardCoercions {
         new InstantCoercion(),
         new StringCoercion()};
     for (CoercionFactory coercion : allCoercions) {
-      CoercionFactory previous = m.put(new MapMirror(coercion.mapperReturnType()), coercion);
+      CoercionFactory previous = m.put(new MapMirror(coercion.mapperReturnType(tool)), coercion);
       if (previous != null) {
         throw new IllegalStateException(String.format("Both triggered by %s : %s, %s",
-            coercion.mapperReturnType(),
+            coercion.mapperReturnType(tool),
             coercion.getClass().getSimpleName(), previous.getClass().getSimpleName()));
       }
     }

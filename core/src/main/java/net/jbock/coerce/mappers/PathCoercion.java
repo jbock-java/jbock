@@ -4,16 +4,11 @@ import com.squareup.javapoet.CodeBlock;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Optional;
 
-class PathCoercion extends CoercionFactory {
+class PathCoercion extends SimpleCoercion {
 
   PathCoercion() {
-    super(Path.class);
+    super(Path.class, CodeBlock.of("$T::get", Paths.class));
   }
 
-  @Override
-  Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.of("$T::get", Paths.class));
-  }
 }

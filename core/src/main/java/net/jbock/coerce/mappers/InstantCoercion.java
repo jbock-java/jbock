@@ -1,18 +1,11 @@
 package net.jbock.coerce.mappers;
 
-import com.squareup.javapoet.CodeBlock;
-
 import java.time.Instant;
-import java.util.Optional;
 
-class InstantCoercion extends CoercionFactory {
+class InstantCoercion extends SimpleCoercion {
 
   InstantCoercion() {
-    super(Instant.class);
+    super(Instant.class, "$T::parse");
   }
 
-  @Override
-  Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.of("$T::parse", Instant.class));
-  }
 }

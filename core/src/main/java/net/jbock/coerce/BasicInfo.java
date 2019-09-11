@@ -81,7 +81,7 @@ public class BasicInfo {
     return ValidationException.create(sourceMethod, message);
   }
 
-  TypeTool tool() {
+  public TypeTool tool() {
     return tool;
   }
 

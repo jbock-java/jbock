@@ -1,18 +1,10 @@
 package net.jbock.coerce.mappers;
 
-import com.squareup.javapoet.CodeBlock;
-
 import java.io.File;
-import java.util.Optional;
 
-class FileCoercion extends CoercionFactory {
+class FileCoercion extends SimpleCoercion {
 
   FileCoercion() {
-    super(File.class);
-  }
-
-  @Override
-  Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.of("$T::new", File.class));
+    super(File.class, "$T::new");
   }
 }
