@@ -124,6 +124,9 @@ final class MapperClassValidator {
       String param = typeParameter.toString();
       TypeMirror tMirror = t_result.get(param);
       TypeMirror rMirror = r_result.get(param);
+      if (tMirror != null && rMirror != null && !tool().isSameType(tMirror, rMirror)) {
+        throw boom("could not resolve type parameters");
+      }
       TypeMirror s = null;
       if (tMirror != null) {
         if (isInvalidT(typeParameter)) {

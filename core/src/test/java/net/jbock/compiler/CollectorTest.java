@@ -591,6 +591,68 @@ class CollectorTest {
         .withErrorContaining("There is a problem with the collector class: invalid bounds.");
   }
 
+
+  @Test
+  void bothMapperAndCollectorHaveTypeargsImpossibleFromString() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             mappedBy = Identity.class,",
+        "             collectedBy = Collect.class)",
+        "  abstract List<Integer> ints();",
+        "",
+        "  static class Identity<E> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class Collect<E> implements Supplier<Collector<E, ?, List<E>>> {",
+        "    public Collector<E, ?, List<E>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: could not resolve type parameters.");
+  }
+
+  @Test
+  void bothMapperAndCollectorHaveTypeargsValid() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             mappedBy = MakeList.class,",
+        "             collectedBy = Concat.class)",
+        "  abstract List<String> strings();",
+        "",
+        "  static class MakeList<E> implements Supplier<Function<E, List<E>>> {",
+        "    public Function<E, List<E>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class Concat<E> implements Supplier<Collector<List<E>, ?, List<E>>> {",
+        "    public Collector<List<E>, ?, List<E>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
   @Test
   void validEnum() {
     List<String> sourceLines = withImports(
