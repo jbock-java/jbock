@@ -884,4 +884,28 @@ class MapperTest {
         .processedWith(new Processor())
         .compilesWithoutError();
   }
+
+  @Test
+  void mapperHasTypeargsImpossibleFromString() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             repeatable = true,",
+        "             mappedBy = Identity.class)",
+        "  abstract List<Integer> ints();",
+        "",
+        "  static class Identity<E> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: could not resolve type parameters.");
+  }
 }
