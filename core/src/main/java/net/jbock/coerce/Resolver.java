@@ -44,9 +44,9 @@ class Resolver {
    */
   static Optional<TypeMirror> typecheck(
       Class<?> goal,
-      TypeMirror start,
+      TypeElement start,
       TypeTool tool) {
-    List<TypeElement> family = getTypeTree(start, tool);
+    List<TypeElement> family = getTypeTree(start.asType(), tool);
     Extension extension;
     TypeMirror nextGoal = tool.erasure(goal);
     List<Extension> extensions = new ArrayList<>();

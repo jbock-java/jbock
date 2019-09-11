@@ -55,10 +55,7 @@ class CollectorClassValidator {
   }
 
   private CollectorType getCollectorType() {
-    Optional<TypeMirror> supplier = Resolver.typecheck(
-        Supplier.class,
-        collectorClass.asType(),
-        basicInfo.tool());
+    Optional<TypeMirror> supplier = typecheck(Supplier.class, collectorClass);
     if (supplier.isPresent()) {
       List<? extends TypeMirror> typeArgs = asDeclared(supplier.get()).getTypeArguments();
       if (typeArgs.isEmpty()) {
@@ -66,16 +63,18 @@ class CollectorClassValidator {
       }
       return collectorType(typeArgs.get(0), true);
     }
-    TypeMirror collector = Resolver.typecheck(
-        Collector.class,
-        collectorClass.asType(),
-        basicInfo.tool()).orElseThrow(() ->
-        boom("not a Collector or Supplier<Collector>"));
+    TypeMirror collector = typecheck(Collector.class, collectorClass)
+        .orElseThrow(() ->
+            boom("not a Collector or Supplier<Collector>"));
     return collectorType(collector, false);
   }
 
   private TypeTool tool() {
     return basicInfo.tool();
+  }
+
+  private Optional<TypeMirror> typecheck(Class<?> goal, TypeElement start) {
+    return Resolver.typecheck(goal, start, tool());
   }
 
   private ValidationException boom(String message) {
