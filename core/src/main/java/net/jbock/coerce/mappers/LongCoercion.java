@@ -4,7 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 
 import java.util.Optional;
 
-final class LongCoercion extends NumberCoercion {
+final class LongCoercion extends CoercionFactory {
 
   LongCoercion() {
     super(Long.class);

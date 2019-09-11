@@ -4,7 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 
 import java.util.Optional;
 
-final class IntegerCoercion extends NumberCoercion {
+final class IntegerCoercion extends CoercionFactory {
 
   IntegerCoercion() {
     super(Integer.class);
