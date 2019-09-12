@@ -4,9 +4,12 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.collector.AbstractCollector;
+import net.jbock.coerce.collector.CustomCollector;
+import net.jbock.coerce.collector.DefaultCollector;
+import net.jbock.coerce.mappers.MapperCoercion;
 import net.jbock.compiler.TypeTool;
 
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.function.Function;
@@ -34,6 +37,7 @@ public final class Coercion {
 
   private final Function<ParameterSpec, CodeBlock> extractExpr;
 
+  // false if custom collector or not repeatable
   private final boolean isDefaultCollector;
 
   private Coercion(
@@ -59,15 +63,25 @@ public final class Coercion {
       Optional<ParameterSpec> collectorParam,
       Optional<CodeBlock> mapExpr,
       CodeBlock initMapper,
-      TypeMirror mapperReturnType,
-      Optional<CodeBlock> initCollector,
+      Optional<AbstractCollector> collector,
       TypeMirror constructorParamType,
       BasicInfo basicInfo) {
-    boolean isDefaultCollector = isDefaultCollector(initCollector, constructorParamType, mapperReturnType);
+    boolean isDefaultCollector = collector.isPresent() && collector.get() instanceof DefaultCollector;
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
-    return new Coercion(collectorParam, mapExpr, initMapper, initCollector, constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr(), isDefaultCollector);
+    return new Coercion(collectorParam, mapExpr, initMapper, collector.flatMap(Coercion::createCollector), constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr(), isDefaultCollector);
   }
+
+  private static Optional<CodeBlock> createCollector(AbstractCollector collectorInfo) {
+    if (!(collectorInfo instanceof CustomCollector)) {
+      return Optional.empty();
+    }
+    CustomCollector collector = (CustomCollector) collectorInfo;
+    return Optional.of(CodeBlock.of("new $T$L",
+        TypeTool.get().erasure(collector.collectorType()),
+        MapperCoercion.getTypeParameters(collector.solution(), collector.supplier())));
+  }
+
 
   /**
    * Maps from String to mapperReturnType
@@ -109,28 +123,11 @@ public final class Coercion {
     if (isDefaultCollector) {
       return Optional.of(CodeBlock.of("$T.toList()", Collectors.class));
     }
-    if (!collectorParam.isPresent()) {
-      return Optional.empty();
-    }
-    return Optional.of(CodeBlock.of("$N", collectorParam.get()));
+    return collectorParam.map(param -> CodeBlock.of("$N", param));
   }
 
   public boolean skipMapCollect() {
     return !mapExpr.isPresent() && isDefaultCollector;
-  }
-
-  private static boolean isDefaultCollector(
-      Optional<CodeBlock> initCollector,
-      TypeMirror paramType,
-      TypeMirror mapperReturnType) {
-    if (initCollector.isPresent()) {
-      return false;
-    }
-    if (mapperReturnType.getKind() != TypeKind.DECLARED) {
-      return false;
-    }
-    TypeTool tool = TypeTool.get();
-    return tool.isSameType(paramType, tool.listOf(mapperReturnType));
   }
 
   public CodeBlock extractExpr() {

@@ -66,7 +66,7 @@ public final class MapperCoercion extends CoercionFactory {
         getTypeParameters(mapperType.solution(), mapperType.supplier()));
   }
 
-  static CodeBlock getTypeParameters(
+  public static CodeBlock getTypeParameters(
       List<TypeMirror> params,
       boolean supplier) {
     if (params.isEmpty()) {

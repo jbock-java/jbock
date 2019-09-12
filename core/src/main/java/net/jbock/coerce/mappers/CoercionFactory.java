@@ -9,14 +9,11 @@ import com.squareup.javapoet.WildcardTypeName;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.collector.AbstractCollector;
-import net.jbock.coerce.collector.CustomCollector;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.stream.Collector;
-
-import static net.jbock.coerce.mappers.MapperCoercion.getTypeParameters;
 
 public abstract class CoercionFactory {
 
@@ -44,20 +41,9 @@ public abstract class CoercionFactory {
         collectorParam,
         mapExpr,
         initMapper,
-        mapperReturnType(basicInfo.tool()),
-        collector.flatMap(this::createCollector),
+        collector,
         constructorParamType,
         basicInfo);
-  }
-
-  private Optional<CodeBlock> createCollector(AbstractCollector collectorInfo) {
-    if (!(collectorInfo instanceof CustomCollector)) {
-      return Optional.empty();
-    }
-    CustomCollector collector = (CustomCollector) collectorInfo;
-    return Optional.of(CodeBlock.of("new $T$L",
-        TypeTool.get().erasure(collector.collectorType()),
-        getTypeParameters(collector.solution(), collector.supplier())));
   }
 
   private TypeMirror getConstructorParamType(BasicInfo basicInfo) {
