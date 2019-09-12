@@ -40,7 +40,7 @@ public final class Coercion {
   // false if custom collector or not repeatable
   private final boolean isDefaultCollector;
 
-  private Coercion(
+  public Coercion(
       Optional<ParameterSpec> collectorParam,
       Optional<CodeBlock> mapExpr,
       CodeBlock initMapper,
@@ -91,6 +91,9 @@ public final class Coercion {
   }
 
   public CodeBlock initMapper() {
+    if (skipMapCollect()) {
+      return CodeBlock.of("");
+    }
     return initMapper;
   }
 

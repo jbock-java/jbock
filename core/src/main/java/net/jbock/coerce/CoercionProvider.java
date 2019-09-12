@@ -1,6 +1,8 @@
 package net.jbock.coerce;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
@@ -20,6 +22,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.snakeToCamel;
 
@@ -29,6 +32,18 @@ public class CoercionProvider {
 
   private CoercionProvider(BasicInfo basicInfo) {
     this.basicInfo = basicInfo;
+  }
+
+  public static Coercion flagCoercion(ExecutableElement sourceMethod, String paramName) {
+    return new Coercion(
+        Optional.empty(),
+        Optional.empty(),
+        CodeBlock.of(""),
+        Optional.empty(),
+        ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName, FINAL).build(),
+        FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName, FINAL).build(),
+        e -> CodeBlock.of("$N", e),
+        false);
   }
 
   public static Coercion findCoercion(

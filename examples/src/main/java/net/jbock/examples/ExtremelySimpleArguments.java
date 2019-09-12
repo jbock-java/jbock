@@ -7,5 +7,5 @@ import net.jbock.PositionalParameter;
 abstract class ExtremelySimpleArguments {
 
   @PositionalParameter
-  abstract boolean hello();
+  abstract int hello();
 }

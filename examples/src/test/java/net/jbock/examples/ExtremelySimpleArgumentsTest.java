@@ -3,8 +3,7 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ExtremelySimpleArgumentsTest {
 
@@ -13,7 +12,6 @@ class ExtremelySimpleArgumentsTest {
 
   @Test
   void simpleTest() {
-    assertTrue(f.parse("true").hello());
-    assertFalse(f.parse("false").hello());
+    assertEquals(1, f.parse("1").hello());
   }
 }

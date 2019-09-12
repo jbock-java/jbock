@@ -264,9 +264,6 @@ final class Helper {
     }
 
     for (Param param : context.parameters) {
-      if (param.coercion().skipMapCollect()) {
-        continue;
-      }
       CodeBlock initMapper = param.coercion().initMapper();
       if (!initMapper.isEmpty()) {
         spec.addStatement(initMapper);
@@ -293,10 +290,8 @@ final class Helper {
     if (collected) {
       builder.add(".stream()");
     }
-    if (!param.flag) {
-      param.coercion().mapExpr().ifPresent(expr ->
-          builder.add(".map($L)", expr));
-    }
+    param.coercion().mapExpr().ifPresent(expr ->
+        builder.add(".map($L)", expr));
     if (collected) {
       param.coercion().collectExpr().ifPresent(expr ->
           builder.add(".collect($L)", expr));

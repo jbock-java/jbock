@@ -52,8 +52,7 @@ public class StandardCoercions {
         SimpleCoercion.create(OffsetDateTime.class, "parse"),
         SimpleCoercion.create(LocalDateTime.class, "parse"),
         SimpleCoercion.create(ZonedDateTime.class, "parse"),
-        SimpleCoercion.create(Instant.class, "parse"),
-        SimpleCoercion.create(Boolean.class, "valueOf")};
+        SimpleCoercion.create(Instant.class, "parse")};
     for (CoercionFactory coercion : allCoercions) {
       CoercionFactory previous = m.put(new MapMirror(coercion.mapperReturnType(tool)), coercion);
       if (previous != null) {

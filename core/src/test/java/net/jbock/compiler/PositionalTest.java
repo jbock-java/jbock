@@ -123,20 +123,21 @@ class PositionalTest {
 
 
   @Test
-  void validPositionalBooleanObject() {
+  void invalidPositionalBooleanObject() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class InvalidArguments {",
         "  @PositionalParameter abstract Boolean a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test
-  void validPositionalBooleanPrimitive() {
+  void invalidPositionalBooleanPrimitive() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
@@ -145,7 +146,8 @@ class PositionalTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test

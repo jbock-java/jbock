@@ -14,7 +14,6 @@ public class HintProvider {
       new RawCombinatorHint(),
       new CollectionHint(),
       new ArrayHint(),
-      new PrimitiveHint(),
       new DateHint(),
       new OptionalHint());
 

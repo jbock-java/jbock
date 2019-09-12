@@ -195,6 +195,8 @@ final class Param {
     boolean flag = isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType(), tool);
     boolean required = !repeatable && !optional && !flag;
     ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
+    ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
+    Coercion coercion;
     if (flag) {
       if (parameter.optional()) {
         throw ValidationException.create(sourceMethod,
@@ -216,9 +218,10 @@ final class Param {
         throw ValidationException.create(sourceMethod,
             "A flag cannot have a description argument name.");
       }
+      coercion = CoercionProvider.flagCoercion(sourceMethod, name);
+    } else {
+      coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     }
-    ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
-    Coercion typeInfo = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, sourceMethod) :
@@ -231,7 +234,7 @@ final class Param {
         sourceMethod,
         name,
         parameter.bundleKey(),
-        typeInfo,
+        coercion,
         cleanDesc(description),
         descriptionArgumentName,
         OptionalInt.empty(),
