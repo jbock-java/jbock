@@ -21,7 +21,7 @@ public final class Coercion {
   private final Optional<ParameterSpec> collectorParam;
 
   // helper.build
-  private final Optional<CodeBlock> mapExpr;
+  private final CodeBlock mapExpr;
 
   // helper.build
   private final CodeBlock initMapper;
@@ -42,7 +42,7 @@ public final class Coercion {
 
   public Coercion(
       Optional<ParameterSpec> collectorParam,
-      Optional<CodeBlock> mapExpr,
+      CodeBlock mapExpr,
       CodeBlock initMapper,
       Optional<CodeBlock> initCollector,
       ParameterSpec constructorParam,
@@ -61,7 +61,7 @@ public final class Coercion {
 
   public static Coercion create(
       Optional<ParameterSpec> collectorParam,
-      Optional<CodeBlock> mapExpr,
+      CodeBlock mapExpr,
       CodeBlock initMapper,
       Optional<AbstractCollector> collector,
       TypeMirror constructorParamType,
@@ -69,7 +69,8 @@ public final class Coercion {
     boolean isDefaultCollector = collector.isPresent() && collector.get() instanceof DefaultCollector;
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
-    return new Coercion(collectorParam, mapExpr, initMapper, collector.flatMap(Coercion::createCollector), constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr(), isDefaultCollector);
+    return new Coercion(collectorParam, mapExpr,
+        initMapper, collector.flatMap(Coercion::createCollector), constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr(), isDefaultCollector);
   }
 
   private static Optional<CodeBlock> createCollector(AbstractCollector collectorInfo) {
@@ -86,21 +87,15 @@ public final class Coercion {
   /**
    * Maps from String to mapperReturnType
    */
-  public Optional<CodeBlock> mapExpr() {
+  public CodeBlock mapExpr() {
     return mapExpr;
   }
 
   public CodeBlock initMapper() {
-    if (skipMapCollect()) {
-      return CodeBlock.of("");
-    }
     return initMapper;
   }
 
   public Optional<CodeBlock> initCollector() {
-    if (skipMapCollect()) {
-      return Optional.empty();
-    }
     return initCollector;
   }
 
@@ -113,24 +108,14 @@ public final class Coercion {
   }
 
   public Optional<ParameterSpec> collectorParam() {
-    if (skipMapCollect()) {
-      return Optional.empty();
-    }
     return collectorParam;
   }
 
   public Optional<CodeBlock> collectExpr() {
-    if (skipMapCollect()) {
-      return Optional.empty();
-    }
     if (isDefaultCollector) {
       return Optional.of(CodeBlock.of("$T.toList()", Collectors.class));
     }
     return collectorParam.map(param -> CodeBlock.of("$N", param));
-  }
-
-  public boolean skipMapCollect() {
-    return !mapExpr.isPresent() && isDefaultCollector;
   }
 
   public CodeBlock extractExpr() {

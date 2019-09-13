@@ -54,7 +54,9 @@ final class Param {
 
   private final boolean repeatable;
 
-  final boolean flag;
+  boolean isFlag() {
+    return paramType == OptionType.FLAG;
+  }
 
   private static String enumConstant(
       List<Param> params,
@@ -122,8 +124,7 @@ final class Param {
       String descriptionArgumentName,
       OptionalInt positionalIndex,
       boolean optional,
-      boolean repeatable,
-      boolean flag) {
+      boolean repeatable) {
     this.bundleKey = bundleKey;
     this.coercion = coercion;
     this.shortName = shortName;
@@ -136,12 +137,11 @@ final class Param {
     this.positionalIndex = positionalIndex;
     this.optional = optional;
     this.repeatable = repeatable;
-    this.flag = flag;
     TypeTool tool = TypeTool.get();
     TypeMirror returnType = sourceMethod.getReturnType();
     boolean itsBoolean = tool.isSameType(returnType, tool.getPrimitiveType(TypeKind.BOOLEAN)) ||
         tool.isSameType(returnType, tool.asType(Boolean.class));
-    if (flag) {
+    if (paramType == OptionType.FLAG) {
       if (!itsBoolean) {
         throw ValidationException.create(sourceMethod, "Flag parameters must return boolean.");
       }
@@ -239,8 +239,7 @@ final class Param {
         descriptionArgumentName,
         OptionalInt.empty(),
         optional,
-        repeatable,
-        flag);
+        repeatable);
   }
 
   private static void ensureNotOptionalAndRepeatable(ExecutableElement sourceMethod, boolean repeatable, boolean optional) {
@@ -290,8 +289,7 @@ final class Param {
         descriptionArgumentName,
         OptionalInt.of(positionalIndex),
         optional,
-        repeatable,
-        false);
+        repeatable);
   }
 
   /**
@@ -433,7 +431,7 @@ final class Param {
   }
 
   boolean required() {
-    return !repeatable && !optional && !flag;
+    return !repeatable && !optional && !isFlag();
   }
 
   Optional<String> bundleKey() {

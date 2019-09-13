@@ -286,13 +286,13 @@ final class Helper {
 
   private CodeBlock extractExpression(Param param) {
     CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
-    boolean collected = param.paramType == REPEATABLE && !param.coercion().skipMapCollect();
-    if (collected) {
+    if (param.paramType == REPEATABLE) {
       builder.add(".stream()");
     }
-    param.coercion().mapExpr().ifPresent(expr ->
-        builder.add(".map($L)", expr));
-    if (collected) {
+    if (!param.isFlag()) {
+      builder.add(".map($L)", param.coercion().mapExpr());
+    }
+    if (param.paramType == REPEATABLE) {
       param.coercion().collectExpr().ifPresent(expr ->
           builder.add(".collect($L)", expr));
     }

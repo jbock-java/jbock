@@ -3,7 +3,6 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.Optional;
 import java.util.function.Function;
 
 class SimpleCoercion extends CoercionFactory {
@@ -23,7 +22,7 @@ class SimpleCoercion extends CoercionFactory {
   }
 
   @Override
-  final Optional<CodeBlock> mapExpr(TypeMirror returnType) {
-    return Optional.of(mapExpr.apply(returnType));
+  final CodeBlock mapExpr(TypeMirror innerType) {
+    return mapExpr.apply(innerType);
   }
 }

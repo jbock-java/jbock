@@ -17,9 +17,9 @@ import java.util.stream.Collector;
 public abstract class CoercionFactory {
 
   /**
-   * An expression that maps from String to mapperReturnType
+   * An expression that maps from String to innerType
    */
-  abstract Optional<CodeBlock> mapExpr(TypeMirror returnType);
+  abstract CodeBlock mapExpr(TypeMirror innerType);
 
   CodeBlock initMapper() {
     return CodeBlock.builder().build();
@@ -29,7 +29,7 @@ public abstract class CoercionFactory {
       BasicInfo basicInfo,
       Optional<AbstractCollector> collector) {
     TypeMirror innerType = innerType(basicInfo, collector);
-    Optional<CodeBlock> mapExpr = mapExpr(innerType);
+    CodeBlock mapExpr = mapExpr(innerType);
     CodeBlock initMapper = initMapper();
     TypeMirror constructorParamType = basicInfo.returnType();
     Optional<ParameterSpec> collectorParam = collector.flatMap(collectorInfo ->

@@ -3,12 +3,12 @@ package net.jbock.coerce.mappers;
 import com.squareup.javapoet.CodeBlock;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.Optional;
+import java.util.function.Function;
 
 class StringCoercion extends CoercionFactory {
 
   @Override
-  Optional<CodeBlock> mapExpr(TypeMirror returnType) {
-    return Optional.empty();
+  CodeBlock mapExpr(TypeMirror innerType) {
+    return CodeBlock.of("$T.identity()", Function.class);
   }
 }
