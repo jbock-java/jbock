@@ -38,19 +38,7 @@ public final class MapperCoercion extends CoercionFactory {
   }
 
   @Override
-  public CodeBlock mapExpr(TypeMirror innerType) {
-    return CodeBlock.of("$N", mapperParam);
-  }
-
-  @Override
-  public CodeBlock initMapper() {
-    return CodeBlock.of("$T $N = $L",
-        mapperParam.type,
-        mapperParam,
-        createMapper());
-  }
-
-  private CodeBlock createMapper() {
+  CodeBlock createMapper(TypeMirror innerType) {
     return CodeBlock.of("new $T$L",
         TypeTool.get().erasure(mapperType.mapperType()),
         getTypeParameters(mapperType.solution(), mapperType.supplier()));

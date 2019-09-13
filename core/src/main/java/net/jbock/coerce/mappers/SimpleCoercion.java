@@ -7,22 +7,22 @@ import java.util.function.Function;
 
 class SimpleCoercion extends CoercionFactory {
 
-  private final Function<TypeMirror, CodeBlock> mapExpr;
+  private final Function<TypeMirror, CodeBlock> createMapper;
 
-  private SimpleCoercion(Function<TypeMirror, CodeBlock> mapExpr) {
-    this.mapExpr = mapExpr;
+  private SimpleCoercion(Function<TypeMirror, CodeBlock> createMapper) {
+    this.createMapper = createMapper;
   }
 
-  static SimpleCoercion create(String mapExpr) {
-    return new SimpleCoercion(type -> CodeBlock.of("$T::" + mapExpr, type));
+  static SimpleCoercion create(String createFromString) {
+    return new SimpleCoercion(type -> CodeBlock.of("$T::" + createFromString, type));
   }
 
-  static SimpleCoercion create(Function<TypeMirror, CodeBlock> mapExpr) {
-    return new SimpleCoercion(mapExpr);
+  static SimpleCoercion create(Function<TypeMirror, CodeBlock> createMapper) {
+    return new SimpleCoercion(createMapper);
   }
 
   @Override
-  final CodeBlock mapExpr(TypeMirror innerType) {
-    return mapExpr.apply(innerType);
+  final CodeBlock createMapper(TypeMirror innerType) {
+    return createMapper.apply(innerType);
   }
 }

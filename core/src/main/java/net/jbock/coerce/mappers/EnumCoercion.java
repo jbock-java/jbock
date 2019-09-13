@@ -7,7 +7,7 @@ import javax.lang.model.type.TypeMirror;
 public final class EnumCoercion extends CoercionFactory {
 
   @Override
-  final CodeBlock mapExpr(TypeMirror innerType) {
+  final CodeBlock createMapper(TypeMirror innerType) {
     return CodeBlock.of("$T::valueOf", innerType);
   }
 

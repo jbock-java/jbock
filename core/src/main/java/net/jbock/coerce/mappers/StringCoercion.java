@@ -8,7 +8,7 @@ import java.util.function.Function;
 class StringCoercion extends CoercionFactory {
 
   @Override
-  CodeBlock mapExpr(TypeMirror innerType) {
+  CodeBlock createMapper(TypeMirror innerType) {
     return CodeBlock.of("$T.identity()", Function.class);
   }
 }
