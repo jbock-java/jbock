@@ -264,8 +264,10 @@ final class Helper {
     }
 
     for (Param param : context.parameters) {
-      spec.addStatement(param.coercion().initMapper());
-      if (param.coercion().collectorParam().isPresent() &&
+      if (!param.isFlag()) {
+        spec.addStatement(param.coercion().initMapper());
+      }
+      if (param.coercion().collectorParam().isPresent() && // TODO only one check
           param.coercion().initCollector().isPresent()) {
         ParameterSpec collectorParam = param.coercion().collectorParam().get();
         spec.addStatement("$T $N = $L", collectorParam.type, collectorParam, param.coercion().initCollector().get());
