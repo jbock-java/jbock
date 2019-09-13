@@ -20,7 +20,7 @@ public class BasicInfo {
 
   private final InferredAttributes attributes;
 
-  private final String paramName;
+  private final ParamName paramName;
 
   private final ExecutableElement sourceMethod;
 
@@ -32,7 +32,7 @@ public class BasicInfo {
 
   private BasicInfo(
       InferredAttributes attributes,
-      String paramName,
+      ParamName paramName,
       ExecutableElement sourceMethod,
       TypeTool tool,
       Optional<TypeElement> mapperClass,
@@ -52,11 +52,11 @@ public class BasicInfo {
       ParamName paramName,
       ExecutableElement sourceMethod,
       TypeTool tool) {
-    return new BasicInfo(attributes, paramName.camel(), sourceMethod, tool, Optional.ofNullable(mapperClass), Optional.ofNullable(collectorClass));
+    return new BasicInfo(attributes, paramName, sourceMethod, tool, Optional.ofNullable(mapperClass), Optional.ofNullable(collectorClass));
   }
 
   public String paramName() {
-    return paramName;
+    return paramName.camel();
   }
 
   // lifted return type of the parameter method
@@ -74,7 +74,7 @@ public class BasicInfo {
   }
 
   FieldSpec fieldSpec() {
-    return FieldSpec.builder(TypeName.get(originalReturnType()), paramName, FINAL).build();
+    return FieldSpec.builder(TypeName.get(originalReturnType()), paramName.camel(), FINAL).build();
   }
 
   ValidationException asValidationException(String message) {

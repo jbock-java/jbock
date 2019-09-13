@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 
-import static net.jbock.compiler.Util.snakeToCamel;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class UtilTest {
@@ -37,7 +36,7 @@ class UtilTest {
         "roboCop9",
         "isWindowsCompatible",
         "aRequiredInt")) {
-      String mapped = snakeToCamel(ParamName.create(s).snake());
+      String mapped = ParamName.create(ParamName.create(s).snake()).camel();
       assertEquals(s, mapped);
     }
   }

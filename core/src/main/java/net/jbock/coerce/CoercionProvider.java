@@ -25,7 +25,6 @@ import java.util.function.Function;
 
 import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Util.snakeToCamel;
 
 public class CoercionProvider {
 
@@ -107,7 +106,7 @@ public class CoercionProvider {
     ParameterizedTypeName mapperParamType = ParameterizedTypeName.get(
         ClassName.get(Function.class), STRING,
         TypeName.get(mapperOutputType));
-    return ParameterSpec.builder(mapperParamType, snakeToCamel(basicInfo.paramName()) + "Mapper").build();
+    return ParameterSpec.builder(mapperParamType, basicInfo.paramName() + "Mapper").build();
   }
 
   private Coercion handleRepeatableAutoMapper() throws UnknownTypeException {
