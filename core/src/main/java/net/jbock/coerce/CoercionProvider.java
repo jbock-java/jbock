@@ -123,12 +123,12 @@ public class CoercionProvider {
     return MapperCoercion.create(Optional.of(collectorInfo), mapperParam, mapperType, basicInfo);
   }
 
-  private CoercionFactory findCoercion(TypeMirror mirror) throws UnknownTypeException {
-    CoercionFactory standardCoercion = StandardCoercions.get(tool(), tool().box(mirror));
+  private CoercionFactory findCoercion(TypeMirror innerType) throws UnknownTypeException {
+    CoercionFactory standardCoercion = StandardCoercions.get(tool(), tool().box(innerType));
     if (standardCoercion != null) {
       return standardCoercion;
     }
-    boolean isEnum = isEnumType(mirror);
+    boolean isEnum = isEnumType(innerType);
     if (!isEnum) {
       throw UnknownTypeException.create();
     }

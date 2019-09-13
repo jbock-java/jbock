@@ -53,9 +53,9 @@ public class StandardCoercions {
       new SimpleImmutableEntry<>(ZonedDateTime.class, PARSE),
       new SimpleImmutableEntry<>(Instant.class, PARSE));
 
-  public static CoercionFactory get(TypeTool tool, TypeMirror mapperReturnType) {
+  public static CoercionFactory get(TypeTool tool, TypeMirror innerType) {
     for (Map.Entry<Class<?>, CoercionFactory> coercion : COERCIONS) {
-      if (tool.isSameType(mapperReturnType, coercion.getKey())) {
+      if (tool.isSameType(innerType, coercion.getKey())) {
         return coercion.getValue();
       }
     }
