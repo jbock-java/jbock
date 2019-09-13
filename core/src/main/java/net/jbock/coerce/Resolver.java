@@ -32,13 +32,9 @@ class Resolver {
     }
   }
 
-  private final List<ImplementsRelation> relations;
   private final TypeTool tool;
 
-  private Resolver(List<ImplementsRelation> relations, TypeTool tool) {
-    List<ImplementsRelation> reversed = new ArrayList<>(relations);
-    Collections.reverse(reversed);
-    this.relations = Collections.unmodifiableList(reversed);
+  private Resolver(TypeTool tool) {
     this.tool = tool;
   }
 
@@ -54,19 +50,21 @@ class Resolver {
    */
   static Optional<TypeMirror> typecheck(TypeElement x, Class<?> something, TypeTool tool) {
     List<TypeElement> hierarchy = new HierarchyUtil(tool).getHierarchy(x);
+    TypeMirror currentGoal = tool.erasure(something);
+    List<ImplementsRelation> path = new ArrayList<>();
+    Resolver resolver = new Resolver(tool);
     ImplementsRelation relation;
-    TypeMirror nextGoal = tool.erasure(something);
-    List<ImplementsRelation> implementsRelations = new ArrayList<>();
-    while ((relation = findRelation(hierarchy, nextGoal, tool)) != null) {
-      implementsRelations.add(relation);
-      nextGoal = tool.erasure(relation.dog.asType());
+    while ((relation = resolver.findRelation(hierarchy, currentGoal)) != null) {
+      path.add(relation);
+      currentGoal = tool.erasure(relation.dog);
     }
-    return new Resolver(implementsRelations, tool).resolveTypevars();
+    Collections.reverse(path);
+    return resolver.resolveTypevars(path);
   }
 
-  private static ImplementsRelation findRelation(List<TypeElement> family, TypeMirror goal, TypeTool tool) {
-    for (TypeElement element : family) {
-      ImplementsRelation implementsRelation = findRelation(element, goal, tool);
+  private ImplementsRelation findRelation(List<TypeElement> hierarchy, TypeMirror something) {
+    for (TypeElement type : hierarchy) {
+      ImplementsRelation implementsRelation = findRelation(type, something);
       if (implementsRelation != null) {
         return implementsRelation;
       }
@@ -74,45 +72,46 @@ class Resolver {
     return null;
   }
 
-  private static ImplementsRelation findRelation(TypeElement typeElement, TypeMirror goal, TypeTool tool) {
-    for (TypeMirror mirror : typeElement.getInterfaces()) {
-      if (tool.isSameType(goal, tool.erasure(mirror))) {
-        return new ImplementsRelation(typeElement, asDeclared(mirror));
+  private ImplementsRelation findRelation(TypeElement type, TypeMirror something) {
+    for (TypeMirror mirror : type.getInterfaces()) {
+      if (tool.isSameType(something, tool.erasure(mirror))) {
+        return new ImplementsRelation(type, asDeclared(mirror));
       }
     }
     return null;
   }
 
-  private Optional<TypeMirror> resolveTypevars() {
-    if (relations.isEmpty()) {
+  /**
+   * @param path a path of implements relations
+   *
+   * <ul>
+   *   <li>ascending from dog to animal</li>
+   *   <li>{@code path[1].dog} and {@code path[0].animal} have the same erasure</li>
+   * </ul>
+   */
+  private Optional<TypeMirror> resolveTypevars(List<ImplementsRelation> path) {
+    if (path.isEmpty()) {
       return Optional.empty();
     }
-    TypeMirror extensionClass = relations.get(0).animal;
-    for (int i = 1; i < relations.size(); i++) {
-      ImplementsRelation implementsRelation = relations.get(i);
-      TypeMirror stepResult = resolveStep(extensionClass, implementsRelation);
-      if (extensionClass == null) {
+    TypeMirror acc = path.get(0).animal;
+    for (int i = 1; i < path.size(); i++) {
+      ImplementsRelation relation = path.get(i);
+      acc = infer(acc, relation);
+      if (acc == null) {
         return Optional.empty();
       }
-      extensionClass = stepResult;
     }
-    return Optional.of(extensionClass);
+    return Optional.of(acc);
   }
 
-  private TypeMirror resolveStep(TypeMirror x, ImplementsRelation implementsRelation) {
+  private TypeMirror infer(TypeMirror x, ImplementsRelation relation) {
     List<? extends TypeMirror> typeArguments = asDeclared(x).getTypeArguments();
-    List<? extends TypeParameterElement> typeParameters = implementsRelation.dog.getTypeParameters();
-    Map<String, TypeMirror> solution = new HashMap<>();
+    List<? extends TypeParameterElement> typeParameters = relation.dog.getTypeParameters();
+    Map<String, TypeMirror> solution = new HashMap<>(); // TODO tool.unify also builds a map, how are they related?
     for (int i = 0; i < typeParameters.size(); i++) {
       solution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
-    DeclaredType input = implementsRelation.animal;
+    DeclaredType input = relation.animal;
     return tool.substitute(input, solution);
   }
-
-  @Override
-  public String toString() {
-    return relations.toString();
-  }
-
 }

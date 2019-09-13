@@ -242,6 +242,10 @@ public class TypeTool {
     return types.erasure(typeMirror);
   }
 
+  public TypeMirror erasure(TypeElement typeMirror) {
+    return types.erasure(typeMirror.asType());
+  }
+
   public TypeMirror erasure(Class<?> type) {
     return erasure(asType(type));
   }
