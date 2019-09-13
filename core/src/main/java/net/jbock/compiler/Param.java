@@ -143,10 +143,6 @@ final class Param {
       if (!itsBoolean) {
         throw ValidationException.create(sourceMethod, "Flag parameters must return boolean.");
       }
-    } else if (!isPositional()) {
-      if (itsBoolean && coercion.initMapper().isEmpty()) {
-        throw ValidationException.create(sourceMethod, "Declare a flag, or use a custom mapper.");
-      }
     }
   }
 

@@ -264,10 +264,7 @@ final class Helper {
     }
 
     for (Param param : context.parameters) {
-      CodeBlock initMapper = param.coercion().initMapper();
-      if (!initMapper.isEmpty()) {
-        spec.addStatement(initMapper);
-      }
+      spec.addStatement(param.coercion().initMapper());
       if (param.coercion().collectorParam().isPresent() &&
           param.coercion().initCollector().isPresent()) {
         ParameterSpec collectorParam = param.coercion().collectorParam().get();
