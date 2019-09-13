@@ -52,7 +52,7 @@ class Resolver {
     List<Extension> extensions = new ArrayList<>();
     while ((extension = findExtension(family, nextGoal, tool)) != null) {
       extensions.add(extension);
-      nextGoal = tool.erasure(extension.baseClass().asType());
+      nextGoal = tool.erasure(extension.baseClass.asType());
     }
     return new Resolver(extensions, tool).resolveTypevars();
   }
@@ -84,7 +84,7 @@ class Resolver {
     if (extensions.isEmpty()) {
       return Optional.empty();
     }
-    TypeMirror extensionClass = extensions.get(0).extensionClass();
+    TypeMirror extensionClass = extensions.get(0).extensionClass;
     for (int i = 1; i < extensions.size(); i++) {
       Extension extension = extensions.get(i);
       TypeMirror stepResult = resolveStep(extensionClass, extension);
@@ -98,17 +98,33 @@ class Resolver {
 
   private TypeMirror resolveStep(TypeMirror x, Extension extension) {
     List<? extends TypeMirror> typeArguments = asDeclared(x).getTypeArguments();
-    List<? extends TypeParameterElement> typeParameters = extension.baseClass().getTypeParameters();
+    List<? extends TypeParameterElement> typeParameters = extension.baseClass.getTypeParameters();
     Map<String, TypeMirror> solution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
       solution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
-    DeclaredType input = extension.extensionClass();
+    DeclaredType input = extension.extensionClass;
     return tool.substitute(input, solution);
   }
 
   @Override
   public String toString() {
     return extensions.toString();
+  }
+
+  static class Extension {
+
+    final TypeElement baseClass;
+    final DeclaredType extensionClass;
+
+    Extension(TypeElement baseClass, DeclaredType extensionClass) {
+      this.baseClass = baseClass;
+      this.extensionClass = extensionClass;
+    }
+
+    @Override
+    public String toString() {
+      return String.format("%s extends %s", baseClass, extensionClass);
+    }
   }
 }

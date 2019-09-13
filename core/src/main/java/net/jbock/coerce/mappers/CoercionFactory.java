@@ -19,16 +19,16 @@ import static net.jbock.compiler.Constants.STRING;
 
 public abstract class CoercionFactory {
 
-  /**
-   * An expression that maps from String to innerType
-   */
-  private CodeBlock mapExpr(TypeMirror innerType, String paramName) {
-    return CodeBlock.of("$N", mapperParam(innerType, paramName));
+  private CodeBlock mapExpr(String paramName) {
+    return CodeBlock.of("$L", mapperParamName(paramName));
   }
 
+  /**
+   * Creates a function that maps from String to innerType
+   */
   abstract CodeBlock createMapper(TypeMirror innerType);
 
-  final CodeBlock initMapper(TypeMirror innerType, String paramName) {
+  private CodeBlock initMapper(TypeMirror innerType, String paramName) {
     ParameterSpec mapperParam = mapperParam(innerType, paramName);
     return CodeBlock.of("$T $N = $L",
         mapperParam.type,
@@ -40,14 +40,18 @@ public abstract class CoercionFactory {
     ParameterizedTypeName mapperParamType = ParameterizedTypeName.get(
         ClassName.get(Function.class), STRING,
         TypeName.get(innerType));
-    return ParameterSpec.builder(mapperParamType, paramName + "Mapper").build();
+    return ParameterSpec.builder(mapperParamType, mapperParamName(paramName)).build();
+  }
+
+  private String mapperParamName(String paramName) {
+    return paramName + "Mapper";
   }
 
   public final Coercion getCoercion(
       BasicInfo basicInfo,
       Optional<AbstractCollector> collector) {
     TypeMirror innerType = innerType(basicInfo, collector);
-    CodeBlock mapExpr = mapExpr(innerType, basicInfo.paramName());
+    CodeBlock mapExpr = mapExpr(basicInfo.paramName());
     CodeBlock initMapper = initMapper(innerType, basicInfo.paramName());
     TypeMirror constructorParamType = basicInfo.returnType();
     Optional<ParameterSpec> collectorParam = collector.flatMap(collectorInfo ->

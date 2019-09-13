@@ -40,7 +40,7 @@ public final class Coercion {
   // false if custom collector or not repeatable
   private final boolean isDefaultCollector;
 
-  public Coercion(
+  Coercion(
       Optional<ParameterSpec> collectorParam,
       CodeBlock mapExpr,
       CodeBlock initMapper,

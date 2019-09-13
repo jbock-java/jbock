@@ -68,7 +68,7 @@ public class CoercionProvider {
         return handleNotRepeatable();
       }
     } catch (UnknownTypeException e) {
-      Optional<String> hint = HintProvider.instance().findHint(basicInfo);
+      Optional<String> hint = HintProvider.findHint(basicInfo);
       throw hint.map(m -> e.asValidationException(basicInfo.sourceMethod(), m))
           .orElseGet(() -> e.asValidationException(basicInfo.sourceMethod()));
     }

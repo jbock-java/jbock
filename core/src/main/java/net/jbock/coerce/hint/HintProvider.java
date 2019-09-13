@@ -17,23 +17,14 @@ public class HintProvider {
       new DateHint(),
       new OptionalHint());
 
-  private static HintProvider instance;
-
-  public static HintProvider instance() {
-    if (instance == null) {
-      instance = new HintProvider();
-    }
-    return instance;
-  }
-
-  public Optional<String> findHint(BasicInfo basicInfo) {
+  public static Optional<String> findHint(BasicInfo basicInfo) {
     if (basicInfo.isOptional()) {
       return findHintSimple(basicInfo.optionalInfo().get(), basicInfo.isRepeatable());
     }
     return findHintSimple(basicInfo.originalReturnType(), basicInfo.isRepeatable());
   }
 
-  private Optional<String> findHintSimple(TypeMirror type, boolean repeatable) {
+  private static Optional<String> findHintSimple(TypeMirror type, boolean repeatable) {
     for (Hint warning : HINTS) {
       String message = warning.message(type, repeatable);
       if (message != null) {
