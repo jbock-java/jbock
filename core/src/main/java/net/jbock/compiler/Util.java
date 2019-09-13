@@ -41,26 +41,24 @@ public final class Util {
   }
 
   enum CharType {
-    LOWER, UPPER, DIGIT, OTHER
+    LOWER, UPPER, DIGIT, UNDERSCORE, OTHER
 
   }
 
   static CharType charType(char c) {
-    if (Character.isUpperCase(c)) {
-      return CharType.UPPER;
+    if (c == '_') {
+      return CharType.UNDERSCORE;
     }
     if (Character.isLowerCase(c)) {
       return CharType.LOWER;
+    }
+    if (Character.isUpperCase(c)) {
+      return CharType.UPPER;
     }
     if (Character.isDigit(c)) {
       return CharType.DIGIT;
     }
     return CharType.OTHER;
-  }
-
-  static String snakeCase(String input) {
-    List<String> elements = ParamName.snakeCase(input);
-    return String.join("_", elements);
   }
 
   public static String snakeToCamel(String s) {

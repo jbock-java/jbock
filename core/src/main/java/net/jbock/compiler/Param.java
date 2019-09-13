@@ -21,7 +21,6 @@ import java.util.OptionalInt;
 import static java.lang.Character.isWhitespace;
 import static net.jbock.compiler.AnnotationUtil.getCollectorClass;
 import static net.jbock.compiler.AnnotationUtil.getMapperClass;
-import static net.jbock.compiler.Util.snakeCase;
 
 /**
  * Internal representation of an abstract method in the source class.
@@ -38,7 +37,7 @@ final class Param {
 
   final ExecutableElement sourceMethod;
 
-  private final String name;
+  private final ParamName name;
 
   private final String bundleKey;
 
@@ -58,14 +57,14 @@ final class Param {
     return paramType == OptionType.FLAG;
   }
 
-  private static String enumConstant(
+  private static ParamName enumConstant(
       List<Param> params,
       ExecutableElement sourceMethod) {
     String methodName = sourceMethod.getSimpleName().toString();
-    String result = snakeCase(methodName);
+    ParamName result = ParamName.create(methodName);
     for (Param param : params) {
       if (param.name.equals(result)) {
-        return result + '_' + params.size();
+        return result.append(Integer.toString(params.size()));
       }
     }
     return result;
@@ -101,15 +100,14 @@ final class Param {
   }
 
   private static String descriptionArgumentName(
-      OptionType paramType, boolean required, ExecutableElement sourceMethod) {
-    String name = snakeCase(sourceMethod.getSimpleName().toString());
+      OptionType paramType, boolean required, ParamName name) {
     if (paramType == OptionType.FLAG) {
       return null;
     }
     if (required) {
-      return name.toUpperCase();
+      return name.snake().toUpperCase();
     } else {
-      return name;
+      return name.snake();
     }
   }
 
@@ -118,7 +116,7 @@ final class Param {
       String longName,
       OptionType paramType,
       ExecutableElement sourceMethod,
-      String name,
+      ParamName name,
       String bundleKey, Coercion coercion,
       List<String> description,
       String descriptionArgumentName,
@@ -188,7 +186,7 @@ final class Param {
     Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
     checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
-    String name = enumConstant(params, sourceMethod);
+    ParamName name = enumConstant(params, sourceMethod);
     InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod, tool);
     boolean repeatable = attributes.repeatable();
     boolean optional = attributes.optional();
@@ -224,7 +222,7 @@ final class Param {
     }
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
-        descriptionArgumentName(type, required, sourceMethod) :
+        descriptionArgumentName(type, required, name) :
         parameter.descriptionArgumentName();
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
@@ -264,7 +262,7 @@ final class Param {
       TypeElement collectorClass) {
     TypeTool tool = TypeTool.get();
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
-    String name = enumConstant(params, sourceMethod);
+    ParamName name = enumConstant(params, sourceMethod);
     InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod, tool);
     boolean repeatable = attributes.repeatable();
     boolean optional = attributes.optional();
@@ -274,7 +272,7 @@ final class Param {
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     OptionType type = optionType(repeatable, false);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
-        descriptionArgumentName(type, required, sourceMethod) :
+        descriptionArgumentName(type, required, name) :
         parameter.descriptionArgumentName();
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
@@ -415,7 +413,7 @@ final class Param {
   }
 
   String enumConstant() {
-    return name.toUpperCase();
+    return name.snake().toUpperCase();
   }
 
   boolean isPositional() {

@@ -13,6 +13,7 @@ import net.jbock.coerce.mappers.CoercionFactory;
 import net.jbock.coerce.mappers.EnumCoercion;
 import net.jbock.coerce.mappers.MapperCoercion;
 import net.jbock.coerce.mappers.StandardCoercions;
+import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.ExecutableElement;
@@ -34,21 +35,21 @@ public class CoercionProvider {
     this.basicInfo = basicInfo;
   }
 
-  public static Coercion flagCoercion(ExecutableElement sourceMethod, String paramName) {
+  public static Coercion flagCoercion(ExecutableElement sourceMethod, ParamName paramName) {
     return new Coercion(
         Optional.empty(),
         CodeBlock.of("$T.identity()", Function.class),
         CodeBlock.of(""),
         Optional.empty(),
-        ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName, FINAL).build(),
-        FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName, FINAL).build(),
+        ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
+        FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         e -> CodeBlock.of("$N", e),
         false);
   }
 
   public static Coercion findCoercion(
       ExecutableElement sourceMethod,
-      String paramName,
+      ParamName paramName,
       TypeElement mapperClass,
       TypeElement collectorClass,
       InferredAttributes attributes,

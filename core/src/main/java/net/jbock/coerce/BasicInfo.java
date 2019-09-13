@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -14,7 +15,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static javax.lang.model.element.Modifier.FINAL;
-import static net.jbock.compiler.Util.snakeToCamel;
 
 public class BasicInfo {
 
@@ -49,10 +49,10 @@ public class BasicInfo {
       TypeElement mapperClass,
       TypeElement collectorClass,
       InferredAttributes attributes,
-      String paramName,
+      ParamName paramName,
       ExecutableElement sourceMethod,
       TypeTool tool) {
-    return new BasicInfo(attributes, snakeToCamel(paramName), sourceMethod, tool, Optional.ofNullable(mapperClass), Optional.ofNullable(collectorClass));
+    return new BasicInfo(attributes, paramName.camel(), sourceMethod, tool, Optional.ofNullable(mapperClass), Optional.ofNullable(collectorClass));
   }
 
   public String paramName() {

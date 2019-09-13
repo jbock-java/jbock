@@ -471,6 +471,24 @@ class ProcessorTest {
   }
 
   @Test
+  void nearNameCollision() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(longName = \"fAncy\")",
+        "  abstract String fAncy();",
+
+        "  @Parameter(longName = \"f_ancy\")",
+        "  abstract String f_ancy();",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void flagNotBoolean() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
