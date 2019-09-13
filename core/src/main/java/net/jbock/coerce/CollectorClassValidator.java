@@ -74,7 +74,7 @@ class CollectorClassValidator {
   }
 
   private Optional<TypeMirror> typecheck(Class<?> goal, TypeElement start) {
-    return Resolver.typecheck(goal, start, tool());
+    return Resolver.typecheck(start, goal, tool());
   }
 
   private ValidationException boom(String message) {

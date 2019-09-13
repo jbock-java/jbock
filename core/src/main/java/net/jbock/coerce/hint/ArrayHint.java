@@ -1,13 +1,13 @@
 package net.jbock.coerce.hint;
 
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 
 class ArrayHint extends Hint {
 
   @Override
-  String message(TypeMirror type, boolean repeatable) {
-    if (type.getKind() == TypeKind.ARRAY) {
+  String message(TypeElement type, boolean repeatable) {
+    if (type.asType().getKind() == TypeKind.ARRAY) {
       if (!repeatable) {
         return "Declare this parameter repeatable.";
       } else {

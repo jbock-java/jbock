@@ -1,23 +1,25 @@
 package net.jbock.coerce.hint;
 
-import com.squareup.javapoet.TypeName;
+import net.jbock.compiler.TypeTool;
 
-import javax.lang.model.type.TypeMirror;
+import javax.lang.model.element.TypeElement;
 import java.util.Set;
 
 abstract class PreciseTypeHint extends Hint {
 
   @Override
-  final String message(TypeMirror mirror, boolean repeatable) {
-    TypeName typeName = TypeName.get(mirror);
-    if (types().contains(typeName)) {
-      return message(typeName);
+  final String message(TypeElement type, boolean repeatable) {
+    TypeTool tool = TypeTool.get();
+    for (Class<?> clazz : types()) {
+      if (tool.isSameErasure(type.asType(), clazz)) {
+        return message(type);
+      }
     }
     return null;
   }
 
-  abstract String message(TypeName typeName);
+  abstract String message(TypeElement typeName);
 
-  abstract Set<TypeName> types();
+  abstract Set<Class<?>> types();
 
 }

@@ -22,7 +22,7 @@ import java.util.Optional;
 
 public class TypeTool {
 
-  public static final TypeVisitor<Boolean, TypeTool> IS_JAVA_LANG_OBJECT = new SimpleTypeVisitor8<Boolean, TypeTool>() {
+  static final TypeVisitor<Boolean, TypeTool> IS_JAVA_LANG_OBJECT = new SimpleTypeVisitor8<Boolean, TypeTool>() {
     @Override
     protected Boolean defaultAction(TypeMirror e, TypeTool tool) {
       return false;
@@ -183,7 +183,7 @@ public class TypeTool {
     return types.isAssignable(mirror, bound);
   }
 
-  public TypeMirror subst(
+  private TypeMirror subst(
       TypeMirror input,
       Map<String, TypeMirror> solution) {
     if (input.getKind() == TypeKind.TYPEVAR) {
@@ -226,7 +226,7 @@ public class TypeTool {
     return types.isSameType(mirror, types.erasure(mirror));
   }
 
-  public PrimitiveType getPrimitiveType(TypeKind kind) {
+  PrimitiveType getPrimitiveType(TypeKind kind) {
     return types.getPrimitiveType(kind);
   }
 
@@ -280,7 +280,7 @@ public class TypeTool {
     return types.boxedClass(primitive).asType();
   }
 
-  public TypeElement getTypeElement(Class<?> clazz) {
+  private TypeElement getTypeElement(Class<?> clazz) {
     return elements.getTypeElement(clazz.getCanonicalName());
   }
 
@@ -292,7 +292,7 @@ public class TypeTool {
     return asTypeElement(element);
   }
 
-  public TypeElement asTypeElement(Element element) {
+  private TypeElement asTypeElement(Element element) {
     TypeElement result = element.accept(AS_TYPE_ELEMENT, null);
     if (result == null) {
       throw new IllegalArgumentException("no type element: " + element);
@@ -306,5 +306,13 @@ public class TypeTool {
       throw new IllegalArgumentException("not declared: " + mirror);
     }
     return result;
+  }
+
+  public Types types() {
+    return types;
+  }
+
+  public Elements elements() {
+    return elements;
   }
 }

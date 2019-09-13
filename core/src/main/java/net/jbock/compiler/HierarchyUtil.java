@@ -4,34 +4,31 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class HierarchyUtil {
 
-  public static List<TypeElement> getTypeTree(
-      TypeMirror mirror,
-      TypeTool tool) {
-    if (mirror == null || mirror.getKind() != TypeKind.DECLARED) {
-      return Collections.emptyList();
-    }
+  private final TypeTool tool;
+
+  public HierarchyUtil(TypeTool tool) {
+    this.tool = tool;
+  }
+
+  public List<TypeElement> getHierarchy(TypeElement typeElement) {
     List<TypeElement> acc = new ArrayList<>();
-    accumulate(mirror, acc, tool);
+    accumulate(typeElement.asType(), acc);
     return acc;
   }
 
-  private static void accumulate(
-      TypeMirror mirror,
-      List<TypeElement> acc,
-      TypeTool tool) {
+  private void accumulate(TypeMirror mirror, List<TypeElement> acc) {
     if (mirror == null || mirror.getKind() != TypeKind.DECLARED) {
       return;
     }
     TypeElement t = tool.asTypeElement(mirror);
     acc.add(t);
     for (TypeMirror inter : t.getInterfaces()) {
-      accumulate(inter, acc, tool);
+      accumulate(inter, acc);
     }
-    accumulate(t.getSuperclass(), acc, tool);
+    accumulate(t.getSuperclass(), acc);
   }
 }

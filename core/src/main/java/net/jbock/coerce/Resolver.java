@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import net.jbock.compiler.HierarchyUtil;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
@@ -13,81 +14,83 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static net.jbock.compiler.HierarchyUtil.getTypeTree;
 import static net.jbock.compiler.TypeTool.asDeclared;
 
 class Resolver {
 
-  private final List<Extension> extensions;
+  /**
+   * "Dog implements Animal"
+   */
+  private static class ImplementsRelation {
+
+    final TypeElement dog;
+    final DeclaredType animal;
+
+    ImplementsRelation(TypeElement dog, DeclaredType animal) {
+      this.dog = dog;
+      this.animal = animal;
+    }
+  }
+
+  private final List<ImplementsRelation> relations;
   private final TypeTool tool;
 
-  private Resolver(
-      List<Extension> extensions,
-      TypeTool tool) {
-    List<Extension> reversed = new ArrayList<>(extensions);
+  private Resolver(List<ImplementsRelation> relations, TypeTool tool) {
+    List<ImplementsRelation> reversed = new ArrayList<>(relations);
     Collections.reverse(reversed);
-    this.extensions = Collections.unmodifiableList(reversed);
+    this.relations = Collections.unmodifiableList(reversed);
     this.tool = tool;
   }
 
   /**
-   * Check if {@code start} is a {@code goal}.
+   * Check if {@code x} is a {@code something}, and also infer
+   * the typevars in {@code something} where possible.
    *
-   * @param goal a type
-   * @param start a type
+   * @param x a type
+   * @param something what we're hoping {@code x} is
    * @param tool a tool
    *
-   * @return the {@code goal} type, with typevars resolved
-   * as far as it can be inferred from {@code start},
-   * or {@link Optional#empty() empty} if {@code start}
-   * is not a {@code goal}.
+   * @return the {@code something} type, with typevars resolved
    */
-  static Optional<TypeMirror> typecheck(
-      Class<?> goal,
-      TypeElement start,
-      TypeTool tool) {
-    List<TypeElement> family = getTypeTree(start.asType(), tool);
-    Extension extension;
-    TypeMirror nextGoal = tool.erasure(goal);
-    List<Extension> extensions = new ArrayList<>();
-    while ((extension = findExtension(family, nextGoal, tool)) != null) {
-      extensions.add(extension);
-      nextGoal = tool.erasure(extension.baseClass.asType());
+  static Optional<TypeMirror> typecheck(TypeElement x, Class<?> something, TypeTool tool) {
+    List<TypeElement> hierarchy = new HierarchyUtil(tool).getHierarchy(x);
+    ImplementsRelation relation;
+    TypeMirror nextGoal = tool.erasure(something);
+    List<ImplementsRelation> implementsRelations = new ArrayList<>();
+    while ((relation = findRelation(hierarchy, nextGoal, tool)) != null) {
+      implementsRelations.add(relation);
+      nextGoal = tool.erasure(relation.dog.asType());
     }
-    return new Resolver(extensions, tool).resolveTypevars();
+    return new Resolver(implementsRelations, tool).resolveTypevars();
   }
 
-  private static Extension findExtension(List<TypeElement> family, TypeMirror goal, TypeTool tool) {
+  private static ImplementsRelation findRelation(List<TypeElement> family, TypeMirror goal, TypeTool tool) {
     for (TypeElement element : family) {
-      Extension extension = findExtension(element, goal, tool);
-      if (extension != null) {
-        return extension;
+      ImplementsRelation implementsRelation = findRelation(element, goal, tool);
+      if (implementsRelation != null) {
+        return implementsRelation;
       }
     }
     return null;
   }
 
-  private static Extension findExtension(TypeElement typeElement, TypeMirror goal, TypeTool tool) {
-    TypeMirror superclass = typeElement.getSuperclass();
-    if (superclass != null && tool.isSameType(goal, tool.erasure(superclass))) {
-      return new Extension(typeElement, asDeclared(superclass));
-    }
+  private static ImplementsRelation findRelation(TypeElement typeElement, TypeMirror goal, TypeTool tool) {
     for (TypeMirror mirror : typeElement.getInterfaces()) {
       if (tool.isSameType(goal, tool.erasure(mirror))) {
-        return new Extension(typeElement, asDeclared(mirror));
+        return new ImplementsRelation(typeElement, asDeclared(mirror));
       }
     }
     return null;
   }
 
   private Optional<TypeMirror> resolveTypevars() {
-    if (extensions.isEmpty()) {
+    if (relations.isEmpty()) {
       return Optional.empty();
     }
-    TypeMirror extensionClass = extensions.get(0).extensionClass;
-    for (int i = 1; i < extensions.size(); i++) {
-      Extension extension = extensions.get(i);
-      TypeMirror stepResult = resolveStep(extensionClass, extension);
+    TypeMirror extensionClass = relations.get(0).animal;
+    for (int i = 1; i < relations.size(); i++) {
+      ImplementsRelation implementsRelation = relations.get(i);
+      TypeMirror stepResult = resolveStep(extensionClass, implementsRelation);
       if (extensionClass == null) {
         return Optional.empty();
       }
@@ -96,35 +99,20 @@ class Resolver {
     return Optional.of(extensionClass);
   }
 
-  private TypeMirror resolveStep(TypeMirror x, Extension extension) {
+  private TypeMirror resolveStep(TypeMirror x, ImplementsRelation implementsRelation) {
     List<? extends TypeMirror> typeArguments = asDeclared(x).getTypeArguments();
-    List<? extends TypeParameterElement> typeParameters = extension.baseClass.getTypeParameters();
+    List<? extends TypeParameterElement> typeParameters = implementsRelation.dog.getTypeParameters();
     Map<String, TypeMirror> solution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
       solution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
-    DeclaredType input = extension.extensionClass;
+    DeclaredType input = implementsRelation.animal;
     return tool.substitute(input, solution);
   }
 
   @Override
   public String toString() {
-    return extensions.toString();
+    return relations.toString();
   }
 
-  static class Extension {
-
-    final TypeElement baseClass;
-    final DeclaredType extensionClass;
-
-    Extension(TypeElement baseClass, DeclaredType extensionClass) {
-      this.baseClass = baseClass;
-      this.extensionClass = extensionClass;
-    }
-
-    @Override
-    public String toString() {
-      return String.format("%s extends %s", baseClass, extensionClass);
-    }
-  }
 }
