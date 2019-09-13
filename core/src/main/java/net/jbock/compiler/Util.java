@@ -40,12 +40,12 @@ public final class Util {
     return false;
   }
 
-  private enum CharType {
+  enum CharType {
     LOWER, UPPER, DIGIT, OTHER
 
   }
 
-  private static CharType charType(char c) {
+  static CharType charType(char c) {
     if (Character.isUpperCase(c)) {
       return CharType.UPPER;
     }
@@ -59,31 +59,8 @@ public final class Util {
   }
 
   static String snakeCase(String input) {
-    int length = input.length();
-    if (length < 2) {
-      return input;
-    }
-    StringBuilder sb = new StringBuilder();
-    CharType type0 = charType(input.charAt(0));
-    CharType type1 = charType(input.charAt(1));
-    sb.append(Character.toLowerCase(input.charAt(0)));
-    if (type0 != type1) {
-      sb.append('_');
-    }
-    sb.append(Character.toLowerCase(input.charAt(1)));
-    for (int i = 2; i < length; i++) {
-      char c = input.charAt(i);
-      CharType type2 = charType(c);
-      if (c != '_' &&
-          type1 != type2 &&
-          (type0 == type1 || type0 != type2)) {
-        sb.append('_');
-      }
-      sb.append(Character.toLowerCase(c));
-      type0 = type1;
-      type1 = type2;
-    }
-    return sb.toString();
+    List<String> elements = ParamName.snakeCase(input);
+    return String.join("_", elements);
   }
 
   public static String snakeToCamel(String s) {
