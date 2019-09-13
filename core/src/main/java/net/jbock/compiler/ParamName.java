@@ -1,13 +1,12 @@
 package net.jbock.compiler;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 
 public class ParamName {
 
   private enum CharType {
-    LOWER, UPPER, DIGIT, UNDERSCORE, OTHER
+    LOWER, UPPER, DIGIT, UNDERSCORE, OTHER, UNDEFINED
   }
 
   private final List<String> parts;
@@ -17,31 +16,17 @@ public class ParamName {
   }
 
   static ParamName create(String input) {
-    int length = input.length();
-    if (length < 2) {
-      return new ParamName(Collections.singletonList(input));
-    }
     List<String> result = new ArrayList<>();
-    CharType type_ = charType(input.charAt(0));
-    CharType type = charType(input.charAt(1));
+    CharType type_ = CharType.UNDEFINED;
     StringBuilder sb = new StringBuilder();
-    if (type_ == CharType.LOWER &&
-        (type == CharType.UPPER || type == CharType.DIGIT || type == CharType.UNDERSCORE)) {
-      result.add(toLower(input.charAt(0)));
-      sb.append(toLower(input.charAt(1)));
-    } else {
-      sb.append(toLower(input.charAt(0))).append(toLower(input.charAt(1)));
-    }
-    type_ = type;
-    for (int i = 2; i < length; i++) {
-      char c = input.charAt(i);
-      type = charType(c);
+    for (int i = 0; i < input.length(); i++) {
+      CharType type = charType(input.charAt(i));
       if (type_ == CharType.LOWER &&
           (type == CharType.UPPER || type == CharType.DIGIT || type == CharType.UNDERSCORE)) {
         result.add(sb.toString());
         sb.setLength(0);
       }
-      sb.append(toLower(c));
+      sb.append(toLower(input.charAt(i)));
       type_ = type;
     }
     if (sb.length() >= 1) {
