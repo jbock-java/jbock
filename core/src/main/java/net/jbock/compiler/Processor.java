@@ -6,7 +6,6 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
-import net.jbock.coerce.mappers.StandardCoercions;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -75,12 +74,10 @@ public final class Processor extends AbstractProcessor {
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
     try {
-      TypeTool tool = TypeTool.init(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
-      StandardCoercions.init(tool);
+      TypeTool.init(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
       processInternal(annotations, env);
     } finally {
       TypeTool.unset();
-      StandardCoercions.unset();
     }
     return false;
   }

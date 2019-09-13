@@ -9,16 +9,12 @@ import com.squareup.javapoet.WildcardTypeName;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.collector.AbstractCollector;
-import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.stream.Collector;
 
 public abstract class CoercionFactory {
-
-  // trigger for this factory
-  abstract TypeMirror mapperReturnType(TypeTool tool);
 
   /**
    * An expression that maps from String to mapperReturnType

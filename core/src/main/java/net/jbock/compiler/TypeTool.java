@@ -92,9 +92,8 @@ public class TypeTool {
     return instance;
   }
 
-  static TypeTool init(Elements elements, Types types) {
+  static void init(Elements elements, Types types) {
     instance = new TypeTool(elements, types);
-    return instance;
   }
 
   static void unset() {

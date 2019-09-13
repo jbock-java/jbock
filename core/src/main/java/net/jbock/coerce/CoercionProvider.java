@@ -96,11 +96,10 @@ public class CoercionProvider {
   }
 
   private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {
-    TypeMirror returnType = basicInfo.returnType();
-    TypeMirror mapperReturnType = basicInfo.optionalInfo().orElse(returnType);
+    TypeMirror mapperReturnType = basicInfo.optionalInfo().orElse(basicInfo.returnType());
     ParameterSpec mapperParam = mapperParam(mapperReturnType);
     MapperType mapperType = new MapperClassValidator(basicInfo, mapperReturnType, mapperClass).checkReturnType();
-    return MapperCoercion.create(mapperReturnType, Optional.empty(), mapperParam, mapperType, basicInfo);
+    return MapperCoercion.create(Optional.empty(), mapperParam, mapperType, basicInfo);
   }
 
   private ParameterSpec mapperParam(TypeMirror mapperOutputType) {
@@ -121,11 +120,11 @@ public class CoercionProvider {
     AbstractCollector collectorInfo = collectorInfo();
     MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
     ParameterSpec mapperParam = mapperParam(collectorInfo.inputType());
-    return MapperCoercion.create(collectorInfo.inputType(), Optional.of(collectorInfo), mapperParam, mapperType, basicInfo);
+    return MapperCoercion.create(Optional.of(collectorInfo), mapperParam, mapperType, basicInfo);
   }
 
   private CoercionFactory findCoercion(TypeMirror mirror) throws UnknownTypeException {
-    CoercionFactory standardCoercion = StandardCoercions.get(mirror);
+    CoercionFactory standardCoercion = StandardCoercions.get(tool(), tool().box(mirror));
     if (standardCoercion != null) {
       return standardCoercion;
     }
@@ -133,7 +132,7 @@ public class CoercionProvider {
     if (!isEnum) {
       throw UnknownTypeException.create();
     }
-    return EnumCoercion.create(mirror);
+    return EnumCoercion.create();
   }
 
   private boolean isEnumType(TypeMirror mirror) {

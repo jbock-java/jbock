@@ -21,30 +21,20 @@ public final class MapperCoercion extends CoercionFactory {
 
   private final MapperType mapperType;
 
-  private final TypeMirror mapperReturnType;
-
   private MapperCoercion(
-      TypeMirror mapperReturnType,
       ParameterSpec mapperParam,
       MapperType mapperType) {
-    this.mapperReturnType = mapperReturnType;
     this.mapperParam = mapperParam;
     this.mapperType = mapperType;
   }
 
   public static Coercion create(
-      TypeMirror mapperReturnType,
       Optional<AbstractCollector> collectorType,
       ParameterSpec mapperParam,
       MapperType mapperType,
       BasicInfo basicInfo) {
-    return new MapperCoercion(mapperReturnType, mapperParam, mapperType)
+    return new MapperCoercion(mapperParam, mapperType)
         .getCoercion(basicInfo, collectorType);
-  }
-
-  @Override
-  TypeMirror mapperReturnType(TypeTool tool) {
-    return mapperReturnType;
   }
 
   @Override
