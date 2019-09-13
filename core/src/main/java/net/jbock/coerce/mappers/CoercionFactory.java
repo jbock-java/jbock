@@ -23,7 +23,7 @@ public abstract class CoercionFactory {
   /**
    * An expression that maps from String to mapperReturnType
    */
-  abstract Optional<CodeBlock> mapExpr();
+  abstract Optional<CodeBlock> mapExpr(TypeMirror returnType);
 
   CodeBlock initMapper() {
     return CodeBlock.builder().build();
@@ -32,9 +32,10 @@ public abstract class CoercionFactory {
   public Coercion getCoercion(
       BasicInfo basicInfo,
       Optional<AbstractCollector> collector) {
-    Optional<CodeBlock> mapExpr = mapExpr();
+    TypeMirror innerType = innerType(basicInfo, collector);
+    Optional<CodeBlock> mapExpr = mapExpr(innerType);
     CodeBlock initMapper = initMapper();
-    TypeMirror constructorParamType = getConstructorParamType(basicInfo);
+    TypeMirror constructorParamType = basicInfo.returnType();
     Optional<ParameterSpec> collectorParam = collector.flatMap(collectorInfo ->
         collectorParam(basicInfo, collectorInfo));
     return Coercion.create(
@@ -46,12 +47,8 @@ public abstract class CoercionFactory {
         basicInfo);
   }
 
-  private TypeMirror getConstructorParamType(BasicInfo basicInfo) {
-    boolean useReturnType = basicInfo.isOptional() || basicInfo.isRepeatable();
-    if (useReturnType) {
-      return basicInfo.returnType();
-    }
-    return mapperReturnType(basicInfo.tool());
+  private TypeMirror innerType(BasicInfo basicInfo, Optional<AbstractCollector> collector) {
+    return collector.map(AbstractCollector::inputType).orElse(basicInfo.optionalInfo().orElse(basicInfo.returnType()));
   }
 
   private static Optional<ParameterSpec> collectorParam(

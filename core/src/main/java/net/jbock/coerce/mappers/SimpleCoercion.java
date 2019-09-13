@@ -5,27 +5,24 @@ import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
+import java.util.function.Function;
 
 class SimpleCoercion extends CoercionFactory {
 
   private final Class<?> mapperReturnType;
 
-  private final CodeBlock mapExpr;
+  private final Function<TypeMirror, CodeBlock> mapExpr;
 
-  SimpleCoercion(Class<?> mapperReturnType, String mapExpr) {
-    this(mapperReturnType, CodeBlock.of("$T::" + mapExpr, mapperReturnType));
-  }
-
-  SimpleCoercion(Class<?> mapperReturnType, CodeBlock mapExpr) {
+  private SimpleCoercion(Class<?> mapperReturnType, Function<TypeMirror, CodeBlock> mapExpr) {
     this.mapperReturnType = mapperReturnType;
     this.mapExpr = mapExpr;
   }
 
   static SimpleCoercion create(Class<?> mapperReturnType, String mapExpr) {
-    return new SimpleCoercion(mapperReturnType, CodeBlock.of("$T::" + mapExpr, mapperReturnType));
+    return new SimpleCoercion(mapperReturnType, type -> CodeBlock.of("$T::" + mapExpr, mapperReturnType));
   }
 
-  static SimpleCoercion create(Class<?> mapperReturnType, CodeBlock mapExpr) {
+  static SimpleCoercion create(Class<?> mapperReturnType, Function<TypeMirror, CodeBlock> mapExpr) {
     return new SimpleCoercion(mapperReturnType, mapExpr);
   }
 
@@ -35,7 +32,7 @@ class SimpleCoercion extends CoercionFactory {
   }
 
   @Override
-  final Optional<CodeBlock> mapExpr() {
-    return Optional.of(mapExpr);
+  final Optional<CodeBlock> mapExpr(TypeMirror returnType) {
+    return Optional.of(mapExpr.apply(returnType));
   }
 }

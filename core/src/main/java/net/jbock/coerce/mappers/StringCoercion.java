@@ -14,7 +14,7 @@ class StringCoercion extends CoercionFactory {
   }
 
   @Override
-  Optional<CodeBlock> mapExpr() {
+  Optional<CodeBlock> mapExpr(TypeMirror returnType) {
     return Optional.empty();
   }
 }

@@ -15,12 +15,12 @@ public final class EnumCoercion extends CoercionFactory {
   }
 
   @Override
-  final Optional<CodeBlock> mapExpr() {
-    return Optional.of(CodeBlock.of("$T::valueOf", mapperReturnType));
+  final Optional<CodeBlock> mapExpr(TypeMirror returnType) {
+    return Optional.of(CodeBlock.of("$T::valueOf", returnType));
   }
 
-  public static EnumCoercion create(TypeMirror mapperReturnType) {
-    return new EnumCoercion(mapperReturnType);
+  public static EnumCoercion create(TypeMirror returnType) {
+    return new EnumCoercion(returnType);
   }
 
   @Override

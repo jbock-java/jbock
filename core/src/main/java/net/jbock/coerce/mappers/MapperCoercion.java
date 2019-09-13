@@ -48,7 +48,7 @@ public final class MapperCoercion extends CoercionFactory {
   }
 
   @Override
-  public Optional<CodeBlock> mapExpr() {
+  public Optional<CodeBlock> mapExpr(TypeMirror returnType) {
     return Optional.of(CodeBlock.of("$N", mapperParam));
   }
 
