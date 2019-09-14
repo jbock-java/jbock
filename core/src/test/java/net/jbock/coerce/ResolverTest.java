@@ -1,6 +1,5 @@
 package net.jbock.coerce;
 
-import net.jbock.coerce.Resolver.ImplementsRelation;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
 import org.junit.jupiter.api.Test;
@@ -62,7 +61,7 @@ class ResolverTest {
   }
 
   @Test
-  void testToAnimal() {
+  void testDogToAnimal() {
 
     EvaluatingProcessor.source(
         "package test;",
@@ -81,7 +80,7 @@ class ResolverTest {
       TypeElement f = elements.getTypeElement("test.F");
       Resolver resolver = new Resolver(tool);
       ImplementsRelation relation = new ImplementsRelation(f, f.getInterfaces().get(0));
-      TypeMirror result = resolver.toAnimal(x, relation);
+      TypeMirror result = resolver.dogToAnimal(x, relation);
       assertEquals("java.util.function.Function<java.lang.String,java.util.List<A>>", result.toString());
     });
   }

@@ -5,7 +5,6 @@ import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -17,21 +16,6 @@ import java.util.Optional;
 import static net.jbock.compiler.TypeTool.asDeclared;
 
 class Resolver {
-
-  /**
-   * "Dog implements Animal"
-   * Any free type parameters in Animal also appear in Dog.
-   */
-  static class ImplementsRelation {
-
-    final TypeElement dog;
-    final DeclaredType animal;
-
-    ImplementsRelation(TypeElement dog, TypeMirror animal) {
-      this.dog = dog;
-      this.animal = asDeclared(animal);
-    }
-  }
 
   private final TypeTool tool;
 
@@ -64,7 +48,7 @@ class Resolver {
       return Optional.empty();
     }
     Collections.reverse(path);
-    return Optional.of(resolver.toAnimal(path));
+    return Optional.of(resolver.dogToAnimal(path));
   }
 
   private ImplementsRelation findRelation(List<TypeElement> hierarchy, TypeMirror something) {
@@ -87,9 +71,9 @@ class Resolver {
   }
 
   /**
-   * Successively replace type parameters.
+   * Go from dog to animal, successively replacing type parameters on the way.
    * The end result is a type that has the same erasure as the last segment's animal,
-   * and uses the same type parameter names as the first path segment.
+   * and uses the same type parameter names as the first segment.
    *
    * @param path a path of implements relations
    * @return a type that has the same erasure as the final animal
@@ -99,26 +83,29 @@ class Resolver {
    *   <li>{@code path[1].dog} and {@code path[0].animal} have the same erasure</li>
    * </ul>
    */
-  private TypeMirror toAnimal(List<ImplementsRelation> path) {
-    TypeMirror acc = path.get(0).animal;
+  private TypeMirror dogToAnimal(List<ImplementsRelation> path) {
+    TypeMirror animal = path.get(0).animal;
     for (int i = 1; i < path.size(); i++) {
-      acc = toAnimal(acc, path.get(i));
+      animal = dogToAnimal(animal, path.get(i));
     }
-    return acc;
+    return animal;
   }
 
-  // visible for testing
-  TypeMirror toAnimal(TypeMirror x, ImplementsRelation relation) {
-    List<? extends TypeMirror> typeArguments = asDeclared(x).getTypeArguments();
+  /**
+   * @param animal a declared type
+   * @param relation a relation the dog of which is the {@code animal}
+   * @return a type that has the erasure of {@code relation.animal}
+   */
+  TypeMirror dogToAnimal(TypeMirror animal, ImplementsRelation relation) {
+    List<? extends TypeMirror> typeArguments = asDeclared(animal).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = relation.dog.getTypeParameters();
     Map<String, TypeMirror> solution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
       solution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
-    DeclaredType input = relation.animal;
-    TypeMirror result = tool.substitute(input, solution);
+    TypeMirror result = tool.substitute(relation.animal, solution);
     if (result == null) {
-      throw new IllegalArgumentException();
+      throw new AssertionError("Bad input");
     }
     return result;
   }
