@@ -10,13 +10,21 @@ import static net.jbock.compiler.TypeTool.asDeclared;
  * "Dog implements Animal"
  * Any free type parameters in Animal also appear in Dog.
  */
-class ImplementsRelation {
+public class ImplementsRelation {
 
-  final TypeElement dog;
-  final DeclaredType animal;
+  private final TypeElement dog;
+  private final DeclaredType animal;
 
-  ImplementsRelation(TypeElement dog, TypeMirror animal) {
+  public ImplementsRelation(TypeElement dog, TypeMirror animal) {
     this.dog = dog;
     this.animal = asDeclared(animal);
+  }
+
+  public TypeElement dog() {
+    return dog;
+  }
+
+  public DeclaredType animal() {
+    return animal;
   }
 }

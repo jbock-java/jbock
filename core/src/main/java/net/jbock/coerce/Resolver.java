@@ -35,36 +35,31 @@ class Resolver {
    * @return the {@code something} type, with typevars resolved
    */
   static Optional<TypeMirror> typecheck(TypeElement x, Class<?> something, TypeTool tool) {
-    List<TypeElement> hierarchy = new HierarchyUtil(tool).getHierarchy(x);
-    TypeMirror currentGoal = tool.erasure(something);
-    List<ImplementsRelation> path = new ArrayList<>();
+    List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(x);
     Resolver resolver = new Resolver(tool);
-    ImplementsRelation relation;
-    while ((relation = resolver.findRelation(hierarchy, currentGoal)) != null) {
-      path.add(relation);
-      currentGoal = tool.erasure(relation.dog);
-    }
+    List<ImplementsRelation> path = resolver.findPath(hierarchy, something);
     if (path.isEmpty()) {
       return Optional.empty();
     }
-    Collections.reverse(path);
     return Optional.of(resolver.dogToAnimal(path));
   }
 
-  private ImplementsRelation findRelation(List<TypeElement> hierarchy, TypeMirror something) {
-    for (TypeElement type : hierarchy) {
-      ImplementsRelation implementsRelation = findRelation(type, something);
-      if (implementsRelation != null) {
-        return implementsRelation;
-      }
+  private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> something) {
+    TypeMirror currentGoal = tool.erasure(something);
+    List<ImplementsRelation> path = new ArrayList<>();
+    ImplementsRelation relation;
+    while ((relation = findRelation(hierarchy, currentGoal)) != null) {
+      path.add(relation);
+      currentGoal = tool.erasure(relation.dog());
     }
-    return null;
+    Collections.reverse(path);
+    return path;
   }
 
-  private ImplementsRelation findRelation(TypeElement type, TypeMirror something) {
-    for (TypeMirror mirror : type.getInterfaces()) {
-      if (tool.isSameType(something, tool.erasure(mirror))) {
-        return new ImplementsRelation(type, mirror);
+  private ImplementsRelation findRelation(List<ImplementsRelation> hierarchy, TypeMirror something) {
+    for (ImplementsRelation relation : hierarchy) {
+      if (tool.isSameType(something, tool.erasure(relation.animal()))) {
+        return relation;
       }
     }
     return null;
@@ -84,7 +79,7 @@ class Resolver {
    * </ul>
    */
   private TypeMirror dogToAnimal(List<ImplementsRelation> path) {
-    TypeMirror animal = path.get(0).animal;
+    TypeMirror animal = path.get(0).animal();
     for (int i = 1; i < path.size(); i++) {
       animal = dogToAnimal(animal, path.get(i));
     }
@@ -98,12 +93,12 @@ class Resolver {
    */
   TypeMirror dogToAnimal(TypeMirror animal, ImplementsRelation relation) {
     List<? extends TypeMirror> typeArguments = asDeclared(animal).getTypeArguments();
-    List<? extends TypeParameterElement> typeParameters = relation.dog.getTypeParameters();
+    List<? extends TypeParameterElement> typeParameters = relation.dog().getTypeParameters();
     Map<String, TypeMirror> solution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
       solution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
-    TypeMirror result = tool.substitute(relation.animal, solution);
+    TypeMirror result = tool.substitute(relation.animal(), solution);
     if (result == null) {
       throw new AssertionError("Bad input");
     }

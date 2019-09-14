@@ -282,11 +282,11 @@ public class TypeTool {
     return types.boxedClass(primitive).asType();
   }
 
-  public TypeElement asTypeElement(Class<?> clazz) {
+  private TypeElement asTypeElement(Class<?> clazz) {
     return elements.getTypeElement(clazz.getCanonicalName());
   }
 
-  public TypeElement asTypeElement(TypeMirror mirror) {
+  TypeElement asTypeElement(TypeMirror mirror) {
     Element element = types.asElement(mirror);
     if (element == null) {
       throw new IllegalArgumentException("no element: " + mirror);
