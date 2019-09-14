@@ -14,7 +14,6 @@ public class HintProvider {
 
   private static final List<Hint> HINTS = Arrays.asList(
       new RawCombinatorHint(),
-      new ArrayHint(),
       new DateHint());
 
   public HintProvider(BasicInfo basicInfo) {
