@@ -21,7 +21,7 @@ class Resolver {
   /**
    * "Dog implements Animal"
    */
-  private static class ImplementsRelation {
+  static class ImplementsRelation {
 
     final TypeElement dog;
     final DeclaredType animal;
@@ -34,7 +34,8 @@ class Resolver {
 
   private final TypeTool tool;
 
-  private Resolver(TypeTool tool) {
+  // visible for testing
+  Resolver(TypeTool tool) {
     this.tool = tool;
   }
 
@@ -96,7 +97,7 @@ class Resolver {
     TypeMirror acc = path.get(0).animal;
     for (int i = 1; i < path.size(); i++) {
       ImplementsRelation relation = path.get(i);
-      acc = infer(acc, relation);
+      acc = asAnimal(acc, relation);
       if (acc == null) {
         return Optional.empty();
       }
@@ -104,10 +105,10 @@ class Resolver {
     return Optional.of(acc);
   }
 
-  private TypeMirror infer(TypeMirror x, ImplementsRelation relation) {
+  TypeMirror asAnimal(TypeMirror x, ImplementsRelation relation) {
     List<? extends TypeMirror> typeArguments = asDeclared(x).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = relation.dog.getTypeParameters();
-    Map<String, TypeMirror> solution = new HashMap<>(); // TODO tool.unify also builds a map, how are they related?
+    Map<String, TypeMirror> solution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
       solution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }

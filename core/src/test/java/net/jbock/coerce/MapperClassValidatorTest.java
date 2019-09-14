@@ -3,13 +3,13 @@ package net.jbock.coerce;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeExpr;
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.ValidationException;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -19,34 +19,33 @@ class MapperClassValidatorTest {
   void simpleTest() {
 
     EvaluatingProcessor.source(
+        "import java.util.List;",
         "import java.util.function.Supplier;",
         "import java.util.function.Function;",
         "",
-        "class Mapper implements A<Integer, String> {",
-        "  public Function<String, Integer> get() {",
+        "class Mapper<F, T> implements A<F, T> {",
+        "  public Function<T, List<F>> get() {",
         "    return null;",
         "  }",
         "}",
         "",
-        "interface A<R, X> extends B<X, R> { }",
-        "interface B<X, R> extends C<X, R> { }",
+        "interface A<R, X> extends B<X, List<R>> { }",
+        "interface B<F, K> extends C<F, K> { }",
         "interface C<X, R> extends Supplier<Function<X, R>> { }"
     ).run("Mapper", (elements, types) -> {
       TypeElement mapperClass = elements.getTypeElement("Mapper");
 
       BasicInfo basicInfo = mock(BasicInfo.class);
-      when(basicInfo.tool()).thenReturn(new TypeTool(elements, types));
-      when(basicInfo.asValidationException(anyString())).thenReturn(ValidationException.create(null, ""));
+      TypeTool tool = new TypeTool(elements, types);
+      when(basicInfo.tool()).thenReturn(tool);
 
-      // no exception: mapper returns Integer indeed
-      new MapperClassValidator(basicInfo, TypeExpr.prepare(elements, types)
-          .parse("java.lang.Integer"), mapperClass)
+      DeclaredType expectedReturnType = TypeExpr.prepare(elements, types).parse("java.util.List<java.lang.Integer>");
+
+      MapperType mapperType = new MapperClassValidator(basicInfo, expectedReturnType, mapperClass)
           .checkReturnType();
-
-      // exception: mapper doesn't return String
-      assertThrows(ValidationException.class, () -> new MapperClassValidator(basicInfo, TypeExpr.prepare(elements, types)
-          .parse("java.lang.String"), mapperClass)
-          .checkReturnType()).getMessage();
+      assertEquals(2, mapperType.solution().size());
+      assertTrue(tool.isSameType(mapperType.solution().get(0), Integer.class));
+      assertTrue(tool.isSameType(mapperType.solution().get(1), String.class));
     });
   }
 }

@@ -150,6 +150,31 @@ public class TypeTool {
     return result;
   }
 
+  private TypeMirror subst(TypeMirror input, Map<String, TypeMirror> solution) {
+    if (input.getKind() == TypeKind.TYPEVAR) {
+      return solution.get(input.toString());
+    }
+    if (input.getKind() == TypeKind.WILDCARD) {
+      return input; // these can stay
+    }
+    DeclaredType declaredType = input.accept(AS_DECLARED, null);
+    if (declaredType == null) {
+      return null; // invalid input
+    }
+    List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+    TypeMirror[] result = new TypeMirror[typeArguments.size()];
+    for (int i = 0; i < typeArguments.size(); i++) {
+      TypeMirror typeArgument = typeArguments.get(i);
+      TypeMirror opt = subst(typeArgument, solution);
+      if (opt == null) {
+        return null; // error
+      }
+      result[i] = opt;
+    }
+    return types.getDeclaredType(declaredType.asElement()
+        .accept(AS_TYPE_ELEMENT, null), result);
+  }
+
   public boolean isAssignableToTypeElement(TypeMirror result) {
     if (result.getKind() == TypeKind.WILDCARD ||
         result.getKind() == TypeKind.TYPEVAR) {
@@ -183,35 +208,8 @@ public class TypeTool {
     return types.isAssignable(mirror, bound);
   }
 
-  private TypeMirror subst(
-      TypeMirror input,
-      Map<String, TypeMirror> solution) {
-    if (input.getKind() == TypeKind.TYPEVAR) {
-      return solution.get(input.toString());
-    }
-    if (input.getKind() == TypeKind.WILDCARD) {
-      return input; // these can stay
-    }
-    DeclaredType declaredType = input.accept(AS_DECLARED, null);
-    if (declaredType == null) {
-      return null; // invalid input
-    }
-    List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
-    TypeMirror[] result = new TypeMirror[typeArguments.size()];
-    for (int i = 0; i < typeArguments.size(); i++) {
-      TypeMirror typeArgument = typeArguments.get(i);
-      TypeMirror opt = subst(typeArgument, solution);
-      if (opt == null) {
-        return null; // error
-      }
-      result[i] = opt;
-    }
-    return types.getDeclaredType(declaredType.asElement()
-        .accept(AS_TYPE_ELEMENT, null), result);
-  }
-
   public boolean isSameType(TypeMirror mirror, Class<?> test) {
-    return types.isSameType(mirror, getTypeElement(test).asType());
+    return types.isSameType(mirror, asTypeElement(test).asType());
   }
 
   public boolean isSameType(TypeMirror mirror, TypeMirror test) {
@@ -256,12 +254,12 @@ public class TypeTool {
 
   public TypeMirror optionalOf(Class<?> type) {
     return types.getDeclaredType(
-        getTypeElement(Optional.class),
-        getTypeElement(type).asType());
+        asTypeElement(Optional.class),
+        asTypeElement(type).asType());
   }
 
   public TypeMirror listOf(TypeMirror type) {
-    return types.getDeclaredType(getTypeElement(List.class), type);
+    return types.getDeclaredType(asTypeElement(List.class), type);
   }
 
   public List<? extends TypeMirror> getDirectSupertypes(TypeMirror mirror) {
@@ -284,7 +282,7 @@ public class TypeTool {
     return types.boxedClass(primitive).asType();
   }
 
-  private TypeElement getTypeElement(Class<?> clazz) {
+  public TypeElement asTypeElement(Class<?> clazz) {
     return elements.getTypeElement(clazz.getCanonicalName());
   }
 
