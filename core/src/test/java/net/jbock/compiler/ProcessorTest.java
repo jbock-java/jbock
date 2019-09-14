@@ -202,7 +202,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("java.util.Date is not supported. Use a type from java.time instead.");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test

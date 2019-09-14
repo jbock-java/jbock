@@ -13,8 +13,7 @@ public class HintProvider {
   private final BasicInfo basicInfo;
 
   private static final List<Hint> HINTS = Arrays.asList(
-      new RawCombinatorHint(),
-      new DateHint());
+      new RawCombinatorHint());
 
   public HintProvider(BasicInfo basicInfo) {
     this.basicInfo = basicInfo;
