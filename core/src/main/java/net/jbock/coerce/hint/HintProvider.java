@@ -16,8 +16,7 @@ public class HintProvider {
       new RawCombinatorHint(),
       new CollectionHint(),
       new ArrayHint(),
-      new DateHint(),
-      new OptionalHint());
+      new DateHint());
 
   public HintProvider(BasicInfo basicInfo) {
     this.basicInfo = basicInfo;
