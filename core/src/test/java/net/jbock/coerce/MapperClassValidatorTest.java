@@ -23,12 +23,7 @@ class MapperClassValidatorTest {
         "import java.util.function.Supplier;",
         "import java.util.function.Function;",
         "",
-        "class Mapper<F, T> implements A<F, T> {",
-        "  public Function<T, List<F>> get() {",
-        "    return null;",
-        "  }",
-        "}",
-        "",
+        "interface Mapper<F, T> extends A<F, T> { }",
         "interface A<R, X> extends B<X, List<R>> { }",
         "interface B<F, K> extends C<F, K> { }",
         "interface C<X, R> extends Supplier<Function<X, R>> { }"
