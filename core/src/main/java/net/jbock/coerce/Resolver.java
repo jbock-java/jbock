@@ -20,15 +20,16 @@ class Resolver {
 
   /**
    * "Dog implements Animal"
+   * Any free type parameters in Animal also appear in Dog.
    */
   static class ImplementsRelation {
 
     final TypeElement dog;
     final DeclaredType animal;
 
-    ImplementsRelation(TypeElement dog, DeclaredType animal) {
+    ImplementsRelation(TypeElement dog, TypeMirror animal) {
       this.dog = dog;
-      this.animal = animal;
+      this.animal = asDeclared(animal);
     }
   }
 
@@ -59,8 +60,11 @@ class Resolver {
       path.add(relation);
       currentGoal = tool.erasure(relation.dog);
     }
+    if (path.isEmpty()) {
+      return Optional.empty();
+    }
     Collections.reverse(path);
-    return resolver.resolveTypevars(path);
+    return Optional.of(resolver.toAnimal(path));
   }
 
   private ImplementsRelation findRelation(List<TypeElement> hierarchy, TypeMirror something) {
@@ -76,36 +80,35 @@ class Resolver {
   private ImplementsRelation findRelation(TypeElement type, TypeMirror something) {
     for (TypeMirror mirror : type.getInterfaces()) {
       if (tool.isSameType(something, tool.erasure(mirror))) {
-        return new ImplementsRelation(type, asDeclared(mirror));
+        return new ImplementsRelation(type, mirror);
       }
     }
     return null;
   }
 
   /**
+   * Successively replace type parameters.
+   * The end result is a type that has the same erasure as the last segment's animal,
+   * and uses the same type parameter names as the first path segment.
+   *
    * @param path a path of implements relations
+   * @return a type that has the same erasure as the final animal
    *
    * <ul>
    *   <li>ascending from dog to animal</li>
    *   <li>{@code path[1].dog} and {@code path[0].animal} have the same erasure</li>
    * </ul>
    */
-  private Optional<TypeMirror> resolveTypevars(List<ImplementsRelation> path) {
-    if (path.isEmpty()) {
-      return Optional.empty();
-    }
+  private TypeMirror toAnimal(List<ImplementsRelation> path) {
     TypeMirror acc = path.get(0).animal;
     for (int i = 1; i < path.size(); i++) {
-      ImplementsRelation relation = path.get(i);
-      acc = asAnimal(acc, relation);
-      if (acc == null) {
-        return Optional.empty();
-      }
+      acc = toAnimal(acc, path.get(i));
     }
-    return Optional.of(acc);
+    return acc;
   }
 
-  TypeMirror asAnimal(TypeMirror x, ImplementsRelation relation) {
+  // visible for testing
+  TypeMirror toAnimal(TypeMirror x, ImplementsRelation relation) {
     List<? extends TypeMirror> typeArguments = asDeclared(x).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = relation.dog.getTypeParameters();
     Map<String, TypeMirror> solution = new HashMap<>();
@@ -113,6 +116,10 @@ class Resolver {
       solution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
     DeclaredType input = relation.animal;
-    return tool.substitute(input, solution);
+    TypeMirror result = tool.substitute(input, solution);
+    if (result == null) {
+      throw new IllegalArgumentException();
+    }
+    return result;
   }
 }
