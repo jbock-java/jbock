@@ -89,10 +89,6 @@ public class BasicInfo {
     return attributes.optionalInfo();
   }
 
-  ExecutableElement sourceMethod() {
-    return sourceMethod;
-  }
-
   public boolean isRepeatable() {
     return attributes.repeatable();
   }
