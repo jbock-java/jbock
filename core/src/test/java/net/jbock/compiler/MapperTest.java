@@ -581,6 +581,25 @@ class MapperTest {
   }
 
   @Test
+  void testTypeSudoku() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract List<List<Integer>> number(); // Supplier<Function<String, List<List<Integer>>>>",
+        "",
+        "  static class Mapper<E> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
+        "  interface FooSupplier<K> extends Supplier<Foo<K>> { }",
+        "  interface Foo<X> extends Function<String, List<List<X>>> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void mapperInvalidComplicatedTree() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
