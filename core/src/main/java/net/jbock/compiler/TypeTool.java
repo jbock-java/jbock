@@ -143,7 +143,11 @@ public class TypeTool {
     if (input.getKind() == TypeKind.TYPEVAR) {
       return solution.get(input.toString());
     }
-    DeclaredType result = subst(input.accept(AS_DECLARED, null), solution);
+    return substitute(input.accept(AS_DECLARED, null), solution);
+  }
+
+  public DeclaredType substitute(DeclaredType declaredType, Map<String, TypeMirror> solution) {
+    DeclaredType result = subst(declaredType, solution);
     if (result == null) {
       return null; // invalid
     }

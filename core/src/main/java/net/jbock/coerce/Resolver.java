@@ -5,6 +5,7 @@ import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -34,7 +35,7 @@ class Resolver {
    *
    * @return the {@code something} type, with typevars resolved
    */
-  static Optional<TypeMirror> typecheck(TypeElement x, Class<?> something, TypeTool tool) {
+  static Optional<DeclaredType> typecheck(TypeElement x, Class<?> something, TypeTool tool) {
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(x);
     Resolver resolver = new Resolver(tool);
     List<ImplementsRelation> path = resolver.findPath(hierarchy, something);
@@ -78,8 +79,8 @@ class Resolver {
    *   <li>{@code path[1].dog} and {@code path[0].animal} have the same erasure</li>
    * </ul>
    */
-  private TypeMirror dogToAnimal(List<ImplementsRelation> path) {
-    TypeMirror animal = path.get(0).animal();
+  private DeclaredType dogToAnimal(List<ImplementsRelation> path) {
+    DeclaredType animal = path.get(0).animal();
     for (int i = 1; i < path.size(); i++) {
       animal = dogToAnimal(animal, path.get(i));
     }
@@ -91,14 +92,14 @@ class Resolver {
    * @param relation a relation the dog of which is the {@code animal}
    * @return a type that has the erasure of {@code relation.animal}
    */
-  TypeMirror dogToAnimal(TypeMirror animal, ImplementsRelation relation) {
+  DeclaredType dogToAnimal(TypeMirror animal, ImplementsRelation relation) {
     List<? extends TypeMirror> typeArguments = asDeclared(animal).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = relation.dog().getTypeParameters();
     Map<String, TypeMirror> solution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
       solution.put(typeParameters.get(i).toString(), typeArguments.get(i));
     }
-    TypeMirror result = tool.substitute(relation.animal(), solution);
+    DeclaredType result = tool.substitute(relation.animal(), solution);
     if (result == null) {
       throw new AssertionError("Bad input");
     }

@@ -6,6 +6,7 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
@@ -52,7 +53,7 @@ class CollectorClassValidator {
   }
 
   private CollectorType getCollectorType() {
-    Optional<TypeMirror> supplier = typecheck(Supplier.class, collectorClass);
+    Optional<DeclaredType> supplier = typecheck(Supplier.class, collectorClass);
     if (supplier.isPresent()) {
       List<? extends TypeMirror> typeArgs = asDeclared(supplier.get()).getTypeArguments();
       if (typeArgs.isEmpty()) {
@@ -70,7 +71,7 @@ class CollectorClassValidator {
     return basicInfo.tool();
   }
 
-  private Optional<TypeMirror> typecheck(Class<?> goal, TypeElement start) {
+  private Optional<DeclaredType> typecheck(Class<?> goal, TypeElement start) {
     return Resolver.typecheck(start, goal, tool());
   }
 

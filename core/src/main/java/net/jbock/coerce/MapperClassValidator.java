@@ -5,6 +5,7 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Map;
@@ -67,7 +68,7 @@ final class MapperClassValidator {
   }
 
   private FunctionType getMapperType() {
-    Optional<TypeMirror> supplier = typecheck(Supplier.class, mapperClass);
+    Optional<DeclaredType> supplier = typecheck(Supplier.class, mapperClass);
     if (supplier.isPresent()) {
       List<? extends TypeMirror> typeArgs = asDeclared(supplier.get()).getTypeArguments();
       if (typeArgs.isEmpty()) {
@@ -85,7 +86,7 @@ final class MapperClassValidator {
     return basicInfo.tool();
   }
 
-  private Optional<TypeMirror> typecheck(Class<?> goal, TypeElement start) {
+  private Optional<DeclaredType> typecheck(Class<?> goal, TypeElement start) {
     return Resolver.typecheck(start, goal, tool());
   }
 
@@ -109,7 +110,7 @@ final class MapperClassValidator {
       boolean supplier) {
     if (!tool().isSameErasure(type, Function.class)) {
       TypeElement typeElement = tool().asTypeElement(type);
-      Optional<TypeMirror> hopefullyFunction = typecheck(Function.class, typeElement);
+      Optional<DeclaredType> hopefullyFunction = typecheck(Function.class, typeElement);
       return new FunctionType(hopefullyFunction.orElseThrow(() ->
           boom("must either implement Function or Supplier<Function>")), supplier);
     }
