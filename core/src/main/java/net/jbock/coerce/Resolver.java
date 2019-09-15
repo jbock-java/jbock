@@ -71,7 +71,7 @@ class Resolver {
    * and uses the same type parameter names as the first segment.
    *
    * @param path a path of implements relations
-   * @return a type that has the same erasure as the final animal
+   * @return a declared type that has the same erasure as the final animal
    *
    * <ul>
    *   <li>ascending from dog to animal</li>

@@ -543,8 +543,7 @@ class MapperTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: must either implement Function or Supplier<Function>");
+        .compilesWithoutError();
   }
 
   @Test
@@ -587,7 +586,8 @@ class MapperTest {
         "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
-        "  abstract List<List<Integer>> number(); // Supplier<Function<String, List<List<Integer>>>>",
+        "  abstract List<List<Integer>> number();",
+        "  // Mapper<Integer> = Supplier<Function<String, List<List<Integer>>>>",
         "",
         "  static class Mapper<E> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
         "  interface FooSupplier<K> extends Supplier<Foo<K>> { }",
@@ -629,8 +629,7 @@ class MapperTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: must either implement Function or Supplier<Function>");
+        .compilesWithoutError();
   }
 
   @Test

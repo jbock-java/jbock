@@ -44,9 +44,6 @@ class CollectorClassValidator {
     TypeMirror r = asDeclared(collectorType.collectorType).getTypeArguments().get(2);
     Map<String, TypeMirror> r_result = tool().unify(basicInfo.returnType(), r)
         .orElseThrow(() -> boom(String.format("The collector should return %s but returns %s", basicInfo.returnType(), r)));
-    if (!tool().isAssignableToTypeElement(collectorClass.asType())) {
-      throw boom("invalid bounds");
-    }
     TypeMirror inputType = tool().substitute(t, r_result);
     if (inputType == null) {
       throw boom("could not resolve all type parameters");

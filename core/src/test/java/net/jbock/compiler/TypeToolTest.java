@@ -7,13 +7,13 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
 import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
+import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static net.jbock.compiler.TypeTool.asDeclared;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -68,7 +68,7 @@ class TypeToolTest {
       TypeMirror setOfE = elements.getTypeElement("a.Set").asType();
       TypeElement string = elements.getTypeElement("java.lang.String");
       TypeMirror result = tool.substitute(
-          setOfE,
+          setOfE.accept(AS_DECLARED, null),
           Collections.singletonMap("E", string.asType()));
       assertNull(result);
     });
@@ -86,14 +86,9 @@ class TypeToolTest {
       TypeMirror setOfE = elements.getTypeElement("a.Set").asType();
       TypeElement boxInt = elements.getTypeElement("java.lang.Integer");
       DeclaredType result = tool.substitute(
-          setOfE,
+          setOfE.accept(AS_DECLARED, null),
           Collections.singletonMap("E", boxInt.asType()))
-          .accept(new SimpleTypeVisitor8<DeclaredType, Void>() {
-            @Override
-            public DeclaredType visitDeclared(DeclaredType declaredType, Void _null) {
-              return declaredType;
-            }
-          }, null);
+          .accept(AS_DECLARED, null);
       assertNotNull(result);
       assertTrue(types.isSameType(types.erasure(result), types.erasure(elements.getTypeElement("a.Set").asType())));
       assertEquals(1, result.getTypeArguments().size());

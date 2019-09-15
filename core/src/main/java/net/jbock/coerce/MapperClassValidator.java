@@ -108,7 +108,10 @@ final class MapperClassValidator {
       TypeMirror type,
       boolean supplier) {
     if (!tool().isSameErasure(type, Function.class)) {
-      throw boom("must either implement Function or Supplier<Function>");
+      TypeElement typeElement = tool().asTypeElement(type);
+      Optional<TypeMirror> hopefullyFunction = typecheck(Function.class, typeElement);
+      return new FunctionType(hopefullyFunction.orElseThrow(() ->
+          boom("must either implement Function or Supplier<Function>")), supplier);
     }
     if (tool().isRawType(type)) {
       throw boom("the function type must be parameterized");
