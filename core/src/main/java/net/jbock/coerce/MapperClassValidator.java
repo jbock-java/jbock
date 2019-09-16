@@ -52,7 +52,7 @@ final class MapperClassValidator {
 
   MapperType checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
-    FunctionType functionType = getMapperType();
+    AbstractFunctionType functionType = getMapperType();
     TypeMirror string = tool().asType(String.class);
     TypeMirror t = asDeclared(functionType.functionType).getTypeArguments().get(0);
     TypeMirror r = asDeclared(functionType.functionType).getTypeArguments().get(1);
@@ -64,22 +64,32 @@ final class MapperClassValidator {
     if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    return new Solver(functionType.supplier, t_result.get(), r_result.get()).solve();
+    return new Solver(functionType instanceof SupplierType, t_result.get(), r_result.get()).solve();
   }
 
-  private FunctionType getMapperType() {
+  private AbstractFunctionType getMapperType() {
     Optional<DeclaredType> supplier = typecheck(Supplier.class, mapperClass);
     if (supplier.isPresent()) {
       List<? extends TypeMirror> typeArgs = asDeclared(supplier.get()).getTypeArguments();
       if (typeArgs.isEmpty()) {
         throw boom("raw Supplier type");
       }
-      return mapperType(typeArgs.get(0), true);
+      if (tool().isSameErasure(typeArgs.get(0), Function.class)) {
+        if (tool().isRawType(typeArgs.get(0))) {
+          throw boom("the function type must be parameterized");
+        }
+        return new SupplierType(supplier.get(), asDeclared(typeArgs.get(0)));
+      }
+      DeclaredType mapper = typecheck(Function.class, tool().asTypeElement(typeArgs.get(0)))
+          .orElseThrow(() -> boom("not a Function or Supplier<Function>"));
+      return new SupplierType(supplier.get(), mapper);
     }
     TypeMirror mapper = typecheck(Function.class, mapperClass)
-        .orElseThrow(() ->
-            boom("not a Function or Supplier<Function>"));
-    return mapperType(mapper, false);
+        .orElseThrow(() -> boom("not a Function or Supplier<Function>"));
+    if (tool().isRawType(mapper)) {
+      throw boom("the function type must be parameterized");
+    }
+    return new FunctionType(asDeclared(mapper));
   }
 
   private TypeTool tool() {
@@ -94,30 +104,31 @@ final class MapperClassValidator {
     return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
   }
 
-  private static class FunctionType {
+  private abstract static class AbstractFunctionType {
+    final DeclaredType functionType; // subtype of Function
 
-    final TypeMirror functionType; // subtype of Function
-    final boolean supplier; // wrapped in Supplier?
-
-    FunctionType(TypeMirror functionType, boolean supplier) {
+    AbstractFunctionType(DeclaredType functionType) {
       this.functionType = functionType;
-      this.supplier = supplier;
     }
   }
 
-  private FunctionType mapperType(
-      TypeMirror type,
-      boolean supplier) {
-    if (!tool().isSameErasure(type, Function.class)) {
-      TypeElement typeElement = tool().asTypeElement(type);
-      Optional<DeclaredType> hopefullyFunction = typecheck(Function.class, typeElement);
-      return new FunctionType(hopefullyFunction.orElseThrow(() ->
-          boom("must either implement Function or Supplier<Function>")), supplier);
+  private static class FunctionType extends AbstractFunctionType {
+
+    FunctionType(DeclaredType functionType) {
+      super(functionType);
     }
-    if (tool().isRawType(type)) {
-      throw boom("the function type must be parameterized");
+  }
+
+  private static class SupplierType extends AbstractFunctionType {
+
+    final DeclaredType functionType; // subtype of Function
+    final DeclaredType supplierType; // subtype of Supplier
+
+    SupplierType(DeclaredType supplierType, DeclaredType functionType) {
+      super(functionType);
+      this.functionType = functionType;
+      this.supplierType = supplierType;
     }
-    return new FunctionType(type, supplier);
   }
 
   private class Solver {

@@ -526,7 +526,7 @@ class MapperTest {
   void mapperValidStringFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -540,7 +540,7 @@ class MapperTest {
         "  interface StringFunction<R> extends Function<String, R> {}",
         "",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -653,7 +653,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: must either implement Function or Supplier<Function>");
+        .withErrorContaining("There is a problem with the mapper class: not a Function or Supplier<Function>.");
   }
 
   @Test
