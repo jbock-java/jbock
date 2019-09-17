@@ -617,8 +617,8 @@ class MapperTest {
         "  interface ZapperSupplier extends Supplier<Zapper> { }",
         "",
         "  static class Zapper implements Foo<String> {",
-        "    public Integer apply(String s) {",
-        "      return 1;",
+        "    public String apply(Integer s) {",
+        "      return null;",
         "    }",
         "  }",
         "",
@@ -629,7 +629,8 @@ class MapperTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes Integer.");
   }
 
   @Test
