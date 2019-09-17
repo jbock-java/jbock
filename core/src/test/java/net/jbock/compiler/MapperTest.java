@@ -526,7 +526,7 @@ class MapperTest {
   void mapperValidStringFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -540,11 +540,35 @@ class MapperTest {
         "  interface StringFunction<R> extends Function<String, R> {}",
         "",
         "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mapperInvalidStringFunction() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
+        "  static class Mapper implements Supplier<StringFunction<Integer>> {",
+        "    public StringFunction<Integer> get() {",
+        "      return s -> 1;",
+        "    }",
+        "  }",
+        "",
+        "  interface StringFunction<R> extends Function<Long, R> {}",
+        "",
+        "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: must either implement Function or Supplier<Function>");
+        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes Long.");
   }
 
   @Test
@@ -581,6 +605,26 @@ class MapperTest {
   }
 
   @Test
+  void testTypeSudoku() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract List<List<Integer>> number();",
+        "  // Mapper<Integer> = Supplier<Function<String, List<List<Integer>>>>",
+        "",
+        "  static class Mapper<E> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
+        "  interface FooSupplier<K> extends Supplier<Foo<K>> { }",
+        "  interface Foo<X> extends Function<String, List<List<X>>> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void mapperInvalidComplicatedTree() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -598,8 +642,8 @@ class MapperTest {
         "  interface ZapperSupplier extends Supplier<Zapper> { }",
         "",
         "  static class Zapper implements Foo<String> {",
-        "    public Integer apply(String s) {",
-        "      return 1;",
+        "    public String apply(Integer s) {",
+        "      return null;",
         "    }",
         "  }",
         "",
@@ -611,7 +655,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: must either implement Function or Supplier<Function>");
+        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes Integer.");
   }
 
   @Test
@@ -635,7 +679,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: must either implement Function or Supplier<Function>");
+        .withErrorContaining("There is a problem with the mapper class: not a Function or Supplier<Function>.");
   }
 
   @Test

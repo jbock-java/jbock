@@ -5,7 +5,10 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -51,7 +54,7 @@ final class MapperClassValidator {
 
   MapperType checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
-    FunctionType functionType = getMapperType();
+    AbstractFunctionType functionType = getMapperType();
     TypeMirror string = tool().asType(String.class);
     TypeMirror t = asDeclared(functionType.functionType).getTypeArguments().get(0);
     TypeMirror r = asDeclared(functionType.functionType).getTypeArguments().get(1);
@@ -63,29 +66,67 @@ final class MapperClassValidator {
     if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    return new Solver(functionType.supplier, t_result.get(), r_result.get()).solve();
+    return new Solver(functionType, t_result.get(), r_result.get()).solve();
   }
 
-  private FunctionType getMapperType() {
-    Optional<TypeMirror> supplier = typecheck(Supplier.class, mapperClass);
+  private AbstractFunctionType getMapperType() {
+    Optional<DeclaredType> supplier = typecheck(Supplier.class, mapperClass);
     if (supplier.isPresent()) {
-      List<? extends TypeMirror> typeArgs = asDeclared(supplier.get()).getTypeArguments();
+      DeclaredType supplierType = supplier.get();
+      List<? extends TypeMirror> typeArgs = asDeclared(supplierType).getTypeArguments();
       if (typeArgs.isEmpty()) {
         throw boom("raw Supplier type");
       }
-      return mapperType(typeArgs.get(0), true);
+      if (tool().isSameErasure(typeArgs.get(0), Function.class)) {
+        if (tool().isRawType(typeArgs.get(0))) {
+          throw boom("the function type must be parameterized");
+        }
+        Map<String, TypeParameterElement> typevarMapping = new HashMap<>();
+        mapperClass.getTypeParameters().forEach(p -> typevarMapping.put(p.toString(), p));
+        return new SupplierType(typevarMapping, supplierType, asDeclared(typeArgs.get(0)));
+      }
+      if (typeArgs.get(0).getKind() != TypeKind.DECLARED) {
+        throw boom("could not infer type parameters");
+      }
+      DeclaredType suppliedType = asDeclared(typeArgs.get(0));
+      TypeElement suppliedTypeElement = tool().asTypeElement(suppliedType);
+      Map<String, TypeParameterElement> typevarMapping = createTypevarMapping(suppliedType, suppliedTypeElement);
+      DeclaredType functionType = typecheck(Function.class, suppliedTypeElement).orElseThrow(() ->
+          boom("not a Function or Supplier<Function>"));
+      return new SupplierType(typevarMapping, supplierType, functionType);
     }
     TypeMirror mapper = typecheck(Function.class, mapperClass)
-        .orElseThrow(() ->
-            boom("not a Function or Supplier<Function>"));
-    return mapperType(mapper, false);
+        .orElseThrow(() -> boom("not a Function or Supplier<Function>"));
+    if (tool().isRawType(mapper)) {
+      throw boom("the function type must be parameterized");
+    }
+    return new FunctionType(asDeclared(mapper));
+  }
+
+  private Map<String, TypeParameterElement> createTypevarMapping(
+      DeclaredType declared,
+      TypeElement typeElement) {
+    List<? extends TypeParameterElement> typeParameters = typeElement.getTypeParameters();
+    List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
+    if (declared.getTypeArguments().size() != typeParameters.size()) {
+      throw boom("could not infer type parameters");
+    }
+    Map<String, TypeParameterElement> mapping = new HashMap<>();
+    for (int i = 0; i < typeParameters.size(); i++) {
+      TypeParameterElement p = typeParameters.get(i);
+      TypeMirror typeArgument = typeArguments.get(i);
+      if (typeArgument.getKind() == TypeKind.TYPEVAR) {
+        mapping.put(typeArgument.toString(), p);
+      }
+    }
+    return mapping;
   }
 
   private TypeTool tool() {
     return basicInfo.tool();
   }
 
-  private Optional<TypeMirror> typecheck(Class<?> goal, TypeElement start) {
+  private Optional<DeclaredType> typecheck(Class<?> goal, TypeElement start) {
     return Resolver.typecheck(start, goal, tool());
   }
 
@@ -93,37 +134,57 @@ final class MapperClassValidator {
     return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
   }
 
-  private static class FunctionType {
+  private abstract static class AbstractFunctionType {
+    final DeclaredType functionType; // subtype of Function
 
-    final TypeMirror functionType; // subtype of Function
-    final boolean supplier; // wrapped in Supplier?
-
-    FunctionType(TypeMirror functionType, boolean supplier) {
+    AbstractFunctionType(DeclaredType functionType) {
       this.functionType = functionType;
-      this.supplier = supplier;
+    }
+
+    abstract TypeParameterElement getTypevar(TypeParameterElement typeParameterInMapperType);
+  }
+
+  private static class FunctionType extends AbstractFunctionType {
+
+    FunctionType(DeclaredType functionType) {
+      super(functionType);
+    }
+
+    @Override
+    TypeParameterElement getTypevar(TypeParameterElement typeParameterInMapperType) {
+      return typeParameterInMapperType;
     }
   }
 
-  private FunctionType mapperType(
-      TypeMirror type,
-      boolean supplier) {
-    if (!tool().isSameErasure(type, Function.class)) {
-      throw boom("must either implement Function or Supplier<Function>");
+  private static class SupplierType extends AbstractFunctionType {
+
+    // mapper type typevar -> function type typevar
+    final Map<String, TypeParameterElement> typevarMapping;
+
+    final DeclaredType functionType; // subtype of Function
+    final DeclaredType supplierType; // subtype of Supplier
+
+    SupplierType(Map<String, TypeParameterElement> typevarMapping, DeclaredType supplierType, DeclaredType functionType) {
+      super(functionType);
+      this.typevarMapping = typevarMapping;
+      this.functionType = functionType;
+      this.supplierType = supplierType;
     }
-    if (tool().isRawType(type)) {
-      throw boom("the function type must be parameterized");
+
+    @Override
+    TypeParameterElement getTypevar(TypeParameterElement typeParameterInMapperType) {
+      return typevarMapping.get(typeParameterInMapperType.toString());
     }
-    return new FunctionType(type, supplier);
   }
 
   private class Solver {
 
-    final boolean isSupplier;
+    final AbstractFunctionType functionType;
     final Map<String, TypeMirror> t_result;
     final Map<String, TypeMirror> r_result;
 
-    Solver(boolean isSupplier, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
-      this.isSupplier = isSupplier;
+    Solver(AbstractFunctionType functionType, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
+      this.functionType = functionType;
       this.t_result = t_result;
       this.r_result = r_result;
     }
@@ -131,9 +192,10 @@ final class MapperClassValidator {
     MapperType solve() {
       List<? extends TypeParameterElement> typeParameters = mapperClass.getTypeParameters();
       List<TypeMirror> solution = typeParameters.stream()
+          .map(functionType::getTypevar)
           .map(this::getSolution)
           .collect(Collectors.toList());
-      return MapperType.create(isSupplier, mapperClass, solution);
+      return MapperType.create(functionType instanceof SupplierType, mapperClass, solution);
     }
 
     TypeMirror getSolution(TypeParameterElement typeParameter) {
