@@ -114,7 +114,10 @@ final class MapperClassValidator {
     Map<String, TypeParameterElement> mapping = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
       TypeParameterElement p = typeParameters.get(i);
-      mapping.put(typeArguments.get(i).toString(), p);
+      TypeMirror typeArgument = typeArguments.get(i);
+      if (typeArgument.getKind() == TypeKind.TYPEVAR) {
+        mapping.put(typeArgument.toString(), p);
+      }
     }
     return mapping;
   }

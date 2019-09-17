@@ -547,6 +547,31 @@ class MapperTest {
   }
 
   @Test
+  void mapperInvalidStringFunction() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
+        "  static class Mapper implements Supplier<StringFunction<Integer>> {",
+        "    public StringFunction<Integer> get() {",
+        "      return s -> 1;",
+        "    }",
+        "  }",
+        "",
+        "  interface StringFunction<R> extends Function<Long, R> {}",
+        "",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes Long.");
+  }
+
+  @Test
   void mapperValidComplicatedTree() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
