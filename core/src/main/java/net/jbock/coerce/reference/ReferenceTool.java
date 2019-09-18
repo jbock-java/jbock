@@ -29,7 +29,7 @@ public class ReferenceTool {
     MAPPER(Function.class),
     COLLECTOR(Collector.class);
 
-    Class<?> expectedClass;
+    private final Class<?> expectedClass;
 
     Expectation(Class<?> expectedClass) {
       this.expectedClass = expectedClass;

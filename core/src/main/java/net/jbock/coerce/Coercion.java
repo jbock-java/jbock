@@ -86,6 +86,7 @@ public final class Coercion {
 
   /**
    * Maps from String to mapperReturnType
+   * @return an expression
    */
   public CodeBlock mapExpr() {
     return mapExpr;
