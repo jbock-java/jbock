@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.JavaFileObjects.forSourceLines;
@@ -523,7 +525,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperValidStringFunction() {
+  void mapperValidExtendsFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
@@ -531,13 +533,13 @@ class MapperTest {
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
-        "  static class Mapper implements Supplier<StringFunction<Integer>> {",
-        "    public StringFunction<Integer> get() {",
+        "  static class Mapper<E> implements Supplier<StringFunction<E, Integer>> {",
+        "    public StringFunction<E, Integer> get() {",
         "      return s -> 1;",
         "    }",
         "  }",
         "",
-        "  interface StringFunction<R> extends Function<String, R> {}",
+        "  interface StringFunction<V, X> extends Function<V, X> {}",
         "",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
@@ -605,16 +607,35 @@ class MapperTest {
   }
 
   @Test
-  void testTypeSudoku() {
+  void testMapperTypeSudokuInvalid() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract List<List<Integer>> number();",
-        "  // Mapper<Integer> = Supplier<Function<String, List<List<Integer>>>>",
         "",
-        "  static class Mapper<E> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
+        "  static class Mapper<E extends List<List<Integer>>> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
+        "  interface FooSupplier<K> extends Supplier<Foo<K>> { }",
+        "  interface Foo<X> extends Function<String, List<List<X>>> { }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: invalid bounds.");
+  }
+
+  @Test
+  void testMapperTypeSudokuValid() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract List<List<Integer>> number();",
+        "",
+        "  static class Mapper<E extends Integer> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
         "  interface FooSupplier<K> extends Supplier<Foo<K>> { }",
         "  interface Foo<X> extends Function<String, List<List<X>>> { }",
         "}");
