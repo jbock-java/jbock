@@ -54,7 +54,7 @@ final class MapperClassValidator {
 
   MapperType checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
-    AbstractFunctionType functionType = getMapperType();
+    AbstractReferencedType functionType = getMapperType();
     TypeMirror string = tool().asType(String.class);
     TypeMirror t = asDeclared(functionType.functionType).getTypeArguments().get(0);
     TypeMirror r = asDeclared(functionType.functionType).getTypeArguments().get(1);
@@ -69,7 +69,7 @@ final class MapperClassValidator {
     return new Solver(functionType, t_result.get(), r_result.get()).solve();
   }
 
-  private AbstractFunctionType getMapperType() {
+  private AbstractReferencedType getMapperType() {
     Optional<DeclaredType> supplier = typecheck(Supplier.class, mapperClass);
     if (supplier.isPresent()) {
       DeclaredType supplierType = supplier.get();
@@ -100,7 +100,7 @@ final class MapperClassValidator {
     if (tool().isRawType(mapper)) {
       throw boom("the function type must be parameterized");
     }
-    return new FunctionType(asDeclared(mapper));
+    return new DirectType(asDeclared(mapper));
   }
 
   private Map<String, TypeParameterElement> createTypevarMapping(
@@ -133,20 +133,21 @@ final class MapperClassValidator {
   private ValidationException boom(String message) {
     return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
   }
+  
+  // mapper or collector
+  private abstract static class AbstractReferencedType {
+    final DeclaredType functionType; // subtype of Function or Collector
 
-  private abstract static class AbstractFunctionType {
-    final DeclaredType functionType; // subtype of Function
-
-    AbstractFunctionType(DeclaredType functionType) {
+    AbstractReferencedType(DeclaredType functionType) {
       this.functionType = functionType;
     }
 
     abstract TypeParameterElement getTypevar(TypeParameterElement typeParameterInMapperType);
   }
 
-  private static class FunctionType extends AbstractFunctionType {
+  private static class DirectType extends AbstractReferencedType {
 
-    FunctionType(DeclaredType functionType) {
+    DirectType(DeclaredType functionType) {
       super(functionType);
     }
 
@@ -156,7 +157,7 @@ final class MapperClassValidator {
     }
   }
 
-  private static class SupplierType extends AbstractFunctionType {
+  private static class SupplierType extends AbstractReferencedType {
 
     // mapper type typevar -> function type typevar
     final Map<String, TypeParameterElement> typevarMapping;
@@ -179,11 +180,11 @@ final class MapperClassValidator {
 
   private class Solver {
 
-    final AbstractFunctionType functionType;
+    final AbstractReferencedType functionType;
     final Map<String, TypeMirror> t_result;
     final Map<String, TypeMirror> r_result;
 
-    Solver(AbstractFunctionType functionType, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
+    Solver(AbstractReferencedType functionType, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
       this.functionType = functionType;
       this.t_result = t_result;
       this.r_result = r_result;

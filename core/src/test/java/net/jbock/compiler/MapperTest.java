@@ -614,7 +614,7 @@ class MapperTest {
         "  abstract List<List<Integer>> number();",
         "  // Mapper<Integer> = Supplier<Function<String, List<List<Integer>>>>",
         "",
-        "  static class Mapper<E> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
+        "  static class Mapper<E extends Long> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
         "  interface FooSupplier<K> extends Supplier<Foo<K>> { }",
         "  interface Foo<X> extends Function<String, List<List<X>>> { }",
         "}");
