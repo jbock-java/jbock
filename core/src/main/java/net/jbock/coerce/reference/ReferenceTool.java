@@ -6,10 +6,12 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -47,37 +49,38 @@ public class ReferenceTool {
   }
 
   public AbstractReferencedType getReferencedType() {
-    Optional<DeclaredType> supplier = typecheck(Supplier.class, referencedClass);
-    if (!supplier.isPresent()) {
-      TypeMirror mapper = typecheck(expectedClass, referencedClass)
+    Optional<DeclaredType> supplierType = typecheck(Supplier.class, referencedClass);
+    if (!supplierType.isPresent()) {
+      TypeMirror expectedType = typecheck(expectedClass, referencedClass)
           .orElseThrow(this::unexpectedClassException);
-      checkRawType(mapper);
-      return new DirectType(asDeclared(mapper));
+      return new DirectType(checkRawType(asDeclared(expectedType)));
     }
-    DeclaredType supplierType = supplier.get();
-    List<? extends TypeMirror> typeArgs = asDeclared(supplierType).getTypeArguments();
+    List<? extends TypeMirror> typeArgs = checkRawType(supplierType.get()).getTypeArguments();
     if (typeArgs.isEmpty()) {
       throw rawTypeException();
     }
-    TypeMirror supplied = typeArgs.get(0);
-    if (tool().isSameErasure(supplied, expectedClass)) {
-      checkRawType(supplied);
-      return new SupplierType(asDeclared(supplied), Collections.emptyMap());
+    TypeMirror suppliedType = typeArgs.get(0);
+    if (tool().isSameErasure(suppliedType, expectedClass)) {
+      // "direct supplier"
+      return new SupplierType(checkRawType(asDeclared(suppliedType)), Collections.emptyMap());
     }
-    if (supplied.getKind() != TypeKind.DECLARED) {
+    if (suppliedType.getKind() != TypeKind.DECLARED) {
       throw inferenceFailedException();
     }
-    DeclaredType suppliedType = asDeclared(supplied);
-    TypeElement suppliedTypeElement = tool().asTypeElement(suppliedType);
-    if (suppliedType.getTypeArguments().size() != suppliedTypeElement.getTypeParameters().size()) {
+    return getIndirectSupplierType(asDeclared(suppliedType));
+  }
+
+  private SupplierType getIndirectSupplierType(DeclaredType suppliedType) {
+    TypeElement suppliedElement = tool().asTypeElement(suppliedType);
+    if (suppliedType.getTypeArguments().size() != suppliedElement.getTypeParameters().size()) {
       throw inferenceFailedException();
     }
-    Map<String, TypeMirror> typevarMapping = SupplierType.createTypevarMapping(
-        suppliedType.getTypeArguments(),
-        suppliedTypeElement.getTypeParameters());
-    DeclaredType functionType = typecheck(expectedClass, suppliedTypeElement)
+    DeclaredType expectedType = typecheck(expectedClass, suppliedElement)
         .orElseThrow(this::unexpectedClassException);
-    return new SupplierType(functionType, typevarMapping);
+    Map<String, TypeMirror> typevarMapping = createTypevarMapping(
+        suppliedType.getTypeArguments(),
+        suppliedElement.getTypeParameters());
+    return new SupplierType(expectedType, typevarMapping);
   }
 
   private ValidationException inferenceFailedException() {
@@ -94,10 +97,11 @@ public class ReferenceTool {
         " type must be parameterized");
   }
 
-  private void checkRawType(TypeMirror mapper) {
+  private DeclaredType checkRawType(DeclaredType mapper) {
     if (tool().isRawType(mapper)) {
       throw rawTypeException();
     }
+    return mapper;
   }
 
   private Optional<DeclaredType> typecheck(Class<?> goal, TypeElement start) {
@@ -111,5 +115,19 @@ public class ReferenceTool {
 
   private TypeTool tool() {
     return basicInfo.tool();
+  }
+
+  private static Map<String, TypeMirror> createTypevarMapping(
+      List<? extends TypeMirror> typeArguments,
+      List<? extends TypeParameterElement> typeParameters) {
+    Map<String, TypeMirror> mapping = new HashMap<>();
+    for (int i = 0; i < typeParameters.size(); i++) {
+      TypeParameterElement p = typeParameters.get(i);
+      TypeMirror typeArgument = typeArguments.get(i);
+      if (typeArgument.getKind() == TypeKind.TYPEVAR) {
+        mapping.put(p.toString(), typeArgument);
+      }
+    }
+    return mapping;
   }
 }
