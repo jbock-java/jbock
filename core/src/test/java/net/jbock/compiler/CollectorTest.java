@@ -14,6 +14,30 @@ import static net.jbock.compiler.ProcessorTest.withImports;
 class CollectorTest {
 
   @Test
+  void collectorValidExtendsCollector() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(repeatable = true, shortName = 'x', collectedBy = MySupplier.class)",
+        "  abstract Set<String> strings();",
+        "",
+        "  static class MySupplier<E> implements Supplier<SetCollector<E>> {",
+        "    public SetCollector<E> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  interface SetCollector<X> extends Collector<X, Set<X>, Set<X>> { }",
+        "",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void invalidNotRepeatable() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",

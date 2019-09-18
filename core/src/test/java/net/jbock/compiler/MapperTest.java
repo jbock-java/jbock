@@ -523,7 +523,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperValidStringFunction() {
+  void mapperValidExtendsFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
@@ -605,7 +605,7 @@ class MapperTest {
   }
 
   @Test
-  void testTypeSudoku() {
+  void testMapperTypeSudoku() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
