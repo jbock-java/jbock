@@ -12,10 +12,9 @@ import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collector;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
-import static net.jbock.coerce.reference.ReferenceTool.Name.MAPPER;
+import static net.jbock.coerce.reference.ReferenceTool.Expectation.COLLECTOR;
 
 class CollectorClassValidator {
 
@@ -30,7 +29,7 @@ class CollectorClassValidator {
   // visible for testing
   CustomCollector getCollectorInfo() {
     commonChecks(basicInfo, collectorClass, "collector");
-    AbstractReferencedType collectorType = new ReferenceTool(MAPPER, basicInfo, collectorClass, Collector.class)
+    AbstractReferencedType collectorType = new ReferenceTool(COLLECTOR, basicInfo, collectorClass)
         .getReferencedType();
     TypeMirror t = collectorType.expectedType.getTypeArguments().get(0);
     TypeMirror r = collectorType.expectedType.getTypeArguments().get(2);

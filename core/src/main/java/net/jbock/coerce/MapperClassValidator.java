@@ -12,12 +12,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
-import static net.jbock.coerce.reference.ReferenceTool.Name.MAPPER;
+import static net.jbock.coerce.reference.ReferenceTool.Expectation.MAPPER;
 
 final class MapperClassValidator {
 
@@ -33,7 +32,7 @@ final class MapperClassValidator {
 
   MapperType checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
-    AbstractReferencedType functionType = new ReferenceTool(MAPPER, basicInfo, mapperClass, Function.class)
+    AbstractReferencedType functionType = new ReferenceTool(MAPPER, basicInfo, mapperClass)
         .getReferencedType();
     TypeMirror t = functionType.expectedType.getTypeArguments().get(0);
     TypeMirror r = functionType.expectedType.getTypeArguments().get(1);
