@@ -533,13 +533,13 @@ class MapperTest {
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
-        "  static class Mapper implements Supplier<StringFunction<Integer>> {",
-        "    public StringFunction<Integer> get() {",
+        "  static class Mapper<E> implements Supplier<StringFunction<E, Integer>> {",
+        "    public StringFunction<E, Integer> get() {",
         "      return s -> 1;",
         "    }",
         "  }",
         "",
-        "  interface StringFunction<R> extends Function<String, R> {}",
+        "  interface StringFunction<V, X> extends Function<V, X> {}",
         "",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);

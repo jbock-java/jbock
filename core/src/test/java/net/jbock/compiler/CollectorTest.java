@@ -743,7 +743,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: must either implement Collector or Supplier<Collector>");
+        .withErrorContaining("There is a problem with the mapper class: not a Collector or Supplier<Collector>.");
   }
 
 
