@@ -7,10 +7,11 @@ import java.util.Map;
 
 // mapper or collector
 public abstract class AbstractReferencedType {
-  public final DeclaredType referencedType; // subtype of Function or Collector
+  
+  public final DeclaredType expectedType; // subtype of Function or Collector
 
-  AbstractReferencedType(DeclaredType referencedType) {
-    this.referencedType = referencedType;
+  AbstractReferencedType(DeclaredType expectedType) {
+    this.expectedType = expectedType;
   }
 
   public abstract String getTypevar(String typeParameter);
