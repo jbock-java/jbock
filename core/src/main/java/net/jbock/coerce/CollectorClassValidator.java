@@ -28,15 +28,6 @@ class CollectorClassValidator {
     this.collectorClass = collectorClass;
   }
 
-  private boolean isInvalidR(TypeParameterElement typeParameter, TypeMirror value) {
-    for (TypeMirror bound : typeParameter.getBounds()) {
-      if (!tool().isAssignable(value, bound)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   // visible for testing
   CustomCollector getCollectorInfo() {
     commonChecks(basicInfo, collectorClass, "collector");
@@ -111,7 +102,7 @@ class CollectorClassValidator {
       TypeMirror rMirror = r_result.get(param);
       TypeMirror s = null;
       if (rMirror != null) {
-        if (isInvalidR(typeParameter, rMirror)) {
+        if (tool().isOutOfBounds(rMirror, typeParameter.getBounds())) {
           throw boom("invalid bounds");
         }
         s = rMirror;

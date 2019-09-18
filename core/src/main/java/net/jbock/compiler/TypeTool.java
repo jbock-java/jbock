@@ -316,6 +316,15 @@ public class TypeTool {
     return result;
   }
 
+  public boolean isOutOfBounds(TypeMirror mirror, List<? extends TypeMirror> bounds) {
+    for (TypeMirror bound : bounds) {
+      if (!isAssignable(mirror, bound)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   public Types types() {
     return types;
   }

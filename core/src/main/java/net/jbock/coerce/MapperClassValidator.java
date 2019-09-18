@@ -30,15 +30,6 @@ final class MapperClassValidator {
   private final TypeMirror expectedReturnType;
   private final TypeElement mapperClass;
 
-  private boolean isOutOfBounds(TypeMirror mirror, List<? extends TypeMirror> bounds) {
-    for (TypeMirror bound : bounds) {
-      if (!tool().isAssignable(mirror, bound)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
   MapperClassValidator(BasicInfo basicInfo, TypeMirror expectedReturnType, TypeElement mapperClass) {
     this.basicInfo = basicInfo;
     this.expectedReturnType = expectedReturnType;
@@ -137,7 +128,7 @@ final class MapperClassValidator {
       TypeMirror r = r_result.get(typeParameter.toString());
       List<? extends TypeMirror> bounds = typeParameter.getBounds();
       if (t != null) {
-        if (isOutOfBounds(tool().asType(String.class), bounds)) {
+        if (tool().isOutOfBounds(tool().asType(String.class), bounds)) {
           throw boom("invalid bounds");
         }
         if (r != null && !tool().isSameType(t, r)) {
@@ -145,7 +136,7 @@ final class MapperClassValidator {
         }
       }
       if (r != null) {
-        if (isOutOfBounds(r, bounds)) {
+        if (tool().isOutOfBounds(r, bounds)) {
           throw boom("invalid bounds");
         }
       }
