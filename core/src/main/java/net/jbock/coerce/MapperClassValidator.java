@@ -2,7 +2,6 @@ package net.jbock.coerce;
 
 import net.jbock.coerce.reference.AbstractReferencedType;
 import net.jbock.coerce.reference.ReferenceTool;
-import net.jbock.coerce.reference.SupplierType;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -76,7 +75,7 @@ final class MapperClassValidator {
       List<TypeMirror> solution = typeParameters.stream()
           .map(this::getSolution)
           .collect(Collectors.toList());
-      return MapperType.create(functionType instanceof SupplierType, mapperClass, solution);
+      return MapperType.create(functionType.isSupplier(), mapperClass, solution);
     }
 
     TypeMirror getSolution(TypeParameterElement typeParameter) {

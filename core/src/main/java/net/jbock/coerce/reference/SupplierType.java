@@ -9,16 +9,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public class SupplierType extends AbstractReferencedType {
+class SupplierType extends AbstractReferencedType {
 
   private final Map<String, TypeMirror> typevarMapping;
 
-  public SupplierType(DeclaredType referencedType, Map<String, TypeMirror> typevarMapping) {
+  SupplierType(DeclaredType referencedType, Map<String, TypeMirror> typevarMapping) {
     super(referencedType);
     this.typevarMapping = typevarMapping;
   }
 
-  public static Map<String, TypeMirror> createTypevarMapping(
+  static Map<String, TypeMirror> createTypevarMapping(
       List<? extends TypeMirror> typeArguments,
       List<? extends TypeParameterElement> typeParameters) {
     Map<String, TypeMirror> mapping = new HashMap<>();
@@ -35,5 +35,10 @@ public class SupplierType extends AbstractReferencedType {
   @Override
   public String getTypevar(String typeParameter) {
     return Objects.toString(typevarMapping.get(typeParameter), typeParameter);
+  }
+
+  @Override
+  public boolean isSupplier() {
+    return true;
   }
 }

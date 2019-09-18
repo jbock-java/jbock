@@ -22,4 +22,6 @@ public abstract class AbstractReferencedType {
     }
     return mapped;
   }
+
+  public abstract boolean isSupplier();
 }
