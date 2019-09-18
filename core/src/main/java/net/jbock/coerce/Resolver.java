@@ -16,12 +16,12 @@ import java.util.Optional;
 
 import static net.jbock.compiler.TypeTool.asDeclared;
 
-class Resolver {
+public class Resolver {
 
   private final TypeTool tool;
 
   // visible for testing
-  Resolver(TypeTool tool) {
+  public Resolver(TypeTool tool) {
     this.tool = tool;
   }
 
@@ -35,7 +35,7 @@ class Resolver {
    *
    * @return the {@code something} type, with typevars resolved
    */
-  static Optional<DeclaredType> typecheck(TypeElement x, Class<?> something, TypeTool tool) {
+  public static Optional<DeclaredType> typecheck(TypeElement x, Class<?> something, TypeTool tool) {
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(x);
     Resolver resolver = new Resolver(tool);
     List<ImplementsRelation> path = resolver.findPath(hierarchy, something);

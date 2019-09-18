@@ -77,7 +77,7 @@ public class BasicInfo {
     return FieldSpec.builder(TypeName.get(originalReturnType()), paramName.camel(), FINAL).build();
   }
 
-  ValidationException asValidationException(String message) {
+  public ValidationException asValidationException(String message) {
     return ValidationException.create(sourceMethod, message);
   }
 
