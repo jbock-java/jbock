@@ -883,6 +883,27 @@ class MapperTest {
   }
 
   @Test
+  void mapperValidOptionalStringTypevar() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class, optional = true)",
+        "  abstract Optional<String> number();",
+        "",
+        "  static class Mapper<E> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void oneOptionalIntNotOptional() {
     // when mapper or collector is present, optionality is never inferred
     List<String> sourceLines = withImports(

@@ -88,8 +88,7 @@ public class CoercionProvider {
   }
 
   private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {
-    TypeMirror mapperReturnType = basicInfo.optionalInfo().orElse(basicInfo.returnType());
-    EnhancedMapperType mapperType = new MapperClassAnalyzer(basicInfo, mapperReturnType, mapperClass).checkReturnType();
+    EnhancedMapperType mapperType = new MapperClassAnalyzer(basicInfo, basicInfo.returnType(), mapperClass).checkReturnType();
     return MapperCoercion.create(Optional.empty(), mapperType, basicInfo);
   }
 

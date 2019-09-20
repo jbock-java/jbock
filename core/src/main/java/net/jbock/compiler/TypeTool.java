@@ -259,9 +259,13 @@ public class TypeTool {
   }
 
   public TypeMirror optionalOf(Class<?> type) {
+    return optionalOf(asTypeElement(type).asType());
+  }
+
+  public TypeMirror optionalOf(TypeMirror typeMirror) {
     return types.getDeclaredType(
         asTypeElement(Optional.class),
-        asTypeElement(type).asType());
+        typeMirror);
   }
 
   public TypeMirror listOf(TypeMirror type) {
