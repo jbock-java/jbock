@@ -50,6 +50,7 @@ final class MapperClassAnalyzer {
         Map<String, TypeMirror> m = new HashMap<>(r_result.get());
         m.put(((CompatibleViaOptional) compatibility).key, ((CompatibleViaOptional) compatibility).solution);
         r_result = Optional.of(m);
+        optional = true;
       }
     }
     if (!r_result.isPresent()) {
