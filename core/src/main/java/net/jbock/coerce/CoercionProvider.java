@@ -101,7 +101,7 @@ public class CoercionProvider {
   private Coercion handleRepeatableExplicitMapper(
       TypeElement mapperClass) {
     AbstractCollector collectorInfo = collectorInfo();
-    MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
+    EnhancedMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
     return MapperCoercion.create(Optional.of(collectorInfo), mapperType, basicInfo);
   }
 
