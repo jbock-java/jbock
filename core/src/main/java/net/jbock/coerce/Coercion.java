@@ -7,7 +7,7 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.CustomCollector;
 import net.jbock.coerce.collector.DefaultCollector;
-import net.jbock.coerce.mappers.MapperCoercion;
+import net.jbock.coerce.coercions.MapperCoercion;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;

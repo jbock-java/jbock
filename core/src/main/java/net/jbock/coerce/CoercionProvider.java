@@ -1,17 +1,17 @@
 package net.jbock.coerce;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.coercions.CoercionFactory;
+import net.jbock.coerce.coercions.EnumCoercion;
+import net.jbock.coerce.coercions.MapperCoercion;
+import net.jbock.coerce.coercions.StandardCoercions;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
-import net.jbock.coerce.mappers.CoercionFactory;
-import net.jbock.coerce.mappers.EnumCoercion;
-import net.jbock.coerce.mappers.MapperCoercion;
-import net.jbock.coerce.mappers.StandardCoercions;
+import net.jbock.coerce.mapper.EnhancedMapperType;
+import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 
@@ -23,7 +23,6 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static javax.lang.model.element.Modifier.FINAL;
-import static net.jbock.compiler.Constants.STRING;
 
 public class CoercionProvider {
 
@@ -90,16 +89,8 @@ public class CoercionProvider {
 
   private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {
     TypeMirror mapperReturnType = basicInfo.optionalInfo().orElse(basicInfo.returnType());
-    ParameterSpec mapperParam = mapperParam(mapperReturnType);
-    MapperType mapperType = new MapperClassAnalyzer(basicInfo, mapperReturnType, mapperClass).checkReturnType();
-    return MapperCoercion.create(Optional.empty(), mapperParam, mapperType, basicInfo);
-  }
-
-  private ParameterSpec mapperParam(TypeMirror mapperOutputType) {
-    ParameterizedTypeName mapperParamType = ParameterizedTypeName.get(
-        ClassName.get(Function.class), STRING,
-        TypeName.get(mapperOutputType));
-    return ParameterSpec.builder(mapperParamType, basicInfo.paramName() + "Mapper").build();
+    EnhancedMapperType mapperType = new MapperClassAnalyzer(basicInfo, mapperReturnType, mapperClass).checkReturnType();
+    return MapperCoercion.create(Optional.empty(), mapperType, basicInfo);
   }
 
   private Coercion handleRepeatableAutoMapper() {
@@ -112,8 +103,7 @@ public class CoercionProvider {
       TypeElement mapperClass) {
     AbstractCollector collectorInfo = collectorInfo();
     MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
-    ParameterSpec mapperParam = mapperParam(collectorInfo.inputType());
-    return MapperCoercion.create(Optional.of(collectorInfo), mapperParam, mapperType, basicInfo);
+    return MapperCoercion.create(Optional.of(collectorInfo), mapperType, basicInfo);
   }
 
   private CoercionFactory findCoercion(TypeMirror innerType) {

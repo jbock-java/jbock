@@ -1,5 +1,7 @@
 package net.jbock.coerce;
 
+import net.jbock.coerce.mapper.MapperType;
+import net.jbock.coerce.mapper.SimpleMapperType;
 import net.jbock.coerce.reference.AbstractReferencedType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.compiler.TypeTool;
@@ -69,12 +71,12 @@ final class MapperClassValidator {
       this.r_result = r_result;
     }
 
-    MapperType solve() {
+    SimpleMapperType solve() {
       List<? extends TypeParameterElement> typeParameters = mapperClass.getTypeParameters();
       List<TypeMirror> solution = typeParameters.stream()
           .map(this::getSolution)
           .collect(Collectors.toList());
-      return MapperType.create(functionType.isSupplier(), mapperClass, solution);
+      return SimpleMapperType.create(functionType.isSupplier(), mapperClass, solution);
     }
 
     TypeMirror getSolution(TypeParameterElement typeParameter) {

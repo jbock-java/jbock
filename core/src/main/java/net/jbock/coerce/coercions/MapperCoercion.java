@@ -1,11 +1,10 @@
-package net.jbock.coerce.mappers;
+package net.jbock.coerce.coercions;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.MapperType;
 import net.jbock.coerce.collector.AbstractCollector;
+import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
@@ -17,23 +16,17 @@ import java.util.Optional;
  */
 public final class MapperCoercion extends CoercionFactory {
 
-  private final ParameterSpec mapperParam;
-
   private final MapperType mapperType;
 
-  private MapperCoercion(
-      ParameterSpec mapperParam,
-      MapperType mapperType) {
-    this.mapperParam = mapperParam;
+  private MapperCoercion(MapperType mapperType) {
     this.mapperType = mapperType;
   }
 
   public static Coercion create(
       Optional<AbstractCollector> collectorType,
-      ParameterSpec mapperParam,
       MapperType mapperType,
       BasicInfo basicInfo) {
-    return new MapperCoercion(mapperParam, mapperType)
+    return new MapperCoercion(mapperType)
         .getCoercion(basicInfo, collectorType);
   }
 

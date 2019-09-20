@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeExpr;
 import net.jbock.compiler.TypeTool;

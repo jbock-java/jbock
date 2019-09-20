@@ -1,4 +1,4 @@
-package net.jbock.coerce.mappers;
+package net.jbock.coerce.coercions;
 
 import com.squareup.javapoet.CodeBlock;
 
