@@ -4,10 +4,10 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.coercions.MapperCoercion;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.CustomCollector;
 import net.jbock.coerce.collector.DefaultCollector;
-import net.jbock.coerce.coercions.MapperCoercion;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
@@ -37,9 +37,6 @@ public final class Coercion {
 
   private final Function<ParameterSpec, CodeBlock> extractExpr;
 
-  // false if custom collector or not repeatable
-  private final boolean isDefaultCollector;
-
   Coercion(
       Optional<ParameterSpec> collectorParam,
       CodeBlock mapExpr,
@@ -47,8 +44,7 @@ public final class Coercion {
       Optional<CodeBlock> initCollector,
       ParameterSpec constructorParam,
       FieldSpec field,
-      Function<ParameterSpec, CodeBlock> extractExpr,
-      boolean isDefaultCollector) {
+      Function<ParameterSpec, CodeBlock> extractExpr) {
     this.collectorParam = collectorParam;
     this.mapExpr = mapExpr;
     this.initMapper = initMapper;
@@ -56,7 +52,6 @@ public final class Coercion {
     this.constructorParam = constructorParam;
     this.field = field;
     this.extractExpr = extractExpr;
-    this.isDefaultCollector = isDefaultCollector;
   }
 
   public static Coercion create(
@@ -66,21 +61,20 @@ public final class Coercion {
       Optional<AbstractCollector> collector,
       TypeMirror constructorParamType,
       BasicInfo basicInfo) {
-    boolean isDefaultCollector = collector.isPresent() && collector.get() instanceof DefaultCollector;
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     return new Coercion(collectorParam, mapExpr,
-        initMapper, collector.flatMap(Coercion::createCollector), constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr(), isDefaultCollector);
+        initMapper, collector.map(Coercion::createCollector), constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr());
   }
 
-  private static Optional<CodeBlock> createCollector(AbstractCollector collectorInfo) {
-    if (!(collectorInfo instanceof CustomCollector)) {
-      return Optional.empty();
+  private static CodeBlock createCollector(AbstractCollector collectorInfo) {
+    if (collectorInfo instanceof DefaultCollector) {
+      return CodeBlock.of("$T.toList()", Collectors.class);
     }
     CustomCollector collector = (CustomCollector) collectorInfo;
-    return Optional.of(CodeBlock.of("new $T$L",
+    return CodeBlock.of("new $T$L",
         TypeTool.get().erasure(collector.collectorType()),
-        MapperCoercion.getTypeParameters(collector.solution(), collector.supplier())));
+        MapperCoercion.getTypeParameters(collector.solution(), collector.supplier()));
   }
 
 
@@ -113,9 +107,6 @@ public final class Coercion {
   }
 
   public Optional<CodeBlock> collectExpr() {
-    if (isDefaultCollector) {
-      return Optional.of(CodeBlock.of("$T.toList()", Collectors.class));
-    }
     return collectorParam.map(param -> CodeBlock.of("$N", param));
   }
 

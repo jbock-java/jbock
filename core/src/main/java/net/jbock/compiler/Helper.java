@@ -292,7 +292,8 @@ final class Helper {
       builder.add(".map($L)", param.coercion().mapExpr());
     }
     if (param.paramType == REPEATABLE) {
-      param.coercion().collectExpr().ifPresent(expr ->
+      param.coercion().
+          collectExpr().ifPresent(expr ->
           builder.add(".collect($L)", expr));
     }
     if (param.required()) {

@@ -11,7 +11,6 @@ import net.jbock.coerce.coercions.StandardCoercions;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
 import net.jbock.coerce.mapper.EnhancedMapperType;
-import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 
@@ -40,8 +39,7 @@ public class CoercionProvider {
         Optional.empty(),
         ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
-        e -> CodeBlock.of("$N", e),
-        false);
+        e -> CodeBlock.of("$N", e));
   }
 
   public static Coercion findCoercion(
