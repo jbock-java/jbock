@@ -54,10 +54,7 @@ public abstract class CoercionFactory {
     CodeBlock mapExpr = mapExpr(basicInfo.paramName());
     CodeBlock initMapper = initMapper(innerType, basicInfo.paramName());
     TypeMirror constructorParamType = basicInfo.returnType();
-    Optional<ParameterSpec> collectorParam = collector.flatMap(collectorInfo ->
-        collectorParam(basicInfo, collectorInfo));
     return Coercion.create(
-        collectorParam,
         mapExpr,
         initMapper,
         collector,
@@ -67,17 +64,5 @@ public abstract class CoercionFactory {
 
   private TypeMirror innerType(BasicInfo basicInfo, Optional<AbstractCollector> collector) {
     return collector.map(AbstractCollector::inputType).orElse(basicInfo.optionalInfo().orElse(basicInfo.returnType()));
-  }
-
-  private static Optional<ParameterSpec> collectorParam(
-      BasicInfo basicInfo,
-      AbstractCollector collectorInfo) {
-    TypeName t = TypeName.get(collectorInfo.inputType());
-    TypeName a = WildcardTypeName.subtypeOf(Object.class);
-    TypeName r = TypeName.get(basicInfo.returnType());
-    return Optional.of(ParameterSpec.builder(ParameterizedTypeName.get(
-        ClassName.get(Collector.class), t, a, r),
-        basicInfo.paramName() + "Collector")
-        .build());
   }
 }
