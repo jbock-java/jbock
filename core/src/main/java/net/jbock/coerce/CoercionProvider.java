@@ -108,7 +108,8 @@ public class CoercionProvider {
     CoercionFactory coercion = findCoercion(collectorInfo.inputType());
     MapperType mapperType = MapperType.create(collectorInfo.inputType(), coercion.createMapper(collectorInfo.inputType()));
     Function<ParameterSpec, CodeBlock> extractExpr = basicInfo.extractExpr(); // TODO
-    return coercion.getCoercion(basicInfo, Optional.of(collectorInfo), Optional.of(mapperType), extractExpr, basicInfo.returnType());
+    TypeMirror constructorParamType = basicInfo.originalReturnType();
+    return coercion.getCoercion(basicInfo, Optional.of(collectorInfo), Optional.of(mapperType), extractExpr, constructorParamType);
   }
 
   private Coercion handleRepeatableExplicitMapper(
