@@ -86,6 +86,11 @@ public class InferredAttributes {
   }
 
   // liftedType -> sourceMethod.returnType
+
+  /**
+   * TODO lifted type can't know this
+   */
+  @Deprecated
   Function<ParameterSpec, CodeBlock> extractExpr() {
     return liftedType.extractExpr();
   }

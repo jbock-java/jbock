@@ -69,6 +69,7 @@ public class BasicInfo {
     return sourceMethod.getReturnType();
   }
 
+  @Deprecated
   Function<ParameterSpec, CodeBlock> extractExpr() {
     return attributes.extractExpr();
   }
