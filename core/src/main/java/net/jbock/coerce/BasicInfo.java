@@ -69,11 +69,6 @@ public class BasicInfo {
     return sourceMethod.getReturnType();
   }
 
-  @Deprecated
-  public Function<ParameterSpec, CodeBlock> extractExpr() {
-    return attributes.extractExpr();
-  }
-
   FieldSpec fieldSpec() {
     return FieldSpec.builder(TypeName.get(originalReturnType()), paramName.camel(), FINAL).build();
   }

@@ -82,10 +82,19 @@ public class CoercionProvider {
   }
 
   private Coercion handleAutoMapperNotRepeatable() {
-    CoercionFactory factory = findCoercion(basicInfo.optionalInfo().orElse(basicInfo.returnType()));
-    Function<ParameterSpec, CodeBlock> extractExpr = basicInfo.extractExpr(); // TODO
+    Optional<CoercionFactory> factory = findCoercion(tool().box(basicInfo.originalReturnType()));
+    Function<ParameterSpec, CodeBlock> extractExpr;
+    if (!factory.isPresent() && basicInfo.optionalInfo().isPresent()) {
+      factory = findCoercion(basicInfo.optionalInfo().get());
+      extractExpr = LiftedType.lift(basicInfo.originalReturnType(), tool()).extractExpr();
+    } else {
+      extractExpr = p -> CodeBlock.of("$N", p);
+    }
+    if (!factory.isPresent()) {
+      throw basicInfo.asValidationException("Unknown parameter type. Define a custom mapper.");
+    }
     TypeMirror constructorParamType = basicInfo.returnType();
-    return factory.getCoercion(basicInfo, Optional.empty(), Optional.empty(), extractExpr, constructorParamType);
+    return factory.get().getCoercion(basicInfo, Optional.empty(), Optional.empty(), extractExpr, constructorParamType);
   }
 
   private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {
@@ -107,7 +116,8 @@ public class CoercionProvider {
 
   private Coercion handleRepeatableAutoMapper() {
     AbstractCollector collectorInfo = collectorInfo();
-    CoercionFactory coercion = findCoercion(collectorInfo.inputType());
+    CoercionFactory coercion = findCoercion(collectorInfo.inputType())
+        .orElseThrow(() -> basicInfo.asValidationException("Unknown parameter type. Define a custom mapper."));
     MapperType mapperType = MapperType.create(collectorInfo.inputType(), coercion.createMapper(collectorInfo.inputType()));
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
@@ -123,16 +133,16 @@ public class CoercionProvider {
     return MapperCoercion.create(Optional.of(collectorInfo), mapperType, basicInfo, extractExpr, constructorParamType);
   }
 
-  private CoercionFactory findCoercion(TypeMirror innerType) {
+  private Optional<CoercionFactory> findCoercion(TypeMirror innerType) {
     CoercionFactory standardCoercion = StandardCoercions.get(tool(), tool().box(innerType));
     if (standardCoercion != null) {
-      return standardCoercion;
+      return Optional.of(standardCoercion);
     }
     boolean isEnum = isEnumType(innerType);
     if (!isEnum) {
-      throw basicInfo.asValidationException("Unknown parameter type. Define a custom mapper.");
+      return Optional.empty();
     }
-    return EnumCoercion.create();
+    return Optional.of(EnumCoercion.create());
   }
 
   private boolean isEnumType(TypeMirror mirror) {

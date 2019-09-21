@@ -1,7 +1,5 @@
 package net.jbock.coerce;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -9,7 +7,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 public class InferredAttributes {
 
@@ -76,16 +73,6 @@ public class InferredAttributes {
 
   TypeMirror liftedType() {
     return liftedType.liftedType();
-  }
-
-  // liftedType -> sourceMethod.returnType
-
-  /**
-   * TODO lifted type can't know this
-   */
-  @Deprecated
-  Function<ParameterSpec, CodeBlock> extractExpr() {
-    return liftedType.extractExpr();
   }
 
   public boolean repeatable() {

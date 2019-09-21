@@ -7,7 +7,7 @@ import net.jbock.compiler.TypeTool;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Objects;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
@@ -23,7 +23,8 @@ final class LiftedType {
 
   private LiftedType(
       Function<ParameterSpec, CodeBlock> extract,
-      TypeMirror liftedType) {
+      TypeMirror liftedType,
+      Optional<Class<?>> optionalType) {
     this.extract = extract;
     if (liftedType.getKind().isPrimitive()) {
       throw new AssertionError("just checking");
@@ -32,9 +33,8 @@ final class LiftedType {
   }
 
   private static LiftedType extractViaNullCheck(TypeMirror type) {
-    Function<ParameterSpec, CodeBlock> extract = p ->
-        CodeBlock.of("$T.requireNonNull($N)", Objects.class, p);
-    return new LiftedType(extract, type);
+    Function<ParameterSpec, CodeBlock> extract = p -> CodeBlock.of("$N", p);
+    return new LiftedType(extract, type, Optional.empty());
   }
 
   private static class OptionalMapping {
@@ -64,7 +64,8 @@ final class LiftedType {
       if (tool.isSameType(type, e.optionalPrimitiveClass)) {
         return new LiftedType(
             e.extractOptionalPrimitive(),
-            tool.optionalOf(e.boxedNumberClass));
+            tool.optionalOf(e.boxedNumberClass),
+            Optional.of(e.boxedNumberClass));
       }
     }
     return extractViaNullCheck(tool.box(type));
