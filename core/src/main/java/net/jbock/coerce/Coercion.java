@@ -65,11 +65,12 @@ public final class Coercion {
       boolean optional) {
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
-    return new Coercion(collector.map(c -> {
+    Optional<CollectorInfo> collectorInfo = collector.map(c -> {
       ParameterSpec p = collectorParam(basicInfo, c);
       return new CollectorInfo(Coercion.createCollector(c), p,
           CodeBlock.of("$N", p));
-    }), mapExpr,
+    });
+    return new Coercion(collectorInfo, mapExpr,
         initMapper, constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr(), optional);
   }
 
@@ -101,7 +102,7 @@ public final class Coercion {
     private final ParameterSpec collectorParam;
     private final CodeBlock collectExpr;
 
-    public CollectorInfo(CodeBlock initCollector, ParameterSpec collectorParam, CodeBlock collectExpr) {
+    CollectorInfo(CodeBlock initCollector, ParameterSpec collectorParam, CodeBlock collectExpr) {
       this.initCollector = initCollector;
       this.collectorParam = collectorParam;
       this.collectExpr = collectExpr;
