@@ -38,7 +38,8 @@ public class CoercionProvider {
         CodeBlock.of(""),
         ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
-        e -> CodeBlock.of("$N", e));
+        e -> CodeBlock.of("$N", e),
+        Optional.empty()  );
   }
 
   public static Coercion findCoercion(

@@ -37,19 +37,23 @@ public final class Coercion {
 
   private final Function<ParameterSpec, CodeBlock> extractExpr;
 
+  private final Optional<Boolean> optional;
+
   Coercion(
       Optional<CollectorInfo> collectorInfo,
       CodeBlock mapExpr,
       CodeBlock initMapper,
       ParameterSpec constructorParam,
       FieldSpec field,
-      Function<ParameterSpec, CodeBlock> extractExpr) {
+      Function<ParameterSpec, CodeBlock> extractExpr,
+      Optional<Boolean> optional) {
     this.collectorInfo = collectorInfo;
     this.mapExpr = mapExpr;
     this.initMapper = initMapper;
     this.constructorParam = constructorParam;
     this.field = field;
     this.extractExpr = extractExpr;
+    this.optional = optional;
   }
 
   public static Coercion create(
@@ -58,6 +62,7 @@ public final class Coercion {
       Optional<AbstractCollector> collector,
       TypeMirror constructorParamType,
       BasicInfo basicInfo) {
+    Optional<Boolean> optional = Optional.empty();
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     return new Coercion(collector.map(c -> {
@@ -65,7 +70,7 @@ public final class Coercion {
       return new CollectorInfo(Coercion.createCollector(c), p,
           CodeBlock.of("$N", p));
     }), mapExpr,
-        initMapper, constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr());
+        initMapper, constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr(), optional);
   }
 
   private static ParameterSpec collectorParam(
@@ -127,10 +132,6 @@ public final class Coercion {
     return initMapper;
   }
 
-  public Optional<CodeBlock> initCollector() {
-    return collectorInfo.map(CollectorInfo::initCollector);
-  }
-
   public ParameterSpec constructorParam() {
     return constructorParam;
   }
@@ -139,19 +140,15 @@ public final class Coercion {
     return field;
   }
 
-  public Optional<ParameterSpec> collectorParam() {
-    return collectorInfo.map(CollectorInfo::collectorParam);
-  }
-
-  public Optional<CodeBlock> collectExpr() {
-    return collectorInfo.map(CollectorInfo::collectExpr);
-  }
-
   public CodeBlock extractExpr() {
     return extractExpr.apply(constructorParam);
   }
 
   public Optional<CollectorInfo> collectorInfo() {
     return collectorInfo;
+  }
+
+  public Optional<Boolean> optional() {
+    return optional;
   }
 }
