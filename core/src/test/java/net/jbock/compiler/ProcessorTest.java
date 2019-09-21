@@ -578,40 +578,6 @@ class ProcessorTest {
         .withErrorContaining("The enum may not be private.");
   }
 
-  @Test
-  void invalidReturnTypeNotOptional() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "",
-        "  @Parameter(shortName = 'x',",
-        "             optional = true)",
-        "  abstract String plainString();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Wrap the parameter type in Optional");
-  }
-
-  @Test
-  void invalidPrimitiveReturnTypeNotOptional() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "",
-        "  @Parameter(shortName = 'x',",
-        "             optional = true)",
-        "  abstract int x();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Wrap the parameter type in Optional");
-  }
-
   static List<String> withImports(String... lines) {
     List<String> header = Arrays.asList(
         "package test;",

@@ -197,30 +197,6 @@ class MapperTest {
   }
 
   @Test
-  void invalidReturnTypeNotOptional() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "",
-        "  @Parameter(shortName = 'x',",
-        "             optional = true,",
-        "             mappedBy = IdMapper.class)",
-        "  abstract String plainString();",
-        "",
-        "  static class IdMapper implements Supplier<Function<String, String>> {",
-        "    public Function<String, String> get() {",
-        "      return Function.identity();",
-        "    }",
-        "  }",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Wrap the parameter type in Optional");
-  }
-
-  @Test
   void validBooleanList() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
@@ -940,8 +916,7 @@ class MapperTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("TODO find a useful error  message");
+        .compilesWithoutError();
   }
 
   @Test
@@ -955,7 +930,7 @@ class MapperTest {
         "",
         "  static class Mapper implements Supplier<Function<String, OptionalInt>> {",
         "    public Function<String, OptionalInt> get() {",
-        "      return s -> 1;",
+        "      return null;",
         "    }",
         "  }",
         "}");
@@ -976,7 +951,7 @@ class MapperTest {
         "",
         "  static class Mapper implements Supplier<Function<String, Optional<Integer>>> {",
         "    public Function<String, Optional<Integer>> get() {",
-        "      return s -> 1;",
+        "      return null;",
         "    }",
         "  }",
         "}");

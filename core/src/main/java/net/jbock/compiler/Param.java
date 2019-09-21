@@ -183,7 +183,7 @@ final class Param {
     checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
     ParamName name = enumConstant(params, sourceMethod);
-    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod, tool);
+    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), sourceMethod.getReturnType(), sourceMethod, tool);
     boolean repeatable = attributes.repeatable();
     boolean flag = isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType(), tool);
     ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
@@ -250,7 +250,7 @@ final class Param {
     TypeTool tool = TypeTool.get();
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     ParamName name = enumConstant(params, sourceMethod);
-    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod, tool);
+    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), sourceMethod.getReturnType(), sourceMethod, tool);
     boolean repeatable = attributes.repeatable();
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     boolean optional = coercion.optional();

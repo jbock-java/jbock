@@ -40,21 +40,14 @@ public class InferredAttributes {
       Object mapperClass,
       Object collectorClass,
       boolean repeatable, // user declared
-      boolean optional, // user declared
       TypeMirror originalReturnType,
       ExecutableElement sourceMethod,
       TypeTool tool) {
 
     LiftedType liftedType = LiftedType.lift(originalReturnType, tool);
     Optional<TypeMirror> optionalInfo = findOptionalInfoInternal(tool, liftedType, sourceMethod);
-    if (optional && !optionalInfo.isPresent()) {
-      throw ValidationException.create(sourceMethod, "Wrap the parameter type in Optional.");
-    }
     if (mapperClass != null || collectorClass != null) {
       // no inferring
-      if (optionalInfo.isPresent() && !optional) {
-        throw ValidationException.create(sourceMethod, "Declare this parameter optional.");
-      }
       return new InferredAttributes(repeatable, optionalInfo, liftedType);
     }
     return new InferredAttributes(
