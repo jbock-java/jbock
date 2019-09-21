@@ -19,6 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class TypeTool {
 
@@ -167,9 +168,11 @@ public class TypeTool {
       if (kind == TypeKind.WILDCARD) {
         opt = typeArgument; // these can stay
       } else if (typeArgument.getKind() == TypeKind.TYPEVAR) {
-        opt = solution.get(typeArgument.toString());
+        opt = solution.getOrDefault(typeArgument.toString(), typeArgument);
       } else if (kind == TypeKind.DECLARED) {
         opt = subst(typeArgument.accept(AS_DECLARED, null), solution);
+      } else if (kind == TypeKind.ARRAY) {
+        opt = typeArgument;
       }
       if (opt == null) {
         return null;  // error
@@ -198,6 +201,9 @@ public class TypeTool {
         }
       }
       if (argument.getKind() == TypeKind.TYPEVAR) {
+        continue;
+      }
+      if (argument.getKind() == TypeKind.ARRAY) {
         continue;
       }
       if (argument.getKind() != TypeKind.DECLARED) {
@@ -270,6 +276,12 @@ public class TypeTool {
 
   public TypeMirror listOf(TypeMirror type) {
     return types.getDeclaredType(asTypeElement(List.class), type);
+  }
+
+  public TypeMirror stringFunction(TypeMirror innerType) {
+    TypeElement function = asTypeElement(Function.class);
+    TypeMirror string = asTypeElement(String.class).asType();
+    return types.getDeclaredType(function, string, innerType);
   }
 
   public List<? extends TypeMirror> getDirectSupertypes(TypeMirror mirror) {

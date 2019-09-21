@@ -5,15 +5,16 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.WildcardTypeName;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.collector.AbstractCollector;
+import net.jbock.coerce.mapper.AutoMapperType;
+import net.jbock.coerce.mapper.MapperType;
+import net.jbock.coerce.mapper.ReferenceMapperType;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collector;
 
 import static net.jbock.compiler.Constants.STRING;
 
@@ -26,7 +27,7 @@ public abstract class CoercionFactory {
   /**
    * Creates a function that maps from String to innerType
    */
-  abstract CodeBlock createMapper(TypeMirror innerType);
+  public abstract CodeBlock createMapper(TypeMirror innerType);
 
   private CodeBlock initMapper(TypeMirror innerType, String paramName) {
     ParameterSpec mapperParam = mapperParam(innerType, paramName);
@@ -49,8 +50,9 @@ public abstract class CoercionFactory {
 
   public final Coercion getCoercion(
       BasicInfo basicInfo,
-      Optional<AbstractCollector> collector) {
-    TypeMirror innerType = innerType(basicInfo, collector);
+      Optional<AbstractCollector> collector,
+      Optional<MapperType> mapperType) {
+    TypeMirror innerType = innerType(basicInfo, mapperType, collector);
     CodeBlock mapExpr = mapExpr(basicInfo.paramName());
     CodeBlock initMapper = initMapper(innerType, basicInfo.paramName());
     TypeMirror constructorParamType = basicInfo.returnType();
@@ -59,10 +61,21 @@ public abstract class CoercionFactory {
         initMapper,
         collector,
         constructorParamType,
-        basicInfo);
+        basicInfo,
+        mapperType.map(MapperType::isOptional));
   }
 
-  private TypeMirror innerType(BasicInfo basicInfo, Optional<AbstractCollector> collector) {
+  private TypeMirror innerType(BasicInfo basicInfo, Optional<MapperType> mapperType, Optional<AbstractCollector> collector) {
+    if (mapperType.isPresent()) {
+      MapperType type = mapperType.get();
+      if (type instanceof AutoMapperType) {
+        return ((AutoMapperType) type).innerType();
+      }
+      if (type instanceof ReferenceMapperType) {
+        return ((ReferenceMapperType) type).innerType();
+      }
+      throw new AssertionError("all cases handled");
+    }
     return collector.map(AbstractCollector::inputType).orElse(basicInfo.optionalInfo().orElse(basicInfo.returnType()));
   }
 }

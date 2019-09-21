@@ -61,8 +61,8 @@ public final class Coercion {
       CodeBlock initMapper,
       Optional<AbstractCollector> collector,
       TypeMirror constructorParamType,
-      BasicInfo basicInfo) {
-    Optional<Boolean> optional = Optional.empty();
+      BasicInfo basicInfo,
+      Optional<Boolean> optional) {
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     return new Coercion(collector.map(c -> {

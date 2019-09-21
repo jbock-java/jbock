@@ -1,6 +1,6 @@
 package net.jbock.coerce;
 
-import net.jbock.coerce.mapper.EnhancedMapperType;
+import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.reference.AbstractReferencedType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.compiler.TypeTool;
@@ -8,6 +8,7 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Map;
@@ -31,7 +32,7 @@ final class MapperClassValidator {
     this.mapperClass = mapperClass;
   }
 
-  EnhancedMapperType checkReturnType() {
+  MapperType checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
     AbstractReferencedType functionType = new ReferenceTool(MAPPER, basicInfo, mapperClass)
         .getReferencedType();
@@ -42,12 +43,11 @@ final class MapperClassValidator {
     if (!t_result.isPresent()) {
       throw boom(String.format("The supplied function must take a String argument, but takes %s", t));
     }
-    Optional<Map<String, TypeMirror>> r_result = tool().unify(expectedReturnType, r)
-        .map(functionType::mapTypevars);
+    Optional<Map<String, TypeMirror>> r_result = tool().unify(expectedReturnType, r);
     if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    return new Solver(functionType, t_result.get(), r_result.get()).solve();
+    return new Solver(functionType, r_result.get(), functionType.mapTypevars(t_result.get()), functionType.mapTypevars(r_result.get())).solve();
   }
 
   private ValidationException boom(String message) {
@@ -61,21 +61,25 @@ final class MapperClassValidator {
   private class Solver {
 
     final AbstractReferencedType functionType;
+    final Map<String, TypeMirror> unmapped_r_result;
     final Map<String, TypeMirror> t_result;
     final Map<String, TypeMirror> r_result;
 
-    Solver(AbstractReferencedType functionType, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
+    Solver(AbstractReferencedType functionType, Map<String, TypeMirror> unmapped_r_result, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
       this.functionType = functionType;
+      this.unmapped_r_result = unmapped_r_result;
       this.t_result = t_result;
       this.r_result = r_result;
     }
 
-    EnhancedMapperType solve() {
+    MapperType solve() {
       List<? extends TypeParameterElement> typeParameters = mapperClass.getTypeParameters();
       List<TypeMirror> solution = typeParameters.stream()
           .map(this::getSolution)
           .collect(Collectors.toList());
-      return EnhancedMapperType.create(functionType.isSupplier(), false, mapperClass, solution);
+      DeclaredType f_type = tool().substitute(functionType.expectedType, unmapped_r_result);
+      TypeMirror innerType = f_type.getTypeArguments().get(1);
+      return MapperType.create(functionType.isSupplier(), false, mapperClass, solution, innerType);
     }
 
     TypeMirror getSolution(TypeParameterElement typeParameter) {

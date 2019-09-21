@@ -22,7 +22,7 @@ class SimpleCoercion extends CoercionFactory {
   }
 
   @Override
-  final CodeBlock createMapper(TypeMirror innerType) {
+  public final CodeBlock createMapper(TypeMirror innerType) {
     return createMapper.apply(innerType);
   }
 }

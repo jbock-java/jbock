@@ -425,7 +425,7 @@ final class Param {
   }
 
   boolean required() {
-    return coercion.optional().map(b -> !b).orElse(!repeatable && !optional && !isFlag());
+    return !repeatable && !coercion.optional().orElse(optional) && !isFlag();
   }
 
   Optional<String> bundleKey() {

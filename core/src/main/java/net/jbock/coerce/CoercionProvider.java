@@ -10,7 +10,7 @@ import net.jbock.coerce.coercions.MapperCoercion;
 import net.jbock.coerce.coercions.StandardCoercions;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
-import net.jbock.coerce.mapper.EnhancedMapperType;
+import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 
@@ -39,7 +39,7 @@ public class CoercionProvider {
         ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         e -> CodeBlock.of("$N", e),
-        Optional.empty()  );
+        Optional.empty());
   }
 
   public static Coercion findCoercion(
@@ -82,24 +82,25 @@ public class CoercionProvider {
 
   private Coercion handleAutoMapperNotRepeatable() {
     CoercionFactory factory = findCoercion(basicInfo.optionalInfo().orElse(basicInfo.returnType()));
-    return factory.getCoercion(basicInfo, Optional.empty());
+    return factory.getCoercion(basicInfo, Optional.empty(), Optional.empty());
   }
 
   private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {
-    EnhancedMapperType mapperType = new MapperClassAnalyzer(basicInfo, basicInfo.returnType(), mapperClass).checkReturnType();
+    MapperType mapperType = new MapperClassAnalyzer(basicInfo, basicInfo.returnType(), mapperClass).checkReturnType();
     return MapperCoercion.create(Optional.empty(), mapperType, basicInfo);
   }
 
   private Coercion handleRepeatableAutoMapper() {
     AbstractCollector collectorInfo = collectorInfo();
     CoercionFactory coercion = findCoercion(collectorInfo.inputType());
-    return coercion.getCoercion(basicInfo, Optional.of(collectorInfo));
+    MapperType mapperType = MapperType.create(collectorInfo.inputType(), coercion.createMapper(collectorInfo.inputType()));
+    return coercion.getCoercion(basicInfo, Optional.of(collectorInfo), Optional.of(mapperType));
   }
 
   private Coercion handleRepeatableExplicitMapper(
       TypeElement mapperClass) {
     AbstractCollector collectorInfo = collectorInfo();
-    EnhancedMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
+    MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
     return MapperCoercion.create(Optional.of(collectorInfo), mapperType, basicInfo);
   }
 
