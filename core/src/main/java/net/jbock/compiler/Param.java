@@ -189,14 +189,6 @@ final class Param {
     ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
     Coercion coercion;
     if (flag) {
-      if (parameter.optional()) {
-        throw ValidationException.create(sourceMethod,
-            "A flag cannot be optional.");
-      }
-      if (parameter.repeatable()) {
-        throw ValidationException.create(sourceMethod,
-            "A flag cannot be repeatable.");
-      }
       if (mapperClass != null) {
         throw ValidationException.create(sourceMethod,
             "A flag parameter can't have a mapper.");
@@ -260,11 +252,11 @@ final class Param {
     ParamName name = enumConstant(params, sourceMethod);
     InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod, tool);
     boolean repeatable = attributes.repeatable();
-    boolean optional = attributes.optional();
+    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
+    boolean optional = coercion.optional();
     boolean required = !repeatable && !optional;
     ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
     ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
-    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     OptionType type = optionType(repeatable, false);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, name) :

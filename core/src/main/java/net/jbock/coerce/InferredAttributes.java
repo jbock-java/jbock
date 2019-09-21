@@ -77,10 +77,6 @@ public class InferredAttributes {
     return Optional.of(typeArgs.get(0));
   }
 
-  public boolean optional() {
-    return optionalInfo.isPresent();
-  }
-
   Optional<TypeMirror> optionalInfo() {
     return optionalInfo;
   }
