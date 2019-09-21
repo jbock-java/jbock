@@ -97,8 +97,9 @@ public class CoercionProvider {
       extractExpr = p -> CodeBlock.of("$N", p);
       constructorParamType = basicInfo.originalReturnType();
     } catch (ValidationException e) {
-      mapperType = new MapperClassAnalyzer(basicInfo, basicInfo.returnType(), mapperClass).checkReturnType();
-      extractExpr = basicInfo.extractExpr(); // TODO
+      LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
+      mapperType = new MapperClassAnalyzer(basicInfo, liftedType.liftedType(), mapperClass).checkReturnType();
+      extractExpr = liftedType.extractExpr();
       constructorParamType = basicInfo.returnType();
     }
     return MapperCoercion.create(Optional.empty(), mapperType, basicInfo, extractExpr, constructorParamType);
@@ -108,7 +109,7 @@ public class CoercionProvider {
     AbstractCollector collectorInfo = collectorInfo();
     CoercionFactory coercion = findCoercion(collectorInfo.inputType());
     MapperType mapperType = MapperType.create(collectorInfo.inputType(), coercion.createMapper(collectorInfo.inputType()));
-    Function<ParameterSpec, CodeBlock> extractExpr = basicInfo.extractExpr(); // TODO
+    Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
     return coercion.getCoercion(basicInfo, Optional.of(collectorInfo), Optional.of(mapperType), extractExpr, constructorParamType);
   }
@@ -117,7 +118,7 @@ public class CoercionProvider {
       TypeElement mapperClass) {
     AbstractCollector collectorInfo = collectorInfo();
     MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
-    Function<ParameterSpec, CodeBlock> extractExpr = basicInfo.extractExpr(); // TODO
+    Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
     return MapperCoercion.create(Optional.of(collectorInfo), mapperType, basicInfo, extractExpr, constructorParamType);
   }
