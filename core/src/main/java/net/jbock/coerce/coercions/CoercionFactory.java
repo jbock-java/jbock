@@ -62,7 +62,7 @@ public abstract class CoercionFactory {
         collector,
         constructorParamType,
         basicInfo,
-        mapperType.map(MapperType::isOptional));
+        mapperType.map(MapperType::isOptional).orElseGet(() -> basicInfo.optionalInfo().isPresent()));
   }
 
   private TypeMirror innerType(BasicInfo basicInfo, Optional<MapperType> mapperType, Optional<AbstractCollector> collector) {
