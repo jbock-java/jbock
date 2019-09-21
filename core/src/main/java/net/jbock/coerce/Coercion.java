@@ -148,7 +148,7 @@ public final class Coercion {
     return collectorInfo;
   }
 
-  public Optional<Boolean> optional() {
-    return Optional.of(optional);
+  public boolean optional() {
+    return optional;
   }
 }

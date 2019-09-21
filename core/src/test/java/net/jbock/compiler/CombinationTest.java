@@ -44,21 +44,6 @@ class CombinationTest {
   }
 
   @Test
-  void optionalRepeatable() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "  @Parameter(shortName = 'x', repeatable = true, optional = true)",
-        " abstract Optional<String> a();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("A parameter can be either repeatable or optional, but not both.");
-  }
-
-  @Test
   void positionalOptionalRepeatable() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",

@@ -185,10 +185,7 @@ final class Param {
     ParamName name = enumConstant(params, sourceMethod);
     InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod, tool);
     boolean repeatable = attributes.repeatable();
-    boolean optional = attributes.optional();
     boolean flag = isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType(), tool);
-    boolean required = !repeatable && !optional && !flag;
-    ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
     ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
     Coercion coercion;
     if (flag) {
@@ -216,6 +213,8 @@ final class Param {
     } else {
       coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     }
+    boolean required = !repeatable && !coercion.optional() && !flag;
+    ensureNotOptionalAndRepeatable(sourceMethod, repeatable, coercion.optional());
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, name) :
@@ -232,7 +231,7 @@ final class Param {
         cleanDesc(description),
         descriptionArgumentName,
         OptionalInt.empty(),
-        optional,
+        coercion.optional(),
         repeatable);
   }
 
@@ -425,7 +424,7 @@ final class Param {
   }
 
   boolean required() {
-    return !repeatable && !coercion.optional().orElse(optional) && !isFlag();
+    return !repeatable && !coercion.optional() && !isFlag();
   }
 
   Optional<String> bundleKey() {
