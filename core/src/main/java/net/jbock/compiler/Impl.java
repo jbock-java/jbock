@@ -1,7 +1,9 @@
 package net.jbock.compiler;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
@@ -71,8 +73,10 @@ final class Impl {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
     for (Param p : option.context.parameters) {
       FieldSpec field = p.field();
-      builder.addStatement("this.$N = $L", field, p.coercion().extractExpr());
-      builder.addParameter(p.coercion().constructorParam());
+      CodeBlock extractExpr = p.coercion().extractExpr();
+      builder.addStatement("this.$N = $L", field, extractExpr);
+      ParameterSpec constructorParam = p.coercion().constructorParam();
+      builder.addParameter(constructorParam);
     }
     return builder.build();
   }

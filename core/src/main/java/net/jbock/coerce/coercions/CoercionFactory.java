@@ -52,11 +52,11 @@ public abstract class CoercionFactory {
       BasicInfo basicInfo,
       Optional<AbstractCollector> collector,
       Optional<MapperType> mapperType,
-      Function<ParameterSpec, CodeBlock> extractExpr) {
+      Function<ParameterSpec, CodeBlock> extractExpr,
+      TypeMirror constructorParamType) {
     TypeMirror innerType = innerType(basicInfo, mapperType, collector);
     CodeBlock mapExpr = mapExpr(basicInfo.paramName());
     CodeBlock initMapper = initMapper(innerType, basicInfo.paramName());
-    TypeMirror constructorParamType = basicInfo.returnType();
     return Coercion.create(
         mapExpr,
         initMapper,

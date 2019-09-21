@@ -27,10 +27,11 @@ public final class MapperCoercion extends CoercionFactory {
   public static Coercion create(
       Optional<AbstractCollector> collectorType,
       MapperType mapperType,
-      BasicInfo basicInfo) {
-    Function<ParameterSpec, CodeBlock> extractExpr = basicInfo.extractExpr(); // TODO
+      BasicInfo basicInfo,
+      Function<ParameterSpec, CodeBlock> extractExpr,
+      TypeMirror constructorParamType) {
     return new MapperCoercion(mapperType)
-        .getCoercion(basicInfo, collectorType, Optional.of(mapperType), extractExpr);
+        .getCoercion(basicInfo, collectorType, Optional.of(mapperType), extractExpr, constructorParamType);
   }
 
   @Override
