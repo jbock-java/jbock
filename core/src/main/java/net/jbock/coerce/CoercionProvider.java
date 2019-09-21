@@ -84,7 +84,8 @@ public class CoercionProvider {
   private Coercion handleAutoMapperNotRepeatable() {
     CoercionFactory factory = findCoercion(basicInfo.optionalInfo().orElse(basicInfo.returnType()));
     Function<ParameterSpec, CodeBlock> extractExpr = basicInfo.extractExpr(); // TODO
-    return factory.getCoercion(basicInfo, Optional.empty(), Optional.empty(), extractExpr, basicInfo.returnType());
+    TypeMirror constructorParamType = basicInfo.returnType();
+    return factory.getCoercion(basicInfo, Optional.empty(), Optional.empty(), extractExpr, constructorParamType);
   }
 
   private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {
@@ -117,7 +118,8 @@ public class CoercionProvider {
     AbstractCollector collectorInfo = collectorInfo();
     MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
     Function<ParameterSpec, CodeBlock> extractExpr = basicInfo.extractExpr(); // TODO
-    return MapperCoercion.create(Optional.of(collectorInfo), mapperType, basicInfo, extractExpr, basicInfo.returnType());
+    TypeMirror constructorParamType = basicInfo.originalReturnType();
+    return MapperCoercion.create(Optional.of(collectorInfo), mapperType, basicInfo, extractExpr, constructorParamType);
   }
 
   private CoercionFactory findCoercion(TypeMirror innerType) {
