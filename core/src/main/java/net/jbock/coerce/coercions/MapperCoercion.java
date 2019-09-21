@@ -1,6 +1,7 @@
 package net.jbock.coerce.coercions;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.collector.AbstractCollector;
@@ -10,6 +11,7 @@ import net.jbock.compiler.TypeTool;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Handles custom mapper.
@@ -26,8 +28,9 @@ public final class MapperCoercion extends CoercionFactory {
       Optional<AbstractCollector> collectorType,
       MapperType mapperType,
       BasicInfo basicInfo) {
+    Function<ParameterSpec, CodeBlock> extractExpr = basicInfo.extractExpr(); // TODO
     return new MapperCoercion(mapperType)
-        .getCoercion(basicInfo, collectorType, Optional.of(mapperType));
+        .getCoercion(basicInfo, collectorType, Optional.of(mapperType), extractExpr);
   }
 
   @Override

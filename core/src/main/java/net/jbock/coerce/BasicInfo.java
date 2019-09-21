@@ -70,7 +70,7 @@ public class BasicInfo {
   }
 
   @Deprecated
-  Function<ParameterSpec, CodeBlock> extractExpr() {
+  public Function<ParameterSpec, CodeBlock> extractExpr() {
     return attributes.extractExpr();
   }
 

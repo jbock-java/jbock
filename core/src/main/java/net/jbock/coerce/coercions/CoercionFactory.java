@@ -51,7 +51,8 @@ public abstract class CoercionFactory {
   public final Coercion getCoercion(
       BasicInfo basicInfo,
       Optional<AbstractCollector> collector,
-      Optional<MapperType> mapperType) {
+      Optional<MapperType> mapperType,
+      Function<ParameterSpec, CodeBlock> extractExpr) {
     TypeMirror innerType = innerType(basicInfo, mapperType, collector);
     CodeBlock mapExpr = mapExpr(basicInfo.paramName());
     CodeBlock initMapper = initMapper(innerType, basicInfo.paramName());
@@ -62,7 +63,8 @@ public abstract class CoercionFactory {
         collector,
         constructorParamType,
         basicInfo,
-        mapperType.map(MapperType::isOptional).orElseGet(() -> basicInfo.optionalInfo().isPresent()));
+        mapperType.map(MapperType::isOptional).orElseGet(() -> basicInfo.optionalInfo().isPresent()),
+        extractExpr);
   }
 
   private TypeMirror innerType(BasicInfo basicInfo, Optional<MapperType> mapperType, Optional<AbstractCollector> collector) {

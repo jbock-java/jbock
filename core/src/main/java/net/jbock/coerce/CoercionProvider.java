@@ -82,7 +82,8 @@ public class CoercionProvider {
 
   private Coercion handleAutoMapperNotRepeatable() {
     CoercionFactory factory = findCoercion(basicInfo.optionalInfo().orElse(basicInfo.returnType()));
-    return factory.getCoercion(basicInfo, Optional.empty(), Optional.empty());
+    Function<ParameterSpec, CodeBlock> extractExpr = basicInfo.extractExpr(); // TODO
+    return factory.getCoercion(basicInfo, Optional.empty(), Optional.empty(), extractExpr);
   }
 
   private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {
@@ -94,7 +95,8 @@ public class CoercionProvider {
     AbstractCollector collectorInfo = collectorInfo();
     CoercionFactory coercion = findCoercion(collectorInfo.inputType());
     MapperType mapperType = MapperType.create(collectorInfo.inputType(), coercion.createMapper(collectorInfo.inputType()));
-    return coercion.getCoercion(basicInfo, Optional.of(collectorInfo), Optional.of(mapperType));
+    Function<ParameterSpec, CodeBlock> extractExpr = basicInfo.extractExpr(); // TODO
+    return coercion.getCoercion(basicInfo, Optional.of(collectorInfo), Optional.of(mapperType), extractExpr);
   }
 
   private Coercion handleRepeatableExplicitMapper(

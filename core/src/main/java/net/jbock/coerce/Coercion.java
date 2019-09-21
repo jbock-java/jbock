@@ -62,7 +62,8 @@ public final class Coercion {
       Optional<AbstractCollector> collector,
       TypeMirror constructorParamType,
       BasicInfo basicInfo,
-      boolean optional) {
+      boolean optional,
+      Function<ParameterSpec, CodeBlock> extractExpr) {
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     Optional<CollectorInfo> collectorInfo = collector.map(c -> {
@@ -71,7 +72,7 @@ public final class Coercion {
           CodeBlock.of("$N", p));
     });
     return new Coercion(collectorInfo, mapExpr,
-        initMapper, constructorParam, basicInfo.fieldSpec(), basicInfo.extractExpr(), optional);
+        initMapper, constructorParam, basicInfo.fieldSpec(), extractExpr, optional);
   }
 
   private static ParameterSpec collectorParam(
