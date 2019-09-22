@@ -84,10 +84,18 @@ public class CoercionProvider {
   private Coercion handleAutoMapperNotRepeatable() {
     Optional<CoercionFactory> factory = findCoercion(tool().box(basicInfo.originalReturnType()));
     Function<ParameterSpec, CodeBlock> extractExpr;
+    Optional<TypeMirror> listInfo = tool().getWrappedType(List.class, basicInfo.originalReturnType());
+    Optional<AbstractCollector> collector;
     if (!factory.isPresent() && basicInfo.optionalInfo().isPresent()) {
       factory = findCoercion(basicInfo.optionalInfo().get());
       extractExpr = LiftedType.lift(basicInfo.originalReturnType(), tool()).extractExpr();
+      collector = Optional.empty();
+    } else if (listInfo.isPresent()) {
+      factory = findCoercion(listInfo.get());
+      extractExpr = p -> CodeBlock.of("$N", p);
+      collector = Optional.of(new DefaultCollector(listInfo.get()));
     } else {
+      collector = Optional.empty();
       extractExpr = p -> CodeBlock.of("$N", p);
     }
     if (!factory.isPresent()) {
@@ -95,7 +103,7 @@ public class CoercionProvider {
     }
     // TODO handle auto collector
     TypeMirror constructorParamType = basicInfo.returnType();
-    return factory.get().getCoercion(basicInfo, Optional.empty(), Optional.empty(), extractExpr, constructorParamType);
+    return factory.get().getCoercion(basicInfo, collector, Optional.empty(), extractExpr, constructorParamType);
   }
 
   private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {

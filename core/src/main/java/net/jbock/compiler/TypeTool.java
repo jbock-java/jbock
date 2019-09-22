@@ -224,6 +224,20 @@ public class TypeTool {
     return types.isSameType(mirror, asTypeElement(test).asType());
   }
 
+  public Optional<TypeMirror> getWrappedType(Class<?> wrapper, TypeMirror mirror) {
+    if (mirror.getKind() != TypeKind.DECLARED) {
+      return Optional.empty();
+    }
+    if (!isSameErasure(mirror, wrapper)) {
+      return Optional.empty();
+    }
+    DeclaredType declaredType = asDeclared(mirror);
+    if (declaredType.getTypeArguments().isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(declaredType.getTypeArguments().get(0));
+  }
+
   public boolean isSameType(TypeMirror mirror, TypeMirror test) {
     return types.isSameType(mirror, test);
   }
