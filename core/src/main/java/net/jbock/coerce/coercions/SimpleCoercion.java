@@ -1,4 +1,4 @@
-package net.jbock.coerce.mappers;
+package net.jbock.coerce.coercions;
 
 import com.squareup.javapoet.CodeBlock;
 
@@ -22,7 +22,7 @@ class SimpleCoercion extends CoercionFactory {
   }
 
   @Override
-  final CodeBlock createMapper(TypeMirror innerType) {
+  public final CodeBlock createMapper(TypeMirror innerType) {
     return createMapper.apply(innerType);
   }
 }

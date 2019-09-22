@@ -23,7 +23,6 @@ import static net.jbock.compiler.Constants.CHARACTER;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.OptionType.REPEATABLE;
 import static net.jbock.compiler.Util.optionalOfSubtype;
 
 /**
@@ -267,11 +266,10 @@ final class Helper {
       if (!param.isFlag()) {
         spec.addStatement(param.coercion().initMapper());
       }
-      if (param.coercion().collectorParam().isPresent() && // TODO only one check
-          param.coercion().initCollector().isPresent()) {
-        ParameterSpec collectorParam = param.coercion().collectorParam().get();
-        spec.addStatement("$T $N = $L", collectorParam.type, collectorParam, param.coercion().initCollector().get());
-      }
+      param.coercion().collectorInfo().ifPresent(c -> {
+        ParameterSpec collectorParam = c.collectorParam();
+        spec.addStatement("$T $N = $L", collectorParam.type, collectorParam, c.initCollector());
+      });
     }
 
     if (context.hasPositional()) {
@@ -285,15 +283,15 @@ final class Helper {
 
   private CodeBlock extractExpression(Param param) {
     CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
-    if (param.paramType == REPEATABLE) {
+    if (param.repeatable()) {
       builder.add(".stream()");
     }
     if (!param.isFlag()) {
       builder.add(".map($L)", param.coercion().mapExpr());
     }
-    if (param.paramType == REPEATABLE) {
-      param.coercion().collectExpr().ifPresent(expr ->
-          builder.add(".collect($L)", expr));
+    if (param.repeatable()) {
+      param.coercion().collectorInfo().ifPresent(c ->
+          builder.add(".collect($L)", c.collectExpr()));
     }
     if (param.required()) {
       builder.add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,

@@ -1,4 +1,4 @@
-package net.jbock.coerce.mappers;
+package net.jbock.coerce.coercions;
 
 import com.squareup.javapoet.CodeBlock;
 
@@ -7,7 +7,7 @@ import javax.lang.model.type.TypeMirror;
 public final class EnumCoercion extends CoercionFactory {
 
   @Override
-  final CodeBlock createMapper(TypeMirror innerType) {
+  public final CodeBlock createMapper(TypeMirror innerType) {
     return CodeBlock.of("$T::valueOf", innerType);
   }
 

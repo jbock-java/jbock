@@ -4,8 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
 import java.util.List;
-import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static com.google.common.truth.Truth.assertAbout;
 import static com.google.testing.compile.JavaFileObjects.forSourceLines;
@@ -196,30 +194,6 @@ class MapperTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("flag parameter can't have a mapper");
-  }
-
-  @Test
-  void invalidReturnTypeNotOptional() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "",
-        "  @Parameter(shortName = 'x',",
-        "             optional = true,",
-        "             mappedBy = IdMapper.class)",
-        "  abstract String plainString();",
-        "",
-        "  static class IdMapper implements Supplier<Function<String, String>> {",
-        "    public Function<String, String> get() {",
-        "      return Function.identity();",
-        "    }",
-        "  }",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Wrap the parameter type in Optional");
   }
 
   @Test
@@ -623,7 +597,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: invalid bounds.");
+        .withErrorContaining("There is a problem with the mapper class: The mapper should return List<Integer> but returns List<List<X>>");
   }
 
   @Test
@@ -883,11 +857,52 @@ class MapperTest {
   }
 
   @Test
-  void oneOptionalIntNotOptional() {
-    // when mapper or collector is present, optionality is never inferred
+  void mapperValidOptionalStringTypevar() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class, optional = true)",
+        "  abstract Optional<String> number();",
+        "",
+        "  static class Mapper<E> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mapperValidStringOptionalStringTypevar() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class, optional = true)",
+        "  abstract Optional<String> number();",
+        "",
+        "  static class Mapper<E> implements Supplier<Function<E, Optional<E>>> {",
+        "    public Function<E, Optional<E>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void implicitMapperOptionalInt() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class InvalidArguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract OptionalInt b();",
@@ -901,8 +916,49 @@ class MapperTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Declare this parameter optional.");
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mapperOptionalInt() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract OptionalInt b();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, OptionalInt>> {",
+        "    public Function<String, OptionalInt> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mapperOptionalInteger() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Optional<Integer> b();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, Optional<Integer>>> {",
+        "    public Function<String, Optional<Integer>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
   }
 
   @Test

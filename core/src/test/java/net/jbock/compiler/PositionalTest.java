@@ -13,7 +13,6 @@ import static net.jbock.compiler.ProcessorTest.withImports;
 
 class PositionalTest {
 
-
   @Test
   void simpleOptional() {
     List<String> sourceLines = withImports(
@@ -25,7 +24,7 @@ class PositionalTest {
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor(true))
+        .processedWith(new Processor())
         .compilesWithoutError();
   }
 

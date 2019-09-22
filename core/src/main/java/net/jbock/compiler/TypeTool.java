@@ -1,5 +1,8 @@
 package net.jbock.compiler;
 
+import com.squareup.javapoet.CodeBlock;
+import net.jbock.coerce.LiftedType;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Modifier;
@@ -19,6 +22,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class TypeTool {
 
@@ -167,9 +173,11 @@ public class TypeTool {
       if (kind == TypeKind.WILDCARD) {
         opt = typeArgument; // these can stay
       } else if (typeArgument.getKind() == TypeKind.TYPEVAR) {
-        opt = solution.get(typeArgument.toString());
+        opt = solution.getOrDefault(typeArgument.toString(), typeArgument);
       } else if (kind == TypeKind.DECLARED) {
         opt = subst(typeArgument.accept(AS_DECLARED, null), solution);
+      } else if (kind == TypeKind.ARRAY) {
+        opt = typeArgument;
       }
       if (opt == null) {
         return null;  // error
@@ -200,6 +208,9 @@ public class TypeTool {
       if (argument.getKind() == TypeKind.TYPEVAR) {
         continue;
       }
+      if (argument.getKind() == TypeKind.ARRAY) {
+        continue;
+      }
       if (argument.getKind() != TypeKind.DECLARED) {
         return false;
       }
@@ -216,6 +227,28 @@ public class TypeTool {
 
   public boolean isSameType(TypeMirror mirror, Class<?> test) {
     return types.isSameType(mirror, asTypeElement(test).asType());
+  }
+
+  public Optional<TypeMirror> unwrap(Class<?> wrapper, TypeMirror mirror) {
+    if (mirror.getKind() != TypeKind.DECLARED) {
+      return Optional.empty();
+    }
+    if (!isSameErasure(mirror, wrapper)) {
+      return Optional.empty();
+    }
+    DeclaredType declaredType = asDeclared(mirror);
+    if (declaredType.getTypeArguments().isEmpty()) {
+      return Optional.empty();
+    }
+    return Optional.of(declaredType.getTypeArguments().get(0));
+  }
+
+  public Optional<TypeMirror> liftingUnwrap(TypeMirror mirror) {
+    LiftedType liftedType = LiftedType.lift(box(mirror), this);
+    if (liftedType.wrappedType().isPresent()) {
+      return Optional.of(asType(liftedType.wrappedType().get()));
+    }
+    return unwrap(Optional.class, box(mirror));
   }
 
   public boolean isSameType(TypeMirror mirror, TypeMirror test) {
@@ -259,13 +292,23 @@ public class TypeTool {
   }
 
   public TypeMirror optionalOf(Class<?> type) {
+    return optionalOf(asTypeElement(type).asType());
+  }
+
+  public TypeMirror optionalOf(TypeMirror typeMirror) {
     return types.getDeclaredType(
         asTypeElement(Optional.class),
-        asTypeElement(type).asType());
+        typeMirror);
   }
 
   public TypeMirror listOf(TypeMirror type) {
     return types.getDeclaredType(asTypeElement(List.class), type);
+  }
+
+  public TypeMirror stringFunction(TypeMirror innerType) {
+    TypeElement function = asTypeElement(Function.class);
+    TypeMirror string = asTypeElement(String.class).asType();
+    return types.getDeclaredType(function, string, innerType);
   }
 
   public List<? extends TypeMirror> getDirectSupertypes(TypeMirror mirror) {

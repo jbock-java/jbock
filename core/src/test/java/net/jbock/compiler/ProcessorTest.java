@@ -106,7 +106,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Add a type parameter.");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test
@@ -122,7 +122,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Add a type parameter");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test
@@ -138,7 +138,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Add a type parameter");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test
@@ -154,7 +154,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Add a type parameter");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test
@@ -170,7 +170,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Either define a custom collector, or return List");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test
@@ -186,7 +186,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Either define a custom collector, or return List");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test
@@ -576,40 +576,6 @@ class ProcessorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("The enum may not be private.");
-  }
-
-  @Test
-  void invalidReturnTypeNotOptional() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "",
-        "  @Parameter(shortName = 'x',",
-        "             optional = true)",
-        "  abstract String plainString();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Wrap the parameter type in Optional");
-  }
-
-  @Test
-  void invalidPrimitiveReturnTypeNotOptional() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "",
-        "  @Parameter(shortName = 'x',",
-        "             optional = true)",
-        "  abstract int x();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Wrap the parameter type in Optional");
   }
 
   static List<String> withImports(String... lines) {

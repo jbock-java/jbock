@@ -62,20 +62,6 @@ public @interface PositionalParameter {
   Class<?> collectedBy() default Object.class;
 
   /**
-   * @see Parameter#repeatable
-   *
-   * @return a boolean
-   */
-  boolean repeatable() default false;
-
-  /**
-   * @see Parameter#optional
-   *
-   * @return a boolean
-   */
-  boolean optional() default false;
-
-  /**
    * @see Parameter#bundleKey
    *
    * @return a string

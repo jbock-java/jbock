@@ -183,23 +183,10 @@ final class Param {
     checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
     ParamName name = enumConstant(params, sourceMethod);
-    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod, tool);
-    boolean repeatable = attributes.repeatable();
-    boolean optional = attributes.optional();
     boolean flag = isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType(), tool);
-    boolean required = !repeatable && !optional && !flag;
-    ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
-    ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
+    InferredAttributes attributes = InferredAttributes.infer(sourceMethod.getReturnType(), tool);
     Coercion coercion;
     if (flag) {
-      if (parameter.optional()) {
-        throw ValidationException.create(sourceMethod,
-            "A flag cannot be optional.");
-      }
-      if (parameter.repeatable()) {
-        throw ValidationException.create(sourceMethod,
-            "A flag cannot be repeatable.");
-      }
       if (mapperClass != null) {
         throw ValidationException.create(sourceMethod,
             "A flag parameter can't have a mapper.");
@@ -216,6 +203,8 @@ final class Param {
     } else {
       coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     }
+    boolean repeatable = coercion.repeatable();
+    boolean required = !repeatable && !coercion.optional() && !flag;
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, name) :
@@ -232,21 +221,8 @@ final class Param {
         cleanDesc(description),
         descriptionArgumentName,
         OptionalInt.empty(),
-        optional,
+        coercion.optional(),
         repeatable);
-  }
-
-  private static void ensureNotOptionalAndRepeatable(ExecutableElement sourceMethod, boolean repeatable, boolean optional) {
-    if (optional && repeatable) {
-      throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");
-    }
-  }
-
-  private static void ensureRepeatableCollector(ExecutableElement sourceMethod, TypeElement collectorClass, boolean repeatable) {
-    if (collectorClass != null && !repeatable) {
-      throw ValidationException.create(sourceMethod,
-          "The parameter must be declared repeatable in order to have a collector.");
-    }
   }
 
   private static Param createPositional(
@@ -259,13 +235,11 @@ final class Param {
     TypeTool tool = TypeTool.get();
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     ParamName name = enumConstant(params, sourceMethod);
-    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), parameter.optional(), sourceMethod.getReturnType(), sourceMethod, tool);
-    boolean repeatable = attributes.repeatable();
-    boolean optional = attributes.optional();
-    boolean required = !repeatable && !optional;
-    ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
-    ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
+    InferredAttributes attributes = InferredAttributes.infer(sourceMethod.getReturnType(), tool);
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
+    boolean repeatable = coercion.repeatable();
+    boolean optional = coercion.optional();
+    boolean required = !repeatable && !optional;
     OptionType type = optionType(repeatable, false);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, name) :
@@ -425,7 +399,11 @@ final class Param {
   }
 
   boolean required() {
-    return !repeatable && !optional && !isFlag();
+    return !repeatable && !coercion.optional() && !isFlag();
+  }
+
+  boolean repeatable() {
+    return coercion.repeatable();
   }
 
   Optional<String> bundleKey() {

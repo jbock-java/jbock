@@ -112,38 +112,6 @@ public @interface Parameter {
    */
   Class<?> collectedBy() default Object.class;
 
-  /**
-   * <p>If {@code true}, or if {@link #mappedBy} or {@link #collectedBy} are set,
-   * declares that this parameter is repeatable.
-   * If {@code false} or unspecified, and neither {@link #collectedBy} nor  {@link #mappedBy} are set,
-   * the question whether or not this parameter is repeatable
-   * will be answered by looking at the parameter's type.</p>
-   *
-   * <p>In the second case, the only parameter type that will lead to a repeatable parameter is {@link java.util.List}.</p>
-   *
-   * @return true to ensure that this parameter is repeatable
-   */
-  boolean repeatable() default false;
-
-  /**
-   * <p>If {@code true}, or if {@link #mappedBy} or {@link #collectedBy} are set,
-   * declares whether this parameter is optional or required.
-   * If {@code false} or unspecified, and neither {@link #collectedBy} nor  {@link #mappedBy} are set,
-   * the question whether this parameter
-   * is optional or required will be answered by looking at the parameter's type.</p>
-   *
-   * <p>In the second case, these are all the parameter types that will lead to an optional parameter:</p>
-   *
-   * <ul>
-   * <li>{@link java.util.Optional}</li>
-   * <li>{@link java.util.OptionalInt}</li>
-   * <li>{@link java.util.OptionalLong}</li>
-   * <li>{@link java.util.OptionalDouble}</li>
-   * </ul>
-   *
-   * @return true to ensure that this parameter is optional
-   */
-  boolean optional() default false;
 
   /**
    * <p>If {@code true}, the parameter's type must be {@code boolean} or {@code Boolean}.
