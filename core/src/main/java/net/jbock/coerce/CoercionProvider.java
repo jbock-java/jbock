@@ -58,7 +58,7 @@ public class CoercionProvider {
   }
 
   private Coercion run() {
-    if (basicInfo.isRepeatable()) {
+    if (basicInfo.collectorClass().isPresent()) {
       return handleRepeatable();
     } else {
       return handleNotRepeatable();
@@ -93,6 +93,7 @@ public class CoercionProvider {
     if (!factory.isPresent()) {
       throw basicInfo.asValidationException("Unknown parameter type. Define a custom mapper.");
     }
+    // TODO handle auto collector
     TypeMirror constructorParamType = basicInfo.returnType();
     return factory.get().getCoercion(basicInfo, Optional.empty(), Optional.empty(), extractExpr, constructorParamType);
   }
@@ -111,6 +112,7 @@ public class CoercionProvider {
       extractExpr = liftedType.extractExpr();
       constructorParamType = basicInfo.returnType();
     }
+    // TODO handle auto collector
     return MapperCoercion.create(Optional.empty(), mapperType, basicInfo, extractExpr, constructorParamType);
   }
 
