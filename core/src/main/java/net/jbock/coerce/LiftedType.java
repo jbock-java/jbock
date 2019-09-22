@@ -13,7 +13,7 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
-final class LiftedType {
+public final class LiftedType {
 
   // the parameter type, but primitives are boxed, also OptionalInt becomes Optional<Integer> etc
   private final TypeMirror liftedType;
@@ -21,15 +21,18 @@ final class LiftedType {
   // going back i.e. int -> Integer or Optional<Integer> -> OptionalInt
   private final Function<ParameterSpec, CodeBlock> extract;
 
+  private final Optional<Class<?>> wrappedType;
+
   private LiftedType(
       Function<ParameterSpec, CodeBlock> extract,
       TypeMirror liftedType,
-      Optional<Class<?>> optionalType) {
+      Optional<Class<?>> wrappedType) {
     this.extract = extract;
     if (liftedType.getKind().isPrimitive()) {
       throw new AssertionError("just checking");
     }
     this.liftedType = liftedType;
+    this.wrappedType = wrappedType;
   }
 
   private static LiftedType extractViaNullCheck(TypeMirror type) {
@@ -59,7 +62,7 @@ final class LiftedType {
       new OptionalMapping(OptionalDouble.class, Double.class));
 
   // visible for testing
-  static LiftedType lift(TypeMirror type, TypeTool tool) {
+  public static LiftedType lift(TypeMirror type, TypeTool tool) {
     for (OptionalMapping e : OPT_MAP) {
       if (tool.isSameType(type, e.optionalPrimitiveClass)) {
         return new LiftedType(
@@ -77,5 +80,9 @@ final class LiftedType {
 
   Function<ParameterSpec, CodeBlock> extractExpr() {
     return extract;
+  }
+
+  public Optional<Class<?>> wrappedType() {
+    return wrappedType;
   }
 }

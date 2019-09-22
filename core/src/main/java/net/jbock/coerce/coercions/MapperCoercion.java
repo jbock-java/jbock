@@ -31,7 +31,7 @@ public final class MapperCoercion extends CoercionFactory {
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType) {
     return new MapperCoercion(mapperType)
-        .getCoercion(basicInfo, collectorType, Optional.of(mapperType), extractExpr, constructorParamType);
+        .getCoercion(basicInfo, collectorType, mapperType, extractExpr, constructorParamType);
   }
 
   @Override

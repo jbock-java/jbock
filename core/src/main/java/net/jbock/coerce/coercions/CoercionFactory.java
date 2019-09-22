@@ -25,18 +25,15 @@ public abstract class CoercionFactory {
    */
   public abstract CodeBlock createMapper(TypeMirror innerType);
 
-  private CodeBlock initMapper(Optional<MapperType> mapperType, TypeMirror innerType, String paramName) {
+  private CodeBlock initMapper(MapperType mapperType, TypeMirror innerType, String paramName) {
     ParameterSpec mapperParam = mapperParam(innerType, paramName);
-    if (mapperType.isPresent()) {
-      MapperType type = mapperType.get();
-      if (type instanceof AutoMapperType) {
-        return CodeBlock.of("$T $N = $L",
-            mapperParam.type,
-            mapperParam,
-            ((AutoMapperType) type).createExpression());
-      }
-      // TODO reference mapper
+    if (mapperType instanceof AutoMapperType) {
+      return CodeBlock.of("$T $N = $L",
+          mapperParam.type,
+          mapperParam,
+          ((AutoMapperType) mapperType).createExpression());
     }
+    // TODO reference mapper
     return CodeBlock.of("$T $N = $L",
         mapperParam.type,
         mapperParam,
@@ -57,10 +54,10 @@ public abstract class CoercionFactory {
   public final Coercion getCoercion(
       BasicInfo basicInfo,
       Optional<AbstractCollector> collector,
-      Optional<MapperType> mapperType,
+      MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType) {
-    TypeMirror innerType = innerType(basicInfo, mapperType, collector);
+    TypeMirror innerType = innerType(mapperType);
     CodeBlock mapExpr = CodeBlock.of("$L", mapperParamName(basicInfo.paramName()));
     CodeBlock initMapper = initMapper(mapperType, innerType, basicInfo.paramName());
     return Coercion.create(
@@ -69,21 +66,17 @@ public abstract class CoercionFactory {
         collector,
         constructorParamType,
         basicInfo,
-        mapperType.map(MapperType::isOptional).orElseGet(() -> basicInfo.optionalInfo().isPresent()),
+        mapperType.isOptional(),
         extractExpr);
   }
 
-  private TypeMirror innerType(BasicInfo basicInfo, Optional<MapperType> mapperType, Optional<AbstractCollector> collector) {
-    if (mapperType.isPresent()) {
-      MapperType type = mapperType.get();
-      if (type instanceof AutoMapperType) {
-        return ((AutoMapperType) type).innerType();
-      }
-      if (type instanceof ReferenceMapperType) {
-        return ((ReferenceMapperType) type).innerType();
-      }
-      throw new AssertionError("all cases handled");
+  private TypeMirror innerType(MapperType mapperType) {
+    if (mapperType instanceof AutoMapperType) {
+      return ((AutoMapperType) mapperType).innerType();
     }
-    return collector.map(AbstractCollector::inputType).orElse(basicInfo.optionalInfo().orElse(basicInfo.returnType()));
+    if (mapperType instanceof ReferenceMapperType) {
+      return ((ReferenceMapperType) mapperType).innerType();
+    }
+    throw new AssertionError("all cases handled");
   }
 }

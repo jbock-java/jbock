@@ -1,8 +1,6 @@
 package net.jbock.coerce;
 
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
@@ -12,7 +10,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static javax.lang.model.element.Modifier.FINAL;
 

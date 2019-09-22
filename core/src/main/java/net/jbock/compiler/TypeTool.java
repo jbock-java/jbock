@@ -1,5 +1,7 @@
 package net.jbock.compiler;
 
+import net.jbock.coerce.LiftedType;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Modifier;
@@ -224,7 +226,7 @@ public class TypeTool {
     return types.isSameType(mirror, asTypeElement(test).asType());
   }
 
-  public Optional<TypeMirror> getWrappedType(Class<?> wrapper, TypeMirror mirror) {
+  public Optional<TypeMirror> unwrap(Class<?> wrapper, TypeMirror mirror) {
     if (mirror.getKind() != TypeKind.DECLARED) {
       return Optional.empty();
     }
@@ -236,6 +238,14 @@ public class TypeTool {
       return Optional.empty();
     }
     return Optional.of(declaredType.getTypeArguments().get(0));
+  }
+
+  public Optional<TypeMirror> liftingUnwrap(TypeMirror mirror) {
+    LiftedType liftedType = LiftedType.lift(box(mirror), this);
+    if (liftedType.wrappedType().isPresent()) {
+      return Optional.of(asType(liftedType.wrappedType().get()));
+    }
+    return unwrap(Optional.class, box(mirror));
   }
 
   public boolean isSameType(TypeMirror mirror, TypeMirror test) {
