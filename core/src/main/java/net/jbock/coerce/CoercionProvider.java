@@ -11,6 +11,7 @@ import net.jbock.coerce.coercions.StandardCoercions;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
 import net.jbock.coerce.mapper.MapperType;
+import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
@@ -120,7 +121,7 @@ public class CoercionProvider {
   // TODO refactoring
   private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {
     Function<ParameterSpec, CodeBlock> extractExpr;
-    MapperType mapperType;
+    ReferenceMapperType mapperType;
     TypeMirror constructorParamType;
     Optional<AbstractCollector> collector;
     try {
@@ -160,10 +161,9 @@ public class CoercionProvider {
     return coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
   }
 
-  private Coercion handleRepeatableExplicitMapper(
-      TypeElement mapperClass) {
+  private Coercion handleRepeatableExplicitMapper(TypeElement mapperClass) {
     AbstractCollector collectorInfo = collectorInfo();
-    MapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
+    ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
     return new ExplicitMapperCoercion(mapperType)

@@ -12,7 +12,6 @@ public abstract class MapperType {
   private final boolean supplier; // wrapped in Supplier?
   private final List<TypeMirror> solution; // solved typevars of mapperClass
 
-
   MapperType(
       boolean supplier,
       List<TypeMirror> solution,
@@ -22,7 +21,7 @@ public abstract class MapperType {
     this.solution = solution;
   }
 
-  public static MapperType create(
+  public static ReferenceMapperType create(
       boolean supplier,
       boolean optional,
       TypeElement mapperClass,
@@ -31,7 +30,7 @@ public abstract class MapperType {
     return new ReferenceMapperType(mapperClass, supplier, solution, optional, innerType);
   }
 
-  public static MapperType create(TypeMirror innerType, CodeBlock createExpression, boolean optional) {
+  public static AutoMapperType create(TypeMirror innerType, CodeBlock createExpression, boolean optional) {
     return new AutoMapperType(innerType, createExpression, optional);
   }
 

@@ -1,6 +1,7 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.mapper.MapperType;
+import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.coerce.reference.AbstractReferencedType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.compiler.TypeTool;
@@ -32,7 +33,7 @@ final class MapperClassValidator {
     this.mapperClass = mapperClass;
   }
 
-  MapperType checkReturnType() {
+  ReferenceMapperType checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
     AbstractReferencedType functionType = new ReferenceTool(MAPPER, basicInfo, mapperClass)
         .getReferencedType();
@@ -72,7 +73,7 @@ final class MapperClassValidator {
       this.r_result = r_result;
     }
 
-    MapperType solve() {
+    ReferenceMapperType solve() {
       List<? extends TypeParameterElement> typeParameters = mapperClass.getTypeParameters();
       List<TypeMirror> solution = typeParameters.stream()
           .map(this::getSolution)
