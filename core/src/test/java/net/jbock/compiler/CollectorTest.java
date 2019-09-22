@@ -55,8 +55,7 @@ class CollectorTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("must be declared repeatable");
+        .compilesWithoutError();
   }
 
   @Test

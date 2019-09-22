@@ -153,4 +153,8 @@ public final class Coercion {
   public boolean optional() {
     return optional;
   }
+
+  public boolean repeatable() {
+    return collectorInfo.isPresent();
+  }
 }

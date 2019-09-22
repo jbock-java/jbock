@@ -10,33 +10,21 @@ import java.util.Optional;
 
 public class InferredAttributes {
 
-  private final boolean repeatable;
-
   // the X inside Optional<X>
   private final Optional<TypeMirror> optionalInfo;
 
   private final LiftedType liftedType;
 
   private InferredAttributes(
-      boolean repeatable,
       Optional<TypeMirror> optionalInfo,
       LiftedType liftedType) {
-    this.repeatable = repeatable;
     this.optionalInfo = optionalInfo;
     this.liftedType = liftedType;
-  }
-
-  /**
-   * Can infer {@code repeatable = true}?
-   */
-  private static boolean isInferredRepeatable(TypeTool tool, TypeMirror originalType) {
-    return tool.isSameErasure(originalType, List.class);
   }
 
   public static InferredAttributes infer(
       Object mapperClass,
       Object collectorClass,
-      boolean repeatable, // user declared
       TypeMirror originalReturnType,
       ExecutableElement sourceMethod,
       TypeTool tool) {
@@ -45,11 +33,9 @@ public class InferredAttributes {
     Optional<TypeMirror> optionalInfo = findOptionalInfoInternal(tool, liftedType, sourceMethod);
     if (mapperClass != null || collectorClass != null) {
       // no inferring
-      return new InferredAttributes(repeatable, optionalInfo, liftedType);
+      return new InferredAttributes(optionalInfo, liftedType);
     }
-    return new InferredAttributes(
-        repeatable || isInferredRepeatable(tool, originalReturnType),
-        optionalInfo, liftedType);
+    return new InferredAttributes(optionalInfo, liftedType);
   }
 
   private static Optional<TypeMirror> findOptionalInfoInternal(
@@ -73,9 +59,5 @@ public class InferredAttributes {
 
   TypeMirror liftedType() {
     return liftedType.liftedType();
-  }
-
-  public boolean repeatable() {
-    return repeatable;
   }
 }

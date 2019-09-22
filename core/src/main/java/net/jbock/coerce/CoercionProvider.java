@@ -40,7 +40,7 @@ public class CoercionProvider {
         ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         e -> CodeBlock.of("$N", e),
-        false);
+        true);
   }
 
   public static Coercion findCoercion(
@@ -86,24 +86,34 @@ public class CoercionProvider {
     Function<ParameterSpec, CodeBlock> extractExpr;
     Optional<TypeMirror> listInfo = tool().getWrappedType(List.class, basicInfo.originalReturnType());
     Optional<AbstractCollector> collector;
-    if (!factory.isPresent() && basicInfo.optionalInfo().isPresent()) {
+    MapperType mapperType = null;
+    if (basicInfo.optionalInfo().isPresent()) {
       factory = findCoercion(basicInfo.optionalInfo().get());
       extractExpr = LiftedType.lift(basicInfo.originalReturnType(), tool()).extractExpr();
+      if (factory.isPresent()) {
+        mapperType = MapperType.create(basicInfo.optionalInfo().get(), factory.get().createMapper(basicInfo.optionalInfo().get()), true);
+      }
       collector = Optional.empty();
     } else if (listInfo.isPresent()) {
       factory = findCoercion(listInfo.get());
       extractExpr = p -> CodeBlock.of("$N", p);
+      if (factory.isPresent()) {
+        mapperType = MapperType.create(listInfo.get(), factory.get().createMapper(listInfo.get()), false);
+      }
       collector = Optional.of(new DefaultCollector(listInfo.get()));
     } else {
       collector = Optional.empty();
+      if (factory.isPresent()) {
+        mapperType = MapperType.create(tool().box(basicInfo.originalReturnType()), factory.get().createMapper(tool().box(basicInfo.originalReturnType())), false);
+      }
       extractExpr = p -> CodeBlock.of("$N", p);
     }
-    if (!factory.isPresent()) {
+    if (mapperType == null) {
       throw basicInfo.asValidationException("Unknown parameter type. Define a custom mapper.");
     }
     // TODO handle auto collector
     TypeMirror constructorParamType = basicInfo.returnType();
-    return factory.get().getCoercion(basicInfo, collector, Optional.empty(), extractExpr, constructorParamType);
+    return factory.get().getCoercion(basicInfo, collector, Optional.of(mapperType), extractExpr, constructorParamType);
   }
 
   private Coercion handleExplicitMapperNotRepeatable(TypeElement mapperClass) {
@@ -128,7 +138,7 @@ public class CoercionProvider {
     AbstractCollector collectorInfo = collectorInfo();
     CoercionFactory coercion = findCoercion(collectorInfo.inputType())
         .orElseThrow(() -> basicInfo.asValidationException("Unknown parameter type. Define a custom mapper."));
-    MapperType mapperType = MapperType.create(collectorInfo.inputType(), coercion.createMapper(collectorInfo.inputType()));
+    MapperType mapperType = MapperType.create(collectorInfo.inputType(), coercion.createMapper(collectorInfo.inputType()), true);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
     return coercion.getCoercion(basicInfo, Optional.of(collectorInfo), Optional.of(mapperType), extractExpr, constructorParamType);

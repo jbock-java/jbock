@@ -184,7 +184,7 @@ final class Param {
     checkName(sourceMethod, longName);
     ParamName name = enumConstant(params, sourceMethod);
     boolean flag = isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType(), tool);
-    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), sourceMethod.getReturnType(), sourceMethod, tool);
+    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, sourceMethod.getReturnType(), sourceMethod, tool);
     Coercion coercion;
     if (flag) {
       if (mapperClass != null) {
@@ -203,9 +203,8 @@ final class Param {
     } else {
       coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     }
-    boolean repeatable = attributes.repeatable();
+    boolean repeatable = coercion.repeatable();
     boolean required = !repeatable && !coercion.optional() && !flag;
-    ensureNotOptionalAndRepeatable(sourceMethod, repeatable, coercion.optional());
     OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, name) :
@@ -226,19 +225,6 @@ final class Param {
         repeatable);
   }
 
-  private static void ensureNotOptionalAndRepeatable(ExecutableElement sourceMethod, boolean repeatable, boolean optional) {
-    if (optional && repeatable) {
-      throw ValidationException.create(sourceMethod, "A parameter can be either repeatable or optional, but not both.");
-    }
-  }
-
-  private static void ensureRepeatableCollector(ExecutableElement sourceMethod, TypeElement collectorClass, boolean repeatable) {
-    if (collectorClass != null && !repeatable) {
-      throw ValidationException.create(sourceMethod,
-          "The parameter must be declared repeatable in order to have a collector.");
-    }
-  }
-
   private static Param createPositional(
       List<Param> params,
       ExecutableElement sourceMethod,
@@ -249,13 +235,11 @@ final class Param {
     TypeTool tool = TypeTool.get();
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     ParamName name = enumConstant(params, sourceMethod);
-    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, parameter.repeatable(), sourceMethod.getReturnType(), sourceMethod, tool);
+    InferredAttributes attributes = InferredAttributes.infer(mapperClass, collectorClass, sourceMethod.getReturnType(), sourceMethod, tool);
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
-    boolean repeatable = attributes.repeatable();
+    boolean repeatable = coercion.repeatable();
     boolean optional = coercion.optional();
     boolean required = !repeatable && !optional;
-    ensureNotOptionalAndRepeatable(sourceMethod, repeatable, optional);
-    ensureRepeatableCollector(sourceMethod, collectorClass, repeatable);
     OptionType type = optionType(repeatable, false);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(type, required, name) :
@@ -416,6 +400,10 @@ final class Param {
 
   boolean required() {
     return !repeatable && !coercion.optional() && !isFlag();
+  }
+
+  boolean repeatable() {
+    return coercion.repeatable();
   }
 
   Optional<String> bundleKey() {

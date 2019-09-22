@@ -23,7 +23,6 @@ import static net.jbock.compiler.Constants.CHARACTER;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.OptionType.REPEATABLE;
 import static net.jbock.compiler.Util.optionalOfSubtype;
 
 /**
@@ -284,13 +283,13 @@ final class Helper {
 
   private CodeBlock extractExpression(Param param) {
     CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
-    if (param.paramType == REPEATABLE) {
+    if (param.repeatable()) {
       builder.add(".stream()");
     }
     if (!param.isFlag()) {
       builder.add(".map($L)", param.coercion().mapExpr());
     }
-    if (param.paramType == REPEATABLE) {
+    if (param.repeatable()) {
       param.coercion().collectorInfo().ifPresent(c ->
           builder.add(".collect($L)", c.collectExpr()));
     }

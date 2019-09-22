@@ -31,8 +31,8 @@ public abstract class MapperType {
     return new ReferenceMapperType(mapperClass, supplier, solution, optional, innerType);
   }
 
-  public static MapperType create(TypeMirror innerType, CodeBlock createExpression) {
-    return new AutoMapperType(innerType, createExpression);
+  public static MapperType create(TypeMirror innerType, CodeBlock createExpression, boolean optional) {
+    return new AutoMapperType(innerType, createExpression, optional);
   }
 
   public boolean isOptional() {

@@ -20,17 +20,23 @@ import static net.jbock.compiler.Constants.STRING;
 
 public abstract class CoercionFactory {
 
-  private CodeBlock mapExpr(String paramName) {
-    return CodeBlock.of("$L", mapperParamName(paramName));
-  }
-
   /**
    * Creates a function that maps from String to innerType
    */
   public abstract CodeBlock createMapper(TypeMirror innerType);
 
-  private CodeBlock initMapper(TypeMirror innerType, String paramName) {
+  private CodeBlock initMapper(Optional<MapperType> mapperType, TypeMirror innerType, String paramName) {
     ParameterSpec mapperParam = mapperParam(innerType, paramName);
+    if (mapperType.isPresent()) {
+      MapperType type = mapperType.get();
+      if (type instanceof AutoMapperType) {
+        return CodeBlock.of("$T $N = $L",
+            mapperParam.type,
+            mapperParam,
+            ((AutoMapperType) type).createExpression());
+      }
+      // TODO reference mapper
+    }
     return CodeBlock.of("$T $N = $L",
         mapperParam.type,
         mapperParam,
@@ -55,8 +61,8 @@ public abstract class CoercionFactory {
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType) {
     TypeMirror innerType = innerType(basicInfo, mapperType, collector);
-    CodeBlock mapExpr = mapExpr(basicInfo.paramName());
-    CodeBlock initMapper = initMapper(innerType, basicInfo.paramName());
+    CodeBlock mapExpr = CodeBlock.of("$L", mapperParamName(basicInfo.paramName()));
+    CodeBlock initMapper = initMapper(mapperType, innerType, basicInfo.paramName());
     return Coercion.create(
         mapExpr,
         initMapper,

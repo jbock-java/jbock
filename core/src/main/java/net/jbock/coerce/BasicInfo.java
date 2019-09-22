@@ -85,10 +85,6 @@ public class BasicInfo {
     return attributes.optionalInfo();
   }
 
-  public boolean isRepeatable() {
-    return attributes.repeatable();
-  }
-
   Optional<TypeElement> mapperClass() {
     return mapperClass;
   }
