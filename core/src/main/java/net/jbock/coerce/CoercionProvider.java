@@ -120,18 +120,32 @@ public class CoercionProvider {
     Function<ParameterSpec, CodeBlock> extractExpr;
     MapperType mapperType;
     TypeMirror constructorParamType;
+    Optional<AbstractCollector> collector;
     try {
       mapperType = new MapperClassAnalyzer(basicInfo, basicInfo.originalReturnType(), mapperClass).checkReturnType();
       extractExpr = p -> CodeBlock.of("$N", p);
       constructorParamType = basicInfo.originalReturnType();
+      collector = Optional.empty();
     } catch (ValidationException e) {
-      LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
-      mapperType = new MapperClassAnalyzer(basicInfo, liftedType.liftedType(), mapperClass).checkReturnType();
-      extractExpr = liftedType.extractExpr();
-      constructorParamType = basicInfo.returnType();
+      try {
+        LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
+        mapperType = new MapperClassAnalyzer(basicInfo, liftedType.liftedType(), mapperClass).checkReturnType();
+        extractExpr = liftedType.extractExpr();
+        constructorParamType = basicInfo.returnType();
+        collector = Optional.empty();
+      } catch (ValidationException e1) {
+        Optional<TypeMirror> wrappedType = tool().getWrappedType(List.class, basicInfo.originalReturnType());
+        if (!wrappedType.isPresent()) {
+          throw e1;
+        }
+        mapperType = new MapperClassAnalyzer(basicInfo, wrappedType.get(), mapperClass).checkReturnType();
+        extractExpr = p -> CodeBlock.of("$N", p);
+        constructorParamType = basicInfo.returnType();
+        collector = Optional.of(new DefaultCollector(wrappedType.get()));
+      }
     }
     // TODO handle auto collector
-    return MapperCoercion.create(Optional.empty(), mapperType, basicInfo, extractExpr, constructorParamType);
+    return MapperCoercion.create(collector, mapperType, basicInfo, extractExpr, constructorParamType);
   }
 
   private Coercion handleRepeatableAutoMapper() {
