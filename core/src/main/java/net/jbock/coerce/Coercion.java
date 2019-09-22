@@ -7,7 +7,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
-import net.jbock.coerce.coercions.MapperCoercion;
+import net.jbock.coerce.coercions.ExplicitMapperCoercion;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.CustomCollector;
 import net.jbock.coerce.collector.DefaultCollector;
@@ -94,7 +94,7 @@ public final class Coercion {
     CustomCollector collector = (CustomCollector) collectorInfo;
     return CodeBlock.of("new $T$L",
         TypeTool.get().erasure(collector.collectorType()),
-        MapperCoercion.getTypeParameters(collector.solution(), collector.supplier()));
+        ExplicitMapperCoercion.getTypeParameters(collector.solution(), collector.supplier()));
   }
 
   public static class CollectorInfo {
