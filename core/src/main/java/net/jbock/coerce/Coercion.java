@@ -92,9 +92,10 @@ public final class Coercion {
       return CodeBlock.of("$T.toList()", Collectors.class);
     }
     CustomCollector collector = (CustomCollector) collectorInfo;
-    return CodeBlock.of("new $T$L",
+    return CodeBlock.of("new $T$L()$L",
         TypeTool.get().erasure(collector.collectorType()),
-        ExplicitMapperCoercion.getTypeParameters(collector.solution(), collector.supplier()));
+        ExplicitMapperCoercion.getTypeParameters(collector.solution()),
+        collector.supplier() ? ".get()" : "");
   }
 
   public static class CollectorInfo {

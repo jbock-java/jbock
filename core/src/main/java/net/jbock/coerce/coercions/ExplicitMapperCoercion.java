@@ -20,26 +20,16 @@ public final class ExplicitMapperCoercion extends CoercionFactory {
 
   @Override
   public CodeBlock createMapper(TypeMirror innerType) {
-    return CodeBlock.of("new $T$L",
+    return CodeBlock.of("new $T$L()$L",
         TypeTool.get().erasure(mapperType.mapperType()),
-        getTypeParameters(mapperType.solution(), mapperType.supplier()));
+        getTypeParameters(mapperType.solution()),
+        mapperType.supplier() ? ".get()" : "");
   }
 
   public static CodeBlock getTypeParameters(
-      List<TypeMirror> params,
-      boolean supplier) {
+      List<TypeMirror> params) {
     if (params.isEmpty()) {
-      if (!supplier) {
-        // new X();
-        return CodeBlock.of("()");
-      } else {
-        // new X().get();
-        return CodeBlock.of("().get()");
-      }
-    }
-    if (!supplier) {
-      // new X<>();
-      return CodeBlock.of("<>()");
+      return CodeBlock.of("");
     }
     CodeBlock.Builder code = CodeBlock.builder();
     // compiler can't handle new X<>().get();
@@ -52,7 +42,7 @@ public final class ExplicitMapperCoercion extends CoercionFactory {
         code.add(", ");
       }
     }
-    code.add(">().get()");
+    code.add(">");
     return code.build();
   }
 }
