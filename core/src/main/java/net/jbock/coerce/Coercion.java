@@ -7,9 +7,11 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.WildcardTypeName;
+import net.jbock.coerce.coercions.CoercionFactory;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.CustomCollector;
 import net.jbock.coerce.collector.DefaultCollector;
+import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
@@ -56,6 +58,27 @@ public final class Coercion {
     this.extractExpr = extractExpr;
     this.optional = optional;
   }
+
+  public static Coercion getCoercion(
+      CoercionFactory factory,
+      BasicInfo basicInfo,
+      Optional<AbstractCollector> collector,
+      MapperType mapperType,
+      Function<ParameterSpec, CodeBlock> extractExpr,
+      TypeMirror constructorParamType) {
+    TypeMirror innerType = factory.innerType(mapperType);
+    CodeBlock mapExpr = CodeBlock.of("$L", factory.mapperParamName(basicInfo.paramName()));
+    CodeBlock initMapper = factory.initMapper(mapperType, innerType, basicInfo.paramName());
+    return create(
+        mapExpr,
+        initMapper,
+        collector,
+        constructorParamType,
+        basicInfo,
+        mapperType.isOptional(),
+        extractExpr);
+  }
+
 
   public static Coercion create(
       CodeBlock mapExpr,
