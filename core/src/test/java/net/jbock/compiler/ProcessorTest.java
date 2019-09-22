@@ -138,7 +138,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Add a type parameter");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test
@@ -154,7 +154,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Add a type parameter");
+        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
   }
 
   @Test

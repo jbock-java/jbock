@@ -80,7 +80,7 @@ public final class Coercion {
       AbstractCollector collectorInfo) {
     TypeName t = TypeName.get(collectorInfo.inputType());
     TypeName a = WildcardTypeName.subtypeOf(Object.class);
-    TypeName r = TypeName.get(basicInfo.returnType());
+    TypeName r = TypeName.get(basicInfo.originalReturnType());
     return ParameterSpec.builder(ParameterizedTypeName.get(
         ClassName.get(Collector.class), t, a, r),
         basicInfo.paramName() + "Collector")

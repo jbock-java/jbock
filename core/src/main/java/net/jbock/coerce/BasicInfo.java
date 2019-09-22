@@ -57,12 +57,12 @@ public class BasicInfo {
   }
 
   // lifted return type of the parameter method
-  public TypeMirror returnType() {
+  TypeMirror returnType() {
     return attributes.liftedType();
   }
 
   // return type of the parameter method
-  public TypeMirror originalReturnType() {
+  TypeMirror originalReturnType() {
     return sourceMethod.getReturnType();
   }
 
@@ -76,10 +76,6 @@ public class BasicInfo {
 
   public TypeTool tool() {
     return tool;
-  }
-
-  public Optional<TypeMirror> optionalInfo() {
-    return attributes.optionalInfo();
   }
 
   Optional<TypeElement> mapperClass() {
