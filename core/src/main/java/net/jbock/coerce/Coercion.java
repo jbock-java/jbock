@@ -59,7 +59,7 @@ public final class Coercion {
     this.optional = optional;
   }
 
-  public static Coercion getCoercion(
+  static Coercion getCoercion(
       CoercionFactory factory,
       BasicInfo basicInfo,
       Optional<AbstractCollector> collector,
@@ -69,25 +69,6 @@ public final class Coercion {
     TypeMirror innerType = factory.innerType(mapperType);
     CodeBlock mapExpr = CodeBlock.of("$L", factory.mapperParamName(basicInfo.paramName()));
     CodeBlock initMapper = factory.initMapper(mapperType, innerType, basicInfo.paramName());
-    return create(
-        mapExpr,
-        initMapper,
-        collector,
-        constructorParamType,
-        basicInfo,
-        mapperType.isOptional(),
-        extractExpr);
-  }
-
-
-  public static Coercion create(
-      CodeBlock mapExpr,
-      CodeBlock initMapper,
-      Optional<AbstractCollector> collector,
-      TypeMirror constructorParamType,
-      BasicInfo basicInfo,
-      boolean optional,
-      Function<ParameterSpec, CodeBlock> extractExpr) {
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     Optional<CollectorInfo> collectorInfo = collector.map(c -> {
@@ -96,8 +77,9 @@ public final class Coercion {
           CodeBlock.of("$N", p));
     });
     return new Coercion(collectorInfo, mapExpr,
-        initMapper, constructorParam, basicInfo.fieldSpec(), extractExpr, optional);
+        initMapper, constructorParam, basicInfo.fieldSpec(), extractExpr, mapperType.isOptional());
   }
+
 
   private static ParameterSpec collectorParam(
       BasicInfo basicInfo,
