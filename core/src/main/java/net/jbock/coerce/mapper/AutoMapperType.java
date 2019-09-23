@@ -23,6 +23,7 @@ public class AutoMapperType extends MapperType {
     return TypeTool.get().stringFunction(innerType);
   }
 
+  @Override
   public TypeMirror innerType() {
     return innerType;
   }

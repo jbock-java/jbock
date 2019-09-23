@@ -25,6 +25,7 @@ public class ReferenceMapperType extends MapperType {
     return mapperClass.asType();
   }
 
+  @Override
   public TypeMirror innerType() {
     return innerType;
   }

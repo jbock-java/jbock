@@ -34,11 +34,13 @@ public abstract class MapperType {
     return new AutoMapperType(innerType, createExpression, optional);
   }
 
+  public abstract TypeMirror mapperType();
+
+  public abstract TypeMirror innerType();
+
   public boolean isOptional() {
     return optional;
   }
-
-  public abstract TypeMirror mapperType();
 
   public boolean supplier() {
     return supplier;
