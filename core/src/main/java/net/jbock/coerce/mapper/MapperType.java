@@ -1,7 +1,6 @@
 package net.jbock.coerce.mapper;
 
 import com.squareup.javapoet.CodeBlock;
-import net.jbock.coerce.coercions.CoercionFactory;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
