@@ -39,6 +39,8 @@ public abstract class MapperType {
 
   public abstract TypeMirror innerType();
 
+  public abstract CodeBlock mapExpr(TypeMirror innerType);
+
   public boolean isOptional() {
     return optional;
   }

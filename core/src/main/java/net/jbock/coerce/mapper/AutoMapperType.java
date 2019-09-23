@@ -29,7 +29,8 @@ public class AutoMapperType extends MapperType {
     return innerType;
   }
 
-  public CodeBlock createExpression() {
+  @Override
+  public CodeBlock mapExpr(TypeMirror innerType) {
     return factory.createMapper(innerType);
   }
 }

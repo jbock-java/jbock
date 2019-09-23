@@ -6,7 +6,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.coercions.CoercionFactory;
 import net.jbock.coerce.coercions.EnumCoercion;
-import net.jbock.coerce.coercions.ExplicitMapperCoercion;
 import net.jbock.coerce.coercions.StandardCoercions;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
@@ -115,7 +114,7 @@ public class CoercionProvider {
       throw basicInfo.asValidationException("Unknown parameter type. Define a custom mapper.");
     }
     TypeMirror constructorParamType = LiftedType.lift(basicInfo.originalReturnType(), tool()).liftedType();
-    return Coercion.getCoercion(factory.get(), basicInfo, collector, mapperType, extractExpr, constructorParamType);
+    return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType);
   }
 
   // TODO refactoring
@@ -147,8 +146,7 @@ public class CoercionProvider {
         collector = Optional.of(new DefaultCollector(wrappedType.get()));
       }
     }
-    return Coercion.getCoercion(new ExplicitMapperCoercion(mapperType),
-        basicInfo, collector, mapperType, extractExpr, constructorParamType);
+    return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType);
   }
 
   private Coercion handleRepeatableAutoMapper() {
@@ -158,7 +156,7 @@ public class CoercionProvider {
     MapperType mapperType = MapperType.create(collectorInfo.inputType(), factory, true);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
-    return Coercion.getCoercion(factory, basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
+    return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
   }
 
   private Coercion handleRepeatableExplicitMapper(TypeElement mapperClass) {
@@ -166,8 +164,7 @@ public class CoercionProvider {
     ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
-    return Coercion.getCoercion(new ExplicitMapperCoercion(mapperType),
-        basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
+    return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
   }
 
   private Optional<CoercionFactory> findCoercion(TypeMirror innerType) {

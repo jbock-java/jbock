@@ -4,7 +4,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.coerce.coercions.CoercionFactory;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.mapper.MapperType;
 
@@ -45,14 +44,13 @@ public final class Coercion {
   }
 
   static Coercion getCoercion(
-      CoercionFactory factory,
       BasicInfo basicInfo,
       Optional<AbstractCollector> collector,
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType) {
     TypeMirror innerType = mapperType.innerType();
-    CodeBlock mapExpr = factory.initMapper(mapperType, innerType);
+    CodeBlock mapExpr = mapperType.mapExpr(innerType);
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     Optional<CodeBlock> collectorInfo = collector.map(AbstractCollector::createCollector);

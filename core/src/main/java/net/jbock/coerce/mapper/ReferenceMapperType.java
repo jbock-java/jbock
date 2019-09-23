@@ -1,8 +1,13 @@
 package net.jbock.coerce.mapper;
 
+import com.squareup.javapoet.CodeBlock;
+import net.jbock.compiler.TypeTool;
+
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
+
+import static net.jbock.compiler.Util.getTypeParameterList;
 
 public class ReferenceMapperType extends MapperType {
 
@@ -28,5 +33,13 @@ public class ReferenceMapperType extends MapperType {
   @Override
   public TypeMirror innerType() {
     return innerType;
+  }
+
+  @Override
+  public CodeBlock mapExpr(TypeMirror innerType) {
+    return CodeBlock.of("new $T$L()$L",
+        TypeTool.get().erasure(mapperClass.asType()),
+        getTypeParameterList(solution()),
+        supplier() ? ".get()" : "");
   }
 }
