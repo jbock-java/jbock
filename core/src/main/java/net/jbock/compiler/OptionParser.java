@@ -23,7 +23,7 @@ final class OptionParser {
 
   static TypeSpec define(Context context) {
     CodeBlock defaultImpl = CodeBlock.builder()
-        .addStatement("throw new $T($S)", UnsupportedOperationException.class, "Oh no!")
+        .addStatement("throw new $T()", AssertionError.class)
         .build();
     FieldSpec option = FieldSpec.builder(context.optionType(), "option", FINAL).build();
     return TypeSpec.classBuilder(context.optionParserType())

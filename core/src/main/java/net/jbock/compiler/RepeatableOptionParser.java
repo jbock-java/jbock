@@ -12,6 +12,8 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
 /**
  * Generates the RepeatableOptionParser class.
@@ -24,12 +26,12 @@ final class RepeatableOptionParser {
         .superclass(context.optionParserType())
         .addMethod(readMethod(values))
         .addMethod(MethodSpec.methodBuilder("values")
+            .addAnnotation(Override.class)
             .returns(LIST_OF_STRING)
             .beginControlFlow("if ($N == null)", values)
             .addStatement("return $T.emptyList()", Collections.class)
             .endControlFlow()
             .addStatement("return $N", values)
-            .addAnnotation(Override.class)
             .build())
         .addField(values)
         .addMethod(constructor(context))
@@ -45,8 +47,8 @@ final class RepeatableOptionParser {
   }
 
   private static MethodSpec readMethod(FieldSpec values) {
-    ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it));
 
