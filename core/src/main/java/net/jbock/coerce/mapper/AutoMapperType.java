@@ -1,20 +1,19 @@
 package net.jbock.coerce.mapper;
 
 import com.squareup.javapoet.CodeBlock;
-import net.jbock.coerce.coercions.CoercionFactory;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Collections;
 
 public class AutoMapperType extends MapperType {
 
-  private final CoercionFactory factory;
+  private final CodeBlock mapExpr;
 
   private final TypeMirror innerType; // what the function returns
 
-  AutoMapperType(TypeMirror innerType, CoercionFactory factory, boolean optional) {
+  AutoMapperType(TypeMirror innerType, CodeBlock mapExpr, boolean optional) {
     super(false, Collections.emptyList(), optional);
-    this.factory = factory;
+    this.mapExpr = mapExpr;
     this.innerType = innerType;
   }
 
@@ -25,6 +24,6 @@ public class AutoMapperType extends MapperType {
 
   @Override
   public CodeBlock mapExpr() {
-    return factory.mapExpr();
+    return mapExpr;
   }
 }

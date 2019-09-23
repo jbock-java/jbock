@@ -5,7 +5,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.coercions.CoercionFactory;
-import net.jbock.coerce.coercions.EnumCoercion;
 import net.jbock.coerce.coercions.StandardCoercions;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
@@ -83,30 +82,30 @@ public class CoercionProvider {
 
   // TODO refactoring
   private Coercion handleAutoMapperNotRepeatable() {
-    Optional<CoercionFactory> factory = findCoercion(tool().box(basicInfo.originalReturnType()));
+    Optional<CodeBlock> mapExpr = findMapExpr(tool().box(basicInfo.originalReturnType()));
     Function<ParameterSpec, CodeBlock> extractExpr;
     Optional<TypeMirror> listInfo = tool().unwrap(List.class, basicInfo.originalReturnType());
     Optional<AbstractCollector> collector;
     Optional<TypeMirror> optionalInfo = tool().liftingUnwrap(basicInfo.originalReturnType());
     MapperType mapperType = null;
     if (optionalInfo.isPresent()) {
-      factory = findCoercion(optionalInfo.get());
+      mapExpr = findMapExpr(optionalInfo.get());
       extractExpr = LiftedType.lift(basicInfo.originalReturnType(), tool()).extractExpr();
-      if (factory.isPresent()) {
-        mapperType = MapperType.create(optionalInfo.get(), factory.get(), true);
+      if (mapExpr.isPresent()) {
+        mapperType = MapperType.create(optionalInfo.get(), mapExpr.get(), true);
       }
       collector = Optional.empty();
     } else if (listInfo.isPresent()) {
-      factory = findCoercion(listInfo.get());
+      mapExpr = findMapExpr(listInfo.get());
       extractExpr = p -> CodeBlock.of("$N", p);
-      if (factory.isPresent()) {
-        mapperType = MapperType.create(listInfo.get(), factory.get(), false);
+      if (mapExpr.isPresent()) {
+        mapperType = MapperType.create(listInfo.get(), mapExpr.get(), false);
       }
       collector = Optional.of(new DefaultCollector(listInfo.get()));
     } else {
       collector = Optional.empty();
-      if (factory.isPresent()) {
-        mapperType = MapperType.create(tool().box(basicInfo.originalReturnType()), factory.get(), false);
+      if (mapExpr.isPresent()) {
+        mapperType = MapperType.create(tool().box(basicInfo.originalReturnType()), mapExpr.get(), false);
       }
       extractExpr = p -> CodeBlock.of("$N", p);
     }
@@ -151,9 +150,9 @@ public class CoercionProvider {
 
   private Coercion handleRepeatableAutoMapper() {
     AbstractCollector collectorInfo = collectorInfo();
-    CoercionFactory factory = findCoercion(collectorInfo.inputType())
+    CodeBlock mapExpr = findMapExpr(collectorInfo.inputType())
         .orElseThrow(() -> basicInfo.asValidationException("Unknown parameter type. Define a custom mapper."));
-    MapperType mapperType = MapperType.create(collectorInfo.inputType(), factory, true);
+    MapperType mapperType = MapperType.create(collectorInfo.inputType(), mapExpr, true);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
     return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
@@ -167,16 +166,15 @@ public class CoercionProvider {
     return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
   }
 
-  private Optional<CoercionFactory> findCoercion(TypeMirror innerType) {
+  private Optional<CodeBlock> findMapExpr(TypeMirror innerType) {
     CoercionFactory standardCoercion = StandardCoercions.get(tool(), tool().box(innerType));
     if (standardCoercion != null) {
-      return Optional.of(standardCoercion);
+      return Optional.of(standardCoercion.mapExpr());
     }
-    boolean isEnum = isEnumType(innerType);
-    if (!isEnum) {
-      return Optional.empty();
+    if (isEnumType(innerType)) {
+      return Optional.of(CodeBlock.of("$T::valueOf", innerType));
     }
-    return Optional.of(EnumCoercion.create(innerType));
+    return Optional.empty();
   }
 
   private boolean isEnumType(TypeMirror mirror) {

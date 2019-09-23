@@ -31,8 +31,8 @@ public abstract class MapperType {
     return new ReferenceMapperType(mapperClass, supplier, solution, optional, innerType);
   }
 
-  public static AutoMapperType create(TypeMirror innerType, CoercionFactory factory, boolean optional) {
-    return new AutoMapperType(innerType, factory, optional);
+  public static AutoMapperType create(TypeMirror innerType, CodeBlock mapExpr, boolean optional) {
+    return new AutoMapperType(innerType, mapExpr, optional);
   }
 
   public abstract TypeMirror innerType();
