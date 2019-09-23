@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.stream.Stream;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
@@ -27,6 +28,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Util.optionalOf;
 
@@ -387,16 +389,16 @@ final class Option {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("values");
 
     spec.beginControlFlow("if (!$N.isPresent())", positionalIndexField)
-        .addStatement("return $T.emptyList()", Collections.class)
+        .addStatement("return $T.empty()", Stream.class)
         .endControlFlow();
 
     spec.beginControlFlow("if ($N.getAsInt() >= $N.size())", positionalIndexField, positionalParameter)
-        .addStatement("return $T.emptyList()", Collections.class)
+        .addStatement("return $T.empty()", Stream.class)
         .endControlFlow();
 
-    spec.addStatement("return $N.subList($N.getAsInt(), $N.size())", positionalParameter, positionalIndexField, positionalParameter);
+    spec.addStatement("return $N.subList($N.getAsInt(), $N.size()).stream()", positionalParameter, positionalIndexField, positionalParameter);
     return spec.addParameter(positionalParameter)
-        .returns(LIST_OF_STRING).build();
+        .returns(STREAM_OF_STRING).build();
   }
 
   private MethodSpec positionalValueMethod() {

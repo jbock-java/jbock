@@ -273,9 +273,6 @@ final class Helper {
 
   private CodeBlock extractExpression(Param param) {
     CodeBlock.Builder builder = param.paramType.extractExpression(this, param).toBuilder();
-    if (param.repeatable()) {
-      builder.add(".stream()");
-    }
     if (!param.isFlag()) {
       builder.add(".map($L)", param.coercion().mapExpr());
     }

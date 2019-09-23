@@ -6,12 +6,13 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
-import java.util.Collections;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
@@ -27,11 +28,11 @@ final class RepeatableOptionParser {
         .addMethod(readMethod(values))
         .addMethod(MethodSpec.methodBuilder("values")
             .addAnnotation(Override.class)
-            .returns(LIST_OF_STRING)
+            .returns(STREAM_OF_STRING)
             .beginControlFlow("if ($N == null)", values)
-            .addStatement("return $T.emptyList()", Collections.class)
+            .addStatement("return $T.empty()", Stream.class)
             .endControlFlow()
-            .addStatement("return $N", values)
+            .addStatement("return $N.stream()", values)
             .build())
         .addField(values)
         .addMethod(constructor(context))

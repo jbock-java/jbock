@@ -8,6 +8,7 @@ import com.squareup.javapoet.TypeName;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public final class Constants {
 
@@ -17,6 +18,9 @@ public final class Constants {
 
   static final ParameterizedTypeName LIST_OF_STRING = ParameterizedTypeName.get(
       ClassName.get(List.class), STRING);
+
+  static final ParameterizedTypeName STREAM_OF_STRING = ParameterizedTypeName.get(
+      ClassName.get(Stream.class), STRING);
 
   static final ParameterizedTypeName STRING_STRING_MAP = ParameterizedTypeName.get(
       ClassName.get(Map.class), STRING, STRING);
