@@ -94,20 +94,20 @@ public class CoercionProvider {
       factory = findCoercion(optionalInfo.get());
       extractExpr = LiftedType.lift(basicInfo.originalReturnType(), tool()).extractExpr();
       if (factory.isPresent()) {
-        mapperType = MapperType.create(optionalInfo.get(), factory.get().createMapper(optionalInfo.get()), true);
+        mapperType = MapperType.create(optionalInfo.get(), factory.get(), true);
       }
       collector = Optional.empty();
     } else if (listInfo.isPresent()) {
       factory = findCoercion(listInfo.get());
       extractExpr = p -> CodeBlock.of("$N", p);
       if (factory.isPresent()) {
-        mapperType = MapperType.create(listInfo.get(), factory.get().createMapper(listInfo.get()), false);
+        mapperType = MapperType.create(listInfo.get(), factory.get(), false);
       }
       collector = Optional.of(new DefaultCollector(listInfo.get()));
     } else {
       collector = Optional.empty();
       if (factory.isPresent()) {
-        mapperType = MapperType.create(tool().box(basicInfo.originalReturnType()), factory.get().createMapper(tool().box(basicInfo.originalReturnType())), false);
+        mapperType = MapperType.create(tool().box(basicInfo.originalReturnType()), factory.get(), false);
       }
       extractExpr = p -> CodeBlock.of("$N", p);
     }
@@ -153,12 +153,12 @@ public class CoercionProvider {
 
   private Coercion handleRepeatableAutoMapper() {
     AbstractCollector collectorInfo = collectorInfo();
-    CoercionFactory coercion = findCoercion(collectorInfo.inputType())
+    CoercionFactory factory = findCoercion(collectorInfo.inputType())
         .orElseThrow(() -> basicInfo.asValidationException("Unknown parameter type. Define a custom mapper."));
-    MapperType mapperType = MapperType.create(collectorInfo.inputType(), coercion.createMapper(collectorInfo.inputType()), true);
+    MapperType mapperType = MapperType.create(collectorInfo.inputType(), factory, true);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
-    return Coercion.getCoercion(coercion, basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
+    return Coercion.getCoercion(factory, basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
   }
 
   private Coercion handleRepeatableExplicitMapper(TypeElement mapperClass) {

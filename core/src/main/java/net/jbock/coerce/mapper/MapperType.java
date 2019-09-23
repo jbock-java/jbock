@@ -1,6 +1,7 @@
 package net.jbock.coerce.mapper;
 
 import com.squareup.javapoet.CodeBlock;
+import net.jbock.coerce.coercions.CoercionFactory;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -30,8 +31,8 @@ public abstract class MapperType {
     return new ReferenceMapperType(mapperClass, supplier, solution, optional, innerType);
   }
 
-  public static AutoMapperType create(TypeMirror innerType, CodeBlock createExpression, boolean optional) {
-    return new AutoMapperType(innerType, createExpression, optional);
+  public static AutoMapperType create(TypeMirror innerType, CoercionFactory factory, boolean optional) {
+    return new AutoMapperType(innerType, factory, optional);
   }
 
   public abstract TypeMirror mapperType();
