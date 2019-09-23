@@ -35,11 +35,9 @@ public abstract class MapperType {
     return new AutoMapperType(innerType, factory, optional);
   }
 
-  public abstract TypeMirror mapperType();
-
   public abstract TypeMirror innerType();
 
-  public abstract CodeBlock mapExpr(TypeMirror innerType);
+  public abstract CodeBlock mapExpr();
 
   public boolean isOptional() {
     return optional;

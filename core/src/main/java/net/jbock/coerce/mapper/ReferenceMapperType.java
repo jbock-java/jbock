@@ -26,17 +26,12 @@ public class ReferenceMapperType extends MapperType {
   }
 
   @Override
-  public TypeMirror mapperType() {
-    return mapperClass.asType();
-  }
-
-  @Override
   public TypeMirror innerType() {
     return innerType;
   }
 
   @Override
-  public CodeBlock mapExpr(TypeMirror innerType) {
+  public CodeBlock mapExpr() {
     return CodeBlock.of("new $T$L()$L",
         TypeTool.get().erasure(mapperClass.asType()),
         getTypeParameterList(solution()),

@@ -2,27 +2,24 @@ package net.jbock.coerce.coercions;
 
 import com.squareup.javapoet.CodeBlock;
 
-import javax.lang.model.type.TypeMirror;
-import java.util.function.Function;
-
 class SimpleCoercion extends CoercionFactory {
 
-  private final Function<TypeMirror, CodeBlock> createMapper;
+  private final CodeBlock mapExpr;
 
-  private SimpleCoercion(Function<TypeMirror, CodeBlock> createMapper) {
-    this.createMapper = createMapper;
+  private SimpleCoercion(CodeBlock mapExpr) {
+    this.mapExpr = mapExpr;
   }
 
-  static SimpleCoercion create(String createFromString) {
-    return new SimpleCoercion(type -> CodeBlock.of("$T::" + createFromString, type));
+  static SimpleCoercion create(Class<?> clasz, String createFromString) {
+    return new SimpleCoercion(CodeBlock.of("$T::" + createFromString, clasz));
   }
 
-  static SimpleCoercion create(Function<TypeMirror, CodeBlock> createMapper) {
-    return new SimpleCoercion(createMapper);
+  static SimpleCoercion create(CodeBlock mapExpr) {
+    return new SimpleCoercion(mapExpr);
   }
 
   @Override
-  public final CodeBlock createMapper(TypeMirror innerType) {
-    return createMapper.apply(innerType);
+  public final CodeBlock mapExpr() {
+    return mapExpr;
   }
 }

@@ -49,8 +49,7 @@ public final class Coercion {
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType) {
-    TypeMirror innerType = mapperType.innerType();
-    CodeBlock mapExpr = mapperType.mapExpr(innerType);
+    CodeBlock mapExpr = mapperType.mapExpr();
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     Optional<CodeBlock> collectorInfo = collector.map(AbstractCollector::createCollector);

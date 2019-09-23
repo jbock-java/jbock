@@ -176,7 +176,7 @@ public class CoercionProvider {
     if (!isEnum) {
       return Optional.empty();
     }
-    return Optional.of(EnumCoercion.create());
+    return Optional.of(EnumCoercion.create(innerType));
   }
 
   private boolean isEnumType(TypeMirror mirror) {

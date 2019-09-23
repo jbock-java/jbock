@@ -6,12 +6,18 @@ import javax.lang.model.type.TypeMirror;
 
 public final class EnumCoercion extends CoercionFactory {
 
-  @Override
-  public final CodeBlock createMapper(TypeMirror innerType) {
-    return CodeBlock.of("$T::valueOf", innerType);
+  private final CodeBlock mapExpr;
+
+  private EnumCoercion(CodeBlock mapExpr) {
+    this.mapExpr = mapExpr;
   }
 
-  public static EnumCoercion create() {
-    return new EnumCoercion();
+  @Override
+  public final CodeBlock mapExpr() {
+    return mapExpr;
+  }
+
+  public static EnumCoercion create(TypeMirror enumType) {
+    return new EnumCoercion(CodeBlock.of("$T::valueOf", enumType));
   }
 }
