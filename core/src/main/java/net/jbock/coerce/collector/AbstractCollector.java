@@ -1,5 +1,7 @@
 package net.jbock.coerce.collector;
 
+import com.squareup.javapoet.CodeBlock;
+
 import javax.lang.model.type.TypeMirror;
 
 public abstract class AbstractCollector {
@@ -15,4 +17,6 @@ public abstract class AbstractCollector {
   public TypeMirror inputType() {
     return inputType;
   }
+
+  public abstract CodeBlock createCollector();
 }

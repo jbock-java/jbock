@@ -262,13 +262,6 @@ final class Helper {
       });
     }
 
-    for (Param param : context.parameters) {
-      param.coercion().collectorInfo().ifPresent(c -> {
-        ParameterSpec collectorParam = c.collectorParam();
-        spec.addStatement("$T $N = $L", collectorParam.type, collectorParam, c.initCollector());
-      });
-    }
-
     if (context.hasPositional()) {
       spec.addParameter(positionalParameter);
     }
@@ -287,11 +280,11 @@ final class Helper {
       builder.add(".map($L)", param.coercion().mapExpr());
     }
     if (param.repeatable()) {
-      param.coercion().collectorInfo().ifPresent(c ->
-          builder.add(".collect($L)", c.collectExpr()));
+      param.coercion().collectorInfo().ifPresent(collectExpr ->
+          builder.add(".collect($L)", collectExpr));
     }
     if (param.required()) {
-      builder.add("\n.orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
+      builder.add(".orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
           missingRequiredOptionMessage(param, context.optionType()));
     }
     return builder.build();

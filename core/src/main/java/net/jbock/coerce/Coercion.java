@@ -1,30 +1,20 @@
 package net.jbock.coerce;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.WildcardTypeName;
 import net.jbock.coerce.coercions.CoercionFactory;
 import net.jbock.coerce.collector.AbstractCollector;
-import net.jbock.coerce.collector.CustomCollector;
-import net.jbock.coerce.collector.DefaultCollector;
 import net.jbock.coerce.mapper.MapperType;
-import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
-
-import static net.jbock.compiler.Util.getTypeParameterList;
 
 public final class Coercion {
 
-  private final Optional<CollectorInfo> collectorInfo;
+  private final Optional<CodeBlock> collectExpr;
 
   // helper.build
   private final CodeBlock mapExpr;
@@ -35,18 +25,18 @@ public final class Coercion {
   // impl
   private final FieldSpec field;
 
-  private final Function<ParameterSpec, CodeBlock> extractExpr;
+  private final CodeBlock extractExpr;
 
   private final boolean optional;
 
   Coercion(
-      Optional<CollectorInfo> collectorInfo,
+      Optional<CodeBlock> collectExpr,
       CodeBlock mapExpr,
       ParameterSpec constructorParam,
       FieldSpec field,
-      Function<ParameterSpec, CodeBlock> extractExpr,
+      CodeBlock extractExpr,
       boolean optional) {
-    this.collectorInfo = collectorInfo;
+    this.collectExpr = collectExpr;
     this.mapExpr = mapExpr;
     this.constructorParam = constructorParam;
     this.field = field;
@@ -65,62 +55,9 @@ public final class Coercion {
     CodeBlock mapExpr = factory.initMapper(mapperType, innerType, basicInfo.paramName());
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
-    Optional<CollectorInfo> collectorInfo = collector.map(c -> {
-      ParameterSpec p = collectorParam(basicInfo, c);
-      return new CollectorInfo(Coercion.createCollector(c), p,
-          CodeBlock.of("$N", p));
-    });
+    Optional<CodeBlock> collectorInfo = collector.map(AbstractCollector::createCollector);
     return new Coercion(collectorInfo, mapExpr,
-        constructorParam, basicInfo.fieldSpec(), extractExpr, mapperType.isOptional());
-  }
-
-
-  private static ParameterSpec collectorParam(
-      BasicInfo basicInfo,
-      AbstractCollector collectorInfo) {
-    TypeName t = TypeName.get(collectorInfo.inputType());
-    TypeName a = WildcardTypeName.subtypeOf(Object.class);
-    TypeName r = TypeName.get(basicInfo.originalReturnType());
-    return ParameterSpec.builder(ParameterizedTypeName.get(
-        ClassName.get(Collector.class), t, a, r),
-        basicInfo.paramName() + "Collector")
-        .build();
-  }
-
-  private static CodeBlock createCollector(AbstractCollector collectorInfo) {
-    if (collectorInfo instanceof DefaultCollector) {
-      return CodeBlock.of("$T.toList()", Collectors.class);
-    }
-    CustomCollector collector = (CustomCollector) collectorInfo;
-    return CodeBlock.of("new $T$L()$L",
-        TypeTool.get().erasure(collector.collectorType()),
-        getTypeParameterList(collector.solution()),
-        collector.supplier() ? ".get()" : "");
-  }
-
-  public static class CollectorInfo {
-
-    private final CodeBlock initCollector;
-    private final ParameterSpec collectorParam;
-    private final CodeBlock collectExpr;
-
-    CollectorInfo(CodeBlock initCollector, ParameterSpec collectorParam, CodeBlock collectExpr) {
-      this.initCollector = initCollector;
-      this.collectorParam = collectorParam;
-      this.collectExpr = collectExpr;
-    }
-
-    public CodeBlock initCollector() {
-      return initCollector;
-    }
-
-    public ParameterSpec collectorParam() {
-      return collectorParam;
-    }
-
-    public CodeBlock collectExpr() {
-      return collectExpr;
-    }
+        constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), mapperType.isOptional());
   }
 
   /**
@@ -140,11 +77,11 @@ public final class Coercion {
   }
 
   public CodeBlock extractExpr() {
-    return extractExpr.apply(constructorParam);
+    return extractExpr;
   }
 
-  public Optional<CollectorInfo> collectorInfo() {
-    return collectorInfo;
+  public Optional<CodeBlock> collectorInfo() {
+    return collectExpr;
   }
 
   public boolean optional() {
@@ -152,6 +89,6 @@ public final class Coercion {
   }
 
   public boolean repeatable() {
-    return collectorInfo.isPresent();
+    return collectExpr.isPresent();
   }
 }

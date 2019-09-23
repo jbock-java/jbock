@@ -1,8 +1,13 @@
 package net.jbock.coerce.collector;
 
+import com.squareup.javapoet.CodeBlock;
+import net.jbock.compiler.TypeTool;
+
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
+
+import static net.jbock.compiler.Util.getTypeParameterList;
 
 /**
  * Custom collector class specified.
@@ -34,5 +39,13 @@ public class CustomCollector extends AbstractCollector {
 
   public List<TypeMirror> solution() {
     return solution;
+  }
+
+  @Override
+  public CodeBlock createCollector() {
+    return CodeBlock.of("new $T$L()$L",
+        TypeTool.get().erasure(collectorType()),
+        getTypeParameterList(solution()),
+        supplier() ? ".get()" : "");
   }
 }
