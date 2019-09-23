@@ -80,7 +80,7 @@ public final class Coercion {
     return extractExpr;
   }
 
-  public Optional<CodeBlock> collectorInfo() {
+  public Optional<CodeBlock> collectExpr() {
     return collectExpr;
   }
 

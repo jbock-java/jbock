@@ -279,10 +279,9 @@ final class Helper {
     if (!param.isFlag()) {
       builder.add(".map($L)", param.coercion().mapExpr());
     }
-    if (param.repeatable()) {
-      param.coercion().collectorInfo().ifPresent(collectExpr ->
-          builder.add(".collect($L)", collectExpr));
-    }
+    param.coercion().collectExpr().map(collectExpr ->
+        CodeBlock.of(".collect($L)", collectExpr))
+        .ifPresent(builder::add);
     if (param.required()) {
       builder.add(".orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
           missingRequiredOptionMessage(param, context.optionType()));
