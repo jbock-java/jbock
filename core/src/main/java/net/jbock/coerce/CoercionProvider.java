@@ -36,7 +36,6 @@ public class CoercionProvider {
   public static Coercion flagCoercion(ExecutableElement sourceMethod, ParamName paramName) {
     return new Coercion(
         Optional.empty(),
-        CodeBlock.of("$T.identity()", Function.class),
         CodeBlock.of(""),
         ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),

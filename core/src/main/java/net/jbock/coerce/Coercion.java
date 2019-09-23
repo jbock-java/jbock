@@ -29,9 +29,6 @@ public final class Coercion {
   // helper.build
   private final CodeBlock mapExpr;
 
-  // helper.build
-  private final CodeBlock initMapper;
-
   // impl constructor param
   private final ParameterSpec constructorParam;
 
@@ -45,14 +42,12 @@ public final class Coercion {
   Coercion(
       Optional<CollectorInfo> collectorInfo,
       CodeBlock mapExpr,
-      CodeBlock initMapper,
       ParameterSpec constructorParam,
       FieldSpec field,
       Function<ParameterSpec, CodeBlock> extractExpr,
       boolean optional) {
     this.collectorInfo = collectorInfo;
     this.mapExpr = mapExpr;
-    this.initMapper = initMapper;
     this.constructorParam = constructorParam;
     this.field = field;
     this.extractExpr = extractExpr;
@@ -67,8 +62,7 @@ public final class Coercion {
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType) {
     TypeMirror innerType = factory.innerType(mapperType);
-    CodeBlock mapExpr = CodeBlock.of("$L", factory.mapperParamName(basicInfo.paramName()));
-    CodeBlock initMapper = factory.initMapper(mapperType, innerType, basicInfo.paramName());
+    CodeBlock mapExpr = factory.initMapper(mapperType, innerType, basicInfo.paramName());
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     Optional<CollectorInfo> collectorInfo = collector.map(c -> {
@@ -77,7 +71,7 @@ public final class Coercion {
           CodeBlock.of("$N", p));
     });
     return new Coercion(collectorInfo, mapExpr,
-        initMapper, constructorParam, basicInfo.fieldSpec(), extractExpr, mapperType.isOptional());
+        constructorParam, basicInfo.fieldSpec(), extractExpr, mapperType.isOptional());
   }
 
 
@@ -135,10 +129,6 @@ public final class Coercion {
    */
   public CodeBlock mapExpr() {
     return mapExpr;
-  }
-
-  public CodeBlock initMapper() {
-    return initMapper;
   }
 
   public ParameterSpec constructorParam() {
