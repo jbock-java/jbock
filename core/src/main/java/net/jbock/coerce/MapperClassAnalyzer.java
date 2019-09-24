@@ -72,10 +72,6 @@ final class MapperClassAnalyzer {
       }
     }
     if (!r_result.isPresent()) {
-      r_result = tool().unify(originalReturnType, tool().optionalOf(r));
-      optional = true;
-    }
-    if (!r_result.isPresent()) {
       return Either.right(failure(String.format("The mapper should return %s but returns %s", originalReturnType, r)));
     }
     Either<ReferenceMapperType, String> solve = new Solver(functionType, t_result.get(), r_result.get(), functionType.mapTypevars(r_result.get()), optional).solve();
