@@ -26,12 +26,10 @@ public @interface PositionalParameter {
 
   /**
    * <p>The parameter position in the sequence of all positional parameters.
-   * Lower order parameters come first.</p>
+   * The lowest position defines the first positional parameter.</p>
    *
    * <ul>
-   * <li>Two parameters must have different position if they are either both required or
-   * both optional.</li>
-   * <li>Gaps in the position numbers are allowed. Negative numbers are also allowed.</li>
+   * <li>Gaps in the positions are allowed. Negative numbers are also allowed.</li>
    * <li>Required parameters must have the lowest positions.</li>
    * <li>There can only be one {@link #repeatable()} positional parameter, and it must have the highest position.</li>
    * </ul>

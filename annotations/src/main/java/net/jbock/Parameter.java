@@ -60,13 +60,14 @@ public @interface Parameter {
    * The mapper is a either a {@link java.util.function.Function Function&lt;String, X&gt;}
    * or a {@link java.util.function.Supplier Supplier} that returns such a function.
    * The return value {@code X} is called the <em>mapper type</em>.
-   * The parameter method must return {@code X}, or {@code Optional<X>} if the
-   * parameter is {@link #optional()}, or {@code List<X>} if the parameter is
-   * {@link #repeatable()}, unless a custom collector is also used.
+   * The parameter method must return {@code X}, or {@code Optional<X>} for an
+   * optional parameter. If the parameter method returns {@code List<X>},
+   * then the parameter is treated as repeatable, even if no
+   * {@link #collectedBy() Collector} is defined.
    * </p>
    *
    * <p>
-   * For example, the following mapper parses and validates a positive number:
+   * For example, the following mapper parses a positive number:
    * </p>
    *
    * <pre>{@code
@@ -95,6 +96,8 @@ public @interface Parameter {
    * or a {@link java.util.function.Supplier Supplier} that returns such a collector.
    * </p>
    *
+   * <p>Specifying a collector always declares a parameter as repeatable.</p>
+   *
    * <p>
    * For example, the following collector creates a {@code Set}:
    * </p>
@@ -112,16 +115,6 @@ public @interface Parameter {
    */
   Class<?> collectedBy() default Object.class;
 
-
-  /**
-   * <p>If {@code true}, the parameter's type must be {@code boolean} or {@code Boolean}.
-   * It will then be treated as a "flag" parameter that doesn't take an argument.
-   * At runtime, the boolean value will indicate presence or absence of the parameter in the argument vector.
-   * Repeating or "grouping" of flag parameters is not supported.</p>
-   *
-   * @return true if this parameter is a flag
-   */
-  boolean flag() default false;
 
   /**
    * <p>This key is used to find the parameter description in the resource bundle.</p>
