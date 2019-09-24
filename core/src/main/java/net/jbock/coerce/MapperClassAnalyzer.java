@@ -28,12 +28,12 @@ import static net.jbock.coerce.reference.ReferenceTool.Expectation.MAPPER;
 final class MapperClassAnalyzer {
 
   private final BasicInfo basicInfo;
-  private final TypeMirror originalReturnType;
+  private final TypeMirror expectedReturnType;
   private final TypeElement mapperClass;
 
-  MapperClassAnalyzer(BasicInfo basicInfo, TypeMirror originalReturnType, TypeElement mapperClass) {
+  MapperClassAnalyzer(BasicInfo basicInfo, TypeMirror expectedReturnType, TypeElement mapperClass) {
     this.basicInfo = basicInfo;
-    this.originalReturnType = originalReturnType;
+    this.expectedReturnType = expectedReturnType;
     this.mapperClass = mapperClass;
   }
 
@@ -64,7 +64,7 @@ final class MapperClassAnalyzer {
     if (!t_result.isPresent()) {
       return Either.right(failure(String.format("The supplied function must take a String argument, but takes %s", t)));
     }
-    Optional<Map<String, TypeMirror>> r_result = tool().unify(originalReturnType, r);
+    Optional<Map<String, TypeMirror>> r_result = tool().unify(expectedReturnType, r);
     boolean optional = false;
     if (r_result.isPresent()) {
       if (!checkCompat(t_result.get(), r_result.get())) {
@@ -72,7 +72,7 @@ final class MapperClassAnalyzer {
       }
     }
     if (!r_result.isPresent()) {
-      return Either.right(failure(String.format("The mapper should return %s but returns %s", originalReturnType, r)));
+      return Either.right(failure(String.format("The mapper should return %s but returns %s", expectedReturnType, r)));
     }
     Either<ReferenceMapperType, String> solve = new Solver(functionType, t_result.get(), r_result.get(), functionType.mapTypevars(r_result.get()), optional).solve();
     if (solve instanceof Right) {

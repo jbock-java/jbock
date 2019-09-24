@@ -34,7 +34,7 @@ class ExplicitMapperNotRepeatableHandler {
     Optional<AbstractCollector> collector;
     Either<ReferenceMapperType, MapperClassAnalyzer.Failure> either = new MapperClassAnalyzer(basicInfo, basicInfo.originalReturnType(), mapperClass).checkReturnType();
     if (either instanceof Left) {
-      mapperType = ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value();
+      mapperType = getLeft(either);
       extractExpr = p -> CodeBlock.of("$N", p);
       constructorParamType = basicInfo.originalReturnType();
       collector = Optional.empty();
@@ -45,18 +45,18 @@ class ExplicitMapperNotRepeatableHandler {
     if (optionalInfo.isPresent()) {
       either = new MapperClassAnalyzer(basicInfo, optionalInfo.get(), mapperClass).checkReturnType();
       if (either instanceof Left) {
-        mapperType = ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value().asOptional();
+        mapperType = getLeft(either).asOptional();
         extractExpr = liftedType.extractExpr();
-        constructorParamType = basicInfo.returnType();
+        constructorParamType = liftedType.liftedType();
         collector = Optional.empty();
         return createCoercion(extractExpr, mapperType, constructorParamType, collector);
       }
     }
     either = new MapperClassAnalyzer(basicInfo, liftedType.liftedType(), mapperClass).checkReturnType();
     if (either instanceof Left) {
-      mapperType = ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value();
+      mapperType = getLeft(either);
       extractExpr = liftedType.extractExpr();
-      constructorParamType = basicInfo.returnType();
+      constructorParamType = liftedType.liftedType();
       collector = Optional.empty();
       return createCoercion(extractExpr, mapperType, constructorParamType, collector);
     }
@@ -65,14 +65,18 @@ class ExplicitMapperNotRepeatableHandler {
       throw ((Right<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value().boom(basicInfo);
     }
     either = new MapperClassAnalyzer(basicInfo, wrappedType.get(), mapperClass).checkReturnType();
-    if (either instanceof Right) {
-      throw ((Right<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value().boom(basicInfo);
+    if (either instanceof Left) {
+      mapperType = getLeft(either);
+      extractExpr = p -> CodeBlock.of("$N", p);
+      constructorParamType = basicInfo.returnType();
+      collector = Optional.of(new DefaultCollector(wrappedType.get()));
+      return createCoercion(extractExpr, mapperType, constructorParamType, collector);
     }
-    mapperType = ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value();
-    extractExpr = p -> CodeBlock.of("$N", p);
-    constructorParamType = basicInfo.returnType();
-    collector = Optional.of(new DefaultCollector(wrappedType.get()));
-    return createCoercion(extractExpr, mapperType, constructorParamType, collector);
+    throw ((Right<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value().boom(basicInfo);
+  }
+
+  private ReferenceMapperType getLeft(Either<ReferenceMapperType, MapperClassAnalyzer.Failure> either) {
+    return ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value();
   }
 
   private Coercion createCoercion(Function<ParameterSpec, CodeBlock> extractExpr, ReferenceMapperType mapperType, TypeMirror constructorParamType, Optional<AbstractCollector> collector) {
