@@ -80,7 +80,7 @@ final class MapperClassValidator {
           .collect(Collectors.toList());
       DeclaredType f_type = tool().substitute(functionType.expectedType, unmapped_r_result);
       TypeMirror innerType = f_type.getTypeArguments().get(1);
-      return MapperType.create(functionType.isSupplier(), false, mapperClass, solution, innerType);
+      return MapperType.create(functionType.isSupplier(), mapperClass, solution, innerType);
     }
 
     TypeMirror getSolution(TypeParameterElement typeParameter) {

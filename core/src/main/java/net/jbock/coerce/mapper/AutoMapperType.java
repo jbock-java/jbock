@@ -11,8 +11,8 @@ public class AutoMapperType extends MapperType {
 
   private final TypeMirror innerType; // what the function returns
 
-  AutoMapperType(TypeMirror innerType, CodeBlock mapExpr, boolean optional) {
-    super(false, Collections.emptyList(), optional);
+  AutoMapperType(TypeMirror innerType, CodeBlock mapExpr) {
+    super(false, Collections.emptyList());
     this.mapExpr = mapExpr;
     this.innerType = innerType;
   }

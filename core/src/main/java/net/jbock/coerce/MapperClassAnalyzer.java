@@ -49,7 +49,7 @@ final class MapperClassAnalyzer {
     }
   }
 
-  static Failure failure(String message) {
+  private static Failure failure(String message) {
     return new Failure(message);
   }
 
@@ -65,7 +65,6 @@ final class MapperClassAnalyzer {
       return Either.right(failure(String.format("The supplied function must take a String argument, but takes %s", t)));
     }
     Optional<Map<String, TypeMirror>> r_result = tool().unify(expectedReturnType, r);
-    boolean optional = false;
     if (r_result.isPresent()) {
       if (!checkCompat(t_result.get(), r_result.get())) {
         return Either.right(failure("could not infer type parameters"));
@@ -74,7 +73,7 @@ final class MapperClassAnalyzer {
     if (!r_result.isPresent()) {
       return Either.right(failure(String.format("The mapper should return %s but returns %s", expectedReturnType, r)));
     }
-    Either<ReferenceMapperType, String> solve = new Solver(functionType, t_result.get(), r_result.get(), functionType.mapTypevars(r_result.get()), optional).solve();
+    Either<ReferenceMapperType, String> solve = new Solver(functionType, t_result.get(), r_result.get(), functionType.mapTypevars(r_result.get())).solve();
     if (solve instanceof Right) {
       return Either.right(failure(((Right<ReferenceMapperType, String>) solve).value()));
     }
@@ -105,19 +104,16 @@ final class MapperClassAnalyzer {
     final Map<String, TypeMirror> t_result;
     final Map<String, TypeMirror> unmapped_r_result;
     final Map<String, TypeMirror> r_result;
-    final boolean optional;
 
     Solver(
         AbstractReferencedType functionType,
         Map<String, TypeMirror> t_result,
         Map<String, TypeMirror> unmapped_r_result,
-        Map<String, TypeMirror> r_result,
-        boolean optional) {
+        Map<String, TypeMirror> r_result) {
       this.functionType = functionType;
       this.t_result = t_result;
       this.unmapped_r_result = unmapped_r_result;
       this.r_result = r_result;
-      this.optional = optional;
     }
 
     Either<ReferenceMapperType, String> solve() {
@@ -131,7 +127,7 @@ final class MapperClassAnalyzer {
       }
       DeclaredType f_type = tool().substitute(functionType.expectedType, unmapped_r_result);
       TypeMirror innerType = f_type.getTypeArguments().get(1);
-      return Either.left(MapperType.create(functionType.isSupplier(), optional, mapperClass, solution, innerType));
+      return Either.left(MapperType.create(functionType.isSupplier(), mapperClass, solution, innerType));
     }
 
     Either<TypeMirror, String> getSolution(TypeParameterElement typeParameter) {

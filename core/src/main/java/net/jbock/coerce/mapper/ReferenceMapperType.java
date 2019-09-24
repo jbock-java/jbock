@@ -18,9 +18,8 @@ public class ReferenceMapperType extends MapperType {
       TypeElement mapperClass,
       boolean supplier,
       List<TypeMirror> solution,
-      boolean optional,
       TypeMirror innerType) {
-    super(supplier, solution, optional);
+    super(supplier, solution);
     this.mapperClass = mapperClass;
     this.innerType = innerType;
   }
