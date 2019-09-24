@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
@@ -136,18 +135,13 @@ final class MapperClassAnalyzer {
     }
 
     ReferenceMapperType solve() {
-      List<? extends TypeParameterElement> typeParameters = mapperClass.getTypeParameters();
-      List<Either<TypeMirror, String>> eithers = typeParameters.stream()
-          .map(this::getSolution)
-          .collect(Collectors.toList());
       List<TypeMirror> solution = new ArrayList<>();
-      for (Either<TypeMirror, String> either : eithers) {
+      for (TypeParameterElement typeMirror : mapperClass.getTypeParameters()) {
+        Either<TypeMirror, String> either = getSolution(typeMirror);
         if (either instanceof Right) {
           throw boom(((Right<TypeMirror, String>) either).value());
         }
-        if (either instanceof Left) {
-          solution.add(((Left<TypeMirror, String>) either).value());
-        }
+        solution.add(((Left<TypeMirror, String>) either).value());
       }
       DeclaredType f_type = tool().substitute(functionType.expectedType, unmapped_r_result);
       TypeMirror innerType = f_type.getTypeArguments().get(1);
