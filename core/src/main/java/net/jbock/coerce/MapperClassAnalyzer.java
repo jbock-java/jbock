@@ -38,22 +38,43 @@ final class MapperClassAnalyzer {
     this.mapperClass = mapperClass;
   }
 
-  ReferenceMapperType checkReturnType() {
+  static class Failure {
+    private final String message;
+
+    Failure(String message) {
+      this.message = message;
+    }
+
+    ValidationException boom(BasicInfo basicInfo) {
+      return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
+    }
+  }
+
+  static Failure failure(String message) {
+    return new Failure(message);
+  }
+
+  Either<ReferenceMapperType, Failure> checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
     AbstractReferencedType functionType = new ReferenceTool(MAPPER, basicInfo, mapperClass)
         .getReferencedType();
     TypeMirror t = functionType.expectedType.getTypeArguments().get(0);
     TypeMirror r = functionType.expectedType.getTypeArguments().get(1);
-    Map<String, TypeMirror> t_result = tool().unify(tool().asType(String.class), t)
-        .map(functionType::mapTypevars)
-        .orElseThrow(() -> boom(String.format("The supplied function must take a String argument, but takes %s", t)));
+    Optional<Map<String, TypeMirror>> t_result = tool().unify(tool().asType(String.class), t)
+        .map(functionType::mapTypevars);
+    if (!t_result.isPresent()) {
+      return Either.right(failure(String.format("The supplied function must take a String argument, but takes %s", t)));
+    }
     Optional<Map<String, TypeMirror>> r_result = tool().unify(originalReturnType, r);
     boolean optional = false;
     if (r_result.isPresent()) {
-      Compatibility compatibility = checkCompat(t_result, r_result.get());
-      if (compatibility instanceof CompatibleViaOptional) {
+      Optional<Compatibility> compatibility = checkCompat(t_result.get(), r_result.get());
+      if (!compatibility.isPresent()) {
+        return Either.right(failure("could not infer type parameters"));
+      }
+      if (compatibility.get() instanceof CompatibleViaOptional) {
         Map<String, TypeMirror> m = new HashMap<>(r_result.get());
-        m.put(((CompatibleViaOptional) compatibility).key, ((CompatibleViaOptional) compatibility).solution);
+        m.put(((CompatibleViaOptional) compatibility.get()).key, ((CompatibleViaOptional) compatibility.get()).solution);
         r_result = Optional.of(m);
         optional = true;
       }
@@ -63,13 +84,13 @@ final class MapperClassAnalyzer {
       optional = true;
     }
     if (!r_result.isPresent()) {
-      throw boom(String.format("The mapper should return %s but returns %s", originalReturnType, r));
+      return Either.right(failure(String.format("The mapper should return %s but returns %s", originalReturnType, r)));
     }
-    Either<ReferenceMapperType, String> solve = new Solver(functionType, t_result, r_result.get(), functionType.mapTypevars(r_result.get()), optional).solve();
+    Either<ReferenceMapperType, String> solve = new Solver(functionType, t_result.get(), r_result.get(), functionType.mapTypevars(r_result.get()), optional).solve();
     if (solve instanceof Right) {
-      throw boom(((Right<ReferenceMapperType, String>) solve).value());
+      return Either.right(failure(((Right<ReferenceMapperType, String>) solve).value()));
     }
-    return ((Left<ReferenceMapperType, String>) solve).value();
+    return Either.left(((Left<ReferenceMapperType, String>) solve).value());
   }
 
   private static class Compatibility {
@@ -89,28 +110,24 @@ final class MapperClassAnalyzer {
   }
 
 
-  private Compatibility checkCompat(Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
+  private Optional<Compatibility> checkCompat(Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
     if (t_result.isEmpty()) {
-      return new Compatible();
+      return Optional.of(new Compatible());
     }
     Map.Entry<String, TypeMirror> tEntry = t_result.entrySet().iterator().next();
     String key = tEntry.getKey();
     TypeMirror tSolution = tEntry.getValue();
     TypeMirror rSolution = r_result.get(key);
     if (rSolution == null) {
-      return new Compatible();
+      return Optional.of(new Compatible());
     }
     if (tool().isSameType(tSolution, rSolution)) {
-      return new Compatible();
+      return Optional.of(new Compatible());
     }
     if (tool().unify(rSolution, tool().optionalOf(tSolution)).isPresent()) {
-      return new CompatibleViaOptional(key, tSolution);
+      return Optional.of(new CompatibleViaOptional(key, tSolution));
     }
-    throw boom("could not infer type parameters");
-  }
-
-  private ValidationException boom(String message) {
-    return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
+    return Optional.empty();
   }
 
   private TypeTool tool() {
@@ -163,7 +180,7 @@ final class MapperClassAnalyzer {
       }
       if (r != null) {
         if (tool().isOutOfBounds(r, bounds)) {
-          throw boom("invalid bounds");
+          return Either.right("invalid bounds");
         }
       }
       return Stream.of(t, r)

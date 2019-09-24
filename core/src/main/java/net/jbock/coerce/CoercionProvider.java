@@ -6,11 +6,13 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
+import net.jbock.coerce.either.Either;
+import net.jbock.coerce.either.Left;
+import net.jbock.coerce.either.Right;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -120,24 +122,30 @@ public class CoercionProvider {
     ReferenceMapperType mapperType;
     TypeMirror constructorParamType;
     Optional<AbstractCollector> collector;
-    try {
-      mapperType = new MapperClassAnalyzer(basicInfo, basicInfo.originalReturnType(), mapperClass).checkReturnType();
+    Either<ReferenceMapperType, MapperClassAnalyzer.Failure> either = new MapperClassAnalyzer(basicInfo, basicInfo.originalReturnType(), mapperClass).checkReturnType();
+    if (either instanceof Left) {
+      mapperType = ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value();
       extractExpr = p -> CodeBlock.of("$N", p);
       constructorParamType = basicInfo.originalReturnType();
       collector = Optional.empty();
-    } catch (ValidationException e) {
-      try {
-        LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
-        mapperType = new MapperClassAnalyzer(basicInfo, liftedType.liftedType(), mapperClass).checkReturnType();
+    } else {
+      LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
+      either = new MapperClassAnalyzer(basicInfo, liftedType.liftedType(), mapperClass).checkReturnType();
+      if (either instanceof Left) {
+        mapperType = ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value();
         extractExpr = liftedType.extractExpr();
         constructorParamType = basicInfo.returnType();
         collector = Optional.empty();
-      } catch (ValidationException e1) {
+      } else {
         Optional<TypeMirror> wrappedType = tool().unwrap(List.class, basicInfo.originalReturnType());
         if (!wrappedType.isPresent()) {
-          throw e1;
+          throw ((Right<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value().boom(basicInfo);
         }
-        mapperType = new MapperClassAnalyzer(basicInfo, wrappedType.get(), mapperClass).checkReturnType();
+        either = new MapperClassAnalyzer(basicInfo, wrappedType.get(), mapperClass).checkReturnType();
+        if (either instanceof Right) {
+          throw ((Right<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value().boom(basicInfo);
+        }
+        mapperType = ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value();
         extractExpr = p -> CodeBlock.of("$N", p);
         constructorParamType = basicInfo.returnType();
         collector = Optional.of(new DefaultCollector(wrappedType.get()));
