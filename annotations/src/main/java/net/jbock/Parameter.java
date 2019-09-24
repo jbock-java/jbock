@@ -111,7 +111,7 @@ public @interface Parameter {
    * }
    * }</pre>
    *
-   * @return an collector class
+   * @return a collector class
    */
   Class<?> collectedBy() default Object.class;
 

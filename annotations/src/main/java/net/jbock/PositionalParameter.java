@@ -31,7 +31,7 @@ public @interface PositionalParameter {
    * <ul>
    * <li>Gaps in the positions are allowed. Negative numbers are also allowed.</li>
    * <li>Required parameters must have the lowest positions.</li>
-   * <li>There can only be one {@link #repeatable()} positional parameter, and it must have the highest position.</li>
+   * <li>There can only be one repeatable positional parameter, and it must have the highest position.</li>
    * </ul>
    *
    * @return parameter position
