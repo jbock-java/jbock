@@ -1,5 +1,8 @@
 package net.jbock.coerce;
 
+import net.jbock.coerce.either.Either;
+import net.jbock.coerce.either.Left;
+import net.jbock.coerce.either.Right;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.coerce.reference.AbstractReferencedType;
@@ -11,6 +14,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -133,21 +137,30 @@ final class MapperClassAnalyzer {
 
     ReferenceMapperType solve() {
       List<? extends TypeParameterElement> typeParameters = mapperClass.getTypeParameters();
-      List<TypeMirror> solution = typeParameters.stream()
+      List<Either<TypeMirror, String>> eithers = typeParameters.stream()
           .map(this::getSolution)
           .collect(Collectors.toList());
+      List<TypeMirror> solution = new ArrayList<>();
+      for (Either<TypeMirror, String> either : eithers) {
+        if (either instanceof Right) {
+          throw boom(((Right<TypeMirror, String>) either).value());
+        }
+        if (either instanceof Left) {
+          solution.add(((Left<TypeMirror, String>) either).value());
+        }
+      }
       DeclaredType f_type = tool().substitute(functionType.expectedType, unmapped_r_result);
       TypeMirror innerType = f_type.getTypeArguments().get(1);
       return MapperType.create(functionType.isSupplier(), optional, mapperClass, solution, innerType);
     }
 
-    TypeMirror getSolution(TypeParameterElement typeParameter) {
+    Either<TypeMirror, String> getSolution(TypeParameterElement typeParameter) {
       TypeMirror t = t_result.get(typeParameter.toString());
       TypeMirror r = r_result.get(typeParameter.toString());
       List<? extends TypeMirror> bounds = typeParameter.getBounds();
       if (t != null) {
         if (tool().isOutOfBounds(tool().asType(String.class), bounds)) {
-          throw boom("invalid bounds");
+          return Either.right("invalid bounds");
         }
       }
       if (r != null) {
@@ -157,8 +170,9 @@ final class MapperClassAnalyzer {
       }
       return Stream.of(t, r)
           .filter(Objects::nonNull)
+          .map(Either::<TypeMirror, String>left)
           .findFirst()
-          .orElseThrow(() -> boom("could not infer all type parameters"));
+          .orElseGet(() -> Either.right("could not infer all type parameters"));
     }
   }
 }
