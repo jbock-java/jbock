@@ -65,16 +65,20 @@ final class MapperClassAnalyzer {
     if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", originalReturnType, r));
     }
-    return new Solver(functionType, t_result, r_result.get(), functionType.mapTypevars(r_result.get()), optional).solve();
+    Either<ReferenceMapperType, String> solve = new Solver(functionType, t_result, r_result.get(), functionType.mapTypevars(r_result.get()), optional).solve();
+    if (solve instanceof Right) {
+      throw boom(((Right<ReferenceMapperType, String>) solve).value());
+    }
+    return ((Left<ReferenceMapperType, String>) solve).value();
   }
 
-  class Compatibility {
+  private static class Compatibility {
   }
 
-  class Compatible extends Compatibility {
+  private static class Compatible extends Compatibility {
   }
 
-  class CompatibleViaOptional extends Compatibility {
+  private static class CompatibleViaOptional extends Compatibility {
     final String key;
     final TypeMirror solution;
 
@@ -134,18 +138,18 @@ final class MapperClassAnalyzer {
       this.optional = optional;
     }
 
-    ReferenceMapperType solve() {
+    Either<ReferenceMapperType, String> solve() {
       List<TypeMirror> solution = new ArrayList<>();
       for (TypeParameterElement typeMirror : mapperClass.getTypeParameters()) {
         Either<TypeMirror, String> either = getSolution(typeMirror);
         if (either instanceof Right) {
-          throw boom(((Right<TypeMirror, String>) either).value());
+          return Either.right(((Right<TypeMirror, String>) either).value());
         }
         solution.add(((Left<TypeMirror, String>) either).value());
       }
       DeclaredType f_type = tool().substitute(functionType.expectedType, unmapped_r_result);
       TypeMirror innerType = f_type.getTypeArguments().get(1);
-      return MapperType.create(functionType.isSupplier(), optional, mapperClass, solution, innerType);
+      return Either.left(MapperType.create(functionType.isSupplier(), optional, mapperClass, solution, innerType));
     }
 
     Either<TypeMirror, String> getSolution(TypeParameterElement typeParameter) {
