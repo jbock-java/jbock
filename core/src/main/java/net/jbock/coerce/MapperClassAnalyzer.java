@@ -15,7 +15,6 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -68,15 +67,8 @@ final class MapperClassAnalyzer {
     Optional<Map<String, TypeMirror>> r_result = tool().unify(originalReturnType, r);
     boolean optional = false;
     if (r_result.isPresent()) {
-      Optional<Compatibility> compatibility = checkCompat(t_result.get(), r_result.get());
-      if (!compatibility.isPresent()) {
+      if (!checkCompat(t_result.get(), r_result.get())) {
         return Either.right(failure("could not infer type parameters"));
-      }
-      if (compatibility.get() instanceof CompatibleViaOptional) {
-        Map<String, TypeMirror> m = new HashMap<>(r_result.get());
-        m.put(((CompatibleViaOptional) compatibility.get()).key, ((CompatibleViaOptional) compatibility.get()).solution);
-        r_result = Optional.of(m);
-        optional = true;
       }
     }
     if (!r_result.isPresent()) {
@@ -93,41 +85,18 @@ final class MapperClassAnalyzer {
     return Either.left(((Left<ReferenceMapperType, String>) solve).value());
   }
 
-  private static class Compatibility {
-  }
-
-  private static class Compatible extends Compatibility {
-  }
-
-  private static class CompatibleViaOptional extends Compatibility {
-    final String key;
-    final TypeMirror solution;
-
-    CompatibleViaOptional(String key, TypeMirror solution) {
-      this.key = key;
-      this.solution = solution;
-    }
-  }
-
-
-  private Optional<Compatibility> checkCompat(Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
+  private boolean checkCompat(Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
     if (t_result.isEmpty()) {
-      return Optional.of(new Compatible());
+      return true;
     }
     Map.Entry<String, TypeMirror> tEntry = t_result.entrySet().iterator().next();
     String key = tEntry.getKey();
     TypeMirror tSolution = tEntry.getValue();
     TypeMirror rSolution = r_result.get(key);
     if (rSolution == null) {
-      return Optional.of(new Compatible());
+      return true;
     }
-    if (tool().isSameType(tSolution, rSolution)) {
-      return Optional.of(new Compatible());
-    }
-    if (tool().unify(rSolution, tool().optionalOf(tSolution)).isPresent()) {
-      return Optional.of(new CompatibleViaOptional(key, tSolution));
-    }
-    return Optional.empty();
+    return tool().isSameType(tSolution, rSolution);
   }
 
   private TypeTool tool() {

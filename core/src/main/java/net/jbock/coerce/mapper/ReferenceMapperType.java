@@ -37,4 +37,8 @@ public class ReferenceMapperType extends MapperType {
         getTypeParameterList(solution()),
         supplier() ? ".get()" : "");
   }
+
+  public ReferenceMapperType asOptional() {
+    return new ReferenceMapperType(mapperClass, supplier(), solution(), true, innerType);
+  }
 }

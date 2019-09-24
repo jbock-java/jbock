@@ -35,7 +35,7 @@ public final class LiftedType {
     this.wrappedType = wrappedType;
   }
 
-  private static LiftedType extractViaNullCheck(TypeMirror type) {
+  private static LiftedType noLifting(TypeMirror type) {
     Function<ParameterSpec, CodeBlock> extract = p -> CodeBlock.of("$N", p);
     return new LiftedType(extract, type, Optional.empty());
   }
@@ -71,7 +71,7 @@ public final class LiftedType {
             Optional.of(e.boxedNumberClass));
       }
     }
-    return extractViaNullCheck(tool.box(type));
+    return noLifting(tool.box(type));
   }
 
   TypeMirror liftedType() {

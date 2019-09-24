@@ -40,6 +40,17 @@ class ExplicitMapperNotRepeatableHandler {
       collector = Optional.empty();
       return createCoercion(extractExpr, mapperType, constructorParamType, collector);
     }
+    Optional<TypeMirror> optionalInfo = tool().unwrap(Optional.class, basicInfo.originalReturnType());
+    if (optionalInfo.isPresent()) {
+      either = new MapperClassAnalyzer(basicInfo, optionalInfo.get(), mapperClass).checkReturnType();
+      if (either instanceof Left) {
+        mapperType = ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value().asOptional();
+        extractExpr = p -> CodeBlock.of("$N", p);
+        constructorParamType = basicInfo.returnType();
+        collector = Optional.empty();
+        return createCoercion(extractExpr, mapperType, constructorParamType, collector);
+      }
+    }
     LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
     either = new MapperClassAnalyzer(basicInfo, liftedType.liftedType(), mapperClass).checkReturnType();
     if (either instanceof Left) {
