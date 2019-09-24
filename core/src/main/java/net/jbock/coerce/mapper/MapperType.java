@@ -38,10 +38,6 @@ public abstract class MapperType {
 
   public abstract CodeBlock mapExpr();
 
-  public boolean isOptional() {
-    return optional;
-  }
-
   public boolean supplier() {
     return supplier;
   }

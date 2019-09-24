@@ -84,12 +84,14 @@ public class CoercionProvider {
     Optional<TypeMirror> listInfo = tool().unwrap(List.class, basicInfo.originalReturnType());
     Optional<AbstractCollector> collector;
     Optional<TypeMirror> optionalInfo = tool().liftingUnwrap(basicInfo.originalReturnType());
+    boolean optional = false;
     MapperType mapperType = null;
     if (optionalInfo.isPresent()) {
       mapExpr = findAutoMapper(optionalInfo.get());
       extractExpr = LiftedType.lift(basicInfo.originalReturnType(), tool()).extractExpr();
       if (mapExpr.isPresent()) {
         mapperType = MapperType.create(optionalInfo.get(), mapExpr.get(), true);
+        optional = true;
       }
       collector = Optional.empty();
     } else if (listInfo.isPresent()) {
@@ -110,7 +112,7 @@ public class CoercionProvider {
       throw basicInfo.asValidationException("Unknown parameter type. Define a custom mapper.");
     }
     TypeMirror constructorParamType = LiftedType.lift(basicInfo.originalReturnType(), tool()).liftedType();
-    return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType);
+    return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, optional);
   }
 
 
@@ -121,7 +123,7 @@ public class CoercionProvider {
     MapperType mapperType = MapperType.create(collectorInfo.inputType(), mapExpr, true);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
-    return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
+    return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType, false);
   }
 
   private Coercion handleRepeatableExplicitMapper(TypeElement mapperClass) {
@@ -129,7 +131,7 @@ public class CoercionProvider {
     ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
-    return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType);
+    return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType, false);
   }
 
   private Optional<CodeBlock> findAutoMapper(TypeMirror innerType) {

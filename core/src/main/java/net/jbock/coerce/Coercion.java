@@ -48,13 +48,17 @@ public final class Coercion {
       Optional<AbstractCollector> collector,
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
-      TypeMirror constructorParamType) {
+      TypeMirror constructorParamType,
+      boolean optional) {
+    if (collector.isPresent() && optional) {
+      throw new AssertionError();
+    }
     CodeBlock mapExpr = mapperType.mapExpr();
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     Optional<CodeBlock> collectorInfo = collector.map(AbstractCollector::createCollector);
     return new Coercion(collectorInfo, mapExpr,
-        constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), mapperType.isOptional());
+        constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), optional);
   }
 
   /**

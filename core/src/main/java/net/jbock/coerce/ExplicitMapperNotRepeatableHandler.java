@@ -38,18 +38,18 @@ class ExplicitMapperNotRepeatableHandler {
       extractExpr = p -> CodeBlock.of("$N", p);
       constructorParamType = basicInfo.originalReturnType();
       collector = Optional.empty();
-      return createCoercion(extractExpr, mapperType, constructorParamType, collector);
+      return createCoercion(extractExpr, mapperType, constructorParamType, collector, false);
     }
     LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
     Optional<TypeMirror> optionalInfo = tool().unwrap(Optional.class, liftedType.liftedType());
     if (optionalInfo.isPresent()) {
       either = new MapperClassAnalyzer(basicInfo, optionalInfo.get(), mapperClass).checkReturnType();
       if (either instanceof Left) {
-        mapperType = getLeft(either).asOptional();
+        mapperType = getLeft(either);
         extractExpr = liftedType.extractExpr();
         constructorParamType = liftedType.liftedType();
         collector = Optional.empty();
-        return createCoercion(extractExpr, mapperType, constructorParamType, collector);
+        return createCoercion(extractExpr, mapperType, constructorParamType, collector, true);
       }
     }
     either = new MapperClassAnalyzer(basicInfo, liftedType.liftedType(), mapperClass).checkReturnType();
@@ -58,7 +58,7 @@ class ExplicitMapperNotRepeatableHandler {
       extractExpr = liftedType.extractExpr();
       constructorParamType = liftedType.liftedType();
       collector = Optional.empty();
-      return createCoercion(extractExpr, mapperType, constructorParamType, collector);
+      return createCoercion(extractExpr, mapperType, constructorParamType, collector, false);
     }
     Optional<TypeMirror> wrappedType = tool().unwrap(List.class, basicInfo.originalReturnType());
     if (!wrappedType.isPresent()) {
@@ -70,7 +70,7 @@ class ExplicitMapperNotRepeatableHandler {
       extractExpr = p -> CodeBlock.of("$N", p);
       constructorParamType = basicInfo.returnType();
       collector = Optional.of(new DefaultCollector(wrappedType.get()));
-      return createCoercion(extractExpr, mapperType, constructorParamType, collector);
+      return createCoercion(extractExpr, mapperType, constructorParamType, collector, false);
     }
     throw ((Right<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value().boom(basicInfo);
   }
@@ -79,8 +79,13 @@ class ExplicitMapperNotRepeatableHandler {
     return ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value();
   }
 
-  private Coercion createCoercion(Function<ParameterSpec, CodeBlock> extractExpr, ReferenceMapperType mapperType, TypeMirror constructorParamType, Optional<AbstractCollector> collector) {
-    return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType);
+  private Coercion createCoercion(
+      Function<ParameterSpec, CodeBlock> extractExpr,
+      ReferenceMapperType mapperType,
+      TypeMirror constructorParamType,
+      Optional<AbstractCollector> collector,
+      boolean optional) {
+    return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, optional);
   }
 
   private TypeTool tool() {
