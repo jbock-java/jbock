@@ -253,11 +253,7 @@ final class Param {
       // no inferring
       return false;
     }
-    return isInferredFlag(tool, mirror);
-  }
-
-  private static boolean isInferredFlag(TypeTool tool, TypeMirror mirror) {
-    return tool.isSameType(mirror, Boolean.class) || tool.isBooleanPrimitive(mirror);
+    return tool.isBooleanPrimitive(mirror) || tool.isSameType(mirror, Boolean.class);
   }
 
   private static char shortName(List<Param> params, ExecutableElement sourceMethod) {
