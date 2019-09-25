@@ -9,7 +9,7 @@ enum OptionType {
 
   FLAG {
     @Override
-    CodeBlock extractExpression(Helper helper, Param param) {
+    CodeBlock getStreamExpression(Helper helper, Param param) {
       return CodeBlock.builder().add(
           "$N.get($T.$N).flag()",
           helper.parsersField,
@@ -21,7 +21,7 @@ enum OptionType {
 
   REGULAR {
     @Override
-    CodeBlock extractExpression(Helper helper, Param param) {
+    CodeBlock getStreamExpression(Helper helper, Param param) {
       if (param.isPositional()) {
         return CodeBlock.builder().add(
             "$T.$L.value($N)",
@@ -42,7 +42,7 @@ enum OptionType {
 
   REPEATABLE {
     @Override
-    CodeBlock extractExpression(Helper helper, Param param) {
+    CodeBlock getStreamExpression(Helper helper, Param param) {
       if (param.isPositional()) {
         return CodeBlock.builder().add(
             "$T.$L.values($N)",
@@ -65,5 +65,5 @@ enum OptionType {
    * @return An expression that extracts the value of the given param from the helper state.
    * This expression will evaluate either to a {@link java.util.stream.Stream} or an {@link java.util.Optional}.
    */
-  abstract CodeBlock extractExpression(Helper helper, Param param);
+  abstract CodeBlock getStreamExpression(Helper helper, Param param);
 }

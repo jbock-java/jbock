@@ -390,14 +390,14 @@ final class Param {
     return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);
   }
 
-  PositionalRank positionalOrder() {
+  OptionalInt positionalOrder() {
     if (!positionalIndex.isPresent()) {
-      throw new AssertionError();
+      return OptionalInt.empty();
     }
     if (repeatable()) {
-      return PositionalRank.LIST;
+      return OptionalInt.of(2);
     }
-    return optional() ? PositionalRank.OPTIONAL : PositionalRank.REQUIRED;
+    return optional() ? OptionalInt.of(1) : OptionalInt.of(0);
   }
 
   // visible for testing

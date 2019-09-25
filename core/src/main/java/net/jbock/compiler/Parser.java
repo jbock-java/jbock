@@ -14,6 +14,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
+import java.util.OptionalInt;
 import java.util.Properties;
 import java.util.ResourceBundle;
 import java.util.stream.Collectors;
@@ -91,8 +92,8 @@ final class Parser {
   }
 
   static Parser create(Context context) {
-    checkOnlyOnePositionalList(context.positionalParameters());
-    checkRankConsistentWithPosition(context.positionalParameters());
+    checkOnlyOnePositionalList(context.parameters);
+    checkRankConsistentWithPosition(context.parameters);
     MethodSpec readNextMethod = readNextMethod();
     MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
     Option option = Option.create(context);
@@ -104,7 +105,10 @@ final class Parser {
   }
 
   private static void checkOnlyOnePositionalList(List<Param> allPositional) {
-    List<Param> positionalRepeatable = allPositional.stream().filter(Param::repeatable).collect(Collectors.toList());
+    List<Param> positionalRepeatable = allPositional.stream()
+        .filter(Param::repeatable)
+        .filter(Param::isPositional)
+        .collect(Collectors.toList());
     if (positionalRepeatable.size() >= 2) {
       throw ValidationException.create(positionalRepeatable.get(0).sourceMethod,
           "There can only be one one repeatable positional parameter.");
@@ -114,12 +118,16 @@ final class Parser {
   private static void checkRankConsistentWithPosition(List<Param> allPositional) {
     int currentOrdinal = -1;
     for (Param param : allPositional) {
-      if (param.positionalOrder().ordinal() < currentOrdinal) {
+      OptionalInt order = param.positionalOrder();
+      if (!order.isPresent()) {
+        continue;
+      }
+      if (order.getAsInt() < currentOrdinal) {
         throw ValidationException.create(param.sourceMethod,
             "Invalid position: Optional parameters must come after required parameters." +
                 "Repeatable parameters must come last.");
       }
-      currentOrdinal = param.positionalOrder().ordinal();
+      currentOrdinal = order.getAsInt();
     }
   }
 
