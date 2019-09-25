@@ -31,15 +31,13 @@ abstract class GradleArguments {
   /**
    * the dir
    */
-  @Parameter(
-      longName = "dir")
+  @Parameter(longName = "dir")
   abstract Optional<String> dir();
 
   /**
    * cmos flag
    */
-  @Parameter(
-      shortName = 'c')
+  @Parameter(shortName = 'c')
   abstract Boolean cmos();
 
   @Parameter(
@@ -53,18 +51,14 @@ abstract class GradleArguments {
   @CommandLineArguments
   static abstract class Foo {
 
-    @Parameter(
-        longName = "bar",
-        optional = true)
+    @Parameter(longName = "bar")
     abstract Optional<Integer> bar();
   }
 
   @CommandLineArguments
   static abstract class Bar {
 
-    @Parameter(
-        longName = "bar",
-        repeatable = true)
+    @Parameter(longName = "bar")
     abstract List<String> bar();
   }
 }

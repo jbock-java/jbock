@@ -24,20 +24,18 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.EnumMap;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.partitioningBy;
-import static java.util.stream.Collectors.toCollection;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -181,14 +179,6 @@ public final class Processor extends AbstractProcessor {
   private static final Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
       .comparingInt(e -> e.getAnnotation(PositionalParameter.class).position());
 
-  private PositionalRank getPositionalOrder(ExecutableElement sourceMethod) {
-    PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
-    if (parameter.repeatable()) {
-      return PositionalRank.LIST;
-    }
-    return parameter.optional() ? PositionalRank.OPTIONAL : PositionalRank.REQUIRED;
-  }
-
   private List<Param> getParams(TypeElement sourceType) {
     List<ExecutableElement> abstractMethods = methodsIn(sourceType.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
@@ -198,20 +188,9 @@ public final class Processor extends AbstractProcessor {
         partitioningBy(method -> method.getAnnotation(PositionalParameter.class) != null));
     List<ExecutableElement> allNonpositional = partition.getOrDefault(false, emptyList());
     List<ExecutableElement> allPositional = partition.getOrDefault(true, emptyList());
-    Map<PositionalRank, List<ExecutableElement>> positionalGroups = allPositional.stream()
-        .collect(groupingBy(
-            this::getPositionalOrder,
-            () -> new EnumMap<>(PositionalRank.class),
-            toCollection(ArrayList::new)));
-    for (List<ExecutableElement> value : positionalGroups.values()) {
-      value.sort(POSITION_COMPARATOR);
-    }
-
-    checkPositionalRepeatable(sourceType, positionalGroups);
-    if (allPositional.size() >= 2) {
-      checkPositionUnique(allPositional);
-    }
-    List<ExecutableElement> sortedPositional = getSortedPositional(positionalGroups);
+    checkPositionUnique(allPositional);
+    checkFlagsThatRequirePositional(sourceType, allPositional);
+    List<ExecutableElement> sortedPositional = allPositional.stream().sorted(POSITION_COMPARATOR).collect(Collectors.toList());
     List<Param> result = new ArrayList<>(abstractMethods.size());
     for (int i = 0; i < sortedPositional.size(); i++) {
       ExecutableElement method = sortedPositional.get(i);
@@ -228,14 +207,6 @@ public final class Processor extends AbstractProcessor {
     return result;
   }
 
-  private List<ExecutableElement> getSortedPositional(Map<PositionalRank, List<ExecutableElement>> positionalGroups) {
-    List<ExecutableElement> sortedPositional = new ArrayList<>();
-    for (PositionalRank positionalRank : PositionalRank.values()) {
-      sortedPositional.addAll(positionalGroups.getOrDefault(positionalRank, emptyList()));
-    }
-    return sortedPositional;
-  }
-
   private void checkPositionUnique(List<ExecutableElement> allPositional) {
     Set<Integer> positions = new HashSet<>();
     for (ExecutableElement method : allPositional) {
@@ -246,21 +217,16 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void checkPositionalRepeatable(TypeElement sourceType, Map<PositionalRank, List<ExecutableElement>> positionalGroups) {
-    List<ExecutableElement> positionalRepeatable = positionalGroups.getOrDefault(PositionalRank.LIST, emptyList());
-    if (positionalRepeatable.size() >= 2) {
-      throw ValidationException.create(positionalRepeatable.get(1),
-          "There can only be one one repeatable positional parameter.");
-    }
+  private void checkFlagsThatRequirePositional(TypeElement sourceType, List<ExecutableElement> allPositional) {
     CommandLineArguments annotation = sourceType.getAnnotation(CommandLineArguments.class);
     if (annotation.allowEscapeSequence()) {
-      if (positionalGroups.values().stream().allMatch(List::isEmpty)) {
+      if (allPositional.isEmpty()) {
         throw ValidationException.create(sourceType,
             "Define a positional parameter, or disable the escape sequence.");
       }
     }
     if (annotation.allowPrefixedTokens()) {
-      if (positionalGroups.values().stream().allMatch(List::isEmpty)) {
+      if (allPositional.isEmpty()) {
         throw ValidationException.create(sourceType,
             "Define a positional parameter, or disallow prefixed tokens.");
       }

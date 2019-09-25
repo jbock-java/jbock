@@ -115,7 +115,7 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "",
-        "  @Parameter(shortName = 'x', repeatable = true)",
+        "  @Parameter(shortName = 'x')",
         "  abstract List a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
@@ -147,7 +147,7 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "",
-        "  @Parameter(optional = true, shortName = 'x')",
+        "  @Parameter(shortName = 'x')",
         "  abstract Optional a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
@@ -163,7 +163,7 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "",
-        "  @Parameter(shortName = 'x', repeatable = true)",
+        "  @Parameter(shortName = 'x')",
         "  abstract java.util.Set<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
@@ -179,7 +179,7 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "",
-        "  @Parameter(shortName = 'x', repeatable = true)",
+        "  @Parameter(shortName = 'x')",
         "  abstract int[] a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
@@ -281,7 +281,7 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @Parameter(shortName = 'x', optional = true)",
+        "  @Parameter(shortName = 'x')",
         "  abstract OptionalInt b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
@@ -296,7 +296,7 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @Parameter(shortName = 'x', flag = true)",
+        "  @Parameter(shortName = 'x')",
         "  abstract boolean x();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
@@ -489,29 +489,13 @@ class ProcessorTest {
   }
 
   @Test
-  void flagNotBoolean() {
-    List<String> sourceLines = withImports(
-        "@CommandLineArguments",
-        "abstract class InvalidArguments {",
-        "",
-        "  @Parameter(flag = true, shortName = 'a')",
-        "  abstract String hello();",
-        "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Flag parameters must return boolean.");
-  }
-
-  @Test
   void doubleAnnotation() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "",
-        "  @Parameter(shortName = 'x', repeatable = true)",
-        "  @PositionalParameter(repeatable = true)",
+        "  @Parameter(shortName = 'x')",
+        "  @PositionalParameter",
         "  abstract List<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
@@ -527,10 +511,10 @@ class ProcessorTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @Parameter(shortName = 'x', repeatable = true)",
+        "  @Parameter(shortName = 'x')",
         "  abstract List<String> a();",
         "",
-        "  @PositionalParameter(repeatable = true)",
+        "  @PositionalParameter",
         "  abstract List<String> b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
