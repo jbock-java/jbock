@@ -196,18 +196,18 @@ assertEquals("-f", args.file());
 
 ### Required and optional parameters
 
-<table>
+<table style="border-collapse: collapse">
 <tr><td></td><td>No collector defined</td><td>Collector defined</td></tr>
 <tr><td>No mapper defined</td><td>
-<table style="border: 1px solid black"><!-- No mapper, no collector-->
-<tr><td>Optional&lt;X&gt;<td></td><i>optional</i><td></td></tr>
-<tr><td>List&lt;X&gt;<td></td><i>repeatable</i><td></td></tr>
-<tr><td>boolean | Boolean<td></td><i>flag</i><td></td></tr>
-<tr><td>otherwise<td></td><i>required</i><td></td></tr>
+<table style="border-collapse: collapse; border: 1px solid black"><!-- No mapper, no collector-->
+<tr><td>Optional&lt;X&gt;<td></td><td><i>optional</i></td></tr>
+<tr><td>List&lt;X&gt;<td></td><td><i>repeatable</i></td></tr>
+<tr><td>boolean | Boolean<td></td><td><i>flag</i></td></tr>
+<tr><td>otherwise<td></td><td><i>required</i></td></tr>
 </table>
 </td><td><i>repeatable</i></td></tr>
 <tr><td>Mapper defined</td><td>
-<table style="border: 1px solid black"><!-- Mapper, no collector-->
+<table style="border-collapse: collapse; border: 1px solid black"><!-- Mapper, no collector-->
 <tr><td>Optional&lt;X&gt;<td></td><td><i>optional</i></td></tr>
 <tr><td>List&lt;X&gt;<td></td><td><i>repeatable</i></td></tr>
 <tr><td>otherwise<td></td><td><i>required</i></td></tr>
