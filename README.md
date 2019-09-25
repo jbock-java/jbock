@@ -197,8 +197,8 @@ assertEquals("-f", args.file());
 ### Required and optional parameters
 
 <table style="border-collapse: collapse">
-<tr><td></td><td>No collector defined</td><td>Collector defined</td></tr>
-<tr><td>No mapper defined</td><td>
+<tr><td></td><td><b>No collector defined</b></td><td><b>Collector defined</b></td></tr>
+<tr><td><b>No mapper defined</b></td><td>
 <table style="border-collapse: collapse; border: 1px solid black"><!-- No mapper, no collector-->
 <tr><td><code>Optional&lt;X&gt;</code>  </td><td><i>optional</i></td></tr>
 <tr><td><code>List&lt;X&gt;</code>      </td><td><i>repeatable</i></td></tr>
@@ -206,7 +206,7 @@ assertEquals("-f", args.file());
 <tr><td>otherwise          </td><td><i>required</i></td></tr>
 </table>
 </td><td><i>repeatable</i></td></tr>
-<tr><td>Mapper defined</td><td>
+<tr><td><b>Mapper defined</b></td><td>
 <table style="border-collapse: collapse; border: 1px solid black"><!-- Mapper, no collector-->
 <tr><td><code>Optional&lt;X&gt;</code>   </td><td><i>optional</i></td></tr>
 <tr><td><code>List&lt;X&gt;</code>       </td><td><i>repeatable</i></td></tr>
