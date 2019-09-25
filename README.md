@@ -205,7 +205,7 @@ The parameter type determines the treatment of the parameter as follows:
 <td><b>Mapper defined</b></td>
 </tr>
 <tr>
-<td><b>No collector</b></td>
+<td><b>No collector<br/>defined</b></td>
 <td>
 <table style="border-collapse: collapse; border: 1px solid black"><!-- No mapper, no collector-->
 <tr><td><code>boolean | Boolean</code>  </td><td><i>flag*</i></td></tr>
@@ -223,7 +223,7 @@ The parameter type determines the treatment of the parameter as follows:
 </td>
 </tr>
 <tr>
-<td><b>Collector</b></td>
+<td><b>Collector<br/>defined</b></td>
 <td colspan="2" style="text-align: center"><i>repeatable</i></td>
 </tr>
 </table>
