@@ -3,21 +3,19 @@ package net.jbock.compiler;
 import org.junit.jupiter.api.Test;
 
 import javax.tools.JavaFileObject;
-import java.util.List;
 
 import static com.google.common.truth.Truth.assertAbout;
-import static com.google.testing.compile.JavaFileObjects.forSourceLines;
 import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static java.util.Collections.singletonList;
-import static net.jbock.compiler.ProcessorTest.withImports;
+import static net.jbock.compiler.ProcessorTest.fromSource;
 
 class CollectorTest {
 
   @Test
   void collectorValidExtendsCollector() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', collectedBy = MySupplier.class)",
         "  abstract Set<String> strings();",
@@ -31,7 +29,6 @@ class CollectorTest {
         "  interface SetCollector<X> extends Collector<X, Set<X>, Set<X>> { }",
         "",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -39,9 +36,9 @@ class CollectorTest {
 
   @Test
   void invalidNotRepeatable() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', collectedBy = MyCollector.class)",
         "  abstract Set<String> strings();",
@@ -52,7 +49,7 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -60,15 +57,14 @@ class CollectorTest {
 
   @Test
   void invalidCollectorClassDoesNotExist() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             collectedBy = JustNotExist.class)",
         "  abstract Set<String> strings();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -77,9 +73,9 @@ class CollectorTest {
 
   @Test
   void validCollectorSupplier() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             collectedBy = MyCollector.class)",
@@ -91,7 +87,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -99,9 +94,9 @@ class CollectorTest {
 
   @Test
   void validCollector() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             collectedBy = MyCollector.class)",
@@ -115,7 +110,6 @@ class CollectorTest {
         "    public Set<Characteristics> characteristics() { return null; }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -123,9 +117,9 @@ class CollectorTest {
 
   @Test
   void invalidReturnType() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             collectedBy = MyCollector.class)",
@@ -137,7 +131,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -146,9 +139,9 @@ class CollectorTest {
 
   @Test
   void invalidMapperMismatch() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = HexMapper.class,",
@@ -167,7 +160,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -176,9 +168,9 @@ class CollectorTest {
 
   @Test
   void validMapperMatch() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = HexMapper.class,",
@@ -197,7 +189,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -205,9 +196,9 @@ class CollectorTest {
 
   @Test
   void validBigIntegers() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = HexMapper.class,",
@@ -226,7 +217,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -234,9 +224,9 @@ class CollectorTest {
 
   @Test
   void validGenericCollector() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = CustomBigIntegerMapper.class,",
@@ -255,7 +245,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -263,9 +252,9 @@ class CollectorTest {
 
   @Test
   void validMap() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'T',",
         "             mappedBy = MapEntryMapper.class,",
@@ -287,7 +276,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -295,9 +283,9 @@ class CollectorTest {
 
   @Test
   void validBothMapperAndCollectorHaveTypeargs() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = XMap.class,",
@@ -316,7 +304,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -324,9 +311,9 @@ class CollectorTest {
 
   @Test
   void invalidOptionalAuto() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             collectedBy = ToSetCollector.class)",
@@ -338,7 +325,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -347,9 +333,9 @@ class CollectorTest {
 
   @Test
   void invalidBounds() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             collectedBy = ToSetCollector.class)",
@@ -361,7 +347,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -370,9 +355,9 @@ class CollectorTest {
 
   @Test
   void invalidOptionalIntAuto() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             collectedBy = ToSetCollector.class)",
@@ -384,7 +369,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -393,9 +377,9 @@ class CollectorTest {
 
   @Test
   void invalidBoundSupplier() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             collectedBy = A.class)",
@@ -409,7 +393,6 @@ class CollectorTest {
         "",
         "  interface ToSetCollector<E> extends Supplier<Collector<E, ?, Set<E>>> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -418,9 +401,9 @@ class CollectorTest {
 
   @Test
   void invalidBound() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             collectedBy = A.class)",
@@ -436,7 +419,6 @@ class CollectorTest {
         "",
         "  interface ToSetCollector<E> extends Collector<E, Set<E>, Set<E>> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -445,9 +427,9 @@ class CollectorTest {
 
   @Test
   void validBothMapperAndCollectorHaveTypeargsHard() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = Map.class,",
@@ -466,7 +448,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -474,9 +455,9 @@ class CollectorTest {
 
   @Test
   void invalidBothMapperAndCollectorHaveTypeargsBadCollectorBounds() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = Map.class,",
@@ -495,7 +476,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -505,9 +485,9 @@ class CollectorTest {
   // TODO inferring collector input from mapper output is currently not supported
   @Test
   void invalidBothMapperAndCollectorHaveTypeargsUnresolvedCollectorTypearg() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = Map.class,",
@@ -526,7 +506,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -535,9 +514,9 @@ class CollectorTest {
 
   @Test
   void validBothMapperCollectorAndResultHaveTypeargs() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = Map.class,",
@@ -558,7 +537,6 @@ class CollectorTest {
         "",
         "  static class Result<E extends java.lang.CharSequence> {}",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -566,9 +544,9 @@ class CollectorTest {
 
   @Test
   void bothMapperAndCollectorHaveTypeargsInvalidBoundsOnCollector() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = XMap.class,",
@@ -587,7 +565,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -597,9 +574,9 @@ class CollectorTest {
 
   @Test
   void bothMapperAndCollectorHaveTypeargsImpossibleFromString() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = Identity.class,",
@@ -618,7 +595,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -627,9 +603,9 @@ class CollectorTest {
 
   @Test
   void bothMapperAndCollectorHaveTypeargsValid() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = MakeList.class,",
@@ -648,7 +624,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -656,9 +631,9 @@ class CollectorTest {
 
   @Test
   void validEnum() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', collectedBy = ToSetCollector.class)",
         "  abstract Set<Foo> foo();",
@@ -673,7 +648,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -681,9 +655,9 @@ class CollectorTest {
 
   @Test
   void invalidEnum() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', collectedBy = ToSetCollector.class)",
         "  abstract Foo foo();",
@@ -698,25 +672,23 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The collector should return test.InvalidArguments.Foo but returns Set<E>");
+        .withErrorContaining("The collector should return test.Arguments.Foo but returns Set<E>");
   }
 
   @Test
   void collectorInvalidNotCollector() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', collectedBy = ZapperSupplier.class)",
         "  abstract String zap();",
         "",
         "  interface ZapperSupplier extends Supplier<String> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -726,9 +698,9 @@ class CollectorTest {
 
   @Test
   void invalidFlagCollector() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             flag = true,",
@@ -741,7 +713,6 @@ class CollectorTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile();
