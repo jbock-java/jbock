@@ -8,7 +8,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 @CommandLineArguments
-public abstract class OptionalIntArguments {
+abstract class OptionalIntArguments {
 
   private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
 

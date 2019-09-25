@@ -899,6 +899,27 @@ class MapperTest {
   }
 
   @Test
+  void mapperValidStringListTypevar() {
+    List<String> sourceLines = withImports(
+        "@CommandLineArguments",
+        "abstract class ValidArguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract List<String> number();",
+        "",
+        "  static class Mapper<E> implements Supplier<Function<E, List<E>>> {",
+        "    public Function<E, List<E>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void implicitMapperOptionalInt() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
