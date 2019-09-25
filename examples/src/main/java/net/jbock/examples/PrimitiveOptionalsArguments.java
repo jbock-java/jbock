@@ -12,22 +12,22 @@ import java.util.function.Supplier;
 @CommandLineArguments
 abstract class PrimitiveOptionalsArguments {
 
-  @Parameter(shortName = 'I', mappedBy = IntegerMapper.class, optional = true)
+  @Parameter(shortName = 'I', mappedBy = IntegerMapper.class)
   abstract OptionalInt simpleInt();
 
-  @Parameter(shortName = 'L', mappedBy = LongMapper.class, optional = true)
+  @Parameter(shortName = 'L', mappedBy = LongMapper.class)
   abstract OptionalLong simpleLong();
 
-  @Parameter(shortName = 'D', mappedBy = DoubleMapper.class, optional = true)
+  @Parameter(shortName = 'D', mappedBy = DoubleMapper.class)
   abstract OptionalDouble simpleDouble();
 
-  @Parameter(shortName = 'i', mappedBy = IntegerMapper.class, optional = true)
+  @Parameter(shortName = 'i', mappedBy = IntegerMapper.class)
   abstract OptionalInt mappedInt();
 
-  @Parameter(shortName = 'l', mappedBy = LongMapper.class, optional = true)
+  @Parameter(shortName = 'l', mappedBy = LongMapper.class)
   abstract OptionalLong mappedLong();
 
-  @Parameter(shortName = 'd', mappedBy = DoubleMapper.class, optional = true)
+  @Parameter(shortName = 'd', mappedBy = DoubleMapper.class)
   abstract OptionalDouble mappedDouble();
 
   static class IntegerMapper implements Supplier<Function<String, Integer>> {

@@ -19,10 +19,8 @@ abstract class MyArguments {
 ````
 
 Note that `path` is a required parameter, because its type is not `Optional<Path>`.
-The correspondence of optional parameters to optional types,
-and required parameters to all other types, can also be made explicit by setting the
-`optional` attribute to `true`.
-The general rule is easy to remember by the slogan that *jbock never returns null*.
+The general rule regarding optional types is easy to remember by the slogan that
+*jbock never returns null*.
 
 After adding such a model class to your project,
 you have to **build once** to trigger the code generation.
@@ -219,16 +217,6 @@ one of these four types:
 abstract Optional<String> file();
 ````
 
-If you want to be more explicit,
-you can also set the `optional` attribute
-in addition to that:
-
-````java
-@Parameter(shortName = 'f', optional = true)
-abstract Optional<String> file();
-````
-
-
 ### Repeatable parameters
 
 Repeatable parameters are <a href="#binding-parameters">*binding parameters*</a>
@@ -252,14 +240,6 @@ assertEquals(List.of("Content-Type: application/json",
 
 To declare a repeatable parameter, simply
 make the corresponding model method return a `List`.
-
-You can also be more explicit by setting the
-`repeatable` attribute:
-
-````java
-@Parameter(shortName = 'X', repeatable = true)
-abstract List<String> headers();
-````
 
 ### Parameter shapes
 
@@ -349,16 +329,14 @@ class PositiveNumberMapper implements Function<String, Integer> {
 The same mapper can also be used for
 <a href="#required-and-optional-parameters">*optional*</a>
 and <a href="#repeatable-parameters">*repeatable*</a> parameters.
-If a parameter has a mapper, the attribute `optional` or `repeatable`
-must be set explicitly.
 
 ````java
-@Parameter(shortName = 'o', mappedBy = PositiveNumberMapper.class, optional = true)
+@Parameter(shortName = 'o', mappedBy = PositiveNumberMapper.class)
 abstract Optional<Integer> optionalNumber();
 ````
 
 ````java
-@Parameter(shortName = 'x', mappedBy = PositiveNumberMapper.class, repeatable = true)
+@Parameter(shortName = 'x', mappedBy = PositiveNumberMapper.class)
 abstract List<Integer> numbers();
 ````
 
@@ -371,8 +349,7 @@ By using a custom collector, it is possible to create a
 builds a `Map`:
 
 ````java
-@Parameter(repeatable = true, 
-           shortName = 'X',
+@Parameter(shortName = 'X',
            mappedBy = MapTokenizer.class,
            collectedBy = MapCollector.class)
 abstract Map<String, String> headers();

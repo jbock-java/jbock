@@ -183,18 +183,10 @@ final class Param {
     checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
     ParamName name = enumConstant(params, sourceMethod);
-    boolean flag = isInferredFlag(mapperClass, collectorClass, parameter.flag(), sourceMethod.getReturnType(), tool);
+    boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
     InferredAttributes attributes = InferredAttributes.infer(sourceMethod.getReturnType(), tool);
     Coercion coercion;
     if (flag) {
-      if (mapperClass != null) {
-        throw ValidationException.create(sourceMethod,
-            "A flag parameter can't have a mapper.");
-      }
-      if (collectorClass != null) {
-        throw ValidationException.create(sourceMethod,
-            "A flag parameter can't have a collector.");
-      }
       if (!parameter.descriptionArgumentName().isEmpty()) {
         throw ValidationException.create(sourceMethod,
             "A flag cannot have a description argument name.");
@@ -266,14 +258,13 @@ final class Param {
   private static boolean isInferredFlag(
       Object mapperClass,
       Object collectorClass,
-      boolean flag,
       TypeMirror mirror,
       TypeTool tool) {
     if (mapperClass != null || collectorClass != null) {
       // no inferring
-      return flag;
+      return false;
     }
-    return flag || isInferredFlag(tool, mirror);
+    return isInferredFlag(tool, mirror);
   }
 
   private static boolean isInferredFlag(TypeTool tool, TypeMirror mirror) {
@@ -411,7 +402,10 @@ final class Param {
   }
 
   PositionalRank positionalOrder() {
-    if (repeatable) {
+    if (!positionalIndex.isPresent()) {
+      throw new AssertionError();
+    }
+    if (repeatable()) {
       return PositionalRank.LIST;
     }
     return optional ? PositionalRank.OPTIONAL : PositionalRank.REQUIRED;
@@ -463,6 +457,10 @@ final class Param {
       return OptionType.FLAG;
     }
     return OptionType.REGULAR;
+  }
+
+  boolean optional() {
+    return optional;
   }
 }
 

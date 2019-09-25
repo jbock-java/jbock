@@ -270,4 +270,8 @@ final class Context {
     }
     return false;
   }
+
+  List<Param> positionalParameters() {
+    return positionalParameters;
+  }
 }

@@ -26,34 +26,34 @@ abstract class CustomMapperArguments {
   @Parameter(longName = "date", mappedBy = DateMapper.class)
   abstract Date date();
 
-  @Parameter(longName = "optDate", optional = true, mappedBy = DateMapper.class)
+  @Parameter(longName = "optDate", mappedBy = DateMapper.class)
   abstract Optional<Date> optDate();
 
-  @Parameter(longName = "dateList", repeatable = true, mappedBy = DateMapper.class)
+  @Parameter(longName = "dateList", mappedBy = DateMapper.class)
   abstract List<Date> dateList();
 
-  @Parameter(longName = "verbosity", optional = true, mappedBy = CustomBigIntegerMapperSupplier.class)
+  @Parameter(longName = "verbosity", mappedBy = CustomBigIntegerMapperSupplier.class)
   abstract Optional<BigInteger> verbosity();
 
   @Parameter(longName = "aRequiredInt", mappedBy = PositiveNumberMapper.class)
   abstract int aRequiredInt();
 
-  @Parameter(longName = "stringArray", optional = true, mappedBy = ArrayMapper.class)
+  @Parameter(longName = "stringArray", mappedBy = ArrayMapper.class)
   abstract Optional<String[]> stringArray();
 
-  @Parameter(longName = "integerList", optional = true, mappedBy = IntegerListMapper.class)
+  @Parameter(longName = "integerList", mappedBy = IntegerListMapper.class)
   abstract Optional<List<Integer>> integerList();
 
-  @Parameter(longName = "enumSet", optional = true, mappedBy = EnumSetMapper.class)
+  @Parameter(longName = "enumSet", mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
-  @PositionalParameter(repeatable = true, mappedBy = BooleanMapper.class)
+  @PositionalParameter(mappedBy = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
-  @Parameter(longName = "optionalInts", repeatable = true, mappedBy = OptionalIntMapper.class)
+  @Parameter(longName = "optionalInts", mappedBy = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
-  @Parameter(longName = "listWrapper", optional = true, mappedBy = ListWrapperMapper.class)
+  @Parameter(longName = "listWrapper", mappedBy = ListWrapperMapper.class)
   abstract Optional<List<String>> listWrapper();
 
   @Parameter(longName = "notFlag", mappedBy = BooleanMapper.class)

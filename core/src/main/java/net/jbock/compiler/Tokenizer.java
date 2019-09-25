@@ -257,26 +257,18 @@ final class Tokenizer {
     }
 
     for (Param param : positional) {
-      PositionalRank positionalRank = param.positionalOrder();
-      if (positionalRank == null) {
-        continue;
-      }
-      switch (positionalRank) {
-        case OPTIONAL:
-          spec.addStatement("$N.add($S)", joiner, "[<" +
-              param.descriptionArgumentName() + ">]");
-          break;
-        case REQUIRED:
-          spec.addStatement("$N.add($S)", joiner, "<" +
-              param.descriptionArgumentName() + ">");
-          break;
-        case LIST:
-          spec.addStatement("$N.add($S)", joiner, context.allowEscape() ?
-              "[[--] <" + param.descriptionArgumentNameWithDots() + ">]" :
-              "[<" + param.descriptionArgumentNameWithDots() + ">]");
-          break;
-        default:
-          throw new AssertionError();
+      if (param.optional()) {
+        spec.addStatement("$N.add($S)", joiner, "[<" +
+            param.descriptionArgumentName() + ">]");
+      } else if (param.required()) {
+        spec.addStatement("$N.add($S)", joiner, "<" +
+            param.descriptionArgumentName() + ">");
+      } else if (param.repeatable()) {
+        spec.addStatement("$N.add($S)", joiner, context.allowEscape() ?
+            "[[--] <" + param.descriptionArgumentNameWithDots() + ">]" :
+            "[<" + param.descriptionArgumentNameWithDots() + ">]");
+      } else {
+        throw new AssertionError();
       }
     }
 

@@ -12,9 +12,11 @@ import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.Properties;
 import java.util.ResourceBundle;
+import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
@@ -89,6 +91,8 @@ final class Parser {
   }
 
   static Parser create(Context context) {
+    checkOnlyOnePositionalList(context.positionalParameters());
+    checkRankConsistentWithPosition(context.positionalParameters());
     MethodSpec readNextMethod = readNextMethod();
     MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
     Option option = Option.create(context);
@@ -97,6 +101,26 @@ final class Parser {
     ParseResult parseResult = ParseResult.create(context);
     Tokenizer builder = Tokenizer.create(context, helper);
     return new Parser(context, builder, option, helper, impl, parseResult, readNextMethod, readArgumentMethod);
+  }
+
+  private static void checkOnlyOnePositionalList(List<Param> allPositional) {
+    List<Param> positionalRepeatable = allPositional.stream().filter(Param::repeatable).collect(Collectors.toList());
+    if (positionalRepeatable.size() >= 2) {
+      throw ValidationException.create(positionalRepeatable.get(0).sourceMethod,
+          "There can only be one one repeatable positional parameter.");
+    }
+  }
+
+  private static void checkRankConsistentWithPosition(List<Param> allPositional) {
+    int currentOrdinal = -1;
+    for (Param param : allPositional) {
+      if (param.positionalOrder().ordinal() < currentOrdinal) {
+        throw ValidationException.create(param.sourceMethod,
+            "Invalid position: Optional parameters must come after required parameters." +
+                "Repeatable parameters must come last.");
+      }
+      currentOrdinal = param.positionalOrder().ordinal();
+    }
   }
 
   TypeSpec define() {

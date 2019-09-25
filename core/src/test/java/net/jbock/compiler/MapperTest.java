@@ -20,7 +20,6 @@ class MapperTest {
         "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x',",
-        "             optional = true,",
         "             mappedBy = ArrayMapper.class)",
         "  abstract Optional<String[]> stringArray();",
         "",
@@ -43,7 +42,6 @@ class MapperTest {
         "abstract class ValidArguments {",
         "",
         "  @Parameter(shortName = 'x',",
-        "             optional = true,",
         "             mappedBy = ArrayMapper.class)",
         "  abstract Optional<String[]> stringArray();",
         "",
@@ -179,7 +177,6 @@ class MapperTest {
         "abstract class InvalidArguments {",
         "",
         "  @Parameter(shortName = 'x',",
-        "             flag = true,",
         "             mappedBy = FlagMapper.class)",
         "  abstract Boolean flag();",
         "",
@@ -192,8 +189,7 @@ class MapperTest {
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("flag parameter can't have a mapper");
+        .compilesWithoutError();
   }
 
   @Test
@@ -202,7 +198,7 @@ class MapperTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "",
-        "  @PositionalParameter(repeatable = true, mappedBy = BooleanMapper.class)",
+        "  @PositionalParameter(mappedBy = BooleanMapper.class)",
         "  abstract List<Boolean> booleanList();",
         "",
         "  static class BooleanMapper implements Supplier<Function<String, Boolean>> {",
@@ -778,7 +774,7 @@ class MapperTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @Parameter(shortName = 'x', repeatable = true, mappedBy = Mapper.class)",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract List<OptionalInt> numbers();",
         "",
         "  static class Mapper implements Supplier<Function<String, OptionalInt>> {",
@@ -841,7 +837,7 @@ class MapperTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @Parameter(shortName = 'x', mappedBy = Mapper.class, optional = true)",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Optional<Integer> number();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
@@ -862,7 +858,7 @@ class MapperTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @Parameter(shortName = 'x', mappedBy = Mapper.class, optional = true)",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Optional<String> number();",
         "",
         "  static class Mapper<E> implements Supplier<Function<E, E>> {",
@@ -883,7 +879,7 @@ class MapperTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @Parameter(shortName = 'x', mappedBy = Mapper.class, optional = true)",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Optional<String> number();",
         "",
         "  static class Mapper<E> implements Supplier<Function<E, Optional<E>>> {",
@@ -988,7 +984,7 @@ class MapperTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @Parameter(shortName = 'x', mappedBy = Mapper.class, optional = true)",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract OptionalInt b();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
@@ -1010,7 +1006,7 @@ class MapperTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @Parameter(shortName = 'x', repeatable = true, mappedBy = Mapper.class)",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract List<Set<Integer>> sets();",
         "",
         "  static class Mapper implements Supplier<Function<String, Set<Integer>>> {",
@@ -1032,7 +1028,6 @@ class MapperTest {
         "abstract class InvalidArguments {",
         "",
         "  @Parameter(shortName = 'x',",
-        "             repeatable = true,",
         "             mappedBy = Identity.class)",
         "  abstract List<Integer> ints();",
         "",

@@ -19,7 +19,7 @@ class PositionalTest {
         "@CommandLineArguments",
         "abstract class ValidArguments {",
         "",
-        "  @PositionalParameter(optional = true)",
+        "  @PositionalParameter",
         "  abstract Optional<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
@@ -95,8 +95,8 @@ class PositionalTest {
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
         "  @PositionalParameter abstract String a();",
-        "  @PositionalParameter(optional = true) abstract OptionalInt b();",
-        "  @PositionalParameter(position = 1, repeatable = true) abstract Optional<String> c();",
+        "  @PositionalParameter abstract OptionalInt b();",
+        "  @PositionalParameter(position = 1) abstract Optional<String> c();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -156,7 +156,7 @@ class PositionalTest {
         "abstract class ValidArguments {",
         "  @PositionalParameter abstract String b();",
         "  @PositionalParameter(position = 1) abstract Optional<String> c();",
-        "  @PositionalParameter(position = 2, repeatable = true) abstract List<String> a();",
+        "  @PositionalParameter(position = 2) abstract List<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -169,8 +169,8 @@ class PositionalTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class InvalidArguments {",
-        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
-        "  @PositionalParameter(repeatable = true) abstract List<String> b();",
+        "  @PositionalParameter(position = 1) abstract List<String> a();",
+        "  @PositionalParameter(position = 2) abstract List<String> b();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -184,7 +184,7 @@ class PositionalTest {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
         "abstract class ValidArguments {",
-        "  @PositionalParameter(repeatable = true) abstract List<String> a();",
+        "  @PositionalParameter abstract List<String> a();",
         "}");
     JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))

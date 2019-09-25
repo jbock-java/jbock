@@ -17,7 +17,6 @@ abstract class ComplicatedMapperArguments {
 
   @Parameter(
       longName = "numbers",
-      repeatable = true,
       mappedBy = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();
 

@@ -16,24 +16,22 @@ import java.util.stream.Collectors;
 @CommandLineArguments
 abstract class CustomCollectorArguments {
 
-  @Parameter(repeatable = true, shortName = 'H', collectedBy = MyStringCollector.class)
+  @Parameter(shortName = 'H', collectedBy = MyStringCollector.class)
   abstract Set<String> strings();
 
-  @Parameter(repeatable = true, shortName = 'B', collectedBy = MyIntegerCollector.class)
+  @Parameter(shortName = 'B', collectedBy = MyIntegerCollector.class)
   abstract Set<Integer> integers();
 
-  @Parameter(repeatable = true, shortName = 'K', collectedBy = ToSetCollector.class)
+  @Parameter(shortName = 'K', collectedBy = ToSetCollector.class)
   abstract Set<Money> moneySet();
 
   @Parameter(
-      repeatable = true,
       shortName = 'T',
       mappedBy = MapEntryTokenizer.class,
       collectedBy = ToMapCollector.class)
   abstract Map<String, LocalDate> dateMap();
 
   @Parameter(
-      repeatable = true,
       shortName = 'M',
       mappedBy = CustomBigIntegerMapper.class,
       collectedBy = ToSetCollector.class)

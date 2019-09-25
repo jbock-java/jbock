@@ -4,7 +4,6 @@ import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
-import java.util.OptionalDouble;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
