@@ -17,13 +17,12 @@ class ProcessorTest {
 
   @Test
   void duplicateLongName() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "  @Parameter(longName = \"x\") abstract String a();",
         "  @Parameter(longName = \"x\") abstract String b();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -32,13 +31,12 @@ class ProcessorTest {
 
   @Test
   void duplicateShortName() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "  @Parameter(shortName = 'x') abstract String a();",
         "  @Parameter(shortName = 'x') abstract String b();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -47,14 +45,13 @@ class ProcessorTest {
 
   @Test
   void unknownReturnType() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract StringBuilder a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -63,14 +60,13 @@ class ProcessorTest {
 
   @Test
   void declaredException() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract String a() throws IllegalArgumentException;",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -79,14 +75,13 @@ class ProcessorTest {
 
   @Test
   void classNotAbstract() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  String a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -95,14 +90,13 @@ class ProcessorTest {
 
   @Test
   void rawList() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract List a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -111,14 +105,13 @@ class ProcessorTest {
 
   @Test
   void rawList2() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract List a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -127,14 +120,13 @@ class ProcessorTest {
 
   @Test
   void rawOptional() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract Optional a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -143,14 +135,13 @@ class ProcessorTest {
 
   @Test
   void rawOptional2() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract Optional a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -159,14 +150,13 @@ class ProcessorTest {
 
   @Test
   void parameterizedSet() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract java.util.Set<String> a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -175,14 +165,13 @@ class ProcessorTest {
 
   @Test
   void integerArray() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract int[] a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -191,14 +180,13 @@ class ProcessorTest {
 
   @Test
   void utilDate() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract java.util.Date a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -207,12 +195,11 @@ class ProcessorTest {
 
   @Test
   void interfaceNotClass() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "interface InvalidArguments {",
+        "interface Arguments {",
         "  abstract String a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -221,13 +208,12 @@ class ProcessorTest {
 
   @Test
   void whitespaceInName() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "  @Parameter(longName = \"a \")",
         "  abstract String a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -236,11 +222,10 @@ class ProcessorTest {
 
   @Test
   void noMethods() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -248,12 +233,11 @@ class ProcessorTest {
 
   @Test
   void escapeAllowedButNoPositionalArgumentsDefined() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments(allowEscapeSequence = true)",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "  @Parameter(shortName = 'a') abstract int a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -262,14 +246,13 @@ class ProcessorTest {
 
   @Test
   void oneOptionalIntNotOptional() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract OptionalInt b();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -277,14 +260,13 @@ class ProcessorTest {
 
   @Test
   void oneOptionalInt() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract OptionalInt b();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -292,14 +274,13 @@ class ProcessorTest {
 
   @Test
   void simpleFlag() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract boolean x();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -307,14 +288,13 @@ class ProcessorTest {
 
   @Test
   void simpleInt() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract int aRequiredInt();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -322,32 +302,30 @@ class ProcessorTest {
 
   @Test
   void extendsNotAllowed() {
-    List<String> sourceLines = withImports(
-        "abstract class Outer {",
+    JavaFileObject javaFile = fromSource(
+        "abstract class Arguments {",
         "",
         "  @CommandLineArguments",
-        "  static abstract class InvalidArguments extends Outer {",
+        "  static abstract class Foo extends Arguments {",
         "    abstract String a();",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Outer", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class may not extend test.Outer");
+        .withErrorContaining("The class may not extend test.Arguments");
   }
 
   @Test
   void implementsNotAllowed() {
-    List<String> sourceLines = withImports(
-        "interface Outer {",
+    JavaFileObject javaFile = fromSource(
+        "interface Arguments {",
         "",
         "  @CommandLineArguments",
-        "  abstract class InvalidArguments implements Outer {",
+        "  abstract class Foo implements Arguments {",
         "    abstract String a();",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Outer", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -356,11 +334,10 @@ class ProcessorTest {
 
   @Test
   void missingCommandLineArgumentsAnnotation() {
-    List<String> sourceLines = withImports(
-        "abstract class InvalidArguments {",
+    JavaFileObject javaFile = fromSource(
+        "abstract class Arguments {",
         "  @Parameter(longName = \"a\") abstract String a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -369,14 +346,13 @@ class ProcessorTest {
 
   @Test
   void noNames() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter",
         "  abstract String a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -385,14 +361,13 @@ class ProcessorTest {
 
   @Test
   void annotatedMethodNotAbstract() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  String a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -401,12 +376,11 @@ class ProcessorTest {
 
   @Test
   void abstractMethodHasParameter() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "  @Parameter abstract String a(int b, int c);",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -415,12 +389,11 @@ class ProcessorTest {
 
   @Test
   void typeParameter() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "  @Parameter abstract <E> String a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -429,11 +402,10 @@ class ProcessorTest {
 
   @Test
   void warningNoMethods() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError()
@@ -442,13 +414,12 @@ class ProcessorTest {
 
   @Test
   void missingAnnotation() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  abstract List<String> a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -457,14 +428,13 @@ class ProcessorTest {
 
   @Test
   void flagNotDeclared() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'a')",
         "  abstract boolean hello();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -472,7 +442,7 @@ class ProcessorTest {
 
   @Test
   void nearNameCollision() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
@@ -482,7 +452,6 @@ class ProcessorTest {
         "  @Parameter(longName = \"f_ancy\")",
         "  abstract String f_ancy();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -490,15 +459,14 @@ class ProcessorTest {
 
   @Test
   void doubleAnnotation() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  @PositionalParameter",
         "  abstract List<String> a();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -507,9 +475,9 @@ class ProcessorTest {
 
   @Test
   void twoLists() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract List<String> a();",
@@ -517,7 +485,6 @@ class ProcessorTest {
         "  @PositionalParameter",
         "  abstract List<String> b();",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -525,9 +492,9 @@ class ProcessorTest {
 
   @Test
   void innerEnum() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract Foo foo();",
@@ -536,7 +503,6 @@ class ProcessorTest {
         "    BAR",
         "   }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -544,9 +510,9 @@ class ProcessorTest {
 
   @Test
   void privateEnum() {
-    List<String> sourceLines = withImports(
+    JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x')",
         "  abstract Foo foo();",
@@ -555,11 +521,15 @@ class ProcessorTest {
         "    BAR",
         "   }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("The enum may not be private.");
+  }
+
+  static JavaFileObject fromSource(String... lines) {
+    List<String> sourceLines = withImports(lines);
+    return forSourceLines("test.Arguments", sourceLines);
   }
 
   static List<String> withImports(String... lines) {
