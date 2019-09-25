@@ -109,7 +109,7 @@ public class CoercionProvider {
       extractExpr = p -> CodeBlock.of("$N", p);
     }
     if (mapperType == null) {
-      throw basicInfo.asValidationException("Unknown parameter type. Define a custom mapper.");
+      throw basicInfo.asValidationException("Unknown parameter type. Try defining a custom mapper or collector.");
     }
     TypeMirror constructorParamType = LiftedType.lift(basicInfo.originalReturnType(), tool()).liftedType();
     return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, optional);

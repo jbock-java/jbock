@@ -105,7 +105,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
 
@@ -119,7 +119,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test
@@ -132,7 +132,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test

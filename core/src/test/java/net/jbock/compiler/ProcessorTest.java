@@ -55,7 +55,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test
@@ -100,7 +100,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test
@@ -115,7 +115,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test
@@ -130,7 +130,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test
@@ -145,7 +145,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test
@@ -160,7 +160,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test
@@ -175,7 +175,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test
@@ -190,7 +190,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type. Define a custom mapper.");
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test
@@ -427,17 +427,18 @@ class ProcessorTest {
   }
 
   @Test
-  void flagNotDeclared() {
+  void positionalFlag() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
-        "  @Parameter(shortName = 'a')",
+        "  @PositionalParameter",
         "  abstract boolean hello();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("Unknown parameter type.");
   }
 
   @Test
