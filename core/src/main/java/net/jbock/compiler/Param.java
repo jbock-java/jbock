@@ -49,10 +49,6 @@ final class Param {
 
   private final OptionalInt positionalIndex;
 
-  private final boolean optional;
-
-  private final boolean repeatable;
-
   boolean isFlag() {
     return paramType == OptionType.FLAG;
   }
@@ -117,12 +113,11 @@ final class Param {
       OptionType paramType,
       ExecutableElement sourceMethod,
       ParamName name,
-      String bundleKey, Coercion coercion,
+      String bundleKey,
+      Coercion coercion,
       List<String> description,
       String descriptionArgumentName,
-      OptionalInt positionalIndex,
-      boolean optional,
-      boolean repeatable) {
+      OptionalInt positionalIndex) {
     this.bundleKey = bundleKey;
     this.coercion = coercion;
     this.shortName = shortName;
@@ -133,8 +128,6 @@ final class Param {
     this.description = description;
     this.descriptionArgumentName = descriptionArgumentName;
     this.positionalIndex = positionalIndex;
-    this.optional = optional;
-    this.repeatable = repeatable;
     TypeTool tool = TypeTool.get();
     TypeMirror returnType = sourceMethod.getReturnType();
     boolean itsBoolean = tool.isSameType(returnType, tool.getPrimitiveType(TypeKind.BOOLEAN)) ||
@@ -212,9 +205,7 @@ final class Param {
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
-        OptionalInt.empty(),
-        coercion.optional(),
-        repeatable);
+        OptionalInt.empty());
   }
 
   private static Param createPositional(
@@ -247,9 +238,7 @@ final class Param {
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
-        OptionalInt.of(positionalIndex),
-        optional,
-        repeatable);
+        OptionalInt.of(positionalIndex));
   }
 
   /**
@@ -390,7 +379,7 @@ final class Param {
   }
 
   boolean required() {
-    return !repeatable && !coercion.optional() && !isFlag();
+    return !repeatable() && !optional() && !isFlag();
   }
 
   boolean repeatable() {
@@ -408,7 +397,7 @@ final class Param {
     if (repeatable()) {
       return PositionalRank.LIST;
     }
-    return optional ? PositionalRank.OPTIONAL : PositionalRank.REQUIRED;
+    return optional() ? PositionalRank.OPTIONAL : PositionalRank.REQUIRED;
   }
 
   // visible for testing
@@ -460,7 +449,7 @@ final class Param {
   }
 
   boolean optional() {
-    return optional;
+    return coercion.optional();
   }
 }
 

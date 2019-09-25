@@ -17,7 +17,7 @@ class MapperTest {
   void validStringArraySupplier() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = ArrayMapper.class)",
@@ -29,7 +29,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -39,7 +39,7 @@ class MapperTest {
   void validStringArray() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = ArrayMapper.class)",
@@ -51,7 +51,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -61,7 +61,7 @@ class MapperTest {
   void validMapperWithTypeParameters() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = IdentityMapper.class)",
@@ -73,7 +73,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -83,7 +83,7 @@ class MapperTest {
   void invalidMapperTypeParameterWithBounds() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = IdentityMapper.class)",
@@ -95,7 +95,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -106,7 +106,7 @@ class MapperTest {
   void validMapperTypeParameterWithBounds() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = IdentityMapper.class)",
@@ -118,7 +118,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -128,7 +128,7 @@ class MapperTest {
   void validMapperTypeParameterSupplierWithBounds() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = IdentityMapper.class)",
@@ -140,7 +140,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -150,7 +150,7 @@ class MapperTest {
   void invalidMapperTypeParameterSupplierWithBounds() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = IdentityMapper.class)",
@@ -162,7 +162,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -174,7 +174,7 @@ class MapperTest {
   void invalidFlagMapper() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = FlagMapper.class)",
@@ -186,7 +186,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -196,7 +196,7 @@ class MapperTest {
   void validBooleanList() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @PositionalParameter(mappedBy = BooleanMapper.class)",
         "  abstract List<Boolean> booleanList();",
@@ -208,7 +208,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -218,7 +218,7 @@ class MapperTest {
   void invalidBounds() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @PositionalParameter(mappedBy = BoundMapper.class)",
         "  abstract String a();",
@@ -230,7 +230,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -241,7 +241,7 @@ class MapperTest {
   void invalidBoundsLong() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -254,7 +254,7 @@ class MapperTest {
         "",
         "  interface Katz<ZK> extends Supplier<Function<String, ZK>> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -265,7 +265,7 @@ class MapperTest {
   void invalidBoundsLong2() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -280,7 +280,7 @@ class MapperTest {
         "  interface B<VN, WN> extends C<VN, WN> { }",
         "  interface C<PRT, QRT> extends Supplier<Function<PRT, QRT>> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -291,7 +291,7 @@ class MapperTest {
   void validBounds() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @PositionalParameter(mappedBy = BoundMapper.class)",
         "  abstract String a();",
@@ -305,7 +305,7 @@ class MapperTest {
         "",
         "  interface Katz<OR> extends Supplier<Function<OR, OR>> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -315,7 +315,7 @@ class MapperTest {
   void mapperInvalidPrivateConstructor() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -329,7 +329,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -340,7 +340,7 @@ class MapperTest {
   void mapperInvalidNoDefaultConstructor() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -354,7 +354,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -365,7 +365,7 @@ class MapperTest {
   void mapperInvalidConstructorException() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -379,7 +379,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -390,7 +390,7 @@ class MapperTest {
   void mapperInvalidNonstaticInnerClass() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -401,7 +401,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -412,7 +412,7 @@ class MapperTest {
   void mapperInvalidNotStringFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -423,7 +423,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -434,7 +434,7 @@ class MapperTest {
   void mapperInvalidReturnsString() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -445,7 +445,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -456,7 +456,7 @@ class MapperTest {
   void mapperValidTypevars() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Supplier<String> string();",
@@ -467,7 +467,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -477,7 +477,7 @@ class MapperTest {
   void mapperValidNestedTypevars() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Supplier<Optional<String>> string();",
@@ -488,7 +488,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -498,7 +498,7 @@ class MapperTest {
   void mapperValidExtendsFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -512,7 +512,7 @@ class MapperTest {
         "  interface StringFunction<V, X> extends Function<V, X> {}",
         "",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -522,7 +522,7 @@ class MapperTest {
   void mapperInvalidStringFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -536,7 +536,7 @@ class MapperTest {
         "  interface StringFunction<R> extends Function<Long, R> {}",
         "",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -547,7 +547,7 @@ class MapperTest {
   void mapperValidComplicatedTree() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -570,7 +570,7 @@ class MapperTest {
         "  interface Zap<T, B, A> extends Xi<A, T, B> { }",
         "  interface Xi<A, T, B> extends Function<B, A> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -580,7 +580,7 @@ class MapperTest {
   void testMapperTypeSudokuInvalid() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract List<List<Integer>> number();",
@@ -589,7 +589,7 @@ class MapperTest {
         "  interface FooSupplier<K> extends Supplier<Foo<K>> { }",
         "  interface Foo<X> extends Function<String, List<List<X>>> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -600,7 +600,7 @@ class MapperTest {
   void testMapperTypeSudokuValid() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract List<List<Integer>> number();",
@@ -609,7 +609,7 @@ class MapperTest {
         "  interface FooSupplier<K> extends Supplier<Foo<K>> { }",
         "  interface Foo<X> extends Function<String, List<List<X>>> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -619,7 +619,7 @@ class MapperTest {
   void mapperInvalidComplicatedTree() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -642,7 +642,7 @@ class MapperTest {
         "  interface Zap<T, B, A> extends Xi<A, T, B> { }",
         "  interface Foo<X> extends Zap<X, String, Integer> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -653,7 +653,7 @@ class MapperTest {
   void mapperInvalidNotFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -666,7 +666,7 @@ class MapperTest {
         "",
         "  interface ZapperSupplier extends Supplier<String> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -677,7 +677,7 @@ class MapperTest {
   void mapperInvalidFunctionReturnType() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -690,7 +690,7 @@ class MapperTest {
         "",
         "  interface ZapperSupplier extends Supplier<Function<String, Long>> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -701,7 +701,7 @@ class MapperTest {
   void mapperInvalidBounds() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -714,7 +714,7 @@ class MapperTest {
         "",
         "  interface ZapperSupplier<E extends java.util.Date> extends Supplier<Function<String, E>> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -725,7 +725,7 @@ class MapperTest {
   void mapperValidBounds() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -740,7 +740,7 @@ class MapperTest {
         "  interface B<X, R> extends C<X, R> { }",
         "  interface C<X, R> extends Supplier<Function<X, R>> { }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -750,7 +750,7 @@ class MapperTest {
   void mapperInvalidRawFunction() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Integer number();",
@@ -761,7 +761,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
@@ -772,7 +772,7 @@ class MapperTest {
   void mapperValid() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract List<OptionalInt> numbers();",
@@ -783,7 +783,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -793,7 +793,7 @@ class MapperTest {
   void mapperValidByte() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Byte number();",
@@ -804,7 +804,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -814,7 +814,7 @@ class MapperTest {
   void mapperValidBytePrimitive() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract byte number();",
@@ -825,7 +825,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -835,7 +835,7 @@ class MapperTest {
   void mapperValidOptionalInteger() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Optional<Integer> number();",
@@ -846,7 +846,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -856,7 +856,7 @@ class MapperTest {
   void mapperValidOptionalStringTypevar() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Optional<String> number();",
@@ -867,7 +867,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -877,7 +877,7 @@ class MapperTest {
   void mapperValidStringOptionalStringTypevar() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Optional<String> number();",
@@ -888,7 +888,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -898,7 +898,7 @@ class MapperTest {
   void mapperValidStringListTypevar() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract List<String> number();",
@@ -909,7 +909,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -919,7 +919,7 @@ class MapperTest {
   void implicitMapperOptionalInt() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract OptionalInt b();",
@@ -930,7 +930,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -940,7 +940,7 @@ class MapperTest {
   void mapperOptionalInt() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract OptionalInt b();",
@@ -951,7 +951,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -961,7 +961,7 @@ class MapperTest {
   void mapperOptionalInteger() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract Optional<Integer> b();",
@@ -972,7 +972,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -982,7 +982,7 @@ class MapperTest {
   void oneOptionalInt() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract OptionalInt b();",
@@ -993,7 +993,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -1004,7 +1004,7 @@ class MapperTest {
   void mapperValidListOfSet() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class ValidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract List<Set<Integer>> sets();",
@@ -1015,7 +1015,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.ValidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
@@ -1025,7 +1025,7 @@ class MapperTest {
   void mapperHasTypeargsImpossibleFromString() {
     List<String> sourceLines = withImports(
         "@CommandLineArguments",
-        "abstract class InvalidArguments {",
+        "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = Identity.class)",
@@ -1037,7 +1037,7 @@ class MapperTest {
         "    }",
         "  }",
         "}");
-    JavaFileObject javaFile = forSourceLines("test.InvalidArguments", sourceLines);
+    JavaFileObject javaFile = forSourceLines("test.Arguments", sourceLines);
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
