@@ -200,17 +200,17 @@ assertEquals("-f", args.file());
 <tr><td></td><td>No collector defined</td><td>Collector defined</td></tr>
 <tr><td>No mapper defined</td><td>
 <table style="border-collapse: collapse; border: 1px solid black"><!-- No mapper, no collector-->
-<tr><td>Optional&lt;X&gt;<td></td><td><i>optional</i></td></tr>
-<tr><td>List&lt;X&gt;<td></td><td><i>repeatable</i></td></tr>
-<tr><td>boolean | Boolean<td></td><td><i>flag</i></td></tr>
-<tr><td>otherwise<td></td><td><i>required</i></td></tr>
+<tr><td><code>Optional&lt;X&gt;</code>  </td><td><i>optional</i></td></tr>
+<tr><td><code>List&lt;X&gt;</code>      </td><td><i>repeatable</i></td></tr>
+<tr><td><code>boolean | Boolean</code>  </td><td><i>flag</i></td></tr>
+<tr><td>otherwise          </td><td><i>required</i></td></tr>
 </table>
 </td><td><i>repeatable</i></td></tr>
 <tr><td>Mapper defined</td><td>
 <table style="border-collapse: collapse; border: 1px solid black"><!-- Mapper, no collector-->
-<tr><td>Optional&lt;X&gt;<td></td><td><i>optional</i></td></tr>
-<tr><td>List&lt;X&gt;<td></td><td><i>repeatable</i></td></tr>
-<tr><td>otherwise<td></td><td><i>required</i></td></tr>
+<tr><td><code>Optional&lt;X&gt;</code>   </td><td><i>optional</i></td></tr>
+<tr><td><code>List&lt;X&gt;</code>       </td><td><i>repeatable</i></td></tr>
+<tr><td>otherwise           </td><td><i>required</i></td></tr>
 </table>
 </td><td><i>repeatable</i></td></tr>
 </table>
