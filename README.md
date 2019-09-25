@@ -196,24 +196,41 @@ assertEquals("-f", args.file());
 
 ### Required and optional parameters
 
+The parameter type determines the treatment of the parameter as follows:
+
 <table style="border-collapse: collapse">
-<tr><td></td><td><b>No collector defined</b></td><td><b>Collector defined</b></td></tr>
-<tr><td><b>No mapper defined</b></td><td>
+<tr>
+<td></td>
+<td><b>No mapper defined</b></td>
+<td><b>Mapper defined</b></td>
+</tr>
+<tr>
+<td><b>No collector</b></td>
+<td>
 <table style="border-collapse: collapse; border: 1px solid black"><!-- No mapper, no collector-->
-<tr><td><code>Optional&lt;X&gt;</code>  </td><td><i>optional</i></td></tr>
-<tr><td><code>List&lt;X&gt;</code>      </td><td><i>repeatable</i></td></tr>
-<tr><td><code>boolean | Boolean</code>  </td><td><i>flag</i></td></tr>
-<tr><td>otherwise          </td><td><i>required</i></td></tr>
+<tr><td><code>boolean | Boolean</code>  </td><td><i>flag*</i></td></tr>
+<tr><td><code>Optional&lt;X&gt;</code>        </td><td><i>optional</i></td></tr>
+<tr><td><code>List&lt;X&gt;</code>            </td><td><i>repeatable</i></td></tr>
+<tr><td><code>X</code>                  </td><td><i>required</i></td></tr>
 </table>
-</td><td><i>repeatable</i></td></tr>
-<tr><td><b>Mapper defined</b></td><td>
+</td>
+<td>
 <table style="border-collapse: collapse; border: 1px solid black"><!-- Mapper, no collector-->
-<tr><td><code>Optional&lt;X&gt;</code>   </td><td><i>optional</i></td></tr>
-<tr><td><code>List&lt;X&gt;</code>       </td><td><i>repeatable</i></td></tr>
-<tr><td>otherwise           </td><td><i>required</i></td></tr>
+<tr><td><code>Optional&lt;R&gt;</code>   </td><td><i>optional</i></td></tr>
+<tr><td><code>List&lt;R&gt;</code>       </td><td><i>repeatable</i></td></tr>
+<tr><td><code>R</code>             </td><td><i>required</i></td></tr>
 </table>
-</td><td><i>repeatable</i></td></tr>
+</td>
+</tr>
+<tr>
+<td><b>Collector</b></td>
+<td colspan="2" style="text-align: center"><i>repeatable</i></td>
+</tr>
 </table>
+
+`*: does not apply to positional parameters`
+
+where `X` is one of the "auto types", and `R` is the return type of the mapper.
 
 All <a href="#binding-parameters">*binding parameters*</a>
 are treated as *required* unless declared otherwise.
