@@ -12,7 +12,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-// TODO refactoring
+import static net.jbock.coerce.ParameterType.OPTIONAL;
+import static net.jbock.coerce.ParameterType.REPEATABLE;
+import static net.jbock.coerce.ParameterType.REQUIRED;
+
 class MapperAbsentCollectorAbsent {
 
   private final BasicInfo basicInfo;
@@ -21,39 +24,48 @@ class MapperAbsentCollectorAbsent {
     this.basicInfo = basicInfo;
   }
 
-  Coercion findCoercion() {
-    Optional<CodeBlock> mapExpr = findAutoMapper(tool().box(basicInfo.originalReturnType()));
-    Function<ParameterSpec, CodeBlock> extractExpr;
-    Optional<TypeMirror> listInfo = tool().unwrap(List.class, basicInfo.originalReturnType());
-    Optional<AbstractCollector> collector;
+  private class Attempt {
+
+    final TypeMirror expectedReturnType;
+    final Function<ParameterSpec, CodeBlock> extractExpr;
+    final TypeMirror constructorParamType;
+    final ParameterType parameterType;
+
+    Attempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, ParameterType parameterType) {
+      this.expectedReturnType = expectedReturnType;
+      this.extractExpr = extractExpr;
+      this.constructorParamType = constructorParamType;
+      this.parameterType = parameterType;
+    }
+
+    Optional<Coercion> findCoercion() {
+      Optional<CodeBlock> autoMapper = findAutoMapper(expectedReturnType);
+      if (!autoMapper.isPresent()) {
+        return Optional.empty();
+      }
+      MapperType mapperType = MapperType.create(expectedReturnType, autoMapper.get());
+      Optional<AbstractCollector> collector = parameterType.repeatable() ? Optional.of(new DefaultCollector(expectedReturnType)) : Optional.empty();
+      return Optional.of(Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, parameterType.optional()));
+    }
+  }
+
+  private Attempt getAttempt() {
     LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
     Optional<TypeMirror> optionalInfo = tool().unwrap(Optional.class, liftedType.liftedType());
-    boolean optional = false;
-    MapperType mapperType;
-    if (mapExpr.isPresent()) {
-      collector = Optional.empty();
-      mapperType = MapperType.create(tool().box(basicInfo.originalReturnType()), mapExpr.get());
-      extractExpr = p -> CodeBlock.of("$N", p);
-      return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, liftedType.liftedType(), optional);
-    } else if (optionalInfo.isPresent()) {
-      mapExpr = findAutoMapper(optionalInfo.get());
-      if (mapExpr.isPresent()) {
-        extractExpr = liftedType.extractExpr();
-        mapperType = MapperType.create(optionalInfo.get(), mapExpr.get());
-        optional = true;
-        collector = Optional.empty();
-        return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, liftedType.liftedType(), optional);
-      }
-    } else if (listInfo.isPresent()) {
-      mapExpr = findAutoMapper(listInfo.get());
-      if (mapExpr.isPresent()) {
-        extractExpr = p -> CodeBlock.of("$N", p);
-        mapperType = MapperType.create(listInfo.get(), mapExpr.get());
-        collector = Optional.of(new DefaultCollector(listInfo.get()));
-        return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, liftedType.liftedType(), optional);
-      }
+    if (optionalInfo.isPresent()) {
+      return new Attempt(optionalInfo.get(), liftedType.extractExpr(), liftedType.liftedType(), OPTIONAL);
     }
-    throw basicInfo.asValidationException("Unknown parameter type. Try defining a custom mapper or collector.");
+    Optional<TypeMirror> listInfo = tool().unwrap(List.class, basicInfo.originalReturnType());
+    if (listInfo.isPresent()) {
+      return new Attempt(listInfo.get(), p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REPEATABLE);
+    }
+    return new Attempt(basicInfo.originalReturnType(), p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REQUIRED);
+  }
+
+  Coercion findCoercion() {
+    Attempt attempt = getAttempt();
+    return attempt.findCoercion()
+        .orElseThrow(() -> basicInfo.asValidationException("Unknown parameter type. Try defining a custom mapper or collector."));
   }
 
 
