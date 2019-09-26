@@ -47,11 +47,11 @@ class CustomCollectorArgumentsTest {
   @Test
   void testCustomEnum() {
     CustomCollectorArguments parsed = f.parse(
-        "-K", "PEANUTS",
-        "-K", "BIG_TIME");
+        "-K", "SOME",
+        "-K", "NONE");
     assertEquals(Stream.of(
-        CustomCollectorArguments.Money.PEANUTS,
-        CustomCollectorArguments.Money.BIG_TIME).collect(toSet()),
+        CustomCollectorArguments.Giddy.SOME,
+        CustomCollectorArguments.Giddy.NONE).collect(toSet()),
         parsed.moneySet());
   }
 

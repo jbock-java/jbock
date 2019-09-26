@@ -9,7 +9,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OptionalIntArgumentsTest {
 
-
   @Test
   void testPresent() {
     OptionalIntArguments args = OptionalIntArguments_Parser.create().parseOrExit(new String[]{"-a", "1"});

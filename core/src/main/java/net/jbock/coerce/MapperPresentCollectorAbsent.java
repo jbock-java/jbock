@@ -17,22 +17,32 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static net.jbock.coerce.ParameterType.OPTIONAL;
+import static net.jbock.coerce.ParameterType.REPEATABLE;
+import static net.jbock.coerce.ParameterType.REQUIRED;
+
 class MapperPresentCollectorAbsent {
 
   private final TypeElement mapperClass;
   private final BasicInfo basicInfo;
-  private final List<Attempt> attempts = new ArrayList<>();
 
   MapperPresentCollectorAbsent(TypeElement mapperClass, BasicInfo basicInfo) {
     this.mapperClass = mapperClass;
     this.basicInfo = basicInfo;
+  }
+
+  private List<Attempt> getAttempts() {
+    List<Attempt> attempts = new ArrayList<>();
     LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
     tool().unwrap(Optional.class, liftedType.liftedType()).ifPresent(wrapped ->
-        attempts.add(new Attempt(wrapped, liftedType.extractExpr(), liftedType.liftedType(), false, true)));
+        attempts.add(new Attempt(wrapped, liftedType.extractExpr(), liftedType.liftedType(), OPTIONAL)));
     tool().unwrap(List.class, basicInfo.originalReturnType()).ifPresent(wrapped ->
-        attempts.add(new Attempt(wrapped, p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), true, false)));
-    attempts.add(new Attempt(liftedType.liftedType(), liftedType.extractExpr(), liftedType.liftedType(), false, false));
-    attempts.add(new Attempt(basicInfo.originalReturnType(), p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), false, false));
+        attempts.add(new Attempt(wrapped, p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REPEATABLE)));
+    if (!tool().isSameType(liftedType.liftedType(), basicInfo.originalReturnType())) {
+      attempts.add(new Attempt(liftedType.liftedType(), liftedType.extractExpr(), liftedType.liftedType(), REQUIRED));
+    }
+    attempts.add(new Attempt(basicInfo.originalReturnType(), p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REQUIRED));
+    return attempts;
   }
 
   private class Attempt {
@@ -40,15 +50,13 @@ class MapperPresentCollectorAbsent {
     final TypeMirror expectedReturnType;
     final Function<ParameterSpec, CodeBlock> extractExpr;
     final TypeMirror constructorParamType;
-    final boolean repeatable;
-    final boolean optional;
+    final ParameterType parameterType;
 
-    Attempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, boolean repeatable, boolean optional) {
+    Attempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, ParameterType parameterType) {
       this.expectedReturnType = expectedReturnType;
       this.extractExpr = extractExpr;
       this.constructorParamType = constructorParamType;
-      this.repeatable = repeatable;
-      this.optional = optional;
+      this.parameterType = parameterType;
     }
 
     Either<Coercion, String> findCoercion() {
@@ -57,18 +65,22 @@ class MapperPresentCollectorAbsent {
         return Either.right(((Right<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value().getMessage());
       }
       ReferenceMapperType mapperType = ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value();
-      Optional<AbstractCollector> collector = repeatable ? Optional.of(new DefaultCollector(expectedReturnType)) : Optional.empty();
-      return Either.left(Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, optional));
+      Optional<AbstractCollector> collector = parameterType.repeatable() ? Optional.of(new DefaultCollector(expectedReturnType)) : Optional.empty();
+      return Either.left(Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, parameterType.optional()));
     }
   }
 
   Coercion handleExplicitMapperNotRepeatable() {
+    List<Attempt> attempts = getAttempts();
     Either<Coercion, String> either = null;
     for (Attempt attempt : attempts) {
       either = attempt.findCoercion();
       if (either instanceof Left) {
         return ((Left<Coercion, String>) either).value();
       }
+    }
+    if (either == null) {
+      throw new AssertionError();
     }
     throw basicInfo.asValidationException(((Right<Coercion, String>) either).value());
   }

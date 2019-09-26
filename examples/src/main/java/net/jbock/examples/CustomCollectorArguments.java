@@ -23,7 +23,7 @@ abstract class CustomCollectorArguments {
   abstract Set<Integer> integers();
 
   @Parameter(shortName = 'K', collectedBy = ToSetCollector.class)
-  abstract Set<Money> moneySet();
+  abstract Set<Giddy> moneySet();
 
   @Parameter(
       shortName = 'T',
@@ -67,8 +67,8 @@ abstract class CustomCollectorArguments {
     }
   }
 
-  enum Money {
-    PEANUTS, DECENT, BIG_TIME
+  enum Giddy {
+    SOME, NONE
   }
 
   static class MyIntegerCollector implements Supplier<Collector<Integer, ?, Set<Integer>>> {
