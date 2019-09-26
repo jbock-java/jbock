@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.LiftedType;
 
 import javax.lang.model.element.Element;
@@ -23,8 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TypeTool {
 
@@ -221,7 +218,7 @@ public class TypeTool {
     return true;
   }
 
-  public boolean isAssignable(TypeMirror mirror, TypeMirror bound) {
+  private boolean isAssignable(TypeMirror mirror, TypeMirror bound) {
     return types.isAssignable(mirror, bound);
   }
 
@@ -267,7 +264,7 @@ public class TypeTool {
     return types.getPrimitiveType(kind);
   }
 
-  public boolean isSameErasure(TypeMirror x, TypeMirror y) {
+  private boolean isSameErasure(TypeMirror x, TypeMirror y) {
     return types.isSameType(types.erasure(x), types.erasure(y));
   }
 
@@ -295,7 +292,7 @@ public class TypeTool {
     return optionalOf(asTypeElement(type).asType());
   }
 
-  public TypeMirror optionalOf(TypeMirror typeMirror) {
+  private TypeMirror optionalOf(TypeMirror typeMirror) {
     return types.getDeclaredType(
         asTypeElement(Optional.class),
         typeMirror);

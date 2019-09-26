@@ -26,7 +26,7 @@ class MapperPresentCollectorAbsent {
   private final TypeElement mapperClass;
   private final BasicInfo basicInfo;
 
-  MapperPresentCollectorAbsent(TypeElement mapperClass, BasicInfo basicInfo) {
+  MapperPresentCollectorAbsent(BasicInfo basicInfo, TypeElement mapperClass) {
     this.mapperClass = mapperClass;
     this.basicInfo = basicInfo;
   }
@@ -70,7 +70,7 @@ class MapperPresentCollectorAbsent {
     }
   }
 
-  Coercion handleExplicitMapperNotRepeatable() {
+  Coercion findCoercion() {
     List<Attempt> attempts = getAttempts();
     Either<Coercion, String> either = null;
     for (Attempt attempt : attempts) {

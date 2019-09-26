@@ -63,9 +63,9 @@ public class CoercionProvider {
 
   private Coercion handleNotRepeatable() {
     if (basicInfo.mapperClass().isPresent()) {
-      return new MapperPresentCollectorAbsent(basicInfo.mapperClass().get(), basicInfo).handleExplicitMapperNotRepeatable();
+      return new MapperPresentCollectorAbsent(basicInfo, basicInfo.mapperClass().get()).findCoercion();
     } else {
-      return handleAutoMapperNotRepeatable();
+      return new MapperAbsentCollectorAbsent(basicInfo).findCoercion();
     }
   }
 
@@ -75,44 +75,6 @@ public class CoercionProvider {
     } else {
       return handleRepeatableAutoMapper();
     }
-  }
-
-  // TODO refactoring
-  private Coercion handleAutoMapperNotRepeatable() {
-    Optional<CodeBlock> mapExpr = findAutoMapper(tool().box(basicInfo.originalReturnType()));
-    Function<ParameterSpec, CodeBlock> extractExpr;
-    Optional<TypeMirror> listInfo = tool().unwrap(List.class, basicInfo.originalReturnType());
-    Optional<AbstractCollector> collector;
-    Optional<TypeMirror> optionalInfo = tool().liftingUnwrap(basicInfo.originalReturnType());
-    boolean optional = false;
-    MapperType mapperType = null;
-    if (optionalInfo.isPresent()) {
-      mapExpr = findAutoMapper(optionalInfo.get());
-      extractExpr = LiftedType.lift(basicInfo.originalReturnType(), tool()).extractExpr();
-      if (mapExpr.isPresent()) {
-        mapperType = MapperType.create(optionalInfo.get(), mapExpr.get());
-        optional = true;
-      }
-      collector = Optional.empty();
-    } else if (listInfo.isPresent()) {
-      mapExpr = findAutoMapper(listInfo.get());
-      extractExpr = p -> CodeBlock.of("$N", p);
-      if (mapExpr.isPresent()) {
-        mapperType = MapperType.create(listInfo.get(), mapExpr.get());
-      }
-      collector = Optional.of(new DefaultCollector(listInfo.get()));
-    } else {
-      collector = Optional.empty();
-      if (mapExpr.isPresent()) {
-        mapperType = MapperType.create(tool().box(basicInfo.originalReturnType()), mapExpr.get());
-      }
-      extractExpr = p -> CodeBlock.of("$N", p);
-    }
-    if (mapperType == null) {
-      throw basicInfo.asValidationException("Unknown parameter type. Try defining a custom mapper or collector.");
-    }
-    TypeMirror constructorParamType = LiftedType.lift(basicInfo.originalReturnType(), tool()).liftedType();
-    return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, optional);
   }
 
 
@@ -135,28 +97,32 @@ public class CoercionProvider {
   }
 
   private Optional<CodeBlock> findAutoMapper(TypeMirror innerType) {
-    Optional<CodeBlock> mapExpr = AutoMapper.findAutoMapper(tool(), tool().box(innerType));
+    return findAutoMapper(innerType, basicInfo);
+  }
+
+  static Optional<CodeBlock> findAutoMapper(TypeMirror innerType, BasicInfo basicInfo) {
+    Optional<CodeBlock> mapExpr = AutoMapper.findAutoMapper(basicInfo.tool(), basicInfo.tool().box(innerType));
     if (mapExpr.isPresent()) {
       return mapExpr;
     }
-    if (isEnumType(innerType)) {
+    if (isEnumType(innerType, basicInfo)) {
       return Optional.of(CodeBlock.of("$T::valueOf", innerType));
     }
     return Optional.empty();
   }
 
-  private boolean isEnumType(TypeMirror mirror) {
-    List<? extends TypeMirror> supertypes = tool().getDirectSupertypes(mirror);
+  private static boolean isEnumType(TypeMirror mirror, BasicInfo basicInfo) {
+    List<? extends TypeMirror> supertypes = basicInfo.tool().getDirectSupertypes(mirror);
     if (supertypes.isEmpty()) {
       // not an enum
       return false;
     }
     TypeMirror superclass = supertypes.get(0);
-    if (!tool().isSameErasure(superclass, tool().asType(Enum.class))) {
+    if (!basicInfo.tool().isSameErasure(superclass, Enum.class)) {
       // not an enum
       return false;
     }
-    if (tool().isPrivateType(mirror)) {
+    if (basicInfo.tool().isPrivateType(mirror)) {
       throw basicInfo.asValidationException("The enum may not be private.");
     }
     return true;
