@@ -331,6 +331,7 @@ final class Param {
     return descriptionArgumentName;
   }
 
+  // TODO remove?
   TypeName returnType() {
     return TypeName.get(sourceMethod.getReturnType());
   }
