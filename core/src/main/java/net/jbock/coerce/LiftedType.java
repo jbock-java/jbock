@@ -7,7 +7,6 @@ import net.jbock.compiler.TypeTool;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
@@ -21,23 +20,19 @@ public final class LiftedType {
   // going back i.e. int -> Integer or Optional<Integer> -> OptionalInt
   private final Function<ParameterSpec, CodeBlock> extract;
 
-  private final Optional<Class<?>> wrappedType;
-
   private LiftedType(
       Function<ParameterSpec, CodeBlock> extract,
-      TypeMirror liftedType,
-      Optional<Class<?>> wrappedType) {
+      TypeMirror liftedType) {
     this.extract = extract;
     if (liftedType.getKind().isPrimitive()) {
       throw new AssertionError("just checking");
     }
     this.liftedType = liftedType;
-    this.wrappedType = wrappedType;
   }
 
   private static LiftedType noLifting(TypeMirror type) {
     Function<ParameterSpec, CodeBlock> extract = p -> CodeBlock.of("$N", p);
-    return new LiftedType(extract, type, Optional.empty());
+    return new LiftedType(extract, type);
   }
 
   private static class OptionalMapping {
@@ -67,8 +62,7 @@ public final class LiftedType {
       if (tool.isSameType(type, e.optionalPrimitiveClass)) {
         return new LiftedType(
             e.extractOptionalPrimitive(),
-            tool.optionalOf(e.boxedNumberClass),
-            Optional.of(e.boxedNumberClass));
+            tool.optionalOf(e.boxedNumberClass));
       }
     }
     return noLifting(tool.box(type));
@@ -80,9 +74,5 @@ public final class LiftedType {
 
   Function<ParameterSpec, CodeBlock> extractExpr() {
     return extract;
-  }
-
-  public Optional<Class<?>> wrappedType() {
-    return wrappedType;
   }
 }

@@ -26,12 +26,13 @@ class MapperAbsentCollectorAbsent {
     Function<ParameterSpec, CodeBlock> extractExpr;
     Optional<TypeMirror> listInfo = tool().unwrap(List.class, basicInfo.originalReturnType());
     Optional<AbstractCollector> collector;
-    Optional<TypeMirror> optionalInfo = tool().liftingUnwrap(basicInfo.originalReturnType());
+    LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
+    Optional<TypeMirror> optionalInfo = tool().unwrap(Optional.class, liftedType.liftedType());
     boolean optional = false;
     MapperType mapperType = null;
     if (optionalInfo.isPresent()) {
       mapExpr = findAutoMapper(optionalInfo.get());
-      extractExpr = LiftedType.lift(basicInfo.originalReturnType(), tool()).extractExpr();
+      extractExpr = liftedType.extractExpr();
       if (mapExpr.isPresent()) {
         mapperType = MapperType.create(optionalInfo.get(), mapExpr.get());
         optional = true;
@@ -54,7 +55,7 @@ class MapperAbsentCollectorAbsent {
     if (mapperType == null) {
       throw basicInfo.asValidationException("Unknown parameter type. Try defining a custom mapper or collector.");
     }
-    TypeMirror constructorParamType = LiftedType.lift(basicInfo.originalReturnType(), tool()).liftedType();
+    TypeMirror constructorParamType = liftedType.liftedType();
     return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, optional);
   }
 
