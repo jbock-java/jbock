@@ -57,7 +57,7 @@ public final class LiftedType {
       new OptionalMapping(OptionalDouble.class, Double.class));
 
   // visible for testing
-  public static LiftedType lift(TypeMirror type, TypeTool tool) {
+  static LiftedType lift(TypeMirror type, TypeTool tool) {
     for (OptionalMapping e : OPT_MAP) {
       if (tool.isSameType(type, e.optionalPrimitiveClass)) {
         return new LiftedType(

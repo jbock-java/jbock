@@ -26,7 +26,7 @@ public final class Coercion {
 
   private final CodeBlock extractExpr;
 
-  private final boolean optional;
+  private final ParameterType parameterType;
 
   Coercion(
       Optional<CodeBlock> collectExpr,
@@ -34,13 +34,13 @@ public final class Coercion {
       ParameterSpec constructorParam,
       FieldSpec field,
       CodeBlock extractExpr,
-      boolean optional) {
+      ParameterType parameterType) {
     this.collectExpr = collectExpr;
     this.mapExpr = mapExpr;
     this.constructorParam = constructorParam;
     this.field = field;
     this.extractExpr = extractExpr;
-    this.optional = optional;
+    this.parameterType = parameterType;
   }
 
   static Coercion getCoercion(
@@ -49,8 +49,8 @@ public final class Coercion {
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType,
-      boolean optional) {
-    if (collector.isPresent() && optional) {
+      ParameterType parameterType) {
+    if (collector.isPresent() && !parameterType.repeatable()) {
       throw new AssertionError();
     }
     CodeBlock mapExpr = mapperType.mapExpr();
@@ -58,7 +58,7 @@ public final class Coercion {
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     Optional<CodeBlock> collectorInfo = collector.map(AbstractCollector::createCollector);
     return new Coercion(collectorInfo, mapExpr,
-        constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), optional);
+        constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), parameterType);
   }
 
   /**
@@ -86,10 +86,10 @@ public final class Coercion {
   }
 
   public boolean optional() {
-    return optional;
+    return parameterType.optional();
   }
 
   public boolean repeatable() {
-    return collectExpr.isPresent();
+    return parameterType.repeatable();
   }
 }

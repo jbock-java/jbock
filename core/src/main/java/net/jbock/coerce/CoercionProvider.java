@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static javax.lang.model.element.Modifier.FINAL;
+import static net.jbock.coerce.ParameterType.FLAG;
+import static net.jbock.coerce.ParameterType.REPEATABLE;
 
 public class CoercionProvider {
 
@@ -36,7 +38,7 @@ public class CoercionProvider {
         name,
         FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         CodeBlock.of("$N", name),
-        true);
+        FLAG);
   }
 
   public static Coercion findCoercion(
@@ -85,7 +87,7 @@ public class CoercionProvider {
     MapperType mapperType = MapperType.create(collectorInfo.inputType(), mapExpr);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
-    return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType, false);
+    return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType, REPEATABLE);
   }
 
   private Coercion handleRepeatableExplicitMapper(TypeElement mapperClass) {
@@ -93,7 +95,7 @@ public class CoercionProvider {
     ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
-    return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType, false);
+    return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType, REPEATABLE);
   }
 
   private Optional<CodeBlock> findAutoMapper(TypeMirror innerType) {
