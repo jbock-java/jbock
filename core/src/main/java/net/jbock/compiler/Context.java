@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.CommandLineArguments;
+import net.jbock.coerce.ParameterType;
 
 import javax.lang.model.element.TypeElement;
 import java.util.List;
@@ -35,10 +36,10 @@ final class Context {
   final boolean addHelp;
 
   // a set of only the non-positional param types in the sourceType
-  final Set<OptionType> nonpositionalParamTypes;
+  final Set<ParameterType> nonpositionalParamTypes;
 
   // a set of only the positional param types in the sourceType
-  final Set<OptionType> positionalParamTypes;
+  final Set<ParameterType> positionalParamTypes;
 
   // program description from javadoc, can be overridden with bundle key jbock.description
   final List<String> description;
@@ -72,8 +73,8 @@ final class Context {
       boolean allowEscape,
       boolean strict,
       boolean addHelp,
-      Set<OptionType> nonpositionalParamTypes,
-      Set<OptionType> positionalParamTypes,
+      Set<ParameterType> nonpositionalParamTypes,
+      Set<ParameterType> positionalParamTypes,
       List<String> description,
       String programName,
       String missionStatement,
@@ -124,8 +125,8 @@ final class Context {
       List<String> description,
       TypeElement sourceType,
       List<Param> parameters,
-      Set<OptionType> nonpositionalParamTypes,
-      Set<OptionType> positionalParamTypes) {
+      Set<ParameterType> nonpositionalParamTypes,
+      Set<ParameterType> positionalParamTypes) {
     boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
     List<Param> positionalParameters = parameters.stream().filter(Param::isPositional).collect(toList());
     boolean strict = !sourceType.getAnnotation(CommandLineArguments.class).allowPrefixedTokens();
@@ -192,7 +193,7 @@ final class Context {
    * or {@code OptionalInt.empty()} if there is no limit
    */
   OptionalInt maxPositional() {
-    if (positionalParamTypes.contains(OptionType.REPEATABLE)) {
+    if (positionalParamTypes.contains(ParameterType.REPEATABLE)) {
       return OptionalInt.empty();
     }
     return OptionalInt.of(positionalParameters.size());
@@ -203,7 +204,7 @@ final class Context {
   }
 
   boolean allowEscape() {
-    return allowEscape && positionalParamTypes.contains(OptionType.REPEATABLE);
+    return allowEscape && positionalParamTypes.contains(ParameterType.REPEATABLE);
   }
 
   ClassName optionParserType() {

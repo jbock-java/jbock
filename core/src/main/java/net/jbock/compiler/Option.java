@@ -191,15 +191,15 @@ final class Option {
     CodeBlock block = CodeBlock.builder().addNamed(format, map).build();
     TypeSpec.Builder spec = anonymousClassBuilder(block);
     if (!param.isPositional() &&
-        param.paramType != OptionType.REGULAR) {
+        !param.regular()) {
       spec.addMethod(parserMethod(param));
     }
-    if (param.paramType == OptionType.FLAG) {
+    if (param.isFlag()) {
       spec.addMethod(validShortTokenOverride(param));
       spec.addMethod(describeMethodFlagOverride());
     } else if (param.isPositional()) {
       spec.addMethod(describeMethodPositionalOverride());
-    } else if (param.paramType == OptionType.REPEATABLE) {
+    } else if (param.repeatable()) {
       spec.addMethod(describeMethodRepeatableOverride());
     }
     return spec.build();
@@ -232,9 +232,9 @@ final class Option {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parser")
         .addAnnotation(Override.class)
         .returns(context.optionParserType());
-    if (param.paramType == OptionType.REPEATABLE) {
+    if (param.repeatable()) {
       spec.addStatement("return new $T(this)", context.repeatableOptionParserType());
-    } else if (param.paramType == OptionType.FLAG) {
+    } else if (param.isFlag()) {
       spec.addStatement("return new $T(this)", context.flagOptionParserType());
     } else {
       spec.addStatement("return new $T(this)", context.regularOptionParserType());

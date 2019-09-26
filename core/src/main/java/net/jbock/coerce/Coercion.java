@@ -92,4 +92,8 @@ public final class Coercion {
   public boolean repeatable() {
     return parameterType.repeatable();
   }
+
+  public ParameterType parameterType() {
+    return parameterType;
+  }
 }

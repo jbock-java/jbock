@@ -8,6 +8,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.coerce.ParameterType;
 
 import java.util.Collections;
 import java.util.Map;
@@ -167,7 +168,7 @@ final class Helper {
         .addStatement("return $N($N)", readLongMethod, token)
         .endControlFlow();
 
-    if (!option.context.nonpositionalParamTypes.contains(OptionType.FLAG)) {
+    if (!option.context.nonpositionalParamTypes.contains(ParameterType.FLAG)) {
       return spec.addStatement("return $N.get($N.charAt(1))",
           shortNamesField, token).build();
     }
@@ -272,7 +273,7 @@ final class Helper {
   }
 
   private CodeBlock extractExpression(Param param) {
-    CodeBlock.Builder builder = param.paramType.getStreamExpression(this, param).toBuilder();
+    CodeBlock.Builder builder = OptionType.getStreamExpression(this, param).toBuilder();
     if (!param.isFlag()) {
       builder.add(".map($L)", param.coercion().mapExpr());
     }

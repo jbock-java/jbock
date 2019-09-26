@@ -7,10 +7,10 @@ import net.jbock.PositionalParameter;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
 import net.jbock.coerce.InferredAttributes;
+import net.jbock.coerce.ParameterType;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Collections;
@@ -33,8 +33,6 @@ final class Param {
   // can be blank
   private final char shortName;
 
-  final OptionType paramType;
-
   final ExecutableElement sourceMethod;
 
   private final ParamName name;
@@ -50,7 +48,7 @@ final class Param {
   private final OptionalInt positionalIndex;
 
   boolean isFlag() {
-    return paramType == OptionType.FLAG;
+    return coercion.parameterType().flag();
   }
 
   private static ParamName enumConstant(
@@ -95,12 +93,11 @@ final class Param {
     }
   }
 
-  private static String descriptionArgumentName(
-      OptionType paramType, boolean required, ParamName name) {
-    if (paramType == OptionType.FLAG) {
+  private static String descriptionArgumentName(ParameterType paramType, ParamName name) {
+    if (paramType.flag()) {
       return null;
     }
-    if (required) {
+    if (paramType.required()) {
       return name.snake().toUpperCase();
     } else {
       return name.snake();
@@ -110,7 +107,6 @@ final class Param {
   private Param(
       char shortName,
       String longName,
-      OptionType paramType,
       ExecutableElement sourceMethod,
       ParamName name,
       String bundleKey,
@@ -123,20 +119,10 @@ final class Param {
     this.shortName = shortName;
     this.longName = longName;
     this.sourceMethod = sourceMethod;
-    this.paramType = paramType;
     this.name = name;
     this.description = description;
     this.descriptionArgumentName = descriptionArgumentName;
     this.positionalIndex = positionalIndex;
-    TypeTool tool = TypeTool.get();
-    TypeMirror returnType = sourceMethod.getReturnType();
-    boolean itsBoolean = tool.isSameType(returnType, tool.getPrimitiveType(TypeKind.BOOLEAN)) ||
-        tool.isSameType(returnType, tool.asType(Boolean.class));
-    if (paramType == OptionType.FLAG) {
-      if (!itsBoolean) {
-        throw ValidationException.create(sourceMethod, "Flag parameters must return boolean.");
-      }
-    }
   }
 
   FieldSpec field() {
@@ -188,17 +174,13 @@ final class Param {
     } else {
       coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
     }
-    boolean repeatable = coercion.repeatable();
-    boolean required = !repeatable && !coercion.optional() && !flag;
-    OptionType type = optionType(repeatable, flag);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
-        descriptionArgumentName(type, required, name) :
+        descriptionArgumentName(coercion.parameterType(), name) :
         parameter.descriptionArgumentName();
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
         shortName,
         longName,
-        type,
         sourceMethod,
         name,
         parameter.bundleKey(),
@@ -220,18 +202,13 @@ final class Param {
     ParamName name = enumConstant(params, sourceMethod);
     InferredAttributes attributes = InferredAttributes.infer(sourceMethod.getReturnType(), tool);
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
-    boolean repeatable = coercion.repeatable();
-    boolean optional = coercion.optional();
-    boolean required = !repeatable && !optional;
-    OptionType type = optionType(repeatable, false);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
-        descriptionArgumentName(type, required, name) :
+        descriptionArgumentName(coercion.parameterType(), name) :
         parameter.descriptionArgumentName();
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
         ' ',
         null,
-        type,
         sourceMethod,
         name,
         parameter.bundleKey(),
@@ -348,7 +325,7 @@ final class Param {
   }
 
   String descriptionArgumentNameWithDots() {
-    if (paramType == OptionType.REPEATABLE) {
+    if (coercion.parameterType().repeatable()) {
       return descriptionArgumentName + "...";
     }
     return descriptionArgumentName;
@@ -375,11 +352,15 @@ final class Param {
   }
 
   boolean required() {
-    return !repeatable() && !optional() && !isFlag();
+    return coercion.parameterType().required();
   }
 
   boolean repeatable() {
     return coercion.repeatable();
+  }
+
+  boolean regular() {
+    return coercion.parameterType().required() || coercion.parameterType().optional();
   }
 
   Optional<String> bundleKey() {
@@ -432,16 +413,6 @@ final class Param {
       }
     }
     return Arrays.copyOfRange(desc, firstNonempty, lastNonempty + 1);
-  }
-
-  private static OptionType optionType(boolean repeatable, boolean flag) {
-    if (repeatable) {
-      return OptionType.REPEATABLE;
-    }
-    if (flag) {
-      return OptionType.FLAG;
-    }
-    return OptionType.REGULAR;
   }
 
   boolean optional() {

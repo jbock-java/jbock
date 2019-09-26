@@ -6,6 +6,7 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
+import net.jbock.coerce.ParameterType;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -105,8 +106,8 @@ public final class Processor extends AbstractProcessor {
               "Define at least one abstract method", sourceType);
         }
 
-        Set<OptionType> nonpositionalParamTypes = nonpositionalParamTypes(parameters);
-        Set<OptionType> positionalParamTypes = positionalParamTypes(parameters);
+        Set<ParameterType> nonpositionalParamTypes = nonpositionalParamTypes(parameters);
+        Set<ParameterType> positionalParamTypes = positionalParamTypes(parameters);
         Context context = Context.create(
             generatedClass,
             getOverview(sourceType),
@@ -124,20 +125,20 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static Set<OptionType> nonpositionalParamTypes(List<Param> parameters) {
-    Set<OptionType> paramTypes = EnumSet.noneOf(OptionType.class);
+  private static Set<ParameterType> nonpositionalParamTypes(List<Param> parameters) {
+    Set<ParameterType> paramTypes = EnumSet.noneOf(ParameterType.class);
     parameters.stream()
         .filter(p -> !p.isPositional())
-        .map(p -> p.paramType)
+        .map(p -> p.coercion().parameterType())
         .forEach(paramTypes::add);
     return paramTypes;
   }
 
-  private static Set<OptionType> positionalParamTypes(List<Param> parameters) {
-    Set<OptionType> paramTypes = EnumSet.noneOf(OptionType.class);
+  private static Set<ParameterType> positionalParamTypes(List<Param> parameters) {
+    Set<ParameterType> paramTypes = EnumSet.noneOf(ParameterType.class);
     parameters.stream()
         .filter(Param::isPositional)
-        .map(p -> p.paramType)
+        .map(p -> p.coercion().parameterType())
         .forEach(paramTypes::add);
     return paramTypes;
   }
