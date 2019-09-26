@@ -393,7 +393,6 @@ final class Tokenizer {
 
     // handle unknown token
     if (context.strict) {
-      // disallow tokens that start with a dash
       spec.beginControlFlow("if ($N.charAt(0) == '-')", token)
           .addStatement(throwInvalidOptionStatement(token))
           .endControlFlow();

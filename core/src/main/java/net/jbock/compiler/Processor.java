@@ -226,12 +226,6 @@ public final class Processor extends AbstractProcessor {
             "Define a positional parameter, or disable the escape sequence.");
       }
     }
-    if (annotation.allowPrefixedTokens()) {
-      if (allPositional.isEmpty()) {
-        throw ValidationException.create(sourceType,
-            "Define a positional parameter, or disallow prefixed tokens.");
-      }
-    }
   }
 
   private void checkExactlyOneAnnotation(List<ExecutableElement> abstractMethods) {

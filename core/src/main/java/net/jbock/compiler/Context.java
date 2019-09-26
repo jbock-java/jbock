@@ -5,31 +5,30 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.CommandLineArguments;
 import net.jbock.coerce.ParameterType;
 
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
-
-import static java.util.stream.Collectors.toList;
 
 final class Context {
 
   // the annotated class
   final TypeElement sourceType;
 
-  // the *_Parser class that will be generated
+  // the name of the class that will be generated
   final ClassName generatedClass;
 
-  // corresponds to _all_ abstract methods of the source type (in source order, inheritance not considered)
+  // corresponds to all parameter methods
   final List<Param> parameters;
 
-  // only the methods that have the Positional annotation (in source order, inheritance not considered)
-  private final List<Param> positionalParameters;
+  // number of methods that have the Positional annotation
+  private final int numPositionalParameters;
 
-  // should "--" end option parsing
+  // whether "--" should end option parsing
   private final boolean allowEscape;
 
-  // should unknown parameters that start with dash be forbidden
+  // whether unknown tokens that start with dash should be accepted as positional parameters
   final boolean strict;
 
   // true if --help is a special token
@@ -69,7 +68,7 @@ final class Context {
       TypeElement sourceType,
       ClassName generatedClass,
       List<Param> parameters,
-      List<Param> positionalParameters,
+      int numPositionalParameters,
       boolean allowEscape,
       boolean strict,
       boolean addHelp,
@@ -95,7 +94,7 @@ final class Context {
     this.sourceType = sourceType;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
-    this.positionalParameters = positionalParameters;
+    this.numPositionalParameters = numPositionalParameters;
     this.allowEscape = allowEscape;
     this.strict = strict;
     this.addHelp = addHelp;
@@ -128,8 +127,8 @@ final class Context {
       Set<ParameterType> nonpositionalParamTypes,
       Set<ParameterType> positionalParamTypes) {
     boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
-    List<Param> positionalParameters = parameters.stream().filter(Param::isPositional).collect(toList());
-    boolean strict = !sourceType.getAnnotation(CommandLineArguments.class).allowPrefixedTokens();
+    long positionalParameters = parameters.stream().filter(Param::isPositional).count();
+    boolean strict = positionalParameters > 0 && !sourceType.getAnnotation(CommandLineArguments.class).allowPrefixedTokens();
     boolean addHelp = sourceType.getAnnotation(CommandLineArguments.class).allowHelpOption();
     String missionStatement = sourceType.getAnnotation(CommandLineArguments.class).missionStatement();
     ClassName optionType = generatedClass.nestedClass("Option");
@@ -151,7 +150,7 @@ final class Context {
         sourceType,
         generatedClass,
         parameters,
-        positionalParameters,
+        Long.valueOf(positionalParameters).intValue(),
         allowEscape,
         strict,
         addHelp,
@@ -180,12 +179,10 @@ final class Context {
     if (!annotation.programName().isEmpty()) {
       return annotation.programName();
     }
-    switch (sourceType.getNestingKind()) {
-      case MEMBER:
-        return sourceType.getEnclosingElement().getSimpleName().toString();
-      default:
-        return sourceType.getSimpleName().toString();
+    if (sourceType.getNestingKind() == NestingKind.MEMBER) {
+      return sourceType.getEnclosingElement().getSimpleName().toString();
     }
+    return sourceType.getSimpleName().toString();
   }
 
   /**
@@ -196,11 +193,11 @@ final class Context {
     if (positionalParamTypes.contains(ParameterType.REPEATABLE)) {
       return OptionalInt.empty();
     }
-    return OptionalInt.of(positionalParameters.size());
+    return OptionalInt.of(numPositionalParameters);
   }
 
   boolean hasPositional() {
-    return !positionalParameters.isEmpty();
+    return numPositionalParameters > 0;
   }
 
   boolean allowEscape() {
@@ -270,9 +267,5 @@ final class Context {
       }
     }
     return false;
-  }
-
-  List<Param> positionalParameters() {
-    return positionalParameters;
   }
 }
