@@ -567,7 +567,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper should return List<Integer> but returns List<List<X>>");
+        .withErrorContaining("There is a problem with the mapper class");
   }
 
   @Test

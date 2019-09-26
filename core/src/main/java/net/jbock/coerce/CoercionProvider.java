@@ -63,7 +63,7 @@ public class CoercionProvider {
 
   private Coercion handleNotRepeatable() {
     if (basicInfo.mapperClass().isPresent()) {
-      return new ExplicitMapperNotRepeatableHandler(basicInfo.mapperClass().get(), basicInfo).handleExplicitMapperNotRepeatable();
+      return new MapperPresentCollectorAbsent(basicInfo.mapperClass().get(), basicInfo).handleExplicitMapperNotRepeatable();
     } else {
       return handleAutoMapperNotRepeatable();
     }

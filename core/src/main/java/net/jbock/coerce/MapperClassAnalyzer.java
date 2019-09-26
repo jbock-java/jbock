@@ -8,7 +8,6 @@ import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.coerce.reference.AbstractReferencedType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
@@ -44,8 +43,8 @@ final class MapperClassAnalyzer {
       this.message = message;
     }
 
-    ValidationException boom(BasicInfo basicInfo) {
-      return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
+    String getMessage() {
+      return String.format("There is a problem with the mapper class: %s.", message);
     }
   }
 
