@@ -29,35 +29,33 @@ class MapperAbsentCollectorAbsent {
     LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
     Optional<TypeMirror> optionalInfo = tool().unwrap(Optional.class, liftedType.liftedType());
     boolean optional = false;
-    MapperType mapperType = null;
-    if (optionalInfo.isPresent()) {
+    MapperType mapperType;
+    if (mapExpr.isPresent()) {
+      collector = Optional.empty();
+      mapperType = MapperType.create(tool().box(basicInfo.originalReturnType()), mapExpr.get());
+      extractExpr = p -> CodeBlock.of("$N", p);
+      return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, liftedType.liftedType(), optional);
+    } else if (optionalInfo.isPresent()) {
       mapExpr = findAutoMapper(optionalInfo.get());
-      extractExpr = liftedType.extractExpr();
       if (mapExpr.isPresent()) {
+        extractExpr = liftedType.extractExpr();
         mapperType = MapperType.create(optionalInfo.get(), mapExpr.get());
         optional = true;
+        collector = Optional.empty();
+        return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, liftedType.liftedType(), optional);
       }
-      collector = Optional.empty();
     } else if (listInfo.isPresent()) {
       mapExpr = findAutoMapper(listInfo.get());
-      extractExpr = p -> CodeBlock.of("$N", p);
       if (mapExpr.isPresent()) {
+        extractExpr = p -> CodeBlock.of("$N", p);
         mapperType = MapperType.create(listInfo.get(), mapExpr.get());
+        collector = Optional.of(new DefaultCollector(listInfo.get()));
+        return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, liftedType.liftedType(), optional);
       }
-      collector = Optional.of(new DefaultCollector(listInfo.get()));
-    } else {
-      collector = Optional.empty();
-      if (mapExpr.isPresent()) {
-        mapperType = MapperType.create(tool().box(basicInfo.originalReturnType()), mapExpr.get());
-      }
-      extractExpr = p -> CodeBlock.of("$N", p);
     }
-    if (mapperType == null) {
-      throw basicInfo.asValidationException("Unknown parameter type. Try defining a custom mapper or collector.");
-    }
-    TypeMirror constructorParamType = liftedType.liftedType();
-    return Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, optional);
+    throw basicInfo.asValidationException("Unknown parameter type. Try defining a custom mapper or collector.");
   }
+
 
   private Optional<CodeBlock> findAutoMapper(TypeMirror innerType) {
     return CoercionProvider.findAutoMapper(innerType, basicInfo);
