@@ -39,7 +39,7 @@ class MapperAbsentCollectorAbsent {
     }
 
     Optional<Coercion> findCoercion() {
-      Optional<CodeBlock> autoMapper = findAutoMapper(expectedReturnType);
+      Optional<CodeBlock> autoMapper = CoercionProvider.findAutoMapper(expectedReturnType, basicInfo);
       if (!autoMapper.isPresent()) {
         return Optional.empty();
       }
@@ -66,11 +66,6 @@ class MapperAbsentCollectorAbsent {
     Attempt attempt = getAttempt();
     return attempt.findCoercion()
         .orElseThrow(() -> basicInfo.asValidationException("Unknown parameter type. Try defining a custom mapper or collector."));
-  }
-
-
-  private Optional<CodeBlock> findAutoMapper(TypeMirror innerType) {
-    return CoercionProvider.findAutoMapper(innerType, basicInfo);
   }
 
   private TypeTool tool() {
