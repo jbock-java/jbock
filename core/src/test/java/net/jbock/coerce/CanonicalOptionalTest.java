@@ -13,15 +13,15 @@ import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class LiftedTypeTest {
+class CanonicalOptionalTest {
 
   @Test
   void testLiftOptionalInt() {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeMirror optionalInt = elements.getTypeElement(OptionalInt.class.getCanonicalName()).asType();
-      Optional<LiftedType> opt = LiftedType.unwrapOptional(optionalInt, new TypeTool(elements, types));
+      Optional<CanonicalOptional> opt = CanonicalOptional.unwrap(optionalInt, new TypeTool(elements, types));
       assertTrue(opt.isPresent());
-      TypeMirror liftedType = opt.get().liftedType();
+      TypeMirror liftedType = opt.get().canonicalType();
       assertSameType("java.util.Optional<java.lang.Integer>", liftedType, elements, types);
     });
   }
@@ -30,7 +30,7 @@ class LiftedTypeTest {
   void testLiftPrimitiveInt() {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeMirror primitiveInt = types.getPrimitiveType(TypeKind.INT);
-      Optional<LiftedType> opt = LiftedType.unwrapOptional(primitiveInt, new TypeTool(elements, types));
+      Optional<CanonicalOptional> opt = CanonicalOptional.unwrap(primitiveInt, new TypeTool(elements, types));
       assertFalse(opt.isPresent());
     });
   }
@@ -39,7 +39,7 @@ class LiftedTypeTest {
   void testLiftString() {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeMirror string = elements.getTypeElement(String.class.getCanonicalName()).asType();
-      Optional<LiftedType> opt = LiftedType.unwrapOptional(string, new TypeTool(elements, types));
+      Optional<CanonicalOptional> opt = CanonicalOptional.unwrap(string, new TypeTool(elements, types));
       assertFalse(opt.isPresent());
     });
   }

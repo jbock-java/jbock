@@ -33,17 +33,15 @@ class CollectorAbsentMapperPresent {
 
   private List<Attempt> getAttempts() {
     TypeMirror returnType = basicInfo.originalReturnType();
-    Optional<LiftedType> liftedType = LiftedType.unwrapOptional(returnType, tool());
-    Optional<TypeMirror> wrappedInOptional = liftedType.map(LiftedType::liftedType)
-        .flatMap(type -> tool().unwrap(Optional.class, type));
-    Optional<TypeMirror> wrappedInList = tool().unwrap(List.class, returnType);
+    Optional<CanonicalOptional> canonicalOptional = CanonicalOptional.unwrap(returnType, tool());
+    Optional<TypeMirror> list = tool().unwrap(List.class, returnType);
     List<Attempt> attempts = new ArrayList<>();
-    wrappedInOptional.ifPresent(wrapped ->
-        attempts.add(new Attempt(wrapped, liftedType.get().extractExpr(), liftedType.get().liftedType(), OPTIONAL)));
-    wrappedInList.ifPresent(wrapped ->
+    canonicalOptional.ifPresent(optional ->
+        attempts.add(new Attempt(optional.wrapped(), optional.extractExpr(), optional.canonicalType(), OPTIONAL)));
+    list.ifPresent(wrapped ->
         attempts.add(new Attempt(wrapped, p -> CodeBlock.of("$N", p), returnType, REPEATABLE)));
-    liftedType.ifPresent(type ->
-        attempts.add(new Attempt(type.liftedType(), type.extractExpr(), type.liftedType(), REQUIRED)));
+    canonicalOptional.ifPresent(type ->
+        attempts.add(new Attempt(type.canonicalType(), type.extractExpr(), type.canonicalType(), REQUIRED)));
     attempts.add(new Attempt(tool().box(returnType), p -> CodeBlock.of("$N", p), returnType, REQUIRED));
     return attempts;
   }

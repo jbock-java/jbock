@@ -51,15 +51,14 @@ class CollectorAbsentMapperAbsent {
 
   private Attempt getAttempt() {
     TypeMirror returnType = basicInfo.originalReturnType();
-    Optional<LiftedType> liftedType = LiftedType.unwrapOptional(returnType, tool());
-    Optional<TypeMirror> wrappedInOptional = liftedType.map(LiftedType::liftedType)
-        .flatMap(type -> tool().unwrap(Optional.class, type));
-    Optional<TypeMirror> wrappedInList = tool().unwrap(List.class, returnType);
-    if (wrappedInOptional.isPresent()) {
-      return new Attempt(wrappedInOptional.get(), liftedType.get().extractExpr(), liftedType.get().liftedType(), OPTIONAL);
+    Optional<CanonicalOptional> canonicalOptional = CanonicalOptional.unwrap(returnType, tool());
+    Optional<TypeMirror> list = tool().unwrap(List.class, returnType);
+    if (canonicalOptional.isPresent()) {
+      CanonicalOptional optional = canonicalOptional.get();
+      return new Attempt(optional.wrapped(), optional.extractExpr(), optional.canonicalType(), OPTIONAL);
     }
-    if (wrappedInList.isPresent()) {
-      return new Attempt(wrappedInList.get(), p -> CodeBlock.of("$N", p), returnType, REPEATABLE);
+    if (list.isPresent()) {
+      return new Attempt(list.get(), p -> CodeBlock.of("$N", p), returnType, REPEATABLE);
     }
     return new Attempt(returnType, p -> CodeBlock.of("$N", p), returnType, REQUIRED);
   }

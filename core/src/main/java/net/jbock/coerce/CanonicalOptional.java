@@ -13,18 +13,21 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
-final class LiftedType {
+final class CanonicalOptional {
 
   // Optional<Integer> instead of OptionalInt etc
   private final TypeMirror liftedType;
 
+  private final TypeMirror wrapped;
+
   // the function returns an expression of the original type, like OptionalInt
   private final Function<ParameterSpec, CodeBlock> extract;
 
-  private LiftedType(
+  private CanonicalOptional(
       Function<ParameterSpec, CodeBlock> extract,
-      TypeMirror liftedType) {
+      TypeMirror liftedType, TypeMirror wrapped) {
     this.extract = extract;
+    this.wrapped = wrapped;
     if (liftedType.getKind().isPrimitive()) {
       throw new AssertionError("just checking");
     }
@@ -54,25 +57,28 @@ final class LiftedType {
       new OptionalMapping(OptionalDouble.class, Double.class));
 
   // visible for testing
-  static Optional<LiftedType> unwrapOptional(TypeMirror type, TypeTool tool) {
+  static Optional<CanonicalOptional> unwrap(TypeMirror type, TypeTool tool) {
     for (OptionalMapping e : OPT_MAP) {
       if (tool.isSameType(type, e.optionalPrimitiveClass)) {
-        return Optional.of(new LiftedType(
+        return Optional.of(new CanonicalOptional(
             e.extractOptionalPrimitive(),
-            tool.optionalOf(e.boxedNumberClass)));
+            tool.optionalOf(e.boxedNumberClass),
+            tool.asType(e.boxedNumberClass)));
       }
     }
-    if (tool.unwrap(Optional.class, type).isPresent()) {
-      return Optional.of(new LiftedType(p -> CodeBlock.of("$N", p), type));
-    }
-    return Optional.empty();
+    return tool.unwrap(Optional.class, type)
+        .map(wrapped -> new CanonicalOptional(p -> CodeBlock.of("$N", p), type, wrapped));
   }
 
-  TypeMirror liftedType() {
+  TypeMirror canonicalType() {
     return liftedType;
   }
 
   Function<ParameterSpec, CodeBlock> extractExpr() {
     return extract;
+  }
+
+  TypeMirror wrapped() {
+    return wrapped;
   }
 }
