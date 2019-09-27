@@ -34,6 +34,6 @@ class AllCharactersArgumentsTest {
         "--charOpt", "X",
         "--charList", "b",
         "--charList", "c").failsWithUsageMessage(
-        "Not a character: <abc>");
+        "Not a single character: <abc>");
   }
 }

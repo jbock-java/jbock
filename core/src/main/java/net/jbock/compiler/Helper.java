@@ -14,13 +14,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.Optional;
 
-import static com.squareup.javapoet.TypeName.CHAR;
 import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.CHARACTER;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
@@ -126,24 +124,7 @@ final class Helper {
           .addField(parsersField);
       spec.addMethod(readLongMethod);
     }
-    if (context.containsType(CHAR) || context.containsType(CHARACTER)) {
-      spec.addMethod(parseCharacterMethod());
-    }
     return spec.build();
-  }
-
-  private static MethodSpec parseCharacterMethod() {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("parseCharacter")
-        .addParameter(token);
-    spec.beginControlFlow("if ($N.length() != 1)", token)
-        .addStatement("throw new $T($S + $N + $S)", IllegalArgumentException.class,
-            "Not a character: <", token, ">")
-        .endControlFlow();
-    spec.addStatement("return $N.charAt(0)", token);
-    return spec.addModifiers(STATIC)
-        .returns(ClassName.get(Character.class))
-        .build();
   }
 
   private static MethodSpec readRegularOptionMethod(

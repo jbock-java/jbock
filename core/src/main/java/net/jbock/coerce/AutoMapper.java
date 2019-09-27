@@ -1,6 +1,7 @@
 package net.jbock.coerce;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
@@ -24,6 +25,8 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
+import static net.jbock.compiler.Constants.STRING;
+
 class AutoMapper {
 
   private static final String NEW = "new";
@@ -46,7 +49,7 @@ class AutoMapper {
       create(Integer.class, VALUE_OF),
       create(Long.class, VALUE_OF),
       create(File.class, NEW),
-      create(Character.class, CodeBlock.of("Helper::parseCharacter")),
+      create(Character.class, parseCharacter()),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
       create(URI.class, CREATE),
       create(BigDecimal.class, NEW),
@@ -70,5 +73,16 @@ class AutoMapper {
       }
     }
     return Optional.empty();
+  }
+
+  private static CodeBlock parseCharacter() {
+    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    CodeBlock.Builder lambda = CodeBlock.builder();
+    lambda.beginControlFlow("if ($N.length() != 1)", s)
+        .add("throw new $T($S + $N + $S);", IllegalArgumentException.class,
+            "Not a single character: <", s, ">")
+        .endControlFlow();
+    lambda.add("return $N.charAt(0);", s);
+    return CodeBlock.of("$N -> { $L }", s, lambda.build());
   }
 }

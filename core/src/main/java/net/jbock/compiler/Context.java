@@ -259,13 +259,4 @@ final class Context {
   ClassName helpPrintedParseResultType() {
     return helpPrintedParseResultType;
   }
-
-  boolean containsType(TypeName typeName) {
-    for (Param parameter : parameters) {
-      if (parameter.returnType().equals(typeName)) {
-        return true;
-      }
-    }
-    return false;
-  }
 }
