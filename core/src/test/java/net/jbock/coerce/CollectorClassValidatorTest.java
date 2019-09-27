@@ -33,7 +33,7 @@ class CollectorClassValidatorTest {
 
       BasicInfo basicInfo = mock(BasicInfo.class);
       when(basicInfo.tool()).thenReturn(new TypeTool(elements, types));
-      when(basicInfo.returnType()).thenReturn(TypeExpr.prepare(elements, types).parse(
+      when(basicInfo.originalReturnType()).thenReturn(TypeExpr.prepare(elements, types).parse(
           "java.util.Set<java.lang.String>"));
 
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");

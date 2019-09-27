@@ -15,8 +15,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 
 public class BasicInfo {
 
-  private final InferredAttributes attributes;
-
   private final ParamName paramName;
 
   private final ExecutableElement sourceMethod;
@@ -28,13 +26,11 @@ public class BasicInfo {
   private final Optional<TypeElement> collectorClass;
 
   private BasicInfo(
-      InferredAttributes attributes,
       ParamName paramName,
       ExecutableElement sourceMethod,
       TypeTool tool,
       Optional<TypeElement> mapperClass,
       Optional<TypeElement> collectorClass) {
-    this.attributes = attributes;
     this.paramName = paramName;
     this.sourceMethod = sourceMethod;
     this.tool = tool;
@@ -45,20 +41,14 @@ public class BasicInfo {
   static BasicInfo create(
       TypeElement mapperClass,
       TypeElement collectorClass,
-      InferredAttributes attributes,
       ParamName paramName,
       ExecutableElement sourceMethod,
       TypeTool tool) {
-    return new BasicInfo(attributes, paramName, sourceMethod, tool, Optional.ofNullable(mapperClass), Optional.ofNullable(collectorClass));
+    return new BasicInfo(paramName, sourceMethod, tool, Optional.ofNullable(mapperClass), Optional.ofNullable(collectorClass));
   }
 
-  public String paramName() {
+  String paramName() {
     return paramName.camel();
-  }
-
-  // lifted return type of the parameter method
-  TypeMirror returnType() {
-    return attributes.liftedType();
   }
 
   // return type of the parameter method

@@ -33,8 +33,8 @@ class CollectorClassValidator {
         .getReferencedType();
     TypeMirror t = collectorType.expectedType.getTypeArguments().get(0);
     TypeMirror r = collectorType.expectedType.getTypeArguments().get(2);
-    Map<String, TypeMirror> r_result = tool().unify(basicInfo.returnType(), r)
-        .orElseThrow(() -> boom(String.format("The collector should return %s but returns %s", basicInfo.returnType(), r)));
+    Map<String, TypeMirror> r_result = tool().unify(basicInfo.originalReturnType(), r)
+        .orElseThrow(() -> boom(String.format("The collector should return %s but returns %s", basicInfo.originalReturnType(), r)));
     TypeMirror inputType = tool().substitute(t, r_result);
     if (inputType == null) {
       throw boom("could not resolve all type parameters");

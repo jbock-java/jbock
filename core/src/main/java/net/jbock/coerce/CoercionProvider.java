@@ -46,11 +46,10 @@ public class CoercionProvider {
       ParamName paramName,
       TypeElement mapperClass,
       TypeElement collectorClass,
-      InferredAttributes attributes,
       TypeTool tool) {
     BasicInfo basicInfo = BasicInfo.create(
         mapperClass, collectorClass,
-        attributes, paramName, sourceMethod, tool);
+        paramName, sourceMethod, tool);
     CoercionProvider coercionProvider = new CoercionProvider(basicInfo);
     return coercionProvider.run();
   }

@@ -6,7 +6,6 @@ import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
-import net.jbock.coerce.InferredAttributes;
 import net.jbock.coerce.ParameterType;
 
 import javax.lang.model.element.ExecutableElement;
@@ -163,7 +162,6 @@ final class Param {
     checkName(sourceMethod, longName);
     ParamName name = enumConstant(params, sourceMethod);
     boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
-    InferredAttributes attributes = InferredAttributes.infer(sourceMethod.getReturnType(), tool);
     Coercion coercion;
     if (flag) {
       if (!parameter.descriptionArgumentName().isEmpty()) {
@@ -172,7 +170,7 @@ final class Param {
       }
       coercion = CoercionProvider.flagCoercion(sourceMethod, name);
     } else {
-      coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
+      coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
     }
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(coercion.parameterType(), name) :
@@ -200,8 +198,7 @@ final class Param {
     TypeTool tool = TypeTool.get();
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     ParamName name = enumConstant(params, sourceMethod);
-    InferredAttributes attributes = InferredAttributes.infer(sourceMethod.getReturnType(), tool);
-    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, attributes, tool);
+    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(coercion.parameterType(), name) :
         parameter.descriptionArgumentName();
