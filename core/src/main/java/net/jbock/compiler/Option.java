@@ -146,7 +146,7 @@ final class Option {
         .addMethod(positionalMethod())
         .addMethod(describeParamMethod)
         .addMethod(exampleMethod)
-        .addMethod(missingRequiredMethod())
+        .addMethod(missingRequiredLambdaMethod())
         .addMethod(privateConstructor());
     if (!context.nonpositionalParamTypes.isEmpty()) {
       spec.addMethod(shortNameMapMethod)
@@ -477,7 +477,7 @@ final class Option {
     return spec.build();
   }
 
-  private MethodSpec missingRequiredMethod() {
+  private MethodSpec missingRequiredLambdaMethod() {
     String ifMessage = "Missing parameter: <%s>";
     String elseMessage = "Missing required option: %s (%s)";
     CodeBlock lambda;

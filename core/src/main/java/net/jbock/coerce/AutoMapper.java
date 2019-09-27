@@ -49,7 +49,7 @@ class AutoMapper {
       create(Integer.class, VALUE_OF),
       create(Long.class, VALUE_OF),
       create(File.class, NEW),
-      create(Character.class, parseCharacter()),
+      create(Character.class, parseCharacterLambda()),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
       create(URI.class, CREATE),
       create(BigDecimal.class, NEW),
@@ -75,14 +75,14 @@ class AutoMapper {
     return Optional.empty();
   }
 
-  private static CodeBlock parseCharacter() {
+  private static CodeBlock parseCharacterLambda() {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-    CodeBlock.Builder lambda = CodeBlock.builder();
-    lambda.beginControlFlow("if ($N.length() != 1)", s)
+    CodeBlock lambda;
+    lambda = CodeBlock.builder().beginControlFlow("if ($N.length() != 1)", s)
         .add("throw new $T($S + $N + $S);", IllegalArgumentException.class,
             "Not a single character: <", s, ">")
-        .endControlFlow();
-    lambda.add("return $N.charAt(0);", s);
-    return CodeBlock.of("$N -> { $L }", s, lambda.build());
+        .endControlFlow()
+        .add("return $N.charAt(0);", s).build();
+    return CodeBlock.of("$N -> { $L }", s, lambda);
   }
 }
