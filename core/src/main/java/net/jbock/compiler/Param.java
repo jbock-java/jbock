@@ -19,6 +19,8 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import static java.lang.Character.isWhitespace;
+import static javax.lang.model.element.Modifier.PROTECTED;
+import static javax.lang.model.element.Modifier.PUBLIC;
 import static net.jbock.compiler.AnnotationUtil.getCollectorClass;
 import static net.jbock.compiler.AnnotationUtil.getMapperClass;
 
@@ -27,13 +29,13 @@ import static net.jbock.compiler.AnnotationUtil.getMapperClass;
  */
 final class Param {
 
-  // can be null
+  // null if absent
   private final String longName;
 
-  // can be blank
+  // blank if absent
   private final char shortName;
 
-  final ExecutableElement sourceMethod;
+  private final ExecutableElement sourceMethod;
 
   private final String bundleKey;
 
@@ -317,7 +319,7 @@ final class Param {
   }
 
   String descriptionArgumentNameWithDots() {
-    if (coercion.parameterType().repeatable()) {
+    if (coercion.parameterType().isRepeatable()) {
       return descriptionArgumentName + "...";
     }
     return descriptionArgumentName;
@@ -343,15 +345,15 @@ final class Param {
     return positionalIndex;
   }
 
-  boolean required() {
+  boolean isRequired() {
     return coercion.parameterType().required();
   }
 
-  boolean repeatable() {
-    return coercion.repeatable();
+  boolean isRepeatable() {
+    return coercion.isRepeatable();
   }
 
-  boolean regular() {
+  boolean isRegular() {
     return coercion.parameterType().required() || coercion.parameterType().optional();
   }
 
@@ -363,7 +365,7 @@ final class Param {
     if (!positionalIndex.isPresent()) {
       return OptionalInt.empty();
     }
-    if (repeatable()) {
+    if (isRepeatable()) {
       return OptionalInt.of(2);
     }
     return optional() ? OptionalInt.of(1) : OptionalInt.of(0);
@@ -408,11 +410,23 @@ final class Param {
   }
 
   boolean optional() {
-    return coercion.optional();
+    return coercion.isOptional();
   }
 
   ParamName paramName() {
     return coercion.paramName();
+  }
+
+  ValidationException validationError(String message) {
+    return ValidationException.create(sourceMethod, message);
+  }
+
+  boolean isPublic() {
+    return sourceMethod.getModifiers().contains(PUBLIC);
+  }
+
+  boolean isProtected() {
+    return sourceMethod.getModifiers().contains(PROTECTED);
   }
 }
 

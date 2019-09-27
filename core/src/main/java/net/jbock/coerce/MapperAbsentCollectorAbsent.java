@@ -44,7 +44,7 @@ class MapperAbsentCollectorAbsent {
         return Optional.empty();
       }
       MapperType mapperType = MapperType.create(expectedReturnType, autoMapper.get());
-      Optional<AbstractCollector> collector = parameterType.repeatable() ? Optional.of(new DefaultCollector(expectedReturnType)) : Optional.empty();
+      Optional<AbstractCollector> collector = parameterType.isRepeatable() ? Optional.of(new DefaultCollector(expectedReturnType)) : Optional.empty();
       return Optional.of(Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, parameterType));
     }
   }

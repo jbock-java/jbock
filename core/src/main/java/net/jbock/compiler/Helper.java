@@ -261,7 +261,7 @@ final class Helper {
     param.coercion().collectExpr().map(collectExpr ->
         CodeBlock.of(".collect($L)", collectExpr))
         .ifPresent(builder::add);
-    if (param.required()) {
+    if (param.isRequired()) {
       builder.add(".orElseThrow($T.$L.missingRequired())", context.optionType(),
           param.enumConstant());
     }

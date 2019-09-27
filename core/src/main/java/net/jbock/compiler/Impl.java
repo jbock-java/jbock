@@ -9,8 +9,6 @@ import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PROTECTED;
@@ -60,10 +58,10 @@ final class Impl {
           .addAnnotation(Override.class)
           .returns(param.returnType());
       builder.addStatement("return $N", param.field());
-      if (param.sourceMethod.getModifiers().contains(PUBLIC)) {
+      if (param.isPublic()) {
         builder.addModifiers(PUBLIC);
       }
-      if (param.sourceMethod.getModifiers().contains(PROTECTED)) {
+      if (param.isProtected()) {
         builder.addModifiers(PROTECTED);
       }
       result.add(builder.build());

@@ -17,7 +17,6 @@ import java.util.Objects;
 import java.util.OptionalInt;
 import java.util.Properties;
 import java.util.ResourceBundle;
-import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
@@ -104,28 +103,25 @@ final class Parser {
     return new Parser(context, builder, option, helper, impl, parseResult, readNextMethod, readArgumentMethod);
   }
 
-  private static void checkOnlyOnePositionalList(List<Param> allPositional) {
-    List<Param> positionalRepeatable = allPositional.stream()
-        .filter(Param::repeatable)
+  private static void checkOnlyOnePositionalList(List<Param> allParams) {
+    allParams.stream()
+        .filter(Param::isRepeatable)
         .filter(Param::isPositional)
-        .collect(Collectors.toList());
-    if (positionalRepeatable.size() >= 2) {
-      throw ValidationException.create(positionalRepeatable.get(0).sourceMethod,
-          "There can only be one one repeatable positional parameter.");
-    }
+        .skip(1).findAny().ifPresent(p -> {
+      throw p.validationError("There can only be one one repeatable positional parameter.");
+    });
   }
 
-  private static void checkRankConsistentWithPosition(List<Param> allPositional) {
+  private static void checkRankConsistentWithPosition(List<Param> allParams) {
     int currentOrdinal = -1;
-    for (Param param : allPositional) {
+    for (Param param : allParams) {
       OptionalInt order = param.positionalOrder();
       if (!order.isPresent()) {
         continue;
       }
       if (order.getAsInt() < currentOrdinal) {
-        throw ValidationException.create(param.sourceMethod,
-            "Invalid position: Optional parameters must come after required parameters." +
-                "Repeatable parameters must come last.");
+        throw param.validationError("Invalid position: Optional parameters must come " +
+            "after required parameters. Repeatable parameters must come last.");
       }
       currentOrdinal = order.getAsInt();
     }

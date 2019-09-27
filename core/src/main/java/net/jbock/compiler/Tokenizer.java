@@ -236,7 +236,7 @@ final class Tokenizer {
 
     Map<Boolean, List<Param>> partitionedOptions = context.parameters.stream()
         .filter(Param::isOption)
-        .collect(partitioningBy(Param::required));
+        .collect(partitioningBy(Param::isRequired));
 
     List<Param> requiredNonpos = partitionedOptions.get(true);
     List<Param> optionalNonpos = partitionedOptions.get(false);
@@ -260,10 +260,10 @@ final class Tokenizer {
       if (param.optional()) {
         spec.addStatement("$N.add($S)", joiner, "[<" +
             param.descriptionArgumentName() + ">]");
-      } else if (param.required()) {
+      } else if (param.isRequired()) {
         spec.addStatement("$N.add($S)", joiner, "<" +
             param.descriptionArgumentName() + ">");
-      } else if (param.repeatable()) {
+      } else if (param.isRepeatable()) {
         spec.addStatement("$N.add($S)", joiner, context.allowEscape() ?
             "[[--] <" + param.descriptionArgumentNameWithDots() + ">]" :
             "[<" + param.descriptionArgumentNameWithDots() + ">]");

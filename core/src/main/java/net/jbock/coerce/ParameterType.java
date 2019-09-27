@@ -4,7 +4,7 @@ public enum ParameterType {
 
   REPEATABLE {
     @Override
-    public boolean repeatable() {
+    public boolean isRepeatable() {
       return true;
     }
 
@@ -24,7 +24,7 @@ public enum ParameterType {
     }
   }, OPTIONAL {
     @Override
-    public boolean repeatable() {
+    public boolean isRepeatable() {
       return false;
     }
 
@@ -44,7 +44,7 @@ public enum ParameterType {
     }
   }, REQUIRED {
     @Override
-    public boolean repeatable() {
+    public boolean isRepeatable() {
       return false;
     }
 
@@ -64,7 +64,7 @@ public enum ParameterType {
     }
   }, FLAG {
     @Override
-    public boolean repeatable() {
+    public boolean isRepeatable() {
       return false;
     }
 
@@ -84,7 +84,7 @@ public enum ParameterType {
     }
   };
 
-  public abstract boolean repeatable();
+  public abstract boolean isRepeatable();
 
   public abstract boolean optional();
 

@@ -65,7 +65,7 @@ class MapperPresentCollectorAbsent {
         return Either.right(((Right<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value().getMessage());
       }
       ReferenceMapperType mapperType = ((Left<ReferenceMapperType, MapperClassAnalyzer.Failure>) either).value();
-      Optional<AbstractCollector> collector = parameterType.repeatable() ? Optional.of(new DefaultCollector(expectedReturnType)) : Optional.empty();
+      Optional<AbstractCollector> collector = parameterType.isRepeatable() ? Optional.of(new DefaultCollector(expectedReturnType)) : Optional.empty();
       return Either.left(Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, parameterType));
     }
   }
