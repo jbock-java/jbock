@@ -39,7 +39,7 @@ class CollectorAbsentMapperAbsent {
     }
 
     Optional<Coercion> findCoercion() {
-      Optional<CodeBlock> autoMapper = CoercionProvider.findAutoMapper(expectedReturnType, basicInfo);
+      Optional<CodeBlock> autoMapper = basicInfo.findAutoMapper(expectedReturnType);
       if (!autoMapper.isPresent()) {
         return Optional.empty();
       }

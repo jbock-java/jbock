@@ -525,7 +525,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The enum may not be private.");
+        .withErrorContaining("Unknown parameter type. Try defining a custom mapper or collector.");
   }
 
   static JavaFileObject fromSource(String... lines) {
