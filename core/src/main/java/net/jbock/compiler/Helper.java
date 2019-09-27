@@ -262,29 +262,10 @@ final class Helper {
         CodeBlock.of(".collect($L)", collectExpr))
         .ifPresent(builder::add);
     if (param.required()) {
-      builder.add(".orElseThrow(() -> new $T($L))", IllegalArgumentException.class,
-          missingRequiredOptionMessage(param, context.optionType()));
+      builder.add(".orElseThrow($T.$L.missingRequired())", context.optionType(),
+          param.enumConstant());
     }
     return builder.build();
-  }
-
-  private CodeBlock missingRequiredOptionMessage(Param param, ClassName className) {
-    if (param.isPositional()) {
-      return CodeBlock.builder()
-          .add("$T.format($S,$W$T.$L)",
-              String.class,
-              "Missing parameter: <%s>",
-              className, param.enumConstant())
-          .build();
-    }
-    return CodeBlock.builder()
-        .add("$T.format($S,$W$T.$L,$W$T.$L.describeParam($S))",
-            String.class,
-            "Missing required option: %s (%s)",
-            className, param.enumConstant(),
-            className, param.enumConstant(),
-            "")
-        .build();
   }
 
   static CodeBlock throwRepetitionErrorStatement(
@@ -297,5 +278,4 @@ final class Helper {
             optionParam, optionParam, "")
         .build();
   }
-
 }

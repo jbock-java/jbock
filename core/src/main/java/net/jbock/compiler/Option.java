@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
@@ -145,6 +146,7 @@ final class Option {
         .addMethod(positionalMethod())
         .addMethod(describeParamMethod)
         .addMethod(exampleMethod)
+        .addMethod(missingRequiredMethod())
         .addMethod(privateConstructor());
     if (!context.nonpositionalParamTypes.isEmpty()) {
       spec.addMethod(shortNameMapMethod)
@@ -473,5 +475,20 @@ final class Option {
     spec.addParameters(asList(
         longName, shortName, bundleKey, positionalIndex, argumentName, description));
     return spec.build();
+  }
+
+  private MethodSpec missingRequiredMethod() {
+    String ifMessage = "Missing parameter: <%s>";
+    String elseMessage = "Missing required option: %s (%s)";
+    CodeBlock lambda;
+    lambda = CodeBlock.of("positionalIndex.isPresent() " +
+            "? new $T($T.format($S, this)) " +
+            ": new $T($T.format($S, this, describeParam($S)))",
+        IllegalArgumentException.class, String.class, ifMessage,
+        IllegalArgumentException.class, String.class, elseMessage, "");
+    return MethodSpec.methodBuilder("missingRequired")
+        .returns(ParameterizedTypeName.get(Supplier.class, IllegalArgumentException.class))
+        .addCode("return () -> $L; ", lambda)
+        .build();
   }
 }
