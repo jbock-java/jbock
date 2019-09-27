@@ -14,6 +14,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalInt;
 
@@ -34,8 +35,6 @@ final class Param {
 
   final ExecutableElement sourceMethod;
 
-  private final ParamName name;
-
   private final String bundleKey;
 
   private final Coercion coercion;
@@ -50,13 +49,13 @@ final class Param {
     return coercion.parameterType().flag();
   }
 
-  private static ParamName enumConstant(
+  private static ParamName findParamName(
       List<Param> params,
       ExecutableElement sourceMethod) {
     String methodName = sourceMethod.getSimpleName().toString();
     ParamName result = ParamName.create(methodName);
     for (Param param : params) {
-      if (param.name.equals(result)) {
+      if (param.paramName().equals(result)) {
         return result.append(Integer.toString(params.size()));
       }
     }
@@ -97,7 +96,7 @@ final class Param {
       return null;
     }
     if (paramType.required()) {
-      return name.snake().toUpperCase();
+      return name.snake().toUpperCase(Locale.US);
     } else {
       return name.snake();
     }
@@ -107,7 +106,6 @@ final class Param {
       char shortName,
       String longName,
       ExecutableElement sourceMethod,
-      ParamName name,
       String bundleKey,
       Coercion coercion,
       List<String> description,
@@ -118,7 +116,6 @@ final class Param {
     this.shortName = shortName;
     this.longName = longName;
     this.sourceMethod = sourceMethod;
-    this.name = name;
     this.description = description;
     this.descriptionArgumentName = descriptionArgumentName;
     this.positionalIndex = positionalIndex;
@@ -160,7 +157,7 @@ final class Param {
     Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
     checkShortName(sourceMethod, shortName);
     checkName(sourceMethod, longName);
-    ParamName name = enumConstant(params, sourceMethod);
+    ParamName name = findParamName(params, sourceMethod);
     boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
     Coercion coercion;
     if (flag) {
@@ -180,7 +177,6 @@ final class Param {
         shortName,
         longName,
         sourceMethod,
-        name,
         parameter.bundleKey(),
         coercion,
         cleanDesc(description),
@@ -197,7 +193,7 @@ final class Param {
       TypeElement collectorClass) {
     TypeTool tool = TypeTool.get();
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
-    ParamName name = enumConstant(params, sourceMethod);
+    ParamName name = findParamName(params, sourceMethod);
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
     String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
         descriptionArgumentName(coercion.parameterType(), name) :
@@ -207,7 +203,6 @@ final class Param {
         ' ',
         null,
         sourceMethod,
-        name,
         parameter.bundleKey(),
         coercion,
         cleanDesc(description),
@@ -333,7 +328,7 @@ final class Param {
   }
 
   String enumConstant() {
-    return name.snake().toUpperCase();
+    return paramName().snake().toUpperCase();
   }
 
   boolean isPositional() {
@@ -414,6 +409,10 @@ final class Param {
 
   boolean optional() {
     return coercion.optional();
+  }
+
+  ParamName paramName() {
+    return coercion.paramName();
   }
 }
 

@@ -51,6 +51,10 @@ public class BasicInfo {
     return paramName.camel();
   }
 
+  ParamName parameterName() {
+    return paramName;
+  }
+
   // return type of the parameter method
   TypeMirror originalReturnType() {
     return sourceMethod.getReturnType();

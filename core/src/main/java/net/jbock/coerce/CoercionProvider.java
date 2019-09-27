@@ -38,7 +38,7 @@ public class CoercionProvider {
         name,
         FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         CodeBlock.of("$N", name),
-        FLAG);
+        FLAG, paramName);
   }
 
   public static Coercion findCoercion(
