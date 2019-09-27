@@ -1,7 +1,6 @@
 package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeName;
 import net.jbock.CommandLineArguments;
 import net.jbock.coerce.ParameterType;
 

@@ -21,27 +21,30 @@ import static net.jbock.coerce.ParameterType.OPTIONAL;
 import static net.jbock.coerce.ParameterType.REPEATABLE;
 import static net.jbock.coerce.ParameterType.REQUIRED;
 
-class MapperPresentCollectorAbsent {
+class CollectorAbsentMapperPresent {
 
   private final TypeElement mapperClass;
   private final BasicInfo basicInfo;
 
-  MapperPresentCollectorAbsent(BasicInfo basicInfo, TypeElement mapperClass) {
+  CollectorAbsentMapperPresent(BasicInfo basicInfo, TypeElement mapperClass) {
     this.mapperClass = mapperClass;
     this.basicInfo = basicInfo;
   }
 
   private List<Attempt> getAttempts() {
+    TypeMirror returnType = basicInfo.originalReturnType();
+    Optional<LiftedType> liftedType = LiftedType.unwrapOptional(returnType, tool());
+    Optional<TypeMirror> wrappedInOptional = liftedType.map(LiftedType::liftedType)
+        .flatMap(type -> tool().unwrap(Optional.class, type));
+    Optional<TypeMirror> wrappedInList = tool().unwrap(List.class, returnType);
     List<Attempt> attempts = new ArrayList<>();
-    LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
-    tool().unwrap(Optional.class, liftedType.liftedType()).ifPresent(wrapped ->
-        attempts.add(new Attempt(wrapped, liftedType.extractExpr(), liftedType.liftedType(), OPTIONAL)));
-    tool().unwrap(List.class, basicInfo.originalReturnType()).ifPresent(wrapped ->
-        attempts.add(new Attempt(wrapped, p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REPEATABLE)));
-    if (!tool().isSameType(liftedType.liftedType(), basicInfo.originalReturnType())) {
-      attempts.add(new Attempt(liftedType.liftedType(), liftedType.extractExpr(), liftedType.liftedType(), REQUIRED));
-    }
-    attempts.add(new Attempt(basicInfo.originalReturnType(), p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REQUIRED));
+    wrappedInOptional.ifPresent(wrapped ->
+        attempts.add(new Attempt(wrapped, liftedType.get().extractExpr(), liftedType.get().liftedType(), OPTIONAL)));
+    wrappedInList.ifPresent(wrapped ->
+        attempts.add(new Attempt(wrapped, p -> CodeBlock.of("$N", p), returnType, REPEATABLE)));
+    liftedType.ifPresent(type ->
+        attempts.add(new Attempt(type.liftedType(), type.extractExpr(), type.liftedType(), REQUIRED)));
+    attempts.add(new Attempt(tool().box(returnType), p -> CodeBlock.of("$N", p), returnType, REQUIRED));
     return attempts;
   }
 

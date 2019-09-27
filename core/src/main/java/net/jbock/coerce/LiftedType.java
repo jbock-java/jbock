@@ -7,12 +7,13 @@ import net.jbock.compiler.TypeTool;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
-public final class LiftedType {
+final class LiftedType {
 
   // the parameter type, but primitives are boxed, also OptionalInt becomes Optional<Integer> etc
   private final TypeMirror liftedType;
@@ -57,15 +58,19 @@ public final class LiftedType {
       new OptionalMapping(OptionalDouble.class, Double.class));
 
   // visible for testing
-  static LiftedType lift(TypeMirror type, TypeTool tool) {
+  static Optional<LiftedType> unwrapOptional(TypeMirror type, TypeTool tool) {
     for (OptionalMapping e : OPT_MAP) {
       if (tool.isSameType(type, e.optionalPrimitiveClass)) {
-        return new LiftedType(
+        return Optional.of(new LiftedType(
             e.extractOptionalPrimitive(),
-            tool.optionalOf(e.boxedNumberClass));
+            tool.optionalOf(e.boxedNumberClass)));
       }
     }
-    return noLifting(tool.box(type));
+    Optional<TypeMirror> unwrap = tool.unwrap(Optional.class, type);
+    if (!unwrap.isPresent()) {
+      return Optional.empty();
+    }
+    return Optional.of(noLifting(type));
   }
 
   TypeMirror liftedType() {

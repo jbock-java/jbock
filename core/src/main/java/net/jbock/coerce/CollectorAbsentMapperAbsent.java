@@ -16,11 +16,11 @@ import static net.jbock.coerce.ParameterType.OPTIONAL;
 import static net.jbock.coerce.ParameterType.REPEATABLE;
 import static net.jbock.coerce.ParameterType.REQUIRED;
 
-class MapperAbsentCollectorAbsent {
+class CollectorAbsentMapperAbsent {
 
   private final BasicInfo basicInfo;
 
-  MapperAbsentCollectorAbsent(BasicInfo basicInfo) {
+  CollectorAbsentMapperAbsent(BasicInfo basicInfo) {
     this.basicInfo = basicInfo;
   }
 
@@ -50,14 +50,15 @@ class MapperAbsentCollectorAbsent {
   }
 
   private Attempt getAttempt() {
-    LiftedType liftedType = LiftedType.lift(basicInfo.originalReturnType(), tool());
-    Optional<TypeMirror> optionalInfo = tool().unwrap(Optional.class, liftedType.liftedType());
-    if (optionalInfo.isPresent()) {
-      return new Attempt(optionalInfo.get(), liftedType.extractExpr(), liftedType.liftedType(), OPTIONAL);
+    Optional<LiftedType> liftedType = LiftedType.unwrapOptional(basicInfo.originalReturnType(), tool());
+    Optional<TypeMirror> wrappedInOptional = liftedType.map(LiftedType::liftedType)
+        .flatMap(type -> tool().unwrap(Optional.class, type));
+    Optional<TypeMirror> wrappedInList = tool().unwrap(List.class, basicInfo.originalReturnType());
+    if (wrappedInOptional.isPresent()) {
+      return new Attempt(wrappedInOptional.get(), liftedType.get().extractExpr(), liftedType.get().liftedType(), OPTIONAL);
     }
-    Optional<TypeMirror> listInfo = tool().unwrap(List.class, basicInfo.originalReturnType());
-    if (listInfo.isPresent()) {
-      return new Attempt(listInfo.get(), p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REPEATABLE);
+    if (wrappedInList.isPresent()) {
+      return new Attempt(wrappedInList.get(), p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REPEATABLE);
     }
     return new Attempt(basicInfo.originalReturnType(), p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REQUIRED);
   }
