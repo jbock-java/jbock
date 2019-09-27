@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.ParamName;
@@ -9,6 +10,7 @@ import net.jbock.compiler.ValidationException;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
 import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.FINAL;
@@ -45,6 +47,34 @@ public class BasicInfo {
       ExecutableElement sourceMethod,
       TypeTool tool) {
     return new BasicInfo(paramName, sourceMethod, tool, Optional.ofNullable(mapperClass), Optional.ofNullable(collectorClass));
+  }
+
+  boolean isEnumType(TypeMirror mirror) {
+    List<? extends TypeMirror> supertypes = tool().getDirectSupertypes(mirror);
+    if (supertypes.isEmpty()) {
+      // not an enum
+      return false;
+    }
+    TypeMirror superclass = supertypes.get(0);
+    if (!tool().isSameErasure(superclass, Enum.class)) {
+      // not an enum
+      return false;
+    }
+    if (tool().isPrivateType(mirror)) {
+      return false;
+    }
+    return true;
+  }
+
+  Optional<CodeBlock> findAutoMapper(TypeMirror innerType) {
+    Optional<CodeBlock> mapExpr = AutoMapper.findAutoMapper(tool(), innerType);
+    if (mapExpr.isPresent()) {
+      return mapExpr;
+    }
+    if (isEnumType(innerType)) {
+      return Optional.of(CodeBlock.of("$T::valueOf", innerType));
+    }
+    return Optional.empty();
   }
 
   String paramName() {

@@ -15,10 +15,10 @@ import java.util.function.Function;
 
 final class LiftedType {
 
-  // the parameter type, but primitives are boxed, also OptionalInt becomes Optional<Integer> etc
+  // Optional<Integer> instead of OptionalInt etc
   private final TypeMirror liftedType;
 
-  // going back i.e. int -> Integer or Optional<Integer> -> OptionalInt
+  // the function returns an expression of the original type, like OptionalInt
   private final Function<ParameterSpec, CodeBlock> extract;
 
   private LiftedType(
@@ -31,12 +31,8 @@ final class LiftedType {
     this.liftedType = liftedType;
   }
 
-  private static LiftedType noLifting(TypeMirror type) {
-    Function<ParameterSpec, CodeBlock> extract = p -> CodeBlock.of("$N", p);
-    return new LiftedType(extract, type);
-  }
-
   private static class OptionalMapping {
+
     final Class<?> optionalPrimitiveClass;
     final Class<? extends Number> boxedNumberClass;
 
@@ -66,11 +62,10 @@ final class LiftedType {
             tool.optionalOf(e.boxedNumberClass)));
       }
     }
-    Optional<TypeMirror> unwrap = tool.unwrap(Optional.class, type);
-    if (!unwrap.isPresent()) {
-      return Optional.empty();
+    if (tool.unwrap(Optional.class, type).isPresent()) {
+      return Optional.of(new LiftedType(p -> CodeBlock.of("$N", p), type));
     }
-    return Optional.of(noLifting(type));
+    return Optional.empty();
   }
 
   TypeMirror liftedType() {

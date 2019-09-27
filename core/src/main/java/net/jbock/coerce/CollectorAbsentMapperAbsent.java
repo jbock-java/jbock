@@ -50,17 +50,18 @@ class CollectorAbsentMapperAbsent {
   }
 
   private Attempt getAttempt() {
-    Optional<LiftedType> liftedType = LiftedType.unwrapOptional(basicInfo.originalReturnType(), tool());
+    TypeMirror returnType = basicInfo.originalReturnType();
+    Optional<LiftedType> liftedType = LiftedType.unwrapOptional(returnType, tool());
     Optional<TypeMirror> wrappedInOptional = liftedType.map(LiftedType::liftedType)
         .flatMap(type -> tool().unwrap(Optional.class, type));
-    Optional<TypeMirror> wrappedInList = tool().unwrap(List.class, basicInfo.originalReturnType());
+    Optional<TypeMirror> wrappedInList = tool().unwrap(List.class, returnType);
     if (wrappedInOptional.isPresent()) {
       return new Attempt(wrappedInOptional.get(), liftedType.get().extractExpr(), liftedType.get().liftedType(), OPTIONAL);
     }
     if (wrappedInList.isPresent()) {
-      return new Attempt(wrappedInList.get(), p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REPEATABLE);
+      return new Attempt(wrappedInList.get(), p -> CodeBlock.of("$N", p), returnType, REPEATABLE);
     }
-    return new Attempt(basicInfo.originalReturnType(), p -> CodeBlock.of("$N", p), basicInfo.originalReturnType(), REQUIRED);
+    return new Attempt(returnType, p -> CodeBlock.of("$N", p), returnType, REQUIRED);
   }
 
   Coercion findCoercion() {

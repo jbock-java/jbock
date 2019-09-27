@@ -81,7 +81,7 @@ public class CoercionProvider {
 
   private Coercion handleRepeatableAutoMapper() {
     AbstractCollector collectorInfo = collectorInfo();
-    CodeBlock mapExpr = findAutoMapper(collectorInfo.inputType())
+    CodeBlock mapExpr = basicInfo.findAutoMapper(collectorInfo.inputType())
         .orElseThrow(() -> basicInfo.asValidationException("Unknown parameter type. Define a custom mapper."));
     MapperType mapperType = MapperType.create(collectorInfo.inputType(), mapExpr);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
@@ -95,38 +95,6 @@ public class CoercionProvider {
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
     return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType, REPEATABLE);
-  }
-
-  private Optional<CodeBlock> findAutoMapper(TypeMirror innerType) {
-    return findAutoMapper(innerType, basicInfo);
-  }
-
-  static Optional<CodeBlock> findAutoMapper(TypeMirror innerType, BasicInfo basicInfo) {
-    Optional<CodeBlock> mapExpr = AutoMapper.findAutoMapper(basicInfo.tool(), basicInfo.tool().box(innerType));
-    if (mapExpr.isPresent()) {
-      return mapExpr;
-    }
-    if (isEnumType(innerType, basicInfo)) {
-      return Optional.of(CodeBlock.of("$T::valueOf", innerType));
-    }
-    return Optional.empty();
-  }
-
-  private static boolean isEnumType(TypeMirror mirror, BasicInfo basicInfo) {
-    List<? extends TypeMirror> supertypes = basicInfo.tool().getDirectSupertypes(mirror);
-    if (supertypes.isEmpty()) {
-      // not an enum
-      return false;
-    }
-    TypeMirror superclass = supertypes.get(0);
-    if (!basicInfo.tool().isSameErasure(superclass, Enum.class)) {
-      // not an enum
-      return false;
-    }
-    if (basicInfo.tool().isPrivateType(mirror)) {
-      throw basicInfo.asValidationException("The enum may not be private.");
-    }
-    return true;
   }
 
   private AbstractCollector collectorInfo() {

@@ -66,9 +66,10 @@ class AutoMapper {
       create(ZonedDateTime.class, PARSE),
       create(Instant.class, PARSE));
 
-  static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror innerType) {
+  static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror type) {
+    TypeMirror boxed = tool.box(type);
     for (Map.Entry<Class<?>, CodeBlock> coercion : MAPPERS) {
-      if (tool.isSameType(innerType, coercion.getKey())) {
+      if (tool.isSameType(boxed, coercion.getKey())) {
         return Optional.of(coercion.getValue());
       }
     }
