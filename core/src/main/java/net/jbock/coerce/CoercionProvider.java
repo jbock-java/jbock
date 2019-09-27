@@ -134,14 +134,11 @@ public class CoercionProvider {
     if (basicInfo.collectorClass().isPresent()) {
       return new CollectorClassValidator(basicInfo, basicInfo.collectorClass().get()).getCollectorInfo();
     }
-    if (!tool().isSameErasure(basicInfo.returnType(), List.class)) {
+    Optional<TypeMirror> wrapped = tool().unwrap(List.class, basicInfo.originalReturnType());
+    if (!wrapped.isPresent()) {
       throw basicInfo.asValidationException("Either define a custom collector, or return List.");
     }
-    List<? extends TypeMirror> typeParameters = tool().typeargs(basicInfo.returnType());
-    if (typeParameters.isEmpty()) {
-      throw basicInfo.asValidationException("Add a type parameter.");
-    }
-    return new DefaultCollector(typeParameters.get(0));
+    return new DefaultCollector(wrapped.get());
   }
 
   private TypeTool tool() {

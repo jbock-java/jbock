@@ -1,7 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.coerce.LiftedType;
-
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Modifier;
