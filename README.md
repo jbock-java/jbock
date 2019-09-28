@@ -2,7 +2,7 @@
 
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock) jbock is a simple and convenient ~~application server~~ *command line parser.*
 
-The command line options are defined as an annotated abstract class, see example:
+The command line options are defined as abstract methods, see example:
 
 ````java
 @CommandLineArguments
