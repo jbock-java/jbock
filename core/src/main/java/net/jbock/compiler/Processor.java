@@ -153,9 +153,7 @@ public final class Processor extends AbstractProcessor {
       ClassName generatedType,
       TypeSpec definedType) {
     JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), definedType);
-    JavaFile javaFile = builder
-        .skipJavaLangImports(true)
-        .build();
+    JavaFile javaFile = builder.build();
     try {
       JavaFileObject sourceFile = processingEnv.getFiler()
           .createSourceFile(generatedType.toString(),
