@@ -72,11 +72,10 @@ The parameter type determines the treatment of the parameter as follows:
 `*: does not apply to positional parameters`
 
 where `X` is one of the 
-"[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/AutoTypes.java)",
+"[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAutoTypes.java)",
 and `R` is the return type of the mapper.
 `OptionalInt` and friends can be used in place of `Optional<Integer>` etc.
 
 * [Detailed documentation](https://github.com/h908714124/jbock/blob/master/READ_MORE.md)
 * [Gradle example](https://github.com/h908714124/jbock-map-example) (described in <a href="#custom-collectors">*custom-collectors*</a>)
 * [Maven example](https://github.com/h908714124/jbock-maven-example)
-* [List of auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/AutoTypes.java)
