@@ -36,8 +36,8 @@ This is determined from the parameter types as follows:
 <table style="border-collapse: collapse">
 <tr>
 <td></td>
-<td><b>No mapper defined</b></td>
-<td><b>Mapper defined</b></td>
+<td><b>No mapper</b></td>
+<td><b>Mapper defined?</b></td>
 </tr>
 <tr>
 <td><b>No collector<br/>defined</b></td>
@@ -58,7 +58,7 @@ This is determined from the parameter types as follows:
 </td>
 </tr>
 <tr>
-<td><b>Collector<br/>defined</b></td>
+<td><b>Collector<br/>defined?</b></td>
 <td colspan="2" style="text-align: center"><i>repeatable</i></td>
 </tr>
 </table>
