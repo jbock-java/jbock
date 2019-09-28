@@ -1,8 +1,6 @@
 ## jbock
 
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
-
-jbock is a simple and convenient ~~application server~~ *command line parser.*
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock) jbock is a simple and convenient ~~application server~~ *command line parser.*
 
 The command line options are defined as an annotated abstract class, see example:
 
@@ -18,7 +16,7 @@ abstract class MyArguments {
 }
 ````
 
-After adding such a model class to your project,
+After adding such an annotated "model" class to your project,
 you have to **build once** to trigger the code generation.
 See also <a href="#gradle-config">*gradle*</a> or
 <a href="#maven-config">*maven*</a> config.
