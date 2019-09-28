@@ -66,7 +66,7 @@ This is determined from the parameter types as follows:
 <i>*</i> : <i>does not apply to positional parameters</i>
 
 where `X` is one of the 
-"[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAutoTypes.java)",
+"[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)",
 and `R` is the return type of the mapper.
 `OptionalInt` and friends can be used in place of `Optional<Integer>` etc.
 
