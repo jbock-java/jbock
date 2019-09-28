@@ -17,12 +17,9 @@ abstract class MyArguments {
 ````
 
 After adding such an annotated "model" class to your project,
-you have to **build once** to trigger the code generation.
-See also <a href="#gradle-config">*gradle*</a> or
-<a href="#maven-config">*maven*</a> config.
-
-The derived class `MyArguments_Parser`, the source of which will then be generated,
-can be used in your `main` method as follows:
+you have to **build once** to trigger the code generation. A derived class `MyArguments_Parser`
+will be generated, which
+can be used in a `main` method as follows:
 
 ````java
 String[] argv = { "-v2", "file.txt" }; // for example
@@ -35,7 +32,7 @@ assertEquals(Paths.get("file.txt"), args.path());
 
 In the example above, note that `path` is a required parameter,
 and `verbosity` is optional.
-The parameter type determines the treatment of the parameter as follows:
+This is determined from the parameter types as follows:
 
 <table style="border-collapse: collapse">
 <tr>
