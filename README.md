@@ -15,8 +15,9 @@ abstract class MyArguments {
 }
 ````
 
-After adding such an annotated "model" class to your project,
-you have to **build once** to trigger the code generation. A derived class `MyArguments_Parser`
+The presence of this annotated class
+triggers the code generation at compile time.
+A derived class `MyArguments_Parser`
 will be generated, which
 can be used in a `main` method as follows:
 
