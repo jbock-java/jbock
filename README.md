@@ -37,7 +37,7 @@ This is determined by the parameter type as follows:
 <tr>
 <td></td>
 <td><b>No mapper</b></td>
-<td><b>Mapper defined?</b></td>
+<td><b>Mapper defined</b></td>
 </tr>
 <tr>
 <td valign="top"><b>No<br/>collector</b></td>
@@ -58,7 +58,7 @@ This is determined by the parameter type as follows:
 </td>
 </tr>
 <tr>
-<td><b>Collector<br/>defined?</b></td>
+<td><b>Collector<br/>defined</b></td>
 <td colspan="2" style="text-align: center"><i>repeatable</i></td>
 </tr>
 </table>
