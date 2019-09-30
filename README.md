@@ -15,7 +15,7 @@ abstract class MyArguments {
 }
 ````
 
-The presence of this annotated class
+The mere presence of this annotated class
 triggers the code generation at compile time.
 A derived class `MyArguments_Parser`
 will be generated, which
