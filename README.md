@@ -41,7 +41,7 @@ This is determined by the parameter type:
 <td><b>Mapper defined</b></td>
 </tr>
 <tr>
-<td valign="top"><b>No<br/>collector</b></td>
+<td valign="top"><b>No<br/>collector<br/>defined</b></td>
 <td>
 <table style="border-collapse: collapse; border: 1px solid black"><!-- No mapper, no collector-->
 <tr><td><code>boolean | Boolean</code>  </td><td><i>flag*</i></td></tr>
