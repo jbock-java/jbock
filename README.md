@@ -19,7 +19,7 @@ The mere presence of this annotated class
 triggers the code generation at compile time.
 A derived class `MyArguments_Parser`
 will be generated, which
-can be used in a `main` method as follows:
+can be used in a *main* method as follows:
 
 ````java
 String[] argv = { "-v2", "file.txt" }; // for example
