@@ -10,11 +10,9 @@
 * <a href="#parameter-shapes">Parameter shapes</a>
 * <a href="#showing-help">Showing help</a>
 * <a href="#standard-coercions">Standard coercions</a>
-* <a href="#custom-mappers-and-parameter-validation">Custom
-  mappers and parameter validation</a>
+* <a href="#custom-mappers-and-parameter-validation">Custom mappers and parameter validation</a>
 * <a href="#custom-collectors">Custom collectors</a>
-* <a href="#parameter-descriptions-and-internationalization">Parameter
-  descriptions and internationalization</a>
+* <a href="#parameter-descriptions-and-internationalization">Parameter descriptions and internationalization</a>
 * <a href="#escape-sequence">Escape sequence</a>
 * <a href="#allowing-prefixed-tokens">Allowing prefixed tokens</a>
 * <a href="#parsing-failure">Parsing failure</a>
@@ -30,18 +28,19 @@ for users of similar parsers:
 1. In the Java model, <a href="#required-and-optional-parameters">*optional parameters*</a>
    correspond to methods that return [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html).
    Coincidentally, there is no way to make a parameter method return `null`.
-1. <a href="#binding-parameters">*Binding parameters*</a> are [unary:](https://en.wikipedia.org/wiki/Unary_operation)
-    1. Each parameter name must be followed by a single argument.
+1. <a href="#binding-parameters">*Binding parameters*</a> are always [unary:](https://en.wikipedia.org/wiki/Unary_operation)
+    1. The parameter name must be followed by a single argument.
        If we think of the `argv` array as a map,
-       then this means that there's only one value per key.
+       then this means that there is only one value per key.
     1. One such key-value pair can also <a href="#parameter-shapes">*appear as a single token.*</a>
     1. Parameters can be <a href="#repeatable-parameters">*repeatable.*</a>
-       Repeatable parameters correspond to methods that return [List.](https://en.wikipedia.org/wiki/Java_collections_framework)
+       Unless a mapper or collector is defined,
+       repeatable parameters correspond to methods that return [List.](https://en.wikipedia.org/wiki/Java_collections_framework)
 1. There are some <a href="#standard-coercions">*standard coercions.*</a>
 Custom <a href="#custom-mappers-and-parameter-validation">*mappers*</a> and
 <a href="#custom-collectors">*collectors*</a> can be added.
 
-Now let's look at some features in more detail.
+Next, we look at some of the features in more detail.
 
 ### Argument vector
 
