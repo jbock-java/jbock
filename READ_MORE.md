@@ -19,6 +19,7 @@
 * <a href="#runtime-modifiers">Runtime modifiers</a>
 * <a href="#gradle-config">Gradle config</a>
 * <a href="#maven-config">Maven config</a>
+* <a href="#running-tests">Running tests</a>
 
 ### Features overview
 
@@ -539,4 +540,11 @@ The processor itself is only needed on the compiler classpath:
     </plugin>
   </plugins>
 </build>
+````
+
+
+### Running tests
+
+````sh
+gradle :core:test :examples:clean :examples:test
 ````

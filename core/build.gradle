@@ -17,7 +17,7 @@ dependencies {
     implementation 'com.squareup:javapoet:1.11.1'
     compile 'com.github.h908714124:jbock-annotations:2.6'
     testImplementation 'com.google.testing.compile:compile-testing:0.18'
-    testImplementation 'org.mockito:mockito-core:3.0.0'
+    testImplementation 'org.mockito:mockito-core:3.1.0'
     testImplementation 'org.junit.jupiter:junit-jupiter:5.5.2'
 }
 
