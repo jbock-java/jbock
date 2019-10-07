@@ -72,7 +72,7 @@ where `X` is the parameter type (must be one of the
 and `R` is the return type of the mapper.
 `OptionalInt` and friends can be used in place of `Optional<Integer>` etc.
 
-* [Detailed documentation](https://github.com/h908714124/jbock/blob/master/READ_MORE.md)
+* [Detailed documentation](https://github.com/h908714124/jbock/blob/master/SPAGHETTI.md)
 * [Gradle example](https://github.com/h908714124/jbock-map-example)
 * [Maven example](https://github.com/h908714124/jbock-maven-example)
 
