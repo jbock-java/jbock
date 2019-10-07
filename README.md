@@ -33,7 +33,7 @@ assertEquals(Paths.get("file.txt"), args.path());
 
 In the example above, note that `path` is a required parameter,
 and `verbosity` is optional.
-This is determined by the parameter type:
+That is determined by the parameter type according to this table:
 
 <table style="border-collapse: collapse">
 <tr>
@@ -67,8 +67,8 @@ This is determined by the parameter type:
 
 <i>*</i> : <i>does not apply to positional parameters</i>
 
-where `X` is the parameter type (must be one of the
-"[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)"),
+where `X` is one of the
+"[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)",
 and `R` is the return type of the mapper.
 `OptionalInt` and friends can be used in place of `Optional<Integer>` etc.
 
