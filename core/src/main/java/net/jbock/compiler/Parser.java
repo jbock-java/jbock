@@ -130,7 +130,7 @@ final class Parser {
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass);
     spec.addModifiers(FINAL);
-    if (context.sourceType.getModifiers().contains(PUBLIC)) {
+    if (context.sourceType().getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
     spec.addMethod(addPublicIfNecessary(createMethod()))
@@ -308,7 +308,7 @@ final class Parser {
     spec.addStatement("throw new $T($S)", AssertionError.class, "never thrown");
 
     return spec.addParameter(args)
-        .returns(TypeName.get(context.sourceType.asType()));
+        .returns(TypeName.get(context.sourceType().asType()));
   }
 
 
@@ -332,7 +332,7 @@ final class Parser {
   }
 
   static MethodSpec addPublicIfNecessary(Context context, MethodSpec.Builder spec) {
-    if (context.sourceType.getModifiers().contains(PUBLIC)) {
+    if (context.sourceType().getModifiers().contains(PUBLIC)) {
       return spec.addModifiers(PUBLIC).build();
     }
     return spec.build();
@@ -386,4 +386,6 @@ final class Parser {
         .addModifiers(STATIC, PRIVATE)
         .build();
   }
+
+
 }

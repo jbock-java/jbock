@@ -41,7 +41,7 @@ final class Impl {
 
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.implType())
-        .superclass(TypeName.get(context.sourceType.asType()));
+        .superclass(TypeName.get(context.sourceType().asType()));
     for (Param param : option.context.parameters) {
       spec.addField(param.field());
     }

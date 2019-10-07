@@ -13,7 +13,7 @@ import java.util.Set;
 final class Context {
 
   // the annotated class
-  final TypeElement sourceType;
+  private final TypeElement sourceElement;
 
   // the name of the class that will be generated
   final ClassName generatedClass;
@@ -64,7 +64,7 @@ final class Context {
   private final ClassName helpPrintedParseResultType;
 
   private Context(
-      TypeElement sourceType,
+      TypeElement sourceElement,
       ClassName generatedClass,
       List<Param> parameters,
       int numPositionalParameters,
@@ -90,7 +90,7 @@ final class Context {
       ClassName successParseResultType,
       ClassName errorParseResultType,
       ClassName helpPrintedParseResultType) {
-    this.sourceType = sourceType;
+    this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
     this.numPositionalParameters = numPositionalParameters;
@@ -119,17 +119,17 @@ final class Context {
   }
 
   static Context create(
+      TypeElement sourceElement,
       ClassName generatedClass,
-      List<String> description,
-      TypeElement sourceType,
       List<Param> parameters,
+      List<String> description,
       Set<ParameterType> nonpositionalParamTypes,
       Set<ParameterType> positionalParamTypes) {
-    boolean allowEscape = sourceType.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
+    boolean allowEscape = sourceElement.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
     long positionalParameters = parameters.stream().filter(Param::isPositional).count();
-    boolean strict = positionalParameters > 0 && !sourceType.getAnnotation(CommandLineArguments.class).allowPrefixedTokens();
-    boolean addHelp = sourceType.getAnnotation(CommandLineArguments.class).allowHelpOption();
-    String missionStatement = sourceType.getAnnotation(CommandLineArguments.class).missionStatement();
+    boolean strict = positionalParameters > 0 && !sourceElement.getAnnotation(CommandLineArguments.class).allowPrefixedTokens();
+    boolean addHelp = sourceElement.getAnnotation(CommandLineArguments.class).allowHelpOption();
+    String missionStatement = sourceElement.getAnnotation(CommandLineArguments.class).missionStatement();
     ClassName optionType = generatedClass.nestedClass("Option");
     ClassName helperType = generatedClass.nestedClass("Helper");
     ClassName optionParserType = generatedClass.nestedClass("OptionParser");
@@ -138,7 +138,7 @@ final class Context {
     ClassName regularOptionParserType = generatedClass.nestedClass("RegularOptionParser");
     ClassName indentPrinterType = generatedClass.nestedClass("IndentPrinter");
     ClassName messagesType = generatedClass.nestedClass("Messages");
-    ClassName implType = generatedClass.nestedClass(sourceType.getSimpleName() + "Impl");
+    ClassName implType = generatedClass.nestedClass(sourceElement.getSimpleName() + "Impl");
     ClassName tokenizerType = generatedClass.nestedClass("Tokenizer");
     ClassName parseResultType = generatedClass.nestedClass("ParseResult");
     ClassName successParseResultType = generatedClass.nestedClass("ParsingSuccess");
@@ -146,7 +146,7 @@ final class Context {
     ClassName helpPrintedParseResultType = generatedClass.nestedClass("HelpPrinted");
 
     return new Context(
-        sourceType,
+        sourceElement,
         generatedClass,
         parameters,
         Long.valueOf(positionalParameters).intValue(),
@@ -156,7 +156,7 @@ final class Context {
         nonpositionalParamTypes,
         positionalParamTypes,
         description,
-        programName(sourceType),
+        programName(sourceElement),
         missionStatement,
         optionParserType,
         flagOptionParserType,
@@ -257,5 +257,9 @@ final class Context {
 
   ClassName helpPrintedParseResultType() {
     return helpPrintedParseResultType;
+  }
+
+  TypeElement sourceType() {
+    return sourceElement;
   }
 }

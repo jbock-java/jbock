@@ -92,36 +92,34 @@ public final class Processor extends AbstractProcessor {
     if (!annotationsToProcess.contains(CommandLineArguments.class.getCanonicalName())) {
       return;
     }
-    processAnnotatedTypes(getAnnotatedTypes(env));
+    getSourceElements(env).forEach(this::processSourceElements);
   }
 
-  private void processAnnotatedTypes(Set<TypeElement> annotatedClasses) {
-    for (TypeElement sourceType : annotatedClasses) {
-      ClassName generatedClass = generatedClass(ClassName.get(sourceType));
-      try {
-        validateType(sourceType);
-        List<Param> parameters = getParams(sourceType);
-        if (parameters.isEmpty()) {
-          processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
-              "Define at least one abstract method", sourceType);
-        }
-
-        Set<ParameterType> nonpositionalParamTypes = nonpositionalParamTypes(parameters);
-        Set<ParameterType> positionalParamTypes = positionalParamTypes(parameters);
-        Context context = Context.create(
-            generatedClass,
-            getOverview(sourceType),
-            sourceType,
-            parameters,
-            nonpositionalParamTypes,
-            positionalParamTypes);
-        TypeSpec typeSpec = Parser.create(context).define();
-        write(sourceType, context.generatedClass, typeSpec);
-      } catch (ValidationException e) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
-      } catch (AssertionError error) {
-        handleUnknownError(sourceType, error);
+  private void processSourceElements(TypeElement sourceElement) {
+    ClassName generatedClass = generatedClass(ClassName.get(sourceElement));
+    try {
+      validateSourceElement(sourceElement);
+      List<Param> parameters = getParams(sourceElement);
+      if (parameters.isEmpty()) {
+        processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
+            "Define at least one abstract method", sourceElement);
       }
+
+      Set<ParameterType> nonpositionalParamTypes = nonpositionalParamTypes(parameters);
+      Set<ParameterType> positionalParamTypes = positionalParamTypes(parameters);
+      Context context = Context.create(
+          sourceElement,
+          generatedClass,
+          parameters,
+          getOverview(sourceElement),
+          nonpositionalParamTypes,
+          positionalParamTypes);
+      TypeSpec typeSpec = Parser.create(context).define();
+      write(sourceElement, context.generatedClass, typeSpec);
+    } catch (ValidationException e) {
+      processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
+    } catch (AssertionError error) {
+      handleUnknownError(sourceElement, error);
     }
   }
 
@@ -143,7 +141,7 @@ public final class Processor extends AbstractProcessor {
     return paramTypes;
   }
 
-  private Set<TypeElement> getAnnotatedTypes(RoundEnvironment env) {
+  private Set<TypeElement> getSourceElements(RoundEnvironment env) {
     Set<? extends Element> annotated = env.getElementsAnnotatedWith(CommandLineArguments.class);
     return ElementFilter.typesIn(annotated);
   }
@@ -178,8 +176,8 @@ public final class Processor extends AbstractProcessor {
   private static final Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
       .comparingInt(e -> e.getAnnotation(PositionalParameter.class).position());
 
-  private List<Param> getParams(TypeElement sourceType) {
-    List<ExecutableElement> abstractMethods = methodsIn(sourceType.getEnclosedElements()).stream()
+  private List<Param> getParams(TypeElement sourceElement) {
+    List<ExecutableElement> abstractMethods = methodsIn(sourceElement.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
         .collect(toList());
     checkExactlyOneAnnotation(abstractMethods);
@@ -188,7 +186,7 @@ public final class Processor extends AbstractProcessor {
     List<ExecutableElement> allNonpositional = partition.getOrDefault(false, emptyList());
     List<ExecutableElement> allPositional = partition.getOrDefault(true, emptyList());
     checkPositionUnique(allPositional);
-    checkFlagsThatRequirePositional(sourceType, allPositional);
+    checkFlagsThatRequirePositional(sourceElement, allPositional);
     List<ExecutableElement> sortedPositional = allPositional.stream().sorted(POSITION_COMPARATOR).collect(Collectors.toList());
     List<Param> result = new ArrayList<>(abstractMethods.size());
     for (int i = 0; i < sortedPositional.size(); i++) {
@@ -200,7 +198,7 @@ public final class Processor extends AbstractProcessor {
       Param param = Param.create(result, method, OptionalInt.empty(), getDescription(method));
       result.add(param);
     }
-    if (sourceType.getAnnotation(CommandLineArguments.class).allowHelpOption()) {
+    if (sourceElement.getAnnotation(CommandLineArguments.class).allowHelpOption()) {
       checkHelp(result);
     }
     return result;
@@ -242,38 +240,38 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void validateType(TypeElement sourceType) {
-    if (sourceType.getKind() == ElementKind.INTERFACE) {
-      throw ValidationException.create(sourceType,
+  private void validateSourceElement(TypeElement sourceElement) {
+    if (sourceElement.getKind() == ElementKind.INTERFACE) {
+      throw ValidationException.create(sourceElement,
           "Use an abstract class, not an interface.");
     }
-    if (!TypeTool.get().isSameType(sourceType.getSuperclass(), Object.class)) {
-      throw ValidationException.create(sourceType,
-          String.format("The class may not extend %s.", sourceType.getSuperclass()));
+    if (!TypeTool.get().isSameType(sourceElement.getSuperclass(), Object.class)) {
+      throw ValidationException.create(sourceElement,
+          String.format("The class may not extend %s.", sourceElement.getSuperclass()));
     }
-    if (!sourceType.getModifiers().contains(ABSTRACT)) {
-      throw ValidationException.create(sourceType,
+    if (!sourceElement.getModifiers().contains(ABSTRACT)) {
+      throw ValidationException.create(sourceElement,
           "Use an abstract class.");
     }
-    if (sourceType.getModifiers().contains(Modifier.PRIVATE)) {
-      throw ValidationException.create(sourceType,
+    if (sourceElement.getModifiers().contains(Modifier.PRIVATE)) {
+      throw ValidationException.create(sourceElement,
           "The class cannot not be private.");
     }
-    if (sourceType.getNestingKind().isNested() &&
-        !sourceType.getModifiers().contains(Modifier.STATIC)) {
-      throw ValidationException.create(sourceType,
+    if (sourceElement.getNestingKind().isNested() &&
+        !sourceElement.getModifiers().contains(Modifier.STATIC)) {
+      throw ValidationException.create(sourceElement,
           "The nested class must be static.");
     }
-    if (!sourceType.getInterfaces().isEmpty()) {
-      throw ValidationException.create(sourceType,
+    if (!sourceElement.getInterfaces().isEmpty()) {
+      throw ValidationException.create(sourceElement,
           "The class cannot implement anything.");
     }
-    if (!sourceType.getTypeParameters().isEmpty()) {
-      throw ValidationException.create(sourceType,
+    if (!sourceElement.getTypeParameters().isEmpty()) {
+      throw ValidationException.create(sourceElement,
           "The class cannot have type parameters.");
     }
-    if (!Util.hasDefaultConstructor(sourceType)) {
-      throw ValidationException.create(sourceType,
+    if (!Util.hasDefaultConstructor(sourceElement)) {
+      throw ValidationException.create(sourceElement,
           "The class must have a default constructor.");
     }
   }
