@@ -115,7 +115,7 @@ public final class Processor extends AbstractProcessor {
           nonpositionalParamTypes,
           positionalParamTypes);
       TypeSpec typeSpec = Parser.create(context).define();
-      write(sourceElement, context.generatedClass, typeSpec);
+      write(sourceElement, context.generatedClass(), typeSpec);
     } catch (ValidationException e) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
     } catch (AssertionError error) {

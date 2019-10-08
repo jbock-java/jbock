@@ -128,9 +128,9 @@ final class Parser {
   }
 
   TypeSpec define() {
-    TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass);
+    TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass());
     spec.addModifiers(FINAL);
-    if (context.sourceType().getModifiers().contains(PUBLIC)) {
+    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
     spec.addMethod(addPublicIfNecessary(createMethod()))
@@ -174,7 +174,7 @@ final class Parser {
         .addParameter(indentParam)
         .addStatement("this.$N = $N", indent, indentParam)
         .addStatement("return this")
-        .returns(context.generatedClass);
+        .returns(context.generatedClass());
   }
 
   private MethodSpec.Builder withErrorExitCodeMethod() {
@@ -183,7 +183,7 @@ final class Parser {
         .addParameter(errorExitCodeParam)
         .addStatement("this.$N = $N", errorExitCode, errorExitCodeParam)
         .addStatement("return this")
-        .returns(context.generatedClass);
+        .returns(context.generatedClass());
   }
 
   private MethodSpec.Builder withMessagesMethod() {
@@ -195,7 +195,7 @@ final class Parser {
     return spec.addParameter(resourceBundleParam)
         .addStatement("this.$N = $T.requireNonNull($N)", messages, Objects.class, resourceBundleParam)
         .addStatement("return this")
-        .returns(context.generatedClass);
+        .returns(context.generatedClass());
   }
 
   private MethodSpec.Builder withResourceBundleMethod() {
@@ -209,7 +209,7 @@ final class Parser {
         .endControlFlow();
     spec.addStatement("return withMessages($N)", map);
     return spec.addParameter(bundle)
-        .returns(context.generatedClass);
+        .returns(context.generatedClass());
   }
 
   private MethodSpec.Builder withMessagesMethodInputStream() {
@@ -237,7 +237,7 @@ final class Parser {
         .addStatement("throw new $T($N)", RuntimeException.class, exception)
         .endControlFlow();
     return spec.addParameter(stream)
-        .returns(context.generatedClass);
+        .returns(context.generatedClass());
   }
 
   private MethodSpec.Builder withOutputStreamMethod() {
@@ -255,7 +255,7 @@ final class Parser {
         .addParameter(param)
         .addStatement("this.$N = $T.requireNonNull($N)", stream, Objects.class, param)
         .addStatement("return this")
-        .returns(context.generatedClass);
+        .returns(context.generatedClass());
   }
 
   private MethodSpec.Builder parseMethod() {
@@ -308,15 +308,15 @@ final class Parser {
     spec.addStatement("throw new $T($S)", AssertionError.class, "never thrown");
 
     return spec.addParameter(args)
-        .returns(TypeName.get(context.sourceType().asType()));
+        .returns(TypeName.get(context.sourceElement().asType()));
   }
 
 
   private MethodSpec.Builder createMethod() {
     MethodSpec.Builder builder = methodBuilder("create");
-    builder.addStatement("return new $T()", context.generatedClass);
+    builder.addStatement("return new $T()", context.generatedClass());
     return builder.addModifiers(STATIC)
-        .returns(context.generatedClass);
+        .returns(context.generatedClass());
   }
 
 
@@ -332,7 +332,7 @@ final class Parser {
   }
 
   static MethodSpec addPublicIfNecessary(Context context, MethodSpec.Builder spec) {
-    if (context.sourceType().getModifiers().contains(PUBLIC)) {
+    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
       return spec.addModifiers(PUBLIC).build();
     }
     return spec.build();
@@ -386,6 +386,4 @@ final class Parser {
         .addModifiers(STATIC, PRIVATE)
         .build();
   }
-
-
 }

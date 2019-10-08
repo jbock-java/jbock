@@ -38,7 +38,7 @@ final class ParseResult {
   }
 
   static ParseResult create(Context context) {
-    FieldSpec result = FieldSpec.builder(TypeName.get(context.sourceType().asType()), "result",
+    FieldSpec result = FieldSpec.builder(TypeName.get(context.sourceElement().asType()), "result",
         PRIVATE, FINAL).build();
     return new ParseResult(context, result);
   }
@@ -48,7 +48,7 @@ final class ParseResult {
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addModifiers(STATIC, ABSTRACT)
         .addJavadoc("This will be a sealed type in the future.\n");
-    if (context.sourceType().getModifiers().contains(PUBLIC)) {
+    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
     return Arrays.asList(spec.build(),
@@ -61,7 +61,7 @@ final class ParseResult {
     TypeSpec.Builder spec = classBuilder(context.helpPrintedParseResultType())
         .superclass(context.parseResultType())
         .addModifiers(STATIC, FINAL);
-    if (context.sourceType().getModifiers().contains(PUBLIC)) {
+    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
     return spec.build();
@@ -77,7 +77,7 @@ final class ParseResult {
             .addStatement("this.$N = $T.requireNonNull($N)", message, Objects.class, paramMessage)
             .addModifiers(PRIVATE).build())
         .addModifiers(STATIC, FINAL);
-    if (context.sourceType().getModifiers().contains(PUBLIC)) {
+    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
     spec.addMethod(addPublicIfNecessary(context, messageMethod()));
@@ -90,7 +90,7 @@ final class ParseResult {
         .addField(result)
         .addMethod(successConstructor())
         .addModifiers(STATIC, FINAL);
-    if (context.sourceType().getModifiers().contains(PUBLIC)) {
+    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
     spec.addMethod(addPublicIfNecessary(context, resultMethod()));
@@ -100,7 +100,7 @@ final class ParseResult {
   private MethodSpec.Builder resultMethod() {
     return methodBuilder("result")
         .addStatement("return $N", result)
-        .returns(TypeName.get(context.sourceType().asType()));
+        .returns(TypeName.get(context.sourceElement().asType()));
   }
 
   private MethodSpec.Builder messageMethod() {

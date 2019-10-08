@@ -16,7 +16,7 @@ final class Context {
   private final TypeElement sourceElement;
 
   // the name of the class that will be generated
-  final ClassName generatedClass;
+  private final ClassName generatedClass;
 
   // corresponds to all parameter methods
   final List<Param> parameters;
@@ -259,7 +259,11 @@ final class Context {
     return helpPrintedParseResultType;
   }
 
-  TypeElement sourceType() {
+  TypeElement sourceElement() {
     return sourceElement;
+  }
+
+  ClassName generatedClass() {
+    return generatedClass;
   }
 }

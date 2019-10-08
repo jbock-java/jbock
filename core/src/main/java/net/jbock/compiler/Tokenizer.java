@@ -280,7 +280,7 @@ final class Tokenizer {
   private CodeBlock parseMethodTryBlock(
       ParameterSpec args) {
     CodeBlock.Builder spec = CodeBlock.builder();
-    ParameterSpec result = ParameterSpec.builder(optionalOfSubtype(TypeName.get(context.sourceType().asType())), "result")
+    ParameterSpec result = ParameterSpec.builder(optionalOfSubtype(TypeName.get(context.sourceElement().asType())), "result")
         .build();
     spec.addStatement("$T $N = parse($T.asList($N).iterator())",
         result.type, result, Arrays.class, args);
@@ -327,7 +327,7 @@ final class Tokenizer {
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse")
         .addParameter(tokens)
-        .returns(optionalOfSubtype(TypeName.get(context.sourceType().asType())));
+        .returns(optionalOfSubtype(TypeName.get(context.sourceElement().asType())));
 
     spec.addStatement("$T $N = $L", BOOLEAN, isFirst, true);
     spec.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
