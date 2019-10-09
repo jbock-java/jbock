@@ -234,14 +234,14 @@ final class Tokenizer {
     spec.addStatement("$T $N = new $T($S)",
         StringJoiner.class, joiner, StringJoiner.class, " ");
 
-    Map<Boolean, List<Param>> partitionedOptions = context.parameters.stream()
+    Map<Boolean, List<Param>> partitionedOptions = context.parameters().stream()
         .filter(Param::isOption)
         .collect(partitioningBy(Param::isRequired));
 
     List<Param> requiredNonpos = partitionedOptions.get(true);
     List<Param> optionalNonpos = partitionedOptions.get(false);
 
-    List<Param> positional = context.parameters.stream()
+    List<Param> positional = context.parameters().stream()
         .filter(Param::isPositional)
         .collect(toList());
 

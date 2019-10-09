@@ -24,25 +24,20 @@ final class Impl {
 
   private final Context context;
 
-  private final Option option;
-
   private Impl(
-      Context context,
-      Option option) {
+      Context context) {
     this.context = context;
-    this.option = option;
   }
 
   static Impl create(
-      Context context,
-      Option option) {
-    return new Impl(context, option);
+      Context context) {
+    return new Impl(context);
   }
 
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.implType())
         .superclass(TypeName.get(context.sourceElement().asType()));
-    for (Param param : option.context.parameters) {
+    for (Param param : context.parameters()) {
       spec.addField(param.field());
     }
     spec.addModifiers(PRIVATE, STATIC)
@@ -52,8 +47,8 @@ final class Impl {
   }
 
   private List<MethodSpec> bindMethods() {
-    List<MethodSpec> result = new ArrayList<>(option.context.parameters.size());
-    for (Param param : option.context.parameters) {
+    List<MethodSpec> result = new ArrayList<>(context.parameters().size());
+    for (Param param : context.parameters()) {
       MethodSpec.Builder builder = MethodSpec.methodBuilder(param.methodName())
           .addAnnotation(Override.class)
           .returns(param.returnType());
@@ -71,7 +66,7 @@ final class Impl {
 
   private MethodSpec implConstructor() {
     MethodSpec.Builder builder = MethodSpec.constructorBuilder();
-    for (Param p : option.context.parameters) {
+    for (Param p : context.parameters()) {
       FieldSpec field = p.field();
       CodeBlock extractExpr = p.coercion().extractExpr();
       builder.addStatement("this.$N = $L", field, extractExpr);

@@ -94,7 +94,6 @@ final class Helper {
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(
         shortNamesField,
         context,
-        option,
         readLongMethod);
 
     MethodSpec readMethod = readMethod(
@@ -130,14 +129,13 @@ final class Helper {
   private static MethodSpec readRegularOptionMethod(
       FieldSpec shortNamesField,
       Context context,
-      Option option,
       MethodSpec readLongMethod) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("readRegularOption")
         .addParameter(token)
         .returns(context.optionType());
 
-    if (option.context.nonpositionalParamTypes.isEmpty()) {
+    if (context.nonpositionalParamTypes.isEmpty()) {
       return spec.addStatement("return null").build();
     }
 
@@ -149,7 +147,7 @@ final class Helper {
         .addStatement("return $N($N)", readLongMethod, token)
         .endControlFlow();
 
-    if (!option.context.nonpositionalParamTypes.contains(ParameterType.FLAG)) {
+    if (!context.nonpositionalParamTypes.contains(ParameterType.FLAG)) {
       return spec.addStatement("return $N.get($N.charAt(1))",
           shortNamesField, token).build();
     }
@@ -218,10 +216,10 @@ final class Helper {
   private MethodSpec buildMethod() {
 
     CodeBlock.Builder args = CodeBlock.builder().add("\n");
-    for (int j = 0; j < context.parameters.size(); j++) {
-      Param param = context.parameters.get(j);
+    for (int j = 0; j < context.parameters().size(); j++) {
+      Param param = context.parameters().get(j);
       args.add(extractExpression(param));
-      if (j < context.parameters.size() - 1) {
+      if (j < context.parameters().size() - 1) {
         args.add(",\n");
       }
     }

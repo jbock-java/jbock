@@ -128,7 +128,7 @@ final class Option {
   }
 
   TypeSpec define() {
-    List<Param> parameters = context.parameters;
+    List<Param> parameters = context.parameters();
     TypeSpec.Builder spec = parameters.isEmpty() ?
         TypeSpec.classBuilder(context.optionType()) :
         TypeSpec.enumBuilder(context.optionType());

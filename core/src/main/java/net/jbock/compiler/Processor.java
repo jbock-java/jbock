@@ -107,6 +107,9 @@ public final class Processor extends AbstractProcessor {
 
       Set<ParameterType> nonpositionalParamTypes = nonpositionalParamTypes(parameters);
       Set<ParameterType> positionalParamTypes = positionalParamTypes(parameters);
+      checkOnlyOnePositionalList(parameters);
+      checkRankConsistentWithPosition(parameters);
+
       Context context = Context.create(
           sourceElement,
           generatedClass,
@@ -120,6 +123,30 @@ public final class Processor extends AbstractProcessor {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
     } catch (AssertionError error) {
       handleUnknownError(sourceElement, error);
+    }
+  }
+
+  private static void checkOnlyOnePositionalList(List<Param> allParams) {
+    allParams.stream()
+        .filter(Param::isRepeatable)
+        .filter(Param::isPositional)
+        .skip(1).findAny().ifPresent(p -> {
+      throw p.validationError("There can only be one one repeatable positional parameter.");
+    });
+  }
+
+  private static void checkRankConsistentWithPosition(List<Param> allParams) {
+    int currentOrdinal = -1;
+    for (Param param : allParams) {
+      OptionalInt order = param.positionalOrder();
+      if (!order.isPresent()) {
+        continue;
+      }
+      if (order.getAsInt() < currentOrdinal) {
+        throw param.validationError("Invalid position: Optional parameters must come " +
+            "after required parameters. Repeatable parameters must come last.");
+      }
+      currentOrdinal = order.getAsInt();
     }
   }
 

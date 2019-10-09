@@ -19,7 +19,7 @@ final class Context {
   private final ClassName generatedClass;
 
   // corresponds to all parameter methods
-  final List<Param> parameters;
+  private final List<Param> parameters;
 
   // number of methods that have the Positional annotation
   private final int numPositionalParameters;
@@ -265,5 +265,9 @@ final class Context {
 
   ClassName generatedClass() {
     return generatedClass;
+  }
+
+  List<Param> parameters() {
+    return parameters;
   }
 }
