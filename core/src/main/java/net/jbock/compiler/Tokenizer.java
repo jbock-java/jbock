@@ -392,7 +392,7 @@ final class Tokenizer {
         .endControlFlow();
 
     // handle unknown token
-    if (context.strict) {
+    if (context.strict()) {
       spec.beginControlFlow("if ($N.charAt(0) == '-')", token)
           .addStatement(throwInvalidOptionStatement(token))
           .endControlFlow();

@@ -28,7 +28,7 @@ final class Context {
   private final boolean allowEscape;
 
   // whether unknown tokens that start with dash should be accepted as positional parameters
-  final boolean strict;
+  private final boolean strict;
 
   // true if --help is a special token
   final boolean addHelp;
@@ -269,5 +269,9 @@ final class Context {
 
   List<Param> parameters() {
     return parameters;
+  }
+
+  boolean strict() {
+    return strict;
   }
 }
