@@ -31,7 +31,7 @@ final class Context {
   private final boolean strict;
 
   // true if --help is a special token
-  final boolean addHelp;
+  private final boolean addHelp;
 
   // a set of only the non-positional param types in the sourceType
   final Set<ParameterType> nonpositionalParamTypes;
@@ -273,5 +273,9 @@ final class Context {
 
   boolean strict() {
     return strict;
+  }
+
+  boolean addHelp() {
+    return addHelp;
   }
 }

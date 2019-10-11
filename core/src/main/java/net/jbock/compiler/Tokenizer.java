@@ -159,7 +159,7 @@ final class Tokenizer {
     }
 
     // Options
-    if (!context.nonpositionalParamTypes.isEmpty() || context.addHelp) {
+    if (!context.nonpositionalParamTypes.isEmpty() || context.addHelp()) {
       spec.addStatement("$N.println($S)", out, "OPTIONS");
     }
 
@@ -176,7 +176,7 @@ final class Tokenizer {
     }
 
     // Help
-    if (context.addHelp) {
+    if (context.addHelp()) {
       describeHelpParameter(spec);
     }
 
@@ -297,7 +297,7 @@ final class Tokenizer {
   private CodeBlock parseMethodCatchBlock(ParameterSpec e) {
     CodeBlock.Builder spec = CodeBlock.builder();
     spec.addStatement("$N.printStackTrace($N.out)", e, err);
-    if (context.addHelp) {
+    if (context.addHelp()) {
       spec.addStatement("$N.println($S)", err, "Usage:");
       spec.addStatement("$N.incrementIndent()", err);
       spec.addStatement("$N.println(synopsis())", err);
@@ -356,7 +356,7 @@ final class Tokenizer {
     CodeBlock.Builder spec = CodeBlock.builder();
     spec.addStatement("$T $N = $N.next()", STRING, token, tokens);
 
-    if (context.addHelp) {
+    if (context.addHelp()) {
       spec.beginControlFlow("if ($N && $S.equals($N))", isFirst, "--help", token)
           .addStatement("return $T.empty()", Optional.class)
           .endControlFlow();

@@ -108,7 +108,7 @@ final class Parser {
     spec.addMethod(addPublicIfNecessary(createMethod()))
         .addMethod(addPublicIfNecessary(parseMethod()))
         .addMethod(addPublicIfNecessary(parseOrExitMethod()));
-    if (context.addHelp) {
+    if (context.addHelp()) {
       spec.addMethod(addPublicIfNecessary(withOutputStreamMethod()));
     }
     return spec.addMethod(addPublicIfNecessary(withErrorStreamMethod()))
@@ -239,7 +239,7 @@ final class Parser {
     ParameterSpec paramTokenizer = builder(context.tokenizerType(), "tokenizer").build();
     ParameterSpec paramErrStream = builder(context.indentPrinterType(), "errStream").build();
     ParameterSpec paramOutStream;
-    if (context.addHelp) {
+    if (context.addHelp()) {
       paramOutStream = builder(context.indentPrinterType(), "outStream").build();
       spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramOutStream, context.indentPrinterType(), out, indent);
     } else {
