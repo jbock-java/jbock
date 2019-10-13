@@ -117,7 +117,7 @@ final class Helper {
     spec.addMethod(readMethod)
         .addMethod(readRegularOptionMethod)
         .addMethod(buildMethod());
-    if (!context.nonpositionalParamTypes.isEmpty()) {
+    if (!context.nonpositionalParamTypes().isEmpty()) {
       spec.addField(longNamesField)
           .addField(shortNamesField)
           .addField(parsersField);
@@ -135,7 +135,7 @@ final class Helper {
         .addParameter(token)
         .returns(context.optionType());
 
-    if (context.nonpositionalParamTypes.isEmpty()) {
+    if (context.nonpositionalParamTypes().isEmpty()) {
       return spec.addStatement("return null").build();
     }
 
@@ -147,7 +147,7 @@ final class Helper {
         .addStatement("return $N($N)", readLongMethod, token)
         .endControlFlow();
 
-    if (!context.nonpositionalParamTypes.contains(ParameterType.FLAG)) {
+    if (!context.nonpositionalParamTypes().contains(ParameterType.FLAG)) {
       return spec.addStatement("return $N.get($N.charAt(1))",
           shortNamesField, token).build();
     }
@@ -206,7 +206,7 @@ final class Helper {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(optionParam, token, it));
 
-    if (!context.nonpositionalParamTypes.isEmpty()) {
+    if (!context.nonpositionalParamTypes().isEmpty()) {
       spec.addStatement("$N.get($N).read($N, $N)", parsersField, optionParam, token, it);
     }
 

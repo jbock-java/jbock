@@ -34,7 +34,7 @@ final class Context {
   private final boolean addHelp;
 
   // a set of only the non-positional param types in the sourceType
-  final Set<ParameterType> nonpositionalParamTypes;
+  private final Set<ParameterType> nonpositionalParamTypes;
 
   // a set of only the positional param types in the sourceType
   final Set<ParameterType> positionalParamTypes;
@@ -277,5 +277,9 @@ final class Context {
 
   boolean addHelp() {
     return addHelp;
+  }
+
+  Set<ParameterType> nonpositionalParamTypes() {
+    return nonpositionalParamTypes;
   }
 }

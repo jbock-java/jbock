@@ -148,7 +148,7 @@ final class Option {
         .addMethod(exampleMethod)
         .addMethod(missingRequiredLambdaMethod())
         .addMethod(privateConstructor());
-    if (!context.nonpositionalParamTypes.isEmpty()) {
+    if (!context.nonpositionalParamTypes().isEmpty()) {
       spec.addMethod(shortNameMapMethod)
           .addMethod(longNameMapMethod)
           .addMethod(parsersMethod);

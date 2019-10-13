@@ -159,11 +159,11 @@ final class Tokenizer {
     }
 
     // Options
-    if (!context.nonpositionalParamTypes.isEmpty() || context.addHelp()) {
+    if (!context.nonpositionalParamTypes().isEmpty() || context.addHelp()) {
       spec.addStatement("$N.println($S)", out, "OPTIONS");
     }
 
-    if (!context.nonpositionalParamTypes.isEmpty()) {
+    if (!context.nonpositionalParamTypes().isEmpty()) {
       spec.addStatement("$N.incrementIndent()", out);
       ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
       spec.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
