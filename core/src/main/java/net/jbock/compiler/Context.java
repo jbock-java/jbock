@@ -37,16 +37,16 @@ final class Context {
   private final Set<ParameterType> nonpositionalParamTypes;
 
   // a set of only the positional param types in the sourceType
-  final Set<ParameterType> positionalParamTypes;
+  private final Set<ParameterType> positionalParamTypes;
 
   // program description from javadoc, can be overridden with bundle key jbock.description
-  final List<String> description;
+  private final List<String> description;
 
   // program name from attribute
-  final String programName;
+  private final String programName;
 
   // mission statement from attribute, can be overridden with bundle key jbock.mission
-  final String missionStatement;
+  private final String missionStatement;
 
   private final ClassName optionParserType;
   private final ClassName flagOptionParserType;
@@ -192,6 +192,9 @@ final class Context {
     if (positionalParamTypes.contains(ParameterType.REPEATABLE)) {
       return OptionalInt.empty();
     }
+    if (!hasPositional()) {
+      return OptionalInt.empty();
+    }
     return OptionalInt.of(numPositionalParameters);
   }
 
@@ -281,5 +284,21 @@ final class Context {
 
   Set<ParameterType> nonpositionalParamTypes() {
     return nonpositionalParamTypes;
+  }
+
+  Set<ParameterType> positionalParamTypes() {
+    return positionalParamTypes;
+  }
+
+  List<String> description() {
+    return description;
+  }
+
+  String programName() {
+    return programName;
+  }
+
+  String missionStatement() {
+    return missionStatement;
   }
 }

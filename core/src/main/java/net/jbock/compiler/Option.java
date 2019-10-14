@@ -153,7 +153,7 @@ final class Option {
           .addMethod(longNameMapMethod)
           .addMethod(parsersMethod);
     }
-    if (!context.positionalParamTypes.isEmpty()) {
+    if (!context.positionalParamTypes().isEmpty()) {
       spec.addMethod(positionalValuesMethod());
       spec.addMethod(positionalValueMethod());
     }

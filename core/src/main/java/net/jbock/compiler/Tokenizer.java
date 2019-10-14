@@ -113,13 +113,14 @@ final class Tokenizer {
     // Mission Statement
     ParameterSpec missionStatement = ParameterSpec.builder(STRING, "missionStatement").build();
     spec.addStatement("$T $N = $N.getMessage($S, $S)",
-        missionStatement.type, missionStatement, messages, SPECIAL_KEY_MISSION, context.missionStatement);
+        missionStatement.type, missionStatement, messages,
+        SPECIAL_KEY_MISSION, context.missionStatement());
     spec.beginControlFlow("if ($N.isEmpty())", missionStatement)
-        .addStatement("$N.println($S)", out, context.programName)
+        .addStatement("$N.println($S)", out, context.programName())
         .endControlFlow();
     spec.beginControlFlow("else")
         .addStatement("$N.println($T.format($S, $S, $N))",
-            out, String.class, "%s - %s", context.programName, missionStatement)
+            out, String.class, "%s - %s", context.programName(), missionStatement)
         .endControlFlow();
     spec.addStatement("$N.println()", out);
     spec.addStatement("$N.decrementIndent()", out);
@@ -136,7 +137,7 @@ final class Tokenizer {
     spec.addStatement("$N.incrementIndent()", out);
     ParameterSpec overview = ParameterSpec.builder(LIST_OF_STRING, "descriptionFromJavadoc").build();
     spec.addStatement("$T $N = new $T<>()", overview.type, overview, ArrayList.class);
-    for (String line : context.description) {
+    for (String line : context.description()) {
       spec.addStatement("$N.add($S)", overview, line);
     }
     ParameterSpec line = ParameterSpec.builder(STRING, "line").build();
@@ -148,7 +149,7 @@ final class Tokenizer {
 
     // Positional parameters
     spec.addStatement("$N.println()", out);
-    if (!context.positionalParamTypes.isEmpty()) {
+    if (!context.positionalParamTypes().isEmpty()) {
       ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
       spec.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
       spec.beginControlFlow("if ($N.positional())", optionParam)
@@ -245,7 +246,7 @@ final class Tokenizer {
         .filter(Param::isPositional)
         .collect(toList());
 
-    spec.addStatement("$N.add($S)", joiner, context.programName);
+    spec.addStatement("$N.add($S)", joiner, context.programName());
 
     if (!optionalNonpos.isEmpty()) {
       spec.addStatement("$N.add($S)", joiner, "[<options>]");
@@ -309,7 +310,8 @@ final class Tokenizer {
       spec.addStatement("$N.println($N.getMessage())", err, e);
       spec.addStatement("$N.decrementIndent()", err);
       spec.addStatement("$N.println()", err);
-      spec.addStatement("$N.println($T.format($S, $S))", err, String.class, "Try '%s --help' for more information.", context.programName);
+      spec.addStatement("$N.println($T.format($S, $S))", err, String.class,
+          "Try '%s --help' for more information.", context.programName());
       spec.addStatement("$N.println()", err);
     } else {
       spec.addStatement("printUsage()");
