@@ -45,18 +45,18 @@ class AutoMapper {
       create(Integer.class, VALUE_OF),
       create(Long.class, VALUE_OF),
       create(File.class, NEW),
-      create(Character.class, parseCharacterLambda()),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
-      create(URI.class, CREATE),
-      create(BigDecimal.class, NEW),
-      create(BigInteger.class, NEW),
       create(Charset.class, FOR_NAME),
       create(Pattern.class, COMPILE),
       create(LocalDate.class, PARSE),
       create(Short.class, VALUE_OF),
       create(Byte.class, VALUE_OF),
       create(Double.class, VALUE_OF),
-      create(Float.class, VALUE_OF));
+      create(Float.class, VALUE_OF),
+      create(Character.class, parseCharacterLambda()),
+      create(URI.class, CREATE),
+      create(BigDecimal.class, NEW),
+      create(BigInteger.class, NEW));
 
   static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror type) {
     TypeMirror boxed = tool.box(type);
