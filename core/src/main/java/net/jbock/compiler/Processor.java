@@ -101,8 +101,8 @@ public final class Processor extends AbstractProcessor {
       validateSourceElement(sourceElement);
       List<Param> parameters = getParams(sourceElement);
       if (parameters.isEmpty()) {
-        processingEnv.getMessager().printMessage(Diagnostic.Kind.WARNING,
-            "Define at least one abstract method", sourceElement);
+        throw ValidationException.create(sourceElement,
+            "Define at least one abstract method");
       }
 
       Set<ParameterType> nonpositionalParamTypes = nonpositionalParamTypes(parameters);

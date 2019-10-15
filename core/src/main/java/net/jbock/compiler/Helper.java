@@ -11,6 +11,7 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.coerce.ParameterType;
 
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -19,7 +20,6 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Util.optionalOfSubtype;
@@ -37,38 +37,33 @@ final class Helper {
   private final FieldSpec longNamesField;
   private final FieldSpec shortNamesField;
   final FieldSpec parsersField;
+  final FieldSpec positionalParsersField;
 
   final MethodSpec readMethod;
   final MethodSpec readRegularOptionMethod;
 
   private final MethodSpec readLongMethod;
 
-  final ParameterSpec positionalParameter;
-
   private Helper(
       Context context,
       FieldSpec longNamesField,
       FieldSpec shortNamesField,
       FieldSpec parsersField,
+      FieldSpec positionalParsersField,
       MethodSpec readMethod,
       MethodSpec readLongMethod,
-      MethodSpec readRegularOptionMethod,
-      ParameterSpec positionalParameter) {
+      MethodSpec readRegularOptionMethod) {
     this.context = context;
     this.longNamesField = longNamesField;
     this.shortNamesField = shortNamesField;
     this.parsersField = parsersField;
+    this.positionalParsersField = positionalParsersField;
     this.readMethod = readMethod;
     this.readLongMethod = readLongMethod;
     this.readRegularOptionMethod = readRegularOptionMethod;
-    this.positionalParameter = positionalParameter;
   }
 
-  static Helper create(
-      Context context,
-      Option option) {
-    ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional")
-        .build();
+  static Helper create(Context context, Option option) {
 
     // read-only lookups
     FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
@@ -89,6 +84,12 @@ final class Helper {
         .addModifiers(FINAL)
         .build();
 
+    FieldSpec positionalParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class),
+        context.positionalOptionParserType()), "positionalParsers")
+        .initializer("$T.unmodifiableList($T.$N())", Collections.class, context.optionType(), option.positionalParsersMethod)
+        .addModifiers(FINAL)
+        .build();
+
     MethodSpec readLongMethod = readLongMethod(longNamesField, context);
 
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(
@@ -96,19 +97,17 @@ final class Helper {
         context,
         readLongMethod);
 
-    MethodSpec readMethod = readMethod(
-        parsersField,
-        context);
+    MethodSpec readMethod = readMethod(parsersField, context);
 
     return new Helper(
         context,
         longNamesField,
         shortNamesField,
         parsersField,
+        positionalParsersField,
         readMethod,
         readLongMethod,
-        readRegularOptionMethod,
-        positionalParameter);
+        readRegularOptionMethod);
   }
 
   TypeSpec define() {
@@ -117,12 +116,11 @@ final class Helper {
     spec.addMethod(readMethod)
         .addMethod(readRegularOptionMethod)
         .addMethod(buildMethod());
-    if (!context.nonpositionalParamTypes().isEmpty()) {
-      spec.addField(longNamesField)
-          .addField(shortNamesField)
-          .addField(parsersField);
-      spec.addMethod(readLongMethod);
-    }
+    spec.addField(longNamesField)
+        .addField(shortNamesField)
+        .addField(parsersField);
+    spec.addMethod(readLongMethod);
+    spec.addField(positionalParsersField);
     return spec.build();
   }
 
@@ -134,10 +132,6 @@ final class Helper {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("readRegularOption")
         .addParameter(token)
         .returns(context.optionType());
-
-    if (context.nonpositionalParamTypes().isEmpty()) {
-      return spec.addStatement("return null").build();
-    }
 
     spec.beginControlFlow("if ($N.length() <= 1 || $N.charAt(0) != '-')", token, token)
         .addStatement("return null")
@@ -224,27 +218,6 @@ final class Helper {
       }
     }
     MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
-
-    ParameterSpec last = ParameterSpec.builder(INT, "size").build();
-    ParameterSpec max = ParameterSpec.builder(INT, "max").build();
-
-    if (context.hasPositional()) {
-      context.maxPositional().ifPresent(maxPositional -> {
-        spec.addStatement("$T $N = $L",
-            INT, max, maxPositional);
-        spec.addStatement("$T $N = $N.size()",
-            INT, last, positionalParameter);
-
-        spec.beginControlFlow("if ($N > $N)", last, max)
-            .addStatement("throw new $T($S + $N.get($N))", IllegalArgumentException.class,
-                "Invalid option: ", positionalParameter, max)
-            .endControlFlow();
-      });
-    }
-
-    if (context.hasPositional()) {
-      spec.addParameter(positionalParameter);
-    }
 
     spec.addStatement("return $T.of(new $T($L))", Optional.class, context.implType(), args.build());
 

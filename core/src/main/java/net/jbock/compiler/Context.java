@@ -52,6 +52,9 @@ final class Context {
   private final ClassName flagOptionParserType;
   private final ClassName repeatableOptionParserType;
   private final ClassName regularOptionParserType;
+  private final ClassName positionalOptionParserType;
+  private final ClassName regularPositionalOptionParserType;
+  private final ClassName repeatablePositionalOptionParserType;
   private final ClassName optionType;
   private final ClassName helperType;
   private final ClassName indentPrinterType;
@@ -77,9 +80,12 @@ final class Context {
       String programName,
       String missionStatement,
       ClassName optionParserType,
+      ClassName positionalOptionParserType,
       ClassName flagOptionParserType,
       ClassName repeatableOptionParserType,
       ClassName regularOptionParserType,
+      ClassName regularPositionalOptionParserType,
+      ClassName repeatablePositionalOptionParserType,
       ClassName optionType,
       ClassName helperType,
       ClassName indentPrinterType,
@@ -103,9 +109,12 @@ final class Context {
     this.programName = programName;
     this.missionStatement = missionStatement;
     this.optionParserType = optionParserType;
+    this.positionalOptionParserType = positionalOptionParserType;
     this.flagOptionParserType = flagOptionParserType;
     this.repeatableOptionParserType = repeatableOptionParserType;
     this.regularOptionParserType = regularOptionParserType;
+    this.regularPositionalOptionParserType = regularPositionalOptionParserType;
+    this.repeatablePositionalOptionParserType = repeatablePositionalOptionParserType;
     this.optionType = optionType;
     this.helperType = helperType;
     this.indentPrinterType = indentPrinterType;
@@ -136,6 +145,9 @@ final class Context {
     ClassName flagOptionParserType = generatedClass.nestedClass("FlagOptionParser");
     ClassName repeatableOptionParserType = generatedClass.nestedClass("RepeatableOptionParser");
     ClassName regularOptionParserType = generatedClass.nestedClass("RegularOptionParser");
+    ClassName positionalOptionParserType = generatedClass.nestedClass("PositionalOptionParser");
+    ClassName regularPositionalOptionParserType = generatedClass.nestedClass("RegularPositionalOptionParser");
+    ClassName repeatablePositionalOptionParserType = generatedClass.nestedClass("RepeatablePositionalOptionParser");
     ClassName indentPrinterType = generatedClass.nestedClass("IndentPrinter");
     ClassName messagesType = generatedClass.nestedClass("Messages");
     ClassName implType = generatedClass.nestedClass(sourceElement.getSimpleName() + "Impl");
@@ -159,9 +171,13 @@ final class Context {
         programName(sourceElement),
         missionStatement,
         optionParserType,
+        positionalOptionParserType,
         flagOptionParserType,
         repeatableOptionParserType,
-        regularOptionParserType, optionType,
+        regularOptionParserType,
+        regularPositionalOptionParserType,
+        repeatablePositionalOptionParserType,
+        optionType,
         helperType,
         indentPrinterType,
         messagesType,
@@ -210,6 +226,10 @@ final class Context {
     return optionParserType;
   }
 
+  ClassName positionalOptionParserType() {
+    return positionalOptionParserType;
+  }
+
   ClassName repeatableOptionParserType() {
     return repeatableOptionParserType;
   }
@@ -220,6 +240,14 @@ final class Context {
 
   ClassName regularOptionParserType() {
     return regularOptionParserType;
+  }
+
+  ClassName regularPositionalOptionParserType() {
+    return regularPositionalOptionParserType;
+  }
+
+  ClassName repeatablePositionalOptionParserType() {
+    return repeatablePositionalOptionParserType;
   }
 
   ClassName optionType() {
