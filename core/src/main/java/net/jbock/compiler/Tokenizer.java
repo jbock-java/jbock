@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.StringJoiner;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
+import static com.squareup.javapoet.TypeName.INT;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -27,7 +28,7 @@ import static net.jbock.compiler.Util.optionalOfSubtype;
 
 final class Tokenizer {
 
-  // special bundle keys that may not be used on a parameter
+  // special bundle keys
   private static final String SPECIAL_KEY_DESCRIPTION = "jbock.description";
   private static final String SPECIAL_KEY_MISSION = "jbock.mission";
   private static final String SPECIAL_KEY_HELP = "jbock.help";
@@ -323,7 +324,7 @@ final class Tokenizer {
 
   private MethodSpec parseMethodOverload() {
 
-    ParameterSpec helper = ParameterSpec.builder(context.helperType(), "helper").build();
+    ParameterSpec helperParam = ParameterSpec.builder(context.helperType(), "helper").build();
     ParameterSpec tokens = ParameterSpec.builder(STRING_ITERATOR, "tokens").build();
     ParameterSpec isFirst = ParameterSpec.builder(BOOLEAN, "first").build();
 
@@ -332,23 +333,25 @@ final class Tokenizer {
         .returns(optionalOfSubtype(TypeName.get(context.sourceElement().asType())));
 
     spec.addStatement("$T $N = $L", BOOLEAN, isFirst, true);
-    spec.addStatement("$T $N = new $T()", helper.type, helper, helper.type);
+    spec.addStatement("$T $N = new $T()", helperParam.type, helperParam, helperParam.type);
 
+    ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
     if (context.hasPositional()) {
-      spec.addStatement("$T $N = new $T<>()",
-          LIST_OF_STRING, this.helper.positionalParameter, ArrayList.class);
+      spec.addStatement("$T $N = $L",
+          positionParam.type, positionParam, 0);
     }
 
     spec.beginControlFlow("while ($N.hasNext())", tokens)
-        .addCode(codeInsideParsingLoop(helper, tokens, isFirst))
+        .addCode(codeInsideParsingLoop(helperParam, positionParam, tokens, isFirst))
         .endControlFlow();
 
-    spec.addStatement(returnFromParseExpression(helper));
+    spec.addStatement(returnFromParseExpression(helperParam));
     return spec.build();
   }
 
   private CodeBlock codeInsideParsingLoop(
       ParameterSpec helperParam,
+      ParameterSpec positionParam,
       ParameterSpec tokens,
       ParameterSpec isFirst) {
 
@@ -369,23 +372,25 @@ final class Tokenizer {
     if (context.allowEscape()) {
       spec.beginControlFlow("if ($S.equals($N))", "--", token);
       if (context.hasPositional()) {
-        spec.addStatement("$N.forEachRemaining($N::add)", tokens, helper.positionalParameter);
+        ParameterSpec t = ParameterSpec.builder(STRING, "t").build();
+        spec.beginControlFlow("while ($N.hasNext())", tokens);
+
+        spec.addStatement("$T $N = $N.next()", STRING, t, tokens);
+
+        spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField)
+            .addStatement(throwInvalidOptionStatement(t))
+            .endControlFlow();
+
+        spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField, positionParam, t)
+            .addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField, positionParam);
+
+        spec.endControlFlow();
       }
       spec.addStatement(returnFromParseExpression(helperParam))
           .endControlFlow();
     }
 
-    // handle empty token
-    spec.beginControlFlow("if ($N.isEmpty())", token);
-    if (context.hasPositional()) {
-      spec.addStatement("$N.add($N)", helper.positionalParameter, token)
-          .addStatement("continue");
-    } else {
-      spec.addStatement(throwInvalidOptionStatement(token));
-    }
-    spec.endControlFlow();
-
-    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, helperParam, this.helper.readRegularOptionMethod, token);
+    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, helperParam, helper.readRegularOptionMethod, token);
 
     spec.beginControlFlow("if ($N != null)", optionParam)
         .addStatement("$N.$N($N, $N, $N)",
@@ -400,7 +405,13 @@ final class Tokenizer {
           .endControlFlow();
     }
     if (context.hasPositional()) {
-      spec.addStatement("$N.add($N)", helper.positionalParameter, token);
+
+      spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField)
+          .addStatement(throwInvalidOptionStatement(token))
+          .endControlFlow();
+
+      spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField, positionParam, token);
+      spec.addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField, positionParam);
     } else {
       spec.addStatement(throwInvalidOptionStatement(token));
     }
@@ -415,13 +426,8 @@ final class Tokenizer {
         .build();
   }
 
-  private CodeBlock returnFromParseExpression(ParameterSpec helper) {
-    if (context.hasPositional()) {
-      return CodeBlock.builder()
-          .add("return $N.build($N)", helper, this.helper.positionalParameter)
-          .build();
-    }
-    return CodeBlock.builder().add("return $N.build()", helper).build();
+  private CodeBlock returnFromParseExpression(ParameterSpec helperParam) {
+    return CodeBlock.builder().add("return $N.build()", helperParam).build();
   }
 
   private MethodSpec privateConstructor() {

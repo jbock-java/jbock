@@ -228,7 +228,8 @@ class ProcessorTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("Define at least one abstract method");
   }
 
   @Test
@@ -398,18 +399,6 @@ class ProcessorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("The method may not have type parameters.");
-  }
-
-  @Test
-  void warningNoMethods() {
-    JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
-        "abstract class Arguments {",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError()
-        .withWarningContaining("Define at least one abstract method");
   }
 
   @Test
