@@ -6,7 +6,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 
 import java.util.ArrayList;
-import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -22,16 +21,15 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
 final class RepeatableOptionParser {
 
   static TypeSpec define(Context context) {
-    FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values").build();
+    FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
+        .initializer("new $T<>()", ArrayList.class)
+        .build();
     return TypeSpec.classBuilder(context.repeatableOptionParserType())
         .superclass(context.optionParserType())
         .addMethod(readMethod(values))
         .addMethod(MethodSpec.methodBuilder("values")
             .addAnnotation(Override.class)
             .returns(STREAM_OF_STRING)
-            .beginControlFlow("if ($N == null)", values)
-            .addStatement("return $T.empty()", Stream.class)
-            .endControlFlow()
             .addStatement("return $N.stream()", values)
             .build())
         .addField(values)
@@ -52,10 +50,6 @@ final class RepeatableOptionParser {
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it));
-
-    spec.beginControlFlow("if ($N == null)", values)
-        .addStatement("$N = new $T<>()", values, ArrayList.class)
-        .endControlFlow();
 
     spec.addStatement("$N.add(readArgument($N, $N))", values, token, it);
 
