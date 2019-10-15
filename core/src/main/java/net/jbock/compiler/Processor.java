@@ -100,7 +100,7 @@ public final class Processor extends AbstractProcessor {
     try {
       validateSourceElement(sourceElement);
       List<Param> parameters = getParams(sourceElement);
-      if (parameters.isEmpty()) {
+      if (parameters.isEmpty()) { // javapoet #739
         throw ValidationException.create(sourceElement,
             "Define at least one abstract method");
       }
