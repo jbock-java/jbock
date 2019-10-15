@@ -12,11 +12,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
@@ -60,11 +56,7 @@ class AutoMapper {
       create(Short.class, VALUE_OF),
       create(Byte.class, VALUE_OF),
       create(Double.class, VALUE_OF),
-      create(Float.class, VALUE_OF),
-      create(OffsetDateTime.class, PARSE),
-      create(LocalDateTime.class, PARSE),
-      create(ZonedDateTime.class, PARSE),
-      create(Instant.class, PARSE));
+      create(Float.class, VALUE_OF));
 
   static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror type) {
     TypeMirror boxed = tool.box(type);
