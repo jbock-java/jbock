@@ -30,18 +30,9 @@ final class RegularPositionalOptionParser {
             .addAnnotation(Override.class)
             .build())
         .addField(value)
-        .addMethod(constructor(context))
         .addModifiers(PRIVATE, STATIC).build();
   }
-
-  private static MethodSpec constructor(Context context) {
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-    return MethodSpec.constructorBuilder()
-        .addStatement("super($N)", optionParam)
-        .addParameter(optionParam)
-        .build();
-  }
-
+  
   private static MethodSpec readMethod(FieldSpec value) {
     ParameterSpec valueParam = ParameterSpec.builder(STRING, "value").build();
     return MethodSpec.methodBuilder("read")

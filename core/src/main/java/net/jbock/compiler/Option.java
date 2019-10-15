@@ -251,15 +251,13 @@ final class Option {
   }
 
   private MethodSpec positionalParserMethodOverride(Param param) {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("positionalParser")
+    return MethodSpec.methodBuilder("positionalParser")
         .addAnnotation(Override.class)
-        .returns(context.positionalOptionParserType());
-    if (param.isRepeatable()) {
-      spec.addStatement("return new $T(this)", context.repeatablePositionalOptionParserType());
-    } else {
-      spec.addStatement("return new $T(this)", context.regularPositionalOptionParserType());
-    }
-    return spec.build();
+        .returns(context.positionalOptionParserType())
+        .addStatement("return new $T()", param.isRepeatable() ?
+            context.repeatablePositionalOptionParserType() :
+            context.regularPositionalOptionParserType())
+        .build();
   }
 
   private CodeBlock descExpression(List<String> desc) {

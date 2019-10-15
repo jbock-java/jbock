@@ -33,16 +33,7 @@ final class RepeatablePositionalOptionParser {
             .addAnnotation(Override.class)
             .build())
         .addField(values)
-        .addMethod(constructor(context))
         .addModifiers(PRIVATE, STATIC).build();
-  }
-
-  private static MethodSpec constructor(Context context) {
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-    return MethodSpec.constructorBuilder()
-        .addStatement("super($N)", optionParam)
-        .addParameter(optionParam)
-        .build();
   }
 
   private static MethodSpec readMethod(FieldSpec values) {

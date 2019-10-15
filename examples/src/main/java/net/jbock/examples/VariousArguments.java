@@ -82,42 +82,6 @@ abstract class VariousArguments {
   @PositionalParameter(position = 4)
   abstract Optional<LocalDate> localDatePos();
 
-  @Parameter(longName = "localDateTime")
-  abstract LocalDateTime localDateTime();
-
-  @Parameter(longName = "localDateTimeList")
-  abstract List<LocalDateTime> localDateTimeList();
-
-  @Parameter(longName = "localDateTimeOpt")
-  abstract Optional<LocalDateTime> localDateTimeOpt();
-
-  @PositionalParameter(position = 5)
-  abstract Optional<LocalDateTime> localDateTimePos();
-
-  @Parameter(longName = "offsetDateTime")
-  abstract OffsetDateTime offsetDateTime();
-
-  @Parameter(longName = "offsetDateTimeList")
-  abstract List<OffsetDateTime> offsetDateTimeList();
-
-  @Parameter(longName = "offsetDateTimeOpt")
-  abstract Optional<OffsetDateTime> offsetDateTimeOpt();
-
-  @PositionalParameter(position = 6)
-  abstract Optional<OffsetDateTime> offsetDateTimePos();
-
-  @Parameter(longName = "zonedDateTime")
-  abstract ZonedDateTime zonedDateTime();
-
-  @Parameter(longName = "zonedDateTimeList")
-  abstract List<ZonedDateTime> zonedDateTimeList();
-
-  @Parameter(longName = "zonedDateTimeOpt")
-  abstract Optional<ZonedDateTime> zonedDateTimeOpt();
-
-  @PositionalParameter(position = 7)
-  abstract Optional<ZonedDateTime> zonedDateTimePos();
-
   @Parameter(longName = "uri")
   abstract URI uri();
 
@@ -130,18 +94,6 @@ abstract class VariousArguments {
   @PositionalParameter(position = 8)
   abstract Optional<URI> uriPos();
 
-  @Parameter(longName = "charset")
-  abstract Charset charset();
-
-  @Parameter(longName = "charsetList")
-  abstract List<Charset> charsetList();
-
-  @Parameter(longName = "charsetOpt")
-  abstract Optional<Charset> charsetOpt();
-
-  @PositionalParameter(position = 9)
-  abstract Optional<Charset> charsetPos();
-
   @Parameter(longName = "pattern")
   abstract Pattern pattern();
 
@@ -153,16 +105,4 @@ abstract class VariousArguments {
 
   @PositionalParameter(position = 10)
   abstract Optional<Pattern> patternPos();
-
-  @Parameter(longName = "instant")
-  abstract Instant instant();
-
-  @Parameter(longName = "instantList")
-  abstract List<Instant> instantList();
-
-  @Parameter(longName = "instantOpt")
-  abstract Optional<Instant> instantOpt();
-
-  @PositionalParameter(position = 11)
-  abstract Optional<Instant> instantPos();
 }

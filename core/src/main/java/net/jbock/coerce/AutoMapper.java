@@ -9,14 +9,13 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
@@ -28,25 +27,24 @@ class AutoMapper {
   private static final String NEW = "new";
   private static final String CREATE = "create";
   private static final String VALUE_OF = "valueOf";
-  private static final String FOR_NAME = "forName";
   private static final String COMPILE = "compile";
   private static final String PARSE = "parse";
 
-  private static Map.Entry<Class<?>, CodeBlock> create(Class<?> clasz, String createFromString) {
+  private static Entry<Class<?>, CodeBlock> create(Class<?> clasz, String createFromString) {
     return new AbstractMap.SimpleImmutableEntry<>(clasz, CodeBlock.of("$T::" + createFromString, clasz));
   }
 
-  private static Map.Entry<Class<?>, CodeBlock> create(Class<?> clasz, CodeBlock mapExpr) {
+  private static Entry<Class<?>, CodeBlock> create(Class<?> clasz, CodeBlock mapExpr) {
     return new AbstractMap.SimpleImmutableEntry<>(clasz, mapExpr);
   }
 
-  private static final List<Map.Entry<Class<?>, CodeBlock>> MAPPERS = Arrays.asList(
+  private static final List<Entry<Class<?>, CodeBlock>> MAPPERS = Arrays.asList(
       create(String.class, CodeBlock.of("$T.identity()", Function.class)),
       create(Integer.class, VALUE_OF),
       create(Long.class, VALUE_OF),
-      create(File.class, NEW),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
-      create(Charset.class, FOR_NAME),
+      create(File.class, NEW),
+      create(URI.class, CREATE),
       create(Pattern.class, COMPILE),
       create(LocalDate.class, PARSE),
       create(Short.class, VALUE_OF),
@@ -54,13 +52,12 @@ class AutoMapper {
       create(Double.class, VALUE_OF),
       create(Float.class, VALUE_OF),
       create(Character.class, parseCharacterLambda()),
-      create(URI.class, CREATE),
-      create(BigDecimal.class, NEW),
-      create(BigInteger.class, NEW));
+      create(BigInteger.class, NEW),
+      create(BigDecimal.class, NEW));
 
   static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror type) {
     TypeMirror boxed = tool.box(type);
-    for (Map.Entry<Class<?>, CodeBlock> coercion : MAPPERS) {
+    for (Entry<Class<?>, CodeBlock> coercion : MAPPERS) {
       if (tool.isSameType(boxed, coercion.getKey())) {
         return Optional.of(coercion.getValue());
       }
