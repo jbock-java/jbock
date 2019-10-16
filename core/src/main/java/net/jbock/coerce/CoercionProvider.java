@@ -50,8 +50,7 @@ public class CoercionProvider {
     BasicInfo basicInfo = BasicInfo.create(
         mapperClass, collectorClass,
         paramName, sourceMethod, tool);
-    CoercionProvider coercionProvider = new CoercionProvider(basicInfo);
-    return coercionProvider.run();
+    return new CoercionProvider(basicInfo).run();
   }
 
   private Coercion run() {

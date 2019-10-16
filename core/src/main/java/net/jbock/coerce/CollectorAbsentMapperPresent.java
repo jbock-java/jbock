@@ -80,10 +80,11 @@ class CollectorAbsentMapperPresent {
         return ((Left<Coercion, String>) either).value();
       }
     }
-    if (either == null) {
+    if (either == null) { // impossible: there is always at least one attempt
       throw new AssertionError();
     }
-    throw basicInfo.asValidationException(((Right<Coercion, String>) either).value());
+    String message = ((Right<Coercion, String>) either).value();
+    throw basicInfo.asValidationException(message);
   }
 
   private TypeTool tool() {

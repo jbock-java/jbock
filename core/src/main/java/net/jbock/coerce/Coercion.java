@@ -55,9 +55,6 @@ public final class Coercion {
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType,
       ParameterType parameterType) {
-    if (collector.isPresent() && !parameterType.isRepeatable()) {
-      throw new AssertionError();
-    }
     CodeBlock mapExpr = mapperType.mapExpr();
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
@@ -91,7 +88,7 @@ public final class Coercion {
   }
 
   public boolean isOptional() {
-    return parameterType.optional();
+    return parameterType.isOptional();
   }
 
   public boolean isRepeatable() {

@@ -9,14 +9,18 @@ import net.jbock.coerce.CoercionProvider;
 import net.jbock.coerce.ParameterType;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.OptionalInt;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.element.Modifier.PROTECTED;
@@ -28,6 +32,9 @@ import static net.jbock.compiler.AnnotationUtil.getMapperClass;
  * Internal representation of an abstract method in the source class.
  */
 final class Param {
+
+  private static final EnumSet<Modifier> NONPRIVATE_ACCESS_MODIFIERS =
+      EnumSet.of(PUBLIC, PROTECTED);
 
   // null if absent
   private final String longName;
@@ -45,10 +52,10 @@ final class Param {
 
   private final String descriptionArgumentName;
 
-  private final OptionalInt positionalIndex;
+  private final Integer positionalIndex;
 
   boolean isFlag() {
-    return coercion.parameterType().flag();
+    return coercion.parameterType().isFlag();
   }
 
   private static ParamName findParamName(
@@ -94,10 +101,10 @@ final class Param {
   }
 
   private static String descriptionArgumentName(ParameterType paramType, ParamName name) {
-    if (paramType.flag()) {
+    if (paramType.isFlag()) {
       return null;
     }
-    if (paramType.required()) {
+    if (paramType.isRequired()) {
       return name.snake().toUpperCase(Locale.US);
     } else {
       return name.snake();
@@ -112,7 +119,7 @@ final class Param {
       Coercion coercion,
       List<String> description,
       String descriptionArgumentName,
-      OptionalInt positionalIndex) {
+      Integer positionalIndex) {
     this.bundleKey = bundleKey;
     this.coercion = coercion;
     this.shortName = shortName;
@@ -131,11 +138,11 @@ final class Param {
     return coercion;
   }
 
-  static Param create(List<Param> params, ExecutableElement sourceMethod, OptionalInt positionalIndex, String[] description) {
-    if (positionalIndex.isPresent()) {
+  static Param create(List<Param> params, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
+    if (positionalIndex != null) {
       TypeElement mapperClass = getMapperClass(sourceMethod, PositionalParameter.class);
       TypeElement collectorClass = getCollectorClass(sourceMethod, PositionalParameter.class);
-      return createPositional(params, sourceMethod, positionalIndex.getAsInt(), description, mapperClass, collectorClass);
+      return createPositional(params, sourceMethod, positionalIndex, description, mapperClass, collectorClass);
     } else {
       TypeElement mapperClass = getMapperClass(sourceMethod, Parameter.class);
       TypeElement collectorClass = getCollectorClass(sourceMethod, Parameter.class);
@@ -183,7 +190,7 @@ final class Param {
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
-        OptionalInt.empty());
+        null);
   }
 
   private static Param createPositional(
@@ -209,7 +216,7 @@ final class Param {
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
-        OptionalInt.of(positionalIndex));
+        positionalIndex);
   }
 
   /**
@@ -334,27 +341,23 @@ final class Param {
   }
 
   boolean isPositional() {
-    return positionalIndex.isPresent();
+    return positionalIndex != null;
   }
 
-  boolean isOption() {
+  boolean isNotPositional() {
     return !isPositional();
   }
 
   OptionalInt positionalIndex() {
-    return positionalIndex;
+    return positionalIndex != null ? OptionalInt.of(positionalIndex) : OptionalInt.empty();
   }
 
   boolean isRequired() {
-    return coercion.parameterType().required();
+    return coercion.parameterType().isRequired();
   }
 
   boolean isRepeatable() {
     return coercion.isRepeatable();
-  }
-
-  boolean isRegular() {
-    return coercion.parameterType().required() || coercion.parameterType().optional();
   }
 
   Optional<String> bundleKey() {
@@ -362,13 +365,13 @@ final class Param {
   }
 
   OptionalInt positionalOrder() {
-    if (!positionalIndex.isPresent()) {
+    if (positionalIndex == null) {
       return OptionalInt.empty();
     }
     if (isRepeatable()) {
       return OptionalInt.of(2);
     }
-    return optional() ? OptionalInt.of(1) : OptionalInt.of(0);
+    return isOptional() ? OptionalInt.of(1) : OptionalInt.of(0);
   }
 
   // visible for testing
@@ -409,11 +412,11 @@ final class Param {
     return Arrays.copyOfRange(desc, firstNonempty, lastNonempty + 1);
   }
 
-  boolean optional() {
+  boolean isOptional() {
     return coercion.isOptional();
   }
 
-  ParamName paramName() {
+  private ParamName paramName() {
     return coercion.paramName();
   }
 
@@ -421,12 +424,9 @@ final class Param {
     return ValidationException.create(sourceMethod, message);
   }
 
-  boolean isPublic() {
-    return sourceMethod.getModifiers().contains(PUBLIC);
-  }
-
-  boolean isProtected() {
-    return sourceMethod.getModifiers().contains(PROTECTED);
+  Set<Modifier> getAccessModifiers() {
+    return sourceMethod.getModifiers().stream()
+        .filter(NONPRIVATE_ACCESS_MODIFIERS::contains)
+        .collect(Collectors.toSet());
   }
 }
-

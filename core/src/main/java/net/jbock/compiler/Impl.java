@@ -1,18 +1,12 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PROTECTED;
-import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 
 /**
@@ -42,37 +36,28 @@ final class Impl {
     }
     spec.addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor())
-        .addMethods(bindMethods());
+        .addMethods(context.parameters().stream()
+            .map(this::parameterMethodOverride)
+            .collect(Collectors.toList()));
     return spec.build();
   }
 
-  private List<MethodSpec> bindMethods() {
-    List<MethodSpec> result = new ArrayList<>(context.parameters().size());
-    for (Param param : context.parameters()) {
-      MethodSpec.Builder builder = MethodSpec.methodBuilder(param.methodName())
-          .addAnnotation(Override.class)
-          .returns(param.returnType());
-      builder.addStatement("return $N", param.field());
-      if (param.isPublic()) {
-        builder.addModifiers(PUBLIC);
-      }
-      if (param.isProtected()) {
-        builder.addModifiers(PROTECTED);
-      }
-      result.add(builder.build());
-    }
-    return result;
+  private MethodSpec parameterMethodOverride(Param param) {
+    return MethodSpec.methodBuilder(param.methodName())
+        .addAnnotation(Override.class)
+        .returns(param.returnType())
+        .addModifiers(param.getAccessModifiers())
+        .addStatement("return $N", param.field())
+        .build();
   }
 
   private MethodSpec implConstructor() {
-    MethodSpec.Builder builder = MethodSpec.constructorBuilder();
+    MethodSpec.Builder spec = MethodSpec.constructorBuilder();
     for (Param p : context.parameters()) {
-      FieldSpec field = p.field();
-      CodeBlock extractExpr = p.coercion().extractExpr();
-      builder.addStatement("this.$N = $L", field, extractExpr);
-      ParameterSpec constructorParam = p.coercion().constructorParam();
-      builder.addParameter(constructorParam);
+      spec.addStatement("this.$N = $L",
+          p.field(), p.coercion().extractExpr());
+      spec.addParameter(p.coercion().constructorParam());
     }
-    return builder.build();
+    return spec.build();
   }
 }

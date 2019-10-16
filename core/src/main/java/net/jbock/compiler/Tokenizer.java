@@ -237,7 +237,7 @@ final class Tokenizer {
         StringJoiner.class, joiner, StringJoiner.class, " ");
 
     Map<Boolean, List<Param>> partitionedOptions = context.parameters().stream()
-        .filter(Param::isOption)
+        .filter(Param::isNotPositional)
         .collect(partitioningBy(Param::isRequired));
 
     List<Param> requiredNonpos = partitionedOptions.get(true);
@@ -259,7 +259,7 @@ final class Tokenizer {
     }
 
     for (Param param : positional) {
-      if (param.optional()) {
+      if (param.isOptional()) {
         spec.addStatement("$N.add($S)", joiner, "[<" +
             param.descriptionArgumentName() + ">]");
       } else if (param.isRequired()) {

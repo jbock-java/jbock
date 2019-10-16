@@ -20,11 +20,11 @@ public class ImplementsRelation {
     this.animal = asDeclared(animal);
   }
 
-  public TypeElement dog() {
+  TypeElement dog() {
     return dog;
   }
 
-  public DeclaredType animal() {
+  DeclaredType animal() {
     return animal;
   }
 }

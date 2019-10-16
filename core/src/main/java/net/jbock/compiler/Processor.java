@@ -218,11 +218,11 @@ public final class Processor extends AbstractProcessor {
     List<Param> result = new ArrayList<>(abstractMethods.size());
     for (int i = 0; i < sortedPositional.size(); i++) {
       ExecutableElement method = sortedPositional.get(i);
-      Param param = Param.create(result, method, OptionalInt.of(i), getDescription(method));
+      Param param = Param.create(result, method, i, getDescription(method));
       result.add(param);
     }
     for (ExecutableElement method : allNonpositional) {
-      Param param = Param.create(result, method, OptionalInt.empty(), getDescription(method));
+      Param param = Param.create(result, method, null, getDescription(method));
       result.add(param);
     }
     if (sourceElement.getAnnotation(CommandLineArguments.class).allowHelpOption()) {
