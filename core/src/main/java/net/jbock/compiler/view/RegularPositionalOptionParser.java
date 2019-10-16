@@ -1,4 +1,4 @@
-package net.jbock.compiler.optionparser;
+package net.jbock.compiler.view;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
@@ -7,50 +7,46 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 
-import java.util.ArrayList;
+import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Util.optionalOf;
 
 /**
- * Generates the RepeatablePositionalOptionParser class.
+ * Generates the RegularPositionalOptionParser class.
  */
-public final class RepeatablePositionalOptionParser {
+public final class RegularPositionalOptionParser {
 
   public static TypeSpec define(Context context) {
-    FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
-        .initializer("new $T<>()", ArrayList.class)
-        .build();
-    return TypeSpec.classBuilder(context.repeatablePositionalOptionParserType())
+    FieldSpec value = FieldSpec.builder(STRING, "value").build();
+    return TypeSpec.classBuilder(context.regularPositionalOptionParserType())
         .superclass(context.positionalOptionParserType())
-        .addMethod(readMethod(values))
+        .addMethod(readMethod(value))
         .addMethod(nextPositionMethod())
-        .addMethod(MethodSpec.methodBuilder("values")
-            .returns(STREAM_OF_STRING)
-            .addStatement("return $N.stream()", values)
+        .addMethod(MethodSpec.methodBuilder("value")
+            .returns(optionalOf(STRING))
+            .addStatement("return $T.ofNullable($N)", Optional.class, value)
             .addAnnotation(Override.class)
             .build())
-        .addField(values)
+        .addField(value)
         .addModifiers(PRIVATE, STATIC).build();
   }
-
-  private static MethodSpec readMethod(FieldSpec values) {
+  
+  private static MethodSpec readMethod(FieldSpec value) {
     ParameterSpec valueParam = ParameterSpec.builder(STRING, "value").build();
     return MethodSpec.methodBuilder("read")
         .addParameter(valueParam)
-        .addStatement("$N.add($N)", values, valueParam)
+        .addStatement("this.$N = $N", value, valueParam)
         .addAnnotation(Override.class)
         .build();
   }
-
 
   private static MethodSpec nextPositionMethod() {
     return MethodSpec.methodBuilder("positionIncrement")
         .addAnnotation(Override.class)
-        .addStatement("return $L", 0)
+        .addStatement("return $L", 1)
         .returns(TypeName.INT)
         .build();
   }

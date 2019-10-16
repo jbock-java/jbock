@@ -20,12 +20,12 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Parser.addPublicIfNecessary;
+import static net.jbock.compiler.view.Parser.addPublicIfNecessary;
 
 /**
  * Defines the inner class ParseResult.
  */
-final class ParseResult {
+public final class ParseResult {
 
   private final Context context;
 
@@ -37,13 +37,13 @@ final class ParseResult {
     this.result = result;
   }
 
-  static ParseResult create(Context context) {
+  public static ParseResult create(Context context) {
     FieldSpec result = FieldSpec.builder(TypeName.get(context.sourceElement().asType()), "result",
         PRIVATE, FINAL).build();
     return new ParseResult(context, result);
   }
 
-  List<TypeSpec> define() {
+  public List<TypeSpec> define() {
     TypeSpec.Builder spec = classBuilder(context.parseResultType())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addModifiers(STATIC, ABSTRACT)

@@ -21,7 +21,7 @@ import static net.jbock.compiler.Constants.STRING;
 /**
  * Defines the inner class IndentPrinter.
  */
-final class IndentPrinter {
+public final class IndentPrinter {
 
   private final Context context;
   private final FieldSpec baseIndent;
@@ -35,14 +35,14 @@ final class IndentPrinter {
     this.indentLevel = indentLevel;
   }
 
-  static IndentPrinter create(Context context) {
+  public static IndentPrinter create(Context context) {
     FieldSpec baseIndent = FieldSpec.builder(INT, "baseIndent", FINAL).build();
     FieldSpec out = FieldSpec.builder(PrintWriter.class, "out", FINAL).build();
     FieldSpec indentLevel = FieldSpec.builder(INT, "indentLevel").build();
     return new IndentPrinter(context, baseIndent, out, indentLevel);
   }
 
-  TypeSpec define() {
+  public TypeSpec define() {
     return classBuilder(context.indentPrinterType())
         .addFields(asList(baseIndent, out, indentLevel))
         .addMethod(privateConstructor())

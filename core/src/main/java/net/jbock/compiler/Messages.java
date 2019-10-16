@@ -19,7 +19,7 @@ import static net.jbock.compiler.Constants.STRING_STRING_MAP;
 /**
  * Defines the inner class Messages.
  */
-final class Messages {
+public final class Messages {
 
   private final FieldSpec resourceBundle = FieldSpec.builder(
       STRING_STRING_MAP, "messages")
@@ -36,11 +36,11 @@ final class Messages {
     this.context = context;
   }
 
-  static Messages create(Context context) {
+  public static Messages create(Context context) {
     return new Messages(context);
   }
 
-  TypeSpec define() {
+  public TypeSpec define() {
     return classBuilder(context.messagesType())
         .addFields(asList(br, resourceBundle))
         .addMethod(privateConstructor())

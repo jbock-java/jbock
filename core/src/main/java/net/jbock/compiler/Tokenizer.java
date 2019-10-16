@@ -26,7 +26,7 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Util.optionalOfSubtype;
 
-final class Tokenizer {
+public final class Tokenizer {
 
   // special bundle keys
   private static final String SPECIAL_KEY_DESCRIPTION = "jbock.description";
@@ -51,7 +51,7 @@ final class Tokenizer {
     this.messages = messages;
   }
 
-  static Tokenizer create(Context context, Helper helper) {
+  public static Tokenizer create(Context context, Helper helper) {
     FieldSpec out = FieldSpec.builder(context.indentPrinterType(), "out")
         .addModifiers(FINAL).build();
     FieldSpec err = FieldSpec.builder(context.indentPrinterType(), "err")
@@ -62,7 +62,7 @@ final class Tokenizer {
   }
 
 
-  TypeSpec define() {
+  public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.tokenizerType())
         .addModifiers(STATIC, PRIVATE)
         .addMethod(parseMethod())

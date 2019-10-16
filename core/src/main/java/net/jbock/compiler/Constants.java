@@ -20,10 +20,10 @@ public final class Constants {
   public static final ParameterizedTypeName STREAM_OF_STRING = ParameterizedTypeName.get(
       ClassName.get(Stream.class), STRING);
 
-  static final ParameterizedTypeName STRING_STRING_MAP = ParameterizedTypeName.get(
+  public static final ParameterizedTypeName STRING_STRING_MAP = ParameterizedTypeName.get(
       ClassName.get(Map.class), STRING, STRING);
 
-  static final ArrayTypeName STRING_ARRAY = ArrayTypeName.of(STRING);
+  public static final ArrayTypeName STRING_ARRAY = ArrayTypeName.of(STRING);
 
   public static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
 }

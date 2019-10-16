@@ -8,6 +8,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.view.Parser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,7 +40,7 @@ import static net.jbock.compiler.Util.optionalOf;
  *
  * @see Parser
  */
-final class Option {
+public final class Option {
 
   private final Context context;
 
@@ -96,7 +97,7 @@ final class Option {
     this.positionalParsersMethod = positionalParsersMethod;
   }
 
-  static Option create(Context context) {
+  public static Option create(Context context) {
     FieldSpec longNameField = FieldSpec.builder(STRING, "longName").addModifiers(FINAL).build();
     FieldSpec positionalIndexField = FieldSpec.builder(OptionalInt.class, "positionalIndex").addModifiers(FINAL).build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
@@ -136,7 +137,7 @@ final class Option {
         positionalParsersMethod);
   }
 
-  TypeSpec define() {
+  public TypeSpec define() {
     List<Param> parameters = context.parameters();
     TypeSpec.Builder spec = TypeSpec.enumBuilder(context.optionType());
     for (Param param : parameters) {

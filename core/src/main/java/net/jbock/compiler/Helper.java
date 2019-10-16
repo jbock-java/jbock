@@ -9,6 +9,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.coerce.ParameterType;
+import net.jbock.compiler.view.Parser;
 
 import java.util.Collections;
 import java.util.List;
@@ -64,7 +65,7 @@ public final class Helper {
     this.readRegularOptionMethod = readRegularOptionMethod;
   }
 
-  static Helper create(Context context, Option option) {
+  public static Helper create(Context context, Option option) {
 
     // read-only lookups
     FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
@@ -111,7 +112,7 @@ public final class Helper {
         readRegularOptionMethod);
   }
 
-  TypeSpec define() {
+  public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.helperType())
         .addModifiers(PRIVATE, STATIC);
     spec.addMethod(readMethod)

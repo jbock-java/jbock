@@ -7,6 +7,7 @@ import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 import net.jbock.coerce.ParameterType;
+import net.jbock.compiler.view.Parser;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;

@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.view.Parser;
 
 import java.util.stream.Collectors;
 
@@ -14,7 +15,7 @@ import static javax.lang.model.element.Modifier.STATIC;
  *
  * @see Parser
  */
-final class Impl {
+public final class Impl {
 
   private final Context context;
 
@@ -23,12 +24,12 @@ final class Impl {
     this.context = context;
   }
 
-  static Impl create(
+  public static Impl create(
       Context context) {
     return new Impl(context);
   }
 
-  TypeSpec define() {
+  public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.implType())
         .superclass(TypeName.get(context.sourceElement().asType()));
     for (Param param : context.parameters()) {

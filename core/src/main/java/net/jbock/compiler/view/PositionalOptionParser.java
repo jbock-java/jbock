@@ -1,4 +1,4 @@
-package net.jbock.compiler.optionparser;
+package net.jbock.compiler.view;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;

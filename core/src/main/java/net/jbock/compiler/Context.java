@@ -258,11 +258,11 @@ public final class Context {
     return helperType;
   }
 
-  ClassName indentPrinterType() {
+  public ClassName indentPrinterType() {
     return indentPrinterType;
   }
 
-  ClassName messagesType() {
+  public ClassName messagesType() {
     return messagesType;
   }
 
@@ -270,31 +270,31 @@ public final class Context {
     return implType;
   }
 
-  ClassName tokenizerType() {
+  public ClassName tokenizerType() {
     return tokenizerType;
   }
 
-  ClassName parseResultType() {
+  public ClassName parseResultType() {
     return parseResultType;
   }
 
-  ClassName successParseResultType() {
+  public ClassName successParseResultType() {
     return successParseResultType;
   }
 
-  ClassName errorParseResultType() {
+  public ClassName errorParseResultType() {
     return errorParseResultType;
   }
 
-  ClassName helpPrintedParseResultType() {
+  public ClassName helpPrintedParseResultType() {
     return helpPrintedParseResultType;
   }
 
-  TypeElement sourceElement() {
+  public TypeElement sourceElement() {
     return sourceElement;
   }
 
-  ClassName generatedClass() {
+  public ClassName generatedClass() {
     return generatedClass;
   }
 
@@ -306,7 +306,7 @@ public final class Context {
     return strict;
   }
 
-  boolean addHelp() {
+  public boolean addHelp() {
     return addHelp;
   }
 

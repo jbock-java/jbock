@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.compiler.view;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -6,13 +6,14 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.optionparser.FlagOptionParser;
-import net.jbock.compiler.optionparser.OptionParser;
-import net.jbock.compiler.optionparser.PositionalOptionParser;
-import net.jbock.compiler.optionparser.RegularOptionParser;
-import net.jbock.compiler.optionparser.RegularPositionalOptionParser;
-import net.jbock.compiler.optionparser.RepeatableOptionParser;
-import net.jbock.compiler.optionparser.RepeatablePositionalOptionParser;
+import net.jbock.compiler.Context;
+import net.jbock.compiler.Helper;
+import net.jbock.compiler.Impl;
+import net.jbock.compiler.IndentPrinter;
+import net.jbock.compiler.Messages;
+import net.jbock.compiler.Option;
+import net.jbock.compiler.ParseResult;
+import net.jbock.compiler.Tokenizer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +41,7 @@ import static net.jbock.compiler.Constants.STRING_STRING_MAP;
 /**
  * Generates the *_Parser class.
  */
-final class Parser {
+public final class Parser {
 
   private static final int DEFAULT_INDENT = 7;
   private static final int DEFAULT_EXITCODE_ON_ERROR = 1;
@@ -106,7 +107,7 @@ final class Parser {
     return new Parser(context, builder, option, helper, impl, parseResult, readNextMethod, readArgumentMethod);
   }
 
-  TypeSpec define() {
+  public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass());
     spec.addModifiers(FINAL);
     if (context.sourceElement().getModifiers().contains(PUBLIC)) {
@@ -313,7 +314,7 @@ final class Parser {
     return addPublicIfNecessary(context, spec);
   }
 
-  static MethodSpec addPublicIfNecessary(Context context, MethodSpec.Builder spec) {
+  public static MethodSpec addPublicIfNecessary(Context context, MethodSpec.Builder spec) {
     if (context.sourceElement().getModifiers().contains(PUBLIC)) {
       return spec.addModifiers(PUBLIC).build();
     }
