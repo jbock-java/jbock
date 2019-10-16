@@ -19,7 +19,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 public class TypeTool {
 
@@ -73,32 +72,14 @@ public class TypeTool {
         }
       };
 
-  public List<? extends TypeMirror> typeargs(TypeMirror mirror) {
-    return mirror.accept(TYPEARGS, null);
-  }
-
   private final Types types;
 
   private final Elements elements;
-
-  private static TypeTool instance;
 
   // visible for testing
   public TypeTool(Elements elements, Types types) {
     this.types = types;
     this.elements = elements;
-  }
-
-  public static TypeTool get() {
-    return instance;
-  }
-
-  static void init(Elements elements, Types types) {
-    instance = new TypeTool(elements, types);
-  }
-
-  static void unset() {
-    instance = null;
   }
 
   /**
@@ -242,10 +223,6 @@ public class TypeTool {
     return types.isSameType(mirror, test);
   }
 
-  boolean isBooleanPrimitive(TypeMirror mirror) {
-    return isSameType(mirror, getPrimitiveType(TypeKind.BOOLEAN));
-  }
-
   public boolean isRawType(TypeMirror mirror) {
     return types.isSameType(mirror, types.erasure(mirror));
   }
@@ -286,16 +263,6 @@ public class TypeTool {
     return types.getDeclaredType(
         asTypeElement(Optional.class),
         typeMirror);
-  }
-
-  public TypeMirror listOf(TypeMirror type) {
-    return types.getDeclaredType(asTypeElement(List.class), type);
-  }
-
-  public TypeMirror stringFunction(TypeMirror innerType) {
-    TypeElement function = asTypeElement(Function.class);
-    TypeMirror string = asTypeElement(String.class).asType();
-    return types.getDeclaredType(function, string, innerType);
   }
 
   public List<? extends TypeMirror> getDirectSupertypes(TypeMirror mirror) {
@@ -355,11 +322,7 @@ public class TypeTool {
     return false;
   }
 
-  public Types types() {
-    return types;
-  }
-
-  public Elements elements() {
-    return elements;
+  private List<? extends TypeMirror> typeargs(TypeMirror mirror) {
+    return mirror.accept(TYPEARGS, null);
   }
 }

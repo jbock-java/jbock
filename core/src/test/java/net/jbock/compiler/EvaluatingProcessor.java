@@ -94,8 +94,6 @@ public final class EvaluatingProcessor extends AbstractProcessor {
         base.run(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
       } catch (Throwable e) {
         thrown = e;
-      } finally {
-        TypeTool.unset();
       }
     }
     return false;

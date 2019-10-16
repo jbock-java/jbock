@@ -72,34 +72,26 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-    try {
-      TypeTool.init(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
-      processInternal(annotations, env);
-    } finally {
-      TypeTool.unset();
-    }
-    return false;
-  }
-
-  private void processInternal(Set<? extends TypeElement> annotations, RoundEnvironment env) {
     Set<String> annotationsToProcess = annotations.stream().map(TypeElement::getQualifiedName).map(Name::toString).collect(toSet());
     try {
       validateAnnotatedMethods(env, annotationsToProcess);
     } catch (ValidationException e) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
-      return;
+      return false;
     }
     if (!annotationsToProcess.contains(CommandLineArguments.class.getCanonicalName())) {
-      return;
+      return false;
     }
     getSourceElements(env).forEach(this::processSourceElements);
+    return false;
   }
 
   private void processSourceElements(TypeElement sourceElement) {
+    TypeTool tool = new TypeTool(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
     ClassName generatedClass = generatedClass(ClassName.get(sourceElement));
     try {
-      validateSourceElement(sourceElement);
-      List<Param> parameters = getParams(sourceElement);
+      validateSourceElement(tool, sourceElement);
+      List<Param> parameters = getParams(tool, sourceElement);
       if (parameters.isEmpty()) { // javapoet #739
         throw ValidationException.create(sourceElement,
             "Define at least one abstract method");
@@ -203,7 +195,7 @@ public final class Processor extends AbstractProcessor {
   private static final Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
       .comparingInt(e -> e.getAnnotation(PositionalParameter.class).position());
 
-  private List<Param> getParams(TypeElement sourceElement) {
+  private List<Param> getParams(TypeTool tool, TypeElement sourceElement) {
     List<ExecutableElement> abstractMethods = methodsIn(sourceElement.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
         .collect(toList());
@@ -218,11 +210,11 @@ public final class Processor extends AbstractProcessor {
     List<Param> result = new ArrayList<>(abstractMethods.size());
     for (int i = 0; i < sortedPositional.size(); i++) {
       ExecutableElement method = sortedPositional.get(i);
-      Param param = Param.create(result, method, i, getDescription(method));
+      Param param = Param.create(tool, result, method, i, getDescription(method));
       result.add(param);
     }
     for (ExecutableElement method : allNonpositional) {
-      Param param = Param.create(result, method, null, getDescription(method));
+      Param param = Param.create(tool, result, method, null, getDescription(method));
       result.add(param);
     }
     if (sourceElement.getAnnotation(CommandLineArguments.class).allowHelpOption()) {
@@ -267,12 +259,12 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void validateSourceElement(TypeElement sourceElement) {
+  private void validateSourceElement(TypeTool tool, TypeElement sourceElement) {
     if (sourceElement.getKind() == ElementKind.INTERFACE) {
       throw ValidationException.create(sourceElement,
           "Use an abstract class, not an interface.");
     }
-    if (!TypeTool.get().isSameType(sourceElement.getSuperclass(), Object.class)) {
+    if (!tool.isSameType(sourceElement.getSuperclass(), Object.class)) {
       throw ValidationException.create(sourceElement,
           String.format("The class may not extend %s.", sourceElement.getSuperclass()));
     }

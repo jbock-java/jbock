@@ -11,7 +11,6 @@ import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
@@ -124,9 +123,7 @@ final class MapperClassAnalyzer {
         }
         solution.add(((Left<TypeMirror, String>) either).value());
       }
-      DeclaredType f_type = tool().substitute(functionType.expectedType, unmapped_r_result);
-      TypeMirror innerType = f_type.getTypeArguments().get(1);
-      return Either.left(MapperType.create(functionType.isSupplier(), mapperClass, solution, innerType));
+      return Either.left(MapperType.create(tool(), functionType.isSupplier(), mapperClass, solution));
     }
 
     Either<TypeMirror, String> getSolution(TypeParameterElement typeParameter) {

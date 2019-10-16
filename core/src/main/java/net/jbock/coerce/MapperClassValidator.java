@@ -9,7 +9,6 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Map;
@@ -78,9 +77,7 @@ final class MapperClassValidator {
       List<TypeMirror> solution = typeParameters.stream()
           .map(this::getSolution)
           .collect(Collectors.toList());
-      DeclaredType f_type = tool().substitute(functionType.expectedType, unmapped_r_result);
-      TypeMirror innerType = f_type.getTypeArguments().get(1);
-      return MapperType.create(functionType.isSupplier(), mapperClass, solution, innerType);
+      return MapperType.create(tool(), functionType.isSupplier(), mapperClass, solution);
     }
 
     TypeMirror getSolution(TypeParameterElement typeParameter) {

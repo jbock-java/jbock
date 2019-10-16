@@ -6,9 +6,11 @@ import javax.lang.model.type.TypeMirror;
 import java.util.stream.Collectors;
 
 /**
- * No collector class specified. Collect to {@link java.util.List List}.
+ * No collector class specified.
+ * Collect into {@link java.util.List}.
  */
 public class DefaultCollector extends AbstractCollector {
+
   public DefaultCollector(TypeMirror inputType) {
     super(inputType);
   }

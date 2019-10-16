@@ -66,7 +66,7 @@ public class BasicInfo {
     return true;
   }
 
-  Optional<CodeBlock> findAutoMapper(TypeMirror innerType) {
+  Optional<CodeBlock> findMapExpr(TypeMirror innerType) {
     Optional<CodeBlock> mapExpr = AutoMapper.findAutoMapper(tool(), innerType);
     if (mapExpr.isPresent()) {
       return mapExpr;

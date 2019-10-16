@@ -22,11 +22,14 @@ public class CustomCollector extends AbstractCollector {
 
   private final List<TypeMirror> solution; // solution to the typevars of collector class, if any
 
-  public CustomCollector(TypeMirror inputType, TypeElement collectorClass, boolean supplier, List<TypeMirror> solution) {
+  private final TypeTool tool;
+
+  public CustomCollector(TypeTool tool, TypeMirror inputType, TypeElement collectorClass, boolean supplier, List<TypeMirror> solution) {
     super(inputType);
     this.collectorClass = collectorClass;
     this.supplier = supplier;
     this.solution = solution;
+    this.tool = tool;
   }
 
   public TypeMirror collectorType() {
@@ -44,7 +47,7 @@ public class CustomCollector extends AbstractCollector {
   @Override
   public CodeBlock createCollector() {
     return CodeBlock.of("new $T$L()$L",
-        TypeTool.get().erasure(collectorType()),
+        tool.erasure(collectorType()),
         getTypeParameterList(solution()),
         supplier() ? ".get()" : "");
   }

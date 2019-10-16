@@ -12,27 +12,23 @@ import static net.jbock.compiler.Util.getTypeParameterList;
 public class ReferenceMapperType extends MapperType {
 
   private final TypeElement mapperClass; // implements Function or Supplier<Function>
-  private final TypeMirror innerType; // what the function returns
+
+  private final TypeTool tool;
 
   ReferenceMapperType(
+      TypeTool tool,
       TypeElement mapperClass,
       boolean supplier,
-      List<TypeMirror> solution,
-      TypeMirror innerType) {
+      List<TypeMirror> solution) {
     super(supplier, solution);
     this.mapperClass = mapperClass;
-    this.innerType = innerType;
-  }
-
-  @Override
-  public TypeMirror innerType() {
-    return innerType;
+    this.tool = tool;
   }
 
   @Override
   public CodeBlock mapExpr() {
     return CodeBlock.of("new $T$L()$L",
-        TypeTool.get().erasure(mapperClass.asType()),
+        tool.erasure(mapperClass.asType()),
         getTypeParameterList(solution()),
         supplier() ? ".get()" : "");
   }

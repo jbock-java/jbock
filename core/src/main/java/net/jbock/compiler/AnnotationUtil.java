@@ -38,10 +38,11 @@ final class AnnotationUtil {
   };
 
   private static TypeElement get(
+      TypeTool tool,
       ExecutableElement sourceMethod,
       Class<?> annotationClass,
       String attributeName) {
-    AnnotationMirror annotation = getAnnotationMirror(sourceMethod, annotationClass);
+    AnnotationMirror annotation = getAnnotationMirror(tool, sourceMethod, annotationClass);
     if (annotation == null) {
       // if the source method doesn't have this annotation
       return null;
@@ -52,7 +53,6 @@ final class AnnotationUtil {
       return null;
     }
     TypeMirror typeMirror = annotationValue.accept(GET_TYPE, new AnnotationUtilContext(sourceMethod, attributeName));
-    TypeTool tool = TypeTool.get();
     if (typeMirror.accept(TypeTool.IS_JAVA_LANG_OBJECT, tool)) {
       // if the default value is not overridden
       return null;
@@ -65,18 +65,16 @@ final class AnnotationUtil {
   }
 
 
-  static TypeElement getMapperClass(ExecutableElement sourceMethod, Class<?> annotationClass) {
-    return get(sourceMethod, annotationClass, "mappedBy");
+  static TypeElement getMapperClass(TypeTool tool, ExecutableElement sourceMethod, Class<?> annotationClass) {
+    return get(tool, sourceMethod, annotationClass, "mappedBy");
   }
 
-  static TypeElement getCollectorClass(ExecutableElement sourceMethod, Class<?> annotationClass) {
-    return get(sourceMethod, annotationClass, "collectedBy");
+  static TypeElement getCollectorClass(TypeTool tool, ExecutableElement sourceMethod, Class<?> annotationClass) {
+    return get(tool, sourceMethod, annotationClass, "collectedBy");
   }
 
-  private static AnnotationMirror getAnnotationMirror(ExecutableElement sourceMethod, Class<?> annotationClass) {
-    TypeTool tool = TypeTool.get();
+  private static AnnotationMirror getAnnotationMirror(TypeTool tool, ExecutableElement sourceMethod, Class<?> annotationClass) {
     for (AnnotationMirror m : sourceMethod.getAnnotationMirrors()) {
-
       if (tool.isSameType(m.getAnnotationType(), annotationClass)) {
         return m;
       }

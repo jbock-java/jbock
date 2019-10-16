@@ -39,11 +39,11 @@ class CollectorAbsentMapperAbsent {
     }
 
     Optional<Coercion> findCoercion() {
-      Optional<CodeBlock> autoMapper = basicInfo.findAutoMapper(expectedReturnType);
-      if (!autoMapper.isPresent()) {
+      Optional<CodeBlock> mapExpr = basicInfo.findMapExpr(expectedReturnType);
+      if (!mapExpr.isPresent()) {
         return Optional.empty();
       }
-      MapperType mapperType = MapperType.create(expectedReturnType, autoMapper.get());
+      MapperType mapperType = MapperType.create(mapExpr.get());
       Optional<AbstractCollector> collector = parameterType.isRepeatable() ? Optional.of(new DefaultCollector(expectedReturnType)) : Optional.empty();
       return Optional.of(Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, parameterType));
     }

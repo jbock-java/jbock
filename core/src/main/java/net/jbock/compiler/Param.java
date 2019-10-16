@@ -11,6 +11,7 @@ import net.jbock.coerce.ParameterType;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Collections;
@@ -53,6 +54,8 @@ final class Param {
   private final String descriptionArgumentName;
 
   private final Integer positionalIndex;
+
+  private final TypeTool typeTool;
 
   boolean isFlag() {
     return coercion.parameterType().isFlag();
@@ -119,7 +122,8 @@ final class Param {
       Coercion coercion,
       List<String> description,
       String descriptionArgumentName,
-      Integer positionalIndex) {
+      Integer positionalIndex,
+      TypeTool typeTool) {
     this.bundleKey = bundleKey;
     this.coercion = coercion;
     this.shortName = shortName;
@@ -128,6 +132,7 @@ final class Param {
     this.description = description;
     this.descriptionArgumentName = descriptionArgumentName;
     this.positionalIndex = positionalIndex;
+    this.typeTool = typeTool;
   }
 
   FieldSpec field() {
@@ -138,15 +143,15 @@ final class Param {
     return coercion;
   }
 
-  static Param create(List<Param> params, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
+  static Param create(TypeTool tool, List<Param> params, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
     if (positionalIndex != null) {
-      TypeElement mapperClass = getMapperClass(sourceMethod, PositionalParameter.class);
-      TypeElement collectorClass = getCollectorClass(sourceMethod, PositionalParameter.class);
-      return createPositional(params, sourceMethod, positionalIndex, description, mapperClass, collectorClass);
+      TypeElement mapperClass = getMapperClass(tool, sourceMethod, PositionalParameter.class);
+      TypeElement collectorClass = getCollectorClass(tool, sourceMethod, PositionalParameter.class);
+      return createPositional(params, sourceMethod, positionalIndex, description, mapperClass, collectorClass, tool);
     } else {
-      TypeElement mapperClass = getMapperClass(sourceMethod, Parameter.class);
-      TypeElement collectorClass = getCollectorClass(sourceMethod, Parameter.class);
-      return createNonpositional(params, sourceMethod, description, mapperClass, collectorClass);
+      TypeElement mapperClass = getMapperClass(tool, sourceMethod, Parameter.class);
+      TypeElement collectorClass = getCollectorClass(tool, sourceMethod, Parameter.class);
+      return createNonpositional(params, sourceMethod, description, mapperClass, collectorClass, tool);
     }
   }
 
@@ -155,8 +160,8 @@ final class Param {
       ExecutableElement sourceMethod,
       String[] description,
       TypeElement mapperClass,
-      TypeElement collectorClass) {
-    TypeTool tool = TypeTool.get();
+      TypeElement collectorClass,
+      TypeTool tool) {
     String longName = longName(params, sourceMethod);
     char shortName = shortName(params, sourceMethod);
     if (shortName == ' ' && longName == null) {
@@ -190,7 +195,8 @@ final class Param {
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
-        null);
+        null,
+        tool);
   }
 
   private static Param createPositional(
@@ -199,8 +205,8 @@ final class Param {
       int positionalIndex,
       String[] description,
       TypeElement mapperClass,
-      TypeElement collectorClass) {
-    TypeTool tool = TypeTool.get();
+      TypeElement collectorClass,
+      TypeTool tool) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     ParamName name = findParamName(params, sourceMethod);
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
@@ -216,7 +222,8 @@ final class Param {
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
-        positionalIndex);
+        positionalIndex,
+        tool);
   }
 
   /**
@@ -231,7 +238,8 @@ final class Param {
       // no inferring
       return false;
     }
-    return tool.isBooleanPrimitive(mirror) || tool.isSameType(mirror, Boolean.class);
+    return tool.isSameType(mirror, tool.getPrimitiveType(TypeKind.BOOLEAN)) ||
+        tool.isSameType(mirror, Boolean.class);
   }
 
   private static char shortName(List<Param> params, ExecutableElement sourceMethod) {

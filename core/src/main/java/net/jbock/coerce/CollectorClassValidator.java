@@ -68,6 +68,6 @@ class CollectorClassValidator {
       }
       solution.add(s);
     }
-    return new CustomCollector(inputType, collectorClass, collectorType.isSupplier(), solution);
+    return new CustomCollector(tool(), inputType, collectorClass, collectorType.isSupplier(), solution);
   }
 }
