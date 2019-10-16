@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
 
-final class Context {
+public final class Context {
 
   // the annotated class
   private final TypeElement sourceElement;
@@ -222,35 +222,35 @@ final class Context {
     return allowEscape && positionalParamTypes.contains(ParameterType.REPEATABLE);
   }
 
-  ClassName optionParserType() {
+  public ClassName optionParserType() {
     return optionParserType;
   }
 
-  ClassName positionalOptionParserType() {
+  public ClassName positionalOptionParserType() {
     return positionalOptionParserType;
   }
 
-  ClassName repeatableOptionParserType() {
+  public ClassName repeatableOptionParserType() {
     return repeatableOptionParserType;
   }
 
-  ClassName flagOptionParserType() {
+  public ClassName flagOptionParserType() {
     return flagOptionParserType;
   }
 
-  ClassName regularOptionParserType() {
+  public ClassName regularOptionParserType() {
     return regularOptionParserType;
   }
 
-  ClassName regularPositionalOptionParserType() {
+  public ClassName regularPositionalOptionParserType() {
     return regularPositionalOptionParserType;
   }
 
-  ClassName repeatablePositionalOptionParserType() {
+  public ClassName repeatablePositionalOptionParserType() {
     return repeatablePositionalOptionParserType;
   }
 
-  ClassName optionType() {
+  public ClassName optionType() {
     return optionType;
   }
 

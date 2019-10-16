@@ -14,12 +14,10 @@ public final class Constants {
 
   public static final ClassName STRING = ClassName.get(String.class);
 
-  static final ClassName CHARACTER = ClassName.get(Character.class);
-
-  static final ParameterizedTypeName LIST_OF_STRING = ParameterizedTypeName.get(
+  public static final ParameterizedTypeName LIST_OF_STRING = ParameterizedTypeName.get(
       ClassName.get(List.class), STRING);
 
-  static final ParameterizedTypeName STREAM_OF_STRING = ParameterizedTypeName.get(
+  public static final ParameterizedTypeName STREAM_OF_STRING = ParameterizedTypeName.get(
       ClassName.get(Stream.class), STRING);
 
   static final ParameterizedTypeName STRING_STRING_MAP = ParameterizedTypeName.get(
@@ -27,5 +25,5 @@ public final class Constants {
 
   static final ArrayTypeName STRING_ARRAY = ArrayTypeName.of(STRING);
 
-  static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
+  public static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
 }

@@ -30,17 +30,18 @@ import static net.jbock.compiler.Util.optionalOfSubtype;
  *
  * @see Parser
  */
-final class Helper {
+public final class Helper {
 
-  final Context context;
+  private final Context context;
 
   private final FieldSpec longNamesField;
   private final FieldSpec shortNamesField;
-  final FieldSpec parsersField;
-  final FieldSpec positionalParsersField;
+  private final FieldSpec parsersField;
 
-  final MethodSpec readMethod;
-  final MethodSpec readRegularOptionMethod;
+  private final FieldSpec positionalParsersField;
+
+  private final MethodSpec readMethod;
+  private final MethodSpec readRegularOptionMethod;
 
   private final MethodSpec readLongMethod;
 
@@ -225,7 +226,7 @@ final class Helper {
   }
 
   private CodeBlock extractExpression(Param param) {
-    CodeBlock.Builder builder = OptionType.getStreamExpression(this, param).toBuilder();
+    CodeBlock.Builder builder = getStreamExpression(param).toBuilder();
     if (!param.isFlag()) {
       builder.add(".map($L)", param.coercion().mapExpr());
     }
@@ -239,7 +240,7 @@ final class Helper {
     return builder.build();
   }
 
-  static CodeBlock throwRepetitionErrorStatement(
+  public static CodeBlock throwRepetitionErrorStatement(
       FieldSpec optionParam) {
     return CodeBlock.builder()
         .add("throw new $T($T.format($S, $N, $N.describeParam($S)))",
@@ -248,5 +249,84 @@ final class Helper {
             "Option %s (%s) is not repeatable",
             optionParam, optionParam, "")
         .build();
+  }
+
+  /**
+   * @return An expression that extracts the value of the given param from the helper state.
+   * This expression will evaluate either to a {@link java.util.stream.Stream} or a {@link java.util.Optional}.
+   */
+  private CodeBlock getStreamExpression(Param param) {
+    ParameterType parameterType = param.coercion().parameterType();
+    if (param.isPositional()) {
+      if (parameterType == ParameterType.REPEATABLE) {
+        return repeatablePositionalStream(param);
+      } else {
+        return regularPositionalStream(param);
+      }
+    }
+    switch (parameterType) {
+      case REPEATABLE:
+        return repeatableStream(param);
+      case FLAG:
+        return flagStream(param);
+      default:
+        return regularStream(param);
+    }
+  }
+
+
+  private CodeBlock flagStream(Param param) {
+    return CodeBlock.builder().add(
+        "$N.get($T.$N).flag()",
+        parsersField,
+        context.optionType(),
+        param.enumConstant())
+        .build();
+  }
+
+  private CodeBlock regularStream(Param param) {
+    return CodeBlock.builder().add(
+        "$N.get($T.$L).value()",
+        parsersField,
+        context.optionType(),
+        param.enumConstant())
+        .build();
+  }
+
+  private CodeBlock regularPositionalStream(Param param) {
+    return CodeBlock.builder().add(
+        "$N.get($L).value()",
+        positionalParsersField,
+        param.positionalIndex().orElseThrow(AssertionError::new))
+        .build();
+  }
+
+  private CodeBlock repeatableStream(Param param) {
+    return CodeBlock.builder().add(
+        "$N.get($T.$L).values()",
+        parsersField,
+        context.optionType(),
+        param.enumConstant())
+        .build();
+  }
+
+  private CodeBlock repeatablePositionalStream(Param param) {
+    return CodeBlock.builder().add(
+        "$N.get($L).values()",
+        positionalParsersField,
+        param.positionalIndex().orElseThrow(AssertionError::new))
+        .build();
+  }
+
+  public FieldSpec positionalParsersField() {
+    return positionalParsersField;
+  }
+
+  public MethodSpec readMethod() {
+    return readMethod;
+  }
+
+  public MethodSpec readRegularOptionMethod() {
+    return readRegularOptionMethod;
   }
 }

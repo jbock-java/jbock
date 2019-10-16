@@ -1,10 +1,12 @@
-package net.jbock.compiler;
+package net.jbock.compiler.optionparser;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.Constants;
+import net.jbock.compiler.Context;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static java.util.Arrays.asList;
@@ -19,30 +21,33 @@ import static net.jbock.compiler.Util.optionalOf;
 /**
  * Generates the OptionParser class.
  */
-final class OptionParser {
+public final class OptionParser {
 
-  static TypeSpec define(Context context) {
-    CodeBlock defaultImpl = CodeBlock.builder()
-        .addStatement("throw new $T()", AssertionError.class)
-        .build();
+  public static TypeSpec define(Context context) {
     FieldSpec option = FieldSpec.builder(context.optionType(), "option", FINAL).build();
     return TypeSpec.classBuilder(context.optionParserType())
         .addMethod(readMethod())
         .addMethod(MethodSpec.methodBuilder("value")
             .returns(optionalOf(STRING))
-            .addCode(defaultImpl)
+            .addCode(throwAssertionError())
             .build())
         .addMethod(MethodSpec.methodBuilder("values")
             .returns(STREAM_OF_STRING)
-            .addCode(defaultImpl)
+            .addCode(throwAssertionError())
             .build())
         .addMethod(MethodSpec.methodBuilder("flag")
             .returns(BOOLEAN)
-            .addCode(defaultImpl)
+            .addCode(throwAssertionError())
             .build())
         .addField(option)
         .addMethod(constructor(option))
         .addModifiers(PRIVATE, ABSTRACT, STATIC)
+        .build();
+  }
+
+  private static CodeBlock throwAssertionError() {
+    return CodeBlock.builder()
+        .addStatement("throw new $T()", AssertionError.class)
         .build();
   }
 

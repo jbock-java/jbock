@@ -377,12 +377,12 @@ final class Tokenizer {
 
         spec.addStatement("$T $N = $N.next()", STRING, t, tokens);
 
-        spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField)
+        spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField())
             .addStatement(throwInvalidOptionStatement(t))
             .endControlFlow();
 
-        spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField, positionParam, t)
-            .addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField, positionParam);
+        spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField(), positionParam, t)
+            .addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField(), positionParam);
 
         spec.endControlFlow();
       }
@@ -390,11 +390,11 @@ final class Tokenizer {
           .endControlFlow();
     }
 
-    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, helperParam, helper.readRegularOptionMethod, token);
+    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, helperParam, helper.readRegularOptionMethod(), token);
 
     spec.beginControlFlow("if ($N != null)", optionParam)
         .addStatement("$N.$N($N, $N, $N)",
-            helperParam, helper.readMethod, optionParam, token, tokens)
+            helperParam, helper.readMethod(), optionParam, token, tokens)
         .addStatement("continue")
         .endControlFlow();
 
@@ -406,12 +406,12 @@ final class Tokenizer {
     }
     if (context.hasPositional()) {
 
-      spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField)
+      spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField())
           .addStatement(throwInvalidOptionStatement(token))
           .endControlFlow();
 
-      spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField, positionParam, token);
-      spec.addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField, positionParam);
+      spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField(), positionParam, token);
+      spec.addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField(), positionParam);
     } else {
       spec.addStatement(throwInvalidOptionStatement(token));
     }

@@ -6,6 +6,13 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.optionparser.FlagOptionParser;
+import net.jbock.compiler.optionparser.OptionParser;
+import net.jbock.compiler.optionparser.PositionalOptionParser;
+import net.jbock.compiler.optionparser.RegularOptionParser;
+import net.jbock.compiler.optionparser.RegularPositionalOptionParser;
+import net.jbock.compiler.optionparser.RepeatableOptionParser;
+import net.jbock.compiler.optionparser.RepeatablePositionalOptionParser;
 
 import java.io.IOException;
 import java.io.InputStream;

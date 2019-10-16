@@ -1,33 +1,37 @@
-package net.jbock.compiler;
+package net.jbock.compiler.optionparser;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.Constants;
+import net.jbock.compiler.Context;
 
-import static com.squareup.javapoet.TypeName.BOOLEAN;
+import java.util.Optional;
+
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Helper.throwRepetitionErrorStatement;
+import static net.jbock.compiler.Util.optionalOf;
 
 /**
- * Generates the FlagOptionParser class.
+ * Generates the RegularOptionParser class.
  */
-final class FlagOptionParser {
+public final class RegularOptionParser {
 
-  static TypeSpec define(Context context) {
-    FieldSpec flag = FieldSpec.builder(TypeName.BOOLEAN, "flag").build();
-    return TypeSpec.classBuilder(context.flagOptionParserType())
+  public static TypeSpec define(Context context) {
+    FieldSpec value = FieldSpec.builder(STRING, "value").build();
+    return TypeSpec.classBuilder(context.regularOptionParserType())
         .superclass(context.optionParserType())
-        .addMethod(readMethod(context, flag))
-        .addMethod(MethodSpec.methodBuilder("flag")
-            .returns(BOOLEAN)
-            .addStatement("return $N", flag)
+        .addMethod(readMethod(context, value))
+        .addMethod(MethodSpec.methodBuilder("value")
+            .returns(optionalOf(STRING))
+            .addStatement("return $T.ofNullable($N)", Optional.class, value)
             .addAnnotation(Override.class)
             .build())
-        .addField(flag)
+        .addField(value)
         .addMethod(constructor(context))
         .addModifiers(PRIVATE, STATIC).build();
   }
@@ -40,18 +44,18 @@ final class FlagOptionParser {
         .build();
   }
 
-  private static MethodSpec readMethod(Context context, FieldSpec flag) {
+  private static MethodSpec readMethod(Context context, FieldSpec value) {
     FieldSpec option = FieldSpec.builder(context.optionType(), "option").build();
-    ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it));
 
-    spec.beginControlFlow("if ($N)", flag)
+    spec.beginControlFlow("if ($N != null)", value)
         .addStatement(throwRepetitionErrorStatement(option))
         .endControlFlow();
 
-    spec.addStatement("$N = $L", flag, true);
+    spec.addStatement("$N = readArgument($N, $N)", value, token, it);
 
     return spec.addAnnotation(Override.class).build();
   }

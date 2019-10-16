@@ -19,7 +19,7 @@ import static com.squareup.javapoet.WildcardTypeName.subtypeOf;
 
 public final class Util {
 
-  static ParameterizedTypeName optionalOf(TypeName typeName) {
+  public static ParameterizedTypeName optionalOf(TypeName typeName) {
     return ParameterizedTypeName.get(ClassName.get(Optional.class), typeName);
   }
 

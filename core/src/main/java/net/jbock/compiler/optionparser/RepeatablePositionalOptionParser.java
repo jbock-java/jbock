@@ -1,10 +1,11 @@
-package net.jbock.compiler;
+package net.jbock.compiler.optionparser;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.Context;
 
 import java.util.ArrayList;
 
@@ -17,9 +18,9 @@ import static net.jbock.compiler.Constants.STRING;
 /**
  * Generates the RepeatablePositionalOptionParser class.
  */
-final class RepeatablePositionalOptionParser {
+public final class RepeatablePositionalOptionParser {
 
-  static TypeSpec define(Context context) {
+  public static TypeSpec define(Context context) {
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
         .initializer("new $T<>()", ArrayList.class)
         .build();

@@ -1,10 +1,11 @@
-package net.jbock.compiler;
+package net.jbock.compiler.optionparser;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.Context;
 
 import java.util.Optional;
 
@@ -16,9 +17,9 @@ import static net.jbock.compiler.Util.optionalOf;
 /**
  * Generates the RegularPositionalOptionParser class.
  */
-final class RegularPositionalOptionParser {
+public final class RegularPositionalOptionParser {
 
-  static TypeSpec define(Context context) {
+  public static TypeSpec define(Context context) {
     FieldSpec value = FieldSpec.builder(STRING, "value").build();
     return TypeSpec.classBuilder(context.regularPositionalOptionParserType())
         .superclass(context.positionalOptionParserType())

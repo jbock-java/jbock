@@ -1,10 +1,11 @@
-package net.jbock.compiler;
+package net.jbock.compiler.optionparser;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.Context;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -16,9 +17,9 @@ import static net.jbock.compiler.Util.optionalOf;
 /**
  * Generates the PositionalOptionParser class.
  */
-final class PositionalOptionParser {
+public final class PositionalOptionParser {
 
-  static TypeSpec define(Context context) {
+  public static TypeSpec define(Context context) {
     CodeBlock defaultImpl = CodeBlock.builder()
         .addStatement("throw new $T()", AssertionError.class)
         .build();
