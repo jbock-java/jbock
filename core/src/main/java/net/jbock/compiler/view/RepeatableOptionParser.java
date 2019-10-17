@@ -52,7 +52,7 @@ final class RepeatableOptionParser {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it));
 
-    spec.addStatement("$N.add(readArgument($N, $N))", values, token, it);
+    spec.addStatement("$N.add(readValidArgument($N, $N))", values, token, it);
 
     return spec.addAnnotation(Override.class).build();
   }

@@ -55,7 +55,7 @@ final class RegularOptionParser {
         .addStatement(throwRepetitionErrorStatement(option))
         .endControlFlow();
 
-    spec.addStatement("$N = readArgument($N, $N)", value, token, it);
+    spec.addStatement("$N = readValidArgument($N, $N)", value, token, it);
 
     return spec.addAnnotation(Override.class).build();
   }

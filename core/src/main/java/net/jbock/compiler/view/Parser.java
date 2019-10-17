@@ -49,7 +49,7 @@ public final class Parser {
   private final ParseResult parseResult;
 
   private final MethodSpec readNextMethod;
-  private final MethodSpec readArgumentMethod;
+  private final MethodSpec readValidArgumentMethod;
 
   private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out")
       .initializer("$T.out", System.class)
@@ -78,7 +78,7 @@ public final class Parser {
       Impl impl,
       ParseResult parseResult,
       MethodSpec readNextMethod,
-      MethodSpec readArgumentMethod) {
+      MethodSpec readValidArgumentMethod) {
     this.context = context;
     this.tokenizer = tokenizer;
     this.option = option;
@@ -86,18 +86,18 @@ public final class Parser {
     this.impl = impl;
     this.parseResult = parseResult;
     this.readNextMethod = readNextMethod;
-    this.readArgumentMethod = readArgumentMethod;
+    this.readValidArgumentMethod = readValidArgumentMethod;
   }
 
   public static Parser create(Context context) {
     MethodSpec readNextMethod = readNextMethod();
-    MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
+    MethodSpec readValidArgumentMethod = readValidArgumentMethod(readNextMethod);
     Option option = Option.create(context);
     Impl impl = Impl.create(context);
     Helper helper = Helper.create(context, option);
     ParseResult parseResult = ParseResult.create(context);
     Tokenizer builder = Tokenizer.create(context, helper);
-    return new Parser(context, builder, option, helper, impl, parseResult, readNextMethod, readArgumentMethod);
+    return new Parser(context, builder, option, helper, impl, parseResult, readNextMethod, readValidArgumentMethod);
   }
 
   public TypeSpec define() {
@@ -135,7 +135,7 @@ public final class Parser {
         .addMethod(addPublicIfNecessary(withMessagesMethod()))
         .addMethod(addPublicIfNecessary(withResourceBundleMethod()))
         .addMethod(addPublicIfNecessary(withMessagesMethodInputStream()))
-        .addMethod(readArgumentMethod)
+        .addMethod(readValidArgumentMethod)
         .addMethod(readNextMethod);
 
     if (context.isHelpParameterEnabled()) {
@@ -316,14 +316,17 @@ public final class Parser {
     return spec.build();
   }
 
-  private static MethodSpec readArgumentMethod(
+  private static MethodSpec readValidArgumentMethod(
       MethodSpec readNextMethod) {
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec index = builder(INT, "index").build();
     ParameterSpec isLong = builder(BOOLEAN, "isLong").build();
-    MethodSpec.Builder builder = methodBuilder("readArgument");
+    MethodSpec.Builder builder = methodBuilder("readValidArgument");
 
+    builder.beginControlFlow("if ($N.length() < 2)", token)
+        .addStatement("throw new $T()", IllegalArgumentException.class)
+        .endControlFlow();
     builder.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
     builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
 

@@ -61,6 +61,7 @@ final class ParseResult {
   private TypeSpec definePrintHelpResult() {
     TypeSpec.Builder spec = classBuilder(context.helpPrintedType())
         .superclass(context.parseResultType())
+        .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addModifiers(STATIC, FINAL);
     if (context.sourceElement().getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
