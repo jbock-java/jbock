@@ -23,35 +23,23 @@ import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.reference.ReferenceTool.Expectation.MAPPER;
 
 // for when there's no collector
-final class MapperClassAnalyzer {
+public final class MapperClassAnalyzer {
 
   private final BasicInfo basicInfo;
   private final TypeMirror expectedReturnType;
   private final TypeElement mapperClass;
 
-  MapperClassAnalyzer(BasicInfo basicInfo, TypeMirror expectedReturnType, TypeElement mapperClass) {
+  public MapperClassAnalyzer(BasicInfo basicInfo, TypeMirror expectedReturnType, TypeElement mapperClass) {
     this.basicInfo = basicInfo;
     this.expectedReturnType = expectedReturnType;
     this.mapperClass = mapperClass;
   }
 
-  static class Failure {
-    private final String message;
-
-    Failure(String message) {
-      this.message = message;
-    }
-
-    String getMessage() {
-      return String.format("There is a problem with the mapper class: %s.", message);
-    }
+  private static MapperFailure failure(String message) {
+    return new MapperFailure(message);
   }
 
-  private static Failure failure(String message) {
-    return new Failure(message);
-  }
-
-  Either<ReferenceMapperType, Failure> checkReturnType() {
+  public Either<ReferenceMapperType, MapperFailure> checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
     AbstractReferencedType functionType = new ReferenceTool(MAPPER, basicInfo, mapperClass)
         .getReferencedType();

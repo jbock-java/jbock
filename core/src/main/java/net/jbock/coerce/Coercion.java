@@ -48,7 +48,7 @@ public final class Coercion {
     this.paramName = paramName;
   }
 
-  static Coercion getCoercion(
+  public static Coercion getCoercion(
       BasicInfo basicInfo,
       Optional<AbstractCollector> collector,
       MapperType mapperType,

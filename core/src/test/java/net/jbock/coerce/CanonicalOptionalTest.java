@@ -21,7 +21,7 @@ class CanonicalOptionalTest {
       TypeMirror optionalInt = elements.getTypeElement(OptionalInt.class.getCanonicalName()).asType();
       Optional<CanonicalOptional> opt = CanonicalOptional.unwrap(optionalInt, new TypeTool(elements, types));
       assertTrue(opt.isPresent());
-      TypeMirror liftedType = opt.get().canonicalType();
+      TypeMirror liftedType = opt.get().liftedType();
       assertSameType("java.util.Optional<java.lang.Integer>", liftedType, elements, types);
     });
   }

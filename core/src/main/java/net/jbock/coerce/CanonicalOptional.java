@@ -13,21 +13,22 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
-final class CanonicalOptional {
+public final class CanonicalOptional {
 
   // Optional<Integer> instead of OptionalInt etc
   private final TypeMirror liftedType;
 
-  private final TypeMirror wrapped;
+  // OptionalInt -> Integer
+  private final TypeMirror wrappedType;
 
   // the function returns an expression of the original type, like OptionalInt
   private final Function<ParameterSpec, CodeBlock> extract;
 
   private CanonicalOptional(
       Function<ParameterSpec, CodeBlock> extract,
-      TypeMirror liftedType, TypeMirror wrapped) {
+      TypeMirror liftedType, TypeMirror wrappedType) {
     this.extract = extract;
-    this.wrapped = wrapped;
+    this.wrappedType = wrappedType;
     if (liftedType.getKind().isPrimitive()) {
       throw new AssertionError("just checking");
     }
@@ -57,7 +58,7 @@ final class CanonicalOptional {
       new OptionalMapping(OptionalDouble.class, Double.class));
 
   // visible for testing
-  static Optional<CanonicalOptional> unwrap(TypeMirror type, TypeTool tool) {
+  public static Optional<CanonicalOptional> unwrap(TypeMirror type, TypeTool tool) {
     for (OptionalMapping e : OPT_MAP) {
       if (tool.isSameType(type, e.optionalPrimitiveClass)) {
         return Optional.of(new CanonicalOptional(
@@ -70,15 +71,15 @@ final class CanonicalOptional {
         .map(wrapped -> new CanonicalOptional(p -> CodeBlock.of("$N", p), type, wrapped));
   }
 
-  TypeMirror canonicalType() {
+  public TypeMirror liftedType() {
     return liftedType;
   }
 
-  Function<ParameterSpec, CodeBlock> extractExpr() {
+  public Function<ParameterSpec, CodeBlock> extractExpr() {
     return extract;
   }
 
-  TypeMirror wrapped() {
-    return wrapped;
+  public TypeMirror wrappedType() {
+    return wrappedType;
   }
 }

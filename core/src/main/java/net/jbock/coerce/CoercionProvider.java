@@ -8,6 +8,8 @@ import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
+import net.jbock.coerce.mapperabsent.CollectorAbsentMapperAbsent;
+import net.jbock.coerce.mapperpresent.CollectorAbsentMapperPresent;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 
