@@ -32,7 +32,7 @@ import static net.jbock.compiler.AnnotationUtil.getMapperClass;
 /**
  * Internal representation of an abstract method in the source class.
  */
-final class Param {
+public final class Param {
 
   private static final EnumSet<Modifier> NONPRIVATE_ACCESS_MODIFIERS =
       EnumSet.of(PUBLIC, PROTECTED);
@@ -57,7 +57,7 @@ final class Param {
 
   private final TypeTool typeTool;
 
-  boolean isFlag() {
+  public boolean isFlag() {
     return coercion.parameterType().isFlag();
   }
 
@@ -139,7 +139,7 @@ final class Param {
     return coercion.field();
   }
 
-  Coercion coercion() {
+  public Coercion coercion() {
     return coercion;
   }
 
@@ -344,11 +344,11 @@ final class Param {
     return TypeName.get(sourceMethod.getReturnType());
   }
 
-  String enumConstant() {
+  public String enumConstant() {
     return paramName().snake().toUpperCase();
   }
 
-  boolean isPositional() {
+  public boolean isPositional() {
     return positionalIndex != null;
   }
 
@@ -356,11 +356,11 @@ final class Param {
     return !isPositional();
   }
 
-  OptionalInt positionalIndex() {
+  public OptionalInt positionalIndex() {
     return positionalIndex != null ? OptionalInt.of(positionalIndex) : OptionalInt.empty();
   }
 
-  boolean isRequired() {
+  public boolean isRequired() {
     return coercion.parameterType().isRequired();
   }
 

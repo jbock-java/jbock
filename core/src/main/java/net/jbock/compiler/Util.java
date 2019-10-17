@@ -23,7 +23,7 @@ public final class Util {
     return ParameterizedTypeName.get(ClassName.get(Optional.class), typeName);
   }
 
-  static ParameterizedTypeName optionalOfSubtype(TypeName typeName) {
+  public static ParameterizedTypeName optionalOfSubtype(TypeName typeName) {
     return ParameterizedTypeName.get(ClassName.get(Optional.class), subtypeOf(typeName));
   }
 

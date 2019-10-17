@@ -13,7 +13,7 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Helper.throwRepetitionErrorStatement;
+import static net.jbock.compiler.view.Helper.throwRepetitionErrorStatement;
 import static net.jbock.compiler.Util.optionalOf;
 
 /**

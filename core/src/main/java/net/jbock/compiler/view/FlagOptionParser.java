@@ -12,7 +12,7 @@ import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Helper.throwRepetitionErrorStatement;
+import static net.jbock.compiler.view.Helper.throwRepetitionErrorStatement;
 
 /**
  * Generates the FlagOptionParser class.

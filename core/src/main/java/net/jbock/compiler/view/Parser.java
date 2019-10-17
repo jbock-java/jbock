@@ -7,7 +7,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
-import net.jbock.compiler.Helper;
 import net.jbock.compiler.Impl;
 import net.jbock.compiler.IndentPrinter;
 import net.jbock.compiler.Messages;
@@ -96,7 +95,7 @@ public final class Parser {
     this.readArgumentMethod = readArgumentMethod;
   }
 
-  static Parser create(Context context) {
+  public static Parser create(Context context) {
     MethodSpec readNextMethod = readNextMethod();
     MethodSpec readArgumentMethod = readArgumentMethod(readNextMethod);
     Option option = Option.create(context);

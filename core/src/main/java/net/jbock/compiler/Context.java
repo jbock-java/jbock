@@ -254,7 +254,7 @@ public final class Context {
     return optionType;
   }
 
-  ClassName helperType() {
+  public ClassName helperType() {
     return helperType;
   }
 
@@ -266,7 +266,7 @@ public final class Context {
     return messagesType;
   }
 
-  ClassName implType() {
+  public ClassName implType() {
     return implType;
   }
 
@@ -298,7 +298,7 @@ public final class Context {
     return generatedClass;
   }
 
-  List<Param> parameters() {
+  public List<Param> parameters() {
     return parameters;
   }
 
@@ -310,7 +310,7 @@ public final class Context {
     return addHelp;
   }
 
-  Set<ParameterType> nonpositionalParamTypes() {
+  public Set<ParameterType> nonpositionalParamTypes() {
     return nonpositionalParamTypes;
   }
 

@@ -60,13 +60,13 @@ public final class Option {
 
   private final FieldSpec positionalIndexField;
 
-  final MethodSpec shortNameMapMethod;
+  private final MethodSpec shortNameMapMethod;
 
-  final MethodSpec longNameMapMethod;
+  private final MethodSpec longNameMapMethod;
 
-  final MethodSpec parsersMethod;
+  private final MethodSpec parsersMethod;
 
-  final MethodSpec positionalParsersMethod;
+  private final MethodSpec positionalParsersMethod;
 
   private Option(
       Context context,
@@ -543,5 +543,21 @@ public final class Option {
         .returns(ParameterizedTypeName.get(Supplier.class, IllegalArgumentException.class))
         .addCode("return () -> $L; ", lambda)
         .build();
+  }
+
+  public MethodSpec shortNameMapMethod() {
+    return shortNameMapMethod;
+  }
+
+  public MethodSpec longNameMapMethod() {
+    return longNameMapMethod;
+  }
+
+  public MethodSpec parsersMethod() {
+    return parsersMethod;
+  }
+
+  public MethodSpec positionalParsersMethod() {
+    return positionalParsersMethod;
   }
 }

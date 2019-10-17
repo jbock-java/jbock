@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.compiler.view;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -9,7 +9,9 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.coerce.ParameterType;
-import net.jbock.compiler.view.Parser;
+import net.jbock.compiler.Context;
+import net.jbock.compiler.Option;
+import net.jbock.compiler.Param;
 
 import java.util.Collections;
 import java.util.List;
@@ -70,25 +72,25 @@ public final class Helper {
     // read-only lookups
     FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, context.optionType()), "longNames")
-        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.longNameMapMethod)
+        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.longNameMapMethod())
         .addModifiers(FINAL)
         .build();
     FieldSpec shortNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         TypeName.get(Character.class), context.optionType()), "shortNames")
-        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.shortNameMapMethod)
+        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.shortNameMapMethod())
         .addModifiers(FINAL)
         .build();
 
     // stateful parsers
     FieldSpec parsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         context.optionType(), context.optionParserType()), "parsers")
-        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.parsersMethod)
+        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.parsersMethod())
         .addModifiers(FINAL)
         .build();
 
     FieldSpec positionalParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class),
         context.positionalOptionParserType()), "positionalParsers")
-        .initializer("$T.unmodifiableList($T.$N())", Collections.class, context.optionType(), option.positionalParsersMethod)
+        .initializer("$T.unmodifiableList($T.$N())", Collections.class, context.optionType(), option.positionalParsersMethod())
         .addModifiers(FINAL)
         .build();
 
