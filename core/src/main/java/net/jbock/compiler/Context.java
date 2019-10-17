@@ -12,19 +12,16 @@ public final class Context {
   // the annotated class
   private final TypeElement sourceElement;
 
-  // the name of the class that will be generated
+  // the class that will be generated
   private final ClassName generatedClass;
 
-  // corresponds to all parameter methods
+  // the abstract methods in the annotated class
   private final List<Param> parameters;
-
-  // number of methods that have the Positional annotation
-  private final int numPositionalParameters;
 
   // whether "--" is a special token
   private final boolean allowEscape;
 
-  // whether unknown tokens that start with dash should be accepted as positional parameters
+  // whether tokens that start with "-" should be acceptable as positional parameters
   private final boolean strict;
 
   // whether "--help" is a special token
@@ -43,7 +40,6 @@ public final class Context {
       TypeElement sourceElement,
       ClassName generatedClass,
       List<Param> parameters,
-      int numPositionalParameters,
       boolean allowEscape,
       boolean strict,
       boolean helpParameterEnabled,
@@ -53,7 +49,6 @@ public final class Context {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
-    this.numPositionalParameters = numPositionalParameters;
     this.allowEscape = allowEscape;
     this.strict = strict;
     this.helpParameterEnabled = helpParameterEnabled;
@@ -69,7 +64,6 @@ public final class Context {
       List<String> description,
       boolean allowEscape,
       boolean strict) {
-    long positionalParameters = parameters.stream().filter(Param::isPositional).count();
     boolean addHelp = sourceElement.getAnnotation(CommandLineArguments.class).allowHelpOption();
     String missionStatement = sourceElement.getAnnotation(CommandLineArguments.class).missionStatement();
 
@@ -77,7 +71,6 @@ public final class Context {
         sourceElement,
         generatedClass,
         parameters,
-        Long.valueOf(positionalParameters).intValue(),
         allowEscape,
         strict,
         addHelp,
@@ -95,10 +88,6 @@ public final class Context {
       return sourceType.getEnclosingElement().getSimpleName().toString();
     }
     return sourceType.getSimpleName().toString();
-  }
-
-  public boolean hasPositional() {
-    return numPositionalParameters > 0;
   }
 
   public boolean allowEscape() {

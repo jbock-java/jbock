@@ -21,7 +21,7 @@ import static net.jbock.compiler.Constants.STRING_STRING_MAP;
 /**
  * Defines the inner class Messages.
  */
-public final class Messages {
+final class Messages {
 
   private final FieldSpec resourceBundle = FieldSpec.builder(
       STRING_STRING_MAP, "messages")

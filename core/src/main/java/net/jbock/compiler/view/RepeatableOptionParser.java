@@ -19,7 +19,7 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
 /**
  * Generates the RepeatableOptionParser class.
  */
-public final class RepeatableOptionParser {
+final class RepeatableOptionParser {
 
   public static TypeSpec define(Context context) {
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")

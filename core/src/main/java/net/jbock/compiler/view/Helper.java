@@ -32,7 +32,7 @@ import static net.jbock.compiler.Util.optionalOfSubtype;
  *
  * @see Parser
  */
-public final class Helper {
+final class Helper {
 
   private final Context context;
 
@@ -235,7 +235,7 @@ public final class Helper {
     return builder.build();
   }
 
-  public static CodeBlock throwRepetitionErrorStatement(
+  static CodeBlock throwRepetitionErrorStatement(
       FieldSpec optionParam) {
     return CodeBlock.builder()
         .add("throw new $T($T.format($S, $N, $N.describeParam($S)))",

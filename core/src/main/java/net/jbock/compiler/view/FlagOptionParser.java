@@ -17,7 +17,7 @@ import static net.jbock.compiler.view.Helper.throwRepetitionErrorStatement;
 /**
  * Generates the FlagOptionParser class.
  */
-public final class FlagOptionParser {
+final class FlagOptionParser {
 
   public static TypeSpec define(Context context) {
     FieldSpec flag = FieldSpec.builder(TypeName.BOOLEAN, "flag").build();

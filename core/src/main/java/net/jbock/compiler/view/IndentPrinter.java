@@ -22,7 +22,7 @@ import static net.jbock.compiler.Constants.STRING;
 /**
  * Defines the inner class IndentPrinter.
  */
-public final class IndentPrinter {
+final class IndentPrinter {
 
   private final Context context;
   private final FieldSpec baseIndent;

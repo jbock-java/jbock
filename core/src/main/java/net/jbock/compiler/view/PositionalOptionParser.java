@@ -17,7 +17,7 @@ import static net.jbock.compiler.Util.optionalOf;
 /**
  * Generates the PositionalOptionParser class.
  */
-public final class PositionalOptionParser {
+final class PositionalOptionParser {
 
   public static TypeSpec define(Context context) {
     CodeBlock defaultImpl = CodeBlock.builder()

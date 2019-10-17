@@ -307,7 +307,7 @@ public final class Parser {
     return addPublicIfNecessary(context, spec);
   }
 
-  public static MethodSpec addPublicIfNecessary(Context context, MethodSpec.Builder spec) {
+  static MethodSpec addPublicIfNecessary(Context context, MethodSpec.Builder spec) {
     if (context.sourceElement().getModifiers().contains(PUBLIC)) {
       return spec.addModifiers(PUBLIC).build();
     }

@@ -26,7 +26,7 @@ import static net.jbock.compiler.view.Parser.addPublicIfNecessary;
 /**
  * Defines the inner class ParseResult.
  */
-public final class ParseResult {
+final class ParseResult {
 
   private final Context context;
 

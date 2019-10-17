@@ -32,7 +32,7 @@ import static net.jbock.compiler.Util.optionalOfSubtype;
 /**
  * Defines the inner class Tokenizer.
  */
-public final class Tokenizer {
+final class Tokenizer {
 
   // special bundle keys
   private static final String SPECIAL_KEY_DESCRIPTION = "jbock.description";
@@ -335,10 +335,8 @@ public final class Tokenizer {
     spec.addStatement("$T $N = new $T()", helperParam.type, helperParam, helperParam.type);
 
     ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
-    if (context.hasPositional()) {
-      spec.addStatement("$T $N = $L",
-          positionParam.type, positionParam, 0);
-    }
+    spec.addStatement("$T $N = $L",
+        positionParam.type, positionParam, 0);
 
     spec.beginControlFlow("while ($N.hasNext())", tokens)
         .addCode(codeInsideParsingLoop(helperParam, positionParam, tokens, isFirst))
@@ -370,21 +368,19 @@ public final class Tokenizer {
 
     if (context.allowEscape()) {
       spec.beginControlFlow("if ($S.equals($N))", "--", token);
-      if (context.hasPositional()) {
-        ParameterSpec t = ParameterSpec.builder(STRING, "t").build();
-        spec.beginControlFlow("while ($N.hasNext())", tokens);
+      ParameterSpec t = ParameterSpec.builder(STRING, "t").build();
+      spec.beginControlFlow("while ($N.hasNext())", tokens);
 
-        spec.addStatement("$T $N = $N.next()", STRING, t, tokens);
+      spec.addStatement("$T $N = $N.next()", STRING, t, tokens);
 
-        spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField())
-            .addStatement(throwInvalidOptionStatement(t))
-            .endControlFlow();
+      spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField())
+          .addStatement(throwInvalidOptionStatement(t))
+          .endControlFlow();
 
-        spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField(), positionParam, t)
-            .addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField(), positionParam);
+      spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField(), positionParam, t)
+          .addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField(), positionParam);
 
-        spec.endControlFlow();
-      }
+      spec.endControlFlow();
       spec.addStatement(returnFromParseExpression(helperParam))
           .endControlFlow();
     }
@@ -403,17 +399,13 @@ public final class Tokenizer {
           .addStatement(throwInvalidOptionStatement(token))
           .endControlFlow();
     }
-    if (context.hasPositional()) {
 
-      spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField())
-          .addStatement(throwInvalidOptionStatement(token))
-          .endControlFlow();
+    spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField())
+        .addStatement(throwInvalidOptionStatement(token))
+        .endControlFlow();
 
-      spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField(), positionParam, token);
-      spec.addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField(), positionParam);
-    } else {
-      spec.addStatement(throwInvalidOptionStatement(token));
-    }
+    spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField(), positionParam, token);
+    spec.addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField(), positionParam);
 
     return spec.build();
   }

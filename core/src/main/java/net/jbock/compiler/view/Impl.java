@@ -16,7 +16,7 @@ import static javax.lang.model.element.Modifier.STATIC;
  *
  * @see Parser
  */
-public final class Impl {
+final class Impl {
 
   private final Context context;
 

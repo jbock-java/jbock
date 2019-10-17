@@ -19,7 +19,7 @@ import static net.jbock.compiler.Util.optionalOf;
 /**
  * Generates the RegularOptionParser class.
  */
-public final class RegularOptionParser {
+final class RegularOptionParser {
 
   public static TypeSpec define(Context context) {
     FieldSpec value = FieldSpec.builder(STRING, "value").build();

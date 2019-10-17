@@ -41,7 +41,7 @@ import static net.jbock.compiler.Util.optionalOf;
  *
  * @see Parser
  */
-public final class Option {
+final class Option {
 
   private final Context context;
 
@@ -546,19 +546,19 @@ public final class Option {
         .build();
   }
 
-  public MethodSpec shortNameMapMethod() {
+  MethodSpec shortNameMapMethod() {
     return shortNameMapMethod;
   }
 
-  public MethodSpec longNameMapMethod() {
+  MethodSpec longNameMapMethod() {
     return longNameMapMethod;
   }
 
-  public MethodSpec parsersMethod() {
+  MethodSpec parsersMethod() {
     return parsersMethod;
   }
 
-  public MethodSpec positionalParsersMethod() {
+  MethodSpec positionalParsersMethod() {
     return positionalParsersMethod;
   }
 }
