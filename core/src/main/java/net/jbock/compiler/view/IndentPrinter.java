@@ -1,9 +1,10 @@
-package net.jbock.compiler;
+package net.jbock.compiler.view;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.Context;
 
 import java.io.PrintStream;
 import java.io.PrintWriter;

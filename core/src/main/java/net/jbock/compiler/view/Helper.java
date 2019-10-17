@@ -10,7 +10,6 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.coerce.ParameterType;
 import net.jbock.compiler.Context;
-import net.jbock.compiler.Option;
 import net.jbock.compiler.Param;
 
 import java.util.Collections;
@@ -145,11 +144,6 @@ public final class Helper {
         .addStatement("return $N($N)", readLongMethod, token)
         .endControlFlow();
 
-    if (!context.nonpositionalParamTypes().contains(ParameterType.FLAG)) {
-      return spec.addStatement("return $N.get($N.charAt(1))",
-          shortNamesField, token).build();
-    }
-
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
 
     spec.addStatement("$T $N = $N.get($N.charAt(1))",
@@ -204,9 +198,7 @@ public final class Helper {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(optionParam, token, it));
 
-    if (!context.nonpositionalParamTypes().isEmpty()) {
-      spec.addStatement("$N.get($N).read($N, $N)", parsersField, optionParam, token, it);
-    }
+    spec.addStatement("$N.get($N).read($N, $N)", parsersField, optionParam, token, it);
 
     return spec.build();
   }

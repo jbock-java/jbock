@@ -1,9 +1,10 @@
-package net.jbock.compiler;
+package net.jbock.compiler.view;
 
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.view.Parser;
+import net.jbock.compiler.Context;
+import net.jbock.compiler.Param;
 
 import java.util.stream.Collectors;
 

@@ -7,7 +7,6 @@ import net.jbock.coerce.ParameterType;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
-import java.util.OptionalInt;
 import java.util.Set;
 
 public final class Context {
@@ -31,7 +30,7 @@ public final class Context {
   private final boolean strict;
 
   // true if --help is a special token
-  private final boolean addHelp;
+  private final boolean helpParameterEnabled;
 
   // a set of only the non-positional param types in the sourceType
   private final Set<ParameterType> nonpositionalParamTypes;
@@ -73,7 +72,7 @@ public final class Context {
       int numPositionalParameters,
       boolean allowEscape,
       boolean strict,
-      boolean addHelp,
+      boolean helpParameterEnabled,
       Set<ParameterType> nonpositionalParamTypes,
       Set<ParameterType> positionalParamTypes,
       List<String> description,
@@ -102,7 +101,7 @@ public final class Context {
     this.numPositionalParameters = numPositionalParameters;
     this.allowEscape = allowEscape;
     this.strict = strict;
-    this.addHelp = addHelp;
+    this.helpParameterEnabled = helpParameterEnabled;
     this.nonpositionalParamTypes = nonpositionalParamTypes;
     this.positionalParamTypes = positionalParamTypes;
     this.description = description;
@@ -200,25 +199,11 @@ public final class Context {
     return sourceType.getSimpleName().toString();
   }
 
-  /**
-   * @return the maximum number of positional arguments,
-   * or {@code OptionalInt.empty()} if there is no limit
-   */
-  OptionalInt maxPositional() {
-    if (positionalParamTypes.contains(ParameterType.REPEATABLE)) {
-      return OptionalInt.empty();
-    }
-    if (!hasPositional()) {
-      return OptionalInt.empty();
-    }
-    return OptionalInt.of(numPositionalParameters);
-  }
-
-  boolean hasPositional() {
+  public boolean hasPositional() {
     return numPositionalParameters > 0;
   }
 
-  boolean allowEscape() {
+  public boolean allowEscape() {
     return allowEscape && positionalParamTypes.contains(ParameterType.REPEATABLE);
   }
 
@@ -302,31 +287,23 @@ public final class Context {
     return parameters;
   }
 
-  boolean strict() {
+  public boolean strict() {
     return strict;
   }
 
-  public boolean addHelp() {
-    return addHelp;
+  public boolean isHelpParameterEnabled() {
+    return helpParameterEnabled;
   }
 
-  public Set<ParameterType> nonpositionalParamTypes() {
-    return nonpositionalParamTypes;
-  }
-
-  Set<ParameterType> positionalParamTypes() {
-    return positionalParamTypes;
-  }
-
-  List<String> description() {
+  public List<String> description() {
     return description;
   }
 
-  String programName() {
+  public String programName() {
     return programName;
   }
 
-  String missionStatement() {
+  public String missionStatement() {
     return missionStatement;
   }
 }

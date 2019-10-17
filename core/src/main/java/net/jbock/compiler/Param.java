@@ -135,7 +135,7 @@ public final class Param {
     this.typeTool = typeTool;
   }
 
-  FieldSpec field() {
+  public FieldSpec field() {
     return coercion.field();
   }
 
@@ -313,34 +313,34 @@ public final class Param {
     }
   }
 
-  Character shortName() {
+  public Character shortName() {
     return shortName == ' ' ? null : shortName;
   }
 
-  String longName() {
+  public String longName() {
     return longName;
   }
 
-  List<String> description() {
+  public List<String> description() {
     return description;
   }
 
-  String methodName() {
+  public String methodName() {
     return sourceMethod.getSimpleName().toString();
   }
 
-  String descriptionArgumentName() {
+  public String descriptionArgumentName() {
     return descriptionArgumentName;
   }
 
-  String descriptionArgumentNameWithDots() {
+  public String descriptionArgumentNameWithDots() {
     if (coercion.parameterType().isRepeatable()) {
       return descriptionArgumentName + "...";
     }
     return descriptionArgumentName;
   }
 
-  TypeName returnType() {
+  public TypeName returnType() {
     return TypeName.get(sourceMethod.getReturnType());
   }
 
@@ -352,7 +352,7 @@ public final class Param {
     return positionalIndex != null;
   }
 
-  boolean isNotPositional() {
+  public boolean isNotPositional() {
     return !isPositional();
   }
 
@@ -364,11 +364,11 @@ public final class Param {
     return coercion.parameterType().isRequired();
   }
 
-  boolean isRepeatable() {
+  public boolean isRepeatable() {
     return coercion.isRepeatable();
   }
 
-  Optional<String> bundleKey() {
+  public Optional<String> bundleKey() {
     return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);
   }
 
@@ -420,7 +420,7 @@ public final class Param {
     return Arrays.copyOfRange(desc, firstNonempty, lastNonempty + 1);
   }
 
-  boolean isOptional() {
+  public boolean isOptional() {
     return coercion.isOptional();
   }
 
@@ -432,7 +432,7 @@ public final class Param {
     return ValidationException.create(sourceMethod, message);
   }
 
-  Set<Modifier> getAccessModifiers() {
+  public Set<Modifier> getAccessModifiers() {
     return sourceMethod.getModifiers().stream()
         .filter(NONPRIVATE_ACCESS_MODIFIERS::contains)
         .collect(Collectors.toSet());

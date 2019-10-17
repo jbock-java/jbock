@@ -7,12 +7,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
-import net.jbock.compiler.Impl;
-import net.jbock.compiler.IndentPrinter;
-import net.jbock.compiler.Messages;
-import net.jbock.compiler.Option;
-import net.jbock.compiler.ParseResult;
-import net.jbock.compiler.Tokenizer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -115,7 +109,7 @@ public final class Parser {
     spec.addMethod(addPublicIfNecessary(createMethod()))
         .addMethod(addPublicIfNecessary(parseMethod()))
         .addMethod(addPublicIfNecessary(parseOrExitMethod()));
-    if (context.addHelp()) {
+    if (context.isHelpParameterEnabled()) {
       spec.addMethod(addPublicIfNecessary(withOutputStreamMethod()));
     }
     return spec.addMethod(addPublicIfNecessary(withErrorStreamMethod()))
@@ -249,7 +243,7 @@ public final class Parser {
     ParameterSpec paramTokenizer = builder(context.tokenizerType(), "tokenizer").build();
     ParameterSpec paramErrStream = builder(context.indentPrinterType(), "errStream").build();
     ParameterSpec paramOutStream;
-    if (context.addHelp()) {
+    if (context.isHelpParameterEnabled()) {
       paramOutStream = builder(context.indentPrinterType(), "outStream").build();
       spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramOutStream, context.indentPrinterType(), out, indent);
     } else {

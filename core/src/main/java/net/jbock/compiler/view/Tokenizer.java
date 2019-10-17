@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.compiler.view;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -6,7 +6,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.view.Helper;
+import net.jbock.compiler.Constants;
+import net.jbock.compiler.Context;
+import net.jbock.compiler.Param;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +29,9 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Util.optionalOfSubtype;
 
+/**
+ * Defines the inner class Tokenizer.
+ */
 public final class Tokenizer {
 
   // special bundle keys
@@ -151,35 +156,28 @@ public final class Tokenizer {
 
     // Positional parameters
     spec.addStatement("$N.println()", out);
-    if (!context.positionalParamTypes().isEmpty()) {
-      ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-      spec.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
-      spec.beginControlFlow("if ($N.positional())", optionParam)
-          .addStatement("printDescription($N)", optionParam)
-          .addStatement("$N.println()", out)
-          .endControlFlow();
-      spec.endControlFlow();
-    }
+    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
+    spec.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
+    spec.beginControlFlow("if ($N.positional())", optionParam)
+        .addStatement("printDescription($N)", optionParam)
+        .addStatement("$N.println()", out)
+        .endControlFlow();
+    spec.endControlFlow();
 
     // Options
-    if (!context.nonpositionalParamTypes().isEmpty() || context.addHelp()) {
-      spec.addStatement("$N.println($S)", out, "OPTIONS");
-    }
+    spec.addStatement("$N.println($S)", out, "OPTIONS");
 
-    if (!context.nonpositionalParamTypes().isEmpty()) {
-      spec.addStatement("$N.incrementIndent()", out);
-      ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-      spec.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
-      spec.beginControlFlow("if (!$N.positional())", optionParam)
-          .addStatement("printDescription($N)", optionParam)
-          .addStatement("$N.println()", out)
-          .endControlFlow();
-      spec.endControlFlow();
-      spec.addStatement("$N.decrementIndent()", out);
-    }
+    spec.addStatement("$N.incrementIndent()", out);
+    spec.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
+    spec.beginControlFlow("if (!$N.positional())", optionParam)
+        .addStatement("printDescription($N)", optionParam)
+        .addStatement("$N.println()", out)
+        .endControlFlow();
+    spec.endControlFlow();
+    spec.addStatement("$N.decrementIndent()", out);
 
     // Help
-    if (context.addHelp()) {
+    if (context.isHelpParameterEnabled()) {
       describeHelpParameter(spec);
     }
 
@@ -300,7 +298,7 @@ public final class Tokenizer {
   private CodeBlock parseMethodCatchBlock(ParameterSpec e) {
     CodeBlock.Builder spec = CodeBlock.builder();
     spec.addStatement("$N.printStackTrace($N.out)", e, err);
-    if (context.addHelp()) {
+    if (context.isHelpParameterEnabled()) {
       spec.addStatement("$N.println($S)", err, "Usage:");
       spec.addStatement("$N.incrementIndent()", err);
       spec.addStatement("$N.println(synopsis())", err);
@@ -362,7 +360,7 @@ public final class Tokenizer {
     CodeBlock.Builder spec = CodeBlock.builder();
     spec.addStatement("$T $N = $N.next()", STRING, token, tokens);
 
-    if (context.addHelp()) {
+    if (context.isHelpParameterEnabled()) {
       spec.beginControlFlow("if ($N && $S.equals($N))", isFirst, "--help", token)
           .addStatement("return $T.empty()", Optional.class)
           .endControlFlow();
