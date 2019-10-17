@@ -98,7 +98,6 @@ public final class Processor extends AbstractProcessor {
             "Define at least one abstract method");
       }
 
-      Set<ParameterType> positionalParamTypes = positionalParamTypes(parameters);
       checkOnlyOnePositionalList(parameters);
       checkRankConsistentWithPosition(parameters);
 
@@ -107,7 +106,8 @@ public final class Processor extends AbstractProcessor {
           generatedClass,
           parameters,
           getOverview(sourceElement),
-          positionalParamTypes);
+          isAllowEscape(sourceElement, parameters),
+          isStrict(sourceElement, parameters));
       TypeSpec typeSpec = Parser.create(context).define();
       write(sourceElement, context.generatedClass(), typeSpec);
     } catch (ValidationException e) {
@@ -141,13 +141,28 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static Set<ParameterType> nonpositionalParamTypes(List<Param> parameters) {
-    Set<ParameterType> paramTypes = EnumSet.noneOf(ParameterType.class);
-    parameters.stream()
-        .filter(p -> !p.isPositional())
-        .map(p -> p.coercion().parameterType())
-        .forEach(paramTypes::add);
-    return paramTypes;
+  private static boolean isAllowEscape(TypeElement sourceElement, List<Param> parameters) {
+    boolean allowEscape = sourceElement.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
+    if (!allowEscape) {
+      return false;
+    }
+    boolean hasPositional = parameters.stream().anyMatch(Param::isPositional);
+    if (!hasPositional) {
+      throw ValidationException.create(sourceElement, "In order to use the escape sequence, define at least one positional parameter");
+    }
+    return true;
+  }
+
+  private static boolean isStrict(TypeElement sourceElement, List<Param> parameters) {
+    boolean allow = sourceElement.getAnnotation(CommandLineArguments.class).allowPrefixedTokens();
+    if (!allow) {
+      return true;
+    }
+    boolean hasPositional = parameters.stream().anyMatch(Param::isPositional);
+    if (!hasPositional) {
+      throw ValidationException.create(sourceElement, "In order to allow prefixed tokens, define at least one positional parameter");
+    }
+    return false;
   }
 
   private static Set<ParameterType> positionalParamTypes(List<Param> parameters) {
@@ -165,7 +180,7 @@ public final class Processor extends AbstractProcessor {
   }
 
   private void write(
-      TypeElement sourceType,
+      TypeElement sourceElement,
       ClassName generatedType,
       TypeSpec definedType) {
     JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), definedType);
@@ -184,10 +199,10 @@ public final class Processor extends AbstractProcessor {
           System.err.println(sourceCode);
         }
       } catch (IOException e) {
-        handleUnknownError(sourceType, e);
+        handleUnknownError(sourceElement, e);
       }
     } catch (IOException e) {
-      handleUnknownError(sourceType, e);
+      handleUnknownError(sourceElement, e);
     }
   }
 

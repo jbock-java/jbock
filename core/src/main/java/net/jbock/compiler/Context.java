@@ -2,12 +2,10 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import net.jbock.CommandLineArguments;
-import net.jbock.coerce.ParameterType;
 
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
-import java.util.Set;
 
 public final class Context {
 
@@ -23,17 +21,14 @@ public final class Context {
   // number of methods that have the Positional annotation
   private final int numPositionalParameters;
 
-  // whether "--" should end option parsing
+  // whether "--" is a special token
   private final boolean allowEscape;
 
   // whether unknown tokens that start with dash should be accepted as positional parameters
   private final boolean strict;
 
-  // true if --help is a special token
+  // whether "--help" is a special token
   private final boolean helpParameterEnabled;
-
-  // a set of only the positional param types in the sourceType
-  private final Set<ParameterType> positionalParamTypes;
 
   // program description from javadoc, can be overridden with bundle key jbock.description
   private final List<String> description;
@@ -70,7 +65,6 @@ public final class Context {
       boolean allowEscape,
       boolean strict,
       boolean helpParameterEnabled,
-      Set<ParameterType> positionalParamTypes,
       List<String> description,
       String programName,
       String missionStatement,
@@ -98,7 +92,6 @@ public final class Context {
     this.allowEscape = allowEscape;
     this.strict = strict;
     this.helpParameterEnabled = helpParameterEnabled;
-    this.positionalParamTypes = positionalParamTypes;
     this.description = description;
     this.programName = programName;
     this.missionStatement = missionStatement;
@@ -126,10 +119,9 @@ public final class Context {
       ClassName generatedClass,
       List<Param> parameters,
       List<String> description,
-      Set<ParameterType> positionalParamTypes) {
-    boolean allowEscape = sourceElement.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
+      boolean allowEscape,
+      boolean strict) {
     long positionalParameters = parameters.stream().filter(Param::isPositional).count();
-    boolean strict = positionalParameters > 0 && !sourceElement.getAnnotation(CommandLineArguments.class).allowPrefixedTokens();
     boolean addHelp = sourceElement.getAnnotation(CommandLineArguments.class).allowHelpOption();
     String missionStatement = sourceElement.getAnnotation(CommandLineArguments.class).missionStatement();
     ClassName optionType = generatedClass.nestedClass("Option");
@@ -158,7 +150,6 @@ public final class Context {
         allowEscape,
         strict,
         addHelp,
-        positionalParamTypes,
         description,
         programName(sourceElement),
         missionStatement,
@@ -197,7 +188,7 @@ public final class Context {
   }
 
   public boolean allowEscape() {
-    return allowEscape && positionalParamTypes.contains(ParameterType.REPEATABLE);
+    return allowEscape;
   }
 
   public ClassName optionParserType() {
