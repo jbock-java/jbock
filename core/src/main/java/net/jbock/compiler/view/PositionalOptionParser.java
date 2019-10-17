@@ -19,7 +19,7 @@ import static net.jbock.compiler.Util.optionalOf;
  */
 final class PositionalOptionParser {
 
-  public static TypeSpec define(Context context) {
+  static TypeSpec define(Context context) {
     CodeBlock defaultImpl = CodeBlock.builder()
         .addStatement("throw new $T()", AssertionError.class)
         .build();

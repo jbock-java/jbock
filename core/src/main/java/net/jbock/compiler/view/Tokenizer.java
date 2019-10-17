@@ -57,7 +57,7 @@ final class Tokenizer {
     this.messages = messages;
   }
 
-  public static Tokenizer create(Context context, Helper helper) {
+  static Tokenizer create(Context context, Helper helper) {
     FieldSpec out = FieldSpec.builder(context.indentPrinterType(), "out")
         .addModifiers(FINAL).build();
     FieldSpec err = FieldSpec.builder(context.indentPrinterType(), "err")
@@ -68,7 +68,7 @@ final class Tokenizer {
   }
 
 
-  public TypeSpec define() {
+  TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.tokenizerType())
         .addModifiers(STATIC, PRIVATE)
         .addMethod(parseMethod())

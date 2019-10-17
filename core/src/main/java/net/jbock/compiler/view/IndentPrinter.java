@@ -36,14 +36,14 @@ final class IndentPrinter {
     this.indentLevel = indentLevel;
   }
 
-  public static IndentPrinter create(Context context) {
+  static IndentPrinter create(Context context) {
     FieldSpec baseIndent = FieldSpec.builder(INT, "baseIndent", FINAL).build();
     FieldSpec out = FieldSpec.builder(PrintWriter.class, "out", FINAL).build();
     FieldSpec indentLevel = FieldSpec.builder(INT, "indentLevel").build();
     return new IndentPrinter(context, baseIndent, out, indentLevel);
   }
 
-  public TypeSpec define() {
+  TypeSpec define() {
     return classBuilder(context.indentPrinterType())
         .addFields(asList(baseIndent, out, indentLevel))
         .addMethod(privateConstructor())

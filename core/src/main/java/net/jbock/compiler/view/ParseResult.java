@@ -38,13 +38,13 @@ final class ParseResult {
     this.result = result;
   }
 
-  public static ParseResult create(Context context) {
+  static ParseResult create(Context context) {
     FieldSpec result = FieldSpec.builder(TypeName.get(context.sourceElement().asType()), "result",
         PRIVATE, FINAL).build();
     return new ParseResult(context, result);
   }
 
-  public List<TypeSpec> define() {
+  List<TypeSpec> define() {
     TypeSpec.Builder spec = classBuilder(context.parseResultType())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addModifiers(STATIC, ABSTRACT)

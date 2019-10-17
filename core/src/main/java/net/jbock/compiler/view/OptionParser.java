@@ -23,7 +23,7 @@ import static net.jbock.compiler.Util.optionalOf;
  */
 final class OptionParser {
 
-  public static TypeSpec define(Context context) {
+  static TypeSpec define(Context context) {
     FieldSpec option = FieldSpec.builder(context.optionType(), "option", FINAL).build();
     return TypeSpec.classBuilder(context.optionParserType())
         .addMethod(readMethod())

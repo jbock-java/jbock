@@ -38,11 +38,11 @@ final class Messages {
     this.context = context;
   }
 
-  public static Messages create(Context context) {
+  static Messages create(Context context) {
     return new Messages(context);
   }
 
-  public TypeSpec define() {
+  TypeSpec define() {
     return classBuilder(context.messagesType())
         .addFields(asList(br, resourceBundle))
         .addMethod(privateConstructor())

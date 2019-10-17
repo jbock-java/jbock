@@ -66,7 +66,7 @@ final class Helper {
     this.readRegularOptionMethod = readRegularOptionMethod;
   }
 
-  public static Helper create(Context context, Option option) {
+  static Helper create(Context context, Option option) {
 
     // read-only lookups
     FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
@@ -113,7 +113,7 @@ final class Helper {
         readRegularOptionMethod);
   }
 
-  public TypeSpec define() {
+  TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.helperType())
         .addModifiers(PRIVATE, STATIC);
     spec.addMethod(readMethod)

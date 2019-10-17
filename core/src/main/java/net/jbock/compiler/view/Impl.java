@@ -25,12 +25,12 @@ final class Impl {
     this.context = context;
   }
 
-  public static Impl create(
+  static Impl create(
       Context context) {
     return new Impl(context);
   }
 
-  public TypeSpec define() {
+  TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.implType())
         .superclass(TypeName.get(context.sourceElement().asType()));
     for (Param param : context.parameters()) {

@@ -98,7 +98,7 @@ final class Option {
     this.positionalParsersMethod = positionalParsersMethod;
   }
 
-  public static Option create(Context context) {
+  static Option create(Context context) {
     FieldSpec longNameField = FieldSpec.builder(STRING, "longName").addModifiers(FINAL).build();
     FieldSpec positionalIndexField = FieldSpec.builder(OptionalInt.class, "positionalIndex").addModifiers(FINAL).build();
     FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
@@ -138,7 +138,7 @@ final class Option {
         positionalParsersMethod);
   }
 
-  public TypeSpec define() {
+  TypeSpec define() {
     List<Param> parameters = context.parameters();
     TypeSpec.Builder spec = TypeSpec.enumBuilder(context.optionType());
     for (Param param : parameters) {

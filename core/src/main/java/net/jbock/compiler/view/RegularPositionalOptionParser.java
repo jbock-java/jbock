@@ -19,7 +19,7 @@ import static net.jbock.compiler.Util.optionalOf;
  */
 final class RegularPositionalOptionParser {
 
-  public static TypeSpec define(Context context) {
+  static TypeSpec define(Context context) {
     FieldSpec value = FieldSpec.builder(STRING, "value").build();
     return TypeSpec.classBuilder(context.regularPositionalOptionParserType())
         .superclass(context.positionalOptionParserType())
@@ -33,7 +33,7 @@ final class RegularPositionalOptionParser {
         .addField(value)
         .addModifiers(PRIVATE, STATIC).build();
   }
-  
+
   private static MethodSpec readMethod(FieldSpec value) {
     ParameterSpec valueParam = ParameterSpec.builder(STRING, "value").build();
     return MethodSpec.methodBuilder("read")
