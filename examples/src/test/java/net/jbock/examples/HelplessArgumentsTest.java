@@ -12,17 +12,17 @@ class HelplessArgumentsTest {
 
   private String[] fullUsage = {
       "NAME",
-      "       HelplessArguments",
+      "    HelplessArguments",
       "",
       "SYNOPSIS",
-      "       HelplessArguments [<options>] <REQUIRED>",
+      "    HelplessArguments [<options>] <REQUIRED>",
       "",
       "DESCRIPTION",
       "",
       "REQUIRED",
       "",
       "OPTIONS",
-      "       --help",
+      "    --help",
       ""};
 
   @Test

@@ -36,7 +36,7 @@ import static net.jbock.compiler.Constants.STRING_STRING_MAP;
  */
 public final class Parser {
 
-  private static final int DEFAULT_INDENT = 7;
+  private static final int DEFAULT_INDENT = 4;
   private static final int DEFAULT_EXITCODE_ON_ERROR = 1;
 
   private static final String METHOD_NAME_PARSE_OR_EXIT = "parseOrExit";
@@ -268,15 +268,15 @@ public final class Parser {
 
     spec.addStatement("$T $N = parse($N)", result.type, result, args);
 
-    spec.beginControlFlow("if ($N instanceof $T)", result, context.successParseResultType())
-        .addStatement("return (($T) $N).result()", context.successParseResultType(), result)
+    spec.beginControlFlow("if ($N instanceof $T)", result, context.parsingSuccessType())
+        .addStatement("return (($T) $N).result()", context.parsingSuccessType(), result)
         .endControlFlow();
 
-    spec.beginControlFlow("if ($N instanceof $T)", result, context.helpPrintedParseResultType())
+    spec.beginControlFlow("if ($N instanceof $T)", result, context.helpPrintedType())
         .addStatement("$T.exit(0)", System.class)
         .endControlFlow();
 
-    spec.beginControlFlow("if ($N instanceof $T)", result, context.errorParseResultType())
+    spec.beginControlFlow("if ($N instanceof $T)", result, context.parsingFailedType())
         .addStatement("$T.exit($N)", System.class, errorExitCode)
         .endControlFlow();
 

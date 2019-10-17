@@ -287,11 +287,11 @@ public final class Tokenizer {
         result.type, result, Arrays.class, args);
 
     spec.beginControlFlow("if ($N.isPresent())", result)
-        .addStatement("return new $T($N.get())", context.successParseResultType(), result)
+        .addStatement("return new $T($N.get())", context.parsingSuccessType(), result)
         .endControlFlow();
 
     spec.addStatement("printUsage()")
-        .addStatement("return new $T()", context.helpPrintedParseResultType());
+        .addStatement("return new $T()", context.helpPrintedType());
     return spec.build();
   }
 
@@ -317,7 +317,7 @@ public final class Tokenizer {
       spec.addStatement("printUsage()");
       spec.addStatement("$N.println($N.getMessage())", err, e);
     }
-    spec.addStatement("return new $T($N.getMessage())", context.errorParseResultType(), e);
+    spec.addStatement("return new $T($N.getMessage())", context.parsingFailedType(), e);
     return spec.build();
   }
 
@@ -398,7 +398,7 @@ public final class Tokenizer {
         .endControlFlow();
 
     // handle unknown token
-    if (context.strict()) {
+    if (context.isStrict()) {
       spec.beginControlFlow("if ($N.charAt(0) == '-')", token)
           .addStatement(throwInvalidOptionStatement(token))
           .endControlFlow();

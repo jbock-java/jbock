@@ -39,24 +39,6 @@ public final class Context {
   // mission statement from attribute, can be overridden with bundle key jbock.mission
   private final String missionStatement;
 
-  private final ClassName optionParserType;
-  private final ClassName flagOptionParserType;
-  private final ClassName repeatableOptionParserType;
-  private final ClassName regularOptionParserType;
-  private final ClassName positionalOptionParserType;
-  private final ClassName regularPositionalOptionParserType;
-  private final ClassName repeatablePositionalOptionParserType;
-  private final ClassName optionType;
-  private final ClassName helperType;
-  private final ClassName indentPrinterType;
-  private final ClassName messagesType;
-  private final ClassName implType;
-  private final ClassName tokenizerType;
-  private final ClassName parseResultType;
-  private final ClassName successParseResultType;
-  private final ClassName errorParseResultType;
-  private final ClassName helpPrintedParseResultType;
-
   private Context(
       TypeElement sourceElement,
       ClassName generatedClass,
@@ -67,24 +49,7 @@ public final class Context {
       boolean helpParameterEnabled,
       List<String> description,
       String programName,
-      String missionStatement,
-      ClassName optionParserType,
-      ClassName positionalOptionParserType,
-      ClassName flagOptionParserType,
-      ClassName repeatableOptionParserType,
-      ClassName regularOptionParserType,
-      ClassName regularPositionalOptionParserType,
-      ClassName repeatablePositionalOptionParserType,
-      ClassName optionType,
-      ClassName helperType,
-      ClassName indentPrinterType,
-      ClassName messagesType,
-      ClassName implType,
-      ClassName tokenizerType,
-      ClassName parseResultType,
-      ClassName successParseResultType,
-      ClassName errorParseResultType,
-      ClassName helpPrintedParseResultType) {
+      String missionStatement) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -95,23 +60,6 @@ public final class Context {
     this.description = description;
     this.programName = programName;
     this.missionStatement = missionStatement;
-    this.optionParserType = optionParserType;
-    this.positionalOptionParserType = positionalOptionParserType;
-    this.flagOptionParserType = flagOptionParserType;
-    this.repeatableOptionParserType = repeatableOptionParserType;
-    this.regularOptionParserType = regularOptionParserType;
-    this.regularPositionalOptionParserType = regularPositionalOptionParserType;
-    this.repeatablePositionalOptionParserType = repeatablePositionalOptionParserType;
-    this.optionType = optionType;
-    this.helperType = helperType;
-    this.indentPrinterType = indentPrinterType;
-    this.messagesType = messagesType;
-    this.implType = implType;
-    this.tokenizerType = tokenizerType;
-    this.parseResultType = parseResultType;
-    this.successParseResultType = successParseResultType;
-    this.errorParseResultType = errorParseResultType;
-    this.helpPrintedParseResultType = helpPrintedParseResultType;
   }
 
   static Context create(
@@ -124,23 +72,6 @@ public final class Context {
     long positionalParameters = parameters.stream().filter(Param::isPositional).count();
     boolean addHelp = sourceElement.getAnnotation(CommandLineArguments.class).allowHelpOption();
     String missionStatement = sourceElement.getAnnotation(CommandLineArguments.class).missionStatement();
-    ClassName optionType = generatedClass.nestedClass("Option");
-    ClassName helperType = generatedClass.nestedClass("Helper");
-    ClassName optionParserType = generatedClass.nestedClass("OptionParser");
-    ClassName flagOptionParserType = generatedClass.nestedClass("FlagOptionParser");
-    ClassName repeatableOptionParserType = generatedClass.nestedClass("RepeatableOptionParser");
-    ClassName regularOptionParserType = generatedClass.nestedClass("RegularOptionParser");
-    ClassName positionalOptionParserType = generatedClass.nestedClass("PositionalOptionParser");
-    ClassName regularPositionalOptionParserType = generatedClass.nestedClass("RegularPositionalOptionParser");
-    ClassName repeatablePositionalOptionParserType = generatedClass.nestedClass("RepeatablePositionalOptionParser");
-    ClassName indentPrinterType = generatedClass.nestedClass("IndentPrinter");
-    ClassName messagesType = generatedClass.nestedClass("Messages");
-    ClassName implType = generatedClass.nestedClass(sourceElement.getSimpleName() + "Impl");
-    ClassName tokenizerType = generatedClass.nestedClass("Tokenizer");
-    ClassName parseResultType = generatedClass.nestedClass("ParseResult");
-    ClassName successParseResultType = generatedClass.nestedClass("ParsingSuccess");
-    ClassName errorParseResultType = generatedClass.nestedClass("ParsingFailed");
-    ClassName helpPrintedParseResultType = generatedClass.nestedClass("HelpPrinted");
 
     return new Context(
         sourceElement,
@@ -152,24 +83,7 @@ public final class Context {
         addHelp,
         description,
         programName(sourceElement),
-        missionStatement,
-        optionParserType,
-        positionalOptionParserType,
-        flagOptionParserType,
-        repeatableOptionParserType,
-        regularOptionParserType,
-        regularPositionalOptionParserType,
-        repeatablePositionalOptionParserType,
-        optionType,
-        helperType,
-        indentPrinterType,
-        messagesType,
-        implType,
-        tokenizerType,
-        parseResultType,
-        successParseResultType,
-        errorParseResultType,
-        helpPrintedParseResultType);
+        missionStatement);
   }
 
   private static String programName(TypeElement sourceType) {
@@ -192,71 +106,71 @@ public final class Context {
   }
 
   public ClassName optionParserType() {
-    return optionParserType;
+    return generatedClass.nestedClass("OptionParser");
   }
 
   public ClassName positionalOptionParserType() {
-    return positionalOptionParserType;
+    return generatedClass.nestedClass("PositionalOptionParser");
   }
 
   public ClassName repeatableOptionParserType() {
-    return repeatableOptionParserType;
+    return generatedClass.nestedClass("RepeatableOptionParser");
   }
 
   public ClassName flagOptionParserType() {
-    return flagOptionParserType;
+    return generatedClass.nestedClass("FlagOptionParser");
   }
 
   public ClassName regularOptionParserType() {
-    return regularOptionParserType;
+    return generatedClass.nestedClass("RegularOptionParser");
   }
 
   public ClassName regularPositionalOptionParserType() {
-    return regularPositionalOptionParserType;
+    return generatedClass.nestedClass("RegularPositionalOptionParser");
   }
 
   public ClassName repeatablePositionalOptionParserType() {
-    return repeatablePositionalOptionParserType;
+    return generatedClass.nestedClass("RepeatablePositionalOptionParser");
   }
 
   public ClassName optionType() {
-    return optionType;
+    return generatedClass.nestedClass("Option");
   }
 
   public ClassName helperType() {
-    return helperType;
+    return generatedClass.nestedClass("Helper");
   }
 
   public ClassName indentPrinterType() {
-    return indentPrinterType;
+    return generatedClass.nestedClass("IndentPrinter");
   }
 
   public ClassName messagesType() {
-    return messagesType;
+    return generatedClass.nestedClass("Messages");
   }
 
   public ClassName implType() {
-    return implType;
+    return generatedClass.nestedClass(sourceElement.getSimpleName() + "Impl");
   }
 
   public ClassName tokenizerType() {
-    return tokenizerType;
+    return generatedClass.nestedClass("Tokenizer");
   }
 
   public ClassName parseResultType() {
-    return parseResultType;
+    return generatedClass.nestedClass("ParseResult");
   }
 
-  public ClassName successParseResultType() {
-    return successParseResultType;
+  public ClassName parsingSuccessType() {
+    return generatedClass.nestedClass("ParsingSuccess");
   }
 
-  public ClassName errorParseResultType() {
-    return errorParseResultType;
+  public ClassName parsingFailedType() {
+    return generatedClass.nestedClass("ParsingFailed");
   }
 
-  public ClassName helpPrintedParseResultType() {
-    return helpPrintedParseResultType;
+  public ClassName helpPrintedType() {
+    return generatedClass.nestedClass("HelpPrinted");
   }
 
   public TypeElement sourceElement() {
@@ -271,7 +185,7 @@ public final class Context {
     return parameters;
   }
 
-  public boolean strict() {
+  public boolean isStrict() {
     return strict;
   }
 

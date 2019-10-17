@@ -59,7 +59,7 @@ public final class ParseResult {
   }
 
   private TypeSpec definePrintHelpResult() {
-    TypeSpec.Builder spec = classBuilder(context.helpPrintedParseResultType())
+    TypeSpec.Builder spec = classBuilder(context.helpPrintedType())
         .superclass(context.parseResultType())
         .addModifiers(STATIC, FINAL);
     if (context.sourceElement().getModifiers().contains(PUBLIC)) {
@@ -70,7 +70,7 @@ public final class ParseResult {
 
   private TypeSpec defineErrorResult() {
     ParameterSpec paramMessage = builder(STRING, message.name).build();
-    TypeSpec.Builder spec = classBuilder(context.errorParseResultType())
+    TypeSpec.Builder spec = classBuilder(context.parsingFailedType())
         .superclass(context.parseResultType())
         .addField(message)
         .addMethod(constructorBuilder()
@@ -86,7 +86,7 @@ public final class ParseResult {
   }
 
   private TypeSpec defineSuccessResult() {
-    TypeSpec.Builder spec = classBuilder(context.successParseResultType())
+    TypeSpec.Builder spec = classBuilder(context.parsingSuccessType())
         .superclass(context.parseResultType())
         .addField(result)
         .addMethod(successConstructor())
