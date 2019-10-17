@@ -109,16 +109,7 @@ public final class Parser {
     spec.addMethod(addPublicIfNecessary(createMethod()))
         .addMethod(addPublicIfNecessary(parseMethod()))
         .addMethod(addPublicIfNecessary(parseOrExitMethod()));
-    if (context.isHelpParameterEnabled()) {
-      spec.addMethod(addPublicIfNecessary(withOutputStreamMethod()));
-    }
-    return spec.addMethod(addPublicIfNecessary(withErrorStreamMethod()))
-        .addMethod(addPublicIfNecessary(withIndentMethod()))
-        .addMethod(addPublicIfNecessary(withErrorExitCodeMethod()))
-        .addMethod(addPublicIfNecessary(withMessagesMethod()))
-        .addMethod(addPublicIfNecessary(withResourceBundleMethod()))
-        .addMethod(addPublicIfNecessary(withMessagesMethodInputStream()))
-        .addType(tokenizer.define())
+    spec.addType(tokenizer.define())
         .addType(impl.define())
         .addType(option.define())
         .addType(helper.define())
@@ -137,10 +128,21 @@ public final class Parser {
         .addField(indent)
         .addField(errorExitCode)
         .addField(messages)
-        .addMethod(readArgumentMethod)
-        .addMethod(readNextMethod)
         .addMethod(MethodSpec.constructorBuilder().addModifiers(PRIVATE).build())
-        .addJavadoc(javadoc())
+        .addMethod(addPublicIfNecessary(withErrorStreamMethod()))
+        .addMethod(addPublicIfNecessary(withIndentMethod()))
+        .addMethod(addPublicIfNecessary(withErrorExitCodeMethod()))
+        .addMethod(addPublicIfNecessary(withMessagesMethod()))
+        .addMethod(addPublicIfNecessary(withResourceBundleMethod()))
+        .addMethod(addPublicIfNecessary(withMessagesMethodInputStream()))
+        .addMethod(readArgumentMethod)
+        .addMethod(readNextMethod);
+
+    if (context.isHelpParameterEnabled()) {
+      spec.addMethod(addPublicIfNecessary(withOutputStreamMethod()));
+    }
+
+    return spec.addJavadoc(javadoc())
         .build();
   }
 
