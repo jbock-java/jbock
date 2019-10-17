@@ -1,8 +1,8 @@
-package net.jbock.coerce.mapperabsent;
+package net.jbock.coerce.collectorabsent.mapperabsent;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.CanonicalOptional;
+import net.jbock.coerce.collectorabsent.CanonicalOptional;
 import net.jbock.coerce.Coercion;
 import net.jbock.compiler.TypeTool;
 
@@ -18,7 +18,7 @@ public class CollectorAbsentMapperAbsent {
 
   private final BasicInfo basicInfo;
 
-  CollectorAbsentMapperAbsent(BasicInfo basicInfo) {
+  public CollectorAbsentMapperAbsent(BasicInfo basicInfo) {
     this.basicInfo = basicInfo;
   }
 

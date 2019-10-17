@@ -1,5 +1,6 @@
-package net.jbock.coerce;
+package net.jbock.coerce.collectorabsent;
 
+import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
@@ -22,7 +23,6 @@ import java.util.stream.Stream;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.reference.ReferenceTool.Expectation.MAPPER;
 
-// for when there's no collector
 public final class MapperClassAnalyzer {
 
   private final BasicInfo basicInfo;

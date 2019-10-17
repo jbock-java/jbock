@@ -1,8 +1,8 @@
-package net.jbock.coerce.mapperpresent;
+package net.jbock.coerce.collectorabsent.mapperpresent;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.CanonicalOptional;
+import net.jbock.coerce.collectorabsent.CanonicalOptional;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
@@ -24,7 +24,7 @@ public class CollectorAbsentMapperPresent {
   private final TypeElement mapperClass;
   private final BasicInfo basicInfo;
 
-  CollectorAbsentMapperPresent(BasicInfo basicInfo, TypeElement mapperClass) {
+  public CollectorAbsentMapperPresent(BasicInfo basicInfo, TypeElement mapperClass) {
     this.mapperClass = mapperClass;
     this.basicInfo = basicInfo;
   }

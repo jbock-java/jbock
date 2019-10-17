@@ -1,4 +1,4 @@
-package net.jbock.coerce;
+package net.jbock.coerce.collectorabsent;
 
 public class MapperFailure {
 

@@ -6,10 +6,10 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
+import net.jbock.coerce.collectorabsent.mapperabsent.CollectorAbsentMapperAbsent;
+import net.jbock.coerce.collectorabsent.mapperpresent.CollectorAbsentMapperPresent;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
-import net.jbock.coerce.mapperabsent.CollectorAbsentMapperAbsent;
-import net.jbock.coerce.mapperpresent.CollectorAbsentMapperPresent;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 
@@ -40,7 +40,8 @@ public class CoercionProvider {
         name,
         FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         CodeBlock.of("$N", name),
-        FLAG, paramName);
+        FLAG,
+        paramName);
   }
 
   public static Coercion findCoercion(
@@ -57,30 +58,21 @@ public class CoercionProvider {
 
   private Coercion run() {
     if (basicInfo.collectorClass().isPresent()) {
-      return handleRepeatable();
+      if (basicInfo.mapperClass().isPresent()) {
+        return handleCollectorPresentMapperPresent(basicInfo.mapperClass().get());
+      } else {
+        return handleCollectorPresentMapperAbsent();
+      }
     } else {
-      return handleNotRepeatable();
+      if (basicInfo.mapperClass().isPresent()) {
+        return new CollectorAbsentMapperPresent(basicInfo, basicInfo.mapperClass().get()).findCoercion();
+      } else {
+        return new CollectorAbsentMapperAbsent(basicInfo).findCoercion();
+      }
     }
   }
 
-  private Coercion handleNotRepeatable() {
-    if (basicInfo.mapperClass().isPresent()) {
-      return new CollectorAbsentMapperPresent(basicInfo, basicInfo.mapperClass().get()).findCoercion();
-    } else {
-      return new CollectorAbsentMapperAbsent(basicInfo).findCoercion();
-    }
-  }
-
-  private Coercion handleRepeatable() {
-    if (basicInfo.mapperClass().isPresent()) {
-      return handleRepeatableExplicitMapper(basicInfo.mapperClass().get());
-    } else {
-      return handleRepeatableAutoMapper();
-    }
-  }
-
-
-  private Coercion handleRepeatableAutoMapper() {
+  private Coercion handleCollectorPresentMapperAbsent() {
     AbstractCollector collectorInfo = collectorInfo();
     CodeBlock mapExpr = basicInfo.findMapExpr(collectorInfo.inputType())
         .orElseThrow(() -> basicInfo.asValidationException("Unknown parameter type. Define a custom mapper."));
@@ -90,7 +82,7 @@ public class CoercionProvider {
     return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType, REPEATABLE);
   }
 
-  private Coercion handleRepeatableExplicitMapper(TypeElement mapperClass) {
+  private Coercion handleCollectorPresentMapperPresent(TypeElement mapperClass) {
     AbstractCollector collectorInfo = collectorInfo();
     ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);

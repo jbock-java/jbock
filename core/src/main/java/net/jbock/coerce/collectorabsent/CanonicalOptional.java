@@ -1,4 +1,4 @@
-package net.jbock.coerce;
+package net.jbock.coerce.collectorabsent;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;

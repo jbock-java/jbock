@@ -1,11 +1,11 @@
-package net.jbock.coerce.mapperpresent;
+package net.jbock.coerce.collectorabsent.mapperpresent;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.MapperClassAnalyzer;
-import net.jbock.coerce.MapperFailure;
+import net.jbock.coerce.collectorabsent.MapperClassAnalyzer;
+import net.jbock.coerce.collectorabsent.MapperFailure;
 import net.jbock.coerce.ParameterType;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
