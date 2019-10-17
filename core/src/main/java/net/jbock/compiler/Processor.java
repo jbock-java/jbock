@@ -98,7 +98,6 @@ public final class Processor extends AbstractProcessor {
             "Define at least one abstract method");
       }
 
-      Set<ParameterType> nonpositionalParamTypes = nonpositionalParamTypes(parameters);
       Set<ParameterType> positionalParamTypes = positionalParamTypes(parameters);
       checkOnlyOnePositionalList(parameters);
       checkRankConsistentWithPosition(parameters);
@@ -108,7 +107,6 @@ public final class Processor extends AbstractProcessor {
           generatedClass,
           parameters,
           getOverview(sourceElement),
-          nonpositionalParamTypes,
           positionalParamTypes);
       TypeSpec typeSpec = Parser.create(context).define();
       write(sourceElement, context.generatedClass(), typeSpec);

@@ -32,9 +32,6 @@ public final class Context {
   // true if --help is a special token
   private final boolean helpParameterEnabled;
 
-  // a set of only the non-positional param types in the sourceType
-  private final Set<ParameterType> nonpositionalParamTypes;
-
   // a set of only the positional param types in the sourceType
   private final Set<ParameterType> positionalParamTypes;
 
@@ -73,7 +70,6 @@ public final class Context {
       boolean allowEscape,
       boolean strict,
       boolean helpParameterEnabled,
-      Set<ParameterType> nonpositionalParamTypes,
       Set<ParameterType> positionalParamTypes,
       List<String> description,
       String programName,
@@ -102,7 +98,6 @@ public final class Context {
     this.allowEscape = allowEscape;
     this.strict = strict;
     this.helpParameterEnabled = helpParameterEnabled;
-    this.nonpositionalParamTypes = nonpositionalParamTypes;
     this.positionalParamTypes = positionalParamTypes;
     this.description = description;
     this.programName = programName;
@@ -131,7 +126,6 @@ public final class Context {
       ClassName generatedClass,
       List<Param> parameters,
       List<String> description,
-      Set<ParameterType> nonpositionalParamTypes,
       Set<ParameterType> positionalParamTypes) {
     boolean allowEscape = sourceElement.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
     long positionalParameters = parameters.stream().filter(Param::isPositional).count();
@@ -164,7 +158,6 @@ public final class Context {
         allowEscape,
         strict,
         addHelp,
-        nonpositionalParamTypes,
         positionalParamTypes,
         description,
         programName(sourceElement),
