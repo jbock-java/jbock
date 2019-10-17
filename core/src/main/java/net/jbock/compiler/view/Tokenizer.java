@@ -72,7 +72,7 @@ final class Tokenizer {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.tokenizerType())
         .addModifiers(STATIC, PRIVATE)
         .addMethod(parseMethod())
-        .addMethod(parseMethodOverload())
+        .addMethod(parseMethodOverloadIterator())
         .addMethod(privateConstructor())
         .addMethod(printUsageMethod())
         .addMethod(synopsisMethod())
@@ -321,7 +321,7 @@ final class Tokenizer {
     return spec.build();
   }
 
-  private MethodSpec parseMethodOverload() {
+  private MethodSpec parseMethodOverloadIterator() {
 
     ParameterSpec helperParam = ParameterSpec.builder(context.helperType(), "helper").build();
     ParameterSpec tokens = ParameterSpec.builder(STRING_ITERATOR, "tokens").build();
@@ -342,7 +342,7 @@ final class Tokenizer {
         .addCode(codeInsideParsingLoop(helperParam, positionParam, tokens, isFirst))
         .endControlFlow();
 
-    spec.addStatement(returnFromParseExpression(helperParam));
+    spec.addStatement(helperBuildInvocation(helperParam));
     return spec.build();
   }
 
@@ -381,7 +381,7 @@ final class Tokenizer {
           .addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField(), positionParam);
 
       spec.endControlFlow();
-      spec.addStatement(returnFromParseExpression(helperParam))
+      spec.addStatement(helperBuildInvocation(helperParam))
           .endControlFlow();
     }
 
@@ -417,8 +417,9 @@ final class Tokenizer {
         .build();
   }
 
-  private CodeBlock returnFromParseExpression(ParameterSpec helperParam) {
-    return CodeBlock.builder().add("return $N.build()", helperParam).build();
+  private CodeBlock helperBuildInvocation(ParameterSpec helperParam) {
+    return CodeBlock.builder().add("return $T.of($N.build())",
+        Optional.class, helperParam).build();
   }
 
   private MethodSpec privateConstructor() {

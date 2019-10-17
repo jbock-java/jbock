@@ -15,7 +15,6 @@ import net.jbock.compiler.Param;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
@@ -24,7 +23,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.Util.optionalOfSubtype;
 
 /**
  * Defines the private *_Parser.Helper inner class,
@@ -215,9 +213,9 @@ final class Helper {
     }
     MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
 
-    spec.addStatement("return $T.of(new $T($L))", Optional.class, context.implType(), args.build());
+    spec.addStatement("return new $T($L)", context.implType(), args.build());
 
-    return spec.returns(optionalOfSubtype(context.implType())).build();
+    return spec.returns(context.implType()).build();
   }
 
   private CodeBlock extractExpression(Param param) {
