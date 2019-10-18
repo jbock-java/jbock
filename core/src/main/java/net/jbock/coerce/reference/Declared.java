@@ -11,7 +11,7 @@ import java.util.List;
  *
  * @param <E> the erasure type
  */
-class Declared<E> {
+public class Declared<E> {
 
   private final Class<E> erasure;
 
@@ -22,7 +22,11 @@ class Declared<E> {
     this.typeArguments = typeArguments;
   }
 
-  DeclaredType asType(TypeTool tool) {
+  public DeclaredType asType(TypeTool tool) {
     return tool.getDeclaredType(erasure, typeArguments);
+  }
+
+  public List<? extends TypeMirror> typeArguments() {
+    return typeArguments;
   }
 }

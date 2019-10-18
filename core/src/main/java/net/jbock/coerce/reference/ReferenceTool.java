@@ -34,21 +34,19 @@ public class ReferenceTool<E> {
     this.resolver = new Resolver(basicInfo.tool());
   }
 
-  public AbstractReferencedType getReferencedType() {
+  public AbstractReferencedType<E> getReferencedType() {
     Optional<Declared<Supplier>> supplierType = resolver.typecheck(referencedClass, Supplier.class);
     if (!supplierType.isPresent()) {
       Declared<E> expectedType = resolver.typecheck(referencedClass, expectedClass.expectedClass())
           .orElseThrow(this::unexpectedClassException);
-      return new DirectType(checkRawType(expectedType.asType(tool())));
+      return new DirectType<>(checkRawType(expectedType));
     }
-    List<? extends TypeMirror> typeArgs = checkRawType(supplierType.get().asType(tool())).getTypeArguments();
-    if (typeArgs.isEmpty()) {
-      throw rawTypeException();
-    }
+    List<? extends TypeMirror> typeArgs = checkRawType(supplierType.get()).typeArguments();
     TypeMirror suppliedType = typeArgs.get(0);
     if (tool().isSameErasure(suppliedType, expectedClass.expectedClass())) {
       // "direct supplier"
-      return new SupplierType(checkRawType(asDeclared(suppliedType)), Collections.emptyMap());
+      return new SupplierType<>(checkRawType(new Declared<>(expectedClass.expectedClass(),
+          asDeclared(suppliedType).getTypeArguments())), Collections.emptyMap());
     }
     if (suppliedType.getKind() != TypeKind.DECLARED) {
       throw inferenceFailedException();
@@ -56,17 +54,17 @@ public class ReferenceTool<E> {
     return getIndirectSupplierType(asDeclared(suppliedType));
   }
 
-  private SupplierType getIndirectSupplierType(DeclaredType suppliedType) {
+  private SupplierType<E> getIndirectSupplierType(DeclaredType suppliedType) {
     TypeElement suppliedElement = tool().asTypeElement(suppliedType);
     if (suppliedType.getTypeArguments().size() != suppliedElement.getTypeParameters().size()) {
       throw inferenceFailedException();
     }
-    Declared<E> expectedType = resolver.typecheck(suppliedElement, expectedClass.expectedClass())
-        .orElseThrow(this::unexpectedClassException);
+    Optional<Declared<E>> tmp = resolver.typecheck(suppliedElement, expectedClass.expectedClass());
+    Declared<E> expectedType = tmp.orElseThrow(this::unexpectedClassException);
     Map<String, TypeMirror> typevarMapping = createTypevarMapping(
         suppliedType.getTypeArguments(),
         suppliedElement.getTypeParameters());
-    return new SupplierType(expectedType.asType(tool()), typevarMapping);
+    return new SupplierType<>(expectedType, typevarMapping);
   }
 
   private ValidationException inferenceFailedException() {
@@ -83,8 +81,8 @@ public class ReferenceTool<E> {
         " type must be parameterized");
   }
 
-  private DeclaredType checkRawType(DeclaredType mapper) {
-    if (tool().isRawType(mapper)) {
+  private <E> Declared<E> checkRawType(Declared<E> mapper) {
+    if (tool().isRawType(mapper.asType(tool()))) {
       throw rawTypeException();
     }
     return mapper;

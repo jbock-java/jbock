@@ -1,16 +1,15 @@
 package net.jbock.coerce.reference;
 
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-class SupplierType extends AbstractReferencedType {
+class SupplierType<E> extends AbstractReferencedType<E> {
 
   private final Map<String, TypeMirror> typevarMapping;
 
-  SupplierType(DeclaredType referencedType, Map<String, TypeMirror> typevarMapping) {
+  SupplierType(Declared<E> referencedType, Map<String, TypeMirror> typevarMapping) {
     super(referencedType);
     this.typevarMapping = typevarMapping;
   }

@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -34,10 +35,10 @@ final class MapperClassValidator {
 
   ReferenceMapperType checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
-    AbstractReferencedType functionType = new ReferenceTool(MAPPER, basicInfo, mapperClass)
+    AbstractReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass)
         .getReferencedType();
-    TypeMirror t = functionType.expectedType().getTypeArguments().get(0);
-    TypeMirror r = functionType.expectedType().getTypeArguments().get(1);
+    TypeMirror t = functionType.expectedType().typeArguments().get(0);
+    TypeMirror r = functionType.expectedType().typeArguments().get(1);
     Optional<Map<String, TypeMirror>> t_result = tool().unify(tool().asType(String.class), t)
         .map(functionType::mapTypevars);
     if (!t_result.isPresent()) {
