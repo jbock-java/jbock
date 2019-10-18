@@ -134,7 +134,7 @@ final class Helper {
         .addParameter(token)
         .returns(context.optionType());
 
-    spec.beginControlFlow("if ($N.length() <= 1 || $N.charAt(0) != '-')", token, token)
+    spec.beginControlFlow("if ($N.length() < 2 || $N.charAt(0) != '-')", token, token)
         .addStatement("return null")
         .endControlFlow();
 
@@ -311,15 +311,15 @@ final class Helper {
         .build();
   }
 
-  public FieldSpec positionalParsersField() {
+  FieldSpec positionalParsersField() {
     return positionalParsersField;
   }
 
-  public MethodSpec readMethod() {
+  MethodSpec readMethod() {
     return readMethod;
   }
 
-  public MethodSpec readRegularOptionMethod() {
+  MethodSpec readRegularOptionMethod() {
     return readRegularOptionMethod;
   }
 }
