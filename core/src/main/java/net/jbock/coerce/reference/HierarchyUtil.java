@@ -1,6 +1,6 @@
-package net.jbock.compiler;
+package net.jbock.coerce.reference;
 
-import net.jbock.coerce.ImplementsRelation;
+import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
@@ -8,15 +8,15 @@ import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
 
-public class HierarchyUtil {
+class HierarchyUtil {
 
   private final TypeTool tool;
 
-  public HierarchyUtil(TypeTool tool) {
+  HierarchyUtil(TypeTool tool) {
     this.tool = tool;
   }
 
-  public List<ImplementsRelation> getHierarchy(TypeElement typeElement) {
+  List<ImplementsRelation> getHierarchy(TypeElement typeElement) {
     List<ImplementsRelation> acc = new ArrayList<>();
     accumulate(typeElement.asType(), acc);
     return acc;

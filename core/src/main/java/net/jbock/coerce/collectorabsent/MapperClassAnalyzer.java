@@ -21,7 +21,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
-import static net.jbock.coerce.reference.ReferenceTool.Expectation.MAPPER;
+import static net.jbock.coerce.reference.ExpectedType.MAPPER;
 
 public final class MapperClassAnalyzer {
 

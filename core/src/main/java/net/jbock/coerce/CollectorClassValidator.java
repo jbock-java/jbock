@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Map;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
-import static net.jbock.coerce.reference.ReferenceTool.Expectation.COLLECTOR;
+import static net.jbock.coerce.reference.ExpectedType.COLLECTOR;
 
 class CollectorClassValidator {
 

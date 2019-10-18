@@ -1,6 +1,5 @@
-package net.jbock.coerce;
+package net.jbock.coerce.reference;
 
-import net.jbock.compiler.HierarchyUtil;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
@@ -16,12 +15,12 @@ import java.util.Optional;
 
 import static net.jbock.compiler.TypeTool.asDeclared;
 
-public class Resolver {
+class Resolver {
 
   private final TypeTool tool;
 
   // visible for testing
-  public Resolver(TypeTool tool) {
+  Resolver(TypeTool tool) {
     this.tool = tool;
   }
 
@@ -35,7 +34,7 @@ public class Resolver {
    * @return A type that erases to the {@code something} type,
    * with typevars resolved where possible
    */
-  public Optional<DeclaredType> typecheck(TypeElement x, Class<?> something) {
+  Optional<DeclaredType> typecheck(TypeElement x, Class<?> something) {
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(x);
     Resolver resolver = new Resolver(tool);
     List<ImplementsRelation> path = resolver.findPath(hierarchy, something);

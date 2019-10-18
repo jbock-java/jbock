@@ -1,7 +1,6 @@
 package net.jbock.coerce.reference;
 
 import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.Resolver;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -16,9 +15,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
-import java.util.stream.Collector;
 
 import static net.jbock.compiler.TypeTool.asDeclared;
 
@@ -26,28 +23,16 @@ public class ReferenceTool {
 
   private final Resolver resolver;
 
-  public enum Expectation {
-
-    MAPPER(Function.class),
-    COLLECTOR(Collector.class);
-
-    private final Class<?> expectedClass;
-
-    Expectation(Class<?> expectedClass) {
-      this.expectedClass = expectedClass;
-    }
-  }
-
-  private final Expectation expectation;
+  private final ExpectedType expectation;
   private final BasicInfo basicInfo;
   private final TypeElement referencedClass;
   private final Class<?> expectedClass;
 
-  public ReferenceTool(Expectation expectation, BasicInfo basicInfo, TypeElement referencedClass) {
+  public ReferenceTool(ExpectedType expectation, BasicInfo basicInfo, TypeElement referencedClass) {
     this.expectation = expectation;
     this.basicInfo = basicInfo;
     this.referencedClass = referencedClass;
-    this.expectedClass = expectation.expectedClass;
+    this.expectedClass = expectation.expectedClass();
     this.resolver = new Resolver(basicInfo.tool());
   }
 
