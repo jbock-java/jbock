@@ -175,17 +175,17 @@ class CollectorTest {
         "  @Parameter(shortName = 'x',",
         "             mappedBy = HexMapper.class,",
         "             collectedBy = ToSetCollector.class)",
-        "  abstract Set<String> bigIntegers();",
+        "  abstract Set<int[]> foo();",
         "",
-        "  static class HexMapper implements Supplier<Function<String, String>> {",
-        "    public Function<String, String> get() {",
-        "      return s -> s;",
+        "  static class HexMapper implements Supplier<Function<String, int[]>> {",
+        "    public Function<String, int[]> get() {",
+        "      return null;",
         "    }",
         "  }",
         "",
         "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
         "    public Collector<E, ?, Set<E>> get() {",
-        "      return Collectors.toSet();",
+        "      return null;",
         "    }",
         "  }",
         "}");
@@ -195,25 +195,18 @@ class CollectorTest {
   }
 
   @Test
-  void validBigIntegers() {
+  void validSetAutoMapper() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
-        "             mappedBy = HexMapper.class,",
         "             collectedBy = MyCollector.class)",
         "  abstract Set<BigInteger> bigIntegers();",
         "",
-        "  static class HexMapper implements Supplier<Function<String, BigInteger>> {",
-        "    public Function<String, BigInteger> get() {",
-        "      return s -> new BigInteger(s, 16);",
-        "    }",
-        "  }",
-        "",
         "  static class MyCollector implements Supplier<Collector<BigInteger, ?, Set<BigInteger>>> {",
         "    public Collector<BigInteger, ?, Set<BigInteger>> get() {",
-        "      return Collectors.toSet();",
+        "      return null;",
         "    }",
         "  }",
         "}");
@@ -238,6 +231,27 @@ class CollectorTest {
         "      return s -> new BigInteger(s, 16);",
         "    }",
         "  }",
+        "",
+        "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
+        "    public Collector<E, ?, Set<E>> get() {",
+        "      return Collectors.toSet();",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void validGenericCollectorAutoMapper() {
+    JavaFileObject javaFile = fromSource(
+        "@CommandLineArguments",
+        "abstract class Arguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             collectedBy = ToSetCollector.class)",
+        "  abstract Set<BigInteger> bigSet();",
         "",
         "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
         "    public Collector<E, ?, Set<E>> get() {",
@@ -288,19 +302,19 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
-        "             mappedBy = XMap.class,",
-        "             collectedBy = YCol.class)",
+        "             mappedBy = IdentityMapper.class,",
+        "             collectedBy = ToListCollector.class)",
         "  abstract List<String> map();",
         "",
-        "  static class XMap implements Supplier<Function<String, String>> {",
-        "    public Function<String, String> get() {",
-        "      return Function.identity();",
+        "  static class IdentityMapper<M> implements Supplier<Function<M, M>> {",
+        "    public Function<M, M> get() {",
+        "      return null;",
         "    }",
         "  }",
         "",
-        "  static class YCol<E> implements Supplier<Collector<E, ?, List<E>>> {",
+        "  static class ToListCollector<E> implements Supplier<Collector<E, ?, List<E>>> {",
         "    public Collector<E, ?, List<E>> get() {",
-        "      return Collectors.toList();",
+        "      return null;",
         "    }",
         "  }",
         "}");

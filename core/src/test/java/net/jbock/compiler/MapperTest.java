@@ -12,18 +12,18 @@ import static net.jbock.compiler.ProcessorTest.fromSource;
 class MapperTest {
 
   @Test
-  void validStringArraySupplier() {
+  void validArrayMapperSupplier() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = ArrayMapper.class)",
-        "  abstract Optional<String[]> stringArray();",
+        "  abstract Optional<int[]> foo();",
         "",
-        "  static class ArrayMapper implements Supplier<Function<String, String[]>> {",
-        "    public Function<String, String[]> get() {",
-        "      return s -> new String[]{s};",
+        "  static class ArrayMapper implements Supplier<Function<String, int[]>> {",
+        "    public Function<String, int[]> get() {",
+        "      return null;",
         "    }",
         "  }",
         "}");
@@ -33,18 +33,18 @@ class MapperTest {
   }
 
   @Test
-  void validStringArray() {
+  void validArrayMapper() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x',",
         "             mappedBy = ArrayMapper.class)",
-        "  abstract Optional<String[]> stringArray();",
+        "  abstract Optional<int[]> foo();",
         "",
-        "  static class ArrayMapper implements Function<String, String[]> {",
-        "    public String[] apply(String s) {",
-        "      return new String[]{s};",
+        "  static class ArrayMapper implements Function<String, int[]> {",
+        "    public int[] apply(String s) {",
+        "      return null;",
         "    }",
         "  }",
         "}");
