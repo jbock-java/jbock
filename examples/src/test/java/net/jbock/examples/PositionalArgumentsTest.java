@@ -31,6 +31,16 @@ class PositionalArgumentsTest {
   }
 
   @Test
+  void testEmpty() {
+    f.assertThat("", "", "0").succeeds(
+        "source", "",
+        "dest", "",
+        "anotherInt", 0,
+        "optString", Optional.empty(),
+        "otherTokens", emptyList());
+  }
+
+  @Test
   void testNoEscape() {
     f.assertThat("a", "b", "1", "c", "d").succeeds(
         "source", "a",
