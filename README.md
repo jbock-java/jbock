@@ -19,8 +19,8 @@ The mere presence of this annotated class
 triggers the code generation at compile time.
 A derived class `MyArguments_Parser`
 will be generated.
-The actual generated code can be seen [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java).
-This can be used in a *main* method as follows:
+The generated code, which can be seen [here,](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
+can be used in a *main* method as follows:
 
 ````java
 String[] argv = { "-v2", "file.txt" }; // for example
