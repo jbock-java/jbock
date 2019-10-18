@@ -20,11 +20,11 @@ public class ExpectedType<E> {
     return name;
   }
 
-  public Class<E> expectedClass() {
+  Class<E> expectedClass() {
     return expectedClass;
   }
 
-  public String simpleName() {
+  String simpleName() {
     return expectedClass.getSimpleName();
   }
 }
