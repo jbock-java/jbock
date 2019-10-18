@@ -43,8 +43,8 @@ public final class MapperClassAnalyzer {
     commonChecks(basicInfo, mapperClass, "mapper");
     AbstractReferencedType functionType = new ReferenceTool(MAPPER, basicInfo, mapperClass)
         .getReferencedType();
-    TypeMirror t = functionType.expectedType.getTypeArguments().get(0);
-    TypeMirror r = functionType.expectedType.getTypeArguments().get(1);
+    TypeMirror t = functionType.expectedType().getTypeArguments().get(0);
+    TypeMirror r = functionType.expectedType().getTypeArguments().get(1);
     Optional<Map<String, TypeMirror>> t_result = tool().unify(tool().asType(String.class), t)
         .map(functionType::mapTypevars);
     if (!t_result.isPresent()) {
