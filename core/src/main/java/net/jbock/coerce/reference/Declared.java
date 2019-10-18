@@ -17,9 +17,12 @@ public class Declared<E> {
 
   private final List<? extends TypeMirror> typeArguments;
 
-  Declared(Class<E> erasure, List<? extends TypeMirror> typeArguments) {
+  private final boolean direct;
+
+  Declared(Class<E> erasure, List<? extends TypeMirror> typeArguments, boolean direct) {
     this.erasure = erasure;
     this.typeArguments = typeArguments;
+    this.direct = direct;
   }
 
   public DeclaredType asType(TypeTool tool) {
@@ -28,5 +31,9 @@ public class Declared<E> {
 
   public List<? extends TypeMirror> typeArguments() {
     return typeArguments;
+  }
+
+  boolean isDirect() {
+    return direct;
   }
 }

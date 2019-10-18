@@ -42,19 +42,23 @@ public class ReferenceTool<E> {
       return new DirectType<>(checkRawType(expectedType));
     }
     List<? extends TypeMirror> typeArgs = checkRawType(supplierType.get()).typeArguments();
-    TypeMirror suppliedType = typeArgs.get(0);
-    if (tool().isSameErasure(suppliedType, expectedClass.expectedClass())) {
-      // "direct supplier"
-      return new SupplierType<>(checkRawType(new Declared<>(expectedClass.expectedClass(),
-          asDeclared(suppliedType).getTypeArguments())), Collections.emptyMap());
+    TypeMirror supplied = typeArgs.get(0);
+    if (supplied.getKind() != TypeKind.DECLARED) {
+      throw unexpectedClassException();
     }
-    if (suppliedType.getKind() != TypeKind.DECLARED) {
+    DeclaredType suppliedType = asDeclared(supplied);
+    Optional<Declared<E>> directExpectation = resolver.typecheck(suppliedType, expectedClass.expectedClass());
+    if (directExpectation.isPresent() && directExpectation.get().isDirect()) {
+      // "direct supplier"
+      return new SupplierType<>(checkRawType(directExpectation.get()), Collections.emptyMap());
+    }
+    if (supplied.getKind() != TypeKind.DECLARED) {
       throw inferenceFailedException();
     }
-    return getIndirectSupplierType(asDeclared(suppliedType));
+    return getIndirectExpectation(suppliedType);
   }
 
-  private SupplierType<E> getIndirectSupplierType(DeclaredType suppliedType) {
+  private SupplierType<E> getIndirectExpectation(DeclaredType suppliedType) {
     TypeElement suppliedElement = tool().asTypeElement(suppliedType);
     if (suppliedType.getTypeArguments().size() != suppliedElement.getTypeParameters().size()) {
       throw inferenceFailedException();

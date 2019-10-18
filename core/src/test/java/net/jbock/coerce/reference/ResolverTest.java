@@ -8,6 +8,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -57,6 +58,26 @@ class ResolverTest {
       TypeElement mapper = elements.getTypeElement("test.Foo");
       Optional<Declared<String>> result = new Resolver(tool).typecheck(mapper, String.class);
       assertFalse(result.isPresent());
+    });
+  }
+
+  @Test
+  void testTypecheckFunction() {
+
+    EvaluatingProcessor.source(
+        "package test;",
+        "",
+        "import java.util.function.Supplier;",
+        "import java.util.function.Function;",
+        "",
+        "interface FunctionSupplier extends Supplier<Function<String, String>> { }"
+    ).run("Mapper", (elements, types) -> {
+      TypeTool tool = new TypeTool(elements, types);
+      TypeElement mapper = elements.getTypeElement("test.FunctionSupplier");
+      DeclaredType declaredType = TypeTool.asDeclared(mapper.getInterfaces().get(0));
+      DeclaredType functionType = TypeTool.asDeclared(declaredType.getTypeArguments().get(0));
+      Optional<Declared<Function>> result = new Resolver(tool).typecheck(functionType, Function.class);
+      assertTrue(result.isPresent());
     });
   }
 

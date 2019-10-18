@@ -24,6 +24,10 @@ class Resolver {
     this.tool = tool;
   }
 
+  <E> Optional<Declared<E>> typecheck(TypeElement x, Class<E> something) {
+    return typecheck(TypeTool.asDeclared(x.asType()), something);
+  }
+
   /**
    * Check if {@code x} is a {@code something}, and also resolve
    * the typevars in {@code something} where possible.
@@ -34,15 +38,18 @@ class Resolver {
    * @return A type that erases to the {@code something} type,
    * with typevars resolved where possible
    */
-  <E> Optional<Declared<E>> typecheck(TypeElement x, Class<E> something) {
-    List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(x);
+  <E> Optional<Declared<E>> typecheck(DeclaredType x, Class<E> something) {
+    if (tool.isSameErasure(x, something)) {
+      return Optional.of(new Declared<E>(something, x.getTypeArguments(), true));
+    }
+    List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(tool.asTypeElement(x));
     Resolver resolver = new Resolver(tool);
     List<ImplementsRelation> path = resolver.findPath(hierarchy, something);
     if (path.isEmpty()) {
       return Optional.empty();
     }
     DeclaredType declaredType = resolver.dogToAnimal(path);
-    return Optional.of(new Declared<E>(something, declaredType.getTypeArguments()));
+    return Optional.of(new Declared<E>(something, declaredType.getTypeArguments(), false));
   }
 
   private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> something) {

@@ -736,6 +736,27 @@ class MapperTest {
   }
 
   @Test
+  void mapperInvalidSupplyingTypevar() {
+    JavaFileObject javaFile = fromSource(
+        "@CommandLineArguments",
+        "abstract class Arguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
+        "  static class Mapper<E> implements Supplier<E> {",
+        "    public E get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: not a Function or Supplier<Function>");
+  }
+
+  @Test
   void mapperValid() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",

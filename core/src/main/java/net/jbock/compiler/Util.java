@@ -48,7 +48,8 @@ public final class Util {
     if (params.isEmpty()) {
       return CodeBlock.of("");
     }
-    return CodeBlock.of(Stream.generate(() -> "$T").limit(params.size())
+    return CodeBlock.of(Stream.generate(() -> "$T")
+        .limit(params.size())
         .collect(Collectors.joining(", ", "<", ">")), params.toArray());
   }
 }
