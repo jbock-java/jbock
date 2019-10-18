@@ -40,7 +40,7 @@ class Resolver {
    */
   <E> Optional<Declared<E>> typecheck(DeclaredType x, Class<E> something) {
     if (tool.isSameErasure(x, something)) {
-      return Optional.of(new Declared<E>(something, x.getTypeArguments(), true));
+      return Optional.of(new Declared<E>(something, x.getTypeArguments(), Collections.emptyList()));
     }
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(tool.asTypeElement(x));
     Resolver resolver = new Resolver(tool);
@@ -49,7 +49,7 @@ class Resolver {
       return Optional.empty();
     }
     DeclaredType declaredType = resolver.dogToAnimal(path);
-    return Optional.of(new Declared<E>(something, declaredType.getTypeArguments(), false));
+    return Optional.of(new Declared<E>(something, declaredType.getTypeArguments(), path));
   }
 
   private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> something) {

@@ -17,12 +17,12 @@ public class Declared<E> {
 
   private final List<? extends TypeMirror> typeArguments;
 
-  private final boolean direct;
+  private final List<ImplementsRelation> path;
 
-  Declared(Class<E> erasure, List<? extends TypeMirror> typeArguments, boolean direct) {
+  Declared(Class<E> erasure, List<? extends TypeMirror> typeArguments, List<ImplementsRelation> path) {
     this.erasure = erasure;
     this.typeArguments = typeArguments;
-    this.direct = direct;
+    this.path = path;
   }
 
   public DeclaredType asType(TypeTool tool) {
@@ -34,6 +34,6 @@ public class Declared<E> {
   }
 
   boolean isDirect() {
-    return direct;
+    return path.isEmpty();
   }
 }
