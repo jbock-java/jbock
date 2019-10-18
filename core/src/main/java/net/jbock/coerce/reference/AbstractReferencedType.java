@@ -7,7 +7,7 @@ import java.util.Map;
 // mapper or collector
 public abstract class AbstractReferencedType {
 
-  private final DeclaredType expectedType; // subtype of Function or Collector
+  private final DeclaredType expectedType; // erases to Function or Collector
 
   AbstractReferencedType(DeclaredType expectedType) {
     this.expectedType = expectedType;

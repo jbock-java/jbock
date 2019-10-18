@@ -26,16 +26,16 @@ public class Resolver {
   }
 
   /**
-   * Check if {@code x} is a {@code something}, and also infer
+   * Check if {@code x} is a {@code something}, and also resolve
    * the typevars in {@code something} where possible.
    *
    * @param x a type
-   * @param something what we're hoping {@code x} is
-   * @param tool a tool
+   * @param something what we're hoping {@code x} is an instance of
    *
-   * @return the {@code something} type, with typevars resolved
+   * @return A type that erases to the {@code something} type,
+   * with typevars resolved where possible
    */
-  public static Optional<DeclaredType> typecheck(TypeElement x, Class<?> something, TypeTool tool) {
+  public Optional<DeclaredType> typecheck(TypeElement x, Class<?> something) {
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(x);
     Resolver resolver = new Resolver(tool);
     List<ImplementsRelation> path = resolver.findPath(hierarchy, something);

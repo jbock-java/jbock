@@ -24,6 +24,8 @@ import static net.jbock.compiler.TypeTool.asDeclared;
 
 public class ReferenceTool {
 
+  private final Resolver resolver;
+
   public enum Expectation {
 
     MAPPER(Function.class),
@@ -46,12 +48,13 @@ public class ReferenceTool {
     this.basicInfo = basicInfo;
     this.referencedClass = referencedClass;
     this.expectedClass = expectation.expectedClass;
+    this.resolver = new Resolver(basicInfo.tool());
   }
 
   public AbstractReferencedType getReferencedType() {
-    Optional<DeclaredType> supplierType = typecheck(Supplier.class, referencedClass);
+    Optional<DeclaredType> supplierType = resolver.typecheck(referencedClass, Supplier.class);
     if (!supplierType.isPresent()) {
-      TypeMirror expectedType = typecheck(expectedClass, referencedClass)
+      TypeMirror expectedType = resolver.typecheck(referencedClass, expectedClass)
           .orElseThrow(this::unexpectedClassException);
       return new DirectType(checkRawType(asDeclared(expectedType)));
     }
@@ -75,7 +78,7 @@ public class ReferenceTool {
     if (suppliedType.getTypeArguments().size() != suppliedElement.getTypeParameters().size()) {
       throw inferenceFailedException();
     }
-    DeclaredType expectedType = typecheck(expectedClass, suppliedElement)
+    DeclaredType expectedType = resolver.typecheck(suppliedElement, expectedClass)
         .orElseThrow(this::unexpectedClassException);
     Map<String, TypeMirror> typevarMapping = createTypevarMapping(
         suppliedType.getTypeArguments(),
@@ -102,10 +105,6 @@ public class ReferenceTool {
       throw rawTypeException();
     }
     return mapper;
-  }
-
-  private Optional<DeclaredType> typecheck(Class<?> goal, TypeElement start) {
-    return Resolver.typecheck(start, goal, tool());
   }
 
   private ValidationException boom(String message) {
