@@ -63,8 +63,8 @@ public class ReferenceTool<E> {
     if (suppliedType.getTypeArguments().size() != suppliedElement.getTypeParameters().size()) {
       throw inferenceFailedException();
     }
-    Optional<Declared<E>> tmp = resolver.typecheck(suppliedElement, expectedClass.expectedClass());
-    Declared<E> expectedType = tmp.orElseThrow(this::unexpectedClassException);
+    Declared<E> expectedType = resolver.typecheck(suppliedElement, expectedClass.expectedClass())
+        .orElseThrow(this::unexpectedClassException);
     Map<String, TypeMirror> typevarMapping = createTypevarMapping(
         suppliedType.getTypeArguments(),
         suppliedElement.getTypeParameters());

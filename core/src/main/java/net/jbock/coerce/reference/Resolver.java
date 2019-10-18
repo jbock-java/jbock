@@ -1,6 +1,7 @@
 package net.jbock.coerce.reference;
 
 import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
@@ -102,13 +103,19 @@ class Resolver {
   DeclaredType dogToAnimal(TypeMirror animal, ImplementsRelation relation) {
     List<? extends TypeMirror> typeArguments = asDeclared(animal).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = relation.dog().getTypeParameters();
+    if (typeArguments.size() != typeParameters.size()) {
+      throw ValidationException.create(relation.dog(), "raw type");
+    }
     Map<String, TypeMirror> solution = new HashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
-      solution.put(typeParameters.get(i).toString(), typeArguments.get(i));
+      TypeParameterElement param = typeParameters.get(i);
+      TypeMirror arg = typeArguments.get(i);
+      solution.put(param.toString(), arg);
     }
+    // TODO store solution for later
     DeclaredType result = tool.substitute(relation.animal(), solution);
     if (result == null) {
-      throw new AssertionError("Bad input");
+      throw ValidationException.create(relation.dog(), "raw type"); // should never happen
     }
     return result;
   }
