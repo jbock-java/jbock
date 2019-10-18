@@ -19,36 +19,34 @@ import java.util.function.Supplier;
 
 import static net.jbock.compiler.TypeTool.asDeclared;
 
-public class ReferenceTool {
+public class ReferenceTool<E> {
 
   private final Resolver resolver;
 
-  private final ExpectedType expectation;
   private final BasicInfo basicInfo;
   private final TypeElement referencedClass;
-  private final Class<?> expectedClass;
+  private final ExpectedType<E> expectedClass;
 
-  public ReferenceTool(ExpectedType expectation, BasicInfo basicInfo, TypeElement referencedClass) {
-    this.expectation = expectation;
+  public ReferenceTool(ExpectedType<E> expectedClass, BasicInfo basicInfo, TypeElement referencedClass) {
+    this.expectedClass = expectedClass;
     this.basicInfo = basicInfo;
     this.referencedClass = referencedClass;
-    this.expectedClass = expectation.expectedClass();
     this.resolver = new Resolver(basicInfo.tool());
   }
 
   public AbstractReferencedType getReferencedType() {
-    Optional<DeclaredType> supplierType = resolver.typecheck(referencedClass, Supplier.class);
+    Optional<Declared<Supplier>> supplierType = resolver.typecheck(referencedClass, Supplier.class);
     if (!supplierType.isPresent()) {
-      TypeMirror expectedType = resolver.typecheck(referencedClass, expectedClass)
+      Declared<E> expectedType = resolver.typecheck(referencedClass, expectedClass.expectedClass())
           .orElseThrow(this::unexpectedClassException);
-      return new DirectType(checkRawType(asDeclared(expectedType)));
+      return new DirectType(checkRawType(expectedType.asType(tool())));
     }
-    List<? extends TypeMirror> typeArgs = checkRawType(supplierType.get()).getTypeArguments();
+    List<? extends TypeMirror> typeArgs = checkRawType(supplierType.get().asType(tool())).getTypeArguments();
     if (typeArgs.isEmpty()) {
       throw rawTypeException();
     }
     TypeMirror suppliedType = typeArgs.get(0);
-    if (tool().isSameErasure(suppliedType, expectedClass)) {
+    if (tool().isSameErasure(suppliedType, expectedClass.expectedClass())) {
       // "direct supplier"
       return new SupplierType(checkRawType(asDeclared(suppliedType)), Collections.emptyMap());
     }
@@ -63,12 +61,12 @@ public class ReferenceTool {
     if (suppliedType.getTypeArguments().size() != suppliedElement.getTypeParameters().size()) {
       throw inferenceFailedException();
     }
-    DeclaredType expectedType = resolver.typecheck(suppliedElement, expectedClass)
+    Declared<E> expectedType = resolver.typecheck(suppliedElement, expectedClass.expectedClass())
         .orElseThrow(this::unexpectedClassException);
     Map<String, TypeMirror> typevarMapping = createTypevarMapping(
         suppliedType.getTypeArguments(),
         suppliedElement.getTypeParameters());
-    return new SupplierType(expectedType, typevarMapping);
+    return new SupplierType(expectedType.asType(tool()), typevarMapping);
   }
 
   private ValidationException inferenceFailedException() {
@@ -76,12 +74,12 @@ public class ReferenceTool {
   }
 
   private ValidationException unexpectedClassException() {
-    return boom("not a " + expectedClass.getSimpleName() +
-        " or Supplier<" + expectedClass.getSimpleName() + ">");
+    return boom("not a " + expectedClass.simpleName() +
+        " or Supplier<" + expectedClass.simpleName() + ">");
   }
 
   private ValidationException rawTypeException() {
-    return boom("the " + expectedClass.getSimpleName().toLowerCase(Locale.US) +
+    return boom("the " + expectedClass.simpleName().toLowerCase(Locale.US) +
         " type must be parameterized");
   }
 
@@ -94,7 +92,7 @@ public class ReferenceTool {
 
   private ValidationException boom(String message) {
     return basicInfo.asValidationException(String.format("There is a problem with the " +
-        expectation.name().toLowerCase(Locale.US) + " class: %s.", message));
+        expectedClass.name().toLowerCase(Locale.US) + " class: %s.", message));
   }
 
   private TypeTool tool() {

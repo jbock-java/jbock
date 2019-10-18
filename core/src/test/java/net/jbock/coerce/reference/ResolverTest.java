@@ -30,9 +30,9 @@ class ResolverTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
-      Optional<DeclaredType> result = new Resolver(tool).typecheck(mapper, Supplier.class);
+      Optional<Declared<Supplier>> result = new Resolver(tool).typecheck(mapper, Supplier.class);
       assertTrue(result.isPresent());
-      TypeMirror typeMirror = result.get();
+      TypeMirror typeMirror = result.get().asType(tool);
       DeclaredType declared = TypeTool.asDeclared(typeMirror);
       assertEquals(1, declared.getTypeArguments().size());
       TypeMirror typeParameter = declared.getTypeArguments().get(0);
@@ -55,7 +55,7 @@ class ResolverTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
-      Optional<DeclaredType> result = new Resolver(tool).typecheck(mapper, String.class);
+      Optional<Declared<String>> result = new Resolver(tool).typecheck(mapper, String.class);
       assertFalse(result.isPresent());
     });
   }

@@ -34,14 +34,15 @@ class Resolver {
    * @return A type that erases to the {@code something} type,
    * with typevars resolved where possible
    */
-  Optional<DeclaredType> typecheck(TypeElement x, Class<?> something) {
+  <E> Optional<Declared<E>> typecheck(TypeElement x, Class<E> something) {
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(x);
     Resolver resolver = new Resolver(tool);
     List<ImplementsRelation> path = resolver.findPath(hierarchy, something);
     if (path.isEmpty()) {
       return Optional.empty();
     }
-    return Optional.of(resolver.dogToAnimal(path));
+    DeclaredType declaredType = resolver.dogToAnimal(path);
+    return Optional.of(new Declared<E>(something, declaredType.getTypeArguments()));
   }
 
   private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> something) {

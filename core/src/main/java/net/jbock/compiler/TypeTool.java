@@ -164,6 +164,11 @@ public class TypeTool {
         .accept(AS_TYPE_ELEMENT, null), result);
   }
 
+  public DeclaredType getDeclaredType(Class<?> clasz, List<? extends TypeMirror> typeArguments) {
+    return types.getDeclaredType(asDeclared(asType(clasz)).asElement()
+        .accept(AS_TYPE_ELEMENT, null), typeArguments.toArray(new TypeMirror[0]));
+  }
+
   private boolean isAssignableToTypeElement(DeclaredType declaredType) {
     TypeElement typeElement = declaredType.asElement().accept(AS_TYPE_ELEMENT, null);
     List<? extends TypeParameterElement> typeParameters = typeElement.getTypeParameters();

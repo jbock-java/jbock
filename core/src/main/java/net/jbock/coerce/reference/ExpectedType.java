@@ -3,18 +3,28 @@ package net.jbock.coerce.reference;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
-public enum ExpectedType {
+public class ExpectedType<E> {
 
-  MAPPER(Function.class),
-  COLLECTOR(Collector.class);
+  private final String name;
+  private final Class<E> expectedClass;
 
-  private final Class<?> expectedClass;
+  public static final ExpectedType<Function> MAPPER = new ExpectedType<>("MAPPER", Function.class);
+  public static final ExpectedType<Collector> COLLECTOR = new ExpectedType<>("COLLECTOR", Collector.class);
 
-  ExpectedType(Class<?> expectedClass) {
+  private ExpectedType(String name, Class<E> expectedClass) {
+    this.name = name;
     this.expectedClass = expectedClass;
   }
 
-  Class<?> expectedClass() {
+  public String name() {
+    return name;
+  }
+
+  public Class<E> expectedClass() {
     return expectedClass;
+  }
+
+  public String simpleName() {
+    return expectedClass.getSimpleName();
   }
 }
