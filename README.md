@@ -20,7 +20,7 @@ triggers the code generation at compile time.
 A derived class `MyArguments_Parser`
 will be generated.
 The generated code, which can be seen [here,](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
-can be used in a *main* method as follows:
+can be used in a *main* method:
 
 ````java
 String[] argv = { "-v2", "file.txt" }; // for example
@@ -33,7 +33,7 @@ assertEquals(Paths.get("file.txt"), args.path());
 
 In the example above, note that `path` is a required parameter,
 and `verbosity` is optional.
-This is determined by the parameter type according to this table:
+This is determined by the parameter type, using the following rule:
 
 <table style="border-collapse: collapse">
 <tr>
