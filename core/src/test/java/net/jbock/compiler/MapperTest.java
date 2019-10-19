@@ -621,6 +621,27 @@ class MapperTest {
   }
 
   @Test
+  void testListSudoku() {
+    JavaFileObject javaFile = fromSource(
+        "@CommandLineArguments",
+        "abstract class Arguments {",
+        "",
+        "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
+        "  abstract List<Integer> number();",
+        "",
+        "  static class Mapper<AA1, AA2> implements A<AA1, AA2> {",
+        "    public Function<AA1, List<AA2>> get() { return null; }",
+        "  }",
+        "  interface A<BB1, BB2> extends B<BB1, List<BB2>> { }",
+        "  interface B<CC1, CC2> extends C<CC1, CC2> { }",
+        "  interface C<DD1, DD2> extends Supplier<Function<DD1, DD2>> { }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void mapperInvalidComplicatedTree() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",

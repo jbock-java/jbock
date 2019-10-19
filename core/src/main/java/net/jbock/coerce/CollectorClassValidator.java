@@ -1,7 +1,7 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.collector.CustomCollector;
-import net.jbock.coerce.reference.AbstractReferencedType;
+import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
@@ -30,7 +30,7 @@ class CollectorClassValidator {
   // visible for testing
   CustomCollector getCollectorInfo() {
     commonChecks(basicInfo, collectorClass, "collector");
-    AbstractReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, basicInfo, collectorClass)
+    ReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, basicInfo, collectorClass)
         .getReferencedType();
     TypeMirror t = collectorType.expectedType().typeArguments().get(0);
     TypeMirror r = collectorType.expectedType().typeArguments().get(2);
@@ -53,7 +53,7 @@ class CollectorClassValidator {
 
   private CustomCollector solve(
       TypeMirror inputType,
-      AbstractReferencedType collectorType,
+      ReferencedType collectorType,
       Map<String, TypeMirror> r_result) {
     List<? extends TypeParameterElement> typeParameters = collectorClass.getTypeParameters();
     List<TypeMirror> solution = new ArrayList<>(typeParameters.size());

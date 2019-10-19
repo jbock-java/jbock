@@ -2,7 +2,7 @@ package net.jbock.coerce;
 
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
-import net.jbock.coerce.reference.AbstractReferencedType;
+import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
@@ -35,7 +35,7 @@ final class MapperClassValidator {
 
   ReferenceMapperType checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
-    AbstractReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass)
+    ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass)
         .getReferencedType();
     TypeMirror t = functionType.expectedType().typeArguments().get(0);
     TypeMirror r = functionType.expectedType().typeArguments().get(1);
@@ -61,12 +61,12 @@ final class MapperClassValidator {
 
   private class Solver {
 
-    final AbstractReferencedType functionType;
+    final ReferencedType functionType;
     final Map<String, TypeMirror> unmapped_r_result;
     final Map<String, TypeMirror> t_result;
     final Map<String, TypeMirror> r_result;
 
-    Solver(AbstractReferencedType functionType, Map<String, TypeMirror> unmapped_r_result, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
+    Solver(ReferencedType functionType, Map<String, TypeMirror> unmapped_r_result, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
       this.functionType = functionType;
       this.unmapped_r_result = unmapped_r_result;
       this.t_result = t_result;

@@ -3,7 +3,7 @@ package net.jbock.coerce.reference;
 import javax.lang.model.type.TypeMirror;
 import java.util.Map;
 
-class DirectType<E> extends AbstractReferencedType<E> {
+class DirectType<E> extends ReferencedType<E> {
 
   DirectType(Declared<E> referencedType) {
     super(referencedType);

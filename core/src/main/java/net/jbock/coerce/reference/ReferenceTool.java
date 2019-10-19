@@ -34,7 +34,7 @@ public class ReferenceTool<E> {
     this.resolver = new Resolver(basicInfo);
   }
 
-  public AbstractReferencedType<E> getReferencedType() {
+  public ReferencedType<E> getReferencedType() {
     Optional<Declared<Supplier>> supplierType = resolver.typecheck(referencedClass, Supplier.class);
     if (!supplierType.isPresent()) {
       Declared<E> expectedType = resolver.typecheck(referencedClass, expectedClass.expectedClass())

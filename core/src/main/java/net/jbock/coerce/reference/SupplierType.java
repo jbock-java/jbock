@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 
-class SupplierType<E> extends AbstractReferencedType<E> {
+class SupplierType<E> extends ReferencedType<E> {
 
   private final Map<String, TypeMirror> typevarMapping;
 
