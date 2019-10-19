@@ -531,6 +531,7 @@ class ProcessorTest {
         "import java.util.Set;",
         "import java.util.Map;",
         "import java.util.AbstractMap;",
+        "import java.util.Collection;",
         "import java.util.Collections;",
         "import java.util.Optional;",
         "import java.util.OptionalInt;",
