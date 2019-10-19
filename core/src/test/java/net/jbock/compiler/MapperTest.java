@@ -604,7 +604,7 @@ class MapperTest {
         "  interface Plop2<BB> extends Plop3<BB> { }",
         "  interface Plop3<CC> extends Plop4<CC> { }",
         "  interface Plop4<DD> extends Plop5<DD> { }",
-        "  interface Plop5<BB> extends FooSupplier<BB> { }",
+        "  interface Plop5<EE> extends FooSupplier<EE> { }",
         "  interface FooSupplier<K> extends Supplier<Foo1<K>> { }",
         "  interface Foo1<A> extends Foo2<A> { }",
         "  interface Foo2<B> extends Foo3<B> { }",

@@ -88,9 +88,14 @@ class Resolver {
    * </ul>
    */
   private DeclaredType dogToAnimal(List<ImplementsRelation> path) {
-    DeclaredType animal = path.get(0).animal();
+    List<Map<String, TypeMirror>> solutions = new ArrayList<>();
     for (int i = 1; i < path.size(); i++) {
-      animal = dogToAnimal(animal, path.get(i));
+      solutions.add(dogToAnimal(path.get(i - 1).animal(), path.get(i)));
+    }
+    DeclaredType animal = path.get(path.size() - 1).animal();
+    for (int i = solutions.size() - 1; i >= 0; i--) {
+      Map<String, TypeMirror> solution = solutions.get(i);
+      animal = tool.substitute(animal, solution);
     }
     return animal;
   }
@@ -100,7 +105,7 @@ class Resolver {
    * @param relation a relation the dog of which is the {@code animal}
    * @return a type that has the erasure of {@code relation.animal}
    */
-  DeclaredType dogToAnimal(TypeMirror animal, ImplementsRelation relation) {
+  Map<String, TypeMirror> dogToAnimal(TypeMirror animal, ImplementsRelation relation) {
     List<? extends TypeMirror> typeArguments = asDeclared(animal).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = relation.dog().getTypeParameters();
     if (typeArguments.size() != typeParameters.size()) {
@@ -112,11 +117,6 @@ class Resolver {
       TypeMirror arg = typeArguments.get(i);
       solution.put(param.toString(), arg);
     }
-    // TODO store solution for later
-    DeclaredType result = tool.substitute(relation.animal(), solution);
-    if (result == null) {
-      throw ValidationException.create(relation.dog(), "raw type"); // should never happen
-    }
-    return result;
+    return solution;
   }
 }

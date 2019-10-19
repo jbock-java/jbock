@@ -80,29 +80,4 @@ class ResolverTest {
       assertTrue(result.isPresent());
     });
   }
-
-  @Test
-  void testDogToAnimal() {
-
-    EvaluatingProcessor.source(
-        "package test;",
-        "import java.util.function.Function;",
-        "import java.util.List;",
-        "",
-        "import java.util.function.Supplier;",
-        "",
-        "interface Mapper<A> extends F<A, String> { }",
-        "interface F<V, T> extends Function<T, List<V>> { }"
-    ).run("Mapper", (elements, types) -> {
-      TypeTool tool = new TypeTool(elements, types);
-      TypeElement mapper = elements.getTypeElement("test.Mapper");
-      assertEquals(1, mapper.getInterfaces().size());
-      TypeMirror x = mapper.getInterfaces().get(0);
-      TypeElement f = elements.getTypeElement("test.F");
-      Resolver resolver = new Resolver(tool);
-      ImplementsRelation relation = new ImplementsRelation(f, f.getInterfaces().get(0));
-      TypeMirror result = resolver.dogToAnimal(x, relation);
-      assertEquals("java.util.function.Function<java.lang.String,java.util.List<A>>", result.toString());
-    });
-  }
 }
