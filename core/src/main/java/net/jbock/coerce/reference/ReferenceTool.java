@@ -31,7 +31,7 @@ public class ReferenceTool<E> {
     this.expectedClass = expectedClass;
     this.basicInfo = basicInfo;
     this.referencedClass = referencedClass;
-    this.resolver = new Resolver(basicInfo.tool());
+    this.resolver = new Resolver(basicInfo);
   }
 
   public AbstractReferencedType<E> getReferencedType() {
@@ -85,7 +85,7 @@ public class ReferenceTool<E> {
         " type must be parameterized");
   }
 
-  private <E> Declared<E> checkRawType(Declared<E> mapper) {
+  private <P> Declared<P> checkRawType(Declared<P> mapper) {
     if (tool().isRawType(mapper.asType(tool()))) {
       throw rawTypeException();
     }

@@ -1,8 +1,10 @@
 package net.jbock.coerce.reference;
 
+import net.jbock.coerce.BasicInfo;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -31,7 +33,9 @@ class ResolverTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
-      Optional<Declared<Supplier>> result = new Resolver(tool).typecheck(mapper, Supplier.class);
+      BasicInfo basicInfo = Mockito.mock(BasicInfo.class);
+      Mockito.when(basicInfo.tool()).thenReturn(tool);
+      Optional<Declared<Supplier>> result = new Resolver(basicInfo).typecheck(mapper, Supplier.class);
       assertTrue(result.isPresent());
       TypeMirror typeMirror = result.get().asType(tool);
       DeclaredType declared = TypeTool.asDeclared(typeMirror);
@@ -56,7 +60,9 @@ class ResolverTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
-      Optional<Declared<String>> result = new Resolver(tool).typecheck(mapper, String.class);
+      BasicInfo basicInfo = Mockito.mock(BasicInfo.class);
+      Mockito.when(basicInfo.tool()).thenReturn(tool);
+      Optional<Declared<String>> result = new Resolver(basicInfo).typecheck(mapper, String.class);
       assertFalse(result.isPresent());
     });
   }
@@ -76,7 +82,9 @@ class ResolverTest {
       TypeElement mapper = elements.getTypeElement("test.FunctionSupplier");
       DeclaredType declaredType = TypeTool.asDeclared(mapper.getInterfaces().get(0));
       DeclaredType functionType = TypeTool.asDeclared(declaredType.getTypeArguments().get(0));
-      Optional<Declared<Function>> result = new Resolver(tool).typecheck(functionType, Function.class);
+      BasicInfo basicInfo = Mockito.mock(BasicInfo.class);
+      Mockito.when(basicInfo.tool()).thenReturn(tool);
+      Optional<Declared<Function>> result = new Resolver(basicInfo).typecheck(functionType, Function.class);
       assertTrue(result.isPresent());
     });
   }

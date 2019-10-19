@@ -24,10 +24,10 @@ class MapperClassValidatorTest {
         "import java.util.function.Supplier;",
         "import java.util.function.Function;",
         "",
-        "interface Mapper<F, T> extends A<F, T> { }",
-        "interface A<R, X> extends B<X, List<R>> { }",
-        "interface B<F, K> extends C<F, K> { }",
-        "interface C<X, R> extends Supplier<Function<X, R>> { }"
+        "interface Mapper<AA1, AA2> extends A<AA1, AA2> { }",
+        "interface A<BB1, BB2> extends B<BB1, List<BB2>> { }",
+        "interface B<CC1, CC2> extends C<CC1, CC2> { }",
+        "interface C<DD1, DD2> extends Supplier<Function<DD1, DD2>> { }"
     ).run("Mapper", (elements, types) -> {
       TypeElement mapperClass = elements.getTypeElement("Mapper");
 
@@ -40,8 +40,8 @@ class MapperClassValidatorTest {
       MapperType mapperType = new MapperClassValidator(basicInfo, expectedReturnType, mapperClass)
           .checkReturnType();
       assertEquals(2, mapperType.solution().size());
-      assertTrue(tool.isSameType(mapperType.solution().get(0), Integer.class));
-      assertTrue(tool.isSameType(mapperType.solution().get(1), String.class));
+      assertTrue(tool.isSameType(mapperType.solution().get(0), String.class));
+      assertTrue(tool.isSameType(mapperType.solution().get(1), Integer.class));
     });
   }
 }
