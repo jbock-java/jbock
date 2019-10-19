@@ -52,10 +52,11 @@ public class ReferenceTool<E> {
       // "direct supplier"
       return new SupplierType<>(checkRawType(directExpectation.get()), Collections.emptyMap());
     }
-    if (supplied.getKind() != TypeKind.DECLARED) {
-      throw inferenceFailedException();
-    }
-    return getIndirectExpectation(suppliedType);
+    throw inferenceFailedException();
+//    if (supplied.getKind() != TypeKind.DECLARED) {
+//      throw inferenceFailedException();
+//    }
+//    return getIndirectExpectation(suppliedType);
   }
 
   private SupplierType<E> getIndirectExpectation(DeclaredType suppliedType) {

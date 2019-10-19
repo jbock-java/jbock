@@ -31,7 +31,8 @@ class CollectorTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("could not infer type parameters");
   }
 
   @Test
@@ -706,9 +707,8 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: not a Collector or Supplier<Collector>.");
+        .withErrorContaining("could not infer type parameters");
   }
-
 
   @Test
   void invalidFlagCollector() {

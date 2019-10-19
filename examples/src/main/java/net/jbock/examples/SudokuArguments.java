@@ -1,7 +1,5 @@
 package net.jbock.examples;
 
-import net.jbock.PositionalParameter;
-
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -12,7 +10,6 @@ import java.util.function.Supplier;
 //@CommandLineArguments
 abstract class SudokuArguments {
 
-  @PositionalParameter(mappedBy = Mapper.class)
   abstract List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> number();
 
   static class Mapper<M extends Integer> implements Plop1<Collection<M>> {
@@ -22,9 +19,10 @@ abstract class SudokuArguments {
   }
 
   void foo() {
-    Mapper<Integer> integerMapper = new Mapper<>();
+    Supplier<? extends Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>>>> integerMapper = new Mapper<>();
     Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>>> listFoo1 = integerMapper.get();
-    List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> apply = listFoo1.apply("");
+    List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> numberType = listFoo1.apply("");
+    numberType = number();
   }
 
   //@formatter:off

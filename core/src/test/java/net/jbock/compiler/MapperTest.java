@@ -492,7 +492,8 @@ class MapperTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("could not infer type parameters");
   }
 
   @Test
@@ -516,7 +517,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes Long.");
+        .withErrorContaining("could not infer type parameters");
   }
 
   @Test
@@ -585,7 +586,8 @@ class MapperTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("could not infer type parameters");
   }
 
   @Test
@@ -617,7 +619,8 @@ class MapperTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("could not infer type parameters");
   }
 
   @Test
@@ -671,7 +674,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes Integer.");
+        .withErrorContaining("could not infer type parameters");
   }
 
   @Test
@@ -694,7 +697,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: not a Function or Supplier<Function>.");
+        .withErrorContaining("could not infer type parameters");
   }
 
   @Test
