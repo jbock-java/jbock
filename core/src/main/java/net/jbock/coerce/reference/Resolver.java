@@ -8,6 +8,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -43,15 +44,17 @@ class Resolver {
    */
   <E> Optional<Declared<E>> typecheck(DeclaredType x, Class<E> something) {
     if (tool().isSameErasure(x, something)) {
-      return Optional.of(new Declared<>(something, x.getTypeArguments(), Collections.emptyList()));
+      return Optional.of(new Declared<>(something, x.getTypeArguments(), Collections.emptyList(), Collections.emptyMap()));
     }
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool()).getHierarchy(tool().asTypeElement(x));
     List<ImplementsRelation> path = findPath(hierarchy, something);
     if (path.isEmpty()) {
       return Optional.empty();
     }
-    DeclaredType declaredType = dogToAnimal(path);
-    return Optional.of(new Declared<>(something, declaredType.getTypeArguments(), path));
+    Entry<DeclaredType, Map<String, TypeMirror>> result = dogToAnimal(path);
+    DeclaredType declaredType = result.getKey();
+    Map<String, TypeMirror> typevarMapping = result.getValue();
+    return Optional.of(new Declared<>(something, declaredType.getTypeArguments(), path, typevarMapping));
   }
 
   private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> something) {
@@ -88,20 +91,17 @@ class Resolver {
    *   <li>{@code path[1].dog} and {@code path[0].animal} have the same erasure</li>
    * </ul>
    */
-  private DeclaredType dogToAnimal(List<ImplementsRelation> path) {
+  private Entry<DeclaredType, Map<String, TypeMirror>> dogToAnimal(List<ImplementsRelation> path) {
     List<Map<String, TypeMirror>> typevarMappings = new ArrayList<>();
     for (int i = 1; i < path.size(); i++) {
       typevarMappings.add(getTypevarMapping(path.get(i - 1).animal(), path.get(i).dog()));
     }
     DeclaredType animal = path.get(path.size() - 1).animal();
     if (typevarMappings.isEmpty()) {
-      return animal;
+      return new SimpleImmutableEntry<>(animal, Collections.emptyMap());
     }
     Map<String, TypeMirror> typevarMapping = getMergedTypevarMapping(typevarMappings);
-    if (typevarMapping == null) {
-      throw basicInfo.asValidationException("Invalid bounds");
-    }
-    return tool().substitute(animal, typevarMapping);
+    return new SimpleImmutableEntry<>(tool().substitute(animal, typevarMapping), typevarMapping);
   }
 
   private Map<String, TypeMirror> getMergedTypevarMapping(List<Map<String, TypeMirror>> solutions) {
@@ -110,9 +110,6 @@ class Resolver {
       Map<String, TypeMirror> merged = new LinkedHashMap<>();
       for (Entry<String, TypeMirror> entry : solution.entrySet()) {
         TypeMirror substituted = tool().substitute(entry.getValue(), solutions.get(i));
-        if (substituted == null) {
-          return null;
-        }
         merged.put(entry.getKey(), substituted);
       }
       solution = merged;
