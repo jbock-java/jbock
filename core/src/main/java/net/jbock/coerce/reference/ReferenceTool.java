@@ -10,7 +10,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -104,7 +104,7 @@ public class ReferenceTool<E> {
   private static Map<String, TypeMirror> createTypevarMapping(
       List<? extends TypeMirror> typeArguments,
       List<? extends TypeParameterElement> typeParameters) {
-    Map<String, TypeMirror> mapping = new HashMap<>();
+    Map<String, TypeMirror> mapping = new LinkedHashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {
       TypeParameterElement p = typeParameters.get(i);
       TypeMirror typeArgument = typeArguments.get(i);

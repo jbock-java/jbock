@@ -595,7 +595,7 @@ class MapperTest {
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
-        "  abstract Set<List<List<List<List<List<List<List<Integer>>>>>>>> number();",
+        "  abstract List<List<List<List<List<List<List<Integer>>>>>>> number();",
         "",
         "  static class Mapper<M extends Integer> implements Plop1<M> {",
         "    public Foo1<M> get() { return null; }",
@@ -613,7 +613,7 @@ class MapperTest {
         "  interface Foo5<E> extends Foo6<List<E>> { }",
         "  interface Foo6<F> extends Foo7<List<F>> { }",
         "  interface Foo7<G> extends Foo8<List<G>> { }",
-        "  interface Foo8<H> extends Function<String, Set<H>> { }",
+        "  interface Foo8<H> extends Function<String, H> { }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
