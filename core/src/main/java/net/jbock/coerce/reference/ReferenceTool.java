@@ -5,15 +5,12 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Collections;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -48,32 +45,10 @@ public class ReferenceTool<E> {
     }
     DeclaredType suppliedType = asDeclared(supplied);
     Optional<Declared<E>> directExpectation = resolver.typecheck(suppliedType, expectedClass.expectedClass());
-    if (directExpectation.isPresent() && directExpectation.get().isDirect()) {
-      // "direct supplier"
-      return new SupplierType<>(checkRawType(directExpectation.get()), Collections.emptyMap());
+    if (!directExpectation.isPresent() || !directExpectation.get().isDirect()) {
+      throw unexpectedClassException();
     }
-    throw inferenceFailedException();
-//    if (supplied.getKind() != TypeKind.DECLARED) {
-//      throw inferenceFailedException();
-//    }
-//    return getIndirectExpectation(suppliedType);
-  }
-
-  private SupplierType<E> getIndirectExpectation(DeclaredType suppliedType) {
-    TypeElement suppliedElement = tool().asTypeElement(suppliedType);
-    if (suppliedType.getTypeArguments().size() != suppliedElement.getTypeParameters().size()) {
-      throw inferenceFailedException();
-    }
-    Declared<E> expectedType = resolver.typecheck(suppliedElement, expectedClass.expectedClass())
-        .orElseThrow(this::unexpectedClassException);
-    Map<String, TypeMirror> typevarMapping = createTypevarMapping(
-        suppliedType.getTypeArguments(),
-        suppliedElement.getTypeParameters());
-    return new SupplierType<>(expectedType, typevarMapping);
-  }
-
-  private ValidationException inferenceFailedException() {
-    return boom("could not infer type parameters");
+    return new SupplierType<>(checkRawType(directExpectation.get()), Collections.emptyMap());
   }
 
   private ValidationException unexpectedClassException() {
@@ -100,19 +75,5 @@ public class ReferenceTool<E> {
 
   private TypeTool tool() {
     return basicInfo.tool();
-  }
-
-  private static Map<String, TypeMirror> createTypevarMapping(
-      List<? extends TypeMirror> typeArguments,
-      List<? extends TypeParameterElement> typeParameters) {
-    Map<String, TypeMirror> mapping = new LinkedHashMap<>();
-    for (int i = 0; i < typeParameters.size(); i++) {
-      TypeParameterElement p = typeParameters.get(i);
-      TypeMirror typeArgument = typeArguments.get(i);
-      if (typeArgument.getKind() == TypeKind.TYPEVAR) {
-        mapping.put(p.toString(), typeArgument);
-      }
-    }
-    return mapping;
   }
 }

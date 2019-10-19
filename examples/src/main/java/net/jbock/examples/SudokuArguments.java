@@ -1,5 +1,8 @@
 package net.jbock.examples;
 
+import net.jbock.CommandLineArguments;
+import net.jbock.PositionalParameter;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -7,31 +10,19 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-//@CommandLineArguments
+@CommandLineArguments
 abstract class SudokuArguments {
 
+  @PositionalParameter(mappedBy = Mapper.class)
   abstract List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> number();
 
-  static class Mapper<M extends Integer> implements Plop1<Collection<M>> {
+  static class Mapper<M extends Integer> implements Supplier<Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>>>>>>>>>> {
     public Foo1<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>> get() {
       return s -> Collections.emptyList();
     }
   }
 
-  void foo() {
-    Supplier<? extends Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>>>> integerMapper = new Mapper<>();
-    Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>>> listFoo1 = integerMapper.get();
-    List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> numberType = listFoo1.apply("");
-    numberType = number();
-  }
-
   //@formatter:off
-  interface Plop1<AA> extends Plop2<Set<AA>> { }
-  interface Plop2<BB> extends Plop3<Set<BB>> { }
-  interface Plop3<CC> extends Plop4<Set<CC>> { }
-  interface Plop4<DD> extends Plop5<Set<DD>> { }
-  interface Plop5<EE> extends FooSupplier<Set<EE>> { }
-  interface FooSupplier<K> extends Supplier<Foo1<Set<K>>> { }
   interface Foo1<A> extends Foo2<List<A>> { }
   interface Foo2<B> extends Foo3<List<B>> { }
   interface Foo3<C> extends Foo4<List<C>> { }

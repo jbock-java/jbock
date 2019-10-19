@@ -493,7 +493,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("could not infer type parameters");
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test
@@ -517,7 +517,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("could not infer type parameters");
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test
@@ -587,11 +587,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("could not infer type parameters");
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test
-  void testLongSudokuValid() {
+  void testSudokuHard() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
@@ -599,7 +599,7 @@ class MapperTest {
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
         "  abstract List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> numbers();",
         "",
-        "  static class Mapper<M extends Integer> implements Plop1<Collection<M>> {",
+        "  static class Mapper<M extends Integer> implements Supplier<Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>>>>>>>>>> {",
         "    public Foo1<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>> get() { return null; }",
         "  }",
         "  interface Plop1<AA> extends Plop2<Set<AA>> { }",
@@ -619,8 +619,7 @@ class MapperTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("could not infer type parameters");
+        .compilesWithoutError();
   }
 
   @Test
@@ -674,7 +673,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("could not infer type parameters");
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test
@@ -697,7 +696,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("could not infer type parameters");
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test

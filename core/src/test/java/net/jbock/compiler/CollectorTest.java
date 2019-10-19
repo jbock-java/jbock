@@ -32,7 +32,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("could not infer type parameters");
+        .withErrorContaining("not a Collector or Supplier<Collector>");
   }
 
   @Test
@@ -707,7 +707,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("could not infer type parameters");
+        .withErrorContaining("not a Collector or Supplier<Collector>");
   }
 
   @Test
