@@ -51,6 +51,9 @@ class Resolver {
       return Optional.empty();
     }
     DeclaredType declaredType = dogToAnimal(path);
+    if (declaredType == null) {
+      return Optional.empty();
+    }
     return Optional.of(new Declared<>(something, declaredType.getTypeArguments(), path));
   }
 
@@ -93,15 +96,15 @@ class Resolver {
     for (int i = 1; i < path.size(); i++) {
       typevarMappings.add(getTypevarMapping(path.get(i - 1).animal(), path.get(i).dog()));
     }
-    DeclaredType animal = path.get(path.size() - 1).animal();
-    if (typevarMappings.isEmpty()) {
-      return animal;
-    }
     Map<String, TypeMirror> typevarMapping = getMergedTypevarMapping(typevarMappings);
+    DeclaredType animal = path.get(path.size() - 1).animal();
     return tool().substitute(animal, typevarMapping);
   }
 
   private Map<String, TypeMirror> getMergedTypevarMapping(List<Map<String, TypeMirror>> solutions) {
+    if (solutions.isEmpty()) {
+      return Collections.emptyMap();
+    }
     Map<String, TypeMirror> solution = solutions.get(solutions.size() - 1);
     for (int i = solutions.size() - 2; i >= 0; i--) {
       Map<String, TypeMirror> merged = new LinkedHashMap<>();
