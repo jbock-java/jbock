@@ -1,8 +1,5 @@
 package net.jbock.coerce.reference;
 
-import javax.lang.model.type.TypeMirror;
-import java.util.Map;
-
 // mapper or collector
 public abstract class ReferencedType<E> {
 
@@ -11,8 +8,6 @@ public abstract class ReferencedType<E> {
   ReferencedType(Declared<E> expectedType) {
     this.expectedType = expectedType;
   }
-
-  public abstract Map<String, TypeMirror> mapTypevars(Map<String, TypeMirror> solution);
 
   public abstract boolean isSupplier();
 

@@ -2,8 +2,8 @@ package net.jbock.coerce;
 
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
-import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.coerce.reference.ReferenceTool;
+import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -39,8 +39,7 @@ final class MapperClassValidator {
         .getReferencedType();
     TypeMirror t = functionType.expectedType().typeArguments().get(0);
     TypeMirror r = functionType.expectedType().typeArguments().get(1);
-    Optional<Map<String, TypeMirror>> t_result = tool().unify(tool().asType(String.class), t)
-        .map(functionType::mapTypevars);
+    Optional<Map<String, TypeMirror>> t_result = tool().unify(tool().asType(String.class), t);
     if (!t_result.isPresent()) {
       throw boom(String.format("The supplied function must take a String argument, but takes %s", t));
     }
@@ -48,7 +47,7 @@ final class MapperClassValidator {
     if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    return new Solver(functionType, r_result.get(), functionType.mapTypevars(t_result.get()), functionType.mapTypevars(r_result.get())).solve();
+    return new Solver(functionType, t_result.get(), r_result.get()).solve();
   }
 
   private ValidationException boom(String message) {
@@ -62,13 +61,11 @@ final class MapperClassValidator {
   private class Solver {
 
     final ReferencedType functionType;
-    final Map<String, TypeMirror> unmapped_r_result;
     final Map<String, TypeMirror> t_result;
     final Map<String, TypeMirror> r_result;
 
-    Solver(ReferencedType functionType, Map<String, TypeMirror> unmapped_r_result, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
+    Solver(ReferencedType functionType, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
       this.functionType = functionType;
-      this.unmapped_r_result = unmapped_r_result;
       this.t_result = t_result;
       this.r_result = r_result;
     }

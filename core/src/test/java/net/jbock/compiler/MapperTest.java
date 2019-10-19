@@ -492,7 +492,8 @@ class MapperTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test
@@ -516,7 +517,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes Long.");
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test
@@ -585,27 +586,28 @@ class MapperTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test
-  void testLongSudokuValid() {
+  void testSudokuHard() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
         "  @Parameter(shortName = 'x', mappedBy = Mapper.class)",
-        "  abstract List<List<List<List<List<List<List<Integer>>>>>>> number();",
+        "  abstract List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> numbers();",
         "",
-        "  static class Mapper<M extends Integer> implements Plop1<M> {",
-        "    public Foo1<M> get() { return null; }",
+        "  static class Mapper<M extends Integer> implements Supplier<Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>>>>>>>>>> {",
+        "    public Foo1<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>> get() { return null; }",
         "  }",
-        "  interface Plop1<AA> extends Plop2<AA> { }",
-        "  interface Plop2<BB> extends Plop3<BB> { }",
-        "  interface Plop3<CC> extends Plop4<CC> { }",
-        "  interface Plop4<DD> extends Plop5<DD> { }",
-        "  interface Plop5<EE> extends FooSupplier<EE> { }",
-        "  interface FooSupplier<K> extends Supplier<Foo1<K>> { }",
+        "  interface Plop1<AA> extends Plop2<Set<AA>> { }",
+        "  interface Plop2<BB> extends Plop3<Set<BB>> { }",
+        "  interface Plop3<CC> extends Plop4<Set<CC>> { }",
+        "  interface Plop4<DD> extends Plop5<Set<DD>> { }",
+        "  interface Plop5<EE> extends FooSupplier<Set<EE>> { }",
+        "  interface FooSupplier<K> extends Supplier<Foo1<Set<K>>> { }",
         "  interface Foo1<A> extends Foo2<List<A>> { }",
         "  interface Foo2<B> extends Foo3<List<B>> { }",
         "  interface Foo3<C> extends Foo4<List<C>> { }",
@@ -671,7 +673,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The supplied function must take a String argument, but takes Integer.");
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test
@@ -694,7 +696,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: not a Function or Supplier<Function>.");
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test

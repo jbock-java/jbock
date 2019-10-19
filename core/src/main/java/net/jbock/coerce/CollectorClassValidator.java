@@ -1,8 +1,8 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.collector.CustomCollector;
-import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.coerce.reference.ReferenceTool;
+import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -40,7 +40,7 @@ class CollectorClassValidator {
     if (inputType == null) {
       throw boom("could not resolve all type parameters");
     }
-    return solve(inputType, collectorType, collectorType.mapTypevars(r_result));
+    return solve(inputType, collectorType, r_result);
   }
 
   private TypeTool tool() {
