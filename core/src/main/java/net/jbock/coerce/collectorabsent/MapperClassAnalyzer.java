@@ -115,11 +115,6 @@ public final class MapperClassAnalyzer {
       TypeMirror t = t_result.get(typeParameter.toString());
       TypeMirror r = r_result.get(typeParameter.toString());
       List<? extends TypeMirror> bounds = typeParameter.getBounds();
-      if (t != null) {
-        if (tool().isOutOfBounds(tool().asType(String.class), bounds)) {
-          return Either.right("invalid bounds");
-        }
-      }
       if (r != null) {
         if (tool().isOutOfBounds(r, bounds)) {
           return Either.right("invalid bounds");

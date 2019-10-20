@@ -2,6 +2,7 @@ package net.jbock.coerce;
 
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
+import net.jbock.coerce.reference.ExpectedType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
@@ -10,6 +11,7 @@ import net.jbock.compiler.ValidationException;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -82,11 +84,6 @@ final class MapperClassValidator {
       TypeMirror t = t_result.get(typeParameter.toString());
       TypeMirror r = r_result.get(typeParameter.toString());
       List<? extends TypeMirror> bounds = typeParameter.getBounds();
-      if (t != null) {
-        if (tool().isOutOfBounds(tool().asType(String.class), bounds)) {
-          throw boom("invalid bounds");
-        }
-      }
       if (r != null) {
         if (tool().isOutOfBounds(r, bounds)) {
           throw boom("invalid bounds");
@@ -102,5 +99,24 @@ final class MapperClassValidator {
           .findFirst()
           .orElseThrow(() -> boom("could not infer all type parameters"));
     }
+  }
+
+  public static Map<String, TypeMirror> mergeResult(
+      ExpectedType expectedType,
+      BasicInfo basicInfo,
+      Map<String, TypeMirror>... results) {
+    Map<String, TypeMirror> result = new LinkedHashMap<>();
+    for (Map<String, TypeMirror> m : results) {
+      for (Map.Entry<String, TypeMirror> entry : m.entrySet()) {
+        TypeMirror typeMirror = m.get(entry.getKey());
+        if (typeMirror != null) {
+          if (!basicInfo.tool().isSameType(typeMirror, entry.getValue())) {
+            throw expectedType.boom(basicInfo, "invalid bounds");
+          }
+        }
+        result.put(entry.getKey(), entry.getValue());
+      }
+    }
+    return result;
   }
 }

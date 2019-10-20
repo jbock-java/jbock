@@ -15,7 +15,7 @@ import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -111,7 +111,7 @@ public class TypeTool {
   }
 
   public Optional<Map<String, TypeMirror>> unify(TypeMirror concreteType, TypeMirror ym) {
-    Map<String, TypeMirror> acc = new HashMap<>();
+    Map<String, TypeMirror> acc = new LinkedHashMap<>();
     boolean failure = unify(concreteType, ym, acc);
     return failure ? Optional.empty() : Optional.of(acc);
   }

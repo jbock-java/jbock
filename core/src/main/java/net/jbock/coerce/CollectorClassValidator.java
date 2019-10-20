@@ -48,7 +48,7 @@ class CollectorClassValidator {
   }
 
   private ValidationException boom(String message) {
-    return basicInfo.asValidationException(String.format("There is a problem with the collector class: %s.", message));
+    return COLLECTOR.boom(basicInfo, message);
   }
 
   private CustomCollector solve(
