@@ -52,13 +52,13 @@ public final class MapperClassAnalyzer {
     if (!r_result.isPresent()) {
       return Either.right(failure(String.format("The mapper should return %s but returns %s", expectedReturnType, r)));
     }
-    Either<List<TypeMirror>, String> solve = new Solver(basicInfo, mapperClass)
+    Either<List<TypeMirror>, String> solution = new Solver(basicInfo, mapperClass)
         .solve(Arrays.asList(t_result.get(), r_result.get()));
-    if (solve instanceof Right) {
-      return Either.right(failure(((Right<List<TypeMirror>, String>) solve).value()));
+    if (solution instanceof Right) {
+      return Either.right(failure(((Right<List<TypeMirror>, String>) solution).value()));
     }
     return Either.left(MapperType.create(tool(), functionType.isSupplier(), mapperClass,
-        ((Left<List<TypeMirror>, String>) solve).value()));
+        ((Left<List<TypeMirror>, String>) solution).value()));
   }
 
   private TypeTool tool() {

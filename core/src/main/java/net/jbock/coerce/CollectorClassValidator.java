@@ -1,19 +1,21 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.collector.CustomCollector;
+import net.jbock.coerce.either.Either;
+import net.jbock.coerce.either.Left;
+import net.jbock.coerce.either.Right;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collector;
 
+import static java.util.Collections.singletonList;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.reference.ExpectedType.COLLECTOR;
 
@@ -40,7 +42,12 @@ class CollectorClassValidator {
     if (inputType == null) {
       throw boom("could not resolve all type parameters");
     }
-    return solve(inputType, collectorType, r_result);
+    Either<List<TypeMirror>, String> solution = new Solver(basicInfo, collectorClass).solve(singletonList(r_result));
+    if (solution instanceof Right) {
+      throw boom(((Right<List<TypeMirror>, String>) solution).value());
+    }
+    return new CustomCollector(tool(), inputType, collectorClass, collectorType.isSupplier(),
+        ((Left<List<TypeMirror>, String>) solution).value());
   }
 
   private TypeTool tool() {
@@ -49,25 +56,5 @@ class CollectorClassValidator {
 
   private ValidationException boom(String message) {
     return COLLECTOR.boom(basicInfo, message);
-  }
-
-  private CustomCollector solve(
-      TypeMirror inputType,
-      ReferencedType collectorType,
-      Map<String, TypeMirror> r_result) {
-    List<? extends TypeParameterElement> typeParameters = collectorClass.getTypeParameters();
-    List<TypeMirror> solution = new ArrayList<>(typeParameters.size());
-    for (TypeParameterElement typeParameter : typeParameters) {
-      String param = typeParameter.toString();
-      TypeMirror rMirror = r_result.get(param);
-      if (rMirror == null) {
-        throw boom("invalid bounds");
-      }
-      if (tool().isOutOfBounds(rMirror, typeParameter.getBounds())) {
-        throw boom("invalid bounds");
-      }
-      solution.add(rMirror);
-    }
-    return new CustomCollector(tool(), inputType, collectorClass, collectorType.isSupplier(), solution);
   }
 }
