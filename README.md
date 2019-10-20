@@ -16,7 +16,7 @@ abstract class MyArguments {
 }
 ````
 
-If your build tool is properly configured, the presence of this annotated class
+If your build tool is set up correctly, the presence of this annotated class
 will trigger code generation at compile time.
 Specifically, a class named `MyArguments_Parser`
 will be generated. The result, which can be seen
