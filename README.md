@@ -15,11 +15,11 @@ abstract class MyArguments {
 }
 ````
 
-The mere presence of this annotated class
-triggers the code generation at compile time.
-A derived class `MyArguments_Parser`
-will be generated.
-The generated code, which can be seen [here,](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
+If your build tool is properly configured, the presence of this annotated class
+will trigger code generation at compile time.
+Specifically, a class named `MyArguments_Parser`
+will be generated. The result, which can be seen
+[here,](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
 can be used in a *main* method:
 
 ````java
