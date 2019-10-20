@@ -310,8 +310,7 @@ final class Tokenizer {
       spec.addStatement("$N.println($N.getMessage())", err, e);
       spec.addStatement("$N.decrementIndent()", err);
       spec.addStatement("$N.println()", err);
-      spec.addStatement("$N.println($T.format($S, $S))", err, String.class,
-          "Try '%s --help' for more information.", context.programName());
+      spec.addStatement("$N.println($S)", err, "Try '--help' for more information.");
       spec.addStatement("$N.println()", err);
     } else {
       spec.addStatement("printUsage()");
