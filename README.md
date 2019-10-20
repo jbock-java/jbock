@@ -1,6 +1,7 @@
 jbock
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
-is a simple and convenient ~~application server~~ *command line parser.*
+is a convenient *command line parser* that generates simple Java code
+rather than using reflection.
 The command line options are defined as abstract methods:
 
 ````java
