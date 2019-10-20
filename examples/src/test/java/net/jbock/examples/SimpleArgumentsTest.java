@@ -30,7 +30,7 @@ class SimpleArgumentsTest {
         "Error:",
         "  Invalid option: --help",
         "",
-        "Try 'SimpleArguments --help' for more information.",
+        "Try '--help' for more information.",
         "",
         "");
   }
