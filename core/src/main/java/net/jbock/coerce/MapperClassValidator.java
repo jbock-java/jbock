@@ -1,22 +1,22 @@
 package net.jbock.coerce;
 
+import net.jbock.coerce.either.Either;
+import net.jbock.coerce.either.Left;
+import net.jbock.coerce.either.Right;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
-import net.jbock.coerce.reference.ExpectedType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
-import java.util.LinkedHashMap;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.reference.ExpectedType.MAPPER;
@@ -47,67 +47,20 @@ final class MapperClassValidator {
     if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    return new Solver(functionType, mergeResult(MAPPER, basicInfo, t_result.get(), r_result.get())).solve();
+    Either<List<TypeMirror>, String> solution = new Solver(basicInfo, mapperClass)
+        .solve(Arrays.asList(t_result.get(), r_result.get()));
+    if (solution instanceof Right) {
+      throw boom(((Right<List<TypeMirror>, String>) solution).value());
+    }
+    return MapperType.create(basicInfo.tool(), functionType.isSupplier(), mapperClass,
+        ((Left<List<TypeMirror>, String>) solution).value());
   }
 
   private ValidationException boom(String message) {
-    return basicInfo.asValidationException(String.format("There is a problem with the mapper class: %s.", message));
+    return MAPPER.boom(basicInfo, message);
   }
 
   private TypeTool tool() {
     return basicInfo.tool();
-  }
-
-  private class Solver {
-
-    final ReferencedType functionType;
-    final Map<String, TypeMirror> result;
-
-    Solver(ReferencedType functionType, Map<String, TypeMirror> result) {
-      this.functionType = functionType;
-      this.result = result;
-    }
-
-    ReferenceMapperType solve() {
-      List<? extends TypeParameterElement> typeParameters = mapperClass.getTypeParameters();
-      List<TypeMirror> solution = typeParameters.stream()
-          .map(p -> MapperClassValidator.getSolution(MAPPER, basicInfo, result, p))
-          .collect(Collectors.toList());
-      return MapperType.create(tool(), functionType.isSupplier(), mapperClass, solution);
-    }
-  }
-
-  public static TypeMirror getSolution(
-      ExpectedType expectedType,
-      BasicInfo basicInfo,
-      Map<String, TypeMirror> result,
-      TypeParameterElement typeParameter) {
-    TypeMirror t = result.get(typeParameter.toString());
-    List<? extends TypeMirror> bounds = typeParameter.getBounds();
-    if (t != null) {
-      if (basicInfo.tool().isOutOfBounds(t, bounds)) {
-        throw expectedType.boom(basicInfo, "invalid bounds");
-      }
-    }
-    return t;
-  }
-
-  public static Map<String, TypeMirror> mergeResult(
-      ExpectedType expectedType,
-      BasicInfo basicInfo,
-      Map<String, TypeMirror>... results) {
-    Map<String, TypeMirror> result = new LinkedHashMap<>();
-    for (Map<String, TypeMirror> m : results) {
-      for (Map.Entry<String, TypeMirror> entry : m.entrySet()) {
-        TypeMirror current = result.get(entry.getKey());
-        if (current != null) {
-          if (!basicInfo.tool().isSameType(current, entry.getValue())) {
-            throw expectedType.boom(basicInfo, "invalid bounds");
-          }
-        }
-        result.put(entry.getKey(), entry.getValue());
-      }
-    }
-    return result;
   }
 }
