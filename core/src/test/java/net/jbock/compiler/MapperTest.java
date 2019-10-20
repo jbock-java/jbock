@@ -54,7 +54,7 @@ class MapperTest {
   }
 
   @Test
-  void validMapperWithTypeParameters() {
+  void validMapperWithTypeParameter() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
@@ -66,6 +66,27 @@ class MapperTest {
         "  static class IdentityMapper<E> implements Function<E, E> {",
         "    public E apply(E e) {",
         "      return e;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void validMapperWithTypeParameters() {
+    JavaFileObject javaFile = fromSource(
+        "@CommandLineArguments",
+        "abstract class Arguments {",
+        "",
+        "  @Parameter(shortName = 'x',",
+        "             mappedBy = IdentityMapper.class)",
+        "  abstract String string();",
+        "",
+        "  static class IdentityMapper<E, F> implements Function<E, F> {",
+        "    public F apply(E e) {",
+        "      return null;",
         "    }",
         "  }",
         "}");

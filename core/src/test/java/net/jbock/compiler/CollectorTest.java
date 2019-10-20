@@ -613,7 +613,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: could not infer type parameters.");
+        .withErrorContaining("There is a problem with the mapper class: invalid bounds");
   }
 
   @Test

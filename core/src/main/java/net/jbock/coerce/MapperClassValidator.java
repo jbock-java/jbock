@@ -86,12 +86,14 @@ final class MapperClassValidator {
         if (tool().isOutOfBounds(tool().asType(String.class), bounds)) {
           throw boom("invalid bounds");
         }
-        if (r != null && !tool().isSameType(t, r)) {
-          throw boom("could not infer type parameters");
-        }
       }
       if (r != null) {
         if (tool().isOutOfBounds(r, bounds)) {
+          throw boom("invalid bounds");
+        }
+      }
+      if (t != null && r != null) {
+        if (!tool().isSameType(t, r)) {
           throw boom("invalid bounds");
         }
       }

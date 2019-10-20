@@ -60,14 +60,13 @@ class CollectorClassValidator {
     for (TypeParameterElement typeParameter : typeParameters) {
       String param = typeParameter.toString();
       TypeMirror rMirror = r_result.get(param);
-      TypeMirror s = null;
-      if (rMirror != null) {
-        if (tool().isOutOfBounds(rMirror, typeParameter.getBounds())) {
-          throw boom("invalid bounds");
-        }
-        s = rMirror;
+      if (rMirror == null) {
+        throw boom("invalid bounds");
       }
-      solution.add(s);
+      if (tool().isOutOfBounds(rMirror, typeParameter.getBounds())) {
+        throw boom("invalid bounds");
+      }
+      solution.add(rMirror);
     }
     return new CustomCollector(tool(), inputType, collectorClass, collectorType.isSupplier(), solution);
   }

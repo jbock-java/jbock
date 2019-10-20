@@ -125,6 +125,11 @@ public final class MapperClassAnalyzer {
           return Either.right("invalid bounds");
         }
       }
+      if (t != null && r != null) {
+        if (!tool().isSameType(t, r)) {
+          return Either.right("invalid bounds");
+        }
+      }
       return Stream.of(t, r)
           .filter(Objects::nonNull)
           .map(Either::<TypeMirror, String>left)
