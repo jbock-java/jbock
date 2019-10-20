@@ -14,11 +14,9 @@ import javax.lang.model.type.TypeMirror;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.reference.ExpectedType.MAPPER;
@@ -49,7 +47,7 @@ final class MapperClassValidator {
     if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    return new Solver(functionType, t_result.get(), r_result.get()).solve();
+    return new Solver(functionType, mergeResult(MAPPER, basicInfo, t_result.get(), r_result.get())).solve();
   }
 
   private ValidationException boom(String message) {
@@ -63,42 +61,35 @@ final class MapperClassValidator {
   private class Solver {
 
     final ReferencedType functionType;
-    final Map<String, TypeMirror> t_result;
-    final Map<String, TypeMirror> r_result;
+    final Map<String, TypeMirror> result;
 
-    Solver(ReferencedType functionType, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
+    Solver(ReferencedType functionType, Map<String, TypeMirror> result) {
       this.functionType = functionType;
-      this.t_result = t_result;
-      this.r_result = r_result;
+      this.result = result;
     }
 
     ReferenceMapperType solve() {
       List<? extends TypeParameterElement> typeParameters = mapperClass.getTypeParameters();
       List<TypeMirror> solution = typeParameters.stream()
-          .map(this::getSolution)
+          .map(p -> MapperClassValidator.getSolution(MAPPER, basicInfo, result, p))
           .collect(Collectors.toList());
       return MapperType.create(tool(), functionType.isSupplier(), mapperClass, solution);
     }
+  }
 
-    TypeMirror getSolution(TypeParameterElement typeParameter) {
-      TypeMirror t = t_result.get(typeParameter.toString());
-      TypeMirror r = r_result.get(typeParameter.toString());
-      List<? extends TypeMirror> bounds = typeParameter.getBounds();
-      if (r != null) {
-        if (tool().isOutOfBounds(r, bounds)) {
-          throw boom("invalid bounds");
-        }
+  public static TypeMirror getSolution(
+      ExpectedType expectedType,
+      BasicInfo basicInfo,
+      Map<String, TypeMirror> result,
+      TypeParameterElement typeParameter) {
+    TypeMirror t = result.get(typeParameter.toString());
+    List<? extends TypeMirror> bounds = typeParameter.getBounds();
+    if (t != null) {
+      if (basicInfo.tool().isOutOfBounds(t, bounds)) {
+        throw expectedType.boom(basicInfo, "invalid bounds");
       }
-      if (t != null && r != null) {
-        if (!tool().isSameType(t, r)) {
-          throw boom("invalid bounds");
-        }
-      }
-      return Stream.of(t, r)
-          .filter(Objects::nonNull)
-          .findFirst()
-          .orElseThrow(() -> boom("could not infer all type parameters"));
     }
+    return t;
   }
 
   public static Map<String, TypeMirror> mergeResult(
@@ -108,9 +99,9 @@ final class MapperClassValidator {
     Map<String, TypeMirror> result = new LinkedHashMap<>();
     for (Map<String, TypeMirror> m : results) {
       for (Map.Entry<String, TypeMirror> entry : m.entrySet()) {
-        TypeMirror typeMirror = m.get(entry.getKey());
-        if (typeMirror != null) {
-          if (!basicInfo.tool().isSameType(typeMirror, entry.getValue())) {
+        TypeMirror current = result.get(entry.getKey());
+        if (current != null) {
+          if (!basicInfo.tool().isSameType(current, entry.getValue())) {
             throw expectedType.boom(basicInfo, "invalid bounds");
           }
         }
