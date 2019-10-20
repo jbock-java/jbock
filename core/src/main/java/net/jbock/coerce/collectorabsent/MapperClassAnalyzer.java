@@ -1,6 +1,7 @@
 package net.jbock.coerce.collectorabsent;
 
 import net.jbock.coerce.BasicInfo;
+import net.jbock.coerce.Solver;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
@@ -11,15 +12,12 @@ import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.stream.Stream;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.reference.ExpectedType.MAPPER;
@@ -51,85 +49,19 @@ public final class MapperClassAnalyzer {
       return Either.right(failure(String.format("The supplied function must take a String argument, but takes %s", t)));
     }
     Optional<Map<String, TypeMirror>> r_result = tool().unify(expectedReturnType, r);
-    if (r_result.isPresent()) {
-      if (!checkCompat(t_result.get(), r_result.get())) {
-        return Either.right(failure("could not infer type parameters"));
-      }
-    }
     if (!r_result.isPresent()) {
       return Either.right(failure(String.format("The mapper should return %s but returns %s", expectedReturnType, r)));
     }
-    Either<ReferenceMapperType, String> solve = new Solver(functionType, t_result.get(), r_result.get()).solve();
+    Either<List<TypeMirror>, String> solve = new Solver(basicInfo, mapperClass)
+        .solve(Arrays.asList(t_result.get(), r_result.get()));
     if (solve instanceof Right) {
-      return Either.right(failure(((Right<ReferenceMapperType, String>) solve).value()));
+      return Either.right(failure(((Right<List<TypeMirror>, String>) solve).value()));
     }
-    return Either.left(((Left<ReferenceMapperType, String>) solve).value());
-  }
-
-  private boolean checkCompat(Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
-    if (t_result.isEmpty()) {
-      return true;
-    }
-    Map.Entry<String, TypeMirror> tEntry = t_result.entrySet().iterator().next();
-    String key = tEntry.getKey();
-    TypeMirror tSolution = tEntry.getValue();
-    TypeMirror rSolution = r_result.get(key);
-    if (rSolution == null) {
-      return true;
-    }
-    return tool().isSameType(tSolution, rSolution);
+    return Either.left(MapperType.create(tool(), functionType.isSupplier(), mapperClass,
+        ((Left<List<TypeMirror>, String>) solve).value()));
   }
 
   private TypeTool tool() {
     return basicInfo.tool();
-  }
-
-  private class Solver {
-
-    final ReferencedType functionType;
-    final Map<String, TypeMirror> t_result;
-    final Map<String, TypeMirror> r_result;
-
-    Solver(
-        ReferencedType functionType,
-        Map<String, TypeMirror> t_result,
-        Map<String, TypeMirror> r_result) {
-      this.functionType = functionType;
-      this.t_result = t_result;
-      this.r_result = r_result;
-    }
-
-    Either<ReferenceMapperType, String> solve() {
-      List<TypeMirror> solution = new ArrayList<>();
-      for (TypeParameterElement typeMirror : mapperClass.getTypeParameters()) {
-        Either<TypeMirror, String> either = getSolution(typeMirror);
-        if (either instanceof Right) {
-          return Either.right(((Right<TypeMirror, String>) either).value());
-        }
-        solution.add(((Left<TypeMirror, String>) either).value());
-      }
-      return Either.left(MapperType.create(tool(), functionType.isSupplier(), mapperClass, solution));
-    }
-
-    Either<TypeMirror, String> getSolution(TypeParameterElement typeParameter) {
-      TypeMirror t = t_result.get(typeParameter.toString());
-      TypeMirror r = r_result.get(typeParameter.toString());
-      List<? extends TypeMirror> bounds = typeParameter.getBounds();
-      if (r != null) {
-        if (tool().isOutOfBounds(r, bounds)) {
-          return Either.right("invalid bounds");
-        }
-      }
-      if (t != null && r != null) {
-        if (!tool().isSameType(t, r)) {
-          return Either.right("invalid bounds");
-        }
-      }
-      return Stream.of(t, r)
-          .filter(Objects::nonNull)
-          .map(Either::<TypeMirror, String>left)
-          .findFirst()
-          .orElseGet(() -> Either.right("could not infer all type parameters"));
-    }
   }
 }
