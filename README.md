@@ -60,8 +60,10 @@ using the following "matching" rules (upper left corner applies for both paramet
 <table><!-- Mapper, no collector-->
 <tr><td><code>R</code>                        </td><td><i>required</i></td></tr>
 <tr><td><code>Optional&lt;R&gt;</code>        </td><td><i>optional</i></td></tr>
-<tr><td><code>OptionalInt</code> (if mapper returns <code>Integer</code>)         </td><td><i>optional</i></td></tr>
 <tr><td><code>List&lt;R&gt;</code>            </td><td><i>repeatable</i></td></tr>
+<tr><td><code>OptionalInt</code> (if <code>R == Integer</code>)         </td><td><i>optional</i></td></tr>
+<tr><td><code>OptionalLong</code> (if <code>R == Long</code>)         </td><td><i>optional</i></td></tr>
+<tr><td><code>OptionalDouble</code> (if <code>R == Double</code>)         </td><td><i>optional</i></td></tr>
 </table>
 </td>
 </tr>
