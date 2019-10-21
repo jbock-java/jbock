@@ -34,7 +34,8 @@ assertEquals(Paths.get("file.txt"), args.path());
 
 In the example above, note that `path` is a required parameter,
 and `verbosity` is optional.
-This is determined by the parameter type, using the following rule:
+This is determined by the parameter type,
+using the following rule (upper left corner applies):
 
 <table style="border-collapse: collapse">
 <tr>
