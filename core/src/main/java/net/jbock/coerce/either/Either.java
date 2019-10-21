@@ -12,18 +12,18 @@ public abstract class Either<L, R> {
     return new Right<>(value);
   }
 
-  public <A, B> Either<A, B> map(Function<L, A> leftFunction, Function<R, B> rightFunction) {
+  public <L2, R2> Either<L2, R2> map(Function<L, L2> leftFunction, Function<R, R2> rightFunction) {
     if (this instanceof Left) {
       return Either.left(leftFunction.apply(((Left<L, R>) this).value()));
     }
     return Either.right(rightFunction.apply(((Right<L, R>) this).value()));
   }
 
-  public <A, B> Either<A, B> flatRightMap(Function<L, A> f1, Function<R, Either<A, B>> f2) {
+  public <R2> Either<L, R2> map(Function<R, Either<L, R2>> rightFunction) {
     if (this instanceof Right) {
-      return f2.apply(((Right<L, R>) this).value());
+      return rightFunction.apply(((Right<L, R>) this).value());
     }
-    return Either.left(f1.apply(((Left<L, R>) this).value()));
+    return Either.left(((Left<L, R>) this).value());
   }
 
   public R orElseThrow(Function<L, ? extends RuntimeException> f) {

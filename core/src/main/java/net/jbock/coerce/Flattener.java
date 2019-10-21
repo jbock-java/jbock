@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Function;
 
 public class Flattener {
 
@@ -30,7 +29,7 @@ public class Flattener {
    */
   public Either<String, List<TypeMirror>> getTypeParameters(List<Map<String, TypeMirror>> partialSolutions) {
     Either<String, Map<String, TypeMirror>> result = mergeResult(partialSolutions);
-    return result.flatRightMap(Function.identity(), this::getTypeParameters);
+    return result.map(this::getTypeParameters);
   }
 
   Either<String, List<TypeMirror>> getTypeParameters(Map<String, TypeMirror> solution) {
