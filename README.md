@@ -50,20 +50,20 @@ using the following "matching" rules (upper left corner applies for both paramet
 <td>
 <table><!-- No mapper, no collector-->
 <tr><td><code>boolean | Boolean</code>        </td><td><i>flag*</i></td></tr>
+<tr><td><code>X</code>                        </td><td><i>required</i></td></tr>
 <tr><td><code>Optional&lt;X&gt;</code>        </td><td><i>optional</i></td></tr>
 <tr><td><code>OptionalInt</code> etc.         </td><td><i>optional</i></td></tr>
 <tr><td><code>List&lt;X&gt;</code>            </td><td><i>repeatable</i></td></tr>
-<tr><td><code>X</code>                        </td><td><i>required</i></td></tr>
 </table>
 </td>
 <td>
 <table><!-- Mapper, no collector-->
 <tr><td><code>R</code>                        </td><td><i>required</i></td></tr>
 <tr><td><code>Optional&lt;R&gt;</code>        </td><td><i>optional</i></td></tr>
-<tr><td><code>List&lt;R&gt;</code>            </td><td><i>repeatable</i></td></tr>
 <tr><td><code>OptionalInt</code> (if <code>R == Integer</code>)         </td><td><i>optional</i></td></tr>
 <tr><td><code>OptionalLong</code> (if <code>R == Long</code>)         </td><td><i>optional</i></td></tr>
 <tr><td><code>OptionalDouble</code> (if <code>R == Double</code>)         </td><td><i>optional</i></td></tr>
+<tr><td><code>List&lt;R&gt;</code>            </td><td><i>repeatable</i></td></tr>
 </table>
 </td>
 </tr>
