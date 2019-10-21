@@ -59,6 +59,7 @@ using the following rule (upper left corner applies for both parameters):
 <td>
 <table><!-- Mapper, no collector-->
 <tr><td><code>Optional&lt;R&gt;</code>        </td><td><i>optional</i></td></tr>
+<tr><td><code>OptionalInt</code> etc.         </td><td><i>optional</i></td></tr>
 <tr><td><code>List&lt;R&gt;</code>            </td><td><i>repeatable</i></td></tr>
 <tr><td><code>R</code>                        </td><td><i>required</i></td></tr>
 </table>
