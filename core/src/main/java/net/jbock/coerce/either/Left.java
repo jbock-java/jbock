@@ -4,28 +4,38 @@ import java.util.function.Function;
 
 public class Left<L, R> extends Either<L, R> {
 
-  private final L value;
+  private final L left;
 
-  Left(L a) {
-    value = a;
+  Left(L left) {
+    this.left = left;
   }
 
   public L value() {
-    return value;
+    return left;
   }
 
   @Override
   public <L2, R2> Either<L2, R2> map(Function<L, L2> leftFunction, Function<R, R2> rightFunction) {
-    return left(leftFunction.apply(value));
+    return left(leftFunction.apply(left));
   }
 
   @Override
-  public <R2> Either<L, R2> map(Function<R, Either<L, R2>> rightFunction) {
-    return left(value);
+  public <R2> Either<L, R2> map(Function<R, R2> rightFunction) {
+    return left(left);
   }
 
   @Override
-  public R orElseThrow(Function<L, ? extends RuntimeException> f) {
-    throw f.apply(value);
+  public <R2> Either<L, R2> flatMap(Function<R, Either<L, R2>> rightFunction) {
+    return left(left);
+  }
+
+  @Override
+  public R orElseThrow(Function<L, ? extends Throwable> f) {
+    throw sneakyThrow(f.apply(left));
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <T extends Throwable> RuntimeException sneakyThrow(Throwable t) throws T {
+    throw (T) t;
   }
 }

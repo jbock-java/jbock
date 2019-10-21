@@ -52,7 +52,7 @@ final class MapperClassValidator {
   }
 
   private ValidationException boom(String message) {
-    return MAPPER.boom(basicInfo, message);
+    return basicInfo.asValidationException(MAPPER.boom(message));
   }
 
   private TypeTool tool() {

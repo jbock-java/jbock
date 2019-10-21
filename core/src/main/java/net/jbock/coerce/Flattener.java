@@ -2,7 +2,6 @@ package net.jbock.coerce;
 
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
-import net.jbock.coerce.either.Right;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
@@ -29,7 +28,7 @@ public class Flattener {
    */
   public Either<String, List<TypeMirror>> getTypeParameters(List<Map<String, TypeMirror>> partialSolutions) {
     Either<String, Map<String, TypeMirror>> result = mergeResult(partialSolutions);
-    return result.map(this::getTypeParameters);
+    return result.flatMap(this::getTypeParameters);
   }
 
   Either<String, List<TypeMirror>> getTypeParameters(Map<String, TypeMirror> solution) {
@@ -40,7 +39,7 @@ public class Flattener {
       if (resolved instanceof Left) {
         return Either.left(((Left<String, TypeMirror>) resolved).value());
       }
-      outcome.add(((Right<String, TypeMirror>) resolved).value());
+      outcome.add(resolved.orElseThrow(left -> new AssertionError()));
     }
     return Either.right(outcome);
   }

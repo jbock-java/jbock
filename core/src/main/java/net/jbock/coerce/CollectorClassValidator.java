@@ -50,6 +50,6 @@ class CollectorClassValidator {
   }
 
   private ValidationException boom(String message) {
-    return COLLECTOR.boom(basicInfo, message);
+    return basicInfo.asValidationException(COLLECTOR.boom(message));
   }
 }
