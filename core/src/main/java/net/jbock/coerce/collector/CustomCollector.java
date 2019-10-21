@@ -40,12 +40,12 @@ public class CustomCollector extends AbstractCollector {
     return supplier;
   }
 
-  public List<TypeMirror> solution() {
+  private List<TypeMirror> solution() {
     return solution;
   }
 
   @Override
-  public CodeBlock createCollector() {
+  public CodeBlock collectExpr() {
     return CodeBlock.of("new $T$L()$L",
         tool.erasure(collectorType()),
         getTypeParameterList(solution()),

@@ -18,5 +18,5 @@ public abstract class AbstractCollector {
     return inputType;
   }
 
-  public abstract CodeBlock createCollector();
+  public abstract CodeBlock collectExpr();
 }

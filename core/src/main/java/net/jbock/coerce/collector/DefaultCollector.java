@@ -16,7 +16,7 @@ public class DefaultCollector extends AbstractCollector {
   }
 
   @Override
-  public CodeBlock createCollector() {
+  public CodeBlock collectExpr() {
     return CodeBlock.of("$T.toList()", Collectors.class);
   }
 }

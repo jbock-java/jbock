@@ -50,7 +50,28 @@ public final class Coercion {
 
   public static Coercion getCoercion(
       BasicInfo basicInfo,
-      Optional<AbstractCollector> collector,
+      AbstractCollector collector,
+      MapperType mapperType,
+      Function<ParameterSpec, CodeBlock> extractExpr,
+      TypeMirror constructorParamType,
+      ParameterType parameterType) {
+    return getCoercion(basicInfo, collector.collectExpr(),
+        mapperType, extractExpr, constructorParamType, parameterType);
+  }
+
+  public static Coercion getCoercion(
+      BasicInfo basicInfo,
+      MapperType mapperType,
+      Function<ParameterSpec, CodeBlock> extractExpr,
+      TypeMirror constructorParamType,
+      ParameterType parameterType) {
+    return getCoercion(basicInfo, CodeBlock.builder().build(),
+        mapperType, extractExpr, constructorParamType, parameterType);
+  }
+
+  private static Coercion getCoercion(
+      BasicInfo basicInfo,
+      CodeBlock collectExpr,
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType,
@@ -58,8 +79,7 @@ public final class Coercion {
     CodeBlock mapExpr = mapperType.mapExpr();
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
-    CodeBlock collectorInfo = collector.map(AbstractCollector::createCollector).orElse(CodeBlock.builder().build());
-    return new Coercion(collectorInfo, mapExpr,
+    return new Coercion(collectExpr, mapExpr,
         constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), parameterType, basicInfo.parameterName());
   }
 
