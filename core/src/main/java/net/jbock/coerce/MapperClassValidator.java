@@ -1,8 +1,5 @@
 package net.jbock.coerce;
 
-import net.jbock.coerce.either.Either;
-import net.jbock.coerce.either.Left;
-import net.jbock.coerce.either.Right;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.coerce.reference.ReferenceTool;
@@ -47,13 +44,11 @@ final class MapperClassValidator {
     if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    Either<List<TypeMirror>, String> typeParameters = new Flattener(basicInfo, mapperClass)
-        .getTypeParameters(Arrays.asList(t_result.get(), r_result.get()));
-    if (typeParameters instanceof Right) {
-      throw boom(((Right<List<TypeMirror>, String>) typeParameters).value());
-    }
-    return MapperType.create(basicInfo.tool(), functionType.isSupplier(), mapperClass,
-        ((Left<List<TypeMirror>, String>) typeParameters).value());
+    List<TypeMirror> typeParameters = new Flattener(basicInfo, mapperClass)
+        .getTypeParameters(Arrays.asList(t_result.get(), r_result.get()))
+        .orElseThrow(this::boom);
+    return MapperType.create(basicInfo.tool(), functionType.isSupplier(),
+        mapperClass, typeParameters);
   }
 
   private ValidationException boom(String message) {

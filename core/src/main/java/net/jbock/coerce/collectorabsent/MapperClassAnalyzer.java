@@ -3,8 +3,6 @@ package net.jbock.coerce.collectorabsent;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Flattener;
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.either.Left;
-import net.jbock.coerce.either.Right;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.coerce.reference.ReferenceTool;
@@ -14,7 +12,6 @@ import net.jbock.compiler.TypeTool;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
@@ -34,10 +31,6 @@ public final class MapperClassAnalyzer {
     this.mapperClass = mapperClass;
   }
 
-  private static MapperFailure failure(String message) {
-    return new MapperFailure(message);
-  }
-
   public Either<ReferenceMapperType, MapperFailure> checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
     ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass)
@@ -46,22 +39,23 @@ public final class MapperClassAnalyzer {
     TypeMirror r = functionType.expectedType().typeArguments().get(1);
     Optional<Map<String, TypeMirror>> t_result = tool().unify(tool().asType(String.class), t);
     if (!t_result.isPresent()) {
-      return Either.right(failure(String.format("The supplied function must take a String argument, but takes %s", t)));
+      return failure(String.format("The supplied function must take a String argument, but takes %s", t));
     }
     Optional<Map<String, TypeMirror>> r_result = tool().unify(expectedReturnType, r);
     if (!r_result.isPresent()) {
-      return Either.right(failure(String.format("The mapper should return %s but returns %s", expectedReturnType, r)));
+      return failure(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    Either<List<TypeMirror>, String> typeParameters = new Flattener(basicInfo, mapperClass)
-        .getTypeParameters(Arrays.asList(t_result.get(), r_result.get()));
-    if (typeParameters instanceof Right) { // TODO Either.map?
-      return Either.right(failure(((Right<List<TypeMirror>, String>) typeParameters).value()));
-    }
-    return Either.left(MapperType.create(tool(), functionType.isSupplier(), mapperClass,
-        ((Left<List<TypeMirror>, String>) typeParameters).value()));
+    return new Flattener(basicInfo, mapperClass)
+        .getTypeParameters(Arrays.asList(t_result.get(), r_result.get()))
+        .map(typeParameters -> MapperType.create(tool(), functionType.isSupplier(), mapperClass, typeParameters),
+            MapperFailure::new);
   }
 
   private TypeTool tool() {
     return basicInfo.tool();
+  }
+
+  private Either<ReferenceMapperType, MapperFailure> failure(String message) {
+    return Either.right(new MapperFailure(message));
   }
 }

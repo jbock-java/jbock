@@ -14,7 +14,7 @@ import java.util.function.Function;
 
 public final class Coercion {
 
-  private final Optional<CodeBlock> collectExpr;
+  private final CodeBlock collectExpr;
 
   // helper.build
   private final CodeBlock mapExpr;
@@ -32,7 +32,7 @@ public final class Coercion {
   private final ParamName paramName;
 
   Coercion(
-      Optional<CodeBlock> collectExpr,
+      CodeBlock collectExpr,
       CodeBlock mapExpr,
       ParameterSpec constructorParam,
       FieldSpec field,
@@ -58,7 +58,7 @@ public final class Coercion {
     CodeBlock mapExpr = mapperType.mapExpr();
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
-    Optional<CodeBlock> collectorInfo = collector.map(AbstractCollector::createCollector);
+    CodeBlock collectorInfo = collector.map(AbstractCollector::createCollector).orElse(CodeBlock.builder().build());
     return new Coercion(collectorInfo, mapExpr,
         constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), parameterType, basicInfo.parameterName());
   }
@@ -84,7 +84,7 @@ public final class Coercion {
   }
 
   public Optional<CodeBlock> collectExpr() {
-    return collectExpr;
+    return collectExpr.isEmpty() ? Optional.empty() : Optional.of(collectExpr);
   }
 
   public boolean isOptional() {

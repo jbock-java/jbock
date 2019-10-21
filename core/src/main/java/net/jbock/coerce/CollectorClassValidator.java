@@ -1,9 +1,6 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.collector.CustomCollector;
-import net.jbock.coerce.either.Either;
-import net.jbock.coerce.either.Left;
-import net.jbock.coerce.either.Right;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
@@ -41,12 +38,11 @@ class CollectorClassValidator {
     if (inputType == null) {
       throw boom("could not resolve all type parameters");
     }
-    Either<List<TypeMirror>, String> typeParameters = new Flattener(basicInfo, collectorClass).getTypeParameters(r_result);
-    if (typeParameters instanceof Right) {
-      throw boom(((Right<List<TypeMirror>, String>) typeParameters).value());
-    }
-    return new CustomCollector(tool(), inputType, collectorClass, collectorType.isSupplier(),
-        ((Left<List<TypeMirror>, String>) typeParameters).value());
+    List<TypeMirror> typeParameters = new Flattener(basicInfo, collectorClass)
+        .getTypeParameters(r_result)
+        .orElseThrow(this::boom);
+    return new CustomCollector(tool(), inputType, collectorClass,
+        collectorType.isSupplier(), typeParameters);
   }
 
   private TypeTool tool() {

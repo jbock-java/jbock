@@ -80,15 +80,15 @@ class Resolver {
 
   /**
    * Go from dog to animal, successively replacing type parameters on the way.
-   * The end result is a type that has the same erasure as the last segment's animal,
-   * and uses the same type parameter names as the first segment.
+   * The end result is a type that has the same erasure as the last animal,
+   * and uses the same type parameter names as the first dog.
    *
    * @param path a path of implements relations
    * @return a declared type that has the same erasure as the final animal
    *
    * <ul>
    *   <li>ascending from dog to animal</li>
-   *   <li>{@code path[1].dog} and {@code path[0].animal} have the same erasure</li>
+   *   <li>{@code path[n].animal} has the same erasure as {@code path[n + 1].dog}</li>
    * </ul>
    */
   private DeclaredType dogToAnimal(List<ImplementsRelation> path) {
