@@ -1,7 +1,7 @@
 [![core](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg?style=plastic&subject=jbock)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 [![annotations](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations/badge.svg?color=red&style=plastic&subject=jbock-annotations)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations)
 
-jbock is a convenient *command line parser* that generates Java source code,
+jbock is a *parser generator* that generates Java source code,
 rather than using reflection.
 The command line options are defined as abstract methods:
 
