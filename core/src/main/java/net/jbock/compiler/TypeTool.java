@@ -121,22 +121,22 @@ public class TypeTool {
    * @param solution for solving typevars in the input
    * @return the input type, with all typevars resolved. Wildcards remain unchanged.
    */
-  public TypeMirror substitute(TypeMirror input, Map<String, TypeMirror> solution) {
+  public Optional<? extends TypeMirror> substitute(TypeMirror input, Map<String, TypeMirror> solution) {
     if (input.getKind() == TypeKind.TYPEVAR) {
-      return solution.get(input.toString());
+      return Optional.ofNullable(solution.get(input.toString()));
     }
     return substitute(input.accept(AS_DECLARED, null), solution);
   }
 
-  public DeclaredType substitute(DeclaredType declaredType, Map<String, TypeMirror> solution) {
+  public Optional<DeclaredType> substitute(DeclaredType declaredType, Map<String, TypeMirror> solution) {
     DeclaredType result = subst(declaredType, solution);
     if (result == null) {
-      return null; // invalid
+      return Optional.empty(); // invalid
     }
     if (!isAssignableToTypeElement(result)) {
-      return null;
+      return Optional.empty();
     }
-    return result;
+    return Optional.of(result);
   }
 
   private DeclaredType subst(DeclaredType input, Map<String, TypeMirror> solution) {

@@ -16,6 +16,7 @@ import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static net.jbock.compiler.TypeTool.asDeclared;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -51,7 +52,8 @@ class TypeToolTest {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement string = elements.getTypeElement("java.lang.String");
-      TypeMirror substitute = tool.substitute(string.asType(), Collections.emptyMap());
+      TypeMirror substitute = tool.substitute(string.asType(), Collections.emptyMap())
+          .orElseThrow(AssertionError::new);
       assertNotNull(substitute);
     });
   }
@@ -67,10 +69,10 @@ class TypeToolTest {
       TypeTool tool = new TypeTool(elements, types);
       TypeMirror setOfE = elements.getTypeElement("a.Set").asType();
       TypeElement string = elements.getTypeElement("java.lang.String");
-      TypeMirror result = tool.substitute(
+      Optional<DeclaredType> result = tool.substitute(
           setOfE.accept(AS_DECLARED, null),
           Collections.singletonMap("E", string.asType()));
-      assertNull(result);
+      assertFalse(result.isPresent());
     });
   }
 
@@ -88,6 +90,7 @@ class TypeToolTest {
       DeclaredType result = tool.substitute(
           setOfE.accept(AS_DECLARED, null),
           Collections.singletonMap("E", boxInt.asType()))
+          .orElseThrow(AssertionError::new)
           .accept(AS_DECLARED, null);
       assertNotNull(result);
       assertTrue(types.isSameType(types.erasure(result), types.erasure(elements.getTypeElement("a.Set").asType())));

@@ -22,19 +22,19 @@ public class ReferenceTool<E> {
 
   private final BasicInfo basicInfo;
   private final TypeElement referencedClass;
-  private final ExpectedType<E> expectedClass;
+  private final ExpectedType<E> expectedType;
 
-  public ReferenceTool(ExpectedType<E> expectedClass, BasicInfo basicInfo, TypeElement referencedClass) {
-    this.expectedClass = expectedClass;
+  public ReferenceTool(ExpectedType<E> expectedType, BasicInfo basicInfo, TypeElement referencedClass) {
+    this.expectedType = expectedType;
     this.basicInfo = basicInfo;
     this.referencedClass = referencedClass;
-    this.resolver = new Resolver(basicInfo);
+    this.resolver = new Resolver(expectedType, basicInfo);
   }
 
   public ReferencedType<E> getReferencedType() {
     Optional<Declared<Supplier>> supplierType = resolver.typecheck(referencedClass, Supplier.class);
     if (!supplierType.isPresent()) {
-      Declared<E> expectedType = resolver.typecheck(referencedClass, expectedClass.expectedClass())
+      Declared<E> expectedType = resolver.typecheck(referencedClass, this.expectedType.expectedClass())
           .orElseThrow(this::unexpectedClassException);
       return new DirectType<>(checkRawType(expectedType));
     }
@@ -44,7 +44,7 @@ public class ReferenceTool<E> {
       throw unexpectedClassException();
     }
     DeclaredType suppliedType = asDeclared(supplied);
-    Optional<Declared<E>> directExpectation = resolver.typecheck(suppliedType, expectedClass.expectedClass());
+    Optional<Declared<E>> directExpectation = resolver.typecheck(suppliedType, expectedType.expectedClass());
     if (!directExpectation.isPresent() || !directExpectation.get().isDirect()) {
       throw unexpectedClassException();
     }
@@ -52,12 +52,12 @@ public class ReferenceTool<E> {
   }
 
   private ValidationException unexpectedClassException() {
-    return boom("not a " + expectedClass.simpleName() +
-        " or Supplier<" + expectedClass.simpleName() + ">");
+    return boom("not a " + expectedType.simpleName() +
+        " or Supplier<" + expectedType.simpleName() + ">");
   }
 
   private ValidationException rawTypeException() {
-    return boom("the " + expectedClass.simpleName().toLowerCase(Locale.US) +
+    return boom("the " + expectedType.simpleName().toLowerCase(Locale.US) +
         " type must be parameterized");
   }
 
@@ -70,7 +70,7 @@ public class ReferenceTool<E> {
 
   private ValidationException boom(String message) {
     return basicInfo.asValidationException(String.format("There is a problem with the " +
-        expectedClass.name().toLowerCase(Locale.US) + " class: %s.", message));
+        expectedType.name().toLowerCase(Locale.US) + " class: %s.", message));
   }
 
   private TypeTool tool() {

@@ -10,6 +10,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collector;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
@@ -34,14 +35,14 @@ class CollectorClassValidator {
     TypeMirror r = collectorType.typeArguments().get(2);
     Map<String, TypeMirror> r_result = tool().unify(basicInfo.originalReturnType(), r)
         .orElseThrow(() -> boom(String.format("The collector should return %s but returns %s", basicInfo.originalReturnType(), r)));
-    TypeMirror inputType = tool().substitute(t, r_result);
-    if (inputType == null) {
+    Optional<? extends TypeMirror> inputType = tool().substitute(t, r_result);
+    if (!inputType.isPresent()) {
       throw boom("could not resolve all type parameters");
     }
     List<TypeMirror> typeParameters = new Flattener(basicInfo, collectorClass)
         .getTypeParameters(r_result)
         .orElseThrow(this::boom);
-    return new CustomCollector(tool(), inputType, collectorClass,
+    return new CustomCollector(tool(), inputType.get(), collectorClass,
         collectorType.isSupplier(), typeParameters);
   }
 
