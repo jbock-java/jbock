@@ -1,14 +1,31 @@
 package net.jbock.coerce.either;
 
-public class Left<A, B> extends Either<A, B> {
+import java.util.function.Function;
 
-  private final A value;
+public class Left<L, R> extends Either<L, R> {
 
-  Left(A a) {
+  private final L value;
+
+  Left(L a) {
     value = a;
   }
 
-  public A value() {
+  public L value() {
     return value;
+  }
+
+  @Override
+  public <L2, R2> Either<L2, R2> map(Function<L, L2> leftFunction, Function<R, R2> rightFunction) {
+    return left(leftFunction.apply(value));
+  }
+
+  @Override
+  public <R2> Either<L, R2> map(Function<R, Either<L, R2>> rightFunction) {
+    return left(value);
+  }
+
+  @Override
+  public R orElseThrow(Function<L, ? extends RuntimeException> f) {
+    throw f.apply(value);
   }
 }
