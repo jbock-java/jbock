@@ -18,11 +18,11 @@ abstract class MyArguments {
 ````
 
 If your build tool is set up correctly, the presence of this annotated class
-will trigger code generation at compile time.
+will cause code to be generated at compile time.
 Specifically, a class named `MyArguments_Parser`
-will be generated. The result, which can be seen
-[here,](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
-can be used in a *main* method:
+will be generated, which can be seen
+[here.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
+It can be used in a *main* method:
 
 ````java
 String[] argv = { "-v2", "file.txt" }; // for example
