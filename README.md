@@ -49,17 +49,18 @@ using the following rule (upper left corner applies for both parameters):
 <td valign="top"><b>No<br/>collector<br/>defined</b></td>
 <td>
 <table><!-- No mapper, no collector-->
-<tr><td><code>boolean | Boolean</code>  </td><td><i>flag*</i></td></tr>
+<tr><td><code>boolean | Boolean</code>        </td><td><i>flag*</i></td></tr>
 <tr><td><code>Optional&lt;X&gt;</code>        </td><td><i>optional</i></td></tr>
+<tr><td><code>OptionalInt</code> etc.         </td><td><i>optional</i></td></tr>
 <tr><td><code>List&lt;X&gt;</code>            </td><td><i>repeatable</i></td></tr>
-<tr><td><code>X</code>                  </td><td><i>required</i></td></tr>
+<tr><td><code>X</code>                        </td><td><i>required</i></td></tr>
 </table>
 </td>
 <td>
 <table><!-- Mapper, no collector-->
-<tr><td><code>Optional&lt;R&gt;</code>   </td><td><i>optional</i></td></tr>
-<tr><td><code>List&lt;R&gt;</code>       </td><td><i>repeatable</i></td></tr>
-<tr><td><code>R</code>             </td><td><i>required</i></td></tr>
+<tr><td><code>Optional&lt;R&gt;</code>        </td><td><i>optional</i></td></tr>
+<tr><td><code>List&lt;R&gt;</code>            </td><td><i>repeatable</i></td></tr>
+<tr><td><code>R</code>                        </td><td><i>required</i></td></tr>
 </table>
 </td>
 </tr>
@@ -74,7 +75,6 @@ using the following rule (upper left corner applies for both parameters):
 where `X` is one of the
 "[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)",
 and `R` is the return type of the mapper.
-`OptionalInt` and friends can be used in place of `Optional<Integer>` etc.
 
 * [Detailed documentation](https://github.com/h908714124/jbock/blob/master/SPAGHETTI.md)
 * [Gradle example](https://github.com/h908714124/jbock-map-example)
