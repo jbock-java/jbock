@@ -30,8 +30,8 @@ class CollectorClassValidator {
     commonChecks(basicInfo, collectorClass, "collector");
     ReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, basicInfo, collectorClass)
         .getReferencedType();
-    TypeMirror t = collectorType.expectedType().typeArguments().get(0);
-    TypeMirror r = collectorType.expectedType().typeArguments().get(2);
+    TypeMirror t = collectorType.typeArguments().get(0);
+    TypeMirror r = collectorType.typeArguments().get(2);
     Map<String, TypeMirror> r_result = tool().unify(basicInfo.originalReturnType(), r)
         .orElseThrow(() -> boom(String.format("The collector should return %s but returns %s", basicInfo.originalReturnType(), r)));
     TypeMirror inputType = tool().substitute(t, r_result);

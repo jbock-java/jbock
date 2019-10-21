@@ -1,5 +1,8 @@
 package net.jbock.coerce.reference;
 
+import javax.lang.model.type.TypeMirror;
+import java.util.List;
+
 // mapper or collector
 public abstract class ReferencedType<E> {
 
@@ -13,5 +16,9 @@ public abstract class ReferencedType<E> {
 
   public Declared<E> expectedType() {
     return expectedType;
+  }
+
+  public List<? extends TypeMirror> typeArguments() {
+    return expectedType.typeArguments();
   }
 }

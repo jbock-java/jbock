@@ -33,8 +33,8 @@ public final class MapperClassValidator {
     commonChecks(basicInfo, mapperClass, "mapper");
     ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass)
         .getReferencedType();
-    TypeMirror t = functionType.expectedType().typeArguments().get(0);
-    TypeMirror r = functionType.expectedType().typeArguments().get(1);
+    TypeMirror t = functionType.typeArguments().get(0);
+    TypeMirror r = functionType.typeArguments().get(1);
     Optional<Map<String, TypeMirror>> t_result = tool().unify(tool().asType(String.class), t);
     if (!t_result.isPresent()) {
       return failure(String.format("The supplied function must take a String argument, but takes %s", t));
