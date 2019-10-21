@@ -7,7 +7,7 @@ import net.jbock.coerce.Coercion;
 import net.jbock.coerce.ParameterType;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
-import net.jbock.coerce.collectorabsent.MapperClassAnalyzer;
+import net.jbock.coerce.MapperClassValidator;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.mapper.ReferenceMapperType;
 
@@ -35,7 +35,7 @@ class Attempt {
   }
 
   Either<String, Coercion> findCoercion() {
-    Either<String, ReferenceMapperType> either = new MapperClassAnalyzer(basicInfo, expectedReturnType, mapperClass)
+    Either<String, ReferenceMapperType> either = new MapperClassValidator(basicInfo, expectedReturnType, mapperClass)
         .checkReturnType();
     return either.map(mapperType -> Coercion.getCoercion(basicInfo, collector(),
         mapperType, extractExpr, constructorParamType, parameterType));

@@ -84,7 +84,8 @@ public class CoercionProvider {
 
   private Coercion handleCollectorPresentMapperPresent(TypeElement mapperClass) {
     AbstractCollector collectorInfo = collectorInfo();
-    ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType();
+    ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType()
+        .orElseThrow(basicInfo::asValidationException);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
     return Coercion.getCoercion(basicInfo, Optional.of(collectorInfo), mapperType, extractExpr, constructorParamType, REPEATABLE);

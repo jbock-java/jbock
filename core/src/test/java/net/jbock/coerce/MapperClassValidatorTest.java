@@ -38,7 +38,8 @@ class MapperClassValidatorTest {
       DeclaredType expectedReturnType = TypeExpr.prepare(elements, types).parse("java.util.List<java.lang.Integer>");
 
       MapperType mapperType = new MapperClassValidator(basicInfo, expectedReturnType, mapperClass)
-          .checkReturnType();
+          .checkReturnType()
+          .orElseThrow(AssertionError::new);
       assertEquals(2, mapperType.solution().size());
       assertTrue(tool.isSameType(mapperType.solution().get(0), String.class));
       assertTrue(tool.isSameType(mapperType.solution().get(1), Integer.class));
