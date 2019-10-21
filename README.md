@@ -41,13 +41,13 @@ using the following rule (upper left corner applies):
 <table style="border-collapse: collapse">
 <tr>
 <td></td>
-<td><b>No mapper</b></td>
+<td><b>No mapper defined</b></td>
 <td><b>Mapper defined</b></td>
 </tr>
 <tr>
 <td valign="top"><b>No<br/>collector<br/>defined</b></td>
 <td>
-<table style="border-collapse: collapse; border: 1px solid black"><!-- No mapper, no collector-->
+<table><!-- No mapper, no collector-->
 <tr><td><code>boolean | Boolean</code>  </td><td><i>flag*</i></td></tr>
 <tr><td><code>Optional&lt;X&gt;</code>        </td><td><i>optional</i></td></tr>
 <tr><td><code>List&lt;X&gt;</code>            </td><td><i>repeatable</i></td></tr>
@@ -55,7 +55,7 @@ using the following rule (upper left corner applies):
 </table>
 </td>
 <td>
-<table style="border-collapse: collapse; border: 1px solid black"><!-- Mapper, no collector-->
+<table><!-- Mapper, no collector-->
 <tr><td><code>Optional&lt;R&gt;</code>   </td><td><i>optional</i></td></tr>
 <tr><td><code>List&lt;R&gt;</code>       </td><td><i>repeatable</i></td></tr>
 <tr><td><code>R</code>             </td><td><i>required</i></td></tr>
@@ -64,7 +64,7 @@ using the following rule (upper left corner applies):
 </tr>
 <tr>
 <td><b>Collector<br/>defined</b></td>
-<td colspan="2" style="text-align: center"><i>repeatable</i></td>
+<td colspan="2"><i>repeatable</i></td>
 </tr>
 </table>
 
