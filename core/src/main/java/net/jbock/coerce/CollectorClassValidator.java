@@ -15,7 +15,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collector;
 
-import static java.util.Collections.singletonList;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.reference.ExpectedType.COLLECTOR;
 
@@ -42,12 +41,12 @@ class CollectorClassValidator {
     if (inputType == null) {
       throw boom("could not resolve all type parameters");
     }
-    Either<List<TypeMirror>, String> solution = new Solver(basicInfo, collectorClass).solve(singletonList(r_result));
-    if (solution instanceof Right) {
-      throw boom(((Right<List<TypeMirror>, String>) solution).value());
+    Either<List<TypeMirror>, String> typeParameters = new Flattener(basicInfo, collectorClass).getTypeParameters(r_result);
+    if (typeParameters instanceof Right) {
+      throw boom(((Right<List<TypeMirror>, String>) typeParameters).value());
     }
     return new CustomCollector(tool(), inputType, collectorClass, collectorType.isSupplier(),
-        ((Left<List<TypeMirror>, String>) solution).value());
+        ((Left<List<TypeMirror>, String>) typeParameters).value());
   }
 
   private TypeTool tool() {

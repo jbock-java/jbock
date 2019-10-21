@@ -13,39 +13,42 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-public class Solver {
+public class Flattener {
 
   private final BasicInfo basicInfo;
   private final TypeElement targetElement;
 
-  public Solver(BasicInfo basicInfo, TypeElement targetElement) {
+  public Flattener(BasicInfo basicInfo, TypeElement targetElement) {
     this.targetElement = targetElement;
     this.basicInfo = basicInfo;
   }
 
   /**
-   * @param results named type parameters
+   * @param partialSolutions named type parameters
    * @return type parameters in the correct order for {@code targetElement}
    */
-  public Either<List<TypeMirror>, String> solve(List<Map<String, TypeMirror>> results) {
-    Either<Map<String, TypeMirror>, String> result = mergeResult(results);
+  public Either<List<TypeMirror>, String> getTypeParameters(List<Map<String, TypeMirror>> partialSolutions) {
+    Either<Map<String, TypeMirror>, String> result = mergeResult(partialSolutions);
     if (result instanceof Right) {
       return Either.right(((Right<Map<String, TypeMirror>, String>) result).value());
     }
-    Map<String, TypeMirror> value = ((Left<Map<String, TypeMirror>, String>) result).value();
+    return getTypeParameters(((Left<Map<String, TypeMirror>, String>) result).value());
+  }
+
+  public Either<List<TypeMirror>, String> getTypeParameters(Map<String, TypeMirror> solution) {
     List<? extends TypeParameterElement> typeParameters = targetElement.getTypeParameters();
     List<TypeMirror> outcome = new ArrayList<>();
     for (TypeParameterElement p : typeParameters) {
-      Either<TypeMirror, String> solution = getSolution(value, p);
-      if (solution instanceof Right) {
-        return Either.right(((Right<TypeMirror, String>) solution).value());
+      Either<TypeMirror, String> resolved = resolve(solution, p);
+      if (resolved instanceof Right) {
+        return Either.right(((Right<TypeMirror, String>) resolved).value());
       }
-      outcome.add(((Left<TypeMirror, String>) solution).value());
+      outcome.add(((Left<TypeMirror, String>) resolved).value());
     }
     return Either.left(outcome);
   }
 
-  private Either<TypeMirror, String> getSolution(Map<String, TypeMirror> result, TypeParameterElement typeParameter) {
+  private Either<TypeMirror, String> resolve(Map<String, TypeMirror> result, TypeParameterElement typeParameter) {
     TypeMirror m = result.get(typeParameter.toString());
     List<? extends TypeMirror> bounds = typeParameter.getBounds();
     if (m != null) {

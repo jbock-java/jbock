@@ -1,7 +1,7 @@
 package net.jbock.coerce.collectorabsent;
 
 import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.Solver;
+import net.jbock.coerce.Flattener;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
@@ -52,13 +52,13 @@ public final class MapperClassAnalyzer {
     if (!r_result.isPresent()) {
       return Either.right(failure(String.format("The mapper should return %s but returns %s", expectedReturnType, r)));
     }
-    Either<List<TypeMirror>, String> solution = new Solver(basicInfo, mapperClass)
-        .solve(Arrays.asList(t_result.get(), r_result.get()));
-    if (solution instanceof Right) {
-      return Either.right(failure(((Right<List<TypeMirror>, String>) solution).value()));
+    Either<List<TypeMirror>, String> typeParameters = new Flattener(basicInfo, mapperClass)
+        .getTypeParameters(Arrays.asList(t_result.get(), r_result.get()));
+    if (typeParameters instanceof Right) { // TODO Either.map?
+      return Either.right(failure(((Right<List<TypeMirror>, String>) typeParameters).value()));
     }
     return Either.left(MapperType.create(tool(), functionType.isSupplier(), mapperClass,
-        ((Left<List<TypeMirror>, String>) solution).value()));
+        ((Left<List<TypeMirror>, String>) typeParameters).value()));
   }
 
   private TypeTool tool() {

@@ -47,13 +47,13 @@ final class MapperClassValidator {
     if (!r_result.isPresent()) {
       throw boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
     }
-    Either<List<TypeMirror>, String> solution = new Solver(basicInfo, mapperClass)
-        .solve(Arrays.asList(t_result.get(), r_result.get()));
-    if (solution instanceof Right) {
-      throw boom(((Right<List<TypeMirror>, String>) solution).value());
+    Either<List<TypeMirror>, String> typeParameters = new Flattener(basicInfo, mapperClass)
+        .getTypeParameters(Arrays.asList(t_result.get(), r_result.get()));
+    if (typeParameters instanceof Right) {
+      throw boom(((Right<List<TypeMirror>, String>) typeParameters).value());
     }
     return MapperType.create(basicInfo.tool(), functionType.isSupplier(), mapperClass,
-        ((Left<List<TypeMirror>, String>) solution).value());
+        ((Left<List<TypeMirror>, String>) typeParameters).value());
   }
 
   private ValidationException boom(String message) {
