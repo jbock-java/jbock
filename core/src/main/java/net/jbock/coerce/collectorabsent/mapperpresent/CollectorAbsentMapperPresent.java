@@ -2,8 +2,8 @@ package net.jbock.coerce.collectorabsent.mapperpresent;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.collectorabsent.CanonicalOptional;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.collectorabsent.CanonicalOptional;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
@@ -50,17 +50,17 @@ public class CollectorAbsentMapperPresent {
 
   public Coercion findCoercion() {
     List<Attempt> attempts = getAttempts();
-    Either<Coercion, String> either = null;
+    Either<String, Coercion> either = null;
     for (Attempt attempt : attempts) {
       either = attempt.findCoercion();
-      if (either instanceof Left) {
-        return ((Left<Coercion, String>) either).value();
+      if (either instanceof Right) {
+        return ((Right<String, Coercion>) either).value();
       }
     }
     if (either == null) { // impossible: there is always the "exact match" attempt
       throw new AssertionError();
     }
-    String message = ((Right<Coercion, String>) either).value();
+    String message = ((Left<String, Coercion>) either).value();
     throw basicInfo.asValidationException(message);
   }
 

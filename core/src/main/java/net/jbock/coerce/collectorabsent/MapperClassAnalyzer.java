@@ -31,7 +31,7 @@ public final class MapperClassAnalyzer {
     this.mapperClass = mapperClass;
   }
 
-  public Either<ReferenceMapperType, MapperFailure> checkReturnType() {
+  public Either<MapperFailure, ReferenceMapperType> checkReturnType() {
     commonChecks(basicInfo, mapperClass, "mapper");
     ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass)
         .getReferencedType();
@@ -47,15 +47,15 @@ public final class MapperClassAnalyzer {
     }
     return new Flattener(basicInfo, mapperClass)
         .getTypeParameters(Arrays.asList(t_result.get(), r_result.get()))
-        .map(typeParameters -> MapperType.create(tool(), functionType.isSupplier(), mapperClass, typeParameters),
-            MapperFailure::new);
+        .map(MapperFailure::new,
+            typeParameters -> MapperType.create(tool(), functionType.isSupplier(), mapperClass, typeParameters));
   }
 
   private TypeTool tool() {
     return basicInfo.tool();
   }
 
-  private Either<ReferenceMapperType, MapperFailure> failure(String message) {
-    return Either.right(new MapperFailure(message));
+  private Either<MapperFailure, ReferenceMapperType> failure(String message) {
+    return Either.left(new MapperFailure(message));
   }
 }

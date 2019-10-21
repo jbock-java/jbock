@@ -28,49 +28,49 @@ public class Flattener {
    * @param partialSolutions named type parameters
    * @return type parameters in the correct order for {@code targetElement}
    */
-  public Either<List<TypeMirror>, String> getTypeParameters(List<Map<String, TypeMirror>> partialSolutions) {
-    Either<Map<String, TypeMirror>, String> result = mergeResult(partialSolutions);
-    return result.flatLeftMap(this::getTypeParameters, Function.identity());
+  public Either<String, List<TypeMirror>> getTypeParameters(List<Map<String, TypeMirror>> partialSolutions) {
+    Either<String, Map<String, TypeMirror>> result = mergeResult(partialSolutions);
+    return result.flatRightMap(Function.identity(), this::getTypeParameters);
   }
 
-  Either<List<TypeMirror>, String> getTypeParameters(Map<String, TypeMirror> solution) {
+  Either<String, List<TypeMirror>> getTypeParameters(Map<String, TypeMirror> solution) {
     List<? extends TypeParameterElement> typeParameters = targetElement.getTypeParameters();
     List<TypeMirror> outcome = new ArrayList<>();
     for (TypeParameterElement p : typeParameters) {
-      Either<TypeMirror, String> resolved = resolve(solution, p);
-      if (resolved instanceof Right) {
-        return Either.right(((Right<TypeMirror, String>) resolved).value());
+      Either<String, TypeMirror> resolved = resolve(solution, p);
+      if (resolved instanceof Left) {
+        return Either.left(((Left<String, TypeMirror>) resolved).value());
       }
-      outcome.add(((Left<TypeMirror, String>) resolved).value());
+      outcome.add(((Right<String, TypeMirror>) resolved).value());
     }
-    return Either.left(outcome);
+    return Either.right(outcome);
   }
 
-  private Either<TypeMirror, String> resolve(Map<String, TypeMirror> result, TypeParameterElement typeParameter) {
+  private Either<String, TypeMirror> resolve(Map<String, TypeMirror> result, TypeParameterElement typeParameter) {
     TypeMirror m = result.get(typeParameter.toString());
     List<? extends TypeMirror> bounds = typeParameter.getBounds();
     if (m != null) {
       if (tool().isOutOfBounds(m, bounds)) {
-        return Either.right("invalid bounds");
+        return Either.left("invalid bounds");
       }
     }
-    return Either.left(m);
+    return Either.right(m);
   }
 
-  private Either<Map<String, TypeMirror>, String> mergeResult(List<Map<String, TypeMirror>> results) {
+  private Either<String, Map<String, TypeMirror>> mergeResult(List<Map<String, TypeMirror>> results) {
     Map<String, TypeMirror> out = new LinkedHashMap<>();
     for (Map<String, TypeMirror> result : results) {
       for (Map.Entry<String, TypeMirror> entry : result.entrySet()) {
         TypeMirror current = out.get(entry.getKey());
         if (current != null) {
           if (!tool().isSameType(current, entry.getValue())) {
-            return Either.right("invalid bounds");
+            return Either.left("invalid bounds");
           }
         }
         out.put(entry.getKey(), entry.getValue());
       }
     }
-    return Either.left(out);
+    return Either.right(out);
   }
 
   private TypeTool tool() {

@@ -4,14 +4,12 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.collectorabsent.MapperClassAnalyzer;
-import net.jbock.coerce.collectorabsent.MapperFailure;
 import net.jbock.coerce.ParameterType;
 import net.jbock.coerce.collector.AbstractCollector;
 import net.jbock.coerce.collector.DefaultCollector;
+import net.jbock.coerce.collectorabsent.MapperClassAnalyzer;
+import net.jbock.coerce.collectorabsent.MapperFailure;
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.either.Left;
-import net.jbock.coerce.either.Right;
 import net.jbock.coerce.mapper.ReferenceMapperType;
 
 import javax.lang.model.element.TypeElement;
@@ -37,13 +35,15 @@ class Attempt {
     this.basicInfo = basicInfo;
   }
 
-  Either<Coercion, String> findCoercion() {
-    Either<ReferenceMapperType, MapperFailure> either = new MapperClassAnalyzer(basicInfo, expectedReturnType, mapperClass).checkReturnType();
-    if (either instanceof Right) {
-      return Either.right(((Right<ReferenceMapperType, MapperFailure>) either).value().getMessage());
-    }
-    ReferenceMapperType mapperType = ((Left<ReferenceMapperType, MapperFailure>) either).value();
-    Optional<AbstractCollector> collector = parameterType.isRepeatable() ? Optional.of(new DefaultCollector(expectedReturnType)) : Optional.empty();
-    return Either.left(Coercion.getCoercion(basicInfo, collector, mapperType, extractExpr, constructorParamType, parameterType));
+  Either<String, Coercion> findCoercion() {
+    Either<MapperFailure, ReferenceMapperType> either = new MapperClassAnalyzer(basicInfo, expectedReturnType, mapperClass)
+        .checkReturnType();
+    return either.map(MapperFailure::getMessage,
+        mapperType -> Coercion.getCoercion(basicInfo, collector(),
+            mapperType, extractExpr, constructorParamType, parameterType));
+  }
+
+  private Optional<AbstractCollector> collector() {
+    return parameterType.isRepeatable() ? Optional.of(new DefaultCollector(expectedReturnType)) : Optional.empty();
   }
 }
