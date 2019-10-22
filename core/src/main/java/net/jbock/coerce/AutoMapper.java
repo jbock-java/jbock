@@ -67,12 +67,13 @@ class AutoMapper {
 
   private static CodeBlock parseCharacterLambda() {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-    CodeBlock lambda;
-    lambda = CodeBlock.builder().beginControlFlow("if ($N.length() != 1)", s)
-        .add("throw new $T($S + $N + $S);", IllegalArgumentException.class,
+    return CodeBlock.builder()
+        .add("$N -> {\n", s).indent()
+        .beginControlFlow("if ($N.length() != 1)", s)
+        .add("throw new $T($S + $N + $S);\n", IllegalArgumentException.class,
             "Not a single character: <", s, ">")
         .endControlFlow()
-        .add("return $N.charAt(0);", s).build();
-    return CodeBlock.of("$N -> { $L }", s, lambda);
+        .add("return $N.charAt(0);\n", s)
+        .unindent().add("}").build();
   }
 }

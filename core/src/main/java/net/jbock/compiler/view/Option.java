@@ -535,14 +535,14 @@ final class Option {
     String ifMessage = "Missing parameter: <%s>";
     String elseMessage = "Missing required option: %s (%s)";
     CodeBlock lambda;
-    lambda = CodeBlock.of("positionalIndex.isPresent() " +
-            "? new $T($T.format($S, this)) " +
-            ": new $T($T.format($S, this, describeParam($S)))",
-        IllegalArgumentException.class, String.class, ifMessage,
-        IllegalArgumentException.class, String.class, elseMessage, "");
+    lambda = CodeBlock.builder()
+        .add("positionalIndex.isPresent()\n").indent()
+        .add("? new $T($T.format($S, this))\n", IllegalArgumentException.class, String.class, ifMessage)
+        .add(": new $T($T.format($S, this, describeParam($S)))", IllegalArgumentException.class, String.class, elseMessage, "")
+        .unindent().build();
     return MethodSpec.methodBuilder("missingRequired")
         .returns(ParameterizedTypeName.get(Supplier.class, IllegalArgumentException.class))
-        .addCode("return () -> $L; ", lambda)
+        .addCode("return () -> $L;\n", lambda)
         .build();
   }
 
