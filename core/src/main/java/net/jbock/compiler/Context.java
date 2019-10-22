@@ -126,8 +126,8 @@ public final class Context {
     return generatedClass.nestedClass("Option");
   }
 
-  public ClassName helperType() {
-    return generatedClass.nestedClass("Helper");
+  public ClassName parserStateType() {
+    return generatedClass.nestedClass("ParserState");
   }
 
   public ClassName indentPrinterType() {

@@ -42,7 +42,7 @@ final class Tokenizer {
 
   private final Context context;
 
-  private final Helper helper;
+  private final ParserState state;
 
   private final FieldSpec out;
 
@@ -50,22 +50,22 @@ final class Tokenizer {
 
   private final FieldSpec messages;
 
-  private Tokenizer(Context context, Helper helper, FieldSpec out, FieldSpec err, FieldSpec messages) {
+  private Tokenizer(Context context, ParserState state, FieldSpec out, FieldSpec err, FieldSpec messages) {
     this.out = out;
     this.context = context;
-    this.helper = helper;
+    this.state = state;
     this.err = err;
     this.messages = messages;
   }
 
-  static Tokenizer create(Context context, Helper helper) {
+  static Tokenizer create(Context context, ParserState state) {
     FieldSpec out = FieldSpec.builder(context.indentPrinterType(), "out")
         .addModifiers(FINAL).build();
     FieldSpec err = FieldSpec.builder(context.indentPrinterType(), "err")
         .addModifiers(FINAL).build();
     FieldSpec messages = FieldSpec.builder(context.messagesType(), "messages")
         .addModifiers(FINAL).build();
-    return new Tokenizer(context, helper, out, err, messages);
+    return new Tokenizer(context, state, out, err, messages);
   }
 
 
@@ -325,7 +325,7 @@ final class Tokenizer {
 
   private MethodSpec parseMethodOverloadIterator() {
 
-    ParameterSpec helperParam = ParameterSpec.builder(context.helperType(), "helper").build();
+    ParameterSpec stateParam = ParameterSpec.builder(context.parserStateType(), "state").build();
     ParameterSpec tokens = ParameterSpec.builder(ITERATOR_OF_STRING, "tokens").build();
     ParameterSpec isFirst = ParameterSpec.builder(BOOLEAN, "first").build();
 
@@ -335,22 +335,22 @@ final class Tokenizer {
             TypeName.get(context.sourceElement().asType())));
 
     spec.addStatement("$T $N = $L", BOOLEAN, isFirst, true);
-    spec.addStatement("$T $N = new $T()", helperParam.type, helperParam, helperParam.type);
+    spec.addStatement("$T $N = new $T()", stateParam.type, stateParam, stateParam.type);
 
     ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
     spec.addStatement("$T $N = $L",
         positionParam.type, positionParam, 0);
 
     spec.beginControlFlow("while ($N.hasNext())", tokens)
-        .addCode(codeInsideParsingLoop(helperParam, positionParam, tokens, isFirst))
+        .addCode(codeInsideParsingLoop(stateParam, positionParam, tokens, isFirst))
         .endControlFlow();
 
-    spec.addStatement(helperBuildInvocation(helperParam));
+    spec.addStatement(stateBuildInvocation(stateParam));
     return spec.build();
   }
 
   private CodeBlock codeInsideParsingLoop(
-      ParameterSpec helperParam,
+      ParameterSpec stateParam,
       ParameterSpec positionParam,
       ParameterSpec tokens,
       ParameterSpec isFirst) {
@@ -376,23 +376,23 @@ final class Tokenizer {
 
       spec.addStatement("$T $N = $N.next()", STRING, t, tokens);
 
-      spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField())
+      spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, stateParam, state.positionalParsersField())
           .addStatement(throwInvalidOptionStatement(t))
           .endControlFlow();
 
-      spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField(), positionParam, t)
-          .addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField(), positionParam);
+      spec.addStatement("$N.$N.get($N).read($N)", stateParam, state.positionalParsersField(), positionParam, t)
+          .addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, stateParam, state.positionalParsersField(), positionParam);
 
       spec.endControlFlow();
-      spec.addStatement(helperBuildInvocation(helperParam))
+      spec.addStatement(stateBuildInvocation(stateParam))
           .endControlFlow();
     }
 
-    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, helperParam, helper.readRegularOptionMethod(), token);
+    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, stateParam, state.readRegularOptionMethod(), token);
 
     spec.beginControlFlow("if ($N != null)", optionParam)
         .addStatement("$N.$N($N, $N, $N)",
-            helperParam, helper.readMethod(), optionParam, token, tokens)
+            stateParam, state.readMethod(), optionParam, token, tokens)
         .addStatement("continue")
         .endControlFlow();
 
@@ -403,12 +403,12 @@ final class Tokenizer {
           .endControlFlow();
     }
 
-    spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, helperParam, helper.positionalParsersField())
+    spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, stateParam, state.positionalParsersField())
         .addStatement(throwInvalidOptionStatement(token))
         .endControlFlow();
 
-    spec.addStatement("$N.$N.get($N).read($N)", helperParam, helper.positionalParsersField(), positionParam, token);
-    spec.addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, helperParam, helper.positionalParsersField(), positionParam);
+    spec.addStatement("$N.$N.get($N).read($N)", stateParam, state.positionalParsersField(), positionParam, token);
+    spec.addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, stateParam, state.positionalParsersField(), positionParam);
 
     return spec.build();
   }
@@ -420,9 +420,9 @@ final class Tokenizer {
         .build();
   }
 
-  private CodeBlock helperBuildInvocation(ParameterSpec helperParam) {
+  private CodeBlock stateBuildInvocation(ParameterSpec stateParam) {
     return CodeBlock.builder().add("return $T.of($N.build())",
-        Optional.class, helperParam).build();
+        Optional.class, stateParam).build();
   }
 
   private MethodSpec privateConstructor() {

@@ -12,6 +12,7 @@ import net.jbock.coerce.ParameterType;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Param;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
@@ -21,16 +22,13 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
+import static net.jbock.compiler.Constants.STRING;
 
 /**
- * Defines the private *_Parser.Helper inner class,
- * which accumulates the non-positional arguments in the input.
- *
- * @see Parser
+ * Defines the inner class ParserState
  */
-final class Helper {
+final class ParserState {
 
   private final Context context;
 
@@ -45,7 +43,7 @@ final class Helper {
 
   private final MethodSpec readLongMethod;
 
-  private Helper(
+  private ParserState(
       Context context,
       FieldSpec longNamesField,
       FieldSpec shortNamesField,
@@ -64,7 +62,7 @@ final class Helper {
     this.readRegularOptionMethod = readRegularOptionMethod;
   }
 
-  static Helper create(Context context, Option option) {
+  static ParserState create(Context context, Option option) {
 
     // read-only lookups
     FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
@@ -100,7 +98,7 @@ final class Helper {
 
     MethodSpec readMethod = readMethod(parsersField, context);
 
-    return new Helper(
+    return new ParserState(
         context,
         longNamesField,
         shortNamesField,
@@ -112,17 +110,14 @@ final class Helper {
   }
 
   TypeSpec define() {
-    TypeSpec.Builder spec = TypeSpec.classBuilder(context.helperType())
-        .addModifiers(PRIVATE, STATIC);
-    spec.addMethod(readMethod)
+    return TypeSpec.classBuilder(context.parserStateType())
+        .addModifiers(PRIVATE, STATIC)
+        .addMethod(buildMethod())
+        .addMethod(readMethod)
         .addMethod(readRegularOptionMethod)
-        .addMethod(buildMethod());
-    spec.addField(longNamesField)
-        .addField(shortNamesField)
-        .addField(parsersField);
-    spec.addMethod(readLongMethod);
-    spec.addField(positionalParsersField);
-    return spec.build();
+        .addMethod(readLongMethod)
+        .addFields(Arrays.asList(longNamesField, shortNamesField, parsersField, positionalParsersField))
+        .build();
   }
 
   private static MethodSpec readRegularOptionMethod(
@@ -245,7 +240,7 @@ final class Helper {
   }
 
   /**
-   * @return An expression that extracts the value of the given param from the helper state.
+   * @return An expression that extracts the value of the given param from the parser state.
    * This expression will evaluate either to a {@link java.util.stream.Stream} or a {@link java.util.Optional}.
    */
   private CodeBlock getStreamExpression(Param param) {

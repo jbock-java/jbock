@@ -26,9 +26,9 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
-import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
 import static net.jbock.compiler.Constants.STRING_STRING_MAP;
 
 /**
@@ -44,7 +44,7 @@ public final class Parser {
   private final Context context;
   private final Tokenizer tokenizer;
   private final Option option;
-  private final Helper helper;
+  private final ParserState state;
   private final Impl impl;
   private final ParseResult parseResult;
 
@@ -74,7 +74,7 @@ public final class Parser {
       Context context,
       Tokenizer tokenizer,
       Option option,
-      Helper helper,
+      ParserState state,
       Impl impl,
       ParseResult parseResult,
       MethodSpec readNextMethod,
@@ -82,7 +82,7 @@ public final class Parser {
     this.context = context;
     this.tokenizer = tokenizer;
     this.option = option;
-    this.helper = helper;
+    this.state = state;
     this.impl = impl;
     this.parseResult = parseResult;
     this.readNextMethod = readNextMethod;
@@ -94,10 +94,10 @@ public final class Parser {
     MethodSpec readValidArgumentMethod = readValidArgumentMethod(readNextMethod);
     Option option = Option.create(context);
     Impl impl = Impl.create(context);
-    Helper helper = Helper.create(context, option);
+    ParserState state = ParserState.create(context, option);
     ParseResult parseResult = ParseResult.create(context);
-    Tokenizer builder = Tokenizer.create(context, helper);
-    return new Parser(context, builder, option, helper, impl, parseResult, readNextMethod, readValidArgumentMethod);
+    Tokenizer builder = Tokenizer.create(context, state);
+    return new Parser(context, builder, option, state, impl, parseResult, readNextMethod, readValidArgumentMethod);
   }
 
   public TypeSpec define() {
@@ -110,9 +110,9 @@ public final class Parser {
         .addMethod(addPublicIfNecessary(parseMethod()))
         .addMethod(addPublicIfNecessary(parseOrExitMethod()));
     spec.addType(tokenizer.define())
+        .addType(state.define())
         .addType(impl.define())
         .addType(option.define())
-        .addType(helper.define())
         .addType(OptionParser.define(context))
         .addType(FlagOptionParser.define(context))
         .addType(RegularOptionParser.define(context))

@@ -16,13 +16,12 @@ public final class Coercion {
 
   private final CodeBlock collectExpr;
 
-  // helper.build
   private final CodeBlock mapExpr;
 
   // impl constructor param
   private final ParameterSpec constructorParam;
 
-  // impl
+  // impl field
   private final FieldSpec field;
 
   private final CodeBlock extractExpr;

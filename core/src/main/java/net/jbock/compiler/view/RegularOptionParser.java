@@ -14,7 +14,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.view.Helper.throwRepetitionErrorStatement;
+import static net.jbock.compiler.view.ParserState.throwRepetitionErrorStatement;
 
 /**
  * Generates the RegularOptionParser class.
