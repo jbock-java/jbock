@@ -80,6 +80,5 @@ where `X` is one of the
 and `R` is the return type of the mapper.
 
 * [Detailed documentation](https://github.com/h908714124/jbock/blob/master/SPAGHETTI.md)
-* [Gradle example](https://github.com/h908714124/jbock-map-example)
-* [Maven example](https://github.com/h908714124/jbock-maven-example)
-
+* [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
+* [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)

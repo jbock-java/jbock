@@ -496,7 +496,7 @@ The `indent` is used when printing the usage page.
 Add two dependencies to `build.gradle`:
 
 ````groovy
-compileOnly "com.github.h908714124:jbock-annotations:2.4"
+compileOnly "com.github.h908714124:jbock-annotations:2.6"
 annotationProcessor "com.github.h908714124:jbock:$jbockVersion"
 ````
 
