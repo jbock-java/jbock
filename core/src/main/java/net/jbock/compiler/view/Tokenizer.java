@@ -334,12 +334,11 @@ final class Tokenizer {
         .returns(ParameterizedTypeName.get(ClassName.get(Optional.class),
             TypeName.get(context.sourceElement().asType())));
 
-    spec.addStatement("$T $N = $L", BOOLEAN, isFirst, true);
-    spec.addStatement("$T $N = new $T()", stateParam.type, stateParam, stateParam.type);
-
     ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
-    spec.addStatement("$T $N = $L",
-        positionParam.type, positionParam, 0);
+
+    spec.addStatement("$T $N = $L", BOOLEAN, isFirst, true);
+    spec.addStatement("$T $N = $L", positionParam.type, positionParam, 0);
+    spec.addStatement("$T $N = new $T()", stateParam.type, stateParam, stateParam.type);
 
     spec.beginControlFlow("while ($N.hasNext())", tokens)
         .addCode(codeInsideParsingLoop(stateParam, positionParam, tokens, isFirst))
@@ -370,29 +369,22 @@ final class Tokenizer {
     spec.addStatement("$N = $L", isFirst, false);
 
     if (context.allowEscape()) {
-      spec.beginControlFlow("if ($S.equals($N))", "--", token);
       ParameterSpec t = ParameterSpec.builder(STRING, "t").build();
-      spec.beginControlFlow("while ($N.hasNext())", tokens);
+      spec.beginControlFlow("if ($S.equals($N))", "--", token);
 
-      spec.addStatement("$T $N = $N.next()", STRING, t, tokens);
-
-      spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, stateParam, state.positionalParsersField())
-          .addStatement(throwInvalidOptionStatement(t))
-          .endControlFlow();
-
-      spec.addStatement("$N.$N.get($N).read($N)", stateParam, state.positionalParsersField(), positionParam, t)
-          .addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, stateParam, state.positionalParsersField(), positionParam);
+      spec.beginControlFlow("while ($N.hasNext())", tokens)
+          .addStatement("$T $N = $N.next()", STRING, t, tokens)
+          .addStatement("$N += $N.$N($N, $N)", positionParam, stateParam, state.readPositionalMethod(), positionParam, t)
+          .endControlFlow()
+          .addStatement(stateBuildInvocation(stateParam));
 
       spec.endControlFlow();
-      spec.addStatement(stateBuildInvocation(stateParam))
-          .endControlFlow();
     }
 
     spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, stateParam, state.readRegularOptionMethod(), token);
 
     spec.beginControlFlow("if ($N != null)", optionParam)
-        .addStatement("$N.$N($N, $N, $N)",
-            stateParam, state.readMethod(), optionParam, token, tokens)
+        .addStatement("$N.$N($N, $N, $N)", stateParam, state.readMethod(), optionParam, token, tokens)
         .addStatement("continue")
         .endControlFlow();
 
@@ -403,17 +395,12 @@ final class Tokenizer {
           .endControlFlow();
     }
 
-    spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, stateParam, state.positionalParsersField())
-        .addStatement(throwInvalidOptionStatement(token))
-        .endControlFlow();
-
-    spec.addStatement("$N.$N.get($N).read($N)", stateParam, state.positionalParsersField(), positionParam, token);
-    spec.addStatement("$N += $N.$N.get($N).positionIncrement()", positionParam, stateParam, state.positionalParsersField(), positionParam);
+    spec.addStatement("$N += $N.$N($N, $N)", positionParam, stateParam, state.readPositionalMethod(), positionParam, token);
 
     return spec.build();
   }
 
-  private CodeBlock throwInvalidOptionStatement(ParameterSpec token) {
+  static CodeBlock throwInvalidOptionStatement(ParameterSpec token) {
     return CodeBlock.builder()
         .add("throw new $T($S + $N)", IllegalArgumentException.class,
             "Invalid option: ", token)

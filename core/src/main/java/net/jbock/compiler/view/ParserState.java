@@ -24,6 +24,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.view.Tokenizer.throwInvalidOptionStatement;
 
 /**
  * Defines the inner class ParserState
@@ -39,6 +40,7 @@ final class ParserState {
   private final FieldSpec positionalParsersField;
 
   private final MethodSpec readMethod;
+  private final MethodSpec readPositionalMethod;
   private final MethodSpec readRegularOptionMethod;
 
   private final MethodSpec readLongMethod;
@@ -50,6 +52,7 @@ final class ParserState {
       FieldSpec parsersField,
       FieldSpec positionalParsersField,
       MethodSpec readMethod,
+      MethodSpec readPositionalMethod,
       MethodSpec readLongMethod,
       MethodSpec readRegularOptionMethod) {
     this.context = context;
@@ -58,6 +61,7 @@ final class ParserState {
     this.parsersField = parsersField;
     this.positionalParsersField = positionalParsersField;
     this.readMethod = readMethod;
+    this.readPositionalMethod = readPositionalMethod;
     this.readLongMethod = readLongMethod;
     this.readRegularOptionMethod = readRegularOptionMethod;
   }
@@ -97,6 +101,7 @@ final class ParserState {
         readLongMethod);
 
     MethodSpec readMethod = readMethod(parsersField, context);
+    MethodSpec readPositionalMethod = readPositionalMethod(positionalParsersField);
 
     return new ParserState(
         context,
@@ -105,6 +110,7 @@ final class ParserState {
         parsersField,
         positionalParsersField,
         readMethod,
+        readPositionalMethod,
         readLongMethod,
         readRegularOptionMethod);
   }
@@ -114,6 +120,7 @@ final class ParserState {
         .addModifiers(PRIVATE, STATIC)
         .addMethod(buildMethod())
         .addMethod(readMethod)
+        .addMethod(readPositionalMethod)
         .addMethod(readRegularOptionMethod)
         .addMethod(readLongMethod)
         .addFields(Arrays.asList(longNamesField, shortNamesField, parsersField, positionalParsersField))
@@ -180,9 +187,7 @@ final class ParserState {
         .build();
   }
 
-  private static MethodSpec readMethod(
-      FieldSpec parsersField,
-      Context context) {
+  private static MethodSpec readMethod(FieldSpec parsersField, Context context) {
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(ITERATOR_OF_STRING, "it").build();
@@ -194,6 +199,22 @@ final class ParserState {
     spec.addStatement("$N.get($N).read($N, $N)", parsersField, optionParam, token, it);
 
     return spec.build();
+  }
+
+  private static MethodSpec readPositionalMethod(FieldSpec positionalParsersField) {
+
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
+
+    return MethodSpec.methodBuilder("readPositional")
+        .addParameters(Arrays.asList(positionParam, token))
+        .returns(INT)
+        .beginControlFlow("if ($N >= $N.size())", positionParam, positionalParsersField)
+        .addStatement(throwInvalidOptionStatement(token))
+        .endControlFlow()
+        .addStatement("$N.get($N).read($N)", positionalParsersField, positionParam, token)
+        .addStatement("return $N.get($N).positionIncrement()", positionalParsersField, positionParam)
+        .build();
   }
 
   private MethodSpec buildMethod() {
@@ -312,6 +333,10 @@ final class ParserState {
 
   MethodSpec readMethod() {
     return readMethod;
+  }
+
+  MethodSpec readPositionalMethod() {
+    return readPositionalMethod;
   }
 
   MethodSpec readRegularOptionMethod() {
