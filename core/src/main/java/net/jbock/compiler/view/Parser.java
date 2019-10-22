@@ -182,7 +182,7 @@ public final class Parser {
     ParameterSpec name = builder(STRING, "name").build();
     MethodSpec.Builder spec = methodBuilder("withResourceBundle");
     spec.addStatement("$T $N = new $T<>()", map.type, map, HashMap.class);
-    spec.beginControlFlow("for ($T $N :$T.list($N.getKeys()))", STRING, name, Collections.class, bundle)
+    spec.beginControlFlow("for ($T $N : $T.list($N.getKeys()))", STRING, name, Collections.class, bundle)
         .addStatement("$N.put($N, $N.getString($N))", map, name, bundle, name)
         .endControlFlow();
     spec.addStatement("return withMessages($N)", map);
