@@ -22,7 +22,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
 
 /**
  * Defines the private *_Parser.Helper inner class,
@@ -190,7 +190,7 @@ final class Helper {
       Context context) {
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
+    ParameterSpec it = ParameterSpec.builder(ITERATOR_OF_STRING, "it").build();
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
@@ -215,7 +215,7 @@ final class Helper {
 
     spec.addStatement("return new $T($L)", context.implType(), args.build());
 
-    return spec.returns(context.implType()).build();
+    return spec.returns(TypeName.get(context.sourceElement().asType())).build();
   }
 
   private CodeBlock extractExpression(Param param) {

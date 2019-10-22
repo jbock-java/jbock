@@ -28,7 +28,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
 import static net.jbock.compiler.Constants.STRING_STRING_MAP;
 
 /**
@@ -319,7 +319,7 @@ public final class Parser {
   private static MethodSpec readValidArgumentMethod(
       MethodSpec readNextMethod) {
     ParameterSpec token = builder(STRING, "token").build();
-    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
+    ParameterSpec it = builder(ITERATOR_OF_STRING, "it").build();
     ParameterSpec index = builder(INT, "index").build();
     ParameterSpec isLong = builder(BOOLEAN, "isLong").build();
     MethodSpec.Builder builder = methodBuilder("readValidArgument");
@@ -348,7 +348,7 @@ public final class Parser {
 
   private static MethodSpec readNextMethod() {
     ParameterSpec token = builder(STRING, "token").build();
-    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
+    ParameterSpec it = builder(ITERATOR_OF_STRING, "it").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if (!$N.hasNext())", it)

@@ -11,8 +11,8 @@ import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Util.optionalOf;
 
 /**
  * Generates the RegularPositionalOptionParser class.
@@ -26,7 +26,7 @@ final class RegularPositionalOptionParser {
         .addMethod(readMethod(value))
         .addMethod(nextPositionMethod())
         .addMethod(MethodSpec.methodBuilder("value")
-            .returns(optionalOf(STRING))
+            .returns(OPTIONAL_STRING)
             .addStatement("return $T.ofNullable($N)", Optional.class, value)
             .addAnnotation(Override.class)
             .build())

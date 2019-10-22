@@ -12,9 +12,9 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.view.Helper.throwRepetitionErrorStatement;
-import static net.jbock.compiler.Util.optionalOf;
 
 /**
  * Generates the RegularOptionParser class.
@@ -27,7 +27,7 @@ final class RegularOptionParser {
         .superclass(context.optionParserType())
         .addMethod(readMethod(context, value))
         .addMethod(MethodSpec.methodBuilder("value")
-            .returns(optionalOf(STRING))
+            .returns(OPTIONAL_STRING)
             .addStatement("return $T.ofNullable($N)", Optional.class, value)
             .addAnnotation(Override.class)
             .build())
@@ -47,7 +47,7 @@ final class RegularOptionParser {
   private static MethodSpec readMethod(Context context, FieldSpec value) {
     FieldSpec option = FieldSpec.builder(context.optionType(), "option").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
+    ParameterSpec it = ParameterSpec.builder(Constants.ITERATOR_OF_STRING, "it").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it));
 

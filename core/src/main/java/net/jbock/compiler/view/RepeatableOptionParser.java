@@ -14,7 +14,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
 
 /**
  * Generates the RepeatableOptionParser class.
@@ -48,7 +48,7 @@ final class RepeatableOptionParser {
 
   private static MethodSpec readMethod(FieldSpec values) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
+    ParameterSpec it = ParameterSpec.builder(ITERATOR_OF_STRING, "it").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it));
 

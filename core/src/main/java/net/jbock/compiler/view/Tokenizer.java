@@ -1,9 +1,11 @@
 package net.jbock.compiler.view;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
@@ -24,10 +26,9 @@ import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.Util.optionalOfSubtype;
 
 /**
  * Defines the inner class Tokenizer.
@@ -281,7 +282,9 @@ final class Tokenizer {
   private CodeBlock parseMethodTryBlock(
       ParameterSpec args) {
     CodeBlock.Builder spec = CodeBlock.builder();
-    ParameterSpec result = ParameterSpec.builder(optionalOfSubtype(TypeName.get(context.sourceElement().asType())), "result")
+    ParameterSpec result = ParameterSpec.builder(ParameterizedTypeName.get(
+        ClassName.get(Optional.class),
+        TypeName.get(context.sourceElement().asType())), "result")
         .build();
     spec.addStatement("$T $N = parse($T.asList($N).iterator())",
         result.type, result, Arrays.class, args);
@@ -323,12 +326,13 @@ final class Tokenizer {
   private MethodSpec parseMethodOverloadIterator() {
 
     ParameterSpec helperParam = ParameterSpec.builder(context.helperType(), "helper").build();
-    ParameterSpec tokens = ParameterSpec.builder(STRING_ITERATOR, "tokens").build();
+    ParameterSpec tokens = ParameterSpec.builder(ITERATOR_OF_STRING, "tokens").build();
     ParameterSpec isFirst = ParameterSpec.builder(BOOLEAN, "first").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse")
         .addParameter(tokens)
-        .returns(optionalOfSubtype(TypeName.get(context.sourceElement().asType())));
+        .returns(ParameterizedTypeName.get(ClassName.get(Optional.class),
+            TypeName.get(context.sourceElement().asType())));
 
     spec.addStatement("$T $N = $L", BOOLEAN, isFirst, true);
     spec.addStatement("$T $N = new $T()", helperParam.type, helperParam, helperParam.type);

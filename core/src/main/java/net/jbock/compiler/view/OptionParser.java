@@ -14,9 +14,9 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Util.optionalOf;
 
 /**
  * Generates the OptionParser class.
@@ -28,7 +28,7 @@ final class OptionParser {
     return TypeSpec.classBuilder(context.optionParserType())
         .addMethod(readMethod())
         .addMethod(MethodSpec.methodBuilder("value")
-            .returns(optionalOf(STRING))
+            .returns(OPTIONAL_STRING)
             .addCode(throwAssertionError())
             .build())
         .addMethod(MethodSpec.methodBuilder("values")
@@ -61,7 +61,7 @@ final class OptionParser {
 
   private static MethodSpec readMethod() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
+    ParameterSpec it = ParameterSpec.builder(Constants.ITERATOR_OF_STRING, "it").build();
     return MethodSpec.methodBuilder("read")
         .addModifiers(ABSTRACT)
         .addParameters(asList(token, it))

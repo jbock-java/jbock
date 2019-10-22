@@ -10,9 +10,9 @@ import net.jbock.compiler.Context;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Util.optionalOf;
 
 /**
  * Generates the PositionalOptionParser class.
@@ -27,7 +27,7 @@ final class PositionalOptionParser {
         .addMethod(readMethod())
         .addMethod(nextPositionMethod())
         .addMethod(MethodSpec.methodBuilder("value")
-            .returns(optionalOf(STRING))
+            .returns(OPTIONAL_STRING)
             .addCode(defaultImpl)
             .build())
         .addMethod(MethodSpec.methodBuilder("values")

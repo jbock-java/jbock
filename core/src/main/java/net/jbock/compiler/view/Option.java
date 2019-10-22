@@ -32,9 +32,9 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Util.optionalOf;
 
 /**
  * Defines the *_Parser.Option enum.
@@ -468,7 +468,7 @@ final class Option {
         Optional.class, positionalParameter, positionalIndexField);
 
     return spec.addParameter(positionalParameter)
-        .returns(optionalOf(STRING)).build();
+        .returns(OPTIONAL_STRING).build();
   }
 
   private static MethodSpec validShortTokenMethod() {
