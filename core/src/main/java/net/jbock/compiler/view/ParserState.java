@@ -101,7 +101,7 @@ final class ParserState {
         readLongMethod);
 
     MethodSpec readMethod = readMethod(parsersField, context);
-    MethodSpec readPositionalMethod = readPositionalMethod(positionalParsersField);
+    MethodSpec readPositionalMethod = readPositionalMethod(positionalParsersField, context);
 
     return new ParserState(
         context,
@@ -201,10 +201,11 @@ final class ParserState {
     return spec.build();
   }
 
-  private static MethodSpec readPositionalMethod(FieldSpec positionalParsersField) {
+  private static MethodSpec readPositionalMethod(FieldSpec positionalParsersField, Context context) {
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
+    ParameterSpec parser = ParameterSpec.builder(context.positionalOptionParserType(), "parser").build();
 
     return MethodSpec.methodBuilder("readPositional")
         .addParameters(Arrays.asList(positionParam, token))
@@ -212,8 +213,9 @@ final class ParserState {
         .beginControlFlow("if ($N >= $N.size())", positionParam, positionalParsersField)
         .addStatement(throwInvalidOptionStatement(token))
         .endControlFlow()
-        .addStatement("$N.get($N).read($N)", positionalParsersField, positionParam, token)
-        .addStatement("return $N.get($N).positionIncrement()", positionalParsersField, positionParam)
+        .addStatement("$T $N = $N.get($N)", parser.type, parser, positionalParsersField, positionParam)
+        .addStatement("$N.read($N)", parser, token)
+        .addStatement("return $N.positionIncrement()", parser)
         .build();
   }
 
