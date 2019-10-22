@@ -504,44 +504,7 @@ Now add your `@CommandLineArguments` class and do `gradle build` once, to trigge
 
 ### Maven config
 
-The annotations are in a separate jar.
-They are not needed at runtime, so the scope can be `optional`
-or `provided`.
-
-````xml
-<dependencies>
-    <dependency>
-      <groupId>com.github.h908714124</groupId>
-      <artifactId>jbock-annotations</artifactId>
-      <version>2.4</version>
-      <scope>provided</scope>
-    </dependency>
-</dependencies>
-````
-
-The processor itself is only needed on the compiler classpath:
-
-````xml
-<build>
-  <plugins>
-    <plugin>
-      <groupId>org.apache.maven.plugins</groupId>
-      <artifactId>maven-compiler-plugin</artifactId>
-      <version>3.8.1</version>
-      <configuration>
-        <annotationProcessorPaths>
-          <dependency>
-            <groupId>com.github.h908714124</groupId>
-            <artifactId>jbock</artifactId>
-            <version>${jbock.version}</version>
-          </dependency>
-        </annotationProcessorPaths>
-      </configuration>
-    </plugin>
-  </plugins>
-</build>
-````
-
+see [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
 
 ### Running tests
 
