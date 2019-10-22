@@ -39,16 +39,15 @@ final class ParseResult {
   }
 
   static ParseResult create(Context context) {
-    FieldSpec result = FieldSpec.builder(TypeName.get(context.sourceElement().asType()), "result",
-        PRIVATE, FINAL).build();
+    FieldSpec result = FieldSpec.builder(TypeName.get(context.sourceElement().asType()),
+        "result", PRIVATE, FINAL).build();
     return new ParseResult(context, result);
   }
 
   List<TypeSpec> define() {
     TypeSpec.Builder spec = classBuilder(context.parseResultType())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
-        .addModifiers(STATIC, ABSTRACT)
-        .addJavadoc("This will be a sealed type in the future.\n");
+        .addModifiers(ABSTRACT, STATIC);
     if (context.sourceElement().getModifiers().contains(PUBLIC)) {
       spec.addModifiers(PUBLIC);
     }
