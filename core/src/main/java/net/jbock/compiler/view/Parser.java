@@ -29,7 +29,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
-import static net.jbock.compiler.Constants.STRING_STRING_MAP;
+import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
 
 /**
  * Generates the *_Parser class.
@@ -67,7 +67,7 @@ public final class Parser {
       .initializer("$L", DEFAULT_EXITCODE_ON_ERROR)
       .addModifiers(PRIVATE).build();
 
-  private final FieldSpec messages = FieldSpec.builder(STRING_STRING_MAP, "messages")
+  private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages")
       .addModifiers(PRIVATE).build();
 
   private Parser(
@@ -178,7 +178,7 @@ public final class Parser {
 
   private MethodSpec.Builder withResourceBundleMethod() {
     ParameterSpec bundle = builder(ResourceBundle.class, "bundle").build();
-    ParameterSpec map = builder(STRING_STRING_MAP, "map").build();
+    ParameterSpec map = builder(STRING_TO_STRING_MAP, "map").build();
     ParameterSpec name = builder(STRING, "name").build();
     MethodSpec.Builder spec = methodBuilder("withResourceBundle");
     spec.addStatement("$T $N = new $T<>()", map.type, map, HashMap.class);
@@ -192,7 +192,7 @@ public final class Parser {
 
   private MethodSpec.Builder withMessagesMethodInputStream() {
     ParameterSpec stream = builder(InputStream.class, "stream").build();
-    ParameterSpec map = builder(STRING_STRING_MAP, "map").build();
+    ParameterSpec map = builder(STRING_TO_STRING_MAP, "map").build();
     ParameterSpec name = builder(STRING, "name").build();
     ParameterSpec properties = builder(Properties.class, "properties").build();
     ParameterSpec exception = builder(IOException.class, "exception").build();

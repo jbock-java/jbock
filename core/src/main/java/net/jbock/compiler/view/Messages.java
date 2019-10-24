@@ -16,7 +16,7 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.STRING_STRING_MAP;
+import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
 
 /**
  * Defines the inner class Messages.
@@ -24,7 +24,7 @@ import static net.jbock.compiler.Constants.STRING_STRING_MAP;
 final class Messages {
 
   private final FieldSpec resourceBundle = FieldSpec.builder(
-      STRING_STRING_MAP, "messages")
+      STRING_TO_STRING_MAP, "messages")
       .addModifiers(FINAL).build();
 
   private final Context context;

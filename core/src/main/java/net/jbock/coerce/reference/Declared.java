@@ -29,7 +29,7 @@ public class Declared<E> {
     return tool.getDeclaredType(erasure, typeArguments);
   }
 
-  public List<? extends TypeMirror> typeArguments() {
+  List<? extends TypeMirror> typeArguments() {
     return typeArguments;
   }
 

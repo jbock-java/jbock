@@ -20,7 +20,7 @@ public class CustomCollector extends AbstractCollector {
 
   private final boolean supplier; // true if wrapped in Supplier
 
-  private final List<TypeMirror> solution; // solution to the typevars of collector class, if any
+  private final List<TypeMirror> solution; // solution to the typevars of collector class
 
   private final TypeTool tool;
 

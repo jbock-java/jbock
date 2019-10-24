@@ -23,16 +23,18 @@ public class BasicInfo {
 
   private final TypeTool tool;
 
-  private final Optional<TypeElement> mapperClass;
+  // nullable
+  private final TypeElement mapperClass;
 
-  private final Optional<TypeElement> collectorClass;
+  // nullable
+  private final TypeElement collectorClass;
 
   private BasicInfo(
       ParamName paramName,
       ExecutableElement sourceMethod,
       TypeTool tool,
-      Optional<TypeElement> mapperClass,
-      Optional<TypeElement> collectorClass) {
+      TypeElement mapperClass,
+      TypeElement collectorClass) {
     this.paramName = paramName;
     this.sourceMethod = sourceMethod;
     this.tool = tool;
@@ -46,10 +48,10 @@ public class BasicInfo {
       ParamName paramName,
       ExecutableElement sourceMethod,
       TypeTool tool) {
-    return new BasicInfo(paramName, sourceMethod, tool, Optional.ofNullable(mapperClass), Optional.ofNullable(collectorClass));
+    return new BasicInfo(paramName, sourceMethod, tool, mapperClass, collectorClass);
   }
 
-  boolean isEnumType(TypeMirror mirror) {
+  private boolean isEnumType(TypeMirror mirror) {
     List<? extends TypeMirror> supertypes = tool().getDirectSupertypes(mirror);
     if (supertypes.isEmpty()) {
       // not an enum
@@ -60,10 +62,7 @@ public class BasicInfo {
       // not an enum
       return false;
     }
-    if (tool().isPrivateType(mirror)) {
-      return false;
-    }
-    return true;
+    return !tool().isPrivateType(mirror);
   }
 
   public Optional<CodeBlock> findMapExpr(TypeMirror innerType) {
@@ -103,10 +102,10 @@ public class BasicInfo {
   }
 
   Optional<TypeElement> mapperClass() {
-    return mapperClass;
+    return Optional.ofNullable(mapperClass);
   }
 
   Optional<TypeElement> collectorClass() {
-    return collectorClass;
+    return Optional.ofNullable(collectorClass);
   }
 }
