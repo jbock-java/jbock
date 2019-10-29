@@ -8,7 +8,7 @@ repositories {
 
 dependencies {
     compileOnly 'com.github.h908714124:jbock-annotations:2.6'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0-M1'
     annotationProcessor project(':core')
 }
 
