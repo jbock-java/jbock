@@ -8,7 +8,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -36,7 +35,7 @@ public class ReferenceTool<E> {
     if (!supplierType.isPresent()) {
       Declared<E> expectedType = resolver.typecheck(referencedClass, this.expectedType.expectedClass())
           .orElseThrow(this::unexpectedClassException);
-      return new DirectType<>(checkRawType(expectedType));
+      return new ReferencedType<>(checkRawType(expectedType), false);
     }
     List<? extends TypeMirror> typeArgs = checkRawType(supplierType.get()).typeArguments();
     TypeMirror supplied = typeArgs.get(0);
@@ -48,7 +47,7 @@ public class ReferenceTool<E> {
     if (!directExpectation.isPresent() || !directExpectation.get().isDirect()) {
       throw unexpectedClassException();
     }
-    return new SupplierType<>(checkRawType(directExpectation.get()), Collections.emptyMap());
+    return new ReferencedType<>(checkRawType(directExpectation.get()), true);
   }
 
   private ValidationException unexpectedClassException() {

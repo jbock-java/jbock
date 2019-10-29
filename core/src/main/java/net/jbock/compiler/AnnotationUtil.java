@@ -10,9 +10,9 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
 import java.util.Map;
 
-final class AnnotationUtil {
+class AnnotationUtil {
 
-  private static final class AnnotationUtilContext {
+  private static class AnnotationUtilContext {
 
     final ExecutableElement sourceMethod;
     final String attributeName;

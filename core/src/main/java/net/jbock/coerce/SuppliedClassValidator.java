@@ -6,9 +6,9 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 
-public abstract class SuppliedClassValidator {
+abstract class SuppliedClassValidator {
 
-  public static void commonChecks(BasicInfo basicInfo, TypeElement classToCheck, String name) {
+  static void commonChecks(BasicInfo basicInfo, TypeElement classToCheck, String name) {
     if (classToCheck.getNestingKind() == NestingKind.MEMBER &&
         !classToCheck.getModifiers().contains(Modifier.STATIC)) {
       throw basicInfo.asValidationException(

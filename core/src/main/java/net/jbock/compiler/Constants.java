@@ -24,7 +24,7 @@ public final class Constants {
   public static final TypeName OPTIONAL_STRING = ParameterizedTypeName.get(
       ClassName.get(Optional.class), STRING);
 
-  public static final TypeName STRING_STRING_MAP = ParameterizedTypeName.get(
+  public static final TypeName STRING_TO_STRING_MAP = ParameterizedTypeName.get(
       ClassName.get(Map.class), STRING, STRING);
 
   public static final TypeName STRING_ARRAY = ArrayTypeName.of(STRING);
