@@ -16,7 +16,6 @@ class VariousArgumentsTest {
   @Test
   void bigDecimal() {
     VariousArguments_Parser.ParseResult parsed = VariousArguments_Parser.create().parse(new String[]{
-        "--file", "/etc/hosts",
         "--bigDecimal", "3.14159265358979323846264338327950288419716939937510",
         "--bigInteger", "60221407600000000000000",
         "--path", "/home",

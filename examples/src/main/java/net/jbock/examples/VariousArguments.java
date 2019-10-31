@@ -46,9 +46,6 @@ abstract class VariousArguments {
   @PositionalParameter(position = 1)
   abstract Optional<BigInteger> bigIntegerPos();
 
-  @Parameter(longName = "file")
-  abstract File file();
-
   @Parameter(longName = "fileList")
   abstract List<File> fileList();
 

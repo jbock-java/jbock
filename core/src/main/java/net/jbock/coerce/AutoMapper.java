@@ -41,16 +41,16 @@ class AutoMapper {
   private static final List<Entry<Class<?>, CodeBlock>> MAPPERS = Arrays.asList(
       create(String.class, CodeBlock.of("$T.identity()", Function.class)),
       create(Integer.class, VALUE_OF),
-      create(Long.class, VALUE_OF),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
-      create(File.class, NEW),
+      create(File.class, parseFileLambda()),
       create(URI.class, CREATE),
       create(Pattern.class, COMPILE),
       create(LocalDate.class, PARSE),
+      create(Long.class, VALUE_OF),
       create(Short.class, VALUE_OF),
       create(Byte.class, VALUE_OF),
-      create(Double.class, VALUE_OF),
       create(Float.class, VALUE_OF),
+      create(Double.class, VALUE_OF),
       create(Character.class, parseCharacterLambda()),
       create(BigInteger.class, NEW),
       create(BigDecimal.class, NEW));
@@ -63,6 +63,20 @@ class AutoMapper {
       }
     }
     return Optional.empty();
+  }
+
+  private static CodeBlock parseFileLambda() {
+    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
+    ParameterSpec f = ParameterSpec.builder(File.class, "f").build();
+    return CodeBlock.builder()
+        .add("$N -> {\n", s).indent()
+        .add("$T $N = new $T($N);\n", File.class, f, File.class, s)
+        .beginControlFlow("if (!$N.exists())", f)
+        .add("throw new $T($S + $N);\n", IllegalStateException.class,
+            "File does not exist: ", s)
+        .endControlFlow()
+        .add("return $N;\n", f)
+        .unindent().add("}").build();
   }
 
   private static CodeBlock parseCharacterLambda() {
