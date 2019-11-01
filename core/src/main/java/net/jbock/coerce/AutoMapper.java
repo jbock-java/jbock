@@ -75,6 +75,10 @@ class AutoMapper {
         .add("throw new $T($S + $N);\n", IllegalStateException.class,
             "File does not exist: ", s)
         .endControlFlow()
+        .beginControlFlow("if (!$N.isFile())", f)
+        .add("throw new $T($S + $N);\n", IllegalStateException.class,
+            "Not a file: ", s)
+        .endControlFlow()
         .add("return $N;\n", f)
         .unindent().add("}").build();
   }
