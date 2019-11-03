@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <h3>Marker for positional parameter methods</h3>
+ * <p>Marker annotation for positional parameters.</p>
  *
  * <ul>
  * <li>The annotated method must be abstract and have an empty argument list.</li>

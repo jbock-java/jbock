@@ -6,7 +6,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <h3>Marker for parameter methods</h3>
+ * <p>Marker annotation for non-positional parameters.</p>
  *
  * <ul>
  * <li>The annotated method must be abstract and have an empty argument list.</li>
@@ -54,7 +54,7 @@ public @interface Parameter {
   String descriptionArgumentName() default "";
 
   /**
-   * <h3>Optional custom mapper</h3>
+   * <p>Declare a custom mapper for this parameter.</p>
    *
    * <p>
    * The mapper is a either a {@link java.util.function.Function Function&lt;String, X&gt;}
@@ -88,7 +88,7 @@ public @interface Parameter {
   Class<?> mappedBy() default Object.class;
 
   /**
-   * <h3>Optional custom collector</h3>
+   * <p>Declare a custom collected for this <em>repeatable</em> parameter.</p>
    *
    * <p>
    * This is either a {@link java.util.stream.Collector Collector&lt;M, ?, X&gt;}
@@ -96,7 +96,7 @@ public @interface Parameter {
    * or a {@link java.util.function.Supplier Supplier} that returns such a collector.
    * </p>
    *
-   * <p>Specifying a collector always declares a parameter as repeatable.</p>
+   * <p>Parameters with a custom collector are always treated as repeatable.</p>
    *
    * <p>
    * For example, the following collector creates a {@code Set}:

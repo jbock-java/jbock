@@ -23,9 +23,8 @@ import java.lang.annotation.Target;
 public @interface CommandLineArguments {
 
   /**
-   * <p>The name of the final executable.
-   * If the Java program is compiled to native, or invoked from a wrapper script,
-   * then this should be the name of the resulting executable.</p>
+   * <p>The name by which the final executable
+   * will be referred to in the online help.</p>
    *
    * <p>The program name is printed when the user passes the
    * {@code --help} parameter, in the {@code NAME} section of the usage information.
@@ -50,22 +49,4 @@ public @interface CommandLineArguments {
    * @return false to disable the special meaning of the {@code --help} parameter
    */
   boolean allowHelpOption() default true;
-
-  /**
-   * <p>True if an unbound token consisting of two dashes {@code --} should end option parsing.
-   * The remaining tokens will then be treated as positional parameters,
-   * regardless of their shape.</p>
-   *
-   * @return true to enable the special meaning of the <em>end of option parsing</em> escape sequence
-   */
-  boolean allowEscapeSequence() default false;
-
-  /**
-   * <p>True if unbound tokens that start with a dash character {@code -} should be allowed
-   * as positional parameters.
-   * By default, unbound tokens that start with a dash are treated as a parsing failure.</p>
-   *
-   * @return true if tokens that start with a dash should be allowed as positional parameters
-   */
-  boolean allowPrefixedTokens() default false;
 }
