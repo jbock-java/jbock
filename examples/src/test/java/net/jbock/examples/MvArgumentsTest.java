@@ -25,13 +25,8 @@ class MvArgumentsTest {
   }
 
   @Test
-  void invalidOptionEscapeSequenceSecond() {
-    f.assertThat("a", "--").failsWithUsageMessage("Invalid option: --");
-  }
-
-  @Test
   void invalidOptionEscapeSequenceThird() {
-    f.assertThat("a", "b", "--", "c").failsWithUsageMessage("Invalid option: --");
+    f.assertThat("a", "b", "--", "c").failsWithUsageMessage("Invalid option: c");
   }
 
   @Test

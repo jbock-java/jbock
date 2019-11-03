@@ -6,7 +6,6 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
-import net.jbock.coerce.ParameterType;
 import net.jbock.compiler.view.Parser;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -26,7 +25,6 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -106,8 +104,7 @@ public final class Processor extends AbstractProcessor {
           generatedClass,
           parameters,
           getOverview(sourceElement),
-          isAllowEscape(sourceElement, parameters),
-          isStrict(sourceElement, parameters));
+          isAllowEscape(parameters));
       TypeSpec typeSpec = Parser.create(context).define();
       write(sourceElement, context.generatedClass(), typeSpec);
     } catch (ValidationException e) {
@@ -141,37 +138,8 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static boolean isAllowEscape(TypeElement sourceElement, List<Param> parameters) {
-    boolean allowEscape = sourceElement.getAnnotation(CommandLineArguments.class).allowEscapeSequence();
-    if (!allowEscape) {
-      return false;
-    }
-    boolean hasPositional = parameters.stream().anyMatch(Param::isPositional);
-    if (!hasPositional) {
-      throw ValidationException.create(sourceElement, "In order to use the escape sequence, define at least one positional parameter");
-    }
-    return true;
-  }
-
-  private static boolean isStrict(TypeElement sourceElement, List<Param> parameters) {
-    boolean allow = sourceElement.getAnnotation(CommandLineArguments.class).allowPrefixedTokens();
-    if (!allow) {
-      return true;
-    }
-    boolean hasPositional = parameters.stream().anyMatch(Param::isPositional);
-    if (!hasPositional) {
-      throw ValidationException.create(sourceElement, "In order to allow prefixed tokens, define at least one positional parameter");
-    }
-    return false;
-  }
-
-  private static Set<ParameterType> positionalParamTypes(List<Param> parameters) {
-    Set<ParameterType> paramTypes = EnumSet.noneOf(ParameterType.class);
-    parameters.stream()
-        .filter(Param::isPositional)
-        .map(p -> p.coercion().parameterType())
-        .forEach(paramTypes::add);
-    return paramTypes;
+  private static boolean isAllowEscape(List<Param> parameters) {
+    return parameters.stream().anyMatch(Param::isPositional);
   }
 
   private Set<TypeElement> getSourceElements(RoundEnvironment env) {
@@ -219,8 +187,9 @@ public final class Processor extends AbstractProcessor {
     List<ExecutableElement> allNonpositional = partition.getOrDefault(false, emptyList());
     List<ExecutableElement> allPositional = partition.getOrDefault(true, emptyList());
     checkPositionUnique(allPositional);
-    checkFlagsThatRequirePositional(sourceElement, allPositional);
-    List<ExecutableElement> sortedPositional = allPositional.stream().sorted(POSITION_COMPARATOR).collect(Collectors.toList());
+    List<ExecutableElement> sortedPositional = allPositional.stream()
+        .sorted(POSITION_COMPARATOR)
+        .collect(Collectors.toList());
     List<Param> result = new ArrayList<>(abstractMethods.size());
     for (int i = 0; i < sortedPositional.size(); i++) {
       ExecutableElement method = sortedPositional.get(i);
@@ -243,16 +212,6 @@ public final class Processor extends AbstractProcessor {
       Integer position = method.getAnnotation(PositionalParameter.class).position();
       if (!positions.add(position)) {
         throw ValidationException.create(method, "Define a unique position.");
-      }
-    }
-  }
-
-  private void checkFlagsThatRequirePositional(TypeElement sourceType, List<ExecutableElement> allPositional) {
-    CommandLineArguments annotation = sourceType.getAnnotation(CommandLineArguments.class);
-    if (annotation.allowEscapeSequence()) {
-      if (allPositional.isEmpty()) {
-        throw ValidationException.create(sourceType,
-            "Define a positional parameter, or disable the escape sequence.");
       }
     }
   }

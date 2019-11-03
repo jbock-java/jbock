@@ -233,19 +233,6 @@ class ProcessorTest {
   }
 
   @Test
-  void escapeAllowedButNoPositionalArgumentsDefined() {
-    JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments(allowEscapeSequence = true)",
-        "abstract class Arguments {",
-        "  @Parameter(shortName = 'a') abstract int a();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Define a positional parameter, or disable the escape sequence.");
-  }
-
-  @Test
   void oneOptionalIntNotOptional() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",

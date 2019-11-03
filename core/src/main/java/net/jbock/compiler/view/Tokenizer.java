@@ -389,11 +389,9 @@ final class Tokenizer {
         .endControlFlow();
 
     // handle unknown token
-    if (context.isStrict()) {
-      spec.beginControlFlow("if (!$N.isEmpty() && $N.charAt(0) == '-')", token, token)
-          .addStatement(throwInvalidOptionStatement(token))
-          .endControlFlow();
-    }
+    spec.beginControlFlow("if (!$N.isEmpty() && $N.charAt(0) == '-')", token, token)
+        .addStatement(throwInvalidOptionStatement(token))
+        .endControlFlow();
 
     spec.addStatement("$N += $N.$N($N, $N)", positionParam, stateParam, state.readPositionalMethod(), positionParam, token);
 

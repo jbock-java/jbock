@@ -21,9 +21,6 @@ public final class Context {
   // whether "--" is a special token
   private final boolean allowEscape;
 
-  // whether tokens that start with "-" should be acceptable as positional parameters
-  private final boolean strict;
-
   // whether "--help" is a special token
   private final boolean helpParameterEnabled;
 
@@ -41,7 +38,6 @@ public final class Context {
       ClassName generatedClass,
       List<Param> parameters,
       boolean allowEscape,
-      boolean strict,
       boolean helpParameterEnabled,
       List<String> description,
       String programName,
@@ -50,7 +46,6 @@ public final class Context {
     this.generatedClass = generatedClass;
     this.parameters = parameters;
     this.allowEscape = allowEscape;
-    this.strict = strict;
     this.helpParameterEnabled = helpParameterEnabled;
     this.description = description;
     this.programName = programName;
@@ -62,8 +57,7 @@ public final class Context {
       ClassName generatedClass,
       List<Param> parameters,
       List<String> description,
-      boolean allowEscape,
-      boolean strict) {
+      boolean allowEscape) {
     boolean addHelp = sourceElement.getAnnotation(CommandLineArguments.class).allowHelpOption();
     String missionStatement = sourceElement.getAnnotation(CommandLineArguments.class).missionStatement();
 
@@ -72,7 +66,6 @@ public final class Context {
         generatedClass,
         parameters,
         allowEscape,
-        strict,
         addHelp,
         description,
         programName(sourceElement),
@@ -173,11 +166,7 @@ public final class Context {
   public List<Param> parameters() {
     return parameters;
   }
-
-  public boolean isStrict() {
-    return strict;
-  }
-
+  
   public boolean isHelpParameterEnabled() {
     return helpParameterEnabled;
   }

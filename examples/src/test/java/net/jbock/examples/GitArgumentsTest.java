@@ -16,9 +16,10 @@ class GitArgumentsTest {
   void testRemaining() {
     String command = "add";
     String[] randomStrings = randomArgs();
-    String[] args = new String[randomStrings.length + 1];
+    String[] args = new String[randomStrings.length + 2];
     args[0] = command;
-    System.arraycopy(randomStrings, 0, args, 1, randomStrings.length);
+    args[1] = "--";
+    System.arraycopy(randomStrings, 0, args, 2, randomStrings.length);
     GitArguments result = f.parse(args);
     String[] remainingArgs = result.remainingArgs().toArray(new String[0]);
 

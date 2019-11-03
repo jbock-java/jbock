@@ -28,16 +28,16 @@ class AdditionArgumentsTest {
 
   @Test
   void wrongNumber() {
-    f.assertThat("-a", "2").failsWithUsageMessage(
+    f.assertThat("--", "-a", "2").failsWithUsageMessage(
         "For input string: \"-a\"");
   }
 
   @Test
   void dashesIgnored() {
-    f.assertThat("1", "-2", "3").satisfies(e -> e.sum() == 2);
-    f.assertThat("-1", "-2", "-3").satisfies(e -> e.sum() == -6);
-    f.assertThat("-1", "-2", "3").satisfies(e -> e.sum() == 0);
-    f.assertThat("-1", "-2").satisfies(e -> e.sum() == -3);
+    f.assertThat("--", "1", "-2", "3").satisfies(e -> e.sum() == 2);
+    f.assertThat("--", "-1", "-2", "-3").satisfies(e -> e.sum() == -6);
+    f.assertThat("--", "-1", "-2", "3").satisfies(e -> e.sum() == 0);
+    f.assertThat("--", "-1", "-2").satisfies(e -> e.sum() == -3);
   }
 
   @Test

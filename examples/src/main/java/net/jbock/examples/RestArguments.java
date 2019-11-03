@@ -6,7 +6,7 @@ import net.jbock.PositionalParameter;
 
 import java.util.List;
 
-@CommandLineArguments(allowPrefixedTokens = true)
+@CommandLineArguments
 abstract class RestArguments {
 
   /**
