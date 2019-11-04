@@ -22,7 +22,7 @@ will cause further source code to be generated at compile time.
 Specifically, a class named `MyArguments_Parser`
 will be generated, which can be seen
 [here.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
-This is how it's normally used in a *main* method:
+This is how it might be used in a *main* method:
 
 ````java
 String[] argv = { "-v2", "file.txt" }; // for example
