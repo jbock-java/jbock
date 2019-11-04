@@ -13,8 +13,6 @@
 * <a href="#custom-mappers-and-parameter-validation">Custom mappers and parameter validation</a>
 * <a href="#custom-collectors">Custom collectors</a>
 * <a href="#parameter-descriptions-and-internationalization">Parameter descriptions and internationalization</a>
-* <a href="#escape-sequence">Escape sequence</a>
-* <a href="#allowing-prefixed-tokens">Allowing prefixed tokens</a>
 * <a href="#parsing-failure">Parsing failure</a>
 * <a href="#runtime-modifiers">Runtime modifiers</a>
 * <a href="#gradle-config">Gradle config</a>
@@ -374,66 +372,6 @@ abstract String headers();
 ````
 
 See [jbock-map-example](https://github.com/h908714124/jbock-map-example) for further details.
-
-### Escape sequence
-
-There can sometimes be ambiguity between
-<a href="#positional-parameters">*positional*</a>
-and <a href="#binding-parameters">*binding*</a> parameters.
-The `allowEscapeSequence = true` attribute enables the escape sequence `--`.
-
-````java
-@CommandLineArguments(allowEscapeSequence = true)
-abstract class MyArguments {
-  
-  @PositionalParameter
-  abstract Path file();
-  
-  @Parameter(shortName = 'q')
-  abstract boolean quiet();
-}
-````
-
-The remaining tokens after the escape sequence `--` are now "blindly"
-treated as positional parameters:
-
-````java
-String[] argv = { "--", "-q" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-
-assertFalse(args.quiet());
-assertEquals(Paths.get("-q"), args.file());
-````
-
-### Allowing prefixed tokens
-
-By default, any <a href="#binding-parameters">unbound token</a> that begins with
-[hyphen-minus](https://en.wikipedia.org/wiki/Hyphen-minus) 
-and is not one of the defined parameter names,
-will cause a <a href="#parsing-failure">*parsing failure*</a>.
-No attempt is made to interpret it as a positional argument.
-
-Use `allowPrefixedTokens` to change this and allow the user
-to pass, for instance, a negative number,
-without forcing them to type the
-<a href="#escape-sequence">*escape sequence*</a>:
-
-````java
-@CommandLineArguments(allowPrefixedTokens = true)
-abstract class MyArguments {
-  
-  @PositionalParameter
-  abstract int number();
-}
-````
-For example, [negative one](https://en.wikipedia.org/wiki/%E2%88%921) can now be passed as a positional parameter.
-
-````java
-String[] argv = { "-1" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-
-assertEquals(-1, args.number());
-````
 
 ### Parsing failure
 
