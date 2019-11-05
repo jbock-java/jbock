@@ -1,10 +1,11 @@
 ### Contents
 
 * <a href="#features-overview">Features overview</a>
-* <a href="#argument-vector">Argument vector</a>
+* <a href="#parameter-types">Parameter types</a>
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#flags">Flags</a>
 * <a href="#binding-parameters">Binding parameters</a>
+* <a href="#escape-sequence">Escape sequence</a>
 * <a href="#required-and-optional-parameters">Required and optional parameters</a>
 * <a href="#repeatable-parameters">Repeatable parameters</a>
 * <a href="#parameter-shapes">Parameter shapes</a>
@@ -38,16 +39,17 @@ for users of similar parsers:
 
 Next, we look at some of the features in more detail.
 
-### Argument vector
+### Parameter types
 
 Command line applications have access to a special array of strings,
 which is often called `args` or `argv`.
+This represents the command line parameters that are passed to the application at runtime.
 
 Some of the tokens in this array take the form of key-value pairs.
 These are called "Options" or "non-positional parameters".
 Others may be distinguished by their position.
 
-Let's take a closer look at the basic parameter types:
+Now we take a closer look at the basic parameter types:
 
 1. <a href="#positional-parameters">*Positional parameters*</a>
 1. Options
@@ -60,26 +62,26 @@ A *positional* parameter is just a value, without a
 preceding parameter name. The value is not allowed
 to start with a "minus" character, unless the
 <a href="#allowing-prefixed-tokens">*allowPrefixedTokens*</a>
-attribute is set.
+attribute is set. Here is an example:
 
 ````java
 @CommandLineArguments
 abstract class MyArguments {
 
-  @PositionalParameter(position = 0)
+  @PositionalParameter(position = 1)
   abstract Path source();
   
-  @PositionalParameter(position = 1)
+  @PositionalParameter(position = 2)
   abstract Path target();
 }
 ````
 
-If we generate the parser `MyArguments_Parser`
-from this example, then `argv` must have length `2`,
+The `MyArguments_Parser` that is generated
+from this example expects `argv.length` to be exactly `2`,
 otherwise <a href="#parsing-failure">*parsing will fail*</a>.
 
-The `source` parameter has the *lowest* position,
-so it will bind the *first positional* argument.
+The `source` parameter has the *lower* position,
+so it will bind the *first* token:
 
 ````java
 String[] argv = { "a.txt", "b.txt" };
@@ -138,6 +140,15 @@ The *parameter value* (or *bound value*) is the next token after the first occur
 token `-f`. The bound token can be an arbitrary string. Any token in `argv` that is not bound by some
 binding parameter, and precedes the
 <a href="#escape-sequence">*escape sequence*</a>, is called *free*.
+
+### Escape sequence
+
+The escape sequence consists of the <a href="#binding-parameters">*free*</a> token `"--"`,
+i.e. two consecutive "dash" characters. 
+Any remaining tokens in `argv` after that will be treated as <a href="#positional-parameters">*positional*</a>.
+In other words, the escape sequence ends option parsing.
+Naturally, the generated parser only recognizes the escape sequence
+if there is at least one positional parameter defined.
 
 ### Required and optional parameters
 
@@ -363,6 +374,7 @@ abstract String headers();
 ````
 
 See [jbock-map-example](https://github.com/h908714124/jbock-map-example) for further details.
+
 
 ### Parsing failure
 
