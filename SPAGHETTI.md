@@ -43,17 +43,16 @@ Next, we look at some of the features in more detail.
 Command line applications have access to a special array of strings,
 which is often called `args` or `argv`.
 
-Sometimes the tokens in this array are grouped into key-value pairs.
-Sometimes they are distinguished by their position or form.
-There can also be a mix of these kinds.
-The tokens and key-value pairs in `argv` are called
-*command line parameters,* or in short, *parameters.*
+Some of the tokens in this array take the form of key-value pairs.
+These are called "Options" or "non-positional parameters".
+Others may be distinguished by their position.
 
-Let's take a look at three basic types of parameters:
+Let's take a closer look at the basic parameter types:
 
 1. <a href="#positional-parameters">*positional parameters*</a>
-1. <a href="#flags">*flags*</a>
-1. <a href="#binding-parameters">*binding parameters*</a>
+1. Options
+    1. nullary: <a href="#flags">*flags*</a>
+    1. unary: <a href="#binding-parameters">*binding parameters*</a>
 
 ### Positional parameters
 
