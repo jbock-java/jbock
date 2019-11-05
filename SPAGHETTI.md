@@ -420,8 +420,8 @@ This example shows all the available options:
 String[] argv = {"-f hello.txt"};
 MyArguments_Parser.create()
     .withErrorExitCode(2)                                           // default is 1
-    .withErrorStream(new PrintStream(new ByteArrayOutputStream()))  // default is System.err
-    .withOutputStream(new PrintStream(new ByteArrayOutputStream())) // default is System.out
+    .withErrorStream(new PrintStream(new ByteArrayOutputStream()))  // used for parsind errors, default is System.err
+    .withOutputStream(new PrintStream(new ByteArrayOutputStream())) // used when --help is passed, default is System.out
     .withIndent(2)                                                  // default is 7
     .withResourceBundle(ResourceBundle.getBundle("UserOpts"))       // default is none
     .parseOrExit(argv);
