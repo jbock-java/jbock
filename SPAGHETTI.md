@@ -125,8 +125,8 @@ abstract boolean quiet();
 
 A <a href="#positional-parameters">*non-positional*</a> parameter
 that is not a <a href="#flags">*flag*</a> is called a
-*binding parameter*. The following
-method declares binding parameter:
+*binding parameter*. For example, this
+parameter method declares binding parameter:
 
 ````java
 // example of a binding parameter
@@ -135,14 +135,9 @@ abstract String file();
 ````
 
 The *parameter value* (or *bound value*) is the next token after the first occurrence of the
-token `-f`. The parameter value
-is an *arbitrary* string. For example, it's fine for the value to start with a "minus" character:
-
-````java
-String[] argv = { "-f", "-f" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-assertEquals("-f", args.file());
-````
+token `-f`. The bound token can be an arbitrary string. Any token in `argv` that is not bound by some
+binding parameter, and precedes the
+<a href="#escape-sequence">*escape sequence*</a>, is called *free*.
 
 ### Required and optional parameters
 
