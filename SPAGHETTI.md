@@ -30,7 +30,7 @@ for users of similar parsers:
 1. <a href="#binding-parameters">*Binding parameters*</a> are always [unary:](https://en.wikipedia.org/wiki/Unary_operation)
     1. The parameter name must be followed by a single argument.
        If we think of the `argv` array as a map,
-       then this means that there must be exactrly one value per key.
+       then this means that there must be exactly one value per key.
     1. These key-value pairs can also be written as <a href="#parameter-shapes">*single tokens.*</a>
     1. Parameters can be <a href="#repeatable-parameters">*repeatable.*</a>
        Repeatable parameters correspond to parameter methods that return [List,](https://en.wikipedia.org/wiki/Java_collections_framework)
