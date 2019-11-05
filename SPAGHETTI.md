@@ -6,7 +6,6 @@
 * <a href="#flags">Flags</a>
 * <a href="#binding-parameters">Binding parameters</a>
 * <a href="#escape-sequence">Escape sequence</a>
-* <a href="#required-and-optional-parameters">Required and optional parameters</a>
 * <a href="#repeatable-parameters">Repeatable parameters</a>
 * <a href="#parameter-shapes">Parameter shapes</a>
 * <a href="#showing-help">Showing help</a>
@@ -25,7 +24,7 @@
 Some of the features, especially the handling of optional parameters, may be unexpected
 for users of similar parsers:
 
-1. In the Java model, <a href="#required-and-optional-parameters">*optional parameters*</a>
+1. In the Java model, <a href="https://github.com/h908714124/jbock/blob/master/README.md#parameter-type-matching">optional parameters</a>
    correspond to methods that return [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html).
    Coincidentally, there is no way to make a parameter method return `null`.
 1. <a href="#binding-parameters">*Binding parameters*</a> are always [unary:](https://en.wikipedia.org/wiki/Unary_operation)
@@ -150,29 +149,6 @@ In other words, the escape sequence ends option parsing.
 Naturally, the generated parser only recognizes the escape sequence
 if there is at least one positional parameter defined.
 
-### Required and optional parameters
-
-All <a href="#binding-parameters">*binding parameters*</a>
-are treated as *required* unless declared otherwise.
-It is not possible to get an instance
-of `MyArguments` unless the input array `String[] argv`
-contains all required parameters. Therefore, we can guarantee that none of your
-model methods will ever return `null`.
-
-To declare an *optional* binding parameter,
-simply make the corresponding model method return
-one of these four types:
-[Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html),
-[OptionalInt](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalInt.html),
-[OptionalLong](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalLong.html) or
-[OptionalDouble](https://docs.oracle.com/javase/8/docs/api/java/util/OptionalDouble.html).
-
-````java
-// an optional parameter
-@Parameter(shortName = 'f')
-abstract Optional<String> file();
-````
-
 ### Repeatable parameters
 
 Repeatable parameters are <a href="#binding-parameters">*binding parameters*</a>
@@ -194,8 +170,8 @@ assertEquals(List.of("Content-Type: application/json",
                      "Content-Length: 200"), args.headers());
 ````
 
-To declare a repeatable parameter, simply
-make the corresponding model method return a `List`.
+To declare a repeatable parameter, either define a custom collector or
+make the corresponding model method return `java.util.List`.
 
 ### Parameter shapes
 
@@ -282,20 +258,6 @@ class PositiveNumberMapper implements Function<String, Integer> {
 }
 ````
 
-The same mapper can also be used for
-<a href="#required-and-optional-parameters">*optional*</a>
-and <a href="#repeatable-parameters">*repeatable*</a> parameters.
-
-````java
-@Parameter(shortName = 'o', mappedBy = PositiveNumberMapper.class)
-abstract Optional<Integer> optionalNumber();
-````
-
-````java
-@Parameter(shortName = 'x', mappedBy = PositiveNumberMapper.class)
-abstract List<Integer> numbers();
-````
-
 *Note: The mapper class must have a no-argument constructor.*
 
 ### Custom collectors
@@ -380,13 +342,11 @@ See [jbock-map-example](https://github.com/h908714124/jbock-map-example) for fur
 
 There are several types of "bad input" which can cause the parsing process to fail:
 
-* Repetition of <a href="#repeatable-parameters">*non-repeatable parameters*</a>
-* Absence of a <a href="#required-and-optional-parameters">*required parameter*</a>
-* Unknown token, after all <a href="#positional-parameters">*positional parameters*</a> are filled
-* Missing value after a <a href="#binding-parameters">*binding*</a> parameter
-* <a href="#standard-coercions">*Coercion*</a> failure
-* Failure in a <a href="#custom-mappers-and-parameter-validation">*mapper*</a> or
-  <a href="#custom-collectors">*collector*</a>
+* Repetition of <a href="#repeatable-parameters">*non-repeatable*</a> parameters
+* Absence of required parameter
+* Too many <a href="#positional-parameters">*positional*</a> parameters
+* Missing value of <a href="#binding-parameters">*binding*</a> parameter
+* Any `RuntimeException` in a mapper or collector
 
 The generated `parseOrExit` method performs the following steps if such a failure is encountered:
 

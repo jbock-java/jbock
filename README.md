@@ -38,6 +38,8 @@ and `verbosity` is optional.
 This is determined by the parameter type,
 using the following "matching" rules (upper left corner applies for both parameters):
 
+### Parameter type matching
+
 <table style="border-collapse: collapse">
 <tr>
 <td></td>
