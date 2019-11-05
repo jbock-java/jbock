@@ -163,7 +163,7 @@ This list will contain the headers in the same order
 in which they appear in `argv`.
 
 To declare a repeatable parameter, either define a custom collector, or
-use a parameter method that returns `java.util.List<E>`, where `E` is the
+use a parameter method that returns `List<E>`, where `E` is the
 mapper return type.
 
 ### Parameter shapes
