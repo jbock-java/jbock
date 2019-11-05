@@ -34,7 +34,7 @@ for users of similar parsers:
     1. These key-value pairs can also be written as <a href="#parameter-shapes">*single tokens.*</a>
     1. Parameters can be <a href="#repeatable-parameters">*repeatable.*</a>
        Repeatable parameters correspond to parameter methods that return [List,](https://en.wikipedia.org/wiki/Java_collections_framework)
-       but there can be exceptions from this rule if a custom mapper or collector is defined (see the matrix in [README.md.](https://github.com/h908714124/jbock/blob/master/README.md)
+       but there can be exceptions from this rule if a custom mapper or collector is defined (see the matrix in [README.md)](https://github.com/h908714124/jbock/blob/master/README.md)
 1. There are some <a href="#standard-coercions">*standard coercions.*</a>
 Custom <a href="#custom-mappers-and-parameter-validation">*mappers*</a> and
 <a href="#custom-collectors">*collectors*</a> can be added.
