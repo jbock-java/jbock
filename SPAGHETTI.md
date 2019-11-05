@@ -125,8 +125,7 @@ abstract boolean quiet();
 
 ### Binding parameters
 
-A <a href="#positional-parameters">*non-positional*</a> parameter
-that is not a <a href="#flags">*flag*</a> is called a
+An *Option* that is not a <a href="#flags">*flag*</a> is called a
 *binding parameter*. For example, this
 parameter method declares binding parameter:
 
@@ -136,8 +135,7 @@ parameter method declares binding parameter:
 abstract String file();
 ````
 
-The *parameter value* (or *bound value*) is the next token after the first occurrence of the
-token `-f`. The bound token can be an arbitrary string. Any token in `argv` that is not bound by some
+The bound token can be an arbitrary string. Any token in `argv` that is not bound by some
 binding parameter, and precedes the
 <a href="#escape-sequence">*escape sequence*</a>, is called *free*.
 
@@ -152,24 +150,17 @@ if there is at least one positional parameter defined.
 
 ### Repeatable parameters
 
-Repeatable parameters are <a href="#binding-parameters">*binding parameters*</a>
-that can appear not only once, but any number of times.
+Repeatable parameters are either <a href="#binding-parameters">*binding*</a>
+or <a href="#positional-parameters">*positional*</a> parameters
+that can appear any number of times in `argv`. For example:
 
 ````java
 @Parameter(shortName = 'X')
 abstract List<String> headers();
 ````
 
-The list will contain the headers in the same order
+This list will contain the headers in the same order
 in which they appear in `argv`.
-
-````java
-String[] argv = { "-X", "Content-Type: application/json", 
-                  "-X", "Content-Length: 200" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-assertEquals(List.of("Content-Type: application/json", 
-                     "Content-Length: 200"), args.headers());
-````
 
 To declare a repeatable parameter, either define a custom collector or
 make the corresponding model method return `java.util.List`.
