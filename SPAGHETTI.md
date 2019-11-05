@@ -33,8 +33,9 @@ for users of similar parsers:
        then this means that there must be exactly one value per key.
     1. These key-value pairs can also be written as <a href="#parameter-shapes">*single tokens.*</a>
     1. Parameters can be <a href="#repeatable-parameters">*repeatable.*</a>
-       Repeatable parameters correspond to parameter methods that return [List,](https://en.wikipedia.org/wiki/Java_collections_framework)
-       but there can be exceptions from this rule if a custom mapper or collector is defined (see the matrix in [README.md](https://github.com/h908714124/jbock/blob/master/README.md))
+       Repeatable parameters mostly correspond to methods that return [List,](https://en.wikipedia.org/wiki/Java_collections_framework)
+       but there can be exceptions from this rule if a custom mapper or collector is defined
+       (see [README.md](https://github.com/h908714124/jbock/blob/master/README.md#parameter-type-matching))
 
 Next, we look at some of the features in more detail.
 
