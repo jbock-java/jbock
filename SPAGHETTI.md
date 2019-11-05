@@ -49,10 +49,10 @@ Others may be distinguished by their position.
 
 Let's take a closer look at the basic parameter types:
 
-1. <a href="#positional-parameters">*positional parameters*</a>
+1. <a href="#positional-parameters">*Positional parameters*</a>
 1. Options
-    1. nullary: <a href="#flags">*flags*</a>
-    1. unary: <a href="#binding-parameters">*binding parameters*</a>
+    1. nullary: <a href="#flags">*Flags*</a>
+    1. unary: <a href="#binding-parameters">*Binding parameters*</a>
 
 ### Positional parameters
 
