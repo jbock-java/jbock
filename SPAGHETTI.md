@@ -30,11 +30,11 @@ for users of similar parsers:
 1. <a href="#binding-parameters">*Binding parameters*</a> are always [unary:](https://en.wikipedia.org/wiki/Unary_operation)
     1. The parameter name must be followed by a single argument.
        If we think of the `argv` array as a map,
-       then this means that there is only one value per key.
-    1. One such key-value pair can also <a href="#parameter-shapes">*appear as a single token.*</a>
+       then this means that there must be exactrly one value per key.
+    1. These key-value pairs can also be written as <a href="#parameter-shapes">*single tokens.*</a>
     1. Parameters can be <a href="#repeatable-parameters">*repeatable.*</a>
-       Unless a mapper or collector is defined,
-       repeatable parameters correspond to methods that return [List.](https://en.wikipedia.org/wiki/Java_collections_framework)
+       Repeatable parameters correspond to parameter methods that return [List,](https://en.wikipedia.org/wiki/Java_collections_framework)
+       but there can be exceptions from this rule if a custom mapper or collector is defined (see the matrix in [README.md.](https://github.com/h908714124/jbock/blob/master/README.md)
 1. There are some <a href="#standard-coercions">*standard coercions.*</a>
 Custom <a href="#custom-mappers-and-parameter-validation">*mappers*</a> and
 <a href="#custom-collectors">*collectors*</a> can be added.
