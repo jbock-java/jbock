@@ -26,6 +26,7 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
+import static net.jbock.compiler.Util.getEnclosingElements;
 
 public final class Processor extends AbstractProcessor {
 
@@ -185,21 +186,6 @@ public final class Processor extends AbstractProcessor {
     return result;
   }
 
-  private List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
-    List<TypeElement> result = new ArrayList<>();
-    TypeElement current = sourceElement;
-    result.add(current);
-    while (current.getNestingKind() == NestingKind.MEMBER) {
-      Element enclosingElement = current.getEnclosingElement();
-      if (enclosingElement.getKind() != ElementKind.CLASS) {
-        return result;
-      }
-      current = TypeTool.asTypeElement(enclosingElement);
-      result.add(current);
-    }
-    return result;
-  }
-
   private void validateSourceElement(TypeTool tool, TypeElement sourceElement) {
     if (sourceElement.getKind() == ElementKind.INTERFACE) {
       throw ValidationException.create(sourceElement,
@@ -244,7 +230,7 @@ public final class Processor extends AbstractProcessor {
     if (docComment == null) {
       return emptyList();
     }
-    return Arrays.asList(tokenize(docComment));
+    return Arrays.asList(tokenizeJavadoc(docComment));
   }
 
   private String[] getDescription(ExecutableElement method) {
@@ -252,11 +238,11 @@ public final class Processor extends AbstractProcessor {
     if (docComment == null) {
       return new String[0];
     }
-    return tokenize(docComment);
+    return tokenizeJavadoc(docComment);
   }
 
-  private static String[] tokenize(String docComment) {
-    String[] tokens = docComment.trim().split("\\n", -1);
+  private static String[] tokenizeJavadoc(String docComment) {
+    String[] tokens = docComment.trim().split("\\R", -1);
     for (int i = 0; i < tokens.length; i++) {
       tokens[i] = tokens[i].trim();
     }
