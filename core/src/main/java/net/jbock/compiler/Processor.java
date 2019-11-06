@@ -11,32 +11,18 @@ import net.jbock.compiler.view.Parser;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
-import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.Name;
-import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.*;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.OptionalInt;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.emptySet;
-import static java.util.stream.Collectors.partitioningBy;
-import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -73,7 +59,10 @@ public final class Processor extends AbstractProcessor {
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
     Set<String> annotationsToProcess = annotations.stream().map(TypeElement::getQualifiedName).map(Name::toString).collect(toSet());
     try {
-      validateAnnotatedMethods(env, annotationsToProcess);
+      getAnnotatedMethods(env, annotationsToProcess).forEach(method -> {
+        checkEnclosingElementIsAnnotated(method);
+        validateParameterMethods(method);
+      });
     } catch (ValidationException e) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
       return false;
@@ -81,7 +70,7 @@ public final class Processor extends AbstractProcessor {
     if (!annotationsToProcess.contains(CommandLineArguments.class.getCanonicalName())) {
       return false;
     }
-    getSourceElements(env).forEach(this::processSourceElements);
+    getAnnotatedTypes(env).forEach(this::processSourceElements);
     return false;
   }
 
@@ -142,7 +131,7 @@ public final class Processor extends AbstractProcessor {
     return parameters.stream().anyMatch(Param::isPositional);
   }
 
-  private Set<TypeElement> getSourceElements(RoundEnvironment env) {
+  private Set<TypeElement> getAnnotatedTypes(RoundEnvironment env) {
     Set<? extends Element> annotated = env.getElementsAnnotatedWith(CommandLineArguments.class);
     return ElementFilter.typesIn(annotated);
   }
@@ -174,29 +163,19 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static final Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
-      .comparingInt(e -> e.getAnnotation(PositionalParameter.class).position());
-
   private List<Param> getParams(TypeTool tool, TypeElement sourceElement) {
     List<ExecutableElement> abstractMethods = methodsIn(sourceElement.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
-        .collect(toList());
-    checkExactlyOneAnnotation(abstractMethods);
-    Map<Boolean, List<ExecutableElement>> partition = abstractMethods.stream().collect(
-        partitioningBy(method -> method.getAnnotation(PositionalParameter.class) != null));
-    List<ExecutableElement> allNonpositional = partition.getOrDefault(false, emptyList());
-    List<ExecutableElement> allPositional = partition.getOrDefault(true, emptyList());
-    checkPositionUnique(allPositional);
-    List<ExecutableElement> sortedPositional = allPositional.stream()
-        .sorted(POSITION_COMPARATOR)
         .collect(Collectors.toList());
-    List<Param> result = new ArrayList<>(abstractMethods.size());
-    for (int i = 0; i < sortedPositional.size(); i++) {
-      ExecutableElement method = sortedPositional.get(i);
+    abstractMethods.forEach(Processor::validateParameterMethods);
+    ParameterMethods methods = ParameterMethods.create(abstractMethods);
+    List<Param> result = new ArrayList<>(methods.options().size() + methods.positionals().size());
+    for (int i = 0; i < methods.positionals().size(); i++) {
+      ExecutableElement method = methods.positionals().get(i);
       Param param = Param.create(tool, result, method, i, getDescription(method));
       result.add(param);
     }
-    for (ExecutableElement method : allNonpositional) {
+    for (ExecutableElement method : methods.options()) {
       Param param = Param.create(tool, result, method, null, getDescription(method));
       result.add(param);
     }
@@ -206,30 +185,19 @@ public final class Processor extends AbstractProcessor {
     return result;
   }
 
-  private void checkPositionUnique(List<ExecutableElement> allPositional) {
-    Set<Integer> positions = new HashSet<>();
-    for (ExecutableElement method : allPositional) {
-      Integer position = method.getAnnotation(PositionalParameter.class).position();
-      if (!positions.add(position)) {
-        throw ValidationException.create(method, "Define a unique position.");
+  private List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
+    List<TypeElement> result = new ArrayList<>();
+    TypeElement current = sourceElement;
+    result.add(current);
+    while (current.getNestingKind() == NestingKind.MEMBER) {
+      Element enclosingElement = current.getEnclosingElement();
+      if (enclosingElement.getKind() != ElementKind.CLASS) {
+        return result;
       }
+      current = TypeTool.asTypeElement(enclosingElement);
+      result.add(current);
     }
-  }
-
-  private void checkExactlyOneAnnotation(List<ExecutableElement> abstractMethods) {
-    for (ExecutableElement method : abstractMethods) {
-      boolean isPositional = method.getAnnotation(PositionalParameter.class) != null;
-      if (!isPositional && method.getAnnotation(Parameter.class) == null) {
-        throw ValidationException.create(method,
-            String.format("Add %s or %s annotation",
-                Parameter.class.getSimpleName(), PositionalParameter.class.getSimpleName()));
-      }
-      if (isPositional && method.getAnnotation(Parameter.class) != null) {
-        throw ValidationException.create(method,
-            String.format("Remove %s or %s annotation",
-                Parameter.class.getSimpleName(), PositionalParameter.class.getSimpleName()));
-      }
-    }
+    return result;
   }
 
   private void validateSourceElement(TypeTool tool, TypeElement sourceElement) {
@@ -245,10 +213,12 @@ public final class Processor extends AbstractProcessor {
       throw ValidationException.create(sourceElement,
           "Use an abstract class.");
     }
-    if (sourceElement.getModifiers().contains(Modifier.PRIVATE)) {
-      throw ValidationException.create(sourceElement,
-          "The class cannot not be private.");
-    }
+    getEnclosingElements(sourceElement).forEach(element -> {
+      if (element.getModifiers().contains(Modifier.PRIVATE)) {
+        throw ValidationException.create(element,
+            "The class may not not be private.");
+      }
+    });
     if (sourceElement.getNestingKind().isNested() &&
         !sourceElement.getModifiers().contains(Modifier.STATIC)) {
       throw ValidationException.create(sourceElement,
@@ -266,6 +236,7 @@ public final class Processor extends AbstractProcessor {
       throw ValidationException.create(sourceElement,
           "The class must have a default constructor.");
     }
+
   }
 
   private List<String> getOverview(TypeElement sourceType) {
@@ -302,49 +273,42 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void validateAnnotatedMethods(
-      RoundEnvironment env, Set<String> annotationsToProcess) {
-    List<ExecutableElement> methods = getAnnotatedMethods(env, annotationsToProcess);
-    for (ExecutableElement method : methods) {
-      Element enclosingElement = method.getEnclosingElement();
-      if (enclosingElement.getAnnotation(CommandLineArguments.class) == null) {
-        throw ValidationException.create(enclosingElement,
-            "The class must have the " +
-                CommandLineArguments.class.getSimpleName() + " annotation.");
-      }
-      if (!enclosingElement.getModifiers().contains(ABSTRACT)) {
-        throw ValidationException.create(enclosingElement,
-            "The class must be abstract");
-      }
-      if (!method.getModifiers().contains(ABSTRACT)) {
-        throw ValidationException.create(method,
-            "The method must be abstract.");
-      }
-      if (!method.getParameters().isEmpty()) {
-        throw ValidationException.create(method,
-            "The method may not have parameters.");
-      }
-      if (!method.getTypeParameters().isEmpty()) {
-        throw ValidationException.create(method,
-            "The method may not have type parameters.");
-      }
-      if (!method.getThrownTypes().isEmpty()) {
-        throw ValidationException.create(method,
-            "The method may not declare any exceptions.");
-      }
+  private static void validateParameterMethods(ExecutableElement method) {
+    if (!method.getModifiers().contains(ABSTRACT)) {
+      throw ValidationException.create(method,
+          "The method must be abstract.");
+    }
+    if (!method.getParameters().isEmpty()) {
+      throw ValidationException.create(method,
+          "The method may not have parameters.");
+    }
+    if (!method.getTypeParameters().isEmpty()) {
+      throw ValidationException.create(method,
+          "The method may not have type parameters.");
+    }
+    if (!method.getThrownTypes().isEmpty()) {
+      throw ValidationException.create(method,
+          "The method may not declare any exceptions.");
+    }
+    if (method.getAnnotation(PositionalParameter.class) == null && method.getAnnotation(Parameter.class) == null) {
+      throw ValidationException.create(method,
+          String.format("Annotate this method with either @%s or @%s",
+              Parameter.class.getSimpleName(), PositionalParameter.class.getSimpleName()));
+    }
+    if (method.getAnnotation(PositionalParameter.class) != null && method.getAnnotation(Parameter.class) != null) {
+      throw ValidationException.create(method,
+          String.format("Use either @%s or @%s annotation, but not both",
+              Parameter.class.getSimpleName(), PositionalParameter.class.getSimpleName()));
     }
   }
 
-  private List<ExecutableElement> getAnnotatedMethods(
-      RoundEnvironment env, Set<String> annotationsToProcess) {
-    Set<? extends Element> parameters =
-        annotationsToProcess.contains(Parameter.class.getCanonicalName()) ?
-            env.getElementsAnnotatedWith(Parameter.class) :
-            emptySet();
-    Set<? extends Element> positionalParams =
-        annotationsToProcess.contains(PositionalParameter.class.getCanonicalName()) ?
-            env.getElementsAnnotatedWith(PositionalParameter.class) :
-            emptySet();
+  private List<ExecutableElement> getAnnotatedMethods(RoundEnvironment env, Set<String> annotationsToProcess) {
+    Set<? extends Element> parameters = annotationsToProcess.contains(Parameter.class.getCanonicalName()) ?
+        env.getElementsAnnotatedWith(Parameter.class) :
+        emptySet();
+    Set<? extends Element> positionalParams = annotationsToProcess.contains(PositionalParameter.class.getCanonicalName()) ?
+        env.getElementsAnnotatedWith(PositionalParameter.class) :
+        emptySet();
     List<ExecutableElement> methods = new ArrayList<>(parameters.size() + positionalParams.size());
     methods.addAll(methodsIn(parameters));
     methods.addAll(methodsIn(positionalParams));
@@ -362,5 +326,16 @@ public final class Processor extends AbstractProcessor {
     String message = String.format("JBOCK: Unexpected error while processing %s: %s", sourceType, e.getMessage());
     e.printStackTrace(System.err);
     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, sourceType);
+  }
+
+  private void checkEnclosingElementIsAnnotated(ExecutableElement method) {
+    Element enclosingElement = method.getEnclosingElement();
+    if (enclosingElement.getKind() != ElementKind.CLASS) {
+      throw ValidationException.create(enclosingElement, "The enclosing element must be a class.");
+    }
+    if (enclosingElement.getAnnotation(CommandLineArguments.class) == null) {
+      throw ValidationException.create(enclosingElement,
+          "The class must have the @" + CommandLineArguments.class.getSimpleName() + " annotation.");
+    }
   }
 }

@@ -55,8 +55,6 @@ public final class Param {
 
   private final Integer positionalIndex;
 
-  private final TypeTool typeTool;
-
   public boolean isFlag() {
     return coercion.parameterType().isFlag();
   }
@@ -122,8 +120,7 @@ public final class Param {
       Coercion coercion,
       List<String> description,
       String descriptionArgumentName,
-      Integer positionalIndex,
-      TypeTool typeTool) {
+      Integer positionalIndex) {
     this.bundleKey = bundleKey;
     this.coercion = coercion;
     this.shortName = shortName;
@@ -132,7 +129,6 @@ public final class Param {
     this.description = description;
     this.descriptionArgumentName = descriptionArgumentName;
     this.positionalIndex = positionalIndex;
-    this.typeTool = typeTool;
   }
 
   public FieldSpec field() {
@@ -195,8 +191,7 @@ public final class Param {
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
-        null,
-        tool);
+        null);
   }
 
   private static Param createPositional(
@@ -222,8 +217,7 @@ public final class Param {
         coercion,
         cleanDesc(description),
         descriptionArgumentName,
-        positionalIndex,
-        tool);
+        positionalIndex);
   }
 
   /**

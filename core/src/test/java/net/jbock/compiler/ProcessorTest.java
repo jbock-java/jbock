@@ -84,8 +84,7 @@ class ProcessorTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("The class must be abstract");
+        .failsToCompile();
   }
 
   @Test
@@ -329,7 +328,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("must have the CommandLineArguments annotation");
+        .withErrorContaining("The class must have the @CommandLineArguments annotation");
   }
 
   @Test
@@ -399,7 +398,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Add Parameter or PositionalParameter annotation");
+        .withErrorContaining("Annotate this method with either @Parameter or @PositionalParameter");
   }
 
   @Test
@@ -447,7 +446,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Remove Parameter or PositionalParameter annotation");
+        .withErrorContaining("Use either @Parameter or @PositionalParameter annotation, but not both");
   }
 
   @Test
@@ -502,6 +501,23 @@ class ProcessorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("Unknown parameter type. Try defining a custom mapper or collector.");
+  }
+
+
+  @Test
+  void invalidNesting() {
+    JavaFileObject javaFile = fromSource(
+        "class Bob {",
+        "  private static class Foo {",
+        "    @CommandLineArguments",
+        "    abstract static class Bar {",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("The class may not not be private");
   }
 
   static JavaFileObject fromSource(String... lines) {

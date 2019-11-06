@@ -297,15 +297,15 @@ public class TypeTool {
   public TypeElement asTypeElement(TypeMirror mirror) {
     Element element = types.asElement(mirror);
     if (element == null) {
-      throw new IllegalArgumentException("no element: " + mirror);
+      throw new IllegalArgumentException("not an element: " + mirror);
     }
     return asTypeElement(element);
   }
 
-  private TypeElement asTypeElement(Element element) {
+  static TypeElement asTypeElement(Element element) {
     TypeElement result = element.accept(AS_TYPE_ELEMENT, null);
     if (result == null) {
-      throw new IllegalArgumentException("no type element: " + element);
+      throw new IllegalArgumentException("not a type element: " + element);
     }
     return result;
   }
