@@ -389,9 +389,11 @@ The `indent` is used when printing the usage page.
 ### Limitations
 
 * No argument grouping. For example, `rm -rf` is invalid, use `rm -r -f` instead
-* Can't use a different character than `"-"` for option names
+* Can't have options that don't start with either `"-"` or `"--"`
 * No multi-valued args (repeatable args are a workaround)
 * No bsd-style args as in `tar xzf`, use `tar -x -z -f` instead
+* Short option names are limited to a single character
+* Cannot distinguish between attached or detached option shape. Both are always allowed and equivalent.
 
 ### Gradle config
 
