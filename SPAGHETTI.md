@@ -392,7 +392,7 @@ The `indent` is used when printing the usage page.
 * Can't have options that don't start with either `"-"` or `"--"`
 * No multi-argument options, use repeatable options instead
 * No bsd-style flags as in `tar xzf`, use `tar -x -z -f` instead
-* Short option names are limited to a single character
+* Short names are limited to a single character, use long names instead
 * Cannot distinguish between attached or detached option shape. Both are always allowed and equivalent.
 * No colors. Use [picocli](https://github.com/remkop/picocli) instead.
 
