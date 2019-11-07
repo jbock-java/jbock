@@ -15,7 +15,7 @@
 * <a href="#parameter-descriptions-and-internationalization">Parameter descriptions and internationalization</a>
 * <a href="#parsing-failure">Parsing failure</a>
 * <a href="#runtime-modifiers">Runtime modifiers</a>
-* <a href="#limitiations">Limitations</a>
+* <a href="#limitations">Limitations</a>
 * <a href="#gradle-config">Gradle config</a>
 * <a href="#maven-config">Maven config</a>
 * <a href="#running-tests">Running tests</a>
