@@ -15,6 +15,7 @@
 * <a href="#parameter-descriptions-and-internationalization">Parameter descriptions and internationalization</a>
 * <a href="#parsing-failure">Parsing failure</a>
 * <a href="#runtime-modifiers">Runtime modifiers</a>
+* <a href="#limitiations">Limitations</a>
 * <a href="#gradle-config">Gradle config</a>
 * <a href="#maven-config">Maven config</a>
 * <a href="#running-tests">Running tests</a>
@@ -384,6 +385,13 @@ MyArguments_Parser.create()
 ````
 
 The `indent` is used when printing the usage page.
+
+### Limitations
+
+* No argument grouping. For example, `rm -rf` is invalid, use `rm -r -f` instead
+* Can't use a different character than `"-"` for option names
+* No multi-valued args (repeatable args are a workaround)
+* No bsd-style args as in `tar xzf`, use `tar -x -z -f` instead
 
 ### Gradle config
 
