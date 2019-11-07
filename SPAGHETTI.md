@@ -390,7 +390,7 @@ The `indent` is used when printing the usage page.
 
 * No argument grouping. For example, `rm -rf` is invalid, use `rm -r -f` instead
 * Can't have options that don't start with either `"-"` or `"--"`
-* No multi-valued options, use repeatable options instead
+* No multi-argument options, use repeatable options instead
 * No bsd-style args as in `tar xzf`, use `tar -x -z -f` instead
 * Short option names are limited to a single character
 * Cannot distinguish between attached or detached option shape. Both are always allowed and equivalent.
