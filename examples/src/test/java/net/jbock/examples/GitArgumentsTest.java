@@ -13,7 +13,7 @@ class GitArgumentsTest {
       ParserTestFixture.create(GitArguments_Parser.create());
 
   @RepeatedTest(10)
-  void testRemaining() {
+  void testEscape() {
     String command = "add";
     String[] randomStrings = randomArgs();
     String[] args = new String[randomStrings.length + 2];
@@ -23,7 +23,7 @@ class GitArgumentsTest {
     GitArguments result = f.parse(args);
     String[] remainingArgs = result.remainingArgs().toArray(new String[0]);
 
-    // The parser should simply put everything after the command in the list.
+    // check that escape sequence works
     assertArrayEquals(randomStrings, remainingArgs);
   }
 
