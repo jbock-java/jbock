@@ -13,7 +13,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collector;
 
+import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
+import static net.jbock.coerce.Util.checkNotAbstract;
 import static net.jbock.coerce.reference.ExpectedType.COLLECTOR;
 
 class CollectorClassValidator {
@@ -28,7 +30,8 @@ class CollectorClassValidator {
 
   // visible for testing
   CustomCollector getCollectorInfo() {
-    commonChecks(basicInfo, collectorClass, "collector");
+    commonChecks(collectorClass);
+    checkNotAbstract(collectorClass);
     ReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, basicInfo, collectorClass)
         .getReferencedType();
     TypeMirror t = collectorType.typeArguments().get(0);

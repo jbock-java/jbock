@@ -302,7 +302,7 @@ public class TypeTool {
     return asTypeElement(element);
   }
 
-  static TypeElement asTypeElement(Element element) {
+  public static TypeElement asTypeElement(Element element) {
     TypeElement result = element.accept(AS_TYPE_ELEMENT, null);
     if (result == null) {
       throw new IllegalArgumentException("not a type element: " + element);

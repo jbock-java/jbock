@@ -702,7 +702,7 @@ class CollectorTest {
         "  @Parameter(shortName = 'x', collectedBy = ZapperSupplier.class)",
         "  abstract String zap();",
         "",
-        "  interface ZapperSupplier extends Supplier<String> { }",
+        "  static class ZapperSupplier implements Supplier<String> { }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())

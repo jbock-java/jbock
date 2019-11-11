@@ -6,6 +6,7 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
+import net.jbock.coerce.SuppliedClassValidator;
 import net.jbock.compiler.view.Parser;
 
 import javax.annotation.processing.AbstractProcessor;
@@ -26,7 +27,6 @@ import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static net.jbock.compiler.Util.getEnclosingElements;
 
 public final class Processor extends AbstractProcessor {
 
@@ -43,10 +43,7 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
-    return Stream.of(
-        CommandLineArguments.class,
-        Parameter.class,
-        PositionalParameter.class)
+    return Stream.of(CommandLineArguments.class, Parameter.class, PositionalParameter.class)
         .map(Class::getCanonicalName)
         .collect(toSet());
   }
@@ -58,7 +55,10 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-    Set<String> annotationsToProcess = annotations.stream().map(TypeElement::getQualifiedName).map(Name::toString).collect(toSet());
+    Set<String> annotationsToProcess = annotations.stream()
+        .map(TypeElement::getQualifiedName)
+        .map(Name::toString)
+        .collect(toSet());
     try {
       getAnnotatedMethods(env, annotationsToProcess).forEach(method -> {
         checkEnclosingElementIsAnnotated(method);
@@ -77,13 +77,12 @@ public final class Processor extends AbstractProcessor {
 
   private void processSourceElements(TypeElement sourceElement) {
     TypeTool tool = new TypeTool(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
-    ClassName generatedClass = generatedClass(ClassName.get(sourceElement));
+    ClassName generatedClass = generatedClass(sourceElement);
     try {
       validateSourceElement(tool, sourceElement);
       List<Param> parameters = getParams(tool, sourceElement);
       if (parameters.isEmpty()) { // javapoet #739
-        throw ValidationException.create(sourceElement,
-            "Define at least one abstract method");
+        throw ValidationException.create(sourceElement, "Define at least one abstract method");
       }
 
       checkOnlyOnePositionalList(parameters);
@@ -187,42 +186,14 @@ public final class Processor extends AbstractProcessor {
   }
 
   private void validateSourceElement(TypeTool tool, TypeElement sourceElement) {
-    if (sourceElement.getKind() == ElementKind.INTERFACE) {
-      throw ValidationException.create(sourceElement,
-          "Use an abstract class, not an interface.");
-    }
-    if (!tool.isSameType(sourceElement.getSuperclass(), Object.class)) {
-      throw ValidationException.create(sourceElement,
-          String.format("The class may not extend %s.", sourceElement.getSuperclass()));
-    }
-    if (!sourceElement.getModifiers().contains(ABSTRACT)) {
-      throw ValidationException.create(sourceElement,
-          "Use an abstract class.");
-    }
-    getEnclosingElements(sourceElement).forEach(element -> {
-      if (element.getModifiers().contains(Modifier.PRIVATE)) {
-        throw ValidationException.create(element,
-            "The class may not not be private.");
-      }
-    });
-    if (sourceElement.getNestingKind().isNested() &&
-        !sourceElement.getModifiers().contains(Modifier.STATIC)) {
-      throw ValidationException.create(sourceElement,
-          "The nested class must be static.");
-    }
-    if (!sourceElement.getInterfaces().isEmpty()) {
-      throw ValidationException.create(sourceElement,
-          "The class cannot implement anything.");
+    SuppliedClassValidator.commonChecks(sourceElement);
+    if (!tool.isSameType(sourceElement.getSuperclass(), Object.class) ||
+        !sourceElement.getInterfaces().isEmpty()) {
+      throw ValidationException.create(sourceElement, "The model class may not implement or extend anything.");
     }
     if (!sourceElement.getTypeParameters().isEmpty()) {
-      throw ValidationException.create(sourceElement,
-          "The class cannot have type parameters.");
+      throw ValidationException.create(sourceElement, "The class cannot have type parameters.");
     }
-    if (!Util.hasDefaultConstructor(sourceElement)) {
-      throw ValidationException.create(sourceElement,
-          "The class must have a default constructor.");
-    }
-
   }
 
   private List<String> getOverview(TypeElement sourceType) {
@@ -301,14 +272,13 @@ public final class Processor extends AbstractProcessor {
     return methods;
   }
 
-  private static ClassName generatedClass(ClassName type) {
+  private static ClassName generatedClass(TypeElement sourceElement) {
+    ClassName type = ClassName.get(sourceElement);
     String name = String.join("_", type.simpleNames()) + "_Parser";
     return type.topLevelClassName().peerClass(name);
   }
 
-  private void handleUnknownError(
-      TypeElement sourceType,
-      Throwable e) {
+  private void handleUnknownError(TypeElement sourceType, Throwable e) {
     String message = String.format("JBOCK: Unexpected error while processing %s: %s", sourceType, e.getMessage());
     e.printStackTrace(System.err);
     processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, message, sourceType);

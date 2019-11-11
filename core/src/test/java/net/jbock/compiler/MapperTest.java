@@ -386,7 +386,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The mapper class must have a default constructor");
+        .withErrorContaining("The class must have a default constructor");
   }
 
   @Test

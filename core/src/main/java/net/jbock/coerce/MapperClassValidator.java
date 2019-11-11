@@ -15,6 +15,7 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
+import static net.jbock.coerce.Util.checkNotAbstract;
 import static net.jbock.coerce.reference.ExpectedType.MAPPER;
 
 public final class MapperClassValidator {
@@ -30,7 +31,8 @@ public final class MapperClassValidator {
   }
 
   public Either<String, ReferenceMapperType> checkReturnType() {
-    commonChecks(basicInfo, mapperClass, "mapper");
+    commonChecks(mapperClass);
+    checkNotAbstract(mapperClass);
     ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass)
         .getReferencedType();
     TypeMirror t = functionType.typeArguments().get(0);

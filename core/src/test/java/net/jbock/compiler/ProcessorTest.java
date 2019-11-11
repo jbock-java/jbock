@@ -202,7 +202,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("abstract class");
+        .withErrorContaining("Use a class, not an interface");
   }
 
   @Test
@@ -300,7 +300,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class may not extend test.Arguments");
+        .withErrorContaining("The model class may not implement or extend anything");
   }
 
   @Test
