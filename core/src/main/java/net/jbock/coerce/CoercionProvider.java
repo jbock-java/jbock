@@ -47,8 +47,8 @@ public class CoercionProvider {
   public static Coercion findCoercion(
       ExecutableElement sourceMethod,
       ParamName paramName,
-      TypeElement mapperClass,
-      TypeElement collectorClass,
+      Optional<TypeElement> mapperClass,
+      Optional<TypeElement> collectorClass,
       TypeTool tool) {
     BasicInfo basicInfo = BasicInfo.create(
         mapperClass, collectorClass,

@@ -43,12 +43,12 @@ public class BasicInfo {
   }
 
   static BasicInfo create(
-      TypeElement mapperClass,
-      TypeElement collectorClass,
+      Optional<TypeElement> mapperClass,
+      Optional<TypeElement> collectorClass,
       ParamName paramName,
       ExecutableElement sourceMethod,
       TypeTool tool) {
-    return new BasicInfo(paramName, sourceMethod, tool, mapperClass, collectorClass);
+    return new BasicInfo(paramName, sourceMethod, tool, mapperClass.orElse(null), collectorClass.orElse(null));
   }
 
   private boolean isEnumType(TypeMirror mirror) {

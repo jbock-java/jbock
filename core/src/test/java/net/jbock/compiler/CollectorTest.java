@@ -57,22 +57,6 @@ class CollectorTest {
   }
 
   @Test
-  void invalidCollectorClassDoesNotExist() {
-    JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
-        "abstract class Arguments {",
-        "",
-        "  @Parameter(shortName = 'x',",
-        "             collectedBy = JustNotExist.class)",
-        "  abstract Set<String> strings();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Invalid value of 'collectedBy'.");
-  }
-
-  @Test
   void validCollectorSupplier() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",

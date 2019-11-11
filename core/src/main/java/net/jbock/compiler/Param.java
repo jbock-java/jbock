@@ -141,12 +141,12 @@ public final class Param {
 
   static Param create(TypeTool tool, List<Param> params, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
     if (positionalIndex != null) {
-      TypeElement mapperClass = getMapperClass(tool, sourceMethod, PositionalParameter.class);
-      TypeElement collectorClass = getCollectorClass(tool, sourceMethod, PositionalParameter.class);
+      Optional<TypeElement> mapperClass = getMapperClass(tool, sourceMethod, PositionalParameter.class);
+      Optional<TypeElement> collectorClass = getCollectorClass(tool, sourceMethod, PositionalParameter.class);
       return createPositional(params, sourceMethod, positionalIndex, description, mapperClass, collectorClass, tool);
     } else {
-      TypeElement mapperClass = getMapperClass(tool, sourceMethod, Parameter.class);
-      TypeElement collectorClass = getCollectorClass(tool, sourceMethod, Parameter.class);
+      Optional<TypeElement> mapperClass = getMapperClass(tool, sourceMethod, Parameter.class);
+      Optional<TypeElement> collectorClass = getCollectorClass(tool, sourceMethod, Parameter.class);
       return createNonpositional(params, sourceMethod, description, mapperClass, collectorClass, tool);
     }
   }
@@ -155,8 +155,8 @@ public final class Param {
       List<Param> params,
       ExecutableElement sourceMethod,
       String[] description,
-      TypeElement mapperClass,
-      TypeElement collectorClass,
+      Optional<TypeElement> mapperClass,
+      Optional<TypeElement> collectorClass,
       TypeTool tool) {
     String longName = longName(params, sourceMethod);
     char shortName = shortName(params, sourceMethod);
@@ -199,8 +199,8 @@ public final class Param {
       ExecutableElement sourceMethod,
       int positionalIndex,
       String[] description,
-      TypeElement mapperClass,
-      TypeElement collectorClass,
+      Optional<TypeElement> mapperClass,
+      Optional<TypeElement> collectorClass,
       TypeTool tool) {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     ParamName name = findParamName(params, sourceMethod);
@@ -224,11 +224,11 @@ public final class Param {
    * Can infer {@code flag = true}?
    */
   private static boolean isInferredFlag(
-      Object mapperClass,
-      Object collectorClass,
+      Optional<TypeElement> mapperClass,
+      Optional<TypeElement> collectorClass,
       TypeMirror mirror,
       TypeTool tool) {
-    if (mapperClass != null || collectorClass != null) {
+    if (mapperClass.isPresent() || collectorClass.isPresent()) {
       // no inferring
       return false;
     }
