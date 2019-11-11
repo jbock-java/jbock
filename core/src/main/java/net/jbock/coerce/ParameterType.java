@@ -2,99 +2,21 @@ package net.jbock.coerce;
 
 public enum ParameterType {
 
-  REPEATABLE {
-    @Override
-    public boolean isRepeatable() {
-      return true;
-    }
+  REPEATABLE, OPTIONAL, REQUIRED, FLAG;
 
-    @Override
-    public boolean isOptional() {
-      return false;
-    }
+  public boolean isRepeatable() {
+    return this == REPEATABLE;
+  }
 
-    @Override
-    public boolean isRequired() {
-      return false;
-    }
+  public boolean isOptional() {
+    return this == OPTIONAL;
+  }
 
-    @Override
-    public boolean isFlag() {
-      return false;
-    }
-  },
+  public boolean isRequired() {
+    return this == REQUIRED;
+  }
 
-  OPTIONAL {
-    @Override
-    public boolean isRepeatable() {
-      return false;
-    }
-
-    @Override
-    public boolean isOptional() {
-      return true;
-    }
-
-    @Override
-    public boolean isRequired() {
-      return false;
-    }
-
-    @Override
-    public boolean isFlag() {
-      return false;
-    }
-  },
-
-  REQUIRED {
-    @Override
-    public boolean isRepeatable() {
-      return false;
-    }
-
-    @Override
-    public boolean isOptional() {
-      return false;
-    }
-
-    @Override
-    public boolean isRequired() {
-      return true;
-    }
-
-    @Override
-    public boolean isFlag() {
-      return false;
-    }
-  },
-
-  FLAG {
-    @Override
-    public boolean isRepeatable() {
-      return false;
-    }
-
-    @Override
-    public boolean isOptional() {
-      return false;
-    }
-
-    @Override
-    public boolean isRequired() {
-      return false;
-    }
-
-    @Override
-    public boolean isFlag() {
-      return true;
-    }
-  };
-
-  public abstract boolean isRepeatable();
-
-  public abstract boolean isOptional();
-
-  public abstract boolean isRequired();
-
-  public abstract boolean isFlag();
+  public boolean isFlag() {
+    return this == FLAG;
+  }
 }
