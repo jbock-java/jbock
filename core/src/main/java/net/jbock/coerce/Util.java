@@ -3,10 +3,8 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.compiler.ValidationException;
 
-import javax.lang.model.element.*;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.ElementFilter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

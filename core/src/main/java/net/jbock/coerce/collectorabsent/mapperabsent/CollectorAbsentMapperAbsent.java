@@ -2,8 +2,8 @@ package net.jbock.coerce.collectorabsent.mapperabsent;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.collectorabsent.CanonicalOptional;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.collectorabsent.CanonicalOptional;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;

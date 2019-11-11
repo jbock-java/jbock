@@ -12,18 +12,25 @@ import net.jbock.compiler.view.Parser;
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
-import javax.lang.model.element.*;
+import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.io.Writer;
-import java.util.*;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.OptionalInt;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.emptySet;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -55,12 +62,8 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment env) {
-    Set<String> annotationsToProcess = annotations.stream()
-        .map(TypeElement::getQualifiedName)
-        .map(Name::toString)
-        .collect(toSet());
     try {
-      getAnnotatedMethods(env, annotationsToProcess).forEach(method -> {
+      getAnnotatedMethods(env, annotations).forEach(method -> {
         checkEnclosingElementIsAnnotated(method);
         validateParameterMethods(method);
       });
@@ -68,7 +71,8 @@ public final class Processor extends AbstractProcessor {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
       return false;
     }
-    if (!annotationsToProcess.contains(CommandLineArguments.class.getCanonicalName())) {
+    if (annotations.stream().map(TypeElement::getQualifiedName)
+        .noneMatch(name -> name.contentEquals(CommandLineArguments.class.getCanonicalName()))) {
       return false;
     }
     getAnnotatedTypes(env).forEach(this::processSourceElements);
@@ -259,16 +263,14 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private List<ExecutableElement> getAnnotatedMethods(RoundEnvironment env, Set<String> annotationsToProcess) {
-    Set<? extends Element> parameters = annotationsToProcess.contains(Parameter.class.getCanonicalName()) ?
-        env.getElementsAnnotatedWith(Parameter.class) :
-        emptySet();
-    Set<? extends Element> positionalParams = annotationsToProcess.contains(PositionalParameter.class.getCanonicalName()) ?
-        env.getElementsAnnotatedWith(PositionalParameter.class) :
-        emptySet();
-    List<ExecutableElement> methods = new ArrayList<>(parameters.size() + positionalParams.size());
-    methods.addAll(methodsIn(parameters));
-    methods.addAll(methodsIn(positionalParams));
+  private List<ExecutableElement> getAnnotatedMethods(RoundEnvironment env, Set<? extends TypeElement> annotations) {
+    List<ExecutableElement> methods = new ArrayList<>();
+    for (Class<? extends Annotation> annotation : Arrays.asList(Parameter.class, PositionalParameter.class)) {
+      if (annotations.stream().map(TypeElement::getQualifiedName)
+          .anyMatch(name -> name.contentEquals(annotation.getCanonicalName()))) {
+        methods.addAll(methodsIn(env.getElementsAnnotatedWith(annotation)));
+      }
+    }
     return methods;
   }
 

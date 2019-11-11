@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collector;
 
-import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.Util.checkNotAbstract;
 import static net.jbock.coerce.reference.ExpectedType.COLLECTOR;
