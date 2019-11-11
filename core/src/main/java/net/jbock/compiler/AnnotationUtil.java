@@ -17,8 +17,6 @@ class AnnotationUtil {
 
   private final TypeTool tool;
   private final ExecutableElement sourceMethod;
-  private final Class<?> annotationClass;
-  private final String attributeName;
 
   private static final AnnotationValueVisitor<TypeMirror, Void> GET_TYPE = new SimpleAnnotationValueVisitor8<TypeMirror, Void>() {
 
@@ -44,14 +42,12 @@ class AnnotationUtil {
     }
   };
 
-  private AnnotationUtil(TypeTool tool, ExecutableElement sourceMethod, Class<?> annotationClass, String attributeName) {
+  AnnotationUtil(TypeTool tool, ExecutableElement sourceMethod) {
     this.tool = tool;
     this.sourceMethod = sourceMethod;
-    this.annotationClass = annotationClass;
-    this.attributeName = attributeName;
   }
 
-  private Optional<TypeElement> get() {
+  Optional<TypeElement> get(Class<?> annotationClass, String attributeName) {
     AnnotationMirror annotation = getAnnotationMirror(tool, sourceMethod, annotationClass);
     if (annotation == null) {
       // if the source method doesn't have this annotation
@@ -71,15 +67,6 @@ class AnnotationUtil {
       return Optional.empty();
     }
     return Optional.of(tool.asTypeElement(typeMirror));
-  }
-
-
-  static Optional<TypeElement> getMapperClass(TypeTool tool, ExecutableElement sourceMethod, Class<?> annotationClass) {
-    return new AnnotationUtil(tool, sourceMethod, annotationClass, "mappedBy").get();
-  }
-
-  static Optional<TypeElement> getCollectorClass(TypeTool tool, ExecutableElement sourceMethod, Class<?> annotationClass) {
-    return new AnnotationUtil(tool, sourceMethod, annotationClass, "collectedBy").get();
   }
 
   private static AnnotationMirror getAnnotationMirror(TypeTool tool, ExecutableElement sourceMethod, Class<?> annotationClass) {

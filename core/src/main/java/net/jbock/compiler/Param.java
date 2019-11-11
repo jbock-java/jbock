@@ -26,16 +26,13 @@ import java.util.stream.Collectors;
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
-import static net.jbock.compiler.AnnotationUtil.getCollectorClass;
-import static net.jbock.compiler.AnnotationUtil.getMapperClass;
 
 /**
  * Internal representation of an abstract method in the source class.
  */
 public final class Param {
 
-  private static final EnumSet<Modifier> NONPRIVATE_ACCESS_MODIFIERS =
-      EnumSet.of(PUBLIC, PROTECTED);
+  private static final Set<Modifier> NONPRIVATE_ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
   // null if absent
   private final String longName;
@@ -140,13 +137,14 @@ public final class Param {
   }
 
   static Param create(TypeTool tool, List<Param> params, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
+    AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     if (positionalIndex != null) {
-      Optional<TypeElement> mapperClass = getMapperClass(tool, sourceMethod, PositionalParameter.class);
-      Optional<TypeElement> collectorClass = getCollectorClass(tool, sourceMethod, PositionalParameter.class);
+      Optional<TypeElement> mapperClass = annotationUtil.get(PositionalParameter.class, "mappedBy");
+      Optional<TypeElement> collectorClass = annotationUtil.get(PositionalParameter.class, "collectedBy");
       return createPositional(params, sourceMethod, positionalIndex, description, mapperClass, collectorClass, tool);
     } else {
-      Optional<TypeElement> mapperClass = getMapperClass(tool, sourceMethod, Parameter.class);
-      Optional<TypeElement> collectorClass = getCollectorClass(tool, sourceMethod, Parameter.class);
+      Optional<TypeElement> mapperClass = annotationUtil.get(Parameter.class, "mappedBy");
+      Optional<TypeElement> collectorClass = annotationUtil.get(Parameter.class, "collectedBy");
       return createNonpositional(params, sourceMethod, description, mapperClass, collectorClass, tool);
     }
   }
