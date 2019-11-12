@@ -61,8 +61,6 @@ final class Option {
 
   private final FieldSpec positionalIndexField;
 
-  private final MethodSpec shortNameMapMethod;
-
   private final MethodSpec longNameMapMethod;
 
   private final MethodSpec parsersMethod;
@@ -78,7 +76,6 @@ final class Option {
       FieldSpec descriptionField,
       FieldSpec argumentNameField,
       MethodSpec exampleMethod,
-      MethodSpec shortNameMapMethod,
       MethodSpec longNameMapMethod,
       MethodSpec describeParamMethod,
       MethodSpec parsersMethod,
@@ -90,7 +87,6 @@ final class Option {
     this.descriptionField = descriptionField;
     this.argumentNameField = argumentNameField;
     this.bundleKeyField = bundleKeyField;
-    this.shortNameMapMethod = shortNameMapMethod;
     this.context = context;
     this.longNameMapMethod = longNameMapMethod;
     this.describeParamMethod = describeParamMethod;
@@ -100,23 +96,17 @@ final class Option {
 
   static Option create(Context context) {
     FieldSpec longNameField = FieldSpec.builder(STRING, "longName").addModifiers(FINAL).build();
+    FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class), "shortName").addModifiers(FINAL).build();
     FieldSpec positionalIndexField = FieldSpec.builder(OptionalInt.class, "positionalIndex").addModifiers(FINAL).build();
-    FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class),
-        "shortName").addModifiers(FINAL).build();
     FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").addModifiers(FINAL).build();
-    TypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class),
-        context.optionType(), context.optionParserType());
-    TypeName positionalParsersType = ParameterizedTypeName.get(ClassName.get(List.class),
-        context.positionalOptionParserType());
-    MethodSpec shortNameMapMethod = shortNameMapMethod(context.optionType(), shortNameField);
-    MethodSpec longNameMapMethod = longNameMapMethod(context.optionType(), longNameField);
+    TypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType());
+    TypeName positionalParsersType = ParameterizedTypeName.get(ClassName.get(List.class), context.positionalOptionParserType());
+    MethodSpec longNameMapMethod = longNameMapMethod(context.optionType(), longNameField, shortNameField);
     MethodSpec parsersMethod = parsersMethod(parsersType, context);
     MethodSpec positionalParsersMethod = positionalParsersMethod(positionalParsersType, context);
-    FieldSpec argumentNameField = FieldSpec.builder(
-        STRING, "descriptionArgumentName").addModifiers(FINAL).build();
+    FieldSpec argumentNameField = FieldSpec.builder(STRING, "descriptionArgumentName").addModifiers(FINAL).build();
     MethodSpec exampleMethod = exampleMethod(longNameField, shortNameField, argumentNameField);
-    FieldSpec descriptionField = FieldSpec.builder(
-        LIST_OF_STRING, "description").addModifiers(FINAL).build();
+    FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").addModifiers(FINAL).build();
 
     MethodSpec describeParamMethod = describeParamMethod(
         longNameField,
@@ -131,7 +121,6 @@ final class Option {
         descriptionField,
         argumentNameField,
         exampleMethod,
-        shortNameMapMethod,
         longNameMapMethod,
         describeParamMethod,
         parsersMethod,
@@ -145,7 +134,7 @@ final class Option {
       String enumConstant = param.enumConstant();
       spec.addEnumConstant(enumConstant, optionEnumConstant(param));
     }
-    spec.addModifiers(PRIVATE)
+    return spec.addModifiers(PRIVATE)
         .addField(longNameField)
         .addField(shortNameField)
         .addField(bundleKeyField)
@@ -156,18 +145,17 @@ final class Option {
         .addMethod(describeParamMethod)
         .addMethod(exampleMethod)
         .addMethod(missingRequiredLambdaMethod())
-        .addMethod(privateConstructor());
-    spec.addMethod(shortNameMapMethod)
+        .addMethod(privateConstructor())
         .addMethod(longNameMapMethod)
-        .addMethod(parsersMethod);
-    spec.addMethod(positionalValuesMethod());
-    spec.addMethod(positionalValueMethod());
-    spec.addMethod(positionalParsersMethod);
-    spec.addMethod(validShortTokenMethod());
-    spec.addMethod(describeMethod());
-    spec.addMethod(parserMethod());
-    spec.addMethod(positionalParserMethod());
-    return spec.build();
+        .addMethod(parsersMethod)
+        .addMethod(positionalValuesMethod())
+        .addMethod(positionalValueMethod())
+        .addMethod(positionalParsersMethod)
+        .addMethod(validShortTokenMethod())
+        .addMethod(describeMethod())
+        .addMethod(parserMethod())
+        .addMethod(positionalParserMethod())
+        .build();
   }
 
   private MethodSpec positionalMethod() {
@@ -279,35 +267,26 @@ final class Option {
         .build();
   }
 
-  private static MethodSpec shortNameMapMethod(
-      ClassName optionType,
-      FieldSpec shortNameField) {
-    ParameterSpec shortNames = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        TypeName.get(Character.class), optionType), "shortNames")
-        .build();
-    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
-    return MethodSpec.methodBuilder("shortNameMap")
-        .addCode(nameMapCreationCode(shortNameField, shortNames, option))
-        .returns(shortNames.type)
-        .addModifiers(STATIC)
-        .build();
-  }
-
   private static MethodSpec longNameMapMethod(
       ClassName optionType,
-      FieldSpec longNameField) {
+      FieldSpec longNameField,
+      FieldSpec shortNameField) {
     ParameterSpec longNames = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, optionType), "longNames")
         .build();
     ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
     return MethodSpec.methodBuilder("longNameMap")
-        .addCode(nameMapCreationCode(longNameField, longNames, option))
+        .addCode(nameMapCreationCode(longNameField, shortNameField, longNames, option))
         .returns(longNames.type)
         .addModifiers(STATIC)
         .build();
   }
 
-  private static CodeBlock nameMapCreationCode(FieldSpec optionField, ParameterSpec resultMap, ParameterSpec option) {
+  private static CodeBlock nameMapCreationCode(
+      FieldSpec longNameField,
+      FieldSpec shortNameField,
+      ParameterSpec resultMap,
+      ParameterSpec option) {
 
     CodeBlock.Builder builder = CodeBlock.builder();
     builder.addStatement("$T $N = new $T<>($T.values().length)",
@@ -316,8 +295,12 @@ final class Option {
     // begin iteration over options
     builder.beginControlFlow("for ($T $N : $T.values())", option.type, option, option.type);
 
-    builder.beginControlFlow("if ($N.$N != null)", option, optionField)
-        .addStatement("$N.put($N.$N, $N)", resultMap, option, optionField, option)
+    builder.beginControlFlow("if ($N.$N != null)", option, longNameField)
+        .addStatement("$N.put($S + $N.$N, $N)", resultMap, "--", option, longNameField, option)
+        .endControlFlow();
+
+    builder.beginControlFlow("if ($N.$N != null)", option, shortNameField)
+        .addStatement("$N.put($S + $N.$N, $N)", resultMap, "-", option, shortNameField, option)
         .endControlFlow();
 
     // end iteration over options
@@ -544,10 +527,6 @@ final class Option {
         .returns(ParameterizedTypeName.get(Supplier.class, IllegalArgumentException.class))
         .addCode("return () -> $L;\n", lambda)
         .build();
-  }
-
-  MethodSpec shortNameMapMethod() {
-    return shortNameMapMethod;
   }
 
   MethodSpec longNameMapMethod() {

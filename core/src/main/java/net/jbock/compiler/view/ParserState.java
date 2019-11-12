@@ -34,7 +34,6 @@ final class ParserState {
   private final Context context;
 
   private final FieldSpec longNamesField;
-  private final FieldSpec shortNamesField;
   private final FieldSpec parsersField;
 
   private final FieldSpec positionalParsersField;
@@ -48,7 +47,6 @@ final class ParserState {
   private ParserState(
       Context context,
       FieldSpec longNamesField,
-      FieldSpec shortNamesField,
       FieldSpec parsersField,
       FieldSpec positionalParsersField,
       MethodSpec readMethod,
@@ -57,7 +55,6 @@ final class ParserState {
       MethodSpec readRegularOptionMethod) {
     this.context = context;
     this.longNamesField = longNamesField;
-    this.shortNamesField = shortNamesField;
     this.parsersField = parsersField;
     this.positionalParsersField = positionalParsersField;
     this.readMethod = readMethod;
@@ -72,11 +69,6 @@ final class ParserState {
     FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, context.optionType()), "longNames")
         .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.longNameMapMethod())
-        .addModifiers(FINAL)
-        .build();
-    FieldSpec shortNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        TypeName.get(Character.class), context.optionType()), "shortNames")
-        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.shortNameMapMethod())
         .addModifiers(FINAL)
         .build();
 
@@ -96,7 +88,7 @@ final class ParserState {
     MethodSpec readLongMethod = readLongMethod(longNamesField, context);
 
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(
-        shortNamesField,
+        longNamesField,
         context,
         readLongMethod);
 
@@ -106,7 +98,6 @@ final class ParserState {
     return new ParserState(
         context,
         longNamesField,
-        shortNamesField,
         parsersField,
         positionalParsersField,
         readMethod,
@@ -123,12 +114,12 @@ final class ParserState {
         .addMethod(readPositionalMethod)
         .addMethod(readRegularOptionMethod)
         .addMethod(readLongMethod)
-        .addFields(Arrays.asList(longNamesField, shortNamesField, parsersField, positionalParsersField))
+        .addFields(Arrays.asList(longNamesField, parsersField, positionalParsersField))
         .build();
   }
 
   private static MethodSpec readRegularOptionMethod(
-      FieldSpec shortNamesField,
+      FieldSpec longNamesField,
       Context context,
       MethodSpec readLongMethod) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
@@ -136,7 +127,7 @@ final class ParserState {
         .addParameter(token)
         .returns(context.optionType());
 
-    spec.beginControlFlow("if ($N.length() < 2 || $N.charAt(0) != '-')", token, token)
+    spec.beginControlFlow("if ($N.length() <= 1 || $N.charAt(0) != '-')", token, token)
         .addStatement("return null")
         .endControlFlow();
 
@@ -146,9 +137,9 @@ final class ParserState {
 
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
 
-    spec.addStatement("$T $N = $N.get($N.charAt(1))",
+    spec.addStatement("$T $N = $N.get($N.substring(0, 2))",
         context.optionType(), optionParam,
-        shortNamesField, token);
+        longNamesField, token);
 
     spec.beginControlFlow("if ($N == null)", optionParam)
         .addStatement("return null")
@@ -173,11 +164,11 @@ final class ParserState {
     spec.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
 
     spec.beginControlFlow("if ($N < 0)", index)
-        .addStatement("return $N.get($N.substring(2))", longNamesField, token)
+        .addStatement("return $N.get($N)", longNamesField, token)
         .endControlFlow();
 
     spec.beginControlFlow("else")
-        .addStatement("return $N.get($N.substring(2, $N))", longNamesField, token, index)
+        .addStatement("return $N.get($N.substring(0, $N))", longNamesField, token, index)
         .endControlFlow();
 
     return MethodSpec.methodBuilder("readLong")
