@@ -160,7 +160,7 @@ final class Tokenizer {
     spec.addStatement("$N.println()", out);
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     spec.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
-    spec.beginControlFlow("if ($N.positional())", optionParam)
+    spec.beginControlFlow("if ($N.positionalIndex.isPresent())", optionParam)
         .addStatement("printDescription($N)", optionParam)
         .addStatement("$N.println()", out)
         .endControlFlow();
@@ -171,7 +171,7 @@ final class Tokenizer {
 
     spec.addStatement("$N.incrementIndent()", out);
     spec.beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type);
-    spec.beginControlFlow("if (!$N.positional())", optionParam)
+    spec.beginControlFlow("if (!$N.positionalIndex.isPresent())", optionParam)
         .addStatement("printDescription($N)", optionParam)
         .addStatement("$N.println()", out)
         .endControlFlow();
@@ -210,7 +210,7 @@ final class Tokenizer {
     ParameterSpec lineParam = ParameterSpec.builder(STRING, "line").build();
     spec.addParameter(optionParam);
 
-    spec.beginControlFlow("if ($N.positional())", optionParam)
+    spec.beginControlFlow("if ($N.positionalIndex.isPresent())", optionParam)
         .addStatement("$N.println($N.describe().toUpperCase($T.US))", out, optionParam, Locale.class)
         .endControlFlow()
         .beginControlFlow("else")

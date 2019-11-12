@@ -133,7 +133,6 @@ final class Option {
         .addField(positionalIndexField)
         .addField(argumentNameField)
         .addField(descriptionField)
-        .addMethod(positionalMethod())
         .addMethod(describeParamMethod)
         .addMethod(exampleMethod)
         .addMethod(missingRequiredLambdaMethod())
@@ -147,13 +146,6 @@ final class Option {
         .addMethod(describeMethod())
         .addMethod(parserMethod())
         .addMethod(positionalParserMethod())
-        .build();
-  }
-
-  private MethodSpec positionalMethod() {
-    return MethodSpec.methodBuilder("positional")
-        .addStatement("return $N.isPresent()", positionalIndexField)
-        .returns(BOOLEAN)
         .build();
   }
 
@@ -273,28 +265,28 @@ final class Option {
   private static MethodSpec optionNamesMethod(
       ClassName optionType,
       FieldSpec namesField) {
-    ParameterSpec optionNames = ParameterSpec.builder(ParameterizedTypeName.get(
-        ClassName.get(Map.class), STRING, optionType), "optionNames").build();
+    ParameterSpec result = ParameterSpec.builder(ParameterizedTypeName.get(
+        ClassName.get(Map.class), STRING, optionType), "result").build();
     ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
     ParameterSpec name = ParameterSpec.builder(STRING, "name").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("longNameMap");
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("optionNames");
     spec.addStatement("$T $N = new $T<>($T.values().length)",
-        optionNames.type, optionNames, HashMap.class, option.type);
+        result.type, result, HashMap.class, option.type);
 
     // begin iteration over options
     spec.beginControlFlow("for ($T $N : $T.values())", option.type, option, option.type);
     // begin iteration over names
     spec.beginControlFlow("for ($T $N : $N.$N)", STRING, name, option, namesField);
 
-    spec.addStatement("$N.put($N, $N)", optionNames, name, option);
+    spec.addStatement("$N.put($N, $N)", result, name, option);
 
     // end iteration over names
     spec.endControlFlow();
     // end iteration over options
     spec.endControlFlow();
 
-    return spec.returns(optionNames.type)
-        .addStatement("return $N", optionNames)
+    return spec.returns(result.type)
+        .addStatement("return $N", result)
         .addModifiers(STATIC)
         .build();
   }
@@ -344,7 +336,7 @@ final class Option {
     // begin iteration over options
     builder.beginControlFlow("for ($T $N : $T.values())", context.optionType(), option, context.optionType());
 
-    builder.beginControlFlow("if (!$N.positional())", option)
+    builder.beginControlFlow("if (!$N.positionalIndex.isPresent())", option)
         .addStatement("$N.put($N, $N.parser())", parsers, option, option)
         .endControlFlow();
 
@@ -373,7 +365,7 @@ final class Option {
     // begin iteration over options
     builder.beginControlFlow("for ($T $N : $T.values())", context.optionType(), option, context.optionType());
 
-    builder.beginControlFlow("if ($N.positional())", option)
+    builder.beginControlFlow("if ($N.positionalIndex.isPresent())", option)
         .addStatement("$N.add($N.positionalParser())", parsers, option)
         .endControlFlow();
 
