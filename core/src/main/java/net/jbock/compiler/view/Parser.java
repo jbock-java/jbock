@@ -8,11 +8,14 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 
 import java.io.PrintStream;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.ResourceBundle;
 
+import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
@@ -92,13 +95,10 @@ public final class Parser {
   }
 
   public TypeSpec define() {
-    TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass());
-    spec.addModifiers(FINAL)
-        .addModifiers(context.getAccessModifiers());
-    spec.addMethod(createMethod())
-        .addMethod(parseMethod())
-        .addMethod(parseOrExitMethod());
-    spec.addType(tokenizer.define())
+    TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass())
+        .addModifiers(FINAL)
+        .addModifiers(context.getAccessModifiers())
+        .addType(tokenizer.define())
         .addType(state.define())
         .addType(impl.define())
         .addType(option.define())
@@ -111,13 +111,12 @@ public final class Parser {
         .addType(RepeatablePositionalOptionParser.define(context))
         .addType(IndentPrinter.create(context).define())
         .addType(Messages.create(context).define())
-        .addTypes(parseResult.define())
-        .addField(out)
-        .addField(err)
-        .addField(indent)
-        .addField(errorExitCode)
-        .addField(messages)
-        .addMethod(MethodSpec.constructorBuilder().addModifiers(PRIVATE).build())
+        .addTypes(parseResult.defineResultTypes())
+        .addFields(Arrays.asList(out, err, indent, errorExitCode, messages))
+        .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
+        .addMethod(createMethod())
+        .addMethod(parseMethod())
+        .addMethod(parseOrExitMethod())
         .addMethod(withErrorStreamMethod())
         .addMethod(withIndentMethod())
         .addMethod(withErrorExitCodeMethod())
@@ -126,12 +125,9 @@ public final class Parser {
         .addMethod(readValidArgumentMethod)
         .addMethod(readNextMethod);
 
-    if (context.isHelpParameterEnabled()) {
-      spec.addMethod(withOutputStreamMethod());
-    }
+    withOutputStreamMethod().ifPresent(spec::addMethod);
 
-    return spec.addJavadoc(javadoc())
-        .build();
+    return spec.addJavadoc(javadoc()).build();
   }
 
   private MethodSpec withIndentMethod() {
@@ -183,8 +179,10 @@ public final class Parser {
         .build();
   }
 
-  private MethodSpec withOutputStreamMethod() {
-    return withPrintStreamMethod("withOutputStream", context, out);
+  private Optional<MethodSpec> withOutputStreamMethod() {
+    return context.isHelpParameterEnabled() ?
+        Optional.of(withPrintStreamMethod("withOutputStream", context, out)) :
+        Optional.empty();
   }
 
   private MethodSpec withErrorStreamMethod() {

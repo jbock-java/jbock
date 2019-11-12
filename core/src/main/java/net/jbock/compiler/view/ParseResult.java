@@ -43,7 +43,7 @@ final class ParseResult {
     return new ParseResult(context, result);
   }
 
-  List<TypeSpec> define() {
+  List<TypeSpec> defineResultTypes() {
     TypeSpec.Builder spec = classBuilder(context.parseResultType())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addModifiers(ABSTRACT, STATIC)
