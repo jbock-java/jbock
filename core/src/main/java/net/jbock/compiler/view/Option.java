@@ -96,7 +96,7 @@ final class Option {
 
   static Option create(Context context) {
     FieldSpec longNameField = FieldSpec.builder(STRING, "longName").addModifiers(FINAL).build();
-    FieldSpec shortNameField = FieldSpec.builder(ClassName.get(Character.class), "shortName").addModifiers(FINAL).build();
+    FieldSpec shortNameField = FieldSpec.builder(STRING, "shortName").addModifiers(FINAL).build();
     FieldSpec positionalIndexField = FieldSpec.builder(OptionalInt.class, "positionalIndex").addModifiers(FINAL).build();
     FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").addModifiers(FINAL).build();
     TypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType());
@@ -108,9 +108,7 @@ final class Option {
     MethodSpec exampleMethod = exampleMethod(longNameField, shortNameField, argumentNameField);
     FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").addModifiers(FINAL).build();
 
-    MethodSpec describeParamMethod = describeParamMethod(
-        longNameField,
-        shortNameField);
+    MethodSpec describeParamMethod = describeParamMethod(longNameField, shortNameField);
 
     return new Option(
         context,
@@ -169,9 +167,9 @@ final class Option {
     List<String> desc = param.description();
     String argumentName = param.descriptionArgumentName();
     Map<String, Object> map = new LinkedHashMap<>();
-    map.put("longName", param.longName());
-    map.put("shortName", param.shortName() == null ? "null" : "'" + param.shortName() + "'");
-    map.put("bundleKey", param.bundleKey().orElse("null"));
+    map.put("longName", param.longName().orElse(null));
+    map.put("shortName", param.shortName().orElse(null));
+    map.put("bundleKey", param.bundleKey().orElse(null));
     map.put("positionalIndex", param.positionalIndex().isPresent() ?
         CodeBlock.of("$T.of($L)", OptionalInt.class, param.positionalIndex().getAsInt()) :
         CodeBlock.of("$T.empty()", OptionalInt.class));
@@ -179,7 +177,7 @@ final class Option {
     map.put("descExpression", descExpression(desc));
     String format = String.join(", ",
         "$longName:S",
-        "$shortName:L",
+        "$shortName:S",
         "$bundleKey:S",
         "$positionalIndex:L",
         "$argumentName:S",
@@ -193,8 +191,8 @@ final class Option {
       spec.addMethod(parserMethodOverride(param));
     }
     if (param.isFlag()) {
-      spec.addMethod(validShortTokenOverride(param));
-      spec.addMethod(describeMethodFlagOverride());
+      validShortTokenMethodOverrideFlag(param).ifPresent(spec::addMethod);
+      spec.addMethod(describeMethodOverrideFlag());
     } else if (param.isPositional()) {
       spec.addMethod(describeMethodPositionalOverride());
     } else if (param.isRepeatable()) {
@@ -203,7 +201,7 @@ final class Option {
     return spec.build();
   }
 
-  private MethodSpec describeMethodFlagOverride() {
+  private MethodSpec describeMethodOverrideFlag() {
     return MethodSpec.methodBuilder("describe")
         .returns(STRING)
         .addStatement("return describeParam($S)", "")
@@ -296,11 +294,11 @@ final class Option {
     builder.beginControlFlow("for ($T $N : $T.values())", option.type, option, option.type);
 
     builder.beginControlFlow("if ($N.$N != null)", option, longNameField)
-        .addStatement("$N.put($S + $N.$N, $N)", resultMap, "--", option, longNameField, option)
+        .addStatement("$N.put($N.$N, $N)", resultMap, option, longNameField, option)
         .endControlFlow();
 
     builder.beginControlFlow("if ($N.$N != null)", option, shortNameField)
-        .addStatement("$N.put($S + $N.$N, $N)", resultMap, "-", option, shortNameField, option)
+        .addStatement("$N.put($N.$N, $N)", resultMap, option, shortNameField, option)
         .endControlFlow();
 
     // end iteration over options
@@ -318,15 +316,15 @@ final class Option {
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if ($N == null)", shortNameField)
-        .addStatement("return $S + $N + $N", "--", longNameField, argname)
+        .addStatement("return $N + $N", longNameField, argname)
         .endControlFlow();
 
     builder.beginControlFlow("if ($N == null)", longNameField)
-        .addStatement("return $S + $N + $N", "-", shortNameField, argname)
+        .addStatement("return $N + $N", shortNameField, argname)
         .endControlFlow();
 
-    builder.addStatement("return $S + $N + $N + $S + $N + $N", "-",
-        shortNameField, argname, ", --", longNameField, argname);
+    builder.addStatement("return $N + $N + $S + $N + $N",
+        shortNameField, argname, ", ", longNameField, argname);
 
     return MethodSpec.methodBuilder("describeParam")
         .addParameter(argname)
@@ -343,11 +341,11 @@ final class Option {
 
     builder.beginControlFlow("if ($N == null)", shortNameField)
         .addStatement("return $T.format($S, $N, $N)",
-            String.class, "--%s=<%s>", longNameField, argumentNameField)
+            String.class, "%s=<%s>", longNameField, argumentNameField)
         .endControlFlow();
 
     builder.addStatement("return $T.format($S, $N, $N)",
-        String.class, "-%s <%s>", shortNameField, argumentNameField);
+        String.class, "%s <%s>", shortNameField, argumentNameField);
 
     return MethodSpec.methodBuilder("example")
         .returns(STRING)
@@ -463,14 +461,16 @@ final class Option {
     return spec.build();
   }
 
-  private static MethodSpec validShortTokenOverride(Param param) {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("validShortToken");
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    spec.addParameter(token);
-    spec.addStatement("return $S.equals($N)", "-" + param.shortName(), token);
-    spec.addAnnotation(Override.class);
-    spec.returns(BOOLEAN);
-    return spec.build();
+  private static Optional<MethodSpec> validShortTokenMethodOverrideFlag(Param param) {
+    return param.shortName().map(shortName -> {
+      ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+      return MethodSpec.methodBuilder("validShortToken")
+          .addParameter(token)
+          .addStatement("return $S.equals($N)", shortName, token)
+          .addAnnotation(Override.class)
+          .returns(BOOLEAN)
+          .build();
+    });
   }
 
   private MethodSpec describeMethod() {

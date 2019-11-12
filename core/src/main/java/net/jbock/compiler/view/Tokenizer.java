@@ -12,6 +12,7 @@ import net.jbock.compiler.Param;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -80,10 +81,8 @@ final class Tokenizer {
   }
 
   private MethodSpec parseMethod() {
-    ParameterSpec args = ParameterSpec.builder(Constants.STRING_ARRAY, "args")
-        .build();
-    ParameterSpec e = ParameterSpec.builder(RuntimeException.class, "e")
-        .build();
+    ParameterSpec args = ParameterSpec.builder(Constants.STRING_ARRAY, "args").build();
+    ParameterSpec e = ParameterSpec.builder(RuntimeException.class, "e").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
     context.helpPrintedType().ifPresent(helpPrintedType ->
@@ -95,8 +94,7 @@ final class Tokenizer {
             .endControlFlow());
 
     spec.beginControlFlow("try")
-        .addStatement("return new $T(parse($T.asList($N).iterator()))",
-            context.parsingSuccessType(), Arrays.class, args)
+        .addStatement("return new $T(parse($T.asList($N).iterator()))", context.parsingSuccessType(), Arrays.class, args)
         .endControlFlow();
 
     spec.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
@@ -215,14 +213,14 @@ final class Tokenizer {
     spec.addParameter(optionParam);
 
     spec.beginControlFlow("if ($N.positional())", optionParam)
-        .addStatement("$N.println($N.describe().toUpperCase())", out, optionParam)
+        .addStatement("$N.println($N.describe().toUpperCase($T.US))", out, optionParam, Locale.class)
         .endControlFlow()
         .beginControlFlow("else")
         .addStatement("$N.println($N.describe())", out, optionParam)
         .endControlFlow();
 
     spec.addStatement("$N.incrementIndent()", out);
-    spec.beginControlFlow("for ($T $N : $N.getMessage($N.bundleKey.toLowerCase(), $N.description))",
+    spec.beginControlFlow("for ($T $N : $N.getMessage($N.bundleKey, $N.description))",
         STRING, lineParam, messages, optionParam, optionParam)
         .addStatement("$N.println($N)", out, lineParam)
         .endControlFlow();

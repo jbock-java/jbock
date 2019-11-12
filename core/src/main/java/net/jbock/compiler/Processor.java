@@ -226,11 +226,13 @@ public final class Processor extends AbstractProcessor {
 
   private void checkHelp(List<Param> parameters) {
     for (Param param : parameters) {
-      if ("help".equals(param.longName())) {
-        throw param.validationError("'help' is reserved. " +
-            "Either disable the help feature " +
-            "or change the long name to something else.");
-      }
+      param.longName().ifPresent(longName -> {
+        if ("help".equals(longName)) {
+          throw param.validationError("'help' is reserved. " +
+              "Either disable the help feature " +
+              "or change the long name to something else.");
+        }
+      });
     }
   }
 

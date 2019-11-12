@@ -69,8 +69,11 @@ final class Messages {
     ParameterSpec defaultValue = ParameterSpec.builder(Constants.STRING, "defaultValue").build();
     ParameterSpec key = ParameterSpec.builder(String.class, "key").build();
     MethodSpec.Builder spec = methodBuilder("getMessage");
-    spec.addStatement("return $N.getOrDefault($N, $N)", resourceBundle, key, defaultValue);
-    return spec.addParameter(key)
+    spec.beginControlFlow("if ($N == null)", key)
+        .addStatement("return $N", defaultValue)
+        .endControlFlow();
+    return spec.addStatement("return $N.getOrDefault($N, $N)", resourceBundle, key, defaultValue)
+        .addParameter(key)
         .addParameter(defaultValue)
         .returns(Constants.STRING)
         .build();

@@ -17,6 +17,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
@@ -33,8 +34,8 @@ public final class Param {
   // null if absent
   private final String longName;
 
-  // blank if absent
-  private final char shortName;
+  // null if absent
+  private final String shortName;
 
   private final ExecutableElement sourceMethod;
 
@@ -106,7 +107,7 @@ public final class Param {
   }
 
   private Param(
-      char shortName,
+      String shortName,
       String longName,
       ExecutableElement sourceMethod,
       String bundleKey,
@@ -153,14 +154,13 @@ public final class Param {
       Optional<TypeElement> collectorClass,
       TypeTool tool) {
     String longName = longName(params, sourceMethod);
-    char shortName = shortName(params, sourceMethod);
-    if (shortName == ' ' && longName == null) {
-      throw ValidationException.create(sourceMethod,
-          "Define either long name or a short name");
+    String shortName = shortName(params, sourceMethod);
+    if (shortName == null && longName == null) {
+      throw ValidationException.create(sourceMethod, "Define either long name or a short name");
     }
     Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
-    checkShortName(sourceMethod, shortName);
-    checkName(sourceMethod, longName);
+    checkShortName(sourceMethod, parameter.shortName());
+    checkName(sourceMethod, parameter.longName());
     ParamName name = findParamName(params, sourceMethod);
     boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
     Coercion coercion;
@@ -204,7 +204,7 @@ public final class Param {
         parameter.descriptionArgumentName();
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
-        ' ',
+        null,
         null,
         sourceMethod,
         parameter.bundleKey(),
@@ -230,21 +230,21 @@ public final class Param {
         tool.isSameType(mirror, Boolean.class);
   }
 
-  private static char shortName(List<Param> params, ExecutableElement sourceMethod) {
+  private static String shortName(List<Param> params, ExecutableElement sourceMethod) {
     Parameter param = sourceMethod.getAnnotation(Parameter.class);
     if (param == null) {
-      return ' ';
+      return null;
     }
     if (param.shortName() == ' ') {
-      return ' ';
+      return null;
     }
-    char c = param.shortName();
+    String result = "-" + param.shortName();
     for (Param p : params) {
-      if (p.shortName == c) {
+      if (result.equals(p.shortName)) {
         throw ValidationException.create(sourceMethod, "Duplicate short name");
       }
     }
-    return c;
+    return result;
   }
 
   private static String longName(List<Param> params, ExecutableElement sourceMethod) {
@@ -252,11 +252,11 @@ public final class Param {
     if (param == null) {
       return null;
     }
-    String longName = param.longName();
-    if (longName.isEmpty()) {
+    if (Objects.toString(param.longName(), "").isEmpty()) {
       // the empty string indicates that no long name should be defined
       return null;
     }
+    String longName = "--" + param.longName();
     for (Param p : params) {
       if (p.longName != null && p.longName.equals(longName)) {
         throw ValidationException.create(sourceMethod, "Duplicate long name");
@@ -265,24 +265,16 @@ public final class Param {
     return longName;
   }
 
-  private static void checkShortName(
-      ExecutableElement sourceMethod,
-      char name) {
+  private static void checkShortName(ExecutableElement sourceMethod, char name) {
     if (name == ' ') {
       return;
     }
     checkName(sourceMethod, Character.toString(name));
   }
 
-  private static void checkName(
-      ExecutableElement sourceMethod,
-      String name) {
-    if (name == null) {
+  private static void checkName(ExecutableElement sourceMethod, String name) {
+    if (Objects.toString(name, "").isEmpty()) {
       return;
-    }
-    if (name.isEmpty()) {
-      throw ValidationException.create(sourceMethod,
-          "The name may not be empty");
     }
     if (name.charAt(0) == '-') {
       throw ValidationException.create(sourceMethod,
@@ -301,12 +293,12 @@ public final class Param {
     }
   }
 
-  public Character shortName() {
-    return shortName == ' ' ? null : shortName;
+  public Optional<String> shortName() {
+    return Optional.ofNullable(shortName);
   }
 
-  public String longName() {
-    return longName;
+  public Optional<String> longName() {
+    return Optional.ofNullable(longName);
   }
 
   public List<String> description() {
@@ -326,7 +318,7 @@ public final class Param {
   }
 
   public String enumConstant() {
-    return paramName().snake().toUpperCase();
+    return paramName().snake().toUpperCase(Locale.US);
   }
 
   public boolean isPositional() {
