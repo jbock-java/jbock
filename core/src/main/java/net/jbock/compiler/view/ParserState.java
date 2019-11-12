@@ -6,7 +6,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.coerce.ParameterType;
 import net.jbock.compiler.Context;
@@ -33,7 +32,7 @@ final class ParserState {
 
   private final Context context;
 
-  private final FieldSpec longNamesField;
+  private final FieldSpec optionNamesField;
   private final FieldSpec parsersField;
 
   private final FieldSpec positionalParsersField;
@@ -46,7 +45,7 @@ final class ParserState {
 
   private ParserState(
       Context context,
-      FieldSpec longNamesField,
+      FieldSpec optionNamesField,
       FieldSpec parsersField,
       FieldSpec positionalParsersField,
       MethodSpec readMethod,
@@ -54,7 +53,7 @@ final class ParserState {
       MethodSpec readLongMethod,
       MethodSpec readRegularOptionMethod) {
     this.context = context;
-    this.longNamesField = longNamesField;
+    this.optionNamesField = optionNamesField;
     this.parsersField = parsersField;
     this.positionalParsersField = positionalParsersField;
     this.readMethod = readMethod;
@@ -66,9 +65,9 @@ final class ParserState {
   static ParserState create(Context context, Option option) {
 
     // read-only lookups
-    FieldSpec longNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        STRING, context.optionType()), "longNames")
-        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.longNameMapMethod())
+    FieldSpec optionNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        STRING, context.optionType()), "optionNames")
+        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.optionNamesMethod())
         .addModifiers(FINAL)
         .build();
 
@@ -85,10 +84,10 @@ final class ParserState {
         .addModifiers(FINAL)
         .build();
 
-    MethodSpec readLongMethod = readLongMethod(longNamesField, context);
+    MethodSpec readLongMethod = readLongMethod(optionNamesField, context);
 
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(
-        longNamesField,
+        optionNamesField,
         context,
         readLongMethod);
 
@@ -97,7 +96,7 @@ final class ParserState {
 
     return new ParserState(
         context,
-        longNamesField,
+        optionNamesField,
         parsersField,
         positionalParsersField,
         readMethod,
@@ -114,7 +113,7 @@ final class ParserState {
         .addMethod(readPositionalMethod)
         .addMethod(readRegularOptionMethod)
         .addMethod(readLongMethod)
-        .addFields(Arrays.asList(longNamesField, parsersField, positionalParsersField))
+        .addFields(Arrays.asList(optionNamesField, parsersField, positionalParsersField))
         .build();
   }
 

@@ -61,7 +61,7 @@ final class Option {
 
   private final FieldSpec positionalIndexField;
 
-  private final MethodSpec longNameMapMethod;
+  private final MethodSpec optionNamesMethod;
 
   private final MethodSpec parsersMethod;
 
@@ -76,7 +76,7 @@ final class Option {
       FieldSpec descriptionField,
       FieldSpec argumentNameField,
       MethodSpec exampleMethod,
-      MethodSpec longNameMapMethod,
+      MethodSpec optionNamesMethod,
       MethodSpec describeParamMethod,
       MethodSpec parsersMethod,
       MethodSpec positionalParsersMethod) {
@@ -88,7 +88,7 @@ final class Option {
     this.argumentNameField = argumentNameField;
     this.bundleKeyField = bundleKeyField;
     this.context = context;
-    this.longNameMapMethod = longNameMapMethod;
+    this.optionNamesMethod = optionNamesMethod;
     this.describeParamMethod = describeParamMethod;
     this.parsersMethod = parsersMethod;
     this.positionalParsersMethod = positionalParsersMethod;
@@ -101,7 +101,7 @@ final class Option {
     FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").addModifiers(FINAL).build();
     TypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType());
     TypeName positionalParsersType = ParameterizedTypeName.get(ClassName.get(List.class), context.positionalOptionParserType());
-    MethodSpec longNameMapMethod = longNameMapMethod(context.optionType(), longNameField, shortNameField);
+    MethodSpec optionNamesMethod = optionNamesMethod(context.optionType(), longNameField, shortNameField);
     MethodSpec parsersMethod = parsersMethod(parsersType, context);
     MethodSpec positionalParsersMethod = positionalParsersMethod(positionalParsersType, context);
     FieldSpec argumentNameField = FieldSpec.builder(STRING, "descriptionArgumentName").addModifiers(FINAL).build();
@@ -119,7 +119,7 @@ final class Option {
         descriptionField,
         argumentNameField,
         exampleMethod,
-        longNameMapMethod,
+        optionNamesMethod,
         describeParamMethod,
         parsersMethod,
         positionalParsersMethod);
@@ -144,7 +144,7 @@ final class Option {
         .addMethod(exampleMethod)
         .addMethod(missingRequiredLambdaMethod())
         .addMethod(privateConstructor())
-        .addMethod(longNameMapMethod)
+        .addMethod(optionNamesMethod)
         .addMethod(parsersMethod)
         .addMethod(positionalValuesMethod())
         .addMethod(positionalValueMethod())
@@ -265,47 +265,36 @@ final class Option {
         .build();
   }
 
-  private static MethodSpec longNameMapMethod(
+  private static MethodSpec optionNamesMethod(
       ClassName optionType,
       FieldSpec longNameField,
       FieldSpec shortNameField) {
-    ParameterSpec longNames = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        STRING, optionType), "longNames")
+    ParameterSpec optMap = ParameterSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        STRING, optionType), "optMap")
         .build();
     ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
-    return MethodSpec.methodBuilder("longNameMap")
-        .addCode(nameMapCreationCode(longNameField, shortNameField, longNames, option))
-        .returns(longNames.type)
-        .addModifiers(STATIC)
-        .build();
-  }
-
-  private static CodeBlock nameMapCreationCode(
-      FieldSpec longNameField,
-      FieldSpec shortNameField,
-      ParameterSpec resultMap,
-      ParameterSpec option) {
-
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = new $T<>($T.values().length)",
-        resultMap.type, resultMap, HashMap.class, option.type);
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("longNameMap");
+    spec.addStatement("$T $N = new $T<>($T.values().length)",
+        optMap.type, optMap, HashMap.class, option.type);
 
     // begin iteration over options
-    builder.beginControlFlow("for ($T $N : $T.values())", option.type, option, option.type);
+    spec.beginControlFlow("for ($T $N : $T.values())", option.type, option, option.type);
 
-    builder.beginControlFlow("if ($N.$N != null)", option, longNameField)
-        .addStatement("$N.put($N.$N, $N)", resultMap, option, longNameField, option)
+    spec.beginControlFlow("if ($N.$N != null)", option, longNameField)
+        .addStatement("$N.put($N.$N, $N)", optMap, option, longNameField, option)
         .endControlFlow();
 
-    builder.beginControlFlow("if ($N.$N != null)", option, shortNameField)
-        .addStatement("$N.put($N.$N, $N)", resultMap, option, shortNameField, option)
+    spec.beginControlFlow("if ($N.$N != null)", option, shortNameField)
+        .addStatement("$N.put($N.$N, $N)", optMap, option, shortNameField, option)
         .endControlFlow();
 
     // end iteration over options
-    builder.endControlFlow();
-    builder.addStatement("return $N", resultMap);
+    spec.endControlFlow();
+    spec.addStatement("return $N", optMap);
 
-    return builder.build();
+    return spec.returns(optMap.type)
+        .addModifiers(STATIC)
+        .build();
   }
 
   private static MethodSpec describeParamMethod(
@@ -529,8 +518,8 @@ final class Option {
         .build();
   }
 
-  MethodSpec longNameMapMethod() {
-    return longNameMapMethod;
+  MethodSpec optionNamesMethod() {
+    return optionNamesMethod;
   }
 
   MethodSpec parsersMethod() {
