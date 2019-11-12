@@ -3,7 +3,7 @@ package net.jbock.examples;
 import java.math.BigInteger;
 import java.util.function.Function;
 
-public class CustomBigIntegerMapper implements Function<String, BigInteger> {
+class CustomBigIntegerMapper implements Function<String, BigInteger> {
 
   @Override
   public BigInteger apply(String s) {
