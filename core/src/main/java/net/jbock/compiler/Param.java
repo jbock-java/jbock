@@ -26,7 +26,7 @@ import static java.lang.Character.isWhitespace;
 import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
 
 /**
- * Internal representation of an abstract method in the source class.
+ * This class represents a parameter method.
  */
 public final class Param {
 
