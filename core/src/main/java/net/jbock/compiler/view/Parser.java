@@ -8,13 +8,10 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.io.PrintStream;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.Properties;
 import java.util.ResourceBundle;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
@@ -130,7 +127,6 @@ public final class Parser {
         .addMethod(addPublicIfNecessary(withErrorExitCodeMethod()))
         .addMethod(addPublicIfNecessary(withMessagesMethod()))
         .addMethod(addPublicIfNecessary(withResourceBundleMethod()))
-        .addMethod(addPublicIfNecessary(withMessagesMethodInputStream()))
         .addMethod(readValidArgumentMethod)
         .addMethod(readNextMethod);
 
@@ -183,31 +179,6 @@ public final class Parser {
         .returns(context.generatedClass());
   }
 
-  private MethodSpec.Builder withMessagesMethodInputStream() {
-    ParameterSpec stream = builder(InputStream.class, "stream").build();
-    ParameterSpec map = builder(STRING_TO_STRING_MAP, "map").build();
-    ParameterSpec name = builder(STRING, "name").build();
-    ParameterSpec properties = builder(Properties.class, "properties").build();
-    ParameterSpec exception = builder(IOException.class, "exception").build();
-    MethodSpec.Builder spec = methodBuilder("withMessages");
-    spec.beginControlFlow("try");
-    // BEGIN TRY BODY
-    spec.addStatement("$T $N = new $T()", properties.type, properties, Properties.class)
-        .addStatement("$N.load($N)", properties, stream)
-        .addStatement("$T $N = new $T<>()", map.type, map, HashMap.class);
-    spec.beginControlFlow("for ($T $N : $N.stringPropertyNames())", STRING, name, properties)
-        .addStatement("$N.put($N, $N.getProperty($N))", map, name, properties, name)
-        .endControlFlow();
-    spec.addStatement("return withMessages($N)", map);
-    // END TRY BODY
-    spec.endControlFlow();
-    spec.beginControlFlow("catch ($T $N)", exception.type, exception)
-        .addStatement("throw new $T($N)", RuntimeException.class, exception)
-        .endControlFlow();
-    return spec.addParameter(stream)
-        .returns(context.generatedClass());
-  }
-
   private MethodSpec.Builder withOutputStreamMethod() {
     return withPrintStreamMethod("withOutputStream", context, out);
   }
@@ -228,8 +199,7 @@ public final class Parser {
 
   private MethodSpec.Builder parseMethod() {
 
-    ParameterSpec args = builder(STRING_ARRAY, "args")
-        .build();
+    ParameterSpec args = builder(STRING_ARRAY, "args").build();
     MethodSpec.Builder spec = methodBuilder("parse");
 
     ParameterSpec paramTokenizer = builder(context.tokenizerType(), "tokenizer").build();

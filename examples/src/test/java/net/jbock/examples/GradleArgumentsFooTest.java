@@ -22,7 +22,7 @@ class GradleArgumentsFooTest {
         "  GradleArguments",
         "",
         "SYNOPSIS",
-        "  GradleArguments [<options>]",
+        "  GradleArguments [OPTIONS...]",
         "",
         "DESCRIPTION",
         "",

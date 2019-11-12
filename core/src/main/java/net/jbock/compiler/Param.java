@@ -324,14 +324,7 @@ public final class Param {
   public String descriptionArgumentName() {
     return descriptionArgumentName;
   }
-
-  public String descriptionArgumentNameWithDots() {
-    if (coercion.parameterType().isRepeatable()) {
-      return descriptionArgumentName + "...";
-    }
-    return descriptionArgumentName;
-  }
-
+  
   public TypeName returnType() {
     return TypeName.get(sourceMethod.getReturnType());
   }

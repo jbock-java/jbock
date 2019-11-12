@@ -97,7 +97,7 @@ class PositionalArgumentsTest {
         "  PositionalArguments",
         "",
         "SYNOPSIS",
-        "  PositionalArguments <SOURCE> <DESTINATION> <ANOTHER_INT> [<opt_string>] [[--] <other_tokens...>]",
+        "  PositionalArguments <SOURCE> <DESTINATION> <ANOTHER_INT> [<opt_string>] [<other_tokens>...]",
         "",
         "DESCRIPTION",
         "",

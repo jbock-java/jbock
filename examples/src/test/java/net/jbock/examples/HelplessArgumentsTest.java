@@ -15,7 +15,7 @@ class HelplessArgumentsTest {
       "    HelplessArguments",
       "",
       "SYNOPSIS",
-      "    HelplessArguments [<options>] <REQUIRED>",
+      "    HelplessArguments [OPTIONS...] <REQUIRED>",
       "",
       "DESCRIPTION",
       "",

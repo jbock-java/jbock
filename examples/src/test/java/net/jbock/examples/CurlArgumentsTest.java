@@ -212,7 +212,7 @@ class CurlArgumentsTest {
         "  curl - transfer a URL",
         "",
         "SYNOPSIS",
-        "  curl [<options>] [[--] <urls...>]",
+        "  curl [OPTIONS...] [<urls>...]",
         "",
         "DESCRIPTION",
         "  curl  is  a  tool  to  transfer data from or to a server",

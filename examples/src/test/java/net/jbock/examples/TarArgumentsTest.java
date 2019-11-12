@@ -37,7 +37,7 @@ class TarArgumentsTest {
         "  TarArguments",
         "",
         "SYNOPSIS",
-        "  TarArguments [<options>] -f <FILE>",
+        "  TarArguments [OPTIONS...] -f <FILE>",
         "",
         "DESCRIPTION",
         "",

@@ -92,7 +92,7 @@ class CpArgumentsTest {
         "  CpArguments",
         "",
         "SYNOPSIS",
-        "  CpArguments [<options>] <SOURCE> <DEST>",
+        "  CpArguments [OPTIONS...] <SOURCE> <DEST>",
         "",
         "DESCRIPTION",
         "",

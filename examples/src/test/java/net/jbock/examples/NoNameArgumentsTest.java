@@ -72,7 +72,7 @@ class NoNameArgumentsTest {
         "  NoNameArguments",
         "",
         "SYNOPSIS",
-        "  NoNameArguments [<options>] -n <NUMBER>",
+        "  NoNameArguments [OPTIONS...] -n <NUMBER>",
         "",
         "DESCRIPTION",
         "",

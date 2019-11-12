@@ -1,11 +1,9 @@
 package net.jbock.compiler.view;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
@@ -16,10 +14,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.StringJoiner;
 
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static java.util.stream.Collectors.partitioningBy;
 import static java.util.stream.Collectors.toList;
@@ -91,8 +87,18 @@ final class Tokenizer {
         .build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
+    if (context.isHelpParameterEnabled()) {
+      spec.beginControlFlow("if ($N.length >= 1 && $S.equals($N[0]))", args, "--help", args)
+          .addStatement("printUsage()")
+          .addStatement("$N.flush()", err)
+          .addStatement("$N.flush()", out)
+          .addStatement("return new $T()", context.helpPrintedType())
+          .endControlFlow();
+    }
+
     spec.beginControlFlow("try")
-        .addCode(parseMethodTryBlock(args))
+        .addStatement("return new $T(parse($T.asList($N).iterator()))",
+            context.parsingSuccessType(), Arrays.class, args)
         .endControlFlow();
 
     spec.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
@@ -105,8 +111,7 @@ final class Tokenizer {
         .endControlFlow();
 
 
-    return spec
-        .addParameter(args)
+    return spec.addParameter(args)
         .returns(context.parseResultType())
         .build();
   }
@@ -250,7 +255,7 @@ final class Tokenizer {
     spec.addStatement("$N.add($S)", joiner, context.programName());
 
     if (!optionalNonpos.isEmpty()) {
-      spec.addStatement("$N.add($S)", joiner, "[<options>]");
+      spec.addStatement("$N.add($S)", joiner, "[OPTIONS...]");
     }
 
     for (Param param : requiredNonpos) {
@@ -260,42 +265,19 @@ final class Tokenizer {
 
     for (Param param : positional) {
       if (param.isOptional()) {
-        spec.addStatement("$N.add($S)", joiner, "[<" +
-            param.descriptionArgumentName() + ">]");
+        spec.addStatement("$N.add($S)", joiner, "[<" + param.descriptionArgumentName() + ">]");
       } else if (param.isRequired()) {
-        spec.addStatement("$N.add($S)", joiner, "<" +
-            param.descriptionArgumentName() + ">");
+        spec.addStatement("$N.add($S)", joiner, "<" + param.descriptionArgumentName() + ">");
       } else if (param.isRepeatable()) {
-        spec.addStatement("$N.add($S)", joiner, context.allowEscape() ?
-            "[[--] <" + param.descriptionArgumentNameWithDots() + ">]" :
-            "[<" + param.descriptionArgumentNameWithDots() + ">]");
+        spec.addStatement("$N.add($S)", joiner, "[<" + param.descriptionArgumentName() + ">...]");
       } else {
-        throw new AssertionError();
+        throw new AssertionError("all cases handled (repeatable can't be flag)");
       }
     }
 
     spec.addStatement("return $N.toString()", joiner);
 
     return spec.addModifiers(STATIC).build();
-  }
-
-  private CodeBlock parseMethodTryBlock(
-      ParameterSpec args) {
-    CodeBlock.Builder spec = CodeBlock.builder();
-    ParameterSpec result = ParameterSpec.builder(ParameterizedTypeName.get(
-        ClassName.get(Optional.class),
-        TypeName.get(context.sourceElement().asType())), "result")
-        .build();
-    spec.addStatement("$T $N = parse($T.asList($N).iterator())",
-        result.type, result, Arrays.class, args);
-
-    spec.beginControlFlow("if ($N.isPresent())", result)
-        .addStatement("return new $T($N.get())", context.parsingSuccessType(), result)
-        .endControlFlow();
-
-    spec.addStatement("printUsage()")
-        .addStatement("return new $T()", context.helpPrintedType());
-    return spec.build();
   }
 
   private CodeBlock parseMethodCatchBlock(ParameterSpec e) {
@@ -307,7 +289,6 @@ final class Tokenizer {
       spec.addStatement("$N.println(synopsis())", err);
       spec.addStatement("$N.decrementIndent()", err);
       spec.addStatement("$N.println()", err);
-
       spec.addStatement("$N.println($S)", err, "Error:");
       spec.addStatement("$N.incrementIndent()", err);
       spec.addStatement("$N.println($N.getMessage())", err, e);
@@ -327,46 +308,34 @@ final class Tokenizer {
 
     ParameterSpec stateParam = ParameterSpec.builder(context.parserStateType(), "state").build();
     ParameterSpec tokens = ParameterSpec.builder(ITERATOR_OF_STRING, "tokens").build();
-    ParameterSpec isFirst = ParameterSpec.builder(BOOLEAN, "first").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse")
         .addParameter(tokens)
-        .returns(ParameterizedTypeName.get(ClassName.get(Optional.class),
-            TypeName.get(context.sourceElement().asType())));
+        .returns(TypeName.get(context.sourceElement().asType()));
 
     ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
 
-    spec.addStatement("$T $N = $L", BOOLEAN, isFirst, true);
     spec.addStatement("$T $N = $L", positionParam.type, positionParam, 0);
     spec.addStatement("$T $N = new $T()", stateParam.type, stateParam, stateParam.type);
 
     spec.beginControlFlow("while ($N.hasNext())", tokens)
-        .addCode(codeInsideParsingLoop(stateParam, positionParam, tokens, isFirst))
+        .addCode(codeInsideParsingLoop(stateParam, positionParam, tokens))
         .endControlFlow();
 
-    spec.addStatement(stateBuildInvocation(stateParam));
+    spec.addStatement("return $N.build()", stateParam);
     return spec.build();
   }
 
   private CodeBlock codeInsideParsingLoop(
       ParameterSpec stateParam,
       ParameterSpec positionParam,
-      ParameterSpec tokens,
-      ParameterSpec isFirst) {
+      ParameterSpec tokens) {
 
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
 
     CodeBlock.Builder spec = CodeBlock.builder();
     spec.addStatement("$T $N = $N.next()", STRING, token, tokens);
-
-    if (context.isHelpParameterEnabled()) {
-      spec.beginControlFlow("if ($N && $S.equals($N))", isFirst, "--help", token)
-          .addStatement("return $T.empty()", Optional.class)
-          .endControlFlow();
-    }
-
-    spec.addStatement("$N = $L", isFirst, false);
 
     if (context.allowEscape()) {
       ParameterSpec t = ParameterSpec.builder(STRING, "t").build();
@@ -376,7 +345,7 @@ final class Tokenizer {
           .addStatement("$T $N = $N.next()", STRING, t, tokens)
           .addStatement("$N += $N.$N($N, $N)", positionParam, stateParam, state.readPositionalMethod(), positionParam, t)
           .endControlFlow()
-          .addStatement(stateBuildInvocation(stateParam));
+          .addStatement("return $N.build()", stateParam);
 
       spec.endControlFlow();
     }
@@ -403,11 +372,6 @@ final class Tokenizer {
         .add("throw new $T($S + $N)", IllegalArgumentException.class,
             "Invalid option: ", token)
         .build();
-  }
-
-  private CodeBlock stateBuildInvocation(ParameterSpec stateParam) {
-    return CodeBlock.builder().add("return $T.of($N.build())",
-        Optional.class, stateParam).build();
   }
 
   private MethodSpec privateConstructor() {

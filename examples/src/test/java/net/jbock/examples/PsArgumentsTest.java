@@ -15,7 +15,7 @@ class PsArgumentsTest {
         "  PsArguments",
         "",
         "SYNOPSIS",
-        "  PsArguments [<options>]",
+        "  PsArguments [OPTIONS...]",
         "",
         "DESCRIPTION",
         "",

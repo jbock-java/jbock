@@ -189,7 +189,7 @@ class GradleArgumentsTest {
         "  GradleArguments",
         "",
         "SYNOPSIS",
-        "  GradleArguments [<options>] [[--] <other_tokens...>]",
+        "  GradleArguments [OPTIONS...] [<other_tokens>...]",
         "",
         "DESCRIPTION",
         "",
