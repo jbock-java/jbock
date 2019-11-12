@@ -1,20 +1,22 @@
 plugins {
-    id 'java'
-    id 'maven'
+    id 'java-library'
+    id 'maven-publish'
     id 'signing'
 }
 
-sourceCompatibility = '1.8'
+group = 'com.github.h908714124'
 
-group = "com.github.h908714124"
-archivesBaseName = "jbock-annotations"
+compileJava {
+    options.encoding = 'UTF-8'
+    sourceCompatibility = '8'
+    targetCompatibility = '8'
+}
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.5.0-M1'
 }
 
 jar {
@@ -34,13 +36,13 @@ test {
 }
 
 task javadocJar(type: Jar) {
-    classifier = 'javadoc'
     from javadoc
+    archiveClassifier = 'javadoc'
 }
 
 task sourcesJar(type: Jar) {
-    classifier = 'sources'
-    from sourceSets.main.allSource
+    from sourceSets.main.allJava
+    archiveClassifier = 'sources'
 }
 
 artifacts {
@@ -55,54 +57,63 @@ signing {
 gradle.taskGraph.whenReady { taskGraph ->
     if (taskGraph.allTasks.any { it instanceof Sign }) {
         allprojects {
-            ext."signing.keyId" = System.getenv( 'SIGNING_KEY_ID' )
-            ext."signing.password" = System.getenv( 'SIGNING_PASSWORD' )
+            ext."signatory.keyId" = System.getenv('SIGNING_KEY_ID')
+            ext."signatory.password" = System.getenv('SIGNING_PASSWORD')
         }
     }
 }
 
 // https://central.sonatype.org/pages/gradle.html
-uploadArchives {
-    repositories {
-        mavenDeployer {
-            beforeDeployment { deployment -> signing.signPom(deployment) }
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifactId = 'jbock'
+            from components.java
 
-            repository(url: "https://oss.sonatype.org/service/local/staging/deploy/maven2/") {
-                authentication(userName: System.getenv( 'OSS_USER' ), password: System.getenv( 'OSS_PASS' ))
-            }
+            artifact sourcesJar
+            artifact javadocJar
 
-            snapshotRepository(url: "https://oss.sonatype.org/content/repositories/snapshots/") {
-                authentication(userName: System.getenv( 'OSS_USER' ), password: System.getenv( 'OSS_PASS' ))
-            }
-
-            pom.project {
-                name 'jbock-annotations'
-                packaging 'jar'
-                artifactId 'jbock-annotations'
-                description 'Annotations for the jbock annotation processor'
-                url 'https://github.com/h908714124/jbock'
-
-                scm {
-                    connection 'scm:svn:https://github.com/h908714124/jbock.git'
-                    developerConnection 'scm:svn:https://github.com/h908714124/jbock.git'
-                    url 'https://github.com/h908714124/jbock'
-                }
+            pom {
+                name = 'jbock-annotations'
+                packaging = 'jar'
+                description = 'Annotations for the jbock annotation processor'
+                url = 'https://github.com/h908714124/jbock'
 
                 licenses {
                     license {
-                        name 'MIT License'
-                        url 'https://opensource.org/licenses/MIT'
+                        name = 'MIT License'
+                        url = 'https://opensource.org/licenses/MIT'
                     }
                 }
-
                 developers {
                     developer {
-                        id 'h908714124'
-                        name 'h908714124'
-                        email 'kraftdurchblumen@gmx.de'
+                        id = 'h908714124'
+                        name = 'h908714124'
+                        email = 'kraftdurchblumen@gmx.de'
                     }
+                }
+                scm {
+                    connection = 'scm:svn:https://github.com/h908714124/jbock.git'
+                    developerConnection = 'scm:svn:https://github.com/h908714124/jbock.git'
+                    url = 'https://github.com/h908714124/jbock'
                 }
             }
         }
     }
+    repositories {
+        maven {
+            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            credentials {
+                username = System.getenv('OSS_USER')
+                password = System.getenv('OSS_PASS')
+            }
+        }
+    }
+}
+
+signing {
+    def signingKey = findProperty('signingKey')
+    def signingPassword = findProperty('signingPassword')
+    useInMemoryPgpKeys(signingKey, signingPassword)
+    sign publishing.publications.mavenJava
 }
