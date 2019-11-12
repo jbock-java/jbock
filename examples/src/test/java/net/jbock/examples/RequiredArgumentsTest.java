@@ -44,7 +44,7 @@ class RequiredArgumentsTest {
         "  RequiredArguments",
         "",
         "SYNOPSIS",
-        "  RequiredArguments --dir=<DIR> [<other_tokens>...]",
+        "  RequiredArguments --dir <DIR> [<other_tokens>...]",
         "",
         "DESCRIPTION",
         "",
@@ -54,9 +54,7 @@ class RequiredArgumentsTest {
         "  --dir <DIR>",
         "",
         "  --help",
-        "    Print this help page.",
-        "    The help flag may only be passed as the first argument.",
-        "    Any further arguments will be ignored.",
+        "    print online help",
         "",
         "");
   }

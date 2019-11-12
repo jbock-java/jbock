@@ -26,7 +26,7 @@ class EvilArgumentsTest {
         "  EvilArguments",
         "",
         "SYNOPSIS",
-        "  EvilArguments --fancy=<FANCY> --fAncy=<F_ANCY> --f_ancy=<F_ANCY_2> --f__ancy=<F_ANCY_3> --blub=<BLUB> --Blub=<BLUB_5>",
+        "  EvilArguments --fancy <FANCY> --fAncy <F_ANCY> --f_ancy <F_ANCY_2> --f__ancy <F_ANCY_3> --blub <BLUB> --Blub <BLUB_5>",
         "",
         "DESCRIPTION",
         "",
@@ -44,9 +44,7 @@ class EvilArgumentsTest {
         "  --Blub <BLUB_5>",
         "",
         "  --help",
-        "    Print this help page.",
-        "    The help flag may only be passed as the first argument.",
-        "    Any further arguments will be ignored.",
+        "    print online help",
         "",
         "");
   }

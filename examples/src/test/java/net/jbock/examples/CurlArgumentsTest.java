@@ -238,9 +238,7 @@ class CurlArgumentsTest {
         "  -i, --include",
         "",
         "  --help",
-        "    Print this help page.",
-        "    The help flag may only be passed as the first argument.",
-        "    Any further arguments will be ignored.",
+        "    print online help",
         "",
         "");
   }

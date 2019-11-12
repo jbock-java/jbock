@@ -189,9 +189,7 @@ final class Tokenizer {
   private void describeHelpParameter(MethodSpec.Builder spec) {
     ParameterSpec defaultHelpText = ParameterSpec.builder(LIST_OF_STRING, "defaultHelp").build();
     spec.addStatement("$T $N = new $T<>()", defaultHelpText.type, defaultHelpText, ArrayList.class);
-    spec.addStatement("$N.add($S)", defaultHelpText, "Print this help page.");
-    spec.addStatement("$N.add($S)", defaultHelpText, "The help flag may only be passed as the first argument.");
-    spec.addStatement("$N.add($S)", defaultHelpText, "Any further arguments will be ignored.");
+    spec.addStatement("$N.add($S)", defaultHelpText, "print online help");
     spec.addStatement("$N.incrementIndent()", out);
     spec.addStatement("$N.println($S)", out, "--help");
     spec.addStatement("$N.incrementIndent()", out);
