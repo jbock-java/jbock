@@ -30,7 +30,7 @@ final class Messages {
   private final Context context;
 
   private final FieldSpec br = FieldSpec.builder(Pattern.class, "br")
-      .initializer("$T.compile($S)", Pattern.class, "\\r?\\n")
+      .initializer("$T.compile($S)", Pattern.class, "\\R")
       .addModifiers(FINAL)
       .build();
 
