@@ -51,13 +51,9 @@ public final class Parser {
   private final MethodSpec readNextMethod;
   private final MethodSpec readValidArgumentMethod;
 
-  private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out")
-      .initializer("$T.out", System.class)
-      .addModifiers(PRIVATE).build();
+  private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out").addModifiers(PRIVATE).build();
 
-  private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err")
-      .initializer("$T.err", System.class)
-      .addModifiers(PRIVATE).build();
+  private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err").addModifiers(PRIVATE).build();
 
   private final FieldSpec indent = FieldSpec.builder(INT, "indent")
       .initializer("$L", DEFAULT_INDENT)
@@ -167,9 +163,6 @@ public final class Parser {
   private MethodSpec.Builder withMessagesMethod() {
     ParameterSpec resourceBundleParam = builder(messages.type, "map").build();
     MethodSpec.Builder spec = methodBuilder("withMessages");
-    spec.beginControlFlow("if ($N != null)", messages)
-        .addStatement("throw new $T($S)", IllegalStateException.class, "setting messages twice")
-        .endControlFlow();
     return spec.addParameter(resourceBundleParam)
         .addStatement("this.$N = $T.requireNonNull($N)", messages, Objects.class, resourceBundleParam)
         .addStatement("return this")
@@ -197,9 +190,6 @@ public final class Parser {
     ParameterSpec properties = builder(Properties.class, "properties").build();
     ParameterSpec exception = builder(IOException.class, "exception").build();
     MethodSpec.Builder spec = methodBuilder("withMessages");
-    spec.beginControlFlow("if ($N == null)", stream)
-        .addStatement("return withMessages($T.emptyMap())", Collections.class)
-        .endControlFlow();
     spec.beginControlFlow("try");
     // BEGIN TRY BODY
     spec.addStatement("$T $N = new $T()", properties.type, properties, Properties.class)
@@ -247,12 +237,14 @@ public final class Parser {
     ParameterSpec paramOutStream;
     if (context.isHelpParameterEnabled()) {
       paramOutStream = builder(context.indentPrinterType(), "outStream").build();
-      spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramOutStream, context.indentPrinterType(), out, indent);
+      spec.addStatement("$T $N = new $T($N == null ? $T.out : $N, $N)", context.indentPrinterType(), paramOutStream, context.indentPrinterType(),
+          out, System.class, out, indent);
     } else {
       paramOutStream = paramErrStream;
     }
     ParameterSpec paramMessages = builder(context.messagesType(), "msg").build();
-    spec.addStatement("$T $N = new $T($N, $N)", context.indentPrinterType(), paramErrStream, context.indentPrinterType(), err, indent);
+    spec.addStatement("$T $N = new $T($N == null ? $T.out : $N, $N)", context.indentPrinterType(), paramErrStream, context.indentPrinterType(),
+        err, System.class, err, indent);
     spec.addStatement("$T $N = new $T($N == null ? $T.emptyMap() : $N)", context.messagesType(), paramMessages, context.messagesType(), messages, Collections.class, messages);
     spec.addStatement("$T $N = new $T($N, $N, $N)",
         paramTokenizer.type, paramTokenizer, paramTokenizer.type, paramOutStream, paramErrStream, paramMessages);
