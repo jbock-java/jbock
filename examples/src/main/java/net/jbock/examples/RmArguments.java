@@ -6,7 +6,7 @@ import net.jbock.PositionalParameter;
 
 import java.util.List;
 
-@CommandLineArguments(allowEscapeSequence = true)
+@CommandLineArguments
 abstract class RmArguments {
 
   @Parameter(shortName = 'r')

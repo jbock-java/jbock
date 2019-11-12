@@ -18,8 +18,7 @@ import java.util.Optional;
  */
 @CommandLineArguments(
     programName = "curl",
-    missionStatement = "transfer a URL",
-    allowEscapeSequence = true)
+    missionStatement = "transfer a URL")
 abstract class CurlArguments {
 
   /**
