@@ -5,13 +5,21 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 
+import javax.lang.model.element.Modifier;
+import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
+import static javax.lang.model.element.Modifier.PROTECTED;
+import static javax.lang.model.element.Modifier.PUBLIC;
+
 public final class Constants {
+
+  static final Set<Modifier> NONPRIVATE_ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
   public static final ClassName STRING = ClassName.get(String.class);
 

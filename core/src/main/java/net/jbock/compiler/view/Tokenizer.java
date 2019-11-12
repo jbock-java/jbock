@@ -4,7 +4,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
@@ -87,14 +86,13 @@ final class Tokenizer {
         .build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
-    if (context.isHelpParameterEnabled()) {
-      spec.beginControlFlow("if ($N.length >= 1 && $S.equals($N[0]))", args, "--help", args)
-          .addStatement("printUsage()")
-          .addStatement("$N.flush()", err)
-          .addStatement("$N.flush()", out)
-          .addStatement("return new $T()", context.helpPrintedType())
-          .endControlFlow();
-    }
+    context.helpPrintedType().ifPresent(helpPrintedType ->
+        spec.beginControlFlow("if ($N.length >= 1 && $S.equals($N[0]))", args, "--help", args)
+            .addStatement("printUsage()")
+            .addStatement("$N.flush()", err)
+            .addStatement("$N.flush()", out)
+            .addStatement("return new $T()", helpPrintedType)
+            .endControlFlow());
 
     spec.beginControlFlow("try")
         .addStatement("return new $T(parse($T.asList($N).iterator()))",
@@ -311,7 +309,7 @@ final class Tokenizer {
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse")
         .addParameter(tokens)
-        .returns(TypeName.get(context.sourceElement().asType()));
+        .returns(context.sourceElement());
 
     ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
 

@@ -1,11 +1,16 @@
 package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 import net.jbock.CommandLineArguments;
 
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
+import java.util.Optional;
+
+import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
 
 public final class Context {
 
@@ -151,12 +156,18 @@ public final class Context {
     return generatedClass.nestedClass("ParsingFailed");
   }
 
-  public ClassName helpPrintedType() {
-    return generatedClass.nestedClass("HelpPrinted");
+  public Optional<ClassName> helpPrintedType() {
+    return helpParameterEnabled ? Optional.of(generatedClass.nestedClass("HelpPrinted")) : Optional.empty();
   }
 
-  public TypeElement sourceElement() {
-    return sourceElement;
+  public TypeName sourceElement() {
+    return TypeName.get(sourceElement.asType());
+  }
+
+  public Modifier[] getAccessModifiers() {
+    return sourceElement.getModifiers().stream()
+        .filter(NONPRIVATE_ACCESS_MODIFIERS::contains)
+        .toArray(Modifier[]::new);
   }
 
   public ClassName generatedClass() {
@@ -166,7 +177,7 @@ public final class Context {
   public List<Param> parameters() {
     return parameters;
   }
-  
+
   public boolean isHelpParameterEnabled() {
     return helpParameterEnabled;
   }

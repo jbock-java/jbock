@@ -4,7 +4,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 
@@ -21,7 +20,6 @@ import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
@@ -95,13 +93,11 @@ public final class Parser {
 
   public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass());
-    spec.addModifiers(FINAL);
-    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
-      spec.addModifiers(PUBLIC);
-    }
-    spec.addMethod(addPublicIfNecessary(createMethod()))
-        .addMethod(addPublicIfNecessary(parseMethod()))
-        .addMethod(addPublicIfNecessary(parseOrExitMethod()));
+    spec.addModifiers(FINAL)
+        .addModifiers(context.getAccessModifiers());
+    spec.addMethod(createMethod())
+        .addMethod(parseMethod())
+        .addMethod(parseOrExitMethod());
     spec.addType(tokenizer.define())
         .addType(state.define())
         .addType(impl.define())
@@ -122,50 +118,56 @@ public final class Parser {
         .addField(errorExitCode)
         .addField(messages)
         .addMethod(MethodSpec.constructorBuilder().addModifiers(PRIVATE).build())
-        .addMethod(addPublicIfNecessary(withErrorStreamMethod()))
-        .addMethod(addPublicIfNecessary(withIndentMethod()))
-        .addMethod(addPublicIfNecessary(withErrorExitCodeMethod()))
-        .addMethod(addPublicIfNecessary(withMessagesMethod()))
-        .addMethod(addPublicIfNecessary(withResourceBundleMethod()))
+        .addMethod(withErrorStreamMethod())
+        .addMethod(withIndentMethod())
+        .addMethod(withErrorExitCodeMethod())
+        .addMethod(withMessagesMethod())
+        .addMethod(withResourceBundleMethod())
         .addMethod(readValidArgumentMethod)
         .addMethod(readNextMethod);
 
     if (context.isHelpParameterEnabled()) {
-      spec.addMethod(addPublicIfNecessary(withOutputStreamMethod()));
+      spec.addMethod(withOutputStreamMethod());
     }
 
     return spec.addJavadoc(javadoc())
         .build();
   }
 
-  private MethodSpec.Builder withIndentMethod() {
+  private MethodSpec withIndentMethod() {
     ParameterSpec indentParam = builder(indent.type, indent.name).build();
     return methodBuilder("withIndent")
         .addParameter(indentParam)
         .addStatement("this.$N = $N", indent, indentParam)
         .addStatement("return this")
-        .returns(context.generatedClass());
+        .returns(context.generatedClass())
+        .addModifiers(context.getAccessModifiers())
+        .build();
   }
 
-  private MethodSpec.Builder withErrorExitCodeMethod() {
+  private MethodSpec withErrorExitCodeMethod() {
     ParameterSpec errorExitCodeParam = builder(errorExitCode.type, errorExitCode.name).build();
     return methodBuilder("withErrorExitCode")
         .addParameter(errorExitCodeParam)
         .addStatement("this.$N = $N", errorExitCode, errorExitCodeParam)
         .addStatement("return this")
-        .returns(context.generatedClass());
+        .returns(context.generatedClass())
+        .addModifiers(context.getAccessModifiers())
+        .build();
   }
 
-  private MethodSpec.Builder withMessagesMethod() {
+  private MethodSpec withMessagesMethod() {
     ParameterSpec resourceBundleParam = builder(messages.type, "map").build();
     MethodSpec.Builder spec = methodBuilder("withMessages");
     return spec.addParameter(resourceBundleParam)
         .addStatement("this.$N = $T.requireNonNull($N)", messages, Objects.class, resourceBundleParam)
         .addStatement("return this")
-        .returns(context.generatedClass());
+        .returns(context.generatedClass())
+        .addModifiers(context.getAccessModifiers())
+        .build();
   }
 
-  private MethodSpec.Builder withResourceBundleMethod() {
+  private MethodSpec withResourceBundleMethod() {
     ParameterSpec bundle = builder(ResourceBundle.class, "bundle").build();
     ParameterSpec map = builder(STRING_TO_STRING_MAP, "map").build();
     ParameterSpec name = builder(STRING, "name").build();
@@ -176,28 +178,32 @@ public final class Parser {
         .endControlFlow();
     spec.addStatement("return withMessages($N)", map);
     return spec.addParameter(bundle)
-        .returns(context.generatedClass());
+        .returns(context.generatedClass())
+        .addModifiers(context.getAccessModifiers())
+        .build();
   }
 
-  private MethodSpec.Builder withOutputStreamMethod() {
+  private MethodSpec withOutputStreamMethod() {
     return withPrintStreamMethod("withOutputStream", context, out);
   }
 
-  private MethodSpec.Builder withErrorStreamMethod() {
+  private MethodSpec withErrorStreamMethod() {
     return withPrintStreamMethod("withErrorStream", context, err);
   }
 
-  private static MethodSpec.Builder withPrintStreamMethod(
+  private static MethodSpec withPrintStreamMethod(
       String methodName, Context context, FieldSpec stream) {
     ParameterSpec param = builder(stream.type, stream.name).build();
     return methodBuilder(methodName)
         .addParameter(param)
         .addStatement("this.$N = $T.requireNonNull($N)", stream, Objects.class, param)
         .addStatement("return this")
-        .returns(context.generatedClass());
+        .returns(context.generatedClass())
+        .addModifiers(context.getAccessModifiers())
+        .build();
   }
 
-  private MethodSpec.Builder parseMethod() {
+  private MethodSpec parseMethod() {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
     MethodSpec.Builder spec = methodBuilder("parse");
@@ -221,10 +227,12 @@ public final class Parser {
     spec.addStatement("return $N.parse($N)", paramTokenizer, args);
 
     return spec.addParameter(args)
-        .returns(context.parseResultType());
+        .addModifiers(context.getAccessModifiers())
+        .returns(context.parseResultType())
+        .build();
   }
 
-  private MethodSpec.Builder parseOrExitMethod() {
+  private MethodSpec parseOrExitMethod() {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
     ParameterSpec result = builder(context.parseResultType(), "result").build();
@@ -236,9 +244,10 @@ public final class Parser {
         .addStatement("return (($T) $N).result()", context.parsingSuccessType(), result)
         .endControlFlow();
 
-    spec.beginControlFlow("if ($N instanceof $T)", result, context.helpPrintedType())
-        .addStatement("$T.exit(0)", System.class)
-        .endControlFlow();
+    context.helpPrintedType().ifPresent(helpPrintedType ->
+        spec.beginControlFlow("if ($N instanceof $T)", result, helpPrintedType)
+            .addStatement("$T.exit(0)", System.class)
+            .endControlFlow());
 
     spec.beginControlFlow("if ($N instanceof $T)", result, context.parsingFailedType())
         .addStatement("$T.exit($N)", System.class, errorExitCode)
@@ -248,15 +257,19 @@ public final class Parser {
     spec.addStatement("throw new $T($S)", AssertionError.class, "never thrown");
 
     return spec.addParameter(args)
-        .returns(TypeName.get(context.sourceElement().asType()));
+        .addModifiers(context.getAccessModifiers())
+        .returns(context.sourceElement())
+        .build();
   }
 
 
-  private MethodSpec.Builder createMethod() {
+  private MethodSpec createMethod() {
     MethodSpec.Builder builder = methodBuilder("create");
     builder.addStatement("return new $T()", context.generatedClass());
     return builder.addModifiers(STATIC)
-        .returns(context.generatedClass());
+        .addModifiers(context.getAccessModifiers())
+        .returns(context.generatedClass())
+        .build();
   }
 
 
@@ -265,17 +278,6 @@ public final class Parser {
         "<a href=\"https://github.com/h908714124/jbock\">jbock " +
         getClass().getPackage().getImplementationVersion() +
         "</a>\n").build();
-  }
-
-  private MethodSpec addPublicIfNecessary(MethodSpec.Builder spec) {
-    return addPublicIfNecessary(context, spec);
-  }
-
-  static MethodSpec addPublicIfNecessary(Context context, MethodSpec.Builder spec) {
-    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
-      return spec.addModifiers(PUBLIC).build();
-    }
-    return spec.build();
   }
 
   private static MethodSpec readValidArgumentMethod(

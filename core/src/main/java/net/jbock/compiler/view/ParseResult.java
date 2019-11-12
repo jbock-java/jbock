@@ -7,9 +7,10 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
@@ -18,10 +19,8 @@ import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.PUBLIC;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.view.Parser.addPublicIfNecessary;
 
 /**
  * Defines the inner class ParseResult.
@@ -39,7 +38,7 @@ final class ParseResult {
   }
 
   static ParseResult create(Context context) {
-    FieldSpec result = FieldSpec.builder(TypeName.get(context.sourceElement().asType()),
+    FieldSpec result = FieldSpec.builder(context.sourceElement(),
         "result", PRIVATE, FINAL).build();
     return new ParseResult(context, result);
   }
@@ -47,67 +46,67 @@ final class ParseResult {
   List<TypeSpec> define() {
     TypeSpec.Builder spec = classBuilder(context.parseResultType())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
-        .addModifiers(ABSTRACT, STATIC);
-    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
-      spec.addModifiers(PUBLIC);
-    }
-    return Arrays.asList(spec.build(),
-        definePrintHelpResult(),
-        defineErrorResult(),
-        defineSuccessResult());
+        .addModifiers(ABSTRACT, STATIC)
+        .addModifiers(context.getAccessModifiers());
+    List<TypeSpec> result = new ArrayList<>();
+    result.add(spec.build());
+    result.add(defineErrorResult());
+    result.add(defineSuccessResult());
+    definePrintHelpResult().ifPresent(result::add);
+    return result;
   }
 
-  private TypeSpec definePrintHelpResult() {
-    TypeSpec.Builder spec = classBuilder(context.helpPrintedType())
-        .superclass(context.parseResultType())
-        .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
-        .addModifiers(STATIC, FINAL);
-    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
-      spec.addModifiers(PUBLIC);
-    }
-    return spec.build();
+  private Optional<TypeSpec> definePrintHelpResult() {
+    return context.helpPrintedType().map(helpPrintedType -> {
+      TypeSpec.Builder spec = classBuilder(helpPrintedType)
+          .superclass(context.parseResultType())
+          .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
+          .addModifiers(STATIC, FINAL)
+          .addModifiers(context.getAccessModifiers());
+      return spec.build();
+    });
   }
 
   private TypeSpec defineErrorResult() {
     ParameterSpec paramMessage = builder(STRING, message.name).build();
-    TypeSpec.Builder spec = classBuilder(context.parsingFailedType())
+    return classBuilder(context.parsingFailedType())
         .superclass(context.parseResultType())
         .addField(message)
         .addMethod(constructorBuilder()
             .addParameter(paramMessage)
             .addStatement("this.$N = $T.requireNonNull($N)", message, Objects.class, paramMessage)
             .addModifiers(PRIVATE).build())
-        .addModifiers(STATIC, FINAL);
-    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
-      spec.addModifiers(PUBLIC);
-    }
-    spec.addMethod(addPublicIfNecessary(context, messageMethod()));
-    return spec.build();
+        .addModifiers(STATIC, FINAL)
+        .addModifiers(context.getAccessModifiers())
+        .addMethod(messageMethod())
+        .build();
   }
 
   private TypeSpec defineSuccessResult() {
-    TypeSpec.Builder spec = classBuilder(context.parsingSuccessType())
+    return classBuilder(context.parsingSuccessType())
         .superclass(context.parseResultType())
         .addField(result)
         .addMethod(successConstructor())
-        .addModifiers(STATIC, FINAL);
-    if (context.sourceElement().getModifiers().contains(PUBLIC)) {
-      spec.addModifiers(PUBLIC);
-    }
-    spec.addMethod(addPublicIfNecessary(context, resultMethod()));
-    return spec.build();
+        .addModifiers(STATIC, FINAL)
+        .addModifiers(context.getAccessModifiers())
+        .addMethod(resultMethod())
+        .build();
   }
 
-  private MethodSpec.Builder resultMethod() {
+  private MethodSpec resultMethod() {
     return methodBuilder("result")
         .addStatement("return $N", result)
-        .returns(TypeName.get(context.sourceElement().asType()));
+        .returns(context.sourceElement())
+        .addModifiers(context.getAccessModifiers())
+        .build();
   }
 
-  private MethodSpec.Builder messageMethod() {
+  private MethodSpec messageMethod() {
     return methodBuilder("message")
         .addStatement("return $N", message)
-        .returns(STRING);
+        .addModifiers(context.getAccessModifiers())
+        .returns(STRING)
+        .build();
   }
 
   private MethodSpec successConstructor() {

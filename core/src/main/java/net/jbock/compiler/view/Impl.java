@@ -1,7 +1,6 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Param;
@@ -32,16 +31,16 @@ final class Impl {
 
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.implType())
-        .superclass(TypeName.get(context.sourceElement().asType()));
+        .superclass(context.sourceElement());
     for (Param param : context.parameters()) {
       spec.addField(param.field());
     }
-    spec.addModifiers(PRIVATE, STATIC)
+    return spec.addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor())
         .addMethods(context.parameters().stream()
             .map(this::parameterMethodOverride)
-            .collect(Collectors.toList()));
-    return spec.build();
+            .collect(Collectors.toList()))
+        .build();
   }
 
   private MethodSpec parameterMethodOverride(Param param) {

@@ -15,7 +15,6 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -24,15 +23,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.Character.isWhitespace;
-import static javax.lang.model.element.Modifier.PROTECTED;
-import static javax.lang.model.element.Modifier.PUBLIC;
+import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
 
 /**
  * Internal representation of an abstract method in the source class.
  */
 public final class Param {
-
-  private static final Set<Modifier> NONPRIVATE_ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
   // null if absent
   private final String longName;
@@ -324,7 +320,7 @@ public final class Param {
   public String descriptionArgumentName() {
     return descriptionArgumentName;
   }
-  
+
   public TypeName returnType() {
     return TypeName.get(sourceMethod.getReturnType());
   }

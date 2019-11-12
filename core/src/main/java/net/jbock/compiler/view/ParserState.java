@@ -229,11 +229,10 @@ final class ParserState {
         args.add(",\n");
       }
     }
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
-
-    spec.addStatement("return new $T($L)", context.implType(), args.build());
-
-    return spec.returns(TypeName.get(context.sourceElement().asType())).build();
+    return MethodSpec.methodBuilder("build")
+        .addStatement("return new $T($L)", context.implType(), args.build())
+        .returns(context.sourceElement())
+        .build();
   }
 
   private CodeBlock extractExpression(Param param) {
