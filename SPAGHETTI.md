@@ -407,5 +407,5 @@ see [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
 ### Running tests
 
 ````sh
-gradle :core:test :examples:clean :examples:test
+./gradlew :core:clean :core:test :examples:clean :examples:test
 ````
