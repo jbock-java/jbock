@@ -217,14 +217,12 @@ public final class Parser {
       paramOutStream = paramErrStream;
     }
     ParameterSpec paramMessages = builder(context.messagesType(), "msg").build();
-    spec.addStatement("$T $N = new $T($N == null ? $T.out : $N, $N)", context.indentPrinterType(), paramErrStream, context.indentPrinterType(),
-        err, System.class, err, indent);
-    spec.addStatement("$T $N = new $T($N == null ? $T.emptyMap() : $N)", context.messagesType(), paramMessages, context.messagesType(), messages, Collections.class, messages);
-    spec.addStatement("$T $N = new $T($N, $N, $N)",
-        paramTokenizer.type, paramTokenizer, paramTokenizer.type, paramOutStream, paramErrStream, paramMessages);
-    spec.addStatement("return $N.parse($N)", paramTokenizer, args);
-
-    return spec.addParameter(args)
+    return spec.addStatement("$T $N = new $T($N == null ? $T.out : $N, $N)", context.indentPrinterType(), paramErrStream, context.indentPrinterType(),
+        err, System.class, err, indent)
+        .addStatement("$T $N = new $T($N == null ? $T.emptyMap() : $N)", context.messagesType(), paramMessages, context.messagesType(), messages, Collections.class, messages)
+        .addStatement("return new $T($N, $N, $N).parse($N)", paramTokenizer.type,
+            paramOutStream, paramErrStream, paramMessages, args)
+        .addParameter(args)
         .addModifiers(context.getAccessModifiers())
         .returns(context.parseResultType())
         .build();

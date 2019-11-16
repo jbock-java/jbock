@@ -6,24 +6,8 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 
 class HelplessArgumentsTest {
-
-  private String[] fullUsage = {
-      "NAME",
-      "    HelplessArguments",
-      "",
-      "SYNOPSIS",
-      "    HelplessArguments [OPTIONS...] <REQUIRED>",
-      "",
-      "DESCRIPTION",
-      "",
-      "REQUIRED",
-      "",
-      "OPTIONS",
-      "    --help",
-      ""};
 
   @Test
   void success0() {
@@ -57,7 +41,6 @@ class HelplessArgumentsTest {
     TestOutputStream out = new TestOutputStream();
     HelplessArguments_Parser.create().withErrorStream(out.out).parse(new String[]{});
     String message = out.toString();
-    assertTrue(message.contains(String.join("\n", fullUsage)));
     assertTrue(message.contains("Missing parameter: <REQUIRED>"));
   }
 
@@ -66,7 +49,6 @@ class HelplessArgumentsTest {
     TestOutputStream out = new TestOutputStream();
     HelplessArguments_Parser.create().withErrorStream(out.out).parse(new String[]{"-p"});
     String message = out.toString();
-    assertTrue(message.contains(String.join("\n", fullUsage)));
     assertTrue(message.contains("Invalid option: -p"));
   }
 }

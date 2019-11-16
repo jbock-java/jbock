@@ -157,7 +157,7 @@ public final class Context {
   }
 
   public Optional<ClassName> helpPrintedType() {
-    return helpParameterEnabled ? Optional.of(generatedClass.nestedClass("HelpPrinted")) : Optional.empty();
+    return helpParameterEnabled ? Optional.of(generatedClass.nestedClass("HelpRequested")) : Optional.empty();
   }
 
   public TypeName sourceElement() {

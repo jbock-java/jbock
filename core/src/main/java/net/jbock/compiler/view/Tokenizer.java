@@ -1,5 +1,6 @@
 package net.jbock.compiler.view;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
@@ -71,12 +72,14 @@ final class Tokenizer {
         .addMethod(parseMethod())
         .addMethod(parseMethodOverloadIterator())
         .addMethod(privateConstructor())
-        .addMethod(printUsageMethod())
         .addMethod(synopsisMethod())
         .addMethod(printDescriptionMethod())
         .addField(err)
         .addField(out)
         .addField(messages);
+    context.helpPrintedType()
+        .map(this::printUsageMethod)
+        .ifPresent(spec::addMethod);
     return spec.build();
   }
 
@@ -112,8 +115,9 @@ final class Tokenizer {
         .build();
   }
 
-  private MethodSpec printUsageMethod() {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("printUsage");
+  private MethodSpec printUsageMethod(ClassName helpRequestedType) {
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("printUsage")
+        .returns(context.parseResultType());
 
     // Program Name
     spec.addStatement("$N.println($S)", out, "NAME");
@@ -182,8 +186,8 @@ final class Tokenizer {
     if (context.isHelpParameterEnabled()) {
       describeHelpParameter(spec);
     }
-
-    return spec.build();
+    return spec.addStatement("return new $T()", helpRequestedType)
+        .build();
   }
 
   private void describeHelpParameter(MethodSpec.Builder spec) {
@@ -291,7 +295,6 @@ final class Tokenizer {
       spec.addStatement("$N.println($S)", err, "Try '--help' for more information.");
       spec.addStatement("$N.println()", err);
     } else {
-      spec.addStatement("printUsage()");
       spec.addStatement("$N.println($N.getMessage())", err, e);
     }
     spec.addStatement("return new $T($N.getMessage())", context.parsingFailedType(), e);
