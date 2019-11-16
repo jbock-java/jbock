@@ -103,14 +103,10 @@ public @interface Parameter {
 
 
   /**
-   * <p>This key is used to find the parameter description in the resource bundle.</p>
-   *
-   * <p>The builder object that's returned by the
-   * generated {@code parse} method can be used
-   * to define the resource bundle at runtime.</p>
-   *
-   * <p>If no bundle key is defined, or no bundle is used,
-   * then the parameter method's javadoc is used as the description.</p>
+   * The key that is used to find the parameter
+   * description in the resource bundle.
+   * If no bundle key is defined, or no bundle is used at runtime,
+   * then the parameter method's javadoc is used as the description.
    *
    * @return an optional resource bundle key
    */
