@@ -6,12 +6,8 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * <p>Marker annotation for non-positional parameters.</p>
- *
- * <ul>
- * <li>The annotated method must be abstract and have an empty argument list.</li>
- * <li>The annotated method may not carry the {@link PositionalParameter} annotation.</li>
- * </ul>
+ * Marker annotation for non-positional parameters.
+ * The annotated method must be abstract and have an empty argument list.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
@@ -54,20 +50,12 @@ public @interface Parameter {
   String descriptionArgumentName() default "";
 
   /**
-   * <p>Declare a custom mapper for this parameter.</p>
-   *
-   * <p>
-   * The mapper is a either a {@link java.util.function.Function Function&lt;String, X&gt;}
-   * or a {@link java.util.function.Supplier Supplier} that returns such a function.
-   * The return value {@code X} is called the <em>mapper type</em>.
-   * The parameter method must return {@code X}, or {@code Optional<X>} for an
-   * optional parameter. If the parameter method returns {@code List<X>},
-   * then the parameter is treated as repeatable, even if no
-   * {@link #collectedBy() Collector} is defined.
+   * <p>Declare a custom mapper for this parameter.
+   * This is either a {@link java.util.function.Function Function&lt;String, X&gt;}
+   * or a {@link java.util.function.Supplier Supplier} of such a function.
    * </p>
    *
-   * <p>
-   * For example, the following mapper parses a positive number:
+   * <p>For example, the following mapper parses a positive number:
    * </p>
    *
    * <pre>{@code
@@ -88,18 +76,16 @@ public @interface Parameter {
   Class<?> mappedBy() default Object.class;
 
   /**
-   * <p>Declare a custom collected for this <em>repeatable</em> parameter.</p>
+   * <p>Declare a custom collector for a <em>repeatable</em> parameter.</p>
    *
-   * <p>
-   * This is either a {@link java.util.stream.Collector Collector&lt;M, ?, X&gt;}
+   * <p>This is either a {@link java.util.stream.Collector Collector&lt;M, ?, X&gt;}
    * where {@code X} is the parameter type and {@code M} is the <em>mapper type</em>,
    * or a {@link java.util.function.Supplier Supplier} that returns such a collector.
    * </p>
    *
    * <p>Parameters with a custom collector are always treated as repeatable.</p>
    *
-   * <p>
-   * For example, the following collector creates a {@code Set}:
+   * <p>For example, the following collector creates a {@code Set}:
    * </p>
    *
    * <pre>{@code
