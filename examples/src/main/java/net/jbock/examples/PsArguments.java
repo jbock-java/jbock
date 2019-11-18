@@ -8,15 +8,12 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class PsArguments {
 
-  @Parameter(longName = "all", shortName = 'a')
+  @Parameter(value = "all", mnemonic = 'a')
   abstract boolean all();
 
   /**
    * This is the description.
    */
-  @Parameter(
-      longName = "width",
-      shortName = 'w',
-      descriptionArgumentName = "number")
+  @Parameter(value = "width", mnemonic = 'w')
   abstract Optional<Integer> width();
 }

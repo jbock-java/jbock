@@ -10,18 +10,18 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class NoNameArguments {
 
-  @Parameter(longName = "message")
+  @Parameter(value = "message")
   abstract Optional<String> message();
 
-  @Parameter(longName = "file")
+  @Parameter(value = "file")
   abstract List<String> file();
 
-  @Parameter(shortName = 'v', longName = "verbosity")
+  @Parameter(mnemonic = 'v', value = "verbosity")
   abstract Optional<Integer> verbosity();
 
-  @Parameter(shortName = 'n', longName = "number")
+  @Parameter(mnemonic = 'n', value = "number")
   abstract int number();
 
-  @Parameter(longName = "cmos")
+  @Parameter(value = "cmos")
   abstract boolean cmos();
 }

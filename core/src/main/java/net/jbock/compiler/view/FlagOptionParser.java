@@ -45,7 +45,7 @@ final class FlagOptionParser {
   private static MethodSpec readMethod(Context context, FieldSpec flag) {
     FieldSpec option = FieldSpec.builder(context.optionType(), "option").build();
     ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(Constants.ITERATOR_OF_STRING, "it").build();
+    ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it));
 

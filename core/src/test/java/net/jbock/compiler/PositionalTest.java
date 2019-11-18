@@ -17,7 +17,7 @@ class PositionalTest {
         "@CommandLineArguments",
         "abstract class Arguments {",
         "",
-        "  @PositionalParameter",
+        "  @PositionalParameter(value = 1)",
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -30,7 +30,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter abstract Optional<Integer> a();",
+        "  @PositionalParameter(value = 1) abstract Optional<Integer> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -42,23 +42,10 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter(position = -1) abstract Optional<String> a();",
-        "  @PositionalParameter(position = 10) abstract Optional<Integer> b();",
-        "  @PositionalParameter(position = 100) abstract Optional<String> c();",
-        "  @PositionalParameter(position = 1000) abstract Optional<Integer> d();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void positionalAutomaticPosition() {
-    JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
-        "abstract class Arguments {",
-        "  @PositionalParameter abstract String a();",
-        "  @PositionalParameter(position = 1) abstract Optional<Integer> b();",
+        "  @PositionalParameter(value = -1) abstract Optional<String> a();",
+        "  @PositionalParameter(value = 10) abstract Optional<Integer> b();",
+        "  @PositionalParameter(value = 100) abstract Optional<String> c();",
+        "  @PositionalParameter(value = 1000) abstract Optional<Integer> d();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -70,8 +57,8 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter abstract int a();",
-        "  @PositionalParameter abstract int b();",
+        "  @PositionalParameter(value = 1) abstract int a();",
+        "  @PositionalParameter(value = 1) abstract int b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -80,13 +67,13 @@ class PositionalTest {
   }
 
   @Test
-  void positionalNonzeroNoInfer() {
+  void positionalConflict2() {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter abstract String a();",
-        "  @PositionalParameter abstract OptionalInt b();",
-        "  @PositionalParameter(position = 1) abstract Optional<String> c();",
+        "  @PositionalParameter(value = 1) abstract String a();",
+        "  @PositionalParameter(value = 1) abstract OptionalInt b();",
+        "  @PositionalParameter(value = 2) abstract Optional<String> c();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -100,34 +87,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter abstract StringBuilder a();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Unknown parameter type.");
-  }
-
-
-  @Test
-  void invalidPositionalBooleanObject() {
-    JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
-        "abstract class Arguments {",
-        "  @PositionalParameter abstract Boolean a();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Unknown parameter type.");
-  }
-
-  @Test
-  void invalidPositionalBooleanPrimitive() {
-    JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
-        "abstract class Arguments {",
-        "  @PositionalParameter abstract boolean a();",
+        "  @PositionalParameter(value = 1) abstract StringBuilder a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -140,9 +100,9 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter abstract String b();",
-        "  @PositionalParameter(position = 1) abstract Optional<String> c();",
-        "  @PositionalParameter(position = 2) abstract List<String> a();",
+        "  @PositionalParameter(value = 1) abstract String b();",
+        "  @PositionalParameter(value = 2) abstract Optional<String> c();",
+        "  @PositionalParameter(value = 3) abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -154,8 +114,8 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter(position = 1) abstract List<String> a();",
-        "  @PositionalParameter(position = 2) abstract List<String> b();",
+        "  @PositionalParameter(value = 1) abstract List<String> a();",
+        "  @PositionalParameter(value = 2) abstract List<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -168,7 +128,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter abstract List<String> a();",
+        "  @PositionalParameter(value = 1) abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -180,8 +140,8 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter(position = 0) abstract Optional<String> a();",
-        "  @PositionalParameter(position = 1) abstract String b();",
+        "  @PositionalParameter(value = 0) abstract Optional<String> a();",
+        "  @PositionalParameter(value = 1) abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -194,8 +154,8 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter(position = 0) abstract List<String> a();",
-        "  @PositionalParameter(position = 1) abstract Optional<String> b();",
+        "  @PositionalParameter(value = 0) abstract List<String> a();",
+        "  @PositionalParameter(value = 1) abstract Optional<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -208,8 +168,8 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter(position = 0) abstract List<String> a();",
-        "  @PositionalParameter(position = 1) abstract String b();",
+        "  @PositionalParameter(value = 0) abstract List<String> a();",
+        "  @PositionalParameter(value = 1) abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -222,7 +182,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter abstract Optional<Integer> a();",
+        "  @PositionalParameter(value = 1) abstract Optional<Integer> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())

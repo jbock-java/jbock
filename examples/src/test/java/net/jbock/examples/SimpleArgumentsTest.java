@@ -12,8 +12,8 @@ class SimpleArgumentsTest {
 
   @Test
   void invalidOptions() {
-    f.assertThat("xf", "1").failsWithUsageMessage("Invalid option: xf");
-    f.assertThat("-xf", "1").failsWithUsageMessage("Invalid option: -xf");
+    f.assertThat("xf", "1").failsWithMessage("Invalid option: xf");
+    f.assertThat("-xf", "1").failsWithMessage("Invalid option: -xf");
   }
 
   @Test
@@ -23,37 +23,15 @@ class SimpleArgumentsTest {
 
   @Test
   void errorHelpNotFirstArgument() {
-    f.assertThat("--file", "1", "--help").failsWithLines(
-        "Usage:",
-        "  SimpleArguments [OPTIONS...]",
-        "",
-        "Error:",
-        "  Invalid option: --help",
-        "",
-        "Try '--help' for more information.",
-        "",
-        "");
+    f.assertThat("--file", "1", "--help").failsWithMessage("Invalid option: --help");
   }
 
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  SimpleArguments",
-        "",
-        "SYNOPSIS",
-        "  SimpleArguments [OPTIONS...]",
-        "",
-        "DESCRIPTION",
-        "",
-        "OPTIONS",
-        "  -x",
-        "",
-        "  --file <file>",
-        "",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: simple-arguments [options...]",
+        "-x, --x",
+        "    --file FILE",
         "");
   }
 }

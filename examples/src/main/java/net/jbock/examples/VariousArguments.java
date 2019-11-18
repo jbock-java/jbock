@@ -8,13 +8,8 @@ import java.io.File;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.net.URI;
-import java.nio.charset.Charset;
 import java.nio.file.Path;
-import java.time.Instant;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.OffsetDateTime;
-import java.time.ZonedDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
@@ -22,84 +17,84 @@ import java.util.regex.Pattern;
 @CommandLineArguments
 abstract class VariousArguments {
 
-  @Parameter(longName = "bigDecimal")
+  @Parameter(value = "bigDecimal")
   abstract BigDecimal bigDecimal();
 
-  @Parameter(longName = "bigDecimalList")
+  @Parameter(value = "bigDecimalList")
   abstract List<BigDecimal> bigDecimalList();
 
-  @Parameter(longName = "bigDecimalOpt")
+  @Parameter(value = "bigDecimalOpt")
   abstract Optional<BigDecimal> bigDecimalOpt();
 
-  @PositionalParameter
+  @PositionalParameter(value = 1)
   abstract Optional<BigDecimal> bigDecimalPos();
 
-  @Parameter(longName = "bigInteger")
+  @Parameter(value = "bigInteger")
   abstract BigInteger bigInteger();
 
-  @Parameter(longName = "bigIntegerList")
+  @Parameter(value = "bigIntegerList")
   abstract List<BigInteger> bigIntegerList();
 
-  @Parameter(longName = "bigIntegerOpt")
+  @Parameter(value = "bigIntegerOpt")
   abstract Optional<BigInteger> bigIntegerOpt();
 
-  @PositionalParameter(position = 1)
+  @PositionalParameter(value = 2)
   abstract Optional<BigInteger> bigIntegerPos();
 
-  @Parameter(longName = "fileList")
+  @Parameter(value = "fileList")
   abstract List<File> fileList();
 
-  @Parameter(longName = "fileOpt")
+  @Parameter(value = "fileOpt")
   abstract Optional<File> fileOpt();
 
-  @PositionalParameter(position = 2)
+  @PositionalParameter(value = 3)
   abstract Optional<File> filePos();
 
-  @Parameter(longName = "path")
+  @Parameter(value = "path")
   abstract Path path();
 
-  @Parameter(longName = "pathList")
+  @Parameter(value = "pathList")
   abstract List<Path> pathList();
 
-  @Parameter(longName = "pathOpt")
+  @Parameter(value = "pathOpt")
   abstract Optional<Path> pathOpt();
 
-  @PositionalParameter(position = 3)
+  @PositionalParameter(value = 4)
   abstract Optional<Path> pathPos();
 
-  @Parameter(longName = "localDate")
+  @Parameter(value = "localDate")
   abstract LocalDate localDate();
 
-  @Parameter(longName = "localDateList")
+  @Parameter(value = "localDateList")
   abstract List<LocalDate> localDateList();
 
-  @Parameter(longName = "localDateOpt")
+  @Parameter(value = "localDateOpt")
   abstract Optional<LocalDate> localDateOpt();
 
-  @PositionalParameter(position = 4)
+  @PositionalParameter(value = 5)
   abstract Optional<LocalDate> localDatePos();
 
-  @Parameter(longName = "uri")
+  @Parameter(value = "uri")
   abstract URI uri();
 
-  @Parameter(longName = "uriList")
+  @Parameter(value = "uriList")
   abstract List<URI> uriList();
 
-  @Parameter(longName = "uriOpt")
+  @Parameter(value = "uriOpt")
   abstract Optional<URI> uriOpt();
 
-  @PositionalParameter(position = 8)
+  @PositionalParameter(value = 8)
   abstract Optional<URI> uriPos();
 
-  @Parameter(longName = "pattern")
+  @Parameter(value = "pattern")
   abstract Pattern pattern();
 
-  @Parameter(longName = "patternList")
+  @Parameter(value = "patternList")
   abstract List<Pattern> patternList();
 
-  @Parameter(longName = "patternOpt")
+  @Parameter(value = "patternOpt")
   abstract Optional<Pattern> patternOpt();
 
-  @PositionalParameter(position = 10)
+  @PositionalParameter(value = 10)
   abstract Optional<Pattern> patternPos();
 }

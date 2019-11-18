@@ -158,88 +158,62 @@ class CurlArgumentsTest {
 
   @Test
   void errorInvalidGrouping() {
-    f.assertThat("-vH1").failsWithUsageMessage("Invalid option: -vH1");
+    f.assertThat("-vH1").failsWithMessage("Invalid option: -vH1");
   }
 
   @Test
   void errorInvalidGroupingLong() {
-    f.assertThat("-vXPOST").failsWithUsageMessage("Invalid option: -vXPOST");
+    f.assertThat("-vXPOST").failsWithMessage("Invalid option: -vXPOST");
   }
 
   @Test
   void errorGroupingDuplicateFlag() {
-    f.assertThat("-v", "-vH'Content-Type: application/xml'").failsWithUsageMessage(
+    f.assertThat("-v", "-vH'Content-Type: application/xml'").failsWithMessage(
         "Invalid option: -vH'Content-Type: application/xml'");
   }
 
   @Test
   void errorMissingRepeatable() {
-    f.assertThat("-H").failsWithUsageMessage("Missing value after token: -H");
+    f.assertThat("-H").failsWithMessage("Missing value after token: -H");
   }
 
   @Test
   void errorMissingNonRepeatable() {
-    f.assertThat("--request").failsWithUsageMessage("Missing value after token: --request");
+    f.assertThat("--request").failsWithMessage("Missing value after token: --request");
   }
 
   @Test
   void errorDuplicateNonRepeatableLong() {
-    f.assertThat("--request", "GET", "--request", "POST").failsWithUsageMessage(
+    f.assertThat("--request", "GET", "--request", "POST").failsWithMessage(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   void errorDuplicateNonRepeatableShort() {
-    f.assertThat("-X1", "-X2").failsWithUsageMessage("Option METHOD (-X, --request) is not repeatable");
+    f.assertThat("-X1", "-X2").failsWithMessage("Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   void errorDuplicateNonRepeatableLongDetachedShortAttached() {
-    f.assertThat("--request", "1", "-X2").failsWithUsageMessage(
+    f.assertThat("--request", "1", "-X2").failsWithMessage(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   void errorDuplicateNonRepeatableLongAttachedShortDetached() {
-    f.assertThat("--request=1", "-X", "2").failsWithUsageMessage(
+    f.assertThat("--request=1", "-X", "2").failsWithMessage(
         "Option METHOD (-X, --request) is not repeatable");
   }
 
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  curl - transfer a URL",
-        "",
-        "SYNOPSIS",
-        "  curl [OPTIONS...] [<urls>...]",
-        "",
-        "DESCRIPTION",
-        "  curl  is  a  tool  to  transfer data from or to a server",
-        "  using one of the supported protocols.",
-        "",
-        "  curl offers a busload of useful tricks.",
-        "",
-        "  curl is powered by libcurl for all transfer-related features.",
-        "  See libcurl(3) for details.",
-        "",
-        "URLS",
-        "",
-        "OPTIONS",
-        "  -X <method>, --request <method>",
-        "    Optional<String> for regular arguments",
-        "",
-        "  -H <headers...>",
-        "    List<String> for repeatable arguments",
-        "",
-        "  -v, --verbose",
-        "    boolean for flags",
-        "",
-        "  -i, --include",
-        "",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: curl [options...] <urls>...",
+        "urls",
+        "-X, --request METHOD  Optional<String> for regular arguments",
+        "-H, --H <headers...>  List<String> for repeatable arguments",
+        "-v, --verbose         boolean for flags",
+        "-i, --include",
         "");
   }
 }

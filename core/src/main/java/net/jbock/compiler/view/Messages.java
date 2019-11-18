@@ -4,7 +4,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 
 import java.util.Arrays;
@@ -16,6 +15,8 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
+import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
 
 /**
@@ -47,35 +48,17 @@ final class Messages {
         .addFields(asList(br, resourceBundle))
         .addMethod(privateConstructor())
         .addMethod(getMessageMethod())
-        .addMethod(getMessageMethodList())
         .addModifiers(PRIVATE, STATIC).build();
   }
 
-  private MethodSpec getMessageMethodList() {
-    ParameterSpec defaultValue = ParameterSpec.builder(Constants.LIST_OF_STRING, "defaultValue").build();
-    ParameterSpec key = ParameterSpec.builder(String.class, "key").build();
-    MethodSpec.Builder spec = methodBuilder("getMessage");
-    spec.beginControlFlow("if (!$N.containsKey($N))", resourceBundle, key)
-        .addStatement("return $N", defaultValue)
-        .endControlFlow();
-    spec.addStatement("return $T.asList($N.split($N.get($N), -1))", Arrays.class, br, resourceBundle, key);
-    return spec.addParameter(key)
-        .addParameter(defaultValue)
-        .returns(Constants.LIST_OF_STRING)
-        .build();
-  }
-
   private MethodSpec getMessageMethod() {
-    ParameterSpec defaultValue = ParameterSpec.builder(Constants.STRING, "defaultValue").build();
     ParameterSpec key = ParameterSpec.builder(String.class, "key").build();
-    MethodSpec.Builder spec = methodBuilder("getMessage");
-    spec.beginControlFlow("if ($N == null)", key)
-        .addStatement("return $N", defaultValue)
-        .endControlFlow();
-    return spec.addStatement("return $N.getOrDefault($N, $N)", resourceBundle, key, defaultValue)
-        .addParameter(key)
-        .addParameter(defaultValue)
-        .returns(Constants.STRING)
+    ParameterSpec defaultValue = ParameterSpec.builder(LIST_OF_STRING, "defaultValue").build();
+    return methodBuilder("getMessage")
+        .addStatement("return $N.getOrDefault($N, $T.join($S, $N))",
+            resourceBundle, key, String.class, " ", defaultValue)
+        .addParameters(Arrays.asList(key, defaultValue))
+        .returns(STRING)
         .build();
   }
 

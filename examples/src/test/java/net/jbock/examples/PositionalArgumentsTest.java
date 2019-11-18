@@ -15,9 +15,9 @@ class PositionalArgumentsTest {
 
   @Test
   void errorMissingParameters() {
-    f.assertThat().failsWithUsageMessage("Missing parameter: <SOURCE>");
-    f.assertThat("a").failsWithUsageMessage("Missing parameter: <DEST>");
-    f.assertThat("a", "b").failsWithUsageMessage("Missing parameter: <ANOTHER_INT>");
+    f.assertThat().failsWithMessage("Missing parameter: <SOURCE>");
+    f.assertThat("a").failsWithMessage("Missing parameter: <DEST>");
+    f.assertThat("a", "b").failsWithMessage("Missing parameter: <ANOTHER_INT>");
   }
 
   @Test
@@ -93,29 +93,13 @@ class PositionalArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  PositionalArguments",
-        "",
-        "SYNOPSIS",
-        "  PositionalArguments <SOURCE> <DESTINATION> <ANOTHER_INT> [<opt_string>] [<other_tokens>...]",
-        "",
-        "DESCRIPTION",
-        "",
-        "SOURCE",
-        "",
-        "DESTINATION",
-        "  Desc of dest.",
-        "",
-        "ANOTHER_INT",
-        "",
-        "OPT_STRING",
-        "",
-        "OTHER_TOKENS",
-        "",
-        "OPTIONS",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: positional-arguments <source> <dest> <another_int> [<opt_string>]",
+        "        <other_tokens>...",
+        "source",
+        "dest          Desc of dest.",
+        "another_int",
+        "opt_string",
+        "other_tokens",
         "");
   }
 }

@@ -57,39 +57,23 @@ class NoNameArgumentsTest {
 
   @Test
   void errorMissingInt() {
-    f.assertThat("--cmos").failsWithUsageMessage("Missing required option: NUMBER (-n, --number)");
+    f.assertThat("--cmos").failsWithMessage("Missing required option: NUMBER (-n, --number)");
   }
 
   @Test
   void errorUnknownToken() {
-    f.assertThat("blabla").failsWithUsageMessage("Invalid option: blabla");
+    f.assertThat("blabla").failsWithMessage("Invalid option: blabla");
   }
 
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  NoNameArguments",
-        "",
-        "SYNOPSIS",
-        "  NoNameArguments [OPTIONS...] -n <NUMBER>",
-        "",
-        "DESCRIPTION",
-        "",
-        "OPTIONS",
-        "  --message <message>",
-        "",
-        "  --file <file...>",
-        "",
-        "  -v <verbosity>, --verbosity <verbosity>",
-        "",
-        "  -n <NUMBER>, --number <NUMBER>",
-        "",
-        "  --cmos",
-        "",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: no-name-arguments [options...] -n <number>",
+        "    --message MESSAGE",
+        "    --file <file...>",
+        "-v, --verbosity VERBOSITY",
+        "-n, --number NUMBER",
+        "    --cmos",
         "");
   }
 

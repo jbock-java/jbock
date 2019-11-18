@@ -18,20 +18,8 @@ class GradleArgumentsFooTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  GradleArguments",
-        "",
-        "SYNOPSIS",
-        "  GradleArguments [OPTIONS...]",
-        "",
-        "DESCRIPTION",
-        "",
-        "OPTIONS",
-        "  --bar <bar>",
-        "",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: foo [options...]",
+        "    --bar BAR",
         "");
   }
 }

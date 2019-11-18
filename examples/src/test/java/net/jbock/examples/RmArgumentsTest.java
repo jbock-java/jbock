@@ -21,24 +21,16 @@ class RmArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  RmArguments",
-        "",
-        "SYNOPSIS",
-        "  RmArguments [OPTIONS...] [<other_tokens>...]",
-        "",
-        "DESCRIPTION",
-        "",
-        "OTHER_TOKENS",
-        "",
-        "OPTIONS",
-        "  -r",
-        "",
-        "  -f",
-        "",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: rm-arguments [options...] <other_tokens>...",
+        "other_tokens     This is a list that may be empty.",
+        "-r, --recursive  ALLES TURISTEN UND NONTEKNISCHEN LOOKENSPEEPERS! DAS",
+        "                 KOMPUTERMASCHINE IST NICHT FUR DER GEFINGERPOKEN UND",
+        "                 MITTENGRABEN! ODERWISE IST EASY TO SCHNAPPEN DER SPRINGENWERK,",
+        "                 BLOWENFUSEN UND POPPENCORKEN MIT SPITZENSPARKEN. IST NICHT FUR",
+        "                 GEWERKEN BEI DUMMKOPFEN. DER RUBBERNECKEN SIGHTSEEREN KEEPEN",
+        "                 DAS COTTONPICKEN HANDER IN DAS POCKETS MUSS. ZO RELAXEN UND",
+        "                 WATSCHEN DER BLINKENLICHTEN.",
+        "-f, --force      Use the force, Luke.",
         "");
   }
 }

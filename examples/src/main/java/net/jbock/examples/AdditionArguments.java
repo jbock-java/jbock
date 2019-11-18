@@ -12,19 +12,19 @@ abstract class AdditionArguments {
   /**
    * First argument
    */
-  @PositionalParameter
+  @PositionalParameter(value = 1)
   abstract int a();
 
   /**
    * Second argument
    */
-  @PositionalParameter(position = 1)
+  @PositionalParameter(value = 2)
   abstract int b();
 
   /**
    * Optional third argument
    */
-  @PositionalParameter(position = 2)
+  @PositionalParameter(value = 3)
   abstract Optional<Integer> c();
 
   final int sum() {

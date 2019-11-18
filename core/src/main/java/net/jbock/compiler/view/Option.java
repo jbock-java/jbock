@@ -18,13 +18,14 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.StringJoiner;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
+import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static java.util.Arrays.asList;
@@ -52,8 +53,6 @@ final class Option {
 
   private final FieldSpec descriptionField;
 
-  private final FieldSpec argumentNameField;
-
   private final FieldSpec namesField;
 
   private final FieldSpec bundleKeyField;
@@ -71,7 +70,6 @@ final class Option {
       FieldSpec bundleKeyField,
       FieldSpec positionalIndexField,
       FieldSpec descriptionField,
-      FieldSpec argumentNameField,
       FieldSpec namesField,
       MethodSpec exampleMethod,
       MethodSpec optionNamesMethod,
@@ -81,7 +79,6 @@ final class Option {
     this.positionalIndexField = positionalIndexField;
     this.exampleMethod = exampleMethod;
     this.descriptionField = descriptionField;
-    this.argumentNameField = argumentNameField;
     this.bundleKeyField = bundleKeyField;
     this.context = context;
     this.optionNamesMethod = optionNamesMethod;
@@ -100,8 +97,7 @@ final class Option {
     MethodSpec optionNamesMethod = optionNamesMethod(context.optionType(), namesField);
     MethodSpec parsersMethod = parsersMethod(parsersType, context);
     MethodSpec positionalParsersMethod = positionalParsersMethod(positionalParsersType, context);
-    FieldSpec argumentNameField = FieldSpec.builder(STRING, "descriptionArgumentName").addModifiers(FINAL).build();
-    MethodSpec exampleMethod = exampleMethod(namesField, argumentNameField);
+    MethodSpec exampleMethod = exampleMethod(namesField);
     FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").addModifiers(FINAL).build();
 
     MethodSpec describeParamMethod = describeParamMethod(namesField);
@@ -111,7 +107,6 @@ final class Option {
         bundleKeyField,
         positionalIndexField,
         descriptionField,
-        argumentNameField,
         namesField,
         exampleMethod,
         optionNamesMethod,
@@ -131,7 +126,6 @@ final class Option {
         .addField(namesField)
         .addField(bundleKeyField)
         .addField(positionalIndexField)
-        .addField(argumentNameField)
         .addField(descriptionField)
         .addMethod(describeParamMethod)
         .addMethod(exampleMethod)
@@ -151,7 +145,6 @@ final class Option {
 
   private TypeSpec optionEnumConstant(Param param) {
     List<String> desc = param.description();
-    String argumentName = param.descriptionArgumentName();
     Map<String, Object> map = new LinkedHashMap<>();
     CodeBlock names = getNames(param);
     map.put("names", names);
@@ -159,13 +152,11 @@ final class Option {
     map.put("positionalIndex", param.positionalIndex().isPresent() ?
         CodeBlock.of("$T.of($L)", OptionalInt.class, param.positionalIndex().getAsInt()) :
         CodeBlock.of("$T.empty()", OptionalInt.class));
-    map.put("argumentName", argumentName);
     map.put("descExpression", descExpression(desc));
     String format = String.join(", ",
         "$names:L",
         "$bundleKey:S",
         "$positionalIndex:L",
-        "$argumentName:S",
         "$descExpression:L");
 
     CodeBlock block = CodeBlock.builder().addNamed(format, map).build();
@@ -209,14 +200,14 @@ final class Option {
   private MethodSpec describeMethodRepeatableOverride() {
     return MethodSpec.methodBuilder("describe")
         .returns(STRING)
-        .addStatement("return describeParam($T.format($S, $N))", String.class, " <%s...>", argumentNameField)
+        .addStatement("return describeParam($T.format($S, name().toLowerCase($T.US)))", String.class, " <%s...>", Locale.class)
         .build();
   }
 
   private MethodSpec describeMethodPositionalOverride() {
     return MethodSpec.methodBuilder("describe")
         .returns(STRING)
-        .addStatement("return $N", argumentNameField)
+        .addStatement("return name().toLowerCase($T.US)", Locale.class)
         .addAnnotation(Override.class)
         .build();
   }
@@ -265,10 +256,10 @@ final class Option {
   private static MethodSpec optionNamesMethod(
       ClassName optionType,
       FieldSpec namesField) {
-    ParameterSpec result = ParameterSpec.builder(ParameterizedTypeName.get(
+    ParameterSpec result = builder(ParameterizedTypeName.get(
         ClassName.get(Map.class), STRING, optionType), "result").build();
-    ParameterSpec option = ParameterSpec.builder(optionType, "option").build();
-    ParameterSpec name = ParameterSpec.builder(STRING, "name").build();
+    ParameterSpec option = builder(optionType, "option").build();
+    ParameterSpec name = builder(STRING, "name").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("optionNames");
     spec.addStatement("$T $N = new $T<>($T.values().length)",
         result.type, result, HashMap.class, option.type);
@@ -292,32 +283,26 @@ final class Option {
   }
 
   private static MethodSpec describeParamMethod(FieldSpec namesField) {
-
-    ParameterSpec argname = ParameterSpec.builder(STRING, "argname").build();
-
-    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
-    ParameterSpec name = ParameterSpec.builder(STRING, "name").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("describeParam")
-        .addStatement("$T $N = new $T($S)", joiner.type, joiner, joiner.type, ", ");
-
-    spec.beginControlFlow("for ($T $N : $N)", STRING, name, namesField)
-        .addStatement("$N.add($N + $N)", joiner, name, argname)
-        .endControlFlow();
-
-    return spec.addParameter(argname)
+    ParameterSpec argname = builder(STRING, "argname").build();
+    return MethodSpec.methodBuilder("describeParam")
+        .addParameter(argname)
         .returns(STRING)
-        .addStatement("return $N.toString()", joiner)
+        .beginControlFlow("if (names.size() == 1)", namesField)
+        .addStatement("return $S + $N.get(0) + $N",
+            "    ", namesField, argname)
+        .endControlFlow()
+        .addStatement("return $N.get(0) + $S + $N.get(1) + $N",
+            namesField, ", ", namesField, argname)
         .build();
   }
 
   private static MethodSpec exampleMethod(
-      FieldSpec namesField,
-      FieldSpec argumentNameField) {
+      FieldSpec namesField) {
 
     return MethodSpec.methodBuilder("example")
         .returns(STRING)
-        .addStatement("return $T.format($S, $N.get(0), $N)",
-            String.class, "%s <%s>", namesField, argumentNameField)
+        .addStatement("return $T.format($S, $N.get(0), name().toLowerCase($T.US))",
+            String.class, "%s <%s>", namesField, Locale.class)
         .build();
   }
 
@@ -325,9 +310,9 @@ final class Option {
   private static MethodSpec parsersMethod(
       TypeName parsersType,
       Context context) {
-    ParameterSpec parsers = ParameterSpec.builder(parsersType, "parsers")
+    ParameterSpec parsers = builder(parsersType, "parsers")
         .build();
-    ParameterSpec option = ParameterSpec.builder(context.optionType(), "option").build();
+    ParameterSpec option = builder(context.optionType(), "option").build();
 
     CodeBlock.Builder builder = CodeBlock.builder();
     builder.addStatement("$T $N = new $T<>($T.class)",
@@ -354,9 +339,9 @@ final class Option {
   private static MethodSpec positionalParsersMethod(
       TypeName positionalParsersType,
       Context context) {
-    ParameterSpec parsers = ParameterSpec.builder(positionalParsersType, "parsers")
+    ParameterSpec parsers = builder(positionalParsersType, "parsers")
         .build();
-    ParameterSpec option = ParameterSpec.builder(context.optionType(), "option").build();
+    ParameterSpec option = builder(context.optionType(), "option").build();
 
     CodeBlock.Builder builder = CodeBlock.builder();
     builder.addStatement("$T $N = new $T<>()",
@@ -382,7 +367,7 @@ final class Option {
 
   private MethodSpec positionalValuesMethod() {
 
-    ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional").build();
+    ParameterSpec positionalParameter = builder(LIST_OF_STRING, "positional").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("values");
 
@@ -401,7 +386,7 @@ final class Option {
 
   private MethodSpec positionalValueMethod() {
 
-    ParameterSpec positionalParameter = ParameterSpec.builder(LIST_OF_STRING, "positional").build();
+    ParameterSpec positionalParameter = builder(LIST_OF_STRING, "positional").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("value");
 
@@ -422,7 +407,7 @@ final class Option {
 
   private static MethodSpec validShortTokenMethod() {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("validShortToken");
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec token = builder(STRING, "token").build();
     spec.addParameter(token);
     spec.addStatement("return $N.length() >= 2 && $N.charAt(0) == '-'", token, token);
     spec.returns(BOOLEAN);
@@ -431,7 +416,7 @@ final class Option {
 
   private static Optional<MethodSpec> validShortTokenMethodOverrideFlag(Param param) {
     return param.shortName().map(shortName -> {
-      ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+      ParameterSpec token = builder(STRING, "token").build();
       return MethodSpec.methodBuilder("validShortToken")
           .addParameter(token)
           .addStatement("return $S.equals($N)", shortName, token)
@@ -444,7 +429,7 @@ final class Option {
   private MethodSpec describeMethod() {
     return MethodSpec.methodBuilder("describe")
         .returns(STRING)
-        .addStatement("return describeParam($T.format($S, $N))", String.class, " <%s>", argumentNameField)
+        .addStatement("return describeParam(' ' + name())")
         .build();
   }
 
@@ -463,21 +448,17 @@ final class Option {
   }
 
   private MethodSpec privateConstructor() {
-    ParameterSpec names = ParameterSpec.builder(namesField.type, namesField.name).build();
-    ParameterSpec bundleKey = ParameterSpec.builder(bundleKeyField.type, bundleKeyField.name).build();
-    ParameterSpec positionalIndex = ParameterSpec.builder(positionalIndexField.type, positionalIndexField.name).build();
-    ParameterSpec description = ParameterSpec.builder(descriptionField.type, descriptionField.name).build();
-    ParameterSpec argumentName = ParameterSpec.builder(argumentNameField.type, argumentNameField.name).build();
-    MethodSpec.Builder spec = MethodSpec.constructorBuilder()
+    ParameterSpec names = builder(namesField.type, namesField.name).build();
+    ParameterSpec bundleKey = builder(bundleKeyField.type, bundleKeyField.name).build();
+    ParameterSpec positionalIndex = builder(positionalIndexField.type, positionalIndexField.name).build();
+    ParameterSpec description = builder(descriptionField.type, descriptionField.name).build();
+    return MethodSpec.constructorBuilder()
         .addStatement("this.$N = $N", namesField, names)
         .addStatement("this.$N = $N", bundleKeyField, bundleKey)
         .addStatement("this.$N = $N", positionalIndexField, positionalIndex)
         .addStatement("this.$N = $N", descriptionField, description)
-        .addStatement("this.$N = $N", argumentNameField, argumentName);
-
-    spec.addParameters(asList(
-        names, bundleKey, positionalIndex, argumentName, description));
-    return spec.build();
+        .addParameters(asList(names, bundleKey, positionalIndex, description))
+        .build();
   }
 
   private MethodSpec missingRequiredLambdaMethod() {
@@ -487,7 +468,7 @@ final class Option {
     lambda = CodeBlock.builder()
         .add("positionalIndex.isPresent()\n").indent()
         .add("? new $T($T.format($S, this))\n", IllegalArgumentException.class, String.class, ifMessage)
-        .add(": new $T($T.format($S, this, describeParam($S)))", IllegalArgumentException.class, String.class, elseMessage, "")
+        .add(": new $T($T.format($S, this, describeParam($S).trim()))", IllegalArgumentException.class, String.class, elseMessage, "")
         .unindent().build();
     return MethodSpec.methodBuilder("missingRequired")
         .returns(ParameterizedTypeName.get(Supplier.class, IllegalArgumentException.class))

@@ -15,15 +15,15 @@ class CpArgumentsTest {
 
   @Test
   void errorMissingSource() {
-    f.assertThat().failsWithUsageMessage("Missing parameter: <SOURCE>");
-    f.assertThat("-r").failsWithUsageMessage("Missing parameter: <SOURCE>");
+    f.assertThat().failsWithMessage("Missing parameter: <SOURCE>");
+    f.assertThat("-r").failsWithMessage("Missing parameter: <SOURCE>");
   }
 
   @Test
   void errorMissingDest() {
-    f.assertThat("a").failsWithUsageMessage("Missing parameter: <DEST>");
-    f.assertThat("a", "-r").failsWithUsageMessage("Missing parameter: <DEST>");
-    f.assertThat("-r", "a").failsWithUsageMessage("Missing parameter: <DEST>");
+    f.assertThat("a").failsWithMessage("Missing parameter: <DEST>");
+    f.assertThat("a", "-r").failsWithMessage("Missing parameter: <DEST>");
+    f.assertThat("-r", "a").failsWithMessage("Missing parameter: <DEST>");
   }
 
   @Test
@@ -44,17 +44,17 @@ class CpArgumentsTest {
 
   @Test
   void dashNotIgnored() {
-    f.assertThat("-a", "b").failsWithUsageMessage("Invalid option: -a");
+    f.assertThat("-a", "b").failsWithMessage("Invalid option: -a");
   }
 
   @Test
   void tooMany() {
-    f.assertThat("a", "b", "c").failsWithUsageMessage("Invalid option: c");
+    f.assertThat("a", "b", "c").failsWithMessage("Invalid option: c");
   }
 
   @Test
   void tooManyAndFlag() {
-    f.assertThat("-r", "a", "b", "c").failsWithUsageMessage("Invalid option: c");
+    f.assertThat("-r", "a", "b", "c").failsWithMessage("Invalid option: c");
   }
 
   @Test
@@ -88,29 +88,12 @@ class CpArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  CpArguments",
-        "",
-        "SYNOPSIS",
-        "  CpArguments [OPTIONS...] <SOURCE> <DEST>",
-        "",
-        "DESCRIPTION",
-        "",
-        "SOURCE",
-        "",
-        "DEST",
-        "",
-        "OPTIONS",
-        "  -r",
-        "",
-        "  --backup <CONTROL>",
-        "",
-        "  -s <suffix>",
-        "    Override the usual backup suffix",
-        "",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: cp-arguments [options...] <source> <dest>",
+        "source",
+        "dest",
+        "-r, --r",
+        "    --backup BACKUP",
+        "-s, --s SUFFIX       Override the usual backup suffix",
         "");
   }
 }

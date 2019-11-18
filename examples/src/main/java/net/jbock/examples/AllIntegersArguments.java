@@ -10,18 +10,18 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class AllIntegersArguments {
 
-  @PositionalParameter
+  @PositionalParameter(value = 1)
   abstract List<Integer> positional();
 
-  @Parameter(shortName = 'i')
+  @Parameter(value = "i", mnemonic = 'i')
   abstract List<Integer> listOfIntegers();
 
-  @Parameter(longName = "opt")
+  @Parameter(value = "opt")
   abstract Optional<Integer> optionalInteger();
 
-  @Parameter(longName = "obj")
+  @Parameter(value = "obj")
   abstract Integer integer();
 
-  @Parameter(longName = "prim")
+  @Parameter(value = "prim")
   abstract int primitiveInt();
 }

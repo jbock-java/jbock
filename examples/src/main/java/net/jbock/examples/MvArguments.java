@@ -6,9 +6,9 @@ import net.jbock.PositionalParameter;
 @CommandLineArguments
 abstract class MvArguments {
 
-  @PositionalParameter
+  @PositionalParameter(1)
   abstract String source();
 
-  @PositionalParameter(position = 1)
+  @PositionalParameter(2)
   abstract String dest();
 }

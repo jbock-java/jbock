@@ -16,7 +16,7 @@ import static java.util.stream.Collectors.partitioningBy;
 class ParameterMethods {
 
   private static final Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
-      .comparingInt(e -> e.getAnnotation(PositionalParameter.class).position());
+      .comparingInt(e -> e.getAnnotation(PositionalParameter.class).value());
 
   private final List<ExecutableElement> positional;
   private final List<ExecutableElement> options;
@@ -40,7 +40,7 @@ class ParameterMethods {
   private static void checkPositionUnique(List<ExecutableElement> allPositional) {
     Set<Integer> positions = new HashSet<>();
     for (ExecutableElement method : allPositional) {
-      Integer position = method.getAnnotation(PositionalParameter.class).position();
+      Integer position = method.getAnnotation(PositionalParameter.class).value();
       if (!positions.add(position)) {
         throw ValidationException.create(method, "Define a unique position.");
       }

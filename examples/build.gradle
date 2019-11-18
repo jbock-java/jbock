@@ -6,8 +6,12 @@ repositories {
     mavenCentral()
 }
 
+compileJava {
+    options.encoding = 'UTF-8'
+}
+
 dependencies {
-    compileOnly 'com.github.h908714124:jbock-annotations:2.7'
+    compileOnly(project(':annotations'))
     testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0-M1'
     annotationProcessor project(':core')
 }

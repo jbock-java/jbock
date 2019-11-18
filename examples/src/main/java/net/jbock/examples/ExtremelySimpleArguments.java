@@ -6,6 +6,6 @@ import net.jbock.PositionalParameter;
 @CommandLineArguments
 abstract class ExtremelySimpleArguments {
 
-  @PositionalParameter
+  @PositionalParameter(value = 1)
   abstract int hello();
 }

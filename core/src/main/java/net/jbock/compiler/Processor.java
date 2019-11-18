@@ -30,7 +30,6 @@ import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static java.util.Collections.emptyList;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -96,7 +95,6 @@ public final class Processor extends AbstractProcessor {
           sourceElement,
           generatedClass,
           parameters,
-          getOverview(sourceElement),
           isAllowEscape(parameters));
       TypeSpec typeSpec = Parser.create(context).define();
       write(sourceElement, context.generatedClass(), typeSpec);
@@ -183,7 +181,7 @@ public final class Processor extends AbstractProcessor {
       Param param = Param.create(tool, result, method, null, getDescription(method));
       result.add(param);
     }
-    if (sourceElement.getAnnotation(CommandLineArguments.class).allowHelpOption()) {
+    if (!sourceElement.getAnnotation(CommandLineArguments.class).helpDisabled()) {
       checkHelp(result);
     }
     return result;
@@ -198,14 +196,6 @@ public final class Processor extends AbstractProcessor {
     if (!sourceElement.getTypeParameters().isEmpty()) {
       throw ValidationException.create(sourceElement, "The class cannot have type parameters.");
     }
-  }
-
-  private List<String> getOverview(TypeElement sourceType) {
-    String docComment = processingEnv.getElementUtils().getDocComment(sourceType);
-    if (docComment == null) {
-      return emptyList();
-    }
-    return Arrays.asList(tokenizeJavadoc(docComment));
   }
 
   private String[] getDescription(ExecutableElement method) {

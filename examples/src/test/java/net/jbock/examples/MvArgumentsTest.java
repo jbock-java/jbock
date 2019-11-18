@@ -10,23 +10,23 @@ class MvArgumentsTest {
 
   @Test
   void notEnoughArguments() {
-    f.assertThat().failsWithUsageMessage("Missing parameter: <SOURCE>");
-    f.assertThat("a").failsWithUsageMessage("Missing parameter: <DEST>");
+    f.assertThat().failsWithMessage("Missing parameter: <SOURCE>");
+    f.assertThat("a").failsWithMessage("Missing parameter: <DEST>");
   }
 
   @Test
   void invalidOption() {
-    f.assertThat("-aa", "b").failsWithUsageMessage("Invalid option: -aa");
+    f.assertThat("-aa", "b").failsWithMessage("Invalid option: -aa");
   }
 
   @Test
   void excessOption() {
-    f.assertThat("a", "b", "c").failsWithUsageMessage("Invalid option: c");
+    f.assertThat("a", "b", "c").failsWithMessage("Invalid option: c");
   }
 
   @Test
   void invalidOptionEscapeSequenceThird() {
-    f.assertThat("a", "b", "--", "c").failsWithUsageMessage("Invalid option: c");
+    f.assertThat("a", "b", "--", "c").failsWithMessage("Invalid option: c");
   }
 
   @Test
@@ -46,22 +46,9 @@ class MvArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  MvArguments",
-        "",
-        "SYNOPSIS",
-        "  MvArguments <SOURCE> <DEST>",
-        "",
-        "DESCRIPTION",
-        "",
-        "SOURCE",
-        "",
-        "DEST",
-        "",
-        "OPTIONS",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: mv-arguments <source> <dest>",
+        "source",
+        "dest",
         "");
   }
 }

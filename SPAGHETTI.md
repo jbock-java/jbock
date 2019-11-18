@@ -180,8 +180,8 @@ then we have the short and long forms, which are equivalent
 
 ````java
 String[] argv;
-argv = { "--file", "data.txt" }; // two hypens -> long form
-argv = { "-f", "data.txt" }; // one hyphen -> short form
+argv = { "--file", "data.txt" }; // two dashes -> long form
+argv = { "-f", "data.txt" }; // one dash -> short form
 ````
 
 Binding parameters can also be written in *attached* form as follows
@@ -198,8 +198,8 @@ On the other hand, if both names are defined,
 there are only *two* ways to write a <a href="#flags">*flag:*</a>
 
 ````java
-argv = { "--quiet" }; // two hyphens -> long flag
-argv = { "-q" }; // one hyphen -> short flag
+argv = { "--quiet" }; // two dashes -> long flag
+argv = { "-q" }; // one dash -> short flag
 ````
 
 ### Showing help

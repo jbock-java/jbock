@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 @CommandLineArguments
 abstract class SudokuArguments {
 
-  @PositionalParameter(mappedBy = Mapper.class)
+  @PositionalParameter(value = 1, mappedBy = Mapper.class)
   abstract List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> number();
 
   static class Mapper<M extends Integer> implements Supplier<Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>>>>>>>>>> {

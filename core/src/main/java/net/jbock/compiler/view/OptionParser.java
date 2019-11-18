@@ -61,7 +61,7 @@ final class OptionParser {
 
   private static MethodSpec readMethod() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(Constants.ITERATOR_OF_STRING, "it").build();
+    ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     return MethodSpec.methodBuilder("read")
         .addModifiers(ABSTRACT)
         .addParameters(asList(token, it))

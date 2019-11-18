@@ -5,9 +5,9 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.CommandLineArguments;
 
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
@@ -29,14 +29,8 @@ public final class Context {
   // whether "--help" is a special token
   private final boolean helpParameterEnabled;
 
-  // program description from javadoc, can be overridden with bundle key jbock.description
-  private final List<String> description;
-
   // program name from attribute
   private final String programName;
-
-  // mission statement from attribute, can be overridden with bundle key jbock.mission
-  private final String missionStatement;
 
   private Context(
       TypeElement sourceElement,
@@ -44,37 +38,30 @@ public final class Context {
       List<Param> parameters,
       boolean allowEscape,
       boolean helpParameterEnabled,
-      List<String> description,
-      String programName,
-      String missionStatement) {
+      String programName) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
     this.allowEscape = allowEscape;
     this.helpParameterEnabled = helpParameterEnabled;
-    this.description = description;
     this.programName = programName;
-    this.missionStatement = missionStatement;
   }
 
   static Context create(
       TypeElement sourceElement,
       ClassName generatedClass,
       List<Param> parameters,
-      List<String> description,
       boolean allowEscape) {
-    boolean addHelp = sourceElement.getAnnotation(CommandLineArguments.class).allowHelpOption();
-    String missionStatement = sourceElement.getAnnotation(CommandLineArguments.class).missionStatement();
+    CommandLineArguments annotation = sourceElement.getAnnotation(CommandLineArguments.class);
+    boolean helpParameterEnabled = !annotation.helpDisabled();
 
     return new Context(
         sourceElement,
         generatedClass,
         parameters,
         allowEscape,
-        addHelp,
-        description,
-        programName(sourceElement),
-        missionStatement);
+        helpParameterEnabled,
+        programName(sourceElement));
   }
 
   private static String programName(TypeElement sourceType) {
@@ -82,10 +69,9 @@ public final class Context {
     if (!annotation.programName().isEmpty()) {
       return annotation.programName();
     }
-    if (sourceType.getNestingKind() == NestingKind.MEMBER) {
-      return sourceType.getEnclosingElement().getSimpleName().toString();
-    }
-    return sourceType.getSimpleName().toString();
+    String camel = sourceType.getSimpleName().toString();
+    return ParamName.create(camel).snake()
+        .replace('_', '-').toLowerCase(Locale.US);
   }
 
   public boolean allowEscape() {
@@ -128,10 +114,6 @@ public final class Context {
     return generatedClass.nestedClass("ParserState");
   }
 
-  public ClassName indentPrinterType() {
-    return generatedClass.nestedClass("IndentPrinter");
-  }
-
   public ClassName messagesType() {
     return generatedClass.nestedClass("Messages");
   }
@@ -156,7 +138,7 @@ public final class Context {
     return generatedClass.nestedClass("ParsingFailed");
   }
 
-  public Optional<ClassName> helpPrintedType() {
+  public Optional<ClassName> helpRequestedType() {
     return helpParameterEnabled ? Optional.of(generatedClass.nestedClass("HelpRequested")) : Optional.empty();
   }
 
@@ -182,15 +164,7 @@ public final class Context {
     return helpParameterEnabled;
   }
 
-  public List<String> description() {
-    return description;
-  }
-
   public String programName() {
     return programName;
-  }
-
-  public String missionStatement() {
-    return missionStatement;
   }
 }

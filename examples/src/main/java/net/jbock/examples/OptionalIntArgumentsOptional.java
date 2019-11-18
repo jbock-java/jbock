@@ -10,7 +10,7 @@ import java.util.function.Supplier;
 @CommandLineArguments
 abstract class OptionalIntArgumentsOptional {
 
-  @Parameter(shortName = 'a', mappedBy = Mapper.class)
+  @Parameter(value = "a", mnemonic = 'a', mappedBy = Mapper.class)
   abstract OptionalInt a();
 
   static class Mapper implements Supplier<Function<String, Integer>> {
