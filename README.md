@@ -8,10 +8,10 @@ The command line parameters are defined as abstract methods:
 @CommandLineArguments
 abstract class MyArguments {
 
-  @PositionalParameter
+  @PositionalParameter(1)
   abstract Path path();
 
-  @Parameter(shortName = 'v')
+  @Parameter(value = "verbosity", mnemonic = 'v')
   abstract OptionalInt verbosity();
 }
 ````
