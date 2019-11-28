@@ -16,6 +16,8 @@ abstract class RmArguments {
    * IST NICHT FUR GEWERKEN BEI DUMMKOPFEN.
    * DER RUBBERNECKEN SIGHTSEEREN KEEPEN DAS COTTONPICKEN HANDER IN DAS POCKETS MUSS.
    * ZO RELAXEN UND WATSCHEN DER BLINKENLICHTEN.
+   *
+   * @return a boolean
    */
   @Parameter(value = "recursive", mnemonic = 'r')
   abstract boolean recursive();

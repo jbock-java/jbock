@@ -208,10 +208,17 @@ public final class Processor extends AbstractProcessor {
 
   private static String[] tokenizeJavadoc(String docComment) {
     String[] tokens = docComment.trim().split("\\R", -1);
-    for (int i = 0; i < tokens.length; i++) {
-      tokens[i] = tokens[i].trim();
+    List<String> result = new ArrayList<>(tokens.length);
+    for (String t : tokens) {
+      String token = t.trim();
+      if (token.startsWith("@")) {
+        return result.toArray(new String[0]);
+      }
+      if (!token.isEmpty()) {
+        result.add(token);
+      }
     }
-    return tokens;
+    return result.toArray(new String[0]);
   }
 
   private void checkHelp(List<Param> parameters) {
