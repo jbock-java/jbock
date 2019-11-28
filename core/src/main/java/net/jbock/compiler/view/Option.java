@@ -130,8 +130,6 @@ final class Option {
         .addMethod(positionalParsersMethod)
         .addMethod(validShortTokenMethod())
         .addMethod(describeMethod())
-        .addMethod(parserMethod())
-        .addMethod(positionalParserMethod())
         .build();
   }
 
@@ -153,11 +151,6 @@ final class Option {
 
     CodeBlock block = CodeBlock.builder().addNamed(format, map).build();
     TypeSpec.Builder spec = anonymousClassBuilder(block);
-    if (param.isPositional()) {
-      spec.addMethod(positionalParserMethodOverride(param));
-    } else {
-      spec.addMethod(parserMethodOverride(param));
-    }
     if (param.isFlag()) {
       validShortTokenMethodOverrideFlag(param).ifPresent(spec::addMethod);
       spec.addMethod(describeMethodOverrideFlag());
@@ -189,30 +182,6 @@ final class Option {
     return MethodSpec.methodBuilder("describe")
         .returns(STRING)
         .addStatement("return describeParam(' ' + name())")
-        .build();
-  }
-
-  private MethodSpec parserMethodOverride(Param param) {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("parser")
-        .addAnnotation(Override.class)
-        .returns(context.optionParserType());
-    if (param.isRepeatable()) {
-      spec.addStatement("return new $T(this)", context.repeatableOptionParserType());
-    } else if (param.isFlag()) {
-      spec.addStatement("return new $T(this)", context.flagOptionParserType());
-    } else {
-      spec.addStatement("return new $T(this)", context.regularOptionParserType());
-    }
-    return spec.build();
-  }
-
-  private MethodSpec positionalParserMethodOverride(Param param) {
-    return MethodSpec.methodBuilder("positionalParser")
-        .addAnnotation(Override.class)
-        .returns(context.positionalOptionParserType())
-        .addStatement("return new $T()", param.isRepeatable() ?
-            context.repeatablePositionalOptionParserType() :
-            context.regularPositionalOptionParserType())
         .build();
   }
 
@@ -281,57 +250,51 @@ final class Option {
       Context context) {
     ParameterSpec parsers = builder(parsersType, "parsers")
         .build();
-    ParameterSpec option = builder(context.optionType(), "option").build();
 
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = new $T<>($T.class)",
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("parsers")
+        .returns(parsers.type)
+        .addModifiers(STATIC);
+    spec.addStatement("$T $N = new $T<>($T.class)",
         parsers.type, parsers, EnumMap.class, context.optionType());
 
-    // begin iteration over options
-    builder.beginControlFlow("for ($T $N : $T.values())", context.optionType(), option, context.optionType());
+    for (Param param : context.parameters()) {
+      if (param.isPositional()) {
+        continue;
+      }
+      if (param.isRepeatable()) {
+        spec.addStatement("$N.put($L, new $T($L))",
+            parsers, param.enumConstant(), context.repeatableOptionParserType(), param.enumConstant());
+      } else if (param.isFlag()) {
+        spec.addStatement("$N.put($L, new $T($L))",
+            parsers, param.enumConstant(),
+            context.flagOptionParserType(), param.enumConstant());
+      } else {
+        spec.addStatement("$N.put($L, new $T($L))",
+            parsers, param.enumConstant(),
+            context.regularOptionParserType(), param.enumConstant());
+      }
+    }
 
-    builder.beginControlFlow("if (!$N.positionalIndex.isPresent())", option)
-        .addStatement("$N.put($N, $N.parser())", parsers, option, option)
-        .endControlFlow();
-
-    // end iteration over options
-    builder.endControlFlow();
-    builder.addStatement("return $N", parsers);
-
-    return MethodSpec.methodBuilder("parsers")
-        .addCode(builder.build())
-        .returns(parsers.type)
-        .addModifiers(STATIC)
-        .build();
+    return spec.addStatement("return $N", parsers).build();
   }
 
   private static MethodSpec positionalParsersMethod(
       TypeName positionalParsersType,
       Context context) {
-    ParameterSpec parsers = builder(positionalParsersType, "parsers")
-        .build();
-    ParameterSpec option = builder(context.optionType(), "option").build();
-
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.addStatement("$T $N = new $T<>()",
-        parsers.type, parsers, ArrayList.class);
-
-    // begin iteration over options
-    builder.beginControlFlow("for ($T $N : $T.values())", context.optionType(), option, context.optionType());
-
-    builder.beginControlFlow("if ($N.positionalIndex.isPresent())", option)
-        .addStatement("$N.add($N.positionalParser())", parsers, option)
-        .endControlFlow();
-
-    // end iteration over options
-    builder.endControlFlow();
-    builder.addStatement("return $N", parsers);
-
-    return MethodSpec.methodBuilder("positionalParsers")
-        .addCode(builder.build())
+    ParameterSpec parsers = builder(positionalParsersType, "parsers").build();
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("positionalParsers")
         .returns(parsers.type)
         .addModifiers(STATIC)
-        .build();
+        .addStatement("$T $N = new $T<>()", parsers.type, parsers, ArrayList.class);
+    for (Param param : context.parameters()) {
+      if (!param.isPositional()) {
+        continue;
+      }
+      spec.addStatement("$N.add(new $T())", parsers, param.isRepeatable() ?
+          context.repeatablePositionalOptionParserType() :
+          context.regularPositionalOptionParserType());
+    }
+    return spec.addStatement("return $N", parsers).build();
   }
 
   private MethodSpec positionalValuesMethod() {
@@ -393,20 +356,6 @@ final class Option {
           .returns(BOOLEAN)
           .build();
     });
-  }
-
-  private MethodSpec parserMethod() {
-    return MethodSpec.methodBuilder("parser")
-        .returns(context.optionParserType())
-        .addStatement("throw new $T()", AssertionError.class)
-        .build();
-  }
-
-  private MethodSpec positionalParserMethod() {
-    return MethodSpec.methodBuilder("positionalParser")
-        .returns(context.positionalOptionParserType())
-        .addStatement("throw new $T()", AssertionError.class)
-        .build();
   }
 
   private MethodSpec privateConstructor() {
