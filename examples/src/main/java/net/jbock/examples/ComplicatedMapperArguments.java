@@ -11,12 +11,12 @@ import java.util.function.Supplier;
 abstract class ComplicatedMapperArguments {
 
   @Parameter(
-      longName = "number",
+      value = "number",
       mappedBy = Mapper.class)
   abstract Integer number();
 
   @Parameter(
-      longName = "numbers",
+      value = "numbers",
       mappedBy = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();
 

@@ -10,9 +10,9 @@ import java.util.List;
 @CommandLineArguments
 abstract class RequiredArguments {
 
-  @Parameter(longName = "dir")
+  @Parameter("dir")
   abstract String dir();
 
-  @PositionalParameter
+  @PositionalParameter(1)
   abstract List<String> otherTokens();
 }

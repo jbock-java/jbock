@@ -45,8 +45,6 @@ public final class Param {
 
   private final List<String> description;
 
-  private final String descriptionArgumentName;
-
   private final Integer positionalIndex;
 
   public boolean isFlag() {
@@ -113,7 +111,6 @@ public final class Param {
       String bundleKey,
       Coercion coercion,
       List<String> description,
-      String descriptionArgumentName,
       Integer positionalIndex) {
     this.bundleKey = bundleKey;
     this.coercion = coercion;
@@ -121,7 +118,6 @@ public final class Param {
     this.longName = longName;
     this.sourceMethod = sourceMethod;
     this.description = description;
-    this.descriptionArgumentName = descriptionArgumentName;
     this.positionalIndex = positionalIndex;
   }
 
@@ -159,23 +155,16 @@ public final class Param {
       throw ValidationException.create(sourceMethod, "Define either long name or a short name");
     }
     Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
-    checkShortName(sourceMethod, parameter.shortName());
-    checkName(sourceMethod, parameter.longName());
+    checkShortName(sourceMethod, parameter.mnemonic());
+    checkName(sourceMethod, parameter.value());
     ParamName name = findParamName(params, sourceMethod);
     boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
     Coercion coercion;
     if (flag) {
-      if (!parameter.descriptionArgumentName().isEmpty()) {
-        throw ValidationException.create(sourceMethod,
-            "A flag cannot have a description argument name.");
-      }
       coercion = CoercionProvider.flagCoercion(sourceMethod, name);
     } else {
       coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
     }
-    String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
-        descriptionArgumentName(coercion.parameterType(), name) :
-        parameter.descriptionArgumentName();
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
         shortName,
@@ -184,7 +173,6 @@ public final class Param {
         parameter.bundleKey(),
         coercion,
         cleanDesc(description),
-        descriptionArgumentName,
         null);
   }
 
@@ -199,9 +187,6 @@ public final class Param {
     PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
     ParamName name = findParamName(params, sourceMethod);
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
-    String descriptionArgumentName = parameter.descriptionArgumentName().isEmpty() ?
-        descriptionArgumentName(coercion.parameterType(), name) :
-        parameter.descriptionArgumentName();
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
     return new Param(
         null,
@@ -210,13 +195,9 @@ public final class Param {
         parameter.bundleKey(),
         coercion,
         cleanDesc(description),
-        descriptionArgumentName,
         positionalIndex);
   }
 
-  /**
-   * Can infer {@code flag = true}?
-   */
   private static boolean isInferredFlag(
       Optional<TypeElement> mapperClass,
       Optional<TypeElement> collectorClass,
@@ -235,10 +216,10 @@ public final class Param {
     if (param == null) {
       return null;
     }
-    if (param.shortName() == ' ') {
+    if (param.mnemonic() == ' ') {
       return null;
     }
-    String result = "-" + param.shortName();
+    String result = "-" + param.mnemonic();
     for (Param p : params) {
       if (result.equals(p.shortName)) {
         throw ValidationException.create(sourceMethod, "Duplicate short name");
@@ -252,11 +233,11 @@ public final class Param {
     if (param == null) {
       return null;
     }
-    if (Objects.toString(param.longName(), "").isEmpty()) {
-      // the empty string indicates that no long name should be defined
-      return null;
+    if (Objects.toString(param.value(), "").isEmpty()) {
+      throw ValidationException.create(sourceMethod,
+          "The name may not be empty");
     }
-    String longName = "--" + param.longName();
+    String longName = "--" + param.value();
     for (Param p : params) {
       if (p.longName != null && p.longName.equals(longName)) {
         throw ValidationException.create(sourceMethod, "Duplicate long name");
@@ -274,7 +255,8 @@ public final class Param {
 
   private static void checkName(ExecutableElement sourceMethod, String name) {
     if (Objects.toString(name, "").isEmpty()) {
-      return;
+      throw ValidationException.create(sourceMethod,
+          "The name may not be empty");
     }
     if (name.charAt(0) == '-') {
       throw ValidationException.create(sourceMethod,
@@ -309,16 +291,16 @@ public final class Param {
     return sourceMethod.getSimpleName().toString();
   }
 
-  public String descriptionArgumentName() {
-    return descriptionArgumentName;
-  }
-
   public TypeName returnType() {
     return TypeName.get(sourceMethod.getReturnType());
   }
 
   public String enumConstant() {
     return paramName().snake().toUpperCase(Locale.US);
+  }
+
+  public String enumConstantLower() {
+    return paramName().snake().toLowerCase(Locale.US);
   }
 
   public boolean isPositional() {

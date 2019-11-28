@@ -11,23 +11,9 @@ class PsArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  PsArguments",
-        "",
-        "SYNOPSIS",
-        "  PsArguments [OPTIONS...]",
-        "",
-        "DESCRIPTION",
-        "",
-        "OPTIONS",
-        "  -a, --all",
-        "",
-        "  -w <number>, --width <number>",
-        "    This is the description.",
-        "",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: ps-arguments [options...]",
+        "-a, --all",
+        "-w, --width WIDTH  This is the description.",
         "");
   }
 }

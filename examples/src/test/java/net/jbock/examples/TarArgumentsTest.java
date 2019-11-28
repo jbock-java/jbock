@@ -26,35 +26,19 @@ class TarArgumentsTest {
 
   @Test
   void noGrouping() {
-    f.assertThat("-v", "xf", "foo.tar").failsWithUsageMessage("Invalid option: xf");
-    f.assertThat("-v", "-xf", "foo.tar").failsWithUsageMessage("Invalid option: -xf");
+    f.assertThat("-v", "xf", "foo.tar").failsWithMessage("Invalid option: xf");
+    f.assertThat("-v", "-xf", "foo.tar").failsWithMessage("Invalid option: -xf");
   }
 
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  TarArguments",
-        "",
-        "SYNOPSIS",
-        "  TarArguments [OPTIONS...] -f <FILE>",
-        "",
-        "DESCRIPTION",
-        "",
-        "OPTIONS",
-        "  -x",
-        "",
-        "  -c",
-        "",
-        "  -v",
-        "",
-        "  -z",
-        "",
-        "  -f <FILE>",
-        "",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: tar-arguments [options...] -f <file>",
+        "-x, --x",
+        "-c, --c",
+        "-v, --v",
+        "-z, --z",
+        "-f, --f FILE",
         "");
   }
 }

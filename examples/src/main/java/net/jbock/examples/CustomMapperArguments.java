@@ -23,40 +23,40 @@ abstract class CustomMapperArguments {
    * The mapper must be a Function from String to whatever-this-returns.
    * It must also have a package-visible no-arg constructor.
    */
-  @Parameter(longName = "date", mappedBy = DateMapper.class)
+  @Parameter(value = "date", mappedBy = DateMapper.class)
   abstract Date date();
 
-  @Parameter(longName = "optDate", mappedBy = DateMapper.class)
+  @Parameter(value = "optDate", mappedBy = DateMapper.class)
   abstract Optional<Date> optDate();
 
-  @Parameter(longName = "dateList", mappedBy = DateMapper.class)
+  @Parameter(value = "dateList", mappedBy = DateMapper.class)
   abstract List<Date> dateList();
 
-  @Parameter(longName = "verbosity", mappedBy = CustomBigIntegerMapperSupplier.class)
+  @Parameter(value = "verbosity", mappedBy = CustomBigIntegerMapperSupplier.class)
   abstract Optional<BigInteger> verbosity();
 
-  @Parameter(longName = "aRequiredInt", mappedBy = PositiveNumberMapper.class)
+  @Parameter(value = "aRequiredInt", mappedBy = PositiveNumberMapper.class)
   abstract int aRequiredInt();
 
-  @Parameter(longName = "stringArray", mappedBy = ArrayMapper.class)
+  @Parameter(value = "stringArray", mappedBy = ArrayMapper.class)
   abstract Optional<String[]> stringArray();
 
-  @Parameter(longName = "integerList", mappedBy = IntegerListMapper.class)
+  @Parameter(value = "integerList", mappedBy = IntegerListMapper.class)
   abstract Optional<List<Integer>> integerList();
 
-  @Parameter(longName = "enumSet", mappedBy = EnumSetMapper.class)
+  @Parameter(value = "enumSet", mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
-  @PositionalParameter(mappedBy = BooleanMapper.class)
+  @PositionalParameter(value = 1, mappedBy = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
-  @Parameter(longName = "optionalInts", mappedBy = OptionalIntMapper.class)
+  @Parameter(value = "optionalInts", mappedBy = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
-  @Parameter(longName = "listWrapper", mappedBy = ListWrapperMapper.class)
+  @Parameter(value = "listWrapper", mappedBy = ListWrapperMapper.class)
   abstract Optional<List<String>> listWrapper();
 
-  @Parameter(longName = "notFlag", mappedBy = BooleanMapper.class)
+  @Parameter(value = "notFlag", mappedBy = BooleanMapper.class)
   abstract Boolean notFlag();
 
   static class DateMapper implements Supplier<Function<String, Date>> {

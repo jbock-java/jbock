@@ -10,7 +10,7 @@ class SudokuArgumentsTest {
   void testSudoku() {
     SudokuArguments_Parser.ParseResult parsed = SudokuArguments_Parser.create().parse(new String[]{""});
     assertTrue(parsed instanceof SudokuArguments_Parser.ParsingSuccess);
-    SudokuArguments args = ((SudokuArguments_Parser.ParsingSuccess) parsed).result();
+    SudokuArguments args = ((SudokuArguments_Parser.ParsingSuccess) parsed).getResult();
     assertTrue(args.number().isEmpty());
   }
 }

@@ -1,6 +1,6 @@
 package net.jbock.examples;
 
-import net.jbock.examples.fixture.TestOutputStream;
+import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -9,11 +9,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HelplessArgumentsTest {
 
+  private ParserTestFixture<HelplessArguments> f =
+      ParserTestFixture.create(HelplessArguments_Parser.create());
+
   @Test
   void success0() {
     HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"x"});
     assertTrue(opt instanceof HelplessArguments_Parser.ParsingSuccess);
-    HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).result();
+    HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).getResult();
     assertEquals("x", args.required());
     assertFalse(args.help());
   }
@@ -22,7 +25,7 @@ class HelplessArgumentsTest {
   void success1() {
     HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"x", "--help"});
     assertTrue(opt instanceof HelplessArguments_Parser.ParsingSuccess);
-    HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).result();
+    HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).getResult();
     assertTrue(args.help());
     assertEquals("x", args.required());
   }
@@ -31,24 +34,18 @@ class HelplessArgumentsTest {
   void success2() {
     HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"--help", "x"});
     assertTrue(opt instanceof HelplessArguments_Parser.ParsingSuccess);
-    HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).result();
+    HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).getResult();
     assertTrue(args.help());
     assertEquals("x", args.required());
   }
 
   @Test
   void errorNoArguments() {
-    TestOutputStream out = new TestOutputStream();
-    HelplessArguments_Parser.create().withErrorStream(out.out).parse(new String[]{});
-    String message = out.toString();
-    assertTrue(message.contains("Missing parameter: <REQUIRED>"));
+    f.assertThat().failsWithMessage("Missing parameter: <REQUIRED>");
   }
 
   @Test
   void errorInvalidOption() {
-    TestOutputStream out = new TestOutputStream();
-    HelplessArguments_Parser.create().withErrorStream(out.out).parse(new String[]{"-p"});
-    String message = out.toString();
-    assertTrue(message.contains("Invalid option: -p"));
+    f.assertThat("-p").failsWithMessage("Invalid option: -p");
   }
 }

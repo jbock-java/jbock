@@ -10,18 +10,18 @@ import java.util.Optional;
 @CommandLineArguments
 abstract class AllDoublesArguments {
 
-  @PositionalParameter
+  @PositionalParameter(value = 1)
   abstract List<Double> positional();
 
-  @Parameter(shortName = 'i')
+  @Parameter(value = "i", mnemonic = 'i')
   abstract List<Double> listOfDoubles();
 
-  @Parameter(longName = "opt")
+  @Parameter(value = "opt")
   abstract Optional<Double> optionalDouble();
 
-  @Parameter(longName = "obj")
+  @Parameter(value = "obj")
   abstract Double doubleObject();
 
-  @Parameter(longName = "prim")
+  @Parameter(value = "prim")
   abstract double primitiveDouble();
 }

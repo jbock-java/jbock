@@ -9,12 +9,26 @@ import java.util.List;
 @CommandLineArguments
 abstract class RmArguments {
 
-  @Parameter(shortName = 'r')
+  /**
+   * ALLES TURISTEN UND NONTEKNISCHEN LOOKENSPEEPERS!
+   * DAS KOMPUTERMASCHINE IST NICHT FUR DER GEFINGERPOKEN UND MITTENGRABEN!
+   * ODERWISE IST EASY TO SCHNAPPEN DER SPRINGENWERK, BLOWENFUSEN UND POPPENCORKEN MIT SPITZENSPARKEN.
+   * IST NICHT FUR GEWERKEN BEI DUMMKOPFEN.
+   * DER RUBBERNECKEN SIGHTSEEREN KEEPEN DAS COTTONPICKEN HANDER IN DAS POCKETS MUSS.
+   * ZO RELAXEN UND WATSCHEN DER BLINKENLICHTEN.
+   */
+  @Parameter(value = "recursive", mnemonic = 'r')
   abstract boolean recursive();
 
-  @Parameter(shortName = 'f')
+  /**
+   * Use the force, Luke.
+   */
+  @Parameter(value = "force", mnemonic = 'f')
   abstract boolean force();
 
-  @PositionalParameter
+  /**
+   * This is a list that may be empty.
+   */
+  @PositionalParameter(1)
   abstract List<String> otherTokens();
 }

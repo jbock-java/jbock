@@ -9,51 +9,51 @@ import java.util.function.Supplier;
 @CommandLineArguments
 abstract class PrimitiveArguments {
 
-  @Parameter(shortName = 'B')
+  @Parameter(value = "B", mnemonic = 'B')
   abstract byte simpleByte();
 
-  @Parameter(shortName = 'S')
+  @Parameter(value = "S", mnemonic = 'S')
   abstract short simpleShort();
 
-  @Parameter(shortName = 'I')
+  @Parameter(value = "I", mnemonic = 'I')
   abstract int simpleInt();
 
-  @Parameter(shortName = 'L')
+  @Parameter(value = "L", mnemonic = 'L')
   abstract long simpleLong();
 
-  @Parameter(shortName = 'F')
+  @Parameter(value = "F", mnemonic = 'F')
   abstract float simpleFloat();
 
-  @Parameter(shortName = 'D')
+  @Parameter(value = "D", mnemonic = 'D')
   abstract double simpleDouble();
 
-  @Parameter(shortName = 'C')
+  @Parameter(value = "C", mnemonic = 'C')
   abstract char simpleChar();
 
   // there's no simple boolean -- that would be a flag!
 
-  @Parameter(shortName = 'b', mappedBy = ByteMapper.class)
+  @Parameter(value = "b", mnemonic = 'b', mappedBy = ByteMapper.class)
   abstract byte mappedByte();
 
-  @Parameter(shortName = 's', mappedBy = ShortMapper.class)
+  @Parameter(value = "s", mnemonic = 's', mappedBy = ShortMapper.class)
   abstract short mappedShort();
 
-  @Parameter(shortName = 'i', mappedBy = IntMapper.class)
+  @Parameter(value = "i", mnemonic = 'i', mappedBy = IntMapper.class)
   abstract int mappedInt();
 
-  @Parameter(shortName = 'l', mappedBy = LongMapper.class)
+  @Parameter(value = "l", mnemonic = 'l', mappedBy = LongMapper.class)
   abstract long mappedLong();
 
-  @Parameter(shortName = 'f', mappedBy = FloatMapper.class)
+  @Parameter(value = "f", mnemonic = 'f', mappedBy = FloatMapper.class)
   abstract float mappedFloat();
 
-  @Parameter(shortName = 'd', mappedBy = DoubleMapper.class)
+  @Parameter(value = "d", mnemonic = 'd', mappedBy = DoubleMapper.class)
   abstract double mappedDouble();
 
-  @Parameter(shortName = 'c', mappedBy = CharMapper.class)
+  @Parameter(value = "c", mnemonic = 'c', mappedBy = CharMapper.class)
   abstract char mappedChar();
 
-  @Parameter(shortName = 'x', mappedBy = BooleanMapper.class)
+  @Parameter(value = "x", mnemonic = 'x', mappedBy = BooleanMapper.class)
   abstract boolean mappedBoolean();
 
   static class IntMapper implements Supplier<Function<String, Integer>> {

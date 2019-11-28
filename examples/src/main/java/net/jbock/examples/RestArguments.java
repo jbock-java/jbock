@@ -12,9 +12,9 @@ abstract class RestArguments {
   /**
    * This is the file.
    */
-  @Parameter(longName = "file", bundleKey = "param_file")
+  @Parameter(value = "file", bundleKey = "param_file")
   abstract List<String> file();
 
-  @PositionalParameter
+  @PositionalParameter(value = 1)
   abstract List<String> rest();
 }

@@ -21,7 +21,7 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
+import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.view.Tokenizer.throwInvalidOptionStatement;
 
@@ -180,7 +180,7 @@ final class ParserState {
   private static MethodSpec readMethod(FieldSpec parsersField, Context context) {
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(ITERATOR_OF_STRING, "it").build();
+    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
@@ -243,7 +243,7 @@ final class ParserState {
   static CodeBlock throwRepetitionErrorStatement(
       FieldSpec optionParam) {
     return CodeBlock.builder()
-        .add("throw new $T($T.format($S, $N, $N.describeParam($S)))",
+        .add("throw new $T($T.format($S, $N, $N.describeParam($S).trim()))",
             IllegalArgumentException.class,
             String.class,
             "Option %s (%s) is not repeatable",

@@ -28,7 +28,7 @@ class AdditionArgumentsTest {
 
   @Test
   void wrongNumber() {
-    f.assertThat("--", "-a", "2").failsWithUsageMessage(
+    f.assertThat("--", "-a", "2").failsWithMessage(
         "For input string: \"-a\"");
   }
 
@@ -43,27 +43,10 @@ class AdditionArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "NAME",
-        "  AdditionArguments",
-        "",
-        "SYNOPSIS",
-        "  AdditionArguments <A> <B> [<c>]",
-        "",
-        "DESCRIPTION",
-        "",
-        "A",
-        "  First argument",
-        "",
-        "B",
-        "  Second argument",
-        "",
-        "C",
-        "  Optional third argument",
-        "",
-        "OPTIONS",
-        "  --help",
-        "    print online help",
-        "",
+        "Usage: addition-arguments <a> <b> [<c>]",
+        "a  First argument",
+        "b  Second argument",
+        "c  Optional third argument",
         "");
   }
 }

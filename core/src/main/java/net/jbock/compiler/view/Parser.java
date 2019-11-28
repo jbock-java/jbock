@@ -1,19 +1,23 @@
 package net.jbock.compiler.view;
 
+import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 
 import java.io.PrintStream;
+import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.function.Consumer;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
@@ -24,20 +28,22 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.ITERATOR_OF_STRING;
+import static net.jbock.compiler.Constants.ENTRY_STRING_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
+import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
+import static net.jbock.compiler.Constants.listOf;
 
 /**
  * Generates the *_Parser class.
  */
 public final class Parser {
 
-  private static final int DEFAULT_INDENT = 4;
-  private static final int DEFAULT_EXITCODE_ON_ERROR = 1;
+  private static final int DEFAULT_WRAP_AFTER = 80;
+  private static final int EXITCODE_ON_ERROR = 1;
 
-  private static final String METHOD_NAME_PARSE_OR_EXIT = "parseOrExit";
+  private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
 
   private final Context context;
   private final Tokenizer tokenizer;
@@ -53,12 +59,10 @@ public final class Parser {
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err").addModifiers(PRIVATE).build();
 
-  private final FieldSpec indent = FieldSpec.builder(INT, "indent")
-      .initializer("$L", DEFAULT_INDENT)
-      .addModifiers(PRIVATE).build();
+  private final FieldSpec runBeforeExit;
 
-  private final FieldSpec errorExitCode = FieldSpec.builder(INT, "errorExitCode")
-      .initializer("$L", DEFAULT_EXITCODE_ON_ERROR)
+  private final FieldSpec maxLineWidth = FieldSpec.builder(INT, "maxLineWidth")
+      .initializer("$L", DEFAULT_WRAP_AFTER)
       .addModifiers(PRIVATE).build();
 
   private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages")
@@ -72,7 +76,8 @@ public final class Parser {
       Impl impl,
       ParseResult parseResult,
       MethodSpec readNextMethod,
-      MethodSpec readValidArgumentMethod) {
+      MethodSpec readValidArgumentMethod,
+      FieldSpec runBeforeExit) {
     this.context = context;
     this.tokenizer = tokenizer;
     this.option = option;
@@ -81,6 +86,7 @@ public final class Parser {
     this.parseResult = parseResult;
     this.readNextMethod = readNextMethod;
     this.readValidArgumentMethod = readValidArgumentMethod;
+    this.runBeforeExit = runBeforeExit;
   }
 
   public static Parser create(Context context) {
@@ -91,7 +97,11 @@ public final class Parser {
     ParserState state = ParserState.create(context, option);
     ParseResult parseResult = ParseResult.create(context);
     Tokenizer builder = Tokenizer.create(context, state);
-    return new Parser(context, builder, option, state, impl, parseResult, readNextMethod, readValidArgumentMethod);
+    FieldSpec runBeforeExit = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), context.parseResultType()), "runBeforeExit").addModifiers(PRIVATE)
+        .initializer("r -> {}")
+        .build();
+    return new Parser(context, builder, option, state, impl, parseResult, readNextMethod, readValidArgumentMethod,
+        runBeforeExit);
   }
 
   public TypeSpec define() {
@@ -109,43 +119,46 @@ public final class Parser {
         .addType(PositionalOptionParser.define(context))
         .addType(RegularPositionalOptionParser.define(context))
         .addType(RepeatablePositionalOptionParser.define(context))
-        .addType(IndentPrinter.create(context).define())
         .addType(Messages.create(context).define())
         .addTypes(parseResult.defineResultTypes())
-        .addFields(Arrays.asList(out, err, indent, errorExitCode, messages))
+        .addFields(Arrays.asList(err, maxLineWidth, runBeforeExit, messages))
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addMethod(createMethod())
         .addMethod(parseMethod())
         .addMethod(parseOrExitMethod())
+        .addMethod(printOnlineHelpMethod())
+        .addMethod(printWrapMethod())
         .addMethod(withErrorStreamMethod())
-        .addMethod(withIndentMethod())
-        .addMethod(withErrorExitCodeMethod())
+        .addMethod(maxLineWidthMethod())
         .addMethod(withMessagesMethod())
         .addMethod(withResourceBundleMethod())
+        .addMethod(runBeforeExitMethod())
         .addMethod(readValidArgumentMethod)
         .addMethod(readNextMethod);
 
-    withOutputStreamMethod().ifPresent(spec::addMethod);
-
+    if (context.isHelpParameterEnabled()) {
+      spec.addMethod(withOutputStreamMethod());
+      spec.addField(out);
+    }
     return spec.addJavadoc(javadoc()).build();
   }
 
-  private MethodSpec withIndentMethod() {
-    ParameterSpec indentParam = builder(indent.type, indent.name).build();
-    return methodBuilder("withIndent")
+  private MethodSpec maxLineWidthMethod() {
+    ParameterSpec indentParam = builder(maxLineWidth.type, "chars").build();
+    return methodBuilder("maxLineWidth")
         .addParameter(indentParam)
-        .addStatement("this.$N = $N", indent, indentParam)
+        .addStatement("this.$N = $N", maxLineWidth, indentParam)
         .addStatement("return this")
         .returns(context.generatedClass())
         .addModifiers(context.getAccessModifiers())
         .build();
   }
 
-  private MethodSpec withErrorExitCodeMethod() {
-    ParameterSpec errorExitCodeParam = builder(errorExitCode.type, errorExitCode.name).build();
-    return methodBuilder("withErrorExitCode")
-        .addParameter(errorExitCodeParam)
-        .addStatement("this.$N = $N", errorExitCode, errorExitCodeParam)
+  private MethodSpec runBeforeExitMethod() {
+    ParameterSpec param = builder(runBeforeExit.type, runBeforeExit.name).build();
+    return methodBuilder("runBeforeExit")
+        .addParameter(param)
+        .addStatement("this.$N = $N", runBeforeExit, param)
         .addStatement("return this")
         .returns(context.generatedClass())
         .addModifiers(context.getAccessModifiers())
@@ -179,10 +192,8 @@ public final class Parser {
         .build();
   }
 
-  private Optional<MethodSpec> withOutputStreamMethod() {
-    return context.isHelpParameterEnabled() ?
-        Optional.of(withPrintStreamMethod("withOutputStream", context, out)) :
-        Optional.empty();
+  private MethodSpec withOutputStreamMethod() {
+    return withPrintStreamMethod("withOutputStream", context, out);
   }
 
   private MethodSpec withErrorStreamMethod() {
@@ -204,24 +215,12 @@ public final class Parser {
   private MethodSpec parseMethod() {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
-    MethodSpec.Builder spec = methodBuilder("parse");
 
     ParameterSpec paramTokenizer = builder(context.tokenizerType(), "tokenizer").build();
-    ParameterSpec paramErrStream = builder(context.indentPrinterType(), "errStream").build();
-    ParameterSpec paramOutStream;
-    if (context.isHelpParameterEnabled()) {
-      paramOutStream = builder(context.indentPrinterType(), "outStream").build();
-      spec.addStatement("$T $N = new $T($N == null ? $T.out : $N, $N)", context.indentPrinterType(), paramOutStream, context.indentPrinterType(),
-          out, System.class, out, indent);
-    } else {
-      paramOutStream = paramErrStream;
-    }
     ParameterSpec paramMessages = builder(context.messagesType(), "msg").build();
-    return spec.addStatement("$T $N = new $T($N == null ? $T.out : $N, $N)", context.indentPrinterType(), paramErrStream, context.indentPrinterType(),
-        err, System.class, err, indent)
+    return methodBuilder("parse")
         .addStatement("$T $N = new $T($N == null ? $T.emptyMap() : $N)", context.messagesType(), paramMessages, context.messagesType(), messages, Collections.class, messages)
-        .addStatement("return new $T($N, $N, $N).parse($N)", paramTokenizer.type,
-            paramOutStream, paramErrStream, paramMessages, args)
+        .addStatement("return new $T($N).parse($N)", paramTokenizer.type, paramMessages, args)
         .addParameter(args)
         .addModifiers(context.getAccessModifiers())
         .returns(context.parseResultType())
@@ -232,25 +231,38 @@ public final class Parser {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
     ParameterSpec result = builder(context.parseResultType(), "result").build();
-    MethodSpec.Builder spec = methodBuilder(METHOD_NAME_PARSE_OR_EXIT);
+    MethodSpec.Builder spec = methodBuilder("parseOrExit");
 
     spec.addStatement("$T $N = parse($N)", result.type, result, args);
 
     spec.beginControlFlow("if ($N instanceof $T)", result, context.parsingSuccessType())
-        .addStatement("return (($T) $N).result()", context.parsingSuccessType(), result)
+        .addStatement("return (($T) $N).getResult()", context.parsingSuccessType(), result)
         .endControlFlow();
 
-    context.helpPrintedType().ifPresent(helpPrintedType ->
-        spec.beginControlFlow("if ($N instanceof $T)", result, helpPrintedType)
-            .addStatement("$T.exit(0)", System.class)
-            .endControlFlow());
+    context.helpRequestedType().ifPresent(helpRequestedType -> {
+      spec.beginControlFlow("if ($N instanceof $T)", result, helpRequestedType);
+      ParameterSpec help = builder(helpRequestedType, "helpResult").build();
+      spec.addStatement("$T $N = ($T) $N", help.type, help, help.type, result);
+      spec.addStatement("printOnlineHelp($N, $N.getSynopsis(), $N.getRows())", out, help, help);
+      spec.addStatement("$N.accept($N)", runBeforeExit, result)
+          .addStatement("$T.exit(0)", System.class);
+      spec.endControlFlow();
+    });
 
+    ParameterSpec error = builder(context.parsingFailedType(), "errorResult").build();
     spec.beginControlFlow("if ($N instanceof $T)", result, context.parsingFailedType())
-        .addStatement("$T.exit($N)", System.class, errorExitCode)
+        .addStatement("$T $N = ($T) $N", error.type, error, error.type, result)
+        .addStatement("$N.getError().printStackTrace($N)", error, err)
+        .addStatement("$N.println($S + $N.getError().getMessage())", err, "Error: ", error)
+        .addStatement("printOnlineHelp($N, $N.getSynopsis(), $N.getRows())", err, error, error);
+    if (context.isHelpParameterEnabled()) {
+      spec.addStatement("$N.println($S)", err, "Try '--help' for more information.");
+    }
+    spec.addStatement("$N.accept($N)", runBeforeExit, result)
+        .addStatement("$T.exit($L)", System.class, EXITCODE_ON_ERROR)
         .endControlFlow();
 
-    spec.addComment("all cases handled");
-    spec.addStatement("throw new $T($S)", AssertionError.class, "never thrown");
+    spec.addStatement("throw new $T($S)", AssertionError.class, "all cases handled");
 
     return spec.addParameter(args)
         .addModifiers(context.getAccessModifiers())
@@ -258,6 +270,83 @@ public final class Parser {
         .build();
   }
 
+  private MethodSpec printOnlineHelpMethod() {
+    ParameterSpec synopsis = builder(STRING, "synopsis").build();
+    ParameterSpec rows = builder(listOf(ENTRY_STRING_STRING), "rows").build();
+    ParameterSpec row = builder(ENTRY_STRING_STRING, "row").build();
+    ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
+    ParameterSpec key = builder(STRING, "key").build();
+    ParameterSpec keyWidth = builder(INT, "keyWidth").build();
+    ParameterSpec keyFormat = builder(STRING, "keyFormat").build();
+    MethodSpec.Builder spec = methodBuilder("printOnlineHelp");
+    spec.addStatement("$T $N = $N.stream().map($T::getKey).mapToInt($T::length).max().orElse(0) + 2",
+        keyWidth.type, keyWidth, rows, AbstractMap.Entry.class, String.class)
+        .addStatement("$T $N = $S + $N + $S", keyFormat.type, keyFormat, "%1$-", keyWidth, "s")
+        .addStatement("printWrap($N, 8, $S, $S + $N)",
+            printStream, "", "Usage: ", synopsis);
+    spec.beginControlFlow("for ($T $N : $N)", row.type, row, rows)
+        .addStatement("$T $N = $T.format($N, $N.getKey())",
+            STRING, key, STRING, keyFormat, row)
+        .addStatement("printWrap($N, $N, $N, $N.getValue())",
+            printStream, keyWidth, key, row)
+        .endControlFlow();
+    spec.addStatement("$N.flush()", printStream);
+    return spec.addParameters(Arrays.asList(printStream, synopsis, rows))
+        .addModifiers(PRIVATE)
+        .build();
+  }
+
+  private MethodSpec printWrapMethod() {
+    ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
+    ParameterSpec continuationIndent = builder(INT, "continuationIndent").build();
+    ParameterSpec i = builder(INT, "i").build();
+    ParameterSpec trim = builder(STRING, "trim").build();
+    ParameterSpec init = builder(STRING, "init").build();
+    ParameterSpec input = builder(STRING, "input").build();
+    ParameterSpec row = builder(StringBuilder.class, "row").build();
+    ParameterSpec token = builder(STRING, "token").build();
+    ParameterSpec tokens = builder(ArrayTypeName.of(String.class), "tokens").build();
+    MethodSpec.Builder spec = methodBuilder("printWrap")
+        .addParameters(Arrays.asList(printStream, continuationIndent, init, input));
+    spec.beginControlFlow("if ($N.isEmpty())", input)
+        .addStatement("$T $N = $N.trim()", STRING, trim, init)
+        .addStatement("$N.println($N.substring(0, $N.indexOf($N)) + $N)",
+            printStream, init, init, trim, trim)
+        .addStatement("return")
+        .endControlFlow();
+    spec.addStatement("$T $N = $N.split($S, $L)", tokens.type, tokens, input, "\\s+", -1);
+    spec.addStatement("$T $N = new $T($N)", row.type, row, StringBuilder.class, init);
+    spec.beginControlFlow("for ($T $N : $N)", STRING, token, tokens);
+
+    spec.beginControlFlow("if ($N.length() + $N.length() + 1 > $N)",
+        token, row, maxLineWidth);
+    spec.beginControlFlow("if ($N.toString().isEmpty())", row)
+        .addStatement("$N.println($N)", printStream, token)
+        .endControlFlow();
+    spec.beginControlFlow("else")
+        .addStatement("$N.println($N)", printStream, row)
+        .addStatement("$N.setLength(0)", row)
+        .beginControlFlow("for ($T $N = 0; $N < $N; $N++)",
+            INT, i, i, continuationIndent, i)
+        .addStatement("$N.append(' ')", row)
+        .endControlFlow()
+        .addStatement("$N.append($N)", row, token)
+        .endControlFlow();
+    spec.endControlFlow();
+    spec.beginControlFlow("else")
+        .beginControlFlow("if ($N.length() > 0 && !$T.isWhitespace($N.charAt($N.length() - 1)))",
+            row, Character.class, row, row)
+        .addStatement("$N.append(' ')", row)
+        .endControlFlow()
+        .addStatement("$N.append($N)", row, token)
+        .endControlFlow();
+    spec.endControlFlow();
+
+    spec.beginControlFlow("if ($N.length() > 0)", row);
+    spec.addStatement("$N.println($N)", printStream, row);
+    spec.endControlFlow();
+    return spec.addModifiers(PRIVATE).build();
+  }
 
   private MethodSpec createMethod() {
     MethodSpec.Builder builder = methodBuilder("create");
@@ -268,10 +357,8 @@ public final class Parser {
         .build();
   }
 
-
   private CodeBlock javadoc() {
-    return CodeBlock.builder().add("Generated by\n" +
-        "<a href=\"https://github.com/h908714124/jbock\">jbock " +
+    return CodeBlock.builder().add("Generated by\n<a href=\"" + PROJECT_URL + "\">jbock " +
         getClass().getPackage().getImplementationVersion() +
         "</a>\n").build();
   }
@@ -279,13 +366,13 @@ public final class Parser {
   private static MethodSpec readValidArgumentMethod(
       MethodSpec readNextMethod) {
     ParameterSpec token = builder(STRING, "token").build();
-    ParameterSpec it = builder(ITERATOR_OF_STRING, "it").build();
+    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec index = builder(INT, "index").build();
     ParameterSpec isLong = builder(BOOLEAN, "isLong").build();
     MethodSpec.Builder builder = methodBuilder("readValidArgument");
 
     builder.beginControlFlow("if ($N.length() < 2)", token)
-        .addStatement("throw new $T()", IllegalArgumentException.class)
+        .addStatement("throw new $T($S)", IllegalArgumentException.class, "unexpected")
         .endControlFlow();
     builder.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
     builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
@@ -308,7 +395,7 @@ public final class Parser {
 
   private static MethodSpec readNextMethod() {
     ParameterSpec token = builder(STRING, "token").build();
-    ParameterSpec it = builder(ITERATOR_OF_STRING, "it").build();
+    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     CodeBlock.Builder builder = CodeBlock.builder();
 
     builder.beginControlFlow("if (!$N.hasNext())", it)

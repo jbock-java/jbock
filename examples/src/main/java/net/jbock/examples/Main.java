@@ -15,13 +15,13 @@ public class Main {
     /**
      * Verbosity enabled?
      */
-    @Parameter(shortName = 'v', longName = "verbose")
+    @Parameter(mnemonic = 'v', value = "verbose")
     abstract boolean verbose();
 
     /**
      * File name and path
      */
-    @Parameter(shortName = 'f', longName = "file")
+    @Parameter(mnemonic = 'f', value = "file")
     abstract String file();
   }
 

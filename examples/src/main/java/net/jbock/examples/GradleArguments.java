@@ -16,49 +16,49 @@ abstract class GradleArguments {
    * message goes here
    */
   @Parameter(
-      longName = "message",
-      shortName = 'm')
+      value = "message",
+      mnemonic = 'm')
   abstract Optional<String> message();
 
   /**
    * the files
    */
   @Parameter(
-      longName = "file",
-      shortName = 'f')
+      value = "file",
+      mnemonic = 'f')
   abstract List<String> file();
 
   /**
    * the dir
    */
-  @Parameter(longName = "dir")
+  @Parameter(value = "dir")
   abstract Optional<String> dir();
 
   /**
    * cmos flag
    */
-  @Parameter(shortName = 'c')
+  @Parameter(value = "c", mnemonic = 'c')
   abstract Boolean cmos();
 
   @Parameter(
-      longName = "verbose",
-      shortName = 'v')
+      value = "verbose",
+      mnemonic = 'v')
   abstract boolean verbose();
 
-  @PositionalParameter
+  @PositionalParameter(value = 1)
   abstract List<String> otherTokens();
 
   @CommandLineArguments
   static abstract class Foo {
 
-    @Parameter(longName = "bar")
+    @Parameter(value = "bar")
     abstract Optional<Integer> bar();
   }
 
   @CommandLineArguments
   static abstract class Bar {
 
-    @Parameter(longName = "bar")
+    @Parameter(value = "bar")
     abstract List<String> bar();
   }
 }

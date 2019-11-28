@@ -16,23 +16,25 @@ import java.util.stream.Collectors;
 @CommandLineArguments
 abstract class CustomCollectorArguments {
 
-  @Parameter(shortName = 'H', collectedBy = MyStringCollector.class)
+  @Parameter(value = "H", mnemonic = 'H', collectedBy = MyStringCollector.class)
   abstract Set<String> strings();
 
-  @Parameter(shortName = 'B', collectedBy = MyIntegerCollector.class)
+  @Parameter(value = "B", mnemonic = 'B', collectedBy = MyIntegerCollector.class)
   abstract Set<Integer> integers();
 
-  @Parameter(shortName = 'K', collectedBy = ToSetCollector.class)
+  @Parameter(value = "K", mnemonic = 'K', collectedBy = ToSetCollector.class)
   abstract Set<Giddy> moneySet();
 
   @Parameter(
-      shortName = 'T',
+      value = "T",
+      mnemonic = 'T',
       mappedBy = MapEntryTokenizer.class,
       collectedBy = ToMapCollector.class)
   abstract Map<String, LocalDate> dateMap();
 
   @Parameter(
-      shortName = 'M',
+      value = "M",
+      mnemonic = 'M',
       mappedBy = CustomBigIntegerMapper.class,
       collectedBy = ToSetCollector.class)
   abstract Set<BigInteger> bigIntegers();

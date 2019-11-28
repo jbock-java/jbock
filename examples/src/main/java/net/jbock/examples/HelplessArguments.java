@@ -4,12 +4,12 @@ import net.jbock.CommandLineArguments;
 import net.jbock.Parameter;
 import net.jbock.PositionalParameter;
 
-@CommandLineArguments(allowHelpOption = false)
+@CommandLineArguments(helpDisabled = true)
 abstract class HelplessArguments {
 
-  @PositionalParameter
+  @PositionalParameter(1)
   abstract String required();
 
-  @Parameter(longName = "help")
+  @Parameter("help")
   abstract boolean help();
 }

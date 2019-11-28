@@ -4,7 +4,6 @@ import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
 import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Paths;
 import java.util.Optional;
 
@@ -31,7 +30,7 @@ class VariousArgumentsTest {
         "^[abc]*$"
     });
     assertTrue(parsed instanceof VariousArguments_Parser.ParsingSuccess);
-    VariousArguments args = ((VariousArguments_Parser.ParsingSuccess) parsed).result();
+    VariousArguments args = ((VariousArguments_Parser.ParsingSuccess) parsed).getResult();
     assertEquals(new BigDecimal("3.14159265358979323846264338327950288419716939937510"), args.bigDecimal());
     assertEquals(Optional.of(Paths.get("/home")), args.pathPos());
     assertEquals(URI.create("http://localhost:8080"), args.uri());

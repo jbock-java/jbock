@@ -6,21 +6,21 @@ import net.jbock.Parameter;
 @CommandLineArguments
 abstract class EvilArguments {
 
-  @Parameter(longName = "fancy")
+  @Parameter(value = "fancy")
   abstract protected String fancy();
 
-  @Parameter(longName = "fAncy")
+  @Parameter(value = "fAncy")
   abstract String fAncy();
 
-  @Parameter(longName = "f_ancy")
+  @Parameter(value = "f_ancy")
   abstract String f_ancy();
 
-  @Parameter(longName = "f__ancy")
+  @Parameter(value = "f__ancy")
   abstract String f__ancy();
 
-  @Parameter(longName = "blub")
+  @Parameter(value = "blub")
   abstract String blub();
 
-  @Parameter(longName = "Blub")
+  @Parameter(value = "Blub")
   abstract String Blub();
 }
