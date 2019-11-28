@@ -48,7 +48,7 @@ final class FlagOptionParser {
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it));
-    
+
     spec.beginControlFlow("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))", token, token, token, "=")
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Invalid token: ", token)
         .endControlFlow();

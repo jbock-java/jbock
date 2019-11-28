@@ -25,6 +25,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
@@ -59,11 +60,14 @@ final class Option {
 
   private final MethodSpec parsersMethod;
 
+  private final FieldSpec flagField;
+
   private final MethodSpec positionalParsersMethod;
 
   private Option(
       Context context,
       FieldSpec bundleKeyField,
+      FieldSpec flagField,
       FieldSpec positionalIndexField,
       FieldSpec descriptionField,
       FieldSpec namesField,
@@ -71,6 +75,7 @@ final class Option {
       MethodSpec describeParamMethod,
       MethodSpec parsersMethod,
       MethodSpec positionalParsersMethod) {
+    this.flagField = flagField;
     this.positionalIndexField = positionalIndexField;
     this.descriptionField = descriptionField;
     this.bundleKeyField = bundleKeyField;
@@ -83,21 +88,23 @@ final class Option {
   }
 
   static Option create(Context context) {
+    FieldSpec flagField = FieldSpec.builder(BOOLEAN, "flag").addModifiers(FINAL).build();
     FieldSpec namesField = FieldSpec.builder(LIST_OF_STRING, "names").addModifiers(FINAL).build();
     FieldSpec positionalIndexField = FieldSpec.builder(OptionalInt.class, "positionalIndex").addModifiers(FINAL).build();
     FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").addModifiers(FINAL).build();
+    FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").addModifiers(FINAL).build();
     TypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType());
     TypeName positionalParsersType = ParameterizedTypeName.get(ClassName.get(List.class), context.positionalOptionParserType());
     MethodSpec optionNamesMethod = optionNamesMethod(context.optionType(), namesField);
     MethodSpec parsersMethod = parsersMethod(parsersType, context);
     MethodSpec positionalParsersMethod = positionalParsersMethod(positionalParsersType, context);
-    FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").addModifiers(FINAL).build();
 
     MethodSpec describeParamMethod = describeParamMethod(namesField);
 
     return new Option(
         context,
         bundleKeyField,
+        flagField,
         positionalIndexField,
         descriptionField,
         namesField,
@@ -116,6 +123,7 @@ final class Option {
     }
     return spec.addModifiers(PRIVATE)
         .addField(namesField)
+        .addField(flagField)
         .addField(bundleKeyField)
         .addField(positionalIndexField)
         .addField(descriptionField)
@@ -135,6 +143,7 @@ final class Option {
     List<String> desc = param.description();
     Map<String, Object> map = new LinkedHashMap<>();
     CodeBlock names = getNames(param);
+    map.put("flag", param.isFlag());
     map.put("names", names);
     map.put("bundleKey", param.bundleKey().orElse(null));
     map.put("positionalIndex", param.positionalIndex().isPresent() ?
@@ -144,6 +153,7 @@ final class Option {
     String format = String.join(", ",
         "$names:L",
         "$bundleKey:S",
+        "$flag:L",
         "$positionalIndex:L",
         "$descExpression:L");
 
@@ -336,15 +346,17 @@ final class Option {
 
   private MethodSpec privateConstructor() {
     ParameterSpec names = builder(namesField.type, namesField.name).build();
+    ParameterSpec flag = builder(flagField.type, flagField.name).build();
     ParameterSpec bundleKey = builder(bundleKeyField.type, bundleKeyField.name).build();
     ParameterSpec positionalIndex = builder(positionalIndexField.type, positionalIndexField.name).build();
     ParameterSpec description = builder(descriptionField.type, descriptionField.name).build();
     return MethodSpec.constructorBuilder()
         .addStatement("this.$N = $N", namesField, names)
+        .addStatement("this.$N = $N", flagField, flag)
         .addStatement("this.$N = $N", bundleKeyField, bundleKey)
         .addStatement("this.$N = $N", positionalIndexField, positionalIndex)
         .addStatement("this.$N = $N", descriptionField, description)
-        .addParameters(asList(names, bundleKey, positionalIndex, description))
+        .addParameters(asList(names, bundleKey, flag, positionalIndex, description))
         .build();
   }
 
