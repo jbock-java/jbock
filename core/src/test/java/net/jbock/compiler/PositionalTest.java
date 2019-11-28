@@ -168,8 +168,8 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter(value = 0) abstract List<String> a();",
-        "  @PositionalParameter(value = 1) abstract String b();",
+        "  @PositionalParameter(1) abstract List<String> a();",
+        "  @PositionalParameter(2) abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -182,7 +182,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@CommandLineArguments",
         "abstract class Arguments {",
-        "  @PositionalParameter(value = 1) abstract Optional<Integer> a();",
+        "  @PositionalParameter(1) abstract Optional<Integer> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())

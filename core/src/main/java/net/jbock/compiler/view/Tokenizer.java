@@ -119,8 +119,13 @@ final class Tokenizer {
         .addParameter(option)
         .addStatement("$T $N = $N.getMessage($N.bundleKey, $N.description)",
             STRING, message, messages, option, option)
-        .addStatement("$T $N = $N.describe()",
-            STRING, description, option)
+        .addStatement("$T $N", STRING, description)
+        .beginControlFlow("if ($N.positionalIndex.isPresent())", option)
+        .addStatement("$N = $N.name().toLowerCase($T.US)", description, option, Locale.class)
+        .endControlFlow()
+        .beginControlFlow("else")
+        .addStatement("$N = $N.describe()", description, option)
+        .endControlFlow()
         .addStatement("return new $T($N, $N)",
             ParameterizedTypeName.get(ClassName.get(SimpleImmutableEntry.class), STRING, STRING),
             description, message)

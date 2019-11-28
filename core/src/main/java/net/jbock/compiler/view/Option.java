@@ -18,7 +18,6 @@ import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -162,8 +161,6 @@ final class Option {
     if (param.isFlag()) {
       validShortTokenMethodOverrideFlag(param).ifPresent(spec::addMethod);
       spec.addMethod(describeMethodOverrideFlag());
-    } else if (param.isPositional()) {
-      spec.addMethod(describeMethodPositionalOverride());
     }
     return spec.build();
   }
@@ -184,14 +181,6 @@ final class Option {
     return MethodSpec.methodBuilder("describe")
         .returns(STRING)
         .addStatement("return describeParam($S)", "")
-        .addAnnotation(Override.class)
-        .build();
-  }
-
-  private MethodSpec describeMethodPositionalOverride() {
-    return MethodSpec.methodBuilder("describe")
-        .returns(STRING)
-        .addStatement("return name().toLowerCase($T.US)", Locale.class)
         .addAnnotation(Override.class)
         .build();
   }
