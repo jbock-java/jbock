@@ -211,7 +211,7 @@ class CurlArgumentsTest {
         "Usage: curl [options...] <urls>...",
         "urls",
         "-X, --request METHOD  Optional<String> for regular arguments",
-        "-H, --H <headers...>  List<String> for repeatable arguments",
+        "-H, --H HEADERS       List<String> for repeatable arguments",
         "-v, --verbose         boolean for flags",
         "-i, --include",
         "");

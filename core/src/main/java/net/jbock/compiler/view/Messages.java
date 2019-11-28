@@ -7,11 +7,9 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 
 import java.util.Arrays;
-import java.util.regex.Pattern;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.TypeSpec.classBuilder;
-import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -30,11 +28,6 @@ final class Messages {
 
   private final Context context;
 
-  private final FieldSpec br = FieldSpec.builder(Pattern.class, "br")
-      .initializer("$T.compile($S)", Pattern.class, "\\R")
-      .addModifiers(FINAL)
-      .build();
-
   private Messages(Context context) {
     this.context = context;
   }
@@ -45,7 +38,7 @@ final class Messages {
 
   TypeSpec define() {
     return classBuilder(context.messagesType())
-        .addFields(asList(br, resourceBundle))
+        .addField(resourceBundle)
         .addMethod(privateConstructor())
         .addMethod(getMessageMethod())
         .addModifiers(PRIVATE, STATIC).build();

@@ -164,8 +164,6 @@ final class Option {
       spec.addMethod(describeMethodOverrideFlag());
     } else if (param.isPositional()) {
       spec.addMethod(describeMethodPositionalOverride());
-    } else if (param.isRepeatable()) {
-      spec.addMethod(describeMethodRepeatableOverride());
     }
     return spec.build();
   }
@@ -190,18 +188,18 @@ final class Option {
         .build();
   }
 
-  private MethodSpec describeMethodRepeatableOverride() {
-    return MethodSpec.methodBuilder("describe")
-        .returns(STRING)
-        .addStatement("return describeParam($T.format($S, name().toLowerCase($T.US)))", String.class, " <%s...>", Locale.class)
-        .build();
-  }
-
   private MethodSpec describeMethodPositionalOverride() {
     return MethodSpec.methodBuilder("describe")
         .returns(STRING)
         .addStatement("return name().toLowerCase($T.US)", Locale.class)
         .addAnnotation(Override.class)
+        .build();
+  }
+
+  private MethodSpec describeMethod() {
+    return MethodSpec.methodBuilder("describe")
+        .returns(STRING)
+        .addStatement("return describeParam(' ' + name())")
         .build();
   }
 
@@ -406,13 +404,6 @@ final class Option {
           .returns(BOOLEAN)
           .build();
     });
-  }
-
-  private MethodSpec describeMethod() {
-    return MethodSpec.methodBuilder("describe")
-        .returns(STRING)
-        .addStatement("return describeParam(' ' + name())")
-        .build();
   }
 
   private MethodSpec parserMethod() {

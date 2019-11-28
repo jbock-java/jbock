@@ -70,7 +70,7 @@ class NoNameArgumentsTest {
     f.assertPrintsHelp(
         "Usage: no-name-arguments [options...] -n <number>",
         "    --message MESSAGE",
-        "    --file <file...>",
+        "    --file FILE",
         "-v, --verbosity VERBOSITY",
         "-n, --number NUMBER",
         "    --cmos",

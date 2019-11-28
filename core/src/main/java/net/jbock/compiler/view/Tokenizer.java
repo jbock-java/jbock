@@ -65,20 +65,17 @@ final class Tokenizer {
         .addMethod(buildRowsMethod())
         .addMethod(printDescriptionMethod())
         .addField(messages);
-    context.helpRequestedType()
-        .map(this::printUsageMethod)
-        .ifPresent(spec::addMethod);
     return spec.build();
   }
 
   private MethodSpec parseMethod() {
-    ParameterSpec args = ParameterSpec.builder(Constants.STRING_ARRAY, "args").build();
-    ParameterSpec e = ParameterSpec.builder(RuntimeException.class, "e").build();
+    ParameterSpec args = builder(Constants.STRING_ARRAY, "args").build();
+    ParameterSpec e = builder(RuntimeException.class, "e").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
-    context.helpRequestedType().ifPresent(helpPrintedType ->
+    context.helpRequestedType().ifPresent(helpRequestedType ->
         spec.beginControlFlow("if ($N.length >= 1 && $S.equals($N[0]))", args, "--help", args)
-            .addStatement("return printUsage()")
+            .addStatement("return new $T(synopsis(), buildRows())", helpRequestedType)
             .endControlFlow());
 
     spec.beginControlFlow("try")
@@ -95,16 +92,9 @@ final class Tokenizer {
         .build();
   }
 
-  private MethodSpec printUsageMethod(ClassName helpRequestedType) {
-    return MethodSpec.methodBuilder("printUsage")
-        .returns(context.parseResultType())
-        .addStatement("return new $T(synopsis(), buildRows())",
-            helpRequestedType).build();
-  }
-
   private MethodSpec buildRowsMethod() {
     ParameterSpec rows = builder(Constants.listOf(ENTRY_STRING_STRING), "rows").build();
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
+    ParameterSpec optionParam = builder(context.optionType(), "option").build();
     return MethodSpec.methodBuilder("buildRows")
         .returns(rows.type)
         .addStatement("$T $N = new $T<>()", rows.type, rows, ArrayList.class)
@@ -122,12 +112,18 @@ final class Tokenizer {
   }
 
   private MethodSpec printDescriptionMethod() {
-    ParameterSpec option = ParameterSpec.builder(context.optionType(), "option").build();
+    ParameterSpec option = builder(context.optionType(), "option").build();
+    ParameterSpec message = builder(STRING, "message").build();
+    ParameterSpec description = builder(STRING, "description").build();
     return MethodSpec.methodBuilder("printDescription")
         .addParameter(option)
-        .addStatement("return new $T($N.describe(), $N.getMessage($N.bundleKey, $N.description))",
+        .addStatement("$T $N = $N.getMessage($N.bundleKey, $N.description)",
+            STRING, message, messages, option, option)
+        .addStatement("$T $N = $N.describe()",
+            STRING, description, option)
+        .addStatement("return new $T($N, $N)",
             ParameterizedTypeName.get(ClassName.get(SimpleImmutableEntry.class), STRING, STRING),
-            option, messages, option, option)
+            description, message)
         .returns(ENTRY_STRING_STRING)
         .build();
   }
@@ -136,7 +132,7 @@ final class Tokenizer {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("synopsis")
         .returns(STRING);
 
-    ParameterSpec joiner = ParameterSpec.builder(StringJoiner.class, "joiner").build();
+    ParameterSpec joiner = builder(StringJoiner.class, "joiner").build();
 
     spec.addStatement("$T $N = new $T($S)",
         StringJoiner.class, joiner, StringJoiner.class, " ");
@@ -184,14 +180,14 @@ final class Tokenizer {
 
   private MethodSpec parseMethodOverloadIterator() {
 
-    ParameterSpec stateParam = ParameterSpec.builder(context.parserStateType(), "state").build();
-    ParameterSpec tokens = ParameterSpec.builder(STRING_ITERATOR, "tokens").build();
+    ParameterSpec stateParam = builder(context.parserStateType(), "state").build();
+    ParameterSpec tokens = builder(STRING_ITERATOR, "tokens").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse")
         .addParameter(tokens)
         .returns(context.sourceElement());
 
-    ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
+    ParameterSpec positionParam = builder(INT, "position").build();
 
     spec.addStatement("$T $N = $L", positionParam.type, positionParam, 0);
     spec.addStatement("$T $N = new $T()", stateParam.type, stateParam, stateParam.type);
@@ -209,14 +205,14 @@ final class Tokenizer {
       ParameterSpec positionParam,
       ParameterSpec tokens) {
 
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec optionParam = builder(context.optionType(), "option").build();
+    ParameterSpec token = builder(STRING, "token").build();
 
     CodeBlock.Builder spec = CodeBlock.builder();
     spec.addStatement("$T $N = $N.next()", STRING, token, tokens);
 
     if (context.allowEscape()) {
-      ParameterSpec t = ParameterSpec.builder(STRING, "t").build();
+      ParameterSpec t = builder(STRING, "t").build();
       spec.beginControlFlow("if ($S.equals($N))", "--", token);
 
       spec.beginControlFlow("while ($N.hasNext())", tokens)
@@ -253,7 +249,7 @@ final class Tokenizer {
   }
 
   private MethodSpec privateConstructor() {
-    ParameterSpec messagesParam = ParameterSpec.builder(messages.type, messages.name).build();
+    ParameterSpec messagesParam = builder(messages.type, messages.name).build();
     return constructorBuilder().addParameter(messagesParam)
         .addStatement("this.$N = $N", messages, messagesParam)
         .build();
