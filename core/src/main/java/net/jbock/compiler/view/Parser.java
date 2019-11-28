@@ -55,9 +55,11 @@ public final class Parser {
   private final MethodSpec readNextMethod;
   private final MethodSpec readValidArgumentMethod;
 
-  private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out").addModifiers(PRIVATE).build();
+  private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out", PRIVATE)
+      .initializer("$T.out", System.class).build();
 
-  private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err").addModifiers(PRIVATE).build();
+  private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
+      .initializer("$T.err", System.class).build();
 
   private final FieldSpec runBeforeExit;
 
