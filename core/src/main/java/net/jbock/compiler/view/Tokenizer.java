@@ -15,6 +15,7 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.StringJoiner;
 
@@ -158,8 +159,10 @@ final class Tokenizer {
     }
 
     for (Param param : requiredNonpos) {
-      spec.addStatement("$N.add($T.$L.example())", joiner,
-          context.optionType(), param.enumConstant());
+      spec.addStatement("$N.add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))", joiner,
+          String.class, "%s <%s>",
+          context.optionType(), param.enumConstant(),
+          context.optionType(), param.enumConstant(), Locale.class);
     }
 
     for (Param param : positional) {

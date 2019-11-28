@@ -49,8 +49,6 @@ final class Option {
 
   private final MethodSpec describeParamMethod;
 
-  private final MethodSpec exampleMethod;
-
   private final FieldSpec descriptionField;
 
   private final FieldSpec namesField;
@@ -71,13 +69,11 @@ final class Option {
       FieldSpec positionalIndexField,
       FieldSpec descriptionField,
       FieldSpec namesField,
-      MethodSpec exampleMethod,
       MethodSpec optionNamesMethod,
       MethodSpec describeParamMethod,
       MethodSpec parsersMethod,
       MethodSpec positionalParsersMethod) {
     this.positionalIndexField = positionalIndexField;
-    this.exampleMethod = exampleMethod;
     this.descriptionField = descriptionField;
     this.bundleKeyField = bundleKeyField;
     this.context = context;
@@ -97,7 +93,6 @@ final class Option {
     MethodSpec optionNamesMethod = optionNamesMethod(context.optionType(), namesField);
     MethodSpec parsersMethod = parsersMethod(parsersType, context);
     MethodSpec positionalParsersMethod = positionalParsersMethod(positionalParsersType, context);
-    MethodSpec exampleMethod = exampleMethod(namesField);
     FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").addModifiers(FINAL).build();
 
     MethodSpec describeParamMethod = describeParamMethod(namesField);
@@ -108,7 +103,6 @@ final class Option {
         positionalIndexField,
         descriptionField,
         namesField,
-        exampleMethod,
         optionNamesMethod,
         describeParamMethod,
         parsersMethod,
@@ -128,7 +122,6 @@ final class Option {
         .addField(positionalIndexField)
         .addField(descriptionField)
         .addMethod(describeParamMethod)
-        .addMethod(exampleMethod)
         .addMethod(missingRequiredLambdaMethod())
         .addMethod(privateConstructor())
         .addMethod(optionNamesMethod)
@@ -295,17 +288,6 @@ final class Option {
             namesField, ", ", namesField, argname)
         .build();
   }
-
-  private static MethodSpec exampleMethod(
-      FieldSpec namesField) {
-
-    return MethodSpec.methodBuilder("example")
-        .returns(STRING)
-        .addStatement("return $T.format($S, $N.get(0), name().toLowerCase($T.US))",
-            String.class, "%s <%s>", namesField, Locale.class)
-        .build();
-  }
-
 
   private static MethodSpec parsersMethod(
       TypeName parsersType,
