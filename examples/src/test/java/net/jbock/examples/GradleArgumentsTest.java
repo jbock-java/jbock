@@ -40,15 +40,15 @@ class GradleArgumentsTest {
 
   @Test
   void errorInvalidOption() {
-    f.assertThat("-c1").failsWithMessage("Invalid option: -c1");
-    f.assertThat("-c-v").failsWithMessage("Invalid option: -c-v");
-    f.assertThat("-c-").failsWithMessage("Invalid option: -c-");
-    f.assertThat("-c=v").failsWithMessage("Invalid option: -c=v");
-    f.assertThat("-c=").failsWithMessage("Invalid option: -c=");
-    f.assertThat("-cX=1").failsWithMessage("Invalid option: -cX=1");
-    f.assertThat("-cvv").failsWithMessage("Invalid option: -cvv");
-    f.assertThat("-cvx").failsWithMessage("Invalid option: -cvx");
-    f.assertThat("-cvm").failsWithMessage("Invalid option: -cvm");
+    f.assertThat("-c1").failsWithMessage("Invalid token: -c1");
+    f.assertThat("-c-v").failsWithMessage("Invalid token: -c-v");
+    f.assertThat("-c-").failsWithMessage("Invalid token: -c-");
+    f.assertThat("-c=v").failsWithMessage("Invalid token: -c=v");
+    f.assertThat("-c=").failsWithMessage("Invalid token: -c=");
+    f.assertThat("-cX=1").failsWithMessage("Invalid token: -cX=1");
+    f.assertThat("-cvv").failsWithMessage("Invalid token: -cvv");
+    f.assertThat("-cvx").failsWithMessage("Invalid token: -cvx");
+    f.assertThat("-cvm").failsWithMessage("Invalid token: -cvm");
   }
 
   @Test
@@ -179,7 +179,7 @@ class GradleArgumentsTest {
 
   @Test
   void errorSuspiciousInput() {
-    f.assertThat("-cvm", "hello").failsWithMessage("Invalid option: -cvm");
+    f.assertThat("-cvm", "hello").failsWithMessage("Invalid token: -cvm");
   }
 
   @Test

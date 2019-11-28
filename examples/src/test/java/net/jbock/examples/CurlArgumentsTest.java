@@ -158,18 +158,18 @@ class CurlArgumentsTest {
 
   @Test
   void errorInvalidGrouping() {
-    f.assertThat("-vH1").failsWithMessage("Invalid option: -vH1");
+    f.assertThat("-vH1").failsWithMessage("Invalid token: -vH1");
   }
 
   @Test
   void errorInvalidGroupingLong() {
-    f.assertThat("-vXPOST").failsWithMessage("Invalid option: -vXPOST");
+    f.assertThat("-vXPOST").failsWithMessage("Invalid token: -vXPOST");
   }
 
   @Test
   void errorGroupingDuplicateFlag() {
     f.assertThat("-v", "-vH'Content-Type: application/xml'").failsWithMessage(
-        "Invalid option: -vH'Content-Type: application/xml'");
+        "Invalid token: -vH'Content-Type: application/xml'");
   }
 
   @Test

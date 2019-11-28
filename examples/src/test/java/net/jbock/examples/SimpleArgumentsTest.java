@@ -13,7 +13,7 @@ class SimpleArgumentsTest {
   @Test
   void invalidOptions() {
     f.assertThat("xf", "1").failsWithMessage("Invalid option: xf");
-    f.assertThat("-xf", "1").failsWithMessage("Invalid option: -xf");
+    f.assertThat("-xf", "1").failsWithMessage("Invalid token: -xf");
   }
 
   @Test

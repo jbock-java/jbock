@@ -25,9 +25,9 @@ class TarArgumentsTest {
   }
 
   @Test
-  void noGrouping() {
-    f.assertThat("-v", "xf", "foo.tar").failsWithMessage("Invalid option: xf");
-    f.assertThat("-v", "-xf", "foo.tar").failsWithMessage("Invalid option: -xf");
+  void flagWithArgument() {
+    f.assertThat("-xf").failsWithMessage("Invalid token: -xf");
+    f.assertThat("--x=f").failsWithMessage("Invalid token: --x=f");
   }
 
   @Test

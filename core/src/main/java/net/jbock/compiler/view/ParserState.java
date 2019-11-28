@@ -144,8 +144,8 @@ final class ParserState {
         .addStatement("return null")
         .endControlFlow();
 
-    spec.beginControlFlow("if (!$N.validShortToken($N))",
-        optionParam, token)
+    spec.beginControlFlow("if ($N.length() < 2 || $N.charAt(0) != '-')",
+        token, token)
         .addStatement("return null")
         .endControlFlow();
 

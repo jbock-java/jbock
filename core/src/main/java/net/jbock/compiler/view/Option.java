@@ -25,7 +25,6 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
@@ -128,7 +127,6 @@ final class Option {
         .addMethod(positionalValuesMethod())
         .addMethod(positionalValueMethod())
         .addMethod(positionalParsersMethod)
-        .addMethod(validShortTokenMethod())
         .addMethod(describeMethod())
         .build();
   }
@@ -152,7 +150,6 @@ final class Option {
     CodeBlock block = CodeBlock.builder().addNamed(format, map).build();
     TypeSpec.Builder spec = anonymousClassBuilder(block);
     if (param.isFlag()) {
-      validShortTokenMethodOverrideFlag(param).ifPresent(spec::addMethod);
       spec.addMethod(describeMethodOverrideFlag());
     }
     return spec.build();
@@ -335,27 +332,6 @@ final class Option {
 
     return spec.addParameter(positionalParameter)
         .returns(OPTIONAL_STRING).build();
-  }
-
-  private static MethodSpec validShortTokenMethod() {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("validShortToken");
-    ParameterSpec token = builder(STRING, "token").build();
-    spec.addParameter(token);
-    spec.addStatement("return $N.length() >= 2 && $N.charAt(0) == '-'", token, token);
-    spec.returns(BOOLEAN);
-    return spec.build();
-  }
-
-  private static Optional<MethodSpec> validShortTokenMethodOverrideFlag(Param param) {
-    return param.shortName().map(shortName -> {
-      ParameterSpec token = builder(STRING, "token").build();
-      return MethodSpec.methodBuilder("validShortToken")
-          .addParameter(token)
-          .addStatement("return $S.equals($N)", shortName, token)
-          .addAnnotation(Override.class)
-          .returns(BOOLEAN)
-          .build();
-    });
   }
 
   private MethodSpec privateConstructor() {
