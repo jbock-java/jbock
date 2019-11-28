@@ -123,8 +123,11 @@ final class Tokenizer {
         .beginControlFlow("if ($N.positionalIndex.isPresent())", option)
         .addStatement("$N = $N.name().toLowerCase($T.US)", description, option, Locale.class)
         .endControlFlow()
+        .beginControlFlow("else if ($N.flag)", option)
+        .addStatement("$N = $N.describeParam($S)", description, option, "")
+        .endControlFlow()
         .beginControlFlow("else")
-        .addStatement("$N = $N.describe()", description, option)
+        .addStatement("$N = $N.describeParam(' ' + $N.name())", description, option, option)
         .endControlFlow()
         .addStatement("return new $T($N, $N)",
             ParameterizedTypeName.get(ClassName.get(SimpleImmutableEntry.class), STRING, STRING),

@@ -135,7 +135,6 @@ final class Option {
         .addMethod(positionalValuesMethod())
         .addMethod(positionalValueMethod())
         .addMethod(positionalParsersMethod)
-        .addMethod(describeMethod())
         .build();
   }
 
@@ -158,11 +157,7 @@ final class Option {
         "$descExpression:L");
 
     CodeBlock block = CodeBlock.builder().addNamed(format, map).build();
-    TypeSpec.Builder spec = anonymousClassBuilder(block);
-    if (param.isFlag()) {
-      spec.addMethod(describeMethodOverrideFlag());
-    }
-    return spec.build();
+    return anonymousClassBuilder(block).build();
   }
 
   private CodeBlock getNames(Param param) {
@@ -175,21 +170,6 @@ final class Option {
     } else {
       return CodeBlock.of("$T.asList($S, $S)", Arrays.class, param.shortName().get(), param.longName().get());
     }
-  }
-
-  private MethodSpec describeMethodOverrideFlag() {
-    return MethodSpec.methodBuilder("describe")
-        .returns(STRING)
-        .addStatement("return describeParam($S)", "")
-        .addAnnotation(Override.class)
-        .build();
-  }
-
-  private MethodSpec describeMethod() {
-    return MethodSpec.methodBuilder("describe")
-        .returns(STRING)
-        .addStatement("return describeParam(' ' + name())")
-        .build();
   }
 
   private CodeBlock descExpression(List<String> desc) {

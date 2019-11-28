@@ -2,7 +2,7 @@
 set -e
 
 if [[ -z "$1" ]]; then echo "arg: version;" exit 1; fi
-gradle "-Pversion=${1}" clean test uploadArchives 
+gradle "-Pversion=${1}" clean test publish
 
 read -e -p "Upload successful. Also tag? [y/N]"
 if [[ "$REPLY" == [Yy]* ]]; then
