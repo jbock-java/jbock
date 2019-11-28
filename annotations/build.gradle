@@ -67,7 +67,7 @@ gradle.taskGraph.whenReady { taskGraph ->
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId = 'jbock'
+            artifactId = 'jbock-annotations'
             from components.java
 
             artifact sourcesJar
