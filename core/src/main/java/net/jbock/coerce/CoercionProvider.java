@@ -36,7 +36,7 @@ public class CoercionProvider {
     ParameterSpec name = ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake()).build();
     return new Coercion(
         CodeBlock.builder().build(),
-        CodeBlock.builder().build(),
+        CodeBlock.of("$T.identity()", Function.class),
         name,
         FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
         CodeBlock.of("$N", name),

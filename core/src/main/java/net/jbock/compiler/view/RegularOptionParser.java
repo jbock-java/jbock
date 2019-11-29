@@ -7,13 +7,11 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 
-import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.view.ParserState.throwRepetitionErrorStatement;
@@ -28,11 +26,6 @@ final class RegularOptionParser {
     return TypeSpec.classBuilder(context.regularOptionParserType())
         .superclass(context.optionParserType())
         .addMethod(readMethod(context, value))
-        .addMethod(MethodSpec.methodBuilder("value")
-            .returns(OPTIONAL_STRING)
-            .addStatement("return $T.ofNullable($N)", Optional.class, value)
-            .addAnnotation(Override.class)
-            .build())
         .addMethod(MethodSpec.methodBuilder("values")
             .returns(STREAM_OF_STRING)
             .addStatement("return $N == null ? $T.empty() : $T.of($N)",

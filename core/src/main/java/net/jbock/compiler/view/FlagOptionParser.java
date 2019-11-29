@@ -10,7 +10,6 @@ import net.jbock.compiler.Context;
 
 import java.util.stream.Stream;
 
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -27,11 +26,6 @@ final class FlagOptionParser {
     return TypeSpec.classBuilder(context.flagOptionParserType())
         .superclass(context.optionParserType())
         .addMethod(readMethod(context, flag))
-        .addMethod(MethodSpec.methodBuilder("flag")
-            .returns(BOOLEAN)
-            .addStatement("return $N", flag)
-            .addAnnotation(Override.class)
-            .build())
         .addMethod(MethodSpec.methodBuilder("values")
             .returns(STREAM_OF_STRING)
             .addStatement("return $N ? $T.of($S) : $T.empty()",

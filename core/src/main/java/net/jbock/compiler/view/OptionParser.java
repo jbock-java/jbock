@@ -8,13 +8,11 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.OPTIONAL_STRING;
 import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
@@ -27,16 +25,8 @@ final class OptionParser {
     FieldSpec option = FieldSpec.builder(context.optionType(), "option", FINAL).build();
     return TypeSpec.classBuilder(context.optionParserType())
         .addMethod(readMethod())
-        .addMethod(MethodSpec.methodBuilder("value")
-            .returns(OPTIONAL_STRING)
-            .addCode(throwAssertionError())
-            .build())
         .addMethod(MethodSpec.methodBuilder("values")
             .returns(STREAM_OF_STRING)
-            .addCode(throwAssertionError())
-            .build())
-        .addMethod(MethodSpec.methodBuilder("flag")
-            .returns(BOOLEAN)
             .addCode(throwAssertionError())
             .build())
         .addField(option)

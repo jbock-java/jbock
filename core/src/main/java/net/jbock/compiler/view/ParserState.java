@@ -7,7 +7,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.coerce.ParameterType;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Param;
 
@@ -130,14 +129,16 @@ final class ParserState {
 
   private CodeBlock extractExpression(Param param) {
     CodeBlock.Builder builder = getStreamExpression(param).toBuilder();
-    if (!param.isFlag()) {
-      builder.add(".map($L)", param.coercion().mapExpr());
-    }
+    builder.add(".map($L)", param.coercion().mapExpr());
     param.coercion().collectExpr().map(collectExpr ->
         CodeBlock.of(".collect($L)", collectExpr))
         .ifPresent(builder::add);
-    if (param.isRequired()) {
-      builder.add(".orElseThrow($T.$L.missingRequired())", context.optionType(),
+    if (param.isFlag()) {
+      builder.add(".findAny().isPresent()");
+    } else if (param.isOptional()) {
+      builder.add(".findAny()");
+    } else if (param.isRequired()) {
+      builder.add(".findAny().orElseThrow($T.$L.missingRequired())", context.optionType(),
           param.enumConstant());
     }
     return builder.build();
@@ -159,65 +160,18 @@ final class ParserState {
    * This expression will evaluate either to a {@link java.util.stream.Stream} or a {@link java.util.Optional}.
    */
   private CodeBlock getStreamExpression(Param param) {
-    ParameterType parameterType = param.coercion().parameterType();
     if (param.isPositional()) {
-      if (parameterType == ParameterType.REPEATABLE) {
-        return repeatablePositionalStream(param);
-      } else {
-        return regularPositionalStream(param);
-      }
+      return CodeBlock.builder().add(
+          "$N.get($L).values()",
+          positionalParsersField,
+          param.positionalIndex().orElseThrow(AssertionError::new))
+          .build();
     }
-    switch (parameterType) {
-      case REPEATABLE:
-        return repeatableStream(param);
-      case FLAG:
-        return flagStream(param);
-      default:
-        return regularStream(param);
-    }
-  }
-
-
-  private CodeBlock flagStream(Param param) {
     return CodeBlock.builder().add(
-        "$N.get($T.$N).flag()",
+        "$N.get($T.$N).values()",
         parsersField,
         context.optionType(),
         param.enumConstant())
-        .build();
-  }
-
-  private CodeBlock regularStream(Param param) {
-    return CodeBlock.builder().add(
-        "$N.get($T.$L).value()",
-        parsersField,
-        context.optionType(),
-        param.enumConstant())
-        .build();
-  }
-
-  private CodeBlock regularPositionalStream(Param param) {
-    return CodeBlock.builder().add(
-        "$N.get($L).value()",
-        positionalParsersField,
-        param.positionalIndex().orElseThrow(AssertionError::new))
-        .build();
-  }
-
-  private CodeBlock repeatableStream(Param param) {
-    return CodeBlock.builder().add(
-        "$N.get($T.$L).values()",
-        parsersField,
-        context.optionType(),
-        param.enumConstant())
-        .build();
-  }
-
-  private CodeBlock repeatablePositionalStream(Param param) {
-    return CodeBlock.builder().add(
-        "$N.get($L).values()",
-        positionalParsersField,
-        param.positionalIndex().orElseThrow(AssertionError::new))
         .build();
   }
 
