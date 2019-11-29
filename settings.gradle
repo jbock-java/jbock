@@ -1,2 +1,3 @@
+include 'annotations'
 include 'core'
 include 'examples'

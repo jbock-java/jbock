@@ -1,0 +1,12 @@
+#!/bin/bash
+set -e
+
+if [[ -z "$1" ]]; then echo "arg: version;" exit 1; fi
+./gradlew "-Pversion=${1}" annotations:clean annotations:publish
+
+read -e -p "Upload successful. Also tag? [y/N]"
+if [[ "$REPLY" == [Yy]* ]]; then
+  git tag "a${1}"
+  git push origin --tags
+fi
+
