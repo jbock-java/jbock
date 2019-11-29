@@ -24,7 +24,6 @@ final class RegularPositionalOptionParser {
     return TypeSpec.classBuilder(context.regularPositionalOptionParserType())
         .superclass(context.positionalOptionParserType())
         .addMethod(readMethod(value))
-        .addMethod(nextPositionMethod())
         .addMethod(MethodSpec.methodBuilder("value")
             .returns(OPTIONAL_STRING)
             .addStatement("return $T.ofNullable($N)", Optional.class, value)
@@ -38,16 +37,10 @@ final class RegularPositionalOptionParser {
     ParameterSpec valueParam = ParameterSpec.builder(STRING, "value").build();
     return MethodSpec.methodBuilder("read")
         .addParameter(valueParam)
-        .addStatement("this.$N = $N", value, valueParam)
-        .addAnnotation(Override.class)
-        .build();
-  }
-
-  private static MethodSpec nextPositionMethod() {
-    return MethodSpec.methodBuilder("positionIncrement")
-        .addAnnotation(Override.class)
-        .addStatement("return $L", 1)
         .returns(TypeName.INT)
+        .addStatement("this.$N = $N", value, valueParam)
+        .addStatement("return $L", 1)
+        .addAnnotation(Override.class)
         .build();
   }
 }

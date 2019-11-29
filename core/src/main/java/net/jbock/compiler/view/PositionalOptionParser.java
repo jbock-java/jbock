@@ -25,7 +25,6 @@ final class PositionalOptionParser {
         .build();
     return TypeSpec.classBuilder(context.positionalOptionParserType())
         .addMethod(readMethod())
-        .addMethod(nextPositionMethod())
         .addMethod(MethodSpec.methodBuilder("value")
             .returns(OPTIONAL_STRING)
             .addCode(defaultImpl)
@@ -42,14 +41,8 @@ final class PositionalOptionParser {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     return MethodSpec.methodBuilder("read")
         .addModifiers(ABSTRACT)
-        .addParameter(token)
-        .build();
-  }
-
-  private static MethodSpec nextPositionMethod() {
-    return MethodSpec.methodBuilder("positionIncrement")
-        .addModifiers(ABSTRACT)
         .returns(TypeName.INT)
+        .addParameter(token)
         .build();
   }
 }

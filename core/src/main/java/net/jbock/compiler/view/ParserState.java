@@ -124,7 +124,6 @@ final class ParserState {
 
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
-    ParameterSpec parser = ParameterSpec.builder(context.positionalOptionParserType(), "parser").build();
 
     return MethodSpec.methodBuilder("readPositional")
         .addParameters(Arrays.asList(positionParam, token))
@@ -132,9 +131,7 @@ final class ParserState {
         .beginControlFlow("if ($N >= $N.size())", positionParam, positionalParsersField)
         .addStatement(throwInvalidOptionStatement(token))
         .endControlFlow()
-        .addStatement("$T $N = $N.get($N)", parser.type, parser, positionalParsersField, positionParam)
-        .addStatement("$N.read($N)", parser, token)
-        .addStatement("return $N.positionIncrement()", parser)
+        .addStatement("return $N.get($N).read($N)", positionalParsersField, positionParam, token)
         .build();
   }
 

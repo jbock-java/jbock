@@ -27,7 +27,6 @@ final class RepeatablePositionalOptionParser {
     return TypeSpec.classBuilder(context.repeatablePositionalOptionParserType())
         .superclass(context.positionalOptionParserType())
         .addMethod(readMethod(values))
-        .addMethod(nextPositionMethod())
         .addMethod(MethodSpec.methodBuilder("values")
             .returns(STREAM_OF_STRING)
             .addStatement("return $N.stream()", values)
@@ -41,17 +40,10 @@ final class RepeatablePositionalOptionParser {
     ParameterSpec valueParam = ParameterSpec.builder(STRING, "value").build();
     return MethodSpec.methodBuilder("read")
         .addParameter(valueParam)
-        .addStatement("$N.add($N)", values, valueParam)
-        .addAnnotation(Override.class)
-        .build();
-  }
-
-
-  private static MethodSpec nextPositionMethod() {
-    return MethodSpec.methodBuilder("positionIncrement")
-        .addAnnotation(Override.class)
-        .addStatement("return $L", 0)
         .returns(TypeName.INT)
+        .addStatement("$N.add($N)", values, valueParam)
+        .addStatement("return $L", 0)
+        .addAnnotation(Override.class)
         .build();
   }
 }
