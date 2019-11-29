@@ -17,12 +17,10 @@ import java.util.List;
 import java.util.Map;
 
 import static com.squareup.javapoet.TypeName.INT;
-import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.view.Tokenizer.throwInvalidOptionStatement;
 
 /**
@@ -37,7 +35,6 @@ final class ParserState {
 
   private final FieldSpec positionalParsersField;
 
-  private final MethodSpec readMethod;
   private final MethodSpec readPositionalMethod;
   private final MethodSpec readRegularOptionMethod;
 
@@ -46,14 +43,12 @@ final class ParserState {
       FieldSpec optionNamesField,
       FieldSpec parsersField,
       FieldSpec positionalParsersField,
-      MethodSpec readMethod,
       MethodSpec readPositionalMethod,
       MethodSpec readRegularOptionMethod) {
     this.context = context;
     this.optionNamesField = optionNamesField;
     this.parsersField = parsersField;
     this.positionalParsersField = positionalParsersField;
-    this.readMethod = readMethod;
     this.readPositionalMethod = readPositionalMethod;
     this.readRegularOptionMethod = readRegularOptionMethod;
   }
@@ -82,7 +77,6 @@ final class ParserState {
 
     MethodSpec readRegularOptionMethod = readRegularOptionMethod(context, optionNamesField);
 
-    MethodSpec readMethod = readMethod(parsersField, context);
     MethodSpec readPositionalMethod = readPositionalMethod(positionalParsersField, context);
 
     return new ParserState(
@@ -90,7 +84,6 @@ final class ParserState {
         optionNamesField,
         parsersField,
         positionalParsersField,
-        readMethod,
         readPositionalMethod,
         readRegularOptionMethod);
   }
@@ -99,7 +92,6 @@ final class ParserState {
     return TypeSpec.classBuilder(context.parserStateType())
         .addModifiers(PRIVATE, STATIC)
         .addMethod(buildMethod())
-        .addMethod(readMethod)
         .addMethod(readPositionalMethod)
         .addMethod(readRegularOptionMethod)
         .addFields(Arrays.asList(optionNamesField, parsersField, positionalParsersField))
@@ -124,20 +116,6 @@ final class ParserState {
         .endControlFlow();
 
     spec.addStatement("return $N.get($N.substring(0, 2))", optionNamesField, token);
-
-    return spec.build();
-  }
-
-  private static MethodSpec readMethod(FieldSpec parsersField, Context context) {
-
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
-        .addParameters(asList(optionParam, token, it));
-
-    spec.addStatement("$N.get($N).read($N, $N)", parsersField, optionParam, token, it);
 
     return spec.build();
   }
@@ -269,19 +247,15 @@ final class ParserState {
         .build();
   }
 
-  FieldSpec positionalParsersField() {
-    return positionalParsersField;
-  }
-
-  MethodSpec readMethod() {
-    return readMethod;
-  }
-
   MethodSpec readPositionalMethod() {
     return readPositionalMethod;
   }
 
   MethodSpec readRegularOptionMethod() {
     return readRegularOptionMethod;
+  }
+
+  FieldSpec parsersField() {
+    return parsersField;
   }
 }

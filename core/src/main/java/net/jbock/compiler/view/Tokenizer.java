@@ -189,10 +189,10 @@ final class Tokenizer {
   private MethodSpec parseMethodOverloadIterator() {
 
     ParameterSpec stateParam = builder(context.parserStateType(), "state").build();
-    ParameterSpec tokens = builder(STRING_ITERATOR, "tokens").build();
+    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse")
-        .addParameter(tokens)
+        .addParameter(it)
         .returns(context.sourceElement());
 
     ParameterSpec positionParam = builder(INT, "position").build();
@@ -200,8 +200,8 @@ final class Tokenizer {
     spec.addStatement("$T $N = $L", positionParam.type, positionParam, 0);
     spec.addStatement("$T $N = new $T()", stateParam.type, stateParam, stateParam.type);
 
-    spec.beginControlFlow("while ($N.hasNext())", tokens)
-        .addCode(codeInsideParsingLoop(stateParam, positionParam, tokens))
+    spec.beginControlFlow("while ($N.hasNext())", it)
+        .addCode(codeInsideParsingLoop(stateParam, positionParam, it))
         .endControlFlow();
 
     spec.addStatement("return $N.build()", stateParam);
@@ -211,20 +211,20 @@ final class Tokenizer {
   private CodeBlock codeInsideParsingLoop(
       ParameterSpec stateParam,
       ParameterSpec positionParam,
-      ParameterSpec tokens) {
+      ParameterSpec it) {
 
     ParameterSpec optionParam = builder(context.optionType(), "option").build();
     ParameterSpec token = builder(STRING, "token").build();
 
     CodeBlock.Builder spec = CodeBlock.builder();
-    spec.addStatement("$T $N = $N.next()", STRING, token, tokens);
+    spec.addStatement("$T $N = $N.next()", STRING, token, it);
 
     if (context.allowEscape()) {
       ParameterSpec t = builder(STRING, "t").build();
       spec.beginControlFlow("if ($S.equals($N))", "--", token);
 
-      spec.beginControlFlow("while ($N.hasNext())", tokens)
-          .addStatement("$T $N = $N.next()", STRING, t, tokens)
+      spec.beginControlFlow("while ($N.hasNext())", it)
+          .addStatement("$T $N = $N.next()", STRING, t, it)
           .addStatement("$N += $N.$N($N, $N)", positionParam, stateParam, state.readPositionalMethod(), positionParam, t)
           .endControlFlow()
           .addStatement("return $N.build()", stateParam);
@@ -235,7 +235,7 @@ final class Tokenizer {
     spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, stateParam, state.readRegularOptionMethod(), token);
 
     spec.beginControlFlow("if ($N != null)", optionParam)
-        .addStatement("$N.$N($N, $N, $N)", stateParam, state.readMethod(), optionParam, token, tokens)
+        .addStatement("$N.$N.get($N).read($N, $N)", stateParam, state.parsersField(), optionParam, token, it)
         .addStatement("continue")
         .endControlFlow();
 

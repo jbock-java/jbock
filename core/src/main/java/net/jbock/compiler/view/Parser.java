@@ -52,7 +52,6 @@ public final class Parser {
   private final Impl impl;
   private final ParseResult parseResult;
 
-  private final MethodSpec readNextMethod;
   private final MethodSpec readValidArgumentMethod;
 
   private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out", PRIVATE)
@@ -77,7 +76,6 @@ public final class Parser {
       ParserState state,
       Impl impl,
       ParseResult parseResult,
-      MethodSpec readNextMethod,
       MethodSpec readValidArgumentMethod,
       FieldSpec runBeforeExit) {
     this.context = context;
@@ -86,14 +84,12 @@ public final class Parser {
     this.state = state;
     this.impl = impl;
     this.parseResult = parseResult;
-    this.readNextMethod = readNextMethod;
     this.readValidArgumentMethod = readValidArgumentMethod;
     this.runBeforeExit = runBeforeExit;
   }
 
   public static Parser create(Context context) {
-    MethodSpec readNextMethod = readNextMethod();
-    MethodSpec readValidArgumentMethod = readValidArgumentMethod(readNextMethod);
+    MethodSpec readValidArgumentMethod = readValidArgumentMethod();
     Option option = Option.create(context);
     Impl impl = Impl.create(context);
     ParserState state = ParserState.create(context, option);
@@ -102,7 +98,7 @@ public final class Parser {
     FieldSpec runBeforeExit = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), context.parseResultType()), "runBeforeExit").addModifiers(PRIVATE)
         .initializer("r -> {}")
         .build();
-    return new Parser(context, builder, option, state, impl, parseResult, readNextMethod, readValidArgumentMethod,
+    return new Parser(context, builder, option, state, impl, parseResult, readValidArgumentMethod,
         runBeforeExit);
   }
 
@@ -123,7 +119,6 @@ public final class Parser {
         .addType(RepeatablePositionalOptionParser.define(context))
         .addType(Messages.create(context).define())
         .addTypes(parseResult.defineResultTypes())
-        .addFields(Arrays.asList(err, maxLineWidth, runBeforeExit, messages))
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addMethod(createMethod())
         .addMethod(parseMethod())
@@ -135,13 +130,13 @@ public final class Parser {
         .addMethod(withMessagesMethod())
         .addMethod(withResourceBundleMethod())
         .addMethod(runBeforeExitMethod())
-        .addMethod(readValidArgumentMethod)
-        .addMethod(readNextMethod);
+        .addMethod(readValidArgumentMethod);
 
     if (context.isHelpParameterEnabled()) {
       spec.addMethod(withOutputStreamMethod());
       spec.addField(out);
     }
+    spec.addFields(Arrays.asList(err, maxLineWidth, runBeforeExit, messages));
     return spec.addJavadoc(javadoc()).build();
   }
 
@@ -365,17 +360,13 @@ public final class Parser {
         "</a>\n").build();
   }
 
-  private static MethodSpec readValidArgumentMethod(
-      MethodSpec readNextMethod) {
+  private static MethodSpec readValidArgumentMethod() {
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec index = builder(INT, "index").build();
     ParameterSpec isLong = builder(BOOLEAN, "isLong").build();
     MethodSpec.Builder builder = methodBuilder("readValidArgument");
 
-    builder.beginControlFlow("if ($N.length() < 2)", token)
-        .addStatement("throw new $T($S)", IllegalArgumentException.class, "unexpected")
-        .endControlFlow();
     builder.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
     builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
 
@@ -387,19 +378,6 @@ public final class Parser {
         .addStatement("return $N.substring(2)", token)
         .endControlFlow();
 
-    builder.addStatement("return $N($N, $N)", readNextMethod, token, it);
-
-    return builder.addParameters(asList(token, it))
-        .returns(STRING)
-        .addModifiers(STATIC, PRIVATE)
-        .build();
-  }
-
-  private static MethodSpec readNextMethod() {
-    ParameterSpec token = builder(STRING, "token").build();
-    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-    CodeBlock.Builder builder = CodeBlock.builder();
-
     builder.beginControlFlow("if (!$N.hasNext())", it)
         .addStatement(CodeBlock.builder()
             .add("throw new $T($S + $N)", IllegalArgumentException.class,
@@ -407,12 +385,9 @@ public final class Parser {
             .build())
         .endControlFlow();
 
-    builder.addStatement("return $N.next()", it);
-
-    return methodBuilder("readNext")
+    return builder.addStatement("return $N.next()", it)
         .addParameters(asList(token, it))
         .returns(STRING)
-        .addCode(builder.build())
         .addModifiers(STATIC, PRIVATE)
         .build();
   }
