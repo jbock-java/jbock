@@ -19,10 +19,8 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
@@ -33,8 +31,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.OPTIONAL_STRING;
-import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 /**
@@ -132,8 +128,6 @@ final class Option {
         .addMethod(privateConstructor())
         .addMethod(optionNamesMethod)
         .addMethod(parsersMethod)
-        .addMethod(positionalValuesMethod())
-        .addMethod(positionalValueMethod())
         .addMethod(positionalParsersMethod)
         .build();
   }
@@ -282,46 +276,6 @@ final class Option {
           context.regularPositionalOptionParserType());
     }
     return spec.addStatement("return $N", parsers).build();
-  }
-
-  private MethodSpec positionalValuesMethod() {
-
-    ParameterSpec positionalParameter = builder(LIST_OF_STRING, "positional").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("values");
-
-    spec.beginControlFlow("if (!$N.isPresent())", positionalIndexField)
-        .addStatement("return $T.empty()", Stream.class)
-        .endControlFlow();
-
-    spec.beginControlFlow("if ($N.getAsInt() >= $N.size())", positionalIndexField, positionalParameter)
-        .addStatement("return $T.empty()", Stream.class)
-        .endControlFlow();
-
-    spec.addStatement("return $N.subList($N.getAsInt(), $N.size()).stream()", positionalParameter, positionalIndexField, positionalParameter);
-    return spec.addParameter(positionalParameter)
-        .returns(STREAM_OF_STRING).build();
-  }
-
-  private MethodSpec positionalValueMethod() {
-
-    ParameterSpec positionalParameter = builder(LIST_OF_STRING, "positional").build();
-
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("value");
-
-    spec.beginControlFlow("if (!$N.isPresent())", positionalIndexField)
-        .addStatement("return $T.empty()", Optional.class)
-        .endControlFlow();
-
-    spec.beginControlFlow("if ($N.getAsInt() >= $N.size())", positionalIndexField, positionalParameter)
-        .addStatement("return $T.empty()", Optional.class)
-        .endControlFlow();
-
-    spec.addStatement("return $T.of($N.get($N.getAsInt()))",
-        Optional.class, positionalParameter, positionalIndexField);
-
-    return spec.addParameter(positionalParameter)
-        .returns(OPTIONAL_STRING).build();
   }
 
   private MethodSpec privateConstructor() {
