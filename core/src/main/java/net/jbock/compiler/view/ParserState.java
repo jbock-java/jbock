@@ -21,8 +21,8 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.view.Tokenizer.throwInvalidOptionStatement;
 
 /**
@@ -41,8 +41,6 @@ final class ParserState {
   private final MethodSpec readPositionalMethod;
   private final MethodSpec readRegularOptionMethod;
 
-  private final MethodSpec readLongMethod;
-
   private ParserState(
       Context context,
       FieldSpec optionNamesField,
@@ -50,7 +48,6 @@ final class ParserState {
       FieldSpec positionalParsersField,
       MethodSpec readMethod,
       MethodSpec readPositionalMethod,
-      MethodSpec readLongMethod,
       MethodSpec readRegularOptionMethod) {
     this.context = context;
     this.optionNamesField = optionNamesField;
@@ -58,7 +55,6 @@ final class ParserState {
     this.positionalParsersField = positionalParsersField;
     this.readMethod = readMethod;
     this.readPositionalMethod = readPositionalMethod;
-    this.readLongMethod = readLongMethod;
     this.readRegularOptionMethod = readRegularOptionMethod;
   }
 
@@ -84,12 +80,7 @@ final class ParserState {
         .addModifiers(FINAL)
         .build();
 
-    MethodSpec readLongMethod = readLongMethod(optionNamesField, context);
-
-    MethodSpec readRegularOptionMethod = readRegularOptionMethod(
-        optionNamesField,
-        context,
-        readLongMethod);
+    MethodSpec readRegularOptionMethod = readRegularOptionMethod(context, optionNamesField);
 
     MethodSpec readMethod = readMethod(parsersField, context);
     MethodSpec readPositionalMethod = readPositionalMethod(positionalParsersField, context);
@@ -101,7 +92,6 @@ final class ParserState {
         positionalParsersField,
         readMethod,
         readPositionalMethod,
-        readLongMethod,
         readRegularOptionMethod);
   }
 
@@ -112,16 +102,13 @@ final class ParserState {
         .addMethod(readMethod)
         .addMethod(readPositionalMethod)
         .addMethod(readRegularOptionMethod)
-        .addMethod(readLongMethod)
         .addFields(Arrays.asList(optionNamesField, parsersField, positionalParsersField))
         .build();
   }
 
-  private static MethodSpec readRegularOptionMethod(
-      FieldSpec longNamesField,
-      Context context,
-      MethodSpec readLongMethod) {
+  private static MethodSpec readRegularOptionMethod(Context context, FieldSpec optionNamesField) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("readRegularOption")
         .addParameter(token)
         .returns(context.optionType());
@@ -131,50 +118,14 @@ final class ParserState {
         .endControlFlow();
 
     spec.beginControlFlow("if ($N.charAt(1) == '-')", token)
-        .addStatement("return $N($N)", readLongMethod, token)
+        .addStatement("$T $N = $N.indexOf('=')", INT, index, token)
+        .addStatement("return $N.get($N.substring(0, $N < 0 ? $N.length() : $N))",
+            optionNamesField, token, index, token, index)
         .endControlFlow();
 
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
+    spec.addStatement("return $N.get($N.substring(0, 2))", optionNamesField, token);
 
-    spec.addStatement("$T $N = $N.get($N.substring(0, 2))",
-        context.optionType(), optionParam,
-        longNamesField, token);
-
-    spec.beginControlFlow("if ($N == null)", optionParam)
-        .addStatement("return null")
-        .endControlFlow();
-
-    spec.beginControlFlow("if ($N.length() < 2 || $N.charAt(0) != '-')",
-        token, token)
-        .addStatement("return null")
-        .endControlFlow();
-
-    spec.addStatement("return $N", optionParam);
     return spec.build();
-  }
-
-  private static MethodSpec readLongMethod(
-      FieldSpec longNamesField,
-      Context context) {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    CodeBlock.Builder spec = CodeBlock.builder();
-
-    spec.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
-
-    spec.beginControlFlow("if ($N < 0)", index)
-        .addStatement("return $N.get($N)", longNamesField, token)
-        .endControlFlow();
-
-    spec.beginControlFlow("else")
-        .addStatement("return $N.get($N.substring(0, $N))", longNamesField, token, index)
-        .endControlFlow();
-
-    return MethodSpec.methodBuilder("readLong")
-        .addParameter(token)
-        .returns(context.optionType())
-        .addCode(spec.build())
-        .build();
   }
 
   private static MethodSpec readMethod(FieldSpec parsersField, Context context) {
