@@ -225,14 +225,17 @@ final class Tokenizer {
 
       spec.beginControlFlow("while ($N.hasNext())", it)
           .addStatement("$T $N = $N.next()", STRING, t, it)
-          .addStatement("$N += $N.$N($N, $N)", positionParam, stateParam, state.readPositionalMethod(), positionParam, t)
+          .beginControlFlow("if ($N >= $N.$N.size())", positionParam, stateParam, state.positionalParsersField())
+          .addStatement(throwInvalidOptionStatement(t))
+          .endControlFlow()
+          .addStatement("$N += $N.$N.get($N).read($N)", positionParam, stateParam, state.positionalParsersField(), positionParam, t)
           .endControlFlow()
           .addStatement("return $N.build()", stateParam);
 
       spec.endControlFlow();
     }
 
-    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, stateParam, state.readRegularOptionMethod(), token);
+    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, stateParam, state.tryReadOption(), token);
 
     spec.beginControlFlow("if ($N != null)", optionParam)
         .addStatement("$N.$N.get($N).read($N, $N)", stateParam, state.parsersField(), optionParam, token, it)
@@ -244,7 +247,10 @@ final class Tokenizer {
         .addStatement(throwInvalidOptionStatement(token))
         .endControlFlow();
 
-    spec.addStatement("$N += $N.$N($N, $N)", positionParam, stateParam, state.readPositionalMethod(), positionParam, token);
+    spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, stateParam, state.positionalParsersField())
+        .addStatement(throwInvalidOptionStatement(token))
+        .endControlFlow()
+        .addStatement("$N += $N.$N.get($N).read($N)", positionParam, stateParam, state.positionalParsersField(), positionParam, token);
 
     return spec.build();
   }

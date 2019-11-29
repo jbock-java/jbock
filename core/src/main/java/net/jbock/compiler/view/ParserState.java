@@ -21,7 +21,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.view.Tokenizer.throwInvalidOptionStatement;
 
 /**
  * Defines the inner class ParserState
@@ -35,22 +34,19 @@ final class ParserState {
 
   private final FieldSpec positionalParsersField;
 
-  private final MethodSpec readPositionalMethod;
-  private final MethodSpec readRegularOptionMethod;
+  private final MethodSpec tryReadOptionMethod;
 
   private ParserState(
       Context context,
       FieldSpec optionNamesField,
       FieldSpec parsersField,
       FieldSpec positionalParsersField,
-      MethodSpec readPositionalMethod,
-      MethodSpec readRegularOptionMethod) {
+      MethodSpec tryReadOptionMethod) {
     this.context = context;
     this.optionNamesField = optionNamesField;
     this.parsersField = parsersField;
     this.positionalParsersField = positionalParsersField;
-    this.readPositionalMethod = readPositionalMethod;
-    this.readRegularOptionMethod = readRegularOptionMethod;
+    this.tryReadOptionMethod = tryReadOptionMethod;
   }
 
   static ParserState create(Context context, Option option) {
@@ -75,16 +71,13 @@ final class ParserState {
         .addModifiers(FINAL)
         .build();
 
-    MethodSpec readRegularOptionMethod = readRegularOptionMethod(context, optionNamesField);
-
-    MethodSpec readPositionalMethod = readPositionalMethod(positionalParsersField, context);
+    MethodSpec readRegularOptionMethod = tryReadOption(context, optionNamesField);
 
     return new ParserState(
         context,
         optionNamesField,
         parsersField,
         positionalParsersField,
-        readPositionalMethod,
         readRegularOptionMethod);
   }
 
@@ -92,16 +85,15 @@ final class ParserState {
     return TypeSpec.classBuilder(context.parserStateType())
         .addModifiers(PRIVATE, STATIC)
         .addMethod(buildMethod())
-        .addMethod(readPositionalMethod)
-        .addMethod(readRegularOptionMethod)
+        .addMethod(tryReadOptionMethod)
         .addFields(Arrays.asList(optionNamesField, parsersField, positionalParsersField))
         .build();
   }
 
-  private static MethodSpec readRegularOptionMethod(Context context, FieldSpec optionNamesField) {
+  private static MethodSpec tryReadOption(Context context, FieldSpec optionNamesField) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("readRegularOption")
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("tryReadOption")
         .addParameter(token)
         .returns(context.optionType());
 
@@ -118,21 +110,6 @@ final class ParserState {
     spec.addStatement("return $N.get($N.substring(0, 2))", optionNamesField, token);
 
     return spec.build();
-  }
-
-  private static MethodSpec readPositionalMethod(FieldSpec positionalParsersField, Context context) {
-
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec positionParam = ParameterSpec.builder(INT, "position").build();
-
-    return MethodSpec.methodBuilder("readPositional")
-        .addParameters(Arrays.asList(positionParam, token))
-        .returns(INT)
-        .beginControlFlow("if ($N >= $N.size())", positionParam, positionalParsersField)
-        .addStatement(throwInvalidOptionStatement(token))
-        .endControlFlow()
-        .addStatement("return $N.get($N).read($N)", positionalParsersField, positionParam, token)
-        .build();
   }
 
   private MethodSpec buildMethod() {
@@ -244,15 +221,15 @@ final class ParserState {
         .build();
   }
 
-  MethodSpec readPositionalMethod() {
-    return readPositionalMethod;
-  }
-
-  MethodSpec readRegularOptionMethod() {
-    return readRegularOptionMethod;
+  MethodSpec tryReadOption() {
+    return tryReadOptionMethod;
   }
 
   FieldSpec parsersField() {
     return parsersField;
+  }
+
+  FieldSpec positionalParsersField() {
+    return positionalParsersField;
   }
 }
