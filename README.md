@@ -22,6 +22,7 @@ will trigger a round of code generation at compile time.
 
 The generated class `MyArguments_Parser` can be seen
 [here.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
+
 This is how it might be used in a *main* method:
 
 ````java
