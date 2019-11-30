@@ -337,26 +337,10 @@ The generated `parseOrExit` method performs the following steps if such a failur
 * Print an error message to the configured <a href="#runtime-modifiers">*error stream*</a>
 * Shut down the JVM with the configured <a href="#runtime-modifiers">*error code*</a>
 
-If you need to handle the cases manually,
-you should use the generated `parse` method,
-which returns `ParseResult`.
-
-````java
-MyArguments_Parser.ParseResult parseResult = MyArguments_Parser.create().parse(argv);
-if (parseResult instanceof MyArguments_Parser.ParsingFailed) {
-  System.out.println("Parsing failed: " + ((MyArguments_Parser.ParsingFailed) parseResult).message());
-  System.out.println("Usage info has been printed to the output stream.");
-  System.exit(1);
-} else if (parseResult instanceof MyArguments_Parser.HelpPrinted) {
-  System.out.println("The user has passed the --help param.");
-  System.out.println("Usage info has been printed to the error stream.");
-} else if (parseResult instanceof MyArguments_Parser.ParsingSuccess) {
-  MyArguments args = ((MyArguments_Parser.ParsingSuccess) parseResult).result();
-  runTheBusinessLogicAlready(args);
-}
-````
-
-Let's hope that this awkward case-handling gets nicer when java finally gets *sealed types.*
+If you need to handle the error-case manually,
+you can use the generated `parse` method.
+This method returns the "union type" `ParseResult` and doesn't have side effects
+like printing to standard out, or shutting down the jvm.
 
 ### Runtime modifiers
 
