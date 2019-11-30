@@ -339,8 +339,8 @@ The generated `parseOrExit` method performs the following steps if such a failur
 
 If you need to handle the error-case manually,
 you can use the generated `parse` method.
-This method returns the "union type" `ParseResult` and doesn't have side effects
-like printing to standard out, or shutting down the jvm.
+This method returns a "union type" to signal parsing success or error,
+and doesn't have side effects, like printing to `System.out` or shutting down the jvm.
 
 ### Runtime modifiers
 
