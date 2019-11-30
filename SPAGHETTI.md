@@ -69,20 +69,22 @@ attribute is set. Here is an example:
 @CommandLineArguments
 abstract class MyArguments {
 
-  @PositionalParameter(position = 1)
+  @PositionalParameter(1)
   abstract Path source();
   
-  @PositionalParameter(position = 2)
+  @PositionalParameter(2)
   abstract Path target();
 }
 ````
 
 The `MyArguments_Parser` that is generated
-from this example expects `argv.length` to be exactly `2`,
+from this example expects `argv.length` to be *exactly* `2`,
 otherwise <a href="#parsing-failure">*parsing will fail*</a>.
+This is because none of the parameters are `Optional`.
 
 The `source` parameter has the *lower* position,
-so it will bind the *first* token:
+so it will bind the *first* token.
+Here is a valid usage example:
 
 ````java
 String[] argv = { "a.txt", "b.txt" };
