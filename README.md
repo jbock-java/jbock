@@ -15,9 +15,11 @@ abstract class MyArguments {
 }
 ````
 
-If jbock is properly configured as an annotation processor,
+If jbock is properly configured as an
+[annotation processor](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java),
 then the presence of this annotated class
-will cause further source code to be generated at compile time.
+will trigger a round of code generation at compile time.
+
 The generated class `MyArguments_Parser` can be seen
 [here.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
 This is how it might be used in a *main* method:
