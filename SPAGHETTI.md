@@ -102,7 +102,7 @@ make the parameter's corresponding model method return
 `boolean` or `Boolean`.
 
 ````java
-@Parameter(shortName = 'q', longName = "quiet")
+@Parameter(value = "quiet", mnemonic = 'q')
 abstract boolean quiet();
 ````
 
@@ -117,24 +117,15 @@ args = MyArguments_Parser.create().parseOrExit(new String[]{ "--quiet" });
 assertTrue(args.quiet());
 ````
 
-If you want, you can also be more
-be more explicit by setting the
-`flag` attribute:
-
-````java
-@Parameter(shortName = 'q', flag = true)
-abstract boolean quiet();
-````
-
 ### Binding parameters
 
 An *Option* that is not a <a href="#flags">*flag*</a> is called a
-*binding parameter*. For example, this
-parameter method declares binding parameter:
+*binding parameter*. For example, the following
+parameter method declares a binding parameter:
 
 ````java
 // example of a binding parameter
-@Parameter(shortName = 'f')
+@Parameter("file")
 abstract String file();
 ````
 
@@ -147,8 +138,8 @@ binding parameter, and precedes the
 The escape sequence consists of the <a href="#binding-parameters">*free*</a> token `"--"`,
 i.e. two consecutive "dash" characters. 
 Any remaining tokens in `argv` after that will be treated as <a href="#positional-parameters">*positional*</a>.
-In other words, the escape sequence ends option parsing.
-Naturally, the generated parser only recognizes the escape sequence
+In other words, the escape sequence *ends option parsing*.
+The generated parser recognizes the escape sequence
 if there is at least one positional parameter defined.
 
 ### Repeatable parameters
@@ -158,7 +149,7 @@ or <a href="#positional-parameters">*positional*</a> parameters
 that can appear any number of times in `argv`. For example:
 
 ````java
-@Parameter(shortName = 'X')
+@Parameter("headers")
 abstract List<String> headers();
 ````
 
@@ -174,39 +165,39 @@ mapper return type.
 Given a <a href="#binding-parameters">*binding parameter*</a> like this
 
 ````java
-@Parameter(longName = "file", shortName = 'f')
+@Parameter(value = "file", mnemonic = 'f')
 abstract Path file();
 ````
 
-then we have the short and long forms, which are equivalent
+then we have the long form and the mnemonic, which are equivalent
 
 ````java
 String[] argv;
 argv = { "--file", "data.txt" }; // two dashes -> long form
-argv = { "-f", "data.txt" }; // one dash -> short form
+argv = { "-f", "data.txt" }; // one dash -> mnemonic
 ````
 
 Binding parameters can also be written in *attached* form as follows
 
 ````java
 argv = { "--file=data.txt" }; // attached long form
-argv = { "-fdata.txt" }; // attached short form
+argv = { "-fdata.txt" }; // attached mnemonic
 ````
 
-Note: If both `longName` and `shortName` are defined, there
+Note: If both `value` and `mnemonic` are defined, there
 are *four* different ways to write a binding parameter.
 
 On the other hand, if both names are defined,
 there are only *two* ways to write a <a href="#flags">*flag:*</a>
 
 ````java
-argv = { "--quiet" }; // two dashes -> long flag
-argv = { "-q" }; // one dash -> short flag
+argv = { "--quiet" }; // two dashes -> flag long form
+argv = { "-q" }; // one dash -> flag mnemonic
 ````
 
 ### Showing help
 
-By default, the token `--help` has a special meaning. 
+The token `--help` has a special meaning, if it is the first token in `argv`. 
 
 ````java
 String[] argv = { "--help" };
@@ -214,14 +205,11 @@ MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
 ````
 
 This time, `parseOrExit` will shut down the JVM with an exit code of `0`, and print
-usage information to standard out.
-
-This will only happen if `--help` is the *first*
-tokens of the input array. Then the remaining tokens, if any,
-are ignored.
+usage information to standard out. Any remaining tokens in `argv`
+will then be ignored.
 
 To disable the special meaning of the `--help` token, use
-`@CommandLineArguments(allowHelpOption = false)`. 
+`@CommandLineArguments(helpDisabled = true)`. 
 
 ### Standard coercions
 
@@ -263,7 +251,7 @@ By using a custom collector, it is possible to create a
 builds a `Map`:
 
 ````java
-@Parameter(shortName = 'X',
+@Parameter(value = "headers",
            mappedBy = MapTokenizer.class,
            collectedBy = MapCollector.class)
 abstract Map<String, String> headers();
@@ -326,7 +314,7 @@ MyArguments args = MyArguments_Parser.create()
 The bundle keys must then be manually defined on the parameter methods:
 
 ````java
-@Parameter(longName = "url",
+@Parameter(value = "url",
            bundleKey = "headers")
 abstract String headers();
 ````
@@ -391,12 +379,11 @@ The `indent` is used when printing the usage page.
 ### Limitations
 
 * No grouping. For example, `rm -rf` is invalid, use `rm -r -f` instead
-* Can't have options that don't start with either `"-"` or `"--"`
-* No multi-argument options, use repeatable options instead
+* Option names always start with `"-"` or `"--"`.
+* No multi-argument options. Workaround: Repeatable options.
 * No bsd-style flags as in `tar xzf`, use `tar -x -z -f` instead
-* Short names are limited to a single character, use long names instead
+* Mnemonics (single-dash options) are limited to a single character.
 * Cannot distinguish between attached or detached option shape. Both are always allowed and equivalent.
-* No colors. Use [picocli](https://github.com/remkop/picocli) instead.
 
 ### Gradle config
 
