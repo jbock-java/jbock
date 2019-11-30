@@ -1,15 +1,40 @@
 #!/bin/bash
-# 1. Define this key in ~/.gradle/gradle.properties: signing.secretKeyRingFile (full path to exported keyring, no ascii armor)
-# 2. Source / export these environment variables: OSS_USER, OSS_PASS (login for http://oss.sonatype.org/)
-# 3. Source / export these environment variables: SIGNING_KEY_ID, SIGNING_PASSWORD
 set -e
 
-if [[ -z "$1" ]]; then echo "arg: version;" exit 1; fi
-./gradlew "-Pversion=${1}" core:clean core:test core:publish
+die () {
+    echo
+    echo "$*"
+    echo
+    exit 1
+}
+
+usage () {
+    die "Usage: release <(core|annotations)> <version>"
+}
+
+MODULE="$1"
+VERSION="$2"
+PREFIX=""
+
+if [[ "$MODULE" != "core" ]] && [[ "$MODULE" != "annotations" ]]; then
+  usage
+fi
+
+if [[ "$MODULE" == "core" ]]; then
+  PREFIX="v"
+else
+  PREFIX="a"
+fi
+
+if [[ -z "$VERSION" ]]; then
+  usage
+fi
+
+./gradlew -Pversion=${VERSION} ${MODULE}:clean ${MODULE}:test ${MODULE}:publish
 
 read -e -p "Upload successful. Also tag? [y/N]"
 if [[ "$REPLY" == [Yy]* ]]; then
-  git tag "v${1}"
+  git tag "${PREFIX}${VERSION}"
   git push origin --tags
 fi
 
