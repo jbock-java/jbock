@@ -78,19 +78,18 @@ abstract class MyArguments {
 ````
 
 The `MyArguments_Parser` that is generated
-from this example expects `argv.length` to be *exactly* `2`,
-otherwise <a href="#parsing-failure">*parsing will fail*</a>.
-This is because none of the parameters are `Optional`.
+from this example requires an `argv` of length *exactly* `2`,
+because none of the parameters are `Optional`.
 
-The `source` parameter has the *lower* position,
+The `source` parameter has the *lowest* position,
 so it will bind the *first* token.
 Here is a valid usage example:
 
 ````java
-String[] argv = { "a.txt", "b.txt" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
-assertEquals(Paths.get("a.txt"), args.source());
-assertEquals(Paths.get("b.txt"), args.target());
+String[] args = { "a.txt", "b.txt" };
+MyArguments my = MyArguments_Parser.create().parseOrExit(args);
+assertEquals(Paths.get("a.txt"), my.source());
+assertEquals(Paths.get("b.txt"), my.target());
 ````
 
 ### Flags
