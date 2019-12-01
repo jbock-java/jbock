@@ -34,8 +34,8 @@ assertEquals(OptionalInt.of(2), args.verbosity());
 assertEquals(Paths.get("file.txt"), args.path());
 ````
 
-Note that `path` is a required parameter,
-and `verbosity` is optional.
+Note that `path` is a *required* parameter,
+while `verbosity` is *optional*.
 This is determined by the parameter type,
 using the following "matching" rules (upper left corner applies for both parameters):
 
