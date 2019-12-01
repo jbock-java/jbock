@@ -26,12 +26,12 @@ The generated class `MyArguments_Parser` can be seen
 This is how it might be used in a *main* method:
 
 ````java
-String[] argv = { "-v2", "file.txt" }; // for example
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+String[] args = { "-v2", "file.txt" }; // for example
+MyArguments my = MyArguments_Parser.create().parseOrExit(args);
 
 // make sure this works as expected...
-assertEquals(OptionalInt.of(2), args.verbosity());
-assertEquals(Paths.get("file.txt"), args.path());
+assertEquals(OptionalInt.of(2), my.verbosity());
+assertEquals(Paths.get("file.txt"), my.path());
 ````
 
 Note that `path` is a *required* parameter,
