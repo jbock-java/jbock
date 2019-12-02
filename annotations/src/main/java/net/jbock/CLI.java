@@ -9,11 +9,11 @@ import java.lang.annotation.Target;
  * This annotation marks an abstract model class
  * that contains parameter methods.
  * Each of its abstract methods must be annotated with either
- * {@link Parameter} or {@link PositionalParameter}.
+ * {@link Option} or {@link Param}.
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface CommandLineArguments {
+public @interface CLI {
 
   /**
    * The program name that is printed

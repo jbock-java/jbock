@@ -1,16 +1,16 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
 import java.util.Optional;
 
-@CommandLineArguments
+@CLI
 abstract class SimpleArguments {
 
-  @Parameter(value = "x", mnemonic = 'x')
+  @Option(value = "x", mnemonic = 'x')
   abstract boolean extract();
 
-  @Parameter("file")
+  @Option("file")
   abstract Optional<String> file();
 }

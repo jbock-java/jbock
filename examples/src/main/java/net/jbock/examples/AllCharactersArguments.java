@@ -1,23 +1,23 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
 import java.util.List;
 import java.util.Optional;
 
-@CommandLineArguments
+@CLI
 abstract class AllCharactersArguments {
 
-  @Parameter(value = "smallChar")
+  @Option(value = "smallChar")
   abstract char smallChar();
 
-  @Parameter(value = "bigChar")
+  @Option(value = "bigChar")
   abstract Character bigChar();
 
-  @Parameter(value = "charOpt")
+  @Option(value = "charOpt")
   abstract Optional<Character> charOpt();
 
-  @Parameter(value = "charList")
+  @Option(value = "charList")
   abstract List<Character> charList();
 }

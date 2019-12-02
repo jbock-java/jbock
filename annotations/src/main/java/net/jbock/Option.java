@@ -6,13 +6,13 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marker annotation for parameter methods.
- * The parameter method must be abstract
+ * Marker annotation for option methods.
+ * The annotated method must be abstract
  * and have an empty argument list.
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
-public @interface Parameter {
+public @interface Option {
 
   /**
    * A unique &quot;gnu style&quot; long name.
@@ -30,7 +30,7 @@ public @interface Parameter {
   char mnemonic() default ' ';
 
   /**
-   * Declare a custom mapper for this parameter.
+   * Declare a custom mapper for this option.
    * This is either a
    * {@link java.util.function.Function Function}
    * accepting strings,
@@ -55,7 +55,7 @@ public @interface Parameter {
    * If no such key is defined,
    * or if no bundle is supplied at runtime,
    * then an attempt is made to derive the parameter description
-   * from the parameter method's javadoc.
+   * from the method's javadoc.
    *
    * @return an optional bundle key
    */

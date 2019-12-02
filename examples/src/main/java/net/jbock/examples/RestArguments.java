@@ -1,20 +1,20 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Option;
+import net.jbock.Param;
 
 import java.util.List;
 
-@CommandLineArguments
+@CLI
 abstract class RestArguments {
 
   /**
    * This is the file.
    */
-  @Parameter(value = "file", bundleKey = "param_file")
+  @Option(value = "file", bundleKey = "param_file")
   abstract List<String> file();
 
-  @PositionalParameter(value = 1)
+  @Param(value = 1)
   abstract List<String> rest();
 }

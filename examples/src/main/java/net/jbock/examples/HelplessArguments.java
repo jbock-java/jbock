@@ -1,15 +1,15 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Option;
+import net.jbock.Param;
 
-@CommandLineArguments(helpDisabled = true)
+@CLI(helpDisabled = true)
 abstract class HelplessArguments {
 
-  @PositionalParameter(1)
+  @Param(1)
   abstract String required();
 
-  @Parameter("help")
+  @Option("help")
   abstract boolean help();
 }

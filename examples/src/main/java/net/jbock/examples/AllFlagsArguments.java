@@ -1,14 +1,14 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
-@CommandLineArguments
+@CLI
 abstract class AllFlagsArguments {
 
-  @Parameter(value = "smallFlag")
+  @Option(value = "smallFlag")
   abstract boolean smallFlag();
 
-  @Parameter(value = "bigFlag")
+  @Option(value = "bigFlag")
   abstract Boolean bigFlag();
 }

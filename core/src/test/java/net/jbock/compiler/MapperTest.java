@@ -14,11 +14,10 @@ class MapperTest {
   @Test
   void validArrayMapperSupplier() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
-        "             mappedBy = ArrayMapper.class)",
+        "  @Option(value = \"x\", mappedBy = ArrayMapper.class)",
         "  abstract Optional<int[]> foo();",
         "",
         "  static class ArrayMapper implements Supplier<Function<String, int[]>> {",
@@ -35,11 +34,10 @@ class MapperTest {
   @Test
   void validArrayMapper() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
-        "             mappedBy = ArrayMapper.class)",
+        "  @Option(value = \"x\", mappedBy = ArrayMapper.class)",
         "  abstract Optional<int[]> foo();",
         "",
         "  static class ArrayMapper implements Function<String, int[]> {",
@@ -56,11 +54,10 @@ class MapperTest {
   @Test
   void validMapperWithTypeParameter() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
-        "             mappedBy = IdentityMapper.class)",
+        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E> implements Function<E, E> {",
@@ -77,11 +74,10 @@ class MapperTest {
   @Test
   void validMapperWithTypeParameters() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
-        "             mappedBy = IdentityMapper.class)",
+        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E, F> implements Function<E, F> {",
@@ -98,11 +94,10 @@ class MapperTest {
   @Test
   void invalidMapperTypeParameterWithBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
-        "             mappedBy = IdentityMapper.class)",
+        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E extends Integer> implements Function<E, E> {",
@@ -120,11 +115,10 @@ class MapperTest {
   @Test
   void validMapperTypeParameterWithBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
-        "             mappedBy = IdentityMapper.class)",
+        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E extends java.lang.CharSequence> implements Function<E, E> {",
@@ -141,11 +135,10 @@ class MapperTest {
   @Test
   void validMapperTypeParameterSupplierWithBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
-        "             mappedBy = IdentityMapper.class)",
+        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E extends java.lang.CharSequence> implements Supplier<Function<E, E>> {",
@@ -162,11 +155,10 @@ class MapperTest {
   @Test
   void invalidMapperTypeParameterSupplierWithBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
-        "             mappedBy = IdentityMapper.class)",
+        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E extends Integer> implements Supplier<Function<E, E>> {",
@@ -185,11 +177,10 @@ class MapperTest {
   @Test
   void invalidFlagMapper() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
-        "             mappedBy = FlagMapper.class)",
+        "  @Option(value = \"x\", mappedBy = FlagMapper.class)",
         "  abstract Boolean flag();",
         "",
         "  static class FlagMapper implements Supplier<Function<String, Boolean>> {",
@@ -206,10 +197,10 @@ class MapperTest {
   @Test
   void validBooleanList() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @PositionalParameter(value = 0, mappedBy = BooleanMapper.class)",
+        "  @Param(value = 0, mappedBy = BooleanMapper.class)",
         "  abstract List<Boolean> booleanList();",
         "",
         "  static class BooleanMapper implements Supplier<Function<String, Boolean>> {",
@@ -227,10 +218,10 @@ class MapperTest {
   @Test
   void invalidBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @PositionalParameter(value = 1, mappedBy = BoundMapper.class)",
+        "  @Param(value = 1, mappedBy = BoundMapper.class)",
         "  abstract String a();",
         "",
         "  static class BoundMapper<E extends Integer> implements Supplier<Function<E, E>> {",
@@ -249,10 +240,10 @@ class MapperTest {
   @Test
   void invalidBoundsLong() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Katz<Long> {",
@@ -272,10 +263,10 @@ class MapperTest {
   @Test
   void invalidBoundsLong2() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements A<Long> {",
@@ -297,10 +288,10 @@ class MapperTest {
   @Test
   void validBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @PositionalParameter(value = 1, mappedBy = BoundMapper.class)",
+        "  @Param(value = 1, mappedBy = BoundMapper.class)",
         "  abstract String a();",
         "",
         "  static class BoundMapper implements Katz<String> {",
@@ -320,10 +311,10 @@ class MapperTest {
   @Test
   void mapperInvalidPrivateConstructor() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
@@ -344,10 +335,10 @@ class MapperTest {
   @Test
   void mapperInvalidNoDefaultConstructor() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
@@ -368,10 +359,10 @@ class MapperTest {
   @Test
   void mapperInvalidConstructorException() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
@@ -392,10 +383,10 @@ class MapperTest {
   @Test
   void mapperInvalidNonstaticInnerClass() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  class Mapper implements Supplier<Function<String, Integer>> {",
@@ -413,10 +404,10 @@ class MapperTest {
   @Test
   void mapperInvalidNotStringFunction() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<Function<Integer, Integer>> {",
@@ -434,10 +425,10 @@ class MapperTest {
   @Test
   void mapperInvalidReturnsString() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<Function<String, String>> {",
@@ -455,10 +446,10 @@ class MapperTest {
   @Test
   void mapperValidTypevars() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Supplier<String> string();",
         "",
         "  static class Mapper implements Supplier<Function<String, Supplier<String>>> {",
@@ -475,10 +466,10 @@ class MapperTest {
   @Test
   void mapperValidNestedTypevars() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Supplier<Optional<String>> string();",
         "",
         "  static class Mapper implements Supplier<Function<String, Supplier<Optional<String>>>> {",
@@ -496,10 +487,10 @@ class MapperTest {
   @Test
   void mapperValidExtendsFunction() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper<E> implements Supplier<StringFunction<E, Integer>> {",
@@ -520,10 +511,10 @@ class MapperTest {
   @Test
   void mapperInvalidStringFunction() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<StringFunction<Integer>> {",
@@ -544,10 +535,10 @@ class MapperTest {
   @Test
   void mapperValidComplicatedTree() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper extends ZapperSupplier {",
@@ -576,10 +567,10 @@ class MapperTest {
   @Test
   void testMapperTypeSudokuInvalid() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract List<List<Integer>> number();",
         "",
         "  static class Mapper<E extends List<List<Integer>>> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
@@ -595,10 +586,10 @@ class MapperTest {
   @Test
   void testMapperTypeSudokuValid() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract List<List<Integer>> number();",
         "",
         "  static class Mapper<E extends Integer> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
@@ -614,10 +605,10 @@ class MapperTest {
   @Test
   void testSudokuHard() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> numbers();",
         "",
         "  static class Mapper<M extends Integer> implements Supplier<Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>>>>>>>>>> {",
@@ -640,10 +631,10 @@ class MapperTest {
   @Test
   void testListSudoku() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract List<Integer> number();",
         "",
         "  static class Mapper<AA1, AA2> implements A<AA1, AA2> {",
@@ -661,10 +652,10 @@ class MapperTest {
   @Test
   void mapperInvalidComplicatedTree() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements ZapperSupplier {",
@@ -694,10 +685,10 @@ class MapperTest {
   @Test
   void mapperInvalidNotFunction() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements ZapperSupplier {",
@@ -717,10 +708,10 @@ class MapperTest {
   @Test
   void mapperInvalidFunctionReturnType() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements ZapperSupplier {",
@@ -740,10 +731,10 @@ class MapperTest {
   @Test
   void mapperInvalidBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements ZapperSupplier<java.util.Date> {",
@@ -763,10 +754,10 @@ class MapperTest {
   @Test
   void mapperValidBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements A<Integer, String> {",
@@ -787,10 +778,10 @@ class MapperTest {
   @Test
   void mapperInvalidRawFunction() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<Function> {",
@@ -808,10 +799,10 @@ class MapperTest {
   @Test
   void mapperInvalidSupplyingTypevar() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
         "  static class Mapper<E> implements Supplier<E> {",
@@ -829,10 +820,10 @@ class MapperTest {
   @Test
   void mapperValid() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract List<OptionalInt> numbers();",
         "",
         "  static class Mapper implements Supplier<Function<String, OptionalInt>> {",
@@ -849,10 +840,10 @@ class MapperTest {
   @Test
   void mapperValidByte() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Byte number();",
         "",
         "  static class Mapper implements Supplier<Function<String, Byte>> {",
@@ -869,10 +860,10 @@ class MapperTest {
   @Test
   void mapperValidBytePrimitive() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract byte number();",
         "",
         "  static class Mapper implements Supplier<Function<String, Byte>> {",
@@ -889,10 +880,10 @@ class MapperTest {
   @Test
   void mapperValidOptionalInteger() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Optional<Integer> number();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
@@ -909,10 +900,10 @@ class MapperTest {
   @Test
   void mapperValidOptionalStringTypevar() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Optional<String> number();",
         "",
         "  static class Mapper<E> implements Supplier<Function<E, E>> {",
@@ -929,10 +920,10 @@ class MapperTest {
   @Test
   void mapperValidStringOptionalStringTypevar() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Optional<String> number();",
         "",
         "  static class Mapper<E> implements Supplier<Function<E, Optional<E>>> {",
@@ -949,10 +940,10 @@ class MapperTest {
   @Test
   void mapperValidStringListTypevar() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract List<String> number();",
         "",
         "  static class Mapper<E> implements Supplier<Function<E, List<E>>> {",
@@ -969,10 +960,10 @@ class MapperTest {
   @Test
   void implicitMapperOptionalInt() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract OptionalInt b();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
@@ -989,10 +980,10 @@ class MapperTest {
   @Test
   void mapperOptionalInt() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract OptionalInt b();",
         "",
         "  static class Mapper implements Supplier<Function<String, OptionalInt>> {",
@@ -1009,10 +1000,10 @@ class MapperTest {
   @Test
   void mapperOptionalInteger() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Optional<Integer> b();",
         "",
         "  static class Mapper implements Supplier<Function<String, Optional<Integer>>> {",
@@ -1029,10 +1020,10 @@ class MapperTest {
   @Test
   void oneOptionalInt() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract OptionalInt b();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
@@ -1050,10 +1041,10 @@ class MapperTest {
   @Test
   void mapperValidListOfSet() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", mappedBy = Mapper.class)",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract List<Set<Integer>> sets();",
         "",
         "  static class Mapper implements Supplier<Function<String, Set<Integer>>> {",
@@ -1070,11 +1061,10 @@ class MapperTest {
   @Test
   void mapperHasTypeargsImpossibleFromString() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
-        "             mappedBy = Identity.class)",
+        "  @Option(value = \"x\", mappedBy = Identity.class)",
         "  abstract List<Integer> ints();",
         "",
         "  static class Identity<E> implements Supplier<Function<E, E>> {",

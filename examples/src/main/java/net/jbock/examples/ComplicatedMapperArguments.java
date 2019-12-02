@@ -1,21 +1,21 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
 import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@CommandLineArguments
+@CLI
 abstract class ComplicatedMapperArguments {
 
-  @Parameter(
+  @Option(
       value = "number",
       mappedBy = Mapper.class)
   abstract Integer number();
 
-  @Parameter(
+  @Option(
       value = "numbers",
       mappedBy = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();

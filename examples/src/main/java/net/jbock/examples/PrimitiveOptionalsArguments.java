@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -9,25 +9,25 @@ import java.util.OptionalLong;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@CommandLineArguments
+@CLI
 abstract class PrimitiveOptionalsArguments {
 
-  @Parameter(value = "I", mnemonic = 'I', mappedBy = IntegerMapper.class)
+  @Option(value = "I", mnemonic = 'I', mappedBy = IntegerMapper.class)
   abstract OptionalInt simpleInt();
 
-  @Parameter(value = "L", mnemonic = 'L', mappedBy = LongMapper.class)
+  @Option(value = "L", mnemonic = 'L', mappedBy = LongMapper.class)
   abstract OptionalLong simpleLong();
 
-  @Parameter(value = "D", mnemonic = 'D', mappedBy = DoubleMapper.class)
+  @Option(value = "D", mnemonic = 'D', mappedBy = DoubleMapper.class)
   abstract OptionalDouble simpleDouble();
 
-  @Parameter(value = "i", mnemonic = 'i', mappedBy = IntegerMapper.class)
+  @Option(value = "i", mnemonic = 'i', mappedBy = IntegerMapper.class)
   abstract OptionalInt mappedInt();
 
-  @Parameter(value = "l", mnemonic = 'l', mappedBy = LongMapper.class)
+  @Option(value = "l", mnemonic = 'l', mappedBy = LongMapper.class)
   abstract OptionalLong mappedLong();
 
-  @Parameter(value = "d", mnemonic = 'd', mappedBy = DoubleMapper.class)
+  @Option(value = "d", mnemonic = 'd', mappedBy = DoubleMapper.class)
   abstract OptionalDouble mappedDouble();
 
   static class IntegerMapper implements Supplier<Function<String, Integer>> {

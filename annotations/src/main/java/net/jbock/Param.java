@@ -12,17 +12,18 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.METHOD)
 @Retention(RetentionPolicy.SOURCE)
-public @interface PositionalParameter {
+public @interface Param {
 
   /**
-   * The parameter position in the sequence of all positional parameters.
-   * The lowest position defines the first positional parameter.
+   * This number determines the parameter's relative position
+   * among the positional parameters.
    *
    * <ul>
+   * <li>The method's position in the java source file is irrelevant.</li>
    * <li>Gaps and negative numbers are allowed.</li>
    * <li>Required parameters must have the lowest positions.</li>
    * <li>There can only be one repeatable positional parameter,
-   * and it must have the highest position.</li>
+   * and it must have the greatest position.</li>
    * </ul>
    *
    * @return a unique number that determines this parameter's position
@@ -31,19 +32,19 @@ public @interface PositionalParameter {
 
   /**
    * @return a class
-   * @see Parameter#mappedBy
+   * @see Option#mappedBy
    */
   Class<?> mappedBy() default Object.class;
 
   /**
    * @return a class
-   * @see Parameter#collectedBy
+   * @see Option#collectedBy
    */
   Class<?> collectedBy() default Object.class;
 
   /**
    * @return a string
-   * @see Parameter#bundleKey
+   * @see Option#bundleKey
    */
   String bundleKey() default "";
 }

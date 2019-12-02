@@ -14,10 +14,10 @@ class CollectorTest {
   @Test
   void collectorValidExtendsCollector() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", collectedBy = MySupplier.class)",
+        "  @Option(value = \"x\", collectedBy = MySupplier.class)",
         "  abstract Set<String> strings();",
         "",
         "  static class MySupplier<E> implements Supplier<SetCollector<E>> {",
@@ -38,10 +38,10 @@ class CollectorTest {
   @Test
   void invalidNotRepeatable() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", collectedBy = MyCollector.class)",
+        "  @Option(value = \"x\", collectedBy = MyCollector.class)",
         "  abstract Set<String> strings();",
         "",
         "  static class MyCollector implements Supplier<Collector<String, ?, Set<String>>> {",
@@ -59,10 +59,10 @@ class CollectorTest {
   @Test
   void validCollectorSupplier() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             collectedBy = MyCollector.class)",
         "  abstract Set<String> strings();",
         "",
@@ -80,10 +80,10 @@ class CollectorTest {
   @Test
   void validCollector() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             collectedBy = MyCollector.class)",
         "  abstract Set<String> strings();",
         "",
@@ -103,10 +103,10 @@ class CollectorTest {
   @Test
   void invalidReturnType() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             collectedBy = MyCollector.class)",
         "  abstract Set<String> strings();",
         "",
@@ -125,10 +125,10 @@ class CollectorTest {
   @Test
   void invalidMapperMismatch() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = HexMapper.class,",
         "             collectedBy = ToSetCollector.class)",
         "  abstract Set<String> bigIntegers();",
@@ -154,10 +154,10 @@ class CollectorTest {
   @Test
   void validMapperMatch() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = HexMapper.class,",
         "             collectedBy = ToSetCollector.class)",
         "  abstract Set<int[]> foo();",
@@ -182,10 +182,10 @@ class CollectorTest {
   @Test
   void validSetAutoMapper() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             collectedBy = MyCollector.class)",
         "  abstract Set<BigInteger> bigIntegers();",
         "",
@@ -203,10 +203,10 @@ class CollectorTest {
   @Test
   void validGenericCollector() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = CustomBigIntegerMapper.class,",
         "             collectedBy = ToSetCollector.class)",
         "  abstract Set<BigInteger> bigSet();",
@@ -231,10 +231,10 @@ class CollectorTest {
   @Test
   void validGenericCollectorAutoMapper() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             collectedBy = ToSetCollector.class)",
         "  abstract Set<BigInteger> bigSet();",
         "",
@@ -252,10 +252,10 @@ class CollectorTest {
   @Test
   void validMap() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = MapEntryMapper.class,",
         "             collectedBy = MapEntryCollector.class)",
         "  abstract Map<String, LocalDate> map();",
@@ -283,10 +283,10 @@ class CollectorTest {
   @Test
   void validBothMapperAndCollectorHaveTypeargs() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = IdentityMapper.class,",
         "             collectedBy = ToListCollector.class)",
         "  abstract List<String> map();",
@@ -311,10 +311,10 @@ class CollectorTest {
   @Test
   void invalidOptionalAuto() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             collectedBy = ToSetCollector.class)",
         "  abstract Set<Optional<Integer>> optionalIntegers();",
         "",
@@ -333,10 +333,10 @@ class CollectorTest {
   @Test
   void invalidBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             collectedBy = ToSetCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
@@ -355,10 +355,10 @@ class CollectorTest {
   @Test
   void invalidOptionalIntAuto() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             collectedBy = ToSetCollector.class)",
         "  abstract Set<OptionalInt> optionalInts();",
         "",
@@ -377,10 +377,10 @@ class CollectorTest {
   @Test
   void invalidBoundSupplier() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             collectedBy = A.class)",
         "  abstract Set<String> strings();",
         "",
@@ -401,10 +401,10 @@ class CollectorTest {
   @Test
   void invalidBound() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             collectedBy = A.class)",
         "  abstract Set<String> strings();",
         "",
@@ -427,10 +427,10 @@ class CollectorTest {
   @Test
   void validBothMapperAndCollectorHaveTypeargsHard() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = Map.class,",
         "             collectedBy = Collect.class)",
         "  abstract List<Integer> map();",
@@ -455,10 +455,10 @@ class CollectorTest {
   @Test
   void invalidBothMapperAndCollectorHaveTypeargsBadCollectorBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = Map.class,",
         "             collectedBy = Collect.class)",
         "  abstract List<Integer> map();",
@@ -485,10 +485,10 @@ class CollectorTest {
   @Test
   void invalidBothMapperAndCollectorHaveTypeargsUnresolvedCollectorTypearg() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = Map.class,",
         "             collectedBy = Collect.class)",
         "  abstract List<Integer> map();",
@@ -514,10 +514,10 @@ class CollectorTest {
   @Test
   void validBothMapperCollectorAndResultHaveTypeargs() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = Map.class,",
         "             collectedBy = Collect.class)",
         "  abstract List<Result<String>> map();",
@@ -544,10 +544,10 @@ class CollectorTest {
   @Test
   void bothMapperAndCollectorHaveTypeargsInvalidBoundsOnCollector() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = XMap.class,",
         "             collectedBy = YCol.class)",
         "  abstract List<String> map();",
@@ -574,10 +574,10 @@ class CollectorTest {
   @Test
   void bothMapperAndCollectorHaveTypeargsImpossibleFromString() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = Identity.class,",
         "             collectedBy = Collect.class)",
         "  abstract List<Integer> ints();",
@@ -603,10 +603,10 @@ class CollectorTest {
   @Test
   void bothMapperAndCollectorHaveTypeargsValid() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\",",
+        "  @Option(value = \"x\",",
         "             mappedBy = MakeList.class,",
         "             collectedBy = Concat.class)",
         "  abstract List<String> strings();",
@@ -631,10 +631,10 @@ class CollectorTest {
   @Test
   void validEnum() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", collectedBy = ToSetCollector.class)",
+        "  @Option(value = \"x\", collectedBy = ToSetCollector.class)",
         "  abstract Set<Foo> foo();",
         "",
         "  enum Foo {",
@@ -655,10 +655,10 @@ class CollectorTest {
   @Test
   void invalidEnum() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", collectedBy = ToSetCollector.class)",
+        "  @Option(value = \"x\", collectedBy = ToSetCollector.class)",
         "  abstract Foo foo();",
         "",
         "  enum Foo {",
@@ -680,10 +680,10 @@ class CollectorTest {
   @Test
   void collectorInvalidNotCollector() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\", collectedBy = ZapperSupplier.class)",
+        "  @Option(value = \"x\", collectedBy = ZapperSupplier.class)",
         "  abstract String zap();",
         "",
         "  static class ZapperSupplier implements Supplier<String> { }",

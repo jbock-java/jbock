@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
 /**
  * Demonstrates use of jbock to process command-line
@@ -9,19 +9,19 @@ import net.jbock.Parameter;
  */
 public class Main {
 
-  @CommandLineArguments
+  @CLI
   abstract static class Arguments {
 
     /**
      * Verbosity enabled?
      */
-    @Parameter(mnemonic = 'v', value = "verbose")
+    @Option(mnemonic = 'v', value = "verbose")
     abstract boolean verbose();
 
     /**
      * File name and path
      */
-    @Parameter(mnemonic = 'f', value = "file")
+    @Option(mnemonic = 'f', value = "file")
     abstract String file();
   }
 

@@ -1,16 +1,16 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Param;
 
 import java.util.List;
 
-@CommandLineArguments
+@CLI
 abstract class GitArguments {
 
-  @PositionalParameter(value = 1)
+  @Param(value = 1)
   abstract String command();
 
-  @PositionalParameter(value = 2)
+  @Param(value = 2)
   abstract List<String> remainingArgs();
 }

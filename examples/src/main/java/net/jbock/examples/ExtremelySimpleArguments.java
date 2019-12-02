@@ -1,11 +1,11 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Param;
 
-@CommandLineArguments
+@CLI
 abstract class ExtremelySimpleArguments {
 
-  @PositionalParameter(value = 1)
+  @Param(value = 1)
   abstract int hello();
 }

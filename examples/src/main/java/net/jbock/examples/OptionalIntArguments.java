@@ -1,18 +1,18 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
 import java.util.OptionalInt;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@CommandLineArguments
+@CLI
 abstract class OptionalIntArguments {
 
   private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
 
-  @Parameter(value = "a", mnemonic = 'a', mappedBy = Mapper.class)
+  @Option(value = "a", mnemonic = 'a', mappedBy = Mapper.class)
   abstract OptionalInt a();
 
   static class Mapper implements Supplier<Function<String, OptionalInt>> {

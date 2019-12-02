@@ -1,59 +1,59 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@CommandLineArguments
+@CLI
 abstract class PrimitiveArguments {
 
-  @Parameter(value = "B", mnemonic = 'B')
+  @Option(value = "B", mnemonic = 'B')
   abstract byte simpleByte();
 
-  @Parameter(value = "S", mnemonic = 'S')
+  @Option(value = "S", mnemonic = 'S')
   abstract short simpleShort();
 
-  @Parameter(value = "I", mnemonic = 'I')
+  @Option(value = "I", mnemonic = 'I')
   abstract int simpleInt();
 
-  @Parameter(value = "L", mnemonic = 'L')
+  @Option(value = "L", mnemonic = 'L')
   abstract long simpleLong();
 
-  @Parameter(value = "F", mnemonic = 'F')
+  @Option(value = "F", mnemonic = 'F')
   abstract float simpleFloat();
 
-  @Parameter(value = "D", mnemonic = 'D')
+  @Option(value = "D", mnemonic = 'D')
   abstract double simpleDouble();
 
-  @Parameter(value = "C", mnemonic = 'C')
+  @Option(value = "C", mnemonic = 'C')
   abstract char simpleChar();
 
   // there's no simple boolean -- that would be a flag!
 
-  @Parameter(value = "b", mnemonic = 'b', mappedBy = ByteMapper.class)
+  @Option(value = "b", mnemonic = 'b', mappedBy = ByteMapper.class)
   abstract byte mappedByte();
 
-  @Parameter(value = "s", mnemonic = 's', mappedBy = ShortMapper.class)
+  @Option(value = "s", mnemonic = 's', mappedBy = ShortMapper.class)
   abstract short mappedShort();
 
-  @Parameter(value = "i", mnemonic = 'i', mappedBy = IntMapper.class)
+  @Option(value = "i", mnemonic = 'i', mappedBy = IntMapper.class)
   abstract int mappedInt();
 
-  @Parameter(value = "l", mnemonic = 'l', mappedBy = LongMapper.class)
+  @Option(value = "l", mnemonic = 'l', mappedBy = LongMapper.class)
   abstract long mappedLong();
 
-  @Parameter(value = "f", mnemonic = 'f', mappedBy = FloatMapper.class)
+  @Option(value = "f", mnemonic = 'f', mappedBy = FloatMapper.class)
   abstract float mappedFloat();
 
-  @Parameter(value = "d", mnemonic = 'd', mappedBy = DoubleMapper.class)
+  @Option(value = "d", mnemonic = 'd', mappedBy = DoubleMapper.class)
   abstract double mappedDouble();
 
-  @Parameter(value = "c", mnemonic = 'c', mappedBy = CharMapper.class)
+  @Option(value = "c", mnemonic = 'c', mappedBy = CharMapper.class)
   abstract char mappedChar();
 
-  @Parameter(value = "x", mnemonic = 'x', mappedBy = BooleanMapper.class)
+  @Option(value = "x", mnemonic = 'x', mappedBy = BooleanMapper.class)
   abstract boolean mappedBoolean();
 
   static class IntMapper implements Supplier<Function<String, Integer>> {

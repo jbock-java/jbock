@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Param;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -10,10 +10,10 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@CommandLineArguments
+@CLI
 abstract class SudokuArguments {
 
-  @PositionalParameter(value = 1, mappedBy = Mapper.class)
+  @Param(value = 1, mappedBy = Mapper.class)
   abstract List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> number();
 
   static class Mapper<M extends Integer> implements Supplier<Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>>>>>>>>>> {

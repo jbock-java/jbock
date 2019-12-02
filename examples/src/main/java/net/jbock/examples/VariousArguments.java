@@ -1,8 +1,8 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Option;
+import net.jbock.Param;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -14,87 +14,87 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-@CommandLineArguments
+@CLI
 abstract class VariousArguments {
 
-  @Parameter(value = "bigDecimal")
+  @Option(value = "bigDecimal")
   abstract BigDecimal bigDecimal();
 
-  @Parameter(value = "bigDecimalList")
+  @Option(value = "bigDecimalList")
   abstract List<BigDecimal> bigDecimalList();
 
-  @Parameter(value = "bigDecimalOpt")
+  @Option(value = "bigDecimalOpt")
   abstract Optional<BigDecimal> bigDecimalOpt();
 
-  @PositionalParameter(value = 1)
+  @Param(value = 1)
   abstract Optional<BigDecimal> bigDecimalPos();
 
-  @Parameter(value = "bigInteger")
+  @Option(value = "bigInteger")
   abstract BigInteger bigInteger();
 
-  @Parameter(value = "bigIntegerList")
+  @Option(value = "bigIntegerList")
   abstract List<BigInteger> bigIntegerList();
 
-  @Parameter(value = "bigIntegerOpt")
+  @Option(value = "bigIntegerOpt")
   abstract Optional<BigInteger> bigIntegerOpt();
 
-  @PositionalParameter(value = 2)
+  @Param(value = 2)
   abstract Optional<BigInteger> bigIntegerPos();
 
-  @Parameter(value = "fileList")
+  @Option(value = "fileList")
   abstract List<File> fileList();
 
-  @Parameter(value = "fileOpt")
+  @Option(value = "fileOpt")
   abstract Optional<File> fileOpt();
 
-  @PositionalParameter(value = 3)
+  @Param(value = 3)
   abstract Optional<File> filePos();
 
-  @Parameter(value = "path")
+  @Option(value = "path")
   abstract Path path();
 
-  @Parameter(value = "pathList")
+  @Option(value = "pathList")
   abstract List<Path> pathList();
 
-  @Parameter(value = "pathOpt")
+  @Option(value = "pathOpt")
   abstract Optional<Path> pathOpt();
 
-  @PositionalParameter(value = 4)
+  @Param(value = 4)
   abstract Optional<Path> pathPos();
 
-  @Parameter(value = "localDate")
+  @Option(value = "localDate")
   abstract LocalDate localDate();
 
-  @Parameter(value = "localDateList")
+  @Option(value = "localDateList")
   abstract List<LocalDate> localDateList();
 
-  @Parameter(value = "localDateOpt")
+  @Option(value = "localDateOpt")
   abstract Optional<LocalDate> localDateOpt();
 
-  @PositionalParameter(value = 5)
+  @Param(value = 5)
   abstract Optional<LocalDate> localDatePos();
 
-  @Parameter(value = "uri")
+  @Option(value = "uri")
   abstract URI uri();
 
-  @Parameter(value = "uriList")
+  @Option(value = "uriList")
   abstract List<URI> uriList();
 
-  @Parameter(value = "uriOpt")
+  @Option(value = "uriOpt")
   abstract Optional<URI> uriOpt();
 
-  @PositionalParameter(value = 8)
+  @Param(value = 8)
   abstract Optional<URI> uriPos();
 
-  @Parameter(value = "pattern")
+  @Option(value = "pattern")
   abstract Pattern pattern();
 
-  @Parameter(value = "patternList")
+  @Option(value = "patternList")
   abstract List<Pattern> patternList();
 
-  @Parameter(value = "patternOpt")
+  @Option(value = "patternOpt")
   abstract Optional<Pattern> patternOpt();
 
-  @PositionalParameter(value = 10)
+  @Param(value = 10)
   abstract Optional<Pattern> patternPos();
 }
