@@ -1,26 +1,26 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
-@CommandLineArguments
+@CLI
 abstract class EvilArguments {
 
-  @Parameter(value = "fancy")
+  @Option(value = "fancy")
   abstract protected String fancy();
 
-  @Parameter(value = "fAncy")
+  @Option(value = "fAncy")
   abstract String fAncy();
 
-  @Parameter(value = "f_ancy")
+  @Option(value = "f_ancy")
   abstract String f_ancy();
 
-  @Parameter(value = "f__ancy")
+  @Option(value = "f__ancy")
   abstract String f__ancy();
 
-  @Parameter(value = "blub")
+  @Option(value = "blub")
   abstract String blub();
 
-  @Parameter(value = "Blub")
+  @Option(value = "Blub")
   abstract String Blub();
 }

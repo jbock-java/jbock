@@ -18,9 +18,9 @@ class ProcessorTest {
   @Test
   void emptyLongName() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
-        "  @Parameter(value = \"\") abstract String a();",
+        "  @Option(\"\") abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -31,10 +31,10 @@ class ProcessorTest {
   @Test
   void duplicateLongName() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
-        "  @Parameter(value = \"x\") abstract String a();",
-        "  @Parameter(value = \"x\") abstract String b();",
+        "  @Option(\"x\") abstract String a();",
+        "  @Option(\"x\") abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -45,10 +45,10 @@ class ProcessorTest {
   @Test
   void duplicateMnemonic() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
-        "  @Parameter(value = \"x\", mnemonic = 'x') abstract String a();",
-        "  @Parameter(value = \"y\", mnemonic = 'x') abstract String b();",
+        "  @Option(value = \"x\", mnemonic = 'x') abstract String a();",
+        "  @Option(value = \"y\", mnemonic = 'x') abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -59,10 +59,10 @@ class ProcessorTest {
   @Test
   void unknownReturnType() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract StringBuilder a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -74,10 +74,10 @@ class ProcessorTest {
   @Test
   void declaredException() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract String a() throws IllegalArgumentException;",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -89,10 +89,10 @@ class ProcessorTest {
   @Test
   void classNotAbstract() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -103,10 +103,10 @@ class ProcessorTest {
   @Test
   void rawList() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract List a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -118,10 +118,10 @@ class ProcessorTest {
   @Test
   void rawList2() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract List a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -133,10 +133,10 @@ class ProcessorTest {
   @Test
   void rawOptional() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract Optional a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -148,10 +148,10 @@ class ProcessorTest {
   @Test
   void rawOptional2() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract Optional a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -163,10 +163,10 @@ class ProcessorTest {
   @Test
   void parameterizedSet() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract java.util.Set<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -178,10 +178,10 @@ class ProcessorTest {
   @Test
   void integerArray() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract int[] a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -193,10 +193,10 @@ class ProcessorTest {
   @Test
   void utilDate() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract java.util.Date a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -208,7 +208,7 @@ class ProcessorTest {
   @Test
   void interfaceNotClass() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "interface Arguments {",
         "  abstract String a();",
         "}");
@@ -221,9 +221,9 @@ class ProcessorTest {
   @Test
   void whitespaceInName() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
-        "  @Parameter(value = \"a \")",
+        "  @Option(\"a \")",
         "  abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -235,7 +235,7 @@ class ProcessorTest {
   @Test
   void noMethods() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -247,10 +247,10 @@ class ProcessorTest {
   @Test
   void oneOptionalIntNotOptional() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract OptionalInt b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -261,10 +261,10 @@ class ProcessorTest {
   @Test
   void oneOptionalInt() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(value = \"x\")",
         "  abstract OptionalInt b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -275,10 +275,10 @@ class ProcessorTest {
   @Test
   void simpleFlag() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(value = \"x\")",
         "  abstract boolean x();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -289,10 +289,10 @@ class ProcessorTest {
   @Test
   void simpleInt() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(value = \"x\")",
         "  abstract int aRequiredInt();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -305,7 +305,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "abstract class Arguments {",
         "",
-        "  @CommandLineArguments",
+        "  @CLI",
         "  static abstract class Foo extends Arguments {",
         "    abstract String a();",
         "  }",
@@ -321,7 +321,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "interface Arguments {",
         "",
-        "  @CommandLineArguments",
+        "  @CLI",
         "  abstract class Foo implements Arguments {",
         "    abstract String a();",
         "  }",
@@ -336,21 +336,21 @@ class ProcessorTest {
   void missingCommandLineArgumentsAnnotation() {
     JavaFileObject javaFile = fromSource(
         "abstract class Arguments {",
-        "  @Parameter(value = \"a\") abstract String a();",
+        "  @Option(value = \"a\") abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class must have the @CommandLineArguments annotation");
+        .withErrorContaining("The class must have the @CLI annotation");
   }
 
   @Test
   void annotatedMethodNotAbstract() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(value = \"x\")",
         "  String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -362,9 +362,9 @@ class ProcessorTest {
   @Test
   void abstractMethodHasParameter() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
-        "  @Parameter(value = \"x\") abstract String a(int b, int c);",
+        "  @Option(value = \"x\") abstract String a(int b, int c);",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -375,9 +375,9 @@ class ProcessorTest {
   @Test
   void typeParameter() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
-        "  @Parameter(value = \"x\") abstract <E> String a();",
+        "  @Option(value = \"x\") abstract <E> String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -388,7 +388,7 @@ class ProcessorTest {
   @Test
   void missingAnnotation() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
         "  abstract List<String> a();",
@@ -396,16 +396,16 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Annotate this method with either @Parameter or @PositionalParameter");
+        .withErrorContaining("Annotate this method with either @Option or @Param");
   }
 
   @Test
   void positionalFlag() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @PositionalParameter(value = 1)",
+        "  @Param(value = 1)",
         "  abstract boolean hello();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -417,13 +417,13 @@ class ProcessorTest {
   @Test
   void nearNameCollision() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"fAncy\")",
+        "  @Option(value = \"fAncy\")",
         "  abstract String fAncy();",
 
-        "  @Parameter(value = \"f_ancy\")",
+        "  @Option(value = \"f_ancy\")",
         "  abstract String f_ancy();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -434,29 +434,29 @@ class ProcessorTest {
   @Test
   void doubleAnnotation() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
-        "  @PositionalParameter(value = 1)",
+        "  @Option(\"x\")",
+        "  @Param(1)",
         "  abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Use either @Parameter or @PositionalParameter annotation, but not both");
+        .withErrorContaining("Use either @Option or @Param annotation, but not both");
   }
 
   @Test
   void twoLists() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract List<String> a();",
         "",
-        "  @PositionalParameter(value = 1)",
+        "  @Param(1)",
         "  abstract List<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -467,10 +467,10 @@ class ProcessorTest {
   @Test
   void innerEnum() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract Foo foo();",
         "",
         "  enum Foo {",
@@ -485,10 +485,10 @@ class ProcessorTest {
   @Test
   void privateEnum() {
     JavaFileObject javaFile = fromSource(
-        "@CommandLineArguments",
+        "@CLI",
         "abstract class Arguments {",
         "",
-        "  @Parameter(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract Foo foo();",
         "",
         "  private enum Foo {",
@@ -507,7 +507,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "class Bob {",
         "  private static class Foo {",
-        "    @CommandLineArguments",
+        "    @CLI",
         "    abstract static class Bar {",
         "    }",
         "  }",
@@ -544,9 +544,9 @@ class ProcessorTest {
         "import java.util.stream.Collectors;",
         "import java.time.LocalDate;",
         "",
-        "import net.jbock.CommandLineArguments;",
-        "import net.jbock.PositionalParameter;",
-        "import net.jbock.Parameter;",
+        "import net.jbock.CLI;",
+        "import net.jbock.Param;",
+        "import net.jbock.Option;",
         "");
     List<String> moreLines = new ArrayList<>(lines.length + header.size());
     moreLines.addAll(header);

@@ -2,8 +2,7 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.Parameter;
-import net.jbock.PositionalParameter;
+import net.jbock.Option;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
 import net.jbock.coerce.ParameterType;
@@ -132,12 +131,12 @@ public final class Param {
   static Param create(TypeTool tool, List<Param> params, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     if (positionalIndex != null) {
-      Optional<TypeElement> mapperClass = annotationUtil.get(PositionalParameter.class, "mappedBy");
-      Optional<TypeElement> collectorClass = annotationUtil.get(PositionalParameter.class, "collectedBy");
+      Optional<TypeElement> mapperClass = annotationUtil.get(net.jbock.Param.class, "mappedBy");
+      Optional<TypeElement> collectorClass = annotationUtil.get(net.jbock.Param.class, "collectedBy");
       return createPositional(params, sourceMethod, positionalIndex, description, mapperClass, collectorClass, tool);
     } else {
-      Optional<TypeElement> mapperClass = annotationUtil.get(Parameter.class, "mappedBy");
-      Optional<TypeElement> collectorClass = annotationUtil.get(Parameter.class, "collectedBy");
+      Optional<TypeElement> mapperClass = annotationUtil.get(Option.class, "mappedBy");
+      Optional<TypeElement> collectorClass = annotationUtil.get(Option.class, "collectedBy");
       return createNonpositional(params, sourceMethod, description, mapperClass, collectorClass, tool);
     }
   }
@@ -154,7 +153,7 @@ public final class Param {
     if (shortName == null && longName == null) {
       throw ValidationException.create(sourceMethod, "Define either long name or a short name");
     }
-    Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
+    Option parameter = sourceMethod.getAnnotation(Option.class);
     checkShortName(sourceMethod, parameter.mnemonic());
     checkName(sourceMethod, parameter.value());
     ParamName name = findParamName(params, sourceMethod);
@@ -184,7 +183,7 @@ public final class Param {
       Optional<TypeElement> mapperClass,
       Optional<TypeElement> collectorClass,
       TypeTool tool) {
-    PositionalParameter parameter = sourceMethod.getAnnotation(PositionalParameter.class);
+    net.jbock.Param parameter = sourceMethod.getAnnotation(net.jbock.Param.class);
     ParamName name = findParamName(params, sourceMethod);
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
@@ -212,7 +211,7 @@ public final class Param {
   }
 
   private static String shortName(List<Param> params, ExecutableElement sourceMethod) {
-    Parameter param = sourceMethod.getAnnotation(Parameter.class);
+    Option param = sourceMethod.getAnnotation(Option.class);
     if (param == null) {
       return null;
     }
@@ -229,7 +228,7 @@ public final class Param {
   }
 
   private static String longName(List<Param> params, ExecutableElement sourceMethod) {
-    Parameter param = sourceMethod.getAnnotation(Parameter.class);
+    Option param = sourceMethod.getAnnotation(Option.class);
     if (param == null) {
       return null;
     }

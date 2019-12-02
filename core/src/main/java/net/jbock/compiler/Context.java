@@ -2,7 +2,7 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
-import net.jbock.CommandLineArguments;
+import net.jbock.CLI;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
@@ -52,7 +52,7 @@ public final class Context {
       ClassName generatedClass,
       List<Param> parameters,
       boolean allowEscape) {
-    CommandLineArguments annotation = sourceElement.getAnnotation(CommandLineArguments.class);
+    CLI annotation = sourceElement.getAnnotation(CLI.class);
     boolean helpParameterEnabled = !annotation.helpDisabled();
 
     return new Context(
@@ -65,7 +65,7 @@ public final class Context {
   }
 
   private static String programName(TypeElement sourceType) {
-    CommandLineArguments annotation = sourceType.getAnnotation(CommandLineArguments.class);
+    CLI annotation = sourceType.getAnnotation(CLI.class);
     if (!annotation.programName().isEmpty()) {
       return annotation.programName();
     }

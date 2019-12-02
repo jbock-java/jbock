@@ -1,21 +1,21 @@
 package net.jbock.examples;
 
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Option;
+import net.jbock.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-@CommandLineArguments
+@CLI
 abstract class GradleArguments {
 
   /**
    * the message
    * message goes here
    */
-  @Parameter(
+  @Option(
       value = "message",
       mnemonic = 'm')
   abstract Optional<String> message();
@@ -23,7 +23,7 @@ abstract class GradleArguments {
   /**
    * the files
    */
-  @Parameter(
+  @Option(
       value = "file",
       mnemonic = 'f')
   abstract List<String> file();
@@ -31,34 +31,34 @@ abstract class GradleArguments {
   /**
    * the dir
    */
-  @Parameter(value = "dir")
+  @Option(value = "dir")
   abstract Optional<String> dir();
 
   /**
    * cmos flag
    */
-  @Parameter(value = "c", mnemonic = 'c')
+  @Option(value = "c", mnemonic = 'c')
   abstract Boolean cmos();
 
-  @Parameter(
+  @Option(
       value = "verbose",
       mnemonic = 'v')
   abstract boolean verbose();
 
-  @PositionalParameter(value = 1)
+  @Param(value = 1)
   abstract List<String> otherTokens();
 
-  @CommandLineArguments
+  @CLI
   static abstract class Foo {
 
-    @Parameter(value = "bar")
+    @Option(value = "bar")
     abstract Optional<Integer> bar();
   }
 
-  @CommandLineArguments
+  @CLI
   static abstract class Bar {
 
-    @Parameter(value = "bar")
+    @Option(value = "bar")
     abstract List<String> bar();
   }
 }

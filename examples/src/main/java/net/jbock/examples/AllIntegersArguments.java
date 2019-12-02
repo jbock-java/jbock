@@ -1,27 +1,27 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Option;
+import net.jbock.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-@CommandLineArguments
+@CLI
 abstract class AllIntegersArguments {
 
-  @PositionalParameter(value = 1)
+  @Param(value = 1)
   abstract List<Integer> positional();
 
-  @Parameter(value = "i", mnemonic = 'i')
+  @Option(value = "i", mnemonic = 'i')
   abstract List<Integer> listOfIntegers();
 
-  @Parameter(value = "opt")
+  @Option(value = "opt")
   abstract Optional<Integer> optionalInteger();
 
-  @Parameter(value = "obj")
+  @Option(value = "obj")
   abstract Integer integer();
 
-  @Parameter(value = "prim")
+  @Option(value = "prim")
   abstract int primitiveInt();
 }

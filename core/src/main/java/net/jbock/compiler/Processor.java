@@ -3,9 +3,9 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Option;
+import net.jbock.Param;
 import net.jbock.coerce.SuppliedClassValidator;
 import net.jbock.compiler.view.Parser;
 
@@ -49,7 +49,7 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
-    return Stream.of(CommandLineArguments.class, Parameter.class, PositionalParameter.class)
+    return Stream.of(CLI.class, Option.class, Param.class)
         .map(Class::getCanonicalName)
         .collect(toSet());
   }
@@ -71,7 +71,7 @@ public final class Processor extends AbstractProcessor {
       return false;
     }
     if (annotations.stream().map(TypeElement::getQualifiedName)
-        .noneMatch(name -> name.contentEquals(CommandLineArguments.class.getCanonicalName()))) {
+        .noneMatch(name -> name.contentEquals(CLI.class.getCanonicalName()))) {
       return false;
     }
     getAnnotatedTypes(env).forEach(this::processSourceElements);
@@ -83,7 +83,7 @@ public final class Processor extends AbstractProcessor {
     ClassName generatedClass = generatedClass(sourceElement);
     try {
       validateSourceElement(tool, sourceElement);
-      List<Param> parameters = getParams(tool, sourceElement);
+      List<net.jbock.compiler.Param> parameters = getParams(tool, sourceElement);
       if (parameters.isEmpty()) { // javapoet #739
         throw ValidationException.create(sourceElement, "Define at least one abstract method");
       }
@@ -105,18 +105,18 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static void checkOnlyOnePositionalList(List<Param> allParams) {
+  private static void checkOnlyOnePositionalList(List<net.jbock.compiler.Param> allParams) {
     allParams.stream()
-        .filter(Param::isRepeatable)
-        .filter(Param::isPositional)
+        .filter(net.jbock.compiler.Param::isRepeatable)
+        .filter(net.jbock.compiler.Param::isPositional)
         .skip(1).findAny().ifPresent(p -> {
       throw p.validationError("There can only be one one repeatable positional parameter.");
     });
   }
 
-  private static void checkRankConsistentWithPosition(List<Param> allParams) {
+  private static void checkRankConsistentWithPosition(List<net.jbock.compiler.Param> allParams) {
     int currentOrdinal = -1;
-    for (Param param : allParams) {
+    for (net.jbock.compiler.Param param : allParams) {
       OptionalInt order = param.positionalOrder();
       if (!order.isPresent()) {
         continue;
@@ -129,12 +129,12 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static boolean isAllowEscape(List<Param> parameters) {
-    return parameters.stream().anyMatch(Param::isPositional);
+  private static boolean isAllowEscape(List<net.jbock.compiler.Param> parameters) {
+    return parameters.stream().anyMatch(net.jbock.compiler.Param::isPositional);
   }
 
   private Set<TypeElement> getAnnotatedTypes(RoundEnvironment env) {
-    Set<? extends Element> annotated = env.getElementsAnnotatedWith(CommandLineArguments.class);
+    Set<? extends Element> annotated = env.getElementsAnnotatedWith(CLI.class);
     return ElementFilter.typesIn(annotated);
   }
 
@@ -165,23 +165,23 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private List<Param> getParams(TypeTool tool, TypeElement sourceElement) {
+  private List<net.jbock.compiler.Param> getParams(TypeTool tool, TypeElement sourceElement) {
     List<ExecutableElement> abstractMethods = methodsIn(sourceElement.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
         .collect(Collectors.toList());
     abstractMethods.forEach(Processor::validateParameterMethods);
     ParameterMethods methods = ParameterMethods.create(abstractMethods);
-    List<Param> result = new ArrayList<>(methods.options().size() + methods.positionals().size());
+    List<net.jbock.compiler.Param> result = new ArrayList<>(methods.options().size() + methods.positionals().size());
     for (int i = 0; i < methods.positionals().size(); i++) {
       ExecutableElement method = methods.positionals().get(i);
-      Param param = Param.create(tool, result, method, i, getDescription(method));
+      net.jbock.compiler.Param param = net.jbock.compiler.Param.create(tool, result, method, i, getDescription(method));
       result.add(param);
     }
     for (ExecutableElement method : methods.options()) {
-      Param param = Param.create(tool, result, method, null, getDescription(method));
+      net.jbock.compiler.Param param = net.jbock.compiler.Param.create(tool, result, method, null, getDescription(method));
       result.add(param);
     }
-    if (!sourceElement.getAnnotation(CommandLineArguments.class).helpDisabled()) {
+    if (!sourceElement.getAnnotation(CLI.class).helpDisabled()) {
       checkHelp(result);
     }
     return result;
@@ -221,8 +221,8 @@ public final class Processor extends AbstractProcessor {
     return result.toArray(new String[0]);
   }
 
-  private void checkHelp(List<Param> parameters) {
-    for (Param param : parameters) {
+  private void checkHelp(List<net.jbock.compiler.Param> parameters) {
+    for (net.jbock.compiler.Param param : parameters) {
       param.longName().ifPresent(longName -> {
         if ("help".equals(longName)) {
           throw param.validationError("'help' is reserved. " +
@@ -250,21 +250,21 @@ public final class Processor extends AbstractProcessor {
       throw ValidationException.create(method,
           "The method may not declare any exceptions.");
     }
-    if (method.getAnnotation(PositionalParameter.class) == null && method.getAnnotation(Parameter.class) == null) {
+    if (method.getAnnotation(Param.class) == null && method.getAnnotation(Option.class) == null) {
       throw ValidationException.create(method,
           String.format("Annotate this method with either @%s or @%s",
-              Parameter.class.getSimpleName(), PositionalParameter.class.getSimpleName()));
+              Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
-    if (method.getAnnotation(PositionalParameter.class) != null && method.getAnnotation(Parameter.class) != null) {
+    if (method.getAnnotation(Param.class) != null && method.getAnnotation(Option.class) != null) {
       throw ValidationException.create(method,
           String.format("Use either @%s or @%s annotation, but not both",
-              Parameter.class.getSimpleName(), PositionalParameter.class.getSimpleName()));
+              Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
   }
 
   private List<ExecutableElement> getAnnotatedMethods(RoundEnvironment env, Set<? extends TypeElement> annotations) {
     List<ExecutableElement> methods = new ArrayList<>();
-    for (Class<? extends Annotation> annotation : Arrays.asList(Parameter.class, PositionalParameter.class)) {
+    for (Class<? extends Annotation> annotation : Arrays.asList(Option.class, Param.class)) {
       if (annotations.stream().map(TypeElement::getQualifiedName)
           .anyMatch(name -> name.contentEquals(annotation.getCanonicalName()))) {
         methods.addAll(methodsIn(env.getElementsAnnotatedWith(annotation)));
@@ -290,9 +290,9 @@ public final class Processor extends AbstractProcessor {
     if (enclosingElement.getKind() != ElementKind.CLASS) {
       throw ValidationException.create(enclosingElement, "The enclosing element must be a class.");
     }
-    if (enclosingElement.getAnnotation(CommandLineArguments.class) == null) {
+    if (enclosingElement.getAnnotation(CLI.class) == null) {
       throw ValidationException.create(enclosingElement,
-          "The class must have the @" + CommandLineArguments.class.getSimpleName() + " annotation.");
+          "The class must have the @" + CLI.class.getSimpleName() + " annotation.");
     }
   }
 }

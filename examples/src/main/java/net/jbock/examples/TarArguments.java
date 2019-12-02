@@ -1,24 +1,24 @@
 package net.jbock.examples;
 
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
-@CommandLineArguments
+@CLI
 abstract class TarArguments {
 
-  @Parameter(value = "x", mnemonic = 'x')
+  @Option(value = "x", mnemonic = 'x')
   abstract boolean extract();
 
-  @Parameter(value = "c", mnemonic = 'c')
+  @Option(value = "c", mnemonic = 'c')
   abstract boolean create();
 
-  @Parameter(value = "v", mnemonic = 'v')
+  @Option(value = "v", mnemonic = 'v')
   abstract boolean verbose();
 
-  @Parameter(value = "z", mnemonic = 'z')
+  @Option(value = "z", mnemonic = 'z')
   abstract boolean compress();
 
-  @Parameter(value = "f", mnemonic = 'f')
+  @Option(value = "f", mnemonic = 'f')
   abstract String file();
 }

@@ -1,27 +1,27 @@
 package net.jbock.examples;
 
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
 import java.util.List;
 import java.util.Optional;
 
-@CommandLineArguments
+@CLI
 abstract class NoNameArguments {
 
-  @Parameter(value = "message")
+  @Option(value = "message")
   abstract Optional<String> message();
 
-  @Parameter(value = "file")
+  @Option(value = "file")
   abstract List<String> file();
 
-  @Parameter(mnemonic = 'v', value = "verbosity")
+  @Option(mnemonic = 'v', value = "verbosity")
   abstract Optional<Integer> verbosity();
 
-  @Parameter(mnemonic = 'n', value = "number")
+  @Option(mnemonic = 'n', value = "number")
   abstract int number();
 
-  @Parameter(value = "cmos")
+  @Option(value = "cmos")
   abstract boolean cmos();
 }

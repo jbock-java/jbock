@@ -1,29 +1,29 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-@CommandLineArguments
+@CLI
 abstract class PositionalArguments {
 
-  @PositionalParameter(-10)
+  @Param(-10)
   abstract String source();
 
   /**
    * Desc of dest.
    */
-  @PositionalParameter(-1)
+  @Param(-1)
   abstract String dest();
 
-  @PositionalParameter(2)
+  @Param(2)
   abstract int anotherInt();
 
-  @PositionalParameter(3)
+  @Param(3)
   abstract Optional<String> optString();
 
-  @PositionalParameter(4)
+  @Param(4)
   abstract List<String> otherTokens();
 }

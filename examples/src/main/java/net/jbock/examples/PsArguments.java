@@ -1,19 +1,19 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
 import java.util.Optional;
 
-@CommandLineArguments
+@CLI
 abstract class PsArguments {
 
-  @Parameter(value = "all", mnemonic = 'a')
+  @Option(value = "all", mnemonic = 'a')
   abstract boolean all();
 
   /**
    * This is the description.
    */
-  @Parameter(value = "width", mnemonic = 'w')
+  @Option(value = "width", mnemonic = 'w')
   abstract Optional<Integer> width();
 }

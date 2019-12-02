@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
+import net.jbock.CLI;
+import net.jbock.Option;
 
 import java.math.BigInteger;
 import java.time.LocalDate;
@@ -13,26 +13,26 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-@CommandLineArguments
+@CLI
 abstract class CustomCollectorArguments {
 
-  @Parameter(value = "H", mnemonic = 'H', collectedBy = MyStringCollector.class)
+  @Option(value = "H", mnemonic = 'H', collectedBy = MyStringCollector.class)
   abstract Set<String> strings();
 
-  @Parameter(value = "B", mnemonic = 'B', collectedBy = MyIntegerCollector.class)
+  @Option(value = "B", mnemonic = 'B', collectedBy = MyIntegerCollector.class)
   abstract Set<Integer> integers();
 
-  @Parameter(value = "K", mnemonic = 'K', collectedBy = ToSetCollector.class)
+  @Option(value = "K", mnemonic = 'K', collectedBy = ToSetCollector.class)
   abstract Set<Giddy> moneySet();
 
-  @Parameter(
+  @Option(
       value = "T",
       mnemonic = 'T',
       mappedBy = MapEntryTokenizer.class,
       collectedBy = ToMapCollector.class)
   abstract Map<String, LocalDate> dateMap();
 
-  @Parameter(
+  @Option(
       value = "M",
       mnemonic = 'M',
       mappedBy = CustomBigIntegerMapper.class,

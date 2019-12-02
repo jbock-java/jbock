@@ -1,8 +1,8 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Option;
+import net.jbock.Param;
 
 import java.math.BigInteger;
 import java.util.Arrays;
@@ -16,47 +16,47 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
-@CommandLineArguments
+@CLI
 abstract class CustomMapperArguments {
 
   /**
    * The mapper must be a Function from String to whatever-this-returns.
    * It must also have a package-visible no-arg constructor.
    */
-  @Parameter(value = "date", mappedBy = DateMapper.class)
+  @Option(value = "date", mappedBy = DateMapper.class)
   abstract Date date();
 
-  @Parameter(value = "optDate", mappedBy = DateMapper.class)
+  @Option(value = "optDate", mappedBy = DateMapper.class)
   abstract Optional<Date> optDate();
 
-  @Parameter(value = "dateList", mappedBy = DateMapper.class)
+  @Option(value = "dateList", mappedBy = DateMapper.class)
   abstract List<Date> dateList();
 
-  @Parameter(value = "verbosity", mappedBy = CustomBigIntegerMapperSupplier.class)
+  @Option(value = "verbosity", mappedBy = CustomBigIntegerMapperSupplier.class)
   abstract Optional<BigInteger> verbosity();
 
-  @Parameter(value = "aRequiredInt", mappedBy = PositiveNumberMapper.class)
+  @Option(value = "aRequiredInt", mappedBy = PositiveNumberMapper.class)
   abstract int aRequiredInt();
 
-  @Parameter(value = "stringArray", mappedBy = ArrayMapper.class)
+  @Option(value = "stringArray", mappedBy = ArrayMapper.class)
   abstract Optional<String[]> stringArray();
 
-  @Parameter(value = "integerList", mappedBy = IntegerListMapper.class)
+  @Option(value = "integerList", mappedBy = IntegerListMapper.class)
   abstract Optional<List<Integer>> integerList();
 
-  @Parameter(value = "enumSet", mappedBy = EnumSetMapper.class)
+  @Option(value = "enumSet", mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
-  @PositionalParameter(value = 1, mappedBy = BooleanMapper.class)
+  @Param(value = 1, mappedBy = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
-  @Parameter(value = "optionalInts", mappedBy = OptionalIntMapper.class)
+  @Option(value = "optionalInts", mappedBy = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
-  @Parameter(value = "listWrapper", mappedBy = ListWrapperMapper.class)
+  @Option(value = "listWrapper", mappedBy = ListWrapperMapper.class)
   abstract Optional<List<String>> listWrapper();
 
-  @Parameter(value = "notFlag", mappedBy = BooleanMapper.class)
+  @Option(value = "notFlag", mappedBy = BooleanMapper.class)
   abstract Boolean notFlag();
 
   static class DateMapper implements Supplier<Function<String, Date>> {

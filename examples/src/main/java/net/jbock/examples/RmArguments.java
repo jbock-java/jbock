@@ -1,12 +1,12 @@
 package net.jbock.examples;
 
-import net.jbock.CommandLineArguments;
-import net.jbock.Parameter;
-import net.jbock.PositionalParameter;
+import net.jbock.CLI;
+import net.jbock.Option;
+import net.jbock.Param;
 
 import java.util.List;
 
-@CommandLineArguments
+@CLI
 abstract class RmArguments {
 
   /**
@@ -19,18 +19,18 @@ abstract class RmArguments {
    *
    * @return a boolean
    */
-  @Parameter(value = "recursive", mnemonic = 'r')
+  @Option(value = "recursive", mnemonic = 'r')
   abstract boolean recursive();
 
   /**
    * Use the force, Luke.
    */
-  @Parameter(value = "force", mnemonic = 'f')
+  @Option(value = "force", mnemonic = 'f')
   abstract boolean force();
 
   /**
    * This is a list that may be empty.
    */
-  @PositionalParameter(1)
+  @Param(1)
   abstract List<String> otherTokens();
 }
