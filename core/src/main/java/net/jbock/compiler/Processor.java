@@ -3,7 +3,7 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 import net.jbock.coerce.SuppliedClassValidator;
@@ -49,7 +49,7 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
-    return Stream.of(CLI.class, Option.class, Param.class)
+    return Stream.of(Command.class, Option.class, Param.class)
         .map(Class::getCanonicalName)
         .collect(toSet());
   }
@@ -71,7 +71,7 @@ public final class Processor extends AbstractProcessor {
       return false;
     }
     if (annotations.stream().map(TypeElement::getQualifiedName)
-        .noneMatch(name -> name.contentEquals(CLI.class.getCanonicalName()))) {
+        .noneMatch(name -> name.contentEquals(Command.class.getCanonicalName()))) {
       return false;
     }
     getAnnotatedTypes(env).forEach(this::processSourceElements);
@@ -134,7 +134,7 @@ public final class Processor extends AbstractProcessor {
   }
 
   private Set<TypeElement> getAnnotatedTypes(RoundEnvironment env) {
-    Set<? extends Element> annotated = env.getElementsAnnotatedWith(CLI.class);
+    Set<? extends Element> annotated = env.getElementsAnnotatedWith(Command.class);
     return ElementFilter.typesIn(annotated);
   }
 
@@ -181,7 +181,7 @@ public final class Processor extends AbstractProcessor {
       net.jbock.compiler.Param param = net.jbock.compiler.Param.create(tool, result, method, null, getDescription(method));
       result.add(param);
     }
-    if (!sourceElement.getAnnotation(CLI.class).helpDisabled()) {
+    if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {
       checkHelp(result);
     }
     return result;
@@ -290,9 +290,9 @@ public final class Processor extends AbstractProcessor {
     if (enclosingElement.getKind() != ElementKind.CLASS) {
       throw ValidationException.create(enclosingElement, "The enclosing element must be a class.");
     }
-    if (enclosingElement.getAnnotation(CLI.class) == null) {
+    if (enclosingElement.getAnnotation(Command.class) == null) {
       throw ValidationException.create(enclosingElement,
-          "The class must have the @" + CLI.class.getSimpleName() + " annotation.");
+          "The class must have the @" + Command.class.getSimpleName() + " annotation.");
     }
   }
 }

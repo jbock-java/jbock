@@ -1,12 +1,12 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 
 import java.util.Optional;
 
-@CLI
+@Command
 abstract class CpArguments {
 
   enum Control {

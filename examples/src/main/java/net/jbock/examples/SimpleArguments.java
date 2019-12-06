@@ -1,11 +1,11 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 
 import java.util.Optional;
 
-@CLI
+@Command
 abstract class SimpleArguments {
 
   @Option(value = "x", mnemonic = 'x')

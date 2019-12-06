@@ -1,14 +1,14 @@
 package net.jbock.examples;
 
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 
 import java.util.List;
 import java.util.Optional;
 
-@CLI
+@Command
 abstract class GradleArguments {
 
   /**
@@ -48,14 +48,14 @@ abstract class GradleArguments {
   @Param(value = 1)
   abstract List<String> otherTokens();
 
-  @CLI
+  @Command
   static abstract class Foo {
 
     @Option(value = "bar")
     abstract Optional<Integer> bar();
   }
 
-  @CLI
+  @Command
   static abstract class Bar {
 
     @Option(value = "bar")

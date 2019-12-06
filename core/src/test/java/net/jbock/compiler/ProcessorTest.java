@@ -18,7 +18,7 @@ class ProcessorTest {
   @Test
   void emptyLongName() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Option(\"\") abstract String a();",
         "}");
@@ -31,7 +31,7 @@ class ProcessorTest {
   @Test
   void duplicateLongName() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Option(\"x\") abstract String a();",
         "  @Option(\"x\") abstract String b();",
@@ -45,7 +45,7 @@ class ProcessorTest {
   @Test
   void duplicateMnemonic() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Option(value = \"x\", mnemonic = 'x') abstract String a();",
         "  @Option(value = \"y\", mnemonic = 'x') abstract String b();",
@@ -59,7 +59,7 @@ class ProcessorTest {
   @Test
   void unknownReturnType() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -74,7 +74,7 @@ class ProcessorTest {
   @Test
   void declaredException() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -89,7 +89,7 @@ class ProcessorTest {
   @Test
   void classNotAbstract() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -103,7 +103,7 @@ class ProcessorTest {
   @Test
   void rawList() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -118,7 +118,7 @@ class ProcessorTest {
   @Test
   void rawList2() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -133,7 +133,7 @@ class ProcessorTest {
   @Test
   void rawOptional() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -148,7 +148,7 @@ class ProcessorTest {
   @Test
   void rawOptional2() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -163,7 +163,7 @@ class ProcessorTest {
   @Test
   void parameterizedSet() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -178,7 +178,7 @@ class ProcessorTest {
   @Test
   void integerArray() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -193,7 +193,7 @@ class ProcessorTest {
   @Test
   void utilDate() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -208,7 +208,7 @@ class ProcessorTest {
   @Test
   void interfaceNotClass() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "interface Arguments {",
         "  abstract String a();",
         "}");
@@ -221,7 +221,7 @@ class ProcessorTest {
   @Test
   void whitespaceInName() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Option(\"a \")",
         "  abstract String a();",
@@ -235,7 +235,7 @@ class ProcessorTest {
   @Test
   void noMethods() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -247,7 +247,7 @@ class ProcessorTest {
   @Test
   void oneOptionalIntNotOptional() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -261,7 +261,7 @@ class ProcessorTest {
   @Test
   void oneOptionalInt() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\")",
@@ -275,7 +275,7 @@ class ProcessorTest {
   @Test
   void simpleFlag() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\")",
@@ -289,7 +289,7 @@ class ProcessorTest {
   @Test
   void simpleInt() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\")",
@@ -305,7 +305,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "abstract class Arguments {",
         "",
-        "  @CLI",
+        "  @Command",
         "  static abstract class Foo extends Arguments {",
         "    abstract String a();",
         "  }",
@@ -321,7 +321,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "interface Arguments {",
         "",
-        "  @CLI",
+        "  @Command",
         "  abstract class Foo implements Arguments {",
         "    abstract String a();",
         "  }",
@@ -341,13 +341,13 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class must have the @CLI annotation");
+        .withErrorContaining("The class must have the @Command annotation");
   }
 
   @Test
   void annotatedMethodNotAbstract() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\")",
@@ -362,7 +362,7 @@ class ProcessorTest {
   @Test
   void abstractMethodHasParameter() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Option(value = \"x\") abstract String a(int b, int c);",
         "}");
@@ -375,7 +375,7 @@ class ProcessorTest {
   @Test
   void typeParameter() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Option(value = \"x\") abstract <E> String a();",
         "}");
@@ -388,7 +388,7 @@ class ProcessorTest {
   @Test
   void missingAnnotation() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  abstract List<String> a();",
@@ -402,7 +402,7 @@ class ProcessorTest {
   @Test
   void positionalFlag() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Param(value = 1)",
@@ -417,7 +417,7 @@ class ProcessorTest {
   @Test
   void nearNameCollision() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"fAncy\")",
@@ -434,7 +434,7 @@ class ProcessorTest {
   @Test
   void doubleAnnotation() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -450,7 +450,7 @@ class ProcessorTest {
   @Test
   void twoLists() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -467,7 +467,7 @@ class ProcessorTest {
   @Test
   void innerEnum() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -485,7 +485,7 @@ class ProcessorTest {
   @Test
   void privateEnum() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
@@ -507,7 +507,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "class Bob {",
         "  private static class Foo {",
-        "    @CLI",
+        "    @Command",
         "    abstract static class Bar {",
         "    }",
         "  }",
@@ -544,7 +544,7 @@ class ProcessorTest {
         "import java.util.stream.Collectors;",
         "import java.time.LocalDate;",
         "",
-        "import net.jbock.CLI;",
+        "import net.jbock.Command;",
         "import net.jbock.Param;",
         "import net.jbock.Option;",
         "");

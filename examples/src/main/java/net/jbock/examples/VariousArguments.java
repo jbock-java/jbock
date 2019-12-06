@@ -1,6 +1,6 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 
@@ -14,7 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-@CLI
+@Command
 abstract class VariousArguments {
 
   @Option(value = "bigDecimal")

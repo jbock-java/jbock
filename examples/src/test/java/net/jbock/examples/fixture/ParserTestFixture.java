@@ -6,9 +6,9 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.ResourceBundle;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -41,7 +41,7 @@ public final class ParserTestFixture<E> {
 
     Parser<E> withErrorStream(PrintStream out);
 
-    Parser<E> withResourceBundle(ResourceBundle bundle);
+    Parser<E> withMessages(Map<String, String> map);
 
     Parser<E> maxLineWidth(int chars);
 
@@ -116,8 +116,8 @@ public final class ParserTestFixture<E> {
       }
 
       @Override
-      public Parser<E> withResourceBundle(ResourceBundle bundle) {
-        return callSetter("withResourceBundle", bundle, ResourceBundle.class);
+      public Parser<E> withMessages(Map<String, String> map) {
+        return callSetter("withMessages", map, Map.class);
       }
 
       @Override
@@ -149,12 +149,11 @@ public final class ParserTestFixture<E> {
   }
 
   public void assertPrintsHelp(String... expected) {
-    String stdout = getOut();
-    String[] actual = stdout.split("\\r?\\n", -1);
-    compareArrays(expected, actual);
+    String[] actual = getOut();
+    assertArraysEquals(expected, actual);
   }
 
-  static void compareArrays(String[] expected, String[] actual) {
+  public static void assertArraysEquals(String[] expected, String[] actual) {
     if (expected.length != actual.length) {
       failDifferentLength(expected, actual);
     }
@@ -300,12 +299,12 @@ public final class ParserTestFixture<E> {
     }
   }
 
-  public String getHelp(ResourceBundle bundle) {
-    parser.withResourceBundle(bundle);
+  public String[] getHelp(Map<String, String> bundle) {
+    parser.withMessages(bundle);
     return getOut();
   }
 
-  private String getOut() {
+  private String[] getOut() {
     TestOutputStream stdout = new TestOutputStream();
     TestOutputStream stderr = new TestOutputStream();
     try {
@@ -322,7 +321,7 @@ public final class ParserTestFixture<E> {
         throw new AssertionError("Unexpected output on stderr: " + stderr.toString());
       }
     }
-    return stdout.toString();
+    return stdout.toString().split("\\R", -1);
   }
 
   private static class Abort extends RuntimeException {

@@ -1,6 +1,6 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 
 import java.math.BigInteger;
@@ -13,7 +13,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
-@CLI
+@Command
 abstract class CustomCollectorArguments {
 
   @Option(value = "H", mnemonic = 'H', collectedBy = MyStringCollector.class)

@@ -1,6 +1,6 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Param;
 
 import java.util.Collection;
@@ -10,7 +10,7 @@ import java.util.Set;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@CLI
+@Command
 abstract class SudokuArguments {
 
   @Param(value = 1, mappedBy = Mapper.class)

@@ -50,7 +50,11 @@ public class ParamName {
   }
 
   public String snake() {
-    return String.join("_", parts);
+    return snake('_');
+  }
+
+  public String snake(char delim) {
+    return String.join(Character.toString(delim), parts);
   }
 
   public String camel() {

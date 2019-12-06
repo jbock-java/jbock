@@ -16,16 +16,17 @@ public @interface Option {
 
   /**
    * A unique &quot;gnu style&quot; long name.
-   * This definition doesn't contain the two dashes.
+   * This definition doesn't contain the double-dash prefix.
    *
    * @return a nonempty string
    */
   String value();
 
   /**
-   * An optional mnemonic.
+   * An optional mnemonic (space char ~= absent).
+   * This definition doesn't contain the single-dash prefix.
    *
-   * @return a character
+   * @return a mnemonic
    */
   char mnemonic() default ' ';
 
@@ -48,16 +49,4 @@ public @interface Option {
    * @return an optional collector class
    */
   Class<?> collectedBy() default Object.class;
-
-  /**
-   * The key that is used to find the parameter
-   * description in the i18 resource bundle for the online help.
-   * If no such key is defined,
-   * or if no bundle is supplied at runtime,
-   * then an attempt is made to derive the parameter description
-   * from the method's javadoc.
-   *
-   * @return an optional bundle key
-   */
-  String bundleKey() default "";
 }

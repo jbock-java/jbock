@@ -1,9 +1,9 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Param;
 
-@CLI
+@Command
 abstract class MvArguments {
 
   @Param(1)

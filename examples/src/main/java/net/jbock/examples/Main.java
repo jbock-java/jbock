@@ -1,6 +1,6 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 
 /**
@@ -9,7 +9,7 @@ import net.jbock.Option;
  */
 public class Main {
 
-  @CLI
+  @Command
   abstract static class Arguments {
 
     /**

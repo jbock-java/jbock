@@ -1,6 +1,6 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 
 import java.util.Collections;
@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@CLI
+@Command
 abstract class ListIntegerArguments {
 
   private static final Function<String, Integer> PARSE_INT = Integer::parseInt;

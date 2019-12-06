@@ -3,11 +3,10 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
-import java.util.Collections;
-import java.util.Enumeration;
-import java.util.ResourceBundle;
+import java.util.HashMap;
+import java.util.Map;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static net.jbock.examples.fixture.ParserTestFixture.assertArraysEquals;
 
 class RestArgumentsTest {
 
@@ -15,23 +14,17 @@ class RestArgumentsTest {
       ParserTestFixture.create(RestArguments_Parser.create());
 
   @Test
-  void testBundleJp() {
-    ResourceBundle bundle = new ResourceBundle() {
-      @Override
-      protected Object handleGetObject(String key) {
-        if ("param_file".equals(key)) {
-          return "Sikorski";
-        }
-        return null;
-      }
-
-      @Override
-      public Enumeration<String> getKeys() {
-        return Collections.enumeration(Collections.singletonList("param_file"));
-      }
+  void testBundleKey() {
+    Map<String, String> messages = new HashMap<>();
+    messages.put("file", "Kawalski\nnext");
+    messages.put("the.rest", "Hello\n   yes");
+    String[] help = f.getHelp(messages);
+    String[] expected = {
+        "Usage: rest-arguments [options...] <rest>...",
+        "rest             Hello yes",
+        "    --file FILE  Kawalski next",
+        ""
     };
-    String result = f.getHelp(bundle);
-    assertTrue(result.contains("Sikorski"));
-
+    assertArraysEquals(expected, help);
   }
 }

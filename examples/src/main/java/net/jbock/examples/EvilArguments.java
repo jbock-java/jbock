@@ -1,9 +1,9 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 
-@CLI
+@Command
 abstract class EvilArguments {
 
   @Option(value = "fancy")

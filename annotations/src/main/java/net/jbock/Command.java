@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  */
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.SOURCE)
-public @interface CLI {
+public @interface Command {
 
   /**
    * The program name that is printed
@@ -21,7 +21,7 @@ public @interface CLI {
    *
    * @return an optional program name
    */
-  String programName() default "";
+  String value() default "";
 
   /**
    * If this flag is left at its default value {@code false},

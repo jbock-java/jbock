@@ -14,7 +14,7 @@ class PositionalTest {
   @Test
   void simpleOptional() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Param(1)",
@@ -26,9 +26,27 @@ class PositionalTest {
   }
 
   @Test
+  void bundleKeyNotUnique() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Param(value = 1, bundleKey = \"x\")",
+        "  abstract String a();",
+        "",
+        "  @Option(\"x\")",
+        "  abstract String b();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Duplicate bundle key.");
+  }
+
+  @Test
   void mayNotDeclareAsOptionalInt() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(1) abstract Optional<Integer> a();",
         "}");
@@ -40,7 +58,7 @@ class PositionalTest {
   @Test
   void positionalOptionalsAnyOrder() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(-1) abstract Optional<String> a();",
         "  @Param(10) abstract Optional<Integer> b();",
@@ -55,7 +73,7 @@ class PositionalTest {
   @Test
   void positionalConflict() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(1) abstract int a();",
         "  @Param(1) abstract int b();",
@@ -69,7 +87,7 @@ class PositionalTest {
   @Test
   void positionalConflict2() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(1) abstract String a();",
         "  @Param(1) abstract OptionalInt b();",
@@ -85,7 +103,7 @@ class PositionalTest {
   @Test
   void positionalBadReturnTypeStringBuilder() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(1) abstract StringBuilder a();",
         "}");
@@ -98,7 +116,7 @@ class PositionalTest {
   @Test
   void positionalAllRanks() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(1) abstract String b();",
         "  @Param(2) abstract Optional<String> c();",
@@ -112,7 +130,7 @@ class PositionalTest {
   @Test
   void twoPositionalLists() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(1) abstract List<String> a();",
         "  @Param(2) abstract List<String> b();",
@@ -126,7 +144,7 @@ class PositionalTest {
   @Test
   void validList() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(1) abstract List<String> a();",
         "}");
@@ -138,7 +156,7 @@ class PositionalTest {
   @Test
   void positionalOptionalBeforeRequired() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(0) abstract Optional<String> a();",
         "  @Param(1) abstract String b();",
@@ -152,7 +170,7 @@ class PositionalTest {
   @Test
   void positionalListBeforeOptional() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(0) abstract List<String> a();",
         "  @Param(1) abstract Optional<String> b();",
@@ -166,7 +184,7 @@ class PositionalTest {
   @Test
   void positionalListBeforeRequired() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(1) abstract List<String> a();",
         "  @Param(2) abstract String b();",
@@ -180,7 +198,7 @@ class PositionalTest {
   @Test
   void mayNotDeclareAsOptional() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "  @Param(1) abstract Optional<Integer> a();",
         "}");

@@ -1,12 +1,12 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Param;
 
 import java.util.Optional;
 
 // Allow positional arguments to start with a dash, so negative numbers can be passed.
-@CLI
+@Command
 abstract class AdditionArguments {
 
   /**

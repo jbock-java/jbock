@@ -3,7 +3,7 @@ package net.jbock.examples.fixture;
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 
-import static net.jbock.examples.fixture.ParserTestFixture.compareArrays;
+import static net.jbock.examples.fixture.ParserTestFixture.assertArraysEquals;
 
 public class TestOutputStream {
 
@@ -19,6 +19,6 @@ public class TestOutputStream {
   public void assertEquals(String... expected) {
     String stdout = baos.toString();
     String[] actual = stdout.split("\\r?\\n", -1);
-    compareArrays(expected, actual);
+    assertArraysEquals(expected, actual);
   }
 }

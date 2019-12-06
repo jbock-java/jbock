@@ -87,19 +87,8 @@ public final class Param {
       }
       if (param.bundleKey.equals(bundleKey)) {
         throw ValidationException.create(sourceMethod,
-            "This bundle key is already taken.");
+            "Duplicate bundle key.");
       }
-    }
-  }
-
-  private static String descriptionArgumentName(ParameterType paramType, ParamName name) {
-    if (paramType.isFlag()) {
-      return null;
-    }
-    if (paramType.isRequired()) {
-      return name.snake().toUpperCase(Locale.US);
-    } else {
-      return name.snake();
     }
   }
 
@@ -164,12 +153,12 @@ public final class Param {
     } else {
       coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
     }
-    checkBundleKey(parameter.bundleKey(), params, sourceMethod);
+    checkBundleKey(parameter.value(), params, sourceMethod);
     return new Param(
         shortName,
         longName,
         sourceMethod,
-        parameter.bundleKey(),
+        parameter.value(),
         coercion,
         cleanDesc(description),
         null);

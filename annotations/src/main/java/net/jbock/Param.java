@@ -43,8 +43,14 @@ public @interface Param {
   Class<?> collectedBy() default Object.class;
 
   /**
-   * @return a string
-   * @see Option#bundleKey
+   * The key that is used to find the parameter
+   * description in the i18 resource bundle for the online help.
+   * If no bundleKey is defined,
+   * or if no bundle is supplied at runtime,
+   * then an attempt is made to derive the parameter description
+   * from the method's javadoc.
+   *
+   * @return an optional bundle key
    */
   String bundleKey() default "";
 }

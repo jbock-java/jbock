@@ -14,7 +14,7 @@ class MapperTest {
   @Test
   void validArrayMapperSupplier() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = ArrayMapper.class)",
@@ -34,7 +34,7 @@ class MapperTest {
   @Test
   void validArrayMapper() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = ArrayMapper.class)",
@@ -54,7 +54,7 @@ class MapperTest {
   @Test
   void validMapperWithTypeParameter() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
@@ -74,7 +74,7 @@ class MapperTest {
   @Test
   void validMapperWithTypeParameters() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
@@ -94,7 +94,7 @@ class MapperTest {
   @Test
   void invalidMapperTypeParameterWithBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
@@ -115,7 +115,7 @@ class MapperTest {
   @Test
   void validMapperTypeParameterWithBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
@@ -135,7 +135,7 @@ class MapperTest {
   @Test
   void validMapperTypeParameterSupplierWithBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
@@ -155,7 +155,7 @@ class MapperTest {
   @Test
   void invalidMapperTypeParameterSupplierWithBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
@@ -177,7 +177,7 @@ class MapperTest {
   @Test
   void invalidFlagMapper() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = FlagMapper.class)",
@@ -197,7 +197,7 @@ class MapperTest {
   @Test
   void validBooleanList() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Param(value = 0, mappedBy = BooleanMapper.class)",
@@ -218,7 +218,7 @@ class MapperTest {
   @Test
   void invalidBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Param(value = 1, mappedBy = BoundMapper.class)",
@@ -240,7 +240,7 @@ class MapperTest {
   @Test
   void invalidBoundsLong() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -263,7 +263,7 @@ class MapperTest {
   @Test
   void invalidBoundsLong2() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -288,7 +288,7 @@ class MapperTest {
   @Test
   void validBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Param(value = 1, mappedBy = BoundMapper.class)",
@@ -311,7 +311,7 @@ class MapperTest {
   @Test
   void mapperInvalidPrivateConstructor() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -335,7 +335,7 @@ class MapperTest {
   @Test
   void mapperInvalidNoDefaultConstructor() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -359,7 +359,7 @@ class MapperTest {
   @Test
   void mapperInvalidConstructorException() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -383,7 +383,7 @@ class MapperTest {
   @Test
   void mapperInvalidNonstaticInnerClass() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -404,7 +404,7 @@ class MapperTest {
   @Test
   void mapperInvalidNotStringFunction() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -425,7 +425,7 @@ class MapperTest {
   @Test
   void mapperInvalidReturnsString() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -446,7 +446,7 @@ class MapperTest {
   @Test
   void mapperValidTypevars() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -466,7 +466,7 @@ class MapperTest {
   @Test
   void mapperValidNestedTypevars() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -487,7 +487,7 @@ class MapperTest {
   @Test
   void mapperValidExtendsFunction() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -511,7 +511,7 @@ class MapperTest {
   @Test
   void mapperInvalidStringFunction() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -535,7 +535,7 @@ class MapperTest {
   @Test
   void mapperValidComplicatedTree() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -567,7 +567,7 @@ class MapperTest {
   @Test
   void testMapperTypeSudokuInvalid() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -586,7 +586,7 @@ class MapperTest {
   @Test
   void testMapperTypeSudokuValid() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -605,7 +605,7 @@ class MapperTest {
   @Test
   void testSudokuHard() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -631,7 +631,7 @@ class MapperTest {
   @Test
   void testListSudoku() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -652,7 +652,7 @@ class MapperTest {
   @Test
   void mapperInvalidComplicatedTree() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -685,7 +685,7 @@ class MapperTest {
   @Test
   void mapperInvalidNotFunction() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -708,7 +708,7 @@ class MapperTest {
   @Test
   void mapperInvalidFunctionReturnType() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -731,7 +731,7 @@ class MapperTest {
   @Test
   void mapperInvalidBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -754,7 +754,7 @@ class MapperTest {
   @Test
   void mapperValidBounds() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -778,7 +778,7 @@ class MapperTest {
   @Test
   void mapperInvalidRawFunction() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -799,7 +799,7 @@ class MapperTest {
   @Test
   void mapperInvalidSupplyingTypevar() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -820,7 +820,7 @@ class MapperTest {
   @Test
   void mapperValid() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -840,7 +840,7 @@ class MapperTest {
   @Test
   void mapperValidByte() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -860,7 +860,7 @@ class MapperTest {
   @Test
   void mapperValidBytePrimitive() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -880,7 +880,7 @@ class MapperTest {
   @Test
   void mapperValidOptionalInteger() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -900,7 +900,7 @@ class MapperTest {
   @Test
   void mapperValidOptionalStringTypevar() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -920,7 +920,7 @@ class MapperTest {
   @Test
   void mapperValidStringOptionalStringTypevar() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -940,7 +940,7 @@ class MapperTest {
   @Test
   void mapperValidStringListTypevar() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -960,7 +960,7 @@ class MapperTest {
   @Test
   void implicitMapperOptionalInt() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -980,7 +980,7 @@ class MapperTest {
   @Test
   void mapperOptionalInt() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -1000,7 +1000,7 @@ class MapperTest {
   @Test
   void mapperOptionalInteger() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -1020,7 +1020,7 @@ class MapperTest {
   @Test
   void oneOptionalInt() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -1041,7 +1041,7 @@ class MapperTest {
   @Test
   void mapperValidListOfSet() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
@@ -1061,7 +1061,7 @@ class MapperTest {
   @Test
   void mapperHasTypeargsImpossibleFromString() {
     JavaFileObject javaFile = fromSource(
-        "@CLI",
+        "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Identity.class)",

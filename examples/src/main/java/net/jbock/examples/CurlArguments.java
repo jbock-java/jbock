@@ -1,6 +1,6 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 
@@ -16,7 +16,7 @@ import java.util.Optional;
  * curl is powered by libcurl for all transfer-related features.
  * See libcurl(3) for details.
  */
-@CLI(programName = "curl")
+@Command("curl")
 abstract class CurlArguments {
 
   /**

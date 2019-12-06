@@ -1,10 +1,10 @@
 package net.jbock.examples;
 
-import net.jbock.CLI;
+import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 
-@CLI(helpDisabled = true)
+@Command(helpDisabled = true)
 abstract class HelplessArguments {
 
   @Param(1)

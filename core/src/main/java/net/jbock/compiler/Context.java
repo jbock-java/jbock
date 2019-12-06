@@ -2,12 +2,11 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
-import net.jbock.CLI;
+import net.jbock.Command;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 
 import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
@@ -52,7 +51,7 @@ public final class Context {
       ClassName generatedClass,
       List<Param> parameters,
       boolean allowEscape) {
-    CLI annotation = sourceElement.getAnnotation(CLI.class);
+    Command annotation = sourceElement.getAnnotation(Command.class);
     boolean helpParameterEnabled = !annotation.helpDisabled();
 
     return new Context(
@@ -65,13 +64,12 @@ public final class Context {
   }
 
   private static String programName(TypeElement sourceType) {
-    CLI annotation = sourceType.getAnnotation(CLI.class);
-    if (!annotation.programName().isEmpty()) {
-      return annotation.programName();
+    Command annotation = sourceType.getAnnotation(Command.class);
+    if (!annotation.value().isEmpty()) {
+      return annotation.value();
     }
-    String camel = sourceType.getSimpleName().toString();
-    return ParamName.create(camel).snake()
-        .replace('_', '-').toLowerCase(Locale.US);
+    String simpleName = sourceType.getSimpleName().toString();
+    return ParamName.create(simpleName).snake('-');
   }
 
   public boolean allowEscape() {
