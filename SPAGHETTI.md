@@ -61,18 +61,16 @@ Now we take a closer look at the basic parameter types:
 
 A *positional* parameter is just a value, without a
 preceding parameter name. The value is not allowed
-to start with a "minus" character, unless the
-<a href="#allowing-prefixed-tokens">*allowPrefixedTokens*</a>
-attribute is set. Here is an example:
+to start with a "minus" character. Here is an example:
 
 ````java
-@CommandLineArguments
+@Command
 abstract class MyArguments {
 
-  @PositionalParameter(1)
+  @Param(1)
   abstract Path source();
   
-  @PositionalParameter(2)
+  @Param(2)
   abstract Path target();
 }
 ````
@@ -97,16 +95,16 @@ assertEquals(Paths.get("b.txt"), my.target());
 These are the simplest non-positional parameters. 
 
 To declare a flag, simply
-make the parameter's corresponding model method return
+declare an option method that returns
 `boolean` or `Boolean`.
 
 ````java
-@Parameter(value = "quiet", mnemonic = 'q')
+@Option(value = "quiet", mnemonic = 'q')
 abstract boolean quiet();
 ````
 
-At runtime, the flag parameter's model method will return `true`
-if its *short name* or *long name*
+At runtime, the method will return `true`
+if either `--quiet` or `-q`
 are <a href="#binding-parameters">*free*</a> in `argv`.
 
 ````java
@@ -120,11 +118,11 @@ assertTrue(args.quiet());
 
 An *Option* that is not a <a href="#flags">*flag*</a> is called a
 *binding parameter*. For example, the following
-parameter method declares a binding parameter:
+method declares a simple binding parameter:
 
 ````java
 // example of a binding parameter
-@Parameter("file")
+@Option("file")
 abstract String file();
 ````
 
@@ -148,7 +146,7 @@ or <a href="#positional-parameters">*positional*</a> parameters
 that can appear any number of times in `argv`. For example:
 
 ````java
-@Parameter("headers")
+@Option("headers")
 abstract List<String> headers();
 ````
 
@@ -164,7 +162,7 @@ mapper return type.
 Given a <a href="#binding-parameters">*binding parameter*</a> like this
 
 ````java
-@Parameter(value = "file", mnemonic = 'f')
+@Option(value = "file", mnemonic = 'f')
 abstract Path file();
 ````
 
