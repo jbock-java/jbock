@@ -9,7 +9,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
-import net.jbock.compiler.Param;
+import net.jbock.compiler.Parameter;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
@@ -99,14 +99,7 @@ final class Tokenizer {
         .returns(rows.type)
         .addStatement("$T $N = new $T<>()", rows.type, rows, ArrayList.class)
         .beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type)
-        .beginControlFlow("if ($N.positionalIndex.isPresent())", optionParam)
         .addStatement("$N.add(printDescription($N))", rows, optionParam)
-        .endControlFlow()
-        .endControlFlow()
-        .beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type)
-        .beginControlFlow("if (!$N.positionalIndex.isPresent())", optionParam)
-        .addStatement("$N.add(printDescription($N))", rows, optionParam)
-        .endControlFlow()
         .endControlFlow()
         .addStatement("return $N", rows).build();
   }
@@ -145,15 +138,15 @@ final class Tokenizer {
     spec.addStatement("$T $N = new $T($S)",
         StringJoiner.class, joiner, StringJoiner.class, " ");
 
-    Map<Boolean, List<Param>> partitionedOptions = context.parameters().stream()
-        .filter(Param::isNotPositional)
-        .collect(partitioningBy(Param::isRequired));
+    Map<Boolean, List<Parameter>> partitionedOptions = context.parameters().stream()
+        .filter(Parameter::isNotPositional)
+        .collect(partitioningBy(Parameter::isRequired));
 
-    List<Param> requiredNonpos = partitionedOptions.get(true);
-    List<Param> optionalNonpos = partitionedOptions.get(false);
+    List<Parameter> requiredNonpos = partitionedOptions.get(true);
+    List<Parameter> optionalNonpos = partitionedOptions.get(false);
 
-    List<Param> positional = context.parameters().stream()
-        .filter(Param::isPositional)
+    List<Parameter> positional = context.parameters().stream()
+        .filter(Parameter::isPositional)
         .collect(toList());
 
     spec.addStatement("$N.add($S)", joiner, context.programName());
@@ -162,14 +155,14 @@ final class Tokenizer {
       spec.addStatement("$N.add($S)", joiner, "[options...]");
     }
 
-    for (Param param : requiredNonpos) {
+    for (Parameter param : requiredNonpos) {
       spec.addStatement("$N.add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))", joiner,
           String.class, "%s <%s>",
           context.optionType(), param.enumConstant(),
           context.optionType(), param.enumConstant(), Locale.class);
     }
 
-    for (Param param : positional) {
+    for (Parameter param : positional) {
       if (param.isOptional()) {
         spec.addStatement("$N.add($S)", joiner, "[<" + param.enumConstantLower() + ">]");
       } else if (param.isRequired()) {

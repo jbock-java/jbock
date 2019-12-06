@@ -20,7 +20,7 @@ public final class Context {
   private final ClassName generatedClass;
 
   // the abstract methods in the annotated class
-  private final List<Param> parameters;
+  private final List<Parameter> parameters;
 
   // whether "--" is a special token
   private final boolean allowEscape;
@@ -34,7 +34,7 @@ public final class Context {
   private Context(
       TypeElement sourceElement,
       ClassName generatedClass,
-      List<Param> parameters,
+      List<Parameter> parameters,
       boolean allowEscape,
       boolean helpParameterEnabled,
       String programName) {
@@ -49,7 +49,7 @@ public final class Context {
   static Context create(
       TypeElement sourceElement,
       ClassName generatedClass,
-      List<Param> parameters,
+      List<Parameter> parameters,
       boolean allowEscape) {
     Command annotation = sourceElement.getAnnotation(Command.class);
     boolean helpParameterEnabled = !annotation.helpDisabled();
@@ -154,7 +154,7 @@ public final class Context {
     return generatedClass;
   }
 
-  public List<Param> parameters() {
+  public List<Parameter> parameters() {
     return parameters;
   }
 

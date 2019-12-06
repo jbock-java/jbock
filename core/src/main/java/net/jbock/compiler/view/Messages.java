@@ -48,7 +48,7 @@ final class Messages {
     ParameterSpec key = ParameterSpec.builder(String.class, "key").build();
     ParameterSpec defaultValue = ParameterSpec.builder(LIST_OF_STRING, "defaultValue").build();
     return methodBuilder("getMessage")
-        .addStatement("return $N.getOrDefault($N, $T.join($S, $N))",
+        .addStatement("return $N.getOrDefault($N, $T.join($S, $N)).trim()",
             resourceBundle, key, String.class, " ", defaultValue)
         .addParameters(Arrays.asList(key, defaultValue))
         .returns(STRING)

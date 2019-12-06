@@ -8,7 +8,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
-import net.jbock.compiler.Param;
+import net.jbock.compiler.Parameter;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -115,7 +115,7 @@ final class ParserState {
 
     CodeBlock.Builder args = CodeBlock.builder().add("\n");
     for (int j = 0; j < context.parameters().size(); j++) {
-      Param param = context.parameters().get(j);
+      Parameter param = context.parameters().get(j);
       args.add(extractExpression(param));
       if (j < context.parameters().size() - 1) {
         args.add(",\n");
@@ -127,7 +127,7 @@ final class ParserState {
         .build();
   }
 
-  private CodeBlock extractExpression(Param param) {
+  private CodeBlock extractExpression(Parameter param) {
     CodeBlock.Builder builder = getStreamExpression(param).toBuilder();
     builder.add(".map($L)", param.coercion().mapExpr());
     param.coercion().collectExpr().map(collectExpr ->
@@ -159,7 +159,7 @@ final class ParserState {
    * @return An expression that extracts the value of the given param from the parser state.
    * This expression will evaluate either to a {@link java.util.stream.Stream} or a {@link java.util.Optional}.
    */
-  private CodeBlock getStreamExpression(Param param) {
+  private CodeBlock getStreamExpression(Parameter param) {
     if (param.isPositional()) {
       return CodeBlock.builder().add(
           "$N.get($L).values()",

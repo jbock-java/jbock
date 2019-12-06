@@ -9,7 +9,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
-import net.jbock.compiler.Param;
+import net.jbock.compiler.Parameter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,9 +111,9 @@ final class Option {
   }
 
   TypeSpec define() {
-    List<Param> parameters = context.parameters();
+    List<Parameter> parameters = context.parameters();
     TypeSpec.Builder spec = TypeSpec.enumBuilder(context.optionType());
-    for (Param param : parameters) {
+    for (Parameter param : parameters) {
       String enumConstant = param.enumConstant();
       spec.addEnumConstant(enumConstant, optionEnumConstant(param));
     }
@@ -132,7 +132,7 @@ final class Option {
         .build();
   }
 
-  private TypeSpec optionEnumConstant(Param param) {
+  private TypeSpec optionEnumConstant(Parameter param) {
     List<String> desc = param.description();
     Map<String, Object> map = new LinkedHashMap<>();
     CodeBlock names = getNames(param);
@@ -154,7 +154,7 @@ final class Option {
     return anonymousClassBuilder(block).build();
   }
 
-  private CodeBlock getNames(Param param) {
+  private CodeBlock getNames(Parameter param) {
     if (param.longName().isPresent() && !param.shortName().isPresent()) {
       return CodeBlock.of("$T.singletonList($S)", Collections.class, param.longName().get());
     } else if (!param.longName().isPresent() && param.shortName().isPresent()) {
@@ -238,7 +238,7 @@ final class Option {
     spec.addStatement("$T $N = new $T<>($T.class)",
         parsers.type, parsers, EnumMap.class, context.optionType());
 
-    for (Param param : context.parameters()) {
+    for (Parameter param : context.parameters()) {
       if (param.isPositional()) {
         continue;
       }
@@ -267,7 +267,7 @@ final class Option {
         .returns(parsers.type)
         .addModifiers(STATIC)
         .addStatement("$T $N = new $T<>()", parsers.type, parsers, ArrayList.class);
-    for (Param param : context.parameters()) {
+    for (Parameter param : context.parameters()) {
       if (!param.isPositional()) {
         continue;
       }

@@ -16,13 +16,13 @@ class RestArgumentsTest {
   @Test
   void testBundleKey() {
     Map<String, String> messages = new HashMap<>();
-    messages.put("file", "Kawalski\nnext");
-    messages.put("the.rest", "Hello\n   yes");
+    messages.put("file", "This\nis\ndog\n");
+    messages.put("the.rest", "Hello\n   yes\n");
     String[] help = f.getHelp(messages);
     String[] expected = {
         "Usage: rest-arguments [options...] <rest>...",
         "rest             Hello yes",
-        "    --file FILE  Kawalski next",
+        "    --file FILE  This is dog",
         ""
     };
     assertArraysEquals(expected, help);

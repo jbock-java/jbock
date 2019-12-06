@@ -3,7 +3,7 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
-import net.jbock.compiler.Param;
+import net.jbock.compiler.Parameter;
 
 import java.util.stream.Collectors;
 
@@ -32,7 +32,7 @@ final class Impl {
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.implType())
         .superclass(context.sourceElement());
-    for (Param param : context.parameters()) {
+    for (Parameter param : context.parameters()) {
       spec.addField(param.field());
     }
     return spec.addModifiers(PRIVATE, STATIC)
@@ -43,7 +43,7 @@ final class Impl {
         .build();
   }
 
-  private MethodSpec parameterMethodOverride(Param param) {
+  private MethodSpec parameterMethodOverride(Parameter param) {
     return MethodSpec.methodBuilder(param.methodName())
         .addAnnotation(Override.class)
         .returns(param.returnType())
@@ -54,7 +54,7 @@ final class Impl {
 
   private MethodSpec implConstructor() {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-    for (Param p : context.parameters()) {
+    for (Parameter p : context.parameters()) {
       spec.addStatement("this.$N = $L",
           p.field(), p.coercion().extractExpr());
       spec.addParameter(p.coercion().constructorParam());

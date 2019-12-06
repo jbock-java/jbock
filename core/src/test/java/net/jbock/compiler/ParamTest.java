@@ -4,8 +4,8 @@ import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
-import static net.jbock.compiler.Param.cleanDesc;
-import static net.jbock.compiler.Param.trim;
+import static net.jbock.compiler.Parameter.cleanDesc;
+import static net.jbock.compiler.Parameter.trim;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 

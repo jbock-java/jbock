@@ -83,7 +83,7 @@ public final class Processor extends AbstractProcessor {
     ClassName generatedClass = generatedClass(sourceElement);
     try {
       validateSourceElement(tool, sourceElement);
-      List<net.jbock.compiler.Param> parameters = getParams(tool, sourceElement);
+      List<Parameter> parameters = getParams(tool, sourceElement);
       if (parameters.isEmpty()) { // javapoet #739
         throw ValidationException.create(sourceElement, "Define at least one abstract method");
       }
@@ -105,18 +105,18 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static void checkOnlyOnePositionalList(List<net.jbock.compiler.Param> allParams) {
+  private static void checkOnlyOnePositionalList(List<Parameter> allParams) {
     allParams.stream()
-        .filter(net.jbock.compiler.Param::isRepeatable)
-        .filter(net.jbock.compiler.Param::isPositional)
+        .filter(Parameter::isRepeatable)
+        .filter(Parameter::isPositional)
         .skip(1).findAny().ifPresent(p -> {
       throw p.validationError("There can only be one one repeatable positional parameter.");
     });
   }
 
-  private static void checkRankConsistentWithPosition(List<net.jbock.compiler.Param> allParams) {
+  private static void checkRankConsistentWithPosition(List<Parameter> allParams) {
     int currentOrdinal = -1;
-    for (net.jbock.compiler.Param param : allParams) {
+    for (Parameter param : allParams) {
       OptionalInt order = param.positionalOrder();
       if (!order.isPresent()) {
         continue;
@@ -129,8 +129,8 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static boolean isAllowEscape(List<net.jbock.compiler.Param> parameters) {
-    return parameters.stream().anyMatch(net.jbock.compiler.Param::isPositional);
+  private static boolean isAllowEscape(List<Parameter> parameters) {
+    return parameters.stream().anyMatch(Parameter::isPositional);
   }
 
   private Set<TypeElement> getAnnotatedTypes(RoundEnvironment env) {
@@ -165,20 +165,20 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private List<net.jbock.compiler.Param> getParams(TypeTool tool, TypeElement sourceElement) {
+  private List<Parameter> getParams(TypeTool tool, TypeElement sourceElement) {
     List<ExecutableElement> abstractMethods = methodsIn(sourceElement.getEnclosedElements()).stream()
         .filter(method -> method.getModifiers().contains(ABSTRACT))
         .collect(Collectors.toList());
     abstractMethods.forEach(Processor::validateParameterMethods);
     ParameterMethods methods = ParameterMethods.create(abstractMethods);
-    List<net.jbock.compiler.Param> result = new ArrayList<>(methods.options().size() + methods.positionals().size());
+    List<Parameter> result = new ArrayList<>(methods.options().size() + methods.positionals().size());
     for (int i = 0; i < methods.positionals().size(); i++) {
       ExecutableElement method = methods.positionals().get(i);
-      net.jbock.compiler.Param param = net.jbock.compiler.Param.create(tool, result, method, i, getDescription(method));
+      Parameter param = Parameter.create(tool, result, method, i, getDescription(method));
       result.add(param);
     }
     for (ExecutableElement method : methods.options()) {
-      net.jbock.compiler.Param param = net.jbock.compiler.Param.create(tool, result, method, null, getDescription(method));
+      Parameter param = Parameter.create(tool, result, method, null, getDescription(method));
       result.add(param);
     }
     if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {
@@ -221,8 +221,8 @@ public final class Processor extends AbstractProcessor {
     return result.toArray(new String[0]);
   }
 
-  private void checkHelp(List<net.jbock.compiler.Param> parameters) {
-    for (net.jbock.compiler.Param param : parameters) {
+  private void checkHelp(List<Parameter> parameters) {
+    for (Parameter param : parameters) {
       param.longName().ifPresent(longName -> {
         if ("help".equals(longName)) {
           throw param.validationError("'help' is reserved. " +

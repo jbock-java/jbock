@@ -5,7 +5,6 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
-import net.jbock.coerce.ParameterType;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -28,7 +27,7 @@ import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
 /**
  * This class represents a parameter method.
  */
-public final class Param {
+public final class Parameter {
 
   // null if absent
   private final String longName;
@@ -51,11 +50,11 @@ public final class Param {
   }
 
   private static ParamName findParamName(
-      List<Param> params,
+      List<Parameter> params,
       ExecutableElement sourceMethod) {
     String methodName = sourceMethod.getSimpleName().toString();
     ParamName result = ParamName.create(methodName);
-    for (Param param : params) {
+    for (Parameter param : params) {
       if (param.paramName().equals(result)) {
         return result.append(Integer.toString(params.size()));
       }
@@ -65,7 +64,7 @@ public final class Param {
 
   private static void checkBundleKey(
       String bundleKey,
-      List<Param> params,
+      List<Parameter> params,
       ExecutableElement sourceMethod) {
     if (bundleKey.isEmpty()) {
       return;
@@ -81,7 +80,7 @@ public final class Param {
       throw ValidationException.create(sourceMethod,
           "Bundle keys may not start with 'jbock.'.");
     }
-    for (Param param : params) {
+    for (Parameter param : params) {
       if (param.bundleKey.isEmpty()) {
         continue;
       }
@@ -92,7 +91,7 @@ public final class Param {
     }
   }
 
-  private Param(
+  private Parameter(
       String shortName,
       String longName,
       ExecutableElement sourceMethod,
@@ -117,7 +116,7 @@ public final class Param {
     return coercion;
   }
 
-  static Param create(TypeTool tool, List<Param> params, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
+  static Parameter create(TypeTool tool, List<Parameter> params, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     if (positionalIndex != null) {
       Optional<TypeElement> mapperClass = annotationUtil.get(net.jbock.Param.class, "mappedBy");
@@ -130,8 +129,8 @@ public final class Param {
     }
   }
 
-  private static Param createNonpositional(
-      List<Param> params,
+  private static Parameter createNonpositional(
+      List<Parameter> params,
       ExecutableElement sourceMethod,
       String[] description,
       Optional<TypeElement> mapperClass,
@@ -154,7 +153,7 @@ public final class Param {
       coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
     }
     checkBundleKey(parameter.value(), params, sourceMethod);
-    return new Param(
+    return new Parameter(
         shortName,
         longName,
         sourceMethod,
@@ -164,8 +163,8 @@ public final class Param {
         null);
   }
 
-  private static Param createPositional(
-      List<Param> params,
+  private static Parameter createPositional(
+      List<Parameter> params,
       ExecutableElement sourceMethod,
       int positionalIndex,
       String[] description,
@@ -176,7 +175,7 @@ public final class Param {
     ParamName name = findParamName(params, sourceMethod);
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
     checkBundleKey(parameter.bundleKey(), params, sourceMethod);
-    return new Param(
+    return new Parameter(
         null,
         null,
         sourceMethod,
@@ -199,7 +198,7 @@ public final class Param {
         tool.isSameType(mirror, Boolean.class);
   }
 
-  private static String shortName(List<Param> params, ExecutableElement sourceMethod) {
+  private static String shortName(List<Parameter> params, ExecutableElement sourceMethod) {
     Option param = sourceMethod.getAnnotation(Option.class);
     if (param == null) {
       return null;
@@ -208,7 +207,7 @@ public final class Param {
       return null;
     }
     String result = "-" + param.mnemonic();
-    for (Param p : params) {
+    for (Parameter p : params) {
       if (result.equals(p.shortName)) {
         throw ValidationException.create(sourceMethod, "Duplicate short name");
       }
@@ -216,7 +215,7 @@ public final class Param {
     return result;
   }
 
-  private static String longName(List<Param> params, ExecutableElement sourceMethod) {
+  private static String longName(List<Parameter> params, ExecutableElement sourceMethod) {
     Option param = sourceMethod.getAnnotation(Option.class);
     if (param == null) {
       return null;
@@ -226,7 +225,7 @@ public final class Param {
           "The name may not be empty");
     }
     String longName = "--" + param.value();
-    for (Param p : params) {
+    for (Parameter p : params) {
       if (p.longName != null && p.longName.equals(longName)) {
         throw ValidationException.create(sourceMethod, "Duplicate long name");
       }
