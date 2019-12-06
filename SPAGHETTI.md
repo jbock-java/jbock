@@ -248,9 +248,9 @@ By using a custom collector, it is possible to create a
 builds a `Map`:
 
 ````java
-@Parameter(value = "headers",
-           mappedBy = MapTokenizer.class,
-           collectedBy = MapCollector.class)
+@Option(value = "headers",
+        mappedBy = MapTokenizer.class,
+        collectedBy = MapCollector.class)
 abstract Map<String, String> headers();
 ````
 
@@ -311,8 +311,8 @@ MyArguments args = MyArguments_Parser.create()
 The bundle keys must then be manually defined on the parameter methods:
 
 ````java
-@Parameter(value = "url",
-           bundleKey = "headers")
+@Param(value = 1,
+       bundleKey = "headers")
 abstract String headers();
 ````
 
