@@ -4,13 +4,13 @@
 With jbock, command line parameters are defined as abstract methods:
 
 ````java
-@CommandLineArguments
+@Command
 abstract class MyArguments {
 
-  @PositionalParameter(1)
+  @Param(1)
   abstract Path path();
 
-  @Parameter(value = "verbosity", mnemonic = 'v')
+  @Option(value = "verbosity", mnemonic = 'v')
   abstract OptionalInt verbosity();
 }
 ````
