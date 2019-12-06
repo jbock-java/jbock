@@ -30,6 +30,8 @@ if [[ -z "$VERSION" ]]; then
   usage
 fi
 
+git checkout master
+git pull origin master
 ./gradlew -Pversion=${VERSION} ${MODULE}:clean ${MODULE}:test ${MODULE}:publish
 
 read -e -p "Upload successful. Also tag? [y/N]"
