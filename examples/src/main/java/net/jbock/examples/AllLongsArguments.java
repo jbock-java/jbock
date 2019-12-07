@@ -10,18 +10,18 @@ import java.util.Optional;
 @Command
 abstract class AllLongsArguments {
 
-  @Param(value = 1)
+  @Param(1)
   abstract List<Long> positional();
 
   @Option(value = "i", mnemonic = 'i')
   abstract List<Long> listOfLongs();
 
-  @Option(value = "opt")
+  @Option("opt")
   abstract Optional<Long> optionalLong();
 
-  @Option(value = "obj")
+  @Option("obj")
   abstract Long longObject();
 
-  @Option(value = "prim")
+  @Option("prim")
   abstract long primitiveLong();
 }

@@ -10,10 +10,10 @@ import java.util.Optional;
 @Command
 abstract class NoNameArguments {
 
-  @Option(value = "message")
+  @Option("message")
   abstract Optional<String> message();
 
-  @Option(value = "file")
+  @Option("file")
   abstract List<String> file();
 
   @Option(mnemonic = 'v', value = "verbosity")
@@ -22,6 +22,6 @@ abstract class NoNameArguments {
   @Option(mnemonic = 'n', value = "number")
   abstract int number();
 
-  @Option(value = "cmos")
+  @Option("cmos")
   abstract boolean cmos();
 }

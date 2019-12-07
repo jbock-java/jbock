@@ -10,18 +10,18 @@ import java.util.Optional;
 @Command
 abstract class AllFloatsArguments {
 
-  @Param(value = 1)
+  @Param(1)
   abstract List<Float> positional();
 
   @Option(value = "i", mnemonic = 'i')
   abstract List<Float> listOfFloats();
 
-  @Option(value = "opt")
+  @Option("opt")
   abstract Optional<Float> optionalFloat();
 
-  @Option(value = "obj")
+  @Option("obj")
   abstract Float floatObject();
 
-  @Option(value = "prim")
+  @Option("prim")
   abstract float primitiveFloat();
 }

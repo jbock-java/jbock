@@ -6,9 +6,9 @@ import net.jbock.Option;
 @Command
 abstract class AllFlagsArguments {
 
-  @Option(value = "smallFlag")
+  @Option("smallFlag")
   abstract boolean smallFlag();
 
-  @Option(value = "bigFlag")
+  @Option("bigFlag")
   abstract Boolean bigFlag();
 }

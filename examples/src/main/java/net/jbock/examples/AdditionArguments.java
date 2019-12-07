@@ -12,19 +12,19 @@ abstract class AdditionArguments {
   /**
    * First argument
    */
-  @Param(value = 1)
+  @Param(1)
   abstract int a();
 
   /**
    * Second argument
    */
-  @Param(value = 2)
+  @Param(2)
   abstract int b();
 
   /**
    * Optional third argument
    */
-  @Param(value = 3)
+  @Param(3)
   abstract Optional<Integer> c();
 
   final int sum() {

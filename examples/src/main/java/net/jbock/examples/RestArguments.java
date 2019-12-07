@@ -12,7 +12,7 @@ abstract class RestArguments {
   /**
    * This is the file.
    */
-  @Option(value = "file")
+  @Option("file")
   abstract List<String> file();
 
   @Param(value = 1, bundleKey = "the.rest")

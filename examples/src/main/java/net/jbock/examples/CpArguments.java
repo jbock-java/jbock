@@ -16,16 +16,16 @@ abstract class CpArguments {
     SIMPLE
   }
 
-  @Param(value = 1)
+  @Param(1)
   abstract String source();
 
-  @Param(value = 2)
+  @Param(2)
   abstract String dest();
 
   @Option(value = "r", mnemonic = 'r')
   abstract boolean recursive();
 
-  @Option(value = "backup")
+  @Option("backup")
   abstract Optional<Control> backup();
 
 

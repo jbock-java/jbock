@@ -31,7 +31,7 @@ abstract class GradleArguments {
   /**
    * the dir
    */
-  @Option(value = "dir")
+  @Option("dir")
   abstract Optional<String> dir();
 
   /**
@@ -45,20 +45,20 @@ abstract class GradleArguments {
       mnemonic = 'v')
   abstract boolean verbose();
 
-  @Param(value = 1)
+  @Param(1)
   abstract List<String> otherTokens();
 
   @Command
   static abstract class Foo {
 
-    @Option(value = "bar")
+    @Option("bar")
     abstract Optional<Integer> bar();
   }
 
   @Command
   static abstract class Bar {
 
-    @Option(value = "bar")
+    @Option("bar")
     abstract List<String> bar();
   }
 }
