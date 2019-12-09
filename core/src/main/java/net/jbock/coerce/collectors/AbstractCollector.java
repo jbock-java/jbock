@@ -1,4 +1,4 @@
-package net.jbock.coerce.collector;
+package net.jbock.coerce.collectors;
 
 import com.squareup.javapoet.CodeBlock;
 

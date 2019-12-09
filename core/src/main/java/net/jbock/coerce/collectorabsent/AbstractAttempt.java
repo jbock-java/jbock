@@ -5,7 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.ParameterType;
-import net.jbock.coerce.collector.DefaultCollector;
+import net.jbock.coerce.collectors.DefaultCollector;
 import net.jbock.coerce.mapper.MapperType;
 
 import javax.lang.model.type.TypeMirror;

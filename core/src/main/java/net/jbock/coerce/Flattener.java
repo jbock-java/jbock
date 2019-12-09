@@ -12,12 +12,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-class Flattener {
+public class Flattener {
 
   private final BasicInfo basicInfo;
   private final TypeElement targetElement;
 
-  Flattener(BasicInfo basicInfo, TypeElement targetElement) {
+  public Flattener(BasicInfo basicInfo, TypeElement targetElement) {
     this.targetElement = targetElement;
     this.basicInfo = basicInfo;
   }
@@ -31,7 +31,7 @@ class Flattener {
     return result.flatMap(this::getTypeParameters);
   }
 
-  Either<String, List<TypeMirror>> getTypeParameters(Map<String, TypeMirror> solution) {
+  public Either<String, List<TypeMirror>> getTypeParameters(Map<String, TypeMirror> solution) {
     List<? extends TypeParameterElement> typeParameters = targetElement.getTypeParameters();
     List<TypeMirror> outcome = new ArrayList<>();
     for (TypeParameterElement p : typeParameters) {

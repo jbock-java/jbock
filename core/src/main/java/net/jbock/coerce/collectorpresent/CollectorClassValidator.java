@@ -1,6 +1,8 @@
-package net.jbock.coerce;
+package net.jbock.coerce.collectorpresent;
 
-import net.jbock.coerce.collector.CustomCollector;
+import net.jbock.coerce.BasicInfo;
+import net.jbock.coerce.Flattener;
+import net.jbock.coerce.collectors.CustomCollector;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
@@ -17,18 +19,18 @@ import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.Util.checkNotAbstract;
 import static net.jbock.coerce.reference.ExpectedType.COLLECTOR;
 
-class CollectorClassValidator {
+public class CollectorClassValidator {
 
   private final BasicInfo basicInfo;
   private final TypeElement collectorClass;
 
-  CollectorClassValidator(BasicInfo basicInfo, TypeElement collectorClass) {
+  public CollectorClassValidator(BasicInfo basicInfo, TypeElement collectorClass) {
     this.basicInfo = basicInfo;
     this.collectorClass = collectorClass;
   }
 
   // visible for testing
-  CustomCollector getCollectorInfo() {
+  public CustomCollector getCollectorInfo() {
     commonChecks(collectorClass);
     checkNotAbstract(collectorClass);
     ReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, basicInfo, collectorClass)

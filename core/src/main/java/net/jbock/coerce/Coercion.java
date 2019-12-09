@@ -4,7 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.coerce.collector.AbstractCollector;
+import net.jbock.coerce.collectors.AbstractCollector;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.ParamName;
 
