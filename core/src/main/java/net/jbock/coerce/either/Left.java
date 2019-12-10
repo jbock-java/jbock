@@ -15,18 +15,18 @@ public class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <L2, R2> Either<L2, R2> map(Function<L, L2> leftFunction, Function<R, R2> rightFunction) {
-    return left(leftFunction.apply(left));
+  public <L2, R2> Either<L2, R2> map(Function<L, L2> leftMapper, Function<R, R2> rightMapper) {
+    return left(leftMapper.apply(left));
   }
 
   @Override
-  public <L2, R2> Either<L2, R2> flatMap(Function<L, L2> leftFunction, Function<R, Either<L2, R2>> rightFunction) {
-    return left(leftFunction.apply(left));
+  public <L2, R2> Either<L2, R2> flatMap(Function<L, L2> leftMapper, Function<R, Either<L2, R2>> rightMapper) {
+    return left(leftMapper.apply(left));
   }
 
   @Override
-  public <T> T collapse(Function<L, T> leftFunction, Function<R, T> rightFunction) {
-    return leftFunction.apply(left);
+  public <U> U fold(Function<L, U> leftMapper, Function<R, U> rightMapper) {
+    return leftMapper.apply(left);
   }
 
   @Override

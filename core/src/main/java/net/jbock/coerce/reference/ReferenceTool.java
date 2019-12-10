@@ -28,7 +28,7 @@ public class ReferenceTool<E> {
 
   public ReferencedType<E> getReferencedType() {
     return resolver.typecheck(referencedClass, Supplier.class)
-        .collapse(this::handleNotSupplier, this::handleSupplier);
+        .fold(this::handleNotSupplier, this::handleSupplier);
   }
 
   private ReferencedType<E> handleNotSupplier(TypecheckFailure failure) {
