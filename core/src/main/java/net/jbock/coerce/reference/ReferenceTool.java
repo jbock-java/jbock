@@ -4,7 +4,6 @@ import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
-import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
@@ -33,25 +32,27 @@ public class ReferenceTool<E> {
   }
 
   public ReferencedType<E> getReferencedType() {
-    Either<String, Declared<Supplier>> supplierType = resolver.typecheck(referencedClass, Supplier.class);
+    Either<TypecheckFailure, Declared<Supplier>> supplierType = resolver.typecheck(referencedClass, Supplier.class);
+    if (supplierType.failureMatches(TypecheckFailure::isFatal)) {
+      throw boom(((Left<TypecheckFailure, Declared<Supplier>>) supplierType).value().getMessage());
+    }
     if (supplierType instanceof Left) {
       Declared<E> expectedType = resolver.typecheck(referencedClass, this.expectedType.expectedClass())
-          .orElseThrow(this::boom);
-      return new ReferencedType<>(checkRawType(expectedType), false);
+          .orElseThrow(f -> boom(f.getMessage()));
+      return new ReferencedType<>(expectedType, false);
     }
-    List<? extends TypeMirror> typeArgs = checkRawType(((Right<String, Declared<Supplier>>) supplierType).value()).typeArguments();
+    List<? extends TypeMirror> typeArgs = ((Right<TypecheckFailure, Declared<Supplier>>) supplierType).value().typeArguments();
     TypeMirror supplied = typeArgs.get(0);
     if (supplied.getKind() != TypeKind.DECLARED) {
       throw unexpectedClassException();
     }
     DeclaredType suppliedType = asDeclared(supplied);
     Declared<E> expected = resolver.typecheck(suppliedType, expectedType.expectedClass())
-        .map(this::checkRawType)
-        .orElseThrow(this::boom);
+        .orElseThrow(f -> boom(f.getMessage()));
     if (!expected.isDirect()) {
       throw unexpectedClassException();
     }
-    return new ReferencedType<>(checkRawType(expected), true);
+    return new ReferencedType<>(expected, true);
   }
 
   private ValidationException unexpectedClassException() {
@@ -59,20 +60,8 @@ public class ReferenceTool<E> {
         " or Supplier<" + expectedType.simpleName() + ">");
   }
 
-  private <P> Declared<P> checkRawType(Declared<P> mapper) {
-    if (tool().isRawType(mapper.asType(tool()))) {
-      throw boom("the " + expectedType.simpleName().toLowerCase(Locale.US) +
-          " type must be parameterized");
-    }
-    return mapper;
-  }
-
   private ValidationException boom(String message) {
     return basicInfo.asValidationException(String.format("There is a problem with the " +
         expectedType.name().toLowerCase(Locale.US) + " class: %s.", message));
-  }
-
-  private TypeTool tool() {
-    return basicInfo.tool();
   }
 }

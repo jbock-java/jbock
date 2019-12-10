@@ -1,6 +1,7 @@
 package net.jbock.coerce.either;
 
 import java.util.function.Function;
+import java.util.function.Predicate;
 
 public class Right<L, R> extends Either<L, R> {
 
@@ -32,5 +33,10 @@ public class Right<L, R> extends Either<L, R> {
   @Override
   public R orElseThrow(Function<L, ? extends Throwable> f) {
     return right;
+  }
+
+  @Override
+  public boolean failureMatches(Predicate<L> predicate) {
+    return false;
   }
 }

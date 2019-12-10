@@ -37,9 +37,9 @@ class ResolverTest {
       TypeElement mapper = elements.getTypeElement("test.Foo");
       BasicInfo basicInfo = Mockito.mock(BasicInfo.class);
       Mockito.when(basicInfo.tool()).thenReturn(tool);
-      Either<String, Declared<Supplier>> result = new Resolver(MAPPER, basicInfo).typecheck(mapper, Supplier.class);
+      Either<TypecheckFailure, Declared<Supplier>> result = new Resolver(MAPPER, basicInfo).typecheck(mapper, Supplier.class);
       assertTrue(result instanceof Right);
-      TypeMirror typeMirror = ((Right<String, Declared<Supplier>>) result).value().asType(tool);
+      TypeMirror typeMirror = ((Right<TypecheckFailure, Declared<Supplier>>) result).value().asType(tool);
       DeclaredType declared = TypeTool.asDeclared(typeMirror);
       assertEquals(1, declared.getTypeArguments().size());
       TypeMirror typeParameter = declared.getTypeArguments().get(0);
@@ -64,7 +64,7 @@ class ResolverTest {
       TypeElement mapper = elements.getTypeElement("test.Foo");
       BasicInfo basicInfo = Mockito.mock(BasicInfo.class);
       Mockito.when(basicInfo.tool()).thenReturn(tool);
-      Either<String, Declared<String>> result = new Resolver(MAPPER, basicInfo).typecheck(mapper, String.class);
+      Either<TypecheckFailure, Declared<String>> result = new Resolver(MAPPER, basicInfo).typecheck(mapper, String.class);
       assertTrue(result instanceof Left);
     });
   }
@@ -86,7 +86,7 @@ class ResolverTest {
       DeclaredType functionType = TypeTool.asDeclared(declaredType.getTypeArguments().get(0));
       BasicInfo basicInfo = Mockito.mock(BasicInfo.class);
       Mockito.when(basicInfo.tool()).thenReturn(tool);
-      Either<String, Declared<Function>> result = new Resolver(MAPPER, basicInfo).typecheck(functionType, Function.class);
+      Either<TypecheckFailure, Declared<Function>> result = new Resolver(MAPPER, basicInfo).typecheck(functionType, Function.class);
       assertTrue(result instanceof Right);
     });
   }

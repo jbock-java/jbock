@@ -33,7 +33,7 @@ class Resolver {
     this.basicInfo = basicInfo;
   }
 
-  <E> Either<String, Declared<E>> typecheck(TypeElement x, Class<E> something) {
+  <E> Either<TypecheckFailure, Declared<E>> typecheck(TypeElement x, Class<E> something) {
     return typecheck(TypeTool.asDeclared(x.asType()), something);
   }
 
@@ -47,11 +47,11 @@ class Resolver {
    * @return A type that erases to the {@code something} type,
    * with typevars resolved where possible
    */
-  <E> Either<String, Declared<E>> typecheck(DeclaredType x, Class<E> something) {
+  <E> Either<TypecheckFailure, Declared<E>> typecheck(DeclaredType x, Class<E> something) {
     if (tool().isSameErasure(x, something)) {
       if (something.getTypeParameters().length >= 1) {
         if (x.getTypeArguments().isEmpty()) {
-          return Either.left("raw type");
+          return Either.left(TypecheckFailure.fatal("raw type"));
         }
       }
       return Either.right(new Declared<>(something, x.getTypeArguments(), Collections.emptyList()));
@@ -59,7 +59,12 @@ class Resolver {
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool()).getHierarchy(tool().asTypeElement(x));
     List<ImplementsRelation> path = findPath(hierarchy, something);
     if (path.isEmpty()) {
-      return Either.left("not a " + something.getCanonicalName());
+      return Either.left(TypecheckFailure.nonFatal("not a " + something.getCanonicalName()));
+    }
+    if (something.getTypeParameters().length >= 1) {
+      if (path.get(path.size() - 1).animal().getTypeArguments().isEmpty()) {
+        return Either.left(TypecheckFailure.fatal("raw type"));
+      }
     }
     return dogToAnimal(path)
         .map(Function.identity(),
@@ -100,7 +105,7 @@ class Resolver {
    *   <li>{@code path[n].animal} has the same erasure as {@code path[n + 1].dog}</li>
    * </ul>
    */
-  private Either<String, DeclaredType> dogToAnimal(List<ImplementsRelation> path) {
+  private Either<TypecheckFailure, DeclaredType> dogToAnimal(List<ImplementsRelation> path) {
     List<Map<String, TypeMirror>> typevarMappings = new ArrayList<>();
     for (int i = 1; i < path.size(); i++) {
       typevarMappings.add(getTypevarMapping(path.get(i - 1).animal(), path.get(i).dog()));
@@ -112,7 +117,7 @@ class Resolver {
         });
   }
 
-  private Either<String, Map<String, TypeMirror>> getMergedTypevarMapping(List<Map<String, TypeMirror>> solutions) {
+  private Either<TypecheckFailure, Map<String, TypeMirror>> getMergedTypevarMapping(List<Map<String, TypeMirror>> solutions) {
     if (solutions.isEmpty()) {
       return Either.right(Collections.emptyMap());
     }
@@ -120,11 +125,11 @@ class Resolver {
     for (int i = solutions.size() - 2; i >= 0; i--) {
       Map<String, TypeMirror> merged = new LinkedHashMap<>();
       for (Entry<String, TypeMirror> entry : solution.entrySet()) {
-        Either<String, TypeMirror> substituted = tool().substitute(entry.getValue(), solutions.get(i));
+        Either<TypecheckFailure, TypeMirror> substituted = tool().substitute(entry.getValue(), solutions.get(i));
         if (substituted instanceof Left) {
-          return Either.left(expectedType.boom(((Left<String, TypeMirror>) substituted).value()));
+          return Either.left(TypecheckFailure.fatal(expectedType.boom(((Left<TypecheckFailure, TypeMirror>) substituted).value().getMessage())));
         }
-        merged.put(entry.getKey(), ((Right<String, TypeMirror>) substituted).value());
+        merged.put(entry.getKey(), ((Right<TypecheckFailure, TypeMirror>) substituted).value());
       }
       solution = merged;
     }

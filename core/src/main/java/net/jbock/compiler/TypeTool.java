@@ -1,6 +1,7 @@
 package net.jbock.compiler;
 
 import net.jbock.coerce.either.Either;
+import net.jbock.coerce.reference.TypecheckFailure;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -111,7 +112,7 @@ public class TypeTool {
    * Can be null.
    * Wildcards remain unchanged.
    */
-  public Either<String, TypeMirror> substitute(TypeMirror input, Map<String, TypeMirror> solution) {
+  public Either<TypecheckFailure, TypeMirror> substitute(TypeMirror input, Map<String, TypeMirror> solution) {
     if (input.getKind() == TypeKind.TYPEVAR) {
       return Either.right(solution.get(input.toString()));
     }
@@ -119,10 +120,10 @@ public class TypeTool {
         .map(type -> type);
   }
 
-  public Either<String, DeclaredType> substitute(DeclaredType declaredType, Map<String, TypeMirror> solution) {
+  public Either<TypecheckFailure, DeclaredType> substitute(DeclaredType declaredType, Map<String, TypeMirror> solution) {
     DeclaredType result = subst(declaredType, solution);
     if (result == null) {
-      return Either.left("substitution failed");
+      return Either.left(TypecheckFailure.fatal("substitution failed"));
     }
     return Either.right(result);
   }

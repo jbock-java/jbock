@@ -39,7 +39,7 @@ public class CollectorClassValidator {
     Map<String, TypeMirror> r_result = tool().unify(basicInfo.originalReturnType(), r)
         .orElseThrow(() -> boom(String.format("The collector should return %s but returns %s", basicInfo.originalReturnType(), r)));
     TypeMirror inputType = tool().substitute(t, r_result)
-        .orElseThrow(this::boom);
+        .orElseThrow(f -> boom(f.getMessage()));
     List<TypeMirror> typeParameters = new Flattener(basicInfo, collectorClass)
         .getTypeParameters(r_result)
         .orElseThrow(this::boom);

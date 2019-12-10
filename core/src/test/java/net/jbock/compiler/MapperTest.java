@@ -797,6 +797,27 @@ class MapperTest {
   }
 
   @Test
+  void mapperInvalidRawSupplier() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
+        "  static class Mapper implements Supplier {",
+        "    public Object get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: raw type.");
+  }
+
+  @Test
   void mapperInvalidRawFunction() {
     JavaFileObject javaFile = fromSource(
         "@Command",
@@ -814,7 +835,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: the function type must be parameterized.");
+        .withErrorContaining("There is a problem with the mapper class: raw type.");
   }
 
   @Test
