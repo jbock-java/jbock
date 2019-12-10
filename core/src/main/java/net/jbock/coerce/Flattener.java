@@ -35,23 +35,27 @@ public class Flattener {
         .map(TypeParameterElement::toString)
         .map(solution::get)
         .collect(Collectors.toList());
-    if (!passesBoundsCheck(outcome)) {
-      return Either.left("invalid bounds");
+    String errorMessage = boundsCheck(outcome);
+    if (errorMessage != null) {
+      return Either.left(errorMessage);
     }
     return Either.right(outcome);
   }
 
-  private boolean passesBoundsCheck(List<TypeMirror> outcome) {
+  private String boundsCheck(List<TypeMirror> outcome) {
     List<? extends TypeParameterElement> parameters = targetElement.getTypeParameters();
     for (int i = 0; i < parameters.size(); i++) {
       TypeParameterElement p = parameters.get(i);
       List<? extends TypeMirror> bounds = p.getBounds();
       TypeMirror m = outcome.get(i);
+      if (m == null) {
+        return "incompatible type";
+      }
       if (tool().isOutOfBounds(m, bounds)) {
-        return false;
+        return "invalid bounds";
       }
     }
-    return true;
+    return null;
   }
 
   private Either<String, Map<String, TypeMirror>> mergeResult(List<Map<String, TypeMirror>> partialSolutions) {

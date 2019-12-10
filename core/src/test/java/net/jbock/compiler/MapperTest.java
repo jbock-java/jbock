@@ -584,7 +584,7 @@ class MapperTest {
   }
 
   @Test
-  void testMapperTypeSudokuValid() {
+  void testMapperTypeSudokuLooksValidButIsnt() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -776,7 +776,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperInvalidRawFunction() {
+  void mapperInvalidRawFunctionSupplier() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -787,6 +787,27 @@ class MapperTest {
         "  static class Mapper implements Supplier<Function> {",
         "    public Function get() {",
         "      return s -> s;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: the function type must be parameterized.");
+  }
+
+  @Test
+  void mapperInvalidRawFunction() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
+        "  abstract Integer number();",
+        "",
+        "  static class Mapper implements Function {",
+        "    public Object apply(Object o) {",
+        "      return null;",
         "    }",
         "  }",
         "}");

@@ -43,11 +43,13 @@ public class ReferenceTool<E> {
       throw unexpectedClassException();
     }
     DeclaredType suppliedType = asDeclared(supplied);
-    Optional<Declared<E>> directExpectation = resolver.typecheck(suppliedType, expectedType.expectedClass());
-    if (!directExpectation.isPresent() || !directExpectation.get().isDirect()) {
+    Declared<E> expected = resolver.typecheck(suppliedType, expectedType.expectedClass())
+        .map(this::checkRawType)
+        .orElseThrow(this::unexpectedClassException);
+    if (!expected.isDirect()) {
       throw unexpectedClassException();
     }
-    return new ReferencedType<>(checkRawType(directExpectation.get()), true);
+    return new ReferencedType<>(checkRawType(expected), true);
   }
 
   private ValidationException unexpectedClassException() {
@@ -55,14 +57,10 @@ public class ReferenceTool<E> {
         " or Supplier<" + expectedType.simpleName() + ">");
   }
 
-  private ValidationException rawTypeException() {
-    return boom("the " + expectedType.simpleName().toLowerCase(Locale.US) +
-        " type must be parameterized");
-  }
-
   private <P> Declared<P> checkRawType(Declared<P> mapper) {
     if (tool().isRawType(mapper.asType(tool()))) {
-      throw rawTypeException();
+      throw boom("the " + expectedType.simpleName().toLowerCase(Locale.US) +
+          " type must be parameterized");
     }
     return mapper;
   }
