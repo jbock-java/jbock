@@ -32,7 +32,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Collector or Supplier<Collector>");
+        .withErrorContaining("not a declared Collector");
   }
 
   @Test
@@ -691,6 +691,6 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Collector");
+        .withErrorContaining("not a declared Collector");
   }
 }

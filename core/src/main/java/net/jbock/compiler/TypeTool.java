@@ -21,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class TypeTool {
 
@@ -117,7 +118,7 @@ public class TypeTool {
       return Either.right(solution.get(input.toString()));
     }
     return substitute(input.accept(AS_DECLARED, null), solution)
-        .map(type -> type);
+        .map(Function.identity(), type -> type);
   }
 
   public Either<TypecheckFailure, DeclaredType> substitute(DeclaredType declaredType, Map<String, TypeMirror> solution) {
@@ -178,10 +179,6 @@ public class TypeTool {
 
   public boolean isSameType(TypeMirror mirror, TypeMirror test) {
     return types.isSameType(mirror, test);
-  }
-
-  public boolean isRawType(TypeMirror mirror) {
-    return types.isSameType(mirror, types.erasure(mirror));
   }
 
   PrimitiveType getPrimitiveType(TypeKind kind) {

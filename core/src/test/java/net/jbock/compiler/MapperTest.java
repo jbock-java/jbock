@@ -505,7 +505,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Function or Supplier<Function>");
+        .withErrorContaining("not a declared Function");
   }
 
   @Test
@@ -529,7 +529,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Function or Supplier<Function>");
+        .withErrorContaining("not a declared Function");
   }
 
   @Test
@@ -599,7 +599,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Function or Supplier<Function>");
+        .withErrorContaining("not a declared Function");
   }
 
   @Test
@@ -679,7 +679,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Function or Supplier<Function>");
+        .withErrorContaining("There is a problem with the mapper class: not a declared Function.");
   }
 
   @Test
@@ -702,7 +702,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Function");
+        .withErrorContaining("not a declared Function");
   }
 
   @Test

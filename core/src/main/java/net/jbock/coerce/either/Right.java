@@ -1,7 +1,6 @@
 package net.jbock.coerce.either;
 
 import java.util.function.Function;
-import java.util.function.Predicate;
 
 public class Right<L, R> extends Either<L, R> {
 
@@ -21,22 +20,17 @@ public class Right<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <R2> Either<L, R2> map(Function<R, R2> rightFunction) {
-    return right(rightFunction.apply(right));
+  public <L2, R2> Either<L2, R2> flatMap(Function<L, L2> leftFunction, Function<R, Either<L2, R2>> rightFunction) {
+    return rightFunction.apply(right);
   }
 
   @Override
-  public <R2> Either<L, R2> flatMap(Function<R, Either<L, R2>> rightFunction) {
+  public <T> T collapse(Function<L, T> leftFunction, Function<R, T> rightFunction) {
     return rightFunction.apply(right);
   }
 
   @Override
   public R orElseThrow(Function<L, ? extends Throwable> f) {
     return right;
-  }
-
-  @Override
-  public boolean failureMatches(Predicate<L> predicate) {
-    return false;
   }
 }

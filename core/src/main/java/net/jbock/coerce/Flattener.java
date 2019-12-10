@@ -9,6 +9,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class Flattener {
@@ -27,7 +28,7 @@ public class Flattener {
    */
   Either<String, List<TypeMirror>> getTypeParameters(List<Map<String, TypeMirror>> partialSolutions) {
     Either<String, Map<String, TypeMirror>> result = mergeResult(partialSolutions);
-    return result.flatMap(this::getTypeParameters);
+    return result.flatMap(Function.identity(), this::getTypeParameters);
   }
 
   public Either<String, List<TypeMirror>> getTypeParameters(Map<String, TypeMirror> solution) {
