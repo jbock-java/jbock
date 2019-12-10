@@ -16,7 +16,6 @@ import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static net.jbock.compiler.TypeTool.asDeclared;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -58,30 +57,12 @@ class TypeToolTest {
   }
 
   @Test
-  void substituteTestWithInvalidBounds() {
+  void substituteTestSet() {
 
     EvaluatingProcessor.source(
         "package a;",
         "",
-        "interface Set<E extends Number> {}"
-    ).run((elements, types) -> {
-      TypeTool tool = new TypeTool(elements, types);
-      TypeMirror setOfE = elements.getTypeElement("a.Set").asType();
-      TypeElement string = elements.getTypeElement("java.lang.String");
-      Optional<DeclaredType> result = tool.substitute(
-          setOfE.accept(AS_DECLARED, null),
-          Collections.singletonMap("E", string.asType()));
-      assertFalse(result.isPresent());
-    });
-  }
-
-  @Test
-  void substituteTestWithValidBounds() {
-
-    EvaluatingProcessor.source(
-        "package a;",
-        "",
-        "interface Set<E extends Number> {}"
+        "interface Set<E> {}"
     ).run((elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeMirror setOfE = elements.getTypeElement("a.Set").asType();

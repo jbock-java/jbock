@@ -4,7 +4,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
@@ -104,7 +103,7 @@ public class TypeTool {
   }
 
   /**
-   * @param input a type
+   * @param input    a type
    * @param solution for solving typevars in the input
    * @return the input type, with all typevars resolved. Wildcards remain unchanged.
    */
@@ -119,9 +118,6 @@ public class TypeTool {
     DeclaredType result = subst(declaredType, solution);
     if (result == null) {
       return Optional.empty(); // invalid
-    }
-    if (!isAssignableToTypeElement(result)) {
-      return Optional.empty();
     }
     return Optional.of(result);
   }
@@ -154,43 +150,6 @@ public class TypeTool {
   public DeclaredType getDeclaredType(Class<?> clasz, List<? extends TypeMirror> typeArguments) {
     return types.getDeclaredType(asDeclared(asType(clasz)).asElement()
         .accept(AS_TYPE_ELEMENT, null), typeArguments.toArray(new TypeMirror[0]));
-  }
-
-  private boolean isAssignableToTypeElement(DeclaredType declaredType) {
-    TypeElement typeElement = declaredType.asElement().accept(AS_TYPE_ELEMENT, null);
-    List<? extends TypeParameterElement> typeParameters = typeElement.getTypeParameters();
-    List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
-    if (typeArguments.size() != typeParameters.size()) {
-      return false;
-    }
-    for (int i = 0; i < typeParameters.size(); i++) {
-      TypeMirror argument = typeArguments.get(i);
-      if (argument.getKind() == TypeKind.WILDCARD) {
-        continue;
-      }
-      for (TypeMirror bound : typeParameters.get(i).getBounds()) {
-        if (!types.isAssignable(argument, bound)) {
-          return false;
-        }
-      }
-      if (argument.getKind() == TypeKind.TYPEVAR) {
-        continue;
-      }
-      if (argument.getKind() == TypeKind.ARRAY) {
-        continue;
-      }
-      if (argument.getKind() != TypeKind.DECLARED) {
-        return false;
-      }
-      if (!isAssignableToTypeElement(argument.accept(AS_DECLARED, null))) {
-        return false;
-      }
-    }
-    return true;
-  }
-
-  private boolean isAssignable(TypeMirror mirror, TypeMirror bound) {
-    return types.isAssignable(mirror, bound);
   }
 
   public boolean isSameType(TypeMirror mirror, Class<?> test) {
@@ -307,7 +266,7 @@ public class TypeTool {
 
   public boolean isOutOfBounds(TypeMirror mirror, List<? extends TypeMirror> bounds) {
     for (TypeMirror bound : bounds) {
-      if (!isAssignable(mirror, bound)) {
+      if (!types.isAssignable(mirror, bound)) {
         return true;
       }
     }

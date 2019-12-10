@@ -1,16 +1,15 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.either.Left;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeMirror;
-import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 public class Flattener {
 
@@ -32,27 +31,28 @@ public class Flattener {
   }
 
   public Either<String, List<TypeMirror>> getTypeParameters(Map<String, TypeMirror> solution) {
-    List<? extends TypeParameterElement> typeParameters = targetElement.getTypeParameters();
-    List<TypeMirror> outcome = new ArrayList<>();
-    for (TypeParameterElement p : typeParameters) {
-      Either<String, TypeMirror> resolved = resolve(solution, p);
-      if (resolved instanceof Left) {
-        return Either.left(((Left<String, TypeMirror>) resolved).value());
-      }
-      outcome.add(resolved.orElseThrow(left -> new AssertionError()));
+    List<? extends TypeParameterElement> ps = targetElement.getTypeParameters();
+    List<TypeMirror> outcome = ps.stream()
+        .map(TypeParameterElement::toString)
+        .map(solution::get)
+        .collect(Collectors.toList());
+    if (!passesBoundsCheck(outcome)) {
+      return Either.left("invalid bounds");
     }
     return Either.right(outcome);
   }
 
-  private Either<String, TypeMirror> resolve(Map<String, TypeMirror> result, TypeParameterElement typeParameter) {
-    TypeMirror m = result.get(typeParameter.toString());
-    List<? extends TypeMirror> bounds = typeParameter.getBounds();
-    if (m != null) {
+  private boolean passesBoundsCheck(List<TypeMirror> outcome) {
+    List<? extends TypeParameterElement> ps = targetElement.getTypeParameters();
+    for (int i = 0; i < ps.size(); i++) {
+      TypeParameterElement p = ps.get(i);
+      List<? extends TypeMirror> bounds = p.getBounds();
+      TypeMirror m = outcome.get(i);
       if (tool().isOutOfBounds(m, bounds)) {
-        return Either.left("invalid bounds");
+        return false;
       }
     }
-    return Either.right(m);
+    return true;
   }
 
   private Either<String, Map<String, TypeMirror>> mergeResult(List<Map<String, TypeMirror>> results) {
