@@ -31,8 +31,7 @@ public class Flattener {
   }
 
   public Either<String, List<TypeMirror>> getTypeParameters(Map<String, TypeMirror> solution) {
-    List<? extends TypeParameterElement> ps = targetElement.getTypeParameters();
-    List<TypeMirror> outcome = ps.stream()
+    List<TypeMirror> outcome = targetElement.getTypeParameters().stream()
         .map(TypeParameterElement::toString)
         .map(solution::get)
         .collect(Collectors.toList());
@@ -43,9 +42,9 @@ public class Flattener {
   }
 
   private boolean passesBoundsCheck(List<TypeMirror> outcome) {
-    List<? extends TypeParameterElement> ps = targetElement.getTypeParameters();
-    for (int i = 0; i < ps.size(); i++) {
-      TypeParameterElement p = ps.get(i);
+    List<? extends TypeParameterElement> parameters = targetElement.getTypeParameters();
+    for (int i = 0; i < parameters.size(); i++) {
+      TypeParameterElement p = parameters.get(i);
       List<? extends TypeMirror> bounds = p.getBounds();
       TypeMirror m = outcome.get(i);
       if (tool().isOutOfBounds(m, bounds)) {
@@ -55,20 +54,18 @@ public class Flattener {
     return true;
   }
 
-  private Either<String, Map<String, TypeMirror>> mergeResult(List<Map<String, TypeMirror>> results) {
-    Map<String, TypeMirror> out = new LinkedHashMap<>();
-    for (Map<String, TypeMirror> result : results) {
-      for (Map.Entry<String, TypeMirror> entry : result.entrySet()) {
-        TypeMirror current = out.get(entry.getKey());
-        if (current != null) {
-          if (!tool().isSameType(current, entry.getValue())) {
-            return Either.left("invalid bounds");
-          }
+  private Either<String, Map<String, TypeMirror>> mergeResult(List<Map<String, TypeMirror>> partialSolutions) {
+    Map<String, TypeMirror> result = new LinkedHashMap<>();
+    for (Map<String, TypeMirror> solution : partialSolutions) {
+      for (Map.Entry<String, TypeMirror> entry : solution.entrySet()) {
+        TypeMirror current = result.get(entry.getKey());
+        if (current != null && !tool().isSameType(current, entry.getValue())) {
+          return Either.left("invalid bounds");
         }
-        out.put(entry.getKey(), entry.getValue());
+        result.put(entry.getKey(), entry.getValue());
       }
     }
-    return Either.right(out);
+    return Either.right(result);
   }
 
   private TypeTool tool() {

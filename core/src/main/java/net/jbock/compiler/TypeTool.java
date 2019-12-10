@@ -103,7 +103,7 @@ public class TypeTool {
   }
 
   /**
-   * @param input    a type
+   * @param input a type
    * @param solution for solving typevars in the input
    * @return the input type, with all typevars resolved. Wildcards remain unchanged.
    */
