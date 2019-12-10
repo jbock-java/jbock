@@ -1,6 +1,9 @@
 package net.jbock.coerce.reference;
 
 import net.jbock.coerce.BasicInfo;
+import net.jbock.coerce.either.Either;
+import net.jbock.coerce.either.Left;
+import net.jbock.coerce.either.Right;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
 import org.junit.jupiter.api.Test;
@@ -9,13 +12,11 @@ import org.mockito.Mockito;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.jbock.coerce.reference.ExpectedType.MAPPER;
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ResolverTest {
@@ -36,9 +37,9 @@ class ResolverTest {
       TypeElement mapper = elements.getTypeElement("test.Foo");
       BasicInfo basicInfo = Mockito.mock(BasicInfo.class);
       Mockito.when(basicInfo.tool()).thenReturn(tool);
-      Optional<Declared<Supplier>> result = new Resolver(MAPPER, basicInfo).typecheck(mapper, Supplier.class);
-      assertTrue(result.isPresent());
-      TypeMirror typeMirror = result.get().asType(tool);
+      Either<String, Declared<Supplier>> result = new Resolver(MAPPER, basicInfo).typecheck(mapper, Supplier.class);
+      assertTrue(result instanceof Right);
+      TypeMirror typeMirror = ((Right<String, Declared<Supplier>>) result).value().asType(tool);
       DeclaredType declared = TypeTool.asDeclared(typeMirror);
       assertEquals(1, declared.getTypeArguments().size());
       TypeMirror typeParameter = declared.getTypeArguments().get(0);
@@ -63,8 +64,8 @@ class ResolverTest {
       TypeElement mapper = elements.getTypeElement("test.Foo");
       BasicInfo basicInfo = Mockito.mock(BasicInfo.class);
       Mockito.when(basicInfo.tool()).thenReturn(tool);
-      Optional<Declared<String>> result = new Resolver(MAPPER, basicInfo).typecheck(mapper, String.class);
-      assertFalse(result.isPresent());
+      Either<String, Declared<String>> result = new Resolver(MAPPER, basicInfo).typecheck(mapper, String.class);
+      assertTrue(result instanceof Left);
     });
   }
 
@@ -85,8 +86,8 @@ class ResolverTest {
       DeclaredType functionType = TypeTool.asDeclared(declaredType.getTypeArguments().get(0));
       BasicInfo basicInfo = Mockito.mock(BasicInfo.class);
       Mockito.when(basicInfo.tool()).thenReturn(tool);
-      Optional<Declared<Function>> result = new Resolver(MAPPER, basicInfo).typecheck(functionType, Function.class);
-      assertTrue(result.isPresent());
+      Either<String, Declared<Function>> result = new Resolver(MAPPER, basicInfo).typecheck(functionType, Function.class);
+      assertTrue(result instanceof Right);
     });
   }
 }

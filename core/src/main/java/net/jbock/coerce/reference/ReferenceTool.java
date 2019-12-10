@@ -1,6 +1,9 @@
 package net.jbock.coerce.reference;
 
 import net.jbock.coerce.BasicInfo;
+import net.jbock.coerce.either.Either;
+import net.jbock.coerce.either.Left;
+import net.jbock.coerce.either.Right;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -10,7 +13,6 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.Supplier;
 
 import static net.jbock.compiler.TypeTool.asDeclared;
@@ -31,13 +33,13 @@ public class ReferenceTool<E> {
   }
 
   public ReferencedType<E> getReferencedType() {
-    Optional<Declared<Supplier>> supplierType = resolver.typecheck(referencedClass, Supplier.class);
-    if (!supplierType.isPresent()) {
+    Either<String, Declared<Supplier>> supplierType = resolver.typecheck(referencedClass, Supplier.class);
+    if (supplierType instanceof Left) {
       Declared<E> expectedType = resolver.typecheck(referencedClass, this.expectedType.expectedClass())
-          .orElseThrow(this::unexpectedClassException);
+          .orElseThrow(this::boom);
       return new ReferencedType<>(checkRawType(expectedType), false);
     }
-    List<? extends TypeMirror> typeArgs = checkRawType(supplierType.get()).typeArguments();
+    List<? extends TypeMirror> typeArgs = checkRawType(((Right<String, Declared<Supplier>>) supplierType).value()).typeArguments();
     TypeMirror supplied = typeArgs.get(0);
     if (supplied.getKind() != TypeKind.DECLARED) {
       throw unexpectedClassException();
@@ -45,7 +47,7 @@ public class ReferenceTool<E> {
     DeclaredType suppliedType = asDeclared(supplied);
     Declared<E> expected = resolver.typecheck(suppliedType, expectedType.expectedClass())
         .map(this::checkRawType)
-        .orElseThrow(this::unexpectedClassException);
+        .orElseThrow(this::boom);
     if (!expected.isDirect()) {
       throw unexpectedClassException();
     }

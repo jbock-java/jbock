@@ -702,7 +702,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Function or Supplier<Function>");
+        .withErrorContaining("not a Function");
   }
 
   @Test
@@ -793,7 +793,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: the function type must be parameterized.");
+        .withErrorContaining("There is a problem with the mapper class: raw type.");
   }
 
   @Test

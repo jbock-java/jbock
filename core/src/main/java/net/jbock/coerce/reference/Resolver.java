@@ -2,6 +2,8 @@ package net.jbock.coerce.reference;
 
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.either.Either;
+import net.jbock.coerce.either.Left;
+import net.jbock.coerce.either.Right;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -15,7 +17,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.function.Function;
 
 import static net.jbock.compiler.TypeTool.asDeclared;
 
@@ -31,7 +33,7 @@ class Resolver {
     this.basicInfo = basicInfo;
   }
 
-  <E> Optional<Declared<E>> typecheck(TypeElement x, Class<E> something) {
+  <E> Either<String, Declared<E>> typecheck(TypeElement x, Class<E> something) {
     return typecheck(TypeTool.asDeclared(x.asType()), something);
   }
 
@@ -45,20 +47,23 @@ class Resolver {
    * @return A type that erases to the {@code something} type,
    * with typevars resolved where possible
    */
-  <E> Optional<Declared<E>> typecheck(DeclaredType x, Class<E> something) {
+  <E> Either<String, Declared<E>> typecheck(DeclaredType x, Class<E> something) {
     if (tool().isSameErasure(x, something)) {
-      return Optional.of(new Declared<>(something, x.getTypeArguments(), Collections.emptyList()));
+      if (something.getTypeParameters().length >= 1) {
+        if (x.getTypeArguments().isEmpty()) {
+          return Either.left("raw type");
+        }
+      }
+      return Either.right(new Declared<>(something, x.getTypeArguments(), Collections.emptyList()));
     }
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool()).getHierarchy(tool().asTypeElement(x));
     List<ImplementsRelation> path = findPath(hierarchy, something);
     if (path.isEmpty()) {
-      return Optional.empty();
+      return Either.left("not a " + something.getCanonicalName());
     }
-    DeclaredType declaredType = dogToAnimal(path);
-    if (declaredType == null) {
-      return Optional.empty();
-    }
-    return Optional.of(new Declared<>(something, declaredType.getTypeArguments(), path));
+    return dogToAnimal(path)
+        .map(Function.identity(),
+            declaredType -> new Declared<>(something, declaredType.getTypeArguments(), path));
   }
 
   private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> something) {
@@ -95,16 +100,16 @@ class Resolver {
    *   <li>{@code path[n].animal} has the same erasure as {@code path[n + 1].dog}</li>
    * </ul>
    */
-  private DeclaredType dogToAnimal(List<ImplementsRelation> path) {
+  private Either<String, DeclaredType> dogToAnimal(List<ImplementsRelation> path) {
     List<Map<String, TypeMirror>> typevarMappings = new ArrayList<>();
     for (int i = 1; i < path.size(); i++) {
       typevarMappings.add(getTypevarMapping(path.get(i - 1).animal(), path.get(i).dog()));
     }
-    Map<String, TypeMirror> typevarMapping = getMergedTypevarMapping(typevarMappings)
-        .orElseThrow(basicInfo::asValidationException);
-    DeclaredType animal = path.get(path.size() - 1).animal();
-    return tool().substitute(animal, typevarMapping).orElseThrow(() ->
-        basicInfo.asValidationException(expectedType.boom("substitution failed")));
+    return getMergedTypevarMapping(typevarMappings)
+        .flatMap((Map<String, TypeMirror> typevarMapping) -> {
+          DeclaredType animal = path.get(path.size() - 1).animal();
+          return tool().substitute(animal, typevarMapping);
+        });
   }
 
   private Either<String, Map<String, TypeMirror>> getMergedTypevarMapping(List<Map<String, TypeMirror>> solutions) {
@@ -115,11 +120,11 @@ class Resolver {
     for (int i = solutions.size() - 2; i >= 0; i--) {
       Map<String, TypeMirror> merged = new LinkedHashMap<>();
       for (Entry<String, TypeMirror> entry : solution.entrySet()) {
-        Optional<? extends TypeMirror> substituted = tool().substitute(entry.getValue(), solutions.get(i));
-        if (!substituted.isPresent()) {
-          return Either.left(expectedType.boom("substitution failed"));
+        Either<String, TypeMirror> substituted = tool().substitute(entry.getValue(), solutions.get(i));
+        if (substituted instanceof Left) {
+          return Either.left(expectedType.boom(((Left<String, TypeMirror>) substituted).value()));
         }
-        merged.put(entry.getKey(), substituted.get());
+        merged.put(entry.getKey(), ((Right<String, TypeMirror>) substituted).value());
       }
       solution = merged;
     }

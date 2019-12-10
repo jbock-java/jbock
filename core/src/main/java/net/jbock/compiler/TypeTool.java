@@ -1,5 +1,7 @@
 package net.jbock.compiler;
 
+import net.jbock.coerce.either.Either;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Modifier;
@@ -105,21 +107,24 @@ public class TypeTool {
   /**
    * @param input a type
    * @param solution for solving typevars in the input
-   * @return the input type, with all typevars resolved. Wildcards remain unchanged.
+   * @return the input type, with all typevars resolved.
+   * Can be null.
+   * Wildcards remain unchanged.
    */
-  public Optional<? extends TypeMirror> substitute(TypeMirror input, Map<String, TypeMirror> solution) {
+  public Either<String, TypeMirror> substitute(TypeMirror input, Map<String, TypeMirror> solution) {
     if (input.getKind() == TypeKind.TYPEVAR) {
-      return Optional.ofNullable(solution.get(input.toString()));
+      return Either.right(solution.get(input.toString()));
     }
-    return substitute(input.accept(AS_DECLARED, null), solution);
+    return substitute(input.accept(AS_DECLARED, null), solution)
+        .map(type -> type);
   }
 
-  public Optional<DeclaredType> substitute(DeclaredType declaredType, Map<String, TypeMirror> solution) {
+  public Either<String, DeclaredType> substitute(DeclaredType declaredType, Map<String, TypeMirror> solution) {
     DeclaredType result = subst(declaredType, solution);
     if (result == null) {
-      return Optional.empty(); // invalid
+      return Either.left("substitution failed");
     }
-    return Optional.of(result);
+    return Either.right(result);
   }
 
   private DeclaredType subst(DeclaredType input, Map<String, TypeMirror> solution) {

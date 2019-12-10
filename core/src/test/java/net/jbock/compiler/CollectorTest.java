@@ -508,7 +508,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: could not resolve all type parameters.");
+        .withErrorContaining("There is a problem with the collector class: incompatible type.");
   }
 
   @Test
@@ -691,6 +691,6 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Collector or Supplier<Collector>");
+        .withErrorContaining("not a Collector");
   }
 }

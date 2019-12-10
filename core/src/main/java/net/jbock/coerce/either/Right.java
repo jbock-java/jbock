@@ -10,6 +10,10 @@ public class Right<L, R> extends Either<L, R> {
     this.right = right;
   }
 
+  public R value() {
+    return right;
+  }
+
   @Override
   public <L2, R2> Either<L2, R2> map(Function<L, L2> leftFunction, Function<R, R2> rightFunction) {
     return right(rightFunction.apply(right));
