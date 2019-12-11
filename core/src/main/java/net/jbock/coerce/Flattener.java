@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static net.jbock.coerce.either.Either.left;
+import static net.jbock.coerce.either.Either.right;
+
 public class Flattener {
 
   private final BasicInfo basicInfo;
@@ -27,50 +30,45 @@ public class Flattener {
    * @return type parameters in the correct order for {@code targetElement}
    */
   Either<String, List<TypeMirror>> getTypeParameters(List<Map<String, TypeMirror>> partialSolutions) {
-    Either<String, Map<String, TypeMirror>> result = mergeResult(partialSolutions);
-    return result.flatMap(Function.identity(), this::getTypeParameters);
+    return mergeSolutions(partialSolutions).flatMap(Function.identity(),
+        this::getTypeParameters);
   }
 
   public Either<String, List<TypeMirror>> getTypeParameters(Map<String, TypeMirror> solution) {
-    List<TypeMirror> outcome = targetElement.getTypeParameters().stream()
+    return boundsCheck(targetElement.getTypeParameters().stream()
         .map(TypeParameterElement::toString)
         .map(solution::get)
-        .collect(Collectors.toList());
-    String errorMessage = boundsCheck(outcome);
-    if (errorMessage != null) {
-      return Either.left(errorMessage);
-    }
-    return Either.right(outcome);
+        .collect(Collectors.toList()));
   }
 
-  private String boundsCheck(List<TypeMirror> outcome) {
+  private Either<String, List<TypeMirror>> boundsCheck(List<TypeMirror> solution) {
     List<? extends TypeParameterElement> parameters = targetElement.getTypeParameters();
     for (int i = 0; i < parameters.size(); i++) {
       TypeParameterElement p = parameters.get(i);
       List<? extends TypeMirror> bounds = p.getBounds();
-      TypeMirror m = outcome.get(i);
+      TypeMirror m = solution.get(i);
       if (m == null) {
-        return "incompatible type";
+        return left("incompatible type");
       }
       if (tool().isOutOfBounds(m, bounds)) {
-        return "invalid bounds";
+        return left("invalid bounds");
       }
     }
-    return null;
+    return right(solution);
   }
 
-  private Either<String, Map<String, TypeMirror>> mergeResult(List<Map<String, TypeMirror>> partialSolutions) {
+  private Either<String, Map<String, TypeMirror>> mergeSolutions(List<Map<String, TypeMirror>> partialSolutions) {
     Map<String, TypeMirror> result = new LinkedHashMap<>();
     for (Map<String, TypeMirror> solution : partialSolutions) {
       for (Map.Entry<String, TypeMirror> entry : solution.entrySet()) {
-        TypeMirror current = result.get(entry.getKey());
-        if (current != null && !tool().isSameType(current, entry.getValue())) {
-          return Either.left("invalid bounds");
+        TypeMirror test = result.get(entry.getKey());
+        if (test != null && !tool().isSameType(test, entry.getValue())) {
+          return left("invalid bounds");
         }
         result.put(entry.getKey(), entry.getValue());
       }
     }
-    return Either.right(result);
+    return right(result);
   }
 
   private TypeTool tool() {
