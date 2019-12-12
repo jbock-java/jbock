@@ -36,44 +36,38 @@ class Resolver {
   }
 
   /**
-   * Check if {@code x} is a {@code something}, and also resolve
-   * the typevars in {@code something} where possible.
+   * Check if {@code dog} is a {@code animal}, and also resolve
+   * the typevars in {@code animal} where possible.
    *
-   * @param x a type
-   * @param something what we're hoping {@code x} is an instance of
+   * @param dog a type
+   * @param animal an interface or abstract class
    *
-   * @return A type that erases to the {@code something} type,
-   * with typevars resolved where possible
+   * @return A type that has the same erasure as {@code animal}
    */
-  <E> Either<TypecheckFailure, Declared<E>> typecheck(TypeElement x, Class<E> something) {
-    DeclaredType declared = TypeTool.asDeclared(x.asType());
-    if (tool().isSameErasure(declared, something)) {
-      return typecheck(declared, something);
-    }
-    List<ImplementsRelation> hierarchy = new HierarchyUtil(tool()).getHierarchy(x);
-    List<ImplementsRelation> path = findPath(hierarchy, something);
+  <E> Either<TypecheckFailure, Declared<E>> typecheck(TypeElement dog, Class<E> animal) {
+    List<ImplementsRelation> hierarchy = new HierarchyUtil(tool()).getHierarchy(dog);
+    List<ImplementsRelation> path = findPath(hierarchy, animal);
     if (path.isEmpty()) {
-      return left(TypecheckFailure.nonFatal("not a " + something.getCanonicalName()));
+      return left(TypecheckFailure.nonFatal("not a " + animal.getCanonicalName()));
     }
-    if (something.getTypeParameters().length >= 1) {
-      if (path.get(path.size() - 1).animal().getTypeArguments().isEmpty()) {
-        return left(TypecheckFailure.fatal("raw type"));
-      }
+    if (animal.getTypeParameters().length >= 1 &&
+        path.get(path.size() - 1).animal().getTypeArguments().isEmpty()) {
+      return left(TypecheckFailure.fatal("raw type"));
     }
     return dogToAnimal(path).map(Function.identity(),
-        declaredType -> new Declared<>(something, declaredType.getTypeArguments()));
+        declaredType -> new Declared<>(animal, declaredType.getTypeArguments()));
   }
 
-  public <E> Either<TypecheckFailure, Declared<E>> typecheck(DeclaredType x, Class<E> something) {
-    if (!tool().isSameErasure(x, something)) {
-      return left(TypecheckFailure.nonFatal("not a declared " + something.getCanonicalName()));
+  public <E> Either<TypecheckFailure, Declared<E>> typecheck(DeclaredType declared, Class<E> someInterface) {
+    if (!tool().isSameErasure(declared, someInterface)) {
+      return left(TypecheckFailure.nonFatal("not a declared " + someInterface.getCanonicalName()));
     }
-    if (something.getTypeParameters().length >= 1) {
-      if (x.getTypeArguments().isEmpty()) {
+    if (someInterface.getTypeParameters().length >= 1) {
+      if (declared.getTypeArguments().isEmpty()) {
         return left(TypecheckFailure.fatal("raw type"));
       }
     }
-    return right(new Declared<>(something, x.getTypeArguments()));
+    return right(new Declared<>(someInterface, declared.getTypeArguments()));
   }
 
   private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> something) {
