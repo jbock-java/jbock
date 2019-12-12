@@ -30,7 +30,7 @@ public class Right<L, R> extends Either<L, R> {
   }
 
   @Override
-  public R orElseThrow(Function<L, ? extends Throwable> f) {
+  public R orElseThrow(Function<L, ? extends RuntimeException> f) {
     return right;
   }
 }

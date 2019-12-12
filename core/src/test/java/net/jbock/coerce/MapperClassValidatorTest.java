@@ -1,6 +1,8 @@
 package net.jbock.coerce;
 
-import net.jbock.coerce.mapper.MapperType;
+import net.jbock.coerce.either.Either;
+import net.jbock.coerce.either.Right;
+import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeExpr;
 import net.jbock.compiler.TypeTool;
@@ -37,12 +39,13 @@ class MapperClassValidatorTest {
 
       DeclaredType expectedReturnType = TypeExpr.prepare(elements, types).parse("java.util.List<java.lang.Integer>");
 
-      MapperType mapperType = new MapperClassValidator(basicInfo, expectedReturnType, mapperClass)
-          .checkReturnType()
-          .orElseThrow(AssertionError::new);
-      assertEquals(2, mapperType.solution().size());
-      assertTrue(tool.isSameType(mapperType.solution().get(0), String.class));
-      assertTrue(tool.isSameType(mapperType.solution().get(1), Integer.class));
+      Either<String, ReferenceMapperType> mapperType = new MapperClassValidator(basicInfo, expectedReturnType, mapperClass)
+          .checkReturnType();
+      assertTrue(mapperType instanceof Right);
+      ReferenceMapperType value = ((Right<String, ReferenceMapperType>) mapperType).value();
+      assertEquals(2, value.solution().size());
+      assertTrue(tool.isSameType(value.solution().get(0), String.class));
+      assertTrue(tool.isSameType(value.solution().get(1), Integer.class));
     });
   }
 }

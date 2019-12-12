@@ -1,5 +1,8 @@
 package net.jbock.compiler;
 
+import net.jbock.coerce.either.Either;
+import net.jbock.coerce.either.Right;
+import net.jbock.coerce.reference.TypecheckFailure;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.ExecutableElement;
@@ -50,9 +53,9 @@ class TypeToolTest {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement string = elements.getTypeElement("java.lang.String");
-      TypeMirror substitute = tool.substitute(string.asType(), Collections.emptyMap())
-          .orElseThrow(AssertionError::new);
+      Either<TypecheckFailure, TypeMirror> substitute = tool.substitute(string.asType(), Collections.emptyMap());
       assertNotNull(substitute);
+      assertTrue(substitute instanceof Right);
     });
   }
 
@@ -67,11 +70,12 @@ class TypeToolTest {
       TypeTool tool = new TypeTool(elements, types);
       TypeMirror setOfE = elements.getTypeElement("a.Set").asType();
       TypeElement boxInt = elements.getTypeElement("java.lang.Integer");
-      DeclaredType result = tool.substitute(
+      Either<TypecheckFailure, DeclaredType> either = tool.substitute(
           setOfE.accept(AS_DECLARED, null),
-          Collections.singletonMap("E", boxInt.asType()))
-          .orElseThrow(AssertionError::new)
-          .accept(AS_DECLARED, null);
+          Collections.singletonMap("E", boxInt.asType()));
+      assertTrue(either instanceof Right);
+      DeclaredType result = ((Right<TypecheckFailure, DeclaredType>) either)
+          .value().accept(AS_DECLARED, null);
       assertNotNull(result);
       assertTrue(types.isSameType(types.erasure(result), types.erasure(elements.getTypeElement("a.Set").asType())));
       assertEquals(1, result.getTypeArguments().size());

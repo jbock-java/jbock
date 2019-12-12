@@ -30,12 +30,7 @@ public class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public R orElseThrow(Function<L, ? extends Throwable> f) {
-    throw sneakyThrow(f.apply(left));
-  }
-
-  @SuppressWarnings("unchecked")
-  private static <T extends Throwable> RuntimeException sneakyThrow(Throwable t) throws T {
-    throw (T) t;
+  public R orElseThrow(Function<L, ? extends RuntimeException> f) {
+    throw f.apply(left);
   }
 }

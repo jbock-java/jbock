@@ -1,7 +1,7 @@
 package net.jbock.coerce;
 
-import net.jbock.coerce.collectors.CustomCollector;
 import net.jbock.coerce.collectorpresent.CollectorClassValidator;
+import net.jbock.coerce.collectors.CustomCollector;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeExpr;
 import net.jbock.compiler.TypeTool;

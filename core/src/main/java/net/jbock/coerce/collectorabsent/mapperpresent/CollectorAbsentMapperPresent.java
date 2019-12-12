@@ -54,7 +54,7 @@ public class CollectorAbsentMapperPresent {
     for (Attempt attempt : attempts) {
       either = attempt.findCoercion();
       if (either instanceof Right) {
-        return either.orElseThrow(left -> new AssertionError());
+        return ((Right<String, Coercion>) either).value();
       }
     }
     if (either == null) { // impossible: there is always the "exact match" attempt
