@@ -75,35 +75,35 @@ public class TypeTool {
   /**
    * @return {@code true} means failure
    */
-  private boolean unify(TypeMirror x, TypeMirror y, Map<String, TypeMirror> acc) {
+  private TypecheckFailure unify(TypeMirror x, TypeMirror y, Map<String, TypeMirror> acc) {
     if (x.getKind() == TypeKind.TYPEVAR) {
-      return true; // only y can have typevars
+      return TypecheckFailure.fatal("can't unify with a typevar"); // only y can have typevars
     }
     if (y.getKind() == TypeKind.TYPEVAR) {
       acc.put(y.toString(), x);
-      return false;
+      return null; // success
     }
     if (!isSameErasure(x, y)) {
-      return true;
+      return TypecheckFailure.nonFatal("incompatible types");
     }
     List<? extends TypeMirror> xargs = typeargs(x);
     List<? extends TypeMirror> yargs = typeargs(y);
     if (xargs.size() != yargs.size()) {
-      return true;
+      return TypecheckFailure.fatal("raw type");
     }
     for (int i = 0; i < yargs.size(); i++) {
-      boolean failure = unify(xargs.get(i), yargs.get(i), acc);
-      if (failure) {
-        return true;
+      TypecheckFailure failure = unify(xargs.get(i), yargs.get(i), acc);
+      if (failure != null) {
+        return failure;
       }
     }
-    return false;
+    return null; // success
   }
 
   public Optional<Map<String, TypeMirror>> unify(TypeMirror concreteType, TypeMirror ym) {
     Map<String, TypeMirror> acc = new LinkedHashMap<>();
-    boolean failure = unify(concreteType, ym, acc);
-    return failure ? Optional.empty() : Optional.of(acc);
+    TypecheckFailure failure = unify(concreteType, ym, acc);
+    return failure != null ? Optional.empty() : Optional.of(acc);
   }
 
   /**
