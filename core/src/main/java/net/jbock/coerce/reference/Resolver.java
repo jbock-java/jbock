@@ -21,6 +21,8 @@ import java.util.function.Function;
 
 import static net.jbock.coerce.either.Either.left;
 import static net.jbock.coerce.either.Either.right;
+import static net.jbock.coerce.reference.TypecheckFailure.fatal;
+import static net.jbock.coerce.reference.TypecheckFailure.nonFatal;
 import static net.jbock.compiler.TypeTool.asDeclared;
 
 class Resolver {
@@ -48,11 +50,11 @@ class Resolver {
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool()).getHierarchy(dog);
     List<ImplementsRelation> path = findPath(hierarchy, animal);
     if (path.isEmpty()) {
-      return left(TypecheckFailure.nonFatal("not a " + animal.getCanonicalName()));
+      return left(nonFatal("not a " + animal.getCanonicalName()));
     }
     assert path.get(0).dog() == dog;
     if (tool().isRaw(path.get(path.size() - 1).animal())) {
-      return left(TypecheckFailure.fatal("raw type: " + path.get(path.size() - 1).animal()));
+      return left(fatal("raw type: " + path.get(path.size() - 1).animal()));
     }
     return dogToAnimal(path).map(Function.identity(),
         declaredType -> new Declared<>(animal, declaredType.getTypeArguments()));
@@ -60,10 +62,10 @@ class Resolver {
 
   public <E> Either<TypecheckFailure, Declared<E>> typecheck(DeclaredType declared, Class<E> someInterface) {
     if (!tool().isSameErasure(declared, someInterface)) {
-      return left(TypecheckFailure.nonFatal("not a declared " + someInterface.getCanonicalName()));
+      return left(nonFatal("not a declared " + someInterface.getCanonicalName()));
     }
     if (tool().isRaw(declared)) {
-      return left(TypecheckFailure.fatal("raw type: " + declared));
+      return left(fatal("raw type: " + declared));
     }
     return right(new Declared<>(someInterface, declared.getTypeArguments()));
   }
@@ -124,7 +126,7 @@ class Resolver {
       for (Entry<String, TypeMirror> entry : solution.entrySet()) {
         Either<TypecheckFailure, TypeMirror> substituted = tool().substitute(entry.getValue(), solutions.get(i));
         if (substituted instanceof Left) {
-          return left(TypecheckFailure.fatal(expectedType.boom(((Left<TypecheckFailure, TypeMirror>) substituted).value().getMessage())));
+          return left(fatal(expectedType.boom(((Left<TypecheckFailure, TypeMirror>) substituted).value().getMessage())));
         }
         merged.put(entry.getKey(), ((Right<TypecheckFailure, TypeMirror>) substituted).value());
       }
