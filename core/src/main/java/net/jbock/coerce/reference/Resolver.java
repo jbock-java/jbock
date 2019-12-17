@@ -50,9 +50,9 @@ class Resolver {
     if (path.isEmpty()) {
       return left(TypecheckFailure.nonFatal("not a " + animal.getCanonicalName()));
     }
-    if (animal.getTypeParameters().length >= 1 &&
-        path.get(path.size() - 1).animal().getTypeArguments().isEmpty()) {
-      return left(TypecheckFailure.fatal("raw type"));
+    assert path.get(0).dog() == dog;
+    if (tool().isRaw(path.get(path.size() - 1).animal())) {
+      return left(TypecheckFailure.fatal("raw type: " + path.get(path.size() - 1).animal()));
     }
     return dogToAnimal(path).map(Function.identity(),
         declaredType -> new Declared<>(animal, declaredType.getTypeArguments()));
@@ -62,29 +62,27 @@ class Resolver {
     if (!tool().isSameErasure(declared, someInterface)) {
       return left(TypecheckFailure.nonFatal("not a declared " + someInterface.getCanonicalName()));
     }
-    if (someInterface.getTypeParameters().length >= 1) {
-      if (declared.getTypeArguments().isEmpty()) {
-        return left(TypecheckFailure.fatal("raw type"));
-      }
+    if (tool().isRaw(declared)) {
+      return left(TypecheckFailure.fatal("raw type: " + declared));
     }
     return right(new Declared<>(someInterface, declared.getTypeArguments()));
   }
 
-  private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> something) {
-    TypeMirror currentGoal = tool().erasure(something);
+  private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> goal) {
+    TypeMirror currentGoal = tool().asType(goal);
     List<ImplementsRelation> path = new ArrayList<>();
     ImplementsRelation relation;
     while ((relation = findRelation(hierarchy, currentGoal)) != null) {
       path.add(relation);
-      currentGoal = tool().erasure(relation.dog());
+      currentGoal = relation.dog().asType();
     }
     Collections.reverse(path);
     return path;
   }
 
-  private ImplementsRelation findRelation(List<ImplementsRelation> hierarchy, TypeMirror something) {
+  private ImplementsRelation findRelation(List<ImplementsRelation> hierarchy, TypeMirror goal) {
     for (ImplementsRelation relation : hierarchy) {
-      if (tool().isSameType(something, tool().erasure(relation.animal()))) {
+      if (tool().isSameErasure(goal, relation.animal())) {
         return relation;
       }
     }
@@ -139,7 +137,7 @@ class Resolver {
     List<? extends TypeMirror> typeArguments = asDeclared(animal).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = dog.getTypeParameters();
     if (typeArguments.size() != typeParameters.size()) {
-      throw ValidationException.create(dog, "raw type");
+      throw ValidationException.create(dog, "raw type: " + animal);
     }
     Map<String, TypeMirror> solution = new LinkedHashMap<>();
     for (int i = 0; i < typeParameters.size(); i++) {

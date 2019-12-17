@@ -793,7 +793,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: raw type.");
+        .withErrorContaining("There is a problem with the mapper class: raw type: Function.");
   }
 
   @Test
@@ -814,7 +814,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: raw type.");
+        .withErrorContaining("There is a problem with the mapper class: raw type: java.util.function.Supplier.");
   }
 
   @Test
@@ -835,7 +835,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: raw type.");
+        .withErrorContaining("There is a problem with the mapper class: raw type: Function.");
   }
 
   @Test

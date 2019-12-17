@@ -112,7 +112,7 @@ public class TypeTool {
     return failure != null ? left(failure) : right(acc);
   }
 
-  private boolean isRaw(TypeMirror m) {
+  public boolean isRaw(TypeMirror m) {
     if (m.getKind() != TypeKind.DECLARED) {
       return false;
     }
@@ -200,7 +200,7 @@ public class TypeTool {
     return types.getPrimitiveType(kind);
   }
 
-  private boolean isSameErasure(TypeMirror x, TypeMirror y) {
+  public boolean isSameErasure(TypeMirror x, TypeMirror y) {
     return types.isSameType(types.erasure(x), types.erasure(y));
   }
 
@@ -210,10 +210,6 @@ public class TypeTool {
 
   public TypeMirror erasure(TypeMirror typeMirror) {
     return types.erasure(typeMirror);
-  }
-
-  public TypeMirror erasure(TypeElement typeMirror) {
-    return types.erasure(typeMirror.asType());
   }
 
   public TypeMirror erasure(Class<?> type) {
