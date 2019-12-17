@@ -37,9 +37,9 @@ class TypeToolTest {
       List<ExecutableElement> methods = ElementFilter.methodsIn(elements.getTypeElement("Foo").getEnclosedElements());
       ExecutableElement getSetMethod = methods.get(0);
       TypeMirror returnType = getSetMethod.getReturnType();
-      Either<TypecheckFailure, Map<String, TypeMirror>> result = tool.unify(types.getDeclaredType(set, string.asType()), returnType);
+      Either<String, Map<String, TypeMirror>> result = tool.unify(types.getDeclaredType(set, string.asType()), returnType);
       assertTrue(result instanceof Right);
-      Map<String, TypeMirror> solution = ((Right<TypecheckFailure, Map<String, TypeMirror>>) result).value();
+      Map<String, TypeMirror> solution = ((Right<String, Map<String, TypeMirror>>) result).value();
       assertTrue(solution.containsKey("E"));
       TypeMirror value = solution.get("E");
       assertTrue(types.isSameType(value, string.asType()));

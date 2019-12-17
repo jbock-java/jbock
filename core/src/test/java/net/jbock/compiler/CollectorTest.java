@@ -395,7 +395,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The collector should return Set<String> but returns Set<Long>");
+        .withErrorContaining("There is a problem with the collector class: can't unify Long with String");
   }
 
   @Test
@@ -421,7 +421,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The collector should return Set<String> but returns Set<Long>");
+        .withErrorContaining("There is a problem with the collector class: can't unify Long with String");
   }
 
   @Test
@@ -674,7 +674,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The collector should return test.Arguments.Foo but returns Set<E>");
+        .withErrorContaining("There is a problem with the collector class: can't unify Set<E> with test.Arguments.Foo");
   }
 
   @Test

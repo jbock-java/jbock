@@ -37,13 +37,13 @@ public final class MapperClassValidator {
     TypeMirror t = functionType.typeArguments().get(0);
     TypeMirror r = functionType.typeArguments().get(1);
     return tool().unify(tool().asType(String.class), t)
-        .flatMap(f -> MAPPER.boom(String.format("The supplied function must take a String argument, but takes %s", t)),
+        .flatMap(MAPPER::boom,
             t_result -> handleTResult(functionType, r, t_result));
   }
 
   private Either<String, ReferenceMapperType> handleTResult(ReferencedType<Function> functionType, TypeMirror r, Map<String, TypeMirror> t_result) {
     return tool().unify(expectedReturnType, r)
-        .flatMap(f -> MAPPER.boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r)),
+        .flatMap(MAPPER::boom,
             r_result -> handleRResult(functionType, t_result, r_result));
   }
 

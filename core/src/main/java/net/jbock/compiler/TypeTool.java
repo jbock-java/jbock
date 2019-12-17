@@ -78,24 +78,27 @@ public class TypeTool {
   /**
    * @return {@code true} means failure
    */
-  private TypecheckFailure unify(TypeMirror x, TypeMirror y, Map<String, TypeMirror> acc) {
+  private String unify(TypeMirror x, TypeMirror y, Map<String, TypeMirror> acc) {
     if (x.getKind() == TypeKind.TYPEVAR) {
-      return TypecheckFailure.fatal("can't unify with a typevar"); // only y can have typevars
+      return "can't unify " + y + " with typevar " + x;
     }
     if (y.getKind() == TypeKind.TYPEVAR) {
       acc.put(y.toString(), x);
       return null; // success
     }
     if (!isSameErasure(x, y)) {
-      return TypecheckFailure.nonFatal("incompatible types");
+      return "can't unify " + y + " with " + x;
+    }
+    if (isRaw(x)) {
+      return "raw type: " + x;
+    }
+    if (isRaw(y)) {
+      return "raw type: " + y;
     }
     List<? extends TypeMirror> xargs = typeargs(x);
     List<? extends TypeMirror> yargs = typeargs(y);
-    if (xargs.size() != yargs.size()) {
-      return TypecheckFailure.fatal("raw type");
-    }
     for (int i = 0; i < yargs.size(); i++) {
-      TypecheckFailure failure = unify(xargs.get(i), yargs.get(i), acc);
+      String failure = unify(xargs.get(i), yargs.get(i), acc);
       if (failure != null) {
         return failure;
       }
@@ -103,10 +106,19 @@ public class TypeTool {
     return null; // success
   }
 
-  public Either<TypecheckFailure, Map<String, TypeMirror>> unify(TypeMirror concreteType, TypeMirror ym) {
+  public Either<String, Map<String, TypeMirror>> unify(TypeMirror concreteType, TypeMirror ym) {
     Map<String, TypeMirror> acc = new LinkedHashMap<>();
-    TypecheckFailure failure = unify(concreteType, ym, acc);
+    String failure = unify(concreteType, ym, acc);
     return failure != null ? left(failure) : right(acc);
+  }
+
+  private boolean isRaw(TypeMirror m) {
+    if (m.getKind() != TypeKind.DECLARED) {
+      return false;
+    }
+    DeclaredType declaredType = asDeclared(m);
+    TypeElement element = asTypeElement(m);
+    return declaredType.getTypeArguments().isEmpty() && !element.getTypeParameters().isEmpty();
   }
 
   /**

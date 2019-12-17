@@ -257,7 +257,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper should return Integer but returns Long.");
+        .withErrorContaining("There is a problem with the mapper class: can't unify Long with Integer");
   }
 
   @Test
@@ -282,7 +282,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper should return Integer but returns Long.");
+        .withErrorContaining("There is a problem with the mapper class: can't unify Long with Integer");
   }
 
   @Test
@@ -440,7 +440,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The mapper should return Integer but returns String.");
+        .withErrorContaining("There is a problem with the mapper class: can't unify String with Integer");
   }
 
   @Test
@@ -725,7 +725,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper should return Integer but returns Long.");
+        .withErrorContaining("There is a problem with the mapper class: can't unify Long with Integer");
   }
 
   @Test
@@ -748,7 +748,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper should return Integer but returns java.util.Date");
+        .withErrorContaining("There is a problem with the mapper class: can't unify java.util.Date with Integer");
   }
 
   @Test
