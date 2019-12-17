@@ -23,6 +23,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
+import static net.jbock.coerce.either.Either.left;
+import static net.jbock.coerce.either.Either.right;
+
 public class TypeTool {
 
   private static final TypeVisitor<List<? extends TypeMirror>, Void> TYPEARGS =
@@ -100,10 +103,10 @@ public class TypeTool {
     return null; // success
   }
 
-  public Optional<Map<String, TypeMirror>> unify(TypeMirror concreteType, TypeMirror ym) {
+  public Either<TypecheckFailure, Map<String, TypeMirror>> unify(TypeMirror concreteType, TypeMirror ym) {
     Map<String, TypeMirror> acc = new LinkedHashMap<>();
     TypecheckFailure failure = unify(concreteType, ym, acc);
-    return failure != null ? Optional.empty() : Optional.of(acc);
+    return failure != null ? left(failure) : right(acc);
   }
 
   /**
@@ -115,7 +118,7 @@ public class TypeTool {
    */
   public Either<TypecheckFailure, TypeMirror> substitute(TypeMirror input, Map<String, TypeMirror> solution) {
     if (input.getKind() == TypeKind.TYPEVAR) {
-      return Either.right(solution.get(input.toString()));
+      return right(solution.get(input.toString()));
     }
     return substitute(input.accept(AS_DECLARED, null), solution)
         .map(Function.identity(), type -> type);
@@ -124,9 +127,9 @@ public class TypeTool {
   public Either<TypecheckFailure, DeclaredType> substitute(DeclaredType declaredType, Map<String, TypeMirror> solution) {
     DeclaredType result = subst(declaredType, solution);
     if (result == null) {
-      return Either.left(TypecheckFailure.fatal("substitution failed"));
+      return left(TypecheckFailure.fatal("substitution failed"));
     }
-    return Either.right(result);
+    return right(result);
   }
 
   private DeclaredType subst(DeclaredType input, Map<String, TypeMirror> solution) {

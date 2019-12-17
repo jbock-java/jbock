@@ -13,7 +13,6 @@ import javax.lang.model.util.ElementFilter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
@@ -38,9 +37,9 @@ class TypeToolTest {
       List<ExecutableElement> methods = ElementFilter.methodsIn(elements.getTypeElement("Foo").getEnclosedElements());
       ExecutableElement getSetMethod = methods.get(0);
       TypeMirror returnType = getSetMethod.getReturnType();
-      Optional<Map<String, TypeMirror>> result = tool.unify(types.getDeclaredType(set, string.asType()), returnType);
-      assertTrue(result.isPresent());
-      Map<String, TypeMirror> solution = result.get();
+      Either<TypecheckFailure, Map<String, TypeMirror>> result = tool.unify(types.getDeclaredType(set, string.asType()), returnType);
+      assertTrue(result instanceof Right);
+      Map<String, TypeMirror> solution = ((Right<TypecheckFailure, Map<String, TypeMirror>>) result).value();
       assertTrue(solution.containsKey("E"));
       TypeMirror value = solution.get("E");
       assertTrue(types.isSameType(value, string.asType()));

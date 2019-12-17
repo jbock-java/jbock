@@ -11,7 +11,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
@@ -37,16 +36,20 @@ public final class MapperClassValidator {
         .getReferencedType();
     TypeMirror t = functionType.typeArguments().get(0);
     TypeMirror r = functionType.typeArguments().get(1);
-    Optional<Map<String, TypeMirror>> t_result = tool().unify(tool().asType(String.class), t);
-    if (!t_result.isPresent()) {
-      return failure(String.format("The supplied function must take a String argument, but takes %s", t));
-    }
-    Optional<Map<String, TypeMirror>> r_result = tool().unify(expectedReturnType, r);
-    if (!r_result.isPresent()) {
-      return failure(String.format("The mapper should return %s but returns %s", expectedReturnType, r));
-    }
+    return tool().unify(tool().asType(String.class), t)
+        .flatMap(f -> MAPPER.boom(String.format("The supplied function must take a String argument, but takes %s", t)),
+            t_result -> handleTResult(functionType, r, t_result));
+  }
+
+  private Either<String, ReferenceMapperType> handleTResult(ReferencedType<Function> functionType, TypeMirror r, Map<String, TypeMirror> t_result) {
+    return tool().unify(expectedReturnType, r)
+        .flatMap(f -> MAPPER.boom(String.format("The mapper should return %s but returns %s", expectedReturnType, r)),
+            r_result -> handleRResult(functionType, t_result, r_result));
+  }
+
+  private Either<String, ReferenceMapperType> handleRResult(ReferencedType<Function> functionType, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
     return new Flattener(basicInfo, mapperClass)
-        .getTypeParameters(Arrays.asList(t_result.get(), r_result.get()))
+        .getTypeParameters(Arrays.asList(t_result, r_result))
         .map(MAPPER::boom,
             typeParameters -> MapperType.create(tool(), functionType.isSupplier(),
                 mapperClass, typeParameters));
