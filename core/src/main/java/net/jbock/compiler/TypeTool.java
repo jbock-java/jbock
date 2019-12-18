@@ -165,13 +165,11 @@ public class TypeTool {
       }
       result[i] = opt;
     }
-    return types.getDeclaredType(input.asElement()
-        .accept(AS_TYPE_ELEMENT, null), result);
+    return types.getDeclaredType(asTypeElement(input), result);
   }
 
-  public DeclaredType getDeclaredType(Class<?> clasz, List<? extends TypeMirror> typeArguments) {
-    return types.getDeclaredType(asDeclared(asType(clasz)).asElement()
-        .accept(AS_TYPE_ELEMENT, null), typeArguments.toArray(new TypeMirror[0]));
+  public DeclaredType getDeclaredType(Class<?> clazz, List<? extends TypeMirror> typeArguments) {
+    return types.getDeclaredType(asTypeElement(clazz), typeArguments.toArray(new TypeMirror[0]));
   }
 
   public boolean isSameType(TypeMirror mirror, Class<?> test) {
@@ -225,9 +223,7 @@ public class TypeTool {
   }
 
   private TypeMirror optionalOf(TypeMirror typeMirror) {
-    return types.getDeclaredType(
-        asTypeElement(Optional.class),
-        typeMirror);
+    return types.getDeclaredType(asTypeElement(Optional.class), typeMirror);
   }
 
   public List<? extends TypeMirror> getDirectSupertypes(TypeMirror mirror) {
