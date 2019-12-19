@@ -1,6 +1,7 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.either.Either;
+import net.jbock.compiler.TypevarMapping;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
@@ -29,12 +30,12 @@ public class Flattener {
    * @param partialSolutions named type parameters
    * @return type parameters in the correct order for {@code targetElement}
    */
-  Either<String, List<TypeMirror>> getTypeParameters(List<Map<String, TypeMirror>> partialSolutions) {
+  Either<String, List<TypeMirror>> getTypeParameters(List<TypevarMapping> partialSolutions) {
     return mergeSolutions(partialSolutions).flatMap(Function.identity(),
         this::getTypeParameters);
   }
 
-  public Either<String, List<TypeMirror>> getTypeParameters(Map<String, TypeMirror> solution) {
+  public Either<String, List<TypeMirror>> getTypeParameters(TypevarMapping solution) {
     return boundsCheck(targetElement.getTypeParameters().stream()
         .map(TypeParameterElement::toString)
         .map(solution::get)
@@ -57,10 +58,10 @@ public class Flattener {
     return right(solution);
   }
 
-  private Either<String, Map<String, TypeMirror>> mergeSolutions(List<Map<String, TypeMirror>> partialSolutions) {
+  private Either<String, TypevarMapping> mergeSolutions(List<TypevarMapping> partialSolutions) {
     Map<String, TypeMirror> result = new LinkedHashMap<>();
-    for (Map<String, TypeMirror> solution : partialSolutions) {
-      for (Map.Entry<String, TypeMirror> entry : solution.entrySet()) {
+    for (TypevarMapping solution : partialSolutions) {
+      for (Map.Entry<String, TypeMirror> entry : solution.entries()) {
         TypeMirror test = result.get(entry.getKey());
         if (test != null && !tool().isSameType(test, entry.getValue())) {
           return left("invalid bounds");
@@ -68,7 +69,7 @@ public class Flattener {
         result.put(entry.getKey(), entry.getValue());
       }
     }
-    return right(result);
+    return right(new TypevarMapping(result, tool()));
   }
 
   private TypeTool tool() {

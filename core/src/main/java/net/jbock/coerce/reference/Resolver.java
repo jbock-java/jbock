@@ -4,6 +4,7 @@ import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
+import net.jbock.compiler.TypevarMapping;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -105,37 +106,37 @@ class Resolver {
    * </ul>
    */
   private Either<TypecheckFailure, DeclaredType> dogToAnimal(List<ImplementsRelation> path) {
-    List<Map<String, TypeMirror>> typevarMappings = new ArrayList<>();
+    List<TypevarMapping> typevarMappings = new ArrayList<>();
     for (int i = 1; i < path.size(); i++) {
       typevarMappings.add(getTypevarMapping(path.get(i - 1).animal(), path.get(i).dog()));
     }
     return getMergedTypevarMapping(typevarMappings)
-        .flatMap(Function.identity(), (Map<String, TypeMirror> typevarMapping) -> {
+        .flatMap(Function.identity(), solution -> {
           DeclaredType animal = path.get(path.size() - 1).animal();
-          return tool().substitute(animal, typevarMapping);
+          return solution.substitute(animal);
         });
   }
 
-  private Either<TypecheckFailure, Map<String, TypeMirror>> getMergedTypevarMapping(List<Map<String, TypeMirror>> solutions) {
+  private Either<TypecheckFailure, TypevarMapping> getMergedTypevarMapping(List<TypevarMapping> solutions) {
     if (solutions.isEmpty()) {
-      return right(Collections.emptyMap());
+      return right(new TypevarMapping(Collections.emptyMap(), tool()));
     }
-    Map<String, TypeMirror> solution = solutions.get(solutions.size() - 1);
+    TypevarMapping solution = solutions.get(solutions.size() - 1);
     for (int i = solutions.size() - 2; i >= 0; i--) {
       Map<String, TypeMirror> merged = new LinkedHashMap<>();
-      for (Entry<String, TypeMirror> entry : solution.entrySet()) {
-        Either<TypecheckFailure, TypeMirror> substituted = tool().substitute(entry.getValue(), solutions.get(i));
+      for (Entry<String, TypeMirror> entry : solution.entries()) {
+        Either<TypecheckFailure, TypeMirror> substituted = solutions.get(i).substitute(entry.getValue());
         if (substituted instanceof Left) {
           return left(fatal(expectedType.boom(((Left<TypecheckFailure, TypeMirror>) substituted).value().getMessage())));
         }
         merged.put(entry.getKey(), ((Right<TypecheckFailure, TypeMirror>) substituted).value());
       }
-      solution = merged;
+      solution = new TypevarMapping(merged, tool());
     }
     return right(solution);
   }
 
-  private Map<String, TypeMirror> getTypevarMapping(DeclaredType animal, TypeElement dog) {
+  private TypevarMapping getTypevarMapping(DeclaredType animal, TypeElement dog) {
     List<? extends TypeMirror> typeArguments = asDeclared(animal).getTypeArguments();
     List<? extends TypeParameterElement> typeParameters = dog.getTypeParameters();
     if (typeArguments.size() != typeParameters.size()) {
@@ -147,7 +148,7 @@ class Resolver {
       TypeMirror arg = typeArguments.get(i);
       solution.put(param.toString(), arg);
     }
-    return solution;
+    return new TypevarMapping(solution, tool());
   }
 
   private TypeTool tool() {

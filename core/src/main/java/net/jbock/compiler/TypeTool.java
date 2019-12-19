@@ -1,7 +1,6 @@
 package net.jbock.compiler;
 
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.reference.TypecheckFailure;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -21,7 +20,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
 
 import static net.jbock.coerce.either.Either.left;
 import static net.jbock.coerce.either.Either.right;
@@ -106,10 +104,10 @@ public class TypeTool {
     return null; // success
   }
 
-  public Either<String, Map<String, TypeMirror>> unify(TypeMirror concreteType, TypeMirror ym) {
+  public Either<String, TypevarMapping> unify(TypeMirror concreteType, TypeMirror ym) {
     Map<String, TypeMirror> acc = new LinkedHashMap<>();
     String failure = unify(concreteType, ym, acc);
-    return failure != null ? left(failure) : right(acc);
+    return failure != null ? left(failure) : right(new TypevarMapping(acc, this));
   }
 
   public boolean isRaw(TypeMirror m) {
@@ -121,55 +119,12 @@ public class TypeTool {
     return declaredType.getTypeArguments().isEmpty() && !element.getTypeParameters().isEmpty();
   }
 
-  /**
-   * @param input a type
-   * @param solution for solving typevars in the input
-   * @return the input type, with all typevars resolved.
-   * Can be null.
-   * Wildcards remain unchanged.
-   */
-  public Either<TypecheckFailure, TypeMirror> substitute(TypeMirror input, Map<String, TypeMirror> solution) {
-    if (input.getKind() == TypeKind.TYPEVAR) {
-      return right(solution.get(input.toString()));
-    }
-    return substitute(input.accept(AS_DECLARED, null), solution)
-        .map(Function.identity(), type -> type);
-  }
-
-  public Either<TypecheckFailure, DeclaredType> substitute(DeclaredType declaredType, Map<String, TypeMirror> solution) {
-    DeclaredType result = subst(declaredType, solution);
-    if (result == null) {
-      return left(TypecheckFailure.fatal("substitution failed"));
-    }
-    return right(result);
-  }
-
-  private DeclaredType subst(DeclaredType input, Map<String, TypeMirror> solution) {
-    List<? extends TypeMirror> typeArguments = input.getTypeArguments();
-    TypeMirror[] result = new TypeMirror[typeArguments.size()];
-    for (int i = 0; i < typeArguments.size(); i++) {
-      TypeMirror typeArgument = typeArguments.get(i);
-      TypeMirror opt = null;
-      TypeKind kind = typeArgument.getKind();
-      if (kind == TypeKind.WILDCARD) {
-        opt = typeArgument; // these can stay
-      } else if (typeArgument.getKind() == TypeKind.TYPEVAR) {
-        opt = solution.getOrDefault(typeArgument.toString(), typeArgument);
-      } else if (kind == TypeKind.DECLARED) {
-        opt = subst(typeArgument.accept(AS_DECLARED, null), solution);
-      } else if (kind == TypeKind.ARRAY) {
-        opt = typeArgument;
-      }
-      if (opt == null) {
-        return null;  // error
-      }
-      result[i] = opt;
-    }
-    return types.getDeclaredType(asTypeElement(input), result);
-  }
-
   public DeclaredType getDeclaredType(Class<?> clazz, List<? extends TypeMirror> typeArguments) {
-    return types.getDeclaredType(asTypeElement(clazz), typeArguments.toArray(new TypeMirror[0]));
+    return getDeclaredType(asTypeElement(clazz), typeArguments.toArray(new TypeMirror[0]));
+  }
+
+  public DeclaredType getDeclaredType(TypeElement element, TypeMirror[] typeArguments) {
+    return types.getDeclaredType(element, typeArguments);
   }
 
   public boolean isSameType(TypeMirror mirror, Class<?> test) {

@@ -5,12 +5,12 @@ import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
+import net.jbock.compiler.TypevarMapping;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
-import java.util.Map;
 import java.util.function.Function;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
@@ -39,12 +39,12 @@ public final class MapperClassValidator {
         handle(functionType, r, t_result));
   }
 
-  private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypeMirror r, Map<String, TypeMirror> t_result) {
+  private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypeMirror r, TypevarMapping t_result) {
     return tool().unify(expectedReturnType, r).flatMap(MAPPER::boom, r_result ->
         handle(functionType, t_result, r_result));
   }
 
-  private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, Map<String, TypeMirror> t_result, Map<String, TypeMirror> r_result) {
+  private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypevarMapping t_result, TypevarMapping r_result) {
     return new Flattener(basicInfo, mapperClass)
         .getTypeParameters(Arrays.asList(t_result, r_result))
         .map(MAPPER::boom, typeParameters ->
