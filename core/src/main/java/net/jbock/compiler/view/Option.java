@@ -50,11 +50,11 @@ final class Option {
 
   private final MethodSpec optionNamesMethod;
 
-  private final MethodSpec parsersMethod;
+  private final MethodSpec optionParsersMethod;
 
   private final FieldSpec shapeField;
 
-  private final MethodSpec positionalParsersMethod;
+  private final MethodSpec paramParsersMethod;
 
   private Option(
       Context context,
@@ -63,18 +63,18 @@ final class Option {
       FieldSpec namesField,
       MethodSpec optionNamesMethod,
       MethodSpec describeParamMethod,
-      MethodSpec parsersMethod,
+      MethodSpec optionParsersMethod,
       FieldSpec shapeField,
-      MethodSpec positionalParsersMethod) {
+      MethodSpec paramParsersMethod) {
     this.descriptionField = descriptionField;
     this.bundleKeyField = bundleKeyField;
     this.context = context;
     this.optionNamesMethod = optionNamesMethod;
     this.describeParamMethod = describeParamMethod;
     this.namesField = namesField;
-    this.parsersMethod = parsersMethod;
+    this.optionParsersMethod = optionParsersMethod;
     this.shapeField = shapeField;
-    this.positionalParsersMethod = positionalParsersMethod;
+    this.paramParsersMethod = paramParsersMethod;
   }
 
   static Option create(Context context) {
@@ -85,8 +85,8 @@ final class Option {
     TypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType());
     TypeName positionalParsersType = ParameterizedTypeName.get(ClassName.get(List.class), context.paramParserType());
     MethodSpec optionNamesMethod = optionNamesMethod(context.optionType(), namesField);
-    MethodSpec parsersMethod = parsersMethod(parsersType, context);
-    MethodSpec positionalParsersMethod = positionalParsersMethod(positionalParsersType, context);
+    MethodSpec parsersMethod = optionParsersMethod(parsersType, context);
+    MethodSpec positionalParsersMethod = paramParsersMethod(positionalParsersType, context);
 
     MethodSpec describeParamMethod = describeParamMethod(namesField);
 
@@ -118,8 +118,8 @@ final class Option {
         .addMethod(missingRequiredLambdaMethod())
         .addMethod(privateConstructor())
         .addMethod(optionNamesMethod)
-        .addMethod(parsersMethod)
-        .addMethod(positionalParsersMethod)
+        .addMethod(optionParsersMethod)
+        .addMethod(paramParsersMethod)
         .build();
   }
 
@@ -216,13 +216,12 @@ final class Option {
         .build();
   }
 
-  private static MethodSpec parsersMethod(
+  private static MethodSpec optionParsersMethod(
       TypeName parsersType,
       Context context) {
-    ParameterSpec parsers = builder(parsersType, "parsers")
-        .build();
+    ParameterSpec parsers = builder(parsersType, "parsers").build();
 
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("parsers")
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("optionParsers")
         .returns(parsers.type)
         .addModifiers(STATIC);
     spec.addStatement("$T $N = new $T<>($T.class)",
@@ -238,7 +237,7 @@ final class Option {
       } else if (param.isFlag()) {
         spec.addStatement("$N.put($L, new $T($L))",
             parsers, param.enumConstant(),
-            context.flagOptionParserType(), param.enumConstant());
+            context.flagParserType(), param.enumConstant());
       } else {
         spec.addStatement("$N.put($L, new $T($L))",
             parsers, param.enumConstant(),
@@ -249,11 +248,11 @@ final class Option {
     return spec.addStatement("return $N", parsers).build();
   }
 
-  private static MethodSpec positionalParsersMethod(
+  private static MethodSpec paramParsersMethod(
       TypeName positionalParsersType,
       Context context) {
     ParameterSpec parsers = builder(positionalParsersType, "parsers").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("positionalParsers")
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("paramParsers")
         .returns(parsers.type)
         .addModifiers(STATIC)
         .addStatement("$T $N = new $T<>()", parsers.type, parsers, ArrayList.class);
@@ -262,7 +261,7 @@ final class Option {
         continue;
       }
       spec.addStatement("$N.add(new $T())", parsers, param.isRepeatable() ?
-          context.repeatableParamParserType() :
+          context.paramParserType() :
           context.regularParamParserType());
     }
     return spec.addStatement("return $N", parsers).build();
@@ -299,11 +298,11 @@ final class Option {
     return optionNamesMethod;
   }
 
-  MethodSpec parsersMethod() {
-    return parsersMethod;
+  MethodSpec optionParsersMethod() {
+    return optionParsersMethod;
   }
 
-  MethodSpec positionalParsersMethod() {
-    return positionalParsersMethod;
+  MethodSpec paramParsersMethod() {
+    return paramParsersMethod;
   }
 }

@@ -17,13 +17,13 @@ import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.view.ParserState.throwRepetitionErrorStatement;
 
 /**
- * Generates the FlagOptionParser class.
+ * Generates the FlagParser class.
  */
-final class FlagOptionParser {
+final class FlagParser {
 
   static TypeSpec define(Context context) {
     FieldSpec flag = FieldSpec.builder(TypeName.BOOLEAN, "flag").build();
-    return TypeSpec.classBuilder(context.flagOptionParserType())
+    return TypeSpec.classBuilder(context.flagParserType())
         .superclass(context.optionParserType())
         .addMethod(readMethod(context, flag))
         .addMethod(MethodSpec.methodBuilder("values")

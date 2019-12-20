@@ -17,7 +17,7 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.view.ParserState.throwRepetitionErrorStatement;
 
 /**
- * Generates the RegularOptionParser class.
+ * Generates the RegularOptionParser class, which handles non-repeatable options.
  */
 final class RegularOptionParser {
 

@@ -19,7 +19,7 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
 /**
- * Generates the inner class OptionParser.
+ * Generates the inner class OptionParser, which handles repeatable options.
  */
 final class OptionParser {
 

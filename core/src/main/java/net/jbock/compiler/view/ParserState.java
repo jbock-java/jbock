@@ -29,22 +29,23 @@ final class ParserState {
   private final Context context;
 
   private final FieldSpec optionNamesField;
-  private final FieldSpec parsersField;
 
-  private final FieldSpec positionalParsersField;
+  private final FieldSpec optionParsersField;
+
+  private final FieldSpec paramParsersField;
 
   private final MethodSpec tryReadOptionMethod;
 
   private ParserState(
       Context context,
       FieldSpec optionNamesField,
-      FieldSpec parsersField,
-      FieldSpec positionalParsersField,
+      FieldSpec optionParsersField,
+      FieldSpec paramParsersField,
       MethodSpec tryReadOptionMethod) {
     this.context = context;
     this.optionNamesField = optionNamesField;
-    this.parsersField = parsersField;
-    this.positionalParsersField = positionalParsersField;
+    this.optionParsersField = optionParsersField;
+    this.paramParsersField = paramParsersField;
     this.tryReadOptionMethod = tryReadOptionMethod;
   }
 
@@ -58,15 +59,15 @@ final class ParserState {
         .build();
 
     // stateful parsers
-    FieldSpec parsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        context.optionType(), context.optionParserType()), "parsers")
-        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.parsersMethod())
+    FieldSpec optionParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
+        context.optionType(), context.optionParserType()), "optionParsers")
+        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.optionParsersMethod())
         .addModifiers(FINAL)
         .build();
 
-    FieldSpec positionalParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class),
-        context.paramParserType()), "positionalParsers")
-        .initializer("$T.unmodifiableList($T.$N())", Collections.class, context.optionType(), option.positionalParsersMethod())
+    FieldSpec paramParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class),
+        context.paramParserType()), "paramParsers")
+        .initializer("$T.unmodifiableList($T.$N())", Collections.class, context.optionType(), option.paramParsersMethod())
         .addModifiers(FINAL)
         .build();
 
@@ -75,8 +76,8 @@ final class ParserState {
     return new ParserState(
         context,
         optionNamesField,
-        parsersField,
-        positionalParsersField,
+        optionParsersField,
+        paramParsersField,
         readRegularOptionMethod);
   }
 
@@ -85,7 +86,7 @@ final class ParserState {
         .addModifiers(PRIVATE, STATIC)
         .addMethod(buildMethod())
         .addMethod(tryReadOptionMethod)
-        .addFields(Arrays.asList(optionNamesField, parsersField, positionalParsersField))
+        .addFields(Arrays.asList(optionNamesField, optionParsersField, paramParsersField))
         .build();
   }
 
@@ -159,13 +160,13 @@ final class ParserState {
     if (param.isPositional()) {
       return CodeBlock.builder().add(
           "$N.get($L).values()",
-          positionalParsersField,
+          paramParsersField,
           param.positionalIndex().orElseThrow(AssertionError::new))
           .build();
     }
     return CodeBlock.builder().add(
         "$N.get($T.$N).values()",
-        parsersField,
+        optionParsersField,
         context.optionType(),
         param.enumConstant())
         .build();
@@ -176,10 +177,10 @@ final class ParserState {
   }
 
   FieldSpec parsersField() {
-    return parsersField;
+    return optionParsersField;
   }
 
   FieldSpec positionalParsersField() {
-    return positionalParsersField;
+    return paramParsersField;
   }
 }

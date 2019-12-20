@@ -84,8 +84,8 @@ public final class Context {
     return generatedClass.nestedClass("ParamParser");
   }
 
-  public ClassName flagOptionParserType() {
-    return generatedClass.nestedClass("FlagOptionParser");
+  public ClassName flagParserType() {
+    return generatedClass.nestedClass("FlagParser");
   }
 
   public ClassName regularOptionParserType() {
@@ -94,10 +94,6 @@ public final class Context {
 
   public ClassName regularParamParserType() {
     return generatedClass.nestedClass("RegularParamParser");
-  }
-
-  public ClassName repeatableParamParserType() {
-    return generatedClass.nestedClass("RepeatableParamParser");
   }
 
   public ClassName optionType() {

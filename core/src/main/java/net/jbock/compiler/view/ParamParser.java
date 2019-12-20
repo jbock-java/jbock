@@ -7,41 +7,41 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 
-import java.util.stream.Stream;
+import java.util.ArrayList;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 /**
- * Generates the RegularPositionalOptionParser class.
+ * Generates the ParamParser class, which handles repeatable params.
  */
-final class RegularPositionalOptionParser {
+final class ParamParser {
 
   static TypeSpec define(Context context) {
-    FieldSpec value = FieldSpec.builder(STRING, "value").build();
-    return TypeSpec.classBuilder(context.regularParamParserType())
-        .superclass(context.paramParserType())
-        .addMethod(readMethod(value))
+    FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
+        .initializer("new $T<>()", ArrayList.class)
+        .build();
+    return TypeSpec.classBuilder(context.paramParserType())
+        .addField(values)
+        .addMethod(readMethod())
         .addMethod(MethodSpec.methodBuilder("values")
             .returns(STREAM_OF_STRING)
-            .addStatement("return $N == null ? $T.empty() : $T.of($N)",
-                value, Stream.class, Stream.class, value)
-            .addAnnotation(Override.class)
+            .addStatement("return $N.stream()", values)
             .build())
-        .addField(value)
-        .addModifiers(PRIVATE, STATIC).build();
+        .addModifiers(PRIVATE, STATIC)
+        .build();
   }
 
-  private static MethodSpec readMethod(FieldSpec value) {
+  private static MethodSpec readMethod() {
     ParameterSpec valueParam = ParameterSpec.builder(STRING, "value").build();
     return MethodSpec.methodBuilder("read")
         .addParameter(valueParam)
         .returns(TypeName.INT)
-        .addStatement("this.$N = $N", value, valueParam)
-        .addStatement("return $L", 1)
-        .addAnnotation(Override.class)
+        .addStatement("values.add($N)", valueParam)
+        .addStatement("return $L", 0)
         .build();
   }
 }
