@@ -5,12 +5,11 @@ import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
-import net.jbock.compiler.TypevarMapping;
 import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.TypevarMapping;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import java.util.Arrays;
 import java.util.function.Function;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
