@@ -19,11 +19,9 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.OptionalInt;
 import java.util.function.Supplier;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
@@ -50,29 +48,24 @@ final class Option {
 
   private final FieldSpec bundleKeyField;
 
-  private final FieldSpec positionalIndexField;
-
   private final MethodSpec optionNamesMethod;
 
   private final MethodSpec parsersMethod;
 
-  private final FieldSpec flagField;
+  private final FieldSpec shapeField;
 
   private final MethodSpec positionalParsersMethod;
 
   private Option(
       Context context,
       FieldSpec bundleKeyField,
-      FieldSpec flagField,
-      FieldSpec positionalIndexField,
       FieldSpec descriptionField,
       FieldSpec namesField,
       MethodSpec optionNamesMethod,
       MethodSpec describeParamMethod,
       MethodSpec parsersMethod,
+      FieldSpec shapeField,
       MethodSpec positionalParsersMethod) {
-    this.flagField = flagField;
-    this.positionalIndexField = positionalIndexField;
     this.descriptionField = descriptionField;
     this.bundleKeyField = bundleKeyField;
     this.context = context;
@@ -80,15 +73,15 @@ final class Option {
     this.describeParamMethod = describeParamMethod;
     this.namesField = namesField;
     this.parsersMethod = parsersMethod;
+    this.shapeField = shapeField;
     this.positionalParsersMethod = positionalParsersMethod;
   }
 
   static Option create(Context context) {
-    FieldSpec flagField = FieldSpec.builder(BOOLEAN, "flag").addModifiers(FINAL).build();
     FieldSpec namesField = FieldSpec.builder(LIST_OF_STRING, "names").addModifiers(FINAL).build();
-    FieldSpec positionalIndexField = FieldSpec.builder(OptionalInt.class, "positionalIndex").addModifiers(FINAL).build();
     FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").addModifiers(FINAL).build();
     FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").addModifiers(FINAL).build();
+    FieldSpec shapeField = FieldSpec.builder(STRING, "shape").addModifiers(FINAL).build();
     TypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType());
     TypeName positionalParsersType = ParameterizedTypeName.get(ClassName.get(List.class), context.positionalOptionParserType());
     MethodSpec optionNamesMethod = optionNamesMethod(context.optionType(), namesField);
@@ -100,13 +93,12 @@ final class Option {
     return new Option(
         context,
         bundleKeyField,
-        flagField,
-        positionalIndexField,
         descriptionField,
         namesField,
         optionNamesMethod,
         describeParamMethod,
         parsersMethod,
+        shapeField,
         positionalParsersMethod);
   }
 
@@ -119,10 +111,9 @@ final class Option {
     }
     return spec.addModifiers(PRIVATE)
         .addField(namesField)
-        .addField(flagField)
         .addField(bundleKeyField)
-        .addField(positionalIndexField)
         .addField(descriptionField)
+        .addField(shapeField)
         .addMethod(describeParamMethod)
         .addMethod(missingRequiredLambdaMethod())
         .addMethod(privateConstructor())
@@ -133,54 +124,53 @@ final class Option {
   }
 
   private TypeSpec optionEnumConstant(Parameter param) {
-    List<String> desc = param.description();
     Map<String, Object> map = new LinkedHashMap<>();
     CodeBlock names = getNames(param);
-    map.put("flag", param.isFlag());
     map.put("names", names);
     map.put("bundleKey", param.bundleKey().orElse(null));
-    map.put("positionalIndex", param.positionalIndex().isPresent() ?
-        CodeBlock.of("$T.of($L)", OptionalInt.class, param.positionalIndex().getAsInt()) :
-        CodeBlock.of("$T.empty()", OptionalInt.class));
-    map.put("descExpression", descExpression(desc));
+    map.put("descExpression", descExpression(param.description()));
+    map.put("shape", param.shape());
     String format = String.join(", ",
         "$names:L",
         "$bundleKey:S",
-        "$flag:L",
-        "$positionalIndex:L",
-        "$descExpression:L");
+        "$descExpression:L",
+        "$shape:S");
 
     CodeBlock block = CodeBlock.builder().addNamed(format, map).build();
     return anonymousClassBuilder(block).build();
   }
 
   private CodeBlock getNames(Parameter param) {
-    if (param.longName().isPresent() && !param.shortName().isPresent()) {
-      return CodeBlock.of("$T.singletonList($S)", Collections.class, param.longName().get());
-    } else if (!param.longName().isPresent() && param.shortName().isPresent()) {
-      return CodeBlock.of("$T.singletonList($S)", Collections.class, param.shortName().get());
-    } else if (!param.longName().isPresent()) {
-      return CodeBlock.of("$T.emptyList()", Collections.class);
-    } else {
-      return CodeBlock.of("$T.asList($S, $S)", Arrays.class, param.shortName().get(), param.longName().get());
+    List<String> names = param.names();
+    switch (names.size()) {
+      case 0:
+        return CodeBlock.of("$T.emptyList()", Collections.class);
+      case 1:
+        return CodeBlock.of("$T.singletonList($S)", Collections.class, names.get(0));
+      default:
+        return arraysOfStringInvocation(names);
     }
   }
 
   private CodeBlock descExpression(List<String> desc) {
-    if (desc.isEmpty()) {
-      return CodeBlock.builder().add("$T.emptyList()", Collections.class).build();
-    } else if (desc.size() == 1) {
-      return CodeBlock.builder().add("$T.singletonList($S)", Collections.class, desc.get(0)).build();
+    switch (desc.size()) {
+      case 0:
+        return CodeBlock.builder().add("$T.emptyList()", Collections.class).build();
+      case 1:
+        return CodeBlock.builder().add("$T.singletonList($S)", Collections.class, desc.get(0)).build();
+      default:
+        return arraysOfStringInvocation(desc);
     }
-    Object[] args = new Object[1 + desc.size()];
+  }
+
+  private CodeBlock arraysOfStringInvocation(List<String> strings) {
+    Object[] args = new Object[1 + strings.size()];
     args[0] = Arrays.class;
-    for (int i = 0; i < desc.size(); i++) {
-      args[i + 1] = desc.get(i);
+    for (int i = 0; i < strings.size(); i++) {
+      args[i + 1] = strings.get(i);
     }
-    return CodeBlock.builder()
-        .add(String.format("$T.asList($Z%s)",
-            String.join(",$Z", nCopies(desc.size(), "$S"))), args)
-        .build();
+    return CodeBlock.of(String.format("$T.asList($Z%s)",
+        String.join(",$Z", nCopies(strings.size(), "$S"))), args);
   }
 
   private static MethodSpec optionNamesMethod(
@@ -280,29 +270,25 @@ final class Option {
 
   private MethodSpec privateConstructor() {
     ParameterSpec names = builder(namesField.type, namesField.name).build();
-    ParameterSpec flag = builder(flagField.type, flagField.name).build();
     ParameterSpec bundleKey = builder(bundleKeyField.type, bundleKeyField.name).build();
-    ParameterSpec positionalIndex = builder(positionalIndexField.type, positionalIndexField.name).build();
     ParameterSpec description = builder(descriptionField.type, descriptionField.name).build();
+    ParameterSpec shape = builder(shapeField.type, shapeField.name).build();
     return MethodSpec.constructorBuilder()
         .addStatement("this.$N = $N", namesField, names)
-        .addStatement("this.$N = $N", flagField, flag)
         .addStatement("this.$N = $N", bundleKeyField, bundleKey)
-        .addStatement("this.$N = $N", positionalIndexField, positionalIndex)
         .addStatement("this.$N = $N", descriptionField, description)
-        .addParameters(asList(names, bundleKey, flag, positionalIndex, description))
+        .addStatement("this.$N = $N", shapeField, shape)
+        .addParameters(asList(names, bundleKey, description, shape))
         .build();
   }
 
   private MethodSpec missingRequiredLambdaMethod() {
-    String ifMessage = "Missing parameter: <%s>";
-    String elseMessage = "Missing required option: %s (%s)";
-    CodeBlock lambda;
-    lambda = CodeBlock.builder()
-        .add("positionalIndex.isPresent()\n").indent()
-        .add("? new $T($T.format($S, this))\n", IllegalArgumentException.class, String.class, ifMessage)
-        .add(": new $T($T.format($S, this, describeParam($S).trim()))", IllegalArgumentException.class, String.class, elseMessage, "")
-        .unindent().build();
+    CodeBlock lambda = CodeBlock.of("new $T($S + (names.isEmpty() ? name() : " +
+            "$T.format($S, name(), $T.join($S, names))))",
+        IllegalArgumentException.class,
+        "Missing required: ",
+        String.class,
+        "%s (%s)", String.class, ", ");
     return MethodSpec.methodBuilder("missingRequired")
         .returns(ParameterizedTypeName.get(Supplier.class, IllegalArgumentException.class))
         .addCode("return () -> $L;\n", lambda)

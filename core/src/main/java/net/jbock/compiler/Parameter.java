@@ -379,4 +379,28 @@ public final class Parameter {
         .filter(NONPRIVATE_ACCESS_MODIFIERS::contains)
         .collect(Collectors.toSet());
   }
+
+  public List<String> names() {
+    if (longName != null && shortName == null) {
+      return Collections.singletonList(longName);
+    } else if (longName == null && shortName != null) {
+      return Collections.singletonList(shortName);
+    } else if (longName == null) {
+      return Collections.emptyList();
+    } else {
+      return Arrays.asList(shortName, longName);
+    }
+  }
+
+  public String shape() {
+    if (positionalIndex != null) {
+      return enumConstantLower();
+    }
+    String argname = isFlag() ? "" : ' ' + enumConstant();
+    List<String> names = names();
+    if (names.size() == 1) {
+      return "    " + names.get(0) + argname;
+    }
+    return names.get(0) + ", " + names.get(1) + argname;
+  }
 }

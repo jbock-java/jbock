@@ -144,15 +144,11 @@ final class ParserState {
     return builder.build();
   }
 
-  static CodeBlock throwRepetitionErrorStatement(
-      FieldSpec optionParam) {
-    return CodeBlock.builder()
-        .add("throw new $T($T.format($S, $N, $N.describeParam($S).trim()))",
-            IllegalArgumentException.class,
-            String.class,
-            "Option %s (%s) is not repeatable",
-            optionParam, optionParam, "")
-        .build();
+  static CodeBlock throwRepetitionErrorStatement(FieldSpec optionParam) {
+    return CodeBlock.of("throw new $T($T.format($S, $N, $T.join($S, $N.names)))",
+        IllegalArgumentException.class, String.class,
+        "Option %s (%s) is not repeatable",
+        optionParam, String.class, ", ", optionParam);
   }
 
   /**

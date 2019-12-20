@@ -58,6 +58,6 @@ class CustomMapperArgumentsTest {
   @Test
   void invalidOptions() {
     f.assertThat("--date", "FooBar").failsWithMessage("For input string: \"FooBar\"");
-    f.assertThat().failsWithMessage("Missing required option: DATE (--date)");
+    f.assertThat().failsWithMessage("Missing required: DATE (--date)");
   }
 }

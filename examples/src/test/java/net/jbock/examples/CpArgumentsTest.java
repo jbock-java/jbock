@@ -15,15 +15,15 @@ class CpArgumentsTest {
 
   @Test
   void errorMissingSource() {
-    f.assertThat().failsWithMessage("Missing parameter: <SOURCE>");
-    f.assertThat("-r").failsWithMessage("Missing parameter: <SOURCE>");
+    f.assertThat().failsWithMessage("Missing required: SOURCE");
+    f.assertThat("-r").failsWithMessage("Missing required: SOURCE");
   }
 
   @Test
   void errorMissingDest() {
-    f.assertThat("a").failsWithMessage("Missing parameter: <DEST>");
-    f.assertThat("a", "-r").failsWithMessage("Missing parameter: <DEST>");
-    f.assertThat("-r", "a").failsWithMessage("Missing parameter: <DEST>");
+    f.assertThat("a").failsWithMessage("Missing required: DEST");
+    f.assertThat("a", "-r").failsWithMessage("Missing required: DEST");
+    f.assertThat("-r", "a").failsWithMessage("Missing required: DEST");
   }
 
   @Test

@@ -57,7 +57,7 @@ class NoNameArgumentsTest {
 
   @Test
   void errorMissingInt() {
-    f.assertThat("--cmos").failsWithMessage("Missing required option: NUMBER (-n, --number)");
+    f.assertThat("--cmos").failsWithMessage("Missing required: NUMBER (-n, --number)");
   }
 
   @Test

@@ -107,24 +107,13 @@ final class Tokenizer {
   private MethodSpec printDescriptionMethod() {
     ParameterSpec option = builder(context.optionType(), "option").build();
     ParameterSpec message = builder(STRING, "message").build();
-    ParameterSpec description = builder(STRING, "description").build();
     return MethodSpec.methodBuilder("printDescription")
         .addParameter(option)
         .addStatement("$T $N = $N.getMessage($N.bundleKey, $N.description)",
             STRING, message, messages, option, option)
-        .addStatement("$T $N", STRING, description)
-        .beginControlFlow("if ($N.positionalIndex.isPresent())", option)
-        .addStatement("$N = $N.name().toLowerCase($T.US)", description, option, Locale.class)
-        .endControlFlow()
-        .beginControlFlow("else if ($N.flag)", option)
-        .addStatement("$N = $N.describeParam($S)", description, option, "")
-        .endControlFlow()
-        .beginControlFlow("else")
-        .addStatement("$N = $N.describeParam(' ' + $N.name())", description, option, option)
-        .endControlFlow()
-        .addStatement("return new $T($N, $N)",
+        .addStatement("return new $T($N.shape, $N)",
             ParameterizedTypeName.get(ClassName.get(SimpleImmutableEntry.class), STRING, STRING),
-            description, message)
+            option, message)
         .returns(ENTRY_STRING_STRING)
         .build();
   }
