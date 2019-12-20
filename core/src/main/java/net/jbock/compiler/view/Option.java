@@ -83,7 +83,7 @@ final class Option {
     FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").addModifiers(FINAL).build();
     FieldSpec shapeField = FieldSpec.builder(STRING, "shape").addModifiers(FINAL).build();
     TypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType());
-    TypeName positionalParsersType = ParameterizedTypeName.get(ClassName.get(List.class), context.positionalOptionParserType());
+    TypeName positionalParsersType = ParameterizedTypeName.get(ClassName.get(List.class), context.paramParserType());
     MethodSpec optionNamesMethod = optionNamesMethod(context.optionType(), namesField);
     MethodSpec parsersMethod = parsersMethod(parsersType, context);
     MethodSpec positionalParsersMethod = positionalParsersMethod(positionalParsersType, context);
@@ -262,8 +262,8 @@ final class Option {
         continue;
       }
       spec.addStatement("$N.add(new $T())", parsers, param.isRepeatable() ?
-          context.repeatablePositionalOptionParserType() :
-          context.regularPositionalOptionParserType());
+          context.repeatableParamParserType() :
+          context.regularParamParserType());
     }
     return spec.addStatement("return $N", parsers).build();
   }

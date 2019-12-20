@@ -22,7 +22,7 @@ final class PositionalOptionParser {
     CodeBlock defaultImpl = CodeBlock.builder()
         .addStatement("throw new $T()", AssertionError.class)
         .build();
-    return TypeSpec.classBuilder(context.positionalOptionParserType())
+    return TypeSpec.classBuilder(context.paramParserType())
         .addMethod(readMethod())
         .addMethod(MethodSpec.methodBuilder("values")
             .returns(STREAM_OF_STRING)

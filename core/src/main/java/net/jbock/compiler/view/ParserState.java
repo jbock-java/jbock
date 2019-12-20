@@ -65,7 +65,7 @@ final class ParserState {
         .build();
 
     FieldSpec positionalParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class),
-        context.positionalOptionParserType()), "positionalParsers")
+        context.paramParserType()), "positionalParsers")
         .initializer("$T.unmodifiableList($T.$N())", Collections.class, context.optionType(), option.positionalParsersMethod())
         .addModifiers(FINAL)
         .build();

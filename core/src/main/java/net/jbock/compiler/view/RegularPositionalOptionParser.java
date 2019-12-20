@@ -21,8 +21,8 @@ final class RegularPositionalOptionParser {
 
   static TypeSpec define(Context context) {
     FieldSpec value = FieldSpec.builder(STRING, "value").build();
-    return TypeSpec.classBuilder(context.regularPositionalOptionParserType())
-        .superclass(context.positionalOptionParserType())
+    return TypeSpec.classBuilder(context.regularParamParserType())
+        .superclass(context.paramParserType())
         .addMethod(readMethod(value))
         .addMethod(MethodSpec.methodBuilder("values")
             .returns(STREAM_OF_STRING)

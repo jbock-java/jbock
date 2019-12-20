@@ -80,8 +80,8 @@ public final class Context {
     return generatedClass.nestedClass("OptionParser");
   }
 
-  public ClassName positionalOptionParserType() {
-    return generatedClass.nestedClass("PositionalOptionParser");
+  public ClassName paramParserType() {
+    return generatedClass.nestedClass("ParamParser");
   }
 
   public ClassName repeatableOptionParserType() {
@@ -96,12 +96,12 @@ public final class Context {
     return generatedClass.nestedClass("RegularOptionParser");
   }
 
-  public ClassName regularPositionalOptionParserType() {
-    return generatedClass.nestedClass("RegularPositionalOptionParser");
+  public ClassName regularParamParserType() {
+    return generatedClass.nestedClass("RegularParamParser");
   }
 
-  public ClassName repeatablePositionalOptionParserType() {
-    return generatedClass.nestedClass("RepeatablePositionalOptionParser");
+  public ClassName repeatableParamParserType() {
+    return generatedClass.nestedClass("RepeatableParamParser");
   }
 
   public ClassName optionType() {

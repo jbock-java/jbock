@@ -205,6 +205,17 @@ class CurlArgumentsTest {
         "Option METHOD (-X, --request) is not repeatable");
   }
 
+  static class A {
+     private String foo;
+
+  }
+
+  static class B extends A {
+    void baba() {
+      System.out.println(super.foo);
+    }
+  }
+
   @Test
   void testPrint() {
     f.assertPrintsHelp(

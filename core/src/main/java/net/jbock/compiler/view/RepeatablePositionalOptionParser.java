@@ -24,8 +24,8 @@ final class RepeatablePositionalOptionParser {
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
         .initializer("new $T<>()", ArrayList.class)
         .build();
-    return TypeSpec.classBuilder(context.repeatablePositionalOptionParserType())
-        .superclass(context.positionalOptionParserType())
+    return TypeSpec.classBuilder(context.repeatableParamParserType())
+        .superclass(context.paramParserType())
         .addMethod(readMethod(values))
         .addMethod(MethodSpec.methodBuilder("values")
             .returns(STREAM_OF_STRING)
