@@ -41,7 +41,7 @@ final class RegularOptionParser {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it));
 
-    spec.beginControlFlow("if (!values.isEmpty()))")
+    spec.beginControlFlow("if (!values.isEmpty())")
         .addStatement(throwRepetitionErrorStatement(option))
         .endControlFlow();
 
