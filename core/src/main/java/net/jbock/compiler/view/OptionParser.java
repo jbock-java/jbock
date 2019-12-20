@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static java.util.Arrays.asList;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
@@ -24,8 +23,8 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
 final class OptionParser {
 
   static TypeSpec define(Context context) {
-    FieldSpec option = FieldSpec.builder(context.optionType(), "option", FINAL).build();
-    FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values", FINAL)
+    FieldSpec option = FieldSpec.builder(context.optionType(), "option").build();
+    FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
         .initializer("new $T<>()", ArrayList.class)
         .build();
     return TypeSpec.classBuilder(context.optionParserType())
