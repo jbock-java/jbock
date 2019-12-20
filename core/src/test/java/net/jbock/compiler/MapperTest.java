@@ -109,7 +109,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: invalid bounds.");
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds for E.");
   }
 
   @Test
@@ -170,7 +170,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: invalid bounds.");
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds for E.");
   }
 
 
@@ -1118,6 +1118,6 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: invalid bounds.");
+        .withErrorContaining("There is a problem with the mapper class: Cannot infer E: String vs List<Integer>.");
   }
 }

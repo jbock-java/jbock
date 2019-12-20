@@ -6,6 +6,7 @@ import net.jbock.coerce.reference.TypecheckFailure;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -82,4 +83,18 @@ public class TypevarMapping {
         return null;
     }
   }
+
+  public Either<String, TypevarMapping> merge(TypevarMapping solution) {
+    Map<String, TypeMirror> result = new LinkedHashMap<>(map);
+    for (String key : solution.map.keySet()) {
+      TypeMirror thisType = map.get(key);
+      TypeMirror thatType = solution.get(key);
+      if (thisType != null && !tool.isSameType(thisType, thatType)) {
+        return left(String.format("Cannot infer %s: %s vs %s", key, thisType, thatType));
+      }
+      result.put(key, thatType);
+    }
+    return right(new TypevarMapping(result, tool));
+  }
+
 }

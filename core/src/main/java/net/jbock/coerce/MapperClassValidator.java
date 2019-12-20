@@ -33,20 +33,20 @@ public final class MapperClassValidator {
     commonChecks(mapperClass);
     checkNotAbstract(mapperClass);
     ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass).getReferencedType();
-    TypeMirror t = functionType.typeArguments().get(0);
-    TypeMirror r = functionType.typeArguments().get(1);
-    return tool().unify(tool().asType(String.class), t).flatMap(MAPPER::boom, t_result ->
-        handle(functionType, r, t_result));
+    TypeMirror inputType = functionType.typeArguments().get(0);
+    TypeMirror outputType = functionType.typeArguments().get(1);
+    return tool().unify(tool().asType(String.class), inputType).flatMap(MAPPER::boom, leftSolution ->
+        handle(functionType, outputType, leftSolution));
   }
 
-  private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypeMirror r, TypevarMapping t_result) {
-    return tool().unify(expectedReturnType, r).flatMap(MAPPER::boom, r_result ->
-        handle(functionType, t_result, r_result));
+  private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypeMirror outputType, TypevarMapping leftSolution) {
+    return tool().unify(expectedReturnType, outputType).flatMap(MAPPER::boom, rightSolution ->
+        handle(functionType, leftSolution, rightSolution));
   }
 
-  private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypevarMapping t_result, TypevarMapping r_result) {
+  private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypevarMapping leftSolution, TypevarMapping rightSolution) {
     return new Flattener(basicInfo, mapperClass)
-        .getTypeParameters(Arrays.asList(t_result, r_result))
+        .getTypeParameters(leftSolution, rightSolution)
         .map(MAPPER::boom, typeParameters ->
             MapperType.create(tool(), functionType.isSupplier(), mapperClass, typeParameters));
   }

@@ -349,7 +349,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: invalid bounds.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds for E.");
   }
 
   @Test
@@ -478,7 +478,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: invalid bounds.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds for E.");
   }
 
   // TODO inferring collector input from mapper output is currently not supported
@@ -567,7 +567,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: invalid bounds.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds for E.");
   }
 
 
@@ -597,7 +597,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: invalid bounds");
+        .withErrorContaining("There is a problem with the mapper class: Cannot infer E: String vs Integer.");
   }
 
   @Test
