@@ -234,7 +234,7 @@ final class Option {
       }
       if (param.isRepeatable()) {
         spec.addStatement("$N.put($L, new $T($L))",
-            parsers, param.enumConstant(), context.repeatableOptionParserType(), param.enumConstant());
+            parsers, param.enumConstant(), context.optionParserType(), param.enumConstant());
       } else if (param.isFlag()) {
         spec.addStatement("$N.put($L, new $T($L))",
             parsers, param.enumConstant(),

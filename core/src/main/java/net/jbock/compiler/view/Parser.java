@@ -114,7 +114,6 @@ public final class Parser {
         .addType(OptionParser.define(context))
         .addType(FlagOptionParser.define(context))
         .addType(RegularOptionParser.define(context))
-        .addType(RepeatableOptionParser.define(context))
         .addType(PositionalOptionParser.define(context))
         .addType(RegularPositionalOptionParser.define(context))
         .addType(RepeatablePositionalOptionParser.define(context))

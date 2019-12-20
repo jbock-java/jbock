@@ -1,43 +1,42 @@
 package net.jbock.compiler.view;
 
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+
 import static java.util.Arrays.asList;
-import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
 /**
- * Generates the OptionParser class.
+ * Generates the inner class OptionParser.
  */
 final class OptionParser {
 
   static TypeSpec define(Context context) {
     FieldSpec option = FieldSpec.builder(context.optionType(), "option", FINAL).build();
+    FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values", FINAL)
+        .initializer("new $T<>()", ArrayList.class)
+        .build();
     return TypeSpec.classBuilder(context.optionParserType())
         .addMethod(readMethod())
         .addMethod(MethodSpec.methodBuilder("values")
             .returns(STREAM_OF_STRING)
-            .addCode(throwAssertionError())
+            .addStatement("return $N.stream()", values)
             .build())
-        .addField(option)
+        .addFields(Arrays.asList(option, values))
         .addMethod(constructor(option))
-        .addModifiers(PRIVATE, ABSTRACT, STATIC)
-        .build();
-  }
-
-  private static CodeBlock throwAssertionError() {
-    return CodeBlock.builder()
-        .addStatement("throw new $T()", AssertionError.class)
+        .addModifiers(PRIVATE, STATIC)
         .build();
   }
 
@@ -51,10 +50,10 @@ final class OptionParser {
 
   private static MethodSpec readMethod() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
+    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     return MethodSpec.methodBuilder("read")
-        .addModifiers(ABSTRACT)
         .addParameters(asList(token, it))
+        .addStatement("values.add(readValidArgument($N, $N))", token, it)
         .build();
   }
 }
