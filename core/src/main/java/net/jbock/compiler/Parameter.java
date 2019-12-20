@@ -25,7 +25,7 @@ import static java.lang.Character.isWhitespace;
 import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
 
 /**
- * This class represents a parameter method.
+ * This class represents a parameter method (option or param).
  */
 public final class Parameter {
 
@@ -38,6 +38,10 @@ public final class Parameter {
   private final ExecutableElement sourceMethod;
 
   private final String bundleKey;
+
+  private final String shape;
+
+  private final List<String> names;
 
   private final Coercion coercion;
 
@@ -96,10 +100,14 @@ public final class Parameter {
       String longName,
       ExecutableElement sourceMethod,
       String bundleKey,
+      String shape,
+      List<String> names,
       Coercion coercion,
       List<String> description,
       Integer positionalIndex) {
     this.bundleKey = bundleKey;
+    this.shape = shape;
+    this.names = names;
     this.coercion = coercion;
     this.shortName = shortName;
     this.longName = longName;
@@ -146,20 +154,20 @@ public final class Parameter {
     checkName(sourceMethod, parameter.value());
     ParamName name = findParamName(params, sourceMethod);
     boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
-    Coercion coercion;
-    if (flag) {
-      coercion = CoercionProvider.flagCoercion(sourceMethod, name);
-    } else {
-      coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
-    }
+    Coercion coercion = flag ?
+        CoercionProvider.flagCoercion(sourceMethod, name) :
+        CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
     checkBundleKey(parameter.value(), params, sourceMethod);
+    List<String> names = names(longName, shortName);
     return new Parameter(
         shortName,
         longName,
         sourceMethod,
         parameter.value(),
+        shape(flag, name, names),
+        names,
         coercion,
-        cleanDesc(description),
+        Arrays.asList(description),
         null);
   }
 
@@ -180,8 +188,10 @@ public final class Parameter {
         null,
         sourceMethod,
         parameter.bundleKey(),
+        name.snake().toLowerCase(Locale.US),
+        Collections.emptyList(),
         coercion,
-        cleanDesc(description),
+        Arrays.asList(description),
         positionalIndex);
   }
 
@@ -262,10 +272,6 @@ public final class Parameter {
     }
   }
 
-  public Optional<String> shortName() {
-    return Optional.ofNullable(shortName);
-  }
-
   public Optional<String> longName() {
     return Optional.ofNullable(longName);
   }
@@ -325,21 +331,6 @@ public final class Parameter {
   }
 
   // visible for testing
-  static List<String> cleanDesc(String[] desc) {
-    if (desc.length == 0) {
-      return Collections.emptyList();
-    }
-    String[] result = new String[desc.length];
-    int resultpos = 0;
-    for (String token : desc) {
-      if (!token.startsWith("@")) {
-        result[resultpos++] = token;
-      }
-    }
-    return Arrays.asList(trim(Arrays.copyOf(result, resultpos)));
-  }
-
-  // visible for testing
   static String[] trim(String[] desc) {
     int firstNonempty = 0, lastNonempty = desc.length - 1;
     boolean nonemptyFound = false;
@@ -381,6 +372,10 @@ public final class Parameter {
   }
 
   public List<String> names() {
+    return names;
+  }
+
+  static List<String> names(String longName, String shortName) {
     if (longName != null && shortName == null) {
       return Collections.singletonList(longName);
     } else if (longName == null && shortName != null) {
@@ -393,12 +388,19 @@ public final class Parameter {
   }
 
   public String shape() {
-    if (positionalIndex != null) {
-      return enumConstantLower();
+    return shape;
+  }
+
+  private static String shape(
+      boolean flag,
+      ParamName name,
+      List<String> names) {
+    if (names.isEmpty() || names.size() >= 3) {
+      throw new AssertionError();
     }
-    String argname = isFlag() ? "" : ' ' + enumConstant();
-    List<String> names = names();
+    String argname = flag ? "" : ' ' + name.snake().toUpperCase(Locale.US);
     if (names.size() == 1) {
+      // four spaces: "-f, "
       return "    " + names.get(0) + argname;
     }
     return names.get(0) + ", " + names.get(1) + argname;
