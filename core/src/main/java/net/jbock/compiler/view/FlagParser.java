@@ -3,17 +3,13 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 
-import java.util.stream.Stream;
-
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.view.ParserState.throwRepetitionErrorStatement;
 
 /**
@@ -22,30 +18,14 @@ import static net.jbock.compiler.view.ParserState.throwRepetitionErrorStatement;
 final class FlagParser {
 
   static TypeSpec define(Context context) {
-    FieldSpec flag = FieldSpec.builder(TypeName.BOOLEAN, "flag").build();
     return TypeSpec.classBuilder(context.flagParserType())
         .superclass(context.optionParserType())
-        .addMethod(readMethod(context, flag))
-        .addMethod(MethodSpec.methodBuilder("values")
-            .returns(STREAM_OF_STRING)
-            .addStatement("return $N ? $T.of($S) : $T.empty()",
-                flag, Stream.class, "", Stream.class)
-            .addAnnotation(Override.class)
-            .build())
-        .addField(flag)
-        .addMethod(constructor(context))
+        .addMethod(readMethod(context))
+        .addMethod(RegularOptionParser.constructor(context))
         .addModifiers(PRIVATE, STATIC).build();
   }
 
-  private static MethodSpec constructor(Context context) {
-    ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
-    return MethodSpec.constructorBuilder()
-        .addStatement("super($N)", optionParam)
-        .addParameter(optionParam)
-        .build();
-  }
-
-  private static MethodSpec readMethod(Context context, FieldSpec flag) {
+  private static MethodSpec readMethod(Context context) {
     FieldSpec option = FieldSpec.builder(context.optionType(), "option").build();
     ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
@@ -55,11 +35,10 @@ final class FlagParser {
     spec.beginControlFlow("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))", token, token, token, "=")
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Invalid token: ", token)
         .endControlFlow();
-    spec.beginControlFlow("if ($N)", flag)
+    spec.beginControlFlow("if (!values.isEmpty())")
         .addStatement(throwRepetitionErrorStatement(option))
         .endControlFlow();
-    spec.addStatement("$N = $L", flag, true);
-
+    spec.addStatement("values.add($S)", "");
     return spec.addAnnotation(Override.class).build();
   }
 }

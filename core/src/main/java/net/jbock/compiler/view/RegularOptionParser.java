@@ -7,12 +7,9 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 
-import java.util.stream.Stream;
-
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.view.ParserState.throwRepetitionErrorStatement;
 
@@ -22,22 +19,14 @@ import static net.jbock.compiler.view.ParserState.throwRepetitionErrorStatement;
 final class RegularOptionParser {
 
   static TypeSpec define(Context context) {
-    FieldSpec value = FieldSpec.builder(STRING, "value").build();
     return TypeSpec.classBuilder(context.regularOptionParserType())
         .superclass(context.optionParserType())
-        .addMethod(readMethod(context, value))
-        .addMethod(MethodSpec.methodBuilder("values")
-            .returns(STREAM_OF_STRING)
-            .addStatement("return $N == null ? $T.empty() : $T.of($N)",
-                value, Stream.class, Stream.class, value)
-            .addAnnotation(Override.class)
-            .build())
-        .addField(value)
+        .addMethod(readMethod(context))
         .addMethod(constructor(context))
         .addModifiers(PRIVATE, STATIC).build();
   }
 
-  private static MethodSpec constructor(Context context) {
+  static MethodSpec constructor(Context context) {
     ParameterSpec optionParam = ParameterSpec.builder(context.optionType(), "option").build();
     return MethodSpec.constructorBuilder()
         .addStatement("super($N)", optionParam)
@@ -45,18 +34,18 @@ final class RegularOptionParser {
         .build();
   }
 
-  private static MethodSpec readMethod(Context context, FieldSpec value) {
+  private static MethodSpec readMethod(Context context) {
     FieldSpec option = FieldSpec.builder(context.optionType(), "option").build();
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it));
 
-    spec.beginControlFlow("if ($N != null)", value)
+    spec.beginControlFlow("if (!values.isEmpty()))")
         .addStatement(throwRepetitionErrorStatement(option))
         .endControlFlow();
 
-    spec.addStatement("$N = readValidArgument($N, $N)", value, token, it);
+    spec.addStatement("super.read($N, $N)", token, it);
 
     return spec.addAnnotation(Override.class).build();
   }
