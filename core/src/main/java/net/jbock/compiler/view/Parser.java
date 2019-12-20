@@ -9,12 +9,13 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
+import net.jbock.compiler.Parameter;
 
 import java.io.PrintStream;
-import java.util.AbstractMap;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.function.Consumer;
@@ -268,6 +269,11 @@ public final class Parser {
   }
 
   private MethodSpec printOnlineHelpMethod() {
+    List<Parameter> params = context.parameters();
+    // 2 space padding on both sides
+    int totalPadding = 4;
+    int width = params.stream().map(Parameter::shape).mapToInt(String::length).max().orElse(0) + totalPadding;
+    String format = "  %1$-" + (width - 2) + "s";
     ParameterSpec synopsis = builder(STRING, "synopsis").build();
     ParameterSpec rows = builder(listOf(ENTRY_STRING_STRING), "rows").build();
     ParameterSpec row = builder(ENTRY_STRING_STRING, "row").build();
@@ -276,16 +282,13 @@ public final class Parser {
     ParameterSpec keyWidth = builder(INT, "keyWidth").build();
     ParameterSpec keyFormat = builder(STRING, "keyFormat").build();
     MethodSpec.Builder spec = methodBuilder("printOnlineHelp");
-    spec.addStatement("$T $N = $N.stream().map($T::getKey).mapToInt($T::length).max().orElse(0) + 2",
-        keyWidth.type, keyWidth, rows, AbstractMap.Entry.class, String.class)
-        .addStatement("$T $N = $S + $N + $S", keyFormat.type, keyFormat, "%1$-", keyWidth, "s")
-        .addStatement("printWrap($N, 8, $S, $S + $N)",
-            printStream, "", "Usage: ", synopsis);
+    spec.addStatement("$T $N = $L", keyWidth.type, keyWidth, width)
+        .addStatement("$T $N = $S", keyFormat.type, keyFormat, format)
+        .addStatement("printWrap($N, 8, $S, $S + $N)", printStream, "", "Usage: ", synopsis);
+    spec.addStatement("$N.println()", printStream);
     spec.beginControlFlow("for ($T $N : $N)", row.type, row, rows)
-        .addStatement("$T $N = $T.format($N, $N.getKey())",
-            STRING, key, STRING, keyFormat, row)
-        .addStatement("printWrap($N, $N, $N, $N.getValue())",
-            printStream, keyWidth, key, row)
+        .addStatement("$T $N = $T.format($N, $N.getKey())", STRING, key, STRING, keyFormat, row)
+        .addStatement("printWrap($N, $N, $N, $N.getValue())", printStream, keyWidth, key, row)
         .endControlFlow();
     spec.addStatement("$N.flush()", printStream);
     return spec.addParameters(Arrays.asList(printStream, synopsis, rows))

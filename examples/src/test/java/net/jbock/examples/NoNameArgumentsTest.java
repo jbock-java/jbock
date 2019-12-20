@@ -69,11 +69,12 @@ class NoNameArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: no-name-arguments [options...] -n <number>",
-        "    --message MESSAGE",
-        "    --file FILE",
-        "-v, --verbosity VERBOSITY",
-        "-n, --number NUMBER",
-        "    --cmos",
+        "",
+        "      --message MESSAGE",
+        "      --file FILE",
+        "  -v, --verbosity VERBOSITY",
+        "  -n, --number NUMBER",
+        "      --cmos",
         "");
   }
 

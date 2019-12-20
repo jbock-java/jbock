@@ -24,12 +24,13 @@ class EvilArgumentsTest {
     f.assertPrintsHelp(
         "Usage: evil-arguments --fancy <fancy> --fAncy <f_ancy> --f_ancy <f_ancy_2>",
         "        --f__ancy <f_ancy_3> --blub <blub> --Blub <blub_5>",
-        "    --fancy FANCY",
-        "    --fAncy F_ANCY",
-        "    --f_ancy F_ANCY_2",
-        "    --f__ancy F_ANCY_3",
-        "    --blub BLUB",
-        "    --Blub BLUB_5",
+        "",
+        "  --fancy FANCY",
+        "  --fAncy F_ANCY",
+        "  --f_ancy F_ANCY_2",
+        "  --f__ancy F_ANCY_3",
+        "  --blub BLUB",
+        "  --Blub BLUB_5",
         "");
   }
 }

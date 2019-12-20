@@ -54,13 +54,13 @@ public final class Parameter {
   }
 
   private static ParamName findParamName(
-      List<Parameter> params,
+      List<Parameter> alreadyCreated,
       ExecutableElement sourceMethod) {
     String methodName = sourceMethod.getSimpleName().toString();
     ParamName result = ParamName.create(methodName);
-    for (Parameter param : params) {
+    for (Parameter param : alreadyCreated) {
       if (param.paramName().equals(result)) {
-        return result.append(Integer.toString(params.size()));
+        return result.append(Integer.toString(alreadyCreated.size()));
       }
     }
     return result;
@@ -68,7 +68,7 @@ public final class Parameter {
 
   private static void checkBundleKey(
       String bundleKey,
-      List<Parameter> params,
+      List<Parameter> alreadyCreated,
       ExecutableElement sourceMethod) {
     if (bundleKey.isEmpty()) {
       return;
@@ -84,7 +84,7 @@ public final class Parameter {
       throw ValidationException.create(sourceMethod,
           "Bundle keys may not start with 'jbock.'.");
     }
-    for (Parameter param : params) {
+    for (Parameter param : alreadyCreated) {
       if (param.bundleKey.isEmpty()) {
         continue;
       }
@@ -124,20 +124,21 @@ public final class Parameter {
     return coercion;
   }
 
-  static Parameter create(TypeTool tool, List<Parameter> params, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
+  static Parameter create(boolean anyMnemonics, TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     if (positionalIndex != null) {
       Optional<TypeElement> mapperClass = annotationUtil.get(net.jbock.Param.class, "mappedBy");
       Optional<TypeElement> collectorClass = annotationUtil.get(net.jbock.Param.class, "collectedBy");
-      return createPositional(params, sourceMethod, positionalIndex, description, mapperClass, collectorClass, tool);
+      return createPositional(alreadyCreated, sourceMethod, positionalIndex, description, mapperClass, collectorClass, tool);
     } else {
       Optional<TypeElement> mapperClass = annotationUtil.get(Option.class, "mappedBy");
       Optional<TypeElement> collectorClass = annotationUtil.get(Option.class, "collectedBy");
-      return createNonpositional(params, sourceMethod, description, mapperClass, collectorClass, tool);
+      return createNonpositional(anyMnemonics, alreadyCreated, sourceMethod, description, mapperClass, collectorClass, tool);
     }
   }
 
   private static Parameter createNonpositional(
+      boolean anyMnemonics,
       List<Parameter> params,
       ExecutableElement sourceMethod,
       String[] description,
@@ -164,7 +165,7 @@ public final class Parameter {
         longName,
         sourceMethod,
         parameter.value(),
-        shape(flag, name, names),
+        shape(flag, name, names, anyMnemonics),
         names,
         coercion,
         Arrays.asList(description),
@@ -172,7 +173,7 @@ public final class Parameter {
   }
 
   private static Parameter createPositional(
-      List<Parameter> params,
+      List<Parameter> alreadyCreated,
       ExecutableElement sourceMethod,
       int positionalIndex,
       String[] description,
@@ -180,9 +181,9 @@ public final class Parameter {
       Optional<TypeElement> collectorClass,
       TypeTool tool) {
     net.jbock.Param parameter = sourceMethod.getAnnotation(net.jbock.Param.class);
-    ParamName name = findParamName(params, sourceMethod);
+    ParamName name = findParamName(alreadyCreated, sourceMethod);
     Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
-    checkBundleKey(parameter.bundleKey(), params, sourceMethod);
+    checkBundleKey(parameter.bundleKey(), alreadyCreated, sourceMethod);
     return new Parameter(
         null,
         null,
@@ -371,14 +372,16 @@ public final class Parameter {
   private static String shape(
       boolean flag,
       ParamName name,
-      List<String> names) {
+      List<String> names,
+      boolean anyMnemonics) {
     if (names.isEmpty() || names.size() >= 3) {
       throw new AssertionError();
     }
     String argname = flag ? "" : ' ' + name.snake().toUpperCase(Locale.US);
     if (names.size() == 1) {
-      // four spaces: "-f, "
-      return "    " + names.get(0) + argname;
+      // The padding has the same length as the string "-f, "
+      String padding = anyMnemonics ? "    " : "";
+      return padding + names.get(0) + argname;
     }
     return names.get(0) + ", " + names.get(1) + argname;
   }

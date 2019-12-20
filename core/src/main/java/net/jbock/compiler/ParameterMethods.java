@@ -1,5 +1,6 @@
 package net.jbock.compiler;
 
+import net.jbock.Option;
 import net.jbock.Param;
 
 import javax.lang.model.element.ExecutableElement;
@@ -47,12 +48,18 @@ class ParameterMethods {
     }
   }
 
-
   List<ExecutableElement> positionals() {
     return positional;
   }
 
   List<ExecutableElement> options() {
     return options;
+  }
+
+  boolean anyMnemonics() {
+    return options.stream()
+        .map(method -> method.getAnnotation(Option.class))
+        .map(Option::mnemonic)
+        .anyMatch(mnemonic -> mnemonic != ' ');
   }
 }

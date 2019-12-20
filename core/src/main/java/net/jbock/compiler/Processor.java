@@ -171,14 +171,15 @@ public final class Processor extends AbstractProcessor {
         .collect(Collectors.toList());
     abstractMethods.forEach(Processor::validateParameterMethods);
     ParameterMethods methods = ParameterMethods.create(abstractMethods);
+    boolean anyMnemonics = methods.anyMnemonics();
     List<Parameter> result = new ArrayList<>(methods.options().size() + methods.positionals().size());
     for (int i = 0; i < methods.positionals().size(); i++) {
       ExecutableElement method = methods.positionals().get(i);
-      Parameter param = Parameter.create(tool, result, method, i, getDescription(method));
+      Parameter param = Parameter.create(anyMnemonics, tool, result, method, i, getDescription(method));
       result.add(param);
     }
     for (ExecutableElement method : methods.options()) {
-      Parameter param = Parameter.create(tool, result, method, null, getDescription(method));
+      Parameter param = Parameter.create(anyMnemonics, tool, result, method, null, getDescription(method));
       result.add(param);
     }
     if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {

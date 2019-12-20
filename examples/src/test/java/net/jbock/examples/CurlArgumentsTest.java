@@ -209,11 +209,12 @@ class CurlArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: curl [options...] <urls>...",
-        "urls",
-        "-X, --request METHOD  Optional<String> for regular arguments",
-        "-H, --H HEADERS       List<String> for repeatable arguments",
-        "-v, --verbose         boolean for flags",
-        "-i, --include",
+        "",
+        "  urls",
+        "  -X, --request METHOD  Optional<String> for regular arguments",
+        "  -H, --H HEADERS       List<String> for repeatable arguments",
+        "  -v, --verbose         boolean for flags",
+        "  -i, --include",
         "");
   }
 }

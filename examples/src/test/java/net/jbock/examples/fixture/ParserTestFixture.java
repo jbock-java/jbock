@@ -23,6 +23,7 @@ public final class ParserTestFixture<E> {
 
   private static final String ANSI_RESET = "\u001B[0m";
   private static final String ANSI_RED = "\u001B[31m";
+  private static final int MAX_LINE_WIDTH = 82;
 
   private static void printErr(String text) {
     System.out.println(ANSI_RED + text + ANSI_RESET);
@@ -141,7 +142,7 @@ public final class ParserTestFixture<E> {
     TestOutputStream stdout = new TestOutputStream();
     TestOutputStream stderr = new TestOutputStream();
     Optional<E> result = parser.withOutputStream(stdout.out)
-        .withErrorStream(stderr.out).maxLineWidth(80).parse(args);
+        .withErrorStream(stderr.out).maxLineWidth(MAX_LINE_WIDTH).parse(args);
     if (!result.isPresent()) {
       throw new AssertionError(stderr.toString());
     }
@@ -220,7 +221,7 @@ public final class ParserTestFixture<E> {
       TestOutputStream stdout = new TestOutputStream();
       TestOutputStream stderr = new TestOutputStream();
       Optional<E> result = parser.withOutputStream(stdout.out)
-          .withErrorStream(stderr.out).maxLineWidth(80).parse(args);
+          .withErrorStream(stderr.out).maxLineWidth(MAX_LINE_WIDTH).parse(args);
       return new Parsed(stdout.toString(), stderr.toString(), result);
     }
 
@@ -260,7 +261,7 @@ public final class ParserTestFixture<E> {
             .runBeforeExit(r -> {
               throw new Abort();
             })
-            .maxLineWidth(80)
+            .maxLineWidth(MAX_LINE_WIDTH)
             .parseOrExit(args);
         fail("Expecting empty result");
       } catch (Abort e) {
@@ -313,7 +314,7 @@ public final class ParserTestFixture<E> {
           .runBeforeExit(r -> {
             throw new Abort();
           })
-          .maxLineWidth(80)
+          .maxLineWidth(MAX_LINE_WIDTH)
           .parseOrExit(new String[]{"--help"});
       fail("Expecting empty result");
     } catch (Abort e) {

@@ -21,8 +21,9 @@ class RestArgumentsTest {
     String[] help = f.getHelp(messages);
     String[] expected = {
         "Usage: rest-arguments [options...] <rest>...",
-        "rest             Hello yes",
-        "    --file FILE  This is dog",
+        "",
+        "  rest         Hello yes",
+        "  --file FILE  This is dog",
         ""
     };
     assertArraysEquals(expected, help);

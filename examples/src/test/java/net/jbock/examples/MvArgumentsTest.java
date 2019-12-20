@@ -47,8 +47,9 @@ class MvArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: mv-arguments <source> <dest>",
-        "source",
-        "dest",
+        "",
+        "  source",
+        "  dest",
         "");
   }
 }
