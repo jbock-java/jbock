@@ -330,29 +330,6 @@ public final class Parameter {
     return isOptional() ? OptionalInt.of(1) : OptionalInt.of(0);
   }
 
-  // visible for testing
-  static String[] trim(String[] desc) {
-    int firstNonempty = 0, lastNonempty = desc.length - 1;
-    boolean nonemptyFound = false;
-    for (int i = 0; i < desc.length; i++) {
-      if (!desc[i].isEmpty()) {
-        firstNonempty = i;
-        nonemptyFound = true;
-        break;
-      }
-    }
-    if (!nonemptyFound) {
-      return new String[0];
-    }
-    for (int j = desc.length - 1; j >= firstNonempty; j--) {
-      if (!desc[j].isEmpty()) {
-        lastNonempty = j;
-        break;
-      }
-    }
-    return Arrays.copyOfRange(desc, firstNonempty, lastNonempty + 1);
-  }
-
   public boolean isOptional() {
     return coercion.isOptional();
   }
