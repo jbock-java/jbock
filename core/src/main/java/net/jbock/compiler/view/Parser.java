@@ -241,7 +241,8 @@ public final class Parser {
       spec.beginControlFlow("if ($N instanceof $T)", result, helpRequestedType);
       ParameterSpec help = builder(helpRequestedType, "helpResult").build();
       spec.addStatement("$T $N = ($T) $N", help.type, help, help.type, result);
-      spec.addStatement("printOnlineHelp($N, $N.getSynopsis(), $N.getRows())", out, help, help);
+      spec.addStatement("printOnlineHelp($N, $N.getSynopsis(), $N.getRows(), $N)", out, help, help, maxLineWidth);
+      spec.addStatement("$N.flush()", out);
       spec.addStatement("$N.accept($N)", runBeforeExit, result)
           .addStatement("$T.exit(0)", System.class);
       spec.endControlFlow();
@@ -252,10 +253,11 @@ public final class Parser {
         .addStatement("$T $N = ($T) $N", error.type, error, error.type, result)
         .addStatement("$N.getError().printStackTrace($N)", error, err)
         .addStatement("$N.println($S + $N.getError().getMessage())", err, "Error: ", error)
-        .addStatement("printOnlineHelp($N, $N.getSynopsis(), $N.getRows())", err, error, error);
+        .addStatement("printOnlineHelp($N, $N.getSynopsis(), $N.getRows(), $N)", err, error, error, maxLineWidth);
     if (context.isHelpParameterEnabled()) {
       spec.addStatement("$N.println($S)", err, "Try '--help' for more information.");
     }
+    spec.addStatement("$N.flush()", err);
     spec.addStatement("$N.accept($N)", runBeforeExit, result)
         .addStatement("$T.exit($L)", System.class, EXITCODE_ON_ERROR)
         .endControlFlow();
@@ -274,6 +276,7 @@ public final class Parser {
     int totalPadding = 4;
     int width = params.stream().map(Parameter::shape).mapToInt(String::length).max().orElse(0) + totalPadding;
     String format = "  %1$-" + (width - 2) + "s";
+    ParameterSpec maxLineWidth = builder(INT, "maxLineWidth").build();
     ParameterSpec synopsis = builder(STRING, "synopsis").build();
     ParameterSpec rows = builder(listOf(ENTRY_STRING_STRING), "rows").build();
     ParameterSpec row = builder(ENTRY_STRING_STRING, "row").build();
@@ -284,15 +287,15 @@ public final class Parser {
     MethodSpec.Builder spec = methodBuilder("printOnlineHelp");
     spec.addStatement("$T $N = $L", keyWidth.type, keyWidth, width)
         .addStatement("$T $N = $S", keyFormat.type, keyFormat, format)
-        .addStatement("printWrap($N, 8, $S, $S + $N)", printStream, "", "Usage: ", synopsis);
+        .addStatement("printWrap($N, 8, $S, $S + $N, $N)", printStream, "", "Usage: ", synopsis, maxLineWidth);
     spec.addStatement("$N.println()", printStream);
     spec.beginControlFlow("for ($T $N : $N)", row.type, row, rows)
         .addStatement("$T $N = $T.format($N, $N.getKey())", STRING, key, STRING, keyFormat, row)
-        .addStatement("printWrap($N, $N, $N, $N.getValue())", printStream, keyWidth, key, row)
+        .addStatement("printWrap($N, $N, $N, $N.getValue(), $N)", printStream, keyWidth, key, row, maxLineWidth)
         .endControlFlow();
-    spec.addStatement("$N.flush()", printStream);
-    return spec.addParameters(Arrays.asList(printStream, synopsis, rows))
-        .addModifiers(PRIVATE)
+    return spec.addParameters(Arrays.asList(printStream, synopsis, rows, maxLineWidth))
+        .addModifiers(STATIC)
+        .addModifiers(context.getAccessModifiers())
         .build();
   }
 
@@ -306,8 +309,8 @@ public final class Parser {
     ParameterSpec row = builder(StringBuilder.class, "row").build();
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec tokens = builder(ArrayTypeName.of(String.class), "tokens").build();
-    MethodSpec.Builder spec = methodBuilder("printWrap")
-        .addParameters(Arrays.asList(printStream, continuationIndent, init, input));
+    ParameterSpec maxLineWidth = builder(INT, "maxLineWidth").build();
+    MethodSpec.Builder spec = methodBuilder("printWrap");
     spec.beginControlFlow("if ($N.isEmpty())", input)
         .addStatement("$T $N = $N.trim()", STRING, trim, init)
         .addStatement("$N.println($N.substring(0, $N.indexOf($N)) + $N)",
@@ -345,7 +348,10 @@ public final class Parser {
     spec.beginControlFlow("if ($N.length() > 0)", row);
     spec.addStatement("$N.println($N)", printStream, row);
     spec.endControlFlow();
-    return spec.addModifiers(PRIVATE).build();
+    return spec.addModifiers(STATIC)
+        .addModifiers(context.getAccessModifiers())
+        .addParameters(Arrays.asList(printStream, continuationIndent, init, input, maxLineWidth))
+        .build();
   }
 
   private MethodSpec createMethod() {
