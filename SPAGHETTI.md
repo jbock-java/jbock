@@ -92,7 +92,7 @@ assertEquals(Paths.get("b.txt"), my.target());
 These are the simplest non-positional parameters, a.k.a. *options*. 
 
 To declare a flag, simply
-declare an option method that returns
+declare an optionEnum method that returns
 `boolean` or `Boolean`.
 
 ````java
@@ -113,18 +113,18 @@ assertTrue(args.quiet());
 
 ### Binding options
 
-An *option* that is not a <a href="#flags">*flag*</a> is called a
-*binding option*. For example, the following
-method declares a binding option:
+An *optionEnum* that is not a <a href="#flags">*flag*</a> is called a
+*binding optionEnum*. For example, the following
+method declares a binding optionEnum:
 
 ````java
-// example of a binding option
+// example of a binding optionEnum
 @Option("file")
 abstract String file();
 ````
 
 The bound token can be any string; it may even start with a dash.
-Any token in `argv` that is not bound by some binding option, and precedes the
+Any token in `argv` that is not bound by some binding optionEnum, and precedes the
 <a href="#escape-sequence">*escape sequence*</a>, is called *free*.
 
 ### Escape sequence
@@ -132,7 +132,7 @@ Any token in `argv` that is not bound by some binding option, and precedes the
 The escape sequence consists of the <a href="#binding-options">*free*</a> token `"--"`,
 i.e. two consecutive dashes. 
 Any remaining tokens in `argv` after that will be treated as <a href="#params">*params*</a>.
-In other words, the escape sequence *ends option parsing*.
+In other words, the escape sequence *ends optionEnum parsing*.
 The generated parser will always recognize the escape sequence,
 as long as there is at least one *param* defined.
 
@@ -151,12 +151,12 @@ abstract List<String> headers();
 This list will contain headers in the same order
 in which they appear in `argv`.
 
-To declare a repeatable option or param, either define a custom collector, or
+To declare a repeatable optionEnum or param, either define a custom collector, or
 use a parameter method that returns `List<SomeMappableType>`.
 
 ### Parameter shapes
 
-Given a <a href="#binding-options">*binding option*</a> like this
+Given a <a href="#binding-options">*binding optionEnum*</a> like this
 
 ````java
 @Option(value = "file", mnemonic = 'f')
@@ -358,7 +358,7 @@ The `indent` is used when printing the usage page.
 * No multi-valued options. Workaround: *Repeatable* options or params.
 * No bsd-style flags as in `tar xzf`, use `tar -x -z -f` instead
 * Mnemonics are limited to a single character.
-* Cannot distinguish between attached or detached option shape. Both are always allowed and equivalent.
+* Cannot distinguish between attached or detached optionEnum shape. Both are always allowed and equivalent.
 
 ### Gradle config
 

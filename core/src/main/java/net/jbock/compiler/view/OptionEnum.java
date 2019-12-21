@@ -35,7 +35,7 @@ import static net.jbock.compiler.Constants.STRING;
  *
  * @see GeneratedClass
  */
-final class Option {
+final class OptionEnum {
 
   private final Context context;
 
@@ -53,7 +53,7 @@ final class Option {
 
   private final FieldSpec shapeField;
 
-  private Option(
+  private OptionEnum(
       Context context,
       FieldSpec bundleKeyField,
       FieldSpec descriptionField,
@@ -72,7 +72,7 @@ final class Option {
     this.paramParsersMethod = paramParsersMethod;
   }
 
-  static Option create(Context context) {
+  static OptionEnum create(Context context) {
     FieldSpec namesField = FieldSpec.builder(LIST_OF_STRING, "names").build();
     FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").build();
     FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").build();
@@ -81,7 +81,7 @@ final class Option {
     MethodSpec optionParsersMethod = optionParsersMethod(context);
     MethodSpec paramParsersMethod = paramParsersMethod(context);
 
-    return new Option(
+    return new OptionEnum(
         context,
         bundleKeyField,
         descriptionField,

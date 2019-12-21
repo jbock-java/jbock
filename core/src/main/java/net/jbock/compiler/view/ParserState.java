@@ -48,23 +48,23 @@ final class ParserState {
     this.tryReadOptionMethod = tryReadOptionMethod;
   }
 
-  static ParserState create(Context context, Option option) {
+  static ParserState create(Context context, OptionEnum optionEnum) {
 
     // read-only lookups
     FieldSpec optionNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, context.optionType()), "optionNames")
-        .initializer("$T.$N()", context.optionType(), option.optionNamesMethod())
+        .initializer("$T.$N()", context.optionType(), optionEnum.optionNamesMethod())
         .build();
 
     // stateful parsers
     FieldSpec optionParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         context.optionType(), context.optionParserType()), "optionParsers")
-        .initializer("$T.$N()", context.optionType(), option.optionParsersMethod())
+        .initializer("$T.$N()", context.optionType(), optionEnum.optionParsersMethod())
         .build();
 
     FieldSpec paramParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class),
         context.paramParserType()), "paramParsers")
-        .initializer("$T.$N()", context.optionType(), option.paramParsersMethod())
+        .initializer("$T.$N()", context.optionType(), optionEnum.paramParsersMethod())
         .build();
 
     MethodSpec readRegularOptionMethod = tryReadOption(context, optionNamesField);

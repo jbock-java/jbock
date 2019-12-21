@@ -22,8 +22,8 @@ public final class Context {
   // the abstract methods in the annotated class
   private final List<Parameter> parameters;
 
-  // whether "--" is a special token
-  private final boolean allowEscape;
+  // whether there are any params
+  private final boolean hasPositionalParams;
 
   // whether "--help" is a special token
   private final boolean helpParameterEnabled;
@@ -35,13 +35,13 @@ public final class Context {
       TypeElement sourceElement,
       ClassName generatedClass,
       List<Parameter> parameters,
-      boolean allowEscape,
+      boolean hasPositionalParams,
       boolean helpParameterEnabled,
       String programName) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
-    this.allowEscape = allowEscape;
+    this.hasPositionalParams = hasPositionalParams;
     this.helpParameterEnabled = helpParameterEnabled;
     this.programName = programName;
   }
@@ -72,8 +72,8 @@ public final class Context {
     return ParamName.create(simpleName).snake('-');
   }
 
-  public boolean allowEscape() {
-    return allowEscape;
+  public boolean hasPositionalParams() {
+    return hasPositionalParams;
   }
 
   public ClassName optionParserType() {
@@ -104,16 +104,8 @@ public final class Context {
     return generatedClass.nestedClass("ParserState");
   }
 
-  public ClassName messagesType() {
-    return generatedClass.nestedClass("Messages");
-  }
-
   public ClassName implType() {
     return generatedClass.nestedClass(sourceElement.getSimpleName() + "Impl");
-  }
-
-  public ClassName tokenizerType() {
-    return generatedClass.nestedClass("Tokenizer");
   }
 
   public ClassName parseResultType() {

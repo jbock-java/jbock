@@ -55,8 +55,8 @@ public final class GeneratedClass {
   private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
 
   private final Context context;
-  private final Option option;
-  private final ParserState state;
+  private final OptionEnum optionEnum;
+  private final ParserState parserState;
   private final Impl impl;
   private final ParseResult parseResult;
 
@@ -78,15 +78,15 @@ public final class GeneratedClass {
 
   private GeneratedClass(
       Context context,
-      Option option,
-      ParserState state,
+      OptionEnum optionEnum,
+      ParserState parserState,
       Impl impl,
       ParseResult parseResult,
       MethodSpec readOptionArgumentMethod,
       FieldSpec runBeforeExit) {
     this.context = context;
-    this.option = option;
-    this.state = state;
+    this.optionEnum = optionEnum;
+    this.parserState = parserState;
     this.impl = impl;
     this.parseResult = parseResult;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
@@ -95,14 +95,14 @@ public final class GeneratedClass {
 
   public static GeneratedClass create(Context context) {
     MethodSpec readOptionArgumentMethod = readOptionArgumentMethod();
-    Option option = Option.create(context);
+    OptionEnum optionEnum = OptionEnum.create(context);
     Impl impl = Impl.create(context);
-    ParserState state = ParserState.create(context, option);
+    ParserState state = ParserState.create(context, optionEnum);
     ParseResult parseResult = ParseResult.create(context);
     FieldSpec runBeforeExit = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), context.parseResultType()), "runBeforeExit").addModifiers(PRIVATE)
         .initializer("r -> {}")
         .build();
-    return new GeneratedClass(context, option, state, impl, parseResult, readOptionArgumentMethod,
+    return new GeneratedClass(context, optionEnum, state, impl, parseResult, readOptionArgumentMethod,
         runBeforeExit);
   }
 
@@ -110,9 +110,9 @@ public final class GeneratedClass {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass())
         .addModifiers(FINAL)
         .addModifiers(context.getAccessModifiers())
-        .addType(state.define())
+        .addType(parserState.define())
         .addType(impl.define())
-        .addType(option.define())
+        .addType(optionEnum.define())
         .addType(OptionParser.define(context))
         .addType(FlagParser.define(context))
         .addType(RegularOptionParser.define(context))
@@ -240,44 +240,34 @@ public final class GeneratedClass {
 
   private MethodSpec parseMethodOverloadIterator() {
 
-    ParameterSpec stateParam = builder(context.parserStateType(), "state").build();
+    ParameterSpec state = builder(context.parserStateType(), "state").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-    ParameterSpec optionParam = builder(context.optionType(), "option").build();
+    ParameterSpec option = builder(context.optionType(), "option").build();
     ParameterSpec token = builder(STRING, "token").build();
-    ParameterSpec positionParam = builder(INT, "position").build();
+    ParameterSpec position = builder(INT, "position").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse")
         .addParameter(it)
         .returns(context.sourceType());
 
-    spec.addStatement("$T $N = $L", positionParam.type, positionParam, 0);
-    spec.addStatement("$T $N = new $T()", stateParam.type, stateParam, stateParam.type);
+    spec.addStatement("$T $N = $L", position.type, position, 0);
+    spec.addStatement("$T $N = new $T()", state.type, state, state.type);
 
     // begin parsing loop
     spec.beginControlFlow("while ($N.hasNext())", it);
 
     spec.addStatement("$T $N = $N.next()", STRING, token, it);
 
-    if (context.allowEscape()) {
-      ParameterSpec t = builder(STRING, "t").build();
-      spec.beginControlFlow("if ($S.equals($N))", "--", token);
-
-      spec.beginControlFlow("while ($N.hasNext())", it)
-          .addStatement("$T $N = $N.next()", STRING, t, it)
-          .beginControlFlow("if ($N >= $N.$N.size())", positionParam, stateParam, state.positionalParsersField())
-          .addStatement(throwInvalidOptionStatement(t, "Excess param"))
-          .endControlFlow()
-          .addStatement("$N += $N.$N.get($N).read($N)", positionParam, stateParam, state.positionalParsersField(), positionParam, t)
-          .endControlFlow()
-          .addStatement("return $N.build()", stateParam);
-
-      spec.endControlFlow();
+    if (context.hasPositionalParams()) {
+      spec.beginControlFlow("if ($S.equals($N))", "--", token)
+          .addCode(handleEndOfOptionParsing(state, it, position, token))
+          .endControlFlow();
     }
 
-    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, stateParam, state.tryReadOption(), token);
+    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), option, state, parserState.tryReadOption(), token);
 
-    spec.beginControlFlow("if ($N != null)", optionParam)
-        .addStatement("$N.$N.get($N).read($N, $N, $N)", stateParam, state.parsersField(), optionParam, optionParam, token, it)
+    spec.beginControlFlow("if ($N != null)", option)
+        .addStatement("$N.$N.get($N).read($N, $N, $N)", state, parserState.parsersField(), option, option, token, it)
         .addStatement("continue")
         .endControlFlow();
 
@@ -286,16 +276,28 @@ public final class GeneratedClass {
         .addStatement(throwInvalidOptionStatement(token, "Invalid option"))
         .endControlFlow();
 
-    spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, stateParam, state.positionalParsersField())
+    spec.beginControlFlow("if ($N >= $N.$N.size())", position, state, parserState.positionalParsersField())
         .addStatement(throwInvalidOptionStatement(token, "Excess param"))
         .endControlFlow()
-        .addStatement("$N += $N.$N.get($N).read($N)", positionParam, stateParam, state.positionalParsersField(), positionParam, token);
+        .addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token);
 
     // end parsing loop
     spec.endControlFlow();
 
-    spec.addStatement("return $N.build()", stateParam);
+    spec.addStatement("return $N.build()", state);
     return spec.build();
+  }
+
+  private CodeBlock handleEndOfOptionParsing(ParameterSpec state, ParameterSpec it, ParameterSpec position, ParameterSpec token) {
+    return CodeBlock.builder()
+        .beginControlFlow("while ($N.hasNext())", it)
+        .addStatement("$N = $N.next()", token, it)
+        .beginControlFlow("if ($N >= $N.$N.size())", position, state, parserState.positionalParsersField())
+        .addStatement(throwInvalidOptionStatement(token, "Excess param"))
+        .endControlFlow()
+        .addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token)
+        .endControlFlow()
+        .addStatement("return $N.build()", state).build();
   }
 
   private static CodeBlock throwInvalidOptionStatement(ParameterSpec token, String message) {
@@ -527,7 +529,7 @@ public final class GeneratedClass {
       } else if (param.isRepeatable()) {
         code.add("$Z.add($S)", "<" + param.enumConstantLower() + ">...");
       } else {
-        throw new AssertionError("all cases handled (repeatable can't be flag)");
+        throw new AssertionError("all cases handled (positional can't be flag)");
       }
     }
 
