@@ -63,7 +63,7 @@ final class ParserState {
         .build();
 
     FieldSpec paramParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class),
-        context.paramParserType()), "paramParsers")
+        context.repeatableParamParserType()), "paramParsers")
         .initializer("$T.$N()", context.optionType(), optionEnum.paramParsersMethod())
         .build();
 

@@ -10,7 +10,6 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Parameter;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -210,20 +209,34 @@ final class OptionEnum {
   }
 
   private static MethodSpec paramParsersMethod(Context context) {
-    ParameterSpec parsers = builder(ParameterizedTypeName.get(ClassName.get(List.class), context.paramParserType()), "parsers").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("paramParsers")
+    ParameterSpec parsers = builder(ParameterizedTypeName.get(ClassName.get(List.class), context.repeatableParamParserType()), "parsers").build();
+    CodeBlock code = paramParsersMethodCode(context);
+    return MethodSpec.methodBuilder("paramParsers")
         .returns(parsers.type)
         .addModifiers(STATIC)
-        .addStatement("$T $N = new $T<>()", parsers.type, parsers, ArrayList.class);
-    for (Parameter param : context.parameters()) {
-      if (!param.isPositional()) {
-        continue;
-      }
-      spec.addStatement("$N.add(new $T())", parsers, param.isRepeatable() ?
-          context.paramParserType() :
-          context.regularParamParserType());
+        .addStatement(code)
+        .build();
+  }
+
+  private static CodeBlock paramParsersMethodCode(Context context) {
+    List<Parameter> params = context.positionalParams();
+    if (params.isEmpty()) {
+      return CodeBlock.of("return $T.emptyList()", Collections.class);
     }
-    return spec.addStatement("return $N", parsers).build();
+    if (params.size() == 1) {
+      Parameter param = params.get(0);
+      return CodeBlock.of("return $T.singletonList(new $T())", Collections.class, param.isRepeatable() ? context.repeatableParamParserType() : context.regularParamParserType());
+    }
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.add("return $T.asList(", Arrays.class);
+    for (int i = 0; i < params.size(); i++) {
+      Parameter param = params.get(i);
+      code.add("new $T()", param.isRepeatable() ? context.repeatableParamParserType() : context.regularParamParserType());
+      if (i < params.size() - 1) {
+        code.add(",$W");
+      }
+    }
+    return code.add(")").build();
   }
 
   private MethodSpec privateConstructor() {

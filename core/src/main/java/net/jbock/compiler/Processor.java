@@ -95,7 +95,7 @@ public final class Processor extends AbstractProcessor {
           sourceElement,
           generatedClass,
           parameters,
-          isAllowEscape(parameters));
+          positionalParameters(parameters));
       TypeSpec typeSpec = GeneratedClass.create(context).define();
       write(sourceElement, context.generatedClass(), typeSpec);
     } catch (ValidationException e) {
@@ -129,8 +129,8 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static boolean isAllowEscape(List<Parameter> parameters) {
-    return parameters.stream().anyMatch(Parameter::isPositional);
+  private static List<Parameter> positionalParameters(List<Parameter> parameters) {
+    return parameters.stream().filter(Parameter::isPositional).collect(Collectors.toList());
   }
 
   private Set<TypeElement> getAnnotatedTypes(RoundEnvironment env) {

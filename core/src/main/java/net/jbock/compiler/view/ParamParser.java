@@ -25,13 +25,13 @@ final class ParamParser {
         .initializer("new $T<>()", ArrayList.class)
         .build();
     List<TypeSpec> result = new ArrayList<>();
-    result.add(TypeSpec.classBuilder(context.paramParserType())
+    result.add(TypeSpec.classBuilder(context.repeatableParamParserType())
         .addField(values)
         .addMethod(readMethodRepeatable())
         .addModifiers(PRIVATE, STATIC)
         .build());
     result.add(TypeSpec.classBuilder(context.regularParamParserType())
-        .superclass(context.paramParserType())
+        .superclass(context.repeatableParamParserType())
         .addMethod(readMethodRegular())
         .addModifiers(PRIVATE, STATIC).build());
     return result;

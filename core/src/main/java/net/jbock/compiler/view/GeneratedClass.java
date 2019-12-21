@@ -238,58 +238,61 @@ public final class GeneratedClass {
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec position = builder(INT, "position").build();
 
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("parse")
-        .addParameter(it)
-        .returns(context.sourceType());
-
-    spec.addStatement("$T $N = $L", position.type, position, 0);
-    spec.addStatement("$T $N = new $T()", state.type, state, state.type);
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = $L", position.type, position, 0);
+    code.addStatement("$T $N = new $T()", state.type, state, state.type);
 
     // begin parsing loop
-    spec.beginControlFlow("while ($N.hasNext())", it);
+    code.beginControlFlow("while ($N.hasNext())", it);
 
-    spec.addStatement("$T $N = $N.next()", STRING, token, it);
+    code.addStatement("$T $N = $N.next()", STRING, token, it);
 
-    if (context.hasPositionalParams()) {
-      spec.beginControlFlow("if ($S.equals($N))", "--", token)
-          .addCode(handleEndOfOptionParsing(state, it, position, token))
+    if (!context.positionalParams().isEmpty()) {
+      code.beginControlFlow("if ($S.equals($N))", "--", token)
+          .add(handleEndOfOptionParsing(state, it, position, token))
+          .addStatement("return $N.build()", state)
           .endControlFlow();
     }
 
-    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), option, state, parserState.tryReadOption(), token);
+    code.addStatement("$T $N = $N.$N($N)", context.optionType(), option, state, parserState.tryReadOption(), token);
 
-    spec.beginControlFlow("if ($N != null)", option)
+    code.beginControlFlow("if ($N != null)", option)
         .addStatement("$N.$N.get($N).read($N, $N, $N)", state, parserState.parsersField(), option, option, token, it)
         .addStatement("continue")
         .endControlFlow();
 
     // handle unknown token
-    spec.beginControlFlow("if (!$N.isEmpty() && $N.charAt(0) == '-')", token, token)
+    code.add("if (!$N.isEmpty() && $N.charAt(0) == '-')\n", token, token).indent()
         .addStatement(throwInvalidOptionStatement(token, "Invalid option"))
-        .endControlFlow();
+        .unindent();
 
-    spec.beginControlFlow("if ($N >= $N.$N.size())", position, state, parserState.positionalParsersField())
+    code.add("if ($N >= $N.$N.size())\n", position, state, parserState.positionalParsersField()).indent()
         .addStatement(throwInvalidOptionStatement(token, "Excess param"))
-        .endControlFlow()
-        .addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token);
+        .unindent();
+
+    code.addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token);
 
     // end parsing loop
-    spec.endControlFlow();
+    code.endControlFlow();
 
-    spec.addStatement("return $N.build()", state);
-    return spec.build();
+    code.addStatement("return $N.build()", state);
+
+    return MethodSpec.methodBuilder("parse")
+        .addParameter(it)
+        .addCode(code.build())
+        .returns(context.sourceType())
+        .build();
   }
 
   private CodeBlock handleEndOfOptionParsing(ParameterSpec state, ParameterSpec it, ParameterSpec position, ParameterSpec token) {
-    return CodeBlock.builder()
-        .beginControlFlow("while ($N.hasNext())", it)
-        .addStatement("$N = $N.next()", token, it)
-        .beginControlFlow("if ($N >= $N.$N.size())", position, state, parserState.positionalParsersField())
+    CodeBlock.Builder code = CodeBlock.builder().beginControlFlow("while ($N.hasNext())", it);
+    code.addStatement("$N = $N.next()", token, it);
+    code.add("if ($N >= $N.$N.size())\n", position, state, parserState.positionalParsersField()).indent()
         .addStatement(throwInvalidOptionStatement(token, "Excess param"))
-        .endControlFlow()
-        .addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token)
-        .endControlFlow()
-        .addStatement("return $N.build()", state).build();
+        .unindent();
+    code.addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token);
+    code.endControlFlow(); // end loop
+    return code.build();
   }
 
   private static CodeBlock throwInvalidOptionStatement(ParameterSpec token, String message) {
@@ -412,25 +415,19 @@ public final class GeneratedClass {
     spec.beginControlFlow("else")
         .addStatement("$N.println($N)", printStream, sb)
         .addStatement("$N.setLength(0)", sb)
-        .beginControlFlow("for ($T $N = 0; $N < $N; $N++)",
-            INT, i, i, continuationIndent, i)
-        .addStatement("$N.append(' ')", sb)
-        .endControlFlow()
+        .addStatement("for ($T $N = 0; $N < $N; $N++) $N.append(' ')",
+            INT, i, i, continuationIndent, i, sb)
         .addStatement("$N.append($N)", sb, token)
         .endControlFlow();
     spec.endControlFlow();
     spec.beginControlFlow("else")
-        .beginControlFlow("if ($N.length() > 0 && !$T.isWhitespace($N.charAt($N.length() - 1)))",
-            sb, Character.class, sb, sb)
-        .addStatement("$N.append(' ')", sb)
-        .endControlFlow()
+        .addStatement("if ($N.length() > 0 && !$T.isWhitespace($N.charAt($N.length() - 1))) $N.append(' ')",
+            sb, Character.class, sb, sb, sb)
         .addStatement("$N.append($N)", sb, token)
         .endControlFlow();
     spec.endControlFlow();
 
-    spec.beginControlFlow("if ($N.length() > 0)", sb);
-    spec.addStatement("$N.println($N)", printStream, sb);
-    spec.endControlFlow();
+    spec.addStatement("if ($N.length() > 0) $N.println($N)", sb, printStream, sb);
     return spec.addModifiers(context.getAccessModifiers())
         .addParameters(Arrays.asList(printStream, continuationIndent, init, input))
         .build();

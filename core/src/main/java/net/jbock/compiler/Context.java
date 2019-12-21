@@ -22,8 +22,7 @@ public final class Context {
   // the abstract methods in the annotated class
   private final List<Parameter> parameters;
 
-  // whether there are any params
-  private final boolean hasPositionalParams;
+  private final List<Parameter> positionalParams;
 
   // whether "--help" is a special token
   private final boolean helpParameterEnabled;
@@ -35,13 +34,13 @@ public final class Context {
       TypeElement sourceElement,
       ClassName generatedClass,
       List<Parameter> parameters,
-      boolean hasPositionalParams,
+      List<Parameter> positionalParams,
       boolean helpParameterEnabled,
       String programName) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
-    this.hasPositionalParams = hasPositionalParams;
+    this.positionalParams = positionalParams;
     this.helpParameterEnabled = helpParameterEnabled;
     this.programName = programName;
   }
@@ -50,7 +49,7 @@ public final class Context {
       TypeElement sourceElement,
       ClassName generatedClass,
       List<Parameter> parameters,
-      boolean allowEscape) {
+      List<Parameter> positionalParams) {
     Command annotation = sourceElement.getAnnotation(Command.class);
     boolean helpParameterEnabled = !annotation.helpDisabled();
 
@@ -58,7 +57,7 @@ public final class Context {
         sourceElement,
         generatedClass,
         parameters,
-        allowEscape,
+        positionalParams,
         helpParameterEnabled,
         programName(sourceElement));
   }
@@ -72,15 +71,15 @@ public final class Context {
     return ParamName.create(simpleName).snake('-');
   }
 
-  public boolean hasPositionalParams() {
-    return hasPositionalParams;
+  public List<Parameter> positionalParams() {
+    return positionalParams;
   }
 
   public ClassName optionParserType() {
     return generatedClass.nestedClass("OptionParser");
   }
 
-  public ClassName paramParserType() {
+  public ClassName repeatableParamParserType() {
     return generatedClass.nestedClass("ParamParser");
   }
 
