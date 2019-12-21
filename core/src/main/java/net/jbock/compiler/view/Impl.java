@@ -17,33 +17,21 @@ import static javax.lang.model.element.Modifier.STATIC;
  */
 final class Impl {
 
-  private final Context context;
-
-  private Impl(
-      Context context) {
-    this.context = context;
-  }
-
-  static Impl create(
-      Context context) {
-    return new Impl(context);
-  }
-
-  TypeSpec define() {
+  static TypeSpec define(Context context) {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.implType())
         .superclass(context.sourceType());
     for (Parameter param : context.parameters()) {
       spec.addField(param.field());
     }
     return spec.addModifiers(PRIVATE, STATIC)
-        .addMethod(implConstructor())
+        .addMethod(implConstructor(context))
         .addMethods(context.parameters().stream()
-            .map(this::parameterMethodOverride)
+            .map(Impl::parameterMethodOverride)
             .collect(Collectors.toList()))
         .build();
   }
 
-  private MethodSpec parameterMethodOverride(Parameter param) {
+  private static MethodSpec parameterMethodOverride(Parameter param) {
     return MethodSpec.methodBuilder(param.methodName())
         .returns(param.returnType())
         .addModifiers(param.getAccessModifiers())
@@ -51,11 +39,10 @@ final class Impl {
         .build();
   }
 
-  private MethodSpec implConstructor() {
+  private static MethodSpec implConstructor(Context context) {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
     for (Parameter p : context.parameters()) {
-      spec.addStatement("this.$N = $L",
-          p.field(), p.coercion().extractExpr());
+      spec.addStatement("this.$N = $L", p.field(), p.coercion().extractExpr());
       spec.addParameter(p.coercion().constructorParam());
     }
     return spec.build();

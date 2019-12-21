@@ -57,7 +57,6 @@ public final class GeneratedClass {
   private final Context context;
   private final OptionEnum optionEnum;
   private final ParserState parserState;
-  private final Impl impl;
   private final ParseResult parseResult;
 
   private final MethodSpec readOptionArgumentMethod;
@@ -80,14 +79,12 @@ public final class GeneratedClass {
       Context context,
       OptionEnum optionEnum,
       ParserState parserState,
-      Impl impl,
       ParseResult parseResult,
       MethodSpec readOptionArgumentMethod,
       FieldSpec runBeforeExit) {
     this.context = context;
     this.optionEnum = optionEnum;
     this.parserState = parserState;
-    this.impl = impl;
     this.parseResult = parseResult;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.runBeforeExit = runBeforeExit;
@@ -96,14 +93,12 @@ public final class GeneratedClass {
   public static GeneratedClass create(Context context) {
     MethodSpec readOptionArgumentMethod = readOptionArgumentMethod();
     OptionEnum optionEnum = OptionEnum.create(context);
-    Impl impl = Impl.create(context);
     ParserState state = ParserState.create(context, optionEnum);
     ParseResult parseResult = ParseResult.create(context);
     FieldSpec runBeforeExit = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), context.parseResultType()), "runBeforeExit").addModifiers(PRIVATE)
         .initializer("r -> {}")
         .build();
-    return new GeneratedClass(context, optionEnum, state, impl, parseResult, readOptionArgumentMethod,
-        runBeforeExit);
+    return new GeneratedClass(context, optionEnum, state, parseResult, readOptionArgumentMethod, runBeforeExit);
   }
 
   public TypeSpec define() {
@@ -111,7 +106,7 @@ public final class GeneratedClass {
         .addModifiers(FINAL)
         .addModifiers(context.getAccessModifiers())
         .addType(parserState.define())
-        .addType(impl.define())
+        .addType(Impl.define(context))
         .addType(optionEnum.define())
         .addType(OptionParser.define(context))
         .addType(FlagParser.define(context))
