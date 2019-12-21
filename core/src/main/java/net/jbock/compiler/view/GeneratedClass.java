@@ -8,10 +8,13 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Parameter;
 
 import java.io.PrintStream;
+import java.util.AbstractMap;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
@@ -40,7 +43,6 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
-import static net.jbock.compiler.Constants.listOf;
 
 /**
  * Generates the *_Parser class.
@@ -53,7 +55,6 @@ public final class GeneratedClass {
   private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
 
   private final Context context;
-  private final Tokenizer tokenizer;
   private final Option option;
   private final ParserState state;
   private final Impl impl;
@@ -77,7 +78,6 @@ public final class GeneratedClass {
 
   private GeneratedClass(
       Context context,
-      Tokenizer tokenizer,
       Option option,
       ParserState state,
       Impl impl,
@@ -85,7 +85,6 @@ public final class GeneratedClass {
       MethodSpec readOptionArgumentMethod,
       FieldSpec runBeforeExit) {
     this.context = context;
-    this.tokenizer = tokenizer;
     this.option = option;
     this.state = state;
     this.impl = impl;
@@ -100,11 +99,10 @@ public final class GeneratedClass {
     Impl impl = Impl.create(context);
     ParserState state = ParserState.create(context, option);
     ParseResult parseResult = ParseResult.create(context);
-    Tokenizer builder = Tokenizer.create(context, state);
     FieldSpec runBeforeExit = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), context.parseResultType()), "runBeforeExit").addModifiers(PRIVATE)
         .initializer("r -> {}")
         .build();
-    return new GeneratedClass(context, builder, option, state, impl, parseResult, readOptionArgumentMethod,
+    return new GeneratedClass(context, option, state, impl, parseResult, readOptionArgumentMethod,
         runBeforeExit);
   }
 
@@ -112,7 +110,6 @@ public final class GeneratedClass {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass())
         .addModifiers(FINAL)
         .addModifiers(context.getAccessModifiers())
-        .addType(tokenizer.define())
         .addType(state.define())
         .addType(impl.define())
         .addType(option.define())
@@ -121,12 +118,14 @@ public final class GeneratedClass {
         .addType(RegularOptionParser.define(context))
         .addType(ParamParser.define(context))
         .addType(RegularParamParser.define(context))
-        .addType(Messages.create(context).define())
         .addTypes(parseResult.defineResultTypes())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addMethod(createMethod())
         .addMethod(parseMethod())
         .addMethod(parseOrExitMethod())
+        .addMethod(parseMethodOverloadIterator())
+        .addMethod(buildRowsMethod())
+        .addMethod(printDescriptionMethod())
         .addMethod(printOnlineHelpMethod())
         .addMethod(printWrapMethod())
         .addMethod(withErrorStreamMethod())
@@ -216,14 +215,103 @@ public final class GeneratedClass {
 
   private MethodSpec parseMethod() {
 
-    ParameterSpec args = builder(STRING_ARRAY, "args").build();
+    ParameterSpec args = builder(Constants.STRING_ARRAY, "args").build();
+    ParameterSpec e = builder(RuntimeException.class, "e").build();
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
 
-    ParameterSpec paramTokenizer = builder(context.tokenizerType(), "tokenizer").build();
-    return methodBuilder("parse")
-        .addStatement("return new $T($N).parse($N)", paramTokenizer.type, messages, args)
-        .addParameter(args)
-        .addModifiers(context.getAccessModifiers())
+    context.helpRequestedType().ifPresent(helpRequestedType ->
+        spec.beginControlFlow("if ($N.length >= 1 && $S.equals($N[0]))", args, "--help", args)
+            .addStatement("return new $T()", helpRequestedType)
+            .endControlFlow());
+
+    spec.beginControlFlow("try")
+        .addStatement("return new $T(parse($T.asList($N).iterator()))", context.parsingSuccessType(), Arrays.class, args)
+        .endControlFlow();
+
+    spec.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
+        .addStatement("return new $T($N)",
+            context.parsingFailedType(), e)
+        .endControlFlow();
+
+    return spec.addParameter(args)
         .returns(context.parseResultType())
+        .addModifiers(context.getAccessModifiers())
+        .build();
+  }
+
+  private MethodSpec parseMethodOverloadIterator() {
+
+    ParameterSpec stateParam = builder(context.parserStateType(), "state").build();
+    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
+
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("parse")
+        .addParameter(it)
+        .returns(context.sourceElement());
+
+    ParameterSpec positionParam = builder(INT, "position").build();
+
+    spec.addStatement("$T $N = $L", positionParam.type, positionParam, 0);
+    spec.addStatement("$T $N = new $T()", stateParam.type, stateParam, stateParam.type);
+
+    spec.beginControlFlow("while ($N.hasNext())", it)
+        .addCode(codeInsideParsingLoop(stateParam, positionParam, it))
+        .endControlFlow();
+
+    spec.addStatement("return $N.build()", stateParam);
+    return spec.build();
+  }
+
+  private CodeBlock codeInsideParsingLoop(
+      ParameterSpec stateParam,
+      ParameterSpec positionParam,
+      ParameterSpec it) {
+
+    ParameterSpec optionParam = builder(context.optionType(), "option").build();
+    ParameterSpec token = builder(STRING, "token").build();
+
+    CodeBlock.Builder spec = CodeBlock.builder();
+    spec.addStatement("$T $N = $N.next()", STRING, token, it);
+
+    if (context.allowEscape()) {
+      ParameterSpec t = builder(STRING, "t").build();
+      spec.beginControlFlow("if ($S.equals($N))", "--", token);
+
+      spec.beginControlFlow("while ($N.hasNext())", it)
+          .addStatement("$T $N = $N.next()", STRING, t, it)
+          .beginControlFlow("if ($N >= $N.$N.size())", positionParam, stateParam, state.positionalParsersField())
+          .addStatement(throwInvalidOptionStatement(t))
+          .endControlFlow()
+          .addStatement("$N += $N.$N.get($N).read($N)", positionParam, stateParam, state.positionalParsersField(), positionParam, t)
+          .endControlFlow()
+          .addStatement("return $N.build()", stateParam);
+
+      spec.endControlFlow();
+    }
+
+    spec.addStatement("$T $N = $N.$N($N)", context.optionType(), optionParam, stateParam, state.tryReadOption(), token);
+
+    spec.beginControlFlow("if ($N != null)", optionParam)
+        .addStatement("$N.$N.get($N).read($N, $N)", stateParam, state.parsersField(), optionParam, token, it)
+        .addStatement("continue")
+        .endControlFlow();
+
+    // handle unknown token
+    spec.beginControlFlow("if (!$N.isEmpty() && $N.charAt(0) == '-')", token, token)
+        .addStatement(throwInvalidOptionStatement(token))
+        .endControlFlow();
+
+    spec.beginControlFlow("if ($N >= $N.$N.size())", positionParam, stateParam, state.positionalParsersField())
+        .addStatement(throwInvalidOptionStatement(token))
+        .endControlFlow()
+        .addStatement("$N += $N.$N.get($N).read($N)", positionParam, stateParam, state.positionalParsersField(), positionParam, token);
+
+    return spec.build();
+  }
+
+  static CodeBlock throwInvalidOptionStatement(ParameterSpec token) {
+    return CodeBlock.builder()
+        .add("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Invalid option: ", token)
         .build();
   }
 
@@ -243,7 +331,7 @@ public final class GeneratedClass {
       spec.beginControlFlow("if ($N instanceof $T)", result, helpRequestedType);
       ParameterSpec help = builder(helpRequestedType, "helpResult").build();
       spec.addStatement("$T $N = ($T) $N", help.type, help, help.type, result);
-      spec.addStatement("printOnlineHelp($N, $N.getSynopsis(), $N.getRows(), $N)", out, help, help, maxLineWidth);
+      spec.addStatement("printOnlineHelp($N)", out);
       spec.addStatement("$N.flush()", out);
       spec.addStatement("$N.accept($N)", runBeforeExit, result)
           .addStatement("$T.exit(0)", System.class);
@@ -255,7 +343,7 @@ public final class GeneratedClass {
         .addStatement("$T $N = ($T) $N", error.type, error, error.type, result)
         .addStatement("$N.getError().printStackTrace($N)", error, err)
         .addStatement("$N.println($S + $N.getError().getMessage())", err, "Error: ", error)
-        .addStatement("printOnlineHelp($N, $N.getSynopsis(), $N.getRows(), $N)", err, error, error, maxLineWidth);
+        .addStatement("printOnlineHelp($N)", err);
     if (context.isHelpParameterEnabled()) {
       spec.addStatement("$N.println($S)", err, "Try '--help' for more information.");
     }
@@ -272,31 +360,51 @@ public final class GeneratedClass {
         .build();
   }
 
+  private MethodSpec buildRowsMethod() {
+    ParameterSpec rows = builder(Constants.listOf(ENTRY_STRING_STRING), "rows").build();
+    ParameterSpec optionParam = builder(context.optionType(), "option").build();
+    return MethodSpec.methodBuilder("buildRows")
+        .returns(rows.type)
+        .addStatement("$T $N = new $T<>()", rows.type, rows, ArrayList.class)
+        .beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type)
+        .addStatement("$N.add(printDescription($N))", rows, optionParam)
+        .endControlFlow()
+        .addStatement("return $N", rows)
+        .addModifiers(context.getAccessModifiers())
+        .build();
+  }
+
+  private MethodSpec printDescriptionMethod() {
+    ParameterSpec option = builder(context.optionType(), "option").build();
+    ParameterSpec message = builder(STRING, "message").build();
+    return MethodSpec.methodBuilder("printDescription")
+        .addParameter(option)
+        .addStatement("$T $N = $N.getOrDefault($N.bundleKey, $T.join($S, $N.description)).trim()",
+            STRING, message, messages, option, String.class, " ", option)
+        .addStatement("return new $T($N.shape, $N)",
+            ParameterizedTypeName.get(ClassName.get(AbstractMap.SimpleImmutableEntry.class), STRING, STRING),
+            option, message)
+        .returns(ENTRY_STRING_STRING)
+        .build();
+  }
+
   private MethodSpec printOnlineHelpMethod() {
     List<Parameter> params = context.parameters();
     // 2 space padding on both sides
     int totalPadding = 4;
     int width = params.stream().map(Parameter::shape).mapToInt(String::length).max().orElse(0) + totalPadding;
     String format = "  %1$-" + (width - 2) + "s";
-    ParameterSpec maxLineWidth = builder(INT, "maxLineWidth").build();
-    ParameterSpec synopsis = builder(STRING, "synopsis").build();
-    ParameterSpec rows = builder(listOf(ENTRY_STRING_STRING), "rows").build();
     ParameterSpec row = builder(ENTRY_STRING_STRING, "row").build();
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec key = builder(STRING, "key").build();
-    ParameterSpec keyWidth = builder(INT, "keyWidth").build();
-    ParameterSpec keyFormat = builder(STRING, "keyFormat").build();
     MethodSpec.Builder spec = methodBuilder("printOnlineHelp");
-    spec.addStatement("$T $N = $L", keyWidth.type, keyWidth, width)
-        .addStatement("$T $N = $S", keyFormat.type, keyFormat, format)
-        .addStatement("printWrap($N, 8, $S, $S + $N, $N)", printStream, "", "Usage: ", synopsis, maxLineWidth);
+    spec.addStatement("printWrap($N, 8, $S, $S + synopsis())", printStream, "", "Usage: ");
     spec.addStatement("$N.println()", printStream);
-    spec.beginControlFlow("for ($T $N : $N)", row.type, row, rows)
-        .addStatement("$T $N = $T.format($N, $N.getKey())", STRING, key, STRING, keyFormat, row)
-        .addStatement("printWrap($N, $N, $N, $N.getValue(), $N)", printStream, keyWidth, key, row, maxLineWidth)
+    spec.beginControlFlow("for ($T $N : buildRows())", row.type, row)
+        .addStatement("$T $N = $T.format($S, $N.getKey())", STRING, key, STRING, format, row)
+        .addStatement("printWrap($N, $L, $N, $N.getValue())", printStream, width, key, row)
         .endControlFlow();
-    return spec.addParameters(Arrays.asList(printStream, synopsis, rows, maxLineWidth))
-        .addModifiers(STATIC)
+    return spec.addParameter(printStream)
         .addModifiers(context.getAccessModifiers())
         .build();
   }
@@ -311,7 +419,6 @@ public final class GeneratedClass {
     ParameterSpec row = builder(StringBuilder.class, "row").build();
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec tokens = builder(ArrayTypeName.of(String.class), "tokens").build();
-    ParameterSpec maxLineWidth = builder(INT, "maxLineWidth").build();
     MethodSpec.Builder spec = methodBuilder("printWrap");
     spec.beginControlFlow("if ($N.isEmpty())", input)
         .addStatement("$T $N = $N.trim()", STRING, trim, init)
@@ -350,9 +457,8 @@ public final class GeneratedClass {
     spec.beginControlFlow("if ($N.length() > 0)", row);
     spec.addStatement("$N.println($N)", printStream, row);
     spec.endControlFlow();
-    return spec.addModifiers(STATIC)
-        .addModifiers(context.getAccessModifiers())
-        .addParameters(Arrays.asList(printStream, continuationIndent, init, input, maxLineWidth))
+    return spec.addModifiers(context.getAccessModifiers())
+        .addParameters(Arrays.asList(printStream, continuationIndent, init, input))
         .build();
   }
 
@@ -450,6 +556,6 @@ public final class GeneratedClass {
         .addCode(code.build())
         .returns(STRING);
 
-    return result.addModifiers(STATIC).build();
+    return result.addModifiers(context.getAccessModifiers()).build();
   }
 }

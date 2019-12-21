@@ -8,7 +8,6 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
@@ -18,10 +17,6 @@ import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.ENTRY_STRING_STRING;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.listOf;
 
 /**
  * Defines the inner class ParseResult.
@@ -46,7 +41,7 @@ final class ParseResult {
   List<TypeSpec> defineResultTypes() {
     TypeSpec.Builder spec = classBuilder(context.parseResultType())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
-        .addModifiers(ABSTRACT, STATIC)
+        .addModifiers(ABSTRACT)
         .addModifiers(context.getAccessModifiers());
     List<TypeSpec> result = new ArrayList<>();
     result.add(spec.build());
@@ -59,55 +54,25 @@ final class ParseResult {
   }
 
   private TypeSpec defineHelpRequestedResult(ClassName helpRequestedType) {
-    ParameterSpec paramRows = builder(listOf(ENTRY_STRING_STRING), "rows").build();
-    FieldSpec fieldRows = FieldSpec.builder(paramRows.type, paramRows.name, PRIVATE, FINAL).build();
     return classBuilder(helpRequestedType)
-        .addField(fieldRows)
         .superclass(context.parseResultType())
-        .addMethod(constructorBuilder()
-            .addParameter(paramRows)
-            .addStatement("this.$N = $N", fieldRows, paramRows)
-            .addModifiers(PRIVATE).build())
-        .addMethod(methodBuilder("getSynopsis")
-            .addStatement("return synopsis()")
-            .returns(STRING)
-            .addModifiers(context.getAccessModifiers())
-            .build())
-        .addMethod(methodBuilder("getRows")
-            .addStatement("return $N", fieldRows)
-            .returns(fieldRows.type)
-            .addModifiers(context.getAccessModifiers())
-            .build())
-        .addModifiers(STATIC, FINAL)
+        .addModifiers(FINAL)
         .addModifiers(context.getAccessModifiers())
         .build();
   }
 
   private TypeSpec defineErrorResult() {
-    ParameterSpec paramRows = builder(listOf(ENTRY_STRING_STRING), "rows").build();
     ParameterSpec paramError = builder(RuntimeException.class, "error").build();
-    FieldSpec fieldRows = FieldSpec.builder(paramRows.type, paramRows.name, PRIVATE, FINAL).build();
     FieldSpec fieldError = FieldSpec.builder(paramError.type, paramError.name, PRIVATE, FINAL).build();
     return classBuilder(context.parsingFailedType())
         .superclass(context.parseResultType())
-        .addFields(Arrays.asList(fieldRows, fieldError))
+        .addField(fieldError)
         .addMethod(constructorBuilder()
-            .addParameters(Arrays.asList(paramRows, paramError))
+            .addParameter(paramError)
             .addStatement("this.$N = $N", fieldError, paramError)
-            .addStatement("this.$N = $N", fieldRows, paramRows)
-            .addModifiers(PRIVATE).build())
-        .addModifiers(STATIC, FINAL)
+            .build())
+        .addModifiers(FINAL)
         .addModifiers(context.getAccessModifiers())
-        .addMethod(methodBuilder("getSynopsis")
-            .addStatement("return synopsis()")
-            .returns(STRING)
-            .addModifiers(context.getAccessModifiers())
-            .build())
-        .addMethod(methodBuilder("getRows")
-            .addStatement("return $N", fieldRows)
-            .returns(fieldRows.type)
-            .addModifiers(context.getAccessModifiers())
-            .build())
         .addMethod(methodBuilder("getError")
             .addStatement("return $N", fieldError)
             .addModifiers(context.getAccessModifiers())
@@ -121,7 +86,7 @@ final class ParseResult {
         .superclass(context.parseResultType())
         .addField(result)
         .addMethod(successConstructor())
-        .addModifiers(STATIC, FINAL)
+        .addModifiers(FINAL)
         .addModifiers(context.getAccessModifiers())
         .addMethod(getResultMethod())
         .build();
@@ -137,11 +102,9 @@ final class ParseResult {
 
   private MethodSpec successConstructor() {
     ParameterSpec paramResult = builder(result.type, result.name).build();
-    MethodSpec.Builder spec = constructorBuilder()
-        .addParameter(paramResult);
-    return spec
+    return constructorBuilder()
+        .addParameter(paramResult)
         .addStatement("this.$N = $N", result, paramResult)
-        .addModifiers(PRIVATE)
         .build();
   }
 }
