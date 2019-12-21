@@ -41,8 +41,6 @@ final class Option {
 
   private final Context context;
 
-  private final MethodSpec describeParamMethod;
-
   private final FieldSpec descriptionField;
 
   private final FieldSpec namesField;
@@ -63,7 +61,6 @@ final class Option {
       FieldSpec descriptionField,
       FieldSpec namesField,
       MethodSpec optionNamesMethod,
-      MethodSpec describeParamMethod,
       MethodSpec optionParsersMethod,
       FieldSpec shapeField,
       MethodSpec paramParsersMethod) {
@@ -71,7 +68,6 @@ final class Option {
     this.bundleKeyField = bundleKeyField;
     this.context = context;
     this.optionNamesMethod = optionNamesMethod;
-    this.describeParamMethod = describeParamMethod;
     this.namesField = namesField;
     this.optionParsersMethod = optionParsersMethod;
     this.shapeField = shapeField;
@@ -89,7 +85,6 @@ final class Option {
     MethodSpec parsersMethod = optionParsersMethod(parsersType, context);
     MethodSpec positionalParsersMethod = paramParsersMethod(positionalParsersType, context);
 
-    MethodSpec describeParamMethod = describeParamMethod(namesField);
 
     return new Option(
         context,
@@ -97,7 +92,6 @@ final class Option {
         descriptionField,
         namesField,
         optionNamesMethod,
-        describeParamMethod,
         parsersMethod,
         shapeField,
         positionalParsersMethod);
@@ -115,7 +109,6 @@ final class Option {
         .addField(bundleKeyField)
         .addField(descriptionField)
         .addField(shapeField)
-        .addMethod(describeParamMethod)
         .addMethod(missingRequiredLambdaMethod())
         .addMethod(privateConstructor())
         .addMethod(optionNamesMethod)
