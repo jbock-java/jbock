@@ -28,6 +28,7 @@ import static java.util.Collections.nCopies;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.coerce.Util.addBreaks;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
@@ -170,7 +171,7 @@ final class Option {
       args[i + 1] = strings.get(i);
     }
     return CodeBlock.of(String.format("$T.asList($Z%s)",
-        String.join(",$Z", nCopies(strings.size(), "$S"))), args);
+        String.join(",$W", nCopies(strings.size(), "$S"))), args);
   }
 
   private static MethodSpec optionNamesMethod(
@@ -282,8 +283,8 @@ final class Option {
   }
 
   private MethodSpec missingRequiredLambdaMethod() {
-    CodeBlock lambda = CodeBlock.of("new $T($S + (names.isEmpty() ? name() : " +
-            "$T.format($S, name(), $T.join($S, names))))",
+    CodeBlock lambda = CodeBlock.of(addBreaks("new $T($S + (names.isEmpty() ? name() : " +
+            "$T.format($S, name(), $T.join($S, names))))"),
         IllegalArgumentException.class,
         "Missing required: ",
         String.class,

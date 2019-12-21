@@ -9,21 +9,14 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
-import net.jbock.compiler.Parameter;
 
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.StringJoiner;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.INT;
-import static java.util.stream.Collectors.partitioningBy;
-import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -74,7 +67,7 @@ final class Tokenizer {
 
     context.helpRequestedType().ifPresent(helpRequestedType ->
         spec.beginControlFlow("if ($N.length >= 1 && $S.equals($N[0]))", args, "--help", args)
-            .addStatement("return new $T(synopsis(), buildRows())", helpRequestedType)
+            .addStatement("return new $T(buildRows())", helpRequestedType)
             .endControlFlow());
 
     spec.beginControlFlow("try")
@@ -82,7 +75,7 @@ final class Tokenizer {
         .endControlFlow();
 
     spec.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
-        .addStatement("return new $T(synopsis(), buildRows(), $N)",
+        .addStatement("return new $T(buildRows(), $N)",
             context.parsingFailedType(), e)
         .endControlFlow();
 

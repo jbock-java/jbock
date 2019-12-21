@@ -34,6 +34,7 @@ import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.coerce.Util.addBreaks;
 import static net.jbock.compiler.Constants.ENTRY_STRING_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
@@ -406,13 +407,10 @@ public final class GeneratedClass {
   }
 
   private MethodSpec synopsisMethod() {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("synopsis")
-        .returns(STRING);
-
+    CodeBlock.Builder code = CodeBlock.builder();
     ParameterSpec joiner = builder(StringJoiner.class, "joiner").build();
 
-    spec.addStatement("$T $N = new $T($S)",
-        StringJoiner.class, joiner, StringJoiner.class, " ");
+    code.add("return new $T($S)", StringJoiner.class, " ");
 
     Map<Boolean, List<Parameter>> partitionedOptions = context.parameters().stream()
         .filter(Parameter::isNotPositional)
@@ -425,14 +423,14 @@ public final class GeneratedClass {
         .filter(Parameter::isPositional)
         .collect(toList());
 
-    spec.addStatement("$N.add($S)", joiner, context.programName());
+    code.add(".add($S)", context.programName());
 
     if (!optionalNonpos.isEmpty()) {
-      spec.addStatement("$N.add($S)", joiner, "[options...]");
+      code.add(".add($S)", "[options...]");
     }
 
     for (Parameter param : requiredNonpos) {
-      spec.addStatement("$N.add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))", joiner,
+      code.add(addBreaks(".add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))"),
           String.class, "%s <%s>",
           context.optionType(), param.enumConstant(),
           context.optionType(), param.enumConstant(), Locale.class);
@@ -440,18 +438,21 @@ public final class GeneratedClass {
 
     for (Parameter param : positional) {
       if (param.isOptional()) {
-        spec.addStatement("$N.add($S)", joiner, "[<" + param.enumConstantLower() + ">]");
+        code.add("$Z.add($S)", "[<" + param.enumConstantLower() + ">]");
       } else if (param.isRequired()) {
-        spec.addStatement("$N.add($S)", joiner, "<" + param.enumConstantLower() + ">");
+        code.add("$Z.add($S)", "<" + param.enumConstantLower() + ">");
       } else if (param.isRepeatable()) {
-        spec.addStatement("$N.add($S)", joiner, "<" + param.enumConstantLower() + ">...");
+        code.add("$Z.add($S)", "<" + param.enumConstantLower() + ">...");
       } else {
         throw new AssertionError("all cases handled (repeatable can't be flag)");
       }
     }
 
-    spec.addStatement("return $N.toString()", joiner);
+    code.add("$Z.toString();\n", joiner);
+    MethodSpec.Builder result = MethodSpec.methodBuilder("synopsis")
+        .addCode(code.build())
+        .returns(STRING);
 
-    return spec.addModifiers(STATIC).build();
+    return result.addModifiers(STATIC).build();
   }
 }

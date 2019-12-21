@@ -59,21 +59,18 @@ final class ParseResult {
   }
 
   private TypeSpec defineHelpRequestedResult(ClassName helpRequestedType) {
-    ParameterSpec paramSynopsis = builder(STRING, "synopsis").build();
     ParameterSpec paramRows = builder(listOf(ENTRY_STRING_STRING), "rows").build();
-    FieldSpec fieldSynopsis = FieldSpec.builder(paramSynopsis.type, paramSynopsis.name, PRIVATE, FINAL).build();
     FieldSpec fieldRows = FieldSpec.builder(paramRows.type, paramRows.name, PRIVATE, FINAL).build();
     return classBuilder(helpRequestedType)
-        .addFields(Arrays.asList(fieldSynopsis, fieldRows))
+        .addField(fieldRows)
         .superclass(context.parseResultType())
         .addMethod(constructorBuilder()
-            .addParameters(Arrays.asList(paramSynopsis, paramRows))
-            .addStatement("this.$N = $N", fieldSynopsis, paramSynopsis)
+            .addParameter(paramRows)
             .addStatement("this.$N = $N", fieldRows, paramRows)
             .addModifiers(PRIVATE).build())
         .addMethod(methodBuilder("getSynopsis")
-            .addStatement("return $N", fieldSynopsis)
-            .returns(fieldSynopsis.type)
+            .addStatement("return synopsis()")
+            .returns(STRING)
             .addModifiers(context.getAccessModifiers())
             .build())
         .addMethod(methodBuilder("getRows")
@@ -87,26 +84,23 @@ final class ParseResult {
   }
 
   private TypeSpec defineErrorResult() {
-    ParameterSpec paramSynopsis = builder(STRING, "synopsis").build();
     ParameterSpec paramRows = builder(listOf(ENTRY_STRING_STRING), "rows").build();
     ParameterSpec paramError = builder(RuntimeException.class, "error").build();
-    FieldSpec fieldSynopsis = FieldSpec.builder(paramSynopsis.type, paramSynopsis.name, PRIVATE, FINAL).build();
     FieldSpec fieldRows = FieldSpec.builder(paramRows.type, paramRows.name, PRIVATE, FINAL).build();
     FieldSpec fieldError = FieldSpec.builder(paramError.type, paramError.name, PRIVATE, FINAL).build();
     return classBuilder(context.parsingFailedType())
         .superclass(context.parseResultType())
-        .addFields(Arrays.asList(fieldSynopsis, fieldRows, fieldError))
+        .addFields(Arrays.asList(fieldRows, fieldError))
         .addMethod(constructorBuilder()
-            .addParameters(Arrays.asList(paramSynopsis, paramRows, paramError))
+            .addParameters(Arrays.asList(paramRows, paramError))
             .addStatement("this.$N = $N", fieldError, paramError)
-            .addStatement("this.$N = $N", fieldSynopsis, paramSynopsis)
             .addStatement("this.$N = $N", fieldRows, paramRows)
             .addModifiers(PRIVATE).build())
         .addModifiers(STATIC, FINAL)
         .addModifiers(context.getAccessModifiers())
         .addMethod(methodBuilder("getSynopsis")
-            .addStatement("return $N", fieldSynopsis)
-            .returns(fieldSynopsis.type)
+            .addStatement("return synopsis()")
+            .returns(STRING)
             .addModifiers(context.getAccessModifiers())
             .build())
         .addMethod(methodBuilder("getRows")
