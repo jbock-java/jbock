@@ -297,7 +297,7 @@ public final class GeneratedClass {
 
   private static CodeBlock throwInvalidOptionStatement(ParameterSpec token, String message) {
     return CodeBlock.builder()
-        .add("throw new $T($S + $N)", IllegalArgumentException.class,
+        .add("throw new $T($S + $N)", RuntimeException.class,
             message + ": ", token)
         .build();
   }
@@ -467,7 +467,7 @@ public final class GeneratedClass {
         .addStatement("return $N.substring(2)", token).unindent();
 
     code.add("if (!$N.hasNext())\n", it).indent()
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+        .addStatement("throw new $T($S + $N)", RuntimeException.class,
             "Missing value after token: ", token)
         .unindent();
 

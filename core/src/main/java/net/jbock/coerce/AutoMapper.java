@@ -88,7 +88,7 @@ class AutoMapper {
     return CodeBlock.builder()
         .add("$N -> {\n", s).indent()
         .beginControlFlow("if ($N.length() != 1)", s)
-        .add("throw new $T($S + $N + $S);\n", IllegalArgumentException.class,
+        .add("throw new $T($S + $N + $S);\n", RuntimeException.class,
             "Not a single character: <", s, ">")
         .endControlFlow()
         .add("return $N.charAt(0);\n", s)

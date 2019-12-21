@@ -80,7 +80,7 @@ final class OptionParser {
     CodeBlock.Builder code = CodeBlock.builder();
 
     code.add("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))\n", token, token, token, "=").indent()
-        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Invalid token: ", token)
+        .addStatement("throw new $T($S + $N)", RuntimeException.class, "Invalid token: ", token)
         .unindent();
     code.add("if (!values.isEmpty())\n").indent()
         .addStatement(throwRepetitionErrorStatement(option))

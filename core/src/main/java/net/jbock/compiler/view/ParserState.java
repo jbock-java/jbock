@@ -142,7 +142,7 @@ final class ParserState {
 
   static CodeBlock throwRepetitionErrorStatement(ParameterSpec optionParam) {
     return CodeBlock.of(addBreaks("throw new $T($T.format($S, $N, $T.join($S, $N.names)))"),
-        IllegalArgumentException.class, String.class,
+        RuntimeException.class, String.class,
         "Option %s (%s) is not repeatable",
         optionParam, String.class, ", ", optionParam);
   }

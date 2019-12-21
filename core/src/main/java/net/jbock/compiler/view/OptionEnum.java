@@ -269,12 +269,12 @@ final class OptionEnum {
   private MethodSpec missingRequiredLambdaMethod() {
     CodeBlock lambda = CodeBlock.of(addBreaks("new $T($S + (names.isEmpty() ? name() : " +
             "$T.format($S, name(), $T.join($S, names))))"),
-        IllegalArgumentException.class,
+        RuntimeException.class,
         "Missing required: ",
         String.class,
         "%s (%s)", String.class, ", ");
     return MethodSpec.methodBuilder("missingRequired")
-        .returns(ParameterizedTypeName.get(Supplier.class, IllegalArgumentException.class))
+        .returns(ParameterizedTypeName.get(Supplier.class, RuntimeException.class))
         .addCode("return () -> $L;\n", lambda)
         .build();
   }
