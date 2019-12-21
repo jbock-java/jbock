@@ -67,14 +67,13 @@ public final class GeneratedClass {
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
 
+  private final FieldSpec maxLineWidth = FieldSpec.builder(INT, "maxLineWidth", PRIVATE)
+      .initializer("$L", DEFAULT_WRAP_AFTER).build();
+
+  private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages", PRIVATE)
+      .initializer("$T.emptyMap()", Collections.class).build();
+
   private final FieldSpec runBeforeExit;
-
-  private final FieldSpec maxLineWidth = FieldSpec.builder(INT, "maxLineWidth")
-      .initializer("$L", DEFAULT_WRAP_AFTER)
-      .addModifiers(PRIVATE).build();
-
-  private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages")
-      .addModifiers(PRIVATE).build();
 
   private GeneratedClass(
       Context context,
@@ -220,10 +219,8 @@ public final class GeneratedClass {
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
 
     ParameterSpec paramTokenizer = builder(context.tokenizerType(), "tokenizer").build();
-    ParameterSpec paramMessages = builder(context.messagesType(), "msg").build();
     return methodBuilder("parse")
-        .addStatement("$T $N = new $T($N == null ? $T.emptyMap() : $N)", context.messagesType(), paramMessages, context.messagesType(), messages, Collections.class, messages)
-        .addStatement("return new $T($N).parse($N)", paramTokenizer.type, paramMessages, args)
+        .addStatement("return new $T($N).parse($N)", paramTokenizer.type, messages, args)
         .addParameter(args)
         .addModifiers(context.getAccessModifiers())
         .returns(context.parseResultType())

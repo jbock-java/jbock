@@ -15,14 +15,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
+import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.INT;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.ENTRY_STRING_STRING;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
 
 /**
  * Defines the inner class Tokenizer.
@@ -42,8 +44,7 @@ final class Tokenizer {
   }
 
   static Tokenizer create(Context context, ParserState state) {
-    FieldSpec messages = FieldSpec.builder(context.messagesType(), "messages")
-        .addModifiers(FINAL).build();
+    FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages").build();
     return new Tokenizer(context, state, messages);
   }
 
@@ -55,6 +56,7 @@ final class Tokenizer {
         .addMethod(parseMethodOverloadIterator())
         .addMethod(privateConstructor())
         .addMethod(buildRowsMethod())
+        .addMethod(getMessageMethod())
         .addMethod(printDescriptionMethod())
         .addField(messages);
     return spec.build();
@@ -101,12 +103,23 @@ final class Tokenizer {
     ParameterSpec message = builder(STRING, "message").build();
     return MethodSpec.methodBuilder("printDescription")
         .addParameter(option)
-        .addStatement("$T $N = $N.getMessage($N.bundleKey, $N.description)",
-            STRING, message, messages, option, option)
+        .addStatement("$T $N = getMessage($N.bundleKey, $N.description)",
+            STRING, message, option, option)
         .addStatement("return new $T($N.shape, $N)",
             ParameterizedTypeName.get(ClassName.get(SimpleImmutableEntry.class), STRING, STRING),
             option, message)
         .returns(ENTRY_STRING_STRING)
+        .build();
+  }
+
+  private MethodSpec getMessageMethod() {
+    ParameterSpec key = ParameterSpec.builder(String.class, "key").build();
+    ParameterSpec defaultValue = ParameterSpec.builder(LIST_OF_STRING, "defaultValue").build();
+    return methodBuilder("getMessage")
+        .addStatement("return $N.getOrDefault($N, $T.join($S, $N)).trim()",
+            messages, key, String.class, " ", defaultValue)
+        .addParameters(Arrays.asList(key, defaultValue))
+        .returns(STRING)
         .build();
   }
 
