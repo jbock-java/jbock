@@ -13,8 +13,6 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
-import static javax.lang.model.element.Modifier.FINAL;
-
 public class BasicInfo {
 
   private final ParamName paramName;
@@ -90,7 +88,7 @@ public class BasicInfo {
   }
 
   FieldSpec fieldSpec() {
-    return FieldSpec.builder(TypeName.get(originalReturnType()), paramName.camel(), FINAL).build();
+    return FieldSpec.builder(TypeName.get(originalReturnType()), paramName.camel()).build();
   }
 
   public ValidationException asValidationException(String message) {

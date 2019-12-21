@@ -132,7 +132,7 @@ public final class Context {
     return helpParameterEnabled ? Optional.of(generatedClass.nestedClass("HelpRequested")) : Optional.empty();
   }
 
-  public TypeName sourceElement() {
+  public TypeName sourceType() {
     return TypeName.get(sourceElement.asType());
   }
 

@@ -20,13 +20,13 @@ class MvArgumentsTest {
   }
 
   @Test
-  void excessOption() {
-    f.assertThat("a", "b", "c").failsWithMessage("Invalid option: c");
+  void excessParam() {
+    f.assertThat("a", "b", "c").failsWithMessage("Excess param: c");
   }
 
   @Test
   void invalidOptionEscapeSequenceThird() {
-    f.assertThat("a", "b", "--", "c").failsWithMessage("Invalid option: c");
+    f.assertThat("a", "b", "--", "c").failsWithMessage("Excess param: c");
   }
 
   @Test

@@ -49,12 +49,12 @@ class CpArgumentsTest {
 
   @Test
   void tooMany() {
-    f.assertThat("a", "b", "c").failsWithMessage("Invalid option: c");
+    f.assertThat("a", "b", "c").failsWithMessage("Excess param: c");
   }
 
   @Test
   void tooManyAndFlag() {
-    f.assertThat("-r", "a", "b", "c").failsWithMessage("Invalid option: c");
+    f.assertThat("-r", "a", "b", "c").failsWithMessage("Excess param: c");
   }
 
   @Test

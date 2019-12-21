@@ -34,7 +34,7 @@ final class ParseResult {
   }
 
   static ParseResult create(Context context) {
-    FieldSpec result = FieldSpec.builder(context.sourceElement(),
+    FieldSpec result = FieldSpec.builder(context.sourceType(),
         "result", PRIVATE, FINAL).build();
     return new ParseResult(context, result);
   }
@@ -96,7 +96,7 @@ final class ParseResult {
   private MethodSpec getResultMethod() {
     return methodBuilder("getResult")
         .addStatement("return $N", result)
-        .returns(context.sourceElement())
+        .returns(context.sourceType())
         .addModifiers(context.getAccessModifiers())
         .build();
   }

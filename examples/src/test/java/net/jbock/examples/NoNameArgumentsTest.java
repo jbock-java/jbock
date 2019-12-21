@@ -62,7 +62,7 @@ class NoNameArgumentsTest {
 
   @Test
   void errorUnknownToken() {
-    f.assertThat("blabla").failsWithMessage("Invalid option: blabla");
+    f.assertThat("blabla").failsWithMessage("Excess param: blabla");
   }
 
   @Test

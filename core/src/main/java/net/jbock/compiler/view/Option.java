@@ -6,7 +6,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Parameter;
@@ -25,7 +24,6 @@ import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.coerce.Util.addBreaks;
@@ -51,9 +49,9 @@ final class Option {
 
   private final MethodSpec optionParsersMethod;
 
-  private final FieldSpec shapeField;
-
   private final MethodSpec paramParsersMethod;
+
+  private final FieldSpec shapeField;
 
   private Option(
       Context context,
@@ -75,16 +73,13 @@ final class Option {
   }
 
   static Option create(Context context) {
-    FieldSpec namesField = FieldSpec.builder(LIST_OF_STRING, "names").addModifiers(FINAL).build();
-    FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").addModifiers(FINAL).build();
-    FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").addModifiers(FINAL).build();
-    FieldSpec shapeField = FieldSpec.builder(STRING, "shape").addModifiers(FINAL).build();
-    TypeName parsersType = ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType());
-    TypeName positionalParsersType = ParameterizedTypeName.get(ClassName.get(List.class), context.paramParserType());
+    FieldSpec namesField = FieldSpec.builder(LIST_OF_STRING, "names").build();
+    FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").build();
+    FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").build();
+    FieldSpec shapeField = FieldSpec.builder(STRING, "shape").build();
     MethodSpec optionNamesMethod = optionNamesMethod(context.optionType(), namesField);
-    MethodSpec parsersMethod = optionParsersMethod(parsersType, context);
-    MethodSpec positionalParsersMethod = paramParsersMethod(positionalParsersType, context);
-
+    MethodSpec optionParsersMethod = optionParsersMethod(context);
+    MethodSpec paramParsersMethod = paramParsersMethod(context);
 
     return new Option(
         context,
@@ -92,9 +87,9 @@ final class Option {
         descriptionField,
         namesField,
         optionNamesMethod,
-        parsersMethod,
+        optionParsersMethod,
         shapeField,
-        positionalParsersMethod);
+        paramParsersMethod);
   }
 
   TypeSpec define() {
@@ -167,9 +162,7 @@ final class Option {
         String.join(",$W", nCopies(strings.size(), "$S"))), args);
   }
 
-  private static MethodSpec optionNamesMethod(
-      ClassName optionType,
-      FieldSpec namesField) {
+  private static MethodSpec optionNamesMethod(ClassName optionType, FieldSpec namesField) {
     ParameterSpec result = builder(ParameterizedTypeName.get(
         ClassName.get(Map.class), STRING, optionType), "result").build();
     ParameterSpec option = builder(optionType, "option").build();
@@ -196,24 +189,8 @@ final class Option {
         .build();
   }
 
-  private static MethodSpec describeParamMethod(FieldSpec namesField) {
-    ParameterSpec argname = builder(STRING, "argname").build();
-    return MethodSpec.methodBuilder("describeParam")
-        .addParameter(argname)
-        .returns(STRING)
-        .beginControlFlow("if (names.size() == 1)", namesField)
-        .addStatement("return $S + $N.get(0) + $N",
-            "    ", namesField, argname)
-        .endControlFlow()
-        .addStatement("return $N.get(0) + $S + $N.get(1) + $N",
-            namesField, ", ", namesField, argname)
-        .build();
-  }
-
-  private static MethodSpec optionParsersMethod(
-      TypeName parsersType,
-      Context context) {
-    ParameterSpec parsers = builder(parsersType, "parsers").build();
+  private static MethodSpec optionParsersMethod(Context context) {
+    ParameterSpec parsers = builder(ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType()), "parsers").build();
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("optionParsers")
         .returns(parsers.type)
@@ -226,26 +203,22 @@ final class Option {
         continue;
       }
       if (param.isRepeatable()) {
-        spec.addStatement("$N.put($L, new $T($L))",
-            parsers, param.enumConstant(), context.optionParserType(), param.enumConstant());
+        spec.addStatement("$N.put($L, new $T())",
+            parsers, param.enumConstant(), context.optionParserType());
       } else if (param.isFlag()) {
-        spec.addStatement("$N.put($L, new $T($L))",
-            parsers, param.enumConstant(),
-            context.flagParserType(), param.enumConstant());
+        spec.addStatement("$N.put($L, new $T())",
+            parsers, param.enumConstant(), context.flagParserType());
       } else {
-        spec.addStatement("$N.put($L, new $T($L))",
-            parsers, param.enumConstant(),
-            context.regularOptionParserType(), param.enumConstant());
+        spec.addStatement("$N.put($L, new $T())",
+            parsers, param.enumConstant(), context.regularOptionParserType());
       }
     }
 
     return spec.addStatement("return $N", parsers).build();
   }
 
-  private static MethodSpec paramParsersMethod(
-      TypeName positionalParsersType,
-      Context context) {
-    ParameterSpec parsers = builder(positionalParsersType, "parsers").build();
+  private static MethodSpec paramParsersMethod(Context context) {
+    ParameterSpec parsers = builder(ParameterizedTypeName.get(ClassName.get(List.class), context.paramParserType()), "parsers").build();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("paramParsers")
         .returns(parsers.type)
         .addModifiers(STATIC)

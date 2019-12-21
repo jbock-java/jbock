@@ -11,12 +11,10 @@ import net.jbock.compiler.Context;
 import net.jbock.compiler.Parameter;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
 import static com.squareup.javapoet.TypeName.INT;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.coerce.Util.addBreaks;
@@ -55,21 +53,18 @@ final class ParserState {
     // read-only lookups
     FieldSpec optionNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         STRING, context.optionType()), "optionNames")
-        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.optionNamesMethod())
-        .addModifiers(FINAL)
+        .initializer("$T.$N()", context.optionType(), option.optionNamesMethod())
         .build();
 
     // stateful parsers
     FieldSpec optionParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
         context.optionType(), context.optionParserType()), "optionParsers")
-        .initializer("$T.unmodifiableMap($T.$N())", Collections.class, context.optionType(), option.optionParsersMethod())
-        .addModifiers(FINAL)
+        .initializer("$T.$N()", context.optionType(), option.optionParsersMethod())
         .build();
 
     FieldSpec paramParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class),
         context.paramParserType()), "paramParsers")
-        .initializer("$T.unmodifiableList($T.$N())", Collections.class, context.optionType(), option.paramParsersMethod())
-        .addModifiers(FINAL)
+        .initializer("$T.$N()", context.optionType(), option.paramParsersMethod())
         .build();
 
     MethodSpec readRegularOptionMethod = tryReadOption(context, optionNamesField);
@@ -125,7 +120,7 @@ final class ParserState {
     }
     return MethodSpec.methodBuilder("build")
         .addStatement("return new $T($L)", context.implType(), args.build())
-        .returns(context.sourceElement())
+        .returns(context.sourceType())
         .build();
   }
 
@@ -146,7 +141,7 @@ final class ParserState {
     return builder.build();
   }
 
-  static CodeBlock throwRepetitionErrorStatement(FieldSpec optionParam) {
+  static CodeBlock throwRepetitionErrorStatement(ParameterSpec optionParam) {
     return CodeBlock.of(addBreaks("throw new $T($T.format($S, $N, $T.join($S, $N.names)))"),
         IllegalArgumentException.class, String.class,
         "Option %s (%s) is not repeatable",
