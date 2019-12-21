@@ -34,7 +34,7 @@ import static net.jbock.compiler.Constants.STRING;
 /**
  * Defines the *_Parser.Option enum.
  *
- * @see Parser
+ * @see GeneratedClass
  */
 final class Option {
 

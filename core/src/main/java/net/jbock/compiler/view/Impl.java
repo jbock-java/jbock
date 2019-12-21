@@ -13,7 +13,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 /**
  * Defines the *_Impl inner class.
  *
- * @see Parser
+ * @see GeneratedClass
  */
 final class Impl {
 

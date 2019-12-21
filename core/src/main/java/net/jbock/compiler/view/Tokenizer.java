@@ -61,7 +61,6 @@ final class Tokenizer {
         .addMethod(parseMethod())
         .addMethod(parseMethodOverloadIterator())
         .addMethod(privateConstructor())
-        .addMethod(synopsisMethod())
         .addMethod(buildRowsMethod())
         .addMethod(printDescriptionMethod())
         .addField(messages);
@@ -116,56 +115,6 @@ final class Tokenizer {
             option, message)
         .returns(ENTRY_STRING_STRING)
         .build();
-  }
-
-  private MethodSpec synopsisMethod() {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("synopsis")
-        .returns(STRING);
-
-    ParameterSpec joiner = builder(StringJoiner.class, "joiner").build();
-
-    spec.addStatement("$T $N = new $T($S)",
-        StringJoiner.class, joiner, StringJoiner.class, " ");
-
-    Map<Boolean, List<Parameter>> partitionedOptions = context.parameters().stream()
-        .filter(Parameter::isNotPositional)
-        .collect(partitioningBy(Parameter::isRequired));
-
-    List<Parameter> requiredNonpos = partitionedOptions.get(true);
-    List<Parameter> optionalNonpos = partitionedOptions.get(false);
-
-    List<Parameter> positional = context.parameters().stream()
-        .filter(Parameter::isPositional)
-        .collect(toList());
-
-    spec.addStatement("$N.add($S)", joiner, context.programName());
-
-    if (!optionalNonpos.isEmpty()) {
-      spec.addStatement("$N.add($S)", joiner, "[options...]");
-    }
-
-    for (Parameter param : requiredNonpos) {
-      spec.addStatement("$N.add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))", joiner,
-          String.class, "%s <%s>",
-          context.optionType(), param.enumConstant(),
-          context.optionType(), param.enumConstant(), Locale.class);
-    }
-
-    for (Parameter param : positional) {
-      if (param.isOptional()) {
-        spec.addStatement("$N.add($S)", joiner, "[<" + param.enumConstantLower() + ">]");
-      } else if (param.isRequired()) {
-        spec.addStatement("$N.add($S)", joiner, "<" + param.enumConstantLower() + ">");
-      } else if (param.isRepeatable()) {
-        spec.addStatement("$N.add($S)", joiner, "<" + param.enumConstantLower() + ">...");
-      } else {
-        throw new AssertionError("all cases handled (repeatable can't be flag)");
-      }
-    }
-
-    spec.addStatement("return $N.toString()", joiner);
-
-    return spec.addModifiers(STATIC).build();
   }
 
   private MethodSpec parseMethodOverloadIterator() {

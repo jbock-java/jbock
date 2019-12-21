@@ -16,8 +16,11 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Objects;
 import java.util.ResourceBundle;
+import java.util.StringJoiner;
 import java.util.function.Consumer;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
@@ -26,6 +29,8 @@ import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
+import static java.util.stream.Collectors.partitioningBy;
+import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -39,7 +44,7 @@ import static net.jbock.compiler.Constants.listOf;
 /**
  * Generates the *_Parser class.
  */
-public final class Parser {
+public final class GeneratedClass {
 
   private static final int DEFAULT_WRAP_AFTER = 80;
   private static final int EXITCODE_ON_ERROR = 1;
@@ -53,7 +58,7 @@ public final class Parser {
   private final Impl impl;
   private final ParseResult parseResult;
 
-  private final MethodSpec readValidArgumentMethod;
+  private final MethodSpec readOptionArgumentMethod;
 
   private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out", PRIVATE)
       .initializer("$T.out", System.class).build();
@@ -70,14 +75,14 @@ public final class Parser {
   private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages")
       .addModifiers(PRIVATE).build();
 
-  private Parser(
+  private GeneratedClass(
       Context context,
       Tokenizer tokenizer,
       Option option,
       ParserState state,
       Impl impl,
       ParseResult parseResult,
-      MethodSpec readValidArgumentMethod,
+      MethodSpec readOptionArgumentMethod,
       FieldSpec runBeforeExit) {
     this.context = context;
     this.tokenizer = tokenizer;
@@ -85,12 +90,12 @@ public final class Parser {
     this.state = state;
     this.impl = impl;
     this.parseResult = parseResult;
-    this.readValidArgumentMethod = readValidArgumentMethod;
+    this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.runBeforeExit = runBeforeExit;
   }
 
-  public static Parser create(Context context) {
-    MethodSpec readValidArgumentMethod = readValidArgumentMethod();
+  public static GeneratedClass create(Context context) {
+    MethodSpec readOptionArgumentMethod = readOptionArgumentMethod();
     Option option = Option.create(context);
     Impl impl = Impl.create(context);
     ParserState state = ParserState.create(context, option);
@@ -99,7 +104,7 @@ public final class Parser {
     FieldSpec runBeforeExit = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), context.parseResultType()), "runBeforeExit").addModifiers(PRIVATE)
         .initializer("r -> {}")
         .build();
-    return new Parser(context, builder, option, state, impl, parseResult, readValidArgumentMethod,
+    return new GeneratedClass(context, builder, option, state, impl, parseResult, readOptionArgumentMethod,
         runBeforeExit);
   }
 
@@ -129,7 +134,8 @@ public final class Parser {
         .addMethod(withMessagesMethod())
         .addMethod(withResourceBundleMethod())
         .addMethod(runBeforeExitMethod())
-        .addMethod(readValidArgumentMethod);
+        .addMethod(readOptionArgumentMethod)
+        .addMethod(synopsisMethod());
 
     if (context.isHelpParameterEnabled()) {
       spec.addMethod(withOutputStreamMethod());
@@ -367,12 +373,12 @@ public final class Parser {
         "</a>\n").build();
   }
 
-  private static MethodSpec readValidArgumentMethod() {
+  private static MethodSpec readOptionArgumentMethod() {
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec index = builder(INT, "index").build();
     ParameterSpec isLong = builder(BOOLEAN, "isLong").build();
-    MethodSpec.Builder builder = methodBuilder("readValidArgument");
+    MethodSpec.Builder builder = methodBuilder("readOptionArgument");
 
     builder.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
     builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
@@ -397,5 +403,55 @@ public final class Parser {
         .returns(STRING)
         .addModifiers(STATIC, PRIVATE)
         .build();
+  }
+
+  private MethodSpec synopsisMethod() {
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("synopsis")
+        .returns(STRING);
+
+    ParameterSpec joiner = builder(StringJoiner.class, "joiner").build();
+
+    spec.addStatement("$T $N = new $T($S)",
+        StringJoiner.class, joiner, StringJoiner.class, " ");
+
+    Map<Boolean, List<Parameter>> partitionedOptions = context.parameters().stream()
+        .filter(Parameter::isNotPositional)
+        .collect(partitioningBy(Parameter::isRequired));
+
+    List<Parameter> requiredNonpos = partitionedOptions.get(true);
+    List<Parameter> optionalNonpos = partitionedOptions.get(false);
+
+    List<Parameter> positional = context.parameters().stream()
+        .filter(Parameter::isPositional)
+        .collect(toList());
+
+    spec.addStatement("$N.add($S)", joiner, context.programName());
+
+    if (!optionalNonpos.isEmpty()) {
+      spec.addStatement("$N.add($S)", joiner, "[options...]");
+    }
+
+    for (Parameter param : requiredNonpos) {
+      spec.addStatement("$N.add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))", joiner,
+          String.class, "%s <%s>",
+          context.optionType(), param.enumConstant(),
+          context.optionType(), param.enumConstant(), Locale.class);
+    }
+
+    for (Parameter param : positional) {
+      if (param.isOptional()) {
+        spec.addStatement("$N.add($S)", joiner, "[<" + param.enumConstantLower() + ">]");
+      } else if (param.isRequired()) {
+        spec.addStatement("$N.add($S)", joiner, "<" + param.enumConstantLower() + ">");
+      } else if (param.isRepeatable()) {
+        spec.addStatement("$N.add($S)", joiner, "<" + param.enumConstantLower() + ">...");
+      } else {
+        throw new AssertionError("all cases handled (repeatable can't be flag)");
+      }
+    }
+
+    spec.addStatement("return $N.toString()", joiner);
+
+    return spec.addModifiers(STATIC).build();
   }
 }

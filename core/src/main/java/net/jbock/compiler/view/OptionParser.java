@@ -52,7 +52,7 @@ final class OptionParser {
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     return MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it))
-        .addStatement("values.add(readValidArgument($N, $N))", token, it)
+        .addStatement("values.add(readOptionArgument($N, $N))", token, it)
         .build();
   }
 }

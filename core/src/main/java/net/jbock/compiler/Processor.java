@@ -7,7 +7,7 @@ import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 import net.jbock.coerce.SuppliedClassValidator;
-import net.jbock.compiler.view.Parser;
+import net.jbock.compiler.view.GeneratedClass;
 
 import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
@@ -96,7 +96,7 @@ public final class Processor extends AbstractProcessor {
           generatedClass,
           parameters,
           isAllowEscape(parameters));
-      TypeSpec typeSpec = Parser.create(context).define();
+      TypeSpec typeSpec = GeneratedClass.create(context).define();
       write(sourceElement, context.generatedClass(), typeSpec);
     } catch (ValidationException e) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
