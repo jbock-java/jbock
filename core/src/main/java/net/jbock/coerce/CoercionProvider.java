@@ -21,7 +21,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static javax.lang.model.element.Modifier.FINAL;
 import static net.jbock.coerce.ParameterType.FLAG;
 import static net.jbock.coerce.ParameterType.REPEATABLE;
 
@@ -39,7 +38,7 @@ public class CoercionProvider {
         CodeBlock.builder().build(),
         CodeBlock.of("$T.identity()", Function.class),
         name,
-        FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake(), FINAL).build(),
+        FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake()).build(),
         CodeBlock.of("$N", name),
         FLAG,
         paramName);

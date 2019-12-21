@@ -171,17 +171,9 @@ final class OptionEnum {
     spec.addStatement("$T $N = new $T<>($T.values().length)",
         result.type, result, HashMap.class, option.type);
 
-    // begin iteration over options
-    spec.beginControlFlow("for ($T $N : $T.values())", option.type, option, option.type);
-    // begin iteration over names
-    spec.beginControlFlow("for ($T $N : $N.$N)", STRING, name, option, namesField);
-
-    spec.addStatement("$N.put($N, $N)", result, name, option);
-
-    // end iteration over names
-    spec.endControlFlow();
-    // end iteration over options
-    spec.endControlFlow();
+    spec.beginControlFlow("for ($T $N : $T.values())", option.type, option, option.type)
+        .addStatement("$N.$N.forEach($N -> $N.put($N, $N))", option, namesField, name, result, name, option)
+        .endControlFlow();
 
     return spec.returns(result.type)
         .addStatement("return $N", result)
