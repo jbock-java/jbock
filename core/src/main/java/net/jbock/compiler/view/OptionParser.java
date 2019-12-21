@@ -1,5 +1,6 @@
 package net.jbock.compiler.view;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -59,16 +60,16 @@ final class OptionParser {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     ParameterSpec option = builder(context.optionType(), "option").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
-        .addParameters(asList(option, token, it));
-
-    spec.beginControlFlow("if (!values.isEmpty())")
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.add("if (!values.isEmpty())\n").indent()
         .addStatement(throwRepetitionErrorStatement(option))
-        .endControlFlow();
+        .unindent();
 
-    spec.addStatement("super.read($N, $N, $N)", option, token, it);
+    code.addStatement("super.read($N, $N, $N)", option, token, it);
 
-    return spec.build();
+    return MethodSpec.methodBuilder("read")
+        .addCode(code.build())
+        .addParameters(asList(option, token, it)).build();
   }
 
 
@@ -76,16 +77,18 @@ final class OptionParser {
     ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     ParameterSpec option = builder(context.optionType(), "option").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
-        .addParameters(asList(option, token, it));
+    CodeBlock.Builder code = CodeBlock.builder();
 
-    spec.beginControlFlow("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))", token, token, token, "=")
+    code.add("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))\n", token, token, token, "=").indent()
         .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Invalid token: ", token)
-        .endControlFlow();
-    spec.beginControlFlow("if (!values.isEmpty())")
+        .unindent();
+    code.add("if (!values.isEmpty())\n").indent()
         .addStatement(throwRepetitionErrorStatement(option))
-        .endControlFlow();
-    return spec.addStatement("values.add($S)", "").build();
+        .unindent();
+    code.addStatement("values.add($S)", "");
+    return MethodSpec.methodBuilder("read")
+        .addCode(code.build())
+        .addParameters(asList(option, token, it)).build();
   }
 
 }

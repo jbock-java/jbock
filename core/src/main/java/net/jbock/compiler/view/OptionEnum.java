@@ -166,16 +166,17 @@ final class OptionEnum {
         ClassName.get(Map.class), STRING, optionType), "result").build();
     ParameterSpec option = builder(optionType, "option").build();
     ParameterSpec name = builder(STRING, "name").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("optionNames");
-    spec.addStatement("$T $N = new $T<>($T.values().length)",
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = new $T<>($T.values().length)",
         result.type, result, HashMap.class, option.type);
 
-    spec.beginControlFlow("for ($T $N : $T.values())", option.type, option, option.type)
+    code.add("for ($T $N : $T.values())\n", option.type, option, option.type).indent()
         .addStatement("$N.$N.forEach($N -> $N.put($N, $N))", option, namesField, name, result, name, option)
-        .endControlFlow();
+        .unindent();
+    code.addStatement("return $N", result);
 
-    return spec.returns(result.type)
-        .addStatement("return $N", result)
+    return MethodSpec.methodBuilder("optionNames").returns(result.type)
+        .addCode(code.build())
         .addModifiers(STATIC)
         .build();
   }

@@ -67,7 +67,7 @@ final class ParserState {
         .initializer("$T.$N()", context.optionType(), optionEnum.paramParsersMethod())
         .build();
 
-    MethodSpec readRegularOptionMethod = tryReadOption(context, optionNamesField);
+    MethodSpec readRegularOptionMethod = tryReadOptionMethod(context, optionNamesField);
 
     return new ParserState(
         context,
@@ -86,26 +86,25 @@ final class ParserState {
         .build();
   }
 
-  private static MethodSpec tryReadOption(Context context, FieldSpec optionNamesField) {
+  private static MethodSpec tryReadOptionMethod(Context context, FieldSpec optionNamesField) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("tryReadOption")
-        .addParameter(token)
-        .returns(context.optionType());
 
-    spec.beginControlFlow("if ($N.length() <= 1 || $N.charAt(0) != '-')", token, token)
-        .addStatement("return null")
-        .endControlFlow();
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.add("if ($N.length() <= 1 || $N.charAt(0) != '-')\n", token, token).indent()
+        .addStatement("return null").unindent();
 
-    spec.beginControlFlow("if ($N.charAt(1) == '-')", token)
-        .addStatement("$T $N = $N.indexOf('=')", INT, index, token)
+    code.add("if ($N.charAt(1) != '-')\n", token).indent()
+        .addStatement("return $N.get($N.substring(0, 2))", optionNamesField, token).unindent();
+
+    code.addStatement("$T $N = $N.indexOf('=')", INT, index, token)
         .addStatement("return $N.get($N.substring(0, $N < 0 ? $N.length() : $N))",
-            optionNamesField, token, index, token, index)
-        .endControlFlow();
+            optionNamesField, token, index, token, index);
 
-    spec.addStatement("return $N.get($N.substring(0, 2))", optionNamesField, token);
-
-    return spec.build();
+    return MethodSpec.methodBuilder("tryReadOption")
+        .addParameter(token)
+        .addCode(code.build())
+        .returns(context.optionType()).build();
   }
 
   private MethodSpec buildMethod() {

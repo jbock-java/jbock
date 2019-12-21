@@ -172,14 +172,14 @@ public final class GeneratedClass {
     ParameterSpec bundle = builder(ResourceBundle.class, "bundle").build();
     ParameterSpec map = builder(STRING_TO_STRING_MAP, "map").build();
     ParameterSpec name = builder(STRING, "name").build();
-    MethodSpec.Builder spec = methodBuilder("withResourceBundle");
-    spec.addStatement("$T $N = new $T<>()", map.type, map, HashMap.class);
-    spec.beginControlFlow("for ($T $N : $T.list($N.getKeys()))", STRING, name, Collections.class, bundle)
-        .addStatement("$N.put($N, $N.getString($N))", map, name, bundle, name)
-        .endControlFlow();
-    spec.addStatement("return withMessages($N)", map);
-    return spec.addParameter(bundle)
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = new $T<>()", map.type, map, HashMap.class);
+    code.add("for ($T $N : $T.list($N.getKeys()))\n", STRING, name, Collections.class, bundle).indent()
+        .addStatement("$N.put($N, $N.getString($N))", map, name, bundle, name).unindent();
+    code.addStatement("return withMessages($N)", map);
+    return methodBuilder("withResourceBundle").addParameter(bundle)
         .returns(context.generatedClass())
+        .addCode(code.build())
         .addModifiers(context.getAccessModifiers())
         .build();
   }
@@ -396,39 +396,44 @@ public final class GeneratedClass {
     ParameterSpec sb = builder(StringBuilder.class, "sb").build();
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec tokens = builder(ArrayTypeName.of(String.class), "tokens").build();
-    MethodSpec.Builder spec = methodBuilder("printWrap");
-    spec.beginControlFlow("if ($N.isEmpty())", input)
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.beginControlFlow("if ($N.isEmpty())", input)
         .addStatement("$T $N = $N.trim()", STRING, trim, init)
         .addStatement("$N.println($N.substring(0, $N.indexOf($N)) + $N)",
             printStream, init, init, trim, trim)
         .addStatement("return")
         .endControlFlow();
-    spec.addStatement("$T $N = $N.split($S, $L)", tokens.type, tokens, input, "\\s+", -1);
-    spec.addStatement("$T $N = new $T($N)", sb.type, sb, StringBuilder.class, init);
-    spec.beginControlFlow("for ($T $N : $N)", STRING, token, tokens);
+    code.addStatement("$T $N = $N.split($S, $L)", tokens.type, tokens, input, "\\s+", -1);
+    code.addStatement("$T $N = new $T($N)", sb.type, sb, StringBuilder.class, init);
+    code.beginControlFlow("for ($T $N : $N)", STRING, token, tokens);
 
-    spec.beginControlFlow("if ($N.length() + $N.length() + 1 > $N)",
+    code.beginControlFlow("if ($N.length() + $N.length() + 1 > $N)",
         token, sb, maxLineWidth);
-    spec.beginControlFlow("if ($N.toString().isEmpty())", sb)
+    code.beginControlFlow("if ($N.toString().isEmpty())", sb)
         .addStatement("$N.println($N)", printStream, token)
         .endControlFlow();
-    spec.beginControlFlow("else")
+    code.beginControlFlow("else")
         .addStatement("$N.println($N)", printStream, sb)
         .addStatement("$N.setLength(0)", sb)
-        .addStatement("for ($T $N = 0; $N < $N; $N++) $N.append(' ')",
-            INT, i, i, continuationIndent, i, sb)
+        .add("for ($T $N = 0; $N < $N; $N++)\n",
+            INT, i, i, continuationIndent, i).indent()
+        .addStatement(" $N.append(' ')", sb).unindent()
         .addStatement("$N.append($N)", sb, token)
         .endControlFlow();
-    spec.endControlFlow();
-    spec.beginControlFlow("else")
-        .addStatement("if ($N.length() > 0 && !$T.isWhitespace($N.charAt($N.length() - 1))) $N.append(' ')",
-            sb, Character.class, sb, sb, sb)
+    code.endControlFlow();
+    code.beginControlFlow("else")
+        .add("if ($N.length() > 0 && !$T.isWhitespace($N.charAt($N.length() - 1)))\n",
+            sb, Character.class, sb, sb).indent()
+        .addStatement("$N.append(' ')", sb).unindent()
         .addStatement("$N.append($N)", sb, token)
         .endControlFlow();
-    spec.endControlFlow();
+    code.endControlFlow();
 
-    spec.addStatement("if ($N.length() > 0) $N.println($N)", sb, printStream, sb);
-    return spec.addModifiers(context.getAccessModifiers())
+    code.add("if ($N.length() > 0)\n", sb).indent()
+        .addStatement("$N.println($N)", printStream, sb).unindent();
+    return methodBuilder("printWrap")
+        .addModifiers(context.getAccessModifiers())
+        .addCode(code.build())
         .addParameters(Arrays.asList(printStream, continuationIndent, init, input))
         .build();
   }
@@ -453,27 +458,24 @@ public final class GeneratedClass {
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec index = builder(INT, "index").build();
     ParameterSpec isLong = builder(BOOLEAN, "isLong").build();
-    MethodSpec.Builder builder = methodBuilder("readOptionArgument");
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
+    code.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
 
-    builder.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
-    builder.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
+    code.add("if ($N && $N >= 0)\n", isLong, index).indent()
+        .addStatement("return $N.substring($N + 1)", token, index).unindent();
 
-    builder.beginControlFlow("if ($N && $N >= 0)", isLong, index)
-        .addStatement("return $N.substring($N + 1)", token, index)
-        .endControlFlow();
+    code.add("if (!$N && $N.length() >= 3)\n", isLong, token).indent()
+        .addStatement("return $N.substring(2)", token).unindent();
 
-    builder.beginControlFlow("if (!$N && $N.length() >= 3)", isLong, token)
-        .addStatement("return $N.substring(2)", token)
-        .endControlFlow();
+    code.add("if (!$N.hasNext())\n", it).indent()
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class,
+            "Missing value after token: ", token)
+        .unindent();
 
-    builder.beginControlFlow("if (!$N.hasNext())", it)
-        .addStatement(CodeBlock.builder()
-            .add("throw new $T($S + $N)", IllegalArgumentException.class,
-                "Missing value after token: ", token)
-            .build())
-        .endControlFlow();
-
-    return builder.addStatement("return $N.next()", it)
+    code.addStatement("return $N.next()", it);
+    return methodBuilder("readOptionArgument")
+        .addCode(code.build())
         .addParameters(asList(token, it))
         .returns(STRING)
         .addModifiers(STATIC, PRIVATE)
