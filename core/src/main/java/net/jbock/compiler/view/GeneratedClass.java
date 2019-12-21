@@ -21,7 +21,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 import java.util.ResourceBundle;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
@@ -128,7 +127,7 @@ public final class GeneratedClass {
         .addMethod(synopsisMethod());
 
     if (context.isHelpParameterEnabled()) {
-      spec.addMethod(withOutputStreamMethod());
+      spec.addMethod(withHelpStreamMethod());
       spec.addField(out);
     }
     spec.addFields(Arrays.asList(err, maxLineWidth, runBeforeExit, messages));
@@ -161,7 +160,7 @@ public final class GeneratedClass {
     ParameterSpec resourceBundleParam = builder(messages.type, "map").build();
     MethodSpec.Builder spec = methodBuilder("withMessages");
     return spec.addParameter(resourceBundleParam)
-        .addStatement("this.$N = $T.requireNonNull($N)", messages, Objects.class, resourceBundleParam)
+        .addStatement("this.$N = $N", messages, resourceBundleParam)
         .addStatement("return this")
         .returns(context.generatedClass())
         .addModifiers(context.getAccessModifiers())
@@ -184,8 +183,8 @@ public final class GeneratedClass {
         .build();
   }
 
-  private MethodSpec withOutputStreamMethod() {
-    return withPrintStreamMethod("withOutputStream", context, out);
+  private MethodSpec withHelpStreamMethod() {
+    return withPrintStreamMethod("withHelpStream", context, out);
   }
 
   private MethodSpec withErrorStreamMethod() {
@@ -197,7 +196,7 @@ public final class GeneratedClass {
     ParameterSpec param = builder(stream.type, stream.name).build();
     return methodBuilder(methodName)
         .addParameter(param)
-        .addStatement("this.$N = $T.requireNonNull($N)", stream, Objects.class, param)
+        .addStatement("this.$N = $N", stream, param)
         .addStatement("return this")
         .returns(context.generatedClass())
         .addModifiers(context.getAccessModifiers())
@@ -208,24 +207,25 @@ public final class GeneratedClass {
 
     ParameterSpec args = builder(Constants.STRING_ARRAY, "args").build();
     ParameterSpec e = builder(RuntimeException.class, "e").build();
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
+    CodeBlock.Builder code = CodeBlock.builder();
 
     context.helpRequestedType().ifPresent(helpRequestedType ->
-        spec.beginControlFlow("if ($N.length >= 1 && $S.equals($N[0]))", args, "--help", args)
+        code.add("if ($N.length >= 1 && $S.equals($N[0]))\n", args, "--help", args).indent()
             .addStatement("return new $T()", helpRequestedType)
-            .endControlFlow());
+            .unindent());
 
-    spec.beginControlFlow("try")
+    code.beginControlFlow("try")
         .addStatement("return new $T(parse($T.asList($N).iterator()))", context.parsingSuccessType(), Arrays.class, args)
         .endControlFlow();
 
-    spec.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
+    code.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
         .addStatement("return new $T($N)",
             context.parsingFailedType(), e)
         .endControlFlow();
 
-    return spec.addParameter(args)
+    return MethodSpec.methodBuilder("parse").addParameter(args)
         .returns(context.parseResultType())
+        .addCode(code.build())
         .addModifiers(context.getAccessModifiers())
         .build();
   }
@@ -306,44 +306,42 @@ public final class GeneratedClass {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
     ParameterSpec result = builder(context.parseResultType(), "result").build();
-    MethodSpec.Builder spec = methodBuilder("parseOrExit");
+    CodeBlock.Builder code = CodeBlock.builder();
 
-    spec.addStatement("$T $N = parse($N)", result.type, result, args);
+    code.addStatement("$T $N = parse($N)", result.type, result, args);
 
-    spec.beginControlFlow("if ($N instanceof $T)", result, context.parsingSuccessType())
+    code.add("if ($N instanceof $T)\n", result, context.parsingSuccessType()).indent()
         .addStatement("return (($T) $N).getResult()", context.parsingSuccessType(), result)
-        .endControlFlow();
+        .unindent();
 
     context.helpRequestedType().ifPresent(helpRequestedType -> {
-      spec.beginControlFlow("if ($N instanceof $T)", result, helpRequestedType);
+      code.beginControlFlow("if ($N instanceof $T)", result, helpRequestedType);
       ParameterSpec help = builder(helpRequestedType, "helpResult").build();
-      spec.addStatement("$T $N = ($T) $N", help.type, help, help.type, result);
-      spec.addStatement("printOnlineHelp($N)", out);
-      spec.addStatement("$N.flush()", out);
-      spec.addStatement("$N.accept($N)", runBeforeExit, result)
+      code.addStatement("$T $N = ($T) $N", help.type, help, help.type, result);
+      code.addStatement("printOnlineHelp($N)", out);
+      code.addStatement("$N.flush()", out)
+          .addStatement("$N.accept($N)", runBeforeExit, result)
           .addStatement("$T.exit(0)", System.class);
-      spec.endControlFlow();
+      code.endControlFlow();
     });
 
     ParameterSpec error = builder(context.parsingFailedType(), "errorResult").build();
-    spec.beginControlFlow("if ($N instanceof $T)", result, context.parsingFailedType())
-        .addStatement("$T $N = ($T) $N", error.type, error, error.type, result)
+    code.addStatement("$T $N = ($T) $N", error.type, error, error.type, result)
         .addStatement("$N.getError().printStackTrace($N)", error, err)
         .addStatement("$N.println($S + $N.getError().getMessage())", err, "Error: ", error)
         .addStatement("printOnlineHelp($N)", err);
     if (context.isHelpParameterEnabled()) {
-      spec.addStatement("$N.println($S)", err, "Try '--help' for more information.");
+      code.addStatement("$N.println($S)", err, "Try '--help' for more information.");
     }
-    spec.addStatement("$N.flush()", err);
-    spec.addStatement("$N.accept($N)", runBeforeExit, result)
+    code.addStatement("$N.flush()", err)
+        .addStatement("$N.accept($N)", runBeforeExit, result)
         .addStatement("$T.exit($L)", System.class, EXITCODE_ON_ERROR)
-        .endControlFlow();
+        .addStatement("throw new $T()", RuntimeException.class);
 
-    spec.addStatement("throw new $T($S)", RuntimeException.class, "all cases handled");
-
-    return spec.addParameter(args)
+    return methodBuilder("parseOrExit").addParameter(args)
         .addModifiers(context.getAccessModifiers())
         .returns(context.sourceType())
+        .addCode(code.build())
         .build();
   }
 

@@ -38,7 +38,7 @@ public final class ParserTestFixture<E> {
 
     Object parseOrExit(String[] args);
 
-    Parser<E> withOutputStream(PrintStream out);
+    Parser<E> withHelpStream(PrintStream out);
 
     Parser<E> withErrorStream(PrintStream out);
 
@@ -103,9 +103,9 @@ public final class ParserTestFixture<E> {
       }
 
       @Override
-      public Parser<E> withOutputStream(PrintStream out) {
+      public Parser<E> withHelpStream(PrintStream out) {
         try {
-          return callSetter("withOutputStream", out);
+          return callSetter("withHelpStream", out);
         } catch (RuntimeException e) {
           return this;
         }
@@ -141,7 +141,7 @@ public final class ParserTestFixture<E> {
   public E parse(String... args) {
     TestOutputStream stdout = new TestOutputStream();
     TestOutputStream stderr = new TestOutputStream();
-    Optional<E> result = parser.withOutputStream(stdout.out)
+    Optional<E> result = parser.withHelpStream(stdout.out)
         .withErrorStream(stderr.out).maxLineWidth(MAX_LINE_WIDTH).parse(args);
     if (!result.isPresent()) {
       throw new AssertionError(stderr.toString());
@@ -220,7 +220,7 @@ public final class ParserTestFixture<E> {
     Parsed getParsed() {
       TestOutputStream stdout = new TestOutputStream();
       TestOutputStream stderr = new TestOutputStream();
-      Optional<E> result = parser.withOutputStream(stdout.out)
+      Optional<E> result = parser.withHelpStream(stdout.out)
           .withErrorStream(stderr.out).maxLineWidth(MAX_LINE_WIDTH).parse(args);
       return new Parsed(stdout.toString(), stderr.toString(), result);
     }
@@ -256,7 +256,7 @@ public final class ParserTestFixture<E> {
       TestOutputStream stdout = new TestOutputStream();
       TestOutputStream stderr = new TestOutputStream();
       try {
-        parser.withOutputStream(stdout.out)
+        parser.withHelpStream(stdout.out)
             .withErrorStream(stderr.out)
             .runBeforeExit(r -> {
               throw new Abort();
@@ -309,7 +309,7 @@ public final class ParserTestFixture<E> {
     TestOutputStream stdout = new TestOutputStream();
     TestOutputStream stderr = new TestOutputStream();
     try {
-      parser.withOutputStream(stdout.out)
+      parser.withHelpStream(stdout.out)
           .withErrorStream(stderr.out)
           .runBeforeExit(r -> {
             throw new Abort();

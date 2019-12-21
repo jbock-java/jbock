@@ -184,29 +184,41 @@ final class OptionEnum {
   private static MethodSpec optionParsersMethod(Context context) {
     ParameterSpec parsers = builder(ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType()), "parsers").build();
 
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("optionParsers")
+    CodeBlock code = optionParsersMethodCode(context, parsers);
+    return MethodSpec.methodBuilder("optionParsers")
         .returns(parsers.type)
-        .addModifiers(STATIC);
-    spec.addStatement("$T $N = new $T<>($T.class)",
-        parsers.type, parsers, EnumMap.class, context.optionType());
+        .addCode(code)
+        .addModifiers(STATIC).build();
+  }
 
-    for (Parameter param : context.parameters()) {
-      if (param.isPositional()) {
-        continue;
-      }
-      if (param.isRepeatable()) {
-        spec.addStatement("$N.put($L, new $T())",
-            parsers, param.enumConstant(), context.optionParserType());
-      } else if (param.isFlag()) {
-        spec.addStatement("$N.put($L, new $T())",
-            parsers, param.enumConstant(), context.flagParserType());
-      } else {
-        spec.addStatement("$N.put($L, new $T())",
-            parsers, param.enumConstant(), context.regularOptionParserType());
-      }
+  private static CodeBlock optionParsersMethodCode(Context context, ParameterSpec parsers) {
+    List<Parameter> options = context.options();
+    if (options.isEmpty()) {
+      return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
     }
+    if (options.size() == 1) {
+      Parameter param = options.get(0);
+      return CodeBlock.builder().addStatement("return $T.singletonMap($L, new $T())",
+          Collections.class, param.enumConstant(), optionParserType(context, param)).build();
+    }
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = new $T<>($T.class)",
+        parsers.type, parsers, EnumMap.class, context.optionType());
+    for (Parameter param : options) {
+      code.addStatement("$N.put($L, new $T())", parsers, param.enumConstant(), optionParserType(context, param));
+    }
+    code.addStatement("return $N", parsers);
+    return code.build();
+  }
 
-    return spec.addStatement("return $N", parsers).build();
+  private static ClassName optionParserType(Context context, Parameter param) {
+    if (param.isRepeatable()) {
+      return context.optionParserType();
+    }
+    if (param.isFlag()) {
+      return context.flagParserType();
+    }
+    return context.regularOptionParserType();
   }
 
   private static MethodSpec paramParsersMethod(Context context) {

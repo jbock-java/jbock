@@ -24,6 +24,8 @@ public final class Context {
 
   private final List<Parameter> positionalParams;
 
+  private final List<Parameter> options;
+
   // whether "--help" is a special token
   private final boolean helpParameterEnabled;
 
@@ -35,12 +37,14 @@ public final class Context {
       ClassName generatedClass,
       List<Parameter> parameters,
       List<Parameter> positionalParams,
+      List<Parameter> options,
       boolean helpParameterEnabled,
       String programName) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
     this.positionalParams = positionalParams;
+    this.options = options;
     this.helpParameterEnabled = helpParameterEnabled;
     this.programName = programName;
   }
@@ -49,7 +53,8 @@ public final class Context {
       TypeElement sourceElement,
       ClassName generatedClass,
       List<Parameter> parameters,
-      List<Parameter> positionalParams) {
+      List<Parameter> positionalParams,
+      List<Parameter> options) {
     Command annotation = sourceElement.getAnnotation(Command.class);
     boolean helpParameterEnabled = !annotation.helpDisabled();
 
@@ -58,7 +63,7 @@ public final class Context {
         generatedClass,
         parameters,
         positionalParams,
-        helpParameterEnabled,
+        options, helpParameterEnabled,
         programName(sourceElement));
   }
 
@@ -69,10 +74,6 @@ public final class Context {
     }
     String simpleName = sourceType.getSimpleName().toString();
     return ParamName.create(simpleName).snake('-');
-  }
-
-  public List<Parameter> positionalParams() {
-    return positionalParams;
   }
 
   public ClassName optionParserType() {
@@ -139,6 +140,14 @@ public final class Context {
 
   public List<Parameter> parameters() {
     return parameters;
+  }
+
+  public List<Parameter> positionalParams() {
+    return positionalParams;
+  }
+
+  public List<Parameter> options() {
+    return options;
   }
 
   public boolean isHelpParameterEnabled() {

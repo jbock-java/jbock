@@ -95,7 +95,8 @@ public final class Processor extends AbstractProcessor {
           sourceElement,
           generatedClass,
           parameters,
-          positionalParameters(parameters));
+          positionalParameters(parameters),
+          options(parameters));
       TypeSpec typeSpec = GeneratedClass.create(context).define();
       write(sourceElement, context.generatedClass(), typeSpec);
     } catch (ValidationException e) {
@@ -131,6 +132,10 @@ public final class Processor extends AbstractProcessor {
 
   private static List<Parameter> positionalParameters(List<Parameter> parameters) {
     return parameters.stream().filter(Parameter::isPositional).collect(Collectors.toList());
+  }
+
+  private static List<Parameter> options(List<Parameter> parameters) {
+    return parameters.stream().filter(parameter -> !parameter.isPositional()).collect(Collectors.toList());
   }
 
   private Set<TypeElement> getAnnotatedTypes(RoundEnvironment env) {
