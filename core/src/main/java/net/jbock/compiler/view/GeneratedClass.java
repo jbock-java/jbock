@@ -125,7 +125,6 @@ public final class GeneratedClass {
         .addMethod(parseOrExitMethod())
         .addMethod(parseMethodOverloadIterator())
         .addMethod(buildRowsMethod())
-        .addMethod(printDescriptionMethod())
         .addMethod(printOnlineHelpMethod())
         .addMethod(printWrapMethod())
         .addMethod(withErrorStreamMethod())
@@ -363,28 +362,18 @@ public final class GeneratedClass {
   private MethodSpec buildRowsMethod() {
     ParameterSpec rows = builder(Constants.listOf(ENTRY_STRING_STRING), "rows").build();
     ParameterSpec optionParam = builder(context.optionType(), "option").build();
+    ParameterSpec message = builder(STRING, "message").build();
     return MethodSpec.methodBuilder("buildRows")
         .returns(rows.type)
         .addStatement("$T $N = new $T<>()", rows.type, rows, ArrayList.class)
         .beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type)
-        .addStatement("$N.add(printDescription($N))", rows, optionParam)
+        .addStatement("$T $N = $N.getOrDefault($N.bundleKey, $T.join($S, $N.description)).trim()",
+            STRING, message, messages, optionParam, String.class, " ", optionParam)
+        .addStatement("$N.add(new $T($N.shape, $N))", rows, ParameterizedTypeName.get(ClassName.get(AbstractMap.SimpleImmutableEntry.class), STRING, STRING),
+            optionParam, message)
         .endControlFlow()
         .addStatement("return $N", rows)
         .addModifiers(context.getAccessModifiers())
-        .build();
-  }
-
-  private MethodSpec printDescriptionMethod() {
-    ParameterSpec option = builder(context.optionType(), "option").build();
-    ParameterSpec message = builder(STRING, "message").build();
-    return MethodSpec.methodBuilder("printDescription")
-        .addParameter(option)
-        .addStatement("$T $N = $N.getOrDefault($N.bundleKey, $T.join($S, $N.description)).trim()",
-            STRING, message, messages, option, String.class, " ", option)
-        .addStatement("return new $T($N.shape, $N)",
-            ParameterizedTypeName.get(ClassName.get(AbstractMap.SimpleImmutableEntry.class), STRING, STRING),
-            option, message)
-        .returns(ENTRY_STRING_STRING)
         .build();
   }
 

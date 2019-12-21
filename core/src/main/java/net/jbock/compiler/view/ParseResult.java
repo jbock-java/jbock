@@ -17,6 +17,7 @@ import static com.squareup.javapoet.TypeSpec.classBuilder;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.STATIC;
 
 /**
  * Defines the inner class ParseResult.
@@ -41,7 +42,7 @@ final class ParseResult {
   List<TypeSpec> defineResultTypes() {
     TypeSpec.Builder spec = classBuilder(context.parseResultType())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
-        .addModifiers(ABSTRACT)
+        .addModifiers(ABSTRACT, STATIC)
         .addModifiers(context.getAccessModifiers());
     List<TypeSpec> result = new ArrayList<>();
     result.add(spec.build());
@@ -56,7 +57,7 @@ final class ParseResult {
   private TypeSpec defineHelpRequestedResult(ClassName helpRequestedType) {
     return classBuilder(helpRequestedType)
         .superclass(context.parseResultType())
-        .addModifiers(FINAL)
+        .addModifiers(STATIC, FINAL)
         .addModifiers(context.getAccessModifiers())
         .build();
   }
@@ -71,7 +72,7 @@ final class ParseResult {
             .addParameter(paramError)
             .addStatement("this.$N = $N", fieldError, paramError)
             .build())
-        .addModifiers(FINAL)
+        .addModifiers(STATIC, FINAL)
         .addModifiers(context.getAccessModifiers())
         .addMethod(methodBuilder("getError")
             .addStatement("return $N", fieldError)
@@ -86,7 +87,7 @@ final class ParseResult {
         .superclass(context.parseResultType())
         .addField(result)
         .addMethod(successConstructor())
-        .addModifiers(FINAL)
+        .addModifiers(STATIC, FINAL)
         .addModifiers(context.getAccessModifiers())
         .addMethod(getResultMethod())
         .build();
