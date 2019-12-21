@@ -4,9 +4,11 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static java.util.Arrays.asList;
@@ -15,24 +17,35 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.view.ParserState.throwRepetitionErrorStatement;
 
 /**
- * Generates the inner class OptionParser, which handles repeatable options.
+ * Generates the inner class OptionParser and its subtypes.
  */
 final class OptionParser {
 
-  static TypeSpec define(Context context) {
+  static List<TypeSpec> define(Context context) {
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
         .initializer("new $T<>()", ArrayList.class)
         .build();
-    return TypeSpec.classBuilder(context.optionParserType())
-        .addMethod(readMethod(context))
+    List<TypeSpec> result = new ArrayList<>();
+    result.add(TypeSpec.classBuilder(context.optionParserType())
+        .addMethod(readMethodRepeatable(context))
         .addField(values)
         .addModifiers(PRIVATE, STATIC)
-        .build();
+        .build());
+    result.add(TypeSpec.classBuilder(context.flagParserType())
+        .superclass(context.optionParserType())
+        .addMethod(readMethodFlag(context))
+        .addModifiers(PRIVATE, STATIC).build());
+    result.add(TypeSpec.classBuilder(context.regularOptionParserType())
+        .superclass(context.optionParserType())
+        .addMethod(readMethodRegular(context))
+        .addModifiers(PRIVATE, STATIC).build());
+    return result;
   }
 
-  private static MethodSpec readMethod(Context context) {
+  private static MethodSpec readMethodRepeatable(Context context) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec option = builder(context.optionType(), "option").build();
@@ -41,4 +54,38 @@ final class OptionParser {
         .addStatement("values.add(readOptionArgument($N, $N))", token, it)
         .build();
   }
+
+  private static MethodSpec readMethodRegular(Context context) {
+    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
+    ParameterSpec option = builder(context.optionType(), "option").build();
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
+        .addParameters(asList(option, token, it));
+
+    spec.beginControlFlow("if (!values.isEmpty())")
+        .addStatement(throwRepetitionErrorStatement(option))
+        .endControlFlow();
+
+    spec.addStatement("super.read($N, $N, $N)", option, token, it);
+
+    return spec.build();
+  }
+
+
+  private static MethodSpec readMethodFlag(Context context) {
+    ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
+    ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
+    ParameterSpec option = builder(context.optionType(), "option").build();
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("read")
+        .addParameters(asList(option, token, it));
+
+    spec.beginControlFlow("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))", token, token, token, "=")
+        .addStatement("throw new $T($S + $N)", IllegalArgumentException.class, "Invalid token: ", token)
+        .endControlFlow();
+    spec.beginControlFlow("if (!values.isEmpty())")
+        .addStatement(throwRepetitionErrorStatement(option))
+        .endControlFlow();
+    return spec.addStatement("values.add($S)", "").build();
+  }
+
 }
