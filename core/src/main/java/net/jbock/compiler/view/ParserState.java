@@ -155,13 +155,13 @@ final class ParserState {
   private CodeBlock getStreamExpression(Parameter param) {
     if (param.isPositional()) {
       return CodeBlock.builder().add(
-          "$N.get($L).values()",
+          "$N.get($L).values.stream()",
           paramParsersField,
           param.positionalIndex().orElseThrow(AssertionError::new))
           .build();
     }
     return CodeBlock.builder().add(
-        "$N.get($T.$N).values()",
+        "$N.get($T.$N).values.stream()",
         optionParsersField,
         context.optionType(),
         param.enumConstant())

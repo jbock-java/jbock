@@ -12,7 +12,6 @@ import java.util.ArrayList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 /**
@@ -27,10 +26,6 @@ final class ParamParser {
     return TypeSpec.classBuilder(context.paramParserType())
         .addField(values)
         .addMethod(readMethod())
-        .addMethod(MethodSpec.methodBuilder("values")
-            .returns(STREAM_OF_STRING)
-            .addStatement("return $N.stream()", values)
-            .build())
         .addModifiers(PRIVATE, STATIC)
         .build();
   }

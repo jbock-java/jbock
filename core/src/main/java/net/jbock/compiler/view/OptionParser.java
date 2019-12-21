@@ -13,7 +13,6 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STREAM_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
@@ -28,10 +27,6 @@ final class OptionParser {
         .build();
     return TypeSpec.classBuilder(context.optionParserType())
         .addMethod(readMethod(context))
-        .addMethod(MethodSpec.methodBuilder("values")
-            .returns(STREAM_OF_STRING)
-            .addStatement("return $N.stream()", values)
-            .build())
         .addField(values)
         .addModifiers(PRIVATE, STATIC)
         .build();
