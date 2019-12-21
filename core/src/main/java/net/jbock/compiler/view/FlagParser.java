@@ -38,7 +38,6 @@ final class FlagParser {
     spec.beginControlFlow("if (!values.isEmpty())")
         .addStatement(throwRepetitionErrorStatement(option))
         .endControlFlow();
-    spec.addStatement("values.add($S)", "");
-    return spec.addAnnotation(Override.class).build();
+    return spec.addStatement("values.add($S)", "").build();
   }
 }

@@ -29,7 +29,6 @@ final class RegularParamParser {
         .returns(TypeName.INT)
         .addStatement("values.add($N)", valueParam)
         .addStatement("return $L", 1)
-        .addAnnotation(Override.class)
         .build();
   }
 }

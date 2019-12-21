@@ -47,6 +47,6 @@ final class RegularOptionParser {
 
     spec.addStatement("super.read($N, $N)", token, it);
 
-    return spec.addAnnotation(Override.class).build();
+    return spec.build();
   }
 }

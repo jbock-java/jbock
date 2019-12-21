@@ -45,7 +45,6 @@ final class Impl {
 
   private MethodSpec parameterMethodOverride(Parameter param) {
     return MethodSpec.methodBuilder(param.methodName())
-        .addAnnotation(Override.class)
         .returns(param.returnType())
         .addModifiers(param.getAccessModifiers())
         .addStatement("return $N", param.field())

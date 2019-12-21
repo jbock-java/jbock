@@ -351,7 +351,7 @@ public final class GeneratedClass {
         .addStatement("$T.exit($L)", System.class, EXITCODE_ON_ERROR)
         .endControlFlow();
 
-    spec.addStatement("throw new $T($S)", AssertionError.class, "all cases handled");
+    spec.addStatement("throw new $T($S)", RuntimeException.class, "all cases handled");
 
     return spec.addParameter(args)
         .addModifiers(context.getAccessModifiers())
@@ -405,7 +405,7 @@ public final class GeneratedClass {
     ParameterSpec trim = builder(STRING, "trim").build();
     ParameterSpec init = builder(STRING, "init").build();
     ParameterSpec input = builder(STRING, "input").build();
-    ParameterSpec row = builder(StringBuilder.class, "row").build();
+    ParameterSpec sb = builder(StringBuilder.class, "sb").build();
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec tokens = builder(ArrayTypeName.of(String.class), "tokens").build();
     MethodSpec.Builder spec = methodBuilder("printWrap");
@@ -416,35 +416,35 @@ public final class GeneratedClass {
         .addStatement("return")
         .endControlFlow();
     spec.addStatement("$T $N = $N.split($S, $L)", tokens.type, tokens, input, "\\s+", -1);
-    spec.addStatement("$T $N = new $T($N)", row.type, row, StringBuilder.class, init);
+    spec.addStatement("$T $N = new $T($N)", sb.type, sb, StringBuilder.class, init);
     spec.beginControlFlow("for ($T $N : $N)", STRING, token, tokens);
 
     spec.beginControlFlow("if ($N.length() + $N.length() + 1 > $N)",
-        token, row, maxLineWidth);
-    spec.beginControlFlow("if ($N.toString().isEmpty())", row)
+        token, sb, maxLineWidth);
+    spec.beginControlFlow("if ($N.toString().isEmpty())", sb)
         .addStatement("$N.println($N)", printStream, token)
         .endControlFlow();
     spec.beginControlFlow("else")
-        .addStatement("$N.println($N)", printStream, row)
-        .addStatement("$N.setLength(0)", row)
+        .addStatement("$N.println($N)", printStream, sb)
+        .addStatement("$N.setLength(0)", sb)
         .beginControlFlow("for ($T $N = 0; $N < $N; $N++)",
             INT, i, i, continuationIndent, i)
-        .addStatement("$N.append(' ')", row)
+        .addStatement("$N.append(' ')", sb)
         .endControlFlow()
-        .addStatement("$N.append($N)", row, token)
+        .addStatement("$N.append($N)", sb, token)
         .endControlFlow();
     spec.endControlFlow();
     spec.beginControlFlow("else")
         .beginControlFlow("if ($N.length() > 0 && !$T.isWhitespace($N.charAt($N.length() - 1)))",
-            row, Character.class, row, row)
-        .addStatement("$N.append(' ')", row)
+            sb, Character.class, sb, sb)
+        .addStatement("$N.append(' ')", sb)
         .endControlFlow()
-        .addStatement("$N.append($N)", row, token)
+        .addStatement("$N.append($N)", sb, token)
         .endControlFlow();
     spec.endControlFlow();
 
-    spec.beginControlFlow("if ($N.length() > 0)", row);
-    spec.addStatement("$N.println($N)", printStream, row);
+    spec.beginControlFlow("if ($N.length() > 0)", sb);
+    spec.addStatement("$N.println($N)", printStream, sb);
     spec.endControlFlow();
     return spec.addModifiers(context.getAccessModifiers())
         .addParameters(Arrays.asList(printStream, continuationIndent, init, input))
