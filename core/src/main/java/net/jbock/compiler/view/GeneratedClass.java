@@ -13,8 +13,7 @@ import net.jbock.compiler.Context;
 import net.jbock.compiler.Parameter;
 
 import java.io.PrintStream;
-import java.util.AbstractMap;
-import java.util.ArrayList;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -319,10 +318,8 @@ public final class GeneratedClass {
         .addStatement("$T.exit(0)", System.class)
         .endControlFlow());
 
-    ParameterSpec error = builder(context.parsingFailedType(), "errorResult").build();
-    code.addStatement("$T $N = ($T) $N", error.type, error, error.type, result)
-        .addStatement("$N.getError().printStackTrace($N)", error, err)
-        .addStatement("$N.println($S + $N.getError().getMessage())", err, "Error: ", error)
+    code.addStatement("(($T) $N).getError().printStackTrace($N)", context.parsingFailedType(), result, err)
+        .addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", context.parsingFailedType(), result)
         .addStatement("printOnlineHelp($N)", err);
     if (context.isHelpParameterEnabled()) {
       code.addStatement("$N.println($S)", err, "Try '--help' for more information.");
@@ -343,16 +340,16 @@ public final class GeneratedClass {
     ParameterSpec rows = builder(Constants.listOf(ENTRY_STRING_STRING), "rows").build();
     ParameterSpec optionParam = builder(context.optionType(), "option").build();
     ParameterSpec message = builder(STRING, "message").build();
-    return MethodSpec.methodBuilder("buildRows")
-        .returns(rows.type)
-        .addStatement("$T $N = new $T<>()", rows.type, rows, ArrayList.class)
-        .beginControlFlow("for ($T $N: $T.values())", optionParam.type, optionParam, optionParam.type)
+    CodeBlock.Builder builder = CodeBlock.builder();
+    builder.add("return $T.stream($T.values()).map($N -> {\n", Arrays.class, context.optionType(), optionParam).indent()
         .addStatement("$T $N = $N.getOrDefault($N.bundleKey, $T.join($S, $N.description)).trim()",
             STRING, message, messages, optionParam, String.class, " ", optionParam)
-        .addStatement("$N.add(new $T($N.shape, $N))", rows, ParameterizedTypeName.get(ClassName.get(AbstractMap.SimpleImmutableEntry.class), STRING, STRING),
+        .addStatement("return new $T($N.shape, $N)", ParameterizedTypeName.get(ClassName.get(SimpleImmutableEntry.class), STRING, STRING),
             optionParam, message)
-        .endControlFlow()
-        .addStatement("return $N", rows)
+        .unindent()
+        .add("}).collect($T.toList());\n", Collectors.class);
+    return methodBuilder("buildRows").returns(rows.type)
+        .addCode(builder.build())
         .addModifiers(context.getAccessModifiers())
         .build();
   }
