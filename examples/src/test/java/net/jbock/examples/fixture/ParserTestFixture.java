@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.ResourceBundle;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
@@ -43,6 +44,8 @@ public final class ParserTestFixture<E> {
     Parser<E> withErrorStream(PrintStream out);
 
     Parser<E> withMessages(Map<String, String> map);
+
+    Parser<E> withResourceBundle(ResourceBundle bundle);
 
     Parser<E> maxLineWidth(int chars);
 
@@ -119,6 +122,11 @@ public final class ParserTestFixture<E> {
       @Override
       public Parser<E> withMessages(Map<String, String> map) {
         return callSetter("withMessages", map, Map.class);
+      }
+
+      @Override
+      public Parser<E> withResourceBundle(ResourceBundle bundle) {
+        return callSetter("withResourceBundle", bundle, ResourceBundle.class);
       }
 
       @Override
@@ -302,6 +310,11 @@ public final class ParserTestFixture<E> {
 
   public String[] getHelp(Map<String, String> bundle) {
     parser.withMessages(bundle);
+    return getOut();
+  }
+
+  public String[] getHelp(ResourceBundle bundle) {
+    parser.withResourceBundle(bundle);
     return getOut();
   }
 
