@@ -249,12 +249,13 @@ public final class GeneratedClass {
           .endControlFlow();
     }
 
-    code.addStatement("$T $N = $N.$N($N)", context.optionType(), option, state, parserState.tryReadOption(), token);
-
-    code.beginControlFlow("if ($N != null)", option)
-        .addStatement("$N.$N.get($N).read($N, $N, $N)", state, parserState.parsersField(), option, option, token, it)
-        .addStatement("continue")
-        .endControlFlow();
+    if (!context.options().isEmpty()) {
+      code.addStatement("$T $N = $N.$N($N)", context.optionType(), option, state, parserState.tryReadOption(), token);
+      code.beginControlFlow("if ($N != null)", option)
+          .addStatement("$N.$N.get($N).read($N, $N, $N)", state, parserState.parsersField(), option, option, token, it)
+          .addStatement("continue")
+          .endControlFlow();
+    }
 
     // handle unknown token
     code.add("if (!$N.isEmpty() && $N.charAt(0) == '-')\n", token, token).indent()
@@ -265,7 +266,9 @@ public final class GeneratedClass {
         .addStatement(throwInvalidOptionStatement(token, "Excess param"))
         .unindent();
 
-    code.addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token);
+    if (!context.positionalParams().isEmpty()) {
+      code.addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token);
+    }
 
     // end parsing loop
     code.endControlFlow();

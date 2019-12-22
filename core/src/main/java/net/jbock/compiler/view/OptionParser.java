@@ -35,14 +35,16 @@ final class OptionParser {
         .addField(values)
         .addModifiers(PRIVATE, STATIC)
         .build());
-    result.add(TypeSpec.classBuilder(context.flagParserType())
-        .superclass(context.optionParserType())
-        .addMethod(readMethodFlag(context))
-        .addModifiers(PRIVATE, STATIC).build());
-    result.add(TypeSpec.classBuilder(context.regularOptionParserType())
-        .superclass(context.optionParserType())
-        .addMethod(readMethodRegular(context))
-        .addModifiers(PRIVATE, STATIC).build());
+    if (!context.options().isEmpty()) {
+      result.add(TypeSpec.classBuilder(context.flagParserType())
+          .superclass(context.optionParserType())
+          .addMethod(readMethodFlag(context))
+          .addModifiers(PRIVATE, STATIC).build());
+      result.add(TypeSpec.classBuilder(context.regularOptionParserType())
+          .superclass(context.optionParserType())
+          .addMethod(readMethodRegular(context))
+          .addModifiers(PRIVATE, STATIC).build());
+    }
     return result;
   }
 
