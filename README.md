@@ -1,15 +1,22 @@
 [![core](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg?style=plastic&subject=jbock)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 [![annotations](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations/badge.svg?color=red&style=plastic&subject=jbock-annotations)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations)
 
-Params (positional arguments) and options are defined as abstract methods:
+Params and options are defined as abstract methods:
 
 ````java
 @Command
 abstract class MyArguments {
 
+  /**
+   * A "param" is a positional parameter.
+   */
   @Param(1)
   abstract Path path();
 
+  /** 
+   * This javadoc will show up when "--help" is passed.
+   * Alternatively you can define the help text in a resource bundle.
+   */
   @Option(value = "verbosity", mnemonic = 'v')
   abstract OptionalInt verbosity();
 }
