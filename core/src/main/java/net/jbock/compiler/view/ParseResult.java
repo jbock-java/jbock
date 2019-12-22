@@ -69,6 +69,7 @@ final class ParseResult {
         .superclass(context.parseResultType())
         .addField(fieldError)
         .addMethod(constructorBuilder()
+            .addModifiers(PRIVATE)
             .addParameter(paramError)
             .addStatement("this.$N = $N", fieldError, paramError)
             .build())
@@ -83,10 +84,15 @@ final class ParseResult {
   }
 
   private TypeSpec defineSuccessResult() {
+    ParameterSpec paramResult = builder(result.type, result.name).build();
     return classBuilder(context.parsingSuccessType())
         .superclass(context.parseResultType())
         .addField(result)
-        .addMethod(successConstructor())
+        .addMethod(constructorBuilder()
+            .addModifiers(PRIVATE)
+            .addParameter(paramResult)
+            .addStatement("this.$N = $N", result, paramResult)
+            .build())
         .addModifiers(STATIC, FINAL)
         .addModifiers(context.getAccessModifiers())
         .addMethod(getResultMethod())
@@ -98,14 +104,6 @@ final class ParseResult {
         .addStatement("return $N", result)
         .returns(context.sourceType())
         .addModifiers(context.getAccessModifiers())
-        .build();
-  }
-
-  private MethodSpec successConstructor() {
-    ParameterSpec paramResult = builder(result.type, result.name).build();
-    return constructorBuilder()
-        .addParameter(paramResult)
-        .addStatement("this.$N = $N", result, paramResult)
         .build();
   }
 }

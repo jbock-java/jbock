@@ -28,7 +28,6 @@ import java.util.stream.Collectors;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
 import static java.util.stream.Collectors.partitioningBy;
@@ -445,16 +444,12 @@ public final class GeneratedClass {
   private static MethodSpec readOptionArgumentMethod() {
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-    ParameterSpec index = builder(INT, "index").build();
-    ParameterSpec isLong = builder(BOOLEAN, "isLong").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $N.charAt(1) == '-'", BOOLEAN, isLong, token);
-    code.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
 
-    code.add("if ($N && $N >= 0)\n", isLong, index).indent()
-        .addStatement("return $N.substring($N + 1)", token, index).unindent();
+    code.add("if ($N.charAt(1) == '-' && $N.indexOf('=') >= 0)\n", token, token).indent()
+        .addStatement("return $N.substring($N.indexOf('=') + 1)", token, token).unindent();
 
-    code.add("if (!$N && $N.length() >= 3)\n", isLong, token).indent()
+    code.add("if ($N.charAt(1) != '-' && $N.length() >= 3)\n", token, token).indent()
         .addStatement("return $N.substring(2)", token).unindent();
 
     code.add("if (!$N.hasNext())\n", it).indent()
