@@ -17,13 +17,14 @@ import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
@@ -169,13 +170,9 @@ public final class GeneratedClass {
 
   private MethodSpec withResourceBundleMethod() {
     ParameterSpec bundle = builder(ResourceBundle.class, "bundle").build();
-    ParameterSpec map = builder(STRING_TO_STRING_MAP, "map").build();
-    ParameterSpec name = builder(STRING, "name").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T<>()", map.type, map, HashMap.class);
-    code.add("for ($T $N : $T.list($N.getKeys()))\n", STRING, name, Collections.class, bundle).indent()
-        .addStatement("$N.put($N, $N.getString($N))", map, name, bundle, name).unindent();
-    code.addStatement("return withMessages($N)", map);
+    code.add("return withMessages($T.list($N.getKeys()).stream()\n", Collections.class, bundle).indent()
+        .addStatement(".collect($T.toMap($T.identity(), $N::getString)))", Collectors.class, Function.class, bundle).unindent();
     return methodBuilder("withResourceBundle").addParameter(bundle)
         .returns(context.generatedClass())
         .addCode(code.build())
