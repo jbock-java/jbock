@@ -311,16 +311,13 @@ public final class GeneratedClass {
         .addStatement("return (($T) $N).getResult()", context.parsingSuccessType(), result)
         .unindent();
 
-    context.helpRequestedType().ifPresent(helpRequestedType -> {
-      code.beginControlFlow("if ($N instanceof $T)", result, helpRequestedType);
-      ParameterSpec help = builder(helpRequestedType, "helpResult").build();
-      code.addStatement("$T $N = ($T) $N", help.type, help, help.type, result);
-      code.addStatement("printOnlineHelp($N)", out);
-      code.addStatement("$N.flush()", out)
-          .addStatement("$N.accept($N)", runBeforeExit, result)
-          .addStatement("$T.exit(0)", System.class);
-      code.endControlFlow();
-    });
+    context.helpRequestedType().ifPresent(helpRequestedType -> code
+        .beginControlFlow("if ($N instanceof $T)", result, helpRequestedType)
+        .addStatement("printOnlineHelp($N)", out)
+        .addStatement("$N.flush()", out)
+        .addStatement("$N.accept($N)", runBeforeExit, result)
+        .addStatement("$T.exit(0)", System.class)
+        .endControlFlow());
 
     ParameterSpec error = builder(context.parsingFailedType(), "errorResult").build();
     code.addStatement("$T $N = ($T) $N", error.type, error, error.type, result)
