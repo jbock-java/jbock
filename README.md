@@ -1,7 +1,7 @@
 [![core](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg?style=plastic&subject=jbock)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 [![annotations](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations/badge.svg?color=red&style=plastic&subject=jbock-annotations)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations)
 
-With jbock, command line parameters are defined as abstract methods:
+Params (positional arguments) and options are defined as abstract methods:
 
 ````java
 @Command
@@ -15,18 +15,19 @@ abstract class MyArguments {
 }
 ````
 
+Note, the number `1` is arbitrary as long as there is only one `@Param`.
+
 If jbock is properly configured as an
 [annotation processor](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java),
 then the presence of this annotated class
 will trigger a round of code generation at compile time.
 
-The generated class `MyArguments_Parser` can be seen
-[here.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
-
-This is how it might be used in a *main* method:
+This will generate a class called
+[MyArguments_Parser.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
+which can be used as follows:
 
 ````java
-String[] args = { "-v2", "file.txt" }; // for example
+String[] args = { "-v2", "file.txt" }; // from command line
 MyArguments my = MyArguments_Parser.create().parseOrExit(args);
 
 // make sure this works as expected...
