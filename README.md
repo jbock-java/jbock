@@ -9,11 +9,12 @@ abstract class MyArguments {
 
   /**
    * A "param" is a positional parameter.
+   * The number 1 is arbitrary as long as there is only one param.
    */
   @Param(1)
   abstract Path path();
 
-  /** 
+  /**
    * This javadoc will show up when "--help" is passed.
    * Alternatively you can define the help text in a resource bundle.
    */
@@ -21,8 +22,6 @@ abstract class MyArguments {
   abstract OptionalInt verbosity();
 }
 ````
-
-Note, the number `1` is arbitrary as long as there is only one `@Param`.
 
 If jbock is properly configured as an
 [annotation processor](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java),
