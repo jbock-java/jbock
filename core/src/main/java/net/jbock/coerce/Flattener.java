@@ -8,12 +8,14 @@ import net.jbock.compiler.TypevarMapping;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static net.jbock.coerce.either.Either.left;
@@ -21,12 +23,24 @@ import static net.jbock.coerce.either.Either.right;
 
 public class Flattener {
 
+  public static class Preference {
+    private final String key;
+    private final TypeMirror type;
+
+    public Preference(String key, TypeMirror type) {
+      this.key = key;
+      this.type = type;
+    }
+  }
+
   private final BasicInfo basicInfo;
   private final TypeElement targetElement;
+  private final Optional<Preference> preference;
 
-  public Flattener(BasicInfo basicInfo, TypeElement targetElement) {
+  public Flattener(BasicInfo basicInfo, TypeElement targetElement, Optional<Preference> preference) {
     this.targetElement = targetElement;
     this.basicInfo = basicInfo;
+    this.preference = preference;
   }
 
   /**
@@ -63,13 +77,18 @@ public class Flattener {
   }
 
   private Either<String, TypeMirror> inferFromBounds(TypeParameterElement p, List<? extends TypeMirror> bounds) {
+    DeclaredType object = tool().getDeclaredType(Object.class, Collections.emptyList());
     if (bounds.isEmpty()) {
-      return right(tool().getDeclaredType(Object.class, Collections.emptyList()));
+      return right(preference.filter(f -> f.key.equals(p.toString()))
+          .map(f -> f.type)
+          .orElse(object));
     }
     if (bounds.size() >= 2) {
       return left("Intersection type is not supported for typevar " + p.toString());
     }
-    return right(bounds.get(0));
+    return right(preference.filter(f -> f.key.equals(p.toString()))
+        .map(f -> f.type)
+        .orElse(bounds.get(0)));
   }
 
   private TypeTool tool() {

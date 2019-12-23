@@ -5,11 +5,8 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
-import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.Map;
 import java.util.Optional;
 
@@ -23,22 +20,6 @@ class AnnotationUtil {
     @Override
     public TypeMirror visitType(TypeMirror mirror, Void _null) {
       return mirror;
-    }
-  };
-
-  private static final TypeVisitor<Boolean, TypeTool> IS_JAVA_LANG_OBJECT = new SimpleTypeVisitor8<Boolean, TypeTool>() {
-    @Override
-    protected Boolean defaultAction(TypeMirror e, TypeTool tool) {
-      return false;
-    }
-
-    @Override
-    public Boolean visitDeclared(DeclaredType type, TypeTool tool) {
-      TypeElement element = type.asElement().accept(TypeTool.AS_TYPE_ELEMENT, null);
-      if (element == null) {
-        return false;
-      }
-      return "java.lang.Object".equals(element.getQualifiedName().toString());
     }
   };
 
@@ -62,7 +43,7 @@ class AnnotationUtil {
     if (typeMirror == null) {
       throw ValidationException.create(sourceMethod, String.format("Invalid value of attribute '%s'.", attributeName));
     }
-    if (typeMirror.accept(IS_JAVA_LANG_OBJECT, tool)) {
+    if (tool.isObject(typeMirror)) {
       // if the default value is not overridden
       return Optional.empty();
     }

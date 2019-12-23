@@ -63,7 +63,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = MyCollector.class)",
+        "          collectedBy = MyCollector.class)",
         "  abstract Set<String> strings();",
         "",
         "  static class MyCollector implements Supplier<Collector<String, ?, Set<String>>> {",
@@ -84,7 +84,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = MyCollector.class)",
+        "          collectedBy = MyCollector.class)",
         "  abstract Set<String> strings();",
         "",
         "  static class MyCollector implements Collector<String, Set<String>, Set<String>> {",
@@ -107,7 +107,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = MyCollector.class)",
+        "          collectedBy = MyCollector.class)",
         "  abstract Set<String> strings();",
         "",
         "  static class MyCollector implements Supplier<Collector<String, ?, List<String>>> {",
@@ -129,8 +129,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = HexMapper.class,",
-        "             collectedBy = ToSetCollector.class)",
+        "          mappedBy = HexMapper.class,",
+        "          collectedBy = ToSetCollector.class)",
         "  abstract Set<String> bigIntegers();",
         "",
         "  static class HexMapper implements Supplier<Function<String, BigInteger>> {",
@@ -158,8 +158,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = HexMapper.class,",
-        "             collectedBy = ToSetCollector.class)",
+        "          mappedBy = HexMapper.class,",
+        "          collectedBy = ToSetCollector.class)",
         "  abstract Set<int[]> foo();",
         "",
         "  static class HexMapper implements Supplier<Function<String, int[]>> {",
@@ -186,7 +186,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = MyCollector.class)",
+        "          collectedBy = MyCollector.class)",
         "  abstract Set<BigInteger> bigIntegers();",
         "",
         "  static class MyCollector implements Supplier<Collector<BigInteger, ?, Set<BigInteger>>> {",
@@ -207,8 +207,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = CustomBigIntegerMapper.class,",
-        "             collectedBy = ToSetCollector.class)",
+        "          mappedBy = CustomBigIntegerMapper.class,",
+        "          collectedBy = ToSetCollector.class)",
         "  abstract Set<BigInteger> bigSet();",
         "",
         "  static class CustomBigIntegerMapper implements Supplier<Function<String, BigInteger>> {",
@@ -235,7 +235,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = ToSetCollector.class)",
+        "          collectedBy = ToSetCollector.class)",
         "  abstract Set<BigInteger> bigSet();",
         "",
         "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
@@ -256,8 +256,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = MapEntryMapper.class,",
-        "             collectedBy = MapEntryCollector.class)",
+        "          mappedBy = MapEntryMapper.class,",
+        "          collectedBy = MapEntryCollector.class)",
         "  abstract Map<String, LocalDate> map();",
         "",
         "  static class MapEntryMapper implements Supplier<Function<String, Map.Entry<String, LocalDate>>> {",
@@ -287,8 +287,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = IdentityMapper.class,",
-        "             collectedBy = ToListCollector.class)",
+        "          mappedBy = IdentityMapper.class,",
+        "          collectedBy = ToListCollector.class)",
         "  abstract List<String> map();",
         "",
         "  static class IdentityMapper<M> implements Supplier<Function<M, M>> {",
@@ -315,7 +315,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = ToSetCollector.class)",
+        "          collectedBy = ToSetCollector.class)",
         "  abstract Set<Optional<Integer>> optionalIntegers();",
         "",
         "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
@@ -337,7 +337,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = ToSetCollector.class)",
+        "          collectedBy = ToSetCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
         "  static class ToSetCollector<E extends Long> implements Supplier<Collector<E, ?, Set<E>>> {",
@@ -359,7 +359,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = MyCollector.class)",
+        "          collectedBy = MyCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
         "  static class MyCollector<E, F> implements Supplier<Collector<E, ?, Set<F>>> {",
@@ -380,7 +380,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = MyCollector.class)",
+        "          collectedBy = MyCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
         "  static class MyCollector<E extends Long & Number, F> implements Supplier<Collector<E, ?, Set<F>>> {",
@@ -402,8 +402,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = MyMapper.class,",
-        "             collectedBy = MyCollector.class)",
+        "          mappedBy = MyMapper.class,",
+        "          collectedBy = MyCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
         "  static class MyMapper implements Supplier<Function<String, Long>> {",
@@ -430,8 +430,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = MyMapper.class,",
-        "             collectedBy = MyCollector.class)",
+        "          mappedBy = MyMapper.class,",
+        "          collectedBy = MyCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
         "  static class MyMapper implements Supplier<Function<String, Long>> {",
@@ -449,7 +449,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign Long to String.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to Long.");
   }
 
   @Test
@@ -459,8 +459,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = MyMapper.class,",
-        "             collectedBy = MyCollector.class)",
+        "          mappedBy = MyMapper.class,",
+        "          collectedBy = MyCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
         "  static class MyMapper<F> implements Supplier<Function<String, F>> {",
@@ -487,8 +487,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = MyMapper.class,",
-        "             collectedBy = MyCollector.class)",
+        "          mappedBy = MyMapper.class,",
+        "          collectedBy = MyCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
         "  static class MyMapper<F extends Long> implements Supplier<Function<String, F>> {",
@@ -506,7 +506,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve F to String.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to Long.");
   }
 
   @Test
@@ -516,7 +516,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = ToSetCollector.class)",
+        "          collectedBy = ToSetCollector.class)",
         "  abstract Set<OptionalInt> optionalInts();",
         "",
         "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
@@ -538,7 +538,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = A.class)",
+        "          collectedBy = A.class)",
         "  abstract Set<String> strings();",
         "",
         "  static class A implements ToSetCollector<Long> {",
@@ -582,7 +582,7 @@ class CollectorTest {
   }
 
   @Test
-  void validBothMapperAndCollectorHaveTypeargsHard() {
+  void freeTypeVariableInMapperAndCollectorCollectorPreference() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -592,13 +592,13 @@ class CollectorTest {
         "             collectedBy = Collect.class)",
         "  abstract List<Integer> map();",
         "",
-        "  static class Map<F extends java.lang.Number, E extends java.lang.CharSequence> implements Supplier<Function<E, F>> {",
+        "  static class Map<E extends CharSequence, F> implements Supplier<Function<E, F>> {",
         "    public Function<E, F> get() {",
         "      return null;",
         "    }",
         "  }",
         "",
-        "  static class Collect<E extends java.lang.Number> implements Supplier<Collector<E, ?, List<E>>> {",
+        "  static class Collect<E extends Number> implements Supplier<Collector<E, ?, List<E>>> {",
         "    public Collector<E, ?, List<E>> get() {",
         "      return null;",
         "    }",
@@ -616,8 +616,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = Map.class,",
-        "             collectedBy = Collect.class)",
+        "          mappedBy = Map.class,",
+        "          collectedBy = Collect.class)",
         "  abstract List<Integer> map();",
         "",
         "  static class Map<E extends CharSequence, F extends Number> implements Supplier<Function<E, F>> {",
@@ -639,7 +639,7 @@ class CollectorTest {
   }
 
   @Test
-  void invalidBothMapperAndCollectorHaveTypeargsUnresolvedCollectorTypearg() {
+  void validFreeTypevarsInMapperAndCollectorMapperPreference() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -655,7 +655,7 @@ class CollectorTest {
         "    }",
         "  }",
         "",
-        "  static class Collect<F, E extends Number> implements Supplier<Collector<F, ?, List<E>>> {",
+        "  static class Collect<F, E> implements Supplier<Collector<F, ?, List<E>>> {",
         "    public Collector<F, ?, List<E>> get() {",
         "      return null;",
         "    }",
@@ -663,8 +663,7 @@ class CollectorTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: incompatible type.");
+        .compilesWithoutError();
   }
 
   @Test
@@ -674,8 +673,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = Map.class,",
-        "             collectedBy = Collect.class)",
+        "          mappedBy = Map.class,",
+        "          collectedBy = Collect.class)",
         "  abstract List<Result<String>> map();",
         "",
         "  static class Map<E, F extends java.util.Collection> implements Supplier<Function<E, F>> {",
@@ -704,8 +703,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = XMap.class,",
-        "             collectedBy = YCol.class)",
+        "          mappedBy = XMap.class,",
+        "          collectedBy = YCol.class)",
         "  abstract List<String> map();",
         "",
         "  static class XMap<E> implements Supplier<Function<E, E>> {",
@@ -734,8 +733,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = Identity.class,",
-        "             collectedBy = Collect.class)",
+        "          mappedBy = Identity.class,",
+        "          collectedBy = Collect.class)",
         "  abstract List<Integer> ints();",
         "",
         "  static class Identity<E> implements Supplier<Function<E, E>> {",
@@ -763,8 +762,8 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = MakeList.class,",
-        "             collectedBy = Concat.class)",
+        "          mappedBy = MakeList.class,",
+        "          collectedBy = Concat.class)",
         "  abstract List<String> strings();",
         "",
         "  static class MakeList<E> implements Supplier<Function<E, List<E>>> {",

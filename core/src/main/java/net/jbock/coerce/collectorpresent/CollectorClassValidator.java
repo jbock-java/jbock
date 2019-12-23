@@ -11,8 +11,8 @@ import net.jbock.compiler.TypevarMapping;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 import java.util.stream.Collector;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
@@ -23,10 +23,12 @@ public class CollectorClassValidator {
 
   private final BasicInfo basicInfo;
   private final TypeElement collectorClass;
+  private final Optional<TypeMirror> mapperPreference;
 
-  public CollectorClassValidator(BasicInfo basicInfo, TypeElement collectorClass) {
+  public CollectorClassValidator(BasicInfo basicInfo, TypeElement collectorClass, Optional<TypeMirror> mapperPreference) {
     this.basicInfo = basicInfo;
     this.collectorClass = collectorClass;
+    this.mapperPreference = mapperPreference;
   }
 
   // visible for testing
@@ -41,13 +43,10 @@ public class CollectorClassValidator {
         .orElseThrow(this::boom);
     TypeMirror inputType = r_result.substitute(t)
         .orElseThrow(f -> boom(f.getMessage()));
-    FlattenerResult typeParameters = new Flattener(basicInfo, collectorClass)
+    FlattenerResult typeParameters = new Flattener(basicInfo, collectorClass, mapperPreference.map(preference -> new Flattener.Preference(inputType.toString(), preference)))
         .getTypeParameters(r_result)
         .orElseThrow(this::boom);
-    if (inputType.getKind() == TypeKind.TYPEVAR) {
-      inputType = typeParameters.get(inputType.toString());
-    }
-    return new CustomCollector(tool(), inputType, collectorClass, collectorType.isSupplier(), typeParameters.getTypeParameters());
+    return new CustomCollector(tool(), typeParameters.resolveTypevar(inputType), collectorClass, collectorType.isSupplier(), typeParameters.getTypeParameters());
   }
 
   private TypeTool tool() {

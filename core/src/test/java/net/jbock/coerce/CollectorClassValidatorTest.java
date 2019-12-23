@@ -8,6 +8,7 @@ import net.jbock.compiler.TypeTool;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.TypeElement;
+import java.util.Optional;
 
 import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -38,7 +39,7 @@ class CollectorClassValidatorTest {
           "java.util.Set<java.lang.String>"));
 
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
-      CustomCollector collectorInfo = new CollectorClassValidator(basicInfo, collectorClass)
+      CustomCollector collectorInfo = new CollectorClassValidator(basicInfo, collectorClass, Optional.empty())
           .getCollectorInfo();
       assertSameType("java.lang.String", collectorInfo.inputType(), elements, types);
       assertNotNull(collectorInfo.collectorType());

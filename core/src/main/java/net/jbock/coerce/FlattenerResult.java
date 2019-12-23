@@ -2,8 +2,10 @@ package net.jbock.coerce;
 
 import net.jbock.compiler.TypevarMapping;
 
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
+import java.util.Objects;
 
 public class FlattenerResult {
 
@@ -15,11 +17,14 @@ public class FlattenerResult {
     this.solution = solution;
   }
 
-  public TypeMirror get(String key) {
-    return solution.get(key);
-  }
-
   public List<TypeMirror> getTypeParameters() {
     return typeParameters;
+  }
+
+  public TypeMirror resolveTypevar(TypeMirror inputType) {
+    if (inputType.getKind() != TypeKind.TYPEVAR) {
+      return inputType;
+    }
+    return Objects.requireNonNull(solution.get(inputType.toString()), "assertion failed: null");
   }
 }

@@ -63,6 +63,22 @@ public class TypeTool {
         }
       };
 
+  private static final TypeVisitor<Boolean, TypeTool> IS_JAVA_LANG_OBJECT = new SimpleTypeVisitor8<Boolean, TypeTool>() {
+    @Override
+    protected Boolean defaultAction(TypeMirror e, TypeTool tool) {
+      return false;
+    }
+
+    @Override
+    public Boolean visitDeclared(DeclaredType type, TypeTool tool) {
+      TypeElement element = type.asElement().accept(TypeTool.AS_TYPE_ELEMENT, null);
+      if (element == null) {
+        return false;
+      }
+      return "java.lang.Object".equals(element.getQualifiedName().toString());
+    }
+  };
+
   private final Types types;
 
   private final Elements elements;
@@ -260,5 +276,9 @@ public class TypeTool {
 
   private List<? extends TypeMirror> typeargs(TypeMirror mirror) {
     return mirror.accept(TYPEARGS, null);
+  }
+
+  public boolean isObject(TypeMirror mirror) {
+    return mirror.accept(IS_JAVA_LANG_OBJECT, this);
   }
 }
