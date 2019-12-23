@@ -10,6 +10,7 @@ import net.jbock.compiler.TypevarMapping;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 import java.util.function.Function;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
@@ -44,10 +45,10 @@ public final class MapperClassValidator {
   }
 
   private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypevarMapping leftSolution, TypevarMapping rightSolution) {
-    return new Flattener(basicInfo, mapperClass)
+    return new Flattener(basicInfo, mapperClass, Optional.empty())
         .getTypeParameters(leftSolution, rightSolution)
         .map(MAPPER::boom, typeParameters ->
-            MapperType.create(tool(), functionType.isSupplier(), mapperClass, typeParameters));
+            MapperType.create(tool(), functionType.isSupplier(), mapperClass, typeParameters.getTypeParameters()));
   }
 
   private TypeTool tool() {

@@ -63,6 +63,22 @@ public class TypeTool {
         }
       };
 
+  private static final TypeVisitor<Boolean, TypeTool> IS_JAVA_LANG_OBJECT = new SimpleTypeVisitor8<Boolean, TypeTool>() {
+    @Override
+    protected Boolean defaultAction(TypeMirror e, TypeTool tool) {
+      return false;
+    }
+
+    @Override
+    public Boolean visitDeclared(DeclaredType type, TypeTool tool) {
+      TypeElement element = type.asElement().accept(TypeTool.AS_TYPE_ELEMENT, null);
+      if (element == null) {
+        return false;
+      }
+      return "java.lang.Object".equals(element.getQualifiedName().toString());
+    }
+  };
+
   private final Types types;
 
   private final Elements elements;
@@ -84,8 +100,21 @@ public class TypeTool {
       acc.put(y.toString(), x);
       return null; // success
     }
-    if (!isSameErasure(x, y)) {
-      return "can't unify " + y + " with " + x;
+    if (x.getKind() == TypeKind.DECLARED) {
+      DeclaredType xx = asDeclared(x);
+      if (xx.getTypeArguments().isEmpty()) {
+        if (!isAssignable(y, x)) {
+          return "Unification failed: can't assign " + y + " to " + x;
+        }
+      } else {
+        if (!isSameErasure(x, y)) {
+          return "Unification failed: " + y + " and " + x + " have different erasure";
+        }
+      }
+    } else {
+      if (!isSameErasure(x, y)) {
+        return "Unification failed: " + y + " and " + x + " have different erasure";
+      }
     }
     if (isRaw(x)) {
       return "raw type: " + x;
@@ -154,7 +183,14 @@ public class TypeTool {
   }
 
   public boolean isSameErasure(TypeMirror x, TypeMirror y) {
+    if (x.getKind().isPrimitive()) {
+      return isSameType(x, y);
+    }
     return types.isSameType(types.erasure(x), types.erasure(y));
+  }
+
+  public boolean isAssignable(TypeMirror x, TypeMirror y) {
+    return types.isAssignable(x, y);
   }
 
   public boolean isSameErasure(TypeMirror x, Class<?> y) {
@@ -240,5 +276,9 @@ public class TypeTool {
 
   private List<? extends TypeMirror> typeargs(TypeMirror mirror) {
     return mirror.accept(TYPEARGS, null);
+  }
+
+  public boolean isObject(TypeMirror mirror) {
+    return mirror.accept(IS_JAVA_LANG_OBJECT, this);
   }
 }
