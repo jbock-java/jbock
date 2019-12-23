@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class AllFlagsArgumentsTest {
 
   private ParserTestFixture<AllFlagsArguments> f =
-      ParserTestFixture.create(AllFlagsArguments_Parser.create());
+      ParserTestFixture.create(new AllFlagsArguments_Parser());
 
   @Test
   void tests() {

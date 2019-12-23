@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class PrimitiveArgumentsTest {
 
   private ParserTestFixture<PrimitiveArguments> f =
-      ParserTestFixture.create(PrimitiveArguments_Parser.create());
+      ParserTestFixture.create(new PrimitiveArguments_Parser());
 
   @Test
   void simpleTest() {

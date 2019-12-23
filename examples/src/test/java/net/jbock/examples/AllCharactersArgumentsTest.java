@@ -10,7 +10,7 @@ import static java.util.Arrays.asList;
 class AllCharactersArgumentsTest {
 
   private ParserTestFixture<AllCharactersArguments> f =
-      ParserTestFixture.create(AllCharactersArguments_Parser.create());
+      ParserTestFixture.create(new AllCharactersArguments_Parser());
 
   @Test
   void tests() {

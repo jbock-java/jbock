@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 class ComplicatedMapperArgumentsTest {
 
   private ParserTestFixture<ComplicatedMapperArguments> f =
-      ParserTestFixture.create(ComplicatedMapperArguments_Parser.create());
+      ParserTestFixture.create(new ComplicatedMapperArguments_Parser());
 
   @Test
   void number() {

@@ -11,13 +11,13 @@ class ListIntegerArgumentsTest {
 
   @Test
   void testPresent() {
-    ListIntegerArguments args = ListIntegerArguments_Parser.create().parseOrExit(new String[]{"-a", "1"});
+    ListIntegerArguments args = new ListIntegerArguments_Parser().parseOrExit(new String[]{"-a", "1"});
     assertEquals(Collections.singletonList(1), args.a());
   }
 
   @Test
   void testAbsent() {
-    ListIntegerArguments_Parser.ParseResult result = ListIntegerArguments_Parser.create().parse(new String[]{});
+    ListIntegerArguments_Parser.ParseResult result = new ListIntegerArguments_Parser().parse(new String[]{});
     assertTrue(result instanceof ListIntegerArguments_Parser.ParsingFailed);
   }
 }

@@ -10,7 +10,7 @@ class MainTest {
   @Test
   void testMain() {
     String[] argv = new String[]{"-v", "-f", "file.txt"};
-    Main.Arguments args = Main_Arguments_Parser.create().parseOrExit(argv);
+    Main.Arguments args = new Main_Arguments_Parser().parseOrExit(argv);
     assertEquals("file.txt", args.file());
     assertTrue(args.verbose());
   }

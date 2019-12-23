@@ -12,7 +12,7 @@ import static java.util.Collections.singletonList;
 class CurlArgumentsTest {
 
   private ParserTestFixture<CurlArguments> f =
-      ParserTestFixture.create(CurlArguments_Parser.create());
+      ParserTestFixture.create(new CurlArguments_Parser());
 
   @Test
   void testEmpty() {

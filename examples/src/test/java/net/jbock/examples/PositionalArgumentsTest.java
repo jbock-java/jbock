@@ -11,7 +11,7 @@ import static java.util.Collections.singletonList;
 class PositionalArgumentsTest {
 
   private ParserTestFixture<PositionalArguments> f =
-      ParserTestFixture.create(PositionalArguments_Parser.create());
+      ParserTestFixture.create(new PositionalArguments_Parser());
 
   @Test
   void errorMissingParameters() {

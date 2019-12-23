@@ -8,7 +8,7 @@ import static java.util.Collections.emptyList;
 class RequiredArgumentsTest {
 
   private ParserTestFixture<RequiredArguments> f =
-      ParserTestFixture.create(RequiredArguments_Parser.create());
+      ParserTestFixture.create(new RequiredArguments_Parser());
 
   @Test
   void success() {

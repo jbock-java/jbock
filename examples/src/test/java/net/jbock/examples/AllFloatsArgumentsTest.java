@@ -11,7 +11,7 @@ import static java.util.Collections.emptyList;
 class AllFloatsArgumentsTest {
 
   private ParserTestFixture<AllFloatsArguments> f =
-      ParserTestFixture.create(AllFloatsArguments_Parser.create());
+      ParserTestFixture.create(new AllFloatsArguments_Parser());
 
   @Test
   void listOfInteger() {

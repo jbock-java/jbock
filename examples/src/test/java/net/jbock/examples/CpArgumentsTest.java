@@ -11,7 +11,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CpArgumentsTest {
 
   private ParserTestFixture<CpArguments> f =
-      ParserTestFixture.create(CpArguments_Parser.create());
+      ParserTestFixture.create(new CpArguments_Parser());
 
   @Test
   void errorMissingSource() {

@@ -10,11 +10,11 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class HelplessArgumentsTest {
 
   private ParserTestFixture<HelplessArguments> f =
-      ParserTestFixture.create(HelplessArguments_Parser.create());
+      ParserTestFixture.create(new HelplessArguments_Parser());
 
   @Test
   void success0() {
-    HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"x"});
+    HelplessArguments_Parser.ParseResult opt = new HelplessArguments_Parser().parse(new String[]{"x"});
     assertTrue(opt instanceof HelplessArguments_Parser.ParsingSuccess);
     HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).getResult();
     assertEquals("x", args.required());
@@ -23,7 +23,7 @@ class HelplessArgumentsTest {
 
   @Test
   void success1() {
-    HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"x", "--help"});
+    HelplessArguments_Parser.ParseResult opt = new HelplessArguments_Parser().parse(new String[]{"x", "--help"});
     assertTrue(opt instanceof HelplessArguments_Parser.ParsingSuccess);
     HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).getResult();
     assertTrue(args.help());
@@ -32,7 +32,7 @@ class HelplessArgumentsTest {
 
   @Test
   void success2() {
-    HelplessArguments_Parser.ParseResult opt = HelplessArguments_Parser.create().parse(new String[]{"--help", "x"});
+    HelplessArguments_Parser.ParseResult opt = new HelplessArguments_Parser().parse(new String[]{"--help", "x"});
     assertTrue(opt instanceof HelplessArguments_Parser.ParsingSuccess);
     HelplessArguments args = ((HelplessArguments_Parser.ParsingSuccess) opt).getResult();
     assertTrue(args.help());

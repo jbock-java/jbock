@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class EvilArgumentsTest {
 
   private ParserTestFixture<EvilArguments> f =
-      ParserTestFixture.create(EvilArguments_Parser.create());
+      ParserTestFixture.create(new EvilArguments_Parser());
 
   @Test
   void basicTest() {

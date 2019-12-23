@@ -11,7 +11,7 @@ import static java.util.Collections.emptyList;
 class AllDoublesArgumentsTest {
 
   private ParserTestFixture<AllDoublesArguments> f =
-      ParserTestFixture.create(AllDoublesArguments_Parser.create());
+      ParserTestFixture.create(new AllDoublesArguments_Parser());
 
   @Test
   void listOfInteger() {

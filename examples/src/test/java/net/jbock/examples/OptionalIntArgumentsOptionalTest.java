@@ -11,13 +11,13 @@ class OptionalIntArgumentsOptionalTest {
 
   @Test
   void testPresent() {
-    OptionalIntArgumentsOptional args = OptionalIntArgumentsOptional_Parser.create().parseOrExit(new String[]{"-a", "1"});
+    OptionalIntArgumentsOptional args = new OptionalIntArgumentsOptional_Parser().parseOrExit(new String[]{"-a", "1"});
     assertEquals(OptionalInt.of(1), args.a());
   }
 
   @Test
   void testAbsent() {
-    OptionalIntArgumentsOptional args = OptionalIntArgumentsOptional_Parser.create().parseOrExit(new String[]{});
+    OptionalIntArgumentsOptional args = new OptionalIntArgumentsOptional_Parser().parseOrExit(new String[]{});
     assertEquals(OptionalInt.empty(), args.a());
   }
 }

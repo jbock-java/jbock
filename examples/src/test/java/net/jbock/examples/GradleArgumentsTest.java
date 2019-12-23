@@ -12,7 +12,7 @@ import static java.util.Collections.singletonList;
 class GradleArgumentsTest {
 
   private ParserTestFixture<GradleArguments> f =
-      ParserTestFixture.create(GradleArguments_Parser.create());
+      ParserTestFixture.create(new GradleArguments_Parser());
 
   @Test
   void errorShortLongConflict() {

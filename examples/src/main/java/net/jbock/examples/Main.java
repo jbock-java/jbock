@@ -26,7 +26,7 @@ public class Main {
   }
 
   public static void main(String[] arguments) {
-    Arguments args = Main_Arguments_Parser.create().parseOrExit(arguments);
+    Arguments args = new Main_Arguments_Parser().parseOrExit(arguments);
     System.out.println("The file '" + args.file() + "' was provided and verbosity is set to '" + args.verbose() + "'.");
   }
 }

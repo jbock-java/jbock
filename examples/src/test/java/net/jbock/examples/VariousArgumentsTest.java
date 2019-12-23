@@ -14,7 +14,7 @@ class VariousArgumentsTest {
 
   @Test
   void bigDecimal() {
-    VariousArguments_Parser.ParseResult parsed = VariousArguments_Parser.create().parse(new String[]{
+    VariousArguments_Parser.ParseResult parsed = new VariousArguments_Parser().parse(new String[]{
         "--bigDecimal", "3.14159265358979323846264338327950288419716939937510",
         "--bigInteger", "60221407600000000000000",
         "--path", "/home",

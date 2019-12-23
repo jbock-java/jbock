@@ -17,7 +17,7 @@ import static org.mockito.Mockito.when;
 class RestArgumentsTest {
 
   private ParserTestFixture<RestArguments> f =
-      ParserTestFixture.create(RestArguments_Parser.create());
+      ParserTestFixture.create(new RestArguments_Parser());
 
   private Map<String, String> messages = new HashMap<>();
 

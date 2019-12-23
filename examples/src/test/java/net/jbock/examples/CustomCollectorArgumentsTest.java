@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class CustomCollectorArgumentsTest {
 
   private ParserTestFixture<CustomCollectorArguments> f =
-      ParserTestFixture.create(CustomCollectorArguments_Parser.create());
+      ParserTestFixture.create(new CustomCollectorArguments_Parser());
 
   @Test
   void testNoMapper() {

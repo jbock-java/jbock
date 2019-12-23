@@ -8,7 +8,7 @@ import static java.util.Arrays.asList;
 class RmArgumentsTest {
 
   private ParserTestFixture<RmArguments> f =
-      ParserTestFixture.create(RmArguments_Parser.create());
+      ParserTestFixture.create(new RmArguments_Parser());
 
   @Test
   void testRest() {
