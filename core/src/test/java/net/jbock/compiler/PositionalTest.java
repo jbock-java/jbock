@@ -110,7 +110,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type.");
+        .withErrorContaining("Unknown parameter type: StringBuilder. Try defining a custom mapper or collector.");
   }
 
   @Test

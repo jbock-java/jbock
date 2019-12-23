@@ -109,7 +109,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Invalid bounds for E.");
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve E to String.");
   }
 
   @Test
@@ -170,7 +170,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Invalid bounds for E.");
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve E to String.");
   }
 
 
@@ -257,7 +257,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: can't unify Long with Integer");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign Long to Integer.");
   }
 
   @Test
@@ -269,8 +269,8 @@ class MapperTest {
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
         "  abstract Integer number();",
         "",
-        "  static class Mapper implements A<Long> {",
-        "    public Function<String, Long> get() {",
+        "  static class Mapper implements A<Number> {",
+        "    public Function<String, Number> get() {",
         "      return null;",
         "    }",
         "  }",
@@ -282,7 +282,31 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: can't unify Long with Integer");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign Number to Integer.");
+  }
+
+  @Test
+  void validBoundsLong3() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
+        "  abstract Number number();",
+        "",
+        "  static class Mapper implements A<Integer> {",
+        "    public Function<String, Integer> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  interface A<Z> extends B<String, Z> { }",
+        "  interface B<VN, WN> extends C<VN, WN> { }",
+        "  interface C<PRT, QRT> extends Supplier<Function<PRT, QRT>> { }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
   }
 
   @Test
@@ -440,7 +464,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: can't unify String with Integer");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign String to Integer.");
   }
 
   @Test
@@ -725,7 +749,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: can't unify Long with Integer");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign Long to Integer.");
   }
 
   @Test
@@ -748,7 +772,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: can't unify java.util.Date with Integer");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.util.Date to Integer.");
   }
 
   @Test
@@ -1120,4 +1144,28 @@ class MapperTest {
         .failsToCompile()
         .withErrorContaining("There is a problem with the mapper class: Cannot infer E: String vs List<Integer>.");
   }
+
+
+  @Test
+  void freeTypeVariableInMapper() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "          mappedBy = MyMapper.class)",
+        "  abstract Set<Integer> integers();",
+        "",
+        "  static class MyMapper<F extends String> implements Supplier<Function<String, F>> {",
+        "    public Function<String, F> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve F to Set<Integer>.");
+  }
+
 }

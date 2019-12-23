@@ -84,8 +84,21 @@ public class TypeTool {
       acc.put(y.toString(), x);
       return null; // success
     }
-    if (!isSameErasure(x, y)) {
-      return "can't unify " + y + " with " + x;
+    if (x.getKind() == TypeKind.DECLARED) {
+      DeclaredType xx = asDeclared(x);
+      if (xx.getTypeArguments().isEmpty()) {
+        if (!isAssignable(y, x)) {
+          return "Unification failed: can't assign " + y + " to " + x;
+        }
+      } else {
+        if (!isSameErasure(x, y)) {
+          return "Unification failed: " + y + " and " + x + " have different erasure";
+        }
+      }
+    } else {
+      if (!isSameErasure(x, y)) {
+        return "Unification failed: " + y + " and " + x + " have different erasure";
+      }
     }
     if (isRaw(x)) {
       return "raw type: " + x;
@@ -154,7 +167,14 @@ public class TypeTool {
   }
 
   public boolean isSameErasure(TypeMirror x, TypeMirror y) {
+    if (x.getKind().isPrimitive()) {
+      return isSameType(x, y);
+    }
     return types.isSameType(types.erasure(x), types.erasure(y));
+  }
+
+  public boolean isAssignable(TypeMirror x, TypeMirror y) {
+    return types.isAssignable(x, y);
   }
 
   public boolean isSameErasure(TypeMirror x, Class<?> y) {

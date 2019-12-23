@@ -75,7 +75,8 @@ public class CoercionProvider {
   private Coercion handleCollectorPresentMapperAbsent() {
     AbstractCollector collectorInfo = collectorInfo();
     CodeBlock mapExpr = basicInfo.findMapExpr(collectorInfo.inputType())
-        .orElseThrow(() -> basicInfo.asValidationException("Unknown parameter type. Define a custom mapper."));
+        .orElseThrow(() -> basicInfo.asValidationException(String.format("Unknown parameter type: %s. Try defining a custom mapper.",
+            collectorInfo.inputType())));
     MapperType mapperType = MapperType.create(mapExpr);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();

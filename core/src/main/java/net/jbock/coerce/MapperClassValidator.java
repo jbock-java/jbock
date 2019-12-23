@@ -47,7 +47,7 @@ public final class MapperClassValidator {
     return new Flattener(basicInfo, mapperClass)
         .getTypeParameters(leftSolution, rightSolution)
         .map(MAPPER::boom, typeParameters ->
-            MapperType.create(tool(), functionType.isSupplier(), mapperClass, typeParameters));
+            MapperType.create(tool(), functionType.isSupplier(), mapperClass, typeParameters.getTypeParameters()));
   }
 
   private TypeTool tool() {

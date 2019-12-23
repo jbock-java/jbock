@@ -327,7 +327,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type.");
+        .withErrorContaining("Unknown parameter type: Optional<Integer>. Try defining a custom mapper.");
   }
 
   @Test
@@ -349,7 +349,164 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds for E.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to Integer.");
+  }
+
+  @Test
+  void freeTypeVariableInCollector() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "             collectedBy = MyCollector.class)",
+        "  abstract Set<Integer> integers();",
+        "",
+        "  static class MyCollector<E, F> implements Supplier<Collector<E, ?, Set<F>>> {",
+        "    public Collector<E, ?, Set<F>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void freeTypeVariableInCollectorIntersectionType() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "             collectedBy = MyCollector.class)",
+        "  abstract Set<Integer> integers();",
+        "",
+        "  static class MyCollector<E extends Long & Number, F> implements Supplier<Collector<E, ?, Set<F>>> {",
+        "    public Collector<E, ?, Set<F>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the collector class: Intersection type is not supported for typevar E.");
+  }
+
+  @Test
+  void freeTypeVariableInCollectorMapped() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "             mappedBy = MyMapper.class,",
+        "             collectedBy = MyCollector.class)",
+        "  abstract Set<Integer> integers();",
+        "",
+        "  static class MyMapper implements Supplier<Function<String, Long>> {",
+        "    public Function<String, Long> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class MyCollector<E, F> implements Supplier<Collector<E, ?, Set<F>>> {",
+        "    public Collector<E, ?, Set<F>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void freeTypeVariableInCollectorMappedIncompatible() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "             mappedBy = MyMapper.class,",
+        "             collectedBy = MyCollector.class)",
+        "  abstract Set<Integer> integers();",
+        "",
+        "  static class MyMapper implements Supplier<Function<String, Long>> {",
+        "    public Function<String, Long> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class MyCollector<E extends String, F> implements Supplier<Collector<E, ?, Set<F>>> {",
+        "    public Collector<E, ?, Set<F>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign Long to String.");
+  }
+
+  @Test
+  void freeTypeVariableInMapperAndCollector() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "             mappedBy = MyMapper.class,",
+        "             collectedBy = MyCollector.class)",
+        "  abstract Set<Integer> integers();",
+        "",
+        "  static class MyMapper<F> implements Supplier<Function<String, F>> {",
+        "    public Function<String, F> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class MyCollector<E extends String, F> implements Supplier<Collector<E, ?, Set<F>>> {",
+        "    public Collector<E, ?, Set<F>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void freeTypeVariableInMapperAndCollectorIncompatible() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "             mappedBy = MyMapper.class,",
+        "             collectedBy = MyCollector.class)",
+        "  abstract Set<Integer> integers();",
+        "",
+        "  static class MyMapper<F extends Long> implements Supplier<Function<String, F>> {",
+        "    public Function<String, F> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class MyCollector<E extends String, F> implements Supplier<Collector<E, ?, Set<F>>> {",
+        "    public Collector<E, ?, Set<F>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve F to String.");
   }
 
   @Test
@@ -371,7 +528,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type.");
+        .withErrorContaining("Unknown parameter type: OptionalInt. Try defining a custom mapper.");
   }
 
   @Test
@@ -395,7 +552,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: can't unify Long with String");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign Long to String.");
   }
 
   @Test
@@ -405,7 +562,7 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             collectedBy = A.class)",
+        "          collectedBy = A.class)",
         "  abstract Set<String> strings();",
         "",
         "  static class A implements ToSetCollector<Long> {",
@@ -421,7 +578,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: can't unify Long with String");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign Long to String.");
   }
 
   @Test
@@ -463,13 +620,13 @@ class CollectorTest {
         "             collectedBy = Collect.class)",
         "  abstract List<Integer> map();",
         "",
-        "  static class Map<F extends java.lang.Number, E extends java.lang.CharSequence> implements Supplier<Function<E, F>> {",
+        "  static class Map<E extends CharSequence, F extends Number> implements Supplier<Function<E, F>> {",
         "    public Function<E, F> get() {",
         "      return null;",
         "    }",
         "  }",
         "",
-        "  static class Collect<E extends java.lang.Long> implements Supplier<Collector<E, ?, List<E>>> {",
+        "  static class Collect<E extends Long> implements Supplier<Collector<E, ?, List<E>>> {",
         "    public Collector<E, ?, List<E>> get() {",
         "      return null;",
         "    }",
@@ -478,10 +635,9 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds for E.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to Integer.");
   }
 
-  // TODO inferring collector input from mapper output is currently not supported
   @Test
   void invalidBothMapperAndCollectorHaveTypeargsUnresolvedCollectorTypearg() {
     JavaFileObject javaFile = fromSource(
@@ -489,17 +645,17 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "             mappedBy = Map.class,",
-        "             collectedBy = Collect.class)",
+        "          mappedBy = Map.class,",
+        "          collectedBy = Collect.class)",
         "  abstract List<Integer> map();",
         "",
-        "  static class Map<F extends java.lang.Number, E extends java.lang.CharSequence> implements Supplier<Function<E, F>> {",
+        "  static class Map<E extends CharSequence, F extends Number> implements Supplier<Function<E, F>> {",
         "    public Function<E, F> get() {",
         "      return null;",
         "    }",
         "  }",
         "",
-        "  static class Collect<F, E extends java.lang.Number> implements Supplier<Collector<F, ?, List<E>>> {",
+        "  static class Collect<F, E extends Number> implements Supplier<Collector<F, ?, List<E>>> {",
         "    public Collector<F, ?, List<E>> get() {",
         "      return null;",
         "    }",
@@ -567,7 +723,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds for E.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to String.");
   }
 
 
@@ -674,7 +830,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: can't unify Set<E> with test.Arguments.Foo");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign Set<E> to test.Arguments.Foo.");
   }
 
   @Test
