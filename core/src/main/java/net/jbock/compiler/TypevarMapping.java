@@ -1,11 +1,14 @@
 package net.jbock.compiler;
 
 import net.jbock.coerce.either.Either;
+import net.jbock.coerce.either.Left;
+import net.jbock.coerce.either.Right;
 import net.jbock.coerce.reference.TypecheckFailure;
 
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,6 +30,10 @@ public class TypevarMapping {
     this.tool = tool;
   }
 
+  public static TypevarMapping empty(TypeTool tool) {
+    return new TypevarMapping(Collections.emptyMap(), tool);
+  }
+
   public Set<Map.Entry<String, TypeMirror>> entries() {
     return map.entrySet();
   }
@@ -44,6 +51,9 @@ public class TypevarMapping {
   public Either<TypecheckFailure, TypeMirror> substitute(TypeMirror input) {
     if (input.getKind() == TypeKind.TYPEVAR) {
       return right(map.getOrDefault(input.toString(), input));
+    }
+    if (input.getKind() == TypeKind.ARRAY) {
+      return right(input);
     }
     return substitute(input.accept(AS_DECLARED, null))
         .map(Function.identity(), type -> type);
@@ -89,12 +99,16 @@ public class TypevarMapping {
     for (String key : solution.map.keySet()) {
       TypeMirror thisType = map.get(key);
       TypeMirror thatType = solution.get(key);
-      if (thisType != null && !tool.isSameType(thisType, thatType)) {
-        return left(String.format("Cannot infer %s: %s vs %s", key, thisType, thatType));
+      if (thisType != null) {
+        Either<Function<String, String>, TypeMirror> specialization = tool.getSpecialization(thisType, thatType);
+        if (specialization instanceof Left) {
+          return left(((Left<Function<String, String>, TypeMirror>) specialization).value().apply(key));
+        }
+        result.put(key, ((Right<Function<String, String>, TypeMirror>) specialization).value());
+      } else {
+        result.put(key, thatType);
       }
-      result.put(key, thatType);
     }
     return right(new TypevarMapping(result, tool));
   }
-
 }

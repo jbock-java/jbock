@@ -18,7 +18,6 @@ import java.util.List;
 import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.regex.Pattern;
 
 import static net.jbock.compiler.Constants.STRING;
@@ -41,8 +40,6 @@ class AutoMapper {
 
   private static final List<Entry<Class<?>, CodeBlock>> MAPPERS = Arrays.asList(
       create(String.class, CodeBlock.of("$T.identity()", Function.class)),
-      create(CharSequence.class, identityLambda()),
-      create(Object.class, identityLambda()),
       create(Integer.class, VALUE_OF),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
       create(File.class, parseFileLambda()),
@@ -96,10 +93,5 @@ class AutoMapper {
         .endControlFlow()
         .add("return $N.charAt(0);\n", s)
         .unindent().add("}").build();
-  }
-
-  private static CodeBlock identityLambda() {
-    ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
-    return CodeBlock.of("$N -> $N", s, s);
   }
 }

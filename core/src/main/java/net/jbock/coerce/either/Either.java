@@ -18,5 +18,5 @@ public abstract class Either<L, R> {
 
   public abstract <U> U fold(Function<L, U> leftMapper, Function<R, U> rightMapper);
 
-  public abstract R orElseThrow(Function<L, ? extends RuntimeException> f);
+  public abstract R orElseThrow(Function<L, ? extends RuntimeException> leftMapper);
 }

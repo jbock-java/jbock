@@ -1,13 +1,13 @@
 package net.jbock.coerce;
 
+import net.jbock.coerce.either.Either;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
-import net.jbock.compiler.TypevarMapping;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -26,13 +26,19 @@ public final class MapperPreferenceChecker {
   public Optional<TypeMirror> getPreference() {
     ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass).getReferencedType();
     TypeMirror outputType = functionType.typeArguments().get(1);
-    FlattenerResult typeParameters = new Flattener(basicInfo, mapperClass, Optional.empty())
-        .getTypeParameters(new TypevarMapping(Collections.emptyMap(), basicInfo.tool()))
-        .orElseThrow(message -> basicInfo.asValidationException(MAPPER.boom(message)));
-    TypeMirror result = typeParameters.resolveTypevar(outputType);
-    if (outputType.getKind() == TypeKind.TYPEVAR && basicInfo.tool().isObject(result)) {
-      return Optional.empty();
+    if (outputType.getKind() != TypeKind.TYPEVAR) {
+      return Optional.of(outputType);
     }
-    return Optional.of(result);
+    Either<String, TypeMirror> bound = basicInfo.tool().getBound(findByName(outputType.toString()));
+    return Optional.of(bound.orElseThrow(s -> basicInfo.asValidationException(MAPPER.boom(s))));
+  }
+
+  private TypeParameterElement findByName(String name) {
+    for (TypeParameterElement p : mapperClass.getTypeParameters()) {
+      if (p.toString().equals(name)) {
+        return p;
+      }
+    }
+    throw new AssertionError("expecting a type parameter named " + name);
   }
 }

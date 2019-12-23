@@ -6,6 +6,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
@@ -20,6 +21,7 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static net.jbock.coerce.either.Either.left;
 import static net.jbock.coerce.either.Either.right;
@@ -93,12 +95,12 @@ public class TypeTool {
    * @return {@code true} means failure
    */
   private String unify(TypeMirror x, TypeMirror y, Map<String, TypeMirror> acc) {
-    if (x.getKind() == TypeKind.TYPEVAR) {
-      return "can't unify " + y + " with typevar " + x;
-    }
     if (y.getKind() == TypeKind.TYPEVAR) {
       acc.put(y.toString(), x);
       return null; // success
+    }
+    if (x.getKind() == TypeKind.TYPEVAR) {
+      return "can't unify " + y + " with typevar " + x;
     }
     if (x.getKind() == TypeKind.DECLARED) {
       DeclaredType xx = asDeclared(x);
@@ -272,6 +274,27 @@ public class TypeTool {
       }
     }
     return false;
+  }
+
+  public Either<String, TypeMirror> getBound(TypeParameterElement p) {
+    List<? extends TypeMirror> bounds = p.getBounds();
+    if (bounds.isEmpty()) {
+      return right(getDeclaredType(Object.class, Collections.emptyList()));
+    }
+    if (bounds.size() >= 2) {
+      return left("Intersection type is not supported for typevar " + p.toString());
+    }
+    return right(bounds.get(0));
+  }
+
+  public Either<Function<String, String>, TypeMirror> getSpecialization(TypeMirror thisType, TypeMirror thatType) {
+    if (isAssignable(thisType, thatType)) {
+      return right(thisType);
+    }
+    if (isAssignable(thatType, thisType)) {
+      return right(thatType);
+    }
+    return left(key -> String.format("Cannot infer %s: %s vs %s", key, thisType, thatType));
   }
 
   private List<? extends TypeMirror> typeargs(TypeMirror mirror) {

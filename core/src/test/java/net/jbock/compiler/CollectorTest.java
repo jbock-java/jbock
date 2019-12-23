@@ -449,7 +449,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to Long.");
+        .withErrorContaining("There is a problem with the collector class: Cannot infer collector input: Long vs String.");
   }
 
   @Test
@@ -506,7 +506,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to Long.");
+        .withErrorContaining("There is a problem with the collector class: Cannot infer collector input: Long vs String.");
   }
 
   @Test
@@ -526,7 +526,7 @@ class CollectorTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(new Processor(true))
         .failsToCompile()
         .withErrorContaining("Unknown parameter type: OptionalInt. Try defining a custom mapper.");
   }
@@ -635,7 +635,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to Integer.");
+        .withErrorContaining("There is a problem with the collector class: Cannot infer E: Long vs Integer.");
   }
 
   @Test
@@ -722,7 +722,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to String.");
+        .withErrorContaining("There is a problem with the collector class: Cannot infer E: Integer vs String.");
   }
 
 

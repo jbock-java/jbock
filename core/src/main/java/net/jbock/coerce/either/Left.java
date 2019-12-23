@@ -30,7 +30,7 @@ public class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public R orElseThrow(Function<L, ? extends RuntimeException> f) {
-    throw f.apply(left);
+  public R orElseThrow(Function<L, ? extends RuntimeException> leftMapper) {
+    throw leftMapper.apply(left);
   }
 }
