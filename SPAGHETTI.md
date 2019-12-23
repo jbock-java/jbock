@@ -82,7 +82,7 @@ Here is a valid usage example:
 
 ````java
 String[] args = { "a.txt", "b.txt" };
-MyArguments my = MyArguments_Parser.create().parseOrExit(args);
+MyArguments my = new MyArguments_Parser().parseOrExit(args);
 assertEquals(Paths.get("a.txt"), my.source());
 assertEquals(Paths.get("b.txt"), my.target());
 ````
@@ -92,7 +92,7 @@ assertEquals(Paths.get("b.txt"), my.target());
 These are the simplest non-positional parameters, a.k.a. *options*. 
 
 To declare a flag, simply
-declare an optionEnum method that returns
+declare an option method that returns
 `boolean` or `Boolean`.
 
 ````java
@@ -105,26 +105,25 @@ if either `--quiet` or `-q`
 are <a href="#binding-options">*free*</a> in `argv`.
 
 ````java
-MyArguments args = MyArguments_Parser.create().parseOrExit(new String[]{ "-q" });
-assertTrue(args.quiet());
-args = MyArguments_Parser.create().parseOrExit(new String[]{ "--quiet" });
-assertTrue(args.quiet());
+MyArguments_Parser parser = new MyArguments_Parser();
+assertTrue(parser.parseOrExit(new String[]{ "-q" }).quiet());
+assertTrue(parser.parseOrExit(new String[]{ "--quiet" }).quiet());
 ````
 
 ### Binding options
 
-An *optionEnum* that is not a <a href="#flags">*flag*</a> is called a
-*binding optionEnum*. For example, the following
-method declares a binding optionEnum:
+An *option* that is not a <a href="#flags">*flag*</a> is called a
+*binding option*. For example, the following
+method declares a binding option:
 
 ````java
-// example of a binding optionEnum
+// example of a binding option
 @Option("file")
 abstract String file();
 ````
 
 The bound token can be any string; it may even start with a dash.
-Any token in `argv` that is not bound by some binding optionEnum, and precedes the
+Any token in `argv` that is not bound by some binding option, and precedes the
 <a href="#escape-sequence">*escape sequence*</a>, is called *free*.
 
 ### Escape sequence
@@ -132,7 +131,7 @@ Any token in `argv` that is not bound by some binding optionEnum, and precedes t
 The escape sequence consists of the <a href="#binding-options">*free*</a> token `"--"`,
 i.e. two consecutive dashes. 
 Any remaining tokens in `argv` after that will be treated as <a href="#params">*params*</a>.
-In other words, the escape sequence *ends optionEnum parsing*.
+In other words, the escape sequence *ends option parsing*.
 The generated parser will always recognize the escape sequence,
 as long as there is at least one *param* defined.
 
@@ -151,12 +150,12 @@ abstract List<String> headers();
 This list will contain headers in the same order
 in which they appear in `argv`.
 
-To declare a repeatable optionEnum or param, either define a custom collector, or
+To declare a repeatable option or param, either define a custom collector, or
 use a parameter method that returns `List<SomeMappableType>`.
 
 ### Parameter shapes
 
-Given a <a href="#binding-options">*binding optionEnum*</a> like this
+Given a <a href="#binding-options">*binding option*</a> like this
 
 ````java
 @Option(value = "file", mnemonic = 'f')
@@ -192,7 +191,7 @@ The token `--help` has a special meaning, if it is the first token in `argv`.
 
 ````java
 String[] argv = { "--help" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+MyArguments args = new MyArguments_Parser().parseOrExit(argv);
 ````
 
 Given this input, or any array where `--help` is the first token,
@@ -228,7 +227,7 @@ class PositiveNumberMapper implements Function<String, Integer> {
     if (i <= 0) {
       throw new IllegalArgumentException("Try to keep it positive.");
     }
-    return i; // returning null is not recommended
+    return i;
   }
 }
 ````
@@ -283,7 +282,7 @@ This can be tested as follows
 
 ````java
 String[] argv = { "-Xhorse:12", "-Xsheep:4" };
-MyArguments args = MyArguments_Parser.create().parseOrExit(argv);
+MyArguments args = new MyArguments_Parser().parseOrExit(argv);
 
 assertEquals(2, args.headers());
 assertEquals("12", args.headers().get("horse"));
@@ -297,7 +296,7 @@ Alternatively a resource bundle can be used, which overrides the
 javadoc if the bundle contains a translation for the JVM's locale:
 
 ````java
-MyArguments args = MyArguments_Parser.create()
+MyArguments args = new MyArguments_Parser()
         .withResourceBundle(ResourceBundle.getBundle("MyBundle"))
         .parseOrExit(argv);
 ````
@@ -339,26 +338,25 @@ The output streams, as well as some other parameters can be changed before one o
 This example shows all the available options:
 
 ````java
-String[] argv = {"-f hello.txt"};
-MyArguments_Parser.create()
-    .withErrorExitCode(2)                                           // default is 1
-    .withErrorStream(new PrintStream(new ByteArrayOutputStream()))  // used for parsind errors, default is System.err
-    .withOutputStream(new PrintStream(new ByteArrayOutputStream())) // used when --help is passed, default is System.out
-    .withIndent(2)                                                  // default is 7
+MyArguments_Parser parser = new MyArguments_Parser()
+    .withErrorStream(new PrintStream(new ByteArrayOutputStream()))  // default is System.err
+    .withHelpStream(new PrintStream(new ByteArrayOutputStream()))   // default is System.out
+    .withIndent(2)                                                  // default is 4
+    .maxLineWidth(120)                                              // default is 80
     .withResourceBundle(ResourceBundle.getBundle("UserOpts"))       // default is none
-    .parseOrExit(argv);
+    ;
 ````
 
-The `indent` is used when printing the usage page.
+The `indent` and `maxLineWidth` are print settings for the help text.
 
 ### Limitations
 
 * No grouping. For example, `rm -rf` is invalid, use `rm -r -f` instead
+* Also no bsd-style grouping as in `tar xzf`, use `tar -x -z -f` instead
 * Option names always start with one or two dashes.
 * No multi-valued options. Workaround: *Repeatable* options or params.
-* No bsd-style flags as in `tar xzf`, use `tar -x -z -f` instead
 * Mnemonics are limited to a single character.
-* Cannot distinguish between attached or detached optionEnum shape. Both are always allowed and equivalent.
+* Cannot distinguish between attached or detached option shape. Both are always allowed and equivalent.
 
 ### Gradle config
 

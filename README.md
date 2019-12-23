@@ -35,7 +35,7 @@ which can be used as follows:
 
 ````java
 String[] args = { "-v2", "file.txt" }; // from command line
-MyArguments my = MyArguments_Parser.create().parseOrExit(args);
+MyArguments my = new MyArguments_Parser().parseOrExit(args);
 
 // make sure this works as expected...
 assertEquals(OptionalInt.of(2), my.verbosity());
