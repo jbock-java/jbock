@@ -33,7 +33,7 @@ This will generate a class called
 which can be used as follows:
 
 ````java
-String[] args = { "-v2", "file.txt" }; // from command line
+String[] args = { "-v2", "file.txt" }; // command line parameters
 MyArguments my = new MyArguments_Parser().parseOrExit(args);
 
 // make sure this works as expected...
