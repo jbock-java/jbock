@@ -147,7 +147,7 @@ if [ "$cygwin" = "true" -o "$msys" = "true" ] ; then
     i=0
     for arg in "$@" ; do
         CHECK=`echo "$arg"|egrep -c "$OURCYGPATTERN" -`
-        CHECK2=`echo "$arg"|egrep -c "^-"`                                 ### Determine if an optionEnum
+        CHECK2=`echo "$arg"|egrep -c "^-"`                                 ### Determine if an option
 
         if [ $CHECK -ne 0 ] && [ $CHECK2 -eq 0 ] ; then                    ### Added a condition
             eval `echo args$i`=`cygpath --path --ignore --mixed "$arg"`
