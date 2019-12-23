@@ -30,10 +30,10 @@ will trigger a round of code generation at compile time.
 
 This will generate a class called
 [MyArguments_Parser,](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
-which can be used as follows:
+which can then be used as follows:
 
 ````java
-String[] args = { "-v2", "file.txt" }; // command line parameters
+String[] args = { "-v", "2", "file.txt" }; // command line parameters
 MyArguments my = new MyArguments_Parser().parseOrExit(args);
 
 // make sure this works as expected...
