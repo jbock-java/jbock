@@ -94,7 +94,7 @@ public class CoercionProvider {
 
   private AbstractCollector collectorInfo(Optional<TypeElement> mapperClass) {
     if (basicInfo.collectorClass().isPresent()) {
-      Optional<TypeMirror> mapperPreference = mapperClass.flatMap(clazz -> new MapperPreferenceChecker(basicInfo, clazz).getPreference());
+      Optional<TypeMirror> mapperPreference = mapperClass.map(clazz -> new MapperConstraintChecker(basicInfo, clazz).getConstraint());
       return new CollectorClassValidator(basicInfo, basicInfo.collectorClass().get(), mapperPreference).getCollectorInfo();
     }
     Optional<TypeMirror> wrapped = tool().unwrap(List.class, basicInfo.originalReturnType());

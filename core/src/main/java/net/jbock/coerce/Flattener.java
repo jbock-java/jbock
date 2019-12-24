@@ -11,7 +11,9 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -52,6 +54,7 @@ public class Flattener {
 
   private Either<String, FlattenerResult> getTypeParameters(TypevarMapping solution) {
     List<TypeMirror> result = new ArrayList<>();
+    Map<String, TypeMirror> mapping = new LinkedHashMap<>(solution.getMapping());
     List<? extends TypeParameterElement> parameters = targetElement.getTypeParameters();
     for (TypeParameterElement p : parameters) {
       List<? extends TypeMirror> bounds = p.getBounds();
@@ -66,9 +69,10 @@ public class Flattener {
       if (tool().isOutOfBounds(m, bounds)) {
         return left("Invalid bounds: Can't resolve " + p.toString() + " to " + m);
       }
+      mapping.put(p.toString(), m);
       result.add(m);
     }
-    return right(new FlattenerResult(result, solution));
+    return right(new FlattenerResult(result, new TypevarMapping(mapping, tool())));
   }
 
   private Either<String, TypeMirror> inferFromBounds(TypeParameterElement p) {

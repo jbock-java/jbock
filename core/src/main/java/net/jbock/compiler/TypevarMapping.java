@@ -111,4 +111,8 @@ public class TypevarMapping {
     }
     return right(new TypevarMapping(result, tool));
   }
+
+  public Map<String, TypeMirror> getMapping() {
+    return map;
+  }
 }

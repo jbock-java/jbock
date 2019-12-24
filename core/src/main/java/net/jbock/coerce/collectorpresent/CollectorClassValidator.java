@@ -9,6 +9,7 @@ import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
+import net.jbock.coerce.reference.TypecheckFailure;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.TypevarMapping;
 import net.jbock.compiler.ValidationException;
@@ -58,12 +59,18 @@ public class CollectorClassValidator {
         .orElseThrow(this::boom);
     TypeMirror inputType = typeParameters.substitute(t).orElseThrow(f -> boom(f.getMessage()));
     if (mapperPreference.isPresent()) {
-      TypeMirror tInput = typeParameters.substitute(mapperPreference.get()).orElseThrow(f -> boom(f.getMessage()));
-      Either<Function<String, String>, TypeMirror> specialization = tool().getSpecialization(tInput, inputType);
+      TypeMirror preference = mapperPreference.get();
+      TypeMirror inferred = typeParameters.substitute(preference).orElseThrow(f -> boom(f.getMessage()));
+      Either<Function<String, String>, TypeMirror> specialization = tool().getSpecialization(inferred, inputType);
       if (specialization instanceof Left) {
-        throw boom(((Left<Function<String, String>, TypeMirror>) specialization).value().apply("collector input"));
+        Either<String, TypevarMapping> unify = tool().unify(preference, inputType);
+        Either<TypecheckFailure, TypeMirror> subsitute = unify
+            .orElseThrow(f -> boom(((Left<Function<String, String>, TypeMirror>) specialization).value().apply("collector input")))
+            .substitute(inputType);
+        inputType = subsitute.orElseThrow(f -> boom(f.getMessage()));
+      } else {
+        inputType = ((Right<Function<String, String>, TypeMirror>) specialization).value();
       }
-      inputType = ((Right<Function<String, String>, TypeMirror>) specialization).value();
     }
     if (inputType.getKind() == TypeKind.TYPEVAR) {
       inputType = tool().getDeclaredType(String.class, Collections.emptyList());

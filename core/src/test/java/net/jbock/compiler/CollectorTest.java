@@ -667,6 +667,62 @@ class CollectorTest {
   }
 
   @Test
+  void validFreeTypevarsInMapperAndCollectorMapperPreferencePossibleNumberToInteger() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "          mappedBy = Map.class,",
+        "          collectedBy = Collect.class)",
+        "  abstract List<Integer> map();",
+        "",
+        "  static class Map<E , F extends Number> implements Supplier<Function<E, List<F>>> {",
+        "    public Function<E, List<F>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class Collect<F extends Integer, E> implements Supplier<Collector<List<F>, ?, List<E>>> {",
+        "    public Collector<List<F>, ?, List<E>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void validFreeTypevarsInMapperAndCollectorMapperPreferencePossibleIntegerToNumber() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "          mappedBy = Map.class,",
+        "          collectedBy = Collect.class)",
+        "  abstract List<Integer> map();",
+        "",
+        "  static class Map<E , F extends Integer> implements Supplier<Function<E, List<F>>> {",
+        "    public Function<E, List<F>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class Collect<F extends Number, E> implements Supplier<Collector<List<F>, ?, List<E>>> {",
+        "    public Collector<List<F>, ?, List<E>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void validBothMapperCollectorAndResultHaveTypeargs() {
     JavaFileObject javaFile = fromSource(
         "@Command",
