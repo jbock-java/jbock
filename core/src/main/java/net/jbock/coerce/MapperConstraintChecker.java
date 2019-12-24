@@ -5,9 +5,6 @@ import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.function.Function;
 
@@ -25,23 +22,15 @@ public final class MapperConstraintChecker {
 
   public TypeMirror getConstraint() {
     ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass).getReferencedType();
+    TypeMirror inputType = functionType.typeArguments().get(0);
     TypeMirror outputType = functionType.typeArguments().get(1);
-    if (outputType.getKind() == TypeKind.DECLARED) {
-      DeclaredType declared = TypeTool.asDeclared(outputType); // TODO validFreeTypevarsInMapperAndCollectorMapperPreferencePossibleIntegerToNumber
-    }
-    if (outputType.getKind() != TypeKind.TYPEVAR) {
-      return outputType;
-    }
-    return basicInfo.tool().getBound(findByName(outputType.toString()))
-        .orElseThrow(s -> basicInfo.asValidationException(MAPPER.boom(s)));
+    return tool().unify(tool().asType(String.class), inputType)
+        .orElseThrow(s -> basicInfo.asValidationException(MAPPER.boom(s)))
+        .substitute(outputType)
+        .orElseThrow(f -> basicInfo.asValidationException(MAPPER.boom(f.getMessage())));
   }
 
-  private TypeParameterElement findByName(String name) {
-    for (TypeParameterElement p : mapperClass.getTypeParameters()) {
-      if (p.toString().equals(name)) {
-        return p;
-      }
-    }
-    throw new AssertionError("expecting a type parameter named " + name);
+  private TypeTool tool() {
+    return basicInfo.tool();
   }
 }
