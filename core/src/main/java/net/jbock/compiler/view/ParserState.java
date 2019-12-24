@@ -134,7 +134,7 @@ final class ParserState {
     } else if (param.isOptional()) {
       builder.add(".findAny()");
     } else if (param.isRequired()) {
-      builder.add(".findAny().orElseThrow($T.$L.missingRequired())", context.optionType(),
+      builder.add(".findAny().orElseThrow($T.$L::missingRequired)", context.optionType(),
           param.enumConstant());
     }
     return builder.build();

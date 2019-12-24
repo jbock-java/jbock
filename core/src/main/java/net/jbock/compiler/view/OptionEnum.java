@@ -17,7 +17,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Supplier;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
@@ -103,7 +102,7 @@ final class OptionEnum {
         .addField(bundleKeyField)
         .addField(descriptionField)
         .addField(shapeField)
-        .addMethod(missingRequiredLambdaMethod())
+        .addMethod(missingRequiredMethod())
         .addMethod(privateConstructor())
         .addMethod(optionNamesMethod)
         .addMethod(optionParsersMethod)
@@ -266,16 +265,15 @@ final class OptionEnum {
         .build();
   }
 
-  private MethodSpec missingRequiredLambdaMethod() {
-    CodeBlock lambda = CodeBlock.of(addBreaks("new $T($S + (names.isEmpty() ? name() : " +
-            "$T.format($S, name(), $T.join($S, names))))"),
-        RuntimeException.class,
-        "Missing required: ",
-        String.class,
-        "%s (%s)", String.class, ", ");
+  private MethodSpec missingRequiredMethod() {
     return MethodSpec.methodBuilder("missingRequired")
-        .returns(ParameterizedTypeName.get(Supplier.class, RuntimeException.class))
-        .addCode("return () -> $L;\n", lambda)
+        .returns(RuntimeException.class)
+        .addStatement(addBreaks("return new $T($S + (names.isEmpty() ? name() : " +
+                "$T.format($S, name(), $T.join($S, names))))"),
+            RuntimeException.class,
+            "Missing required: ",
+            String.class,
+            "%s (%s)", String.class, ", ")
         .build();
   }
 
