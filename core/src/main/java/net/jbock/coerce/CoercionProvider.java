@@ -73,7 +73,7 @@ public class CoercionProvider {
   }
 
   private Coercion handleCollectorPresentMapperAbsent() {
-    AbstractCollector collectorInfo = collectorInfo(Optional.empty());
+    AbstractCollector collectorInfo = collectorInfo();
     CodeBlock mapExpr = basicInfo.findMapExpr(collectorInfo.inputType())
         .orElseThrow(() -> basicInfo.asValidationException(String.format("Unknown parameter type: %s. Try defining a custom mapper.",
             collectorInfo.inputType())));
@@ -84,7 +84,7 @@ public class CoercionProvider {
   }
 
   private Coercion handleCollectorPresentMapperPresent(TypeElement mapperClass) {
-    AbstractCollector collectorInfo = collectorInfo(Optional.of(mapperClass));
+    AbstractCollector collectorInfo = collectorInfo();
     ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType()
         .orElseThrow(basicInfo::asValidationException);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
@@ -92,10 +92,9 @@ public class CoercionProvider {
     return Coercion.getCoercion(basicInfo, collectorInfo, mapperType, extractExpr, constructorParamType, REPEATABLE);
   }
 
-  private AbstractCollector collectorInfo(Optional<TypeElement> mapperClass) {
+  private AbstractCollector collectorInfo() {
     if (basicInfo.collectorClass().isPresent()) {
-      Optional<TypeMirror> mapperPreference = mapperClass.flatMap(clazz -> new MapperPreferenceChecker(basicInfo, clazz).getPreference());
-      return new CollectorClassValidator(basicInfo, basicInfo.collectorClass().get(), mapperPreference).getCollectorInfo();
+      return new CollectorClassValidator(basicInfo, basicInfo.collectorClass().get()).getCollectorInfo();
     }
     Optional<TypeMirror> wrapped = tool().unwrap(List.class, basicInfo.originalReturnType());
     if (!wrapped.isPresent()) {

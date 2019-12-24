@@ -353,27 +353,6 @@ class CollectorTest {
   }
 
   @Test
-  void freeTypeVariableInCollector() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\",",
-        "          collectedBy = MyCollector.class)",
-        "  abstract Set<Integer> integers();",
-        "",
-        "  static class MyCollector<E, F> implements Supplier<Collector<E, ?, Set<F>>> {",
-        "    public Collector<E, ?, Set<F>> get() {",
-        "      return null;",
-        "    }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
   void freeTypeVariableInCollectorIntersectionType() {
     JavaFileObject javaFile = fromSource(
         "@Command",
@@ -449,7 +428,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Cannot infer collector input: Long vs String.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign Long to String.");
   }
 
   @Test
@@ -463,8 +442,8 @@ class CollectorTest {
         "          collectedBy = MyCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
-        "  static class MyMapper<F> implements Supplier<Function<String, F>> {",
-        "    public Function<String, F> get() {",
+        "  static class MyMapper<A> implements Supplier<Function<String, A>> {",
+        "    public Function<String, A> get() {",
         "      return null;",
         "    }",
         "  }",
@@ -491,8 +470,8 @@ class CollectorTest {
         "          collectedBy = MyCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
-        "  static class MyMapper<F extends Long> implements Supplier<Function<String, F>> {",
-        "    public Function<String, F> get() {",
+        "  static class MyMapper<A extends Long> implements Supplier<Function<String, A>> {",
+        "    public Function<String, A> get() {",
         "      return null;",
         "    }",
         "  }",
@@ -506,7 +485,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Cannot infer collector input: Long vs String.");
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve A to String.");
   }
 
   @Test
@@ -610,36 +589,28 @@ class CollectorTest {
   }
 
   @Test
-  void invalidBothMapperAndCollectorHaveTypeargsBadCollectorBounds() {
+  void freeTypeVariableInCollector() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
-        "          mappedBy = Map.class,",
-        "          collectedBy = Collect.class)",
-        "  abstract List<Integer> map();",
+        "          collectedBy = MyCollector.class)",
+        "  abstract Set<Integer> integers();",
         "",
-        "  static class Map<E extends CharSequence, F extends Number> implements Supplier<Function<E, F>> {",
-        "    public Function<E, F> get() {",
-        "      return null;",
-        "    }",
-        "  }",
-        "",
-        "  static class Collect<E extends Long> implements Supplier<Collector<E, ?, List<E>>> {",
-        "    public Collector<E, ?, List<E>> get() {",
+        "  static class MyCollector<E extends String, F> implements Supplier<Collector<E, ?, Set<F>>> {",
+        "    public Collector<E, ?, Set<F>> get() {",
         "      return null;",
         "    }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Cannot infer E: Long vs Integer.");
+        .compilesWithoutError();
   }
 
   @Test
-  void validFreeTypevarsInMapperAndCollectorMapperPreference() {
+  void validFreeTypevarsInMapperAndCollectorMapperPreferencePossibleNumberToInteger() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -649,14 +620,14 @@ class CollectorTest {
         "          collectedBy = Collect.class)",
         "  abstract List<Integer> map();",
         "",
-        "  static class Map<E extends CharSequence, F extends Number> implements Supplier<Function<E, F>> {",
-        "    public Function<E, F> get() {",
+        "  static class Map<E , F extends Number> implements Supplier<Function<E, List<F>>> {",
+        "    public Function<E, List<F>> get() {",
         "      return null;",
         "    }",
         "  }",
         "",
-        "  static class Collect<F, E> implements Supplier<Collector<F, ?, List<E>>> {",
-        "    public Collector<F, ?, List<E>> get() {",
+        "  static class Collect<F extends Integer, E> implements Supplier<Collector<List<F>, ?, List<E>>> {",
+        "    public Collector<List<F>, ?, List<E>> get() {",
         "      return null;",
         "    }",
         "  }",
@@ -707,8 +678,8 @@ class CollectorTest {
         "          collectedBy = YCol.class)",
         "  abstract List<String> map();",
         "",
-        "  static class XMap<E> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() {",
+        "  static class XMap<A> implements Supplier<Function<A, A>> {",
+        "    public Function<A, A> get() {",
         "      return Function.identity();",
         "    }",
         "  }",
@@ -722,7 +693,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Cannot infer E: Integer vs String.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to String.");
   }
 
 
