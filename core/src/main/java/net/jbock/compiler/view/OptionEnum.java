@@ -24,7 +24,6 @@ import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.coerce.Util.addBreaks;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
@@ -266,14 +265,12 @@ final class OptionEnum {
   }
 
   private MethodSpec missingRequiredMethod() {
+    CodeBlock.Builder code = CodeBlock.builder()
+        .add("return new $T($S + name() +\n", RuntimeException.class, "Missing required: ").indent()
+        .addStatement("(names.isEmpty() ? $S : $S + $T.join($S, names) + $S))", "", " (", String.class, ", ", ")").unindent();
     return MethodSpec.methodBuilder("missingRequired")
         .returns(RuntimeException.class)
-        .addStatement(addBreaks("return new $T($S + (names.isEmpty() ? name() : " +
-                "$T.format($S, name(), $T.join($S, names))))"),
-            RuntimeException.class,
-            "Missing required: ",
-            String.class,
-            "%s (%s)", String.class, ", ")
+        .addCode(code.build())
         .build();
   }
 
