@@ -12,7 +12,6 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import java.util.Optional;
 import java.util.stream.Collector;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
@@ -23,12 +22,10 @@ public class CollectorClassValidator {
 
   private final BasicInfo basicInfo;
   private final TypeElement collectorClass;
-  private final Optional<TypeMirror> mapperPreference;
 
-  public CollectorClassValidator(BasicInfo basicInfo, TypeElement collectorClass, Optional<TypeMirror> mapperPreference) {
+  public CollectorClassValidator(BasicInfo basicInfo, TypeElement collectorClass) {
     this.basicInfo = basicInfo;
     this.collectorClass = collectorClass;
-    this.mapperPreference = mapperPreference;
   }
 
   // visible for testing
