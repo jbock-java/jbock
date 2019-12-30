@@ -53,7 +53,7 @@ public class TypevarMapping {
       return right(map.getOrDefault(input.toString(), input));
     }
     if (input.getKind() == TypeKind.ARRAY) {
-      return right(input);
+      return right(input); // TODO generic array?
     }
     return substitute(input.accept(AS_DECLARED, null))
         .map(Function.identity(), type -> type);

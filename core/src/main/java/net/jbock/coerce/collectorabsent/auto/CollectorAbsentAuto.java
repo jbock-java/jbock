@@ -1,9 +1,9 @@
-package net.jbock.coerce.collectorabsent.mapperabsent;
+package net.jbock.coerce.collectorabsent.auto;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.collectorabsent.CanonicalOptional;
+import net.jbock.coerce.collectorabsent.Optionalish;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
@@ -24,10 +24,10 @@ public class CollectorAbsentAuto {
 
   private AutoAttempt getAttempt() {
     TypeMirror returnType = basicInfo.originalReturnType();
-    Optional<CanonicalOptional> canonicalOptional = CanonicalOptional.unwrap(returnType, tool());
+    Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
     Optional<TypeMirror> list = tool().unwrap(List.class, returnType);
-    if (canonicalOptional.isPresent()) {
-      CanonicalOptional optional = canonicalOptional.get();
+    if (opt.isPresent()) {
+      Optionalish optional = opt.get();
       // optional attempt
       return new AutoAttempt(optional.wrappedType(), optional.extractExpr(), optional.liftedType(), OPTIONAL, basicInfo);
     }

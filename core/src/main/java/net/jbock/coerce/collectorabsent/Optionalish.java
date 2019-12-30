@@ -13,7 +13,7 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
-public final class CanonicalOptional {
+public final class Optionalish {
 
   private static final List<OptionalPrimitive> OPTIONAL_PRIMITIVES = Arrays.asList(
       new OptionalPrimitive(OptionalInt.class, Integer.class),
@@ -26,7 +26,7 @@ public final class CanonicalOptional {
 
   private final Function<ParameterSpec, CodeBlock> extract;
 
-  private CanonicalOptional(
+  private Optionalish(
       Function<ParameterSpec, CodeBlock> extract,
       TypeMirror liftedType, TypeMirror wrappedType) {
     this.extract = extract;
@@ -53,19 +53,19 @@ public final class CanonicalOptional {
   }
 
   // visible for testing
-  public static Optional<CanonicalOptional> unwrap(TypeMirror type, TypeTool tool) {
-    Optional<CanonicalOptional> optionalPrimtive = getOptionalPrimitive(type, tool);
+  public static Optional<Optionalish> unwrap(TypeMirror type, TypeTool tool) {
+    Optional<Optionalish> optionalPrimtive = getOptionalPrimitive(type, tool);
     if (optionalPrimtive.isPresent()) {
       return optionalPrimtive;
     }
     return tool.unwrap(Optional.class, type)
-        .map(wrapped -> new CanonicalOptional(p -> CodeBlock.of("$N", p), type, wrapped));
+        .map(wrapped -> new Optionalish(p -> CodeBlock.of("$N", p), type, wrapped));
   }
 
-  private static Optional<CanonicalOptional> getOptionalPrimitive(TypeMirror type, TypeTool tool) {
+  private static Optional<Optionalish> getOptionalPrimitive(TypeMirror type, TypeTool tool) {
     for (OptionalPrimitive e : OPTIONAL_PRIMITIVES) {
       if (tool.isSameType(type, e.specialClass)) {
-        return Optional.of(new CanonicalOptional(
+        return Optional.of(new Optionalish(
             e.extractExpr(),
             tool.optionalOf(e.wrapped),
             tool.asType(e.wrapped)));

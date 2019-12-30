@@ -1,9 +1,9 @@
-package net.jbock.coerce.collectorabsent.mapperpresent;
+package net.jbock.coerce.collectorabsent.explicit;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.collectorabsent.CanonicalOptional;
+import net.jbock.coerce.collectorabsent.Optionalish;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
@@ -31,10 +31,10 @@ public class CollectorAbsentExplicit {
 
   private List<ExplicitAttempt> getAttempts() {
     TypeMirror returnType = basicInfo.originalReturnType();
-    Optional<CanonicalOptional> canonicalOptional = CanonicalOptional.unwrap(returnType, tool());
+    Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
     Optional<TypeMirror> list = tool().unwrap(List.class, returnType);
     List<ExplicitAttempt> attempts = new ArrayList<>();
-    canonicalOptional.ifPresent(optional -> {
+    opt.ifPresent(optional -> {
       // optional wrapped attempt
       attempts.add(new ExplicitAttempt(optional.wrappedType(), optional.extractExpr(), optional.liftedType(), OPTIONAL, mapperClass, basicInfo));
       // optional lifted type attempt

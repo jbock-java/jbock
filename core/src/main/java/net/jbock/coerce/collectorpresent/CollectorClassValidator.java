@@ -34,16 +34,16 @@ public class CollectorClassValidator {
     checkNotAbstract(collectorClass);
     ReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, basicInfo, collectorClass)
         .getReferencedType();
-    TypeMirror t = collectorType.typeArguments().get(0);
-    TypeMirror r = collectorType.typeArguments().get(2);
-    TypevarMapping r_result = tool().unify(basicInfo.originalReturnType(), r)
+    TypeMirror inputType = collectorType.typeArguments().get(0);
+    TypeMirror outputType = collectorType.typeArguments().get(2);
+    TypevarMapping rightSolution = tool().unify(basicInfo.originalReturnType(), outputType)
         .orElseThrow(this::boom);
-    TypevarMapping t_result = TypevarMapping.empty(tool());
-    FlattenerResult typeParameters = new Flattener(basicInfo, collectorClass)
-        .getTypeParameters(t_result, r_result)
+    TypevarMapping leftSolution = TypevarMapping.empty(tool()); // left side is currently ignored
+    FlattenerResult result = new Flattener(basicInfo, collectorClass)
+        .getTypeParameters(leftSolution, rightSolution)
         .orElseThrow(this::boom);
-    TypeMirror inputType = typeParameters.substitute(t).orElseThrow(f -> boom(f.getMessage()));
-    return new CustomCollector(tool(), inputType, collectorClass, collectorType.isSupplier(), typeParameters.getTypeParameters());
+    return new CustomCollector(tool(), result.substitute(inputType).orElseThrow(f -> boom(f.getMessage())),
+        collectorClass, collectorType.isSupplier(), result.getTypeParameters());
   }
 
   private TypeTool tool() {

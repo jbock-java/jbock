@@ -1,4 +1,4 @@
-package net.jbock.coerce.collectorabsent.mapperpresent;
+package net.jbock.coerce.collectorabsent.explicit;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
