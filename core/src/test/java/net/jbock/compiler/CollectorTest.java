@@ -36,6 +36,61 @@ class CollectorTest {
   }
 
   @Test
+  void genericArrayGoodHint() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = M.class, collectedBy = MyCollector.class)",
+        "  abstract Set<String> strings();",
+        "",
+        "  static class M implements Supplier<Function<String, String[]>> {",
+        "    public Function<String, String[]> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class MyCollector<E extends String> implements Supplier<Collector<E[], ?, Set<String>>> {",
+        "    public Collector<E[], ?, Set<String>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void genericArrayBadHint() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = M.class, collectedBy = MyCollector.class)",
+        "  abstract Set<String> strings();",
+        "",
+        "  static class M implements Supplier<Function<String, String[]>> {",
+        "    public Function<String, String[]> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "",
+        "  static class MyCollector<E extends Integer> implements Supplier<Collector<E[], ?, Set<String>>> {",
+        "    public Collector<E[], ?, Set<String>> get() {",
+        "      return null;",
+        "    }",
+        "  }",
+        "}");
+
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: String[] and E[] have different erasure.");
+  }
+
+  @Test
   void invalidNotRepeatable() {
     JavaFileObject javaFile = fromSource(
         "@Command",
