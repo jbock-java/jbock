@@ -6,6 +6,7 @@ import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.ParameterType;
 import net.jbock.coerce.collectors.DefaultCollector;
+import net.jbock.coerce.either.Either;
 import net.jbock.coerce.mapper.MapperType;
 
 import javax.lang.model.type.TypeMirror;
@@ -31,10 +32,8 @@ public abstract class AbstractAttempt {
     if (parameterType.isRepeatable()) {
       return Coercion.getCoercion(basicInfo, new DefaultCollector(expectedReturnType),
           mapperType, extractExpr, constructorParamType, parameterType);
-    } else {
-      return Coercion.getCoercion(basicInfo,
-          mapperType, extractExpr, constructorParamType, parameterType);
     }
+    return Coercion.getCoercion(basicInfo, mapperType, extractExpr, constructorParamType, parameterType);
   }
 
   protected TypeMirror expectedReturnType() {
@@ -44,4 +43,6 @@ public abstract class AbstractAttempt {
   protected BasicInfo basicInfo() {
     return basicInfo;
   }
+
+  protected abstract Either<String, Coercion> findCoercion();
 }

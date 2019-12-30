@@ -22,7 +22,8 @@ class Attempt extends AbstractAttempt {
     this.mapperClass = mapperClass;
   }
 
-  Either<String, Coercion> findCoercion() {
+  @Override
+  protected Either<String, Coercion> findCoercion() {
     return new MapperClassValidator(basicInfo(), expectedReturnType(), mapperClass)
         .checkReturnType()
         .map(Function.identity(), this::getCoercion);

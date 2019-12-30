@@ -63,7 +63,7 @@ public class BasicInfo {
     return !tool().isPrivateType(mirror);
   }
 
-  public Optional<CodeBlock> findMapExpr(TypeMirror innerType) {
+  public Optional<CodeBlock> findAutoMapper(TypeMirror innerType) {
     Optional<CodeBlock> mapExpr = AutoMapper.findAutoMapper(tool(), innerType);
     if (mapExpr.isPresent()) {
       return mapExpr;

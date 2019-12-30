@@ -42,8 +42,7 @@ public class CollectorAbsentMapperAbsent {
   public Coercion findCoercion() {
     Attempt attempt = getAttempt();
     return attempt.findCoercion()
-        .orElseThrow(() -> basicInfo.asValidationException(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
-            basicInfo.originalReturnType())));
+        .orElseThrow(basicInfo::asValidationException);
   }
 
   private TypeTool tool() {
