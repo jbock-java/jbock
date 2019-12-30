@@ -15,13 +15,15 @@ import java.util.function.Function;
 
 public final class CanonicalOptional {
 
-  // Optional<Integer> instead of OptionalInt etc
+  private static final List<OptionalPrimitive> OPTIONAL_PRIMITIVES = Arrays.asList(
+      new OptionalPrimitive(OptionalInt.class, Integer.class),
+      new OptionalPrimitive(OptionalLong.class, Long.class),
+      new OptionalPrimitive(OptionalDouble.class, Double.class));
+
   private final TypeMirror liftedType;
 
-  // OptionalInt -> Integer
   private final TypeMirror wrappedType;
 
-  // the function returns an expression of the original type, like OptionalInt
   private final Function<ParameterSpec, CodeBlock> extract;
 
   private CanonicalOptional(
@@ -35,50 +37,67 @@ public final class CanonicalOptional {
     this.liftedType = liftedType;
   }
 
-  private static class OptionalMapping {
+  private static class OptionalPrimitive {
 
-    final Class<?> optionalPrimitiveClass;
-    final Class<? extends Number> boxedNumberClass;
+    final Class<?> specialClass;
+    final Class<? extends Number> wrapped;
 
-    OptionalMapping(Class<?> optionalPrimitiveClass, Class<? extends Number> boxedNumberClass) {
-      this.optionalPrimitiveClass = optionalPrimitiveClass;
-      this.boxedNumberClass = boxedNumberClass;
+    OptionalPrimitive(Class<?> specialClass, Class<? extends Number> wrapped) {
+      this.specialClass = specialClass;
+      this.wrapped = wrapped;
     }
 
-    Function<ParameterSpec, CodeBlock> extractOptionalPrimitive() {
-      return optional -> CodeBlock.of(
-          "$N.isPresent() ? $T.of($N.get()) : $T.empty()",
-          optional, optionalPrimitiveClass, optional, optionalPrimitiveClass);
+    Function<ParameterSpec, CodeBlock> extractExpr() {
+      return p -> CodeBlock.of("$N.isPresent() ? $T.of($N.get()) : $T.empty()", p, specialClass, p, specialClass);
     }
   }
 
-  private static final List<OptionalMapping> OPT_MAP = Arrays.asList(
-      new OptionalMapping(OptionalInt.class, Integer.class),
-      new OptionalMapping(OptionalLong.class, Long.class),
-      new OptionalMapping(OptionalDouble.class, Double.class));
-
   // visible for testing
   public static Optional<CanonicalOptional> unwrap(TypeMirror type, TypeTool tool) {
-    for (OptionalMapping e : OPT_MAP) {
-      if (tool.isSameType(type, e.optionalPrimitiveClass)) {
-        return Optional.of(new CanonicalOptional(
-            e.extractOptionalPrimitive(),
-            tool.optionalOf(e.boxedNumberClass),
-            tool.asType(e.boxedNumberClass)));
-      }
+    Optional<CanonicalOptional> optionalPrimtive = getOptionalPrimitive(type, tool);
+    if (optionalPrimtive.isPresent()) {
+      return optionalPrimtive;
     }
     return tool.unwrap(Optional.class, type)
         .map(wrapped -> new CanonicalOptional(p -> CodeBlock.of("$N", p), type, wrapped));
   }
 
+  private static Optional<CanonicalOptional> getOptionalPrimitive(TypeMirror type, TypeTool tool) {
+    for (OptionalPrimitive e : OPTIONAL_PRIMITIVES) {
+      if (tool.isSameType(type, e.specialClass)) {
+        return Optional.of(new CanonicalOptional(
+            e.extractExpr(),
+            tool.optionalOf(e.wrapped),
+            tool.asType(e.wrapped)));
+      }
+    }
+    return Optional.empty();
+  }
+
+  /**
+   * <ul>
+   *   <li>{@code OptionalInt} -> {@code Optional<Integer>}</li>
+   *   <li>{@code Optional<Integer>} -> {@code Optional<Integer>}</li>
+   * </ul>
+   */
   public TypeMirror liftedType() {
     return liftedType;
   }
 
+  /**
+   * The function creates an expression of the original type,
+   * like {@code OptionalInt}.
+   */
   public Function<ParameterSpec, CodeBlock> extractExpr() {
     return extract;
   }
 
+  /**
+   * <ul>
+   *   <li>{@code OptionalInt} -> {@code Integer}</li>
+   *   <li>{@code Optional<Integer>} -> {@code Integer}</li>
+   * </ul>
+   */
   public TypeMirror wrappedType() {
     return wrappedType;
   }

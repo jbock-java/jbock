@@ -5,20 +5,20 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.MapperClassValidator;
-import net.jbock.coerce.ParameterType;
-import net.jbock.coerce.collectorabsent.AbstractAttempt;
+import net.jbock.coerce.ParameterStyle;
+import net.jbock.coerce.collectorabsent.MapperAttempt;
 import net.jbock.coerce.either.Either;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.function.Function;
 
-class Attempt extends AbstractAttempt {
+class ExplicitAttempt extends MapperAttempt {
 
   private final TypeElement mapperClass;
 
-  Attempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, ParameterType parameterType, TypeElement mapperClass, BasicInfo basicInfo) {
-    super(expectedReturnType, extractExpr, constructorParamType, parameterType, basicInfo);
+  ExplicitAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, ParameterStyle style, TypeElement mapperClass, BasicInfo basicInfo) {
+    super(expectedReturnType, extractExpr, constructorParamType, style, basicInfo);
     this.mapperClass = mapperClass;
   }
 

@@ -26,7 +26,7 @@ public final class Coercion {
 
   private final CodeBlock extractExpr;
 
-  private final ParameterType parameterType;
+  private final ParameterStyle parameterType;
 
   private final ParamName paramName;
 
@@ -36,7 +36,7 @@ public final class Coercion {
       ParameterSpec constructorParam,
       FieldSpec field,
       CodeBlock extractExpr,
-      ParameterType parameterType,
+      ParameterStyle parameterType,
       ParamName paramName) {
     this.collectExpr = collectExpr;
     this.mapExpr = mapExpr;
@@ -53,7 +53,7 @@ public final class Coercion {
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType,
-      ParameterType parameterType) {
+      ParameterStyle parameterType) {
     return getCoercion(basicInfo, collector.collectExpr(),
         mapperType, extractExpr, constructorParamType, parameterType);
   }
@@ -63,7 +63,7 @@ public final class Coercion {
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType,
-      ParameterType parameterType) {
+      ParameterStyle parameterType) {
     return getCoercion(basicInfo, CodeBlock.builder().build(),
         mapperType, extractExpr, constructorParamType, parameterType);
   }
@@ -74,7 +74,7 @@ public final class Coercion {
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType,
-      ParameterType parameterType) {
+      ParameterStyle parameterType) {
     CodeBlock mapExpr = mapperType.mapExpr();
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
@@ -114,7 +114,7 @@ public final class Coercion {
     return parameterType.isRepeatable();
   }
 
-  public ParameterType parameterType() {
+  public ParameterStyle parameterType() {
     return parameterType;
   }
 

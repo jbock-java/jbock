@@ -10,37 +10,37 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
-import static net.jbock.coerce.ParameterType.OPTIONAL;
-import static net.jbock.coerce.ParameterType.REPEATABLE;
-import static net.jbock.coerce.ParameterType.REQUIRED;
+import static net.jbock.coerce.ParameterStyle.OPTIONAL;
+import static net.jbock.coerce.ParameterStyle.REPEATABLE;
+import static net.jbock.coerce.ParameterStyle.REQUIRED;
 
-public class CollectorAbsentMapperAbsent {
+public class CollectorAbsentAuto {
 
   private final BasicInfo basicInfo;
 
-  public CollectorAbsentMapperAbsent(BasicInfo basicInfo) {
+  public CollectorAbsentAuto(BasicInfo basicInfo) {
     this.basicInfo = basicInfo;
   }
 
-  private Attempt getAttempt() {
+  private AutoAttempt getAttempt() {
     TypeMirror returnType = basicInfo.originalReturnType();
     Optional<CanonicalOptional> canonicalOptional = CanonicalOptional.unwrap(returnType, tool());
     Optional<TypeMirror> list = tool().unwrap(List.class, returnType);
     if (canonicalOptional.isPresent()) {
       CanonicalOptional optional = canonicalOptional.get();
       // optional attempt
-      return new Attempt(optional.wrappedType(), optional.extractExpr(), optional.liftedType(), OPTIONAL, basicInfo);
+      return new AutoAttempt(optional.wrappedType(), optional.extractExpr(), optional.liftedType(), OPTIONAL, basicInfo);
     }
     if (list.isPresent()) {
       // repeatable attempt
-      return new Attempt(list.get(), p -> CodeBlock.of("$N", p), returnType, REPEATABLE, basicInfo);
+      return new AutoAttempt(list.get(), p -> CodeBlock.of("$N", p), returnType, REPEATABLE, basicInfo);
     }
     // required attempt (exact match)
-    return new Attempt(returnType, p -> CodeBlock.of("$N", p), returnType, REQUIRED, basicInfo);
+    return new AutoAttempt(returnType, p -> CodeBlock.of("$N", p), returnType, REQUIRED, basicInfo);
   }
 
   public Coercion findCoercion() {
-    Attempt attempt = getAttempt();
+    AutoAttempt attempt = getAttempt();
     return attempt.findCoercion()
         .orElseThrow(basicInfo::asValidationException);
   }

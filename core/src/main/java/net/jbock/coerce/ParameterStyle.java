@@ -1,6 +1,6 @@
 package net.jbock.coerce;
 
-public enum ParameterType {
+public enum ParameterStyle {
 
   REPEATABLE, OPTIONAL, REQUIRED, FLAG;
 

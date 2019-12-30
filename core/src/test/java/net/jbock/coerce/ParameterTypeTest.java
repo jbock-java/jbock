@@ -19,7 +19,7 @@ class ParameterTypeTest {
   @Test
   void testBooleans() {
     Set<List<Integer>> masks = new HashSet<>();
-    for (ParameterType type : ParameterType.values()) {
+    for (ParameterStyle type : ParameterStyle.values()) {
       masks.add(Stream.of(
           type.isFlag(),
           type.isOptional(),
@@ -28,7 +28,7 @@ class ParameterTypeTest {
           .map(this::booleanToInt)
           .collect(Collectors.toList()));
     }
-    assertEquals(ParameterType.values().length, masks.size());
+    assertEquals(ParameterStyle.values().length, masks.size());
     for (List<Integer> mask : masks) {
       assertEquals(1, mask.stream().mapToInt(i -> i).sum());
     }

@@ -4,8 +4,8 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.coerce.collectorabsent.mapperabsent.CollectorAbsentMapperAbsent;
-import net.jbock.coerce.collectorabsent.mapperpresent.CollectorAbsentMapperPresent;
+import net.jbock.coerce.collectorabsent.mapperabsent.CollectorAbsentAuto;
+import net.jbock.coerce.collectorabsent.mapperpresent.CollectorAbsentExplicit;
 import net.jbock.coerce.collectorpresent.CollectorClassValidator;
 import net.jbock.coerce.collectors.AbstractCollector;
 import net.jbock.coerce.collectors.DefaultCollector;
@@ -21,8 +21,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static net.jbock.coerce.ParameterType.FLAG;
-import static net.jbock.coerce.ParameterType.REPEATABLE;
+import static net.jbock.coerce.ParameterStyle.FLAG;
+import static net.jbock.coerce.ParameterStyle.REPEATABLE;
 
 public class CoercionProvider {
 
@@ -65,9 +65,9 @@ public class CoercionProvider {
       }
     } else {
       if (basicInfo.mapperClass().isPresent()) {
-        return new CollectorAbsentMapperPresent(basicInfo, basicInfo.mapperClass().get()).findCoercion();
+        return new CollectorAbsentExplicit(basicInfo, basicInfo.mapperClass().get()).findCoercion();
       } else {
-        return new CollectorAbsentMapperAbsent(basicInfo).findCoercion();
+        return new CollectorAbsentAuto(basicInfo).findCoercion();
       }
     }
   }
