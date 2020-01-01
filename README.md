@@ -28,7 +28,7 @@ jbock must be configured as an
 The presence of the annotated class above
 will trigger a round of code generation at compile time.
 The resulting class
-[MyArguments_Parser,](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
+[MyArguments_Parser](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
 can be used as follows:
 
 ````java
