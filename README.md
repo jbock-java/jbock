@@ -23,9 +23,9 @@ abstract class MyArguments {
 }
 ````
 
-If jbock is properly configured as an
+jbock must be configured as an
 [annotation processor](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java),
-then the presence of this annotated class
+and then the presence of this annotated class
 will trigger a round of code generation at compile time.
 
 This will generate a class called
