@@ -2,7 +2,7 @@
 [![annotations](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations/badge.svg?color=red&style=plastic&subject=jbock-annotations)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations)
 
 jbock is a simple but powerful command line parser that uses the same annotation names as 
-[picocli](https://github.com/remkop/picocli).
+[picocli.](https://github.com/remkop/picocli)
 The following example shows how to declare your command line arguments:
 
 ````java
