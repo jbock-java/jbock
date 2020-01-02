@@ -95,6 +95,7 @@ public final class Processor extends AbstractProcessor {
       Context context = Context.create(
           sourceElement,
           generatedClass,
+          optionType,
           parameters,
           positionalParameters(parameters),
           options(parameters));

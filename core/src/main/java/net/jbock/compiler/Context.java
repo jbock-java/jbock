@@ -32,6 +32,8 @@ public final class Context {
   // program name from attribute
   private final String programName;
 
+  private final ClassName optionType;
+
   private Context(
       TypeElement sourceElement,
       ClassName generatedClass,
@@ -39,7 +41,8 @@ public final class Context {
       List<Parameter> positionalParams,
       List<Parameter> options,
       boolean helpParameterEnabled,
-      String programName) {
+      String programName,
+      ClassName optionType) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
@@ -47,11 +50,13 @@ public final class Context {
     this.options = options;
     this.helpParameterEnabled = helpParameterEnabled;
     this.programName = programName;
+    this.optionType = optionType;
   }
 
   static Context create(
       TypeElement sourceElement,
       ClassName generatedClass,
+      ClassName optionType,
       List<Parameter> parameters,
       List<Parameter> positionalParams,
       List<Parameter> options) {
@@ -64,7 +69,8 @@ public final class Context {
         parameters,
         positionalParams,
         options, helpParameterEnabled,
-        programName(sourceElement));
+        programName(sourceElement),
+        optionType);
   }
 
   private static String programName(TypeElement sourceType) {
@@ -97,7 +103,7 @@ public final class Context {
   }
 
   public ClassName optionType() {
-    return generatedClass.nestedClass("Option");
+    return optionType;
   }
 
   public ClassName parserStateType() {
