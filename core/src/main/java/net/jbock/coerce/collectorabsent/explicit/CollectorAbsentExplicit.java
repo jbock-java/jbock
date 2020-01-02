@@ -3,6 +3,7 @@ package net.jbock.coerce.collectorabsent.explicit;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.collectorabsent.MapperAttempt;
 import net.jbock.coerce.collectorabsent.Optionalish;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
@@ -29,30 +30,30 @@ public class CollectorAbsentExplicit {
     this.basicInfo = basicInfo;
   }
 
-  private List<ExplicitAttempt> getAttempts() {
+  private List<MapperAttempt> getAttempts() {
     TypeMirror returnType = basicInfo.originalReturnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
     Optional<TypeMirror> list = tool().unwrap(List.class, returnType);
-    List<ExplicitAttempt> attempts = new ArrayList<>();
+    List<MapperAttempt> attempts = new ArrayList<>();
     opt.ifPresent(optional -> {
       // optional wrapped attempt
-      attempts.add(new ExplicitAttempt(optional.wrappedType(), optional.extractExpr(), optional.liftedType(), OPTIONAL, mapperClass, basicInfo));
+      attempts.add(new ExplicitAttempt(optional.wrappedType(), optional.extractExpr(), optional.liftedType(), OPTIONAL, mapperClass));
       // optional lifted type attempt
-      attempts.add(new ExplicitAttempt(optional.liftedType(), optional.extractExpr(), optional.liftedType(), REQUIRED, mapperClass, basicInfo));
+      attempts.add(new ExplicitAttempt(optional.liftedType(), optional.extractExpr(), optional.liftedType(), REQUIRED, mapperClass));
     });
     list.ifPresent(wrapped ->
         // repeatable attempt
-        attempts.add(new ExplicitAttempt(wrapped, p -> CodeBlock.of("$N", p), returnType, REPEATABLE, mapperClass, basicInfo)));
+        attempts.add(new ExplicitAttempt(wrapped, p -> CodeBlock.of("$N", p), returnType, REPEATABLE, mapperClass)));
     // required attempt (exact match)
-    attempts.add(new ExplicitAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), returnType, REQUIRED, mapperClass, basicInfo));
+    attempts.add(new ExplicitAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), returnType, REQUIRED, mapperClass));
     return attempts;
   }
 
   public Coercion findCoercion() {
-    List<ExplicitAttempt> attempts = getAttempts();
+    List<MapperAttempt> attempts = getAttempts();
     Either<String, Coercion> either = null;
-    for (ExplicitAttempt attempt : attempts) {
-      either = attempt.findCoercion();
+    for (MapperAttempt attempt : attempts) {
+      either = attempt.findCoercion(basicInfo);
       if (either instanceof Right) {
         return ((Right<String, Coercion>) either).value();
       }

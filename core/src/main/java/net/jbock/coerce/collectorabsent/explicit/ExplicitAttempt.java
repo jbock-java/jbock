@@ -17,15 +17,15 @@ class ExplicitAttempt extends MapperAttempt {
 
   private final TypeElement mapperClass;
 
-  ExplicitAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, ParameterStyle style, TypeElement mapperClass, BasicInfo basicInfo) {
-    super(expectedReturnType, extractExpr, constructorParamType, style, basicInfo);
+  ExplicitAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, ParameterStyle style, TypeElement mapperClass) {
+    super(expectedReturnType, extractExpr, constructorParamType, style);
     this.mapperClass = mapperClass;
   }
 
   @Override
-  protected Either<String, Coercion> findCoercion() {
-    return new MapperClassValidator(basicInfo(), expectedReturnType(), mapperClass)
+  public Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
+    return new MapperClassValidator(basicInfo, expectedReturnType(), mapperClass)
         .checkReturnType()
-        .map(Function.identity(), this::getCoercion);
+        .map(Function.identity(), mapperType -> getCoercion(basicInfo, mapperType));
   }
 }

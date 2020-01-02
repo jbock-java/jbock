@@ -14,17 +14,17 @@ import java.util.function.Function;
 
 class AutoAttempt extends MapperAttempt {
 
-  AutoAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, ParameterStyle style, BasicInfo basicInfo) {
-    super(expectedReturnType, extractExpr, constructorParamType, style, basicInfo);
+  AutoAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, ParameterStyle style) {
+    super(expectedReturnType, extractExpr, constructorParamType, style);
   }
 
   @Override
-  protected Either<String, Coercion> findCoercion() {
-    return basicInfo().findAutoMapper(expectedReturnType())
+  public Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
+    return basicInfo.findAutoMapper(expectedReturnType())
         .map(MapperType::create)
-        .map(this::getCoercion)
+        .map(mapperType -> getCoercion(basicInfo, mapperType))
         .<Either<String, Coercion>>map(Either::right)
         .orElseGet(() -> Either.left(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
-            basicInfo().originalReturnType())));
+            basicInfo.originalReturnType())));
   }
 }

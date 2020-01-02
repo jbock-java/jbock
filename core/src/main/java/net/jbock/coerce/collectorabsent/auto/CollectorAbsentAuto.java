@@ -29,19 +29,19 @@ public class CollectorAbsentAuto {
     if (opt.isPresent()) {
       Optionalish optional = opt.get();
       // optional attempt
-      return new AutoAttempt(optional.wrappedType(), optional.extractExpr(), optional.liftedType(), OPTIONAL, basicInfo);
+      return new AutoAttempt(optional.wrappedType(), optional.extractExpr(), optional.liftedType(), OPTIONAL);
     }
     if (list.isPresent()) {
       // repeatable attempt
-      return new AutoAttempt(list.get(), p -> CodeBlock.of("$N", p), returnType, REPEATABLE, basicInfo);
+      return new AutoAttempt(list.get(), p -> CodeBlock.of("$N", p), returnType, REPEATABLE);
     }
     // required attempt (exact match)
-    return new AutoAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), returnType, REQUIRED, basicInfo);
+    return new AutoAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), returnType, REQUIRED);
   }
 
   public Coercion findCoercion() {
     AutoAttempt attempt = getAttempt();
-    return attempt.findCoercion()
+    return attempt.findCoercion(basicInfo)
         .orElseThrow(basicInfo::asValidationException);
   }
 
