@@ -3,7 +3,6 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.collectors.AbstractCollector;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.ParamName;
@@ -51,20 +50,20 @@ public final class Coercion {
       AbstractCollector collector,
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
-      TypeName constructorParamType,
-      ParameterStyle parameterType) {
+      ParameterSpec constructorParam,
+      ParameterStyle style) {
     return getCoercion(basicInfo, collector.collectExpr(),
-        mapperType, extractExpr, constructorParamType, parameterType);
+        mapperType, extractExpr, style, constructorParam);
   }
 
   public static Coercion getCoercion(
       BasicInfo basicInfo,
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
-      TypeName constructorParamType,
-      ParameterStyle parameterType) {
+      ParameterSpec constructorParam,
+      ParameterStyle style) {
     return getCoercion(basicInfo, CodeBlock.builder().build(),
-        mapperType, extractExpr, constructorParamType, parameterType);
+        mapperType, extractExpr, style, constructorParam);
   }
 
   private static Coercion getCoercion(
@@ -72,11 +71,9 @@ public final class Coercion {
       CodeBlock collectExpr,
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
-      TypeName constructorParamType,
-      ParameterStyle style) {
+      ParameterStyle style,
+      ParameterSpec constructorParam) {
     CodeBlock mapExpr = mapperType.mapExpr();
-    ParameterSpec constructorParam = ParameterSpec.builder(
-        constructorParamType, basicInfo.paramName()).build();
     return new Coercion(collectExpr, mapExpr,
         constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), style, basicInfo.parameterName());
   }

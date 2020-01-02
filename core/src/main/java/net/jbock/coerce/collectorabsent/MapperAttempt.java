@@ -29,9 +29,9 @@ public abstract class MapperAttempt {
   protected Coercion getCoercion(BasicInfo basicInfo, MapperType mapperType) {
     if (style.isRepeatable()) {
       return Coercion.getCoercion(basicInfo, new DefaultCollector(expectedReturnType),
-          mapperType, extractExpr, constructorParam.type, style);
+          mapperType, extractExpr, constructorParam, style);
     }
-    return Coercion.getCoercion(basicInfo, mapperType, extractExpr, constructorParam.type, style);
+    return Coercion.getCoercion(basicInfo, mapperType, extractExpr, constructorParam, style);
   }
 
   protected TypeMirror expectedReturnType() {
