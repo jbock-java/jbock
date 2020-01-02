@@ -2,6 +2,7 @@ package net.jbock.compiler;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 public class ParamName {
 
@@ -97,5 +98,9 @@ public class ParamName {
       return CharType.DIGIT;
     }
     return CharType.OTHER;
+  }
+
+  public String enumConstant() {
+    return snake().toUpperCase(Locale.US);
   }
 }

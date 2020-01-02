@@ -290,11 +290,7 @@ public final class Parameter {
   }
 
   public String enumConstant() {
-    return paramName().snake().toUpperCase(Locale.US);
-  }
-
-  public String enumConstantLower() {
-    return paramName().snake().toLowerCase(Locale.US);
+    return paramName().enumConstant();
   }
 
   public boolean isPositional() {
@@ -339,7 +335,7 @@ public final class Parameter {
     return isOptional() ? OptionalInt.of(1) : OptionalInt.of(0);
   }
 
-  private ParamName paramName() {
+  public ParamName paramName() {
     return coercion.paramName();
   }
 
@@ -381,7 +377,7 @@ public final class Parameter {
     if (names.isEmpty() || names.size() >= 3) {
       throw new AssertionError();
     }
-    String argname = flag ? "" : ' ' + name.snake().toUpperCase(Locale.US);
+    String argname = flag ? "" : ' ' + name.enumConstant();
     if (names.size() == 1) {
       // The padding has the same length as the string "-f, "
       String padding = anyMnemonics ? "    " : "";

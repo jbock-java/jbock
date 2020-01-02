@@ -10,7 +10,6 @@ import net.jbock.coerce.either.Either;
 import net.jbock.coerce.mapper.MapperType;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.Locale;
 
 public abstract class MapperAttempt {
 
@@ -37,7 +36,7 @@ public abstract class MapperAttempt {
         return CodeBlock.of(".findAny()");
       case REQUIRED:
         return CodeBlock.of(".findAny().orElseThrow($T.$L::missingRequired)", basicInfo.optionType(),
-            basicInfo.parameterName().snake().toUpperCase(Locale.US));
+            basicInfo.parameterName().enumConstant());
       case REPEATABLE:
         return new DefaultCollector(testType).collectExpr();
       default:

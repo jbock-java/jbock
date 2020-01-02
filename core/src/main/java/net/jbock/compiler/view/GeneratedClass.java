@@ -396,11 +396,11 @@ public final class GeneratedClass {
 
     for (Parameter param : positional) {
       if (param.isOptional()) {
-        code.add("$Z.add($S)", "[<" + param.enumConstantLower() + ">]");
+        code.add("$Z.add($S)", "[<" + param.paramName().snake() + ">]");
       } else if (param.isRequired()) {
-        code.add("$Z.add($S)", "<" + param.enumConstantLower() + ">");
+        code.add("$Z.add($S)", "<" + param.paramName().snake() + ">");
       } else if (param.isRepeatable()) {
-        code.add("$Z.add($S)", "<" + param.enumConstantLower() + ">...");
+        code.add("$Z.add($S)", "<" + param.paramName().snake() + ">...");
       } else {
         throw new AssertionError("all cases handled (positional can't be flag)");
       }

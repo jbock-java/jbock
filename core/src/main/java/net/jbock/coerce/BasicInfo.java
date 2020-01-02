@@ -18,6 +18,9 @@ import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Basic information about a single parameter (option or param).
+ */
 public class BasicInfo {
 
   private final ParamName paramName;
