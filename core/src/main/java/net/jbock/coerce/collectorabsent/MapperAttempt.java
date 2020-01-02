@@ -10,16 +10,15 @@ import net.jbock.coerce.either.Either;
 import net.jbock.coerce.mapper.MapperType;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.function.Function;
 
 public abstract class MapperAttempt {
 
-  private final Function<ParameterSpec, CodeBlock> extractExpr;
+  private final CodeBlock extractExpr;
   private final ParameterSpec constructorParam;
   private final ParameterStyle style;
   private final TypeMirror expectedReturnType;
 
-  protected MapperAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
+  protected MapperAttempt(TypeMirror expectedReturnType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
     this.expectedReturnType = expectedReturnType;
     this.extractExpr = extractExpr;
     this.constructorParam = constructorParam;

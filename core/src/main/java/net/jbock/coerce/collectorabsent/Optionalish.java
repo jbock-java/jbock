@@ -88,8 +88,8 @@ public final class Optionalish {
    * The function creates an expression of the original type,
    * like {@code OptionalInt}.
    */
-  public Function<ParameterSpec, CodeBlock> extractExpr() {
-    return extract;
+  public CodeBlock extractExpr(ParameterSpec param) {
+    return extract.apply(param);
   }
 
   /**

@@ -17,7 +17,7 @@ class ExplicitAttempt extends MapperAttempt {
 
   private final TypeElement mapperClass;
 
-  ExplicitAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, ParameterSpec constructorParam, ParameterStyle style, TypeElement mapperClass) {
+  ExplicitAttempt(TypeMirror expectedReturnType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style, TypeElement mapperClass) {
     super(expectedReturnType, extractExpr, constructorParam, style);
     this.mapperClass = mapperClass;
   }

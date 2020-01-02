@@ -8,7 +8,6 @@ import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.ParamName;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 public final class Coercion {
 
@@ -49,7 +48,7 @@ public final class Coercion {
       BasicInfo basicInfo,
       AbstractCollector collector,
       MapperType mapperType,
-      Function<ParameterSpec, CodeBlock> extractExpr,
+      CodeBlock extractExpr,
       ParameterSpec constructorParam,
       ParameterStyle style) {
     return getCoercion(basicInfo, collector.collectExpr(),
@@ -59,7 +58,7 @@ public final class Coercion {
   public static Coercion getCoercion(
       BasicInfo basicInfo,
       MapperType mapperType,
-      Function<ParameterSpec, CodeBlock> extractExpr,
+      CodeBlock extractExpr,
       ParameterSpec constructorParam,
       ParameterStyle style) {
     return getCoercion(basicInfo, CodeBlock.builder().build(),
@@ -70,12 +69,12 @@ public final class Coercion {
       BasicInfo basicInfo,
       CodeBlock collectExpr,
       MapperType mapperType,
-      Function<ParameterSpec, CodeBlock> extractExpr,
+      CodeBlock extractExpr,
       ParameterStyle style,
       ParameterSpec constructorParam) {
     CodeBlock mapExpr = mapperType.mapExpr();
     return new Coercion(collectExpr, mapExpr,
-        constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), style, basicInfo.parameterName());
+        constructorParam, basicInfo.fieldSpec(), extractExpr, style, basicInfo.parameterName());
   }
 
   /**

@@ -38,19 +38,19 @@ public class CollectorAbsentExplicit {
     List<MapperAttempt> attempts = new ArrayList<>();
     opt.ifPresent(optional -> {
       ParameterSpec param = basicInfo.param(optional.liftedType());
-      // optional wrapped attempt
-      attempts.add(new ExplicitAttempt(optional.wrappedType(), optional.extractExpr(), param, OPTIONAL, mapperClass));
-      // optional lifted type attempt
-      attempts.add(new ExplicitAttempt(optional.liftedType(), optional.extractExpr(), param, REQUIRED, mapperClass));
+      // optional match
+      attempts.add(new ExplicitAttempt(optional.wrappedType(), optional.extractExpr(param), param, OPTIONAL, mapperClass));
+      // exact match (-> required)
+      attempts.add(new ExplicitAttempt(optional.liftedType(), optional.extractExpr(param), param, REQUIRED, mapperClass));
     });
     list.ifPresent(wrapped -> {
       ParameterSpec param = basicInfo.param(returnType);
-      // repeatable attempt
-      attempts.add(new ExplicitAttempt(wrapped, p -> CodeBlock.of("$N", p), param, REPEATABLE, mapperClass));
+      // list match
+      attempts.add(new ExplicitAttempt(wrapped, CodeBlock.of("$N", param), param, REPEATABLE, mapperClass));
     });
     ParameterSpec param = basicInfo.param(returnType);
-    // required attempt (exact match)
-    attempts.add(new ExplicitAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), param, REQUIRED, mapperClass));
+    // exact match (-> required)
+    attempts.add(new ExplicitAttempt(tool().box(returnType), CodeBlock.of("$N", param), param, REQUIRED, mapperClass));
     return attempts;
   }
 

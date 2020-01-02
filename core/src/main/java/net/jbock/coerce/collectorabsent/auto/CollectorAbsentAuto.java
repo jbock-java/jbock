@@ -32,16 +32,16 @@ public class CollectorAbsentAuto {
       Optionalish optional = opt.get();
       // optional attempt
       ParameterSpec param = basicInfo.param(optional.liftedType());
-      return new AutoAttempt(optional.wrappedType(), optional.extractExpr(), param, OPTIONAL);
+      return new AutoAttempt(optional.wrappedType(), optional.extractExpr(param), param, OPTIONAL);
     }
     if (list.isPresent()) {
       // repeatable attempt
       ParameterSpec param = basicInfo.param(returnType);
-      return new AutoAttempt(list.get(), p -> CodeBlock.of("$N", p), param, REPEATABLE);
+      return new AutoAttempt(list.get(), CodeBlock.of("$N", param), param, REPEATABLE);
     }
     // required attempt (exact match)
     ParameterSpec param = basicInfo.param(returnType);
-    return new AutoAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), param, REQUIRED);
+    return new AutoAttempt(tool().box(returnType), CodeBlock.of("$N", param), param, REQUIRED);
   }
 
   public Coercion findCoercion() {
