@@ -1,6 +1,7 @@
 package net.jbock.coerce.collectorabsent.explicit;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.collectorabsent.MapperAttempt;
@@ -36,16 +37,20 @@ public class CollectorAbsentExplicit {
     Optional<TypeMirror> list = tool().unwrap(List.class, returnType);
     List<MapperAttempt> attempts = new ArrayList<>();
     opt.ifPresent(optional -> {
+      ParameterSpec param = basicInfo.param(optional.liftedType());
       // optional wrapped attempt
-      attempts.add(new ExplicitAttempt(optional.wrappedType(), optional.extractExpr(), optional.liftedType(), OPTIONAL, mapperClass));
+      attempts.add(new ExplicitAttempt(optional.wrappedType(), optional.extractExpr(), param, OPTIONAL, mapperClass));
       // optional lifted type attempt
-      attempts.add(new ExplicitAttempt(optional.liftedType(), optional.extractExpr(), optional.liftedType(), REQUIRED, mapperClass));
+      attempts.add(new ExplicitAttempt(optional.liftedType(), optional.extractExpr(), param, REQUIRED, mapperClass));
     });
-    list.ifPresent(wrapped ->
-        // repeatable attempt
-        attempts.add(new ExplicitAttempt(wrapped, p -> CodeBlock.of("$N", p), returnType, REPEATABLE, mapperClass)));
+    list.ifPresent(wrapped -> {
+      ParameterSpec param = basicInfo.param(returnType);
+      // repeatable attempt
+      attempts.add(new ExplicitAttempt(wrapped, p -> CodeBlock.of("$N", p), param, REPEATABLE, mapperClass));
+    });
+    ParameterSpec param = basicInfo.param(returnType);
     // required attempt (exact match)
-    attempts.add(new ExplicitAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), returnType, REQUIRED, mapperClass));
+    attempts.add(new ExplicitAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), param, REQUIRED, mapperClass));
     return attempts;
   }
 

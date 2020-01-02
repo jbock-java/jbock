@@ -2,6 +2,7 @@ package net.jbock.coerce;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
@@ -74,12 +75,17 @@ public class BasicInfo {
     return Optional.empty();
   }
 
-  String paramName() {
+  public String paramName() {
     return paramName.camel();
   }
 
   ParamName parameterName() {
     return paramName;
+  }
+
+  public ParameterSpec param(TypeMirror type) {
+    return ParameterSpec.builder(TypeName.get(type), paramName()).build();
+
   }
 
   // return type of the parameter method

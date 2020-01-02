@@ -14,8 +14,8 @@ import java.util.function.Function;
 
 class AutoAttempt extends MapperAttempt {
 
-  AutoAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, ParameterStyle style) {
-    super(expectedReturnType, extractExpr, constructorParamType, style);
+  AutoAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
+    super(expectedReturnType, extractExpr, constructorParam, style);
   }
 
   @Override

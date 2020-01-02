@@ -80,7 +80,7 @@ public class CoercionProvider {
     MapperType mapperType = MapperType.create(mapExpr);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
-    return Coercion.getCoercion(basicInfo, collectorInfo, mapperType, extractExpr, constructorParamType, REPEATABLE);
+    return Coercion.getCoercion(basicInfo, collectorInfo, mapperType, extractExpr, TypeName.get(constructorParamType), REPEATABLE);
   }
 
   private Coercion collectorPresentExplicit(TypeElement mapperClass) {
@@ -89,7 +89,7 @@ public class CoercionProvider {
         .orElseThrow(basicInfo::asValidationException);
     Function<ParameterSpec, CodeBlock> extractExpr = p -> CodeBlock.of("$N", p);
     TypeMirror constructorParamType = basicInfo.originalReturnType();
-    return Coercion.getCoercion(basicInfo, collectorInfo, mapperType, extractExpr, constructorParamType, REPEATABLE);
+    return Coercion.getCoercion(basicInfo, collectorInfo, mapperType, extractExpr, TypeName.get(constructorParamType), REPEATABLE);
   }
 
   private AbstractCollector collectorInfo() {

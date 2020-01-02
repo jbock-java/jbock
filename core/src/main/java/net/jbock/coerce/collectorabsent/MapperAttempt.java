@@ -15,23 +15,23 @@ import java.util.function.Function;
 public abstract class MapperAttempt {
 
   private final Function<ParameterSpec, CodeBlock> extractExpr;
-  private final TypeMirror constructorParamType;
+  private final ParameterSpec constructorParam;
   private final ParameterStyle style;
   private final TypeMirror expectedReturnType;
 
-  protected MapperAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, TypeMirror constructorParamType, ParameterStyle style) {
+  protected MapperAttempt(TypeMirror expectedReturnType, Function<ParameterSpec, CodeBlock> extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
     this.expectedReturnType = expectedReturnType;
     this.extractExpr = extractExpr;
-    this.constructorParamType = constructorParamType;
+    this.constructorParam = constructorParam;
     this.style = style;
   }
 
   protected Coercion getCoercion(BasicInfo basicInfo, MapperType mapperType) {
     if (style.isRepeatable()) {
       return Coercion.getCoercion(basicInfo, new DefaultCollector(expectedReturnType),
-          mapperType, extractExpr, constructorParamType, style);
+          mapperType, extractExpr, constructorParam.type, style);
     }
-    return Coercion.getCoercion(basicInfo, mapperType, extractExpr, constructorParamType, style);
+    return Coercion.getCoercion(basicInfo, mapperType, extractExpr, constructorParam.type, style);
   }
 
   protected TypeMirror expectedReturnType() {

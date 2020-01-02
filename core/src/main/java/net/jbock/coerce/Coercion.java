@@ -8,7 +8,6 @@ import net.jbock.coerce.collectors.AbstractCollector;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.ParamName;
 
-import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -52,7 +51,7 @@ public final class Coercion {
       AbstractCollector collector,
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
-      TypeMirror constructorParamType,
+      TypeName constructorParamType,
       ParameterStyle parameterType) {
     return getCoercion(basicInfo, collector.collectExpr(),
         mapperType, extractExpr, constructorParamType, parameterType);
@@ -62,7 +61,7 @@ public final class Coercion {
       BasicInfo basicInfo,
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
-      TypeMirror constructorParamType,
+      TypeName constructorParamType,
       ParameterStyle parameterType) {
     return getCoercion(basicInfo, CodeBlock.builder().build(),
         mapperType, extractExpr, constructorParamType, parameterType);
@@ -73,11 +72,11 @@ public final class Coercion {
       CodeBlock collectExpr,
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
-      TypeMirror constructorParamType,
+      TypeName constructorParamType,
       ParameterStyle style) {
     CodeBlock mapExpr = mapperType.mapExpr();
     ParameterSpec constructorParam = ParameterSpec.builder(
-        TypeName.get(constructorParamType), basicInfo.paramName()).build();
+        constructorParamType, basicInfo.paramName()).build();
     return new Coercion(collectExpr, mapExpr,
         constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), style, basicInfo.parameterName());
   }

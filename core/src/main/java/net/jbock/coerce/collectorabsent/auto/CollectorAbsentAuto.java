@@ -1,6 +1,7 @@
 package net.jbock.coerce.collectorabsent.auto;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.collectorabsent.MapperAttempt;
@@ -30,14 +31,17 @@ public class CollectorAbsentAuto {
     if (opt.isPresent()) {
       Optionalish optional = opt.get();
       // optional attempt
-      return new AutoAttempt(optional.wrappedType(), optional.extractExpr(), optional.liftedType(), OPTIONAL);
+      ParameterSpec param = basicInfo.param(optional.liftedType());
+      return new AutoAttempt(optional.wrappedType(), optional.extractExpr(), param, OPTIONAL);
     }
     if (list.isPresent()) {
       // repeatable attempt
-      return new AutoAttempt(list.get(), p -> CodeBlock.of("$N", p), returnType, REPEATABLE);
+      ParameterSpec param = basicInfo.param(returnType);
+      return new AutoAttempt(list.get(), p -> CodeBlock.of("$N", p), param, REPEATABLE);
     }
     // required attempt (exact match)
-    return new AutoAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), returnType, REQUIRED);
+    ParameterSpec param = basicInfo.param(returnType);
+    return new AutoAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), param, REQUIRED);
   }
 
   public Coercion findCoercion() {
