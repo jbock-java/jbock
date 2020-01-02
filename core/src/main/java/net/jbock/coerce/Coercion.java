@@ -74,12 +74,12 @@ public final class Coercion {
       MapperType mapperType,
       Function<ParameterSpec, CodeBlock> extractExpr,
       TypeMirror constructorParamType,
-      ParameterStyle parameterType) {
+      ParameterStyle style) {
     CodeBlock mapExpr = mapperType.mapExpr();
     ParameterSpec constructorParam = ParameterSpec.builder(
         TypeName.get(constructorParamType), basicInfo.paramName()).build();
     return new Coercion(collectExpr, mapExpr,
-        constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), parameterType, basicInfo.parameterName());
+        constructorParam, basicInfo.fieldSpec(), extractExpr.apply(constructorParam), style, basicInfo.parameterName());
   }
 
   /**
