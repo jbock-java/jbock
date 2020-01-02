@@ -84,7 +84,7 @@ public class BasicInfo {
     return Optional.empty();
   }
 
-  ParamName parameterName() {
+  public ParamName parameterName() {
     return paramName;
   }
 
@@ -127,5 +127,9 @@ public class BasicInfo {
       throw asValidationException("Either define a custom collector, or return List.");
     }
     return new DefaultCollector(wrapped.get());
+  }
+
+  public ClassName optionType() {
+    return optionType;
   }
 }

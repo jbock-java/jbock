@@ -18,7 +18,6 @@ import javax.lang.model.element.TypeElement;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static net.jbock.coerce.ParameterStyle.FLAG;
 import static net.jbock.coerce.ParameterStyle.REPEATABLE;
 
 public class CoercionProvider {
@@ -32,12 +31,12 @@ public class CoercionProvider {
   public static Coercion flagCoercion(ExecutableElement sourceMethod, ParamName paramName) {
     ParameterSpec name = ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake()).build();
     return new Coercion(
-        CodeBlock.builder().build(),
+        CodeBlock.of(".findAny().isPresent()"),
         CodeBlock.of("$T.identity()", Function.class),
         name,
         FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake()).build(),
         CodeBlock.of("$N", name),
-        FLAG,
+        Optional.empty(),
         paramName);
   }
 
@@ -76,7 +75,7 @@ public class CoercionProvider {
             collectorInfo.inputType())));
     MapperType mapperType = MapperType.create(mapExpr);
     ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
-    return Coercion.getCoercion(basicInfo, collectorInfo, mapperType, CodeBlock.of("$N", constructorParam), constructorParam, REPEATABLE);
+    return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapperType, CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
   }
 
   private Coercion collectorPresentExplicit(TypeElement mapperClass) {
@@ -84,6 +83,6 @@ public class CoercionProvider {
     ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType()
         .orElseThrow(basicInfo::asValidationException);
     ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
-    return Coercion.getCoercion(basicInfo, collectorInfo, mapperType, CodeBlock.of("$N", constructorParam), constructorParam, REPEATABLE);
+    return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapperType, CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
   }
 }

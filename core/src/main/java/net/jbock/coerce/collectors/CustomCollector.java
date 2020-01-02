@@ -46,7 +46,7 @@ public class CustomCollector extends AbstractCollector {
 
   @Override
   public CodeBlock collectExpr() {
-    return CodeBlock.of("new $T$L()$L",
+    return CodeBlock.of(".collect(new $T$L()$L)",
         tool.erasure(collectorType()),
         getTypeParameterList(solution()),
         supplier() ? ".get()" : "");

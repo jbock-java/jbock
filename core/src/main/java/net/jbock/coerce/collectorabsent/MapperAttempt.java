@@ -10,6 +10,7 @@ import net.jbock.coerce.either.Either;
 import net.jbock.coerce.mapper.MapperType;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.Locale;
 
 public abstract class MapperAttempt {
 
@@ -26,11 +27,22 @@ public abstract class MapperAttempt {
   }
 
   protected Coercion getCoercion(BasicInfo basicInfo, MapperType mapperType) {
-    if (style.isRepeatable()) {
-      return Coercion.getCoercion(basicInfo, new DefaultCollector(testType),
-          mapperType, extractExpr, constructorParam, style);
+    CodeBlock collectExpr = getCollectExpr(basicInfo);
+    return Coercion.getCoercion(basicInfo, collectExpr, mapperType, extractExpr, style, constructorParam);
+  }
+
+  private CodeBlock getCollectExpr(BasicInfo basicInfo) {
+    switch (style) {
+      case OPTIONAL:
+        return CodeBlock.of(".findAny()");
+      case REQUIRED:
+        return CodeBlock.of(".findAny().orElseThrow($T.$L::missingRequired)", basicInfo.optionType(),
+            basicInfo.parameterName().snake().toUpperCase(Locale.US));
+      case REPEATABLE:
+        return new DefaultCollector(testType).collectExpr();
+      default:
+        throw new AssertionError("unexpected: " + style);
     }
-    return Coercion.getCoercion(basicInfo, CodeBlock.builder().build(), mapperType, extractExpr, style, constructorParam);
   }
 
   protected TypeMirror getTestType() {

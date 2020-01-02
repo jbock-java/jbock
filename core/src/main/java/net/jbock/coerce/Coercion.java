@@ -3,7 +3,6 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.coerce.collectors.AbstractCollector;
 import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.ParamName;
 
@@ -23,7 +22,8 @@ public final class Coercion {
 
   private final CodeBlock extractExpr;
 
-  private final ParameterStyle parameterType;
+  // absent -> flag
+  private final Optional<ParameterStyle> parameterType;
 
   private final ParamName paramName;
 
@@ -33,7 +33,7 @@ public final class Coercion {
       ParameterSpec constructorParam,
       FieldSpec field,
       CodeBlock extractExpr,
-      ParameterStyle parameterType,
+      Optional<ParameterStyle> parameterType,
       ParamName paramName) {
     this.collectExpr = collectExpr;
     this.mapExpr = mapExpr;
@@ -46,17 +46,6 @@ public final class Coercion {
 
   public static Coercion getCoercion(
       BasicInfo basicInfo,
-      AbstractCollector collector,
-      MapperType mapperType,
-      CodeBlock extractExpr,
-      ParameterSpec constructorParam,
-      ParameterStyle style) {
-    return getCoercion(basicInfo, collector.collectExpr(),
-        mapperType, extractExpr, style, constructorParam);
-  }
-
-  public static Coercion getCoercion(
-      BasicInfo basicInfo,
       CodeBlock collectExpr,
       MapperType mapperType,
       CodeBlock extractExpr,
@@ -64,7 +53,7 @@ public final class Coercion {
       ParameterSpec constructorParam) {
     CodeBlock mapExpr = mapperType.mapExpr();
     return new Coercion(collectExpr, mapExpr,
-        constructorParam, basicInfo.fieldSpec(), extractExpr, style, basicInfo.parameterName());
+        constructorParam, basicInfo.fieldSpec(), extractExpr, Optional.of(style), basicInfo.parameterName());
   }
 
   /**
@@ -87,19 +76,11 @@ public final class Coercion {
     return extractExpr;
   }
 
-  public Optional<CodeBlock> collectExpr() {
-    return collectExpr.isEmpty() ? Optional.empty() : Optional.of(collectExpr);
+  public CodeBlock collectExpr() {
+    return collectExpr;
   }
 
-  public boolean isOptional() {
-    return parameterType.isOptional();
-  }
-
-  public boolean isRepeatable() {
-    return parameterType.isRepeatable();
-  }
-
-  public ParameterStyle parameterType() {
+  public Optional<ParameterStyle> getStyle() {
     return parameterType;
   }
 

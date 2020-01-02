@@ -6,6 +6,7 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
+import net.jbock.coerce.ParameterStyle;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -49,10 +50,6 @@ public final class Parameter {
   private final List<String> description;
 
   private final Integer positionalIndex;
-
-  public boolean isFlag() {
-    return coercion.parameterType().isFlag();
-  }
 
   private static ParamName findParamName(
       List<Parameter> alreadyCreated,
@@ -313,11 +310,19 @@ public final class Parameter {
   }
 
   public boolean isRequired() {
-    return coercion.parameterType().isRequired();
+    return coercion.getStyle().isPresent() && coercion.getStyle().get() == ParameterStyle.REQUIRED;
   }
 
   public boolean isRepeatable() {
-    return coercion.isRepeatable();
+    return coercion.getStyle().isPresent() && coercion.getStyle().get() == ParameterStyle.REPEATABLE;
+  }
+
+  public boolean isOptional() {
+    return coercion.getStyle().isPresent() && coercion.getStyle().get() == ParameterStyle.OPTIONAL;
+  }
+
+  public boolean isFlag() {
+    return !coercion.getStyle().isPresent();
   }
 
   public Optional<String> bundleKey() {
@@ -332,10 +337,6 @@ public final class Parameter {
       return OptionalInt.of(2);
     }
     return isOptional() ? OptionalInt.of(1) : OptionalInt.of(0);
-  }
-
-  public boolean isOptional() {
-    return coercion.isOptional();
   }
 
   private ParamName paramName() {

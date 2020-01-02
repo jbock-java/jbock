@@ -124,20 +124,11 @@ final class ParserState {
   }
 
   private CodeBlock extractExpression(Parameter param) {
-    CodeBlock.Builder builder = getStreamExpression(param).toBuilder();
-    builder.add(".map($L)", param.coercion().mapExpr());
-    param.coercion().collectExpr().map(collectExpr ->
-        CodeBlock.of(".collect($L)", collectExpr))
-        .ifPresent(builder::add);
-    if (param.isFlag()) {
-      builder.add(".findAny().isPresent()");
-    } else if (param.isOptional()) {
-      builder.add(".findAny()");
-    } else if (param.isRequired()) {
-      builder.add(".findAny().orElseThrow($T.$L::missingRequired)", context.optionType(),
-          param.enumConstant());
-    }
-    return builder.build();
+    return getStreamExpression(param)
+        .add(".values.stream()")
+        .add(".map($L)", param.coercion().mapExpr())
+        .add(param.coercion().collectExpr())
+        .build();
   }
 
   static CodeBlock throwRepetitionErrorStatement(ParameterSpec optionParam) {
@@ -151,20 +142,15 @@ final class ParserState {
    * @return An expression that extracts the value of the given param from the parser state.
    * This expression will evaluate either to a {@link java.util.stream.Stream} or a {@link java.util.Optional}.
    */
-  private CodeBlock getStreamExpression(Parameter param) {
+  private CodeBlock.Builder getStreamExpression(Parameter param) {
     if (param.isPositional()) {
       return CodeBlock.builder().add(
-          "$N.get($L).values.stream()",
-          paramParsersField,
-          param.positionalIndex().orElseThrow(AssertionError::new))
-          .build();
+          "$N.get($L)", paramParsersField,
+          param.positionalIndex().orElseThrow(AssertionError::new));
     }
     return CodeBlock.builder().add(
-        "$N.get($T.$N).values.stream()",
-        optionParsersField,
-        context.optionType(),
-        param.enumConstant())
-        .build();
+        "$N.get($T.$N)", optionParsersField,
+        context.optionType(), param.enumConstant());
   }
 
   MethodSpec tryReadOption() {
