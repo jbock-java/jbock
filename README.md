@@ -23,14 +23,13 @@ abstract class MyArguments {
 }
 ````
 
-If jbock is properly configured as an
-[annotation processor](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java),
-then the presence of this annotated class
+jbock must be configured as an
+[annotation processor.](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java)
+The presence of the annotated class above
 will trigger a round of code generation at compile time.
-
-This will generate a class called
-[MyArguments_Parser,](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
-which can then be used as follows:
+The resulting class
+[MyArguments_Parser](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
+can be used as follows:
 
 ````java
 String[] args = { "-v", "2", "file.txt" }; // command line parameters
