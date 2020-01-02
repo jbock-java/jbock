@@ -36,7 +36,7 @@ public class CollectorAbsentAuto {
       return new AutoAttempt(list.get(), p -> CodeBlock.of("$N", p), returnType, REPEATABLE, basicInfo);
     }
     // required attempt (exact match)
-    return new AutoAttempt(returnType, p -> CodeBlock.of("$N", p), returnType, REQUIRED, basicInfo);
+    return new AutoAttempt(tool().box(returnType), p -> CodeBlock.of("$N", p), returnType, REQUIRED, basicInfo);
   }
 
   public Coercion findCoercion() {
