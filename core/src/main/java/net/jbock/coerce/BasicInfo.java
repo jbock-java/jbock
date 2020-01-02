@@ -19,7 +19,7 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Basic information about a single parameter (option or param).
+ * Coercion input: Information about a single parameter (option or param).
  */
 public class BasicInfo {
 

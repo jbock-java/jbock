@@ -8,6 +8,9 @@ import net.jbock.compiler.ParamName;
 
 import java.util.Optional;
 
+/**
+ * The result of coercion: Information about a single parameter (option or param).
+ */
 public final class Coercion {
 
   private final CodeBlock collectExpr;
