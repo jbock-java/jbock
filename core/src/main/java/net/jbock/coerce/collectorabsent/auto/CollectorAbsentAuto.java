@@ -3,6 +3,7 @@ package net.jbock.coerce.collectorabsent.auto;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.collectorabsent.MapperAttempt;
 import net.jbock.coerce.collectorabsent.Optionalish;
 import net.jbock.compiler.TypeTool;
 
@@ -22,7 +23,7 @@ public class CollectorAbsentAuto {
     this.basicInfo = basicInfo;
   }
 
-  private AutoAttempt getAttempt() {
+  private MapperAttempt getAttempt() {
     TypeMirror returnType = basicInfo.originalReturnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
     Optional<TypeMirror> list = tool().unwrap(List.class, returnType);
@@ -40,7 +41,7 @@ public class CollectorAbsentAuto {
   }
 
   public Coercion findCoercion() {
-    AutoAttempt attempt = getAttempt();
+    MapperAttempt attempt = getAttempt();
     return attempt.findCoercion(basicInfo)
         .orElseThrow(basicInfo::asValidationException);
   }
