@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -45,10 +46,11 @@ public class CoercionProvider {
       ParamName paramName,
       Optional<TypeElement> mapperClass,
       Optional<TypeElement> collectorClass,
+      ClassName optionType,
       TypeTool tool) {
     BasicInfo basicInfo = BasicInfo.create(
         mapperClass, collectorClass,
-        paramName, sourceMethod, tool);
+        paramName, optionType, sourceMethod, tool);
     return new CoercionProvider(basicInfo).run();
   }
 
@@ -73,7 +75,7 @@ public class CoercionProvider {
         .orElseThrow(() -> basicInfo.asValidationException(String.format("Unknown parameter type: %s. Try defining a custom mapper.",
             collectorInfo.inputType())));
     MapperType mapperType = MapperType.create(mapExpr);
-    ParameterSpec constructorParam = basicInfo.param(basicInfo.originalReturnType());
+    ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
     return Coercion.getCoercion(basicInfo, collectorInfo, mapperType, CodeBlock.of("$N", constructorParam), constructorParam, REPEATABLE);
   }
 
@@ -81,7 +83,7 @@ public class CoercionProvider {
     AbstractCollector collectorInfo = basicInfo.collectorInfo();
     ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType()
         .orElseThrow(basicInfo::asValidationException);
-    ParameterSpec constructorParam = basicInfo.param(basicInfo.originalReturnType());
+    ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
     return Coercion.getCoercion(basicInfo, collectorInfo, mapperType, CodeBlock.of("$N", constructorParam), constructorParam, REPEATABLE);
   }
 }

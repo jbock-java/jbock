@@ -10,17 +10,20 @@ import net.jbock.coerce.either.Either;
 import net.jbock.coerce.mapper.MapperType;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.function.Function;
 
 class AutoAttempt extends MapperAttempt {
 
-  AutoAttempt(TypeMirror expectedReturnType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
-    super(expectedReturnType, extractExpr, constructorParam, style);
+  AutoAttempt(TypeMirror test, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
+    super(test, extractExpr, constructorParam, style);
+  }
+
+  AutoAttempt(TypeMirror test, ParameterSpec constructorParam, ParameterStyle style) {
+    this(test, CodeBlock.of("$N", constructorParam), constructorParam, style);
   }
 
   @Override
   public Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
-    return basicInfo.findAutoMapper(expectedReturnType())
+    return basicInfo.findAutoMapper(getTestType())
         .map(MapperType::create)
         .map(mapperType -> getCoercion(basicInfo, mapperType))
         .<Either<String, Coercion>>map(Either::right)

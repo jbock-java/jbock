@@ -57,16 +57,6 @@ public final class Coercion {
 
   public static Coercion getCoercion(
       BasicInfo basicInfo,
-      MapperType mapperType,
-      CodeBlock extractExpr,
-      ParameterSpec constructorParam,
-      ParameterStyle style) {
-    return getCoercion(basicInfo, CodeBlock.builder().build(),
-        mapperType, extractExpr, style, constructorParam);
-  }
-
-  private static Coercion getCoercion(
-      BasicInfo basicInfo,
       CodeBlock collectExpr,
       MapperType mapperType,
       CodeBlock extractExpr,

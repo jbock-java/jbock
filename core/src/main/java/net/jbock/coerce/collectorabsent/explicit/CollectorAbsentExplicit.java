@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.ParameterStyle;
 import net.jbock.coerce.collectorabsent.MapperAttempt;
 import net.jbock.coerce.collectorabsent.Optionalish;
 import net.jbock.coerce.either.Either;
@@ -34,24 +35,32 @@ public class CollectorAbsentExplicit {
   private List<MapperAttempt> getAttempts() {
     TypeMirror returnType = basicInfo.originalReturnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
-    Optional<TypeMirror> list = tool().unwrap(List.class, returnType);
+    Optional<TypeMirror> listWrapped = tool().unwrap(List.class, returnType);
     List<MapperAttempt> attempts = new ArrayList<>();
     opt.ifPresent(optional -> {
-      ParameterSpec param = basicInfo.param(optional.liftedType());
+      ParameterSpec param = basicInfo.constructorParam(optional.liftedType());
       // optional match
-      attempts.add(new ExplicitAttempt(optional.wrappedType(), optional.extractExpr(param), param, OPTIONAL, mapperClass));
+      attempts.add(explicit(optional.wrappedType(), optional.extractExpr(param), param, OPTIONAL));
       // exact match (-> required)
-      attempts.add(new ExplicitAttempt(optional.liftedType(), optional.extractExpr(param), param, REQUIRED, mapperClass));
+      attempts.add(explicit(optional.liftedType(), optional.extractExpr(param), param, REQUIRED));
     });
-    list.ifPresent(wrapped -> {
-      ParameterSpec param = basicInfo.param(returnType);
+    listWrapped.ifPresent(wrapped -> {
+      ParameterSpec param = basicInfo.constructorParam(returnType);
       // list match
-      attempts.add(new ExplicitAttempt(wrapped, CodeBlock.of("$N", param), param, REPEATABLE, mapperClass));
+      attempts.add(explicit(wrapped, param, REPEATABLE));
     });
-    ParameterSpec param = basicInfo.param(returnType);
+    ParameterSpec param = basicInfo.constructorParam(returnType);
     // exact match (-> required)
-    attempts.add(new ExplicitAttempt(tool().box(returnType), CodeBlock.of("$N", param), param, REQUIRED, mapperClass));
+    attempts.add(explicit(tool().box(returnType), param, REQUIRED));
     return attempts;
+  }
+
+  private MapperAttempt explicit(TypeMirror expectedReturnType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
+    return new ExplicitAttempt(expectedReturnType, extractExpr, constructorParam, style, mapperClass);
+  }
+
+  private MapperAttempt explicit(TypeMirror expectedReturnType, ParameterSpec constructorParam, ParameterStyle style) {
+    return new ExplicitAttempt(expectedReturnType, CodeBlock.of("$N", constructorParam), constructorParam, style, mapperClass);
   }
 
   public Coercion findCoercion() {

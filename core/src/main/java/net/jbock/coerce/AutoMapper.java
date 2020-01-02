@@ -55,9 +55,9 @@ class AutoMapper {
       create(BigInteger.class, NEW),
       create(BigDecimal.class, NEW));
 
-  static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror type) {
+  static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror testType) {
     for (Entry<Class<?>, CodeBlock> coercion : MAPPERS) {
-      if (tool.isSameType(type, coercion.getKey())) {
+      if (tool.isSameType(testType, coercion.getKey())) {
         return Optional.of(coercion.getValue());
       }
     }

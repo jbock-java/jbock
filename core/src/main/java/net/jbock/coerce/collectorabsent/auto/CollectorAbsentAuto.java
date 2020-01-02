@@ -1,6 +1,5 @@
 package net.jbock.coerce.collectorabsent.auto;
 
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
@@ -27,21 +26,21 @@ public class CollectorAbsentAuto {
   private MapperAttempt getAttempt() {
     TypeMirror returnType = basicInfo.originalReturnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
-    Optional<TypeMirror> list = tool().unwrap(List.class, returnType);
+    Optional<TypeMirror> listWrapped = tool().unwrap(List.class, returnType);
     if (opt.isPresent()) {
       Optionalish optional = opt.get();
-      // optional attempt
-      ParameterSpec param = basicInfo.param(optional.liftedType());
+      // optional match
+      ParameterSpec param = basicInfo.constructorParam(optional.liftedType());
       return new AutoAttempt(optional.wrappedType(), optional.extractExpr(param), param, OPTIONAL);
     }
-    if (list.isPresent()) {
-      // repeatable attempt
-      ParameterSpec param = basicInfo.param(returnType);
-      return new AutoAttempt(list.get(), CodeBlock.of("$N", param), param, REPEATABLE);
+    if (listWrapped.isPresent()) {
+      // repeatable match
+      ParameterSpec param = basicInfo.constructorParam(returnType);
+      return new AutoAttempt(listWrapped.get(), param, REPEATABLE);
     }
-    // required attempt (exact match)
-    ParameterSpec param = basicInfo.param(returnType);
-    return new AutoAttempt(tool().box(returnType), CodeBlock.of("$N", param), param, REQUIRED);
+    // exact match (-> required)
+    ParameterSpec param = basicInfo.constructorParam(returnType);
+    return new AutoAttempt(tool().box(returnType), param, REQUIRED);
   }
 
   public Coercion findCoercion() {

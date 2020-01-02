@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -25,6 +26,8 @@ public class BasicInfo {
 
   private final TypeTool tool;
 
+  private final ClassName optionType;
+
   // nullable
   private final TypeElement mapperClass;
 
@@ -35,11 +38,13 @@ public class BasicInfo {
       ParamName paramName,
       ExecutableElement sourceMethod,
       TypeTool tool,
+      ClassName optionType,
       TypeElement mapperClass,
       TypeElement collectorClass) {
     this.paramName = paramName;
     this.sourceMethod = sourceMethod;
     this.tool = tool;
+    this.optionType = optionType;
     this.mapperClass = mapperClass;
     this.collectorClass = collectorClass;
   }
@@ -48,9 +53,10 @@ public class BasicInfo {
       Optional<TypeElement> mapperClass,
       Optional<TypeElement> collectorClass,
       ParamName paramName,
+      ClassName optionType,
       ExecutableElement sourceMethod,
       TypeTool tool) {
-    return new BasicInfo(paramName, sourceMethod, tool, mapperClass.orElse(null), collectorClass.orElse(null));
+    return new BasicInfo(paramName, sourceMethod, tool, optionType, mapperClass.orElse(null), collectorClass.orElse(null));
   }
 
   private boolean isEnumType(TypeMirror mirror) {
@@ -67,27 +73,23 @@ public class BasicInfo {
     return !tool().isPrivateType(mirror);
   }
 
-  public Optional<CodeBlock> findAutoMapper(TypeMirror innerType) {
-    Optional<CodeBlock> mapExpr = AutoMapper.findAutoMapper(tool(), innerType);
+  public Optional<CodeBlock> findAutoMapper(TypeMirror testType) {
+    Optional<CodeBlock> mapExpr = AutoMapper.findAutoMapper(tool(), testType);
     if (mapExpr.isPresent()) {
       return mapExpr;
     }
-    if (isEnumType(innerType)) {
-      return Optional.of(CodeBlock.of("$T::valueOf", innerType));
+    if (isEnumType(testType)) {
+      return Optional.of(CodeBlock.of("$T::valueOf", testType));
     }
     return Optional.empty();
-  }
-
-  public String paramName() {
-    return paramName.camel();
   }
 
   ParamName parameterName() {
     return paramName;
   }
 
-  public ParameterSpec param(TypeMirror type) {
-    return ParameterSpec.builder(TypeName.get(type), paramName()).build();
+  public ParameterSpec constructorParam(TypeMirror type) {
+    return ParameterSpec.builder(TypeName.get(type), paramName.camel()).build();
 
   }
 

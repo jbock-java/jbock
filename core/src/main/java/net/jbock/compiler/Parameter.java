@@ -1,5 +1,6 @@
 package net.jbock.compiler;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
@@ -124,16 +125,16 @@ public final class Parameter {
     return coercion;
   }
 
-  static Parameter create(boolean anyMnemonics, TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod, Integer positionalIndex, String[] description) {
+  static Parameter create(boolean anyMnemonics, TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod, Integer positionalIndex, String[] description, ClassName optionType) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     if (positionalIndex != null) {
       Optional<TypeElement> mapperClass = annotationUtil.get(net.jbock.Param.class, "mappedBy");
       Optional<TypeElement> collectorClass = annotationUtil.get(net.jbock.Param.class, "collectedBy");
-      return createPositional(alreadyCreated, sourceMethod, positionalIndex, description, mapperClass, collectorClass, tool);
+      return createPositional(alreadyCreated, sourceMethod, positionalIndex, description, mapperClass, collectorClass, optionType, tool);
     } else {
       Optional<TypeElement> mapperClass = annotationUtil.get(Option.class, "mappedBy");
       Optional<TypeElement> collectorClass = annotationUtil.get(Option.class, "collectedBy");
-      return createNonpositional(anyMnemonics, alreadyCreated, sourceMethod, description, mapperClass, collectorClass, tool);
+      return createNonpositional(anyMnemonics, alreadyCreated, sourceMethod, description, mapperClass, collectorClass, optionType, tool);
     }
   }
 
@@ -144,6 +145,7 @@ public final class Parameter {
       String[] description,
       Optional<TypeElement> mapperClass,
       Optional<TypeElement> collectorClass,
+      ClassName optionType,
       TypeTool tool) {
     String longName = longName(params, sourceMethod);
     String shortName = shortName(params, sourceMethod);
@@ -157,7 +159,7 @@ public final class Parameter {
     boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
     Coercion coercion = flag ?
         CoercionProvider.flagCoercion(sourceMethod, name) :
-        CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
+        CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
     checkBundleKey(parameter.value(), params, sourceMethod);
     List<String> names = names(longName, shortName);
     return new Parameter(
@@ -179,10 +181,11 @@ public final class Parameter {
       String[] description,
       Optional<TypeElement> mapperClass,
       Optional<TypeElement> collectorClass,
+      ClassName optionType,
       TypeTool tool) {
     net.jbock.Param parameter = sourceMethod.getAnnotation(net.jbock.Param.class);
     ParamName name = findParamName(alreadyCreated, sourceMethod);
-    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, tool);
+    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
     checkBundleKey(parameter.bundleKey(), alreadyCreated, sourceMethod);
     return new Parameter(
         null,

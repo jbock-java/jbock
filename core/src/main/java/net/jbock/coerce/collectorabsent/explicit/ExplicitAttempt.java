@@ -24,8 +24,7 @@ class ExplicitAttempt extends MapperAttempt {
 
   @Override
   public Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
-    return new MapperClassValidator(basicInfo, expectedReturnType(), mapperClass)
-        .checkReturnType()
+    return new MapperClassValidator(basicInfo, getTestType(), mapperClass).checkReturnType()
         .map(Function.identity(), mapperType -> getCoercion(basicInfo, mapperType));
   }
 }

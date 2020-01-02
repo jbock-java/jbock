@@ -16,10 +16,10 @@ public abstract class MapperAttempt {
   private final CodeBlock extractExpr;
   private final ParameterSpec constructorParam;
   private final ParameterStyle style;
-  private final TypeMirror expectedReturnType;
+  private final TypeMirror testType;
 
-  protected MapperAttempt(TypeMirror expectedReturnType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
-    this.expectedReturnType = expectedReturnType;
+  protected MapperAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
+    this.testType = testType;
     this.extractExpr = extractExpr;
     this.constructorParam = constructorParam;
     this.style = style;
@@ -27,14 +27,14 @@ public abstract class MapperAttempt {
 
   protected Coercion getCoercion(BasicInfo basicInfo, MapperType mapperType) {
     if (style.isRepeatable()) {
-      return Coercion.getCoercion(basicInfo, new DefaultCollector(expectedReturnType),
+      return Coercion.getCoercion(basicInfo, new DefaultCollector(testType),
           mapperType, extractExpr, constructorParam, style);
     }
-    return Coercion.getCoercion(basicInfo, mapperType, extractExpr, constructorParam, style);
+    return Coercion.getCoercion(basicInfo, CodeBlock.builder().build(), mapperType, extractExpr, style, constructorParam);
   }
 
-  protected TypeMirror expectedReturnType() {
-    return expectedReturnType;
+  protected TypeMirror getTestType() {
+    return testType;
   }
 
   public abstract Either<String, Coercion> findCoercion(BasicInfo basicInfo);
