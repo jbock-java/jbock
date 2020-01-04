@@ -89,16 +89,17 @@ public final class Optionalish {
   /**
    * The function creates an expression of the original type.
    *
+   * @param constructorParam the constructor constructorParam
    * @return extract expr
    */
-  public CodeBlock extractExpr(ParameterSpec param) {
-    return extract.apply(param);
+  public CodeBlock extractExpr(ParameterSpec constructorParam) {
+    return extract.apply(constructorParam);
   }
 
   /**
    * <ul>
-   *   <li>{@code OptionalInt} -> {@code Integer}</li>
-   *   <li>{@code Optional<Integer>} -> {@code Integer}</li>
+   *   <li>{@code OptionalInt} -&gt; {@code Integer}</li>
+   *   <li>{@code Optional<Integer>} -&gt; {@code Integer}</li>
    * </ul>
    *
    * @return wrapped type
