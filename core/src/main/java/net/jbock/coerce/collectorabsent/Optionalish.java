@@ -76,17 +76,20 @@ public final class Optionalish {
 
   /**
    * <ul>
-   *   <li>{@code OptionalInt} -> {@code Optional<Integer>}</li>
-   *   <li>{@code Optional<Integer>} -> {@code Optional<Integer>}</li>
+   *   <li>{@code OptionalInt} -&gt; {@code Optional<Integer>}</li>
+   *   <li>{@code Optional<Integer>} -&gt; {@code Optional<Integer>}</li>
    * </ul>
+   *
+   * @return lifted type
    */
   public TypeMirror liftedType() {
     return liftedType;
   }
 
   /**
-   * The function creates an expression of the original type,
-   * like {@code OptionalInt}.
+   * The function creates an expression of the original type.
+   *
+   * @return extract expr
    */
   public CodeBlock extractExpr(ParameterSpec param) {
     return extract.apply(param);
@@ -97,6 +100,8 @@ public final class Optionalish {
    *   <li>{@code OptionalInt} -> {@code Integer}</li>
    *   <li>{@code Optional<Integer>} -> {@code Integer}</li>
    * </ul>
+   *
+   * @return wrapped type
    */
   public TypeMirror wrappedType() {
     return wrappedType;
