@@ -356,6 +356,7 @@ The `indent` and `maxLineWidth` are print settings for the help text.
 * Option names always start with one or two dashes.
 * No multi-valued options. Workaround: *Repeatable* options or params.
 * Mnemonics are limited to a single character.
+* An option can't have more than one long name or more than one mnemonic.
 * Cannot distinguish between attached or detached option shape. Both are always allowed and equivalent.
 * Type matching uses `java.util.List` and `java.util.Optional` exclusively. Alternatives like `com.google.common.base.Optional` won't work.
 
