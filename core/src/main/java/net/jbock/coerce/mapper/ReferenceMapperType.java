@@ -11,25 +11,28 @@ import static net.jbock.coerce.Util.getTypeParameterList;
 
 public class ReferenceMapperType extends MapperType {
 
-  private final TypeElement mapperClass; // implements Function or Supplier<Function>
+  // solved typevars of mapperClass
+  // this field is not used at runtime, it's used for testing only
+  private final List<TypeMirror> solution;
 
-  private final TypeTool tool;
-
-  ReferenceMapperType(
-      TypeTool tool,
-      TypeElement mapperClass,
-      boolean supplier,
-      List<TypeMirror> solution) {
-    super(supplier, solution);
-    this.mapperClass = mapperClass;
-    this.tool = tool;
+  public ReferenceMapperType(List<TypeMirror> solution, CodeBlock mapExpr) {
+    super(mapExpr);
+    this.solution = solution;
   }
 
-  @Override
-  public CodeBlock mapExpr() {
-    return CodeBlock.of("new $T$L()$L",
+  public static ReferenceMapperType create(
+      TypeTool tool,
+      boolean supplier,
+      TypeElement mapperClass,
+      List<TypeMirror> solution) {
+    CodeBlock mapExpr = CodeBlock.of("new $T$L()$L",
         tool.erasure(mapperClass.asType()),
-        getTypeParameterList(solution()),
-        supplier() ? ".get()" : "");
+        getTypeParameterList(solution),
+        supplier ? ".get()" : "");
+    return new ReferenceMapperType(solution, mapExpr);
+  }
+
+  public List<TypeMirror> solution() {
+    return solution;
   }
 }

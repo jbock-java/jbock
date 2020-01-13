@@ -24,7 +24,7 @@ class AutoAttempt extends MapperAttempt {
   @Override
   public Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
     return basicInfo.findAutoMapper(getTestType())
-        .map(MapperType::create)
+        .map(MapperType::new)
         .map(mapperType -> getCoercion(basicInfo, mapperType))
         .<Either<String, Coercion>>map(Either::right)
         .orElseGet(() -> Either.left(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",

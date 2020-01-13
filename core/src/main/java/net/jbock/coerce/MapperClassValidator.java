@@ -1,7 +1,6 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
@@ -47,7 +46,7 @@ public final class MapperClassValidator {
     return new Flattener(basicInfo, mapperClass)
         .getTypeParameters(leftSolution, rightSolution)
         .map(MAPPER::boom, typeParameters ->
-            MapperType.create(tool(), functionType.isSupplier(), mapperClass, typeParameters.getTypeParameters()));
+            ReferenceMapperType.create(tool(), functionType.isSupplier(), mapperClass, typeParameters.getTypeParameters()));
   }
 
   private TypeTool tool() {

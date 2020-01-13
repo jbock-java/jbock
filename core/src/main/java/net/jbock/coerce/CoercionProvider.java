@@ -73,7 +73,7 @@ public class CoercionProvider {
     CodeBlock mapExpr = basicInfo.findAutoMapper(collectorInfo.inputType())
         .orElseThrow(() -> basicInfo.asValidationException(String.format("Unknown parameter type: %s. Try defining a custom mapper.",
             collectorInfo.inputType())));
-    MapperType mapperType = MapperType.create(mapExpr);
+    MapperType mapperType = new MapperType(mapExpr);
     ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
     return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapperType, CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
   }
