@@ -357,6 +357,7 @@ The `indent` and `maxLineWidth` are print settings for the help text.
 * No multi-valued options. Workaround: *Repeatable* options or params.
 * Mnemonics are limited to a single character.
 * Cannot distinguish between attached or detached option shape. Both are always allowed and equivalent.
+* Type matching uses `java.util.List` and `java.util.Optional` exclusively. Alternatives like `com.google.common.base.Optional` won't work.
 
 ### Gradle config
 
