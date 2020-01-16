@@ -1,7 +1,6 @@
 ### Contents
 
-* <a href="#features-overview">Features overview</a>
-* <a href="#parameter-types">Parameter types</a>
+* <a href="#option-param-kinds">Option/param kinds</a>
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#flags">Flags</a>
 * <a href="#binding-parameters">Binding options</a>
@@ -20,41 +19,25 @@
 * <a href="#maven-config">Maven config</a>
 * <a href="#running-tests">Running tests</a>
 
-### Features overview
+### Option/Param kinds
 
-Some of the features, especially the handling of optional parameters, may be unexpected
-for users of similar parsers:
+Command line applications ("commands") have access to a special array of strings,
+which is often called `args` or `argv`, which contains the command line parameters of the invocation.
 
-1. In the Java model, <a href="https://github.com/h908714124/jbock/blob/master/README.md#parameter-type-matching">optional parameters</a>
-   correspond to methods that return [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html).
-   Coincidentally, there is no way to make a parameter method return `null`.
-1. <a href="#binding-options">*Binding options*</a> are always [unary:](https://en.wikipedia.org/wiki/Unary_operation)
-    1. The parameter name must be followed by a single argument, in other words there are no multi-valued options.
-    1. Instead, options and params can be <a href="#repeatable-parameters">*repeatable.*</a>
-       This is expressed by a model method that returns [List.](https://en.wikipedia.org/wiki/Java_collections_framework)
-       Other collection types can also be used, if a custom mapper or collector is defined.
+Some of the tokens in this array take the form of key-value pairs,
+where the key starts with one or two dashes.
+These are called *options*.
+The other kind of tokens, which are distinguished not by their *name* but by their *position* in `argv`, relative to the other non-options, are called *params*.
 
-Next, we look at some of the features in more detail.
-
-### Parameter types
-
-Command line applications have access to a special array of strings,
-which is often called `args` or `argv`.
-This represents the command line parameters that are passed to the application at runtime.
-
-Some of the tokens in this array take the form of key-value pairs.
-These are called *options*, but keep in mind that options are not always *optional*.
-The other kind of tokens, which are distinguished by their position in `argv`, are called *params*.
-
-Now we take a closer look at the basic parameter types:
+Options can be further subdivided into options that take an argument, and those that don't, which leaves us with three kinds:
 
 1. <a href="#params">*Params*</a>
-1. nullary options: <a href="#flags">*Flags*</a>
-1. unary options: <a href="#binding-options">*Binding options*</a>
+1. <a href="#flags">*Flag options*</a>
+1. <a href="#binding-options">*Options*</a>
 
 ### Params
 
-A *positional* parameter is just an arbitrary token *without a
+A *positional* parameter is just an arbitrary token in `argv` *without a
 preceding parameter name*. We call this a *param*.
 The token is not allowed to start with a dash, unless the
 <a href="#escape-sequence">*escape sequence*</a> was used.
@@ -72,7 +55,7 @@ abstract class MyArguments {
 }
 ````
 
-The `MyArguments_Parser` that is generated
+The class `MyArguments_Parser` that is generated
 from this example requires an `argv` of length *exactly* `2`,
 because none of the params are `Optional`.
 
