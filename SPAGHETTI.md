@@ -204,7 +204,7 @@ To disable the special meaning of the `--help` token, use
 ### Standard coercions
 
 All non-private enums, as well as
-[some standard Java types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java)
+[some standard Java types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAutoTypes.java)
 can be used as parameter types, without having
 to write a custom mapper first. Optional and List of these
 types are also allowed.
