@@ -32,7 +32,7 @@ public class CollectorClassValidator {
   public CustomCollector getCollectorInfo() {
     commonChecks(collectorClass);
     checkNotAbstract(collectorClass);
-    ReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, basicInfo, collectorClass)
+    ReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, basicInfo, basicInfo.tool(), collectorClass)
         .getReferencedType();
     TypeMirror inputType = collectorType.typeArguments().get(0);
     TypeMirror outputType = collectorType.typeArguments().get(2);
@@ -51,6 +51,6 @@ public class CollectorClassValidator {
   }
 
   private ValidationException boom(String message) {
-    return basicInfo.asValidationException(COLLECTOR.boom(message));
+    return basicInfo.apply(COLLECTOR.boom(message));
   }
 }

@@ -30,7 +30,7 @@ public final class MapperClassValidator {
   public Either<String, ReferenceMapperType> checkReturnType() {
     commonChecks(mapperClass);
     checkNotAbstract(mapperClass);
-    ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, mapperClass).getReferencedType();
+    ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, basicInfo, basicInfo.tool(), mapperClass).getReferencedType();
     TypeMirror inputType = functionType.typeArguments().get(0);
     TypeMirror outputType = functionType.typeArguments().get(1);
     return tool().unify(tool().asType(String.class), inputType).flatMap(MAPPER::boom, leftSolution ->

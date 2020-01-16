@@ -17,11 +17,12 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 /**
  * Coercion input: Information about a single parameter (option or param).
  */
-public class BasicInfo {
+public class BasicInfo implements Function<String, ValidationException> {
 
   private final ParamName paramName;
 
@@ -105,7 +106,8 @@ public class BasicInfo {
     return FieldSpec.builder(TypeName.get(originalReturnType()), paramName.camel()).build();
   }
 
-  public ValidationException asValidationException(String message) {
+  @Override
+  public ValidationException apply(String message) {
     return ValidationException.create(sourceMethod, message);
   }
 
@@ -127,7 +129,7 @@ public class BasicInfo {
     }
     Optional<TypeMirror> wrapped = tool().unwrap(List.class, originalReturnType());
     if (!wrapped.isPresent()) {
-      throw asValidationException("Either define a custom collector, or return List.");
+      throw apply("Either define a custom collector, or return List.");
     }
     return new DefaultCollector(wrapped.get());
   }

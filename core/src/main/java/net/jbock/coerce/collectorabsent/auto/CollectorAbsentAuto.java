@@ -46,7 +46,7 @@ public class CollectorAbsentAuto {
   public Coercion findCoercion() {
     MapperAttempt attempt = getAttempt();
     return attempt.findCoercion(basicInfo)
-        .orElseThrow(basicInfo::asValidationException);
+        .orElseThrow(basicInfo::apply);
   }
 
   private TypeTool tool() {

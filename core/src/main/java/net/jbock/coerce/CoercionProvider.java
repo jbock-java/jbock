@@ -71,7 +71,7 @@ public class CoercionProvider {
   private Coercion collectorPresentAuto() {
     AbstractCollector collectorInfo = basicInfo.collectorInfo();
     CodeBlock mapExpr = basicInfo.findAutoMapper(collectorInfo.inputType())
-        .orElseThrow(() -> basicInfo.asValidationException(String.format("Unknown parameter type: %s. Try defining a custom mapper.",
+        .orElseThrow(() -> basicInfo.apply(String.format("Unknown parameter type: %s. Try defining a custom mapper.",
             collectorInfo.inputType())));
     MapperType mapperType = new MapperType(mapExpr);
     ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
@@ -81,7 +81,7 @@ public class CoercionProvider {
   private Coercion collectorPresentExplicit(TypeElement mapperClass) {
     AbstractCollector collectorInfo = basicInfo.collectorInfo();
     ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, collectorInfo.inputType(), mapperClass).checkReturnType()
-        .orElseThrow(basicInfo::asValidationException);
+        .orElseThrow(basicInfo::apply);
     ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
     return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapperType, CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
   }

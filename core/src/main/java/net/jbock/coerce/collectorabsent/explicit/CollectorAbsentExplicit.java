@@ -76,7 +76,7 @@ public class CollectorAbsentExplicit {
       throw new AssertionError();
     }
     String message = ((Left<String, Coercion>) either).value();
-    throw basicInfo.asValidationException(message);
+    throw basicInfo.apply(message);
   }
 
   private TypeTool tool() {

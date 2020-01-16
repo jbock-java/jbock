@@ -1,11 +1,10 @@
 package net.jbock.coerce.reference;
 
-import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
-import net.jbock.compiler.TypevarMapping;
 import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.TypevarMapping;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
@@ -30,12 +29,12 @@ class Resolver {
 
   private final ExpectedType<?> expectedType;
 
-  private final BasicInfo basicInfo;
+  private final TypeTool tool;
 
   // visible for testing
-  Resolver(ExpectedType<?> expectedType, BasicInfo basicInfo) {
+  Resolver(ExpectedType<?> expectedType, TypeTool tool) {
     this.expectedType = expectedType;
-    this.basicInfo = basicInfo;
+    this.tool = tool;
   }
 
   /**
@@ -48,13 +47,13 @@ class Resolver {
    * @return A type that has the same erasure as {@code animal}
    */
   <E> Either<TypecheckFailure, Declared<E>> typecheck(TypeElement dog, Class<E> animal) {
-    List<ImplementsRelation> hierarchy = new HierarchyUtil(tool()).getHierarchy(dog);
+    List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(dog);
     List<ImplementsRelation> path = findPath(hierarchy, animal);
     if (path.isEmpty()) {
       return left(nonFatal("not a " + animal.getCanonicalName()));
     }
     assert path.get(0).dog() == dog;
-    if (tool().isRaw(path.get(path.size() - 1).animal())) {
+    if (tool.isRaw(path.get(path.size() - 1).animal())) {
       return left(fatal("raw type: " + path.get(path.size() - 1).animal()));
     }
     return dogToAnimal(path).map(Function.identity(),
@@ -62,17 +61,17 @@ class Resolver {
   }
 
   public <E> Either<TypecheckFailure, Declared<E>> typecheck(DeclaredType declared, Class<E> someInterface) {
-    if (!tool().isSameErasure(declared, someInterface)) {
+    if (!tool.isSameErasure(declared, someInterface)) {
       return left(nonFatal("not a declared " + someInterface.getCanonicalName()));
     }
-    if (tool().isRaw(declared)) {
+    if (tool.isRaw(declared)) {
       return left(fatal("raw type: " + declared));
     }
     return right(new Declared<>(someInterface, declared.getTypeArguments()));
   }
 
   private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> goal) {
-    TypeMirror currentGoal = tool().asType(goal);
+    TypeMirror currentGoal = tool.asType(goal);
     List<ImplementsRelation> path = new ArrayList<>();
     ImplementsRelation relation;
     while ((relation = findRelation(hierarchy, currentGoal)) != null) {
@@ -85,7 +84,7 @@ class Resolver {
 
   private ImplementsRelation findRelation(List<ImplementsRelation> hierarchy, TypeMirror goal) {
     for (ImplementsRelation relation : hierarchy) {
-      if (tool().isSameErasure(goal, relation.animal())) {
+      if (tool.isSameErasure(goal, relation.animal())) {
         return relation;
       }
     }
@@ -119,7 +118,7 @@ class Resolver {
 
   private Either<TypecheckFailure, TypevarMapping> getMergedTypevarMapping(List<TypevarMapping> solutions) {
     if (solutions.isEmpty()) {
-      return right(new TypevarMapping(Collections.emptyMap(), tool()));
+      return right(new TypevarMapping(Collections.emptyMap(), tool));
     }
     TypevarMapping solution = solutions.get(solutions.size() - 1);
     for (int i = solutions.size() - 2; i >= 0; i--) {
@@ -131,7 +130,7 @@ class Resolver {
         }
         merged.put(entry.getKey(), ((Right<TypecheckFailure, TypeMirror>) substituted).value());
       }
-      solution = new TypevarMapping(merged, tool());
+      solution = new TypevarMapping(merged, tool);
     }
     return right(solution);
   }
@@ -148,10 +147,6 @@ class Resolver {
       TypeMirror arg = typeArguments.get(i);
       solution.put(param.toString(), arg);
     }
-    return new TypevarMapping(solution, tool());
-  }
-
-  private TypeTool tool() {
-    return basicInfo.tool();
+    return new TypevarMapping(solution, tool);
   }
 }

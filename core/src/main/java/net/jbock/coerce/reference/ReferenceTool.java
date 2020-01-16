@@ -1,12 +1,13 @@
 package net.jbock.coerce.reference;
 
-import net.jbock.coerce.BasicInfo;
+import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Locale;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.jbock.compiler.TypeTool.asDeclared;
@@ -15,15 +16,15 @@ public class ReferenceTool<E> {
 
   private final Resolver resolver;
 
-  private final BasicInfo basicInfo;
+  private final Function<String, ValidationException> errorHandler;
   private final TypeElement referencedClass;
   private final ExpectedType<E> expectedType;
 
-  public ReferenceTool(ExpectedType<E> expectedType, BasicInfo basicInfo, TypeElement referencedClass) {
+  public ReferenceTool(ExpectedType<E> expectedType, Function<String, ValidationException> errorHandler, TypeTool tool, TypeElement referencedClass) {
     this.expectedType = expectedType;
-    this.basicInfo = basicInfo;
+    this.errorHandler = errorHandler;
     this.referencedClass = referencedClass;
-    this.resolver = new Resolver(expectedType, basicInfo);
+    this.resolver = new Resolver(expectedType, tool);
   }
 
   public ReferencedType<E> getReferencedType() {
@@ -56,7 +57,7 @@ public class ReferenceTool<E> {
   }
 
   private ValidationException boom(String message) {
-    return basicInfo.asValidationException(String.format("There is a problem with the " +
+    return errorHandler.apply(String.format("There is a problem with the " +
         expectedType.name().toLowerCase(Locale.US) + " class: %s.", message));
   }
 }
