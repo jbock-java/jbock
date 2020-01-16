@@ -214,7 +214,7 @@ types are also allowed.
 Mappers (a.k.a. converters) must implement [Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html)`<`[String](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html)`, ?>`,
 or a [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html) of such a function,
 where `?` depends on the option or parameter it's used on.
-At runtime, the mapper is invoked once for each appearance of the option or parameter `argv`.
+At runtime, the mapper is invoked once for each appearance of the option or parameter in `argv`.
 The mapper may reject its input by throwing any [RuntimeException](https://docs.oracle.com/javase/8/docs/api/java/lang/RuntimeException.html).
 The mapper class must be accessible at compile time, and have a no-argument constructor.
 
