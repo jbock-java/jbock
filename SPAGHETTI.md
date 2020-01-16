@@ -213,44 +213,43 @@ types are also allowed.
 
 Mappers (a.k.a. converters) must implement [Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html)`<`[String](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html)`, ?>`,
 or a [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html) of such a function,
-where `?` depends on the parameter it's used on.
-The mapper's input is the parameter value taken from the argument vector `String[] argv`.
-If the parameter does not appear in `argv`, then the mapper is not invoked.
+where `?` depends on the option or parameter it's used on.
+At runtime, the mapper is invoked once for each appearance of the option or parameter `argv`.
 The mapper may reject its input by throwing any [RuntimeException](https://docs.oracle.com/javase/8/docs/api/java/lang/RuntimeException.html).
+The mapper class must be accessible at compile time, and have a no-argument constructor.
 
 ````java
-class PositiveNumberMapper implements Function<String, Integer> {
+class NatMapper implements Function<String, Integer> {
 
   @Override
-  public Integer apply(String s) { // the input string will not be null
-    Integer i = Integer.valueOf(s); // exceptions are ok, no try-catch needed
-    if (i <= 0) {
-      throw new IllegalArgumentException("Try to keep it positive.");
+  public Integer apply(String s) {
+    Integer i = Integer.valueOf(s); // exceptions are fine
+    if (i < 0) {
+      throw new IllegalArgumentException("negative: " + i);
     }
     return i;
   }
 }
 ````
 
-*Note: The mapper class must have a no-argument constructor.*
-
 ### Custom collectors
 
-By using a custom collector, it is possible to create a
-`Set`, or `Map` or other collections. The following example
-builds a `Map`:
+The following example shows how a repeatable
+option can be parsed into a `Map`,
+by declaring a custom mapper and collector:
 
 ````java
 @Option(value = "headers",
-        mappedBy = MapTokenizer.class,
-        collectedBy = MapCollector.class)
+        mnemonic = 'H'
+        mappedBy = MyTokenizer.class,
+        collectedBy = MyCollector.class)
 abstract Map<String, String> headers();
 ````
 
-The mapper splits tokens of the form `a:b` into map entries
+This mapper parses a token of the form `-Hfoo:bar` into a map entry:
 
 ````java
-class MapTokenizer implements Function<String, Map.Entry<String, String>> {
+class MyTokenizer implements Function<String, Map.Entry<String, String>> {
 
   @Override
   public Map.Entry<String, String> apply(String s) {
@@ -263,13 +262,12 @@ class MapTokenizer implements Function<String, Map.Entry<String, String>> {
 }
 ````
 
-The collector class must be a [Collector](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html)`<A, ?, B>`,
-or a `Supplier` of such a collector,
-where `A` is the output of the mapper, and `B` is the
-parameter type.
+The collector class must implement either [Collector](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html)`<A, ?, B>` or `Supplier<Collector<A, ?, B>`,
+where `A` is mappable, and `B` is the option's or parameter's type.
+The collector class may have type parameters, as long as they can be chosen so that `A` and `B` are matched.
 
 ````java
-class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
+class MyCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
 
   @Override
   public Collector<Map.Entry<K, V>, ?, Map<K, V>> get() {
@@ -351,14 +349,12 @@ The `indent` and `maxLineWidth` are print settings for the help text.
 
 ### Limitations
 
-* No grouping. For example, `rm -rf` is invalid, use `rm -r -f` instead
-* Also no bsd-style grouping as in `tar xzf`, use `tar -x -z -f` instead
-* Option names always start with one or two dashes.
-* No multi-valued options. Workaround: *Repeatable* options or params.
-* Mnemonics are limited to a single character.
+* No multi-valued options or params. Workaround: Declare the option or param *repeatable*, either by making it a `List`, or defining a <a href="#custom-collectors">*custom collector.*</a>
+* Option names start with two dashes. Only single-character names may use a single dash; these are called mnemonics.
+* No grouping. For example, `rm -rf` and `tar xzf` are bad, use `rm -r -f` and `tar -x -z -f` instead
 * An option can't have more than one long name or more than one mnemonic.
-* Cannot distinguish between attached or detached option shape. Both are always allowed and equivalent.
-* Type matching uses `java.util.List` and `java.util.Optional` exclusively. Alternatives like `com.google.common.base.Optional` won't work.
+* Mappers don't currently know about option form (long name or mnemonic) or shape (attached or detached). Also it's currently not possible to forbid one of the shapes.
+* Type matching currently uses `java.util.List` and `java.util.Optional` exclusively. Alternatives like `com.google.common.base.Optional` don't get special semantics.
 
 ### Gradle config
 
@@ -373,3 +369,4 @@ see [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
 ````sh
 ./gradlew core:clean core:test examples:clean examples:test
 ````
+
