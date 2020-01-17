@@ -25,9 +25,9 @@ public abstract class MapperAttempt {
     this.style = style;
   }
 
-  protected Coercion getCoercion(BasicInfo basicInfo, MapperType mapperType) {
+  protected Coercion getCoercion(BasicInfo basicInfo, CodeBlock mapExpr) {
     CodeBlock collectExpr = getCollectExpr(basicInfo);
-    return Coercion.getCoercion(basicInfo, collectExpr, mapperType, extractExpr, style, constructorParam);
+    return Coercion.getCoercion(basicInfo, collectExpr, mapExpr, extractExpr, style, constructorParam);
   }
 
   private CodeBlock getCollectExpr(BasicInfo basicInfo) {

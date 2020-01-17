@@ -3,7 +3,6 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Right;
-import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeExpr;
 import net.jbock.compiler.TypeTool;
@@ -33,11 +32,10 @@ class MapperClassValidatorTest {
       TypeElement mapperClass = elements.getTypeElement("Mapper");
       TypeTool tool = new TypeTool(elements, types);
       DeclaredType expectedReturnType = TypeExpr.prepare(elements, types).parse("java.util.List<java.lang.Integer>");
-      Either<String, MapperType> mapperType = new MapperClassValidator(s -> null, tool, expectedReturnType, mapperClass)
+      Either<String, CodeBlock> either = new MapperClassValidator(s -> null, tool, expectedReturnType, mapperClass)
           .checkReturnType();
-      assertTrue(mapperType instanceof Right);
-      MapperType value = ((Right<String, MapperType>) mapperType).value();
-      CodeBlock mapExpr = value.mapExpr();
+      assertTrue(either instanceof Right);
+      CodeBlock mapExpr = ((Right<String, CodeBlock>) either).value();
       CodeBlock expected = CodeBlock.of("new $T<$T, $T>().get()", types.erasure(mapperClass.asType()), String.class, Integer.class);
       assertEquals(expected, mapExpr);
     });
