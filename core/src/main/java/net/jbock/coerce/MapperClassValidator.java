@@ -2,7 +2,6 @@ package net.jbock.coerce;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
@@ -32,7 +31,7 @@ public final class MapperClassValidator {
     this.mapperClass = mapperClass;
   }
 
-  public Either<String, MapperType> checkReturnType() {
+  public Either<String, CodeBlock> checkReturnType() {
     commonChecks(mapperClass);
     checkNotAbstract(mapperClass);
     ReferencedType<Function> functionType = new ReferenceTool<>(FUNCTION, errorHandler, tool, mapperClass).getReferencedType();
@@ -42,20 +41,17 @@ public final class MapperClassValidator {
         handle(functionType, outputType, leftSolution));
   }
 
-  private Either<String, MapperType> handle(ReferencedType<Function> functionType, TypeMirror outputType, TypevarMapping leftSolution) {
+  private Either<String, CodeBlock> handle(ReferencedType<Function> functionType, TypeMirror outputType, TypevarMapping leftSolution) {
     return tool.unify(expectedReturnType, outputType).flatMap(FUNCTION::boom, rightSolution ->
         handle(functionType, leftSolution, rightSolution));
   }
 
-  private Either<String, MapperType> handle(ReferencedType<Function> functionType, TypevarMapping leftSolution, TypevarMapping rightSolution) {
+  private Either<String, CodeBlock> handle(ReferencedType<Function> functionType, TypevarMapping leftSolution, TypevarMapping rightSolution) {
     return new Flattener(tool, mapperClass)
         .mergeSolutions(leftSolution, rightSolution)
-        .map(FUNCTION::boom, typeParameters -> {
-          CodeBlock mapExpr = CodeBlock.of("new $T$L()$L",
-              tool.erasure(mapperClass.asType()),
-              getTypeParameterList(typeParameters.getTypeParameters()),
-              functionType.isSupplier() ? ".get()" : "");
-          return new MapperType(mapExpr);
-        });
+        .map(FUNCTION::boom, typeParameters -> CodeBlock.of("new $T$L()$L",
+            tool.erasure(mapperClass.asType()),
+            getTypeParameterList(typeParameters.getTypeParameters()),
+            functionType.isSupplier() ? ".get()" : ""));
   }
 }

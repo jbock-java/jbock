@@ -50,11 +50,10 @@ public final class Coercion {
   public static Coercion getCoercion(
       BasicInfo basicInfo,
       CodeBlock collectExpr,
-      MapperType mapperType,
+      CodeBlock mapExpr,
       CodeBlock extractExpr,
       ParameterStyle style,
       ParameterSpec constructorParam) {
-    CodeBlock mapExpr = mapperType.mapExpr();
     return new Coercion(collectExpr, mapExpr,
         constructorParam, basicInfo.fieldSpec(), extractExpr, Optional.of(style), basicInfo.parameterName());
   }
