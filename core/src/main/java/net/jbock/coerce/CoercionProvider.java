@@ -14,6 +14,7 @@ import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -54,12 +55,16 @@ public class CoercionProvider {
 
   private Coercion run() {
     if (basicInfo.collectorClass().isPresent()) {
-      TypeElement collectorClass = basicInfo.collectorClass().get();
-      if (basicInfo.mapperClass().isPresent()) {
-        return collectorPresentExplicit(collectorClass, basicInfo.mapperClass().get());
-      } else {
-        return collectorPresentAuto(collectorClass);
-      }
+      CollectorInfo collectorInfo = new CollectorClassValidator(basicInfo::failure,
+          basicInfo.tool(), basicInfo.collectorClass().get(),
+          basicInfo.originalReturnType()).getCollectorInfo();
+      ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
+      TypeMirror inputType = collectorInfo.inputType();
+      CodeBlock mapExpr = basicInfo.mapperClass()
+          .map(mapperClass -> collectorPresentExplicit(inputType, mapperClass))
+          .orElseGet(() -> collectorPresentAuto(inputType));
+      return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapExpr,
+          CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
     }
     if (basicInfo.mapperClass().isPresent()) {
       return new CollectorAbsentExplicit(basicInfo, basicInfo.mapperClass().get()).findCoercion();
@@ -68,20 +73,14 @@ public class CoercionProvider {
     }
   }
 
-  private Coercion collectorPresentAuto(TypeElement collectorClass) {
-    CollectorInfo collectorInfo = new CollectorClassValidator(basicInfo::failure, basicInfo.tool(), collectorClass, basicInfo.originalReturnType()).getCollectorInfo();
-    CodeBlock mapExpr = basicInfo.findAutoMapper(collectorInfo.inputType())
+  private CodeBlock collectorPresentAuto(TypeMirror inputType) {
+    return basicInfo.findAutoMapper(inputType)
         .orElseThrow(() -> basicInfo.failure(String.format("Unknown parameter type: %s. Try defining a custom mapper.",
-            collectorInfo.inputType())));
-    ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
-    return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapExpr, CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
+            inputType)));
   }
 
-  private Coercion collectorPresentExplicit(TypeElement collectorClass, TypeElement mapperClass) {
-    CollectorInfo collectorInfo = new CollectorClassValidator(basicInfo::failure, basicInfo.tool(), collectorClass, basicInfo.originalReturnType()).getCollectorInfo();
-    CodeBlock mapperType = new MapperClassValidator(basicInfo::failure, basicInfo.tool(), collectorInfo.inputType(), mapperClass).checkReturnType()
+  private CodeBlock collectorPresentExplicit(TypeMirror inputType, TypeElement mapperClass) {
+    return new MapperClassValidator(basicInfo::failure, basicInfo.tool(), inputType, mapperClass).checkReturnType()
         .orElseThrow(basicInfo::failure);
-    ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
-    return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapperType, CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
   }
 }
