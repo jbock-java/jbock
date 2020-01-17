@@ -1,4 +1,4 @@
-package net.jbock.coerce;
+package net.jbock.coerce.collectorabsent;
 
 import net.jbock.coerce.collectorabsent.Optionalish;
 import net.jbock.compiler.EvaluatingProcessor;
@@ -14,7 +14,7 @@ import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class CanonicalOptionalTest {
+class OptionalishTest {
 
   @Test
   void testLiftOptionalInt() {

@@ -13,7 +13,7 @@ import java.util.OptionalInt;
 import java.util.OptionalLong;
 import java.util.function.Function;
 
-public final class Optionalish {
+class Optionalish {
 
   private static final List<OptionalPrimitive> OPTIONAL_PRIMITIVES = Arrays.asList(
       new OptionalPrimitive(OptionalInt.class, Integer.class),
@@ -52,8 +52,7 @@ public final class Optionalish {
     }
   }
 
-  // visible for testing
-  public static Optional<Optionalish> unwrap(TypeMirror type, TypeTool tool) {
+  static Optional<Optionalish> unwrap(TypeMirror type, TypeTool tool) {
     Optional<Optionalish> optionalPrimtive = getOptionalPrimitive(type, tool);
     if (optionalPrimtive.isPresent()) {
       return optionalPrimtive;
@@ -82,7 +81,7 @@ public final class Optionalish {
    *
    * @return lifted type
    */
-  public TypeMirror liftedType() {
+  TypeMirror liftedType() {
     return liftedType;
   }
 
@@ -92,7 +91,7 @@ public final class Optionalish {
    * @param constructorParam the constructor constructorParam
    * @return extract expr
    */
-  public CodeBlock extractExpr(ParameterSpec constructorParam) {
+  CodeBlock extractExpr(ParameterSpec constructorParam) {
     return extract.apply(constructorParam);
   }
 
@@ -104,7 +103,7 @@ public final class Optionalish {
    *
    * @return wrapped type
    */
-  public TypeMirror wrappedType() {
+  TypeMirror wrappedType() {
     return wrappedType;
   }
 }

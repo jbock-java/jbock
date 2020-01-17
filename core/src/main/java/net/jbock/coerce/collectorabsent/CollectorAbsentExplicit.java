@@ -1,12 +1,10 @@
-package net.jbock.coerce.collectorabsent.explicit;
+package net.jbock.coerce.collectorabsent;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.ParameterStyle;
-import net.jbock.coerce.collectorabsent.MapperAttempt;
-import net.jbock.coerce.collectorabsent.Optionalish;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;

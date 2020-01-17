@@ -10,21 +10,21 @@ import net.jbock.coerce.either.Either;
 import javax.lang.model.type.TypeMirror;
 import java.util.stream.Collectors;
 
-public abstract class MapperAttempt {
+abstract class MapperAttempt {
 
   private final CodeBlock extractExpr;
   private final ParameterSpec constructorParam;
   private final ParameterStyle style;
   private final TypeMirror testType;
 
-  protected MapperAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
+  MapperAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
     this.testType = testType;
     this.extractExpr = extractExpr;
     this.constructorParam = constructorParam;
     this.style = style;
   }
 
-  protected Coercion getCoercion(BasicInfo basicInfo, CodeBlock mapExpr) {
+  Coercion getCoercion(BasicInfo basicInfo, CodeBlock mapExpr) {
     CodeBlock collectExpr = getCollectExpr(basicInfo);
     return Coercion.getCoercion(basicInfo, collectExpr, mapExpr, extractExpr, style, constructorParam);
   }
@@ -43,9 +43,9 @@ public abstract class MapperAttempt {
     }
   }
 
-  protected TypeMirror getTestType() {
+  TypeMirror getTestType() {
     return testType;
   }
 
-  public abstract Either<String, Coercion> findCoercion(BasicInfo basicInfo);
+  abstract Either<String, Coercion> findCoercion(BasicInfo basicInfo);
 }
