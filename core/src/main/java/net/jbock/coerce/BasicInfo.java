@@ -125,7 +125,7 @@ public class BasicInfo implements Function<String, ValidationException> {
 
   public AbstractCollector collectorInfo() {
     if (collectorClass().isPresent()) {
-      return new CollectorClassValidator(this, collectorClass().get()).getCollectorInfo();
+      return new CollectorClassValidator(this, tool, collectorClass().get(), originalReturnType()).getCollectorInfo();
     }
     Optional<TypeMirror> wrapped = tool().unwrap(List.class, originalReturnType());
     if (!wrapped.isPresent()) {

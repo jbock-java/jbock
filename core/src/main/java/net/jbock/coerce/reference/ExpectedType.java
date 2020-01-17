@@ -8,7 +8,7 @@ public abstract class ExpectedType<E> {
   private final String name;
   private final Class<E> expectedClass;
 
-  public static final ExpectedType<Function> MAPPER = new ExpectedType<Function>("MAPPER", Function.class) {
+  public static final ExpectedType<Function> FUNCTION = new ExpectedType<Function>("MAPPER", Function.class) {
     @Override
     public String boom(String message) {
       return String.format("There is a problem with the mapper class: %s.", message);

@@ -13,7 +13,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static net.jbock.coerce.reference.ExpectedType.MAPPER;
+import static net.jbock.coerce.reference.ExpectedType.FUNCTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -33,7 +33,7 @@ class ResolverTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
-      Either<TypecheckFailure, Declared<Supplier>> result = new Resolver(MAPPER, tool).typecheck(mapper, Supplier.class);
+      Either<TypecheckFailure, Declared<Supplier>> result = new Resolver(FUNCTION, tool).typecheck(mapper, Supplier.class);
       assertTrue(result instanceof Right);
       TypeMirror typeMirror = ((Right<TypecheckFailure, Declared<Supplier>>) result).value().asType(tool);
       DeclaredType declared = TypeTool.asDeclared(typeMirror);
@@ -58,7 +58,7 @@ class ResolverTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
-      Either<TypecheckFailure, Declared<String>> result = new Resolver(MAPPER, tool).typecheck(mapper, String.class);
+      Either<TypecheckFailure, Declared<String>> result = new Resolver(FUNCTION, tool).typecheck(mapper, String.class);
       assertTrue(result instanceof Left);
     });
   }
@@ -78,7 +78,7 @@ class ResolverTest {
       TypeElement mapper = elements.getTypeElement("test.FunctionSupplier");
       DeclaredType declaredType = TypeTool.asDeclared(mapper.getInterfaces().get(0));
       DeclaredType functionType = TypeTool.asDeclared(declaredType.getTypeArguments().get(0));
-      Either<TypecheckFailure, Declared<Function>> result = new Resolver(MAPPER, tool).typecheck(functionType, Function.class);
+      Either<TypecheckFailure, Declared<Function>> result = new Resolver(FUNCTION, tool).typecheck(functionType, Function.class);
       assertTrue(result instanceof Right);
     });
   }

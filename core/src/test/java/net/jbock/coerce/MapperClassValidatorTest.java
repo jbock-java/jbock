@@ -13,8 +13,6 @@ import javax.lang.model.type.DeclaredType;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class MapperClassValidatorTest {
 
@@ -32,14 +30,9 @@ class MapperClassValidatorTest {
         "interface C<DD1, DD2> extends Supplier<Function<DD1, DD2>> { }"
     ).run("Mapper", (elements, types) -> {
       TypeElement mapperClass = elements.getTypeElement("Mapper");
-
-      BasicInfo basicInfo = mock(BasicInfo.class);
       TypeTool tool = new TypeTool(elements, types);
-      when(basicInfo.tool()).thenReturn(tool);
-
       DeclaredType expectedReturnType = TypeExpr.prepare(elements, types).parse("java.util.List<java.lang.Integer>");
-
-      Either<String, ReferenceMapperType> mapperType = new MapperClassValidator(basicInfo, expectedReturnType, mapperClass)
+      Either<String, ReferenceMapperType> mapperType = new MapperClassValidator(s -> null, tool, expectedReturnType, mapperClass)
           .checkReturnType();
       assertTrue(mapperType instanceof Right);
       ReferenceMapperType value = ((Right<String, ReferenceMapperType>) mapperType).value();

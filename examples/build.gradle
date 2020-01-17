@@ -15,8 +15,8 @@ compileJava {
 dependencies {
     compileOnly project(':annotations')
     annotationProcessor project(':core')
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0-M1'
-    testImplementation 'org.mockito:mockito-core:3.2.0'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0-RC1'
+    testImplementation 'org.mockito:mockito-core:3.2.4'
 }
 
 test {

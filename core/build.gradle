@@ -23,11 +23,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.squareup:javapoet:1.11.1'
+    implementation 'com.squareup:javapoet:1.12.0'
     implementation 'com.github.h908714124:jbock-annotations:3.4'
     testImplementation 'com.google.testing.compile:compile-testing:0.18'
-    testImplementation 'org.mockito:mockito-core:3.2.0'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0-M1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0-RC1'
 }
 
 jar {

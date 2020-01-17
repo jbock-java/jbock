@@ -32,7 +32,7 @@ class ReferenceToolTest {
       TypeMirror AA1 = mapperClass.getTypeParameters().get(0).asType();
       TypeMirror AA2 = mapperClass.getTypeParameters().get(1).asType();
       TypeTool tool = new TypeTool(elements, types);
-      ReferenceTool<Function> referenceTool = new ReferenceTool<>(ExpectedType.MAPPER, s -> null, tool, mapperClass);
+      ReferenceTool<Function> referenceTool = new ReferenceTool<>(ExpectedType.FUNCTION, s -> null, tool, mapperClass);
       ReferencedType<Function> referencedType = referenceTool.getReferencedType();
       assertTrue(referencedType.isSupplier());
       assertEquals(2, referencedType.typeArguments().size());

@@ -3,16 +3,16 @@ package net.jbock.coerce;
 import net.jbock.coerce.collectorpresent.CollectorClassValidator;
 import net.jbock.coerce.collectors.CustomCollector;
 import net.jbock.compiler.EvaluatingProcessor;
-import net.jbock.compiler.TypeExpr;
 import net.jbock.compiler.TypeTool;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import java.util.Collections;
+import java.util.Set;
 
 import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 class CollectorClassValidatorTest {
 
@@ -32,13 +32,10 @@ class CollectorClassValidatorTest {
         "}"
     ).run("ToSetCollector", (elements, types) -> {
 
-      BasicInfo basicInfo = mock(BasicInfo.class);
-      when(basicInfo.tool()).thenReturn(new TypeTool(elements, types));
-      when(basicInfo.originalReturnType()).thenReturn(TypeExpr.prepare(elements, types).parse(
-          "java.util.Set<java.lang.String>"));
-
+      TypeTool tool = new TypeTool(elements, types);
+      DeclaredType originalReturnType = tool.getDeclaredType(Set.class, Collections.singletonList(tool.asType(String.class)));
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
-      CustomCollector collectorInfo = new CollectorClassValidator(basicInfo, collectorClass)
+      CustomCollector collectorInfo = new CollectorClassValidator(s -> null, tool, collectorClass, originalReturnType)
           .getCollectorInfo();
       assertSameType("java.lang.String", collectorInfo.inputType(), elements, types);
       assertNotNull(collectorInfo.collectorType());
