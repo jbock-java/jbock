@@ -7,7 +7,6 @@ import net.jbock.coerce.Coercion;
 import net.jbock.coerce.ParameterStyle;
 import net.jbock.coerce.collectorabsent.MapperAttempt;
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.mapper.MapperType;
 
 import javax.lang.model.type.TypeMirror;
 

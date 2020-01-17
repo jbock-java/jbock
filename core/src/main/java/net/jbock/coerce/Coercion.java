@@ -3,7 +3,6 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.ParamName;
 
 import java.util.Optional;
