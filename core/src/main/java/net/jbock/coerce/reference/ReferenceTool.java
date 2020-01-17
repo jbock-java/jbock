@@ -6,6 +6,7 @@ import net.jbock.compiler.ValidationException;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
 import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -36,19 +37,19 @@ public class ReferenceTool<E> {
     if (failure.isFatal()) {
       throw boom(failure.getMessage());
     }
-    Declared<E> expected = resolver.typecheck(referencedClass, expectedType.expectedClass())
+    List<? extends TypeMirror> expected = resolver.typecheck(referencedClass, expectedType.expectedClass())
         .orElseThrow(f -> boom(f.getMessage()));
     return new ReferencedType<>(expected, false);
   }
 
-  private ReferencedType<E> handleSupplier(Declared<Supplier> declaredSupplier) {
-    TypeMirror supplied = declaredSupplier.typeArguments().get(0);
+  private ReferencedType<E> handleSupplier(List<? extends TypeMirror> typeArguments) {
+    TypeMirror supplied = typeArguments.get(0);
     if (supplied.getKind() != TypeKind.DECLARED) {
       throw unexpectedClassException();
     }
-    Declared<E> expected = resolver.typecheck(asDeclared(supplied), expectedType.expectedClass())
+    List<? extends TypeMirror> typeParameters = resolver.typecheck(asDeclared(supplied), expectedType.expectedClass())
         .orElseThrow(f -> boom(f.getMessage()));
-    return new ReferencedType<>(expected, true);
+    return new ReferencedType<E>(typeParameters, true);
   }
 
   private ValidationException unexpectedClassException() {

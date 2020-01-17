@@ -6,11 +6,11 @@ import java.util.List;
 // mapper or collector
 public class ReferencedType<E> {
 
-  private final Declared<E> expectedType; // erases to Function or Collector (see ExpectedType)
+  private final List<? extends TypeMirror> typeArguments;
   private final boolean supplier; // wrapped in Supplier?
 
-  ReferencedType(Declared<E> expectedType, boolean supplier) {
-    this.expectedType = expectedType;
+  ReferencedType(List<? extends TypeMirror> typeArguments, boolean supplier) {
+    this.typeArguments = typeArguments;
     this.supplier = supplier;
   }
 
@@ -19,6 +19,6 @@ public class ReferencedType<E> {
   }
 
   public List<? extends TypeMirror> typeArguments() {
-    return expectedType.typeArguments();
+    return typeArguments;
   }
 }

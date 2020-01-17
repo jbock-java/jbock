@@ -46,7 +46,7 @@ class Resolver {
    *
    * @return A type that has the same erasure as {@code animal}
    */
-  <E> Either<TypecheckFailure, Declared<E>> typecheck(TypeElement dog, Class<E> animal) {
+  <E> Either<TypecheckFailure, List<? extends TypeMirror>> typecheck(TypeElement dog, Class<E> animal) {
     List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(dog);
     List<ImplementsRelation> path = findPath(hierarchy, animal);
     if (path.isEmpty()) {
@@ -56,18 +56,17 @@ class Resolver {
     if (tool.isRaw(path.get(path.size() - 1).animal())) {
       return left(fatal("raw type: " + path.get(path.size() - 1).animal()));
     }
-    return dogToAnimal(path).map(Function.identity(),
-        declaredType -> new Declared<>(animal, declaredType.getTypeArguments()));
+    return dogToAnimal(path).map(Function.identity(), DeclaredType::getTypeArguments);
   }
 
-  public <E> Either<TypecheckFailure, Declared<E>> typecheck(DeclaredType declared, Class<E> someInterface) {
+  public <E> Either<TypecheckFailure, List<? extends TypeMirror>> typecheck(DeclaredType declared, Class<E> someInterface) {
     if (!tool.isSameErasure(declared, someInterface)) {
       return left(nonFatal("not a declared " + someInterface.getSimpleName()));
     }
     if (tool.isRaw(declared)) {
       return left(fatal("raw type: " + declared));
     }
-    return right(new Declared<>(someInterface, declared.getTypeArguments()));
+    return right(declared.getTypeArguments());
   }
 
   private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> goal) {

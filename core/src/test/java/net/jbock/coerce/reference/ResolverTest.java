@@ -10,6 +10,7 @@ import org.junit.jupiter.api.Test;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -33,12 +34,12 @@ class ResolverTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
-      Either<TypecheckFailure, Declared<Supplier>> result = new Resolver(FUNCTION, tool).typecheck(mapper, Supplier.class);
+      Resolver resolver = new Resolver(FUNCTION, tool);
+      Either<TypecheckFailure, List<? extends TypeMirror>> result = resolver.typecheck(mapper, Supplier.class);
       assertTrue(result instanceof Right);
-      TypeMirror typeMirror = ((Right<TypecheckFailure, Declared<Supplier>>) result).value().asType(tool);
-      DeclaredType declared = TypeTool.asDeclared(typeMirror);
-      assertEquals(1, declared.getTypeArguments().size());
-      TypeMirror typeParameter = declared.getTypeArguments().get(0);
+      List<? extends TypeMirror> typeArguments = ((Right<TypecheckFailure, List<? extends TypeMirror>>) result).value();
+      assertEquals(1, typeArguments.size());
+      TypeMirror typeParameter = typeArguments.get(0);
       TypeElement string = elements.getTypeElement("java.lang.String");
       assertTrue(types.isSameType(string.asType(), typeParameter));
     });
@@ -58,7 +59,7 @@ class ResolverTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
-      Either<TypecheckFailure, Declared<String>> result = new Resolver(FUNCTION, tool).typecheck(mapper, String.class);
+      Either<TypecheckFailure, List<? extends TypeMirror>> result = new Resolver(FUNCTION, tool).typecheck(mapper, String.class);
       assertTrue(result instanceof Left);
     });
   }
@@ -78,7 +79,7 @@ class ResolverTest {
       TypeElement mapper = elements.getTypeElement("test.FunctionSupplier");
       DeclaredType declaredType = TypeTool.asDeclared(mapper.getInterfaces().get(0));
       DeclaredType functionType = TypeTool.asDeclared(declaredType.getTypeArguments().get(0));
-      Either<TypecheckFailure, Declared<Function>> result = new Resolver(FUNCTION, tool).typecheck(functionType, Function.class);
+      Either<TypecheckFailure, List<? extends TypeMirror>> result = new Resolver(FUNCTION, tool).typecheck(functionType, Function.class);
       assertTrue(result instanceof Right);
     });
   }
