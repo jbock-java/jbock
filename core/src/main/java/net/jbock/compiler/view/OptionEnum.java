@@ -182,10 +182,9 @@ final class OptionEnum {
   private static MethodSpec optionParsersMethod(Context context) {
     ParameterSpec parsers = builder(ParameterizedTypeName.get(ClassName.get(Map.class), context.optionType(), context.optionParserType()), "parsers").build();
 
-    CodeBlock code = optionParsersMethodCode(context, parsers);
     return MethodSpec.methodBuilder("optionParsers")
         .returns(parsers.type)
-        .addCode(code)
+        .addCode(optionParsersMethodCode(context, parsers))
         .addModifiers(STATIC).build();
   }
 

@@ -1,7 +1,5 @@
-package net.jbock.coerce.collectorpresent;
+package net.jbock.coerce;
 
-import net.jbock.coerce.Flattener;
-import net.jbock.coerce.FlattenerResult;
 import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
@@ -19,22 +17,21 @@ import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.Util.checkNotAbstract;
 import static net.jbock.coerce.reference.ExpectedType.COLLECTOR;
 
-public class CollectorClassValidator {
+class CollectorClassValidator {
 
   private final Function<String, ValidationException> errorHandler;
   private final TypeTool tool;
   private final TypeElement collectorClass;
   private final TypeMirror originalReturnType;
 
-  public CollectorClassValidator(Function<String, ValidationException> errorHandler, TypeTool tool, TypeElement collectorClass, TypeMirror originalReturnType) {
+  CollectorClassValidator(Function<String, ValidationException> errorHandler, TypeTool tool, TypeElement collectorClass, TypeMirror originalReturnType) {
     this.errorHandler = errorHandler;
     this.tool = tool;
     this.collectorClass = collectorClass;
     this.originalReturnType = originalReturnType;
   }
 
-  // visible for testing
-  public CollectorInfo getCollectorInfo() {
+  CollectorInfo getCollectorInfo() {
     commonChecks(collectorClass);
     checkNotAbstract(collectorClass);
     ReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, errorHandler, tool, collectorClass)

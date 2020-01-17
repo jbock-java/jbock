@@ -7,7 +7,6 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.collectorabsent.auto.CollectorAbsentAuto;
 import net.jbock.coerce.collectorabsent.explicit.CollectorAbsentExplicit;
-import net.jbock.coerce.collectorpresent.CollectorClassValidator;
 import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;

@@ -21,6 +21,7 @@ import java.util.Optional;
 import static net.jbock.coerce.ParameterStyle.OPTIONAL;
 import static net.jbock.coerce.ParameterStyle.REPEATABLE;
 import static net.jbock.coerce.ParameterStyle.REQUIRED;
+import static net.jbock.coerce.either.Either.left;
 
 public class CollectorAbsentExplicit {
 
@@ -65,15 +66,12 @@ public class CollectorAbsentExplicit {
 
   public Coercion findCoercion() {
     List<MapperAttempt> attempts = getAttempts();
-    Either<String, Coercion> either = null;
+    Either<String, Coercion> either = left("");
     for (MapperAttempt attempt : attempts) {
       either = attempt.findCoercion(basicInfo);
       if (either instanceof Right) {
         return ((Right<String, Coercion>) either).value();
       }
-    }
-    if (either == null) { // impossible: there is always the "exact match" attempt
-      throw new AssertionError();
     }
     String message = ((Left<String, Coercion>) either).value();
     throw basicInfo.failure(message);
