@@ -1,7 +1,6 @@
 ### Contents
 
-* <a href="#features-overview">Features overview</a>
-* <a href="#parameter-types">Parameter types</a>
+* <a href="#option-param-kinds">Option/param kinds</a>
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#flags">Flags</a>
 * <a href="#binding-parameters">Binding options</a>
@@ -20,41 +19,25 @@
 * <a href="#maven-config">Maven config</a>
 * <a href="#running-tests">Running tests</a>
 
-### Features overview
+### Option/Param kinds
 
-Some of the features, especially the handling of optional parameters, may be unexpected
-for users of similar parsers:
+Command line applications ("commands") have access to a special array of strings,
+which is often called `args` or `argv`, which contains the command line parameters of the invocation.
 
-1. In the Java model, <a href="https://github.com/h908714124/jbock/blob/master/README.md#parameter-type-matching">optional parameters</a>
-   correspond to methods that return [Optional](https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html).
-   Coincidentally, there is no way to make a parameter method return `null`.
-1. <a href="#binding-options">*Binding options*</a> are always [unary:](https://en.wikipedia.org/wiki/Unary_operation)
-    1. The parameter name must be followed by a single argument, in other words there are no multi-valued options.
-    1. Instead, options and params can be <a href="#repeatable-parameters">*repeatable.*</a>
-       This is expressed by a model method that returns [List.](https://en.wikipedia.org/wiki/Java_collections_framework)
-       Other collection types can also be used, if a custom mapper or collector is defined.
+Some of the tokens in this array take the form of key-value pairs,
+where the key starts with one or two dashes.
+These are called *options*.
+The other kind of tokens, which are distinguished not by their *name* but by their *position* in `argv`, relative to the other non-options, are called *params*.
 
-Next, we look at some of the features in more detail.
-
-### Parameter types
-
-Command line applications have access to a special array of strings,
-which is often called `args` or `argv`.
-This represents the command line parameters that are passed to the application at runtime.
-
-Some of the tokens in this array take the form of key-value pairs.
-These are called *options*, but keep in mind that options are not always *optional*.
-The other kind of tokens, which are distinguished by their position in `argv`, are called *params*.
-
-Now we take a closer look at the basic parameter types:
+Options can be further subdivided into options that take an argument, and those that don't, which leaves us with three kinds:
 
 1. <a href="#params">*Params*</a>
-1. nullary options: <a href="#flags">*Flags*</a>
-1. unary options: <a href="#binding-options">*Binding options*</a>
+1. <a href="#flags">*Flag options*</a>
+1. <a href="#binding-options">*Options*</a>
 
 ### Params
 
-A *positional* parameter is just an arbitrary token *without a
+A *positional* parameter is just an arbitrary token in `argv` *without a
 preceding parameter name*. We call this a *param*.
 The token is not allowed to start with a dash, unless the
 <a href="#escape-sequence">*escape sequence*</a> was used.
@@ -72,7 +55,7 @@ abstract class MyArguments {
 }
 ````
 
-The `MyArguments_Parser` that is generated
+The class `MyArguments_Parser` that is generated
 from this example requires an `argv` of length *exactly* `2`,
 because none of the params are `Optional`.
 
@@ -204,7 +187,7 @@ To disable the special meaning of the `--help` token, use
 ### Standard coercions
 
 All non-private enums, as well as
-[some standard Java types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAllTypes.java)
+[some standard Java types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAutoTypes.java)
 can be used as parameter types, without having
 to write a custom mapper first. Optional and List of these
 types are also allowed.
@@ -213,44 +196,43 @@ types are also allowed.
 
 Mappers (a.k.a. converters) must implement [Function](https://docs.oracle.com/javase/8/docs/api/java/util/function/Function.html)`<`[String](https://docs.oracle.com/javase/8/docs/api/java/lang/String.html)`, ?>`,
 or a [Supplier](https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html) of such a function,
-where `?` depends on the parameter it's used on.
-The mapper's input is the parameter value taken from the argument vector `String[] argv`.
-If the parameter does not appear in `argv`, then the mapper is not invoked.
+where `?` depends on the option or parameter it's used on.
+At runtime, the mapper is invoked once for each appearance of the option or parameter in `argv`.
 The mapper may reject its input by throwing any [RuntimeException](https://docs.oracle.com/javase/8/docs/api/java/lang/RuntimeException.html).
+The mapper class must be accessible at compile time, and have a no-argument constructor.
 
 ````java
-class PositiveNumberMapper implements Function<String, Integer> {
+class NatMapper implements Function<String, Integer> {
 
   @Override
-  public Integer apply(String s) { // the input string will not be null
-    Integer i = Integer.valueOf(s); // exceptions are ok, no try-catch needed
-    if (i <= 0) {
-      throw new IllegalArgumentException("Try to keep it positive.");
+  public Integer apply(String s) {
+    Integer i = Integer.valueOf(s); // exceptions are fine
+    if (i < 0) {
+      throw new IllegalArgumentException("negative: " + i);
     }
     return i;
   }
 }
 ````
 
-*Note: The mapper class must have a no-argument constructor.*
-
 ### Custom collectors
 
-By using a custom collector, it is possible to create a
-`Set`, or `Map` or other collections. The following example
-builds a `Map`:
+The following example shows how a repeatable
+option can be parsed into a `Map`,
+by declaring a custom mapper and collector:
 
 ````java
 @Option(value = "headers",
-        mappedBy = MapTokenizer.class,
-        collectedBy = MapCollector.class)
+        mnemonic = 'H'
+        mappedBy = MyTokenizer.class,
+        collectedBy = MyCollector.class)
 abstract Map<String, String> headers();
 ````
 
-The mapper splits tokens of the form `a:b` into map entries
+This mapper parses a token of the form `-Hfoo:bar` into a map entry:
 
 ````java
-class MapTokenizer implements Function<String, Map.Entry<String, String>> {
+class MyTokenizer implements Function<String, Map.Entry<String, String>> {
 
   @Override
   public Map.Entry<String, String> apply(String s) {
@@ -263,13 +245,12 @@ class MapTokenizer implements Function<String, Map.Entry<String, String>> {
 }
 ````
 
-The collector class must be a [Collector](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html)`<A, ?, B>`,
-or a `Supplier` of such a collector,
-where `A` is the output of the mapper, and `B` is the
-parameter type.
+The collector class must implement either [Collector](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html)`<A, ?, B>` or `Supplier<Collector<A, ?, B>`,
+where `A` is mappable, and `B` is the option's or parameter's type.
+The collector class may have type parameters, as long as they can be chosen so that `A` and `B` are matched.
 
 ````java
-class MapCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
+class MyCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
 
   @Override
   public Collector<Map.Entry<K, V>, ?, Map<K, V>> get() {
@@ -351,14 +332,12 @@ The `indent` and `maxLineWidth` are print settings for the help text.
 
 ### Limitations
 
-* No grouping. For example, `rm -rf` is invalid, use `rm -r -f` instead
-* Also no bsd-style grouping as in `tar xzf`, use `tar -x -z -f` instead
-* Option names always start with one or two dashes.
-* No multi-valued options. Workaround: *Repeatable* options or params.
-* Mnemonics are limited to a single character.
+* No multi-valued options or params. Workaround: Declare the option or param *repeatable*, either by making it a `List`, or defining a <a href="#custom-collectors">*custom collector.*</a>
+* Option names start with two dashes. Only single-character names may use a single dash; these are called mnemonics.
+* No grouping. For example, `rm -rf` and `tar xzf` are bad, use `rm -r -f` and `tar -x -z -f` instead
 * An option can't have more than one long name or more than one mnemonic.
-* Cannot distinguish between attached or detached option shape. Both are always allowed and equivalent.
-* Type matching uses `java.util.List` and `java.util.Optional` exclusively. Alternatives like `com.google.common.base.Optional` won't work.
+* Mappers don't currently know about option form (long name or mnemonic) or shape (attached or detached). Also it's currently not possible to forbid one of the shapes.
+* Type matching currently uses `java.util.List` and `java.util.Optional` exclusively. Alternatives like `com.google.common.base.Optional` don't get special semantics.
 
 ### Gradle config
 
@@ -373,3 +352,4 @@ see [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
 ````sh
 ./gradlew core:clean core:test examples:clean examples:test
 ````
+
