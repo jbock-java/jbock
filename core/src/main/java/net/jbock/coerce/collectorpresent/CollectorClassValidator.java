@@ -11,6 +11,7 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.Collections;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
@@ -42,9 +43,9 @@ public class CollectorClassValidator {
     TypeMirror outputType = collectorType.typeArguments().get(2);
     TypevarMapping rightSolution = tool.unify(originalReturnType, outputType)
         .orElseThrow(this::boom);
-    TypevarMapping leftSolution = TypevarMapping.empty(tool); // left side is currently ignored
-    FlattenerResult result = new Flattener(errorHandler, tool, collectorClass)
-        .getTypeParameters(leftSolution, rightSolution)
+    TypevarMapping leftSolution = new TypevarMapping(Collections.emptyMap(), tool);
+    FlattenerResult result = new Flattener(tool, collectorClass)
+        .mergeSolutions(leftSolution, rightSolution)
         .orElseThrow(this::boom);
     return new CustomCollector(tool, result.substitute(inputType).orElseThrow(f -> boom(f.getMessage())),
         collectorClass, collectorType.isSupplier(), result.getTypeParameters());

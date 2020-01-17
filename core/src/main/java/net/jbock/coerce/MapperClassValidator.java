@@ -47,7 +47,7 @@ public final class MapperClassValidator {
 
   private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypevarMapping leftSolution, TypevarMapping rightSolution) {
     return new Flattener(errorHandler, tool, mapperClass)
-        .getTypeParameters(leftSolution, rightSolution)
+        .mergeSolutions(leftSolution, rightSolution)
         .map(FUNCTION::boom, typeParameters -> ReferenceMapperType.create(tool, functionType.isSupplier(), mapperClass, typeParameters.getTypeParameters()));
   }
 }

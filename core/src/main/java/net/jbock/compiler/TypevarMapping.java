@@ -8,7 +8,6 @@ import net.jbock.coerce.reference.TypecheckFailure;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,10 +27,6 @@ public class TypevarMapping {
   public TypevarMapping(Map<String, TypeMirror> map, TypeTool tool) {
     this.map = map;
     this.tool = tool;
-  }
-
-  public static TypevarMapping empty(TypeTool tool) {
-    return new TypevarMapping(Collections.emptyMap(), tool);
   }
 
   public Set<Map.Entry<String, TypeMirror>> entries() {

@@ -21,7 +21,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class TypevarMappingTest {
 
   @Test
-  void simpleTest() {
+  void unifyTest() {
 
     EvaluatingProcessor.source(
         "import java.util.Set;",
