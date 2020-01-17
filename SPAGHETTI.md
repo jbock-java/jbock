@@ -238,7 +238,7 @@ class MyTokenizer implements Function<String, Map.Entry<String, String>> {
   public Map.Entry<String, String> apply(String s) {
     String[] tokens = s.split(":", 2);
     if (tokens.length < 2) {
-      throw new IllegalArgumentException("Invalid pair: " + s);
+      throw new IllegalArgumentException("Invalid token: " + s);
     }
     return new AbstractMap.SimpleImmutableEntry<>(tokens[0], tokens[1]);
   }
