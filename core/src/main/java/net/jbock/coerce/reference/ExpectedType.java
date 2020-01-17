@@ -22,7 +22,7 @@ public class ExpectedType<E> {
   }
 
   public String boom(String message) {
-    return String.format("There is a problem with the %n collector class: %s.", name.toLowerCase(Locale.US), message);
+    return String.format("There is a problem with the %s class: %s.", name.toLowerCase(Locale.US), message);
   }
 
   Class<E> expectedClass() {

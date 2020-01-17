@@ -10,9 +10,7 @@ import java.util.EnumSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Stream;
 
 import static javax.lang.model.element.Modifier.PROTECTED;
 import static javax.lang.model.element.Modifier.PUBLIC;
@@ -25,12 +23,6 @@ public final class Constants {
 
   public static final TypeName LIST_OF_STRING = ParameterizedTypeName.get(
       ClassName.get(List.class), STRING);
-
-  public static final TypeName STREAM_OF_STRING = ParameterizedTypeName.get(
-      ClassName.get(Stream.class), STRING);
-
-  public static final TypeName OPTIONAL_STRING = ParameterizedTypeName.get(
-      ClassName.get(Optional.class), STRING);
 
   public static final TypeName STRING_TO_STRING_MAP = ParameterizedTypeName.get(
       ClassName.get(Map.class), STRING, STRING);

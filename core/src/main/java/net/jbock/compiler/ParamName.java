@@ -68,22 +68,6 @@ public class ParamName {
     return sb.toString();
   }
 
-  @Override
-  public boolean equals(Object o) {
-    if (this == o) {
-      return true;
-    }
-    if (o == null || getClass() != o.getClass()) {
-      return false;
-    }
-    return parts.equals(((ParamName) o).parts);
-  }
-
-  @Override
-  public int hashCode() {
-    return parts.hashCode();
-  }
-
   private static CharType charType(char c) {
     if (c == '_') {
       return CharType.UNDERSCORE;

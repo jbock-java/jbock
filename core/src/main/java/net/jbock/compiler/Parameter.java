@@ -57,7 +57,7 @@ public final class Parameter {
     String methodName = sourceMethod.getSimpleName().toString();
     ParamName result = ParamName.create(methodName);
     for (Parameter param : alreadyCreated) {
-      if (param.paramName().equals(result)) {
+      if (param.paramName().enumConstant().equals(result.enumConstant())) {
         return result.append(Integer.toString(alreadyCreated.size()));
       }
     }
