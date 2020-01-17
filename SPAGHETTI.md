@@ -1,6 +1,6 @@
 ### Contents
 
-* <a href="#option-param-kinds">Option/param kinds</a>
+* <a href="#optionparam-kinds">Option/param kinds</a>
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#flags">Flags</a>
 * <a href="#binding-parameters">Binding options</a>
