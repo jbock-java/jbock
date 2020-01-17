@@ -7,7 +7,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
-import java.util.Locale;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -45,20 +44,14 @@ public class ReferenceTool<E> {
   private ReferencedType<E> handleSupplier(List<? extends TypeMirror> typeArguments) {
     TypeMirror supplied = typeArguments.get(0);
     if (supplied.getKind() != TypeKind.DECLARED) {
-      throw unexpectedClassException();
+      throw boom("not a " + expectedType.simpleName() + " or Supplier<" + expectedType.simpleName() + ">");
     }
     List<? extends TypeMirror> typeParameters = resolver.typecheck(asDeclared(supplied), expectedType.expectedClass())
         .orElseThrow(f -> boom(f.getMessage()));
     return new ReferencedType<E>(typeParameters, true);
   }
 
-  private ValidationException unexpectedClassException() {
-    return boom("not a " + expectedType.simpleName() +
-        " or Supplier<" + expectedType.simpleName() + ">");
-  }
-
   private ValidationException boom(String message) {
-    return errorHandler.apply(String.format("There is a problem with the " +
-        expectedType.name().toLowerCase(Locale.US) + " class: %s.", message));
+    return errorHandler.apply(expectedType.boom(message));
   }
 }
