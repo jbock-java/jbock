@@ -2,7 +2,7 @@ package net.jbock.coerce.collectorpresent;
 
 import net.jbock.coerce.Flattener;
 import net.jbock.coerce.FlattenerResult;
-import net.jbock.coerce.collectors.CustomCollector;
+import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
@@ -34,7 +34,7 @@ public class CollectorClassValidator {
   }
 
   // visible for testing
-  public CustomCollector getCollectorInfo() {
+  public CollectorInfo getCollectorInfo() {
     commonChecks(collectorClass);
     checkNotAbstract(collectorClass);
     ReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, errorHandler, tool, collectorClass)
@@ -47,7 +47,7 @@ public class CollectorClassValidator {
     FlattenerResult result = new Flattener(tool, collectorClass)
         .mergeSolutions(leftSolution, rightSolution)
         .orElseThrow(this::boom);
-    return new CustomCollector(tool, result.substitute(inputType).orElseThrow(f -> boom(f.getMessage())),
+    return CollectorInfo.createCustom(tool, result.substitute(inputType).orElseThrow(f -> boom(f.getMessage())),
         collectorClass, collectorType.isSupplier(), result.getTypeParameters());
   }
 

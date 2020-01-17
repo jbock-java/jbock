@@ -6,8 +6,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.collectorpresent.CollectorClassValidator;
-import net.jbock.coerce.collectors.AbstractCollector;
-import net.jbock.coerce.collectors.DefaultCollector;
+import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
@@ -17,12 +16,11 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 
 /**
  * Coercion input: Information about a single parameter (option or param).
  */
-public class BasicInfo implements Function<String, ValidationException> {
+public class BasicInfo {
 
   private final ParamName paramName;
 
@@ -106,8 +104,7 @@ public class BasicInfo implements Function<String, ValidationException> {
     return FieldSpec.builder(TypeName.get(originalReturnType()), paramName.camel()).build();
   }
 
-  @Override
-  public ValidationException apply(String message) {
+  public ValidationException failure(String message) {
     return ValidationException.create(sourceMethod, message);
   }
 
@@ -123,15 +120,15 @@ public class BasicInfo implements Function<String, ValidationException> {
     return Optional.ofNullable(collectorClass);
   }
 
-  public AbstractCollector collectorInfo() {
+  public CollectorInfo collectorInfo() {
     if (collectorClass().isPresent()) {
-      return new CollectorClassValidator(this, tool, collectorClass().get(), originalReturnType()).getCollectorInfo();
+      return new CollectorClassValidator(this::failure, tool, collectorClass().get(), originalReturnType()).getCollectorInfo();
     }
     Optional<TypeMirror> wrapped = tool().unwrap(List.class, originalReturnType());
     if (!wrapped.isPresent()) {
-      throw apply("Either define a custom collector, or return List.");
+      throw failure("Either define a custom collector, or return List.");
     }
-    return new DefaultCollector(wrapped.get());
+    return CollectorInfo.createDefault(wrapped.get());
   }
 
   public ClassName optionType() {

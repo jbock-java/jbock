@@ -1,7 +1,8 @@
 package net.jbock.coerce;
 
+import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.collectorpresent.CollectorClassValidator;
-import net.jbock.coerce.collectors.CustomCollector;
+import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
 import org.junit.jupiter.api.Test;
@@ -11,8 +12,7 @@ import javax.lang.model.type.DeclaredType;
 import java.util.Collections;
 import java.util.Set;
 
-import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CollectorClassValidatorTest {
 
@@ -35,10 +35,10 @@ class CollectorClassValidatorTest {
       TypeTool tool = new TypeTool(elements, types);
       DeclaredType originalReturnType = tool.getDeclaredType(Set.class, Collections.singletonList(tool.asType(String.class)));
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
-      CustomCollector collectorInfo = new CollectorClassValidator(s -> null, tool, collectorClass, originalReturnType)
+      CollectorInfo collectorInfo = new CollectorClassValidator(s -> null, tool, collectorClass, originalReturnType)
           .getCollectorInfo();
-      assertSameType("java.lang.String", collectorInfo.inputType(), elements, types);
-      assertNotNull(collectorInfo.collectorType());
+      CodeBlock expected = CodeBlock.of(".collect(new $T<$T>().get())", types.erasure(collectorClass.asType()), String.class);
+      assertEquals(expected, collectorInfo.collectExpr());
     });
   }
 }

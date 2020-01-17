@@ -7,7 +7,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.collectorabsent.auto.CollectorAbsentAuto;
 import net.jbock.coerce.collectorabsent.explicit.CollectorAbsentExplicit;
-import net.jbock.coerce.collectors.AbstractCollector;
+import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 
@@ -67,18 +67,18 @@ public class CoercionProvider {
   }
 
   private Coercion collectorPresentAuto() {
-    AbstractCollector collectorInfo = basicInfo.collectorInfo();
+    CollectorInfo collectorInfo = basicInfo.collectorInfo();
     CodeBlock mapExpr = basicInfo.findAutoMapper(collectorInfo.inputType())
-        .orElseThrow(() -> basicInfo.apply(String.format("Unknown parameter type: %s. Try defining a custom mapper.",
+        .orElseThrow(() -> basicInfo.failure(String.format("Unknown parameter type: %s. Try defining a custom mapper.",
             collectorInfo.inputType())));
     ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
     return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapExpr, CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
   }
 
   private Coercion collectorPresentExplicit(TypeElement mapperClass) {
-    AbstractCollector collectorInfo = basicInfo.collectorInfo();
-    CodeBlock mapperType = new MapperClassValidator(basicInfo, basicInfo.tool(), collectorInfo.inputType(), mapperClass).checkReturnType()
-        .orElseThrow(basicInfo::apply);
+    CollectorInfo collectorInfo = basicInfo.collectorInfo();
+    CodeBlock mapperType = new MapperClassValidator(basicInfo::failure, basicInfo.tool(), collectorInfo.inputType(), mapperClass).checkReturnType()
+        .orElseThrow(basicInfo::failure);
     ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
     return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapperType, CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
   }

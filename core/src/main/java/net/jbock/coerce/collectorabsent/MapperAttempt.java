@@ -5,9 +5,8 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.ParameterStyle;
-import net.jbock.coerce.collectors.DefaultCollector;
+import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.mapper.MapperType;
 
 import javax.lang.model.type.TypeMirror;
 
@@ -38,7 +37,7 @@ public abstract class MapperAttempt {
         return CodeBlock.of(".findAny().orElseThrow($T.$L::missingRequired)", basicInfo.optionType(),
             basicInfo.parameterName().enumConstant());
       case REPEATABLE:
-        return new DefaultCollector(testType).collectExpr();
+        return CollectorInfo.createDefault(testType).collectExpr();
       default:
         throw new AssertionError("unexpected: " + style);
     }
