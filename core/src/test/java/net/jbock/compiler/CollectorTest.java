@@ -87,7 +87,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: String[] and E[] have different erasure.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: java.lang.String[] and E[] have different erasure.");
   }
 
   @Test
@@ -382,7 +382,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: Optional<Integer>. Try defining a custom mapper.");
+        .withErrorContaining("Unknown parameter type: java.util.Optional<java.lang.Integer>. Try defining a custom mapper.");
   }
 
   @Test
@@ -404,7 +404,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to Integer.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to java.lang.Integer.");
   }
 
   @Test
@@ -483,7 +483,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign Long to String.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.Long to java.lang.String.");
   }
 
   @Test
@@ -540,7 +540,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve A to String.");
+        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve A to java.lang.String.");
   }
 
   @Test
@@ -562,7 +562,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor(true))
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: OptionalInt. Try defining a custom mapper.");
+        .withErrorContaining("Unknown parameter type: java.util.OptionalInt. Try defining a custom mapper.");
   }
 
   @Test
@@ -586,7 +586,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign Long to String.");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign java.lang.Long to java.lang.String.");
   }
 
   @Test
@@ -612,7 +612,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign Long to String.");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign java.lang.Long to java.lang.String.");
   }
 
   @Test
@@ -748,7 +748,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to String.");
+        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to java.lang.String.");
   }
 
 
@@ -778,7 +778,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Cannot infer E: String vs Integer.");
+        .withErrorContaining("There is a problem with the mapper class: Cannot infer E: java.lang.String vs java.lang.Integer.");
   }
 
   @Test
@@ -855,7 +855,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign Set<E> to test.Arguments.Foo.");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign java.util.Set<E> to test.Arguments.Foo.");
   }
 
   @Test

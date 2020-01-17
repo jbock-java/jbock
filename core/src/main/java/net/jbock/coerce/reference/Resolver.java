@@ -62,7 +62,7 @@ class Resolver {
 
   public <E> Either<TypecheckFailure, Declared<E>> typecheck(DeclaredType declared, Class<E> someInterface) {
     if (!tool.isSameErasure(declared, someInterface)) {
-      return left(nonFatal("not a declared " + someInterface.getCanonicalName()));
+      return left(nonFatal("not a declared " + someInterface.getSimpleName()));
     }
     if (tool.isRaw(declared)) {
       return left(fatal("raw type: " + declared));
