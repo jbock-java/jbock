@@ -9,7 +9,6 @@ import net.jbock.coerce.collectorabsent.auto.CollectorAbsentAuto;
 import net.jbock.coerce.collectorabsent.explicit.CollectorAbsentExplicit;
 import net.jbock.coerce.collectors.AbstractCollector;
 import net.jbock.coerce.mapper.MapperType;
-import net.jbock.coerce.mapper.ReferenceMapperType;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 
@@ -80,7 +79,7 @@ public class CoercionProvider {
 
   private Coercion collectorPresentExplicit(TypeElement mapperClass) {
     AbstractCollector collectorInfo = basicInfo.collectorInfo();
-    ReferenceMapperType mapperType = new MapperClassValidator(basicInfo, basicInfo.tool(), collectorInfo.inputType(), mapperClass).checkReturnType()
+    MapperType mapperType = new MapperClassValidator(basicInfo, basicInfo.tool(), collectorInfo.inputType(), mapperClass).checkReturnType()
         .orElseThrow(basicInfo::apply);
     ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
     return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapperType, CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);

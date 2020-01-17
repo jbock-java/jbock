@@ -1,8 +1,9 @@
 package net.jbock.coerce;
 
+import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Right;
-import net.jbock.coerce.mapper.ReferenceMapperType;
+import net.jbock.coerce.mapper.MapperType;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeExpr;
 import net.jbock.compiler.TypeTool;
@@ -32,13 +33,13 @@ class MapperClassValidatorTest {
       TypeElement mapperClass = elements.getTypeElement("Mapper");
       TypeTool tool = new TypeTool(elements, types);
       DeclaredType expectedReturnType = TypeExpr.prepare(elements, types).parse("java.util.List<java.lang.Integer>");
-      Either<String, ReferenceMapperType> mapperType = new MapperClassValidator(s -> null, tool, expectedReturnType, mapperClass)
+      Either<String, MapperType> mapperType = new MapperClassValidator(s -> null, tool, expectedReturnType, mapperClass)
           .checkReturnType();
       assertTrue(mapperType instanceof Right);
-      ReferenceMapperType value = ((Right<String, ReferenceMapperType>) mapperType).value();
-      assertEquals(2, value.solution().size());
-      assertTrue(tool.isSameType(value.solution().get(0), String.class));
-      assertTrue(tool.isSameType(value.solution().get(1), Integer.class));
+      MapperType value = ((Right<String, MapperType>) mapperType).value();
+      CodeBlock mapExpr = value.mapExpr();
+      CodeBlock expected = CodeBlock.of("new $T<$T, $T>().get()", types.erasure(mapperClass.asType()), String.class, Integer.class);
+      assertEquals(expected, mapExpr);
     });
   }
 }

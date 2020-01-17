@@ -1,7 +1,8 @@
 package net.jbock.coerce;
 
+import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.mapper.ReferenceMapperType;
+import net.jbock.coerce.mapper.MapperType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
@@ -14,6 +15,7 @@ import java.util.function.Function;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.Util.checkNotAbstract;
+import static net.jbock.coerce.Util.getTypeParameterList;
 import static net.jbock.coerce.reference.ExpectedType.FUNCTION;
 
 public final class MapperClassValidator {
@@ -30,7 +32,7 @@ public final class MapperClassValidator {
     this.mapperClass = mapperClass;
   }
 
-  public Either<String, ReferenceMapperType> checkReturnType() {
+  public Either<String, MapperType> checkReturnType() {
     commonChecks(mapperClass);
     checkNotAbstract(mapperClass);
     ReferencedType<Function> functionType = new ReferenceTool<>(FUNCTION, errorHandler, tool, mapperClass).getReferencedType();
@@ -40,14 +42,20 @@ public final class MapperClassValidator {
         handle(functionType, outputType, leftSolution));
   }
 
-  private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypeMirror outputType, TypevarMapping leftSolution) {
+  private Either<String, MapperType> handle(ReferencedType<Function> functionType, TypeMirror outputType, TypevarMapping leftSolution) {
     return tool.unify(expectedReturnType, outputType).flatMap(FUNCTION::boom, rightSolution ->
         handle(functionType, leftSolution, rightSolution));
   }
 
-  private Either<String, ReferenceMapperType> handle(ReferencedType<Function> functionType, TypevarMapping leftSolution, TypevarMapping rightSolution) {
-    return new Flattener(errorHandler, tool, mapperClass)
+  private Either<String, MapperType> handle(ReferencedType<Function> functionType, TypevarMapping leftSolution, TypevarMapping rightSolution) {
+    return new Flattener(tool, mapperClass)
         .mergeSolutions(leftSolution, rightSolution)
-        .map(FUNCTION::boom, typeParameters -> ReferenceMapperType.create(tool, functionType.isSupplier(), mapperClass, typeParameters.getTypeParameters()));
+        .map(FUNCTION::boom, typeParameters -> {
+          CodeBlock mapExpr = CodeBlock.of("new $T$L()$L",
+              tool.erasure(mapperClass.asType()),
+              getTypeParameterList(typeParameters.getTypeParameters()),
+              functionType.isSupplier() ? ".get()" : "");
+          return new MapperType(mapExpr);
+        });
   }
 }
