@@ -1,6 +1,5 @@
 package net.jbock.coerce;
 
-import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
@@ -44,7 +43,7 @@ class CollectorClassValidator {
     FlattenerResult result = new Flattener(tool, collectorClass)
         .mergeSolutions(leftSolution, rightSolution)
         .orElseThrow(this::boom);
-    return CollectorInfo.createCustom(tool, result.substitute(inputType).orElseThrow(f -> boom(f.getMessage())),
+    return CollectorInfo.create(tool, result.substitute(inputType).orElseThrow(f -> boom(f.getMessage())),
         collectorClass, collectorType.isSupplier(), result.getTypeParameters());
   }
 

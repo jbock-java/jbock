@@ -5,10 +5,10 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.ParameterStyle;
-import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.coerce.either.Either;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.stream.Collectors;
 
 public abstract class MapperAttempt {
 
@@ -37,7 +37,7 @@ public abstract class MapperAttempt {
         return CodeBlock.of(".findAny().orElseThrow($T.$L::missingRequired)", basicInfo.optionType(),
             basicInfo.parameterName().enumConstant());
       case REPEATABLE:
-        return CollectorInfo.createDefault(testType).collectExpr();
+        return CodeBlock.of(".collect($T.toList())", Collectors.class);
       default:
         throw new AssertionError("unexpected: " + style);
     }
