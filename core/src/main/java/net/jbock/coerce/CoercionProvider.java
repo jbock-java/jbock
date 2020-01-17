@@ -7,6 +7,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.coerce.collectorabsent.auto.CollectorAbsentAuto;
 import net.jbock.coerce.collectorabsent.explicit.CollectorAbsentExplicit;
+import net.jbock.coerce.collectorpresent.CollectorClassValidator;
 import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
@@ -53,10 +54,11 @@ public class CoercionProvider {
 
   private Coercion run() {
     if (basicInfo.collectorClass().isPresent()) {
+      TypeElement collectorClass = basicInfo.collectorClass().get();
       if (basicInfo.mapperClass().isPresent()) {
-        return collectorPresentExplicit(basicInfo.mapperClass().get());
+        return collectorPresentExplicit(collectorClass, basicInfo.mapperClass().get());
       } else {
-        return collectorPresentAuto();
+        return collectorPresentAuto(collectorClass);
       }
     }
     if (basicInfo.mapperClass().isPresent()) {
@@ -66,8 +68,8 @@ public class CoercionProvider {
     }
   }
 
-  private Coercion collectorPresentAuto() {
-    CollectorInfo collectorInfo = basicInfo.collectorInfo();
+  private Coercion collectorPresentAuto(TypeElement collectorClass) {
+    CollectorInfo collectorInfo = new CollectorClassValidator(basicInfo::failure, basicInfo.tool(), collectorClass, basicInfo.originalReturnType()).getCollectorInfo();
     CodeBlock mapExpr = basicInfo.findAutoMapper(collectorInfo.inputType())
         .orElseThrow(() -> basicInfo.failure(String.format("Unknown parameter type: %s. Try defining a custom mapper.",
             collectorInfo.inputType())));
@@ -75,8 +77,8 @@ public class CoercionProvider {
     return Coercion.getCoercion(basicInfo, collectorInfo.collectExpr(), mapExpr, CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
   }
 
-  private Coercion collectorPresentExplicit(TypeElement mapperClass) {
-    CollectorInfo collectorInfo = basicInfo.collectorInfo();
+  private Coercion collectorPresentExplicit(TypeElement collectorClass, TypeElement mapperClass) {
+    CollectorInfo collectorInfo = new CollectorClassValidator(basicInfo::failure, basicInfo.tool(), collectorClass, basicInfo.originalReturnType()).getCollectorInfo();
     CodeBlock mapperType = new MapperClassValidator(basicInfo::failure, basicInfo.tool(), collectorInfo.inputType(), mapperClass).checkReturnType()
         .orElseThrow(basicInfo::failure);
     ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());

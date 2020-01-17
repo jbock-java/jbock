@@ -5,8 +5,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.coerce.collectorpresent.CollectorClassValidator;
-import net.jbock.coerce.collectors.CollectorInfo;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
@@ -118,17 +116,6 @@ public class BasicInfo {
 
   Optional<TypeElement> collectorClass() {
     return Optional.ofNullable(collectorClass);
-  }
-
-  public CollectorInfo collectorInfo() {
-    if (collectorClass().isPresent()) {
-      return new CollectorClassValidator(this::failure, tool, collectorClass().get(), originalReturnType()).getCollectorInfo();
-    }
-    Optional<TypeMirror> wrapped = tool().unwrap(List.class, originalReturnType());
-    if (!wrapped.isPresent()) {
-      throw failure("Either define a custom collector, or return List.");
-    }
-    return CollectorInfo.createDefault(wrapped.get());
   }
 
   public ClassName optionType() {
