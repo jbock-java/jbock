@@ -25,11 +25,15 @@ abstract class MapperAttempt {
   }
 
   Coercion getCoercion(BasicInfo basicInfo, CodeBlock mapExpr) {
-    CodeBlock collectExpr = getCollectExpr(basicInfo);
+    CodeBlock collectExpr = autoCollectExpr(basicInfo);
     return Coercion.getCoercion(basicInfo, collectExpr, mapExpr, extractExpr, style, constructorParam);
   }
 
-  private CodeBlock getCollectExpr(BasicInfo basicInfo) {
+  private CodeBlock autoCollectExpr(BasicInfo basicInfo) {
+    return autoCollectExpr(basicInfo, style);
+  }
+
+  static CodeBlock autoCollectExpr(BasicInfo basicInfo, ParameterStyle style) {
     switch (style) {
       case OPTIONAL:
         return CodeBlock.of(".findAny()");
@@ -39,7 +43,7 @@ abstract class MapperAttempt {
       case REPEATABLE:
         return CodeBlock.of(".collect($T.toList())", Collectors.class);
       default:
-        throw new AssertionError("unexpected: " + style);
+        throw new AssertionError("unexpected: " + style); // flags were handled earlier
     }
   }
 
