@@ -29,10 +29,6 @@ class MapperAttempt {
     this.mapperClass = mapperClass;
   }
 
-  private CodeBlock autoCollectExpr(BasicInfo basicInfo) {
-    return autoCollectExpr(basicInfo, style);
-  }
-
   static CodeBlock autoCollectExpr(BasicInfo basicInfo, ParameterStyle style) {
     switch (style) {
       case OPTIONAL:
@@ -47,13 +43,9 @@ class MapperAttempt {
     }
   }
 
-  TypeMirror getTestType() {
-    return testType;
-  }
-
   Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
-    return new MapperClassValidator(basicInfo::failure, basicInfo.tool(), getTestType(), mapperClass).checkReturnType()
+    return new MapperClassValidator(basicInfo::failure, basicInfo.tool(), testType, mapperClass).checkReturnType()
         .map(Function.identity(), mapperType ->
-            Coercion.getCoercion(basicInfo, autoCollectExpr(basicInfo), mapperType, extractExpr, style, constructorParam));
+            Coercion.getCoercion(basicInfo, autoCollectExpr(basicInfo, style), mapperType, extractExpr, style, constructorParam));
   }
 }

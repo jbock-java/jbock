@@ -39,27 +39,19 @@ public class CollectorAbsentExplicit {
     opt.ifPresent(optional -> {
       ParameterSpec param = basicInfo.constructorParam(optional.liftedType());
       // optional match
-      attempts.add(explicit(optional.wrappedType(), optional.extractExpr(param), param, OPTIONAL));
+      attempts.add(attempt(optional.wrappedType(), optional.extractExpr(param), param, OPTIONAL));
       // exact match (-> required)
-      attempts.add(explicit(optional.liftedType(), optional.extractExpr(param), param, REQUIRED));
+      attempts.add(attempt(optional.liftedType(), optional.extractExpr(param), param, REQUIRED));
     });
     listWrapped.ifPresent(wrapped -> {
       ParameterSpec param = basicInfo.constructorParam(returnType);
       // list match
-      attempts.add(explicit(wrapped, param, REPEATABLE));
+      attempts.add(attempt(wrapped, param, REPEATABLE));
     });
     ParameterSpec param = basicInfo.constructorParam(returnType);
     // exact match (-> required)
-    attempts.add(explicit(tool().box(returnType), param, REQUIRED));
+    attempts.add(attempt(tool().box(returnType), param, REQUIRED));
     return attempts;
-  }
-
-  private MapperAttempt explicit(TypeMirror expectedReturnType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
-    return new MapperAttempt(expectedReturnType, extractExpr, constructorParam, style, mapperClass);
-  }
-
-  private MapperAttempt explicit(TypeMirror expectedReturnType, ParameterSpec constructorParam, ParameterStyle style) {
-    return new MapperAttempt(expectedReturnType, CodeBlock.of("$N", constructorParam), constructorParam, style, mapperClass);
   }
 
   public Coercion findCoercion() {
@@ -71,11 +63,18 @@ public class CollectorAbsentExplicit {
         return ((Right<String, Coercion>) either).value();
       }
     }
-    String message = ((Left<String, Coercion>) either).value();
-    throw basicInfo.failure(message);
+    throw basicInfo.failure(((Left<String, Coercion>) either).value());
   }
 
   private TypeTool tool() {
     return basicInfo.tool();
+  }
+
+  private MapperAttempt attempt(TypeMirror expectedReturnType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
+    return new MapperAttempt(expectedReturnType, extractExpr, constructorParam, style, mapperClass);
+  }
+
+  private MapperAttempt attempt(TypeMirror expectedReturnType, ParameterSpec constructorParam, ParameterStyle style) {
+    return new MapperAttempt(expectedReturnType, CodeBlock.of("$N", constructorParam), constructorParam, style, mapperClass);
   }
 }
