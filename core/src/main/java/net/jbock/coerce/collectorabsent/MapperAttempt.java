@@ -4,29 +4,29 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.MapperClassValidator;
 import net.jbock.coerce.ParameterStyle;
 import net.jbock.coerce.either.Either;
 
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
-abstract class MapperAttempt {
+class MapperAttempt {
 
   private final CodeBlock extractExpr;
   private final ParameterSpec constructorParam;
   private final ParameterStyle style;
   private final TypeMirror testType;
+  private final TypeElement mapperClass;
 
-  MapperAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
+  MapperAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style, TypeElement mapperClass) {
     this.testType = testType;
     this.extractExpr = extractExpr;
     this.constructorParam = constructorParam;
     this.style = style;
-  }
-
-  Coercion getCoercion(BasicInfo basicInfo, CodeBlock mapExpr) {
-    CodeBlock collectExpr = autoCollectExpr(basicInfo);
-    return Coercion.getCoercion(basicInfo, collectExpr, mapExpr, extractExpr, style, constructorParam);
+    this.mapperClass = mapperClass;
   }
 
   private CodeBlock autoCollectExpr(BasicInfo basicInfo) {
@@ -51,5 +51,9 @@ abstract class MapperAttempt {
     return testType;
   }
 
-  abstract Either<String, Coercion> findCoercion(BasicInfo basicInfo);
+  Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
+    return new MapperClassValidator(basicInfo::failure, basicInfo.tool(), getTestType(), mapperClass).checkReturnType()
+        .map(Function.identity(), mapperType ->
+            Coercion.getCoercion(basicInfo, autoCollectExpr(basicInfo), mapperType, extractExpr, style, constructorParam));
+  }
 }

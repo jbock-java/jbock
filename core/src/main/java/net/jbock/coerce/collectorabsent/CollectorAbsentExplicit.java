@@ -55,11 +55,11 @@ public class CollectorAbsentExplicit {
   }
 
   private MapperAttempt explicit(TypeMirror expectedReturnType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style) {
-    return new ExplicitAttempt(expectedReturnType, extractExpr, constructorParam, style, mapperClass);
+    return new MapperAttempt(expectedReturnType, extractExpr, constructorParam, style, mapperClass);
   }
 
   private MapperAttempt explicit(TypeMirror expectedReturnType, ParameterSpec constructorParam, ParameterStyle style) {
-    return new ExplicitAttempt(expectedReturnType, CodeBlock.of("$N", constructorParam), constructorParam, style, mapperClass);
+    return new MapperAttempt(expectedReturnType, CodeBlock.of("$N", constructorParam), constructorParam, style, mapperClass);
   }
 
   public Coercion findCoercion() {
