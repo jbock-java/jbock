@@ -211,11 +211,11 @@ public class TypeTool {
     return elements.getTypeElement(type.getCanonicalName()).asType();
   }
 
-  public TypeMirror optionalOf(Class<?> type) {
+  public DeclaredType optionalOf(Class<?> type) {
     return optionalOf(asTypeElement(type).asType());
   }
 
-  private TypeMirror optionalOf(TypeMirror typeMirror) {
+  private DeclaredType optionalOf(TypeMirror typeMirror) {
     return types.getDeclaredType(asTypeElement(Optional.class), typeMirror);
   }
 

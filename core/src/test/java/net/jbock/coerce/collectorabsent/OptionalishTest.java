@@ -1,6 +1,5 @@
 package net.jbock.coerce.collectorabsent;
 
-import net.jbock.coerce.collectorabsent.Optionalish;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
 import org.junit.jupiter.api.Test;
