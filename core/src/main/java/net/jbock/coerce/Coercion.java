@@ -25,7 +25,7 @@ public final class Coercion {
   private final CodeBlock extractExpr;
 
   // absent -> flag
-  private final Optional<ParameterStyle> parameterType;
+  private final Optional<Skew> parameterType;
 
   private final ParamName paramName;
 
@@ -35,7 +35,7 @@ public final class Coercion {
       ParameterSpec constructorParam,
       FieldSpec field,
       CodeBlock extractExpr,
-      Optional<ParameterStyle> parameterType,
+      Optional<Skew> parameterType,
       ParamName paramName) {
     this.collectExpr = collectExpr;
     this.mapExpr = mapExpr;
@@ -51,10 +51,10 @@ public final class Coercion {
       CodeBlock collectExpr,
       CodeBlock mapExpr,
       CodeBlock extractExpr,
-      ParameterStyle style,
+      Skew skew,
       ParameterSpec constructorParam) {
     return new Coercion(collectExpr, mapExpr,
-        constructorParam, basicInfo.fieldSpec(), extractExpr, Optional.of(style), basicInfo.parameterName());
+        constructorParam, basicInfo.fieldSpec(), extractExpr, Optional.of(skew), basicInfo.parameterName());
   }
 
   /**
@@ -81,7 +81,7 @@ public final class Coercion {
     return collectExpr;
   }
 
-  public Optional<ParameterStyle> getStyle() {
+  public Optional<Skew> getStyle() {
     return parameterType;
   }
 

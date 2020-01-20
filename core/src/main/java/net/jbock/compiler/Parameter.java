@@ -6,7 +6,7 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
-import net.jbock.coerce.ParameterStyle;
+import net.jbock.coerce.Skew;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -306,15 +306,15 @@ public final class Parameter {
   }
 
   public boolean isRequired() {
-    return coercion.getStyle().isPresent() && coercion.getStyle().get() == ParameterStyle.REQUIRED;
+    return coercion.getStyle().isPresent() && coercion.getStyle().get() == Skew.REQUIRED;
   }
 
   public boolean isRepeatable() {
-    return coercion.getStyle().isPresent() && coercion.getStyle().get() == ParameterStyle.REPEATABLE;
+    return coercion.getStyle().isPresent() && coercion.getStyle().get() == Skew.REPEATABLE;
   }
 
   public boolean isOptional() {
-    return coercion.getStyle().isPresent() && coercion.getStyle().get() == ParameterStyle.OPTIONAL;
+    return coercion.getStyle().isPresent() && coercion.getStyle().get() == Skew.OPTIONAL;
   }
 
   public boolean isFlag() {

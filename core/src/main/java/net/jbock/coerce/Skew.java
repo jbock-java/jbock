@@ -1,6 +1,6 @@
 package net.jbock.coerce;
 
-public enum ParameterStyle {
+public enum Skew {
 
   REPEATABLE, OPTIONAL, REQUIRED;
 }

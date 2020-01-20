@@ -16,7 +16,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.function.Function;
 
-import static net.jbock.coerce.ParameterStyle.REPEATABLE;
+import static net.jbock.coerce.Skew.REPEATABLE;
 
 public class CoercionProvider {
 

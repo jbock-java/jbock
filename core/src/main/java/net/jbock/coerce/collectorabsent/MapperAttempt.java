@@ -5,7 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.MapperClassValidator;
-import net.jbock.coerce.ParameterStyle;
+import net.jbock.coerce.Skew;
 import net.jbock.coerce.either.Either;
 
 import javax.lang.model.element.TypeElement;
@@ -17,20 +17,20 @@ class MapperAttempt {
 
   private final CodeBlock extractExpr;
   private final ParameterSpec constructorParam;
-  private final ParameterStyle style;
+  private final Skew skew;
   private final TypeMirror testType;
   private final TypeElement mapperClass;
 
-  MapperAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, ParameterStyle style, TypeElement mapperClass) {
+  MapperAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, Skew skew, TypeElement mapperClass) {
     this.testType = testType;
     this.extractExpr = extractExpr;
     this.constructorParam = constructorParam;
-    this.style = style;
+    this.skew = skew;
     this.mapperClass = mapperClass;
   }
 
-  static CodeBlock autoCollectExpr(BasicInfo basicInfo, ParameterStyle style) {
-    switch (style) {
+  static CodeBlock autoCollectExpr(BasicInfo basicInfo, Skew skew) {
+    switch (skew) {
       case OPTIONAL:
         return CodeBlock.of(".findAny()");
       case REQUIRED:
@@ -39,13 +39,13 @@ class MapperAttempt {
       case REPEATABLE:
         return CodeBlock.of(".collect($T.toList())", Collectors.class);
       default:
-        throw new AssertionError("unexpected: " + style); // flags were handled earlier
+        throw new AssertionError("unexpected: " + skew); // flags were handled earlier
     }
   }
 
   Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
     return new MapperClassValidator(basicInfo::failure, basicInfo.tool(), testType, mapperClass).checkReturnType()
         .map(Function.identity(), mapperType ->
-            Coercion.getCoercion(basicInfo, autoCollectExpr(basicInfo, style), mapperType, extractExpr, style, constructorParam));
+            Coercion.getCoercion(basicInfo, autoCollectExpr(basicInfo, skew), mapperType, extractExpr, skew, constructorParam));
   }
 }
