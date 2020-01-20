@@ -7,8 +7,8 @@ import javax.lang.model.type.TypeMirror;
 import static net.jbock.compiler.TypeTool.asDeclared;
 
 /**
- * "Dog implements Animal"
- * Any free type parameters in Animal also appear in Dog.
+ * Either "Dog implements Animal" or "Dog extends Animal".
+ * Animal may use the type parameters of Dog.
  */
 class ImplementsRelation {
 
