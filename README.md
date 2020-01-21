@@ -60,7 +60,7 @@ using the following "matching" rules (upper left corner applies for both paramet
 <td valign="top"><b>No<br/>collector<br/>defined</b></td>
 <td>
 <table><!-- No mapper, no collector-->
-<tr><td>Parameter type</td><td>Skew</td></tr>
+<tr><td><b>Parameter type</b></td><td><b>Skew</b></td></tr>
 <tr><td><code>boolean | Boolean</code>        </td><td><i>flag*</i></td></tr>
 <tr><td><code>X</code>                        </td><td><i>required</i></td></tr>
 <tr><td><code>Optional&lt;X&gt;</code>        </td><td><i>optional</i></td></tr>
@@ -70,7 +70,7 @@ using the following "matching" rules (upper left corner applies for both paramet
 </td>
 <td>
 <table><!-- Mapper, no collector-->
-<tr><td>Parameter type</td><td>Skew</td></tr>
+<tr><td><b>Parameter type</b></td><td><b>Skew</b></td></tr>
 <tr><td><code>R</code>                        </td><td><i>required</i></td></tr>
 <tr><td><code>Optional&lt;R&gt;</code>        </td><td><i>optional</i></td></tr>
 <tr><td><code>OptionalInt</code> (if <code>R == Integer</code>)         </td><td><i>optional</i></td></tr>
@@ -89,7 +89,7 @@ using the following "matching" rules (upper left corner applies for both paramet
 <i>*</i> : <i>does not apply to positional parameters</i>
 
 where `X` is one of the
-"[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)",
+[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java),
 and `R` is the return type of the mapper.
 
 * [Detailed documentation](https://github.com/h908714124/jbock/blob/master/SPAGHETTI.md)
