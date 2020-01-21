@@ -5,7 +5,8 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.MapperClassValidator;
-import net.jbock.coerce.Skew;
+import net.jbock.coerce.NonFlagCoercion;
+import net.jbock.coerce.NonFlagSkew;
 import net.jbock.coerce.either.Either;
 
 import javax.lang.model.element.TypeElement;
@@ -17,11 +18,11 @@ class MapperAttempt {
 
   private final CodeBlock extractExpr;
   private final ParameterSpec constructorParam;
-  private final Skew skew;
+  private final NonFlagSkew skew;
   private final TypeMirror testType;
   private final TypeElement mapperClass;
 
-  MapperAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, Skew skew, TypeElement mapperClass) {
+  MapperAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew, TypeElement mapperClass) {
     this.testType = testType;
     this.extractExpr = extractExpr;
     this.constructorParam = constructorParam;
@@ -29,7 +30,7 @@ class MapperAttempt {
     this.mapperClass = mapperClass;
   }
 
-  static CodeBlock autoCollectExpr(BasicInfo basicInfo, Skew skew) {
+  static CodeBlock autoCollectExpr(BasicInfo basicInfo, NonFlagSkew skew) {
     switch (skew) {
       case OPTIONAL:
         return CodeBlock.of(".findAny()");
@@ -39,13 +40,13 @@ class MapperAttempt {
       case REPEATABLE:
         return CodeBlock.of(".collect($T.toList())", Collectors.class);
       default:
-        throw new AssertionError("unexpected: " + skew); // flags were handled earlier
+        throw new AssertionError("unknown skew: " + skew);
     }
   }
 
   Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
     return new MapperClassValidator(basicInfo::failure, basicInfo.tool(), testType, mapperClass).checkReturnType()
         .map(Function.identity(), mapperType ->
-            Coercion.getCoercion(basicInfo, autoCollectExpr(basicInfo, skew), mapperType, extractExpr, skew, constructorParam));
+            new NonFlagCoercion(basicInfo, autoCollectExpr(basicInfo, skew), mapperType, extractExpr, skew, constructorParam));
   }
 }

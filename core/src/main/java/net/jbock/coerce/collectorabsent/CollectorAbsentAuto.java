@@ -3,17 +3,17 @@ package net.jbock.coerce.collectorabsent;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.Coercion;
-import net.jbock.coerce.Skew;
+import net.jbock.coerce.NonFlagCoercion;
+import net.jbock.coerce.NonFlagSkew;
 import net.jbock.compiler.TypeTool;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 import java.util.Optional;
 
-import static net.jbock.coerce.Skew.OPTIONAL;
-import static net.jbock.coerce.Skew.REPEATABLE;
-import static net.jbock.coerce.Skew.REQUIRED;
+import static net.jbock.coerce.NonFlagSkew.OPTIONAL;
+import static net.jbock.coerce.NonFlagSkew.REPEATABLE;
+import static net.jbock.coerce.NonFlagSkew.REQUIRED;
 
 public class CollectorAbsentAuto {
 
@@ -23,7 +23,7 @@ public class CollectorAbsentAuto {
     this.basicInfo = basicInfo;
   }
 
-  public Coercion findCoercion() {
+  public NonFlagCoercion findCoercion() {
     TypeMirror returnType = basicInfo.originalReturnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
     Optional<TypeMirror> listWrapped = tool().unwrap(List.class, returnType);
@@ -43,13 +43,13 @@ public class CollectorAbsentAuto {
     return createCoercion(tool().box(returnType), param, REQUIRED);
   }
 
-  private Coercion createCoercion(TypeMirror testType, ParameterSpec constructorParam, Skew skew) {
+  private NonFlagCoercion createCoercion(TypeMirror testType, ParameterSpec constructorParam, NonFlagSkew skew) {
     return createCoercion(testType, CodeBlock.of("$N", constructorParam), constructorParam, skew);
   }
 
-  private Coercion createCoercion(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, Skew skew) {
+  private NonFlagCoercion createCoercion(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew) {
     return basicInfo.findAutoMapper(testType)
-        .map(mapExpr -> Coercion.getCoercion(basicInfo, MapperAttempt.autoCollectExpr(basicInfo, skew), mapExpr, extractExpr, skew, constructorParam))
+        .map(mapExpr -> new NonFlagCoercion(basicInfo, MapperAttempt.autoCollectExpr(basicInfo, skew), mapExpr, extractExpr, skew, constructorParam))
         .orElseThrow(() -> basicInfo.failure(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
             basicInfo.originalReturnType())));
   }

@@ -2,10 +2,12 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
+import net.jbock.coerce.FlagCoercion;
 import net.jbock.coerce.Skew;
 
 import javax.lang.model.element.ExecutableElement;
@@ -155,8 +157,8 @@ public final class Parameter {
     ParamName name = findParamName(params, sourceMethod);
     boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
     Coercion coercion = flag ?
-        CoercionProvider.flagCoercion(sourceMethod, name) :
-        CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
+        flagCoercion(sourceMethod, name) :
+        CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
     checkBundleKey(parameter.value(), params, sourceMethod);
     List<String> names = names(longName, shortName);
     return new Parameter(
@@ -171,6 +173,12 @@ public final class Parameter {
         null);
   }
 
+  private static Coercion flagCoercion(ExecutableElement sourceMethod, ParamName paramName) {
+    ParameterSpec constructorParam = ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake()).build();
+    FieldSpec field = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake()).build();
+    return new FlagCoercion(paramName, constructorParam, field);
+  }
+
   private static Parameter createPositional(
       List<Parameter> alreadyCreated,
       ExecutableElement sourceMethod,
@@ -182,7 +190,7 @@ public final class Parameter {
       TypeTool tool) {
     net.jbock.Param parameter = sourceMethod.getAnnotation(net.jbock.Param.class);
     ParamName name = findParamName(alreadyCreated, sourceMethod);
-    Coercion coercion = CoercionProvider.findCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
+    Coercion coercion = CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
     checkBundleKey(parameter.bundleKey(), alreadyCreated, sourceMethod);
     return new Parameter(
         null,
@@ -306,19 +314,19 @@ public final class Parameter {
   }
 
   public boolean isRequired() {
-    return coercion.getStyle().isPresent() && coercion.getStyle().get() == Skew.REQUIRED;
+    return coercion.getSkew() == Skew.REQUIRED;
   }
 
   public boolean isRepeatable() {
-    return coercion.getStyle().isPresent() && coercion.getStyle().get() == Skew.REPEATABLE;
+    return coercion.getSkew() == Skew.REPEATABLE;
   }
 
   public boolean isOptional() {
-    return coercion.getStyle().isPresent() && coercion.getStyle().get() == Skew.OPTIONAL;
+    return coercion.getSkew() == Skew.OPTIONAL;
   }
 
   public boolean isFlag() {
-    return !coercion.getStyle().isPresent();
+    return coercion.getSkew() == Skew.FLAG;
   }
 
   public Optional<String> bundleKey() {

@@ -2,5 +2,5 @@ package net.jbock.coerce;
 
 public enum Skew {
 
-  REPEATABLE, OPTIONAL, REQUIRED;
+  REPEATABLE, OPTIONAL, REQUIRED, FLAG
 }
