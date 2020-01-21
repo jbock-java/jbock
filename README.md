@@ -4,7 +4,7 @@
 jbock is a simple yet flexible command line parser that uses the same annotation names as
 [airline](https://github.com/airlift/airline) and
 [picocli.](https://github.com/remkop/picocli)
-The following example shows how to declare your command line arguments:
+Options and params are defined as `abstract` methods:
 
 ````java
 @Command
