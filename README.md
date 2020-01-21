@@ -46,7 +46,7 @@ assertEquals(Paths.get("file.txt"), my.path());
 Please note that `path` is a *required* param,
 while `verbosity` is an *optional* option.
 This so-called *parameter skew* is determined from the parameter type,
-using the following "matching" rules (upper left corner applies for both parameters):
+using the following "matching" rules:
 
 ### Parameter type matching
 
