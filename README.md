@@ -48,9 +48,10 @@ while `verbosity` is an *optional* option.
 This so-called *parameter skew* is determined by the parameter type,
 as described in the following section.
 
-### Parameter type matching
+### Skew rules
 
-If neither mapper nor collector are explicitly defined, the following matching rules apply:
+These are the rules if neither mapper nor collector are defined,
+as in the introductory example:
 
 Parameter type                      | Skew
 ----------------------------------- | --------------------------------
@@ -63,7 +64,7 @@ Parameter type                      | Skew
 where `X` is one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
 
-If an explicit mapper is defined, but no collector, then the following rules apply:
+If an explicit mapper is defined, but no collector, then these rules apply:
 
 Mapper return type      | Parameter type              | Skew
 ----------------------- | --------------------------- | ------------

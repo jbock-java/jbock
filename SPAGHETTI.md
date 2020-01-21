@@ -29,7 +29,7 @@ where the key starts with one or two dashes.
 These are called *options*.
 The other kind of tokens, which are distinguished not by their *name* but by their *position* in `argv`, relative to the other non-options, are called *params*.
 
-Options can be further subdivided into options that take an argument, and those that don't, which leaves us with three kinds:
+Options can be further subdivided into options that take an argument, and those that don't, which leaves us with this list:
 
 1. <a href="#params">*Params*</a>
 1. <a href="#flags">*Flag options*</a>
@@ -72,11 +72,9 @@ assertEquals(Paths.get("b.txt"), my.target());
 
 ### Flags
 
-These are the simplest non-positional parameters, a.k.a. *options*. 
-
-To declare a flag, simply
-declare an option method that returns
-`boolean` or `Boolean`.
+To declare a flag, simply use an *option* of type
+`boolean` or `Boolean`,
+and don't declare a custom mapper or collector.
 
 ````java
 @Option(value = "quiet", mnemonic = 'q')
