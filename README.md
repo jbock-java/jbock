@@ -86,7 +86,7 @@ using the following "matching" rules:
 </tr>
 </table>
 
-<i>*</i> : <i>does not apply to positional parameters</i>
+<i>*</i> : <i>only applies to options</i>
 
 where `X` is one of the
 [auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java),
