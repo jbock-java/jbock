@@ -38,7 +38,7 @@ can be used as follows:
 String[] args = { "-v", "2", "file.txt" }; // command line parameters
 MyArguments my = new MyArguments_Parser().parseOrExit(args);
 
-// make sure this works as expected...
+// works as expected
 assertEquals(OptionalInt.of(2), my.verbosity());
 assertEquals(Paths.get("file.txt"), my.path());
 ````
