@@ -31,9 +31,6 @@ class Optionalish {
       TypeMirror liftedType, TypeMirror wrappedType) {
     this.extract = extract;
     this.wrappedType = wrappedType;
-    if (liftedType.getKind().isPrimitive()) {
-      throw new AssertionError("just checking");
-    }
     this.liftedType = liftedType;
   }
 
