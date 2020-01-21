@@ -56,8 +56,9 @@ Parameter type                      | Skew
 ----------------------------------- | --------------------------------
 `boolean` or `Boolean`              | *flag* (only applies to options)
 `X` (exact match)                   | *required*
-`Optional<X>` or `OptionalInt` etc. | *optional*
+`Optional<X>`                       | *optional*
 `List<X>`                           | *repeatable*
+<code>Optional{Int&#124;Long&#124;Double}</code> | *optional*
 
 where `X` is one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
