@@ -51,7 +51,7 @@ as described in the following section.
 ### Skew rules
 
 These are the rules if neither mapper nor collector are defined,
-as in the introductory example:
+like in the introductory example:
 
 Parameter type                      | Skew
 ----------------------------------- | --------------------------------
