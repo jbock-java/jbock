@@ -45,7 +45,7 @@ assertEquals(Paths.get("file.txt"), my.path());
 
 Please note that `path` is a *required* param,
 while `verbosity` is an *optional* option.
-This is determined from the methods' return type,
+This so-called *parameter skew* is determined from the parameter type,
 using the following "matching" rules (upper left corner applies for both parameters):
 
 ### Parameter type matching
@@ -60,6 +60,7 @@ using the following "matching" rules (upper left corner applies for both paramet
 <td valign="top"><b>No<br/>collector<br/>defined</b></td>
 <td>
 <table><!-- No mapper, no collector-->
+<tr><td>Parameter type</td><td>Skew</td></tr>
 <tr><td><code>boolean | Boolean</code>        </td><td><i>flag*</i></td></tr>
 <tr><td><code>X</code>                        </td><td><i>required</i></td></tr>
 <tr><td><code>Optional&lt;X&gt;</code>        </td><td><i>optional</i></td></tr>
@@ -69,6 +70,7 @@ using the following "matching" rules (upper left corner applies for both paramet
 </td>
 <td>
 <table><!-- Mapper, no collector-->
+<tr><td>Parameter type</td><td>Skew</td></tr>
 <tr><td><code>R</code>                        </td><td><i>required</i></td></tr>
 <tr><td><code>Optional&lt;R&gt;</code>        </td><td><i>optional</i></td></tr>
 <tr><td><code>OptionalInt</code> (if <code>R == Integer</code>)         </td><td><i>optional</i></td></tr>
