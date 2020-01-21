@@ -50,47 +50,30 @@ using the following "matching" rules:
 
 ### Parameter type matching
 
-<table style="border-collapse: collapse">
-<tr>
-<td></td>
-<td><b>No mapper defined</b></td>
-<td><b>Mapper defined</b></td>
-</tr>
-<tr>
-<td valign="top"><b>No<br/>collector<br/>defined</b></td>
-<td>
-<table><!-- No mapper, no collector-->
-<tr><td><b>Parameter type</b></td><td><b>Skew</b></td></tr>
-<tr><td><code>boolean | Boolean</code>        </td><td><i>flag*</i></td></tr>
-<tr><td><code>X</code>                        </td><td><i>required</i></td></tr>
-<tr><td><code>Optional&lt;X&gt;</code>        </td><td><i>optional</i></td></tr>
-<tr><td><code>OptionalInt</code> etc.         </td><td><i>optional</i></td></tr>
-<tr><td><code>List&lt;X&gt;</code>            </td><td><i>repeatable</i></td></tr>
-</table>
-</td>
-<td>
-<table><!-- Mapper, no collector-->
-<tr><td><b>Parameter type</b></td><td><b>Skew</b></td></tr>
-<tr><td><code>R</code>                        </td><td><i>required</i></td></tr>
-<tr><td><code>Optional&lt;R&gt;</code>        </td><td><i>optional</i></td></tr>
-<tr><td><code>OptionalInt</code> (if <code>R == Integer</code>)         </td><td><i>optional</i></td></tr>
-<tr><td><code>OptionalLong</code> (if <code>R == Long</code>)         </td><td><i>optional</i></td></tr>
-<tr><td><code>OptionalDouble</code> (if <code>R == Double</code>)         </td><td><i>optional</i></td></tr>
-<tr><td><code>List&lt;R&gt;</code>            </td><td><i>repeatable</i></td></tr>
-</table>
-</td>
-</tr>
-<tr>
-<td><b>Collector<br/>defined</b></td>
-<td colspan="2"><i>repeatable</i></td>
-</tr>
-</table>
+If neither mapper nor collector are explicitly defined, the following matching rules apply:
 
-<i>*</i> : <i>only applies to options</i>
+Parameter type                      | Skew
+----------------------------------- | --------------------------------
+`boolean` or `Boolean`              | *flag* (only applies to options)
+`X` (exact match)                   | *required*
+`Optional<X>` or `OptionalInt` etc. | *optional*
+`List<X>`                           | *repeatable*
 
 where `X` is one of the
-[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java),
-and `R` is the return type of the mapper.
+[auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
+
+If an explicit mapper is defined, but no collector, then the following rules apply:
+
+Mapper return type      | Parameter type              | Skew
+----------------------- | --------------------------- | ------------
+`R`                     | `R` (exact match)           | *required*
+`R`                     | `Optional<R>`               | *optional*
+`R`                     | `List<R>`                   | *repeatable*
+`Integer`               | `OptionalInt`               | *optional*
+`Long`                  | `OptionalLong`              | *optional*
+`Double`                | `OptionalDouble`            | *optional*
+
+If a custom collector is defined, then the skew is always *repeatable*.
 
 * [Detailed documentation](https://github.com/h908714124/jbock/blob/master/SPAGHETTI.md)
 * [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
