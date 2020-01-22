@@ -115,7 +115,7 @@ final class OptionEnum {
     map.put("names", names);
     map.put("bundleKey", param.bundleKey().orElse(null));
     map.put("descExpression", descExpression(param.description()));
-    map.put("shape", param.shape());
+    map.put("shape", param.sample());
     String format = String.join(", ",
         "$names:L",
         "$bundleKey:S",

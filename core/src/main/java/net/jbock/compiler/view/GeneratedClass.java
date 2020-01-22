@@ -154,7 +154,7 @@ public final class GeneratedClass {
     List<Parameter> params = context.parameters();
     // 2 space padding on both sides
     int totalPadding = 4;
-    int width = params.stream().map(Parameter::shape).mapToInt(String::length).max().orElse(0) + totalPadding;
+    int width = params.stream().map(Parameter::sample).mapToInt(String::length).max().orElse(0) + totalPadding;
     String format = "  %1$-" + (width - 2) + "s";
     ParameterSpec row = builder(ENTRY_STRING_STRING, "row").build();
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();

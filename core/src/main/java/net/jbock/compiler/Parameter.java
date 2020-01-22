@@ -43,7 +43,7 @@ public final class Parameter {
 
   private final String bundleKey;
 
-  private final String shape;
+  private final String sample;
 
   private final List<String> names;
 
@@ -83,13 +83,13 @@ public final class Parameter {
       String longName,
       ExecutableElement sourceMethod,
       String bundleKey,
-      String shape,
+      String sample,
       List<String> names,
       Coercion coercion,
       List<String> description,
       Integer positionalIndex) {
     this.bundleKey = bundleKey;
-    this.shape = shape;
+    this.sample = sample;
     this.names = names;
     this.coercion = coercion;
     this.shortName = shortName;
@@ -144,16 +144,8 @@ public final class Parameter {
         CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
     checkBundleKey(parameter.value(), params, sourceMethod);
     List<String> names = names(longName, shortName);
-    return new Parameter(
-        shortName,
-        longName,
-        sourceMethod,
-        parameter.value(),
-        shape(flag, name, names, anyMnemonics),
-        names,
-        coercion,
-        Arrays.asList(description),
-        null);
+    return new Parameter(shortName, longName, sourceMethod, parameter.value(), sample(flag, name, names, anyMnemonics),
+        names, coercion, Arrays.asList(description), null);
   }
 
   private static Coercion flagCoercion(ExecutableElement sourceMethod, ParamName paramName) {
@@ -175,16 +167,8 @@ public final class Parameter {
     ParamName name = findParamName(alreadyCreated, sourceMethod);
     Coercion coercion = CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
     checkBundleKey(parameter.bundleKey(), alreadyCreated, sourceMethod);
-    return new Parameter(
-        null,
-        null,
-        sourceMethod,
-        parameter.bundleKey(),
-        name.snake().toLowerCase(Locale.US),
-        Collections.emptyList(),
-        coercion,
-        Arrays.asList(description),
-        positionalIndex);
+    return new Parameter(null, null, sourceMethod, parameter.bundleKey(), name.snake().toLowerCase(Locale.US),
+        Collections.emptyList(), coercion, Arrays.asList(description), positionalIndex);
   }
 
   private static boolean isInferredFlag(
@@ -348,11 +332,11 @@ public final class Parameter {
     return Arrays.asList(shortName, longName);
   }
 
-  public String shape() {
-    return shape;
+  public String sample() {
+    return sample;
   }
 
-  private static String shape(boolean flag, ParamName name, List<String> names, boolean anyMnemonics) {
+  private static String sample(boolean flag, ParamName name, List<String> names, boolean anyMnemonics) {
     if (names.isEmpty() || names.size() >= 3) {
       throw new AssertionError();
     }
