@@ -371,7 +371,7 @@ public final class GeneratedClass {
     code.add("return new $T($S)", StringJoiner.class, " ");
 
     Map<Boolean, List<Parameter>> partitionedOptions = context.parameters().stream()
-        .filter(Parameter::isNotPositional)
+        .filter(parameter -> !parameter.isPositional())
         .collect(partitioningBy(Parameter::isRequired));
 
     List<Parameter> requiredNonpos = partitionedOptions.get(true);

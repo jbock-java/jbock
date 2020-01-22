@@ -53,9 +53,7 @@ public final class Parameter {
 
   private final Integer positionalIndex;
 
-  private static ParamName findParamName(
-      List<Parameter> alreadyCreated,
-      ExecutableElement sourceMethod) {
+  private static ParamName findParamName(List<Parameter> alreadyCreated, ExecutableElement sourceMethod) {
     String methodName = sourceMethod.getSimpleName().toString();
     ParamName result = ParamName.create(methodName);
     for (Parameter param : alreadyCreated) {
@@ -66,31 +64,16 @@ public final class Parameter {
     return result;
   }
 
-  private static void checkBundleKey(
-      String bundleKey,
-      List<Parameter> alreadyCreated,
-      ExecutableElement sourceMethod) {
+  private static void checkBundleKey(String bundleKey, List<Parameter> alreadyCreated, ExecutableElement sourceMethod) {
     if (bundleKey.isEmpty()) {
       return;
     }
-    for (int i = 0; i < bundleKey.length(); i++) {
-      char c = bundleKey.charAt(i);
-      if (Character.isWhitespace(c)) {
-        throw ValidationException.create(sourceMethod,
-            "The bundle key may not contain whitespace characters.");
-      }
-    }
-    if (bundleKey.startsWith("jbock.")) {
-      throw ValidationException.create(sourceMethod,
-          "Bundle keys may not start with 'jbock.'.");
+    if (bundleKey.matches(".*\\s+.*")) {
+      throw ValidationException.create(sourceMethod, "The bundle key may not contain whitespace characters.");
     }
     for (Parameter param : alreadyCreated) {
-      if (param.bundleKey.isEmpty()) {
-        continue;
-      }
-      if (param.bundleKey.equals(bundleKey)) {
-        throw ValidationException.create(sourceMethod,
-            "Duplicate bundle key.");
+      if (bundleKey.equals(param.bundleKey)) {
+        throw ValidationException.create(sourceMethod, "Duplicate bundle key.");
       }
     }
   }
@@ -219,10 +202,7 @@ public final class Parameter {
 
   private static String shortName(List<Parameter> params, ExecutableElement sourceMethod) {
     Option param = sourceMethod.getAnnotation(Option.class);
-    if (param == null) {
-      return null;
-    }
-    if (param.mnemonic() == ' ') {
+    if (param == null || param.mnemonic() == ' ') {
       return null;
     }
     String result = "-" + param.mnemonic();
@@ -305,10 +285,6 @@ public final class Parameter {
     return positionalIndex != null;
   }
 
-  public boolean isNotPositional() {
-    return !isPositional();
-  }
-
   public OptionalInt positionalIndex() {
     return positionalIndex != null ? OptionalInt.of(positionalIndex) : OptionalInt.empty();
   }
@@ -368,20 +344,15 @@ public final class Parameter {
       return Collections.singletonList(shortName);
     } else if (longName == null) {
       return Collections.emptyList();
-    } else {
-      return Arrays.asList(shortName, longName);
     }
+    return Arrays.asList(shortName, longName);
   }
 
   public String shape() {
     return shape;
   }
 
-  private static String shape(
-      boolean flag,
-      ParamName name,
-      List<String> names,
-      boolean anyMnemonics) {
+  private static String shape(boolean flag, ParamName name, List<String> names, boolean anyMnemonics) {
     if (names.isEmpty() || names.size() >= 3) {
       throw new AssertionError();
     }
