@@ -15,8 +15,8 @@ public class NonFlagCoercion extends Coercion {
 
   public NonFlagCoercion(
       BasicInfo basicInfo,
-      CodeBlock collectExpr,
       CodeBlock mapExpr,
+      CodeBlock collectExpr,
       CodeBlock extractExpr,
       NonFlagSkew skew,
       ParameterSpec constructorParam) {

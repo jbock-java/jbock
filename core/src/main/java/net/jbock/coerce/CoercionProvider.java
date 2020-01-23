@@ -46,7 +46,7 @@ public class CoercionProvider {
       CodeBlock mapExpr = basicInfo.mapperClass()
           .map(mapperClass -> collectorPresentExplicit(inputType, mapperClass))
           .orElseGet(() -> collectorPresentAuto(inputType));
-      return new NonFlagCoercion(basicInfo, collectorInfo.collectExpr(), mapExpr,
+      return new NonFlagCoercion(basicInfo, mapExpr, collectorInfo.collectExpr(),
           CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
     }
     if (basicInfo.mapperClass().isPresent()) {

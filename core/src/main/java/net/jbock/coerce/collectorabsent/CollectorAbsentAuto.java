@@ -49,7 +49,7 @@ public class CollectorAbsentAuto {
 
   private NonFlagCoercion createCoercion(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew) {
     return basicInfo.findAutoMapper(testType)
-        .map(mapExpr -> new NonFlagCoercion(basicInfo, MapperAttempt.autoCollectExpr(basicInfo, skew), mapExpr, extractExpr, skew, constructorParam))
+        .map(mapExpr -> new NonFlagCoercion(basicInfo, mapExpr, MapperAttempt.autoCollectExpr(basicInfo, skew), extractExpr, skew, constructorParam))
         .orElseThrow(() -> basicInfo.failure(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
             basicInfo.originalReturnType())));
   }

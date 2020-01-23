@@ -47,6 +47,6 @@ class MapperAttempt {
   Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
     return new MapperClassValidator(basicInfo::failure, basicInfo.tool(), testType, mapperClass).getMapExpr()
         .map(Function.identity(), mapExpr ->
-            new NonFlagCoercion(basicInfo, autoCollectExpr(basicInfo, skew), mapExpr, extractExpr, skew, constructorParam));
+            new NonFlagCoercion(basicInfo, mapExpr, autoCollectExpr(basicInfo, skew), extractExpr, skew, constructorParam));
   }
 }
