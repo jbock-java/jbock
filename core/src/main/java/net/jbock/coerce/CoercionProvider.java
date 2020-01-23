@@ -63,7 +63,7 @@ public class CoercionProvider {
   }
 
   private CodeBlock collectorPresentExplicit(TypeMirror inputType, TypeElement mapperClass) {
-    return new MapperClassValidator(basicInfo::failure, basicInfo.tool(), inputType, mapperClass).checkReturnType()
+    return new MapperClassValidator(basicInfo::failure, basicInfo.tool(), inputType, mapperClass).getMapExpr()
         .orElseThrow(basicInfo::failure);
   }
 }

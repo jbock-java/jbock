@@ -31,7 +31,7 @@ public final class MapperClassValidator {
     this.mapperClass = mapperClass;
   }
 
-  public Either<String, CodeBlock> checkReturnType() {
+  public Either<String, CodeBlock> getMapExpr() {
     commonChecks(mapperClass);
     checkNotAbstract(mapperClass);
     ReferencedType<Function> functionType = new ReferenceTool<>(FUNCTION, errorHandler, tool, mapperClass).getReferencedType();
