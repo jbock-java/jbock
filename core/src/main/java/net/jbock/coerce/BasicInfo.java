@@ -31,32 +31,26 @@ public class BasicInfo {
   // nullable
   private final TypeElement mapperClass;
 
-  // nullable
-  private final TypeElement collectorClass;
-
   private BasicInfo(
       ParamName paramName,
       ExecutableElement sourceMethod,
       TypeTool tool,
       ClassName optionType,
-      TypeElement mapperClass,
-      TypeElement collectorClass) {
+      TypeElement mapperClass) {
     this.paramName = paramName;
     this.sourceMethod = sourceMethod;
     this.tool = tool;
     this.optionType = optionType;
     this.mapperClass = mapperClass;
-    this.collectorClass = collectorClass;
   }
 
   static BasicInfo create(
       Optional<TypeElement> mapperClass,
-      Optional<TypeElement> collectorClass,
       ParamName paramName,
       ClassName optionType,
       ExecutableElement sourceMethod,
       TypeTool tool) {
-    return new BasicInfo(paramName, sourceMethod, tool, optionType, mapperClass.orElse(null), collectorClass.orElse(null));
+    return new BasicInfo(paramName, sourceMethod, tool, optionType, mapperClass.orElse(null));
   }
 
   private boolean isEnumType(TypeMirror mirror) {
@@ -112,10 +106,6 @@ public class BasicInfo {
 
   Optional<TypeElement> mapperClass() {
     return Optional.ofNullable(mapperClass);
-  }
-
-  Optional<TypeElement> collectorClass() {
-    return Optional.ofNullable(collectorClass);
   }
 
   public ClassName optionType() {
