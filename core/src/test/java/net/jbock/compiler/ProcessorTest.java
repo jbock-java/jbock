@@ -304,7 +304,7 @@ class ProcessorTest {
   }
 
   @Test
-  void missingCommandLineArgumentsAnnotation() {
+  void missingCommandAnnotation() {
     JavaFileObject javaFile = fromSource(
         "abstract class Arguments {",
         "  @Option(value = \"a\") abstract String a();",
@@ -313,21 +313,6 @@ class ProcessorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("The class must have the @Command annotation");
-  }
-
-  @Test
-  void annotatedMethodNotAbstract() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\")",
-        "  String a();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("The method must be abstract.");
   }
 
   @Test
@@ -383,23 +368,6 @@ class ProcessorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("Unknown parameter type: boolean. Try defining a custom mapper or collector.");
-  }
-
-  @Test
-  void nearNameCollision() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"fAncy\")",
-        "  abstract String fAncy();",
-
-        "  @Option(value = \"f_ancy\")",
-        "  abstract String f_ancy();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
   }
 
   @Test
