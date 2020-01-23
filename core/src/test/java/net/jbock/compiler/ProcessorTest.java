@@ -117,37 +117,7 @@ class ProcessorTest {
   }
 
   @Test
-  void rawList2() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(\"x\")",
-        "  abstract List a();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.util.List. Try defining a custom mapper or collector.");
-  }
-
-  @Test
   void rawOptional() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(\"x\")",
-        "  abstract Optional a();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.util.Optional. Try defining a custom mapper or collector.");
-  }
-
-  @Test
-  void rawOptional2() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
