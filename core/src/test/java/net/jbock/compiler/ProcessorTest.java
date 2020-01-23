@@ -87,7 +87,7 @@ class ProcessorTest {
   }
 
   @Test
-  void classNotAbstract() {
+  void methodNotAbstract() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "class Arguments {",
@@ -97,7 +97,8 @@ class ProcessorTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile();
+        .failsToCompile()
+        .withErrorContaining("The method must be abstract.");
   }
 
   @Test
