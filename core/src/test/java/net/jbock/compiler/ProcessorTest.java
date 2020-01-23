@@ -222,7 +222,7 @@ class ProcessorTest {
         "abstract class Arguments {",
         "",
         "  @Option(\"x\")",
-        "  abstract OptionalInt b();",
+        "  abstract java.util.OptionalInt b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -236,7 +236,7 @@ class ProcessorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\")",
-        "  abstract OptionalInt b();",
+        "  abstract java.util.OptionalInt b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -466,22 +466,14 @@ class ProcessorTest {
     List<String> header = Arrays.asList(
         "package test;",
         "",
-        "import java.math.BigInteger;",
         "import java.util.List;",
         "import java.util.Set;",
         "import java.util.Map;",
-        "import java.util.AbstractMap;",
         "import java.util.Collection;",
-        "import java.util.Collections;",
         "import java.util.Optional;",
-        "import java.util.OptionalInt;",
         "import java.util.function.Function;",
         "import java.util.function.Supplier;",
-        "import java.util.function.BiConsumer;",
-        "import java.util.function.BinaryOperator;",
         "import java.util.stream.Collector;",
-        "import java.util.stream.Collectors;",
-        "import java.time.LocalDate;",
         "",
         "import net.jbock.Command;",
         "import net.jbock.Param;",
