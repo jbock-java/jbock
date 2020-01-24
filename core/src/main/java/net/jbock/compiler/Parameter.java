@@ -33,11 +33,11 @@ import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
  */
 public final class Parameter {
 
-  // null if absent
-  private final String longName;
+  // null iff this is a param
+  private final String optionName;
 
-  // null if absent
-  private final String shortName;
+  // nullable
+  private final String mnemonic;
 
   private final ExecutableElement sourceMethod;
 
@@ -79,8 +79,8 @@ public final class Parameter {
   }
 
   private Parameter(
-      String shortName,
-      String longName,
+      String mnemonic,
+      String optionName,
       ExecutableElement sourceMethod,
       String bundleKey,
       String sample,
@@ -92,8 +92,8 @@ public final class Parameter {
     this.sample = sample;
     this.names = names;
     this.coercion = coercion;
-    this.shortName = shortName;
-    this.longName = longName;
+    this.mnemonic = mnemonic;
+    this.optionName = optionName;
     this.sourceMethod = sourceMethod;
     this.description = description;
     this.positionalIndex = positionalIndex;
@@ -129,13 +129,10 @@ public final class Parameter {
       Optional<TypeElement> collectorClass,
       ClassName optionType,
       TypeTool tool) {
-    String longName = longName(params, sourceMethod);
-    String shortName = shortName(params, sourceMethod);
-    if (shortName == null && longName == null) {
-      throw ValidationException.create(sourceMethod, "Define either long name or a short name");
-    }
+    String optionName = longName(params, sourceMethod);
+    String mnemonic = shortName(params, sourceMethod);
     Option parameter = sourceMethod.getAnnotation(Option.class);
-    checkShortName(sourceMethod, parameter.mnemonic());
+    checkMnemonic(sourceMethod, parameter.mnemonic());
     checkName(sourceMethod, parameter.value());
     ParamName name = findParamName(params, sourceMethod);
     boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
@@ -143,8 +140,8 @@ public final class Parameter {
         flagCoercion(sourceMethod, name) :
         CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
     checkBundleKey(parameter.value(), params, sourceMethod);
-    List<String> names = names(longName, shortName);
-    return new Parameter(shortName, longName, sourceMethod, parameter.value(), sample(flag, name, names, anyMnemonics),
+    List<String> names = names(optionName, mnemonic);
+    return new Parameter(mnemonic, optionName, sourceMethod, parameter.value(), sample(flag, name, names, anyMnemonics),
         names, coercion, Arrays.asList(description), null);
   }
 
@@ -191,8 +188,8 @@ public final class Parameter {
     }
     String result = "-" + param.mnemonic();
     for (Parameter p : params) {
-      if (result.equals(p.shortName)) {
-        throw ValidationException.create(sourceMethod, "Duplicate short name");
+      if (result.equals(p.mnemonic)) {
+        throw ValidationException.create(sourceMethod, "Duplicate mnemonic");
       }
     }
     return result;
@@ -209,18 +206,18 @@ public final class Parameter {
     }
     String longName = "--" + param.value();
     for (Parameter p : params) {
-      if (p.longName != null && p.longName.equals(longName)) {
-        throw ValidationException.create(sourceMethod, "Duplicate long name");
+      if (p.optionName != null && p.optionName.equals(longName)) {
+        throw ValidationException.create(sourceMethod, "Duplicate option name");
       }
     }
     return longName;
   }
 
-  private static void checkShortName(ExecutableElement sourceMethod, char name) {
-    if (name == ' ') {
+  private static void checkMnemonic(ExecutableElement sourceMethod, char mnemonic) {
+    if (mnemonic == ' ') {
       return;
     }
-    checkName(sourceMethod, Character.toString(name));
+    checkName(sourceMethod, Character.toString(mnemonic));
   }
 
   private static void checkName(ExecutableElement sourceMethod, String name) {
@@ -246,7 +243,7 @@ public final class Parameter {
   }
 
   public Optional<String> longName() {
-    return Optional.ofNullable(longName);
+    return Optional.ofNullable(optionName);
   }
 
   public List<String> description() {

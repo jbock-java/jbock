@@ -29,7 +29,7 @@ class ProcessorTest {
   }
 
   @Test
-  void duplicateLongName() {
+  void duplicateOptionName() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -39,7 +39,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Duplicate long name");
+        .withErrorContaining("Duplicate option name");
   }
 
   @Test
@@ -53,7 +53,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Duplicate short name");
+        .withErrorContaining("Duplicate mnemonic");
   }
 
   @Test

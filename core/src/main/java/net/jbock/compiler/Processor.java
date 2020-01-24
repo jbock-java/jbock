@@ -159,9 +159,7 @@ public final class Processor extends AbstractProcessor {
         String sourceCode = javaFile.toString();
         writer.write(sourceCode);
         if (debug) {
-          System.err.println("##############");
-          System.err.println("# Debug info #");
-          System.err.println("##############");
+          System.err.println("##############\n# Debug info #\n##############");
           System.err.println(sourceCode);
         }
       } catch (IOException e) {
@@ -233,9 +231,7 @@ public final class Processor extends AbstractProcessor {
     for (Parameter param : parameters) {
       param.longName().ifPresent(longName -> {
         if ("help".equals(longName)) {
-          throw param.validationError("'help' is reserved. " +
-              "Either disable the help feature " +
-              "or change the long name to something else.");
+          throw param.validationError("'help' is reserved. Either disable the help feature or change the option name to something else.");
         }
       });
     }
@@ -243,30 +239,24 @@ public final class Processor extends AbstractProcessor {
 
   private static void validateParameterMethods(ExecutableElement method) {
     if (!method.getModifiers().contains(ABSTRACT)) {
-      throw ValidationException.create(method,
-          "The method must be abstract.");
+      throw ValidationException.create(method, "The method must be abstract.");
     }
     if (!method.getParameters().isEmpty()) {
-      throw ValidationException.create(method,
-          "The method may not have parameters.");
+      throw ValidationException.create(method, "The method may not have parameters.");
     }
     if (!method.getTypeParameters().isEmpty()) {
-      throw ValidationException.create(method,
-          "The method may not have type parameters.");
+      throw ValidationException.create(method, "The method may not have type parameters.");
     }
     if (!method.getThrownTypes().isEmpty()) {
-      throw ValidationException.create(method,
-          "The method may not declare any exceptions.");
+      throw ValidationException.create(method, "The method may not declare any exceptions.");
     }
     if (method.getAnnotation(Param.class) == null && method.getAnnotation(Option.class) == null) {
-      throw ValidationException.create(method,
-          String.format("Annotate this method with either @%s or @%s",
-              Option.class.getSimpleName(), Param.class.getSimpleName()));
+      throw ValidationException.create(method, String.format("Annotate this method with either @%s or @%s",
+          Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
     if (method.getAnnotation(Param.class) != null && method.getAnnotation(Option.class) != null) {
-      throw ValidationException.create(method,
-          String.format("Use either @%s or @%s annotation, but not both",
-              Option.class.getSimpleName(), Param.class.getSimpleName()));
+      throw ValidationException.create(method, String.format("Use either @%s or @%s annotation, but not both",
+          Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
   }
 
