@@ -29,7 +29,7 @@ import static java.lang.Character.isWhitespace;
 import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
 
 /**
- * This class represents a parameter method (option or param).
+ * This class represents either an {@link Option} or a {@link net.jbock.Param}.
  */
 public final class Parameter {
 
@@ -107,20 +107,21 @@ public final class Parameter {
     return coercion;
   }
 
-  static Parameter create(boolean anyMnemonics, TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod, Integer positionalIndex, String[] description, ClassName optionType) {
+  static Parameter createParam(TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod, int positionalIndex, String[] description, ClassName optionType) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
-    if (positionalIndex != null) {
-      Optional<TypeElement> mapperClass = annotationUtil.get(net.jbock.Param.class, "mappedBy");
-      Optional<TypeElement> collectorClass = annotationUtil.get(net.jbock.Param.class, "collectedBy");
-      return createPositional(alreadyCreated, sourceMethod, positionalIndex, description, mapperClass, collectorClass, optionType, tool);
-    } else {
-      Optional<TypeElement> mapperClass = annotationUtil.get(Option.class, "mappedBy");
-      Optional<TypeElement> collectorClass = annotationUtil.get(Option.class, "collectedBy");
-      return createNonpositional(anyMnemonics, alreadyCreated, sourceMethod, description, mapperClass, collectorClass, optionType, tool);
-    }
+    Optional<TypeElement> mapperClass = annotationUtil.get(net.jbock.Param.class, "mappedBy");
+    Optional<TypeElement> collectorClass = annotationUtil.get(net.jbock.Param.class, "collectedBy");
+    return createParam(alreadyCreated, sourceMethod, positionalIndex, description, mapperClass, collectorClass, optionType, tool);
   }
 
-  private static Parameter createNonpositional(
+  static Parameter createOption(boolean anyMnemonics, TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod, String[] description, ClassName optionType) {
+    AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
+    Optional<TypeElement> mapperClass = annotationUtil.get(Option.class, "mappedBy");
+    Optional<TypeElement> collectorClass = annotationUtil.get(Option.class, "collectedBy");
+    return createOption(anyMnemonics, alreadyCreated, sourceMethod, description, mapperClass, collectorClass, optionType, tool);
+  }
+
+  private static Parameter createOption(
       boolean anyMnemonics,
       List<Parameter> params,
       ExecutableElement sourceMethod,
@@ -129,19 +130,19 @@ public final class Parameter {
       Optional<TypeElement> collectorClass,
       ClassName optionType,
       TypeTool tool) {
-    String optionName = longName(params, sourceMethod);
-    String mnemonic = shortName(params, sourceMethod);
-    Option parameter = sourceMethod.getAnnotation(Option.class);
-    checkMnemonic(sourceMethod, parameter.mnemonic());
-    checkName(sourceMethod, parameter.value());
+    String optionName = optionName(params, sourceMethod);
+    String mnemonic = mnemonic(params, sourceMethod);
+    Option option = sourceMethod.getAnnotation(Option.class);
+    checkMnemonic(sourceMethod, option.mnemonic());
+    checkName(sourceMethod, option.value());
     ParamName name = findParamName(params, sourceMethod);
     boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
     Coercion coercion = flag ?
         flagCoercion(sourceMethod, name) :
         CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
-    checkBundleKey(parameter.value(), params, sourceMethod);
+    checkBundleKey(option.value(), params, sourceMethod);
     List<String> names = names(optionName, mnemonic);
-    return new Parameter(mnemonic, optionName, sourceMethod, parameter.value(), sample(flag, name, names, anyMnemonics),
+    return new Parameter(mnemonic, optionName, sourceMethod, option.value(), sample(flag, name, names, anyMnemonics),
         names, coercion, Arrays.asList(description), null);
   }
 
@@ -151,7 +152,7 @@ public final class Parameter {
     return new FlagCoercion(paramName, constructorParam, field);
   }
 
-  private static Parameter createPositional(
+  private static Parameter createParam(
       List<Parameter> alreadyCreated,
       ExecutableElement sourceMethod,
       int positionalIndex,
@@ -181,7 +182,7 @@ public final class Parameter {
         tool.isSameType(mirror, Boolean.class);
   }
 
-  private static String shortName(List<Parameter> params, ExecutableElement sourceMethod) {
+  private static String mnemonic(List<Parameter> params, ExecutableElement sourceMethod) {
     Option param = sourceMethod.getAnnotation(Option.class);
     if (param == null || param.mnemonic() == ' ') {
       return null;
@@ -195,7 +196,7 @@ public final class Parameter {
     return result;
   }
 
-  private static String longName(List<Parameter> params, ExecutableElement sourceMethod) {
+  private static String optionName(List<Parameter> params, ExecutableElement sourceMethod) {
     Option param = sourceMethod.getAnnotation(Option.class);
     if (param == null) {
       return null;
@@ -242,7 +243,7 @@ public final class Parameter {
     }
   }
 
-  public Optional<String> longName() {
+  public Optional<String> optionName() {
     return Optional.ofNullable(optionName);
   }
 

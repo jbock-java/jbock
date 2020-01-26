@@ -26,8 +26,8 @@ public class CoercionProvider {
   private static Coercion findCoercion(BasicInfo basicInfo, Optional<TypeElement> collector) {
     return collector.<Coercion>map(collectorClass -> {
       CollectorInfo collectorInfo = new CollectorClassValidator(basicInfo::failure,
-          basicInfo.tool(), collectorClass, basicInfo.originalReturnType()).getCollectorInfo();
-      ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.originalReturnType());
+          basicInfo.tool(), collectorClass, basicInfo.returnType()).getCollectorInfo();
+      ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.returnType());
       TypeMirror inputType = collectorInfo.inputType();
       CodeBlock mapExpr = basicInfo.mapperClass()
           .map(mapperClass -> collectorPresentExplicit(basicInfo, inputType, mapperClass))

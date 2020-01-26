@@ -13,7 +13,6 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
@@ -64,7 +63,7 @@ public final class Processor extends AbstractProcessor {
     try {
       getAnnotatedMethods(env, annotations).forEach(method -> {
         checkEnclosingElementIsAnnotated(method);
-        validateParameterMethods(method);
+        validateParameterMethod(method);
       });
     } catch (ValidationException e) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
@@ -171,26 +170,22 @@ public final class Processor extends AbstractProcessor {
   }
 
   private List<Parameter> getParams(TypeTool tool, TypeElement sourceElement, ClassName optionType) {
-    List<ExecutableElement> abstractMethods = methodsIn(sourceElement.getEnclosedElements()).stream()
-        .filter(method -> method.getModifiers().contains(ABSTRACT))
-        .collect(Collectors.toList());
-    abstractMethods.forEach(Processor::validateParameterMethods);
-    ParameterMethods methods = ParameterMethods.create(abstractMethods);
-    boolean anyMnemonics = methods.anyMnemonics();
-    List<Parameter> result = new ArrayList<>(methods.options().size() + methods.positionals().size());
-    for (int i = 0; i < methods.positionals().size(); i++) {
-      ExecutableElement method = methods.positionals().get(i);
-      Parameter param = Parameter.create(anyMnemonics, tool, result, method, i, getDescription(method), optionType);
-      result.add(param);
+    Methods methods = Methods.create(methodsIn(sourceElement.getEnclosedElements()).stream()
+        .filter(Processor::validateParameterMethod)
+        .collect(Collectors.toList()));
+    List<Parameter> params = new ArrayList<>();
+    for (int i = 0; i < methods.params().size(); i++) {
+      params.add(Parameter.createParam(tool, params, methods.params().get(i), i, getDescription(methods.params().get(i)), optionType));
     }
-    for (ExecutableElement method : methods.options()) {
-      Parameter param = Parameter.create(anyMnemonics, tool, result, method, null, getDescription(method), optionType);
-      result.add(param);
+    boolean anyMnemonics = methods.options().stream().anyMatch(method ->
+        method.getAnnotation(Option.class).mnemonic() != ' ');
+    for (ExecutableElement option : methods.options()) {
+      params.add(Parameter.createOption(anyMnemonics, tool, params, option, getDescription(option), optionType));
     }
     if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {
-      checkHelp(result);
+      methods.options().forEach(this::checkHelp);
     }
-    return result;
+    return params;
   }
 
   private void validateSourceElement(TypeTool tool, TypeElement sourceElement) {
@@ -227,19 +222,18 @@ public final class Processor extends AbstractProcessor {
     return result.toArray(new String[0]);
   }
 
-  private void checkHelp(List<Parameter> parameters) {
-    for (Parameter param : parameters) {
-      param.longName().ifPresent(longName -> {
-        if ("help".equals(longName)) {
-          throw param.validationError("'help' is reserved. Either disable the help feature or change the option name to something else.");
-        }
-      });
+  private void checkHelp(ExecutableElement option) {
+    if ("help".equals(option.getAnnotation(Option.class).value())) {
+      throw ValidationException.create(option, "'help' is reserved. Either disable the help feature or change the option name to something else.");
     }
   }
 
-  private static void validateParameterMethods(ExecutableElement method) {
+  private static boolean validateParameterMethod(ExecutableElement method) {
     if (!method.getModifiers().contains(ABSTRACT)) {
-      throw ValidationException.create(method, "The method must be abstract.");
+      if (method.getAnnotation(Param.class) != null || method.getAnnotation(Option.class) != null) {
+        throw ValidationException.create(method, "The method must be abstract.");
+      }
+      return false;
     }
     if (!method.getParameters().isEmpty()) {
       throw ValidationException.create(method, "The method may not have parameters.");
@@ -258,6 +252,7 @@ public final class Processor extends AbstractProcessor {
       throw ValidationException.create(method, String.format("Use either @%s or @%s annotation, but not both",
           Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
+    return true;
   }
 
   private List<ExecutableElement> getAnnotatedMethods(RoundEnvironment env, Set<? extends TypeElement> annotations) {
@@ -272,9 +267,8 @@ public final class Processor extends AbstractProcessor {
   }
 
   private static ClassName generatedClass(TypeElement sourceElement) {
-    ClassName type = ClassName.get(sourceElement);
-    String name = String.join("_", type.simpleNames()) + "_Parser";
-    return type.topLevelClassName().peerClass(name);
+    String name = String.join("_", ClassName.get(sourceElement).simpleNames()) + "_Parser";
+    return ClassName.get(sourceElement).topLevelClassName().peerClass(name);
   }
 
   private void handleUnknownError(TypeElement sourceType, Throwable e) {
@@ -284,13 +278,9 @@ public final class Processor extends AbstractProcessor {
   }
 
   private void checkEnclosingElementIsAnnotated(ExecutableElement method) {
-    Element enclosingElement = method.getEnclosingElement();
-    if (enclosingElement.getKind() != ElementKind.CLASS) {
-      throw ValidationException.create(enclosingElement, "The enclosing element must be a class.");
-    }
-    if (enclosingElement.getAnnotation(Command.class) == null) {
-      throw ValidationException.create(enclosingElement,
-          "The class must have the @" + Command.class.getSimpleName() + " annotation.");
+    Element p = method.getEnclosingElement();
+    if (p.getAnnotation(Command.class) == null) {
+      throw ValidationException.create(p, "The class must have the @" + Command.class.getSimpleName() + " annotation.");
     }
   }
 }

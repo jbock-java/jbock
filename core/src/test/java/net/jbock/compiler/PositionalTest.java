@@ -81,22 +81,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Define a unique position.");
-  }
-
-  @Test
-  void positionalConflict2() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "  @Param(1) abstract String a();",
-        "  @Param(1) abstract OptionalInt b();",
-        "  @Param(2) abstract Optional<String> c();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Define a unique position.");
+        .withErrorContaining("Duplicate position: 1");
   }
 
 

@@ -87,13 +87,12 @@ public class BasicInfo {
 
   }
 
-  // return type of the parameter method
-  public TypeMirror originalReturnType() {
+  public TypeMirror returnType() {
     return sourceMethod.getReturnType();
   }
 
   FieldSpec fieldSpec() {
-    return FieldSpec.builder(TypeName.get(originalReturnType()), paramName.camel()).build();
+    return FieldSpec.builder(TypeName.get(returnType()), paramName.camel()).build();
   }
 
   public ValidationException failure(String message) {

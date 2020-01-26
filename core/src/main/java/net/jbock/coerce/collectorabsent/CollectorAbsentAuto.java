@@ -24,7 +24,7 @@ public class CollectorAbsentAuto {
   }
 
   public NonFlagCoercion findCoercion() {
-    TypeMirror returnType = basicInfo.originalReturnType();
+    TypeMirror returnType = basicInfo.returnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
     Optional<TypeMirror> listWrapped = tool().unwrap(List.class, returnType);
     if (opt.isPresent()) {
@@ -51,7 +51,7 @@ public class CollectorAbsentAuto {
     return basicInfo.findAutoMapper(testType)
         .map(mapExpr -> new NonFlagCoercion(basicInfo, mapExpr, MapperAttempt.autoCollectExpr(basicInfo, skew), extractExpr, skew, constructorParam))
         .orElseThrow(() -> basicInfo.failure(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
-            basicInfo.originalReturnType())));
+            basicInfo.returnType())));
   }
 
   private TypeTool tool() {
