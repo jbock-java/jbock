@@ -10,7 +10,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
+import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
 
 public final class Context {
 
@@ -50,8 +50,7 @@ public final class Context {
     if (!sourceType.getAnnotation(Command.class).value().isEmpty()) {
       return sourceType.getAnnotation(Command.class).value();
     }
-    String simpleName = sourceType.getSimpleName().toString();
-    return ParamName.create(simpleName).snake('-');
+    return ParamName.create(sourceType.getSimpleName().toString()).snake('-');
   }
 
   public ClassName optionParserType() {
@@ -107,9 +106,7 @@ public final class Context {
   }
 
   public Modifier[] getAccessModifiers() {
-    return sourceElement.getModifiers().stream()
-        .filter(NONPRIVATE_ACCESS_MODIFIERS::contains)
-        .toArray(Modifier[]::new);
+    return sourceElement.getModifiers().stream().filter(ALLOWED_MODIFIERS::contains).toArray(Modifier[]::new);
   }
 
   public ClassName generatedClass() {

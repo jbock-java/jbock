@@ -17,7 +17,7 @@ import static javax.lang.model.element.Modifier.PUBLIC;
 
 public final class Constants {
 
-  static final Set<Modifier> NONPRIVATE_ACCESS_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
+  static final Set<Modifier> ALLOWED_MODIFIERS = EnumSet.of(PUBLIC, PROTECTED);
 
   public static final ClassName STRING = ClassName.get(String.class);
 

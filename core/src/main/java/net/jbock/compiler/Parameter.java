@@ -26,7 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static java.lang.Character.isWhitespace;
-import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
+import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
 
 /**
  * This class represents either an {@link Option} or a {@link net.jbock.Param}.
@@ -258,7 +258,7 @@ public final class Parameter {
 
   public Set<Modifier> getAccessModifiers() {
     return sourceMethod.getModifiers().stream()
-        .filter(NONPRIVATE_ACCESS_MODIFIERS::contains)
+        .filter(ALLOWED_MODIFIERS::contains)
         .collect(Collectors.toSet());
   }
 
