@@ -122,10 +122,7 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void write(
-      TypeElement sourceElement,
-      ClassName generatedType,
-      TypeSpec definedType) {
+  private void write(TypeElement sourceElement, ClassName generatedType, TypeSpec definedType) {
     JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), definedType);
     JavaFile javaFile = builder.build();
     try {
