@@ -5,8 +5,11 @@ import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
+import javax.lang.model.util.SimpleTypeVisitor8;
 import java.util.Map;
 import java.util.Optional;
 
@@ -20,6 +23,19 @@ class AnnotationUtil {
     @Override
     public TypeMirror visitType(TypeMirror mirror, Void _null) {
       return mirror;
+    }
+  };
+
+  private static final TypeVisitor<Boolean, TypeTool> IS_JAVA_LANG_OBJECT = new SimpleTypeVisitor8<Boolean, TypeTool>() {
+    @Override
+    protected Boolean defaultAction(TypeMirror e, TypeTool tool) {
+      return false;
+    }
+
+    @Override
+    public Boolean visitDeclared(DeclaredType type, TypeTool tool) {
+      TypeElement element = type.asElement().accept(TypeTool.AS_TYPE_ELEMENT, null);
+      return element != null && "java.lang.Object".equals(element.getQualifiedName().toString());
     }
   };
 
@@ -43,7 +59,7 @@ class AnnotationUtil {
     if (typeMirror == null) {
       throw ValidationException.create(sourceMethod, String.format("Invalid value of attribute '%s'.", attributeName));
     }
-    if (tool.isObject(typeMirror)) {
+    if (typeMirror.accept(IS_JAVA_LANG_OBJECT, tool)) {
       // if the default value is not overridden
       return Optional.empty();
     }
@@ -51,22 +67,14 @@ class AnnotationUtil {
   }
 
   private static AnnotationMirror getAnnotationMirror(TypeTool tool, ExecutableElement sourceMethod, Class<?> annotationClass) {
-    for (AnnotationMirror m : sourceMethod.getAnnotationMirrors()) {
-      if (tool.isSameType(m.getAnnotationType(), annotationClass)) {
-        return m;
-      }
-    }
-    return null;
+    return sourceMethod.getAnnotationMirrors().stream()
+        .filter(m -> tool.isSameType(m.getAnnotationType(), annotationClass))
+        .findAny().orElse(null);
   }
 
   private static AnnotationValue getAnnotationValue(AnnotationMirror annotationMirror, String key) {
-    Map<? extends ExecutableElement, ? extends AnnotationValue> elementValues = annotationMirror.getElementValues();
-    for (Map.Entry<? extends ExecutableElement, ? extends AnnotationValue> entry : elementValues.entrySet()) {
-      String simpleName = entry.getKey().getSimpleName().toString();
-      if (simpleName.equals(key)) {
-        return entry.getValue();
-      }
-    }
-    return null;
+    return annotationMirror.getElementValues().entrySet().stream()
+        .filter(entry -> entry.getKey().getSimpleName().toString().equals(key))
+        .map(Map.Entry::getValue).findAny().orElse(null);
   }
 }

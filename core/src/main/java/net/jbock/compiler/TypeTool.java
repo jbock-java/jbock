@@ -65,22 +65,6 @@ public class TypeTool {
         }
       };
 
-  private static final TypeVisitor<Boolean, TypeTool> IS_JAVA_LANG_OBJECT = new SimpleTypeVisitor8<Boolean, TypeTool>() {
-    @Override
-    protected Boolean defaultAction(TypeMirror e, TypeTool tool) {
-      return false;
-    }
-
-    @Override
-    public Boolean visitDeclared(DeclaredType type, TypeTool tool) {
-      TypeElement element = type.asElement().accept(TypeTool.AS_TYPE_ELEMENT, null);
-      if (element == null) {
-        return false;
-      }
-      return "java.lang.Object".equals(element.getQualifiedName().toString());
-    }
-  };
-
   private final Types types;
 
   private final Elements elements;
@@ -124,8 +108,8 @@ public class TypeTool {
     if (isRaw(y)) {
       return "raw type: " + y;
     }
-    List<? extends TypeMirror> xargs = typeargs(x);
-    List<? extends TypeMirror> yargs = typeargs(y);
+    List<? extends TypeMirror> xargs = x.accept(TYPEARGS, null);
+    List<? extends TypeMirror> yargs = y.accept(TYPEARGS, null);
     for (int i = 0; i < yargs.size(); i++) {
       String failure = unify(xargs.get(i), yargs.get(i), acc);
       if (failure != null) {
@@ -268,12 +252,7 @@ public class TypeTool {
   }
 
   public boolean isOutOfBounds(TypeMirror mirror, List<? extends TypeMirror> bounds) {
-    for (TypeMirror bound : bounds) {
-      if (!types.isAssignable(mirror, bound)) {
-        return true;
-      }
-    }
-    return false;
+    return bounds.stream().anyMatch(bound -> !types.isAssignable(mirror, bound));
   }
 
   public Either<String, TypeMirror> getBound(TypeParameterElement p) {
@@ -295,13 +274,5 @@ public class TypeTool {
       return right(thatType);
     }
     return left(key -> String.format("Cannot infer %s: %s vs %s", key, thisType, thatType));
-  }
-
-  private List<? extends TypeMirror> typeargs(TypeMirror mirror) {
-    return mirror.accept(TYPEARGS, null);
-  }
-
-  public boolean isObject(TypeMirror mirror) {
-    return mirror.accept(IS_JAVA_LANG_OBJECT, this);
   }
 }

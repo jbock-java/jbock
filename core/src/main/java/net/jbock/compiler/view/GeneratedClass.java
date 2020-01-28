@@ -84,7 +84,7 @@ public final class GeneratedClass {
   public static GeneratedClass create(Context context) {
     OptionEnum optionEnum = OptionEnum.create(context);
     ParserState state = ParserState.create(context, optionEnum);
-    ParseResult parseResult = ParseResult.create(context);
+    ParseResult parseResult = new ParseResult(context);
     FieldSpec runBeforeExit = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), context.parseResultType()), "runBeforeExit").addModifiers(PRIVATE)
         .initializer("r -> {}")
         .build();

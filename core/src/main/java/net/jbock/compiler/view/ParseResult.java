@@ -28,15 +28,9 @@ final class ParseResult {
 
   private final FieldSpec result;
 
-  private ParseResult(Context context, FieldSpec result) {
+  ParseResult(Context context) {
     this.context = context;
-    this.result = result;
-  }
-
-  static ParseResult create(Context context) {
-    FieldSpec result = FieldSpec.builder(context.sourceType(),
-        "result", PRIVATE, FINAL).build();
-    return new ParseResult(context, result);
+    this.result = FieldSpec.builder(context.sourceType(), "result", PRIVATE, FINAL).build();
   }
 
   List<TypeSpec> defineResultTypes() {

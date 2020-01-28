@@ -1,24 +1,22 @@
 package net.jbock.compiler.view;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Parameter;
 
 import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
 
 import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.coerce.Util.addBreaks;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.listOf;
+import static net.jbock.compiler.Constants.mapOf;
 
 /**
  * Defines the inner class ParserState
@@ -35,12 +33,8 @@ final class ParserState {
 
   private final MethodSpec tryReadOptionMethod;
 
-  private ParserState(
-      Context context,
-      FieldSpec optionNamesField,
-      FieldSpec optionParsersField,
-      FieldSpec paramParsersField,
-      MethodSpec tryReadOptionMethod) {
+  private ParserState(Context context, FieldSpec optionNamesField, FieldSpec optionParsersField,
+                      FieldSpec paramParsersField, MethodSpec tryReadOptionMethod) {
     this.context = context;
     this.optionNamesField = optionNamesField;
     this.optionParsersField = optionParsersField;
@@ -51,30 +45,22 @@ final class ParserState {
   static ParserState create(Context context, OptionEnum optionEnum) {
 
     // read-only lookups
-    FieldSpec optionNamesField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        STRING, context.optionType()), "optionNames")
+    FieldSpec optionNamesField = FieldSpec.builder(mapOf(STRING, context.optionType()), "optionNames")
         .initializer("$T.$N()", context.optionType(), optionEnum.optionNamesMethod())
         .build();
 
     // stateful parsers
-    FieldSpec optionParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Map.class),
-        context.optionType(), context.optionParserType()), "optionParsers")
+    FieldSpec optionParsersField = FieldSpec.builder(mapOf(context.optionType(), context.optionParserType()), "optionParsers")
         .initializer("$T.$N()", context.optionType(), optionEnum.optionParsersMethod())
         .build();
 
-    FieldSpec paramParsersField = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(List.class),
-        context.repeatableParamParserType()), "paramParsers")
+    FieldSpec paramParsersField = FieldSpec.builder(listOf(context.repeatableParamParserType()), "paramParsers")
         .initializer("$T.$N()", context.optionType(), optionEnum.paramParsersMethod())
         .build();
 
-    MethodSpec readRegularOptionMethod = tryReadOptionMethod(context, optionNamesField);
+    MethodSpec tryReadOptionMethod = tryReadOptionMethod(context, optionNamesField);
 
-    return new ParserState(
-        context,
-        optionNamesField,
-        optionParsersField,
-        paramParsersField,
-        readRegularOptionMethod);
+    return new ParserState(context, optionNamesField, optionParsersField, paramParsersField, tryReadOptionMethod);
   }
 
   TypeSpec define() {
