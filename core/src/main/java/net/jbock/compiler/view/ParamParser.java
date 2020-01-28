@@ -30,7 +30,7 @@ final class ParamParser {
         .addMethod(readMethodRepeatable())
         .addModifiers(PRIVATE, STATIC)
         .build());
-    if (!context.positionalParams().isEmpty()) {
+    if (!context.params().isEmpty()) {
       result.add(TypeSpec.classBuilder(context.regularParamParserType())
           .superclass(context.repeatableParamParserType())
           .addMethod(readMethodRegular())

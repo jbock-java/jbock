@@ -73,7 +73,7 @@ public final class Processor extends AbstractProcessor {
         .noneMatch(name -> name.contentEquals(Command.class.getCanonicalName()))) {
       return false;
     }
-    getAnnotatedTypes(env).forEach(this::processSourceElements);
+    ElementFilter.typesIn(env.getElementsAnnotatedWith(Command.class)).forEach(this::processSourceElements);
     return false;
   }
 
@@ -104,7 +104,7 @@ public final class Processor extends AbstractProcessor {
   private static void checkOnlyOnePositionalList(List<Parameter> allParams) {
     allParams.stream().filter(p -> p.isRepeatable() && p.isPositional())
         .skip(1).findAny().ifPresent(p -> {
-      throw p.validationError("There can only be one one repeatable positional parameter.");
+      throw p.validationError("There can only be one repeatable param.");
     });
   }
 
@@ -116,16 +116,10 @@ public final class Processor extends AbstractProcessor {
         continue;
       }
       if (order.getAsInt() < currentOrdinal) {
-        throw param.validationError("Invalid position: Optional parameters must come " +
-            "after required parameters. Repeatable parameters must come last.");
+        throw param.validationError("Bad position, expecting Optional < Required < Repeatable");
       }
       currentOrdinal = order.getAsInt();
     }
-  }
-
-  private Set<TypeElement> getAnnotatedTypes(RoundEnvironment env) {
-    Set<? extends Element> annotated = env.getElementsAnnotatedWith(Command.class);
-    return ElementFilter.typesIn(annotated);
   }
 
   private void write(
@@ -161,8 +155,7 @@ public final class Processor extends AbstractProcessor {
     for (int i = 0; i < methods.params().size(); i++) {
       params.add(Parameter.createParam(tool, params, methods.params().get(i), i, getDescription(methods.params().get(i)), optionType));
     }
-    boolean anyMnemonics = methods.options().stream().anyMatch(method ->
-        method.getAnnotation(Option.class).mnemonic() != ' ');
+    boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
     for (ExecutableElement option : methods.options()) {
       params.add(Parameter.createOption(anyMnemonics, tool, params, option, getDescription(option), optionType));
     }
@@ -174,8 +167,7 @@ public final class Processor extends AbstractProcessor {
 
   private void validateSourceElement(TypeTool tool, TypeElement sourceElement) {
     SuppliedClassValidator.commonChecks(sourceElement);
-    if (!tool.isSameType(sourceElement.getSuperclass(), Object.class) ||
-        !sourceElement.getInterfaces().isEmpty()) {
+    if (!tool.isSameType(sourceElement.getSuperclass(), Object.class) || !sourceElement.getInterfaces().isEmpty()) {
       throw ValidationException.create(sourceElement, "The model class may not implement or extend anything.");
     }
     if (!sourceElement.getTypeParameters().isEmpty()) {
@@ -185,10 +177,7 @@ public final class Processor extends AbstractProcessor {
 
   private String[] getDescription(ExecutableElement method) {
     String docComment = processingEnv.getElementUtils().getDocComment(method);
-    if (docComment == null) {
-      return new String[0];
-    }
-    return tokenizeJavadoc(docComment);
+    return docComment == null ? new String[0] : tokenizeJavadoc(docComment);
   }
 
   private static String[] tokenizeJavadoc(String docComment) {

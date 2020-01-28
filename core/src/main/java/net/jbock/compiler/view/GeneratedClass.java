@@ -19,7 +19,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
-import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
@@ -30,8 +29,6 @@ import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
-import static java.util.stream.Collectors.partitioningBy;
-import static java.util.stream.Collectors.toList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -366,53 +363,42 @@ public final class GeneratedClass {
   }
 
   private MethodSpec synopsisMethod(Modifier[] accessModifiers) {
-    CodeBlock.Builder code = CodeBlock.builder();
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("synopsis");
+
     ParameterSpec joiner = builder(StringJoiner.class, "joiner").build();
 
-    code.add("return new $T($S)", StringJoiner.class, " ");
+    spec.addCode("return new $T($S)", StringJoiner.class, " ");
 
-    Map<Boolean, List<Parameter>> partitionedOptions = context.parameters().stream()
-        .filter(parameter -> !parameter.isPositional())
-        .collect(partitioningBy(Parameter::isRequired));
+    List<Parameter> requiredOptions = context.options().stream().filter(Parameter::isRequired).collect(Collectors.toList());
+    List<Parameter> optionalOptions = context.options().stream().filter(p -> !p.isRequired()).collect(Collectors.toList());
 
-    List<Parameter> requiredNonpos = partitionedOptions.get(true);
-    List<Parameter> optionalNonpos = partitionedOptions.get(false);
+    spec.addCode(".add($S)", context.programName());
 
-    List<Parameter> positional = context.parameters().stream()
-        .filter(Parameter::isPositional)
-        .collect(toList());
-
-    code.add(".add($S)", context.programName());
-
-    if (!optionalNonpos.isEmpty()) {
-      code.add(".add($S)", "[options...]");
+    if (!optionalOptions.isEmpty()) {
+      spec.addCode(".add($S)", "[options...]");
     }
 
-    for (Parameter param : requiredNonpos) {
-      code.add(addBreaks(".add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))"),
+    for (Parameter option : requiredOptions) {
+      spec.addCode(addBreaks(".add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))"),
           String.class, "%s <%s>",
-          context.optionType(), param.enumConstant(),
-          context.optionType(), param.enumConstant(), Locale.class);
+          context.optionType(), option.enumConstant(),
+          context.optionType(), option.enumConstant(), Locale.class);
     }
 
-    for (Parameter param : positional) {
+    for (Parameter param : context.params()) {
       if (param.isOptional()) {
-        code.add("$Z.add($S)", "[<" + param.paramName().snake() + ">]");
+        spec.addCode("$Z.add($S)", "[<" + param.paramName().snake() + ">]");
       } else if (param.isRequired()) {
-        code.add("$Z.add($S)", "<" + param.paramName().snake() + ">");
+        spec.addCode("$Z.add($S)", "<" + param.paramName().snake() + ">");
       } else if (param.isRepeatable()) {
-        code.add("$Z.add($S)", "<" + param.paramName().snake() + ">...");
+        spec.addCode("$Z.add($S)", "<" + param.paramName().snake() + ">...");
       } else {
-        throw new AssertionError("all cases handled (positional can't be flag)");
+        throw new AssertionError("all cases handled (param can't be flag)");
       }
     }
 
-    code.add("$Z.toString();\n", joiner);
-    MethodSpec.Builder result = MethodSpec.methodBuilder("synopsis")
-        .addCode(code.build())
-        .returns(STRING);
-
-    return result.addModifiers(accessModifiers).build();
+    spec.addCode("$Z.toString();\n", joiner);
+    return spec.returns(STRING).addModifiers(accessModifiers).build();
   }
 
   private MethodSpec parseOrExitMethod(Modifier[] accessModifiers) {
@@ -472,7 +458,7 @@ public final class GeneratedClass {
 
     code.addStatement("$T $N = $N.next()", STRING, token, it);
 
-    if (!context.positionalParams().isEmpty()) {
+    if (!context.params().isEmpty()) {
       code.beginControlFlow("if ($S.equals($N))", "--", token)
           .add(handleEndOfOptionParsing(state, it, position, token))
           .addStatement("return $N.build()", state)
@@ -496,7 +482,7 @@ public final class GeneratedClass {
         .addStatement(throwInvalidOptionStatement(token, "Excess param"))
         .unindent();
 
-    if (!context.positionalParams().isEmpty()) {
+    if (!context.params().isEmpty()) {
       code.addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token);
     }
 

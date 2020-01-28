@@ -117,7 +117,7 @@ public final class Context {
     return parameters;
   }
 
-  public List<Parameter> positionalParams() {
+  public List<Parameter> params() {
     return params;
   }
 

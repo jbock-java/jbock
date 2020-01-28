@@ -229,7 +229,7 @@ final class OptionEnum {
   }
 
   private static CodeBlock paramParsersMethodCode(Context context) {
-    List<Parameter> params = context.positionalParams();
+    List<Parameter> params = context.params();
     if (params.isEmpty()) {
       return CodeBlock.of("return $T.emptyList()", Collections.class);
     }
