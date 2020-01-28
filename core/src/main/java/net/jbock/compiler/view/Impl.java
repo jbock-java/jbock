@@ -21,7 +21,7 @@ final class Impl {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.implType())
         .superclass(context.sourceType());
     for (Parameter param : context.parameters()) {
-      spec.addField(param.field());
+      spec.addField(param.coercion().field());
     }
     return spec.addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor(context))
@@ -35,14 +35,14 @@ final class Impl {
     return MethodSpec.methodBuilder(param.methodName())
         .returns(param.returnType())
         .addModifiers(param.getAccessModifiers())
-        .addStatement("return $N", param.field())
+        .addStatement("return $N", param.coercion().field())
         .build();
   }
 
   private static MethodSpec implConstructor(Context context) {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
     for (Parameter p : context.parameters()) {
-      spec.addStatement("this.$N = $L", p.field(), p.coercion().extractExpr());
+      spec.addStatement("this.$N = $L", p.coercion().field(), p.coercion().extractExpr());
       spec.addParameter(p.coercion().constructorParam());
     }
     return spec.build();

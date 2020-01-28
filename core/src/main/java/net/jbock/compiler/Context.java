@@ -8,6 +8,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import static net.jbock.compiler.Constants.NONPRIVATE_ACCESS_MODIFIERS;
 
@@ -22,7 +23,7 @@ public final class Context {
   // the abstract methods in the annotated class
   private final List<Parameter> parameters;
 
-  private final List<Parameter> positionalParams;
+  private final List<Parameter> params;
 
   private final List<Parameter> options;
 
@@ -34,49 +35,20 @@ public final class Context {
 
   private final ClassName optionType;
 
-  private Context(
-      TypeElement sourceElement,
-      ClassName generatedClass,
-      List<Parameter> parameters,
-      List<Parameter> positionalParams,
-      List<Parameter> options,
-      boolean helpParameterEnabled,
-      String programName,
-      ClassName optionType) {
+  Context(TypeElement sourceElement, ClassName generatedClass, ClassName optionType, List<Parameter> parameters) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.parameters = parameters;
-    this.positionalParams = positionalParams;
-    this.options = options;
-    this.helpParameterEnabled = helpParameterEnabled;
-    this.programName = programName;
+    this.params = parameters.stream().filter(Parameter::isPositional).collect(Collectors.toList());
+    this.options = parameters.stream().filter(parameter -> !parameter.isPositional()).collect(Collectors.toList());
+    this.helpParameterEnabled = !sourceElement.getAnnotation(Command.class).helpDisabled();
+    this.programName = programName(sourceElement);
     this.optionType = optionType;
   }
 
-  static Context create(
-      TypeElement sourceElement,
-      ClassName generatedClass,
-      ClassName optionType,
-      List<Parameter> parameters,
-      List<Parameter> positionalParams,
-      List<Parameter> options) {
-    Command annotation = sourceElement.getAnnotation(Command.class);
-    boolean helpParameterEnabled = !annotation.helpDisabled();
-
-    return new Context(
-        sourceElement,
-        generatedClass,
-        parameters,
-        positionalParams,
-        options, helpParameterEnabled,
-        programName(sourceElement),
-        optionType);
-  }
-
   private static String programName(TypeElement sourceType) {
-    Command annotation = sourceType.getAnnotation(Command.class);
-    if (!annotation.value().isEmpty()) {
-      return annotation.value();
+    if (!sourceType.getAnnotation(Command.class).value().isEmpty()) {
+      return sourceType.getAnnotation(Command.class).value();
     }
     String simpleName = sourceType.getSimpleName().toString();
     return ParamName.create(simpleName).snake('-');
@@ -149,7 +121,7 @@ public final class Context {
   }
 
   public List<Parameter> positionalParams() {
-    return positionalParams;
+    return params;
   }
 
   public List<Parameter> options() {

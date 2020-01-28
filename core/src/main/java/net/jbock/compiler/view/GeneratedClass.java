@@ -95,21 +95,22 @@ public final class GeneratedClass {
   }
 
   public TypeSpec define() {
+    Modifier[] accessModifiers = context.getAccessModifiers();
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass())
-        .addMethod(parseMethod(context.getAccessModifiers()))
-        .addMethod(maxLineWidthMethod(context.getAccessModifiers()))
-        .addMethod(withMessagesMethod(context.getAccessModifiers()))
-        .addMethod(withResourceBundleMethod(context.getAccessModifiers()))
-        .addMethod(runBeforeExitMethod(context.getAccessModifiers()))
-        .addMethod(withErrorStreamMethod(context.getAccessModifiers()));
+        .addMethod(parseMethod(accessModifiers))
+        .addMethod(maxLineWidthMethod(accessModifiers))
+        .addMethod(withMessagesMethod(accessModifiers))
+        .addMethod(withResourceBundleMethod(accessModifiers))
+        .addMethod(runBeforeExitMethod(accessModifiers))
+        .addMethod(withErrorStreamMethod(accessModifiers));
     if (context.isHelpParameterEnabled()) {
-      spec.addMethod(withHelpStreamMethod(context.getAccessModifiers()));
+      spec.addMethod(withHelpStreamMethod(accessModifiers));
     }
-    spec.addMethod(parseOrExitMethod(context.getAccessModifiers()))
-        .addMethod(buildRowsMethod(context.getAccessModifiers()))
-        .addMethod(printOnlineHelpMethod(context.getAccessModifiers()))
-        .addMethod(printWrapMethod(context.getAccessModifiers()))
-        .addMethod(synopsisMethod(context.getAccessModifiers()));
+    spec.addMethod(parseOrExitMethod(accessModifiers))
+        .addMethod(buildRowsMethod(accessModifiers))
+        .addMethod(printOnlineHelpMethod(accessModifiers))
+        .addMethod(printWrapMethod(accessModifiers))
+        .addMethod(synopsisMethod(accessModifiers));
 
     // PRIVATE Methods
     spec.addMethod(parseMethodOverloadIterator())
@@ -128,7 +129,7 @@ public final class GeneratedClass {
         .addTypes(parseResult.defineResultTypes());
 
     return spec.addModifiers(FINAL)
-        .addModifiers(context.getAccessModifiers())
+        .addModifiers(accessModifiers)
         .addJavadoc(javadoc()).build();
   }
 

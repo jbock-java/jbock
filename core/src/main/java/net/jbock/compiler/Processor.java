@@ -91,13 +91,7 @@ public final class Processor extends AbstractProcessor {
       checkOnlyOnePositionalList(parameters);
       checkRankConsistentWithPosition(parameters);
 
-      Context context = Context.create(
-          sourceElement,
-          generatedClass,
-          optionType,
-          parameters,
-          positionalParameters(parameters),
-          options(parameters));
+      Context context = new Context(sourceElement, generatedClass, optionType, parameters);
       TypeSpec typeSpec = GeneratedClass.create(context).define();
       write(sourceElement, context.generatedClass(), typeSpec);
     } catch (ValidationException e) {
@@ -108,9 +102,7 @@ public final class Processor extends AbstractProcessor {
   }
 
   private static void checkOnlyOnePositionalList(List<Parameter> allParams) {
-    allParams.stream()
-        .filter(Parameter::isRepeatable)
-        .filter(Parameter::isPositional)
+    allParams.stream().filter(p -> p.isRepeatable() && p.isPositional())
         .skip(1).findAny().ifPresent(p -> {
       throw p.validationError("There can only be one one repeatable positional parameter.");
     });
@@ -129,14 +121,6 @@ public final class Processor extends AbstractProcessor {
       }
       currentOrdinal = order.getAsInt();
     }
-  }
-
-  private static List<Parameter> positionalParameters(List<Parameter> parameters) {
-    return parameters.stream().filter(Parameter::isPositional).collect(Collectors.toList());
-  }
-
-  private static List<Parameter> options(List<Parameter> parameters) {
-    return parameters.stream().filter(parameter -> !parameter.isPositional()).collect(Collectors.toList());
   }
 
   private Set<TypeElement> getAnnotatedTypes(RoundEnvironment env) {
