@@ -1,19 +1,17 @@
 package net.jbock.coerce;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.ParamName;
 
+import javax.lang.model.element.ExecutableElement;
 import java.util.function.Function;
 
 public class FlagCoercion extends Coercion {
 
-  public FlagCoercion(
-      ParamName paramName,
-      ParameterSpec constructorParam,
-      FieldSpec field) {
-    super(constructorParam, field, paramName);
+  public FlagCoercion(ParamName paramName, ExecutableElement sourceMethod) {
+    super(ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake()).build(), paramName);
   }
 
   public Skew getSkew() {

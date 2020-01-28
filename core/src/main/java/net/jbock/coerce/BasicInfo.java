@@ -2,7 +2,6 @@ package net.jbock.coerce;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.ParamName;
@@ -89,10 +88,6 @@ public class BasicInfo {
 
   public TypeMirror returnType() {
     return sourceMethod.getReturnType();
-  }
-
-  FieldSpec fieldSpec() {
-    return FieldSpec.builder(TypeName.get(returnType()), paramName.camel()).build();
   }
 
   public ValidationException failure(String message) {

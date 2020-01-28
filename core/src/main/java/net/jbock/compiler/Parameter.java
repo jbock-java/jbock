@@ -1,8 +1,6 @@
 package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.FieldSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.coerce.Coercion;
@@ -80,13 +78,13 @@ public final class Parameter {
 
   private Parameter(char mnemonic, String optionName, ExecutableElement sourceMethod, String bundleKey, String sample,
                     List<String> names, Coercion coercion, List<String> description, Integer positionalIndex) {
+    this.mnemonic = mnemonic;
+    this.optionName = optionName;
+    this.sourceMethod = sourceMethod;
     this.bundleKey = bundleKey;
     this.sample = sample;
     this.names = names;
     this.coercion = coercion;
-    this.mnemonic = mnemonic;
-    this.optionName = optionName;
-    this.sourceMethod = sourceMethod;
     this.description = description;
     this.positionalIndex = positionalIndex;
   }
@@ -119,18 +117,12 @@ public final class Parameter {
     ParamName name = findParamName(alreadyCreated, sourceMethod);
     boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
     Coercion coercion = flag ?
-        flagCoercion(sourceMethod, name) :
+        new FlagCoercion(name, sourceMethod) :
         CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
     checkBundleKey(option.value(), alreadyCreated, sourceMethod);
-    List<String> names1 = names(optionName, mnemonic);
-    return new Parameter(mnemonic, optionName, sourceMethod, option.value(), sample(flag, name, names1, anyMnemonics),
-        names1, coercion, Arrays.asList(description), null);
-  }
-
-  private static Coercion flagCoercion(ExecutableElement sourceMethod, ParamName paramName) {
-    ParameterSpec constructorParam = ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake()).build();
-    FieldSpec field = FieldSpec.builder(TypeName.get(sourceMethod.getReturnType()), paramName.snake()).build();
-    return new FlagCoercion(paramName, constructorParam, field);
+    List<String> names = names(optionName, mnemonic);
+    return new Parameter(mnemonic, optionName, sourceMethod, option.value(), sample(flag, name, names, anyMnemonics),
+        names, coercion, Arrays.asList(description), null);
   }
 
   private static boolean isInferredFlag(Optional<TypeElement> mapperClass, Optional<TypeElement> collectorClass, TypeMirror mirror, TypeTool tool) {
