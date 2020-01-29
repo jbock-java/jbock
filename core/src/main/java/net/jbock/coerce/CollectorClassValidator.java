@@ -21,13 +21,13 @@ class CollectorClassValidator {
   private final Function<String, ValidationException> errorHandler;
   private final TypeTool tool;
   private final TypeElement collectorClass;
-  private final TypeMirror originalReturnType;
+  private final TypeMirror returnType;
 
-  CollectorClassValidator(Function<String, ValidationException> errorHandler, TypeTool tool, TypeElement collectorClass, TypeMirror originalReturnType) {
+  CollectorClassValidator(Function<String, ValidationException> errorHandler, TypeTool tool, TypeElement collectorClass, TypeMirror returnType) {
     this.errorHandler = errorHandler;
     this.tool = tool;
     this.collectorClass = collectorClass;
-    this.originalReturnType = originalReturnType;
+    this.returnType = returnType;
   }
 
   CollectorInfo getCollectorInfo() {
@@ -37,7 +37,7 @@ class CollectorClassValidator {
         .getReferencedType();
     TypeMirror inputType = collectorType.typeArguments().get(0);
     TypeMirror outputType = collectorType.typeArguments().get(2);
-    TypevarMapping rightSolution = tool.unify(originalReturnType, outputType)
+    TypevarMapping rightSolution = tool.unify(returnType, outputType)
         .orElseThrow(this::boom);
     TypevarMapping leftSolution = new TypevarMapping(Collections.emptyMap(), tool);
     FlattenerResult result = new Flattener(tool, collectorClass)

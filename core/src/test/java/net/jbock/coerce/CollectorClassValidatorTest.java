@@ -31,9 +31,9 @@ class CollectorClassValidatorTest {
     ).run("ToSetCollector", (elements, types) -> {
 
       TypeTool tool = new TypeTool(elements, types);
-      DeclaredType originalReturnType = tool.getDeclaredType(Set.class, Collections.singletonList(tool.asType(String.class)));
+      DeclaredType returnType = tool.getDeclaredType(Set.class, Collections.singletonList(tool.asType(String.class)));
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
-      CollectorInfo collectorInfo = new CollectorClassValidator(s -> null, tool, collectorClass, originalReturnType)
+      CollectorInfo collectorInfo = new CollectorClassValidator(s -> null, tool, collectorClass, returnType)
           .getCollectorInfo();
       CodeBlock expected = CodeBlock.of(".collect(new $T<$T>().get())", types.erasure(collectorClass.asType()), String.class);
       assertEquals(expected, collectorInfo.collectExpr());
