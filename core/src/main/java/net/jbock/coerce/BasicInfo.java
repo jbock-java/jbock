@@ -30,40 +30,14 @@ public class BasicInfo {
   // nullable
   private final TypeElement mapperClass;
 
-  private BasicInfo(
-      ParamName paramName,
-      ExecutableElement sourceMethod,
-      TypeTool tool,
-      ClassName optionType,
-      TypeElement mapperClass) {
+  BasicInfo(Optional<TypeElement> mapperClass, ParamName paramName, ClassName optionType,
+            ExecutableElement sourceMethod,
+            TypeTool tool) {
+    this.mapperClass = mapperClass.orElse(null);
     this.paramName = paramName;
+    this.optionType = optionType;
     this.sourceMethod = sourceMethod;
     this.tool = tool;
-    this.optionType = optionType;
-    this.mapperClass = mapperClass;
-  }
-
-  static BasicInfo create(
-      Optional<TypeElement> mapperClass,
-      ParamName paramName,
-      ClassName optionType,
-      ExecutableElement sourceMethod,
-      TypeTool tool) {
-    return new BasicInfo(paramName, sourceMethod, tool, optionType, mapperClass.orElse(null));
-  }
-
-  private boolean isEnumType(TypeMirror mirror) {
-    List<? extends TypeMirror> supertypes = tool().getDirectSupertypes(mirror);
-    if (supertypes.isEmpty()) {
-      // not an enum
-      return false;
-    }
-    TypeMirror superclass = supertypes.get(0);
-    if (!tool().isSameErasure(superclass, Enum.class)) {
-      // not an enum
-      return false;
-    }
-    return !tool().isPrivateType(mirror);
   }
 
   public Optional<CodeBlock> findAutoMapper(TypeMirror testType) {
@@ -71,7 +45,7 @@ public class BasicInfo {
     if (mapExpr.isPresent()) {
       return mapExpr;
     }
-    if (isEnumType(testType)) {
+    if (tool.isEnumType(testType)) {
       return Optional.of(CodeBlock.of("$T::valueOf", testType));
     }
     return Optional.empty();

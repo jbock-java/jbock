@@ -11,7 +11,6 @@ import net.jbock.coerce.Skew;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Collections;
@@ -130,8 +129,7 @@ public final class Parameter {
       // no inferring
       return false;
     }
-    return tool.isSameType(mirror, tool.getPrimitiveType(TypeKind.BOOLEAN)) ||
-        tool.isSameType(mirror, Boolean.class);
+    return tool.isSameType(mirror, tool.getPrimitiveBoolean()) || tool.isSameType(mirror, Boolean.class);
   }
 
   private static Character mnemonic(List<Parameter> parameters, ExecutableElement sourceMethod) {
@@ -279,9 +277,8 @@ public final class Parameter {
     }
     String argname = flag ? "" : ' ' + name.enumConstant();
     if (names.size() == 1) {
-      // The padding has the same length as the string "-f, "
-      String padding = anyMnemonics ? "    " : "";
-      return padding + names.get(0) + argname;
+      // Note: The padding has the same length as the string "-f, "
+      return (anyMnemonics ? "    " : "") + names.get(0) + argname;
     }
     return names.get(0) + ", " + names.get(1) + argname;
   }

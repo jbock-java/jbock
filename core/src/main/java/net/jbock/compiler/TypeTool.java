@@ -130,8 +130,7 @@ public class TypeTool {
       return false;
     }
     DeclaredType declaredType = asDeclared(m);
-    TypeElement element = asTypeElement(m);
-    return declaredType.getTypeArguments().isEmpty() && !element.getTypeParameters().isEmpty();
+    return declaredType.getTypeArguments().isEmpty() && !asTypeElement(m).getTypeParameters().isEmpty();
   }
 
   public DeclaredType getDeclaredType(Class<?> clazz, List<? extends TypeMirror> typeArguments) {
@@ -147,9 +146,6 @@ public class TypeTool {
   }
 
   public Optional<TypeMirror> unwrap(Class<?> wrapper, TypeMirror mirror) {
-    if (mirror.getKind() != TypeKind.DECLARED) {
-      return Optional.empty();
-    }
     if (!isSameErasure(mirror, wrapper)) {
       return Optional.empty();
     }
@@ -164,14 +160,11 @@ public class TypeTool {
     return types.isSameType(mirror, test);
   }
 
-  PrimitiveType getPrimitiveType(TypeKind kind) {
-    return types.getPrimitiveType(kind);
+  PrimitiveType getPrimitiveBoolean() {
+    return types.getPrimitiveType(TypeKind.BOOLEAN);
   }
 
   public boolean isSameErasure(TypeMirror x, TypeMirror y) {
-    if (x.getKind().isPrimitive()) {
-      return isSameType(x, y);
-    }
     return types.isSameType(types.erasure(x), types.erasure(y));
   }
 
@@ -203,24 +196,20 @@ public class TypeTool {
     return types.getDeclaredType(asTypeElement(Optional.class), typeMirror);
   }
 
-  public List<? extends TypeMirror> getDirectSupertypes(TypeMirror mirror) {
-    return types.directSupertypes(mirror);
+  public boolean isEnumType(TypeMirror mirror) {
+    return !isPrivateType(mirror) && types.directSupertypes(mirror).stream()
+        .anyMatch(t -> isSameErasure(types.directSupertypes(mirror).get(0), Enum.class));
   }
+
 
   public boolean isPrivateType(TypeMirror mirror) {
     Element element = types.asElement(mirror);
-    if (element == null) {
-      return false;
-    }
-    return element.getModifiers().contains(Modifier.PRIVATE);
+    return element != null && element.getModifiers().contains(Modifier.PRIVATE);
   }
 
   public TypeMirror box(TypeMirror mirror) {
     PrimitiveType primitive = mirror.accept(AS_PRIMITIVE, null);
-    if (primitive == null) {
-      return mirror;
-    }
-    return types.boxedClass(primitive).asType();
+    return primitive == null ? mirror : types.boxedClass(primitive).asType();
   }
 
   private TypeElement asTypeElement(Class<?> clazz) {
