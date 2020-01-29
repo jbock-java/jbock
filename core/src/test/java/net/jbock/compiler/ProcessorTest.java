@@ -312,7 +312,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class must have the @Command annotation");
+        .withErrorContaining("missing @Command annotation");
   }
 
   @Test
@@ -325,7 +325,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The method may not have parameters.");
+        .withErrorContaining("The method may not have any parameters.");
   }
 
   @Test
@@ -338,7 +338,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The method may not have type parameters.");
+        .withErrorContaining("The method may not have any type parameters.");
   }
 
   @Test

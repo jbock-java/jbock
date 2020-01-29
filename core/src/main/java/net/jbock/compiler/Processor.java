@@ -206,10 +206,10 @@ public final class Processor extends AbstractProcessor {
       return false;
     }
     if (!method.getParameters().isEmpty()) {
-      throw ValidationException.create(method, "The method may not have parameters.");
+      throw ValidationException.create(method, "The method may not have any parameters.");
     }
     if (!method.getTypeParameters().isEmpty()) {
-      throw ValidationException.create(method, "The method may not have type parameters.");
+      throw ValidationException.create(method, "The method may not have any type parameters.");
     }
     if (!method.getThrownTypes().isEmpty()) {
       throw ValidationException.create(method, "The method may not declare any exceptions.");
@@ -250,7 +250,7 @@ public final class Processor extends AbstractProcessor {
   private void checkEnclosingElementIsAnnotated(ExecutableElement method) {
     Element p = method.getEnclosingElement();
     if (p.getAnnotation(Command.class) == null) {
-      throw ValidationException.create(p, "The class must have the @" + Command.class.getSimpleName() + " annotation.");
+      throw ValidationException.create(p, "missing @" + Command.class.getSimpleName() + " annotation");
     }
   }
 }
