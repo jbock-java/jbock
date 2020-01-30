@@ -30,7 +30,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a declared Collector");
+        .withErrorContaining("expected java.util.stream.Collector but found test.Arguments.SetCollector<E>");
   }
 
   @Test
@@ -773,6 +773,6 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a declared Collector");
+        .withErrorContaining("expected java.util.stream.Collector but found java.lang.String");
   }
 }
