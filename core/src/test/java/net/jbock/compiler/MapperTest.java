@@ -21,9 +21,7 @@ class MapperTest {
         "  abstract Optional<int[]> foo();",
         "",
         "  static class ArrayMapper implements Supplier<Function<String, int[]>> {",
-        "    public Function<String, int[]> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<String, int[]> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -41,9 +39,7 @@ class MapperTest {
         "  abstract Optional<int[]> foo();",
         "",
         "  static class ArrayMapper implements Function<String, int[]> {",
-        "    public int[] apply(String s) {",
-        "      return null;",
-        "    }",
+        "    public int[] apply(String s) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -61,9 +57,7 @@ class MapperTest {
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E> implements Function<E, E> {",
-        "    public E apply(E e) {",
-        "      return e;",
-        "    }",
+        "    public E apply(E e) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -81,9 +75,7 @@ class MapperTest {
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E, F> implements Function<E, F> {",
-        "    public F apply(E e) {",
-        "      return null;",
-        "    }",
+        "    public F apply(E e) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -101,9 +93,7 @@ class MapperTest {
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E extends Integer> implements Function<E, E> {",
-        "    public E apply(E e) {",
-        "      return e;",
-        "    }",
+        "    public E apply(E e) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -122,9 +112,7 @@ class MapperTest {
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E extends java.lang.CharSequence> implements Function<E, E> {",
-        "    public E apply(E e) {",
-        "      return e;",
-        "    }",
+        "    public E apply(E e) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -142,9 +130,7 @@ class MapperTest {
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E extends java.lang.CharSequence> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<E, E> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -162,9 +148,7 @@ class MapperTest {
         "  abstract String string();",
         "",
         "  static class IdentityMapper<E extends Integer> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<E, E> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -184,9 +168,7 @@ class MapperTest {
         "  abstract Boolean flag();",
         "",
         "  static class FlagMapper implements Supplier<Function<String, Boolean>> {",
-        "    public Function<String, Boolean> get() {",
-        "      return s -> !s.isEmpty();",
-        "    }",
+        "    public Function<String, Boolean> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -204,10 +186,7 @@ class MapperTest {
         "  abstract List<Boolean> booleanList();",
         "",
         "  static class BooleanMapper implements Supplier<Function<String, Boolean>> {",
-        "    @Override",
-        "    public Function<String, Boolean> get() {",
-        "      return Boolean::valueOf;",
-        "    }",
+        "    public Function<String, Boolean> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -225,10 +204,7 @@ class MapperTest {
         "  abstract String a();",
         "",
         "  static class BoundMapper<E extends Integer> implements Supplier<Function<E, E>> {",
-        "    @Override",
-        "    public Function<E, E> get() {",
-        "      return Function.identity();",
-        "    }",
+        "    public Function<E, E> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -247,9 +223,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Katz<Long> {",
-        "    public Function<String, Long> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<String, Long> get() { return null; }",
         "  }",
         "",
         "  interface Katz<ZK> extends Supplier<Function<String, ZK>> { }",
@@ -270,9 +244,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements A<Number> {",
-        "    public Function<String, Number> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<String, Number> get() { return null; }",
         "  }",
         "",
         "  interface A<Z> extends B<String, Z> { }",
@@ -295,9 +267,7 @@ class MapperTest {
         "  abstract Number number();",
         "",
         "  static class Mapper implements A<Integer> {",
-        "    public Function<String, Integer> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<String, Integer> get() { return null; }",
         "  }",
         "",
         "  interface A<Z> extends B<String, Z> { }",
@@ -319,10 +289,7 @@ class MapperTest {
         "  abstract String a();",
         "",
         "  static class BoundMapper implements Katz<String> {",
-        "    @Override",
-        "    public Function<String, String> get() {",
-        "      return Function.identity();",
-        "    }",
+        "    public Function<String, String> get() { return null; }",
         "  }",
         "",
         "  interface Katz<OR> extends Supplier<Function<OR, OR>> { }",
@@ -345,9 +312,7 @@ class MapperTest {
         "",
         "    private Mapper() {}",
         "",
-        "    public Function<String, Integer> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public Function<String, Integer> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -369,9 +334,7 @@ class MapperTest {
         "",
         "    Mapper(int i) {}",
         "",
-        "    public Function<String, Integer> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public Function<String, Integer> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -393,9 +356,7 @@ class MapperTest {
         "",
         "    Mapper() throws IllegalStateException {}",
         "",
-        "    public Function<String, Integer> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public Function<String, Integer> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -414,9 +375,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  class Mapper implements Supplier<Function<String, Integer>> {",
-        "    public Function<String, Integer> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public Function<String, Integer> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -435,9 +394,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<Function<Integer, Integer>> {",
-        "    public Function<Integer, Integer> get() {",
-        "      return s -> s;",
-        "    }",
+        "    public Function<Integer, Integer> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -456,9 +413,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<Function<String, String>> {",
-        "    public Function<String, String> get() {",
-        "      return Function.identity();",
-        "    }",
+        "    public Function<String, String> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -477,9 +432,7 @@ class MapperTest {
         "  abstract Supplier<String> string();",
         "",
         "  static class Mapper implements Supplier<Function<String, Supplier<String>>> {",
-        "    public Function<String, Supplier<String>> get() {",
-        "      return s -> () -> s;",
-        "    }",
+        "    public Function<String, Supplier<String>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -497,9 +450,7 @@ class MapperTest {
         "  abstract Supplier<Optional<String>> string();",
         "",
         "  static class Mapper implements Supplier<Function<String, Supplier<Optional<String>>>> {",
-        "    public Function<String, Supplier<Optional<String>>> get() {",
-        "      return s -> () -> Optional.of(s);",
-        "    }",
+        "    public Function<String, Supplier<Optional<String>>> get() { return null; }",
         "  }",
         "}");
 
@@ -518,9 +469,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper<E> implements Supplier<StringFunction<E, Integer>> {",
-        "    public StringFunction<E, Integer> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public StringFunction<E, Integer> get() { return null; }",
         "  }",
         "",
         "  interface StringFunction<V, X> extends Function<V, X> {}",
@@ -542,9 +491,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<StringFunction<Integer>> {",
-        "    public StringFunction<Integer> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public StringFunction<Integer> get() { return null; }",
         "  }",
         "",
         "  interface StringFunction<R> extends Function<Long, R> {}",
@@ -566,17 +513,13 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper extends ZapperSupplier {",
-        "    public Zapper get() {",
-        "      return null;",
-        "    }",
+        "    public Zapper get() { return null; }",
         "  }",
         "",
         "  static abstract class ZapperSupplier implements Supplier<Function<String, Integer>> { }",
         "",
         "  static class Zapper implements Foo<String>  {",
-        "    public Integer apply(String s) {",
-        "      return 1;",
-        "    }",
+        "    public Integer apply(String s) { return null; }",
         "  }",
         "",
         "  interface Foo<X> extends Zap<X, String, Integer> { }",
@@ -683,17 +626,13 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements ZapperSupplier {",
-        "    public Zapper get() {",
-        "      return new Zapper();",
-        "    }",
+        "    public Zapper get() { return null; }",
         "  }",
         "",
         "  interface ZapperSupplier extends Supplier<Zapper> { }",
         "",
         "  static class Zapper implements Foo<String> {",
-        "    public String apply(Integer s) {",
-        "      return null;",
-        "    }",
+        "    public String apply(Integer s) { return null; }",
         "  }",
         "",
         "  interface Xi<A, T, B> extends Function<A, B> { }",
@@ -716,9 +655,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements ZapperSupplier {",
-        "    public String get() {",
-        "      return Integer.toString(1);",
-        "    }",
+        "    public String get() { return null; }",
         "  }",
         "",
         "  interface ZapperSupplier extends Supplier<String> { }",
@@ -739,9 +676,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements ZapperSupplier {",
-        "    public Function<String, Long> get() {",
-        "      return s -> 1L;",
-        "    }",
+        "    public Function<String, Long> get() { return null; }",
         "  }",
         "",
         "  interface ZapperSupplier extends Supplier<Function<String, Long>> { }",
@@ -762,9 +697,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements ZapperSupplier<java.util.Date> {",
-        "    public Function<String, java.util.Date> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<String, java.util.Date> get() { return null; }",
         "  }",
         "",
         "  interface ZapperSupplier<E extends java.util.Date> extends Supplier<Function<String, E>> { }",
@@ -785,9 +718,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements A<Integer, String> {",
-        "    public Function<String, Integer> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<String, Integer> get() { return null; }",
         "  }",
         "",
         "  interface A<R, X> extends B<X, R> { }",
@@ -809,9 +740,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier<Function> {",
-        "    public Function get() {",
-        "      return s -> s;",
-        "    }",
+        "    public Function get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -830,9 +759,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Supplier {",
-        "    public Object get() {",
-        "      return null;",
-        "    }",
+        "    public Object get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -851,9 +778,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper implements Function {",
-        "    public Object apply(Object o) {",
-        "      return null;",
-        "    }",
+        "    public Object apply(Object o) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -872,9 +797,7 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  static class Mapper<E> implements Supplier<E> {",
-        "    public E get() {",
-        "      return null;",
-        "    }",
+        "    public E get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -911,9 +834,7 @@ class MapperTest {
         "  abstract Byte number();",
         "",
         "  static class Mapper implements Supplier<Function<String, Byte>> {",
-        "    public Function<String, Byte> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public Function<String, Byte> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -931,9 +852,7 @@ class MapperTest {
         "  abstract byte number();",
         "",
         "  static class Mapper implements Supplier<Function<String, Byte>> {",
-        "    public Function<String, Byte> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public Function<String, Byte> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -951,9 +870,7 @@ class MapperTest {
         "  abstract Optional<Integer> number();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
-        "    public Function<String, Integer> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public Function<String, Integer> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -971,9 +888,7 @@ class MapperTest {
         "  abstract Optional<String> number();",
         "",
         "  static class Mapper<E> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<E, E> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -991,9 +906,7 @@ class MapperTest {
         "  abstract Optional<String> number();",
         "",
         "  static class Mapper<E> implements Supplier<Function<E, Optional<E>>> {",
-        "    public Function<E, Optional<E>> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<E, Optional<E>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -1011,9 +924,7 @@ class MapperTest {
         "  abstract List<String> number();",
         "",
         "  static class Mapper<E> implements Supplier<Function<E, List<E>>> {",
-        "    public Function<E, List<E>> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<E, List<E>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -1031,9 +942,7 @@ class MapperTest {
         "  abstract java.util.OptionalInt b();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
-        "    public Function<String, Integer> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public Function<String, Integer> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -1069,9 +978,7 @@ class MapperTest {
         "  abstract Optional<Integer> b();",
         "",
         "  static class Mapper implements Supplier<Function<String, Optional<Integer>>> {",
-        "    public Function<String, Optional<Integer>> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<String, Optional<Integer>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -1089,9 +996,7 @@ class MapperTest {
         "  abstract java.util.OptionalInt b();",
         "",
         "  static class Mapper implements Supplier<Function<String, Integer>> {",
-        "    public Function<String, Integer> get() {",
-        "      return s -> 1;",
-        "    }",
+        "    public Function<String, Integer> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -1128,9 +1033,7 @@ class MapperTest {
         "  abstract List<Integer> ints();",
         "",
         "  static class Identity<E> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<E, E> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -1151,9 +1054,7 @@ class MapperTest {
         "  abstract Set<Integer> integers();",
         "",
         "  static class MyMapper<F extends String> implements Supplier<Function<String, F>> {",
-        "    public Function<String, F> get() {",
-        "      return null;",
-        "    }",
+        "    public Function<String, F> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
