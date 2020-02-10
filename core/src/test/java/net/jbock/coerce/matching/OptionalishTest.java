@@ -1,4 +1,4 @@
-package net.jbock.coerce.collectorabsent;
+package net.jbock.coerce.matching;
 
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;

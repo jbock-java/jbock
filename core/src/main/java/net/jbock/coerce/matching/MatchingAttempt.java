@@ -1,4 +1,4 @@
-package net.jbock.coerce.collectorabsent;
+package net.jbock.coerce.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
@@ -14,7 +14,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-class MapperAttempt {
+class MatchingAttempt {
 
   private final CodeBlock extractExpr;
   private final ParameterSpec constructorParam;
@@ -22,7 +22,7 @@ class MapperAttempt {
   private final TypeMirror testType;
   private final TypeElement mapperClass;
 
-  MapperAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew, TypeElement mapperClass) {
+  MatchingAttempt(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew, TypeElement mapperClass) {
     this.testType = testType;
     this.extractExpr = extractExpr;
     this.constructorParam = constructorParam;

@@ -1,4 +1,4 @@
-package net.jbock.coerce.collectorabsent;
+package net.jbock.coerce.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
@@ -15,11 +15,11 @@ import static net.jbock.coerce.NonFlagSkew.OPTIONAL;
 import static net.jbock.coerce.NonFlagSkew.REPEATABLE;
 import static net.jbock.coerce.NonFlagSkew.REQUIRED;
 
-public class CollectorAbsentAuto {
+public class AutoMatcher {
 
   private final BasicInfo basicInfo;
 
-  public CollectorAbsentAuto(BasicInfo basicInfo) {
+  public AutoMatcher(BasicInfo basicInfo) {
     this.basicInfo = basicInfo;
   }
 
@@ -49,7 +49,7 @@ public class CollectorAbsentAuto {
 
   private NonFlagCoercion createCoercion(TypeMirror testType, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew) {
     return basicInfo.findAutoMapper(testType)
-        .map(mapExpr -> new NonFlagCoercion(basicInfo, mapExpr, MapperAttempt.autoCollectExpr(basicInfo, skew), extractExpr, skew, constructorParam))
+        .map(mapExpr -> new NonFlagCoercion(basicInfo, mapExpr, MatchingAttempt.autoCollectExpr(basicInfo, skew), extractExpr, skew, constructorParam))
         .orElseThrow(() -> basicInfo.failure(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
             basicInfo.returnType())));
   }

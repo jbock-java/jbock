@@ -3,8 +3,8 @@ package net.jbock.coerce;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.coerce.collectorabsent.CollectorAbsentAuto;
-import net.jbock.coerce.collectorabsent.CollectorAbsentExplicit;
+import net.jbock.coerce.matching.AutoMatcher;
+import net.jbock.coerce.matching.MapperMatcher;
 import net.jbock.compiler.ParamName;
 import net.jbock.compiler.TypeTool;
 
@@ -35,9 +35,9 @@ public class CoercionProvider {
           CodeBlock.of("$N", constructorParam), REPEATABLE, constructorParam);
     }).orElseGet(() -> {
       if (basicInfo.mapperClass().isPresent()) {
-        return new CollectorAbsentExplicit(basicInfo, basicInfo.mapperClass().get()).findCoercion();
+        return new MapperMatcher(basicInfo, basicInfo.mapperClass().get()).findCoercion();
       } else {
-        return new CollectorAbsentAuto(basicInfo).findCoercion();
+        return new AutoMatcher(basicInfo).findCoercion();
       }
     });
   }
