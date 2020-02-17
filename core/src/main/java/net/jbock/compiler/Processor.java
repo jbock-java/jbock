@@ -73,11 +73,11 @@ public final class Processor extends AbstractProcessor {
         .noneMatch(name -> name.contentEquals(Command.class.getCanonicalName()))) {
       return false;
     }
-    ElementFilter.typesIn(env.getElementsAnnotatedWith(Command.class)).forEach(this::processSourceElements);
+    ElementFilter.typesIn(env.getElementsAnnotatedWith(Command.class)).forEach(this::processSourceElement);
     return false;
   }
 
-  private void processSourceElements(TypeElement sourceElement) {
+  private void processSourceElement(TypeElement sourceElement) {
     TypeTool tool = new TypeTool(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
     ClassName generatedClass = generatedClass(sourceElement);
     try {
