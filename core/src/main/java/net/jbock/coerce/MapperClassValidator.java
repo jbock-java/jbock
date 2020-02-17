@@ -37,18 +37,18 @@ public final class MapperClassValidator {
     ReferencedType<Function> functionType = new ReferenceTool<>(FUNCTION, errorHandler, tool, mapperClass).getReferencedType();
     TypeMirror inputType = functionType.typeArguments().get(0);
     TypeMirror outputType = functionType.typeArguments().get(1);
-    return tool.unify(tool.asType(String.class), inputType).flatMap(FUNCTION::boom, leftSolution ->
-        handle(functionType, outputType, leftSolution));
+    return tool.unify(tool.asType(String.class), inputType).flatMap(FUNCTION::boom, inputSolution ->
+        handle(functionType, outputType, inputSolution));
   }
 
-  private Either<String, CodeBlock> handle(ReferencedType<Function> functionType, TypeMirror outputType, TypevarMapping leftSolution) {
-    return tool.unify(expectedReturnType, outputType).flatMap(FUNCTION::boom, rightSolution ->
-        handle(functionType, leftSolution, rightSolution));
+  private Either<String, CodeBlock> handle(ReferencedType<Function> functionType, TypeMirror outputType, TypevarMapping inputSolution) {
+    return tool.unify(expectedReturnType, outputType).flatMap(FUNCTION::boom, outputSolution ->
+        handle(functionType, inputSolution, outputSolution));
   }
 
-  private Either<String, CodeBlock> handle(ReferencedType<Function> functionType, TypevarMapping leftSolution, TypevarMapping rightSolution) {
+  private Either<String, CodeBlock> handle(ReferencedType<Function> functionType, TypevarMapping inputSolution, TypevarMapping outputSolution) {
     return new Flattener(tool, mapperClass)
-        .mergeSolutions(leftSolution, rightSolution)
+        .mergeSolutions(inputSolution, outputSolution)
         .map(FUNCTION::boom, typeParameters -> CodeBlock.of("new $T$L()$L",
             tool.erasure(mapperClass.asType()),
             getTypeParameterList(typeParameters.getTypeParameters()),
