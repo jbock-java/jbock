@@ -12,10 +12,8 @@ compileJava {
     targetCompatibility = '8'
 }
 
-// Prevent a problem with org.gradle.jvm.version
-// https://docs.gradle.org/current/userguide/publishing_gradle_module_metadata.html
 tasks.withType(GenerateModuleMetadata) {
-    enabled = false
+    enabled = true
 }
 
 repositories {
