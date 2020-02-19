@@ -422,7 +422,7 @@ class ProcessorTest {
   }
 
   @Test
-  void privateEnum() {
+  void privateParameterType() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -437,7 +437,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: test.Arguments.Foo. Try defining a custom mapper or collector.");
+        .withErrorContaining("The parameter type may not be private.");
   }
 
 

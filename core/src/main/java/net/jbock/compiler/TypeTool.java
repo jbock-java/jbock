@@ -197,7 +197,7 @@ public class TypeTool {
   }
 
   public boolean isEnumType(TypeMirror mirror) {
-    return !isPrivateType(mirror) && types.directSupertypes(mirror).stream()
+    return types.directSupertypes(mirror).stream()
         .anyMatch(t -> isSameErasure(types.directSupertypes(mirror).get(0), Enum.class));
   }
 
