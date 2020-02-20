@@ -93,7 +93,7 @@ class ProcessorTest {
         "class Arguments {",
         "",
         "  @Option(\"x\")",
-        "  String a();",
+        "  String a() { return null; }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
