@@ -223,8 +223,8 @@ public final class Processor extends AbstractProcessor {
       throw ValidationException.create(method, String.format("Use either @%s or @%s annotation, but not both",
           Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
-    if (tool.isPrivateType(method.getReturnType())) {
-      throw ValidationException.create(method, "The parameter type may not be private.");
+    if (!tool.isReachable(method.getReturnType())) {
+      throw ValidationException.create(method, "Unreachable parameter type.");
     }
     return true;
   }

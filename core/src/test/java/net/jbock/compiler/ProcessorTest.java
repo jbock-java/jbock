@@ -437,17 +437,37 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The parameter type may not be private.");
+        .withErrorContaining("Unreachable parameter type.");
+  }
+
+  @Test
+  void unreachableParameterType() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(\"x\")",
+        "  abstract List<Foo> foo();",
+        "",
+        "  private enum Foo {",
+        "    BAR",
+        "   }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Unreachable parameter type.");
   }
 
 
   @Test
   void invalidNesting() {
     JavaFileObject javaFile = fromSource(
-        "class Bob {",
+        "class Arguments {",
         "  private static class Foo {",
         "    @Command",
         "    abstract static class Bar {",
+        "      @Option(\"x\") abstract String a();",
         "    }",
         "  }",
         "}");

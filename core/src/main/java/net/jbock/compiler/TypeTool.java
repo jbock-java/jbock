@@ -164,24 +164,20 @@ public class TypeTool {
     return types.getPrimitiveType(TypeKind.BOOLEAN);
   }
 
-  public boolean isSameErasure(TypeMirror x, TypeMirror y) {
-    return types.isSameType(types.erasure(x), types.erasure(y));
-  }
-
   public boolean isAssignable(TypeMirror x, TypeMirror y) {
     return types.isAssignable(x, y);
   }
 
   public boolean isSameErasure(TypeMirror x, Class<?> y) {
-    return isSameErasure(x, erasure(y));
+    return isSameErasure(x, asType(y));
+  }
+
+  public boolean isSameErasure(TypeMirror x, TypeMirror y) {
+    return types.isSameType(types.erasure(x), types.erasure(y));
   }
 
   public TypeMirror erasure(TypeMirror typeMirror) {
     return types.erasure(typeMirror);
-  }
-
-  public TypeMirror erasure(Class<?> type) {
-    return erasure(asType(type));
   }
 
   public TypeMirror asType(Class<?> type) {
@@ -201,10 +197,22 @@ public class TypeTool {
         .anyMatch(t -> isSameErasure(types.directSupertypes(mirror).get(0), Enum.class));
   }
 
-
-  public boolean isPrivateType(TypeMirror mirror) {
-    Element element = types.asElement(mirror);
-    return element != null && element.getModifiers().contains(Modifier.PRIVATE);
+  public boolean isReachable(TypeMirror mirror) {
+    TypeKind kind = mirror.getKind();
+    if (kind != TypeKind.DECLARED) {
+      return true;
+    }
+    DeclaredType declared = asDeclared(mirror);
+    if (declared.asElement().getModifiers().contains(Modifier.PRIVATE)) {
+      return false;
+    }
+    List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
+    for (TypeMirror typeArgument : typeArguments) {
+      if (!isReachable(typeArgument)) {
+        return false;
+      }
+    }
+    return true;
   }
 
   public TypeMirror box(TypeMirror mirror) {
