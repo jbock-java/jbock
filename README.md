@@ -3,8 +3,10 @@
 
 jbock is a simple yet flexible command line parser that uses the same annotation names as
 [airline](https://github.com/airlift/airline) and
-[picocli.](https://github.com/remkop/picocli)
-Options and params are defined as `abstract` methods:
+[picocli.](https://github.com/remkop/picocli).
+Jbock doesn't use reflection, instead it generates java source code that you can read and even debug if you feel like it.
+
+In your model "command" class, options and params are defined as `abstract` methods:
 
 ````java
 @Command
@@ -28,7 +30,7 @@ abstract class MyArguments {
 
 jbock must be configured as an
 [annotation processor.](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java)
-The presence of the annotated class above
+The presence of a command class
 will trigger a round of code generation at compile time.
 The resulting class
 [MyArguments_Parser](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
