@@ -61,7 +61,7 @@ determined by its type, according to the following rules.
 These are the rules for options and params that
 define neither a custom mapper nor collector:
 
-Parameter type                      | Skew
+param/option type                   | Skew
 ----------------------------------- | --------------------------------
 `boolean` or `Boolean`              | *flag* (only applies to options)
 `X` (exact match)                   | *required*
@@ -72,9 +72,11 @@ Parameter type                      | Skew
 where `X` is one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
 
-If a custom mapper is defined, but no collector, then these rules apply:
+If a custom mapper is defined, but no collector,
+then the skew is determined by comparing the mapper return type
+and the param/option type:
 
-Mapper return type      | Parameter type              | Skew
+Mapper return type      | param/option type           | Skew
 ----------------------- | --------------------------- | ------------
 `R`                     | `R` (exact match)           | *required*
 `R`                     | `Optional<R>`               | *optional*
