@@ -64,10 +64,10 @@ define neither a custom mapper nor collector:
 param/option type                   | Skew
 ----------------------------------- | --------------------------------
 `boolean` or `Boolean`              | *flag* (only applies to options)
-`X` (exact match)                   | *required*
 `Optional<X>`                       | *optional*
 `List<X>`                           | *repeatable*
 <code>Optional{Int&#124;Long&#124;Double}</code> | *optional*
+other                               | *required*
 
 where `X` is one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
@@ -78,7 +78,7 @@ and the param/option type:
 
 Mapper return type      | param/option type           | Skew
 ----------------------- | --------------------------- | ------------
-`R`                     | `R` (auto-boxing)           | *required*
+`R`                     | `R` (exact match, or auto-boxed)  | *required*
 `R`                     | `Optional<R>`               | *optional*
 `R`                     | `List<R>`                   | *repeatable*
 `Integer`               | `OptionalInt`               | *optional*
