@@ -83,7 +83,7 @@ Mapper return type      | param/option type           | Skew
 `Long`                  | `OptionalLong`              | *optional*
 `Double`                | `OptionalDouble`            | *optional*
 `R`                     | `List<R>`                   | *repeatable*
-`R`                     | `R` (exact match, or auto-boxed)  | *required*
+`R`                     | `R` (exact match, or via boxing)  | *required*
 
 If a custom collector is defined, then the skew is always *repeatable*.
 
