@@ -65,8 +65,8 @@ param/option type                   | Skew
 ----------------------------------- | --------------------------------
 `boolean` or `Boolean`              | *flag* (only applies to options)
 `Optional<X>`                       | *optional*
-`List<X>`                           | *repeatable*
 <code>Optional{Int&#124;Long&#124;Double}</code> | *optional*
+`List<X>`                           | *repeatable*
 other                               | *required*
 
 where `X` is one of the
@@ -78,12 +78,12 @@ and the param/option type:
 
 Mapper return type      | param/option type           | Skew
 ----------------------- | --------------------------- | ------------
-`R`                     | `R` (exact match, or auto-boxed)  | *required*
 `R`                     | `Optional<R>`               | *optional*
 `R`                     | `List<R>`                   | *repeatable*
 `Integer`               | `OptionalInt`               | *optional*
 `Long`                  | `OptionalLong`              | *optional*
 `Double`                | `OptionalDouble`            | *optional*
+`R`                     | `R` (exact match, or auto-boxed)  | *required*
 
 If a custom collector is defined, then the skew is always *repeatable*.
 
