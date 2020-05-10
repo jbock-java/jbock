@@ -78,7 +78,7 @@ and the param/option type:
 
 Mapper return type      | param/option type           | Skew
 ----------------------- | --------------------------- | ------------
-`R`                     | `R` (exact match)           | *required*
+`R`                     | `R` (auto-boxing)           | *required*
 `R`                     | `Optional<R>`               | *optional*
 `R`                     | `List<R>`                   | *repeatable*
 `Integer`               | `OptionalInt`               | *optional*
