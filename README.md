@@ -51,8 +51,10 @@ assertEquals(Paths.get("file.txt"), my.path());
 
 In the example above, `path` is a *required* param,
 while `verbosity` is an *optional* option.
-This so-called *parameter skew* is determined by the parameter type,
-as described in the following section.
+We call this property *skew*. There are four different skews:
+*required*, *optional*, *repeatable* and *flag*.
+Each option and param has a skew which is
+determined by its type, according to the following rules.
 
 ### Skew rules
 
