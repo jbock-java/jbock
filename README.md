@@ -25,7 +25,7 @@ abstract class MyArguments {
    * The name is passed with one or two leading dashes:
    * ["--verbosity=1", "--verbosity 1", "-v 1", "-v1"] are all valid.
    * Note: This javadoc will show up when "--help" is passed.
-   * Alternatively the help text can read from a resource bundle.
+   * Alternatively the help text can be taken from a resource bundle.
    */
   @Option(value = "verbosity", mnemonic = 'v')
   abstract OptionalInt verbosity();
