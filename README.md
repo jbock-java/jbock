@@ -67,7 +67,7 @@ param/option type                   | Skew
 `Optional<X>`                       | *optional*
 <code>Optional{Int&#124;Long&#124;Double}</code> | *optional*
 `List<X>`                           | *repeatable*
-other                               | *required*
+any other                           | *required*
 
 where `X` is one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
