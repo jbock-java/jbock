@@ -14,14 +14,18 @@ abstract class MyArguments {
 
   /**
    * A "param" is a positional parameter.
-   * The number 1 is arbitrary as long as there is only one param.
+   * The number 1 determines its position relative to the other params. 
+   * In this case it is irrelevant, as there is only one param.
    */
   @Param(1)
   abstract Path path();
 
   /**
-   * This javadoc will show up when "--help" is passed.
-   * Alternatively you can define the help text in a resource bundle.
+   * An option is a named parameter or flag.
+   * The name is passed with one or two leading dashes:
+   * ["--verbosity=1", "--verbosity 1", "-v 1", "-v1"] are all valid.
+   * Note: This javadoc will show up when "--help" is passed.
+   * Alternatively the help text can read from a resource bundle.
    */
   @Option(value = "verbosity", mnemonic = 'v')
   abstract OptionalInt verbosity();
