@@ -79,10 +79,10 @@ and the param/option type:
 Mapper return type      | param/option type           | Skew
 ----------------------- | --------------------------- | ------------
 `R`                     | `Optional<R>`               | *optional*
-`R`                     | `List<R>`                   | *repeatable*
 `Integer`               | `OptionalInt`               | *optional*
 `Long`                  | `OptionalLong`              | *optional*
 `Double`                | `OptionalDouble`            | *optional*
+`R`                     | `List<R>`                   | *repeatable*
 `R`                     | `R` (exact match, or auto-boxed)  | *required*
 
 If a custom collector is defined, then the skew is always *repeatable*.
