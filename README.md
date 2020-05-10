@@ -49,15 +49,15 @@ assertEquals(OptionalInt.of(2), my.verbosity());
 assertEquals(Paths.get("file.txt"), my.path());
 ````
 
-Please note that `path` is a *required* param,
+In the example above, `path` is a *required* param,
 while `verbosity` is an *optional* option.
 This so-called *parameter skew* is determined by the parameter type,
 as described in the following section.
 
 ### Skew rules
 
-These are the rules if neither mapper nor collector are defined,
-like in the introductory example:
+These are the rules for options and params that
+define neither a custom mapper nor collector:
 
 Parameter type                      | Skew
 ----------------------------------- | --------------------------------
@@ -70,7 +70,7 @@ Parameter type                      | Skew
 where `X` is one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
 
-If an explicit mapper is defined, but no collector, then these rules apply:
+If a custom mapper is defined, but no collector, then these rules apply:
 
 Mapper return type      | Parameter type              | Skew
 ----------------------- | --------------------------- | ------------
