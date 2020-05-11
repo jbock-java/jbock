@@ -21,8 +21,8 @@ abstract class MyArguments {
   abstract Path path();
 
   /**
-   * An option is a named parameter or flag.
-   * The name is passed with one or two leading dashes:
+   * An "option" is a named parameter (or flag).
+   * The name is passed with one or two leading dashes. In this case,
    * ["--verbosity=1", "--verbosity 1", "-v 1", "-v1"] are all valid.
    * Note: This javadoc will show up when "--help" is passed.
    * Alternatively the help text can be taken from a resource bundle.
