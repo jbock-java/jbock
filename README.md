@@ -7,7 +7,7 @@ jbock is a simple yet flexible command line parser that uses the same annotation
 It does not make any use of Java's reflection capabilities, but generates java source code instead, which can be easily read and debugged.
 
 The jbock way to declare your command line interface is via a custom model class, the so called "command" class.
-In this class, options and params are defined as `abstract` methods:
+In this class, each option and param corresponds to one annotated `abstract` method.
 
 ````java
 @Command
