@@ -64,12 +64,12 @@ define neither a custom mapper nor collector:
 param/option type                   | Skew
 ----------------------------------- | --------------------------------
 `boolean` or `Boolean`              | *flag* (only applies to options)
-`Optional<X>`                       | *optional*
+`Optional<A>`                       | *optional*
 <code>Optional{Int&#124;Long&#124;Double}</code> | *optional*
-`List<X>`                           | *repeatable*
+`List<A>`                           | *repeatable*
 any other                           | *required*
 
-where `X` is one of the
+where `A` is one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
 
 If a custom mapper is defined, but no collector,
@@ -78,12 +78,12 @@ and the param/option type:
 
 Mapper return type      | param/option type           | Skew
 ----------------------- | --------------------------- | ------------
-`R`                     | `Optional<R>`               | *optional*
+`M`                     | `Optional<M>`               | *optional*
 `Integer`               | `OptionalInt`               | *optional*
 `Long`                  | `OptionalLong`              | *optional*
 `Double`                | `OptionalDouble`            | *optional*
-`R`                     | `List<R>`                   | *repeatable*
-`R`                     | `R` (exact match, or via boxing)  | *required*
+`M`                     | `List<M>`                   | *repeatable*
+`M`                     | `M` (exact match, or via boxing)  | *required*
 
 If a custom collector is defined, then the skew is always *repeatable*.
 
