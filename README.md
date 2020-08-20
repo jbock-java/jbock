@@ -15,8 +15,9 @@ abstract class MyArguments {
 
   /**
    * A "param" is a positional parameter.
-   * The number 1 determines its position relative to the other params. 
-   * In this case it is irrelevant, as there is only one param.
+   * Its value attribute (number 1 in this example)
+   * determines its relative position among the params. 
+   * In this case it is arbitrary, as there is only one param.
    */
   @Param(1)
   abstract Path path();
