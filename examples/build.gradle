@@ -10,13 +10,15 @@ compileJava {
     options.encoding = 'UTF-8'
     sourceCompatibility = '8'
     targetCompatibility = '8'
+    options.compilerArgs << '--release'
+    options.compilerArgs << '8'
 }
 
 dependencies {
     compileOnly project(':annotations')
     annotationProcessor project(':core')
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0-RC1'
-    testImplementation 'org.mockito:mockito-core:3.2.4'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
+    testImplementation 'org.mockito:mockito-core:3.6.0' //  for mocking resourcebundle
 }
 
 test {

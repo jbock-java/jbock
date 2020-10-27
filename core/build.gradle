@@ -10,6 +10,8 @@ compileJava {
     options.encoding = 'UTF-8'
     sourceCompatibility = '8'
     targetCompatibility = '8'
+    options.compilerArgs << '--release'
+    options.compilerArgs << '8'
 }
 
 tasks.withType(GenerateModuleMetadata) {
@@ -21,10 +23,10 @@ repositories {
 }
 
 dependencies {
-    implementation 'com.squareup:javapoet:1.12.1'
+    implementation 'com.squareup:javapoet:1.13.0'
     implementation 'com.github.h908714124:jbock-annotations:3.4'
-    testImplementation 'com.google.testing.compile:compile-testing:0.18'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.6.0'
+    testImplementation 'com.google.testing.compile:compile-testing:0.19'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
 }
 
 jar {
