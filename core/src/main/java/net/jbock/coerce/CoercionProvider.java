@@ -17,12 +17,20 @@ import static net.jbock.coerce.NonFlagSkew.REPEATABLE;
 
 public class CoercionProvider {
 
-  public static Coercion nonFlagCoercion(ExecutableElement sourceMethod, ParamName paramName, Optional<TypeElement> mapperClass,
-                                         Optional<TypeElement> collectorClass, ClassName optionType, TypeTool tool) {
-    return findCoercion(new BasicInfo(mapperClass, paramName, optionType, sourceMethod, tool), collectorClass);
+  public static Coercion nonFlagCoercion(
+      ExecutableElement sourceMethod,
+      ParamName paramName,
+      Optional<TypeElement> mapperClass,
+      Optional<TypeElement> collectorClass,
+      ClassName optionType,
+      TypeTool tool) {
+    BasicInfo info = new BasicInfo(mapperClass, paramName, optionType, sourceMethod, tool);
+    return findCoercion(info, collectorClass);
   }
 
-  private static Coercion findCoercion(BasicInfo basicInfo, Optional<TypeElement> collector) {
+  private static Coercion findCoercion(
+      BasicInfo basicInfo,
+      Optional<TypeElement> collector) {
     return collector.<Coercion>map(collectorClass -> {
       CollectorInfo collectorInfo = new CollectorClassValidator(basicInfo::failure,
           basicInfo.tool(), collectorClass, basicInfo.returnType()).getCollectorInfo();

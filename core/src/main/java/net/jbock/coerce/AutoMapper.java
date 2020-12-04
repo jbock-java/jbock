@@ -12,7 +12,7 @@ import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.AbstractMap;
+import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
@@ -31,11 +31,11 @@ class AutoMapper {
   private static final String PARSE = "parse";
 
   private static Entry<Class<?>, CodeBlock> create(Class<?> clasz, String createFromString) {
-    return new AbstractMap.SimpleImmutableEntry<>(clasz, CodeBlock.of("$T::" + createFromString, clasz));
+    return new SimpleImmutableEntry<>(clasz, CodeBlock.of("$T::" + createFromString, clasz));
   }
 
   private static Entry<Class<?>, CodeBlock> create(Class<?> clasz, CodeBlock mapExpr) {
-    return new AbstractMap.SimpleImmutableEntry<>(clasz, mapExpr);
+    return new SimpleImmutableEntry<>(clasz, mapExpr);
   }
 
   private static final List<Entry<Class<?>, CodeBlock>> MAPPERS = Arrays.asList(

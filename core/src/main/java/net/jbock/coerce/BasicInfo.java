@@ -29,9 +29,12 @@ public class BasicInfo {
   // nullable
   private final TypeElement mapperClass;
 
-  BasicInfo(Optional<TypeElement> mapperClass, ParamName paramName, ClassName optionType,
-            ExecutableElement sourceMethod,
-            TypeTool tool) {
+  BasicInfo(
+      Optional<TypeElement> mapperClass,
+      ParamName paramName,
+      ClassName optionType,
+      ExecutableElement sourceMethod,
+      TypeTool tool) {
     this.mapperClass = mapperClass.orElse(null);
     this.paramName = paramName;
     this.optionType = optionType;

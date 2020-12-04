@@ -9,13 +9,13 @@ import java.util.List;
 
 public class FlattenerResult {
 
-  private List<TypeMirror> typeParameters;
+  private final List<TypeMirror> typeParameters;
 
-  private TypevarMapping merged;
+  private final TypevarMapping mapping;
 
-  FlattenerResult(List<TypeMirror> typeParameters, TypevarMapping merged) {
+  FlattenerResult(List<TypeMirror> typeParameters, TypevarMapping mapping) {
     this.typeParameters = typeParameters;
-    this.merged = merged;
+    this.mapping = mapping;
   }
 
   public List<TypeMirror> getTypeParameters() {
@@ -23,6 +23,6 @@ public class FlattenerResult {
   }
 
   public Either<TypecheckFailure, TypeMirror> substitute(TypeMirror input) {
-    return merged.substitute(input);
+    return mapping.substitute(input);
   }
 }
