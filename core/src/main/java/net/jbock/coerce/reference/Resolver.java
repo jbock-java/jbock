@@ -47,8 +47,7 @@ class Resolver {
    * @return A type that has the same erasure as {@code animal}
    */
   <E> Either<TypecheckFailure, List<? extends TypeMirror>> typecheck(TypeElement dog, Class<E> animal) {
-    List<ImplementsRelation> hierarchy = new HierarchyUtil(tool).getHierarchy(dog);
-    List<ImplementsRelation> path = findPath(hierarchy, animal);
+    List<ImplementsRelation> path = new HierarchyUtil(tool).findPath(dog, animal);
     if (path.isEmpty()) {
       return left(nonFatal("not a " + animal.getCanonicalName()));
     }
@@ -67,27 +66,6 @@ class Resolver {
       return left(fatal("raw type: " + declared));
     }
     return right(declared.getTypeArguments());
-  }
-
-  private List<ImplementsRelation> findPath(List<ImplementsRelation> hierarchy, Class<?> goal) {
-    TypeMirror currentGoal = tool.asType(goal);
-    List<ImplementsRelation> path = new ArrayList<>();
-    ImplementsRelation relation;
-    while ((relation = findRelation(hierarchy, currentGoal)) != null) {
-      path.add(relation);
-      currentGoal = relation.dog().asType();
-    }
-    Collections.reverse(path);
-    return path;
-  }
-
-  private ImplementsRelation findRelation(List<ImplementsRelation> hierarchy, TypeMirror goal) {
-    for (ImplementsRelation relation : hierarchy) {
-      if (tool.isSameErasure(goal, relation.animal())) {
-        return relation;
-      }
-    }
-    return null;
   }
 
   /**
