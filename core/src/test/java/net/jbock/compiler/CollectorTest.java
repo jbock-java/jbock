@@ -499,28 +499,6 @@ class CollectorTest {
   }
 
   @Test
-  void invalidBoundSupplier() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\",",
-        "          collectedBy = A.class)",
-        "  abstract Set<String> strings();",
-        "",
-        "  static class A implements ToSetCollector<Long> {",
-        "    public Collector<Long, ?, Set<Long>> get() { return null; }",
-        "  }",
-        "",
-        "  interface ToSetCollector<E> extends Supplier<Collector<E, ?, Set<E>>> { }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign java.lang.Long to java.lang.String.");
-  }
-
-  @Test
   void invalidBound() {
     JavaFileObject javaFile = fromSource(
         "@Command",
@@ -543,7 +521,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign java.lang.Long to java.lang.String.");
+        .withErrorContaining("not a java.util.stream.Collector");
   }
 
   @Test

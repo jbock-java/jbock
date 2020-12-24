@@ -36,12 +36,7 @@ class ResolverTest {
       TypeElement mapper = elements.getTypeElement("test.Foo");
       Resolver resolver = new Resolver(FUNCTION, tool);
       Either<TypecheckFailure, List<? extends TypeMirror>> result = resolver.typecheck(mapper, Supplier.class);
-      assertTrue(result instanceof Right);
-      List<? extends TypeMirror> typeArguments = ((Right<TypecheckFailure, List<? extends TypeMirror>>) result).value();
-      assertEquals(1, typeArguments.size());
-      TypeMirror typeParameter = typeArguments.get(0);
-      TypeElement string = elements.getTypeElement("java.lang.String");
-      assertTrue(types.isSameType(string.asType(), typeParameter));
+      assertTrue(result instanceof Left);
     });
   }
 
@@ -81,6 +76,7 @@ class ResolverTest {
       DeclaredType functionType = TypeTool.asDeclared(declaredType.getTypeArguments().get(0));
       Either<TypecheckFailure, List<? extends TypeMirror>> result = new Resolver(FUNCTION, tool).typecheck(functionType, Function.class);
       assertTrue(result instanceof Right);
+      assertEquals(2, ((Right<TypecheckFailure, List<? extends TypeMirror>>) result).value().size());
     });
   }
 }

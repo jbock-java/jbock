@@ -3,14 +3,17 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.ValidationException;
 import org.junit.jupiter.api.Test;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import java.util.Collections;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.Mockito.mock;
 
 class CollectorClassValidatorTest {
 
@@ -33,7 +36,8 @@ class CollectorClassValidatorTest {
       TypeTool tool = new TypeTool(elements, types);
       DeclaredType returnType = tool.getDeclaredType(Set.class, Collections.singletonList(tool.asType(String.class)));
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
-      CollectorInfo collectorInfo = new CollectorClassValidator(s -> null, tool, collectorClass, returnType)
+      CollectorInfo collectorInfo = new CollectorClassValidator(s -> ValidationException.create(mock(Element.class), s),
+          tool, collectorClass, returnType)
           .getCollectorInfo();
       CodeBlock expected = CodeBlock.of(".collect(new $T<$T>().get())", types.erasure(collectorClass.asType()), String.class);
       assertEquals(expected, collectorInfo.collectExpr());

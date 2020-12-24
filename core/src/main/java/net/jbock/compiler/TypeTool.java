@@ -1,6 +1,7 @@
 package net.jbock.compiler;
 
 import net.jbock.coerce.either.Either;
+import net.jbock.coerce.reference.ImplementsRelation;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -271,5 +272,14 @@ public class TypeTool {
       return right(thatType);
     }
     return left(key -> String.format("Cannot infer %s: %s vs %s", key, thisType, thatType));
+  }
+
+  public Optional<ImplementsRelation> getHierarchy(TypeElement dog, Class<?> animal) {
+    for (TypeMirror inter : dog.getInterfaces()) {
+      if (isSameErasure(inter, animal)) {
+        return Optional.of(new ImplementsRelation(asTypeElement(dog), inter));
+      }
+    }
+    return Optional.empty();
   }
 }

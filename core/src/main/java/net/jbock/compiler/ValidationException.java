@@ -2,7 +2,7 @@ package net.jbock.compiler;
 
 import javax.lang.model.element.Element;
 
-public final class ValidationException extends RuntimeException {
+public class ValidationException extends RuntimeException {
 
   final Element about;
 
