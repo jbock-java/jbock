@@ -24,7 +24,7 @@ public class ReferenceTool<E> {
     this.expectedType = expectedType;
     this.errorHandler = errorHandler;
     this.referencedClass = referencedClass;
-    this.resolver = new Resolver(expectedType, tool);
+    this.resolver = new Resolver(tool);
   }
 
   public ReferencedType<E> getReferencedType() {

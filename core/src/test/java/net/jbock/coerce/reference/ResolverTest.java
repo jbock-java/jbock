@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static net.jbock.coerce.reference.ExpectedType.FUNCTION;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -34,7 +33,7 @@ class ResolverTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
-      Resolver resolver = new Resolver(FUNCTION, tool);
+      Resolver resolver = new Resolver(tool);
       Either<TypecheckFailure, List<? extends TypeMirror>> result = resolver.typecheck(mapper, Supplier.class);
       assertTrue(result instanceof Left);
     });
@@ -54,7 +53,7 @@ class ResolverTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
-      Either<TypecheckFailure, List<? extends TypeMirror>> result = new Resolver(FUNCTION, tool).typecheck(mapper, String.class);
+      Either<TypecheckFailure, List<? extends TypeMirror>> result = new Resolver(tool).typecheck(mapper, String.class);
       assertTrue(result instanceof Left);
     });
   }
@@ -74,7 +73,7 @@ class ResolverTest {
       TypeElement mapper = elements.getTypeElement("test.FunctionSupplier");
       DeclaredType declaredType = TypeTool.asDeclared(mapper.getInterfaces().get(0));
       DeclaredType functionType = TypeTool.asDeclared(declaredType.getTypeArguments().get(0));
-      Either<TypecheckFailure, List<? extends TypeMirror>> result = new Resolver(FUNCTION, tool).typecheck(functionType, Function.class);
+      Either<TypecheckFailure, List<? extends TypeMirror>> result = new Resolver(tool).typecheck(functionType, Function.class);
       assertTrue(result instanceof Right);
       assertEquals(2, ((Right<TypecheckFailure, List<? extends TypeMirror>>) result).value().size());
     });

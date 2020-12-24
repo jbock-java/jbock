@@ -172,8 +172,8 @@ class CollectorTest {
         "          collectedBy = ToSetCollector.class)",
         "  abstract Set<String> bigIntegers();",
         "",
-        "  static class HexMapper implements Supplier<Function<String, BigInteger>> {",
-        "    public Function<String, BigInteger> get() { return null; }",
+        "  static class HexMapper implements Supplier<Function<String, Integer>> {",
+        "    public Function<String, Integer> get() { return null; }",
         "  }",
         "",
         "  static class ToSetCollector<E> implements Supplier<Collector<E, ?, Set<E>>> {",
@@ -183,7 +183,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("problem");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.Integer to java.lang.String");
   }
 
   @Test
