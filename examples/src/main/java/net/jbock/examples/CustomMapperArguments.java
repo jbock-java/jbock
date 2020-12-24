@@ -117,10 +117,7 @@ abstract class CustomMapperArguments {
     }
   }
 
-  interface ListWrapperMapperInterface<E> extends Supplier<Function<E, List<E>>> {
-  }
-
-  static class ListWrapperMapper implements ListWrapperMapperInterface<String> {
+  static class ListWrapperMapper implements Supplier<Function<String, List<String>>> {
 
     @Override
     public Function<String, List<String>> get() {
