@@ -4,6 +4,7 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
@@ -15,6 +16,7 @@ import static net.jbock.compiler.TypeTool.asDeclared;
 public class ReferenceTool<E> {
 
   private final Resolver resolver;
+  private final TypeTool tool;
 
   private final Function<String, ValidationException> errorHandler;
   private final TypeElement referencedClass;
@@ -24,19 +26,17 @@ public class ReferenceTool<E> {
     this.expectedType = expectedType;
     this.errorHandler = errorHandler;
     this.referencedClass = referencedClass;
-    this.resolver = new Resolver(tool);
+    this.resolver = new Resolver(tool, this::boom);
+    this.tool = tool;
   }
 
   public ReferencedType<E> getReferencedType() {
-    return resolver.typecheck(referencedClass, Supplier.class)
+    return resolver.checkImplements(referencedClass, Supplier.class)
         .fold(this::handleNotSupplier, this::handleSupplier);
   }
 
   private ReferencedType<E> handleNotSupplier(TypecheckFailure failure) {
-    if (failure.isFatal()) {
-      throw boom(failure.getMessage());
-    }
-    List<? extends TypeMirror> expected = resolver.typecheck(referencedClass, expectedType.expectedClass())
+    List<? extends TypeMirror> expected = resolver.checkImplements(referencedClass, expectedType.expectedClass())
         .orElseThrow(f -> boom(f.getMessage()));
     return new ReferencedType<>(expected, false);
   }
@@ -46,9 +46,15 @@ public class ReferenceTool<E> {
     if (supplied.getKind() != TypeKind.DECLARED) {
       throw boom("not a " + expectedType.simpleName() + " or Supplier<" + expectedType.simpleName() + ">");
     }
-    List<? extends TypeMirror> typeParameters = resolver.typecheck(asDeclared(supplied), expectedType.expectedClass())
-        .orElseThrow(f -> boom(f.getMessage()));
-    return new ReferencedType<E>(typeParameters, true);
+    DeclaredType actual = asDeclared(supplied);
+    Class<E> expected = expectedType.expectedClass();
+    if (!tool.isSameErasure(actual, expected)) {
+      throw boom("expected " + expected.getCanonicalName() + " but found " + actual);
+    }
+    if (tool.isRaw(actual)) {
+      throw boom("raw type: " + actual);
+    }
+    return new ReferencedType<>(actual.getTypeArguments(), true);
   }
 
   private ValidationException boom(String message) {

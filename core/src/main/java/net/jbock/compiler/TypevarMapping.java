@@ -11,11 +11,11 @@ import javax.lang.model.type.TypeMirror;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.function.Function;
 
 import static net.jbock.coerce.either.Either.left;
 import static net.jbock.coerce.either.Either.right;
+import static net.jbock.coerce.reference.TypecheckFailure.typeFail;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 
 public class TypevarMapping {
@@ -27,10 +27,6 @@ public class TypevarMapping {
   public TypevarMapping(Map<String, TypeMirror> map, TypeTool tool) {
     this.map = map;
     this.tool = tool;
-  }
-
-  public Set<Map.Entry<String, TypeMirror>> entries() {
-    return map.entrySet();
   }
 
   public TypeMirror get(String key) {
@@ -57,7 +53,7 @@ public class TypevarMapping {
   public Either<TypecheckFailure, DeclaredType> substitute(DeclaredType declaredType) {
     DeclaredType result = subst(declaredType);
     if (result == null) {
-      return left(TypecheckFailure.fatal("substitution failed"));
+      return left(typeFail("substitution failed"));
     }
     return right(result);
   }

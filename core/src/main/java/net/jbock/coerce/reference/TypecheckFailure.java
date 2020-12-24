@@ -1,28 +1,22 @@
 package net.jbock.coerce.reference;
 
+/**
+ * Indicates a typechecking issue that is potentially recoverable .
+ */
 public class TypecheckFailure {
-  
+
   private final String message;
-  private final boolean fatal;
 
-  private TypecheckFailure(String message, boolean fatal) {
+  private TypecheckFailure(String message) {
     this.message = message;
-    this.fatal = fatal;
   }
 
-  public static TypecheckFailure fatal(String message) {
-    return new TypecheckFailure(message, true);
-  }
-
-  public static TypecheckFailure nonFatal(String message) {
-    return new TypecheckFailure(message, false);
+  public static TypecheckFailure typeFail(String message) {
+    return new TypecheckFailure(message);
   }
 
   public String getMessage() {
     return message;
   }
 
-  public boolean isFatal() {
-    return fatal;
-  }
 }

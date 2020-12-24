@@ -44,8 +44,10 @@ class CollectorClassValidator {
     FlattenerResult result = new Flattener(tool, collectorClass)
         .mergeSolutions(leftSolution, rightSolution)
         .orElseThrow(this::boom);
-    return CollectorInfo.create(tool, result.substitute(inputType).orElseThrow(f -> boom(f.getMessage())),
-        collectorClass, collectorType.isSupplier(), result.getTypeParameters());
+    TypeMirror substituted = result.substitute(inputType)
+        .orElseThrow(f -> boom(f.getMessage()));
+    return CollectorInfo.create(tool, substituted, collectorClass,
+        collectorType.isSupplier(), result.getTypeParameters());
   }
 
   private ValidationException boom(String message) {

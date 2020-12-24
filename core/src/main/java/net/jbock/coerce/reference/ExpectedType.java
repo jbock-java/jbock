@@ -9,8 +9,11 @@ public class ExpectedType<E> {
   private final String name;
   private final Class<E> expectedClass;
 
-  public static final ExpectedType<Function> FUNCTION = new ExpectedType<>("MAPPER", Function.class);
+  @SuppressWarnings("rawtypes")
   public static final ExpectedType<Collector> COLLECTOR = new ExpectedType<>("COLLECTOR", Collector.class);
+
+  @SuppressWarnings("rawtypes")
+  public static final ExpectedType<Function> FUNCTION = new ExpectedType<>("MAPPER", Function.class);
 
   private ExpectedType(String name, Class<E> expectedClass) {
     this.name = name;
