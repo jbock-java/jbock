@@ -25,11 +25,6 @@ public class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <U> U fold(Function<L, U> leftMapper, Function<R, U> rightMapper) {
-    return leftMapper.apply(left);
-  }
-
-  @Override
   public R orElseThrow(Function<L, ? extends RuntimeException> leftMapper) {
     throw leftMapper.apply(left);
   }

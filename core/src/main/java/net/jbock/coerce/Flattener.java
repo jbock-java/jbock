@@ -5,6 +5,7 @@ import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.TypevarMapping;
+import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;
@@ -23,10 +24,12 @@ public class Flattener {
 
   private final TypeTool tool;
   private final TypeElement targetElement;
+  private final Function<String, ValidationException> errorHandler;
 
-  public Flattener(TypeTool tool, TypeElement targetElement) {
+  public Flattener(TypeTool tool, TypeElement targetElement, Function<String, ValidationException> errorHandler) {
     this.tool = tool;
     this.targetElement = targetElement;
+    this.errorHandler = errorHandler;
   }
 
   /**
@@ -59,6 +62,6 @@ public class Flattener {
       mapping.put(p.toString(), m);
       result.add(m);
     }
-    return right(new FlattenerResult(result, new TypevarMapping(mapping, tool)));
+    return right(new FlattenerResult(result, new TypevarMapping(mapping, tool, errorHandler)));
   }
 }

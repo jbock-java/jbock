@@ -1,7 +1,5 @@
 package net.jbock.coerce;
 
-import net.jbock.coerce.either.Either;
-import net.jbock.coerce.reference.TypecheckFailure;
 import net.jbock.compiler.TypevarMapping;
 
 import javax.lang.model.type.TypeMirror;
@@ -22,7 +20,7 @@ public class FlattenerResult {
     return typeParameters;
   }
 
-  public Either<TypecheckFailure, TypeMirror> substitute(TypeMirror input) {
+  public TypeMirror substitute(TypeMirror input) {
     return mapping.substitute(input);
   }
 }

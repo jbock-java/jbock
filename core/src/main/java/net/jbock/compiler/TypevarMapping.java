@@ -3,7 +3,6 @@ package net.jbock.compiler;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
-import net.jbock.coerce.reference.TypecheckFailure;
 
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -15,7 +14,6 @@ import java.util.function.Function;
 
 import static net.jbock.coerce.either.Either.left;
 import static net.jbock.coerce.either.Either.right;
-import static net.jbock.coerce.reference.TypecheckFailure.typeFail;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 
 public class TypevarMapping {
@@ -24,9 +22,12 @@ public class TypevarMapping {
 
   private final TypeTool tool;
 
-  public TypevarMapping(Map<String, TypeMirror> map, TypeTool tool) {
+  private final Function<String, ValidationException> errorHandler;
+
+  public TypevarMapping(Map<String, TypeMirror> map, TypeTool tool, Function<String, ValidationException> errorHandler) {
     this.map = map;
     this.tool = tool;
+    this.errorHandler = errorHandler;
   }
 
   public TypeMirror get(String key) {
@@ -39,35 +40,26 @@ public class TypevarMapping {
    * Can be null.
    * Wildcards remain unchanged.
    */
-  public Either<TypecheckFailure, TypeMirror> substitute(TypeMirror input) {
+  public TypeMirror substitute(TypeMirror input) {
     if (input.getKind() == TypeKind.TYPEVAR) {
-      return right(map.getOrDefault(input.toString(), input));
+      return map.getOrDefault(input.toString(), input);
     }
     if (input.getKind() == TypeKind.ARRAY) {
-      return right(input); // TODO generic array?
+      return input; // TODO generic array?
     }
-    return substitute(input.accept(AS_DECLARED, null))
-        .map(Function.identity(), type -> type);
+    return substitute(input.accept(AS_DECLARED, null));
   }
 
-  public Either<TypecheckFailure, DeclaredType> substitute(DeclaredType declaredType) {
-    DeclaredType result = subst(declaredType);
-    if (result == null) {
-      return left(typeFail("substitution failed"));
-    }
-    return right(result);
-  }
-
-  private DeclaredType subst(DeclaredType input) {
-    List<? extends TypeMirror> typeArguments = input.getTypeArguments();
+  public DeclaredType substitute(DeclaredType declaredType) {
+    List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
     TypeMirror[] result = new TypeMirror[typeArguments.size()];
     for (int i = 0; i < typeArguments.size(); i++) {
-      result[i] = switchType(typeArguments.get(i));
+      result[i] = switchType(typeArguments.get(i)); // potential recursion
       if (result[i] == null) {
-        return null;  // error
+        throw errorHandler.apply("substitution failed");
       }
     }
-    return tool.getDeclaredType(tool.asTypeElement(input), result);
+    return tool.getDeclaredType(tool.asTypeElement(declaredType), result);
   }
 
   private TypeMirror switchType(TypeMirror input) {
@@ -77,7 +69,7 @@ public class TypevarMapping {
       case TYPEVAR:
         return map.getOrDefault(input.toString(), input);
       case DECLARED:
-        return subst(TypeTool.asDeclared(input));
+        return substitute(TypeTool.asDeclared(input));
       case ARRAY:
         return input;
       default:
@@ -100,7 +92,7 @@ public class TypevarMapping {
         result.put(key, thatType);
       }
     }
-    return right(new TypevarMapping(result, tool));
+    return right(new TypevarMapping(result, tool, errorHandler));
   }
 
   public Map<String, TypeMirror> getMapping() {

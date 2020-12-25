@@ -2,9 +2,10 @@ package net.jbock.compiler;
 
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Right;
-import net.jbock.coerce.reference.TypecheckFailure;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mockito;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -12,6 +13,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.Collections;
 import java.util.List;
+import java.util.function.Function;
 
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +36,8 @@ class TypevarMappingTest {
       List<ExecutableElement> methods = ElementFilter.methodsIn(elements.getTypeElement("Foo").getEnclosedElements());
       ExecutableElement getSetMethod = methods.get(0);
       TypeMirror returnType = getSetMethod.getReturnType();
-      Either<String, TypevarMapping> result = tool.unify(types.getDeclaredType(set, string.asType()), returnType);
+      Function<String, ValidationException> errorHandler = s -> ValidationException.create(Mockito.mock(Element.class), s);
+      Either<String, TypevarMapping> result = tool.unify(types.getDeclaredType(set, string.asType()), returnType, errorHandler);
       assertTrue(result instanceof Right);
       TypevarMapping solution = ((Right<String, TypevarMapping>) result).value();
       assertNotNull(solution.get("E"));
@@ -49,10 +52,10 @@ class TypevarMappingTest {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement string = elements.getTypeElement("java.lang.String");
-      TypevarMapping mapping = new TypevarMapping(Collections.emptyMap(), tool);
-      Either<TypecheckFailure, TypeMirror> substitute = mapping.substitute(string.asType());
+      Function<String, ValidationException> errorHandler = s -> ValidationException.create(Mockito.mock(Element.class), s);
+      TypevarMapping mapping = new TypevarMapping(Collections.emptyMap(), tool, errorHandler);
+      TypeMirror substitute = mapping.substitute(string.asType());
       assertNotNull(substitute);
-      assertTrue(substitute instanceof Right);
     });
   }
 
@@ -67,12 +70,10 @@ class TypevarMappingTest {
       TypeTool tool = new TypeTool(elements, types);
       TypeMirror setOfE = elements.getTypeElement("a.Set").asType();
       TypeElement boxInt = elements.getTypeElement("java.lang.Integer");
-      TypevarMapping mapping = new TypevarMapping(Collections.singletonMap("E", boxInt.asType()), tool);
-      Either<TypecheckFailure, DeclaredType> either = mapping.substitute(
+      Function<String, ValidationException> errorHandler = s -> ValidationException.create(Mockito.mock(Element.class), s);
+      TypevarMapping mapping = new TypevarMapping(Collections.singletonMap("E", boxInt.asType()), tool, errorHandler);
+      DeclaredType result = mapping.substitute(
           setOfE.accept(AS_DECLARED, null));
-      assertTrue(either instanceof Right);
-      DeclaredType result = ((Right<TypecheckFailure, DeclaredType>) either)
-          .value().accept(AS_DECLARED, null);
       assertNotNull(result);
       assertTrue(types.isSameType(types.erasure(result), types.erasure(elements.getTypeElement("a.Set").asType())));
       assertEquals(1, result.getTypeArguments().size());

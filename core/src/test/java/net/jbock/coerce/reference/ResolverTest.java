@@ -1,7 +1,5 @@
 package net.jbock.coerce.reference;
 
-import net.jbock.coerce.either.Either;
-import net.jbock.coerce.either.Left;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
@@ -12,9 +10,10 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 
 class ResolverTest {
 
@@ -33,8 +32,8 @@ class ResolverTest {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
       Resolver resolver = new Resolver(tool, message -> ValidationException.create(Mockito.mock(Element.class), ""));
-      Either<TypecheckFailure, List<? extends TypeMirror>> result = resolver.checkImplements(mapper, Supplier.class);
-      assertTrue(result instanceof Left);
+      Optional<List<? extends TypeMirror>> result = resolver.checkImplements(mapper, Supplier.class);
+      assertFalse(result.isPresent());
     });
   }
 
@@ -53,8 +52,8 @@ class ResolverTest {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
       Resolver resolver = new Resolver(tool, message -> ValidationException.create(Mockito.mock(Element.class), ""));
-      Either<TypecheckFailure, List<? extends TypeMirror>> result = resolver.checkImplements(mapper, String.class);
-      assertTrue(result instanceof Left);
+      Optional<List<? extends TypeMirror>> result = resolver.checkImplements(mapper, String.class);
+      assertFalse(result.isPresent());
     });
   }
 }

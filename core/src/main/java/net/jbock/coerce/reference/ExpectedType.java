@@ -13,7 +13,7 @@ public class ExpectedType<E> {
   public static final ExpectedType<Collector> COLLECTOR = new ExpectedType<>("COLLECTOR", Collector.class);
 
   @SuppressWarnings("rawtypes")
-  public static final ExpectedType<Function> FUNCTION = new ExpectedType<>("MAPPER", Function.class);
+  public static final ExpectedType<Function> MAPPER = new ExpectedType<>("MAPPER", Function.class);
 
   private ExpectedType(String name, Class<E> expectedClass) {
     this.name = name;

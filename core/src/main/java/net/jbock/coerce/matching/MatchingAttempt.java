@@ -45,8 +45,10 @@ class MatchingAttempt {
   }
 
   Either<String, Coercion> findCoercion(BasicInfo basicInfo) {
-    return new MapperClassValidator(basicInfo::failure, basicInfo.tool(), testType, mapperClass).getMapExpr()
-        .map(Function.identity(), mapExpr ->
-            new NonFlagCoercion(basicInfo, mapExpr, autoCollectExpr(basicInfo, skew), extractExpr, skew, constructorParam));
+    MapperClassValidator validator = new MapperClassValidator(basicInfo::failure, basicInfo.tool(), testType, mapperClass);
+    return validator.getMapExpr().map(Function.identity(), mapExpr -> {
+      CodeBlock expr = autoCollectExpr(basicInfo, skew);
+      return new NonFlagCoercion(basicInfo, mapExpr, expr, extractExpr, skew, constructorParam);
+    });
   }
 }

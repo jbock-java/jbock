@@ -32,12 +32,14 @@ public class ReferenceTool<E> {
 
   public ReferencedType<E> getReferencedType() {
     return resolver.checkImplements(referencedClass, Supplier.class)
-        .fold(this::handleNotSupplier, this::handleSupplier);
+        .map(this::handleSupplier)
+        .orElseGet(this::handleNotSupplier);
   }
 
-  private ReferencedType<E> handleNotSupplier(TypecheckFailure failure) {
+  private ReferencedType<E> handleNotSupplier() {
     List<? extends TypeMirror> expected = resolver.checkImplements(referencedClass, expectedType.expectedClass())
-        .orElseThrow(f -> boom(f.getMessage()));
+        .orElseThrow(() -> boom("not a " + expectedType.expectedClass().getSimpleName() +
+            " or Supplier<" + expectedType.expectedClass().getSimpleName() + ">"));
     return new ReferencedType<>(expected, false);
   }
 

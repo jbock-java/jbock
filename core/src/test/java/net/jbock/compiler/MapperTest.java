@@ -231,7 +231,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a java.util.function.Function");
+        .withErrorContaining("not a Function or Supplier<Function>");
   }
 
   @Test

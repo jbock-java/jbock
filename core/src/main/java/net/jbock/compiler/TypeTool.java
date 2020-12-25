@@ -119,10 +119,10 @@ public class TypeTool {
     return null; // success
   }
 
-  public Either<String, TypevarMapping> unify(TypeMirror concreteType, TypeMirror ym) {
+  public Either<String, TypevarMapping> unify(TypeMirror concreteType, TypeMirror ym, Function<String, ValidationException> errorHandler) {
     Map<String, TypeMirror> acc = new LinkedHashMap<>();
     String failure = unify(concreteType, ym, acc);
-    return failure != null ? left(failure) : right(new TypevarMapping(acc, this));
+    return failure != null ? left(failure) : right(new TypevarMapping(acc, this, errorHandler));
   }
 
   public boolean isRaw(TypeMirror m) {

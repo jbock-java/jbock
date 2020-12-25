@@ -38,14 +38,13 @@ class CollectorClassValidator {
         .getReferencedType();
     TypeMirror inputType = collectorType.typeArguments().get(0);
     TypeMirror outputType = collectorType.typeArguments().get(2);
-    TypevarMapping rightSolution = tool.unify(returnType, outputType)
+    TypevarMapping rightSolution = tool.unify(returnType, outputType, this::boom)
         .orElseThrow(this::boom);
-    TypevarMapping leftSolution = new TypevarMapping(Collections.emptyMap(), tool);
-    FlattenerResult result = new Flattener(tool, collectorClass)
+    TypevarMapping leftSolution = new TypevarMapping(Collections.emptyMap(), tool, this::boom);
+    FlattenerResult result = new Flattener(tool, collectorClass, this::boom)
         .mergeSolutions(leftSolution, rightSolution)
         .orElseThrow(this::boom);
-    TypeMirror substituted = result.substitute(inputType)
-        .orElseThrow(f -> boom(f.getMessage()));
+    TypeMirror substituted = result.substitute(inputType);
     return CollectorInfo.create(tool, substituted, collectorClass,
         collectorType.isSupplier(), result.getTypeParameters());
   }

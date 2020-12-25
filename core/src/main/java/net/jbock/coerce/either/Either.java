@@ -16,7 +16,5 @@ public abstract class Either<L, R> {
 
   public abstract <L2, R2> Either<L2, R2> flatMap(Function<L, L2> leftMapper, Function<R, Either<L2, R2>> rightMapper);
 
-  public abstract <U> U fold(Function<L, U> leftMapper, Function<R, U> rightMapper);
-
   public abstract R orElseThrow(Function<L, ? extends RuntimeException> leftMapper);
 }
