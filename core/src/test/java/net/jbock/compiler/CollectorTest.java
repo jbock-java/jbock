@@ -521,7 +521,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Collector or Supplier<Collector>");
+        .withErrorContaining("not a java.util.stream.Collector or java.util.function.Supplier<java.util.stream.Collector>");
   }
 
   @Test

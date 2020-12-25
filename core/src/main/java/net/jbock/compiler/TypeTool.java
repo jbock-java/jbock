@@ -16,6 +16,8 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
+import java.lang.reflect.AnnotatedType;
+import java.lang.reflect.ParameterizedType;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -172,6 +174,10 @@ public class TypeTool {
     return isSameErasure(x, asType(y));
   }
 
+  public boolean isSameErasure(TypeMirror x, String y) {
+    return isSameErasure(x, elements.getTypeElement(y).asType());
+  }
+
   public boolean isSameErasure(TypeMirror x, TypeMirror y) {
     return types.isSameType(types.erasure(x), types.erasure(y));
   }
@@ -180,8 +186,25 @@ public class TypeTool {
     return types.erasure(typeMirror);
   }
 
+  public TypeMirror asType(String type) {
+    return elements.getTypeElement(type).asType();
+  }
+
   public TypeMirror asType(Class<?> type) {
-    return elements.getTypeElement(type.getCanonicalName()).asType();
+    String canonicalName = type.getCanonicalName();
+    if (canonicalName != null) {
+      return elements.getTypeElement(canonicalName).asType();
+    }
+    AnnotatedType[] interfaces = type.getAnnotatedInterfaces();
+    if (interfaces.length == 1) {
+      AnnotatedType interface1 = interfaces[0];
+      if (!(interface1.getType() instanceof ParameterizedType)) {
+        throw new IllegalArgumentException("Not a parameterized type: " + type);
+      }
+      String typeName = ((ParameterizedType) interface1.getType()).getRawType().getTypeName();
+      return elements.getTypeElement(typeName).asType();
+    }
+    throw new IllegalArgumentException("Expecting exactly one interface: " + type);
   }
 
   public DeclaredType optionalOf(Class<?> type) {
@@ -273,7 +296,7 @@ public class TypeTool {
     return left(key -> String.format("Cannot infer %s: %s vs %s", key, thisType, thatType));
   }
 
-  public Optional<DeclaredType> checkImplements(TypeElement dog, Class<?> animal) {
+  public Optional<DeclaredType> checkImplements(TypeElement dog, String animal) {
     for (TypeMirror inter : dog.getInterfaces()) {
       if (isSameErasure(inter, animal)) {
         return Optional.of(TypeTool.asDeclared(inter));

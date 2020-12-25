@@ -33,8 +33,7 @@ class CollectorClassValidator {
   CollectorInfo getCollectorInfo() {
     commonChecks(collectorClass);
     checkNotAbstract(collectorClass);
-    @SuppressWarnings("rawtypes")
-    ReferencedType<Collector> collectorType = new ReferenceTool<>(COLLECTOR, errorHandler, tool, collectorClass)
+    ReferencedType<Collector<?, ?, ?>> collectorType = new ReferenceTool<>(COLLECTOR, errorHandler, tool, collectorClass)
         .getReferencedType();
     TypeMirror inputType = collectorType.typeArguments().get(0);
     TypeMirror outputType = collectorType.typeArguments().get(2);

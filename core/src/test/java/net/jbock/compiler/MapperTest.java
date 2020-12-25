@@ -231,7 +231,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a Function or Supplier<Function>");
+        .withErrorContaining("not a java.util.function.Function or java.util.function.Supplier<java.util.function.Function>");
   }
 
   @Test
@@ -556,7 +556,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: not a Function or Supplier<Function>");
+        .withErrorContaining("There is a problem with the mapper class: not a java.util.function.Function or java.util.function.Supplier<java.util.function.Function>");
   }
 
   @Test

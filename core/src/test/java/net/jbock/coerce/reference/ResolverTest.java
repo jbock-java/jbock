@@ -32,7 +32,7 @@ class ResolverTest {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
       Resolver resolver = new Resolver(tool, message -> ValidationException.create(Mockito.mock(Element.class), ""));
-      Optional<List<? extends TypeMirror>> result = resolver.checkImplements(mapper, Supplier.class);
+      Optional<List<? extends TypeMirror>> result = resolver.checkImplements(mapper, Supplier.class.getCanonicalName());
       assertFalse(result.isPresent());
     });
   }
@@ -52,7 +52,7 @@ class ResolverTest {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement mapper = elements.getTypeElement("test.Foo");
       Resolver resolver = new Resolver(tool, message -> ValidationException.create(Mockito.mock(Element.class), ""));
-      Optional<List<? extends TypeMirror>> result = resolver.checkImplements(mapper, String.class);
+      Optional<List<? extends TypeMirror>> result = resolver.checkImplements(mapper, String.class.getCanonicalName());
       assertFalse(result.isPresent());
     });
   }

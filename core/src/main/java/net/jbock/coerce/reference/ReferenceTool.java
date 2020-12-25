@@ -31,27 +31,28 @@ public class ReferenceTool<E> {
   }
 
   public ReferencedType<E> getReferencedType() {
-    return resolver.checkImplements(referencedClass, Supplier.class)
+    return resolver.checkImplements(referencedClass, Supplier.class.getCanonicalName())
         .map(this::handleSupplier)
         .orElseGet(this::handleNotSupplier);
   }
 
   private ReferencedType<E> handleNotSupplier() {
-    List<? extends TypeMirror> expected = resolver.checkImplements(referencedClass, expectedType.expectedClass())
-        .orElseThrow(() -> boom("not a " + expectedType.expectedClass().getSimpleName() +
-            " or Supplier<" + expectedType.expectedClass().getSimpleName() + ">"));
+    List<? extends TypeMirror> expected = resolver.checkImplements(referencedClass, expectedType.canonicalName())
+        .orElseThrow(() -> boom("not a " + expectedType.canonicalName() +
+            " or " + Supplier.class.getCanonicalName() +
+            "<" + expectedType.canonicalName() + ">"));
     return new ReferencedType<>(expected, false);
   }
 
   private ReferencedType<E> handleSupplier(List<? extends TypeMirror> typeArguments) {
     TypeMirror supplied = typeArguments.get(0);
     if (supplied.getKind() != TypeKind.DECLARED) {
-      throw boom("not a " + expectedType.simpleName() + " or Supplier<" + expectedType.simpleName() + ">");
+      throw boom("not a " + expectedType.canonicalName() + " or " + Supplier.class.getCanonicalName() +
+          "<" + expectedType.canonicalName() + ">");
     }
     DeclaredType actual = asDeclared(supplied);
-    Class<E> expected = expectedType.expectedClass();
-    if (!tool.isSameErasure(actual, expected)) {
-      throw boom("expected " + expected.getCanonicalName() + " but found " + actual);
+    if (!tool.isSameErasure(actual, expectedType.canonicalName())) {
+      throw boom("expected " + expectedType.canonicalName() + " but found " + actual);
     }
     if (tool.isRaw(actual)) {
       throw boom("raw type: " + actual);

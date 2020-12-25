@@ -32,7 +32,7 @@ class Resolver {
    * @return the list of typeargs that are passed to {@code animal}
    * in the declaration of {@code dog}
    */
-  <E> Optional<List<? extends TypeMirror>> checkImplements(TypeElement dog, Class<E> animal) {
+  <E> Optional<List<? extends TypeMirror>> checkImplements(TypeElement dog, String animal) {
     return tool.checkImplements(dog, animal)
         .map(declared -> {
           List<? extends TypeMirror> typeArguments = asDeclared(declared).getTypeArguments();

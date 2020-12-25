@@ -34,8 +34,7 @@ public final class MapperClassValidator {
   public Either<String, CodeBlock> getMapExpr() {
     commonChecks(mapperClass);
     checkNotAbstract(mapperClass);
-    @SuppressWarnings("rawtypes")
-    ReferencedType<Function> functionType = new ReferenceTool<>(MAPPER, errorHandler, tool, mapperClass)
+    ReferencedType<Function<?, ?>> functionType = new ReferenceTool<>(MAPPER, errorHandler, tool, mapperClass)
         .getReferencedType();
     TypeMirror inputType = functionType.typeArguments().get(0);
     TypeMirror outputType = functionType.typeArguments().get(1);
@@ -45,7 +44,7 @@ public final class MapperClassValidator {
   }
 
   private Either<String, CodeBlock> handle(
-      @SuppressWarnings("rawtypes") ReferencedType<Function> functionType,
+      ReferencedType<Function<?, ?>> functionType,
       TypeMirror outputType,
       TypevarMapping inputSolution) {
     return tool.unify(expectedReturnType, outputType, this::boom)
@@ -54,7 +53,7 @@ public final class MapperClassValidator {
   }
 
   private Either<String, CodeBlock> handle(
-      @SuppressWarnings("rawtypes") ReferencedType<Function> functionType,
+      ReferencedType<Function<?, ?>> functionType,
       TypevarMapping inputSolution,
       TypevarMapping outputSolution) {
     return new Flattener(tool, mapperClass, this::boom)
