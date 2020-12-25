@@ -47,7 +47,6 @@ public class Flattener {
     Map<String, TypeMirror> mapping = new LinkedHashMap<>(solution.getMapping());
     List<? extends TypeParameterElement> parameters = targetElement.getTypeParameters();
     for (TypeParameterElement p : parameters) {
-      List<? extends TypeMirror> bounds = p.getBounds();
       TypeMirror m = solution.get(p.toString());
       if (m == null || m.getKind() == TypeKind.TYPEVAR) {
         Either<String, TypeMirror> inferred = tool.getBound(p);
@@ -56,7 +55,7 @@ public class Flattener {
         }
         m = ((Right<String, TypeMirror>) inferred).value();
       }
-      if (tool.isOutOfBounds(m, bounds)) {
+      if (tool.isOutOfBounds(m, p.getBounds())) {
         return left("Invalid bounds: Can't resolve " + p.toString() + " to " + m);
       }
       mapping.put(p.toString(), m);
