@@ -43,7 +43,7 @@ public class ExpectedType<E> {
   private static String getCanonicalName(Class<?> expectedClass) {
     AnnotatedType[] interfaces = expectedClass.getAnnotatedInterfaces();
     if (interfaces.length != 1) {
-      throw new IllegalArgumentException("Expecting exactly one interface: " + expectedClass);
+      throw new AssertionError("Expecting exactly one interface: " + expectedClass);
     }
     AnnotatedType interface1 = interfaces[0];
     if (!(interface1.getType() instanceof ParameterizedType)) {
