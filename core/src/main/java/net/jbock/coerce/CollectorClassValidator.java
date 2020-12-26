@@ -33,7 +33,7 @@ class CollectorClassValidator {
   CollectorInfo getCollectorInfo() {
     commonChecks(collectorClass);
     checkNotAbstract(collectorClass);
-    ReferencedType<Collector<?, ?, ?>> collectorType = new ReferenceTool<>(COLLECTOR, errorHandler, tool, collectorClass)
+    ReferencedType<Collector<?, ?, ?>> collectorType = new ReferenceTool<>(COLLECTOR, this::boom, tool, collectorClass)
         .getReferencedType();
     TypeMirror inputType = collectorType.typeArguments().get(0);
     TypeMirror outputType = collectorType.typeArguments().get(2);
@@ -49,6 +49,6 @@ class CollectorClassValidator {
   }
 
   private ValidationException boom(String message) {
-    return errorHandler.apply(COLLECTOR.boom(message));
+    return errorHandler.apply(String.format("There is a problem with the collector class: %s.", message));
   }
 }

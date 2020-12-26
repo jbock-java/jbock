@@ -34,12 +34,12 @@ public final class MapperClassValidator {
   public Either<String, CodeBlock> getMapExpr() {
     commonChecks(mapperClass);
     checkNotAbstract(mapperClass);
-    ReferencedType<Function<?, ?>> functionType = new ReferenceTool<>(MAPPER, errorHandler, tool, mapperClass)
+    ReferencedType<Function<?, ?>> functionType = new ReferenceTool<>(MAPPER, this::boom, tool, mapperClass)
         .getReferencedType();
     TypeMirror inputType = functionType.typeArguments().get(0);
     TypeMirror outputType = functionType.typeArguments().get(1);
     return tool.unify(tool.asType(String.class), inputType, this::boom)
-        .flatMap(MAPPER::boom, inputSolution ->
+        .flatMap(this::enrichMessage, inputSolution ->
             handle(functionType, outputType, inputSolution));
   }
 
@@ -48,7 +48,7 @@ public final class MapperClassValidator {
       TypeMirror outputType,
       TypevarMapping inputSolution) {
     return tool.unify(expectedReturnType, outputType, this::boom)
-        .flatMap(MAPPER::boom, outputSolution ->
+        .flatMap(this::enrichMessage, outputSolution ->
             handle(functionType, inputSolution, outputSolution));
   }
 
@@ -58,13 +58,17 @@ public final class MapperClassValidator {
       TypevarMapping outputSolution) {
     return new Flattener(tool, mapperClass, this::boom)
         .mergeSolutions(inputSolution, outputSolution)
-        .map(MAPPER::boom, typeParameters -> CodeBlock.of("new $T$L()$L",
+        .map(this::enrichMessage, typeParameters -> CodeBlock.of("new $T$L()$L",
             tool.erasure(mapperClass.asType()),
             getTypeParameterList(typeParameters.getTypeParameters()),
             functionType.isSupplier() ? ".get()" : ""));
   }
 
   private ValidationException boom(String message) {
-    return errorHandler.apply(MAPPER.boom(message));
+    return errorHandler.apply(enrichMessage(message));
+  }
+
+  private String enrichMessage(String message) {
+    return String.format("There is a problem with the mapper class: %s.", message);
   }
 }

@@ -4,10 +4,12 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -15,29 +17,30 @@ import static net.jbock.compiler.TypeTool.asDeclared;
 
 public class ReferenceTool<E> {
 
-  private final Resolver resolver;
   private final TypeTool tool;
-
   private final Function<String, ValidationException> errorHandler;
   private final TypeElement referencedClass;
   private final ExpectedType<E> expectedType;
 
-  public ReferenceTool(ExpectedType<E> expectedType, Function<String, ValidationException> errorHandler, TypeTool tool, TypeElement referencedClass) {
+  public ReferenceTool(
+      ExpectedType<E> expectedType,
+      Function<String, ValidationException> errorHandler,
+      TypeTool tool,
+      TypeElement referencedClass) {
     this.expectedType = expectedType;
     this.errorHandler = errorHandler;
     this.referencedClass = referencedClass;
-    this.resolver = new Resolver(tool, this::boom);
     this.tool = tool;
   }
 
   public ReferencedType<E> getReferencedType() {
-    return resolver.checkImplements(referencedClass, Supplier.class.getCanonicalName())
+    return checkImplements(referencedClass, Supplier.class.getCanonicalName())
         .map(this::handleSupplier)
         .orElseGet(this::handleNotSupplier);
   }
 
   private ReferencedType<E> handleNotSupplier() {
-    List<? extends TypeMirror> expected = resolver.checkImplements(referencedClass, expectedType.canonicalName())
+    List<? extends TypeMirror> expected = checkImplements(referencedClass, expectedType.canonicalName())
         .orElseThrow(() -> boom("not a " + expectedType.canonicalName() +
             " or " + Supplier.class.getCanonicalName() +
             "<" + expectedType.canonicalName() + ">"));
@@ -60,7 +63,28 @@ public class ReferenceTool<E> {
     return new ReferencedType<>(actual.getTypeArguments(), true);
   }
 
+  /**
+   * Check if {@code dog} implements {@code animal}.
+   *
+   * @param dog a type
+   * @param animal an interface or abstract class
+   *
+   * @return the list of typeargs that are passed to {@code animal}
+   * in the declaration of {@code dog}
+   */
+  private Optional<List<? extends TypeMirror>> checkImplements(TypeElement dog, String animal) {
+    return tool.checkImplements(dog, animal)
+        .map(declared -> {
+          List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
+          List<? extends TypeParameterElement> typeParams = tool.asTypeElement(tool.asType(animal)).getTypeParameters();
+          if (typeArguments.size() != typeParams.size()) {
+            throw errorHandler.apply("raw type: " + declared);
+          }
+          return declared.getTypeArguments();
+        });
+  }
+
   private ValidationException boom(String message) {
-    return errorHandler.apply(expectedType.boom(message));
+    return errorHandler.apply(message);
   }
 }

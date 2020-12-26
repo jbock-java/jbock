@@ -2,7 +2,6 @@ package net.jbock.coerce.reference;
 
 import java.lang.reflect.AnnotatedType;
 import java.lang.reflect.ParameterizedType;
-import java.util.Locale;
 import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.BinaryOperator;
@@ -12,28 +11,18 @@ import java.util.stream.Collector;
 
 public class ExpectedType<E> {
 
-  private final String name;
   private final String canonicalName;
 
-  public static final ExpectedType<Collector<?, ?, ?>> COLLECTOR = create("COLLECTOR", collectorClass());
+  public static final ExpectedType<Collector<?, ?, ?>> COLLECTOR = create(collectorClass());
 
-  public static final ExpectedType<Function<?, ?>> MAPPER = create("MAPPER", functionClass());
+  public static final ExpectedType<Function<?, ?>> MAPPER = create(functionClass());
 
-  private ExpectedType(String name, String canonicalName) {
-    this.name = name;
+  private ExpectedType(String canonicalName) {
     this.canonicalName = canonicalName;
   }
 
-  private static <E> ExpectedType<E> create(String name, Class<? extends E> expectedClass) {
-    return new ExpectedType<>(name, getCanonicalName(expectedClass));
-  }
-
-  public String name() {
-    return name;
-  }
-
-  public String boom(String message) {
-    return String.format("There is a problem with the %s class: %s.", name.toLowerCase(Locale.US), message);
+  private static <E> ExpectedType<E> create(Class<? extends E> expectedClass) {
+    return new ExpectedType<>(getCanonicalName(expectedClass));
   }
 
   String canonicalName() {
