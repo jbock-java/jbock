@@ -127,12 +127,12 @@ public class TypeTool {
     return failure != null ? left(failure) : right(new TypevarMapping(acc, this, errorHandler));
   }
 
-  public boolean isRaw(TypeMirror m) {
+  private boolean isRaw(TypeMirror m) {
     if (m.getKind() != TypeKind.DECLARED) {
       return false;
     }
     DeclaredType declaredType = asDeclared(m);
-    return declaredType.getTypeArguments().isEmpty() && !asTypeElement(m).getTypeParameters().isEmpty();
+    return declaredType.getTypeArguments().size() != asTypeElement(m).getTypeParameters().size();
   }
 
   public DeclaredType getDeclaredType(Class<?> clazz, List<? extends TypeMirror> typeArguments) {
@@ -244,7 +244,11 @@ public class TypeTool {
   }
 
   private TypeElement asTypeElement(Class<?> clazz) {
-    return elements.getTypeElement(clazz.getCanonicalName());
+    return asTypeElement(clazz.getCanonicalName());
+  }
+
+  public TypeElement asTypeElement(String canonicalName) {
+    return elements.getTypeElement(canonicalName);
   }
 
   public TypeElement asTypeElement(TypeMirror mirror) {
@@ -294,14 +298,5 @@ public class TypeTool {
       return right(thatType);
     }
     return left(key -> String.format("Cannot infer %s: %s vs %s", key, thisType, thatType));
-  }
-
-  public Optional<DeclaredType> checkImplements(TypeElement dog, String animal) {
-    for (TypeMirror inter : dog.getInterfaces()) {
-      if (isSameErasure(inter, animal)) {
-        return Optional.of(TypeTool.asDeclared(inter));
-      }
-    }
-    return Optional.empty();
   }
 }

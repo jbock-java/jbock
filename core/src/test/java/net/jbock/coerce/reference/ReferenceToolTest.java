@@ -5,16 +5,17 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import java.util.function.Function;
 import java.util.stream.Collector;
 
+import static org.mockito.Mockito.mock;
+
 class ReferenceToolTest {
 
-  private final Function<String, ValidationException> errorHandler = message -> ValidationException.create(Mockito.mock(Element.class), "");
+  private final Function<String, ValidationException> errorHandler = message -> ValidationException.create(mock(Element.class), "");
 
   @Test
   void testTypecheckSuccess() {

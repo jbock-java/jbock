@@ -34,13 +34,13 @@ public class ReferenceTool<E> {
   }
 
   public ReferencedType<E> getReferencedType() {
-    return checkImplements(referencedClass, Supplier.class.getCanonicalName())
+    return checkImplements(Supplier.class.getCanonicalName())
         .map(this::handleSupplier)
         .orElseGet(this::handleNotSupplier);
   }
 
   private ReferencedType<E> handleNotSupplier() {
-    List<? extends TypeMirror> expected = checkImplements(referencedClass, expectedType.canonicalName())
+    List<? extends TypeMirror> expected = checkImplements(expectedType.canonicalName())
         .orElseThrow(() -> boom("not a " + expectedType.canonicalName() +
             " or " + Supplier.class.getCanonicalName() +
             "<" + expectedType.canonicalName() + ">"));
@@ -48,40 +48,34 @@ public class ReferenceTool<E> {
   }
 
   private ReferencedType<E> handleSupplier(List<? extends TypeMirror> typeArguments) {
-    TypeMirror supplied = typeArguments.get(0);
-    if (supplied.getKind() != TypeKind.DECLARED) {
+    TypeMirror typearg = typeArguments.get(0);
+    if (typearg.getKind() != TypeKind.DECLARED) {
       throw boom("not a " + expectedType.canonicalName() + " or " + Supplier.class.getCanonicalName() +
           "<" + expectedType.canonicalName() + ">");
     }
-    DeclaredType actual = asDeclared(supplied);
+    DeclaredType actual = asDeclared(typearg);
     if (!tool.isSameErasure(actual, expectedType.canonicalName())) {
       throw boom("expected " + expectedType.canonicalName() + " but found " + actual);
     }
-    if (tool.isRaw(actual)) {
+    if (actual.getTypeArguments().size() != tool.asTypeElement(expectedType.canonicalName()).getTypeParameters().size()) {
       throw boom("raw type: " + actual);
     }
     return new ReferencedType<>(actual.getTypeArguments(), true);
   }
 
-  /**
-   * Check if {@code dog} implements {@code animal}.
-   *
-   * @param dog a type
-   * @param animal an interface or abstract class
-   *
-   * @return the list of typeargs that are passed to {@code animal}
-   * in the declaration of {@code dog}
-   */
-  private Optional<List<? extends TypeMirror>> checkImplements(TypeElement dog, String animal) {
-    return tool.checkImplements(dog, animal)
+  private Optional<? extends List<? extends TypeMirror>> checkImplements(String candidate) {
+    return referencedClass.getInterfaces().stream()
+        .filter(inter -> tool.isSameErasure(inter, candidate))
+        .map(TypeTool::asDeclared)
         .map(declared -> {
           List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
-          List<? extends TypeParameterElement> typeParams = tool.asTypeElement(tool.asType(animal)).getTypeParameters();
+          List<? extends TypeParameterElement> typeParams = tool.asTypeElement(candidate).getTypeParameters();
           if (typeArguments.size() != typeParams.size()) {
-            throw errorHandler.apply("raw type: " + declared);
+            throw boom("raw type: " + declared);
           }
-          return declared.getTypeArguments();
-        });
+          return typeArguments;
+        })
+        .findFirst();
   }
 
   private ValidationException boom(String message) {
