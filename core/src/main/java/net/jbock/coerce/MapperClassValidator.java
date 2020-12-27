@@ -56,8 +56,9 @@ public final class MapperClassValidator {
       ReferencedType<Function<?, ?>> functionType,
       TypevarMapping inputSolution,
       TypevarMapping outputSolution) {
-    return new Flattener(tool, mapperClass, this::boom)
-        .mergeSolutions(inputSolution, outputSolution)
+    return inputSolution.merge(outputSolution)
+        .flatMap(Function.identity(), mapping ->
+            mapping.getTypeParameters(mapperClass))
         .map(this::enrichMessage, typeParameters -> CodeBlock.of("new $T$L()$L",
             tool.erasure(mapperClass.asType()),
             getTypeParameterList(typeParameters.getTypeParameters()),

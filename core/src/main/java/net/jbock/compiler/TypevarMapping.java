@@ -1,12 +1,16 @@
 package net.jbock.compiler;
 
+import net.jbock.coerce.FlattenerResult;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -50,31 +54,27 @@ public class TypevarMapping {
     return substitute(input.accept(AS_DECLARED, null));
   }
 
-  public DeclaredType substitute(DeclaredType declaredType) {
+  private DeclaredType substitute(DeclaredType declaredType) {
     List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
     TypeMirror[] result = new TypeMirror[typeArguments.size()];
     for (int i = 0; i < typeArguments.size(); i++) {
-      result[i] = switchType(typeArguments.get(i)); // potential recursion
-      if (result[i] == null) {
-        throw errorHandler.apply("substitution failed");
+      TypeMirror arg = typeArguments.get(i);
+      switch (arg.getKind()) {
+        case TYPEVAR:
+          result[i] = map.getOrDefault(arg.toString(), arg);
+          break;
+        case DECLARED:
+          result[i] = substitute(TypeTool.asDeclared(arg)); // recursion
+          break;
+        case WILDCARD:
+        case ARRAY:
+          result[i] = arg;
+          break;
+        default:
+          throw errorHandler.apply("substitution failed");
       }
     }
     return tool.getDeclaredType(tool.asTypeElement(declaredType), result);
-  }
-
-  private TypeMirror switchType(TypeMirror input) {
-    switch (input.getKind()) {
-      case WILDCARD:
-        return input; // these can stay
-      case TYPEVAR:
-        return map.getOrDefault(input.toString(), input);
-      case DECLARED:
-        return substitute(TypeTool.asDeclared(input));
-      case ARRAY:
-        return input;
-      default:
-        return null;
-    }
   }
 
   public Either<String, TypevarMapping> merge(TypevarMapping solution) {
@@ -95,7 +95,25 @@ public class TypevarMapping {
     return right(new TypevarMapping(result, tool, errorHandler));
   }
 
-  public Map<String, TypeMirror> getMapping() {
-    return map;
+  public Either<String, FlattenerResult> getTypeParameters(TypeElement targetElement) {
+    List<TypeMirror> result = new ArrayList<>();
+    Map<String, TypeMirror> mapping = new LinkedHashMap<>(map);
+    List<? extends TypeParameterElement> parameters = targetElement.getTypeParameters();
+    for (TypeParameterElement p : parameters) {
+      TypeMirror m = map.get(p.toString());
+      if (m == null || m.getKind() == TypeKind.TYPEVAR) {
+        Either<String, TypeMirror> inferred = tool.getBound(p);
+        if (inferred instanceof Left) {
+          return left(((Left<String, TypeMirror>) inferred).value());
+        }
+        m = ((Right<String, TypeMirror>) inferred).value();
+      }
+      if (tool.isOutOfBounds(m, p.getBounds())) {
+        return left("Invalid bounds: Can't resolve " + p.toString() + " to " + m);
+      }
+      mapping.put(p.toString(), m);
+      result.add(m);
+    }
+    return right(new FlattenerResult(result, new TypevarMapping(mapping, tool, errorHandler)));
   }
 }

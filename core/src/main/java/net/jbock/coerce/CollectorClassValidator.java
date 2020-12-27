@@ -42,8 +42,8 @@ class CollectorClassValidator {
     TypevarMapping rightSolution = tool.unify(returnType, outputType, this::boom)
         .orElseThrow(this::boom);
     TypevarMapping leftSolution = new TypevarMapping(Collections.emptyMap(), tool, this::boom);
-    FlattenerResult result = new Flattener(tool, collectorClass, this::boom)
-        .mergeSolutions(leftSolution, rightSolution)
+    FlattenerResult result = leftSolution.merge(rightSolution).flatMap(Function.identity(),
+        mapping -> mapping.getTypeParameters(collectorClass))
         .orElseThrow(this::boom);
     TypeMirror substituted = result.substitute(inputType);
     return CollectorInfo.create(tool, substituted, collectorClass,

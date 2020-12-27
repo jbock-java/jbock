@@ -11,7 +11,7 @@ public class FlattenerResult {
 
   private final TypevarMapping mapping;
 
-  FlattenerResult(List<TypeMirror> typeParameters, TypevarMapping mapping) {
+  public FlattenerResult(List<TypeMirror> typeParameters, TypevarMapping mapping) {
     this.typeParameters = typeParameters;
     this.mapping = mapping;
   }

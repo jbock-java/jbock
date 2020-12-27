@@ -72,8 +72,7 @@ class TypevarMappingTest {
       TypeElement boxInt = elements.getTypeElement("java.lang.Integer");
       Function<String, ValidationException> errorHandler = s -> ValidationException.create(Mockito.mock(Element.class), s);
       TypevarMapping mapping = new TypevarMapping(Collections.singletonMap("E", boxInt.asType()), tool, errorHandler);
-      DeclaredType result = mapping.substitute(
-          setOfE.accept(AS_DECLARED, null));
+      DeclaredType result = mapping.substitute(setOfE).accept(AS_DECLARED, null);
       assertNotNull(result);
       assertTrue(types.isSameType(types.erasure(result), types.erasure(elements.getTypeElement("a.Set").asType())));
       assertEquals(1, result.getTypeArguments().size());
