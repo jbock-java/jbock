@@ -30,15 +30,15 @@ class AutoMapper {
   private static final String COMPILE = "compile";
   private static final String PARSE = "parse";
 
-  private static Entry<Class<?>, CodeBlock> create(Class<?> clasz, String createFromString) {
-    return new SimpleImmutableEntry<>(clasz, CodeBlock.of("$T::" + createFromString, clasz));
+  private static Entry<String, CodeBlock> create(Class<?> clasz, String createFromString) {
+    return new SimpleImmutableEntry<>(clasz.getCanonicalName(), CodeBlock.of("$T::" + createFromString, clasz));
   }
 
-  private static Entry<Class<?>, CodeBlock> create(Class<?> clasz, CodeBlock mapExpr) {
-    return new SimpleImmutableEntry<>(clasz, mapExpr);
+  private static Entry<String, CodeBlock> create(Class<?> clasz, CodeBlock mapExpr) {
+    return new SimpleImmutableEntry<>(clasz.getCanonicalName(), mapExpr);
   }
 
-  private static final List<Entry<Class<?>, CodeBlock>> MAPPERS = Arrays.asList(
+  private static final List<Entry<String, CodeBlock>> MAPPERS = Arrays.asList(
       create(String.class, CodeBlock.of("$T.identity()", Function.class)),
       create(Integer.class, VALUE_OF),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
@@ -56,8 +56,9 @@ class AutoMapper {
       create(BigDecimal.class, NEW));
 
   static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror testType) {
-    for (Entry<Class<?>, CodeBlock> coercion : MAPPERS) {
-      if (tool.isSameType(testType, coercion.getKey())) {
+    for (Entry<String, CodeBlock> coercion : MAPPERS) {
+      String canonicalName = coercion.getKey();
+      if (tool.isSameType(testType, canonicalName)) {
         return Optional.of(coercion.getValue());
       }
     }

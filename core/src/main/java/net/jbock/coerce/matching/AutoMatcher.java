@@ -26,7 +26,7 @@ public class AutoMatcher {
   public NonFlagCoercion findCoercion() {
     TypeMirror returnType = basicInfo.returnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
-    Optional<TypeMirror> listWrapped = tool().unwrap(List.class, returnType);
+    Optional<TypeMirror> listWrapped = tool().unwrap(returnType, List.class.getCanonicalName());
     if (opt.isPresent()) {
       Optionalish optional = opt.get();
       // optional match

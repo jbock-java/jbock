@@ -34,7 +34,7 @@ class CollectorClassValidatorTest {
     ).run("ToSetCollector", (elements, types) -> {
 
       TypeTool tool = new TypeTool(elements, types);
-      DeclaredType returnType = tool.getDeclaredType(Set.class, Collections.singletonList(tool.asType(String.class)));
+      DeclaredType returnType = tool.getDeclaredType(Set.class, Collections.singletonList(tool.asTypeElement(String.class.getCanonicalName()).asType()));
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
       CollectorInfo collectorInfo = new CollectorClassValidator(s -> ValidationException.create(mock(Element.class), s),
           tool, collectorClass, returnType)

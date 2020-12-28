@@ -11,6 +11,7 @@ import net.jbock.coerce.Skew;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Collections;
@@ -129,7 +130,7 @@ public final class Parameter {
       // no inferring
       return false;
     }
-    return tool.isSameType(mirror, tool.getPrimitiveBoolean()) || tool.isSameType(mirror, Boolean.class);
+    return mirror.getKind() == TypeKind.BOOLEAN || tool.isSameType(mirror, Boolean.class.getCanonicalName());
   }
 
   private static Character mnemonic(List<Parameter> parameters, ExecutableElement sourceMethod) {

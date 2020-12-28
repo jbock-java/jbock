@@ -36,35 +36,35 @@ class Optionalish {
 
   private static class OptionalPrimitive {
 
-    final Class<?> specialClass;
-    final Class<? extends Number> wrapped;
+    final Class<?> optionalType;
+    final Class<? extends Number> boxingType;
 
-    OptionalPrimitive(Class<?> specialClass, Class<? extends Number> wrapped) {
-      this.specialClass = specialClass;
-      this.wrapped = wrapped;
+    OptionalPrimitive(Class<?> optionalType, Class<? extends Number> boxingType) {
+      this.optionalType = optionalType;
+      this.boxingType = boxingType;
     }
 
     Function<ParameterSpec, CodeBlock> extractExpr() {
-      return p -> CodeBlock.of("$N.isPresent() ? $T.of($N.get()) : $T.empty()", p, specialClass, p, specialClass);
+      return p -> CodeBlock.of("$N.isPresent() ? $T.of($N.get()) : $T.empty()", p, optionalType, p, optionalType);
     }
   }
 
   static Optional<Optionalish> unwrap(TypeMirror type, TypeTool tool) {
-    Optional<Optionalish> optionalPrimtive = getOptionalPrimitive(type, tool);
-    if (optionalPrimtive.isPresent()) {
-      return optionalPrimtive;
+    Optional<Optionalish> optionalPrimitive = getOptionalPrimitive(type, tool);
+    if (optionalPrimitive.isPresent()) {
+      return optionalPrimitive;
     }
-    return tool.unwrap(Optional.class, type)
+    return tool.unwrap(type, Optional.class.getCanonicalName())
         .map(wrapped -> new Optionalish(p -> CodeBlock.of("$N", p), type, wrapped));
   }
 
   private static Optional<Optionalish> getOptionalPrimitive(TypeMirror type, TypeTool tool) {
     for (OptionalPrimitive e : OPTIONAL_PRIMITIVES) {
-      if (tool.isSameType(type, e.specialClass)) {
+      if (tool.isSameType(type, e.optionalType.getCanonicalName())) {
         return Optional.of(new Optionalish(
             e.extractExpr(),
-            tool.optionalOf(e.wrapped),
-            tool.asType(e.wrapped)));
+            tool.optionalOf(e.boxingType.getCanonicalName()),
+            tool.asTypeElement(e.boxingType.getCanonicalName()).asType()));
       }
     }
     return Optional.empty();

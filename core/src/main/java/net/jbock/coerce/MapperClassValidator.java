@@ -38,7 +38,7 @@ public final class MapperClassValidator {
         .getReferencedType();
     TypeMirror inputType = functionType.typeArguments().get(0);
     TypeMirror outputType = functionType.typeArguments().get(1);
-    return tool.unify(tool.asType(String.class), inputType, this::boom)
+    return tool.unify(tool.asTypeElement(String.class.getCanonicalName()).asType(), inputType, this::boom)
         .flatMap(this::enrichMessage, inputSolution ->
             handle(functionType, outputType, inputSolution));
   }

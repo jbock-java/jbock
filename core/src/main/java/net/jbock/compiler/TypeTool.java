@@ -16,8 +16,6 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
-import java.lang.reflect.AnnotatedType;
-import java.lang.reflect.ParameterizedType;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -77,9 +75,6 @@ public class TypeTool {
     this.elements = elements;
   }
 
-  /**
-   * @return {@code true} means failure
-   */
   private String unify(TypeMirror x, TypeMirror y, Map<String, TypeMirror> acc) {
     if (y.getKind() == TypeKind.TYPEVAR) {
       acc.put(y.toString(), x);
@@ -88,21 +83,11 @@ public class TypeTool {
     if (x.getKind() == TypeKind.TYPEVAR) {
       return "can't unify " + y + " with typevar " + x;
     }
-    if (x.getKind() == TypeKind.DECLARED) {
-      DeclaredType xx = asDeclared(x);
-      if (xx.getTypeArguments().isEmpty()) {
-        if (!isAssignable(y, x)) {
-          return "Unification failed: can't assign " + y + " to " + x;
-        }
-      } else {
-        if (!isSameErasure(x, y)) {
-          return "Unification failed: " + y + " and " + x + " have different erasure";
-        }
-      }
-    } else {
-      if (!isSameErasure(x, y)) {
-        return "Unification failed: " + y + " and " + x + " have different erasure";
-      }
+    if (isSameType(x, Object.class.getCanonicalName())) {
+      return null; // success
+    }
+    if (x.getKind() != y.getKind()) {
+      return "can't unify " + x + " with " + y;
     }
     if (isRaw(x)) {
       return "raw type: " + x;
@@ -110,8 +95,31 @@ public class TypeTool {
     if (isRaw(y)) {
       return "raw type: " + y;
     }
+    if (x.getKind() == TypeKind.ARRAY) {
+      if (!isSameErasure(x, y)) {
+        return "Unification failed: " + y + " and " + x + " have different erasure";
+      }
+      return null;
+    }
+    if (x.getKind() != TypeKind.DECLARED) {
+      if (!types.isAssignable(y, x)) {
+        return "Unification failed: can't assign " + y + " to " + x;
+      }
+      return null;
+    }
     List<? extends TypeMirror> xargs = x.accept(TYPEARGS, null);
+    if (xargs.isEmpty()) {
+      if (!types.isAssignable(y, x)) {
+        return "Unification failed: can't assign " + y + " to " + x;
+      }
+    }
+    if (!isSameErasure(x, y)) {
+      return "Unification failed: " + y + " and " + x + " have different erasure";
+    }
     List<? extends TypeMirror> yargs = y.accept(TYPEARGS, null);
+    if (xargs.size() != yargs.size()) {
+      return "can't unify " + x + " with " + y;
+    }
     for (int i = 0; i < yargs.size(); i++) {
       String failure = unify(xargs.get(i), yargs.get(i), acc);
       if (failure != null) {
@@ -136,19 +144,19 @@ public class TypeTool {
   }
 
   public DeclaredType getDeclaredType(Class<?> clazz, List<? extends TypeMirror> typeArguments) {
-    return getDeclaredType(asTypeElement(clazz), typeArguments.toArray(new TypeMirror[0]));
+    return getDeclaredType(asTypeElement(clazz.getCanonicalName()), typeArguments.toArray(new TypeMirror[0]));
   }
 
   public DeclaredType getDeclaredType(TypeElement element, TypeMirror[] typeArguments) {
     return types.getDeclaredType(element, typeArguments);
   }
 
-  public boolean isSameType(TypeMirror mirror, Class<?> test) {
-    return types.isSameType(mirror, asTypeElement(test).asType());
+  public boolean isSameType(TypeMirror mirror, String canonicalName) {
+    return types.isSameType(mirror, asTypeElement(canonicalName).asType());
   }
 
-  public Optional<TypeMirror> unwrap(Class<?> wrapper, TypeMirror mirror) {
-    if (!isSameErasure(mirror, wrapper)) {
+  public Optional<TypeMirror> unwrap(TypeMirror mirror, String canonicalName) {
+    if (!isSameErasure(mirror, canonicalName)) {
       return Optional.empty();
     }
     DeclaredType declaredType = asDeclared(mirror);
@@ -158,27 +166,11 @@ public class TypeTool {
     return Optional.of(declaredType.getTypeArguments().get(0));
   }
 
-  public boolean isSameType(TypeMirror mirror, TypeMirror test) {
-    return types.isSameType(mirror, test);
-  }
-
-  PrimitiveType getPrimitiveBoolean() {
-    return types.getPrimitiveType(TypeKind.BOOLEAN);
-  }
-
-  public boolean isAssignable(TypeMirror x, TypeMirror y) {
-    return types.isAssignable(x, y);
-  }
-
-  public boolean isSameErasure(TypeMirror x, Class<?> y) {
-    return isSameErasure(x, asType(y));
-  }
-
   public boolean isSameErasure(TypeMirror x, String y) {
     return isSameErasure(x, elements.getTypeElement(y).asType());
   }
 
-  public boolean isSameErasure(TypeMirror x, TypeMirror y) {
+  private boolean isSameErasure(TypeMirror x, TypeMirror y) {
     return types.isSameType(types.erasure(x), types.erasure(y));
   }
 
@@ -186,65 +178,40 @@ public class TypeTool {
     return types.erasure(typeMirror);
   }
 
-  public TypeMirror asType(String type) {
-    return elements.getTypeElement(type).asType();
-  }
-
-  public TypeMirror asType(Class<?> type) {
-    String canonicalName = type.getCanonicalName();
-    if (canonicalName != null) {
-      return elements.getTypeElement(canonicalName).asType();
-    }
-    AnnotatedType[] interfaces = type.getAnnotatedInterfaces();
-    if (interfaces.length == 1) {
-      AnnotatedType interface1 = interfaces[0];
-      if (!(interface1.getType() instanceof ParameterizedType)) {
-        throw new IllegalArgumentException("Not a parameterized type: " + type);
-      }
-      String typeName = ((ParameterizedType) interface1.getType()).getRawType().getTypeName();
-      return elements.getTypeElement(typeName).asType();
-    }
-    throw new IllegalArgumentException("Expecting exactly one interface: " + type);
-  }
-
-  public DeclaredType optionalOf(Class<?> type) {
-    return optionalOf(asTypeElement(type).asType());
+  public DeclaredType optionalOf(String canonicalName) {
+    return optionalOf(asTypeElement(canonicalName).asType());
   }
 
   private DeclaredType optionalOf(TypeMirror typeMirror) {
-    return types.getDeclaredType(asTypeElement(Optional.class), typeMirror);
+    return types.getDeclaredType(asTypeElement(Optional.class.getCanonicalName()), typeMirror);
   }
 
   public boolean isEnumType(TypeMirror mirror) {
     return types.directSupertypes(mirror).stream()
-        .anyMatch(t -> isSameErasure(types.directSupertypes(mirror).get(0), Enum.class));
+        .anyMatch(t -> isSameErasure(types.directSupertypes(mirror).get(0), Enum.class.getCanonicalName()));
   }
 
-  public boolean isReachable(TypeMirror mirror) {
+  public boolean isUnreachable(TypeMirror mirror) {
     TypeKind kind = mirror.getKind();
     if (kind != TypeKind.DECLARED) {
-      return true;
+      return false;
     }
     DeclaredType declared = asDeclared(mirror);
     if (declared.asElement().getModifiers().contains(Modifier.PRIVATE)) {
-      return false;
+      return true;
     }
     List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
     for (TypeMirror typeArgument : typeArguments) {
-      if (!isReachable(typeArgument)) {
-        return false;
+      if (isUnreachable(typeArgument)) {
+        return true;
       }
     }
-    return true;
+    return false;
   }
 
   public TypeMirror box(TypeMirror mirror) {
     PrimitiveType primitive = mirror.accept(AS_PRIMITIVE, null);
     return primitive == null ? mirror : types.boxedClass(primitive).asType();
-  }
-
-  private TypeElement asTypeElement(Class<?> clazz) {
-    return asTypeElement(clazz.getCanonicalName());
   }
 
   public TypeElement asTypeElement(String canonicalName) {
@@ -291,10 +258,10 @@ public class TypeTool {
   }
 
   public Either<Function<String, String>, TypeMirror> getSpecialization(TypeMirror thisType, TypeMirror thatType) {
-    if (isAssignable(thisType, thatType)) {
+    if (types.isAssignable(thisType, thatType)) {
       return right(thisType);
     }
-    if (isAssignable(thatType, thisType)) {
+    if (types.isAssignable(thatType, thisType)) {
       return right(thatType);
     }
     return left(key -> String.format("Cannot infer %s: %s vs %s", key, thisType, thatType));

@@ -68,7 +68,7 @@ class AnnotationUtil {
 
   private static AnnotationMirror getAnnotationMirror(TypeTool tool, ExecutableElement sourceMethod, Class<?> annotationClass) {
     return sourceMethod.getAnnotationMirrors().stream()
-        .filter(m -> tool.isSameType(m.getAnnotationType(), annotationClass))
+        .filter(m -> tool.isSameType(m.getAnnotationType(), annotationClass.getCanonicalName()))
         .findAny().orElse(null);
   }
 

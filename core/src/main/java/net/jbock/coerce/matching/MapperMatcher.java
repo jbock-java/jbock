@@ -34,7 +34,7 @@ public class MapperMatcher {
   private List<MatchingAttempt> getAttempts() {
     TypeMirror returnType = basicInfo.returnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
-    Optional<TypeMirror> listWrapped = tool().unwrap(List.class, returnType);
+    Optional<TypeMirror> listWrapped = tool().unwrap(returnType, List.class.getCanonicalName());
     List<MatchingAttempt> attempts = new ArrayList<>();
     opt.ifPresent(optional -> {
       ParameterSpec param = basicInfo.constructorParam(optional.liftedType());

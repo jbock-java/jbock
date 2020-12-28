@@ -165,7 +165,7 @@ public final class Processor extends AbstractProcessor {
 
   private void validateSourceElement(TypeTool tool, TypeElement sourceElement) {
     SuppliedClassValidator.commonChecks(sourceElement);
-    if (!tool.isSameType(sourceElement.getSuperclass(), Object.class) || !sourceElement.getInterfaces().isEmpty()) {
+    if (!tool.isSameType(sourceElement.getSuperclass(), Object.class.getCanonicalName()) || !sourceElement.getInterfaces().isEmpty()) {
       throw ValidationException.create(sourceElement, "The model class may not implement or extend anything.");
     }
     if (!sourceElement.getTypeParameters().isEmpty()) {
@@ -223,7 +223,7 @@ public final class Processor extends AbstractProcessor {
       throw ValidationException.create(method, String.format("Use either @%s or @%s annotation, but not both",
           Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
-    if (!tool.isReachable(method.getReturnType())) {
+    if (tool.isUnreachable(method.getReturnType())) {
       throw ValidationException.create(method, "Unreachable parameter type.");
     }
     return true;
