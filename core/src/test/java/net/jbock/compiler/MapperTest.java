@@ -99,7 +99,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve E to java.lang.String.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.String to E.");
   }
 
   @Test
@@ -154,7 +154,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve E to java.lang.String.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.String to E.");
   }
 
 
@@ -813,7 +813,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve F to java.util.Set<java.lang.Integer>.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.util.Set<java.lang.Integer> to F.");
   }
 
 }

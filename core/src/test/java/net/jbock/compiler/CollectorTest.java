@@ -357,7 +357,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to java.lang.Integer.");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign java.lang.Integer to E.");
   }
 
   @Test
@@ -367,17 +367,21 @@ class CollectorTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\",",
+        "          mappedBy = MapMap.class,",
         "          collectedBy = MyCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
-        "  static class MyCollector<E extends Long & Number, F> implements Supplier<Collector<E, ?, Set<F>>> {",
+        "  static class MapMap implements Supplier<Function<String, Long>> {",
+        "    public Function<String, Long> get() { return null; }",
+        "  }",
+        "",
+        "  static class MyCollector<E extends Long & java.io.Serializable, F> implements Supplier<Collector<E, ?, Set<F>>> {",
         "    public Collector<E, ?, Set<F>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Intersection type is not supported for typevar E.");
+        .compilesWithoutError();
   }
 
   @Test
@@ -426,7 +430,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.Long to java.lang.String.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.Long to E.");
   }
 
   @Test
@@ -475,7 +479,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Invalid bounds: Can't resolve A to java.lang.String.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign E to A.");
   }
 
   @Test
@@ -558,8 +562,8 @@ class CollectorTest {
         "          collectedBy = MyCollector.class)",
         "  abstract Set<Integer> integers();",
         "",
-        "  static class MyCollector<E extends String, F> implements Supplier<Collector<E, ?, Set<F>>> {",
-        "    public Collector<E, ?, Set<F>> get() { return null; }",
+        "  static class MyCollector<F> implements Supplier<Collector<String, ?, Set<F>>> {",
+        "    public Collector<String, ?, Set<F>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -639,7 +643,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Invalid bounds: Can't resolve E to java.lang.String.");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign java.lang.String to E.");
   }
 
 

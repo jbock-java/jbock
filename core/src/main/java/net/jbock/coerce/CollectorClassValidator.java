@@ -25,7 +25,9 @@ class CollectorClassValidator {
 
   CollectorClassValidator(
       Function<String, ValidationException> errorHandler,
-      TypeTool tool, TypeElement collectorClass, TypeMirror returnType) {
+      TypeTool tool,
+      TypeElement collectorClass,
+      TypeMirror returnType) {
     this.errorHandler = errorHandler;
     this.tool = tool;
     this.collectorClass = collectorClass;

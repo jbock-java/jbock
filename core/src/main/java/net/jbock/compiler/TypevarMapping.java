@@ -96,24 +96,18 @@ public class TypevarMapping {
   }
 
   public Either<String, FlattenerResult> getTypeParameters(TypeElement targetElement) {
-    List<TypeMirror> result = new ArrayList<>();
-    Map<String, TypeMirror> mapping = new LinkedHashMap<>(map);
     List<? extends TypeParameterElement> parameters = targetElement.getTypeParameters();
+    List<TypeMirror> result = new ArrayList<>(parameters.size());
     for (TypeParameterElement p : parameters) {
-      TypeMirror m = map.get(p.toString());
-      if (m == null || m.getKind() == TypeKind.TYPEVAR) {
-        Either<String, TypeMirror> inferred = tool.getBound(p);
-        if (inferred instanceof Left) {
-          return left(((Left<String, TypeMirror>) inferred).value());
-        }
-        m = ((Right<String, TypeMirror>) inferred).value();
+      TypeMirror m = map.getOrDefault(p.toString(), p.asType());
+      if (m.getKind() == TypeKind.TYPEVAR) {
+        m = m.accept(TypeTool.AS_TYPEVAR, null).getUpperBound();
       }
-      if (tool.isOutOfBounds(m, p.getBounds())) {
-        return left("Invalid bounds: Can't resolve " + p.toString() + " to " + m);
+      if (m.getKind() == TypeKind.INTERSECTION) {
+        m = m.accept(TypeTool.AS_INTERSECTION, null).getBounds().get(0);
       }
-      mapping.put(p.toString(), m);
       result.add(m);
     }
-    return right(new FlattenerResult(result, new TypevarMapping(mapping, tool, errorHandler)));
+    return right(new FlattenerResult(result, new TypevarMapping(map, tool, errorHandler)));
   }
 }

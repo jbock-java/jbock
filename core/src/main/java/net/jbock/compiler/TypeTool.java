@@ -6,11 +6,12 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor8;
@@ -65,6 +66,24 @@ public class TypeTool {
         }
       };
 
+  public static final TypeVisitor<TypeVariable, Void> AS_TYPEVAR =
+      new SimpleTypeVisitor8<TypeVariable, Void>() {
+
+        @Override
+        public TypeVariable visitTypeVariable(TypeVariable t, Void unused) {
+          return t;
+        }
+      };
+
+  public static final TypeVisitor<IntersectionType, Void> AS_INTERSECTION =
+      new SimpleTypeVisitor8<IntersectionType, Void>() {
+
+        @Override
+        public IntersectionType visitIntersection(IntersectionType t, Void unused) {
+          return t;
+        }
+      };
+
   private final Types types;
 
   private final Elements elements;
@@ -75,16 +94,20 @@ public class TypeTool {
     this.elements = elements;
   }
 
+  // solve typevars in y
   private String unify(TypeMirror x, TypeMirror y, Map<String, TypeMirror> acc) {
     if (y.getKind() == TypeKind.TYPEVAR) {
+      if (!types.isAssignable(x, y.accept(AS_TYPEVAR, null).getUpperBound())) {
+        return "Unification failed: can't assign " + x + " to " + y;
+      }
       acc.put(y.toString(), x);
       return null; // success
     }
     if (x.getKind() == TypeKind.TYPEVAR) {
-      return "can't unify " + y + " with typevar " + x;
-    }
-    if (isSameType(x, Object.class.getCanonicalName())) {
-      return null; // success
+      if (!types.isAssignable(y, x.accept(AS_TYPEVAR, null).getUpperBound())) {
+        return "Unification failed: can't assign " + y + " to " + x;
+      }
+      return null; // no constraint for y
     }
     if (x.getKind() != y.getKind()) {
       return "can't unify " + x + " with " + y;
@@ -126,7 +149,7 @@ public class TypeTool {
         return failure;
       }
     }
-    return null; // success
+    return null;
   }
 
   public Either<String, TypevarMapping> unify(TypeMirror concreteType, TypeMirror ym, Function<String, ValidationException> errorHandler) {
@@ -240,21 +263,6 @@ public class TypeTool {
       throw new IllegalArgumentException("not declared: " + mirror);
     }
     return result;
-  }
-
-  public boolean isOutOfBounds(TypeMirror mirror, List<? extends TypeMirror> bounds) {
-    return bounds.stream().anyMatch(bound -> !types.isAssignable(mirror, bound));
-  }
-
-  public Either<String, TypeMirror> getBound(TypeParameterElement p) {
-    List<? extends TypeMirror> bounds = p.getBounds();
-    if (bounds.isEmpty()) {
-      return right(getDeclaredType(Object.class, Collections.emptyList()));
-    }
-    if (bounds.size() >= 2) {
-      return left("Intersection type is not supported for typevar " + p.toString());
-    }
-    return right(bounds.get(0));
   }
 
   public Either<Function<String, String>, TypeMirror> getSpecialization(TypeMirror thisType, TypeMirror thatType) {
