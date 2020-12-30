@@ -106,7 +106,7 @@ public class TypeTool {
       }
       return null; // no constraint for y
     }
-    if (y.getKind() == TypeKind.WILDCARD) {
+    if (x.getKind() == TypeKind.WILDCARD || y.getKind() == TypeKind.WILDCARD) {
       return "Unification failed: wildcard is not allowed here";
     }
     if (x.getKind() != y.getKind()) {
