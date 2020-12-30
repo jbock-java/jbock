@@ -129,10 +129,9 @@ public class TypeTool {
       return "raw type: " + y;
     }
     if (x.getKind() == TypeKind.ARRAY) {
-      if (!isSameErasure(x, y)) {
-        return "Unification failed: " + y + " and " + x + " have different erasure";
-      }
-      return null;
+      TypeMirror xc = x.accept(AS_ARRAY, null).getComponentType();
+      TypeMirror yc = y.accept(AS_ARRAY, null).getComponentType();
+      return unify(xc, yc, acc);
     }
     if (x.getKind() != TypeKind.DECLARED) {
       if (!types.isAssignable(y, x)) {

@@ -77,7 +77,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: java.lang.String[] and E[] have different erasure.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.String to E.");
   }
 
   @Test
