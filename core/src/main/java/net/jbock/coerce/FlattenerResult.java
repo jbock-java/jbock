@@ -1,7 +1,5 @@
 package net.jbock.coerce;
 
-import net.jbock.compiler.TypevarMapping;
-
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 

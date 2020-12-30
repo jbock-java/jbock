@@ -1,9 +1,10 @@
-package net.jbock.compiler;
+package net.jbock.coerce;
 
-import net.jbock.coerce.FlattenerResult;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
+import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.element.TypeParameterElement;

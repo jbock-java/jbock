@@ -1,7 +1,10 @@
-package net.jbock.compiler;
+package net.jbock.coerce;
 
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Right;
+import net.jbock.compiler.EvaluatingProcessor;
+import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.ValidationException;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 

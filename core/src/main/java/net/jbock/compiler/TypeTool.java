@@ -1,5 +1,6 @@
 package net.jbock.compiler;
 
+import net.jbock.coerce.TypevarMapping;
 import net.jbock.coerce.either.Either;
 
 import javax.lang.model.element.Element;

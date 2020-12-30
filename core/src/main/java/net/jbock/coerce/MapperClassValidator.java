@@ -5,7 +5,6 @@ import net.jbock.coerce.either.Either;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.coerce.reference.ReferencedType;
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.TypevarMapping;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
