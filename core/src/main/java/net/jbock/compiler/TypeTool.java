@@ -19,7 +19,6 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
-import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
