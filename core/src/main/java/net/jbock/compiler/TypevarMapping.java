@@ -18,6 +18,7 @@ import java.util.function.Function;
 
 import static net.jbock.coerce.either.Either.left;
 import static net.jbock.coerce.either.Either.right;
+import static net.jbock.compiler.TypeTool.AS_ARRAY;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 
 public class TypevarMapping {
@@ -49,13 +50,19 @@ public class TypevarMapping {
       return map.getOrDefault(input.toString(), input);
     }
     if (input.getKind() == TypeKind.ARRAY) {
-      return input; // TODO generic array?
+      return tool.getArrayType(substitute(input.accept(AS_ARRAY, null).getComponentType()));
+    }
+    if (input.getKind() != TypeKind.DECLARED) {
+      return input;
     }
     return substitute(input.accept(AS_DECLARED, null));
   }
 
   private DeclaredType substitute(DeclaredType declaredType) {
     List<? extends TypeMirror> typeArguments = declaredType.getTypeArguments();
+    if (typeArguments.isEmpty()) {
+      return declaredType;
+    }
     TypeMirror[] result = new TypeMirror[typeArguments.size()];
     for (int i = 0; i < typeArguments.size(); i++) {
       TypeMirror arg = typeArguments.get(i);
@@ -68,7 +75,7 @@ public class TypevarMapping {
           break;
         case WILDCARD:
         case ARRAY:
-          result[i] = arg;
+          result[i] = tool.getArrayType(substitute(arg.accept(AS_ARRAY, null).getComponentType()));
           break;
         default:
           throw errorHandler.apply("substitution failed");

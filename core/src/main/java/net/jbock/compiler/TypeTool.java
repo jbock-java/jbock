@@ -6,6 +6,7 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.PrimitiveType;
@@ -80,6 +81,14 @@ public class TypeTool {
 
         @Override
         public IntersectionType visitIntersection(IntersectionType t, Void unused) {
+          return t;
+        }
+      };
+
+  public static final TypeVisitor<ArrayType, Void> AS_ARRAY =
+      new SimpleTypeVisitor8<ArrayType, Void>() {
+        @Override
+        public ArrayType visitArray(ArrayType t, Void unused) {
           return t;
         }
       };
@@ -273,5 +282,9 @@ public class TypeTool {
       return right(thatType);
     }
     return left(key -> String.format("Cannot infer %s: %s vs %s", key, thisType, thatType));
+  }
+
+  public TypeMirror getArrayType(TypeMirror componentType) {
+    return types.getArrayType(componentType);
   }
 }
