@@ -74,11 +74,12 @@ public class TypevarMapping {
           result[i] = substitute(TypeTool.asDeclared(arg)); // recursion
           break;
         case WILDCARD:
+          result[i] = arg;
         case ARRAY:
           result[i] = tool.getArrayType(substitute(arg.accept(AS_ARRAY, null).getComponentType()));
           break;
         default:
-          throw errorHandler.apply("substitution failed");
+          throw errorHandler.apply("substitution failed: unknown typearg " + arg);
       }
     }
     return tool.getDeclaredType(tool.asTypeElement(declaredType), result);
