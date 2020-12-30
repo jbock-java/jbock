@@ -12,6 +12,26 @@ import static net.jbock.compiler.ProcessorTest.fromSource;
 class CollectorTest {
 
   @Test
+  void wildcard() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "          collectedBy = MyCollector.class)",
+        "  abstract Set<String> strings();",
+        "",
+        "  static class MyCollector implements Supplier<Collector<String, ?, ?>> {",
+        "    public Collector<String, ?, ?> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the collector class: Unification failed: wildcard is not allowed here.");
+  }
+
+  @Test
   void collectorValidExtendsCollector() {
     JavaFileObject javaFile = fromSource(
         "@Command",

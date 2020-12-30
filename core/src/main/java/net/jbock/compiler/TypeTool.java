@@ -31,19 +31,6 @@ import static net.jbock.coerce.either.Either.right;
 
 public class TypeTool {
 
-  private static final TypeVisitor<List<? extends TypeMirror>, Void> TYPEARGS =
-      new SimpleTypeVisitor8<List<? extends TypeMirror>, Void>() {
-        @Override
-        public List<? extends TypeMirror> visitDeclared(DeclaredType declaredType, Void _null) {
-          return declaredType.getTypeArguments();
-        }
-
-        @Override
-        protected List<? extends TypeMirror> defaultAction(TypeMirror e, Void _null) {
-          return Collections.emptyList();
-        }
-      };
-
   public static final TypeVisitor<DeclaredType, Void> AS_DECLARED =
       new SimpleTypeVisitor8<DeclaredType, Void>() {
         @Override
@@ -119,14 +106,11 @@ public class TypeTool {
       }
       return null; // no constraint for y
     }
+    if (y.getKind() == TypeKind.WILDCARD) {
+      return "Unification failed: wildcard is not allowed here";
+    }
     if (x.getKind() != y.getKind()) {
       return "can't unify " + x + " with " + y;
-    }
-    if (isRaw(x)) {
-      return "raw type: " + x;
-    }
-    if (isRaw(y)) {
-      return "raw type: " + y;
     }
     if (x.getKind() == TypeKind.ARRAY) {
       TypeMirror xc = x.accept(AS_ARRAY, null).getComponentType();
@@ -139,7 +123,15 @@ public class TypeTool {
       }
       return null;
     }
-    List<? extends TypeMirror> xargs = x.accept(TYPEARGS, null);
+    DeclaredType xx = asDeclared(x);
+    DeclaredType yy = asDeclared(y);
+    if (isRaw(xx)) {
+      return "raw type: " + x;
+    }
+    if (isRaw(yy)) {
+      return "raw type: " + y;
+    }
+    List<? extends TypeMirror> xargs = xx.getTypeArguments();
     if (xargs.isEmpty()) {
       if (!types.isAssignable(y, x)) {
         return "Unification failed: can't assign " + y + " to " + x;
@@ -148,7 +140,7 @@ public class TypeTool {
     if (!isSameErasure(x, y)) {
       return "Unification failed: " + y + " and " + x + " have different erasure";
     }
-    List<? extends TypeMirror> yargs = y.accept(TYPEARGS, null);
+    List<? extends TypeMirror> yargs = yy.getTypeArguments();
     if (xargs.size() != yargs.size()) {
       return "can't unify " + x + " with " + y;
     }
@@ -167,12 +159,8 @@ public class TypeTool {
     return failure != null ? left(failure) : right(new TypevarMapping(acc, this, errorHandler));
   }
 
-  private boolean isRaw(TypeMirror m) {
-    if (m.getKind() != TypeKind.DECLARED) {
-      return false;
-    }
-    DeclaredType declaredType = asDeclared(m);
-    return declaredType.getTypeArguments().size() != asTypeElement(m).getTypeParameters().size();
+  private boolean isRaw(DeclaredType declaredType) {
+    return declaredType.getTypeArguments().size() != asTypeElement(declaredType).getTypeParameters().size();
   }
 
   public DeclaredType getDeclaredType(Class<?> clazz, List<? extends TypeMirror> typeArguments) {
