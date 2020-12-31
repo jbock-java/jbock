@@ -23,7 +23,12 @@ public class Unifier {
     this.types = types;
   }
 
-  // resolve typevars in y
+  /**
+   * Resolve typevars in y, to make its type equal to x.
+   * If a typevar in x is encountered, that means that we have an
+   * extra degree of freedom and we can later replace it with its upper bound,
+   * provided that the bound is compatible with y.
+   */
   public String unify(TypeMirror x, TypeMirror y) {
     if (y.getKind() == TypeKind.TYPEVAR) {
       if (!types.isAssignable(x, y.accept(AS_TYPEVAR, null).getUpperBound())) {
