@@ -63,11 +63,6 @@ public class Unifier {
     DeclaredType xx = x.accept(TypeTool.AS_DECLARED, null);
     DeclaredType yy = y.accept(TypeTool.AS_DECLARED, null);
     List<? extends TypeMirror> xargs = xx.getTypeArguments();
-    if (xargs.isEmpty()) {
-      if (!types.isAssignable(y, x)) {
-        return "Unification failed: can't assign " + y + " to " + x;
-      }
-    }
     if (!types.isSameType(types.erasure(x), types.erasure(y))) {
       return "Unification failed: " + y + " and " + x + " have different erasure";
     }

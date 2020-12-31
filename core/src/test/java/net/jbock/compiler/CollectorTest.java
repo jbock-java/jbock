@@ -221,7 +221,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.Integer to java.lang.String");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: java.lang.Integer and java.lang.String have different erasure.");
   }
 
   @Test
@@ -776,7 +776,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign java.util.Set<E> to test.Arguments.Foo.");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: java.util.Set<E> and test.Arguments.Foo have different erasure.");
   }
 
   @Test

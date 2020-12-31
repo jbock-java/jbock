@@ -354,7 +354,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.String to java.lang.Integer.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: java.lang.String and java.lang.Integer have different erasure.");
   }
 
   @Test
@@ -701,6 +701,25 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
+  }
+
+  @Test
+  void charSequence() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
+        "  abstract List<List<java.lang.CharSequence>> number();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, List<List<String>>>> {",
+        "    public Function<String, List<List<String>>> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: java.lang.String and java.lang.CharSequence have different erasure.");
   }
 
   @Test
