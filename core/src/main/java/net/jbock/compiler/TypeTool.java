@@ -124,12 +124,6 @@ public class TypeTool {
     }
     DeclaredType xx = asDeclared(x);
     DeclaredType yy = asDeclared(y);
-    if (isRaw(xx)) {
-      return "raw type: " + x;
-    }
-    if (isRaw(yy)) {
-      return "raw type: " + y;
-    }
     List<? extends TypeMirror> xargs = xx.getTypeArguments();
     if (xargs.isEmpty()) {
       if (!types.isAssignable(y, x)) {
@@ -156,10 +150,6 @@ public class TypeTool {
     Map<String, TypeMirror> acc = new LinkedHashMap<>();
     String failure = unify(concreteType, ym, acc);
     return failure != null ? left(failure) : right(new TypevarMapping(acc, this, errorHandler));
-  }
-
-  private boolean isRaw(DeclaredType declaredType) {
-    return declaredType.getTypeArguments().size() != asTypeElement(declaredType).getTypeParameters().size();
   }
 
   public DeclaredType getDeclaredType(Class<?> clazz, List<? extends TypeMirror> typeArguments) {

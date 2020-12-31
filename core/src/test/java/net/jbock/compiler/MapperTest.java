@@ -358,6 +358,24 @@ class MapperTest {
   }
 
   @Test
+  void rawType() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = Mapper.class)",
+        "  abstract List things();",
+        "",
+        "  static class Mapper implements Supplier<Function<String, List>> {",
+        "    public Function<String, List> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void mapperValidTypevars() {
     JavaFileObject javaFile = fromSource(
         "@Command",

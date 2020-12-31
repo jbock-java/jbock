@@ -54,6 +54,24 @@ class CollectorTest {
   }
 
   @Test
+  void rawType() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", collectedBy = MySupplier.class)",
+        "  abstract List<Set> strings();",
+        "",
+        "  static class MySupplier implements Supplier<Collector<String, ?, List<Set>>> {",
+        "    public Collector<String, ?, List<Set>> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void genericArrayGoodHint() {
     JavaFileObject javaFile = fromSource(
         "@Command",
