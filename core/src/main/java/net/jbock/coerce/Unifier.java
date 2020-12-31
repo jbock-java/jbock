@@ -47,7 +47,7 @@ public class Unifier {
       return "Unification failed: wildcard is not allowed here";
     }
     if (x.getKind() != y.getKind()) {
-      return "can't unify " + x + " with " + y;
+      return "Unification failed: " + y + " and " + x + " cannot be unified";
     }
     if (x.getKind() == TypeKind.ARRAY) {
       TypeMirror xc = x.accept(AS_ARRAY, null).getComponentType();
@@ -68,7 +68,7 @@ public class Unifier {
     }
     List<? extends TypeMirror> yargs = yy.getTypeArguments();
     if (xargs.size() != yargs.size()) {
-      return "can't unify " + x + " with " + y;
+      return "Unification failed: " + y + " and " + x + " have different numbers of typeargs";
     }
     for (int i = 0; i < yargs.size(); i++) {
       String failure = unify(xargs.get(i), yargs.get(i));
