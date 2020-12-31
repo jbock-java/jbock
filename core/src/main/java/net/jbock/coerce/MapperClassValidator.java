@@ -59,7 +59,7 @@ public final class MapperClassValidator {
         .flatMap(Function.identity(), mapping ->
             mapping.getTypeParameters(mapperClass))
         .map(this::enrichMessage, typeParameters -> CodeBlock.of("new $T$L()$L",
-            tool.erasure(mapperClass.asType()),
+            tool.types().erasure(mapperClass.asType()),
             getTypeParameterList(typeParameters.getTypeParameters()),
             functionType.isSupplier() ? ".get()" : ""));
   }

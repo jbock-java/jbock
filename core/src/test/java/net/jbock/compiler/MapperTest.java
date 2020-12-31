@@ -810,9 +810,8 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Cannot infer E: java.lang.String vs java.util.List<java.lang.Integer>.");
+        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.util.List<java.lang.Integer>.");
   }
-
 
   @Test
   void freeTypeVariableInMapper() {
@@ -833,5 +832,4 @@ class MapperTest {
         .failsToCompile()
         .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.util.Set<java.lang.Integer> to F.");
   }
-
 }

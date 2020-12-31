@@ -11,6 +11,7 @@ import net.jbock.compiler.ValidationException;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import java.util.Optional;
 
 /**
@@ -47,7 +48,7 @@ public class BasicInfo {
     if (mapExpr.isPresent()) {
       return mapExpr;
     }
-    if (tool.isEnumType(testType)) {
+    if (isEnumType(testType)) {
       return Optional.of(CodeBlock.of("$T::valueOf", testType));
     }
     return Optional.empty();
@@ -80,5 +81,11 @@ public class BasicInfo {
 
   public ClassName optionType() {
     return optionType;
+  }
+
+  private boolean isEnumType(TypeMirror mirror) {
+    Types types = tool.types();
+    return types.directSupertypes(mirror).stream()
+        .anyMatch(t -> tool.isSameErasure(t, Enum.class.getCanonicalName()));
   }
 }

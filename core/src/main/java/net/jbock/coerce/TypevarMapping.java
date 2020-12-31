@@ -1,8 +1,6 @@
 package net.jbock.coerce;
 
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.either.Left;
-import net.jbock.coerce.either.Right;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -11,6 +9,7 @@ import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -29,11 +28,14 @@ public class TypevarMapping {
 
   private final TypeTool tool;
 
+  private final Types types;
+
   private final Function<String, ValidationException> errorHandler;
 
   public TypevarMapping(Map<String, TypeMirror> map, TypeTool tool, Function<String, ValidationException> errorHandler) {
     this.map = map;
     this.tool = tool;
+    this.types = tool.types();
     this.errorHandler = errorHandler;
   }
 
@@ -84,23 +86,21 @@ public class TypevarMapping {
           throw errorHandler.apply("substitution failed: unknown typearg " + arg);
       }
     }
-    return tool.getDeclaredType(tool.asTypeElement(declaredType), result);
+    return types.getDeclaredType(tool.asTypeElement(declaredType), result);
   }
 
   public Either<String, TypevarMapping> merge(TypevarMapping solution) {
     Map<String, TypeMirror> result = new LinkedHashMap<>(map);
     for (String key : solution.map.keySet()) {
-      TypeMirror thisType = map.get(key);
-      TypeMirror thatType = solution.get(key);
-      if (thisType != null) {
-        Either<Function<String, String>, TypeMirror> specialization = tool.getSpecialization(thisType, thatType);
-        if (specialization instanceof Left) {
-          return left(((Left<Function<String, String>, TypeMirror>) specialization).value().apply(key));
+      TypeMirror solutionType = solution.get(key);
+      if (map.containsKey(key)) {
+        TypeMirror mapType = map.get(key);
+        if (!tool.types().isSameType(mapType, solutionType)) {
+          return left(String.format("Conflicting solutions for " + key +
+              ": %s vs %s", mapType, solutionType));
         }
-        result.put(key, ((Right<Function<String, String>, TypeMirror>) specialization).value());
-      } else {
-        result.put(key, thatType);
       }
+      result.put(key, solutionType);
     }
     return right(new TypevarMapping(result, tool, errorHandler));
   }

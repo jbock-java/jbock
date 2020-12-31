@@ -6,13 +6,11 @@ import net.jbock.coerce.either.Either;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
-import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.TypeVisitor;
@@ -20,7 +18,6 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -37,7 +34,7 @@ public class TypeTool {
         }
       };
 
-  private static final TypeVisitor<PrimitiveType, Void> AS_PRIMITIVE =
+  public static final TypeVisitor<PrimitiveType, Void> AS_PRIMITIVE =
       new SimpleTypeVisitor8<PrimitiveType, Void>() {
         @Override
         public PrimitiveType visitPrimitive(PrimitiveType primitiveType, Void _null) {
@@ -89,20 +86,14 @@ public class TypeTool {
     this.elements = elements;
   }
 
-
-  public DeclaredType getDeclaredType(Class<?> clazz, List<? extends TypeMirror> typeArguments) {
-    return getDeclaredType(asTypeElement(clazz.getCanonicalName()), typeArguments.toArray(new TypeMirror[0]));
-  }
-
-  public DeclaredType getDeclaredType(TypeElement element, TypeMirror[] typeArguments) {
-    return types.getDeclaredType(element, typeArguments);
-  }
-
   public boolean isSameType(TypeMirror mirror, String canonicalName) {
     return types.isSameType(mirror, asTypeElement(canonicalName).asType());
   }
 
-  public Optional<TypeMirror> unwrap(TypeMirror mirror, String canonicalName) {
+  /**
+   * The canonical name must be a class with exactly one type parameter.
+   */
+  public Optional<TypeMirror> getSingleTypeArgument(TypeMirror mirror, String canonicalName) {
     if (!isSameErasure(mirror, canonicalName)) {
       return Optional.empty();
     }
@@ -119,46 +110,6 @@ public class TypeTool {
 
   private boolean isSameErasure(TypeMirror x, TypeMirror y) {
     return types.isSameType(types.erasure(x), types.erasure(y));
-  }
-
-  public TypeMirror erasure(TypeMirror typeMirror) {
-    return types.erasure(typeMirror);
-  }
-
-  public DeclaredType optionalOf(String canonicalName) {
-    return optionalOf(asTypeElement(canonicalName).asType());
-  }
-
-  private DeclaredType optionalOf(TypeMirror typeMirror) {
-    return types.getDeclaredType(asTypeElement(Optional.class.getCanonicalName()), typeMirror);
-  }
-
-  public boolean isEnumType(TypeMirror mirror) {
-    return types.directSupertypes(mirror).stream()
-        .anyMatch(t -> isSameErasure(types.directSupertypes(mirror).get(0), Enum.class.getCanonicalName()));
-  }
-
-  public boolean isUnreachable(TypeMirror mirror) {
-    TypeKind kind = mirror.getKind();
-    if (kind != TypeKind.DECLARED) {
-      return false;
-    }
-    DeclaredType declared = asDeclared(mirror);
-    if (declared.asElement().getModifiers().contains(Modifier.PRIVATE)) {
-      return true;
-    }
-    List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
-    for (TypeMirror typeArgument : typeArguments) {
-      if (isUnreachable(typeArgument)) {
-        return true;
-      }
-    }
-    return false;
-  }
-
-  public TypeMirror box(TypeMirror mirror) {
-    PrimitiveType primitive = mirror.accept(AS_PRIMITIVE, null);
-    return primitive == null ? mirror : types.boxedClass(primitive).asType();
   }
 
   public TypeElement asTypeElement(String canonicalName) {
@@ -189,16 +140,6 @@ public class TypeTool {
     return result;
   }
 
-  public Either<Function<String, String>, TypeMirror> getSpecialization(TypeMirror thisType, TypeMirror thatType) {
-    if (types.isAssignable(thisType, thatType)) {
-      return right(thisType);
-    }
-    if (types.isAssignable(thatType, thisType)) {
-      return right(thatType);
-    }
-    return left(key -> String.format("Cannot infer %s: %s vs %s", key, thisType, thatType));
-  }
-
   public TypeMirror getArrayType(TypeMirror componentType) {
     return types.getArrayType(componentType);
   }
@@ -210,5 +151,9 @@ public class TypeTool {
     Unifier unifier = new Unifier(types);
     String failure = unifier.unify(concreteType, ym);
     return failure != null ? left(failure) : right(new TypevarMapping(unifier.getResult(), this, errorHandler));
+  }
+
+  public Types types() {
+    return types;
   }
 }

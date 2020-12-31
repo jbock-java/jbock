@@ -707,7 +707,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Cannot infer E: java.lang.String vs java.lang.Integer.");
+        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.lang.Integer.");
   }
 
   @Test

@@ -9,7 +9,10 @@ import org.junit.jupiter.api.Test;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -34,7 +37,7 @@ class CollectorClassValidatorTest {
     ).run("ToSetCollector", (elements, types) -> {
 
       TypeTool tool = new TypeTool(elements, types);
-      DeclaredType returnType = tool.getDeclaredType(Set.class, Collections.singletonList(tool.asTypeElement(String.class.getCanonicalName()).asType()));
+      DeclaredType returnType = getDeclaredType(tool, Set.class, Collections.singletonList(tool.asTypeElement(String.class.getCanonicalName()).asType()));
       TypeElement collectorClass = elements.getTypeElement("ToSetCollector");
       CollectorInfo collectorInfo = new CollectorClassValidator(s -> ValidationException.create(mock(Element.class), s),
           tool, collectorClass, returnType)
@@ -42,5 +45,14 @@ class CollectorClassValidatorTest {
       CodeBlock expected = CodeBlock.of(".collect(new $T<$T>().get())", types.erasure(collectorClass.asType()), String.class);
       assertEquals(expected, collectorInfo.collectExpr());
     });
+  }
+
+  private DeclaredType getDeclaredType(
+      TypeTool tool,
+      Class<?> clazz,
+      List<? extends TypeMirror> typeArguments) {
+    TypeElement element = tool.asTypeElement(clazz.getCanonicalName());
+    Types types = tool.types();
+    return types.getDeclaredType(element, typeArguments.toArray(new TypeMirror[0]));
   }
 }

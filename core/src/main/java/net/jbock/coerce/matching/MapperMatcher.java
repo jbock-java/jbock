@@ -20,6 +20,7 @@ import static net.jbock.coerce.NonFlagSkew.OPTIONAL;
 import static net.jbock.coerce.NonFlagSkew.REPEATABLE;
 import static net.jbock.coerce.NonFlagSkew.REQUIRED;
 import static net.jbock.coerce.either.Either.left;
+import static net.jbock.coerce.matching.AutoMatcher.boxedType;
 
 public class MapperMatcher {
 
@@ -34,7 +35,7 @@ public class MapperMatcher {
   private List<MatchingAttempt> getAttempts() {
     TypeMirror returnType = basicInfo.returnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
-    Optional<TypeMirror> listWrapped = tool().unwrap(returnType, List.class.getCanonicalName());
+    Optional<TypeMirror> listWrapped = tool().getSingleTypeArgument(returnType, List.class.getCanonicalName());
     List<MatchingAttempt> attempts = new ArrayList<>();
     opt.ifPresent(optional -> {
       ParameterSpec param = basicInfo.constructorParam(optional.liftedType());
@@ -50,7 +51,7 @@ public class MapperMatcher {
     });
     ParameterSpec param = basicInfo.constructorParam(returnType);
     // exact match (-> required)
-    attempts.add(attempt(tool().box(returnType), param, REQUIRED));
+    attempts.add(attempt(boxedType(returnType, tool().types()), param, REQUIRED));
     return attempts;
   }
 

@@ -14,7 +14,11 @@ import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
+import javax.lang.model.type.TypeKind;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -32,6 +36,7 @@ import java.util.stream.Stream;
 import static java.util.stream.Collectors.toSet;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
+import static net.jbock.compiler.TypeTool.AS_DECLARED;
 
 public final class Processor extends AbstractProcessor {
 
@@ -223,10 +228,28 @@ public final class Processor extends AbstractProcessor {
       throw ValidationException.create(method, String.format("Use either @%s or @%s annotation, but not both",
           Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
-    if (tool.isUnreachable(method.getReturnType())) {
+    if (isUnreachable(method.getReturnType())) {
       throw ValidationException.create(method, "Unreachable parameter type.");
     }
     return true;
+  }
+
+  private static boolean isUnreachable(TypeMirror mirror) {
+    TypeKind kind = mirror.getKind();
+    if (kind != TypeKind.DECLARED) {
+      return false;
+    }
+    DeclaredType declared = mirror.accept(AS_DECLARED, null);
+    if (declared.asElement().getModifiers().contains(Modifier.PRIVATE)) {
+      return true;
+    }
+    List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
+    for (TypeMirror typeArgument : typeArguments) {
+      if (isUnreachable(typeArgument)) {
+        return true;
+      }
+    }
+    return false;
   }
 
   private List<ExecutableElement> getAnnotatedMethods(RoundEnvironment env, Set<? extends TypeElement> annotations) {

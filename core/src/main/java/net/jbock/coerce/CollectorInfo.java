@@ -23,7 +23,7 @@ class CollectorInfo {
 
   static CollectorInfo create(TypeTool tool, TypeMirror inputType, TypeElement collectorClass, boolean supplier, List<TypeMirror> solution) {
     return new CollectorInfo(inputType, CodeBlock.of(".collect(new $T$L()$L)",
-        tool.erasure(collectorClass.asType()),
+        tool.types().erasure(collectorClass.asType()),
         getTypeParameterList(solution),
         supplier ? ".get()" : ""));
   }

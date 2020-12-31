@@ -4,6 +4,8 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.TypeTool;
 
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.List;
@@ -54,7 +56,7 @@ class Optionalish {
     if (optionalPrimitive.isPresent()) {
       return optionalPrimitive;
     }
-    return tool.unwrap(type, Optional.class.getCanonicalName())
+    return tool.getSingleTypeArgument(type, Optional.class.getCanonicalName())
         .map(wrapped -> new Optionalish(p -> CodeBlock.of("$N", p), type, wrapped));
   }
 
@@ -63,11 +65,17 @@ class Optionalish {
       if (tool.isSameType(type, e.optionalType.getCanonicalName())) {
         return Optional.of(new Optionalish(
             e.extractExpr(),
-            tool.optionalOf(e.boxingType.getCanonicalName()),
+            optionalOf(e.boxingType.getCanonicalName(), tool),
             tool.asTypeElement(e.boxingType.getCanonicalName()).asType()));
       }
     }
     return Optional.empty();
+  }
+
+  private static DeclaredType optionalOf(String canonicalName, TypeTool tool) {
+    TypeElement optional = tool.asTypeElement(Optional.class.getCanonicalName());
+    TypeElement element = tool.asTypeElement(canonicalName);
+    return tool.types().getDeclaredType(optional, element.asType());
   }
 
   /**
