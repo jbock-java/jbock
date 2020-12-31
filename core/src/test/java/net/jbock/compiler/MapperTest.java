@@ -801,6 +801,25 @@ class MapperTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Identity.class)",
+        "  abstract Integer ints();",
+        "",
+        "  static class Identity<E> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.lang.Integer.");
+  }
+
+  @Test
+  void mapperHasTypeargsImpossibleFromStringList() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = Identity.class)",
         "  abstract List<Integer> ints();",
         "",
         "  static class Identity<E> implements Supplier<Function<E, E>> {",
@@ -811,6 +830,63 @@ class MapperTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.util.List<java.lang.Integer>.");
+  }
+
+  @Test
+  void mapperHasTypeargsImpossibleFromStringListList() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = Identity.class)",
+        "  abstract List<Integer> ints();",
+        "",
+        "  static class Identity<E> implements Supplier<Function<E, List<E>>> {",
+        "    public Function<E, E> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.lang.Integer.");
+  }
+
+  @Test
+  void mapperHasTypeargsImpossibleFromStringOptional() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = Identity.class)",
+        "  abstract Optional<Integer> ints();",
+        "",
+        "  static class Identity<E> implements Supplier<Function<E, E>> {",
+        "    public Function<E, E> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.util.Optional<java.lang.Integer>.");
+  }
+
+  @Test
+  void mapperHasTypeargsImpossibleFromStringOptionalOptional() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = Identity.class)",
+        "  abstract Optional<Integer> ints();",
+        "",
+        "  static class Identity<E> implements Supplier<Function<E, Optional<E>>> {",
+        "    public Function<E, E> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.lang.Integer.");
   }
 
   @Test
