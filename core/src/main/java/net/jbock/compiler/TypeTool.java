@@ -1,6 +1,7 @@
 package net.jbock.compiler;
 
 import net.jbock.coerce.TypevarMapping;
+import net.jbock.coerce.Unifier;
 import net.jbock.coerce.either.Either;
 
 import javax.lang.model.element.Element;
@@ -19,9 +20,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -90,67 +89,6 @@ public class TypeTool {
     this.elements = elements;
   }
 
-  // solve typevars in y
-  private String unify(TypeMirror x, TypeMirror y, Map<String, TypeMirror> acc) {
-    if (y.getKind() == TypeKind.TYPEVAR) {
-      if (!types.isAssignable(x, y.accept(AS_TYPEVAR, null).getUpperBound())) {
-        return "Unification failed: can't assign " + x + " to " + y;
-      }
-      acc.put(y.toString(), x);
-      return null; // success
-    }
-    if (x.getKind() == TypeKind.TYPEVAR) {
-      if (!types.isAssignable(y, x.accept(AS_TYPEVAR, null).getUpperBound())) {
-        return "Unification failed: can't assign " + y + " to " + x;
-      }
-      return null; // no constraint for y
-    }
-    if (x.getKind() == TypeKind.WILDCARD || y.getKind() == TypeKind.WILDCARD) {
-      return "Unification failed: wildcard is not allowed here";
-    }
-    if (x.getKind() != y.getKind()) {
-      return "can't unify " + x + " with " + y;
-    }
-    if (x.getKind() == TypeKind.ARRAY) {
-      TypeMirror xc = x.accept(AS_ARRAY, null).getComponentType();
-      TypeMirror yc = y.accept(AS_ARRAY, null).getComponentType();
-      return unify(xc, yc, acc);
-    }
-    if (x.getKind() != TypeKind.DECLARED) {
-      if (!types.isAssignable(y, x)) {
-        return "Unification failed: can't assign " + y + " to " + x;
-      }
-      return null;
-    }
-    DeclaredType xx = asDeclared(x);
-    DeclaredType yy = asDeclared(y);
-    List<? extends TypeMirror> xargs = xx.getTypeArguments();
-    if (xargs.isEmpty()) {
-      if (!types.isAssignable(y, x)) {
-        return "Unification failed: can't assign " + y + " to " + x;
-      }
-    }
-    if (!isSameErasure(x, y)) {
-      return "Unification failed: " + y + " and " + x + " have different erasure";
-    }
-    List<? extends TypeMirror> yargs = yy.getTypeArguments();
-    if (xargs.size() != yargs.size()) {
-      return "can't unify " + x + " with " + y;
-    }
-    for (int i = 0; i < yargs.size(); i++) {
-      String failure = unify(xargs.get(i), yargs.get(i), acc);
-      if (failure != null) {
-        return failure;
-      }
-    }
-    return null;
-  }
-
-  public Either<String, TypevarMapping> unify(TypeMirror concreteType, TypeMirror ym, Function<String, ValidationException> errorHandler) {
-    Map<String, TypeMirror> acc = new LinkedHashMap<>();
-    String failure = unify(concreteType, ym, acc);
-    return failure != null ? left(failure) : right(new TypevarMapping(acc, this, errorHandler));
-  }
 
   public DeclaredType getDeclaredType(Class<?> clazz, List<? extends TypeMirror> typeArguments) {
     return getDeclaredType(asTypeElement(clazz.getCanonicalName()), typeArguments.toArray(new TypeMirror[0]));
@@ -263,5 +201,14 @@ public class TypeTool {
 
   public TypeMirror getArrayType(TypeMirror componentType) {
     return types.getArrayType(componentType);
+  }
+
+  public Either<String, TypevarMapping> unify(
+      TypeMirror concreteType,
+      TypeMirror ym,
+      Function<String, ValidationException> errorHandler) {
+    Unifier unifier = new Unifier(types);
+    String failure = unifier.unify(concreteType, ym);
+    return failure != null ? left(failure) : right(new TypevarMapping(unifier.getResult(), this, errorHandler));
   }
 }

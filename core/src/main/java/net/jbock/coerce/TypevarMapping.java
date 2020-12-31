@@ -19,8 +19,9 @@ import java.util.function.Function;
 
 import static net.jbock.coerce.either.Either.left;
 import static net.jbock.coerce.either.Either.right;
-import static net.jbock.compiler.TypeTool.AS_ARRAY;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
+import static net.jbock.compiler.TypeTool.AS_INTERSECTION;
+import static net.jbock.compiler.TypeTool.AS_TYPEVAR;
 
 public class TypevarMapping {
 
@@ -51,7 +52,7 @@ public class TypevarMapping {
       return map.getOrDefault(input.toString(), input);
     }
     if (input.getKind() == TypeKind.ARRAY) {
-      return tool.getArrayType(substitute(input.accept(AS_ARRAY, null).getComponentType()));
+      return tool.getArrayType(substitute(input.accept(TypeTool.AS_ARRAY, null).getComponentType()));
     }
     if (input.getKind() != TypeKind.DECLARED) {
       return input;
@@ -77,7 +78,7 @@ public class TypevarMapping {
         case WILDCARD:
           result[i] = arg;
         case ARRAY:
-          result[i] = tool.getArrayType(substitute(arg.accept(AS_ARRAY, null).getComponentType()));
+          result[i] = tool.getArrayType(substitute(arg.accept(TypeTool.AS_ARRAY, null).getComponentType()));
           break;
         default:
           throw errorHandler.apply("substitution failed: unknown typearg " + arg);
@@ -110,10 +111,10 @@ public class TypevarMapping {
     for (TypeParameterElement p : parameters) {
       TypeMirror m = map.getOrDefault(p.toString(), p.asType());
       if (m.getKind() == TypeKind.TYPEVAR) {
-        m = m.accept(TypeTool.AS_TYPEVAR, null).getUpperBound();
+        m = m.accept(AS_TYPEVAR, null).getUpperBound();
       }
       if (m.getKind() == TypeKind.INTERSECTION) {
-        m = m.accept(TypeTool.AS_INTERSECTION, null).getBounds().get(0);
+        m = m.accept(AS_INTERSECTION, null).getBounds().get(0);
       }
       result.add(m);
     }
