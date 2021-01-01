@@ -35,7 +35,7 @@ abstract class MyArguments {
 ````
 
 When jbock is properly configured as an
-[annotation processor.](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java), the presence of a command class
+[annotation processor.](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java), the presence of the command class
 will trigger a round of code generation at compile time.
 The generated class
 [MyArguments_Parser](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
