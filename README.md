@@ -71,7 +71,7 @@ param/option type                   | Skew
 `List<A>`                           | *repeatable*
 any other                           | *required*
 
-where `A` is one of the
+where `A` must be one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
 
 If a custom mapper is defined, but no collector,
