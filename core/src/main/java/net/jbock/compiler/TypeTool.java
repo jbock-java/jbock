@@ -150,7 +150,9 @@ public class TypeTool {
       Function<String, ValidationException> errorHandler) {
     Unifier unifier = new Unifier(types);
     String failure = unifier.unify(concreteType, ym);
-    return failure != null ? left(failure) : right(new TypevarMapping(unifier.getResult(), this, errorHandler));
+    return failure != null ?
+        left("Unification failed: " + failure) :
+        right(new TypevarMapping(unifier.getResult(), this, errorHandler));
   }
 
   public Types types() {

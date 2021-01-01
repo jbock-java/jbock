@@ -13,6 +13,9 @@ import java.util.Map;
 import static net.jbock.compiler.TypeTool.AS_ARRAY;
 import static net.jbock.compiler.TypeTool.AS_TYPEVAR;
 
+/**
+ * Not thread-safe.
+ */
 public class Unifier {
 
   private final Types types;
@@ -32,22 +35,22 @@ public class Unifier {
   public String unify(TypeMirror x, TypeMirror y) {
     if (y.getKind() == TypeKind.TYPEVAR) {
       if (!types.isAssignable(x, y.accept(AS_TYPEVAR, null).getUpperBound())) {
-        return "Unification failed: can't assign " + x + " to " + y;
+        return "can't assign " + x + " to " + y;
       }
       acc.put(y.toString(), x);
       return null; // success
     }
     if (x.getKind() == TypeKind.TYPEVAR) {
       if (!types.isAssignable(y, x.accept(AS_TYPEVAR, null).getUpperBound())) {
-        return "Unification failed: can't assign " + y + " to " + x;
+        return "can't assign " + y + " to " + x;
       }
       return null; // no constraint for y
     }
     if (x.getKind() == TypeKind.WILDCARD || y.getKind() == TypeKind.WILDCARD) {
-      return "Unification failed: wildcard is not allowed here";
+      return "wildcard is not allowed here";
     }
     if (x.getKind() != y.getKind()) {
-      return "Unification failed: " + y + " and " + x + " cannot be unified";
+      return y + " and " + x + " cannot be unified";
     }
     if (x.getKind() == TypeKind.ARRAY) {
       TypeMirror xc = x.accept(AS_ARRAY, null).getComponentType();
@@ -55,20 +58,17 @@ public class Unifier {
       return unify(xc, yc);
     }
     if (x.getKind() != TypeKind.DECLARED) {
-      if (!types.isAssignable(y, x)) {
-        return "Unification failed: can't assign " + y + " to " + x;
-      }
-      return null;
+      return types.isSameType(y, x) ? null : y + " and " + x + " cannot be unified";
     }
     DeclaredType xx = x.accept(TypeTool.AS_DECLARED, null);
     DeclaredType yy = y.accept(TypeTool.AS_DECLARED, null);
     List<? extends TypeMirror> xargs = xx.getTypeArguments();
     if (!types.isSameType(types.erasure(x), types.erasure(y))) {
-      return "Unification failed: " + y + " and " + x + " have different erasure";
+      return y + " and " + x + " have different erasure";
     }
     List<? extends TypeMirror> yargs = yy.getTypeArguments();
     if (xargs.size() != yargs.size()) {
-      return "Unification failed: " + y + " and " + x + " have different numbers of typeargs";
+      return y + " and " + x + " have different numbers of typeargs";
     }
     for (int i = 0; i < yargs.size(); i++) {
       String failure = unify(xargs.get(i), yargs.get(i));
@@ -76,7 +76,7 @@ public class Unifier {
         return failure;
       }
     }
-    return null;
+    return null; // success
   }
 
   public Map<String, TypeMirror> getResult() {
