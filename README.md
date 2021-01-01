@@ -4,7 +4,7 @@
 jbock is a command line parser that uses the same annotation names as
 [airline](https://github.com/airlift/airline) and
 [picocli.](https://github.com/remkop/picocli)
-It does not make any use of Java's reflection capabilities, but generates java source code instead, which can be easily read and debugged.
+It doesn't use reflection, but generates java source code at compile time instead.
 
 The jbock way to declare your command line interface is via a custom model class, the so called "command" class.
 In this class, each option and param corresponds to one annotated `abstract` method.
