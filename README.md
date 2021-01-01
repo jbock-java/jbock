@@ -49,17 +49,19 @@ assertEquals(OptionalInt.of(2), my.verbosity());
 assertEquals(Paths.get("file.txt"), my.path());
 ````
 
-In the example above, `path` is a *required* param,
-while `verbosity` is an *optional* option.
-We call this property *skew*. There are four different skews:
+In the example above, `path` is a *required* parameter,
+while `verbosity` is an *optional* (named) option.
+This property of being either optional or required is called *skew*.
+There are four different skews:
 *required*, *optional*, *repeatable* and *flag*.
-Each option and param has a skew which is
-determined by its type, according to the following rules.
+The skew is
+determined by the *type* of the option or parameter,
+according to the following rules:
 
 ### Skew rules
 
 These are the rules for options and params that
-define neither a custom mapper nor collector:
+define neither a custom mapper nor collector.
 
 param/option type                   | Skew
 ----------------------------------- | --------------------------------
