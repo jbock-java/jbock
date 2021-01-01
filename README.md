@@ -1,7 +1,7 @@
 [![core](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg?style=plastic&subject=jbock)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 [![annotations](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations/badge.svg?color=red&style=plastic&subject=jbock-annotations)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations)
 
-jbock is a nifty command line parser that uses the same annotation names as
+jbock is a nifty command line parser that uses annotations similar to
 [airline](https://github.com/airlift/airline) and
 [picocli.](https://github.com/remkop/picocli)
 It doesn't use reflection, but generates java source code at compile time instead.
