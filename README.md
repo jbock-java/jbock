@@ -39,7 +39,7 @@ When jbock is properly configured as an
 will trigger a round of code generation at compile time.
 The generated class
 [MyArguments_Parser](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
-can be used as follows:
+can then be used as follows:
 
 ````java
 String[] args = { "-v", "2", "file.txt" }; // command line parameters
