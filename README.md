@@ -37,9 +37,8 @@ abstract class MyArguments {
 When jbock is properly configured as an
 [annotation processor.](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java), the presence of the command class
 will trigger a round of code generation at compile time.
-The generated class
-[MyArguments_Parser](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/MyArguments_Parser.java)
-can then be used as follows:
+The generated class will, in this case, be called
+`MyArguments_Parser`. It can be used as follows:
 
 ````java
 String[] args = { "-v", "2", "file.txt" }; // command line parameters
