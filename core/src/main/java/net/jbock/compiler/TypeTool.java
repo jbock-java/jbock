@@ -105,11 +105,8 @@ public class TypeTool {
   }
 
   public boolean isSameErasure(TypeMirror x, String y) {
-    return isSameErasure(x, elements.getTypeElement(y).asType());
-  }
-
-  private boolean isSameErasure(TypeMirror x, TypeMirror y) {
-    return types.isSameType(types.erasure(x), types.erasure(y));
+    TypeElement el = elements.getTypeElement(y);
+    return types.isSameType(types.erasure(x), types.erasure(el.asType()));
   }
 
   public TypeElement asTypeElement(String canonicalName) {

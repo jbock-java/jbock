@@ -72,6 +72,31 @@ class CollectorTest {
   }
 
   @Test
+  void unifyProblem() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "          mappedBy = MapMap.class,",
+        "          collectedBy = Coll.class)",
+        "  abstract java.util.Map<String, Integer> things();",
+        "",
+        "  static class MapMap<E> implements Supplier<Function<String, E>> {",
+        "    public Function<String, E> get() { return null; }",
+        "  }",
+        "",
+        "  static class Coll<E> implements Supplier<Collector<E, ?, java.util.Map<E, E>>> {",
+        "    public Collector<E, ?, java.util.Map<E, E>> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the collector class: Unification failed: E=java.lang.Integer vs E=java.lang.String.");
+  }
+
+  @Test
   void genericArrayGoodHint() {
     JavaFileObject javaFile = fromSource(
         "@Command",

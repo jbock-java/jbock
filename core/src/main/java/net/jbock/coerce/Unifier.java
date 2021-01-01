@@ -37,7 +37,12 @@ public class Unifier {
       if (!types.isAssignable(x, y.accept(AS_TYPEVAR, null).getUpperBound())) {
         return "can't assign " + x + " to " + y;
       }
-      acc.put(y.toString(), x);
+      String key = y.toString();
+      TypeMirror exist = acc.get(key);
+      if (exist != null && !types.isSameType(exist, x)) {
+        return key + "=" + x + " vs " + key + "=" + exist;
+      }
+      acc.put(key, x);
       return null; // success
     }
     if (x.getKind() == TypeKind.TYPEVAR) {
