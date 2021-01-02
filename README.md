@@ -70,7 +70,7 @@ Return type of the `abstract` method          | *Skew*
 `A` (exact match)                             | *required*
 
 where `A` must be one of the
-[auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java),
+[auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java),
 otherwise compilation will fail.
 
 If a custom mapper is defined, but no collector,
