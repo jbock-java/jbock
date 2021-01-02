@@ -13,7 +13,7 @@ Here, each *named option* and *positional parameter* corresponds to one annotate
 @Command
 abstract class MyCommand {
 
-  /**
+  /*
    * A @Param is a positional parameter.
    * This particular param is in the first position,
    * since there are no other params in lower positions.
@@ -21,7 +21,7 @@ abstract class MyCommand {
   @Param(1)
   abstract Path path();
 
-  /**
+  /*
    * An @Option is a named option.
    */
   @Option("verbosity")
