@@ -11,7 +11,7 @@ Here, each *named option* and *positional parameter* corresponds to one annotate
 
 ````java
 @Command
-abstract class MyArguments {
+abstract class MyCommand {
 
   /**
    * A positional parameter in position 1.
@@ -33,11 +33,11 @@ When jbock is properly configured as an
 [annotation processor](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java), the presence of the command class
 will trigger a round of code generation at compile time.
 The generated class will, in this case, be called
-`MyArguments_Parser`. It can be used as follows:
+`MyCommand_Parser`. It can be used as follows:
 
 ````java
 String[] args = { "--verbosity", "2", "file.txt" }; // sample psvm input
-MyArguments my = new MyArguments_Parser().parseOrExit(args);
+MyCommand my = new MyCommand_Parser().parseOrExit(args);
 
 // Working as expected!
 assertEquals(OptionalInt.of(2), my.verbosity());
