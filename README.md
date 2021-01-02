@@ -15,7 +15,8 @@ abstract class MyArguments {
 
   /**
    * A positional parameter in position 1.
-   * This is the first position, as there are no params in lower positions.
+   * This is the first position,
+   * since there are no other positional parameters in lower positions.
    */
   @Param(1)
   abstract Path path();
@@ -35,10 +36,10 @@ The generated class will, in this case, be called
 `MyArguments_Parser`. It can be used as follows:
 
 ````java
-String[] args = { "--verbosity", "2", "file.txt" }; // command line parameters
+String[] args = { "--verbosity", "2", "file.txt" }; // sample psvm input
 MyArguments my = new MyArguments_Parser().parseOrExit(args);
 
-// works as expected
+// Working as expected!
 assertEquals(OptionalInt.of(2), my.verbosity());
 assertEquals(Paths.get("file.txt"), my.path());
 ````
