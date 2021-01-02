@@ -37,11 +37,11 @@ The generated class will, in this case, be called
 
 ````java
 String[] args = { "--verbosity", "2", "file.txt" }; // sample psvm input
-MyCommand my = new MyCommand_Parser().parseOrExit(args);
+MyCommand c = new MyCommand_Parser().parseOrExit(args);
 
 // Working as expected!
-assertEquals(OptionalInt.of(2), my.verbosity());
-assertEquals(Paths.get("file.txt"), my.path());
+assertEquals(OptionalInt.of(2), c.verbosity());
+assertEquals(Paths.get("file.txt"), c.path());
 ````
 
 In the MyCommand example, the `path` parameter is *required*,
