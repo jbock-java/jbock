@@ -57,13 +57,13 @@ according to the following rules:
 These are the rules for options and params that
 define neither a custom mapper nor collector.
 
-param/option type                   | Skew
------------------------------------ | --------------------------------
-`boolean` or `Boolean`              | *flag* (only applies to options)
-`Optional<A>`                       | *optional*
+Return type of the `abstract` method  | Skew
+------------------------------------- | --------------------------------
+`boolean` or `Boolean`                | *flag* (only applies to options)
+`Optional<A>`                         | *optional*
 <code>Optional{Int&#124;Long&#124;Double}</code> | *optional*
-`List<A>`                           | *repeatable*
-any other                           | *required*
+`List<A>`                             | *repeatable*
+any other                             | *required*
 
 where `A` must be one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
@@ -72,14 +72,14 @@ If a custom mapper is defined, but no collector,
 then the skew is determined by comparing the mapper's return type
 and the return type of the option's `abstract` method:
 
-Mapper return type      | param/option type           | Skew
------------------------ | --------------------------- | ------------
-`M`                     | `Optional<M>`               | *optional*
-`Integer`               | `OptionalInt`               | *optional*
-`Long`                  | `OptionalLong`              | *optional*
-`Double`                | `OptionalDouble`            | *optional*
-`M`                     | `List<M>`                   | *repeatable*
-`M`                     | `M` (exact match, or via boxing)  | *required*
+Mapper return type      | Return type of the `abstract` method | Skew
+----------------------- | ------------------------------------ | ------------
+`M`                     | `Optional<M>`                        | *optional*
+`Integer`               | `OptionalInt`                        | *optional*
+`Long`                  | `OptionalLong`                       | *optional*
+`Double`                | `OptionalDouble`                     | *optional*
+`M`                     | `List<M>`                            | *repeatable*
+`M`                     | `M` (exact match, or via boxing)     | *required*
 
 If a custom collector is defined, then the skew is always *repeatable*.
 
