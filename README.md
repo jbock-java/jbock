@@ -84,6 +84,5 @@ Mapper return type      | Return type of the `abstract` method | Skew
 
 When a custom collector is defined, the skew is always *repeatable*.
 
-* [Detailed documentation](https://github.com/h908714124/jbock/blob/master/SPAGHETTI.md)
 * [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
