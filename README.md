@@ -30,7 +30,7 @@ abstract class MyCommand {
 ````
 
 When jbock is properly configured as an
-[annotation processor](https://stackoverflow.com/questions/2146104/what-is-annotation-processing-in-java), the presence of the command class
+annotation processor, the presence of the command class
 will trigger a round of code generation at compile time.
 The generated class will, in this case, be called
 `MyCommand_Parser`. It can be used as follows:
