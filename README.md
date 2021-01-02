@@ -88,8 +88,9 @@ Mapper return type        | Return type of the `abstract` method          | *Ske
 
 If none of these rules apply, compilation will fail.
 
-When a custom collector is defined, then its *input* type must equal the mapper's return type,
-or if no mapper is defined, it must equal the return type of the `abstract` method.
+When a custom collector is defined, then its *input* type must be the mapper's return type,
+or if no mapper is defined, it must be one of the auto types.
+Its *output* type must be the return type of the `abstract` method.
 The *skew* of a parameter with a custom collector is always *repeatable*.
 This can be summarized in another table:
 
