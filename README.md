@@ -50,12 +50,12 @@ There are four different skews:
 *required*, *optional*, *repeatable* and *flag*.
 The skew is mostly
 determined by the return type of the option's or parameter's `abstract` method,
-according to the following rules:
+according to the following rules.
 
 ### Skew rules
 
-These are the rules for options and params that
-define neither a custom mapper nor collector.
+These rules apply for options and params that
+define neither a custom mapper nor collector:
 
 Return type of the `abstract` method  | Skew
 ------------------------------------- | --------------------------------
