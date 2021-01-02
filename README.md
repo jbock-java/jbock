@@ -58,31 +58,34 @@ according to the following rules.
 These rules apply for options and params that
 define neither a custom mapper nor collector:
 
-Return type of the `abstract` method  | Skew
-------------------------------------- | --------------------------------
-`boolean` or `Boolean`                | *flag* (only applies to options)
-`Optional<A>`                         | *optional*
-<code>Optional{Int&#124;Long&#124;Double}</code> | *optional*
-`List<A>`                             | *repeatable*
-any other type                        | *required*
+Return type of the `abstract` method          | *Skew*
+--------------------------------------------- | --------------------------------
+`boolean` or `Boolean`                        | *flag* (only applies to options)
+`Optional<A>`                                 | *optional*
+`OptionalInt`,`OptionalLong`,`OptionalDouble` | *optional*
+`List<A>`                                     | *repeatable*
+`A` (exact match)                             | *required*
 
 where `A` must be one of the
-[auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
+[auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java),
+otherwise compilation will fail.
 
 If a custom mapper is defined, but no collector,
-then the skew is determined by comparing the mapper's return type
+then the skew is determined by comparing the mapper's return type `M`
 and the return type of the option's `abstract` method:
 
-Mapper return type      | Return type of the `abstract` method | Skew
------------------------ | ------------------------------------ | ------------
-`M`                     | `Optional<M>`                        | *optional*
-`Integer`               | `OptionalInt`                        | *optional*
-`Long`                  | `OptionalLong`                       | *optional*
-`Double`                | `OptionalDouble`                     | *optional*
-`M`                     | `List<M>`                            | *repeatable*
-`M`                     | `M` (exact match, or via boxing)     | *required*
+Mapper return type        | Return type of the `abstract` method          | *Skew*
+------------------------- | --------------------------------------------- | ------------
+`M`                       | `Optional<M>`                                 | *optional*
+`Integer`,`Long`,`Double` | `OptionalInt`,`OptionalLong`,`OptionalDouble` | *optional*
+`M`                       | `List<M>`                                     | *repeatable*
+`M`                       | `M` (exact match)                             | *required*
 
-When a custom collector is defined, the skew is always *repeatable*.
+If none of these rules apply, compilation will fail.
+
+When a custom collector is defined, then its *input* type must equal the mapper's return type,
+or if no mapper is defined, it must equal the return type of the `abstract` method.
+The *skew* of a parameter with a custom collector is always *repeatable*.
 
 * [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
