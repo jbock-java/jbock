@@ -44,7 +44,7 @@ assertEquals(OptionalInt.of(2), my.verbosity());
 assertEquals(Paths.get("file.txt"), my.path());
 ````
 
-In the example above, `path` is a *required* parameter,
+In the MyCommand example, `path` is a *required* parameter,
 while `verbosity` is *optional*.
 The property of being either optional or required is called *skew*.
 There are four different skews:
