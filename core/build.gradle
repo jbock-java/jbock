@@ -6,6 +6,12 @@ plugins {
 
 group = 'com.github.h908714124'
 
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(15)
+    }
+}
+
 compileJava {
     options.encoding = 'UTF-8'
     sourceCompatibility = '8'
