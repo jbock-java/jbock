@@ -69,8 +69,8 @@ where `A` must be one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
 
 If a custom mapper is defined, but no collector,
-then the skew is determined by comparing the mapper return type
-and the param/option type:
+then the skew is determined by comparing the mapper's return type
+and the return type of the option's `abstract` method:
 
 Mapper return type      | param/option type           | Skew
 ----------------------- | --------------------------- | ------------
