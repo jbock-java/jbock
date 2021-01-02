@@ -81,7 +81,7 @@ Mapper return type      | Return type of the `abstract` method | Skew
 `M`                     | `List<M>`                            | *repeatable*
 `M`                     | `M` (exact match, or via boxing)     | *required*
 
-If a custom collector is defined, then the skew is always *repeatable*.
+When a custom collector is defined, the skew is always *repeatable*.
 
 * [Detailed documentation](https://github.com/h908714124/jbock/blob/master/SPAGHETTI.md)
 * [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
