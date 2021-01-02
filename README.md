@@ -14,20 +14,14 @@ Here, each *named option* and *positional parameter* corresponds to one annotate
 abstract class MyArguments {
 
   /**
-   * A "param" is a positional parameter.
-   * Its value attribute (number 1 in this example)
-   * determines its relative position among the params. 
-   * In this case it is arbitrary, as there is only one param.
+   * A positional parameter in position 1.
+   * This is the first position, as there are no params in lower positions.
    */
   @Param(1)
   abstract Path path();
 
   /**
-   * An "option" is a named parameter (or flag).
-   * The name is passed with one or two leading dashes. In this case,
-   * ["--verbosity=1"], ["--verbosity", "1"], ["-v", "1"] and ["-v1"] are all valid.
-   * Note: This javadoc will show up when "--help" is passed.
-   * Alternatively the help text can be taken from a resource bundle.
+   * A named option, or flag if the return type is boolean.
    */
   @Option(value = "verbosity", mnemonic = 'v')
   abstract OptionalInt verbosity();
