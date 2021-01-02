@@ -64,7 +64,7 @@ Return type of the `abstract` method  | Skew
 `Optional<A>`                         | *optional*
 <code>Optional{Int&#124;Long&#124;Double}</code> | *optional*
 `List<A>`                             | *repeatable*
-any other                             | *required*
+any other type                        | *required*
 
 where `A` must be one of the
 [auto types.](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java)
