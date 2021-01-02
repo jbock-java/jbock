@@ -14,7 +14,7 @@ import static net.jbock.compiler.TypeTool.AS_ARRAY;
 import static net.jbock.compiler.TypeTool.AS_TYPEVAR;
 
 /**
- * Not thread-safe.
+ * Single-use.
  */
 public class Unifier {
 
@@ -34,8 +34,8 @@ public class Unifier {
    */
   public String unify(TypeMirror x, TypeMirror y) {
     if (y.getKind() == TypeKind.TYPEVAR) {
-      if (!types.isAssignable(x, y.accept(AS_TYPEVAR, null).getUpperBound())) {
-        return "can't assign " + x + " to " + y;
+      if (!isAssignable(x, y)) {
+        return "can't choose " + y + " to be " + typeOrBound(x);
       }
       String key = y.toString();
       TypeMirror exist = acc.get(key);
@@ -46,8 +46,8 @@ public class Unifier {
       return null; // success
     }
     if (x.getKind() == TypeKind.TYPEVAR) {
-      if (!types.isAssignable(y, x.accept(AS_TYPEVAR, null).getUpperBound())) {
-        return "can't assign " + y + " to " + x;
+      if (!isAssignable(y, x)) {
+        return "can't choose " + x + " to be " + typeOrBound(y);
       }
       return null; // no constraint for y
     }
@@ -86,5 +86,16 @@ public class Unifier {
 
   public Map<String, TypeMirror> getResult() {
     return acc;
+  }
+
+  private boolean isAssignable(TypeMirror a, TypeMirror typevar) {
+    return types.isAssignable(a, typeOrBound(typevar));
+  }
+
+  private TypeMirror typeOrBound(TypeMirror type) {
+    if (type.getKind() != TypeKind.TYPEVAR) {
+      return type;
+    }
+    return type.accept(AS_TYPEVAR, null).getUpperBound();
   }
 }

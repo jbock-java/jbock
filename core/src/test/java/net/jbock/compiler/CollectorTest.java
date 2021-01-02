@@ -140,7 +140,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.String to E.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't choose E to be java.lang.String.");
   }
 
   @Test
@@ -420,7 +420,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign java.lang.Integer to E.");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: can't choose E to be java.lang.Integer.");
   }
 
   @Test
@@ -493,7 +493,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.Long to E.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't choose E to be java.lang.Long.");
   }
 
   @Test
@@ -542,7 +542,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign E to A.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't choose A to be java.lang.String.");
   }
 
   @Test
@@ -706,7 +706,7 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the collector class: Unification failed: can't assign java.lang.String to E.");
+        .withErrorContaining("There is a problem with the collector class: Unification failed: can't choose E to be java.lang.String.");
   }
 
 
@@ -757,6 +757,55 @@ class CollectorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
+  }
+
+  @Test
+  void bothMapperAndCollectorHaveTypeargsNotAssignable() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "          mappedBy = Mappy.class,",
+        "          collectedBy = Collie.class)",
+        "  abstract String strength();",
+        "",
+        "  static class Mappy<M extends Number> implements Supplier<Function<String, M>> {",
+        "    public Function<String, M> get() { return null; }",
+        "  }",
+        "",
+        "  static class Collie<E extends Integer> implements Supplier<Collector<E, ?, String>> {",
+        "    public Collector<E, ?, String> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void bothMapperAndCollectorHaveTypeargsIsAssignable() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\",",
+        "          mappedBy = Mappy.class,",
+        "          collectedBy = Collie.class)",
+        "  abstract String strength();",
+        "",
+        "  static class Mappy<M extends Integer> implements Supplier<Function<String, M>> {",
+        "    public Function<String, M> get() { return null; }",
+        "  }",
+        "",
+        "  static class Collie<E extends Number> implements Supplier<Collector<E, ?, String>> {",
+        "    public Collector<E, ?, String> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't choose M to be java.lang.Number.");
   }
 
   @Test

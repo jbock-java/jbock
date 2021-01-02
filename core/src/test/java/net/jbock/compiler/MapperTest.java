@@ -99,7 +99,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.String to E.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't choose E to be java.lang.String.");
   }
 
   @Test
@@ -154,7 +154,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.lang.String to E.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't choose E to be java.lang.String.");
   }
 
 
@@ -925,6 +925,6 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't assign java.util.Set<java.lang.Integer> to F.");
+        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't choose F to be java.util.Set<java.lang.Integer>.");
   }
 }
