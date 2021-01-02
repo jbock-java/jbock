@@ -21,9 +21,9 @@ abstract class MyArguments {
   abstract Path path();
 
   /**
-   * A named option, or flag if the return type is boolean.
+   * A named option.
    */
-  @Option(value = "verbosity", mnemonic = 'v')
+  @Option("verbosity")
   abstract OptionalInt verbosity();
 }
 ````
@@ -35,7 +35,7 @@ The generated class will, in this case, be called
 `MyArguments_Parser`. It can be used as follows:
 
 ````java
-String[] args = { "-v", "2", "file.txt" }; // command line parameters
+String[] args = { "--verbosity", "2", "file.txt" }; // command line parameters
 MyArguments my = new MyArguments_Parser().parseOrExit(args);
 
 // works as expected
@@ -44,8 +44,8 @@ assertEquals(Paths.get("file.txt"), my.path());
 ````
 
 In the example above, `path` is a *required* parameter,
-while `verbosity` is an *optional* (named) option.
-This property of being either optional or required is called *skew*.
+while `verbosity` is *optional*.
+The property of being either optional or required is called *skew*.
 There are four different skews:
 *required*, *optional*, *repeatable* and *flag*.
 The skew is
