@@ -14,15 +14,15 @@ Here, each *named option* and *positional parameter* corresponds to one annotate
 abstract class MyCommand {
 
   /**
-   * A positional parameter in position 1.
-   * This is the first position,
-   * since there are no other positional parameters in lower positions.
+   * A @Param is a positional parameter.
+   * This particular param is in the first position,
+   * since there are no other params in lower positions.
    */
   @Param(1)
   abstract Path path();
 
   /**
-   * A named option.
+   * An @Option is a named option.
    */
   @Option("verbosity")
   abstract OptionalInt verbosity();
