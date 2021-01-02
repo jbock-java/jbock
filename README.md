@@ -58,6 +58,8 @@ according to the following rules.
 These rules apply for options and params that
 define neither a custom mapper nor collector:
 
+#### Skew table A
+
 Return type of the `abstract` method          | *Skew*
 --------------------------------------------- | --------------------------------
 `boolean` or `Boolean`                        | *flag* (only applies to options)
@@ -74,6 +76,8 @@ If a custom mapper is defined, but no collector,
 then the skew is determined by comparing the mapper's return type `M`
 and the return type of the option's `abstract` method:
 
+#### Skew table B
+
 Mapper return type        | Return type of the `abstract` method          | *Skew*
 ------------------------- | --------------------------------------------- | ------------
 `M`                       | `Optional<M>`                                 | *optional*
@@ -86,6 +90,16 @@ If none of these rules apply, compilation will fail.
 When a custom collector is defined, then its *input* type must equal the mapper's return type,
 or if no mapper is defined, it must equal the return type of the `abstract` method.
 The *skew* of a parameter with a custom collector is always *repeatable*.
+This can be summarized in another table:
+
+#### Meta skew rules
+
+Mapper defined? | Collector defined? | *Skew*
+--------------- | ------------------ | -----------
+No              | No                 | Determined by Skew Table A
+Yes             | No                 | Determined by Skew Table B
+No              | Yes                | *repeatable*
+Yes             | Yes                | *repeatable*
 
 * [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
