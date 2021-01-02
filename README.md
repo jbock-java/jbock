@@ -101,5 +101,7 @@ Yes             | No                 | See <a href="#skew-table-b">Skew Table B<
 No              | Yes                | *repeatable*
 Yes             | Yes                | *repeatable*
 
+### Sample projects
+
 * [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
 * [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
