@@ -63,7 +63,7 @@ as in the `MyCommand` example:
 
 Return type of the `abstract` method          | *Skew*
 --------------------------------------------- | --------------------------------
-`boolean` or `Boolean`                        | *flag* (only applies to options)
+`boolean` or `Boolean`                        | *flag* (only for `@Option`)
 `Optional<A>`                                 | *optional*
 `OptionalInt`,`OptionalLong`,`OptionalDouble` | *optional*
 `List<A>`                                     | *repeatable*
