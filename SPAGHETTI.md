@@ -3,8 +3,8 @@
 * <a href="#optionparam-kinds">Option/param kinds</a>
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#flags">Flags</a>
-* <a href="#binding-parameters">Binding options</a>
-* <a href="#escape-sequence">Escape sequence</a>
+* <a href="#named-options">Named options</a>
+* <a href="#escape-sequence">Escape sequence</a>f
 * <a href="#repeatable-parameters">Repeatable parameters</a>
 * <a href="#parameter-shapes">Parameter shapes</a>
 * <a href="#showing-help">Showing help</a>
@@ -21,24 +21,14 @@
 
 ### Option/Param kinds
 
-Command line applications ("commands") have access to a special array of strings,
-which is often called `args` or `argv`, which contains the command line parameters of the invocation.
+A Java `main` Method has a parameter of type `String[]`,
+which contains the "extra" command line parameters of the `java` invocation,
+after the positional parameter `class` or the named option `-jar file.jar`.
 
-Some of the tokens in this array take the form of key-value pairs,
-where the key starts with one or two dashes.
-These are called *options*.
-The other kind of tokens, which are distinguished not by their *name* but by their *position* in `argv`, relative to the other non-options, are called *params*.
+### Positional parameters
 
-Options can be further subdivided into options that take an argument, and those that don't, which leaves us with this list:
-
-1. <a href="#params">*Params*</a>
-1. <a href="#flags">*Flag options*</a>
-1. <a href="#binding-options">*Options*</a>
-
-### Params
-
-A *positional* parameter is just an arbitrary token in `argv` *without a
-preceding parameter name*. We call this a *param*.
+A positional parameter is just an arbitrary token in `argv`, without a
+preceding parameter name.
 The token is not allowed to start with a dash, unless the
 <a href="#escape-sequence">*escape sequence*</a> was used.
 Here is an example:
@@ -59,9 +49,9 @@ The class `MyArguments_Parser` that is generated
 from this example requires an `argv` of length *exactly* `2`,
 because none of the params are `Optional`.
 
-The `source` param has the *lowest* position,
-so it will bind the *first* token.
-Here is a valid usage example:
+The `source` param has the lowest position,
+so it will bind the first token, while
+`target` will bind to the second token.
 
 ````java
 String[] args = { "a.txt", "b.txt" };
@@ -72,7 +62,8 @@ assertEquals(Paths.get("b.txt"), my.target());
 
 ### Flags
 
-To declare a flag, simply use an *option* of type
+To declare a *flag* (which is a parameterless named option),
+simply declare a named option of type
 `boolean` or `Boolean`,
 and don't declare a custom mapper or collector.
 
@@ -83,7 +74,7 @@ abstract boolean quiet();
 
 At runtime, the method will return `true`
 if either `--quiet` or `-q`
-are <a href="#binding-options">*free*</a> in `argv`.
+are <a href="#named-options">*free*</a> in `argv`.
 
 ````java
 MyArguments_Parser parser = new MyArguments_Parser();
@@ -91,25 +82,21 @@ assertTrue(parser.parseOrExit(new String[]{ "-q" }).quiet());
 assertTrue(parser.parseOrExit(new String[]{ "--quiet" }).quiet());
 ````
 
-### Binding options
-
-An *option* that is not a <a href="#flags">*flag*</a> is called a
-*binding option*. For example, the following
-method declares a binding option:
+### Named options
 
 ````java
-// example of a binding option
+// example of a named option
 @Option("file")
 abstract String file();
 ````
 
-The bound token can be any string; it may even start with a dash.
-Any token in `argv` that is not bound by some binding option, and precedes the
+The token that follows `--file` can be any string; it may even start with a dash.
+Any token in `argv` that is not bound by some named option, and precedes the
 <a href="#escape-sequence">*escape sequence*</a>, is called *free*.
 
 ### Escape sequence
 
-The escape sequence consists of the <a href="#binding-options">*free*</a> token `"--"`,
+The escape sequence consists of the <a href="#named-options">*free*</a> token `"--"`,
 i.e. two consecutive dashes. 
 Any remaining tokens in `argv` after that will be treated as <a href="#params">*params*</a>.
 In other words, the escape sequence *ends option parsing*.
@@ -118,10 +105,7 @@ as long as there is at least one *param* defined.
 
 ### Repeatable parameters
 
-Repeatable parameters are either <a href="#binding-options">*binding options*</a>
-or <a href="#params">*params*</a>
-that can appear any number of times in `argv`.
-Consider this curl-inspired example:
+Both named options and positional parameters can be *repeatable*.
 
 ````java
 @Option(value = "header", mnemonic = 'H')
@@ -131,12 +115,13 @@ abstract List<String> headers();
 This list will contain headers in the same order
 in which they appear in `argv`.
 
-To declare a repeatable option or param, either define a custom collector, or
-use a parameter method that returns `List<SomeMappableType>`.
+To declare a repeatable named option or positional parameter,
+either define a custom collector, or
+use a parameter type of the form `java.util.List<?>`.
 
 ### Parameter shapes
 
-Given a <a href="#binding-options">*binding option*</a> like this
+Given a named option like this
 
 ````java
 @Option(value = "file", mnemonic = 'f')
@@ -151,7 +136,7 @@ argv = { "--file", "data.txt" }; // two dashes -> long form
 argv = { "-f", "data.txt" };     // single dash -> mnemonic
 ````
 
-Binding parameters can also be written in *attached* form as follows
+Named options can also be written in *attached* form as follows
 
 ````java
 argv = { "--file=data.txt" }; // attached long form
@@ -159,16 +144,16 @@ argv = { "-fdata.txt" };      // attached mnemonic
 ````
 
 On the other hand,
-there are at most *two* ways to write a <a href="#flags">*flag:*</a>
+there are at most two ways to write a <a href="#flags">*flag:*</a>
 
 ````java
-argv = { "--quiet" }; // two dashes -> flag long form
-argv = { "-q" };      // single dash -> flag mnemonic
+argv = { "--quiet" }; // two dashes  -> long form
+argv = { "-q" };      // single dash -> mnemonic
 ````
 
 ### Showing help
 
-The token `--help` has a special meaning, if it is the first token in `argv`. 
+The token `--help` has a special meaning, but only if it is the first token in `argv`! 
 
 ````java
 String[] argv = { "--help" };
@@ -176,10 +161,11 @@ MyArguments args = new MyArguments_Parser().parseOrExit(argv);
 ````
 
 Given this input, or any array where `--help` is the first token,
-`parseOrExit` will print usage information to the standard output,
-and then shut down the JVM with an exit code of `0`
+`parseOrExit` will print usage information
+about the declared options and parameters to the standard output,
+and then shut the JVM down with an exit code of `0`
 
-To disable the special meaning of the `--help` token, use
+The special meaning of the `--help` token can be disabled like this:
 `@Command(helpDisabled = true)`. 
 
 ### Standard coercions
@@ -187,7 +173,7 @@ To disable the special meaning of the `--help` token, use
 All non-private enums, as well as
 [some standard Java types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAutoTypes.java)
 can be used as parameter types, without having
-to write a custom mapper first. Optional and List of these
+to write a custom mapper first. `java.util.Optional` and `java.util.List` of these
 types are also allowed.
 
 ### Custom mappers and parameter validation
@@ -295,10 +281,10 @@ See [jbock-map-example](https://github.com/h908714124/jbock-map-example) for fur
 
 There are several types of "bad input" which can cause the parsing process to fail:
 
-* Repetition of <a href="#repeatable-parameters">*non-repeatable*</a> parameters
+* Repetition of non-repeatable parameters
 * Absence of required parameter
-* Too many <a href="#positional-parameters">*positional*</a> parameters
-* Missing value of <a href="#binding-parameters">*binding*</a> parameter
+* Too many positional parameters
+* Missing value of named option
 * Any `RuntimeException` in a mapper or collector
 
 The generated `parseOrExit` method performs the following steps if such a failure is encountered:
