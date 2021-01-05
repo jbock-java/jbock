@@ -69,7 +69,7 @@ public final class Processor extends AbstractProcessor {
     try {
       getAnnotatedMethods(env, annotations).forEach(method -> {
         checkEnclosingElementIsAnnotated(method);
-        validateParameterMethod(method, tool);
+        validateParameterMethod(method);
       });
     } catch (ValidationException e) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
@@ -132,9 +132,10 @@ public final class Processor extends AbstractProcessor {
     JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), definedType);
     JavaFile javaFile = builder.build();
     try {
+      Element[] originatingElements = new Element[]{sourceElement};
       JavaFileObject sourceFile = processingEnv.getFiler()
           .createSourceFile(generatedType.toString(),
-              javaFile.typeSpec.originatingElements.toArray(new Element[0]));
+              originatingElements);
       try (Writer writer = sourceFile.openWriter()) {
         String sourceCode = javaFile.toString();
         writer.write(sourceCode);
@@ -152,7 +153,7 @@ public final class Processor extends AbstractProcessor {
 
   private List<Parameter> getParams(TypeTool tool, TypeElement sourceElement, ClassName optionType) {
     Methods methods = Methods.create(methodsIn(sourceElement.getEnclosedElements()).stream()
-        .filter(method -> validateParameterMethod(method, tool))
+        .filter(method -> validateParameterMethod(method))
         .collect(Collectors.toList()));
     List<Parameter> params = new ArrayList<>();
     for (int i = 0; i < methods.params().size(); i++) {
@@ -204,7 +205,7 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private static boolean validateParameterMethod(ExecutableElement method, TypeTool tool) {
+  private static boolean validateParameterMethod(ExecutableElement method) {
     if (!method.getModifiers().contains(ABSTRACT)) {
       if (method.getAnnotation(Param.class) != null || method.getAnnotation(Option.class) != null) {
         throw ValidationException.create(method, "The method must be abstract.");
