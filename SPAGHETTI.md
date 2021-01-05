@@ -301,12 +301,10 @@ The `indent` and `maxLineWidth` are print settings for the help text.
 
 ### Limitations
 
-* No multi-valued options or params. Workaround: Declare the option or param *repeatable*, either by making it a `List`, or defining a <a href="#custom-collectors">*custom collector.*</a>
-* Option names start with two dashes. Only single-character names may use a single dash; these are called mnemonics.
-* No grouping. For example, `rm -rf` and `tar xzf` are bad, use `rm -r -f` and `tar -x -z -f` instead
-* An option can't have more than one long name or more than one mnemonic.
-* Mappers don't currently know about option form (long name or mnemonic) or shape (attached or detached). Also it's currently not possible to forbid one of the shapes.
-* Type matching currently uses `java.util.List` and `java.util.Optional` exclusively. Alternatives like `com.google.common.base.Optional` don't get special semantics.
+* The dash character has special meaning. Can't use a different character than dash.
+* No grouping of flags. For example, `rm -rf` and `tar xzf` are bad, use `rm -r -f` and `tar -x -z -f` instead
+* A named option always has exactly one standard name, and zero or one mnemonics.
+* Only `java.util.List` and `java.util.Optional` have special meaning. Guava's `Optional` doesn't do the trick, for instance.
 
 ### Gradle config
 
