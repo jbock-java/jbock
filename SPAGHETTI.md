@@ -284,8 +284,8 @@ but does not have any side effects like printing or shutting down the jvm.
 
 ### Runtime modifiers
 
-The output streams, as well as some other parameters can be changed before one of the parse methods is invoked.
-This example shows all the available options:
+The output streams, as well as some other parameters can be changed before either `parse` or `parseOrExit` is invoked.
+This example shows all available runtime modifiers:
 
 ````java
 MyArguments_Parser parser = new MyArguments_Parser()
@@ -293,8 +293,7 @@ MyArguments_Parser parser = new MyArguments_Parser()
     .withHelpStream(new PrintStream(new ByteArrayOutputStream()))   // default is System.out
     .withIndent(2)                                                  // default is 4
     .maxLineWidth(120)                                              // default is 80
-    .withResourceBundle(ResourceBundle.getBundle("UserOpts"))       // default is none
-    ;
+    .withResourceBundle(ResourceBundle.getBundle("UserOpts"));      // default is none
 ````
 
 The `indent` and `maxLineWidth` are print settings for the help text.
@@ -305,14 +304,6 @@ The `indent` and `maxLineWidth` are print settings for the help text.
 * No grouping of flags. For example, `rm -rf` and `tar xzf` are bad, use `rm -r -f` and `tar -x -z -f` instead
 * A named option always has exactly one standard name, and zero or one mnemonics.
 * Only `java.util.List` and `java.util.Optional` have special meaning. Guava's `Optional` doesn't do the trick, for instance.
-
-### Gradle config
-
-see [jbock-gradle-example](https://github.com/h908714124/jbock-gradle-example)
-
-### Maven config
-
-see [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
 
 ### Running tests
 
