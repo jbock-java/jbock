@@ -4,7 +4,7 @@
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#flags">Flags</a>
 * <a href="#named-options">Named options</a>
-* <a href="#escape-sequence">Escape sequence</a>f
+* <a href="#escape-sequence">Escape sequence</a>
 * <a href="#repeatable-parameters">Repeatable parameters</a>
 * <a href="#parameter-shapes">Parameter shapes</a>
 * <a href="#showing-help">Showing help</a>
