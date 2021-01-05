@@ -79,18 +79,21 @@ abstract String file();
 
 `file` is a required option, since the option type `String` is not wrapped in `java.util.Optional`.
 The *value* of this option is the token that immediately follows `--file` in the input array.
-Since this named option is not a <a href="#flags">flag</a>, the value must be present.
+Since this named option is not a flag, the value must be present.
 So `--file` cannot be the last token 
 in the input array. The value can be any string. In particular, it is allowed to start with a dash.
 
 ### Escape sequence
 
-The escape sequence consists of the <a href="#named-options">*free*</a> token `"--"`,
-i.e. two consecutive dashes. 
-Any remaining tokens in the input array will be treated as positional parameters, regardless of their shape.
-In other words, the escape sequence ends option parsing.
-The generated parser will recognize the escape sequence,
-as long as there is at least one positional parameter defined.
+The escape sequence consists of the free token `"--"`.
+That's two consecutive dashes which are not either bound by any other named option, or already escaped themselves.
+Any remaining tokens *after* the escape sequence in the input array will be treated as positional parameters,
+regardless of their shape.
+In other words, the escape sequence ends the parsing of named options.
+
+If for some reason you wish to deactivate this escaping mechanism, please note that 
+the generated parser will not contain the code to recognize the escape sequence if your command doesn't define any
+positional parameters.
 
 ### Repeatable parameters
 
@@ -111,48 +114,42 @@ use a parameter type of the form `java.util.List<?>`.
 
 ### Parameter shapes
 
-Given a named option like this
+Suppose a named option is defined as follows:
 
 ````java
 @Option(value = "file", mnemonic = 'f')
 abstract Path file();
 ````
 
-then we have the long form and the mnemonic, which are equivalent
+Then in the input array, the option can be passed in these two equivalent forms:
 
 ````java
 String[] argv;
-argv = { "--file", "data.txt" }; // long form
+argv = { "--file", "data.txt" }; // standard
 argv = { "-f", "data.txt" };     // mnemonic
 ````
 
-Named options can also be written in *attached* form:
+Alternatively it can be passed in two equivalent *attached* forms:
 
 ````java
-argv = { "--file=data.txt" }; // attached long form
+argv = { "--file=data.txt" }; // attached standard
 argv = { "-fdata.txt" };      // attached mnemonic
-````
-
-On the other hand, there are at most two ways to write a flag:
-
-````java
-argv = { "--quiet" }; // long form
-argv = { "-q" };      // mnemonic
 ````
 
 ### Showing help
 
-The token `--help` has a special meaning, but only if it is the first token in `argv`! 
+The token `--help` has a special meaning, but only if it is the first token in `argv`:
 
 ````java
 String[] argv = { "--help" };
 MyArguments args = new MyArguments_Parser().parseOrExit(argv);
 ````
 
-Given this input, or any array where `--help` is the first token,
+Given this input, or any input array where `--help` is the first token,
 `parseOrExit` will print usage information
 about the declared options and parameters to the standard output,
 and then shut the JVM down with an exit code of `0`
+Any remaining tokens in the input array will be ignored.
 
 The special meaning of the `--help` token can be disabled like this:
 `@Command(helpDisabled = true)`. 
@@ -162,8 +159,7 @@ The special meaning of the `--help` token can be disabled like this:
 All non-private enums, as well as
 [some standard Java types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/helloworld/JbockAutoTypes.java)
 can be used as parameter types, without having
-to write a custom mapper first. `java.util.Optional` and `java.util.List` of these
-types are also allowed.
+to write a custom mapper.
 
 ### Custom mappers and parameter validation
 
