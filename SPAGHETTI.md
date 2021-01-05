@@ -1,6 +1,6 @@
 ### Contents
 
-* <a href="#optionparam-kinds">Option/param kinds</a>
+* <a href="#introduction">Introduction</a>
 * <a href="#positional-parameters">Positional parameters</a>
 * <a href="#flags">Flags</a>
 * <a href="#named-options">Named options</a>
@@ -19,23 +19,23 @@
 * <a href="#maven-config">Maven config</a>
 * <a href="#running-tests">Running tests</a>
 
-### Option/Param kinds
+### Introduction
 
 A Java `main` Method has a parameter of type `String[]`,
-which contains the "extra" command line parameters of the `java` invocation,
-after the positional parameter `class` or the named option `-jar file.jar`.
+which contains the "extra" command line parameters of the `java` invocation.
+If the application is in an executable `.jar` file, these are any
+remaining parameters after the option `-jar file.jar`.
 
 ### Positional parameters
 
-A positional parameter is just an arbitrary token in `argv`, without a
-preceding parameter name.
-The token is not allowed to start with a dash, unless the
-<a href="#escape-sequence">*escape sequence*</a> was used.
-Here is an example:
+In order to distinguish it from the options, the string that is passed as a positional parameter is not allowed
+to start with a dash. The <a href="#escape-sequence">*escape sequence*</a> can be used to get around this limitation.
+
+The following class declares two positional parameters:
 
 ````java
 @Command
-abstract class MyArguments {
+abstract class Cp {
 
   @Param(1)
   abstract Path source();
@@ -45,27 +45,20 @@ abstract class MyArguments {
 }
 ````
 
-The class `MyArguments_Parser` that is generated
-from this example requires an `argv` of length *exactly* `2`,
-because none of the params are `Optional`.
+The method `Cp_Parser#parseOrExit(String[])` that is generated
+from this example requires an input array of length *exactly* `2`,
+because neither of the two params are `Optional`.
 
 The `source` param has the lowest position,
-so it will bind the first token, while
-`target` will bind to the second token.
-
-````java
-String[] args = { "a.txt", "b.txt" };
-MyArguments my = new MyArguments_Parser().parseOrExit(args);
-assertEquals(Paths.get("a.txt"), my.source());
-assertEquals(Paths.get("b.txt"), my.target());
-````
+so it will correspond to the first token, while
+`target` will correspond to the second token in the input array.
 
 ### Flags
 
-To declare a *flag* (which is a parameterless named option),
-simply declare a named option of type
+A value-less named option is called a *flag*.
+To declare a flag, simply declare a named option of type
 `boolean` or `Boolean`,
-and don't declare a custom mapper or collector.
+with no custom mapper or collector.
 
 ````java
 @Option(value = "quiet", mnemonic = 'q')
@@ -74,13 +67,7 @@ abstract boolean quiet();
 
 At runtime, the method will return `true`
 if either `--quiet` or `-q`
-are <a href="#named-options">*free*</a> in `argv`.
-
-````java
-MyArguments_Parser parser = new MyArguments_Parser();
-assertTrue(parser.parseOrExit(new String[]{ "-q" }).quiet());
-assertTrue(parser.parseOrExit(new String[]{ "--quiet" }).quiet());
-````
+are present in the input array, and are not escaped or bound by any other options.
 
 ### Named options
 
@@ -90,30 +77,33 @@ assertTrue(parser.parseOrExit(new String[]{ "--quiet" }).quiet());
 abstract String file();
 ````
 
-The token that follows `--file` can be any string; it may even start with a dash.
-Any token in `argv` that is not bound by some named option, and precedes the
-<a href="#escape-sequence">*escape sequence*</a>, is called *free*.
+`file` is a required option, since the option type `String` is not wrapped in `java.util.Optional`.
+The *value* of this option is the token that immediately follows `--file` in the input array.
+Since this named option is not a <a href="#flags">flag</a>, the value must be present.
+So `--file` cannot be the last token 
+in the input array. The value can be any string. In particular, it is allowed to start with a dash.
 
 ### Escape sequence
 
 The escape sequence consists of the <a href="#named-options">*free*</a> token `"--"`,
 i.e. two consecutive dashes. 
-Any remaining tokens in `argv` after that will be treated as <a href="#params">*params*</a>.
-In other words, the escape sequence *ends option parsing*.
-The generated parser will always recognize the escape sequence,
-as long as there is at least one *param* defined.
+Any remaining tokens in the input array will be treated as positional parameters, regardless of their shape.
+In other words, the escape sequence ends option parsing.
+The generated parser will recognize the escape sequence,
+as long as there is at least one positional parameter defined.
 
 ### Repeatable parameters
 
 Both named options and positional parameters can be *repeatable*.
+The following example declares a repeatable option:
 
 ````java
 @Option(value = "header", mnemonic = 'H')
 abstract List<String> headers();
 ````
 
-This list will contain headers in the same order
-in which they appear in `argv`.
+This list will contain the values of all `-H` or `--header` options in the input array,
+in the same order as in the input array.
 
 To declare a repeatable named option or positional parameter,
 either define a custom collector, or
@@ -132,23 +122,22 @@ then we have the long form and the mnemonic, which are equivalent
 
 ````java
 String[] argv;
-argv = { "--file", "data.txt" }; // two dashes -> long form
-argv = { "-f", "data.txt" };     // single dash -> mnemonic
+argv = { "--file", "data.txt" }; // long form
+argv = { "-f", "data.txt" };     // mnemonic
 ````
 
-Named options can also be written in *attached* form as follows
+Named options can also be written in *attached* form:
 
 ````java
 argv = { "--file=data.txt" }; // attached long form
 argv = { "-fdata.txt" };      // attached mnemonic
 ````
 
-On the other hand,
-there are at most two ways to write a <a href="#flags">*flag:*</a>
+On the other hand, there are at most two ways to write a flag:
 
 ````java
-argv = { "--quiet" }; // two dashes  -> long form
-argv = { "-q" };      // single dash -> mnemonic
+argv = { "--quiet" }; // long form
+argv = { "-q" };      // mnemonic
 ````
 
 ### Showing help
