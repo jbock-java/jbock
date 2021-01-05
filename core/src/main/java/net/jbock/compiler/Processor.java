@@ -153,7 +153,7 @@ public final class Processor extends AbstractProcessor {
 
   private List<Parameter> getParams(TypeTool tool, TypeElement sourceElement, ClassName optionType) {
     Methods methods = Methods.create(methodsIn(sourceElement.getEnclosedElements()).stream()
-        .filter(method -> validateParameterMethod(method))
+        .filter(Processor::validateParameterMethod)
         .collect(Collectors.toList()));
     List<Parameter> params = new ArrayList<>();
     for (int i = 0; i < methods.params().size(); i++) {
