@@ -1,9 +1,10 @@
 package net.jbock;
 
-import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * This annotation marks an abstract model class
@@ -11,8 +12,8 @@ import java.lang.annotation.Target;
  * Each of its abstract methods must be annotated with either
  * {@link Option} or {@link Param}.
  */
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.SOURCE)
+@Target(TYPE)
+@Retention(SOURCE)
 public @interface Command {
 
   /**
