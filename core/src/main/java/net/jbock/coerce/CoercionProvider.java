@@ -24,14 +24,13 @@ public class CoercionProvider {
       Optional<TypeElement> collectorClass,
       ClassName optionType,
       TypeTool tool) {
-    BasicInfo info = new BasicInfo(mapperClass, paramName, optionType, sourceMethod, tool);
-    return findCoercion(info, collectorClass);
+    BasicInfo info = new BasicInfo(mapperClass, collectorClass, paramName, optionType, sourceMethod, tool);
+    return findCoercion(info);
   }
 
   private static Coercion findCoercion(
-      BasicInfo basicInfo,
-      Optional<TypeElement> collector) {
-    return collector.<Coercion>map(collectorClass -> {
+      BasicInfo basicInfo) {
+    return basicInfo.collectorClass().<Coercion>map(collectorClass -> {
       CollectorInfo collectorInfo = new CollectorClassValidator(basicInfo::failure,
           basicInfo.tool(), collectorClass, basicInfo.returnType()).getCollectorInfo();
       ParameterSpec constructorParam = basicInfo.constructorParam(basicInfo.returnType());

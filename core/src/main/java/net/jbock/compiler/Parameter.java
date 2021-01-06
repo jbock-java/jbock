@@ -93,8 +93,8 @@ public final class Parameter {
     return coercion;
   }
 
-  static Parameter createParam(TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod,
-                               int positionalIndex, String[] description, ClassName optionType) {
+  static Parameter createPositionalParam(TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod,
+                                         int positionalIndex, String[] description, ClassName optionType) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     Optional<TypeElement> mapperClass = annotationUtil.get(net.jbock.Param.class, "mappedBy");
     Optional<TypeElement> collectorClass = annotationUtil.get(net.jbock.Param.class, "collectedBy");
@@ -106,8 +106,8 @@ public final class Parameter {
         Collections.emptyList(), coercion, Arrays.asList(description), positionalIndex);
   }
 
-  static Parameter createOption(boolean anyMnemonics, TypeTool tool, List<Parameter> alreadyCreated,
-                                ExecutableElement sourceMethod, String[] description, ClassName optionType) {
+  static Parameter createNamedOption(boolean anyMnemonics, TypeTool tool, List<Parameter> alreadyCreated,
+                                     ExecutableElement sourceMethod, String[] description, ClassName optionType) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     Optional<TypeElement> mapperClass = annotationUtil.get(Option.class, "mappedBy");
     Optional<TypeElement> collectorClass = annotationUtil.get(Option.class, "collectedBy");
@@ -127,7 +127,7 @@ public final class Parameter {
 
   private static boolean isInferredFlag(Optional<TypeElement> mapperClass, Optional<TypeElement> collectorClass, TypeMirror mirror, TypeTool tool) {
     if (mapperClass.isPresent() || collectorClass.isPresent()) {
-      // no inferring
+      // not a flag
       return false;
     }
     return mirror.getKind() == TypeKind.BOOLEAN || tool.isSameType(mirror, Boolean.class.getCanonicalName());

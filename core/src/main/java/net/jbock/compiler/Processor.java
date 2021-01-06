@@ -13,8 +13,10 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -94,12 +96,19 @@ public final class Processor extends AbstractProcessor {
         throw ValidationException.create(sourceElement, "Define at least one abstract method");
       }
 
+      // track originating elements for gradle incremental processing
+      List<TypeElement> originatingElements = parameters.stream()
+          .map(Parameter::coercion)
+          .flatMap(coercion -> coercion.originatingElements().stream())
+          .filter(originatingElement -> isSeparateClassFile(sourceElement, originatingElement))
+          .collect(Collectors.toList());
+
       checkOnlyOnePositionalList(parameters);
       checkRankConsistentWithPosition(parameters);
 
       Context context = new Context(sourceElement, generatedClass, optionType, parameters);
       TypeSpec typeSpec = GeneratedClass.create(context).define();
-      write(sourceElement, context.generatedClass(), typeSpec);
+      write(sourceElement, context.generatedClass(), typeSpec, originatingElements);
     } catch (ValidationException e) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
     } catch (AssertionError error) {
@@ -128,14 +137,13 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void write(TypeElement sourceElement, ClassName generatedType, TypeSpec definedType) {
+  private void write(TypeElement sourceElement, ClassName generatedType, TypeSpec definedType, List<TypeElement> originatingElements) {
     JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), definedType);
     JavaFile javaFile = builder.build();
     try {
-      Element[] originatingElements = new Element[]{sourceElement};
       JavaFileObject sourceFile = processingEnv.getFiler()
           .createSourceFile(generatedType.toString(),
-              originatingElements);
+              originatingElements.toArray(new TypeElement[0]));
       try (Writer writer = sourceFile.openWriter()) {
         String sourceCode = javaFile.toString();
         writer.write(sourceCode);
@@ -157,11 +165,11 @@ public final class Processor extends AbstractProcessor {
         .collect(Collectors.toList()));
     List<Parameter> params = new ArrayList<>();
     for (int i = 0; i < methods.params().size(); i++) {
-      params.add(Parameter.createParam(tool, params, methods.params().get(i), i, getDescription(methods.params().get(i)), optionType));
+      params.add(Parameter.createPositionalParam(tool, params, methods.params().get(i), i, getDescription(methods.params().get(i)), optionType));
     }
     boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
     for (ExecutableElement option : methods.options()) {
-      params.add(Parameter.createOption(anyMnemonics, tool, params, option, getDescription(option), optionType));
+      params.add(Parameter.createNamedOption(anyMnemonics, tool, params, option, getDescription(option), optionType));
     }
     if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {
       methods.options().forEach(this::checkHelp);
@@ -279,6 +287,26 @@ public final class Processor extends AbstractProcessor {
     Element p = method.getEnclosingElement();
     if (p.getAnnotation(Command.class) == null) {
       throw ValidationException.create(p, "missing @" + Command.class.getSimpleName() + " annotation");
+    }
+  }
+
+  private boolean isSeparateClassFile(TypeElement sourceElement, TypeElement originatingElement) {
+    if (sourceElement == originatingElement) {
+      return false;
+    }
+    if (originatingElement.getNestingKind() == NestingKind.TOP_LEVEL) {
+      return true;
+    }
+    Element current = originatingElement;
+    while (true) {
+      Element enclosingElement = current.getEnclosingElement();
+      if (enclosingElement == null || enclosingElement.getKind() == ElementKind.PACKAGE) {
+        return true;
+      }
+      if (enclosingElement == sourceElement) {
+        return false;
+      }
+      current = enclosingElement;
     }
   }
 }

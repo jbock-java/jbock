@@ -12,7 +12,12 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
+
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 
 /**
  * Coercion input: Information about a single parameter (option or param).
@@ -30,13 +35,18 @@ public class BasicInfo {
   // nullable
   private final TypeElement mapperClass;
 
+  // nullable
+  private final TypeElement collectorClass;
+
   BasicInfo(
       Optional<TypeElement> mapperClass,
+      Optional<TypeElement> collectorClass,
       ParamName paramName,
       ClassName optionType,
       ExecutableElement sourceMethod,
       TypeTool tool) {
     this.mapperClass = mapperClass.orElse(null);
+    this.collectorClass = collectorClass.orElse(null);
     this.paramName = paramName;
     this.optionType = optionType;
     this.sourceMethod = sourceMethod;
@@ -79,6 +89,10 @@ public class BasicInfo {
     return Optional.ofNullable(mapperClass);
   }
 
+  Optional<TypeElement> collectorClass() {
+    return Optional.ofNullable(collectorClass);
+  }
+
   public ClassName optionType() {
     return optionType;
   }
@@ -87,5 +101,16 @@ public class BasicInfo {
     Types types = tool.types();
     return types.directSupertypes(mirror).stream()
         .anyMatch(t -> tool.isSameErasure(t, Enum.class.getCanonicalName()));
+  }
+
+  List<TypeElement> originatingElements() {
+    if (collectorClass == null) {
+      return mapperClass == null ?
+          emptyList() :
+          singletonList(mapperClass);
+    }
+    return mapperClass == null ?
+        singletonList(collectorClass) :
+        Arrays.asList(mapperClass, collectorClass);
   }
 }

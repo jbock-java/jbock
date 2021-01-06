@@ -303,7 +303,7 @@ The `indent` and `maxLineWidth` are print settings for the help text.
 * The dash character has special meaning. Can't use a different character than dash.
 * No grouping of flags. For example, `rm -rf` and `tar xzf` are bad, use `rm -r -f` and `tar -x -z -f` instead
 * A named option always has exactly one standard name, and zero or one mnemonics.
-* Only `java.util.List` and `java.util.Optional` have special meaning. Guava's `Optional` doesn't do the trick, for instance.
+* Only `java.util.List` and `java.util.Optional` have special meaning. For example, Guava's `Optional` doesn't work.
 
 ### Running tests
 
