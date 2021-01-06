@@ -31,7 +31,7 @@ class RestArgumentsTest {
 
   @BeforeEach
   void setup() {
-    messages.put("file", "This\nis\ndog\n");
+    messages.put("the.file", "This\nis\ndog\n");
     messages.put("the.rest", "Hello\n   yes\n");
   }
 

@@ -17,15 +17,15 @@ public @interface Option {
 
   /**
    * A unique &quot;gnu style&quot; long name.
-   * This definition doesn't contain the double-dash prefix.
+   * It must not begin with a dash character.
    *
    * @return a nonempty string
    */
   String value();
 
   /**
-   * An optional mnemonic (space char ~= absent).
-   * This definition doesn't contain the single-dash prefix.
+   * An optional mnemonic.
+   * The space character is reserved for "none".
    *
    * @return a mnemonic
    */
@@ -50,4 +50,16 @@ public @interface Option {
    * @return an optional collector class
    */
   Class<?> collectedBy() default Object.class;
+
+  /**
+   * The key that is used to find the parameter
+   * description in the i18 resource bundle for the online help.
+   * If no bundleKey is defined, the method name is used as bundle key instead.
+   * If no bundle is supplied at runtime,
+   * or a bundle is supplied but doesn't contain the bundle key,
+   * then the {@code abstract} method's javadoc is used as description.
+   *
+   * @return an optional bundle key
+   */
+  String bundleKey() default "";
 }

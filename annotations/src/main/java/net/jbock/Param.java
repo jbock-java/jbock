@@ -21,9 +21,9 @@ public @interface Param {
    *
    * <ul>
    * <li>The method's position in the java source file is irrelevant.</li>
-   * <li>Gaps and negative numbers are allowed.</li>
-   * <li>Required parameters must have the lowest positions.</li>
-   * <li>There can only be one repeatable positional parameter,
+   * <li>Negative numbers are allowed.</li>
+   * <li>Required parameters must have lower positions than optional or repeatable parameters.</li>
+   * <li>There can only be one repeatable {@code Param},
    * and it must have the greatest position.</li>
    * </ul>
    *
@@ -47,9 +47,9 @@ public @interface Param {
    * The key that is used to find the parameter
    * description in the i18 resource bundle for the online help.
    * If no bundleKey is defined,
-   * or if no bundle is supplied at runtime,
-   * then an attempt is made to derive the parameter description
-   * from the method's javadoc.
+   * or no bundle is supplied at runtime,
+   * or a bundle is supplied but doesn't contain the bundle key,
+   * then the {@code abstract} method's javadoc is used as description.
    *
    * @return an optional bundle key
    */
