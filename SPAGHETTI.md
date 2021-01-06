@@ -1,23 +1,21 @@
 ### Contents
 
-* <a href="#introduction">Introduction</a>
-* <a href="#positional-parameters">Positional parameters</a>
-* <a href="#flags">Flags</a>
-* <a href="#named-options">Named options</a>
-* <a href="#escape-sequence">Escape sequence</a>
-* <a href="#repeatable-parameters">Repeatable parameters</a>
-* <a href="#parameter-shapes">Parameter shapes</a>
-* <a href="#showing-help">Showing help</a>
-* <a href="#standard-coercions">Standard coercions</a>
-* <a href="#custom-mappers-and-parameter-validation">Custom mappers and parameter validation</a>
-* <a href="#custom-collectors">Custom collectors</a>
-* <a href="#parameter-descriptions-and-internationalization">Parameter descriptions and internationalization</a>
-* <a href="#parsing-failure">Parsing failure</a>
-* <a href="#runtime-modifiers">Runtime modifiers</a>
-* <a href="#limitations">Limitations</a>
-* <a href="#gradle-config">Gradle config</a>
-* <a href="#maven-config">Maven config</a>
-* <a href="#running-tests">Running tests</a>
+* <a href="#user-content-introduction">Introduction</a>
+* <a href="#user-content-positional-parameters">Positional parameters</a>
+* <a href="#user-content-flags">Flags</a>
+* <a href="#user-content-named-options">Named options</a>
+* <a href="#user-content-escape-sequence">Escape sequence</a>
+* <a href="#user-content-repeatable-parameters">Repeatable parameters</a>
+* <a href="#user-content-parameter-shapes">Parameter shapes</a>
+* <a href="#user-content-showing-help">Showing help</a>
+* <a href="#user-content-standard-coercions">Standard coercions</a>
+* <a href="#user-content-custom-mappers-and-parameter-validation">Custom mappers and parameter validation</a>
+* <a href="#user-content-custom-collectors">Custom collectors</a>
+* <a href="#user-content-parameter-descriptions-and-internationalization">Parameter descriptions and internationalization</a>
+* <a href="#user-content-parsing-failure">Parsing failure</a>
+* <a href="#user-content-runtime-modifiers">Runtime modifiers</a>
+* <a href="#user-content-limitations">Limitations</a>
+* <a href="#user-content-running-tests">Running tests</a>
 
 ### Introduction
 
@@ -29,7 +27,7 @@ remaining parameters after the option `-jar file.jar`.
 ### Positional parameters
 
 In order to distinguish it from the options, the string that is passed as a positional parameter is not allowed
-to start with a dash. The <a href="#escape-sequence">*escape sequence*</a> can be used to get around this limitation.
+to start with a dash. The <a href="#user-content-escape-sequence">*escape sequence*</a> can be used to get around this limitation.
 
 The following class declares two positional parameters:
 
@@ -274,8 +272,8 @@ There are several types of "bad input" which can cause the parsing process to fa
 
 The generated `parseOrExit` method performs the following steps if such a failure is encountered:
 
-1. Print an error message to the configured <a href="#runtime-modifiers">*error stream*</a>.
-1. Shut down the JVM with the configured <a href="#runtime-modifiers">*error code*</a>.
+1. Print an error message to the configured <a href="#user-content-runtime-modifiers">*error stream*</a>.
+1. Shut down the JVM with the configured <a href="#user-content-runtime-modifiers">*error code*</a>.
 
 If manual error handling is desired, the generated `parse` method can be used instead.
 This method returns a "union type" to signal one of three conditions parsing success,
