@@ -98,8 +98,8 @@ This can be summarized in another table:
 
 Mapper defined? | Collector defined? | *Skew*
 --------------- | ------------------ | -----------
-No              | No                 | See <a href="#skew-table-a">Skew Table A</a>
-Yes             | No                 | See <a href="#skew-table-b">Skew Table B</a>
+No              | No                 | See <a href="#user-content-skew-table-a">Skew Table A</a>
+Yes             | No                 | See <a href="#user-content-skew-table-b">Skew Table B</a>
 No              | Yes                | *repeatable*
 Yes             | Yes                | *repeatable*
 
