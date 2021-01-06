@@ -9,16 +9,16 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 /**
  * The annotated method must have an empty argument list
  * and may not be {@code abstract}.
- * It must return an instance of {@link java.util.function.Function}.
+ * It must accept a single argument of type {@link java.lang.String String}
+ * and its return type must be that of the corresponding {@code abstract} method.
  */
 @Target(METHOD)
 @Retention(SOURCE)
 public @interface MapperFor {
 
   /**
-   * The exact name of the abstract method that defines the
-   * positional parameter or named option for which
-   * this mapper should be registered.
+   * The exact name of the {@code abstract} method that defines the
+   * corresponding positional parameter or named option.
    */
   String value();
 }

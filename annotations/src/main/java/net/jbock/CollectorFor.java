@@ -9,16 +9,17 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 /**
  * The annotated method must have an empty argument list
  * and may not be {@code abstract}.
- * It must return an instance of {@link java.util.stream.Collector}.
+ * It must return an instance of {@link java.util.stream.Collector},
+ * the output type of which must be the return type of the corresponding
+ * {@code abstract} method.
  */
 @Target(METHOD)
 @Retention(SOURCE)
 public @interface CollectorFor {
 
   /**
-   * The exact name of the abstract method that defines the
-   * repeatable positional parameter or named option
-   * for which this collector should be registered.
+   * The exact name of the {@code abstract} method that defines the
+   * corresponding repeatable positional parameter or named option.
    */
   String value();
 }
