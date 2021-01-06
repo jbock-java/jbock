@@ -7,8 +7,8 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for parameter methods.
- * The parameter method must be abstract
+ * Marker annotation for positional parameters.
+ * The annotated method must be abstract
  * and have an empty argument list.
  */
 @Target(METHOD)
@@ -17,7 +17,7 @@ public @interface Param {
 
   /**
    * This number determines the parameter's relative position
-   * among the positional parameters.
+   * among all positional parameters.
    *
    * <ul>
    * <li>The method's position in the java source file is irrelevant.</li>

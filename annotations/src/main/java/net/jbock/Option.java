@@ -7,7 +7,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for option methods.
+ * Marker annotation for named options.
  * The annotated method must be abstract
  * and have an empty argument list.
  */
