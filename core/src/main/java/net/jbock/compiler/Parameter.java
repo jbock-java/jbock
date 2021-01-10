@@ -122,10 +122,9 @@ public final class Parameter {
     Coercion coercion = flag ?
         new FlagCoercion(name, sourceMethod) :
         CoercionProvider.nonFlagCoercion(sourceMethod, sourceElement, name, mapperClass, optionType, tool);
-    String bundleKey = option.bundleKey().isEmpty() ? option.value() : option.bundleKey();
-    checkBundleKey(bundleKey, alreadyCreated, sourceMethod);
+    checkBundleKey(option.bundleKey(), alreadyCreated, sourceMethod);
     List<String> names = names(optionName, mnemonic);
-    return new Parameter(mnemonic, optionName, sourceMethod, bundleKey, sample(flag, name, names, anyMnemonics),
+    return new Parameter(mnemonic, optionName, sourceMethod, option.bundleKey(), sample(flag, name, names, anyMnemonics),
         names, coercion, Arrays.asList(description), null);
   }
 

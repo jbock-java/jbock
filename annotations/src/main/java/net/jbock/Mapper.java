@@ -7,15 +7,22 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for a mapper class.
- * It must implement either {@code Function<String, M>} or
+ * Marker annotation for mapper class.
+ * This annotation is mandatory only for standalone classes, i.e.
+ * classes which are not an inner class of the class that carries the {@link Command} annotation.
+ * The mapper class must implement either {@code Function<String, M>} or
  * {@code Supplier<Function<String, M>>}
  * where one of the following holds:
  * <ul>
  *   <li>The return type of the associated {@code abstract}
  *   parameter method is {@code M}.</li>
  *   <li>The return type of the associated {@code abstract}
+ *   parameter method is a primitive type, and {@code M} is its boxed version.</li>
+ *   <li>The return type of the associated {@code abstract}
  *   parameter method is {@code Optional<M>}.</li>
+ *   <li>The return type of the associated {@code abstract}
+ *   parameter method is one of the types {@code OptionalInt, OptionalLong, OptionalDouble}
+ *   and {@code M} is the boxed version of the corresponding primitive type.</li>
  *   <li>The return type of the associated {@code abstract}
  *   parameter method is {@code List<M>}.</li>
  * </ul>
