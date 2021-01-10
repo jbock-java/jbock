@@ -26,7 +26,7 @@ class AnnotationUtil {
     }
   };
 
-  private static final TypeVisitor<Boolean, TypeTool> IS_JAVA_LANG_OBJECT = new SimpleTypeVisitor8<Boolean, TypeTool>() {
+  private static final TypeVisitor<Boolean, TypeTool> IS_VOID = new SimpleTypeVisitor8<Boolean, TypeTool>() {
     @Override
     protected Boolean defaultAction(TypeMirror e, TypeTool tool) {
       return false;
@@ -35,7 +35,7 @@ class AnnotationUtil {
     @Override
     public Boolean visitDeclared(DeclaredType type, TypeTool tool) {
       TypeElement element = type.asElement().accept(TypeTool.AS_TYPE_ELEMENT, null);
-      return element != null && "java.lang.Object".equals(element.getQualifiedName().toString());
+      return element != null && "java.lang.Void".equals(element.getQualifiedName().toString());
     }
   };
 
@@ -59,7 +59,7 @@ class AnnotationUtil {
     if (typeMirror == null) {
       throw ValidationException.create(sourceMethod, String.format("Invalid value of attribute '%s'.", attributeName));
     }
-    if (typeMirror.accept(IS_JAVA_LANG_OBJECT, tool)) {
+    if (typeMirror.accept(IS_VOID, tool)) {
       // if the default value is not overridden
       return Optional.empty();
     }

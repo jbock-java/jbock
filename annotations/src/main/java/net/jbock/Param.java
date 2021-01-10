@@ -32,16 +32,16 @@ public @interface Param {
   int value();
 
   /**
-   * @return a class
-   * @see Option#mappedBy
+   * Declare a custom mapper for this positional parameter.
+   * This is either a
+   * {@link java.util.function.Function Function}
+   * accepting strings,
+   * or a {@link java.util.function.Supplier Supplier} thereof.
+   * It must carry the {@link Mapper} annotation.
+   *
+   * @return an optional mapper class
    */
-  Class<?> mappedBy() default Object.class;
-
-  /**
-   * @return a class
-   * @see Option#collectedBy
-   */
-  Class<?> collectedBy() default Object.class;
+  Class<?> mappedBy() default Void.class;
 
   /**
    * The key that is used to find the parameter

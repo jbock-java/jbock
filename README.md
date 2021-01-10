@@ -56,7 +56,7 @@ according to the following rules.
 ### Skew rules
 
 These rules apply for options and params that
-define neither a custom mapper nor collector,
+do not define a custom mapper,
 as in the `MyCommand` example:
 
 #### Skew table A
@@ -73,7 +73,7 @@ where `A` must be one of the
 [auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java),
 otherwise compilation will fail.
 
-If a custom mapper is defined, but no collector,
+If a custom mapper is defined,
 then the skew is determined by comparing the mapper's return type `M`
 and the return type of the option's `abstract` method:
 
@@ -88,20 +88,14 @@ Mapper return type        | Return type of the `abstract` method          | *Ske
 
 If none of these rules apply, compilation will fail.
 
-When a custom collector is defined, then its *input* type must be the mapper's return type,
-or if no mapper is defined, it must be one of the auto types.
-Its *output* type must be the return type of the `abstract` method.
-The *skew* of a parameter with a custom collector is always *repeatable*.
-This can be summarized in another table:
+These rules can be summarized in another table:
 
-#### Meta skew rules
+#### Skew rules overview
 
-Mapper defined? | Collector defined? | *Skew*
---------------- | ------------------ | -----------
-No              | No                 | See <a href="#user-content-skew-table-a">Skew Table A</a>
-Yes             | No                 | See <a href="#user-content-skew-table-b">Skew Table B</a>
-No              | Yes                | *repeatable*
-Yes             | Yes                | *repeatable*
+Mapper defined? | *Skew*
+--------------- | -----------
+No              | See <a href="#user-content-skew-table-a">Skew Table A</a>
+Yes             | See <a href="#user-content-skew-table-b">Skew Table B</a>
 
 ### Sample projects
 
