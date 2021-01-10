@@ -21,7 +21,7 @@ public @interface Param {
    * among all positional parameters.
    *
    * <ul>
-   * <li>The method's position in the java source file is irrelevant.</li>
+   * <li>The method's position in the source file is irrelevant.</li>
    * <li>Negative numbers are allowed.</li>
    * <li>The number must be unique among all params.</li>
    * <li>Required parameters must have lower positions than optional or repeatable parameters.</li>
