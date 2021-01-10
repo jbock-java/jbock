@@ -7,12 +7,13 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for mapper class.
- * This annotation is mandatory only for standalone classes, i.e.
+ * Marker annotation for a mapper class.
+ * This annotation is mandatory only for standalone classes. Those are the
  * classes which are not an inner class of the class that carries the {@link Command} annotation.
  * The mapper class must implement either {@code Function<String, M>} or
- * {@code Supplier<Function<String, M>>}
+ * {@code Supplier<Function<String, M>>},
  * where one of the following holds:
+ *
  * <ul>
  *   <li>The return type of the associated {@code abstract}
  *   parameter method is {@code M}.</li>
@@ -30,5 +31,4 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 @Target(TYPE)
 @Retention(SOURCE)
 public @interface Mapper {
-
 }

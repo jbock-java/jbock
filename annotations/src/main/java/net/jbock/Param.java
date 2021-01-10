@@ -23,12 +23,13 @@ public @interface Param {
    * <ul>
    * <li>The method's position in the java source file is irrelevant.</li>
    * <li>Negative numbers are allowed.</li>
+   * <li>The number must be unique among all params.</li>
    * <li>Required parameters must have lower positions than optional or repeatable parameters.</li>
    * <li>There can only be one repeatable {@code Param},
    * and it must have the greatest position.</li>
    * </ul>
    *
-   * @return a unique number that determines this parameter's position
+   * @return a number that determines the param's position
    */
   int value();
 
@@ -41,7 +42,7 @@ public @interface Param {
    * It must either be a {@code static} inner class of the class carrying the {@link Command} annotation,
    * or, if it is declared in a separate source file, it must carry the {@link Mapper} annotation.
    *
-   * @return an optional mapper class
+   * @return an optional mapper class, or {@code Void.class} to represent &quot;none&quot;
    */
   Class<?> mappedBy() default Void.class;
 

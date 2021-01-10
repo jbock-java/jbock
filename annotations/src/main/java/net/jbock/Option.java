@@ -41,7 +41,7 @@ public @interface Option {
    * It must either be a {@code static} inner class of the class carrying the {@link Command} annotation,
    * or, if it is declared in a separate source file, it must carry the {@link Mapper} annotation.
    *
-   * @return an optional mapper class
+   * @return an optional mapper class, or {@code Void.class} to represent "none"
    */
   Class<?> mappedBy() default Void.class;
 

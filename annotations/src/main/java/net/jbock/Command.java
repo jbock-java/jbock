@@ -7,27 +7,27 @@ import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * This annotation marks an abstract model class
- * that contains parameter methods.
- * Each of its abstract methods must be annotated with either
- * {@link Option} or {@link Param}.
+ * Marker annotation for an {@code abstract} class that is used
+ * to define a command line API.
+ * Each of its {@code abstract} methods must have an empty argument list and must be
+ * annotated with either {@link Option} or {@link Param}.
  */
 @Target(TYPE)
 @Retention(SOURCE)
 public @interface Command {
 
   /**
-   * The program name that is printed
-   * when the {@code --help} token is encountered.
+   * The handle that will be used when the full
+   * usage information is printed.
    *
-   * @return an optional program name
+   * @return the intended file name of the final executable
    */
   String value() default "";
 
   /**
-   * If this flag is left at its default value {@code false},
-   * then the generated parser will print the online help,
-   * if {@code --help} is passed as the first argument.
+   * When {@code false},
+   * then the generated parser will print the full usage information
+   * if {@code --help} is encountered as the first token in the input array.
    *
    * @return {@code true} to disable the {@code --help} mechanism
    */
