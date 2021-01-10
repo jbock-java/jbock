@@ -309,11 +309,15 @@ public final class GeneratedClass {
         .returns(context.parseResultType())
         .addCode(code.build())
         .addModifiers(accessModifiers)
+        .addJavadoc("This parse method has no side effects.\n" +
+            "Consider {@link #parseOrExit()} instead which does standard error-handling\n" +
+            "like printing error messages, and potentially shutting down the JVM.\n")
         .build();
   }
 
   private CodeBlock handleEndOfOptionParsing(ParameterSpec state, ParameterSpec it, ParameterSpec position, ParameterSpec token) {
-    CodeBlock.Builder code = CodeBlock.builder().beginControlFlow("while ($N.hasNext())", it);
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.beginControlFlow("while ($N.hasNext())", it); // begin loop
     code.addStatement("$N = $N.next()", token, it);
     code.add("if ($N >= $N.$N.size())\n", position, state, parserState.positionalParsersField()).indent()
         .addStatement(throwInvalidOptionStatement(token, "Excess param"))

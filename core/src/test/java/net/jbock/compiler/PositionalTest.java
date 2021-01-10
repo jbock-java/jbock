@@ -34,7 +34,7 @@ class PositionalTest {
         "  @Param(value = 1, bundleKey = \"x\")",
         "  abstract String a();",
         "",
-        "  @Option(\"x\")",
+        "  @Option(value = \"x\", bundleKey = \"x\")",
         "  abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
