@@ -11,7 +11,7 @@ import static java.util.Collections.singletonList;
 
 class CurlArgumentsTest {
 
-  private ParserTestFixture<CurlArguments> f =
+  private final ParserTestFixture<CurlArguments> f =
       ParserTestFixture.create(new CurlArguments_Parser());
 
   @Test
@@ -206,7 +206,7 @@ class CurlArgumentsTest {
   }
 
   static class A {
-     private String foo;
+    private String foo;
 
   }
 
@@ -220,7 +220,6 @@ class CurlArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: curl [options...] <urls>...",
-        "",
         "  urls",
         "  -X, --request METHOD  Optional<String> for regular arguments",
         "  -H, --H HEADERS       List<String> for repeatable arguments",

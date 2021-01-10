@@ -7,7 +7,7 @@ import static java.util.Arrays.asList;
 
 class RmArgumentsTest {
 
-  private ParserTestFixture<RmArguments> f =
+  private final ParserTestFixture<RmArguments> f =
       ParserTestFixture.create(new RmArguments_Parser());
 
   @Test
@@ -22,7 +22,6 @@ class RmArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: rm-arguments [options...] <other_tokens>...",
-        "",
         "  other_tokens     This is a list that may be empty.",
         "  -r, --recursive  ALLES TURISTEN UND NONTEKNISCHEN LOOKENSPEEPERS! DAS",
         "                   KOMPUTERMASCHINE IST NICHT FUR DER GEFINGERPOKEN UND",

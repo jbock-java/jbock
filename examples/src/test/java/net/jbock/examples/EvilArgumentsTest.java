@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 class EvilArgumentsTest {
 
-  private ParserTestFixture<EvilArguments> f =
+  private final ParserTestFixture<EvilArguments> f =
       ParserTestFixture.create(new EvilArguments_Parser());
 
   @Test
@@ -24,7 +24,6 @@ class EvilArgumentsTest {
     f.assertPrintsHelp(
         "Usage: evil-arguments --fancy <fancy> --fAncy <f_ancy> --f_ancy <f_ancy_2>",
         "        --f__ancy <f_ancy_3> --blub <blub> --Blub <blub_5>",
-        "",
         "  --fancy FANCY",
         "  --fAncy F_ANCY",
         "  --f_ancy F_ANCY_2",

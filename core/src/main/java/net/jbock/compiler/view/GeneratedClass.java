@@ -159,7 +159,6 @@ public final class GeneratedClass {
     ParameterSpec key = builder(STRING, "key").build();
     MethodSpec.Builder spec = methodBuilder("printOnlineHelp");
     spec.addStatement("printWrap($N, 8, $S, $S + synopsis())", printStream, "", "Usage: ");
-    spec.addStatement("$N.println()", printStream);
     spec.beginControlFlow("for ($T $N : buildRows())", row.type, row)
         .addStatement("$T $N = $T.format($S, $N.getKey())", STRING, key, STRING, format, row)
         .addStatement("printWrap($N, $L, $N, $N.getValue())", printStream, width, key, row)
@@ -424,6 +423,8 @@ public final class GeneratedClass {
     code.addStatement("(($T) $N).getError().printStackTrace($N)", context.parsingFailedType(), result, err);
     if (!context.isHelpParameterEnabled()) {
       code.addStatement("printOnlineHelp($N)", err);
+    } else {
+      code.addStatement("printWrap($N, 8, $S, $S + synopsis())", err, "", "Usage: ");
     }
     code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", context.parsingFailedType(), result);
     if (context.isHelpParameterEnabled()) {

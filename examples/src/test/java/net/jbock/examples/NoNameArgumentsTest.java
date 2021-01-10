@@ -10,7 +10,7 @@ import static java.util.Collections.emptyList;
 
 class NoNameArgumentsTest {
 
-  private ParserTestFixture<NoNameArguments> f =
+  private final ParserTestFixture<NoNameArguments> f =
       ParserTestFixture.create(new NoNameArguments_Parser());
 
   @Test
@@ -69,7 +69,6 @@ class NoNameArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: no-name-arguments [options...] -n <number>",
-        "",
         "      --message MESSAGE",
         "      --file FILE",
         "  -v, --verbosity VERBOSITY",

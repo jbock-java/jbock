@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class GitArgumentsTest {
 
-  private ParserTestFixture<GitArguments> f =
+  private final ParserTestFixture<GitArguments> f =
       ParserTestFixture.create(new GitArguments_Parser());
 
   @RepeatedTest(10)

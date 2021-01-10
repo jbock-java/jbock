@@ -10,7 +10,7 @@ import static java.util.Collections.emptyList;
 
 class AllIntegersArgumentsTest {
 
-  private ParserTestFixture<AllIntegersArguments> f =
+  private final ParserTestFixture<AllIntegersArguments> f =
       ParserTestFixture.create(new AllIntegersArguments_Parser());
 
   @Test

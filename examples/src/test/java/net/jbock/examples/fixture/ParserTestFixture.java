@@ -54,7 +54,7 @@ public final class ParserTestFixture<E> {
 
   private final Parser<E> parser;
 
-  private ParserTestFixture(Parser<E> parser) {
+  private final ParserTestFixture(Parser<E> parser) {
     this.parser = parser;
   }
 

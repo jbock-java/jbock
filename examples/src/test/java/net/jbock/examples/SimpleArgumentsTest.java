@@ -7,7 +7,7 @@ import java.util.Optional;
 
 class SimpleArgumentsTest {
 
-  private ParserTestFixture<SimpleArguments> f =
+  private final ParserTestFixture<SimpleArguments> f =
       ParserTestFixture.create(new SimpleArguments_Parser());
 
   @Test
@@ -30,7 +30,6 @@ class SimpleArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: simple-arguments [options...]",
-        "",
         "  -x, --x",
         "      --file FILE",
         "");

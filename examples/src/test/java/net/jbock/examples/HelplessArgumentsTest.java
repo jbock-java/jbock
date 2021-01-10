@@ -9,7 +9,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HelplessArgumentsTest {
 
-  private ParserTestFixture<HelplessArguments> f =
+  private final ParserTestFixture<HelplessArguments> f =
       ParserTestFixture.create(new HelplessArguments_Parser());
 
   @Test

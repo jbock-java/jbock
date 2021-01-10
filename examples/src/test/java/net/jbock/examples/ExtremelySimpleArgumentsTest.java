@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class ExtremelySimpleArgumentsTest {
 
-  private ParserTestFixture<ExtremelySimpleArguments> f =
+  private final ParserTestFixture<ExtremelySimpleArguments> f =
       ParserTestFixture.create(new ExtremelySimpleArguments_Parser());
 
   @Test

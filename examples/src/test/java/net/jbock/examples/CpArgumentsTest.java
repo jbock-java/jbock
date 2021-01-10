@@ -10,7 +10,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class CpArgumentsTest {
 
-  private ParserTestFixture<CpArguments> f =
+  private final ParserTestFixture<CpArguments> f =
       ParserTestFixture.create(new CpArguments_Parser());
 
   @Test
@@ -89,7 +89,6 @@ class CpArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: cp-arguments [options...] <source> <dest>",
-        "",
         "  source",
         "  dest",
         "  -r, --r",

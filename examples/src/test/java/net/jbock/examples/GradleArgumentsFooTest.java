@@ -7,7 +7,7 @@ import java.util.Optional;
 
 class GradleArgumentsFooTest {
 
-  private ParserTestFixture<GradleArguments.Foo> f =
+  private final ParserTestFixture<GradleArguments.Foo> f =
       ParserTestFixture.create(new GradleArguments_Foo_Parser());
 
   @Test
@@ -19,7 +19,6 @@ class GradleArgumentsFooTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: foo [options...]",
-        "",
         "  --bar BAR",
         "");
   }

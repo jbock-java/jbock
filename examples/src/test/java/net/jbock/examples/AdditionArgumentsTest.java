@@ -7,7 +7,7 @@ import java.util.Optional;
 
 class AdditionArgumentsTest {
 
-  private ParserTestFixture<AdditionArguments> f =
+  private final ParserTestFixture<AdditionArguments> f =
       ParserTestFixture.create(new AdditionArguments_Parser());
 
   @Test
@@ -44,7 +44,6 @@ class AdditionArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: addition-arguments <a> <b> [<c>]",
-        "",
         "  a  First argument",
         "  b  Second argument",
         "  c  Optional third argument",

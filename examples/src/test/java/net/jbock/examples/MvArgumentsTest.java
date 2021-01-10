@@ -5,7 +5,7 @@ import org.junit.jupiter.api.Test;
 
 class MvArgumentsTest {
 
-  private ParserTestFixture<MvArguments> f =
+  private final ParserTestFixture<MvArguments> f =
       ParserTestFixture.create(new MvArguments_Parser());
 
   @Test
@@ -47,7 +47,6 @@ class MvArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: mv-arguments <source> <dest>",
-        "",
         "  source",
         "  dest",
         "");

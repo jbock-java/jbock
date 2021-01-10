@@ -16,14 +16,13 @@ import static org.mockito.Mockito.when;
 
 class RestArgumentsTest {
 
-  private ParserTestFixture<RestArguments> f =
+  private final ParserTestFixture<RestArguments> f =
       ParserTestFixture.create(new RestArguments_Parser());
 
-  private Map<String, String> messages = new HashMap<>();
+  private final Map<String, String> messages = new HashMap<>();
 
-  private String[] expected = {
+  private final String[] expected = {
       "Usage: rest-arguments [options...] <rest>...",
-      "",
       "  rest         Hello yes",
       "  --file FILE  This is dog",
       ""

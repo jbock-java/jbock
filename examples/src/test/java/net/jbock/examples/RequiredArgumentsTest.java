@@ -7,7 +7,7 @@ import static java.util.Collections.emptyList;
 
 class RequiredArgumentsTest {
 
-  private ParserTestFixture<RequiredArguments> f =
+  private final ParserTestFixture<RequiredArguments> f =
       ParserTestFixture.create(new RequiredArguments_Parser());
 
   @Test
@@ -41,7 +41,6 @@ class RequiredArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: required-arguments --dir <dir> <other_tokens>...",
-        "",
         "  other_tokens",
         "  --dir DIR",
         "");

@@ -10,7 +10,7 @@ import static java.util.Collections.singletonList;
 
 class PositionalArgumentsTest {
 
-  private ParserTestFixture<PositionalArguments> f =
+  private final ParserTestFixture<PositionalArguments> f =
       ParserTestFixture.create(new PositionalArguments_Parser());
 
   @Test
@@ -95,7 +95,6 @@ class PositionalArgumentsTest {
     f.assertPrintsHelp(
         "Usage: positional-arguments <source> <dest> <another_int> [<opt_string>]",
         "        <other_tokens>...",
-        "",
         "  source",
         "  dest          Desc of dest.",
         "  another_int",
