@@ -105,7 +105,7 @@ public class TypevarMapping {
     return right(new TypevarMapping(result, tool, errorHandler));
   }
 
-  public Either<String, FlattenerResult> getTypeParameters(TypeElement targetElement) {
+  public Either<String, List<TypeMirror>> getTypeParameters(TypeElement targetElement) {
     List<? extends TypeParameterElement> parameters = targetElement.getTypeParameters();
     List<TypeMirror> result = new ArrayList<>(parameters.size());
     for (TypeParameterElement p : parameters) {
@@ -118,6 +118,6 @@ public class TypevarMapping {
       }
       result.add(m);
     }
-    return right(new FlattenerResult(result, new TypevarMapping(map, tool, errorHandler)));
+    return right(result);
   }
 }

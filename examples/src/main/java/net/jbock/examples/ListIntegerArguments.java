@@ -3,8 +3,8 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Option;
 
+import java.util.ArrayList;
 import java.util.Collections;
-import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -14,13 +14,13 @@ abstract class ListIntegerArguments {
   private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
 
   @Option(value = "a", mnemonic = 'a', mappedBy = Mapper.class)
-  abstract List<Integer> a();
+  abstract java.util.ArrayList<Integer> a();
 
-  static class Mapper implements Supplier<Function<String, List<Integer>>> {
+  static class Mapper implements Supplier<Function<String, java.util.ArrayList<Integer>>> {
 
     @Override
-    public Function<String, List<Integer>> get() {
-      return PARSE_INT.andThen(Collections::singletonList);
+    public Function<String, java.util.ArrayList<Integer>> get() {
+      return PARSE_INT.andThen(Collections::singletonList).andThen(ArrayList::new);
     }
   }
 }

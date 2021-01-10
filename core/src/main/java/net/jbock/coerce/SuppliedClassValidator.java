@@ -17,21 +17,21 @@ public class SuppliedClassValidator {
 
   public static void commonChecks(TypeElement classToCheck) {
     if (classToCheck.getNestingKind().isNested() && classToCheck.getNestingKind() != NestingKind.MEMBER) {
-      throw ValidationException.create(classToCheck, "Use a top level class or static inner class.");
+      throw ValidationException.create(classToCheck, "Use a top level class or static inner class");
     }
     if (classToCheck.getNestingKind().isNested() &&
         !classToCheck.getModifiers().contains(Modifier.STATIC)) {
-      throw ValidationException.create(classToCheck, "The nested class must be static.");
+      throw ValidationException.create(classToCheck, "The nested class must be static");
     }
     if (classToCheck.getModifiers().contains(Modifier.PRIVATE)) {
-      throw ValidationException.create(classToCheck, "The class may not be private.");
+      throw ValidationException.create(classToCheck, "The class may not be private");
     }
     if (classToCheck.getKind() == ElementKind.INTERFACE) {
-      throw ValidationException.create(classToCheck, "Use a class, not an interface.");
+      throw ValidationException.create(classToCheck, "Use a class, not an interface");
     }
     getEnclosingElements(classToCheck).forEach(element -> {
       if (element.getModifiers().contains(Modifier.PRIVATE)) {
-        throw ValidationException.create(element, "The class may not not be private.");
+        throw ValidationException.create(element, "The class may not not be private");
       }
     });
     if (!hasDefaultConstructor(classToCheck)) {

@@ -5,6 +5,7 @@ import net.jbock.Option;
 import net.jbock.Param;
 
 import java.math.BigInteger;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
@@ -42,7 +43,7 @@ abstract class CustomMapperArguments {
   abstract Optional<String[]> stringArray();
 
   @Option(value = "integerList", mappedBy = IntegerListMapper.class)
-  abstract Optional<List<Integer>> integerList();
+  abstract Optional<ArrayList<Integer>> integerList();
 
   @Option(value = "enumSet", mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
@@ -54,7 +55,7 @@ abstract class CustomMapperArguments {
   abstract List<OptionalInt> optionalInts();
 
   @Option(value = "listWrapper", mappedBy = ListWrapperMapper.class)
-  abstract Optional<List<String>> listWrapper();
+  abstract Optional<java.util.ArrayList<String>> listWrapper();
 
   @Option(value = "notFlag", mappedBy = BooleanMapper.class)
   abstract Boolean notFlag();
@@ -89,13 +90,13 @@ abstract class CustomMapperArguments {
     }
   }
 
-  static class IntegerListMapper implements Supplier<Function<String, List<Integer>>> {
+  static class IntegerListMapper implements Supplier<Function<String, java.util.ArrayList<Integer>>> {
 
     @Override
-    public Function<String, List<Integer>> get() {
-      return s -> Arrays.stream(s.split(",", -1))
+    public Function<String, java.util.ArrayList<Integer>> get() {
+      return s -> new ArrayList<>(Arrays.stream(s.split(",", -1))
           .map(Integer::valueOf)
-          .collect(Collectors.toList());
+          .collect(Collectors.toList()));
     }
   }
 
@@ -117,11 +118,11 @@ abstract class CustomMapperArguments {
     }
   }
 
-  static class ListWrapperMapper implements Supplier<Function<String, List<String>>> {
+  static class ListWrapperMapper implements Supplier<Function<String, java.util.ArrayList<String>>> {
 
     @Override
-    public Function<String, List<String>> get() {
-      return Collections::singletonList;
+    public Function<String, java.util.ArrayList<String>> get() {
+      return s -> new ArrayList<>(Collections.singletonList(s));
     }
   }
 

@@ -97,10 +97,9 @@ public final class Parameter {
                                          int positionalIndex, String[] description, ClassName optionType) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     Optional<TypeElement> mapperClass = annotationUtil.get(net.jbock.Param.class, "mappedBy");
-    Optional<TypeElement> collectorClass = annotationUtil.get(net.jbock.Param.class, "collectedBy");
     net.jbock.Param parameter = sourceMethod.getAnnotation(net.jbock.Param.class);
     ParamName name = findParamName(alreadyCreated, sourceMethod);
-    Coercion coercion = CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
+    Coercion coercion = CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, optionType, tool);
     checkBundleKey(parameter.bundleKey(), alreadyCreated, sourceMethod);
     return new Parameter(' ', null, sourceMethod, parameter.bundleKey(), name.snake().toLowerCase(Locale.US),
         Collections.emptyList(), coercion, Arrays.asList(description), positionalIndex);
@@ -110,15 +109,14 @@ public final class Parameter {
                                      ExecutableElement sourceMethod, String[] description, ClassName optionType) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     Optional<TypeElement> mapperClass = annotationUtil.get(Option.class, "mappedBy");
-    Optional<TypeElement> collectorClass = annotationUtil.get(Option.class, "collectedBy");
     String optionName = optionName(alreadyCreated, sourceMethod);
     char mnemonic = mnemonic(alreadyCreated, sourceMethod);
     Option option = sourceMethod.getAnnotation(Option.class);
     ParamName name = findParamName(alreadyCreated, sourceMethod);
-    boolean flag = isInferredFlag(mapperClass, collectorClass, sourceMethod.getReturnType(), tool);
+    boolean flag = isInferredFlag(mapperClass, sourceMethod.getReturnType(), tool);
     Coercion coercion = flag ?
         new FlagCoercion(name, sourceMethod) :
-        CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, collectorClass, optionType, tool);
+        CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, optionType, tool);
     String bundleKey = option.bundleKey().isEmpty() ? option.value() : option.bundleKey();
     checkBundleKey(bundleKey, alreadyCreated, sourceMethod);
     List<String> names = names(optionName, mnemonic);
@@ -126,8 +124,8 @@ public final class Parameter {
         names, coercion, Arrays.asList(description), null);
   }
 
-  private static boolean isInferredFlag(Optional<TypeElement> mapperClass, Optional<TypeElement> collectorClass, TypeMirror mirror, TypeTool tool) {
-    if (mapperClass.isPresent() || collectorClass.isPresent()) {
+  private static boolean isInferredFlag(Optional<TypeElement> mapperClass, TypeMirror mirror, TypeTool tool) {
+    if (mapperClass.isPresent()) {
       // not a flag
       return false;
     }

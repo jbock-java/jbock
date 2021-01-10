@@ -364,10 +364,10 @@ class MapperTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
-        "  abstract List things();",
+        "  abstract java.util.Set<java.util.Set> things();",
         "",
-        "  static class Mapper implements Supplier<Function<String, List>> {",
-        "    public Function<String, List> get() { return null; }",
+        "  static class Mapper implements Supplier<Function<String, java.util.Set<java.util.Set>>> {",
+        "    public Function<String, java.util.Set<java.util.Set>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -482,9 +482,9 @@ class MapperTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
-        "  abstract List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<java.util.Collection<Integer>>>>>>>>>>>>>> numbers();",
+        "  abstract java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<java.util.Collection<Integer>>>>>>>>>>>>>> numbers();",
         "",
-        "  static class Mapper<M extends Integer> implements Supplier<Function<String, List<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<java.util.Collection<M>>>>>>>>>>>>>>>> {",
+        "  static class Mapper<M extends Integer> implements Supplier<Function<String, java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<java.util.Collection<M>>>>>>>>>>>>>>>> {",
         "    public Foo1<Set<Set<Set<Set<Set<Set<java.util.Collection<M>>>>>>>> get() { return null; }",
         "  }",
         "  interface Foo1<A> extends Foo2<List<A>> { }",
@@ -493,7 +493,7 @@ class MapperTest {
         "  interface Foo4<D> extends Foo5<List<D>> { }",
         "  interface Foo5<E> extends Foo6<List<E>> { }",
         "  interface Foo6<F> extends Foo7<List<F>> { }",
-        "  interface Foo7<G> extends Foo8<List<G>> { }",
+        "  interface Foo7<G> extends Foo8<java.util.ArrayList<G>> { }",
         "  interface Foo8<H> extends Function<String, H> { }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -668,24 +668,6 @@ class MapperTest {
   }
 
   @Test
-  void mapperValidStringOptionalStringTypevar() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = Mapper.class)",
-        "  abstract Optional<String> number();",
-        "",
-        "  static class Mapper<E> implements Supplier<Function<E, Optional<E>>> {",
-        "    public Function<E, Optional<E>> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
   void mapperValidStringListTypevar() {
     JavaFileObject javaFile = fromSource(
         "@Command",
@@ -700,7 +682,8 @@ class MapperTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: The mapper must not return one of the special types [java.util.Optional, java.util.List]");
   }
 
   @Test
@@ -710,10 +693,10 @@ class MapperTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Mapper.class)",
-        "  abstract List<List<java.lang.CharSequence>> number();",
+        "  abstract java.util.ArrayList<List<java.lang.CharSequence>> number();",
         "",
-        "  static class Mapper implements Supplier<Function<String, List<List<String>>>> {",
-        "    public Function<String, List<List<String>>> get() { return null; }",
+        "  static class Mapper implements Supplier<Function<String, java.util.ArrayList<List<String>>>> {",
+        "    public Function<String, java.util.ArrayList<List<String>>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -773,7 +756,8 @@ class MapperTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: The mapper must not return one of the special types [java.util.Optional, java.util.List].");
   }
 
   @Test
@@ -858,9 +842,9 @@ class MapperTest {
         "abstract class Arguments {",
         "",
         "  @Option(value = \"x\", mappedBy = Identity.class)",
-        "  abstract List<Integer> ints();",
+        "  abstract java.util.ArrayList<Integer> ints();",
         "",
-        "  static class Identity<E> implements Supplier<Function<E, List<E>>> {",
+        "  static class Identity<E> implements Supplier<Function<E, java.util.ArrayList<E>>> {",
         "    public Function<E, E> get() { return null; }",
         "  }",
         "}");
@@ -887,25 +871,6 @@ class MapperTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.util.Optional<java.lang.Integer>.");
-  }
-
-  @Test
-  void mapperHasTypeargsImpossibleFromStringOptionalOptional() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = Identity.class)",
-        "  abstract Optional<Integer> ints();",
-        "",
-        "  static class Identity<E> implements Supplier<Function<E, Optional<E>>> {",
-        "    public Function<E, E> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.lang.Integer.");
   }
 
   @Test

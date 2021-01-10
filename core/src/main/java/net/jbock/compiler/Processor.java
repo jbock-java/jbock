@@ -10,6 +10,7 @@ import net.jbock.coerce.SuppliedClassValidator;
 import net.jbock.compiler.view.GeneratedClass;
 
 import javax.annotation.processing.AbstractProcessor;
+import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
@@ -96,19 +97,12 @@ public final class Processor extends AbstractProcessor {
         throw ValidationException.create(sourceElement, "Define at least one abstract method");
       }
 
-      // track originating elements for gradle incremental processing
-      List<TypeElement> originatingElements = parameters.stream()
-          .map(Parameter::coercion)
-          .flatMap(coercion -> coercion.originatingElements().stream())
-          .filter(originatingElement -> isSeparateClassFile(sourceElement, originatingElement))
-          .collect(Collectors.toList());
-
       checkOnlyOnePositionalList(parameters);
       checkRankConsistentWithPosition(parameters);
 
       Context context = new Context(sourceElement, generatedClass, optionType, parameters);
       TypeSpec typeSpec = GeneratedClass.create(context).define();
-      write(sourceElement, context.generatedClass(), typeSpec, originatingElements);
+      write(sourceElement, context.generatedClass(), typeSpec);
     } catch (ValidationException e) {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
     } catch (AssertionError error) {
@@ -137,13 +131,12 @@ public final class Processor extends AbstractProcessor {
     }
   }
 
-  private void write(TypeElement sourceElement, ClassName generatedType, TypeSpec definedType, List<TypeElement> originatingElements) {
+  private void write(TypeElement sourceElement, ClassName generatedType, TypeSpec definedType) {
     JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), definedType);
     JavaFile javaFile = builder.build();
     try {
-      JavaFileObject sourceFile = processingEnv.getFiler()
-          .createSourceFile(generatedType.toString(),
-              originatingElements.toArray(new TypeElement[0]));
+      Filer filer = processingEnv.getFiler();
+      JavaFileObject sourceFile = filer.createSourceFile(generatedType.toString(), sourceElement);
       try (Writer writer = sourceFile.openWriter()) {
         String sourceCode = javaFile.toString();
         writer.write(sourceCode);

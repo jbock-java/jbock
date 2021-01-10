@@ -6,9 +6,9 @@ import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.NonFlagSkew;
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.either.Left;
 import net.jbock.coerce.either.Right;
 import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
@@ -22,7 +22,7 @@ import static net.jbock.coerce.NonFlagSkew.REQUIRED;
 import static net.jbock.coerce.either.Either.left;
 import static net.jbock.coerce.matching.AutoMatcher.boxedType;
 
-public class MapperMatcher {
+public class MapperMatcher implements Matcher {
 
   private final TypeElement mapperClass;
   private final BasicInfo basicInfo;
@@ -55,16 +55,21 @@ public class MapperMatcher {
     return attempts;
   }
 
+  @Override
   public Coercion findCoercion() {
-    List<MatchingAttempt> attempts = getAttempts();
-    Either<String, Coercion> either = left("");
-    for (MatchingAttempt attempt : attempts) {
-      either = attempt.findCoercion(basicInfo);
-      if (either instanceof Right) {
-        return ((Right<String, Coercion>) either).value();
+    try {
+      List<MatchingAttempt> attempts = getAttempts();
+      Either<String, Coercion> either = left("");
+      for (MatchingAttempt attempt : attempts) {
+        either = attempt.findCoercion(basicInfo);
+        if (either instanceof Right) {
+          return ((Right<String, Coercion>) either).value();
+        }
       }
+      return either.orElseThrow(this::boom);
+    } catch (ValidationException e) {
+      throw boom(e.getMessage());
     }
-    throw basicInfo.failure(((Left<String, Coercion>) either).value());
   }
 
   private TypeTool tool() {
@@ -77,5 +82,13 @@ public class MapperMatcher {
 
   private MatchingAttempt attempt(TypeMirror expectedReturnType, ParameterSpec constructorParam, NonFlagSkew skew) {
     return new MatchingAttempt(expectedReturnType, CodeBlock.of("$N", constructorParam), constructorParam, skew, mapperClass);
+  }
+
+  private ValidationException boom(String message) {
+    return basicInfo.failure(enrichMessage(message));
+  }
+
+  private String enrichMessage(String message) {
+    return String.format("There is a problem with the mapper class: %s.", message);
   }
 }

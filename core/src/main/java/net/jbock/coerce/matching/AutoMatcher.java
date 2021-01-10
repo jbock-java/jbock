@@ -3,6 +3,7 @@ package net.jbock.coerce.matching;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.BasicInfo;
+import net.jbock.coerce.Coercion;
 import net.jbock.coerce.NonFlagCoercion;
 import net.jbock.coerce.NonFlagSkew;
 import net.jbock.compiler.TypeTool;
@@ -17,7 +18,7 @@ import static net.jbock.coerce.NonFlagSkew.OPTIONAL;
 import static net.jbock.coerce.NonFlagSkew.REPEATABLE;
 import static net.jbock.coerce.NonFlagSkew.REQUIRED;
 
-public class AutoMatcher {
+public class AutoMatcher implements Matcher {
 
   private final BasicInfo basicInfo;
 
@@ -25,7 +26,8 @@ public class AutoMatcher {
     this.basicInfo = basicInfo;
   }
 
-  public NonFlagCoercion findCoercion() {
+  @Override
+  public Coercion findCoercion() {
     TypeMirror returnType = basicInfo.returnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
     Optional<TypeMirror> listWrapped = tool().getSingleTypeArgument(returnType, List.class.getCanonicalName());

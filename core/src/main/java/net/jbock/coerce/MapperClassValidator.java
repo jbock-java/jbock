@@ -9,7 +9,11 @@ import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
+import java.util.Optional;
 import java.util.function.Function;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.Util.checkNotAbstract;
@@ -17,6 +21,10 @@ import static net.jbock.coerce.Util.getTypeParameterList;
 import static net.jbock.coerce.reference.ExpectedType.MAPPER;
 
 public final class MapperClassValidator {
+
+  private static final List<String> SPECIAL_TYPES = Stream.of(Optional.class, List.class)
+      .map(Class::getCanonicalName)
+      .collect(Collectors.toList());
 
   private final Function<String, ValidationException> errorHandler;
   private final TypeTool tool;
@@ -37,8 +45,13 @@ public final class MapperClassValidator {
         .getReferencedType();
     TypeMirror inputType = functionType.typeArguments().get(0);
     TypeMirror outputType = functionType.typeArguments().get(1);
+    for (String specialType : SPECIAL_TYPES) {
+      if (tool.isSameErasure(outputType, specialType)) {
+        throw boom("The mapper must not return one of the special types " + SPECIAL_TYPES);
+      }
+    }
     return tool.unify(tool.asTypeElement(String.class.getCanonicalName()).asType(), inputType, this::boom)
-        .flatMap(this::enrichMessage, inputSolution ->
+        .flatMap(Function.identity(), inputSolution ->
             handle(functionType, outputType, inputSolution));
   }
 
@@ -47,7 +60,7 @@ public final class MapperClassValidator {
       TypeMirror outputType,
       TypevarMapping inputSolution) {
     return tool.unify(expectedReturnType, outputType, this::boom)
-        .flatMap(this::enrichMessage, outputSolution ->
+        .flatMap(Function.identity(), outputSolution ->
             handle(functionType, inputSolution, outputSolution));
   }
 
@@ -58,17 +71,13 @@ public final class MapperClassValidator {
     return inputSolution.merge(outputSolution)
         .flatMap(Function.identity(), mapping ->
             mapping.getTypeParameters(mapperClass))
-        .map(this::enrichMessage, typeParameters -> CodeBlock.of("new $T$L()$L",
+        .map(Function.identity(), typeParameters -> CodeBlock.of("new $T$L()$L",
             tool.types().erasure(mapperClass.asType()),
-            getTypeParameterList(typeParameters.getTypeParameters()),
+            getTypeParameterList(typeParameters),
             functionType.isSupplier() ? ".get()" : ""));
   }
 
   private ValidationException boom(String message) {
-    return errorHandler.apply(enrichMessage(message));
-  }
-
-  private String enrichMessage(String message) {
-    return String.format("There is a problem with the mapper class: %s.", message);
+    return errorHandler.apply(message);
   }
 }
