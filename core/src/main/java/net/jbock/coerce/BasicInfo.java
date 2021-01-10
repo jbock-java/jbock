@@ -9,6 +9,7 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.Optional;
@@ -22,6 +23,8 @@ public class BasicInfo {
 
   private final ExecutableElement sourceMethod;
 
+  private final TypeElement sourceElement;
+
   private final TypeTool tool;
 
   private final ClassName optionType;
@@ -30,10 +33,12 @@ public class BasicInfo {
       ParamName paramName,
       ClassName optionType,
       ExecutableElement sourceMethod,
+      TypeElement sourceElement,
       TypeTool tool) {
     this.paramName = paramName;
     this.optionType = optionType;
     this.sourceMethod = sourceMethod;
+    this.sourceElement = sourceElement;
     this.tool = tool;
   }
 
@@ -77,5 +82,9 @@ public class BasicInfo {
     Types types = tool.types();
     return types.directSupertypes(mirror).stream()
         .anyMatch(t -> tool.isSameErasure(t, Enum.class.getCanonicalName()));
+  }
+
+  public TypeElement sourceElement() {
+    return sourceElement;
   }
 }

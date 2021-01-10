@@ -15,11 +15,12 @@ public class CoercionProvider {
 
   public static Coercion nonFlagCoercion(
       ExecutableElement sourceMethod,
+      TypeElement sourceElement,
       ParamName paramName,
       Optional<TypeElement> mapperClass,
       ClassName optionType,
       TypeTool tool) {
-    BasicInfo info = new BasicInfo(paramName, optionType, sourceMethod, tool);
+    BasicInfo info = new BasicInfo(paramName, optionType, sourceMethod, sourceElement, tool);
     return mapperClass
         .<Matcher>map(mapper -> new MapperMatcher(info, mapper))
         .orElseGet(() -> new AutoMatcher(info))

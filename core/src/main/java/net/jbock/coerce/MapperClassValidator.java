@@ -15,8 +15,6 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
-import static net.jbock.coerce.Util.checkNotAbstract;
 import static net.jbock.coerce.Util.getTypeParameterList;
 import static net.jbock.coerce.reference.ExpectedType.MAPPER;
 
@@ -39,8 +37,6 @@ public final class MapperClassValidator {
   }
 
   public Either<String, CodeBlock> getMapExpr() {
-    commonChecks(mapperClass);
-    checkNotAbstract(mapperClass);
     ReferencedType<Function<?, ?>> functionType = new ReferenceTool<>(MAPPER, this::boom, tool, mapperClass)
         .getReferencedType();
     TypeMirror inputType = functionType.typeArguments().get(0);

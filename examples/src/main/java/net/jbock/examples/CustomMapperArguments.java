@@ -25,40 +25,40 @@ abstract class CustomMapperArguments {
    * The mapper must be a Function from String to whatever-this-returns.
    * It must also have a package-visible no-arg constructor.
    */
-  @Option(value = "date", mapper = DateMapper.class)
+  @Option(value = "date", mappedBy = DateMapper.class)
   abstract Date date();
 
-  @Option(value = "optDate", mapper = DateMapper.class)
+  @Option(value = "optDate", mappedBy = DateMapper.class)
   abstract Optional<Date> optDate();
 
-  @Option(value = "dateList", mapper = DateMapper.class)
+  @Option(value = "dateList", mappedBy = DateMapper.class)
   abstract List<Date> dateList();
 
-  @Option(value = "verbosity", mapper = CustomBigIntegerMapperSupplier.class)
+  @Option(value = "verbosity", mappedBy = CustomBigIntegerMapperSupplier.class)
   abstract Optional<BigInteger> verbosity();
 
-  @Option(value = "aRequiredInt", mapper = PositiveNumberMapper.class)
+  @Option(value = "aRequiredInt", mappedBy = PositiveNumberMapper.class)
   abstract int aRequiredInt();
 
-  @Option(value = "stringArray", mapper = ArrayMapper.class)
+  @Option(value = "stringArray", mappedBy = ArrayMapper.class)
   abstract Optional<String[]> stringArray();
 
-  @Option(value = "integerList", mapper = IntegerListMapper.class)
+  @Option(value = "integerList", mappedBy = IntegerListMapper.class)
   abstract Optional<ArrayList<Integer>> integerList();
 
-  @Option(value = "enumSet", mapper = EnumSetMapper.class)
+  @Option(value = "enumSet", mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
-  @Param(value = 1, mapper = BooleanMapper.class)
+  @Param(value = 1, mappedBy = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
-  @Option(value = "optionalInts", mapper = OptionalIntMapper.class)
+  @Option(value = "optionalInts", mappedBy = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
-  @Option(value = "listWrapper", mapper = ListWrapperMapper.class)
+  @Option(value = "listWrapper", mappedBy = ListWrapperMapper.class)
   abstract Optional<java.util.ArrayList<String>> listWrapper();
 
-  @Option(value = "notFlag", mapper = BooleanMapper.class)
+  @Option(value = "notFlag", mappedBy = BooleanMapper.class)
   abstract Boolean notFlag();
 
   @Mapper
@@ -85,7 +85,6 @@ abstract class CustomMapperArguments {
     }
   }
 
-  @Mapper
   static class ArrayMapper implements Supplier<Function<String, String[]>> {
 
     @Override
@@ -94,7 +93,6 @@ abstract class CustomMapperArguments {
     }
   }
 
-  @Mapper
   static class IntegerListMapper implements Supplier<Function<String, java.util.ArrayList<Integer>>> {
 
     @Override
@@ -105,7 +103,6 @@ abstract class CustomMapperArguments {
     }
   }
 
-  @Mapper
   static class EnumSetMapper implements Supplier<Function<String, Set<MyEnum>>> {
 
     @Override
@@ -116,7 +113,6 @@ abstract class CustomMapperArguments {
     }
   }
 
-  @Mapper
   static class BooleanMapper implements Supplier<Function<String, Boolean>> {
 
     @Override
@@ -125,7 +121,6 @@ abstract class CustomMapperArguments {
     }
   }
 
-  @Mapper
   static class ListWrapperMapper implements Supplier<Function<String, java.util.ArrayList<String>>> {
 
     @Override
@@ -134,7 +129,6 @@ abstract class CustomMapperArguments {
     }
   }
 
-  @Mapper
   static class OptionalIntMapper implements Supplier<Function<String, OptionalInt>> {
 
     @Override

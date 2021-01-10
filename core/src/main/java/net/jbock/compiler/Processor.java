@@ -159,11 +159,13 @@ public final class Processor extends AbstractProcessor {
         .collect(Collectors.toList()));
     List<Parameter> params = new ArrayList<>();
     for (int i = 0; i < methods.params().size(); i++) {
-      params.add(Parameter.createPositionalParam(tool, params, methods.params().get(i), i, getDescription(methods.params().get(i)), optionType));
+      params.add(Parameter.createPositionalParam(tool, params, methods.params().get(i), sourceElement, i,
+          getDescription(methods.params().get(i)), optionType));
     }
     boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
     for (ExecutableElement option : methods.options()) {
-      params.add(Parameter.createNamedOption(anyMnemonics, tool, params, option, getDescription(option), optionType));
+      params.add(Parameter.createNamedOption(anyMnemonics, tool, params, option, sourceElement,
+          getDescription(option), optionType));
     }
     if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {
       methods.options().forEach(this::checkHelp);

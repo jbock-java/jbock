@@ -12,12 +12,12 @@ abstract class ComplicatedMapperArguments {
 
   @Option(
       value = "number",
-      mapper = Mapper.class)
+      mappedBy = Mapper.class)
   abstract Integer number();
 
   @Option(
       value = "numbers",
-      mapper = LazyNumberMapper.class)
+      mappedBy = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();
 
   @net.jbock.Mapper

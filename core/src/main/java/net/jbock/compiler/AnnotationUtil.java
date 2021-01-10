@@ -15,6 +15,7 @@ import java.util.Optional;
 
 class AnnotationUtil {
 
+  private static final String MAPPER_ATTRIBUTE = "mappedBy";
   private final TypeTool tool;
   private final ExecutableElement sourceMethod;
 
@@ -57,7 +58,7 @@ class AnnotationUtil {
     }
     TypeMirror typeMirror = annotationValue.accept(GET_TYPE, null);
     if (typeMirror == null) {
-      throw ValidationException.create(sourceMethod, "Invalid value of attribute 'mapper'.");
+      throw ValidationException.create(sourceMethod, "Invalid value of attribute '" + MAPPER_ATTRIBUTE + "'.");
     }
     if (typeMirror.accept(IS_VOID, tool)) {
       // if the default value is not overridden
@@ -74,7 +75,7 @@ class AnnotationUtil {
 
   private static AnnotationValue getAnnotationValue(AnnotationMirror annotationMirror) {
     return annotationMirror.getElementValues().entrySet().stream()
-        .filter(entry -> entry.getKey().getSimpleName().toString().equals("mapper"))
+        .filter(entry -> entry.getKey().getSimpleName().toString().equals(MAPPER_ATTRIBUTE))
         .map(Map.Entry::getValue).findAny().orElse(null);
   }
 }

@@ -39,7 +39,7 @@ public class SuppliedClassValidator {
     }
   }
 
-  private static List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
+  public static List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
     List<TypeElement> result = new ArrayList<>();
     TypeElement current = sourceElement;
     result.add(current);

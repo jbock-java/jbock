@@ -13,7 +13,7 @@ abstract class ListIntegerArguments {
 
   private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
 
-  @Option(value = "a", mnemonic = 'a', mapper = Mapper.class)
+  @Option(value = "a", mnemonic = 'a', mappedBy = Mapper.class)
   abstract java.util.ArrayList<Integer> a();
 
   @net.jbock.Mapper

@@ -94,20 +94,24 @@ public final class Parameter {
     return coercion;
   }
 
-  static Parameter createPositionalParam(TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod,
-                                         int positionalIndex, String[] description, ClassName optionType) {
+  static Parameter createPositionalParam(
+      TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod,
+      TypeElement sourceElement,
+      int positionalIndex, String[] description, ClassName optionType) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     Optional<TypeElement> mapperClass = annotationUtil.getMapper(Param.class);
     Param parameter = sourceMethod.getAnnotation(Param.class);
     ParamName name = findParamName(alreadyCreated, sourceMethod);
-    Coercion coercion = CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, optionType, tool);
+    Coercion coercion = CoercionProvider.nonFlagCoercion(sourceMethod, sourceElement, name, mapperClass, optionType, tool);
     checkBundleKey(parameter.bundleKey(), alreadyCreated, sourceMethod);
     return new Parameter(' ', null, sourceMethod, parameter.bundleKey(), name.snake().toLowerCase(Locale.US),
         Collections.emptyList(), coercion, Arrays.asList(description), positionalIndex);
   }
 
-  static Parameter createNamedOption(boolean anyMnemonics, TypeTool tool, List<Parameter> alreadyCreated,
-                                     ExecutableElement sourceMethod, String[] description, ClassName optionType) {
+  static Parameter createNamedOption(
+      boolean anyMnemonics, TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod,
+      TypeElement sourceElement,
+      String[] description, ClassName optionType) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
     Optional<TypeElement> mapperClass = annotationUtil.getMapper(Option.class);
     String optionName = optionName(alreadyCreated, sourceMethod);
@@ -117,7 +121,7 @@ public final class Parameter {
     boolean flag = isInferredFlag(mapperClass, sourceMethod.getReturnType(), tool);
     Coercion coercion = flag ?
         new FlagCoercion(name, sourceMethod) :
-        CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, optionType, tool);
+        CoercionProvider.nonFlagCoercion(sourceMethod, sourceElement, name, mapperClass, optionType, tool);
     String bundleKey = option.bundleKey().isEmpty() ? option.value() : option.bundleKey();
     checkBundleKey(bundleKey, alreadyCreated, sourceMethod);
     List<String> names = names(optionName, mnemonic);

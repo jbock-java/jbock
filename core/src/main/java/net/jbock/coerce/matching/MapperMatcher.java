@@ -17,9 +17,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.coerce.NonFlagSkew.OPTIONAL;
 import static net.jbock.coerce.NonFlagSkew.REPEATABLE;
 import static net.jbock.coerce.NonFlagSkew.REQUIRED;
+import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
+import static net.jbock.coerce.SuppliedClassValidator.getEnclosingElements;
 import static net.jbock.coerce.either.Either.left;
 import static net.jbock.coerce.matching.AutoMatcher.boxedType;
 
@@ -58,10 +61,9 @@ public class MapperMatcher implements Matcher {
 
   @Override
   public Coercion findCoercion() {
-    Mapper mapperAnnotation = mapperClass.getAnnotation(Mapper.class);
-    if (mapperAnnotation == null) {
-      throw boom("The class must carry the " + Mapper.class.getCanonicalName() + " annotation");
-    }
+    commonChecks(mapperClass);
+    checkNotAbstract(mapperClass);
+    checkMapperAnnotation();
     try {
       List<MatchingAttempt> attempts = getAttempts();
       Either<String, Coercion> either = left("");
@@ -74,6 +76,21 @@ public class MapperMatcher implements Matcher {
       return either.orElseThrow(this::boom);
     } catch (ValidationException e) {
       throw boom(e.getMessage());
+    }
+  }
+
+  private void checkMapperAnnotation() {
+    Mapper mapperAnnotation = mapperClass.getAnnotation(Mapper.class);
+    boolean nestedMapper = getEnclosingElements(mapperClass).contains(basicInfo.sourceElement());
+    if (mapperAnnotation == null && !nestedMapper) {
+      throw boom("The class must either be an inner class of " + basicInfo.sourceElement() +
+          ", or carry the " + Mapper.class.getCanonicalName() + " annotation");
+    }
+  }
+
+  private static void checkNotAbstract(TypeElement typeElement) {
+    if (typeElement.getModifiers().contains(ABSTRACT)) {
+      throw ValidationException.create(typeElement, "The class may not be abstract.");
     }
   }
 
