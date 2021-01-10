@@ -32,28 +32,28 @@ abstract class PrimitiveArguments {
 
   // there's no simple boolean -- that would be a flag!
 
-  @Option(value = "b", mnemonic = 'b', mappedBy = ByteMapper.class)
+  @Option(value = "b", mnemonic = 'b', mapper = ByteMapper.class)
   abstract byte mappedByte();
 
-  @Option(value = "s", mnemonic = 's', mappedBy = ShortMapper.class)
+  @Option(value = "s", mnemonic = 's', mapper = ShortMapper.class)
   abstract short mappedShort();
 
-  @Option(value = "i", mnemonic = 'i', mappedBy = IntMapper.class)
+  @Option(value = "i", mnemonic = 'i', mapper = IntMapper.class)
   abstract int mappedInt();
 
-  @Option(value = "l", mnemonic = 'l', mappedBy = LongMapper.class)
+  @Option(value = "l", mnemonic = 'l', mapper = LongMapper.class)
   abstract long mappedLong();
 
-  @Option(value = "f", mnemonic = 'f', mappedBy = FloatMapper.class)
+  @Option(value = "f", mnemonic = 'f', mapper = FloatMapper.class)
   abstract float mappedFloat();
 
-  @Option(value = "d", mnemonic = 'd', mappedBy = DoubleMapper.class)
+  @Option(value = "d", mnemonic = 'd', mapper = DoubleMapper.class)
   abstract double mappedDouble();
 
-  @Option(value = "c", mnemonic = 'c', mappedBy = CharMapper.class)
+  @Option(value = "c", mnemonic = 'c', mapper = CharMapper.class)
   abstract char mappedChar();
 
-  @Option(value = "x", mnemonic = 'x', mappedBy = BooleanMapper.class)
+  @Option(value = "x", mnemonic = 'x', mapper = BooleanMapper.class)
   abstract boolean mappedBoolean();
 
   static class IntMapper implements Supplier<Function<String, Integer>> {

@@ -41,7 +41,7 @@ public @interface Option {
    *
    * @return an optional mapper class
    */
-  Class<?> mappedBy() default Void.class;
+  Class<?> mapper() default Void.class;
 
   /**
    * The key that is used to find the parameter

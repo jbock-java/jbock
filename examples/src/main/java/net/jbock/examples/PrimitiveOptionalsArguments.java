@@ -12,22 +12,22 @@ import java.util.function.Supplier;
 @Command
 abstract class PrimitiveOptionalsArguments {
 
-  @Option(value = "I", mnemonic = 'I', mappedBy = IntegerMapper.class)
+  @Option(value = "I", mnemonic = 'I', mapper = IntegerMapper.class)
   abstract OptionalInt simpleInt();
 
-  @Option(value = "L", mnemonic = 'L', mappedBy = LongMapper.class)
+  @Option(value = "L", mnemonic = 'L', mapper = LongMapper.class)
   abstract OptionalLong simpleLong();
 
-  @Option(value = "D", mnemonic = 'D', mappedBy = DoubleMapper.class)
+  @Option(value = "D", mnemonic = 'D', mapper = DoubleMapper.class)
   abstract OptionalDouble simpleDouble();
 
-  @Option(value = "i", mnemonic = 'i', mappedBy = IntegerMapper.class)
+  @Option(value = "i", mnemonic = 'i', mapper = IntegerMapper.class)
   abstract OptionalInt mappedInt();
 
-  @Option(value = "l", mnemonic = 'l', mappedBy = LongMapper.class)
+  @Option(value = "l", mnemonic = 'l', mapper = LongMapper.class)
   abstract OptionalLong mappedLong();
 
-  @Option(value = "d", mnemonic = 'd', mappedBy = DoubleMapper.class)
+  @Option(value = "d", mnemonic = 'd', mapper = DoubleMapper.class)
   abstract OptionalDouble mappedDouble();
 
   static class IntegerMapper implements Supplier<Function<String, Integer>> {

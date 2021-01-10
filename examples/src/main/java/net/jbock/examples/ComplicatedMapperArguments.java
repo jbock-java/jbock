@@ -12,12 +12,12 @@ abstract class ComplicatedMapperArguments {
 
   @Option(
       value = "number",
-      mappedBy = Mapper.class)
+      mapper = Mapper.class)
   abstract Integer number();
 
   @Option(
       value = "numbers",
-      mappedBy = LazyNumberMapper.class)
+      mapper = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();
 
   static class LazyNumberMapper implements Supplier<Function<String, LazyNumber>> {

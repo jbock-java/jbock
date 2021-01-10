@@ -35,7 +35,7 @@ class AnnotationUtil {
     @Override
     public Boolean visitDeclared(DeclaredType type, TypeTool tool) {
       TypeElement element = type.asElement().accept(TypeTool.AS_TYPE_ELEMENT, null);
-      return element != null && "java.lang.Void".equals(element.getQualifiedName().toString());
+      return element != null && Void.class.getCanonicalName().equals(element.getQualifiedName().toString());
     }
   };
 
@@ -44,20 +44,20 @@ class AnnotationUtil {
     this.sourceMethod = sourceMethod;
   }
 
-  Optional<TypeElement> get(Class<?> annotationClass, String attributeName) {
+  Optional<TypeElement> getMapper(Class<?> annotationClass) {
     AnnotationMirror annotation = getAnnotationMirror(tool, sourceMethod, annotationClass);
     if (annotation == null) {
       // if the source method doesn't have this annotation
       return Optional.empty();
     }
-    AnnotationValue annotationValue = getAnnotationValue(annotation, attributeName);
+    AnnotationValue annotationValue = getAnnotationValue(annotation);
     if (annotationValue == null) {
       // if the default value is not overridden
       return Optional.empty();
     }
     TypeMirror typeMirror = annotationValue.accept(GET_TYPE, null);
     if (typeMirror == null) {
-      throw ValidationException.create(sourceMethod, String.format("Invalid value of attribute '%s'.", attributeName));
+      throw ValidationException.create(sourceMethod, "Invalid value of attribute 'mapper'.");
     }
     if (typeMirror.accept(IS_VOID, tool)) {
       // if the default value is not overridden
@@ -72,9 +72,9 @@ class AnnotationUtil {
         .findAny().orElse(null);
   }
 
-  private static AnnotationValue getAnnotationValue(AnnotationMirror annotationMirror, String key) {
+  private static AnnotationValue getAnnotationValue(AnnotationMirror annotationMirror) {
     return annotationMirror.getElementValues().entrySet().stream()
-        .filter(entry -> entry.getKey().getSimpleName().toString().equals(key))
+        .filter(entry -> entry.getKey().getSimpleName().toString().equals("mapper"))
         .map(Map.Entry::getValue).findAny().orElse(null);
   }
 }

@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
+import net.jbock.Param;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionProvider;
 import net.jbock.coerce.FlagCoercion;
@@ -27,7 +28,7 @@ import static java.lang.Character.isWhitespace;
 import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
 
 /**
- * This class represents either an {@link Option} or a {@link net.jbock.Param}.
+ * This class represents either an {@link Option} or a {@link Param}.
  */
 public final class Parameter {
 
@@ -96,8 +97,8 @@ public final class Parameter {
   static Parameter createPositionalParam(TypeTool tool, List<Parameter> alreadyCreated, ExecutableElement sourceMethod,
                                          int positionalIndex, String[] description, ClassName optionType) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
-    Optional<TypeElement> mapperClass = annotationUtil.get(net.jbock.Param.class, "mappedBy");
-    net.jbock.Param parameter = sourceMethod.getAnnotation(net.jbock.Param.class);
+    Optional<TypeElement> mapperClass = annotationUtil.getMapper(Param.class);
+    Param parameter = sourceMethod.getAnnotation(Param.class);
     ParamName name = findParamName(alreadyCreated, sourceMethod);
     Coercion coercion = CoercionProvider.nonFlagCoercion(sourceMethod, name, mapperClass, optionType, tool);
     checkBundleKey(parameter.bundleKey(), alreadyCreated, sourceMethod);
@@ -108,7 +109,7 @@ public final class Parameter {
   static Parameter createNamedOption(boolean anyMnemonics, TypeTool tool, List<Parameter> alreadyCreated,
                                      ExecutableElement sourceMethod, String[] description, ClassName optionType) {
     AnnotationUtil annotationUtil = new AnnotationUtil(tool, sourceMethod);
-    Optional<TypeElement> mapperClass = annotationUtil.get(Option.class, "mappedBy");
+    Optional<TypeElement> mapperClass = annotationUtil.getMapper(Option.class);
     String optionName = optionName(alreadyCreated, sourceMethod);
     char mnemonic = mnemonic(alreadyCreated, sourceMethod);
     Option option = sourceMethod.getAnnotation(Option.class);

@@ -12,7 +12,7 @@ abstract class OptionalIntArguments {
 
   private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
 
-  @Option(value = "a", mnemonic = 'a', mappedBy = Mapper.class)
+  @Option(value = "a", mnemonic = 'a', mapper = Mapper.class)
   abstract OptionalInt a();
 
   static class Mapper implements Supplier<Function<String, OptionalInt>> {
