@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
+import net.jbock.Mapper;
 import net.jbock.Option;
 
 import java.util.function.Function;
@@ -56,6 +57,7 @@ abstract class PrimitiveArguments {
   @Option(value = "x", mnemonic = 'x', mapper = BooleanMapper.class)
   abstract boolean mappedBoolean();
 
+  @Mapper
   static class IntMapper implements Supplier<Function<String, Integer>> {
     @Override
     public Function<String, Integer> get() {
@@ -63,6 +65,7 @@ abstract class PrimitiveArguments {
     }
   }
 
+  @Mapper
   static class LongMapper implements Supplier<Function<String, Long>> {
     @Override
     public Function<String, Long> get() {
@@ -70,6 +73,7 @@ abstract class PrimitiveArguments {
     }
   }
 
+  @Mapper
   static class DoubleMapper implements Supplier<Function<String, Double>> {
     @Override
     public Function<String, Double> get() {
@@ -77,6 +81,7 @@ abstract class PrimitiveArguments {
     }
   }
 
+  @Mapper
   static class ByteMapper implements Supplier<Function<String, Byte>> {
     @Override
     public Function<String, Byte> get() {
@@ -84,6 +89,7 @@ abstract class PrimitiveArguments {
     }
   }
 
+  @Mapper
   static class ShortMapper implements Supplier<Function<String, Short>> {
     @Override
     public Function<String, Short> get() {
@@ -91,6 +97,7 @@ abstract class PrimitiveArguments {
     }
   }
 
+  @Mapper
   static class FloatMapper implements Supplier<Function<String, Float>> {
     @Override
     public Function<String, Float> get() {
@@ -98,6 +105,7 @@ abstract class PrimitiveArguments {
     }
   }
 
+  @Mapper
   static class CharMapper implements Supplier<Function<String, Character>> {
     @Override
     public Function<String, Character> get() {
@@ -105,6 +113,7 @@ abstract class PrimitiveArguments {
     }
   }
 
+  @Mapper
   static class BooleanMapper implements Supplier<Function<String, Boolean>> {
     @Override
     public Function<String, Boolean> get() {

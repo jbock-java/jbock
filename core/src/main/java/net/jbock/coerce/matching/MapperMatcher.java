@@ -2,6 +2,7 @@ package net.jbock.coerce.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.Mapper;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.NonFlagSkew;
@@ -57,6 +58,10 @@ public class MapperMatcher implements Matcher {
 
   @Override
   public Coercion findCoercion() {
+    Mapper mapperAnnotation = mapperClass.getAnnotation(Mapper.class);
+    if (mapperAnnotation == null) {
+      throw boom("The class must carry the " + Mapper.class.getCanonicalName() + " annotation");
+    }
     try {
       List<MatchingAttempt> attempts = getAttempts();
       Either<String, Coercion> either = left("");

@@ -15,6 +15,7 @@ abstract class OptionalIntArguments {
   @Option(value = "a", mnemonic = 'a', mapper = Mapper.class)
   abstract OptionalInt a();
 
+  @net.jbock.Mapper
   static class Mapper implements Supplier<Function<String, OptionalInt>> {
 
     @Override

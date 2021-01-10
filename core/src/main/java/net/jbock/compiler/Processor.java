@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.Command;
+import net.jbock.Mapper;
 import net.jbock.Option;
 import net.jbock.Param;
 import net.jbock.coerce.SuppliedClassValidator;
@@ -14,10 +15,9 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.RoundEnvironment;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.NestingKind;
+import javax.lang.model.element.Name;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
@@ -56,7 +56,7 @@ public final class Processor extends AbstractProcessor {
 
   @Override
   public Set<String> getSupportedAnnotationTypes() {
-    return Stream.of(Command.class, Option.class, Param.class)
+    return Stream.of(Command.class, Option.class, Param.class, Mapper.class)
         .map(Class::getCanonicalName)
         .collect(toSet());
   }
@@ -78,8 +78,9 @@ public final class Processor extends AbstractProcessor {
       processingEnv.getMessager().printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
       return false;
     }
-    if (annotations.stream().map(TypeElement::getQualifiedName)
-        .noneMatch(name -> name.contentEquals(Command.class.getCanonicalName()))) {
+    Set<String> qualifiedNames = annotations.stream().map(TypeElement::getQualifiedName)
+        .map(Name::toString).collect(Collectors.toSet());
+    if (!qualifiedNames.contains(Command.class.getCanonicalName())) {
       return false;
     }
     ElementFilter.typesIn(env.getElementsAnnotatedWith(Command.class)).forEach(sourceElement ->
@@ -280,26 +281,6 @@ public final class Processor extends AbstractProcessor {
     Element p = method.getEnclosingElement();
     if (p.getAnnotation(Command.class) == null) {
       throw ValidationException.create(p, "missing @" + Command.class.getSimpleName() + " annotation");
-    }
-  }
-
-  private boolean isSeparateClassFile(TypeElement sourceElement, TypeElement originatingElement) {
-    if (sourceElement == originatingElement) {
-      return false;
-    }
-    if (originatingElement.getNestingKind() == NestingKind.TOP_LEVEL) {
-      return true;
-    }
-    Element current = originatingElement;
-    while (true) {
-      Element enclosingElement = current.getEnclosingElement();
-      if (enclosingElement == null || enclosingElement.getKind() == ElementKind.PACKAGE) {
-        return true;
-      }
-      if (enclosingElement == sourceElement) {
-        return false;
-      }
-      current = enclosingElement;
     }
   }
 }

@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
+import net.jbock.Mapper;
 import net.jbock.Option;
 
 import java.util.OptionalDouble;
@@ -30,6 +31,7 @@ abstract class PrimitiveOptionalsArguments {
   @Option(value = "d", mnemonic = 'd', mapper = DoubleMapper.class)
   abstract OptionalDouble mappedDouble();
 
+  @Mapper
   static class IntegerMapper implements Supplier<Function<String, Integer>> {
     @Override
     public Function<String, Integer> get() {
@@ -37,6 +39,7 @@ abstract class PrimitiveOptionalsArguments {
     }
   }
 
+  @Mapper
   static class LongMapper implements Supplier<Function<String, Long>> {
     @Override
     public Function<String, Long> get() {
@@ -44,6 +47,7 @@ abstract class PrimitiveOptionalsArguments {
     }
   }
 
+  @Mapper
   static class DoubleMapper implements Supplier<Function<String, Double>> {
     @Override
     public Function<String, Double> get() {

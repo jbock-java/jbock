@@ -20,6 +20,7 @@ abstract class ComplicatedMapperArguments {
       mapper = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();
 
+  @net.jbock.Mapper
   static class LazyNumberMapper implements Supplier<Function<String, LazyNumber>> {
     @Override
     public Function<String, LazyNumber> get() {
@@ -31,6 +32,7 @@ abstract class ComplicatedMapperArguments {
   }
 
   // parser must understand that this implements Function<String, Integer>
+  @net.jbock.Mapper
   static class Mapper implements Supplier<Function<String, Integer>> {
     @Override
     public Function<String, Integer> get() {

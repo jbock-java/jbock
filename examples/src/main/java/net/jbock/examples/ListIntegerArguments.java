@@ -16,6 +16,7 @@ abstract class ListIntegerArguments {
   @Option(value = "a", mnemonic = 'a', mapper = Mapper.class)
   abstract java.util.ArrayList<Integer> a();
 
+  @net.jbock.Mapper
   static class Mapper implements Supplier<Function<String, java.util.ArrayList<Integer>>> {
 
     @Override

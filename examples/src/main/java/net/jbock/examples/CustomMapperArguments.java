@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
+import net.jbock.Mapper;
 import net.jbock.Option;
 import net.jbock.Param;
 
@@ -60,6 +61,7 @@ abstract class CustomMapperArguments {
   @Option(value = "notFlag", mapper = BooleanMapper.class)
   abstract Boolean notFlag();
 
+  @Mapper
   static class DateMapper implements Supplier<Function<String, Date>> {
 
     @Override
@@ -68,6 +70,7 @@ abstract class CustomMapperArguments {
     }
   }
 
+  @Mapper
   static class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
 
     @Override
@@ -82,6 +85,7 @@ abstract class CustomMapperArguments {
     }
   }
 
+  @Mapper
   static class ArrayMapper implements Supplier<Function<String, String[]>> {
 
     @Override
@@ -90,6 +94,7 @@ abstract class CustomMapperArguments {
     }
   }
 
+  @Mapper
   static class IntegerListMapper implements Supplier<Function<String, java.util.ArrayList<Integer>>> {
 
     @Override
@@ -100,6 +105,7 @@ abstract class CustomMapperArguments {
     }
   }
 
+  @Mapper
   static class EnumSetMapper implements Supplier<Function<String, Set<MyEnum>>> {
 
     @Override
@@ -110,6 +116,7 @@ abstract class CustomMapperArguments {
     }
   }
 
+  @Mapper
   static class BooleanMapper implements Supplier<Function<String, Boolean>> {
 
     @Override
@@ -118,6 +125,7 @@ abstract class CustomMapperArguments {
     }
   }
 
+  @Mapper
   static class ListWrapperMapper implements Supplier<Function<String, java.util.ArrayList<String>>> {
 
     @Override
@@ -126,6 +134,7 @@ abstract class CustomMapperArguments {
     }
   }
 
+  @Mapper
   static class OptionalIntMapper implements Supplier<Function<String, OptionalInt>> {
 
     @Override

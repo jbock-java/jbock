@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
+import net.jbock.Mapper;
 import net.jbock.Param;
 
 import java.util.ArrayList;
@@ -16,6 +17,7 @@ abstract class SudokuArguments {
   @Param(value = 1, mapper = Mapper.class)
   abstract java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> number();
 
+  @net.jbock.Mapper
   static class Mapper<M extends Integer> implements Supplier<Function<String, java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>>>>>>>>>> {
     public Foo1<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>> get() {
       return s -> new ArrayList<>();

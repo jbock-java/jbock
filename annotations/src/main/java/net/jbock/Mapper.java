@@ -3,7 +3,7 @@ package net.jbock;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
@@ -20,7 +20,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  *   parameter method is {@code List<M>}.</li>
  * </ul>
  */
-@Target(METHOD)
+@Target(TYPE)
 @Retention(SOURCE)
 public @interface Mapper {
 
