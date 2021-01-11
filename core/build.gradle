@@ -1,5 +1,6 @@
 plugins {
     id 'java'
+    id 'com.github.johnrengelman.shadow' version '6.1.0'
     id 'maven-publish'
     id 'signing'
 }
@@ -20,12 +21,25 @@ compileJava {
     options.compilerArgs << '8'
 }
 
+repositories {
+    mavenCentral()
+}
+
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
 tasks.withType(GenerateModuleMetadata) {
     enabled = true
 }
 
-repositories {
-    mavenCentral()
+shadowJar {
+    minimize()
+    dependencies {
+        exclude(dependency('com.github.h908714124:jbock-annotations:.*'))
+    }
+    relocate 'com.squareup.javapoet', 'net.jbock.javapoet'
 }
 
 dependencies {
@@ -83,9 +97,9 @@ gradle.taskGraph.whenReady { taskGraph ->
 // https://central.sonatype.org/pages/gradle.html
 publishing {
     publications {
-        mavenJava(MavenPublication) {
+        mavenJava(MavenPublication) { publication ->
+            project.shadow.component(publication)
             artifactId = 'jbock'
-            from components.java
 
             artifact sourcesJar
             artifact javadocJar
