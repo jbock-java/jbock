@@ -32,8 +32,7 @@ if [[ "${VERSION:0:1}" == $TAG_PREFIX ]]; then
   die "version cannot begin with $TAG_PREFIX"
 fi
 
-git checkout master
-git pull origin master
+git pull origin $(git rev-parse --abbrev-ref HEAD)
 ./gradlew core:clean core:test examples:clean examples:test
 ./gradlew -Pversion=${VERSION} ${MODULE}:publish
 
