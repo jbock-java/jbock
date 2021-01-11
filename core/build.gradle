@@ -39,6 +39,7 @@ shadowJar {
     dependencies {
         exclude(dependency('com.github.h908714124:jbock-annotations:.*'))
     }
+    archiveClassifier.set('')
     relocate 'com.squareup.javapoet', 'net.jbock.javapoet'
 }
 
