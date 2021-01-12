@@ -312,7 +312,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("missing @Command annotation");
+        .withErrorContaining("The enclosing class is missing the @Command annotation.");
   }
 
   @Test

@@ -41,10 +41,15 @@ shadowJar {
     }
     archiveClassifier.set('')
     relocate 'com.squareup.javapoet', 'net.jbock.javapoet'
+    relocate 'com.google.auto', 'net.jbock.google.auto'
+    relocate 'com.google.common', 'net.jbock.google.common'
+    relocate 'com.google.thirdparty', 'net.jbock.google.thirdparty'
 }
 
 dependencies {
     implementation 'com.squareup:javapoet:1.13.0'
+    implementation 'com.google.auto:auto-common:0.11'
+    implementation 'com.google.guava:guava:30.1-jre'
     shadow 'com.github.h908714124:jbock-annotations:3.5'
     testImplementation 'com.github.h908714124:jbock-annotations:3.5'
     testImplementation 'com.google.testing.compile:compile-testing:0.19'
