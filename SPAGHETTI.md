@@ -10,7 +10,6 @@
 * <a href="#user-content-showing-help">Showing help</a>
 * <a href="#user-content-standard-coercions">Standard coercions</a>
 * <a href="#user-content-custom-mappers-and-parameter-validation">Custom mappers and parameter validation</a>
-* <a href="#user-content-custom-collectors">Custom collectors</a>
 * <a href="#user-content-parameter-descriptions-and-internationalization">Parameter descriptions and internationalization</a>
 * <a href="#user-content-parsing-failure">Parsing failure</a>
 * <a href="#user-content-runtime-modifiers">Runtime modifiers</a>
@@ -55,8 +54,7 @@ so it will correspond to the first token, while
 
 A value-less named option is called a *flag*.
 To declare a flag, simply declare a named option of type
-`boolean` or `Boolean`,
-with no custom mapper or collector.
+`boolean` or `Boolean`, with no custom mapper.
 
 ````java
 @Option(value = "quiet", mnemonic = 'q')
@@ -107,7 +105,6 @@ This list will contain the values of all `-H` or `--header` options in the input
 in the same order as in the input array.
 
 To declare a repeatable named option or positional parameter,
-either define a custom collector, or
 use a parameter type of the form `java.util.List<?>`.
 
 ### Parameter shapes
@@ -182,61 +179,6 @@ class NatMapper implements Function<String, Integer> {
 }
 ````
 
-### Custom collectors
-
-The following example shows how a repeatable
-option can be parsed into a `Map`,
-by declaring a custom mapper and collector:
-
-````java
-@Option(value = "headers",
-        mnemonic = 'H'
-        mappedBy = MyTokenizer.class,
-        collectedBy = MyCollector.class)
-abstract Map<String, String> headers();
-````
-
-This mapper parses a token of the form `-Hfoo:bar` into a map entry:
-
-````java
-class MyTokenizer implements Function<String, Map.Entry<String, String>> {
-
-  @Override
-  public Map.Entry<String, String> apply(String s) {
-    String[] tokens = s.split(":", 2);
-    if (tokens.length < 2) {
-      throw new IllegalArgumentException("Invalid token: " + s);
-    }
-    return new AbstractMap.SimpleImmutableEntry<>(tokens[0], tokens[1]);
-  }
-}
-````
-
-The collector class must implement either [Collector](https://docs.oracle.com/javase/8/docs/api/java/util/stream/Collector.html)`<A, ?, B>` or `Supplier<Collector<A, ?, B>`,
-where `A` is mappable, and `B` is the option's or parameter's type.
-The collector class may have type parameters, as long as they can be chosen so that `A` and `B` are matched.
-
-````java
-class MyCollector<K, V> implements Supplier<Collector<Map.Entry<K, V>, ?, Map<K, V>>> {
-
-  @Override
-  public Collector<Map.Entry<K, V>, ?, Map<K, V>> get() {
-    return Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue);
-  }
-}
-````
-
-This can be tested as follows
-
-````java
-String[] argv = { "-Xhorse:12", "-Xsheep:4" };
-MyArguments args = new MyArguments_Parser().parseOrExit(argv);
-
-assertEquals(2, args.headers());
-assertEquals("12", args.headers().get("horse"));
-assertEquals("4", args.headers().get("sheep"));
-````
-
 ### Parameter descriptions and internationalization
 
 By default, the method's Javadoc is used as the parameter description. 
@@ -268,7 +210,7 @@ There are several types of "bad input" which can cause the parsing process to fa
 * Absence of required parameter
 * Too many positional parameters
 * Missing value of named option
-* Any `RuntimeException` in a mapper or collector
+* Any `RuntimeException` thrown from a mapper's `apply` method
 
 The generated `parseOrExit` method performs the following steps if such a failure is encountered:
 
