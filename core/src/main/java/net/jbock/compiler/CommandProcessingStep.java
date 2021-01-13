@@ -5,6 +5,8 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
+import dagger.BindsInstance;
+import dagger.Component;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
@@ -52,6 +54,29 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     this.messager = messager;
     this.filer = filer;
     this.elements = elements;
+  }
+
+  @Component
+  interface ParameterComponent {
+
+    ParameterFactory parameterFactory();
+
+    @Component.Builder
+    interface Builder {
+      @BindsInstance
+      Builder sourceMethod(ExecutableElement sourceMethod);
+
+      @BindsInstance
+      Builder sourceElement(TypeElement sourceElement);
+
+      @BindsInstance
+      Builder typeTool(TypeTool tool);
+
+      @BindsInstance
+      Builder optionType(ClassName optionType);
+
+      ParameterComponent build();
+    }
   }
 
   @Override
@@ -118,13 +143,24 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .collect(Collectors.toList()));
     List<Parameter> params = new ArrayList<>();
     for (int i = 0; i < methods.params().size(); i++) {
-      params.add(Parameter.createPositionalParam(tool, params, methods.params().get(i), sourceElement, i,
-          getDescription(methods.params().get(i)), optionType));
+      ParameterComponent component = DaggerCommandProcessingStep_ParameterComponent.builder()
+          .optionType(optionType)
+          .sourceElement(sourceElement)
+          .sourceMethod(methods.params().get(i))
+          .typeTool(tool)
+          .build();
+      params.add(component.parameterFactory().createPositionalParam(params, i, getDescription(methods.params().get(i))));
     }
     boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
     for (ExecutableElement option : methods.options()) {
-      params.add(Parameter.createNamedOption(anyMnemonics, tool, params, option, sourceElement,
-          getDescription(option), optionType));
+      ParameterComponent component = DaggerCommandProcessingStep_ParameterComponent.builder()
+          .optionType(optionType)
+          .sourceElement(sourceElement)
+          .sourceMethod(option)
+          .typeTool(tool)
+          .build();
+      params.add(component.parameterFactory().createNamedOption(anyMnemonics, params,
+          getDescription(option)));
     }
     if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {
       methods.options().forEach(this::checkHelp);
