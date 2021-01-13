@@ -109,7 +109,7 @@ final class OptionEnum {
   }
 
   private CodeBlock getNames(Parameter param) {
-    List<String> names = param.names();
+    List<String> names = param.dashedNames();
     switch (names.size()) {
       case 0:
         return CodeBlock.of("$T.emptyList()", Collections.class);

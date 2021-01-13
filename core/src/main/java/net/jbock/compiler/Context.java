@@ -50,7 +50,7 @@ public final class Context {
     if (!sourceType.getAnnotation(Command.class).value().isEmpty()) {
       return sourceType.getAnnotation(Command.class).value();
     }
-    return ParamName.create(sourceType.getSimpleName().toString()).snake('-');
+    return EnumName.create(sourceType.getSimpleName().toString()).snake('-');
   }
 
   public ClassName optionParserType() {

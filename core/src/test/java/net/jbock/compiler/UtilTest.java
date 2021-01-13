@@ -10,21 +10,21 @@ class UtilTest {
 
   @Test
   void testSnakeCase() {
-    assertEquals("get_money", ParamName.create("getMoney").snake());
-    assertEquals("github", ParamName.create("GIThub").snake());
-    assertEquals("money_maker", ParamName.create("money_maker").snake());
-    assertEquals("robo_cop_9", ParamName.create("roboCop9").snake());
-    assertEquals("is_windowscompatible", ParamName.create("isWINDOWScompatible").snake());
-    assertEquals("a_required_int", ParamName.create("aRequiredInt").snake());
+    assertEquals("get_money", EnumName.create("getMoney").snake());
+    assertEquals("github", EnumName.create("GIThub").snake());
+    assertEquals("money_maker", EnumName.create("money_maker").snake());
+    assertEquals("robo_cop_9", EnumName.create("roboCop9").snake());
+    assertEquals("is_windowscompatible", EnumName.create("isWINDOWScompatible").snake());
+    assertEquals("a_required_int", EnumName.create("aRequiredInt").snake());
   }
 
   @Test
   void testSnakeToCamel() {
-    assertEquals("this_is_snake", ParamName.create("thisIsSnake").snake());
-    assertEquals("fancy", ParamName.create("fancy").snake());
-    assertEquals("f_ancy", ParamName.create("fAncy").snake());
-    assertEquals("f_ancy", ParamName.create("f_ancy").snake());
-    assertEquals("f_ancy", ParamName.create("f__ancy").snake());
+    assertEquals("this_is_snake", EnumName.create("thisIsSnake").snake());
+    assertEquals("fancy", EnumName.create("fancy").snake());
+    assertEquals("f_ancy", EnumName.create("fAncy").snake());
+    assertEquals("f_ancy", EnumName.create("f_ancy").snake());
+    assertEquals("f_ancy", EnumName.create("f__ancy").snake());
   }
 
   @Test
@@ -36,7 +36,7 @@ class UtilTest {
         "roboCop9",
         "isWindowsCompatible",
         "aRequiredInt")) {
-      String mapped = ParamName.create(ParamName.create(s).snake()).camel();
+      String mapped = EnumName.create(EnumName.create(s).snake()).camel();
       assertEquals(s, mapped);
     }
   }

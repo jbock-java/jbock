@@ -33,7 +33,7 @@ public final class Parameter {
 
   private final String sample;
 
-  private final List<String> names;
+  private final List<String> dashedNames;
 
   private final Coercion coercion;
 
@@ -42,13 +42,13 @@ public final class Parameter {
   private final Integer positionalIndex;
 
   Parameter(char mnemonic, String optionName, ExecutableElement sourceMethod, String bundleKey, String sample,
-            List<String> names, Coercion coercion, List<String> description, Integer positionalIndex) {
+            List<String> dashedNames, Coercion coercion, List<String> description, Integer positionalIndex) {
     this.mnemonic = mnemonic;
     this.optionName = optionName;
     this.sourceMethod = sourceMethod;
     this.bundleKey = bundleKey;
     this.sample = sample;
-    this.names = names;
+    this.dashedNames = dashedNames;
     this.coercion = coercion;
     this.description = description;
     this.positionalIndex = positionalIndex;
@@ -109,7 +109,7 @@ public final class Parameter {
     return OptionalInt.of(isRepeatable() ? 2 : isOptional() ? 1 : 0);
   }
 
-  public ParamName paramName() {
+  public EnumName paramName() {
     return coercion.paramName();
   }
 
@@ -123,8 +123,8 @@ public final class Parameter {
         .collect(Collectors.toSet());
   }
 
-  public List<String> names() {
-    return names;
+  public List<String> dashedNames() {
+    return dashedNames;
   }
 
   public String sample() {

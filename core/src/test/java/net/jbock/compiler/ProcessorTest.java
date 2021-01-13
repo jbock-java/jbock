@@ -235,7 +235,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract java.util.OptionalInt b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -249,7 +249,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract boolean x();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -263,7 +263,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(value = \"x\")",
+        "  @Option(\"x\")",
         "  abstract int aRequiredInt();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -307,7 +307,7 @@ class ProcessorTest {
   void missingCommandAnnotation() {
     JavaFileObject javaFile = fromSource(
         "abstract class Arguments {",
-        "  @Option(value = \"a\") abstract String a();",
+        "  @Option(\"a\") abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -320,7 +320,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Option(value = \"x\") abstract String a(int b, int c);",
+        "  @Option(\"x\") abstract String a(int b, int c);",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -333,7 +333,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Option(value = \"x\") abstract <E> String a();",
+        "  @Option(\"x\") abstract <E> String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -361,7 +361,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Param(value = 1)",
+        "  @Param(1)",
         "  abstract boolean hello();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))

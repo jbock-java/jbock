@@ -4,7 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.compiler.ParamName;
+import net.jbock.compiler.EnumName;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -19,7 +19,7 @@ import java.util.Optional;
  */
 public class BasicInfo {
 
-  private final ParamName paramName;
+  private final EnumName paramName;
 
   private final ExecutableElement sourceMethod;
 
@@ -30,7 +30,7 @@ public class BasicInfo {
   private final ClassName optionType;
 
   BasicInfo(
-      ParamName paramName,
+      EnumName paramName,
       ClassName optionType,
       ExecutableElement sourceMethod,
       TypeElement sourceElement,
@@ -53,7 +53,7 @@ public class BasicInfo {
     return Optional.empty();
   }
 
-  public ParamName parameterName() {
+  public EnumName parameterName() {
     return paramName;
   }
 

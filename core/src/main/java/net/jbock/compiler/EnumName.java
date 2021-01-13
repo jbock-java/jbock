@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-public class ParamName {
+public class EnumName {
 
   private enum CharType {
     LOWER, UPPER, DIGIT, UNDERSCORE, OTHER, UNDEFINED
@@ -12,11 +12,11 @@ public class ParamName {
 
   private final List<String> parts;
 
-  private ParamName(List<String> parts) {
+  private EnumName(List<String> parts) {
     this.parts = parts;
   }
 
-  static ParamName create(String input) {
+  static EnumName create(String input) {
     List<String> result = new ArrayList<>();
     CharType type_ = CharType.UNDEFINED;
     StringBuilder sb = new StringBuilder();
@@ -33,7 +33,7 @@ public class ParamName {
     if (sb.length() >= 1) {
       result.add(sb.toString());
     }
-    return new ParamName(result);
+    return new EnumName(result);
   }
 
   private static String toLower(char c) {
@@ -43,11 +43,11 @@ public class ParamName {
     return Character.toString(Character.toLowerCase(c));
   }
 
-  ParamName append(String s) {
+  EnumName append(String s) {
     List<String> newParts = new ArrayList<>(this.parts.size() + 1);
     newParts.addAll(this.parts);
     newParts.add(s);
-    return new ParamName(newParts);
+    return new EnumName(newParts);
   }
 
   public String snake() {

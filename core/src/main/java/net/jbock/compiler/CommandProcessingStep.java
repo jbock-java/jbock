@@ -1,6 +1,7 @@
 package net.jbock.compiler;
 
 import com.google.auto.common.BasicAnnotationProcessor;
+import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
@@ -32,6 +33,7 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -56,24 +58,32 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     this.elements = elements;
   }
 
-  @Component
+  @Component(modules = ParameterModule.class)
   interface ParameterComponent {
 
-    ParameterFactory parameterFactory();
+    PositionalParamFactory positionalParameterFactory();
+
+    NamedOptionFactory namedOptionFactory();
 
     @Component.Builder
     interface Builder {
-      @BindsInstance
-      Builder sourceMethod(ExecutableElement sourceMethod);
 
       @BindsInstance
-      Builder sourceElement(TypeElement sourceElement);
+      Builder sourceMethod(ExecutableElement sourceMethod);
 
       @BindsInstance
       Builder typeTool(TypeTool tool);
 
       @BindsInstance
       Builder optionType(ClassName optionType);
+
+      @BindsInstance
+      Builder description(String[] description);
+
+      @BindsInstance
+      Builder alreadyCreated(ImmutableList<Parameter> alreadyCreated);
+
+      Builder parameterModule(ParameterModule module);
 
       ParameterComponent build();
     }
@@ -143,24 +153,30 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .collect(Collectors.toList()));
     List<Parameter> params = new ArrayList<>();
     for (int i = 0; i < methods.params().size(); i++) {
-      ParameterComponent component = DaggerCommandProcessingStep_ParameterComponent.builder()
+      AnnotationUtil annotationUtil = new AnnotationUtil(tool, methods.params().get(i));
+      Optional<TypeElement> mapperClass = annotationUtil.getMapper(Param.class);
+      Param param = methods.params().get(i).getAnnotation(Param.class);
+      ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
           .optionType(optionType)
-          .sourceElement(sourceElement)
           .sourceMethod(methods.params().get(i))
           .typeTool(tool)
-          .build();
-      params.add(component.parameterFactory().createPositionalParam(params, i, getDescription(methods.params().get(i))));
+          .alreadyCreated(ImmutableList.copyOf(params))
+          .parameterModule(new ParameterModule(sourceElement, mapperClass, param.bundleKey()))
+          .description(getDescription(methods.params().get(i)));
+      params.add(builder.build().positionalParameterFactory().createPositionalParam(i));
     }
     boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
     for (ExecutableElement option : methods.options()) {
-      ParameterComponent component = DaggerCommandProcessingStep_ParameterComponent.builder()
+      AnnotationUtil annotationUtil = new AnnotationUtil(tool, option);
+      Optional<TypeElement> mapperClass = annotationUtil.getMapper(Option.class);
+      ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
           .optionType(optionType)
-          .sourceElement(sourceElement)
           .sourceMethod(option)
           .typeTool(tool)
-          .build();
-      params.add(component.parameterFactory().createNamedOption(anyMnemonics, params,
-          getDescription(option)));
+          .alreadyCreated(ImmutableList.copyOf(params))
+          .parameterModule(new ParameterModule(sourceElement, mapperClass, option.getAnnotation(Option.class).bundleKey()))
+          .description(getDescription(option));
+      params.add(builder.build().namedOptionFactory().createNamedOption(anyMnemonics));
     }
     if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {
       methods.options().forEach(this::checkHelp);
