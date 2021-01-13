@@ -4,6 +4,7 @@ import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Mapper;
 
+import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import java.util.Collections;
 import java.util.Set;
@@ -11,6 +12,10 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 class MapperProcessingStep implements BasicAnnotationProcessor.Step {
+
+  @Inject
+  MapperProcessingStep() {
+  }
 
   @Override
   public Set<String> annotations() {

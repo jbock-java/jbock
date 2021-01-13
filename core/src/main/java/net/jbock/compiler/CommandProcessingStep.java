@@ -13,6 +13,7 @@ import net.jbock.compiler.view.GeneratedClass;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
+import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -45,6 +46,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private final Filer filer;
   private final Elements elements;
 
+  @Inject
   CommandProcessingStep(TypeTool tool, Messager messager, Filer filer, Elements elements) {
     this.tool = tool;
     this.messager = messager;

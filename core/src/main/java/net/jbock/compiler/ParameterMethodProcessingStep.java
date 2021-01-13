@@ -7,6 +7,7 @@ import net.jbock.Option;
 import net.jbock.Param;
 
 import javax.annotation.processing.Messager;
+import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.ElementFilter;
@@ -20,6 +21,7 @@ class ParameterMethodProcessingStep implements BasicAnnotationProcessor.Step {
 
   private final Messager messager;
 
+  @Inject
   ParameterMethodProcessingStep(Messager messager) {
     this.messager = messager;
   }
