@@ -23,7 +23,11 @@ public class MapperMatcher extends ParameterScoped {
   private final ImmutableList<Matcher> matchers;
 
   @Inject
-  MapperMatcher(ParameterContext context, OptionalMatcher optionalMatcher, ListMatcher listMatcher, ExactMatcher exactMatcher) {
+  MapperMatcher(
+      ParameterContext context,
+      OptionalMatcher optionalMatcher,
+      ListMatcher listMatcher,
+      ExactMatcher exactMatcher) {
     super(context);
     this.matchers = ImmutableList.of(optionalMatcher, listMatcher, exactMatcher);
   }

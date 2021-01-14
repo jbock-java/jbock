@@ -23,7 +23,12 @@ public class AutoMatcher extends ParameterScoped {
   private final ImmutableList<Matcher> matchers;
 
   @Inject
-  AutoMatcher(ParameterContext context, AutoMapper autoMapper, OptionalMatcher optionalMatcher, ListMatcher listMatcher, ExactMatcher exactMatcher) {
+  AutoMatcher(
+      ParameterContext context,
+      AutoMapper autoMapper,
+      OptionalMatcher optionalMatcher,
+      ListMatcher listMatcher,
+      ExactMatcher exactMatcher) {
     super(context);
     this.autoMapper = autoMapper;
     this.matchers = ImmutableList.of(optionalMatcher, listMatcher, exactMatcher);
