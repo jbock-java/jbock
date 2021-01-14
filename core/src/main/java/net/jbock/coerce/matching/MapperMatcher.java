@@ -25,7 +25,6 @@ import static net.jbock.coerce.NonFlagSkew.REQUIRED;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.SuppliedClassValidator.getEnclosingElements;
 import static net.jbock.coerce.either.Either.left;
-import static net.jbock.coerce.matching.AutoMatcher.boxedType;
 
 public class MapperMatcher extends ParameterScoped {
 
@@ -53,7 +52,7 @@ public class MapperMatcher extends ParameterScoped {
     });
     ParameterSpec param = constructorParam(returnType);
     // exact match (-> required)
-    attempts.add(attempt(boxedType(returnType, tool().types()), param, REQUIRED, mapperClass));
+    attempts.add(attempt(boxedReturnType(), param, REQUIRED, mapperClass));
     return attempts;
   }
 

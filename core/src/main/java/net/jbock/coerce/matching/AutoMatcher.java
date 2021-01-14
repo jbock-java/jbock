@@ -7,12 +7,9 @@ import net.jbock.coerce.NonFlagCoercion;
 import net.jbock.coerce.NonFlagSkew;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
-import net.jbock.compiler.TypeTool;
 
 import javax.inject.Inject;
-import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Types;
 import java.util.List;
 import java.util.Optional;
 
@@ -44,7 +41,7 @@ public class AutoMatcher extends ParameterScoped {
     }
     // exact match (-> required)
     ParameterSpec param = constructorParam(returnType);
-    return createCoercion(boxedType(returnType, tool().types()), param, REQUIRED);
+    return createCoercion(boxedReturnType(), param, REQUIRED);
   }
 
   private NonFlagCoercion createCoercion(TypeMirror testType, ParameterSpec constructorParam, NonFlagSkew skew) {
@@ -56,10 +53,5 @@ public class AutoMatcher extends ParameterScoped {
         .map(mapExpr -> new NonFlagCoercion(enumName(), mapExpr, MatchingAttempt.autoCollectExpr(optionType(), enumName(), skew), extractExpr, skew, constructorParam))
         .orElseThrow(() -> failure(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
             returnType())));
-  }
-
-  static TypeMirror boxedType(TypeMirror mirror, Types types) {
-    PrimitiveType primitive = mirror.accept(TypeTool.AS_PRIMITIVE, null);
-    return primitive == null ? mirror : types.boxedClass(primitive).asType();
   }
 }

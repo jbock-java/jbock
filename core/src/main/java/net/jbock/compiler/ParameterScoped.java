@@ -9,6 +9,7 @@ import net.jbock.coerce.AutoMapper;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.Optional;
@@ -84,5 +85,10 @@ public class ParameterScoped {
     Types types = tool().types();
     return types.directSupertypes(mirror).stream()
         .anyMatch(t -> tool().isSameErasure(t, Enum.class.getCanonicalName()));
+  }
+
+  public final TypeMirror boxedReturnType() {
+    PrimitiveType primitive = returnType().accept(TypeTool.AS_PRIMITIVE, null);
+    return primitive == null ? returnType() : tool().types().boxedClass(primitive).asType();
   }
 }
