@@ -2,13 +2,15 @@ package net.jbock.compiler;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
+import dagger.Reusable;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import java.util.Optional;
 
-class ParameterContext {
+@Reusable
+public class ParameterContext {
 
   final ExecutableElement sourceMethod;
   final TypeElement sourceElement;

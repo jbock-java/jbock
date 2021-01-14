@@ -1,8 +1,8 @@
 package net.jbock.compiler;
 
 import net.jbock.Option;
+import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.CoercionProvider;
 import net.jbock.coerce.FlagCoercion;
 
 import javax.inject.Inject;
@@ -15,11 +15,14 @@ import java.util.Objects;
 
 import static java.lang.Character.isWhitespace;
 
-class NamedOptionFactory extends ParameterFactory {
+class NamedOptionFactory extends ParameterScoped {
+
+  private final BasicInfo basicInfo;
 
   @Inject
-  NamedOptionFactory(ParameterContext parameterContext) {
+  NamedOptionFactory(ParameterContext parameterContext, BasicInfo basicInfo) {
     super(parameterContext);
+    this.basicInfo = basicInfo;
   }
 
   Parameter createNamedOption(boolean anyMnemonics) {
@@ -29,8 +32,7 @@ class NamedOptionFactory extends ParameterFactory {
     boolean flag = !mapperClass().isPresent() && isInferredFlag();
     Coercion coercion = flag ?
         new FlagCoercion(enumName(), sourceMethod()) :
-        CoercionProvider.nonFlagCoercion(sourceMethod(), sourceElement(), enumName(),
-            mapperClass(), optionType(), tool());
+        basicInfo.nonFlagCoercion();
     List<String> names = names(optionName, mnemonic);
     return new Parameter(mnemonic, optionName, sourceMethod(), bundleKey(),
         sample(flag, enumName(), names, anyMnemonics),

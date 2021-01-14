@@ -7,47 +7,47 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import java.util.Optional;
 
-class ParameterFactory {
+public class ParameterScoped {
 
   final ParameterContext parameterContext;
 
-  ParameterFactory(ParameterContext parameterContext) {
+  public ParameterScoped(ParameterContext parameterContext) {
     this.parameterContext = parameterContext;
   }
 
-  ExecutableElement sourceMethod() {
+  public final ExecutableElement sourceMethod() {
     return parameterContext.sourceMethod;
   }
 
-  TypeElement sourceElement() {
+  public final TypeElement sourceElement() {
     return parameterContext.sourceElement;
   }
 
-  TypeTool tool() {
+  public final TypeTool tool() {
     return parameterContext.tool;
   }
 
-  ClassName optionType() {
+  public final ClassName optionType() {
     return parameterContext.optionType;
   }
 
-  ImmutableList<Parameter> alreadyCreated() {
+  final ImmutableList<Parameter> alreadyCreated() {
     return parameterContext.alreadyCreated;
   }
 
-  String[] description() {
+  final String[] description() {
     return parameterContext.description;
   }
 
-  Optional<TypeElement> mapperClass() {
+  public final Optional<TypeElement> mapperClass() {
     return parameterContext.mapperClass;
   }
 
-  String bundleKey() {
+  final String bundleKey() {
     return parameterContext.bundleKey;
   }
 
-  EnumName enumName() {
+  public final EnumName enumName() {
     return parameterContext.enumName;
   }
 }
