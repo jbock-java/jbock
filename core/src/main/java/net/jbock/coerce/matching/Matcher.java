@@ -27,10 +27,10 @@ abstract class Matcher extends ParameterScoped {
 
   final Either<String, MatchingSuccess> match(TypeElement mapperClass, UnwrapSuccess unwrapSuccess) {
     MapperClassValidator validator = new MapperClassValidator(this::failure, tool(), unwrapSuccess.wrappedType(), mapperClass);
-    return validator.getMapExpr().map(Function.identity(), mapExpr -> {
-      ParameterSpec constructorParam = constructorParam(unwrapSuccess.liftedType());
-      return new MatchingSuccess(mapExpr, unwrapSuccess.extractExpr(constructorParam), constructorParam, skew(), autoCollectExpr());
-    });
+    ParameterSpec constructorParam = constructorParam(unwrapSuccess.constructorParamType());
+    return validator.getMapExpr().map(Function.identity(), mapExpr ->
+        new MatchingSuccess(mapExpr, unwrapSuccess.extractExpr(constructorParam), constructorParam,
+            skew(), autoCollectExpr()));
   }
 
   abstract NonFlagSkew skew();

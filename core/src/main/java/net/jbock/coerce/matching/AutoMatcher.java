@@ -34,7 +34,7 @@ public class AutoMatcher extends ParameterScoped {
         .flatMap(entry -> {
           Matcher matcher = entry.getKey();
           UnwrapSuccess unwrapSuccess = entry.getValue();
-          ParameterSpec constructorParam = constructorParam(unwrapSuccess.liftedType());
+          ParameterSpec constructorParam = constructorParam(unwrapSuccess.constructorParamType());
           return findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr ->
               new NonFlagCoercion(enumName(), mapExpr, matcher.autoCollectExpr(),
                   unwrapSuccess.extractExpr(constructorParam), matcher.skew(), constructorParam));

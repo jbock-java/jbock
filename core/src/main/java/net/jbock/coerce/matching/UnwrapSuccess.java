@@ -9,12 +9,15 @@ import java.util.function.Function;
 class UnwrapSuccess {
 
   private final TypeMirror wrappedType;
-  private final TypeMirror liftedType;
+  private final TypeMirror constructorParamType;
   private final Function<ParameterSpec, CodeBlock> extractExpr;
 
-  UnwrapSuccess(TypeMirror wrappedType, TypeMirror liftedType, Function<ParameterSpec, CodeBlock> extractExpr) {
+  UnwrapSuccess(
+      TypeMirror wrappedType,
+      TypeMirror constructorParamType,
+      Function<ParameterSpec, CodeBlock> extractExpr) {
     this.wrappedType = wrappedType;
-    this.liftedType = liftedType;
+    this.constructorParamType = constructorParamType;
     this.extractExpr = extractExpr;
   }
 
@@ -22,8 +25,8 @@ class UnwrapSuccess {
     return wrappedType;
   }
 
-  TypeMirror liftedType() {
-    return liftedType;
+  TypeMirror constructorParamType() {
+    return constructorParamType;
   }
 
   CodeBlock extractExpr(ParameterSpec constructorParam) {

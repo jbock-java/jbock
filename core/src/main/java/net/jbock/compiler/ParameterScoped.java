@@ -60,8 +60,8 @@ public class ParameterScoped {
     return sourceMethod().getReturnType();
   }
 
-  public final ParameterSpec constructorParam(TypeMirror type) {
-    return ParameterSpec.builder(TypeName.get(type), enumName().camel()).build();
+  public final ParameterSpec constructorParam(TypeMirror constructorParamType) {
+    return ParameterSpec.builder(TypeName.get(constructorParamType), enumName().camel()).build();
   }
 
   public final ValidationException failure(String message) {
