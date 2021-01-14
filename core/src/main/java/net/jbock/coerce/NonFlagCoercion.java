@@ -2,6 +2,7 @@ package net.jbock.coerce;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.compiler.EnumName;
 
 public class NonFlagCoercion extends Coercion {
 
@@ -13,9 +14,9 @@ public class NonFlagCoercion extends Coercion {
 
   private final Skew skew;
 
-  public NonFlagCoercion(BasicInfo basicInfo, CodeBlock mapExpr, CodeBlock collectExpr, CodeBlock extractExpr,
+  public NonFlagCoercion(EnumName enumName, CodeBlock mapExpr, CodeBlock collectExpr, CodeBlock extractExpr,
                          NonFlagSkew skew, ParameterSpec constructorParam) {
-    super(constructorParam, basicInfo.parameterName());
+    super(constructorParam, enumName);
     this.collectExpr = collectExpr;
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;

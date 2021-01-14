@@ -3,14 +3,15 @@ package net.jbock.coerce.matching;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.Mapper;
-import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.NonFlagSkew;
 import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Right;
-import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.ParameterContext;
+import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.ValidationException;
 
+import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
@@ -26,49 +27,45 @@ import static net.jbock.coerce.SuppliedClassValidator.getEnclosingElements;
 import static net.jbock.coerce.either.Either.left;
 import static net.jbock.coerce.matching.AutoMatcher.boxedType;
 
-public class MapperMatcher implements Matcher {
+public class MapperMatcher extends ParameterScoped {
 
-  private final TypeElement mapperClass;
-  private final BasicInfo basicInfo;
-
-  public MapperMatcher(BasicInfo basicInfo, TypeElement mapperClass) {
-    this.mapperClass = mapperClass;
-    this.basicInfo = basicInfo;
+  @Inject
+  MapperMatcher(ParameterContext context) {
+    super(context);
   }
 
-  private List<MatchingAttempt> getAttempts() {
-    TypeMirror returnType = basicInfo.returnType();
+  private List<MatchingAttempt> getAttempts(TypeElement mapperClass) {
+    TypeMirror returnType = returnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
     Optional<TypeMirror> listWrapped = tool().getSingleTypeArgument(returnType, List.class.getCanonicalName());
     List<MatchingAttempt> attempts = new ArrayList<>();
     opt.ifPresent(optional -> {
-      ParameterSpec param = basicInfo.constructorParam(optional.liftedType());
+      ParameterSpec param = constructorParam(optional.liftedType());
       // optional match
-      attempts.add(attempt(optional.wrappedType(), optional.extractExpr(param), param, OPTIONAL));
+      attempts.add(attempt(optional.wrappedType(), optional.extractExpr(param), param, OPTIONAL, mapperClass));
       // exact match (-> required)
-      attempts.add(attempt(optional.liftedType(), optional.extractExpr(param), param, REQUIRED));
+      attempts.add(attempt(optional.liftedType(), optional.extractExpr(param), param, REQUIRED, mapperClass));
     });
     listWrapped.ifPresent(wrapped -> {
-      ParameterSpec param = basicInfo.constructorParam(returnType);
+      ParameterSpec param = constructorParam(returnType);
       // list match
-      attempts.add(attempt(wrapped, param, REPEATABLE));
+      attempts.add(attempt(wrapped, param, REPEATABLE, mapperClass));
     });
-    ParameterSpec param = basicInfo.constructorParam(returnType);
+    ParameterSpec param = constructorParam(returnType);
     // exact match (-> required)
-    attempts.add(attempt(boxedType(returnType, tool().types()), param, REQUIRED));
+    attempts.add(attempt(boxedType(returnType, tool().types()), param, REQUIRED, mapperClass));
     return attempts;
   }
 
-  @Override
-  public Coercion findCoercion() {
+  public Coercion findCoercion(TypeElement mapperClass) {
     commonChecks(mapperClass);
     checkNotAbstract(mapperClass);
-    checkMapperAnnotation();
+    checkMapperAnnotation(mapperClass);
     try {
-      List<MatchingAttempt> attempts = getAttempts();
+      List<MatchingAttempt> attempts = getAttempts(mapperClass);
       Either<String, Coercion> either = left("");
       for (MatchingAttempt attempt : attempts) {
-        either = attempt.findCoercion(basicInfo);
+        either = attempt.findCoercion(this);
         if (either instanceof Right) {
           return ((Right<String, Coercion>) either).value();
         }
@@ -79,11 +76,11 @@ public class MapperMatcher implements Matcher {
     }
   }
 
-  private void checkMapperAnnotation() {
+  private void checkMapperAnnotation(TypeElement mapperClass) {
     Mapper mapperAnnotation = mapperClass.getAnnotation(Mapper.class);
-    boolean nestedMapper = getEnclosingElements(mapperClass).contains(basicInfo.sourceElement());
+    boolean nestedMapper = getEnclosingElements(mapperClass).contains(sourceElement());
     if (mapperAnnotation == null && !nestedMapper) {
-      throw boom("The class must either be an inner class of " + basicInfo.sourceElement() +
+      throw boom("The class must either be an inner class of " + sourceElement() +
           ", or carry the " + Mapper.class.getCanonicalName() + " annotation");
     }
   }
@@ -94,20 +91,16 @@ public class MapperMatcher implements Matcher {
     }
   }
 
-  private TypeTool tool() {
-    return basicInfo.tool();
-  }
-
-  private MatchingAttempt attempt(TypeMirror expectedReturnType, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew) {
+  private MatchingAttempt attempt(TypeMirror expectedReturnType, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew, TypeElement mapperClass) {
     return new MatchingAttempt(expectedReturnType, extractExpr, constructorParam, skew, mapperClass);
   }
 
-  private MatchingAttempt attempt(TypeMirror expectedReturnType, ParameterSpec constructorParam, NonFlagSkew skew) {
+  private MatchingAttempt attempt(TypeMirror expectedReturnType, ParameterSpec constructorParam, NonFlagSkew skew, TypeElement mapperClass) {
     return new MatchingAttempt(expectedReturnType, CodeBlock.of("$N", constructorParam), constructorParam, skew, mapperClass);
   }
 
   private ValidationException boom(String message) {
-    return basicInfo.failure(enrichMessage(message));
+    return failure(enrichMessage(message));
   }
 
   private String enrichMessage(String message) {

@@ -22,7 +22,7 @@ import java.util.regex.Pattern;
 
 import static net.jbock.compiler.Constants.STRING;
 
-class AutoMapper {
+public class AutoMapper {
 
   private static final String NEW = "new";
   private static final String CREATE = "create";
@@ -55,7 +55,7 @@ class AutoMapper {
       create(BigInteger.class, NEW),
       create(BigDecimal.class, NEW));
 
-  static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror testType) {
+  public static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror testType) {
     for (Entry<String, CodeBlock> coercion : MAPPERS) {
       String canonicalName = coercion.getKey();
       if (tool.isSameType(testType, canonicalName)) {
