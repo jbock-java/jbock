@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.TypeTool;
 
+import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
 import java.io.File;
 import java.math.BigDecimal;
@@ -30,19 +31,26 @@ public class AutoMapper {
   private static final String COMPILE = "compile";
   private static final String PARSE = "parse";
 
-  private static Entry<String, CodeBlock> create(Class<?> clasz, String createFromString) {
-    return new SimpleImmutableEntry<>(clasz.getCanonicalName(), CodeBlock.of("$T::" + createFromString, clasz));
+  private final TypeTool tool;
+
+  @Inject
+  AutoMapper(TypeTool tool) {
+    this.tool = tool;
   }
 
-  private static Entry<String, CodeBlock> create(Class<?> clasz, CodeBlock mapExpr) {
-    return new SimpleImmutableEntry<>(clasz.getCanonicalName(), mapExpr);
+  private static Entry<String, CodeBlock> create(Class<?> mappedType, String createFromString) {
+    return create(mappedType, CodeBlock.of("$T::" + createFromString, mappedType));
+  }
+
+  private static Entry<String, CodeBlock> create(Class<?> mappedType, CodeBlock mapExpr) {
+    return new SimpleImmutableEntry<>(mappedType.getCanonicalName(), mapExpr);
   }
 
   private static final List<Entry<String, CodeBlock>> MAPPERS = Arrays.asList(
       create(String.class, CodeBlock.of("$T.identity()", Function.class)),
       create(Integer.class, VALUE_OF),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
-      create(File.class, parseFileLambda()),
+      create(File.class, autoMapperFile()),
       create(URI.class, CREATE),
       create(Pattern.class, COMPILE),
       create(LocalDate.class, PARSE),
@@ -51,21 +59,21 @@ public class AutoMapper {
       create(Byte.class, VALUE_OF),
       create(Float.class, VALUE_OF),
       create(Double.class, VALUE_OF),
-      create(Character.class, parseCharacterLambda()),
+      create(Character.class, autoMapperChar()),
       create(BigInteger.class, NEW),
       create(BigDecimal.class, NEW));
 
-  public static Optional<CodeBlock> findAutoMapper(TypeTool tool, TypeMirror testType) {
+  public Optional<CodeBlock> findAutoMapper(TypeMirror unwrappedReturnType) {
     for (Entry<String, CodeBlock> coercion : MAPPERS) {
-      String canonicalName = coercion.getKey();
-      if (tool.isSameType(testType, canonicalName)) {
-        return Optional.of(coercion.getValue());
+      if (tool.isSameType(unwrappedReturnType, coercion.getKey())) {
+        CodeBlock mapExpr = coercion.getValue();
+        return Optional.of(mapExpr);
       }
     }
     return Optional.empty();
   }
 
-  private static CodeBlock parseFileLambda() {
+  private static CodeBlock autoMapperFile() {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     ParameterSpec f = ParameterSpec.builder(File.class, "f").build();
     return CodeBlock.builder()
@@ -83,7 +91,7 @@ public class AutoMapper {
         .unindent().add("}").build();
   }
 
-  private static CodeBlock parseCharacterLambda() {
+  private static CodeBlock autoMapperChar() {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     return CodeBlock.builder()
         .add("$N -> {\n", s).indent()
