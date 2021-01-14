@@ -1,11 +1,13 @@
 package net.jbock.coerce.matching;
 
+import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.NonFlagCoercion;
 import net.jbock.coerce.NonFlagSkew;
+import net.jbock.coerce.either.Either;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 
@@ -17,20 +19,34 @@ import java.util.Optional;
 import static net.jbock.coerce.NonFlagSkew.OPTIONAL;
 import static net.jbock.coerce.NonFlagSkew.REPEATABLE;
 import static net.jbock.coerce.NonFlagSkew.REQUIRED;
+import static net.jbock.coerce.either.Either.left;
 
 public class AutoMatcher extends ParameterScoped {
 
   private static final String ENUM = Enum.class.getCanonicalName();
 
   private final AutoMapper autoMapper;
+  private final ImmutableList<Matcher> matchers;
 
   @Inject
-  AutoMatcher(ParameterContext context, AutoMapper autoMapper) {
+  AutoMatcher(ParameterContext context, AutoMapper autoMapper, OptionalMatcher optionalMatcher, ListMatcher listMatcher, ExactMatcher exactMatcher) {
     super(context);
     this.autoMapper = autoMapper;
+    this.matchers = ImmutableList.of(optionalMatcher, listMatcher, exactMatcher);
   }
 
   public Coercion findCoercion() {
+    Either<String, MatchingSuccess> either = left("");
+//    try {
+//      for (Matcher matcher : matchers) {
+//        either = matcher.tryMatch(mapperClass());
+//        if (either instanceof Right) {
+//          return ((Right<String, MatchingSuccess>) either).value();
+//        }
+//      }
+//    } catch (ValidationException e) {
+//      throw boom(e.getMessage());
+//    }
     TypeMirror returnType = returnType();
     Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
     Optional<TypeMirror> listWrapped = tool().getSingleTypeArgument(returnType, List.class.getCanonicalName());

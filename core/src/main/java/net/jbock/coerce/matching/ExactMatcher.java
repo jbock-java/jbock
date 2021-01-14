@@ -9,6 +9,7 @@ import net.jbock.compiler.ParameterContext;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
+import java.util.Optional;
 import java.util.function.Function;
 
 class ExactMatcher extends Matcher {
@@ -19,16 +20,18 @@ class ExactMatcher extends Matcher {
   }
 
   @Override
-  Either<String, MatchingSuccess> tryMatch(TypeElement mapperClass) {
-    MapperClassValidator validator = new MapperClassValidator(this::failure, tool(), boxedReturnType(), mapperClass);
-    return validator.getMapExpr().map(Function.identity(), mapExpr -> {
-      ParameterSpec constructorParam = constructorParam(returnType());
-      return new MatchingSuccess(mapExpr, CodeBlock.of("$N", constructorParam), constructorParam, skew());
-    });
+  Optional<UnwrapSuccess> tryUnwrapReturnType() {
+    return Optional.of(new UnwrapSuccess(boxedReturnType(), returnType(), constructorParam -> CodeBlock.of("$N", constructorParam)));
   }
 
   @Override
   NonFlagSkew skew() {
     return NonFlagSkew.REQUIRED;
+  }
+
+  @Override
+  CodeBlock autoCollectExpr() {
+    return CodeBlock.of(".findAny().orElseThrow($T.$L::missingRequired)", optionType(),
+        enumName().enumConstant());
   }
 }

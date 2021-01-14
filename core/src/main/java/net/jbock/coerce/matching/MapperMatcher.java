@@ -1,7 +1,6 @@
 package net.jbock.coerce.matching;
 
 import com.google.common.collect.ImmutableList;
-import com.squareup.javapoet.CodeBlock;
 import net.jbock.Mapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.NonFlagCoercion;
@@ -49,8 +48,7 @@ public class MapperMatcher extends ParameterScoped {
 
   public Coercion findMyCoercion(TypeElement mapperClass) {
     MatchingSuccess success = findCoercion(mapperClass);
-    CodeBlock expr = MatchingAttempt.autoCollectExpr(optionType(), enumName(), success.skew);
-    return new NonFlagCoercion(enumName(), success.mapExpr, expr, success.extractExpr, success.skew, success.constructorParam);
+    return new NonFlagCoercion(enumName(), success.mapExpr, success.autoCollectExpr, success.extractExpr, success.skew, success.constructorParam);
   }
 
   private void checkMapperAnnotation(TypeElement mapperClass) {

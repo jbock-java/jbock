@@ -10,12 +10,13 @@ class MatchingSuccess {
   final CodeBlock extractExpr;
   final ParameterSpec constructorParam;
   final NonFlagSkew skew;
-//  final CodeBlock autoCollectExpr;
+  final CodeBlock autoCollectExpr;
 
-  MatchingSuccess(CodeBlock mapExpr, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew) {
+  MatchingSuccess(CodeBlock mapExpr, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew, CodeBlock autoCollectExpr) {
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
     this.constructorParam = constructorParam;
     this.skew = skew;
+    this.autoCollectExpr = autoCollectExpr;
   }
 }
