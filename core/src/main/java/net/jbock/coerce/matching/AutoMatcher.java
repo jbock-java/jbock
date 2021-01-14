@@ -11,7 +11,6 @@ import net.jbock.compiler.ParameterScoped;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Types;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,6 +19,8 @@ import static net.jbock.coerce.NonFlagSkew.REPEATABLE;
 import static net.jbock.coerce.NonFlagSkew.REQUIRED;
 
 public class AutoMatcher extends ParameterScoped {
+
+  private static final String ENUM = Enum.class.getCanonicalName();
 
   private final AutoMapper autoMapper;
 
@@ -54,13 +55,13 @@ public class AutoMatcher extends ParameterScoped {
       TypeMirror unwrappedReturnType,
       CodeBlock extractExpr,
       ParameterSpec constructorParam) {
-    return findAutoMapper(unwrappedReturnType)
+    return findMapExpr(unwrappedReturnType)
         .map(mapExpr -> new NonFlagCoercion(enumName(), mapExpr, MatchingAttempt.autoCollectExpr(optionType(), enumName(), skew), extractExpr, skew, constructorParam))
         .orElseThrow(() -> failure(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
             returnType())));
   }
 
-  private Optional<CodeBlock> findAutoMapper(TypeMirror unwrappedReturnType) {
+  private Optional<CodeBlock> findMapExpr(TypeMirror unwrappedReturnType) {
     Optional<CodeBlock> mapExpr = autoMapper.findAutoMapper(unwrappedReturnType);
     if (mapExpr.isPresent()) {
       return mapExpr;
@@ -71,9 +72,8 @@ public class AutoMatcher extends ParameterScoped {
     return Optional.empty();
   }
 
-  private boolean isEnumType(TypeMirror mirror) {
-    Types types = tool().types();
-    return types.directSupertypes(mirror).stream()
-        .anyMatch(t -> tool().isSameErasure(t, Enum.class.getCanonicalName()));
+  private boolean isEnumType(TypeMirror type) {
+    return types().directSupertypes(type).stream()
+        .anyMatch(t -> tool().isSameErasure(t, ENUM));
   }
 }

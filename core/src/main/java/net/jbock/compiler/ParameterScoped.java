@@ -9,6 +9,7 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import java.util.Optional;
 
 public class ParameterScoped {
@@ -70,5 +71,9 @@ public class ParameterScoped {
   public final TypeMirror boxedReturnType() {
     PrimitiveType primitive = returnType().accept(TypeTool.AS_PRIMITIVE, null);
     return primitive == null ? returnType() : tool().types().boxedClass(primitive).asType();
+  }
+
+  public final Types types() {
+    return tool().types();
   }
 }
