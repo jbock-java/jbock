@@ -25,7 +25,7 @@ public class BasicInfo extends ParameterScoped {
 
   public Coercion nonFlagCoercion() {
     return mapperClass()
-        .map(mapper -> mapperMatcher.get().findCoercion(mapper))
+        .map(mapper -> mapperMatcher.get().findMyCoercion(mapper))
         .orElseGet(() -> autoMatcher.get().findCoercion());
   }
 }
