@@ -6,20 +6,14 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.NonFlagCoercion;
-import net.jbock.coerce.NonFlagSkew;
-import net.jbock.coerce.either.Either;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
-import java.util.List;
+import java.util.AbstractMap;
+import java.util.Map;
 import java.util.Optional;
-
-import static net.jbock.coerce.NonFlagSkew.OPTIONAL;
-import static net.jbock.coerce.NonFlagSkew.REPEATABLE;
-import static net.jbock.coerce.NonFlagSkew.REQUIRED;
-import static net.jbock.coerce.either.Either.left;
 
 public class AutoMatcher extends ParameterScoped {
 
@@ -36,45 +30,27 @@ public class AutoMatcher extends ParameterScoped {
   }
 
   public Coercion findCoercion() {
-    Either<String, MatchingSuccess> either = left("");
-//    try {
-//      for (Matcher matcher : matchers) {
-//        either = matcher.tryMatch(mapperClass());
-//        if (either instanceof Right) {
-//          return ((Right<String, MatchingSuccess>) either).value();
-//        }
-//      }
-//    } catch (ValidationException e) {
-//      throw boom(e.getMessage());
-//    }
-    TypeMirror returnType = returnType();
-    Optional<Optionalish> opt = Optionalish.unwrap(returnType, tool());
-    Optional<TypeMirror> listWrapped = tool().getSingleTypeArgument(returnType, List.class.getCanonicalName());
-    if (opt.isPresent()) {
-      Optionalish optional = opt.get();
-      // optional match
-      ParameterSpec param = constructorParam(optional.liftedType());
-      return createCoercion(OPTIONAL, optional.wrappedType(), optional.extractExpr(param), param);
-    }
-    if (listWrapped.isPresent()) {
-      // repeatable match
-      ParameterSpec param = constructorParam(returnType);
-      return createCoercion(REPEATABLE, listWrapped.get(), CodeBlock.of("$N", param), param);
-    }
-    // exact match (-> required)
-    ParameterSpec param = constructorParam(returnType);
-    return createCoercion(REQUIRED, boxedReturnType(), CodeBlock.of("$N", param), param);
-  }
-
-  private NonFlagCoercion createCoercion(
-      NonFlagSkew skew,
-      TypeMirror unwrappedReturnType,
-      CodeBlock extractExpr,
-      ParameterSpec constructorParam) {
-    return findMapExpr(unwrappedReturnType)
-        .map(mapExpr -> new NonFlagCoercion(enumName(), mapExpr, MatchingAttempt.autoCollectExpr(optionType(), enumName(), skew), extractExpr, skew, constructorParam))
+    return tryFindCoercion()
+        .flatMap(entry -> {
+          Matcher matcher = entry.getKey();
+          UnwrapSuccess unwrapSuccess = entry.getValue();
+          ParameterSpec constructorParam = constructorParam(unwrapSuccess.liftedType());
+          return findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr ->
+              new NonFlagCoercion(enumName(), mapExpr, matcher.autoCollectExpr(),
+                  unwrapSuccess.extractExpr(constructorParam), matcher.skew(), constructorParam));
+        })
         .orElseThrow(() -> failure(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
             returnType())));
+  }
+
+  private Optional<Map.Entry<Matcher, UnwrapSuccess>> tryFindCoercion() {
+    for (Matcher matcher : matchers) {
+      Optional<UnwrapSuccess> success = matcher.tryUnwrapReturnType();
+      if (success.isPresent()) {
+        return success.map(e -> new AbstractMap.SimpleImmutableEntry<>(matcher, e));
+      }
+    }
+    return Optional.empty();
   }
 
   private Optional<CodeBlock> findMapExpr(TypeMirror unwrappedReturnType) {
