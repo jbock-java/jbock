@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import dagger.Lazy;
 import net.jbock.coerce.matching.AutoMatcher;
 import net.jbock.coerce.matching.MapperMatcher;
 import net.jbock.compiler.ParameterContext;
@@ -10,14 +11,13 @@ import javax.inject.Inject;
 /**
  * Coercion input: Information about a single parameter (option or param).
  */
-@Deprecated
 public class BasicInfo extends ParameterScoped {
 
-  private final MapperMatcher mapperMatcher;
-  private final AutoMatcher autoMatcher;
+  private final Lazy<MapperMatcher> mapperMatcher;
+  private final Lazy<AutoMatcher> autoMatcher;
 
   @Inject
-  BasicInfo(ParameterContext context, MapperMatcher mapperMatcher, AutoMatcher autoMatcher) {
+  BasicInfo(ParameterContext context, Lazy<MapperMatcher> mapperMatcher, Lazy<AutoMatcher> autoMatcher) {
     super(context);
     this.mapperMatcher = mapperMatcher;
     this.autoMatcher = autoMatcher;
@@ -25,7 +25,7 @@ public class BasicInfo extends ParameterScoped {
 
   public Coercion nonFlagCoercion() {
     return mapperClass()
-        .map(mapperMatcher::findCoercion)
-        .orElseGet(autoMatcher::findCoercion);
+        .map(mapper -> mapperMatcher.get().findCoercion(mapper))
+        .orElseGet(() -> autoMatcher.get().findCoercion());
   }
 }
