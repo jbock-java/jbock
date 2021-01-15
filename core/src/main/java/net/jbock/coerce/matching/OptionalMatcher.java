@@ -7,7 +7,7 @@ import net.jbock.compiler.ParameterContext;
 import javax.inject.Inject;
 import java.util.Optional;
 
-class OptionalMatcher extends Matcher {
+public class OptionalMatcher extends Matcher {
 
   @Inject
   OptionalMatcher(ParameterContext parameterContext) {

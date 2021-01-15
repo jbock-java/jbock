@@ -26,12 +26,10 @@ public class AutoMatcher extends ParameterScoped {
   AutoMatcher(
       ParameterContext context,
       AutoMapper autoMapper,
-      OptionalMatcher optionalMatcher,
-      ListMatcher listMatcher,
-      ExactMatcher exactMatcher) {
+      ImmutableList<Matcher> matchers) {
     super(context);
     this.autoMapper = autoMapper;
-    this.matchers = ImmutableList.of(optionalMatcher, listMatcher, exactMatcher);
+    this.matchers = matchers;
   }
 
   public Coercion findCoercion() {
@@ -52,7 +50,7 @@ public class AutoMatcher extends ParameterScoped {
     for (Matcher matcher : matchers) {
       Optional<UnwrapSuccess> success = matcher.tryUnwrapReturnType();
       if (success.isPresent()) {
-        return success.map(e -> new AbstractMap.SimpleImmutableEntry<>(matcher, e));
+        return success.map(s -> new AbstractMap.SimpleImmutableEntry<>(matcher, s));
       }
     }
     return Optional.empty();

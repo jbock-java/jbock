@@ -4,13 +4,17 @@ import com.google.common.collect.ImmutableList;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
+import net.jbock.coerce.matching.ExactMatcher;
+import net.jbock.coerce.matching.ListMatcher;
+import net.jbock.coerce.matching.Matcher;
+import net.jbock.coerce.matching.OptionalMatcher;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import java.util.Optional;
 
 @Module
-class ParameterModule {
+public class ParameterModule {
 
   private final TypeElement sourceElement;
   private final Optional<TypeElement> mapperClass;
@@ -51,5 +55,14 @@ class ParameterModule {
       }
     }
     return result;
+  }
+
+  @Reusable
+  @Provides
+  ImmutableList<Matcher> getMatchers(
+      OptionalMatcher optionalMatcher,
+      ListMatcher listMatcher,
+      ExactMatcher exactMatcher) {
+    return ImmutableList.of(optionalMatcher, listMatcher, exactMatcher);
   }
 }

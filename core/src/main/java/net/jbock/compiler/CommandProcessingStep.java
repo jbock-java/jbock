@@ -11,7 +11,6 @@ import dagger.Component;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
-import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.SuppliedClassValidator;
 import net.jbock.compiler.view.GeneratedClass;
 

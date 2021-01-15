@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-class ListMatcher extends Matcher {
+public class ListMatcher extends Matcher {
 
   @Inject
   ListMatcher(ParameterContext parameterContext) {

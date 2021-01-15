@@ -6,12 +6,14 @@ import net.jbock.coerce.Coercion;
 import net.jbock.coerce.FlagCoercion;
 
 import javax.inject.Inject;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.lang.Character.isWhitespace;
 
@@ -19,17 +21,23 @@ class NamedOptionFactory extends ParameterScoped {
 
   private final BasicInfo basicInfo;
 
+  private final Optional<TypeElement> mapperClass;
+
   @Inject
-  NamedOptionFactory(ParameterContext parameterContext, BasicInfo basicInfo) {
+  NamedOptionFactory(
+      ParameterContext parameterContext,
+      BasicInfo basicInfo,
+      @MapperClass Optional<TypeElement> mapperClass) {
     super(parameterContext);
     this.basicInfo = basicInfo;
+    this.mapperClass = mapperClass;
   }
 
   Parameter createNamedOption(boolean anyMnemonics) {
-    parameterContext.checkBundleKey();
+    checkBundleKey();
     String optionName = optionName();
     char mnemonic = mnemonic();
-    boolean flag = !mapperClass().isPresent() && isInferredFlag();
+    boolean flag = !mapperClass.isPresent() && isInferredFlag();
     Coercion coercion = flag ?
         new FlagCoercion(enumName(), sourceMethod()) :
         basicInfo.nonFlagCoercion();

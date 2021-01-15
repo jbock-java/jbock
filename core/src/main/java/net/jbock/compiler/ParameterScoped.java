@@ -10,11 +10,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
-import java.util.Optional;
 
 public class ParameterScoped {
 
-  final ParameterContext parameterContext;
+  private final ParameterContext parameterContext;
 
   public ParameterScoped(ParameterContext parameterContext) {
     this.parameterContext = parameterContext;
@@ -44,10 +43,6 @@ public class ParameterScoped {
     return parameterContext.description;
   }
 
-  public final Optional<TypeElement> mapperClass() {
-    return parameterContext.mapperClass;
-  }
-
   final String bundleKey() {
     return parameterContext.bundleKey;
   }
@@ -75,5 +70,23 @@ public class ParameterScoped {
 
   public final Types types() {
     return tool().types();
+  }
+
+  void checkBundleKey() {
+    if (bundleKey().isEmpty()) {
+      return;
+    }
+    if (bundleKey().matches(".*\\s+.*")) {
+      throw ValidationException.create(sourceMethod(), "The bundle key may not contain whitespace characters.");
+    }
+    for (Parameter param : alreadyCreated()) {
+      if (bundleKey().equals(param.bundleKey)) {
+        throw ValidationException.create(sourceMethod(), "Duplicate bundle key.");
+      }
+    }
+  }
+
+  public ParameterContext parameterContext() {
+    return parameterContext;
   }
 }
