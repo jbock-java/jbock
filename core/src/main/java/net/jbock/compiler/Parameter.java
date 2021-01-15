@@ -17,7 +17,8 @@ import java.util.stream.Collectors;
 import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
 
 /**
- * This class represents either an {@link Option} or a {@link Param}.
+ * This class represents an {@code abstract} Method in the command class,
+ * which can be either an {@link Option} or an {@link Param}.
  */
 public final class Parameter {
 
