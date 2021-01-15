@@ -41,10 +41,10 @@ class NamedOptionFactory extends ParameterScoped {
     Coercion coercion = flag ?
         new FlagCoercion(enumName(), sourceMethod()) :
         basicInfo.nonFlagCoercion();
-    List<String> names = names(optionName, mnemonic);
+    List<String> dashedNames = dashedNames(optionName, mnemonic);
     return new Parameter(mnemonic, optionName, sourceMethod(), bundleKey(),
-        sample(flag, enumName(), names, anyMnemonics),
-        names, coercion, Arrays.asList(description()), null);
+        sample(flag, enumName(), dashedNames, anyMnemonics),
+        dashedNames, coercion, Arrays.asList(description()), null);
   }
 
   private Character mnemonic() {
@@ -107,7 +107,7 @@ class NamedOptionFactory extends ParameterScoped {
     return mirror.getKind() == TypeKind.BOOLEAN || tool().isSameType(mirror, Boolean.class.getCanonicalName());
   }
 
-  private static List<String> names(String optionName, char mnemonic) {
+  private static List<String> dashedNames(String optionName, char mnemonic) {
     if (optionName != null && mnemonic == ' ') {
       return Collections.singletonList("--" + optionName);
     } else if (optionName == null && mnemonic != ' ') {
