@@ -37,7 +37,7 @@ class NamedOptionFactory extends ParameterScoped {
     checkBundleKey();
     String optionName = optionName();
     char mnemonic = mnemonic();
-    boolean flag = !mapperClass.isPresent() && isInferredFlag();
+    boolean flag = !mapperClass.isPresent() && isReturnTypeBoolean();
     Coercion coercion = flag ?
         new FlagCoercion(enumName(), sourceMethod()) :
         basicInfo.nonFlagCoercion();
@@ -102,7 +102,7 @@ class NamedOptionFactory extends ParameterScoped {
     return name;
   }
 
-  private boolean isInferredFlag() {
+  private boolean isReturnTypeBoolean() {
     TypeMirror mirror = sourceMethod().getReturnType();
     return mirror.getKind() == TypeKind.BOOLEAN || tool().isSameType(mirror, Boolean.class.getCanonicalName());
   }
