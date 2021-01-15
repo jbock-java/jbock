@@ -1,6 +1,7 @@
 package net.jbock.coerce.matching;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.NonFlagSkew;
 import net.jbock.compiler.ParameterContext;
 
@@ -16,7 +17,8 @@ public class ExactMatcher extends Matcher {
 
   @Override
   Optional<UnwrapSuccess> tryUnwrapReturnType() {
-    return Optional.of(new UnwrapSuccess(boxedReturnType(), returnType(), constructorParam -> CodeBlock.of("$N", constructorParam)));
+    ParameterSpec constructorParam = constructorParam(returnType());
+    return Optional.of(new UnwrapSuccess(boxedReturnType(), constructorParam, CodeBlock.of("$N", constructorParam)));
   }
 
   @Override

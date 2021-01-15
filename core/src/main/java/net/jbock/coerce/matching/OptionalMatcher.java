@@ -1,6 +1,7 @@
 package net.jbock.coerce.matching;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.NonFlagSkew;
 import net.jbock.compiler.ParameterContext;
 
@@ -17,7 +18,10 @@ public class OptionalMatcher extends Matcher {
   @Override
   Optional<UnwrapSuccess> tryUnwrapReturnType() {
     return Optionalish.unwrap(returnType(), tool())
-        .map(opt -> new UnwrapSuccess(opt.wrappedType(), opt.liftedType(), opt::extractExpr));
+        .map(opt -> {
+          ParameterSpec constructorParam = constructorParam(opt.liftedType());
+          return new UnwrapSuccess(opt.wrappedType(), constructorParam, opt.extractExpr(constructorParam));
+        });
   }
 
   @Override

@@ -1,6 +1,7 @@
 package net.jbock.coerce.matching;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.NonFlagSkew;
 import net.jbock.compiler.ParameterContext;
 
@@ -18,8 +19,9 @@ public class ListMatcher extends Matcher {
 
   @Override
   Optional<UnwrapSuccess> tryUnwrapReturnType() {
+    ParameterSpec constructorParam = constructorParam(returnType());
     return tool().getSingleTypeArgument(returnType(), List.class.getCanonicalName())
-        .map(wrapped -> new UnwrapSuccess(wrapped, returnType(), constructorParam -> CodeBlock.of("$N", constructorParam)));
+        .map(wrapped -> new UnwrapSuccess(wrapped, constructorParam, CodeBlock.of("$N", constructorParam)));
   }
 
   @Override

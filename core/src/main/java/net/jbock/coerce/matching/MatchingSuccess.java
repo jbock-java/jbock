@@ -6,17 +6,36 @@ import net.jbock.coerce.NonFlagSkew;
 
 class MatchingSuccess {
 
-  final CodeBlock mapExpr;
-  final CodeBlock extractExpr;
-  final ParameterSpec constructorParam;
-  final NonFlagSkew skew;
-  final CodeBlock autoCollectExpr;
+  private final CodeBlock mapExpr;
+  private final UnwrapSuccess unwrapSuccess;
+  private final Matcher matcher;
 
-  MatchingSuccess(CodeBlock mapExpr, CodeBlock extractExpr, ParameterSpec constructorParam, NonFlagSkew skew, CodeBlock autoCollectExpr) {
+  MatchingSuccess(
+      CodeBlock mapExpr,
+      UnwrapSuccess unwrapSuccess,
+      Matcher matcher) {
     this.mapExpr = mapExpr;
-    this.extractExpr = extractExpr;
-    this.constructorParam = constructorParam;
-    this.skew = skew;
-    this.autoCollectExpr = autoCollectExpr;
+    this.unwrapSuccess = unwrapSuccess;
+    this.matcher = matcher;
+  }
+
+  public CodeBlock mapExpr() {
+    return mapExpr;
+  }
+
+  public CodeBlock extractExpr() {
+    return unwrapSuccess.extractExpr();
+  }
+
+  public ParameterSpec constructorParam() {
+    return unwrapSuccess.constructorParam();
+  }
+
+  public NonFlagSkew skew() {
+    return matcher.skew();
+  }
+
+  public CodeBlock autoCollectExpr() {
+    return matcher.autoCollectExpr();
   }
 }

@@ -1,7 +1,6 @@
 package net.jbock.coerce.matching;
 
 import com.google.common.collect.ImmutableList;
-import com.squareup.javapoet.ParameterSpec;
 import net.jbock.Mapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.MapperClassValidator;
@@ -56,7 +55,12 @@ public class MapperMatcher extends ParameterScoped {
 
   public Coercion findMyCoercion() {
     MatchingSuccess success = findCoercion();
-    return new NonFlagCoercion(enumName(), success.mapExpr, success.autoCollectExpr, success.extractExpr, success.skew, success.constructorParam);
+    return new NonFlagCoercion(enumName(),
+        success.mapExpr(),
+        success.autoCollectExpr(),
+        success.extractExpr(),
+        success.skew(),
+        success.constructorParam());
   }
 
   private void checkMapperAnnotation() {
@@ -82,10 +86,8 @@ public class MapperMatcher extends ParameterScoped {
 
   final Either<String, MatchingSuccess> match(Matcher matcher, UnwrapSuccess unwrapSuccess) {
     MapperClassValidator validator = new MapperClassValidator(this::failure, tool(), unwrapSuccess.wrappedType(), mapperClass);
-    ParameterSpec constructorParam = constructorParam(unwrapSuccess.constructorParamType());
     return validator.getMapExpr().map(Function.identity(), mapExpr ->
-        new MatchingSuccess(mapExpr, unwrapSuccess.extractExpr(constructorParam), constructorParam,
-            matcher.skew(), matcher.autoCollectExpr()));
+        new MatchingSuccess(mapExpr, unwrapSuccess, matcher));
   }
 
   private ValidationException boom(String message) {

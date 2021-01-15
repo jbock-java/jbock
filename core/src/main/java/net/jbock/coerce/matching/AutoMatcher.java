@@ -2,7 +2,6 @@ package net.jbock.coerce.matching;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.NonFlagCoercion;
@@ -37,10 +36,9 @@ public class AutoMatcher extends ParameterScoped {
         .flatMap(entry -> {
           Matcher matcher = entry.getKey();
           UnwrapSuccess unwrapSuccess = entry.getValue();
-          ParameterSpec constructorParam = constructorParam(unwrapSuccess.constructorParamType());
           return findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr ->
               new NonFlagCoercion(enumName(), mapExpr, matcher.autoCollectExpr(),
-                  unwrapSuccess.extractExpr(constructorParam), matcher.skew(), constructorParam));
+                  unwrapSuccess.extractExpr(), matcher.skew(), unwrapSuccess.constructorParam()));
         })
         .orElseThrow(() -> failure(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
             returnType())));
