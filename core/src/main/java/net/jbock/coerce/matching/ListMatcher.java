@@ -21,7 +21,7 @@ public class ListMatcher extends Matcher {
   Optional<UnwrapSuccess> tryUnwrapReturnType() {
     ParameterSpec constructorParam = constructorParam(returnType());
     return tool().getSingleTypeArgument(returnType(), List.class.getCanonicalName())
-        .map(wrapped -> new UnwrapSuccess(wrapped, constructorParam, CodeBlock.of("$N", constructorParam)));
+        .map(wrapped -> UnwrapSuccess.create(wrapped, constructorParam));
   }
 
   @Override

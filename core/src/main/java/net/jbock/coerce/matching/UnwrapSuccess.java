@@ -11,13 +11,24 @@ class UnwrapSuccess {
   private final ParameterSpec constructorParam;
   private final CodeBlock extractExpr;
 
-  UnwrapSuccess(
+  private UnwrapSuccess(
       TypeMirror wrappedType,
       ParameterSpec constructorParam,
       CodeBlock extractExpr) {
     this.wrappedType = wrappedType;
     this.constructorParam = constructorParam;
     this.extractExpr = extractExpr;
+  }
+
+  static UnwrapSuccess create(TypeMirror wrappedType, ParameterSpec constructorParam) {
+    return create(wrappedType, constructorParam, CodeBlock.of("$N", constructorParam));
+  }
+
+  static UnwrapSuccess create(
+      TypeMirror wrappedType,
+      ParameterSpec constructorParam,
+      CodeBlock extractExpr) {
+    return new UnwrapSuccess(wrappedType, constructorParam, extractExpr);
   }
 
   TypeMirror wrappedType() {

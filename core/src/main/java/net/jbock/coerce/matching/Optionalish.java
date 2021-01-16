@@ -1,114 +1,57 @@
 package net.jbock.coerce.matching;
 
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
+import net.jbock.compiler.EnumName;
 import net.jbock.compiler.TypeTool;
 
+import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import java.util.Arrays;
-import java.util.List;
 import java.util.Optional;
-import java.util.OptionalDouble;
-import java.util.OptionalInt;
-import java.util.OptionalLong;
-import java.util.function.Function;
 
 class Optionalish {
 
-  private static final List<OptionalPrimitive> OPTIONAL_PRIMITIVES = Arrays.asList(
-      new OptionalPrimitive(OptionalInt.class, Integer.class),
-      new OptionalPrimitive(OptionalLong.class, Long.class),
-      new OptionalPrimitive(OptionalDouble.class, Double.class));
+  private final TypeTool tool;
+  private final EnumName enumName;
 
-  private final TypeMirror liftedType;
-
-  private final TypeMirror wrappedType;
-
-  private final Function<ParameterSpec, CodeBlock> extract;
-
-  private Optionalish(
-      Function<ParameterSpec, CodeBlock> extract,
-      TypeMirror liftedType, TypeMirror wrappedType) {
-    this.extract = extract;
-    this.wrappedType = wrappedType;
-    this.liftedType = liftedType;
+  @Inject
+  Optionalish(TypeTool tool, EnumName enumName) {
+    this.tool = tool;
+    this.enumName = enumName;
   }
 
-  private static class OptionalPrimitive {
-
-    final Class<?> optionalType;
-    final Class<? extends Number> boxingType;
-
-    OptionalPrimitive(Class<?> optionalType, Class<? extends Number> boxingType) {
-      this.optionalType = optionalType;
-      this.boxingType = boxingType;
-    }
-
-    Function<ParameterSpec, CodeBlock> extractExpr() {
-      return p -> CodeBlock.of("$N.isPresent() ? $T.of($N.get()) : $T.empty()", p, optionalType, p, optionalType);
-    }
-  }
-
-  static Optional<Optionalish> unwrap(TypeMirror type, TypeTool tool) {
-    Optional<Optionalish> optionalPrimitive = getOptionalPrimitive(type, tool);
+  Optional<UnwrapSuccess> unwrap(TypeMirror type) {
+    Optional<UnwrapSuccess> optionalPrimitive = getOptionalPrimitive(type);
     if (optionalPrimitive.isPresent()) {
       return optionalPrimitive;
     }
+    ParameterSpec constructorParam = constructorParam(type);
     return tool.getSingleTypeArgument(type, Optional.class.getCanonicalName())
-        .map(wrapped -> new Optionalish(p -> CodeBlock.of("$N", p), type, wrapped));
+        .map(wrapped -> UnwrapSuccess.create(wrapped, constructorParam));
   }
 
-  private static Optional<Optionalish> getOptionalPrimitive(TypeMirror type, TypeTool tool) {
-    for (OptionalPrimitive e : OPTIONAL_PRIMITIVES) {
-      if (tool.isSameType(type, e.optionalType.getCanonicalName())) {
-        return Optional.of(new Optionalish(
-            e.extractExpr(),
-            optionalOf(e.boxingType.getCanonicalName(), tool),
-            tool.asTypeElement(e.boxingType.getCanonicalName()).asType()));
+  private Optional<UnwrapSuccess> getOptionalPrimitive(TypeMirror type) {
+    for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
+      if (tool.isSameType(type, optionalPrimitive.type())) {
+        ParameterSpec constructorParam = constructorParam(asOptional(optionalPrimitive));
+        return Optional.of(UnwrapSuccess.create(
+            tool.asTypeElement(optionalPrimitive.wrappedObjectType()).asType(),
+            constructorParam,
+            optionalPrimitive.extractExpr(constructorParam)));
       }
     }
     return Optional.empty();
   }
 
-  private static DeclaredType optionalOf(String canonicalName, TypeTool tool) {
+  private DeclaredType asOptional(OptionalPrimitive optionalPrimitive) {
     TypeElement optional = tool.asTypeElement(Optional.class.getCanonicalName());
-    TypeElement element = tool.asTypeElement(canonicalName);
+    TypeElement element = tool.asTypeElement(optionalPrimitive.wrappedObjectType());
     return tool.types().getDeclaredType(optional, element.asType());
   }
 
-  /**
-   * <ul>
-   *   <li>{@code OptionalInt} -&gt; {@code Optional<Integer>}</li>
-   *   <li>{@code Optional<Integer>} -&gt; {@code Optional<Integer>}</li>
-   * </ul>
-   *
-   * @return lifted type
-   */
-  TypeMirror liftedType() {
-    return liftedType;
-  }
-
-  /**
-   * The function creates an expression of the original type.
-   *
-   * @param constructorParam the constructor constructorParam
-   * @return extract expr
-   */
-  CodeBlock extractExpr(ParameterSpec constructorParam) {
-    return extract.apply(constructorParam);
-  }
-
-  /**
-   * <ul>
-   *   <li>{@code OptionalInt} -&gt; {@code Integer}</li>
-   *   <li>{@code Optional<Integer>} -&gt; {@code Integer}</li>
-   * </ul>
-   *
-   * @return wrapped type
-   */
-  TypeMirror wrappedType() {
-    return wrappedType;
+  private ParameterSpec constructorParam(TypeMirror constructorParamType) {
+    return ParameterSpec.builder(TypeName.get(constructorParamType), enumName.camel()).build();
   }
 }

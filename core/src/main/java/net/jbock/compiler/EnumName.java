@@ -16,7 +16,7 @@ public class EnumName {
     this.parts = parts;
   }
 
-  static EnumName create(String input) {
+  public static EnumName create(String input) {
     List<String> result = new ArrayList<>();
     CharType type_ = CharType.UNDEFINED;
     StringBuilder sb = new StringBuilder();
