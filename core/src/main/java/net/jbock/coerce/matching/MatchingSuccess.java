@@ -36,6 +36,6 @@ class MatchingSuccess {
   }
 
   public CodeBlock autoCollectExpr() {
-    return matcher.autoCollectExpr();
+    return matcher.tail();
   }
 }

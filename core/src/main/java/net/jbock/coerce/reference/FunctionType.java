@@ -3,13 +3,12 @@ package net.jbock.coerce.reference;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
 
-// mapper or collector
-public class ReferencedType<E> {
+public class FunctionType {
 
   private final List<? extends TypeMirror> typeArguments;
   private final boolean supplier; // wrapped in Supplier?
 
-  ReferencedType(List<? extends TypeMirror> typeArguments, boolean supplier) {
+  FunctionType(List<? extends TypeMirror> typeArguments, boolean supplier) {
     this.typeArguments = typeArguments;
     this.supplier = supplier;
   }
@@ -18,7 +17,11 @@ public class ReferencedType<E> {
     return supplier;
   }
 
-  public List<? extends TypeMirror> typeArguments() {
-    return typeArguments;
+  public TypeMirror inputType() {
+    return typeArguments.get(0);
+  }
+
+  public TypeMirror outputType() {
+    return typeArguments.get(1);
   }
 }

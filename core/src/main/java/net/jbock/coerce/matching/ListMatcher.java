@@ -30,7 +30,7 @@ public class ListMatcher extends Matcher {
   }
 
   @Override
-  CodeBlock autoCollectExpr() {
+  CodeBlock tail() {
     return CodeBlock.of(".collect($T.toList())", Collectors.class);
   }
 }

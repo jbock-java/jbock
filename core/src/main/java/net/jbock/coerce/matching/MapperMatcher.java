@@ -9,52 +9,52 @@ import net.jbock.coerce.either.Either;
 import net.jbock.coerce.either.Right;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
-import net.jbock.compiler.ValidationException;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
-import java.util.function.Function;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.SuppliedClassValidator.getEnclosingElements;
 import static net.jbock.coerce.either.Either.left;
+import static net.jbock.coerce.either.Either.right;
 
 public class MapperMatcher extends ParameterScoped {
 
   private final ImmutableList<Matcher> matchers;
   private final TypeElement mapperClass;
+  private final MapperClassValidator mapperClassValidator;
 
   @Inject
   MapperMatcher(
       ParameterContext context,
       TypeElement mapperClass,
-      ImmutableList<Matcher> matchers) {
+      ImmutableList<Matcher> matchers,
+      MapperClassValidator mapperClassValidator) {
     super(context);
     this.mapperClass = mapperClass;
     this.matchers = matchers;
+    this.mapperClassValidator = mapperClassValidator;
   }
 
-  private MatchingSuccess findCoercion() {
-    commonChecks(mapperClass);
-    checkNotAbstract();
-    checkMapperAnnotation();
-    Either<String, MatchingSuccess> either = left("");
-    try {
-      for (Matcher matcher : matchers) {
-        either = tryMatch(matcher);
-        if (either instanceof Right) {
-          return ((Right<String, MatchingSuccess>) either).value();
-        }
-      }
-    } catch (ValidationException e) {
-      throw boom(e.getMessage());
-    }
-    return either.orElseThrow(this::boom);
+  private Either<String, MatchingSuccess> findCoercion() {
+    return commonChecks(mapperClass)
+        .flatMap(this::checkNotAbstract)
+        .flatMap(this::checkMapperAnnotation)
+        .flatMap(() -> {
+          Either<String, MatchingSuccess> match = left("");
+          for (Matcher matcher : matchers) {
+            match = tryMatch(matcher);
+            if (match instanceof Right) {
+              return match;
+            }
+          }
+          return match; // report the final mapper failure
+        });
   }
 
   public Coercion findMyCoercion() {
-    MatchingSuccess success = findCoercion();
+    MatchingSuccess success = findCoercion().orElseThrow(this::mapperFailure);
     return new NonFlagCoercion(enumName(),
         success.mapExpr(),
         success.autoCollectExpr(),
@@ -63,38 +63,31 @@ public class MapperMatcher extends ParameterScoped {
         success.constructorParam());
   }
 
-  private void checkMapperAnnotation() {
+  private Either<String, Void> checkMapperAnnotation() {
     Mapper mapperAnnotation = mapperClass.getAnnotation(Mapper.class);
     boolean nestedMapper = getEnclosingElements(mapperClass).contains(sourceElement());
     if (mapperAnnotation == null && !nestedMapper) {
-      throw boom("The class must either be an inner class of " + sourceElement() +
+      return left("The class must either be an inner class of " + sourceElement() +
           ", or carry the " + Mapper.class.getCanonicalName() + " annotation");
     }
+    return right();
   }
 
-  private void checkNotAbstract() {
+  private Either<String, Void> checkNotAbstract() {
     if (mapperClass.getModifiers().contains(ABSTRACT)) {
-      throw ValidationException.create(mapperClass, "The class may not be abstract.");
+      return left("The class may not be abstract.");
     }
+    return right();
   }
 
   final Either<String, MatchingSuccess> tryMatch(Matcher matcher) {
     return matcher.tryUnwrapReturnType()
         .map(unwrapSuccess -> match(matcher, unwrapSuccess))
-        .orElseGet(() -> Either.left("no match"));
+        .orElseGet(() -> left("no match"));
   }
 
   final Either<String, MatchingSuccess> match(Matcher matcher, UnwrapSuccess unwrapSuccess) {
-    MapperClassValidator validator = new MapperClassValidator(this::failure, tool(), unwrapSuccess.wrappedType(), mapperClass);
-    return validator.getMapExpr().map(Function.identity(), mapExpr ->
-        new MatchingSuccess(mapExpr, unwrapSuccess, matcher));
-  }
-
-  private ValidationException boom(String message) {
-    return failure(enrichMessage(message));
-  }
-
-  private String enrichMessage(String message) {
-    return String.format("There is a problem with the mapper class: %s.", message);
+    return mapperClassValidator.getMapExpr(unwrapSuccess.wrappedType())
+        .map(mapExpr -> new MatchingSuccess(mapExpr, unwrapSuccess, matcher));
   }
 }

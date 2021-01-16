@@ -41,6 +41,8 @@ import java.util.stream.Stream;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
+import static net.jbock.coerce.either.Either.left;
+import static net.jbock.coerce.either.Either.right;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 
 class CommandProcessingStep implements BasicAnnotationProcessor.Step {
@@ -215,13 +217,17 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private void validateSourceElement(TypeElement sourceElement) {
-    SuppliedClassValidator.commonChecks(sourceElement);
-    if (!tool.isSameType(sourceElement.getSuperclass(), Object.class.getCanonicalName()) || !sourceElement.getInterfaces().isEmpty()) {
-      throw ValidationException.create(sourceElement, "The model class may not implement or extend anything.");
-    }
-    if (!sourceElement.getTypeParameters().isEmpty()) {
-      throw ValidationException.create(sourceElement, "The class cannot have type parameters.");
-    }
+    SuppliedClassValidator.commonChecks(sourceElement)
+        .flatMap(() -> {
+          if (!tool.isSameType(sourceElement.getSuperclass(), Object.class.getCanonicalName()) || !sourceElement.getInterfaces().isEmpty()) {
+            return left("The model class may not implement or extend anything.");
+          }
+          if (!sourceElement.getTypeParameters().isEmpty()) {
+            return left("The class cannot have type parameters.");
+          }
+          return right(sourceElement);
+        })
+        .orElseThrow(message -> ValidationException.create(sourceElement, message));
   }
 
   private static ClassName generatedClass(TypeElement sourceElement) {

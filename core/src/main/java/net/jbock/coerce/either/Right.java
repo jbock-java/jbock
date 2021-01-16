@@ -1,8 +1,16 @@
 package net.jbock.coerce.either;
 
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class Right<L, R> extends Either<L, R> {
+
+  private static final Either<?, Void> EMPTY = new Right<>(null);
+
+  @SuppressWarnings("unchecked")
+  static <__IGNORE> Either<__IGNORE, Void> empty() {
+    return (Right<__IGNORE, Void>) EMPTY;
+  }
 
   private final R right;
 
@@ -15,13 +23,18 @@ public class Right<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <L2, R2> Either<L2, R2> map(Function<L, L2> leftMapper, Function<R, R2> rightMapper) {
+  public <R2> Either<L, R2> map(Function<R, R2> rightMapper) {
     return right(rightMapper.apply(right));
   }
 
   @Override
-  public <L2, R2> Either<L2, R2> flatMap(Function<L, L2> leftMapper, Function<R, Either<L2, R2>> rightMapper) {
+  public <R2> Either<L, R2> flatMap(Function<R, Either<L, R2>> rightMapper) {
     return rightMapper.apply(right);
+  }
+
+  @Override
+  public <R2> Either<L, R2> flatMap(Supplier<Either<L, R2>> rightMapper) {
+    return rightMapper.get();
   }
 
   @Override

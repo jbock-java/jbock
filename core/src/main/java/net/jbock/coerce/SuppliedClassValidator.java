@@ -1,5 +1,6 @@
 package net.jbock.coerce;
 
+import net.jbock.coerce.either.Either;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -13,21 +14,24 @@ import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.List;
 
+import static net.jbock.coerce.either.Either.left;
+import static net.jbock.coerce.either.Either.right;
+
 public class SuppliedClassValidator {
 
-  public static void commonChecks(TypeElement classToCheck) {
+  public static Either<String, Void> commonChecks(TypeElement classToCheck) {
     if (classToCheck.getNestingKind().isNested() && classToCheck.getNestingKind() != NestingKind.MEMBER) {
-      throw ValidationException.create(classToCheck, "Use a top level class or static inner class");
+      return left("Use a top level class or static inner class");
     }
     if (classToCheck.getNestingKind().isNested() &&
         !classToCheck.getModifiers().contains(Modifier.STATIC)) {
-      throw ValidationException.create(classToCheck, "The nested class must be static");
+      return left("The nested class must be static");
     }
     if (classToCheck.getModifiers().contains(Modifier.PRIVATE)) {
-      throw ValidationException.create(classToCheck, "The class may not be private");
+      return left("The class may not be private");
     }
     if (classToCheck.getKind() == ElementKind.INTERFACE) {
-      throw ValidationException.create(classToCheck, "Use a class, not an interface");
+      return left("Use a class, not an interface");
     }
     getEnclosingElements(classToCheck).forEach(element -> {
       if (element.getModifiers().contains(Modifier.PRIVATE)) {
@@ -35,8 +39,9 @@ public class SuppliedClassValidator {
       }
     });
     if (!hasDefaultConstructor(classToCheck)) {
-      throw ValidationException.create(classToCheck, "The class must have a default constructor");
+      return left("The class must have a default constructor");
     }
+    return right();
   }
 
   public static List<TypeElement> getEnclosingElements(TypeElement sourceElement) {

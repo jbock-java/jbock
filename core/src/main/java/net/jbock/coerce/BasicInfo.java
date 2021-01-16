@@ -10,6 +10,7 @@ import net.jbock.coerce.matching.Matcher;
 import net.jbock.compiler.MapperClass;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
+import net.jbock.compiler.TypeTool;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -53,6 +54,9 @@ public class BasicInfo extends ParameterScoped {
       @BindsInstance
       Builder matchers(ImmutableList<Matcher> matchers);
 
+      @BindsInstance
+      Builder typeTool(TypeTool typeTool);
+
       ParameterWithMapperComponent build();
     }
   }
@@ -64,6 +68,7 @@ public class BasicInfo extends ParameterScoped {
               .parameterContext(parameterContext())
               .mapperClass(mapper)
               .matchers(matchers)
+              .typeTool(tool())
               .build();
           return component.mapperMatcher().findMyCoercion();
         })
