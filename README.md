@@ -41,7 +41,7 @@ The generated class will, in this case, be called
 String[] args = { "--verbosity", "2", "file.txt" }; // sample psvm input
 MyCommand c = new MyCommand_Parser().parseOrExit(args);
 
-// Working as expected!
+// Works as expected!
 assertEquals(OptionalInt.of(2), c.verbosity());
 assertEquals(Paths.get("file.txt"), c.path());
 ````
