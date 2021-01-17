@@ -90,7 +90,7 @@ Mapper return type        | Return type of the `abstract` method          | *Ske
 
 If none of these rules apply, compilation will fail.
 
-These rules can be summarized in another table:
+Both rule tables can be summarized in yet another table:
 
 #### Skew rules overview
 
