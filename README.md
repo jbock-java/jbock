@@ -51,7 +51,7 @@ while the option `verbosity` is *optional*.
 The property of being either optional or required is called *skew*.
 There are four different skews:
 *required*, *optional*, *repeatable* and *flag*.
-In this case the skew is
+In this case, the skew is
 determined by the return type of the option's or parameter's `abstract` method,
 according to the following rules.
 
