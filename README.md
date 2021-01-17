@@ -1,13 +1,15 @@
 [![core](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg?style=plastic&subject=jbock)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 [![annotations](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations/badge.svg?color=red&style=plastic&subject=jbock-annotations)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations)
 
-jbock is a nifty command line parser that uses annotations similar to
+jbock is a command line parser that works similar to
 [airline](https://github.com/airlift/airline) and
 [picocli.](https://github.com/remkop/picocli)
-It doesn't use reflection, but generates java source code at compile time instead.
+While those other parsers rely on reflection, it generates java source code at compile time instead.
 
-A command line interface is expressed as an `abstract` class carrying the `@Command` annotation.
-Here, each parameterless `abstract` method defines either a *named option* or a *positional parameter*.
+### Overview
+
+A command line interface is defined by an `abstract` class which has a `@Command` annotation.
+In this class, each `abstract` method corresponds either to a *named option* or a *positional parameter*.
 
 ````java
 @Command
@@ -30,7 +32,7 @@ abstract class MyCommand {
 ````
 
 When jbock is properly configured as an
-annotation processor, the presence of the command class
+annotation processor, the presence of the `@Command` annotation
 will trigger a round of code generation at compile time.
 The generated class will, in this case, be called
 `MyCommand_Parser`. It can be used as follows:
