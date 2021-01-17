@@ -19,10 +19,6 @@ final class Right<L, R> extends Either<L, R> {
     this.right = right;
   }
 
-  public R value() {
-    return right;
-  }
-
   @Override
   public boolean isRight() {
     return true;
@@ -35,7 +31,7 @@ final class Right<L, R> extends Either<L, R> {
 
   @Override
   public Either<L, Void> accept(Consumer<R> rightConsumer) {
-    rightConsumer.accept(value());
+    rightConsumer.accept(right);
     return right();
   }
 
