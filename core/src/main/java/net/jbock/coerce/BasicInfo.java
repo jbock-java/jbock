@@ -61,7 +61,7 @@ public class BasicInfo extends ParameterScoped {
     }
   }
 
-  public Coercion nonFlagCoercion() {
+  public Coercion coercion() {
     return mapperClass
         .map(mapper -> {
           ParameterWithMapperComponent component = DaggerBasicInfo_ParameterWithMapperComponent.builder()
@@ -70,7 +70,7 @@ public class BasicInfo extends ParameterScoped {
               .matchers(matchers)
               .typeTool(tool())
               .build();
-          return component.mapperMatcher().findMyCoercion();
+          return component.mapperMatcher().findCoercion();
         })
         .orElseGet(() -> autoMatcher.get().findCoercion());
   }

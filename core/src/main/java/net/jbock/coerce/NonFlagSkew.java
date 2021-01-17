@@ -4,7 +4,7 @@ public enum NonFlagSkew {
 
   REPEATABLE, OPTIONAL, REQUIRED;
 
-  Skew widen() {
+  public Skew widen() {
     return Skew.valueOf(name());
   }
 }

@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.NonFlagCoercion;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 
@@ -37,8 +36,8 @@ public class AutoMatcher extends ParameterScoped {
           Matcher matcher = entry.getKey();
           UnwrapSuccess unwrapSuccess = entry.getValue();
           return findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr ->
-              new NonFlagCoercion(enumName(), mapExpr, matcher.tail(),
-                  unwrapSuccess.extractExpr(), matcher.skew(), unwrapSuccess.constructorParam()));
+              new Coercion(enumName(), mapExpr, matcher.tailExpr(),
+                  unwrapSuccess.extractExpr(), matcher.skew().widen(), unwrapSuccess.constructorParam()));
         })
         .orElseThrow(() -> failure(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
             returnType())));

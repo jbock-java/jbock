@@ -27,7 +27,7 @@ public class ExactMatcher extends Matcher {
   }
 
   @Override
-  CodeBlock tail() {
+  CodeBlock tailExpr() {
     return CodeBlock.of(".findAny().orElseThrow($T.$L::missingRequired)", optionType(),
         enumName().enumConstant());
   }

@@ -17,5 +17,5 @@ public abstract class Matcher extends ParameterScoped {
 
   abstract NonFlagSkew skew();
 
-  abstract CodeBlock tail();
+  abstract CodeBlock tailExpr();
 }

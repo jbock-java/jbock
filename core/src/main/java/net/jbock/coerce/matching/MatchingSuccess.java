@@ -35,7 +35,7 @@ class MatchingSuccess {
     return matcher.skew();
   }
 
-  public CodeBlock autoCollectExpr() {
-    return matcher.tail();
+  public CodeBlock tailExpr() {
+    return matcher.tailExpr();
   }
 }

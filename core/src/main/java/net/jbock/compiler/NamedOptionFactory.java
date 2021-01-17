@@ -3,7 +3,6 @@ package net.jbock.compiler;
 import net.jbock.Option;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.FlagCoercion;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -39,8 +38,8 @@ class NamedOptionFactory extends ParameterScoped {
     char mnemonic = mnemonic();
     boolean flag = !mapperClass.isPresent() && isReturnTypeBoolean();
     Coercion coercion = flag ?
-        new FlagCoercion(enumName(), sourceMethod()) :
-        basicInfo.nonFlagCoercion();
+        Coercion.createFlag(enumName(), sourceMethod()) :
+        basicInfo.coercion();
     List<String> dashedNames = dashedNames(optionName, mnemonic);
     return new Parameter(mnemonic, optionName, sourceMethod(), bundleKey(),
         sample(flag, enumName(), dashedNames, anyMnemonics),

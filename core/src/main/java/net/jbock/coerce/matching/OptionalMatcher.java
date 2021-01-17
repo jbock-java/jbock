@@ -28,7 +28,7 @@ public class OptionalMatcher extends Matcher {
   }
 
   @Override
-  CodeBlock tail() {
+  CodeBlock tailExpr() {
     return CodeBlock.of(".findAny()");
   }
 }

@@ -1,15 +1,16 @@
 package net.jbock.coerce.either;
 
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-public class Right<L, R> extends Either<L, R> {
+final class Right<L, R> extends Either<L, R> {
 
-  private static final Either<?, Void> EMPTY = new Right<>(null);
+  private static final Either<?, Void> CONTAINS_NULL = new Right<>(null);
 
   @SuppressWarnings("unchecked")
-  static <__IGNORE> Either<__IGNORE, Void> empty() {
-    return (Right<__IGNORE, Void>) EMPTY;
+  static <__IGNORE> Either<__IGNORE, Void> containsNull() {
+    return (Right<__IGNORE, Void>) CONTAINS_NULL;
   }
 
   private final R right;
@@ -23,8 +24,19 @@ public class Right<L, R> extends Either<L, R> {
   }
 
   @Override
+  public boolean isRight() {
+    return true;
+  }
+
+  @Override
   public <R2> Either<L, R2> map(Function<R, R2> rightMapper) {
     return right(rightMapper.apply(right));
+  }
+
+  @Override
+  public Either<L, Void> accept(Consumer<R> rightConsumer) {
+    rightConsumer.accept(value());
+    return right();
   }
 
   @Override

@@ -4,9 +4,7 @@ import com.google.common.collect.ImmutableList;
 import net.jbock.Mapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.MapperClassValidator;
-import net.jbock.coerce.NonFlagCoercion;
 import net.jbock.coerce.either.Either;
-import net.jbock.coerce.either.Right;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 
@@ -37,30 +35,29 @@ public class MapperMatcher extends ParameterScoped {
     this.mapperClassValidator = mapperClassValidator;
   }
 
-  private Either<String, MatchingSuccess> findCoercion() {
+  private Either<String, MatchingSuccess> tryAllMatchers() {
+    Either<String, MatchingSuccess> match = left("");
+    for (Matcher matcher : matchers) {
+      match = tryMatch(matcher);
+      if (match.isRight()) {
+        return match;
+      }
+    }
+    return match; // report the final mapper failure
+  }
+
+  public Coercion findCoercion() {
     return commonChecks(mapperClass)
         .flatMap(this::checkNotAbstract)
         .flatMap(this::checkMapperAnnotation)
-        .flatMap(() -> {
-          Either<String, MatchingSuccess> match = left("");
-          for (Matcher matcher : matchers) {
-            match = tryMatch(matcher);
-            if (match instanceof Right) {
-              return match;
-            }
-          }
-          return match; // report the final mapper failure
-        });
-  }
-
-  public Coercion findMyCoercion() {
-    MatchingSuccess success = findCoercion().orElseThrow(this::mapperFailure);
-    return new NonFlagCoercion(enumName(),
-        success.mapExpr(),
-        success.autoCollectExpr(),
-        success.extractExpr(),
-        success.skew(),
-        success.constructorParam());
+        .flatMap(this::tryAllMatchers)
+        .map(success -> new Coercion(enumName(),
+            success.mapExpr(),
+            success.tailExpr(),
+            success.extractExpr(),
+            success.skew().widen(),
+            success.constructorParam()))
+        .orElseThrow(this::mapperFailure);
   }
 
   private Either<String, Void> checkMapperAnnotation() {

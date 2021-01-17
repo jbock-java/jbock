@@ -113,7 +113,7 @@ final class ParserState {
     return getStreamExpression(param)
         .add(".values.stream()")
         .add(".map($L)", param.coercion().mapExpr())
-        .add(param.coercion().collectExpr())
+        .add(param.coercion().tailExpr())
         .build();
   }
 
