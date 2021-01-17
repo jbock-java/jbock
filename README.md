@@ -88,7 +88,7 @@ Mapper return type        | Return type of the `abstract` method          | *Ske
 `M`                       | `List<M>`                                     | *repeatable*
 `M`                       | `M` (exact match)                             | *required*
 
-If none of these rules apply, compilation will fail.
+When none of these rules apply, compilation will fail.
 
 Both rule tables can be summarized in yet another table:
 
