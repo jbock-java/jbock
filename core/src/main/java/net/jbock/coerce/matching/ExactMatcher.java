@@ -17,7 +17,7 @@ public class ExactMatcher extends Matcher {
 
   @Override
   Optional<UnwrapSuccess> tryUnwrapReturnType() {
-    ParameterSpec constructorParam = constructorParam(returnType());
+    ParameterSpec constructorParam = constructorParam(boxedReturnType());
     return Optional.of(UnwrapSuccess.create(boxedReturnType(), constructorParam));
   }
 
