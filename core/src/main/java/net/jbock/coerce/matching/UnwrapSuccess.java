@@ -5,7 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 
 import javax.lang.model.type.TypeMirror;
 
-class UnwrapSuccess {
+public class UnwrapSuccess {
 
   private final TypeMirror wrappedType;
   private final ParameterSpec constructorParam;
@@ -20,26 +20,26 @@ class UnwrapSuccess {
     this.extractExpr = extractExpr;
   }
 
-  static UnwrapSuccess create(TypeMirror wrappedType, ParameterSpec constructorParam) {
+  public static UnwrapSuccess create(TypeMirror wrappedType, ParameterSpec constructorParam) {
     return create(wrappedType, constructorParam, CodeBlock.of("$N", constructorParam));
   }
 
-  static UnwrapSuccess create(
+  public static UnwrapSuccess create(
       TypeMirror wrappedType,
       ParameterSpec constructorParam,
       CodeBlock extractExpr) {
     return new UnwrapSuccess(wrappedType, constructorParam, extractExpr);
   }
 
-  TypeMirror wrappedType() {
+  public TypeMirror wrappedType() {
     return wrappedType;
   }
 
-  ParameterSpec constructorParam() {
+  public ParameterSpec constructorParam() {
     return constructorParam;
   }
 
-  CodeBlock extractExpr() {
+  public CodeBlock extractExpr() {
     return extractExpr;
   }
 }

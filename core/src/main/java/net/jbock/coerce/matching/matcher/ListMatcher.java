@@ -1,8 +1,9 @@
-package net.jbock.coerce.matching;
+package net.jbock.coerce.matching.matcher;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.NonFlagSkew;
+import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.ParameterContext;
 
 import javax.inject.Inject;
@@ -18,19 +19,19 @@ public class ListMatcher extends Matcher {
   }
 
   @Override
-  Optional<UnwrapSuccess> tryUnwrapReturnType() {
+  public Optional<UnwrapSuccess> tryUnwrapReturnType() {
     ParameterSpec constructorParam = constructorParam(returnType());
     return tool().getSingleTypeArgument(returnType(), List.class.getCanonicalName())
         .map(wrapped -> UnwrapSuccess.create(wrapped, constructorParam));
   }
 
   @Override
-  NonFlagSkew skew() {
+  public NonFlagSkew skew() {
     return NonFlagSkew.REPEATABLE;
   }
 
   @Override
-  CodeBlock tailExpr() {
+  public CodeBlock tailExpr() {
     return CodeBlock.of(".collect($T.toList())", Collectors.class);
   }
 }

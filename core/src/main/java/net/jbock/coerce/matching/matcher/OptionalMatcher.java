@@ -1,7 +1,8 @@
-package net.jbock.coerce.matching;
+package net.jbock.coerce.matching.matcher;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.NonFlagSkew;
+import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.ParameterContext;
 
 import javax.inject.Inject;
@@ -18,17 +19,17 @@ public class OptionalMatcher extends Matcher {
   }
 
   @Override
-  Optional<UnwrapSuccess> tryUnwrapReturnType() {
+  public Optional<UnwrapSuccess> tryUnwrapReturnType() {
     return optionalish.unwrap(returnType());
   }
 
   @Override
-  NonFlagSkew skew() {
+  public NonFlagSkew skew() {
     return NonFlagSkew.OPTIONAL;
   }
 
   @Override
-  CodeBlock tailExpr() {
+  public CodeBlock tailExpr() {
     return CodeBlock.of(".findAny()");
   }
 }

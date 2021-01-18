@@ -1,7 +1,8 @@
-package net.jbock.coerce.matching;
+package net.jbock.coerce.matching.matcher;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.NonFlagSkew;
+import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 
@@ -9,13 +10,13 @@ import java.util.Optional;
 
 public abstract class Matcher extends ParameterScoped {
 
-  Matcher(ParameterContext parameterContext) {
+  public Matcher(ParameterContext parameterContext) {
     super(parameterContext);
   }
 
-  abstract Optional<UnwrapSuccess> tryUnwrapReturnType();
+  public abstract Optional<UnwrapSuccess> tryUnwrapReturnType();
 
-  abstract NonFlagSkew skew();
+  public abstract NonFlagSkew skew();
 
-  abstract CodeBlock tailExpr();
+  public abstract CodeBlock tailExpr();
 }

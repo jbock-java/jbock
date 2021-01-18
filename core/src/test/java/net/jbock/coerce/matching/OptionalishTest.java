@@ -1,6 +1,7 @@
 package net.jbock.coerce.matching;
 
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.matching.matcher.Optionalish;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;

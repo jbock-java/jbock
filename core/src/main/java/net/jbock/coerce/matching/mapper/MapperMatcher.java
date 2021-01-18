@@ -1,10 +1,12 @@
-package net.jbock.coerce.matching;
+package net.jbock.coerce.matching.mapper;
 
 import com.google.common.collect.ImmutableList;
 import net.jbock.Mapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.MapperClassValidator;
 import net.jbock.coerce.either.Either;
+import net.jbock.coerce.matching.UnwrapSuccess;
+import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 
@@ -35,8 +37,8 @@ public class MapperMatcher extends ParameterScoped {
     this.mapperClassValidator = mapperClassValidator;
   }
 
-  private Either<String, MatchingSuccess> tryAllMatchers() {
-    Either<String, MatchingSuccess> match = left("");
+  private Either<String, MapperSuccess> tryAllMatchers() {
+    Either<String, MapperSuccess> match = left("");
     for (Matcher matcher : matchers) {
       match = tryMatch(matcher);
       if (match.isRight()) {
@@ -77,14 +79,14 @@ public class MapperMatcher extends ParameterScoped {
     return right();
   }
 
-  final Either<String, MatchingSuccess> tryMatch(Matcher matcher) {
+  final Either<String, MapperSuccess> tryMatch(Matcher matcher) {
     return matcher.tryUnwrapReturnType()
         .map(unwrapSuccess -> match(matcher, unwrapSuccess))
         .orElseGet(() -> left("no match"));
   }
 
-  final Either<String, MatchingSuccess> match(Matcher matcher, UnwrapSuccess unwrapSuccess) {
+  final Either<String, MapperSuccess> match(Matcher matcher, UnwrapSuccess unwrapSuccess) {
     return mapperClassValidator.getMapExpr(unwrapSuccess.wrappedType())
-        .map(mapExpr -> new MatchingSuccess(mapExpr, unwrapSuccess, matcher));
+        .map(mapExpr -> new MapperSuccess(mapExpr, unwrapSuccess, matcher));
   }
 }

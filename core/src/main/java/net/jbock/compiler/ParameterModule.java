@@ -4,10 +4,10 @@ import com.google.common.collect.ImmutableList;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
-import net.jbock.coerce.matching.ExactMatcher;
-import net.jbock.coerce.matching.ListMatcher;
-import net.jbock.coerce.matching.Matcher;
-import net.jbock.coerce.matching.OptionalMatcher;
+import net.jbock.coerce.matching.matcher.ExactMatcher;
+import net.jbock.coerce.matching.matcher.ListMatcher;
+import net.jbock.coerce.matching.matcher.Matcher;
+import net.jbock.coerce.matching.matcher.OptionalMatcher;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;

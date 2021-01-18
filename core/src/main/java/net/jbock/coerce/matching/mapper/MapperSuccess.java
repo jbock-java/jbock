@@ -1,16 +1,18 @@
-package net.jbock.coerce.matching;
+package net.jbock.coerce.matching.mapper;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.NonFlagSkew;
+import net.jbock.coerce.matching.UnwrapSuccess;
+import net.jbock.coerce.matching.matcher.Matcher;
 
-class MatchingSuccess {
+class MapperSuccess {
 
   private final CodeBlock mapExpr;
   private final UnwrapSuccess unwrapSuccess;
   private final Matcher matcher;
 
-  MatchingSuccess(
+  MapperSuccess(
       CodeBlock mapExpr,
       UnwrapSuccess unwrapSuccess,
       Matcher matcher) {
@@ -19,23 +21,23 @@ class MatchingSuccess {
     this.matcher = matcher;
   }
 
-  public CodeBlock mapExpr() {
+  CodeBlock mapExpr() {
     return mapExpr;
   }
 
-  public CodeBlock extractExpr() {
+  CodeBlock extractExpr() {
     return unwrapSuccess.extractExpr();
   }
 
-  public ParameterSpec constructorParam() {
+  ParameterSpec constructorParam() {
     return unwrapSuccess.constructorParam();
   }
 
-  public NonFlagSkew skew() {
+  NonFlagSkew skew() {
     return matcher.skew();
   }
 
-  public CodeBlock tailExpr() {
+  CodeBlock tailExpr() {
     return matcher.tailExpr();
   }
 }

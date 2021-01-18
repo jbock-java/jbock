@@ -1,7 +1,8 @@
-package net.jbock.coerce.matching;
+package net.jbock.coerce.matching.matcher;
 
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.TypeTool;
 

@@ -1,9 +1,11 @@
-package net.jbock.coerce.matching;
+package net.jbock.coerce.matching.auto;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.matching.UnwrapSuccess;
+import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 
