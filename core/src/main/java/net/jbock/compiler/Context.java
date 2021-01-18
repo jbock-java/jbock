@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Command;
+import net.jbock.compiler.parameter.Parameter;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;

@@ -10,7 +10,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
-import net.jbock.compiler.Parameter;
+import net.jbock.compiler.parameter.Parameter;
 
 import javax.lang.model.element.Modifier;
 import java.io.PrintStream;

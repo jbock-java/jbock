@@ -1,10 +1,12 @@
-package net.jbock.compiler;
+package net.jbock.compiler.parameter;
 
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.Param;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Skew;
+import net.jbock.compiler.EnumName;
+import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -20,39 +22,25 @@ import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
  * This class represents an {@code abstract} Method in the command class,
  * which can be either an {@link Option} or an {@link Param}.
  */
-public final class Parameter {
-
-  // null iff this is a param
-  final String optionName;
-
-  // ' ' if this is a param
-  final char mnemonic;
+public abstract class Parameter {
 
   private final ExecutableElement sourceMethod;
 
-  final String bundleKey;
+  private final String bundleKey;
 
   private final String sample;
-
-  private final List<String> dashedNames;
 
   private final Coercion coercion;
 
   private final List<String> description;
 
-  private final Integer positionalIndex;
-
-  Parameter(char mnemonic, String optionName, ExecutableElement sourceMethod, String bundleKey, String sample,
-            List<String> dashedNames, Coercion coercion, List<String> description, Integer positionalIndex) {
-    this.mnemonic = mnemonic;
-    this.optionName = optionName;
+  Parameter(ExecutableElement sourceMethod, String bundleKey, String sample,
+            Coercion coercion, List<String> description) {
     this.sourceMethod = sourceMethod;
     this.bundleKey = bundleKey;
     this.sample = sample;
-    this.dashedNames = dashedNames;
     this.coercion = coercion;
     this.description = description;
-    this.positionalIndex = positionalIndex;
   }
 
   public Coercion coercion() {
@@ -75,46 +63,37 @@ public final class Parameter {
     return paramName().enumConstant();
   }
 
-  public boolean isPositional() {
-    return positionalIndex != null;
-  }
+  public abstract boolean isPositional();
 
-  public OptionalInt positionalIndex() {
-    return positionalIndex != null ? OptionalInt.of(positionalIndex) : OptionalInt.empty();
-  }
+  public abstract OptionalInt positionalIndex();
 
   public boolean isRequired() {
-    return coercion.getSkew() == Skew.REQUIRED;
+    return coercion.skew() == Skew.REQUIRED;
   }
 
   public boolean isRepeatable() {
-    return coercion.getSkew() == Skew.REPEATABLE;
+    return coercion.skew() == Skew.REPEATABLE;
   }
 
   public boolean isOptional() {
-    return coercion.getSkew() == Skew.OPTIONAL;
+    return coercion.skew() == Skew.OPTIONAL;
   }
 
   public boolean isFlag() {
-    return coercion.getSkew() == Skew.FLAG;
+    return coercion.skew() == Skew.FLAG;
   }
 
   public Optional<String> bundleKey() {
     return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);
   }
 
-  OptionalInt positionalOrder() {
-    if (positionalIndex == null) {
-      return OptionalInt.empty();
-    }
-    return OptionalInt.of(isRepeatable() ? 2 : isOptional() ? 1 : 0);
-  }
+  public abstract OptionalInt positionalOrder();
 
   public EnumName paramName() {
     return coercion.paramName();
   }
 
-  ValidationException validationError(String message) {
+  public ValidationException validationError(String message) {
     return ValidationException.create(sourceMethod, message);
   }
 
@@ -124,11 +103,13 @@ public final class Parameter {
         .collect(Collectors.toSet());
   }
 
-  public List<String> dashedNames() {
-    return dashedNames;
-  }
+  public abstract List<String> dashedNames();
 
   public String sample() {
     return sample;
   }
+
+  public abstract String optionName();
+
+  public abstract char mnemonic();
 }

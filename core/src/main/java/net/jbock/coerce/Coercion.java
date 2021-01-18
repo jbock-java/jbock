@@ -57,7 +57,7 @@ public class Coercion {
     return tailExpr;
   }
 
-  public Skew getSkew() {
+  public Skew skew() {
     return skew;
   }
 

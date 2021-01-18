@@ -12,6 +12,7 @@ import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 import net.jbock.coerce.SuppliedClassValidator;
+import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.view.GeneratedClass;
 
 import javax.annotation.processing.Filer;

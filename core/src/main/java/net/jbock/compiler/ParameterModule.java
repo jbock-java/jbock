@@ -8,6 +8,7 @@ import net.jbock.coerce.matching.matcher.ExactMatcher;
 import net.jbock.coerce.matching.matcher.ListMatcher;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.coerce.matching.matcher.OptionalMatcher;
+import net.jbock.compiler.parameter.Parameter;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;

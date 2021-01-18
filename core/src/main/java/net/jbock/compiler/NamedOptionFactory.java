@@ -3,6 +3,8 @@ package net.jbock.compiler;
 import net.jbock.Option;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
+import net.jbock.compiler.parameter.NamedOption;
+import net.jbock.compiler.parameter.Parameter;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -41,9 +43,9 @@ class NamedOptionFactory extends ParameterScoped {
         Coercion.createFlag(enumName(), sourceMethod()) :
         basicInfo.coercion();
     List<String> dashedNames = dashedNames(optionName, mnemonic);
-    return new Parameter(mnemonic, optionName, sourceMethod(), bundleKey(),
+    return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
         sample(flag, enumName(), dashedNames, anyMnemonics),
-        dashedNames, coercion, Arrays.asList(description()), null);
+        dashedNames, coercion, Arrays.asList(description()));
   }
 
   private Character mnemonic() {
@@ -52,7 +54,7 @@ class NamedOptionFactory extends ParameterScoped {
       return ' ';
     }
     for (Parameter param : alreadyCreated()) {
-      if (option.mnemonic() == param.mnemonic) {
+      if (option.mnemonic() == param.mnemonic()) {
         throw ValidationException.create(sourceMethod(), "Duplicate mnemonic");
       }
     }
@@ -68,7 +70,7 @@ class NamedOptionFactory extends ParameterScoped {
       throw ValidationException.create(sourceMethod(), "The name may not be empty");
     }
     for (Parameter param : alreadyCreated()) {
-      if (option.value().equals(param.optionName)) {
+      if (option.value().equals(param.optionName())) {
         throw ValidationException.create(sourceMethod(), "Duplicate option name: " + option.value());
       }
     }

@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import net.jbock.compiler.parameter.Parameter;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -77,16 +78,18 @@ public class ParameterScoped {
   }
 
   void checkBundleKey() {
-    if (bundleKey().isEmpty()) {
+    String key = bundleKey();
+    if (key.isEmpty()) {
       return;
     }
-    if (bundleKey().matches(".*\\s+.*")) {
+    if (key.matches(".*\\s+.*")) {
       throw ValidationException.create(sourceMethod(), "The bundle key may not contain whitespace characters.");
     }
     for (Parameter param : alreadyCreated()) {
-      if (bundleKey().equals(param.bundleKey)) {
-        throw ValidationException.create(sourceMethod(), "Duplicate bundle key.");
-      }
+      param.bundleKey().filter(bundleKey -> bundleKey.equals(key))
+          .ifPresent(k -> {
+            throw ValidationException.create(sourceMethod(), "Duplicate bundle key.");
+          });
     }
   }
 

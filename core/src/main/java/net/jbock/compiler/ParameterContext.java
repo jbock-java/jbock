@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import dagger.Reusable;
+import net.jbock.compiler.parameter.Parameter;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;

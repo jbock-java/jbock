@@ -4,7 +4,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
-import net.jbock.compiler.Parameter;
+import net.jbock.compiler.parameter.Parameter;
 
 import java.util.stream.Collectors;
 
