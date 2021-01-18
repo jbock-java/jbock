@@ -154,29 +154,30 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .filter(CommandProcessingStep::validateParameterMethod)
         .collect(Collectors.toList()));
     List<Parameter> params = new ArrayList<>();
+    AnnotationUtil annotationUtil = new AnnotationUtil();
     for (int i = 0; i < methods.params().size(); i++) {
-      AnnotationUtil annotationUtil = new AnnotationUtil(tool, methods.params().get(i));
-      Optional<TypeElement> mapperClass = annotationUtil.getMapper(Param.class);
+      Optional<TypeElement> mapperClass = annotationUtil.getMapper(methods.params().get(i));
       Param param = methods.params().get(i).getAnnotation(Param.class);
+      ParameterModule module = new ParameterModule(sourceElement, mapperClass, param.bundleKey());
       ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
           .optionType(optionType)
           .sourceMethod(methods.params().get(i))
           .typeTool(tool)
           .alreadyCreated(ImmutableList.copyOf(params))
-          .parameterModule(new ParameterModule(sourceElement, mapperClass, param.bundleKey()))
+          .parameterModule(module)
           .description(getDescription(methods.params().get(i)));
       params.add(builder.build().positionalParameterFactory().createPositionalParam(i));
     }
     boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
     for (ExecutableElement option : methods.options()) {
-      AnnotationUtil annotationUtil = new AnnotationUtil(tool, option);
-      Optional<TypeElement> mapperClass = annotationUtil.getMapper(Option.class);
+      Optional<TypeElement> mapperClass = annotationUtil.getMapper(option);
+      ParameterModule module = new ParameterModule(sourceElement, mapperClass, option.getAnnotation(Option.class).bundleKey());
       ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
           .optionType(optionType)
           .sourceMethod(option)
           .typeTool(tool)
           .alreadyCreated(ImmutableList.copyOf(params))
-          .parameterModule(new ParameterModule(sourceElement, mapperClass, option.getAnnotation(Option.class).bundleKey()))
+          .parameterModule(module)
           .description(getDescription(option));
       params.add(builder.build().namedOptionFactory().createNamedOption(anyMnemonics));
     }

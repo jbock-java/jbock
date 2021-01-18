@@ -1,23 +1,29 @@
 package net.jbock.compiler;
 
+import com.google.auto.common.AnnotationMirrors;
+import com.google.auto.common.MoreTypes;
+import net.jbock.Option;
+import net.jbock.Param;
+
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
 import javax.lang.model.element.AnnotationValueVisitor;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleAnnotationValueVisitor8;
-import javax.lang.model.util.SimpleTypeVisitor8;
-import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toSet;
 
 class AnnotationUtil {
 
   private static final String MAPPER_ATTRIBUTE = "mappedBy";
-  private final TypeTool tool;
-  private final ExecutableElement sourceMethod;
+
+  private static final Set<String> ANNOTATIONS = Stream.of(Param.class, Option.class)
+      .map(Class::getCanonicalName).collect(toSet());
 
   private static final AnnotationValueVisitor<TypeMirror, Void> GET_TYPE = new SimpleAnnotationValueVisitor8<TypeMirror, Void>() {
 
@@ -27,55 +33,35 @@ class AnnotationUtil {
     }
   };
 
-  private static final TypeVisitor<Boolean, TypeTool> IS_VOID = new SimpleTypeVisitor8<Boolean, TypeTool>() {
-    @Override
-    protected Boolean defaultAction(TypeMirror e, TypeTool tool) {
-      return false;
-    }
-
-    @Override
-    public Boolean visitDeclared(DeclaredType type, TypeTool tool) {
-      TypeElement element = type.asElement().accept(TypeTool.AS_TYPE_ELEMENT, null);
-      return element != null && Void.class.getCanonicalName().equals(element.getQualifiedName().toString());
-    }
-  };
-
-  AnnotationUtil(TypeTool tool, ExecutableElement sourceMethod) {
-    this.tool = tool;
-    this.sourceMethod = sourceMethod;
+  Optional<TypeElement> getMapper(ExecutableElement sourceMethod) {
+    return getAnnotationMirror(sourceMethod)
+        .map(AnnotationUtil::getAnnotationValue)
+        .map(AnnotationUtil::asType)
+        .map(MoreTypes::asTypeElement)
+        .filter(AnnotationUtil::isNotVoid);
   }
 
-  Optional<TypeElement> getMapper(Class<?> annotationClass) {
-    AnnotationMirror annotation = getAnnotationMirror(tool, sourceMethod, annotationClass);
-    if (annotation == null) {
-      // if the source method doesn't have this annotation
-      return Optional.empty();
-    }
-    AnnotationValue annotationValue = getAnnotationValue(annotation);
-    if (annotationValue == null) {
-      // if the default value is not overridden
-      return Optional.empty();
-    }
-    TypeMirror typeMirror = annotationValue.accept(GET_TYPE, null);
-    if (typeMirror == null) {
-      throw ValidationException.create(sourceMethod, "Invalid value of attribute '" + MAPPER_ATTRIBUTE + "'.");
-    }
-    if (typeMirror.accept(IS_VOID, tool)) {
-      // if the default value is not overridden
-      return Optional.empty();
-    }
-    return Optional.of(tool.asTypeElement(typeMirror));
-  }
-
-  private static AnnotationMirror getAnnotationMirror(TypeTool tool, ExecutableElement sourceMethod, Class<?> annotationClass) {
+  private static Optional<AnnotationMirror> getAnnotationMirror(ExecutableElement sourceMethod) {
     return sourceMethod.getAnnotationMirrors().stream()
-        .filter(m -> tool.isSameType(m.getAnnotationType(), annotationClass.getCanonicalName()))
-        .findAny().orElse(null);
+        .filter(AnnotationUtil::hasAnnotationTypeIn)
+        .map((AnnotationMirror a) -> a) // Avoid returning Optional<? extends AnnotationMirror>.
+        .findFirst();
+  }
+
+  private static boolean hasAnnotationTypeIn(AnnotationMirror annotation) {
+    return ANNOTATIONS.contains(
+        MoreTypes.asTypeElement(annotation.getAnnotationType()).getQualifiedName().toString());
   }
 
   private static AnnotationValue getAnnotationValue(AnnotationMirror annotationMirror) {
-    return annotationMirror.getElementValues().entrySet().stream()
-        .filter(entry -> entry.getKey().getSimpleName().toString().equals(MAPPER_ATTRIBUTE))
-        .map(Map.Entry::getValue).findAny().orElse(null);
+    return AnnotationMirrors.getAnnotationValue(annotationMirror, MAPPER_ATTRIBUTE);
+  }
+
+  private static TypeMirror asType(AnnotationValue annotationValue) {
+    return GET_TYPE.visit(annotationValue);
+  }
+
+  private static boolean isNotVoid(TypeElement typeElement) {
+    return !Void.class.getCanonicalName().equals(typeElement.getQualifiedName().toString());
   }
 }
