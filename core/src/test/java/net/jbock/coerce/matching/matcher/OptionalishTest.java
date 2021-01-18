@@ -1,7 +1,7 @@
-package net.jbock.coerce.matching;
+package net.jbock.coerce.matching.matcher;
 
 import com.squareup.javapoet.TypeName;
-import net.jbock.coerce.matching.matcher.Optionalish;
+import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
@@ -29,8 +29,6 @@ class OptionalishTest {
       Optional<UnwrapSuccess> opt = optionalish.unwrap(optionalInt);
       assertTrue(opt.isPresent());
       TypeName liftedType = opt.get().constructorParam().type;
-      TypeMirror wrapped = opt.get().wrappedType();
-      System.out.println(wrapped);
       assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
     });
   }
@@ -46,8 +44,6 @@ class OptionalishTest {
       Optional<UnwrapSuccess> opt = optionalish.unwrap(optionalInteger);
       assertTrue(opt.isPresent());
       TypeName liftedType = opt.get().constructorParam().type;
-      TypeMirror wrapped = opt.get().wrappedType();
-      System.out.println(wrapped);
       assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
     });
   }
