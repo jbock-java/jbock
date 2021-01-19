@@ -1,5 +1,6 @@
 package net.jbock.either;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -22,11 +23,15 @@ public abstract class Either<L, R> {
     return Right.containsNull();
   }
 
+  public static <LL, RR> Either<LL, RR> fromOptional(Optional<RR> optional, LL emptyValue) {
+    return optional.map((Function<RR, Either<LL, RR>>) Either::right).orElse(left(emptyValue));
+  }
+
   public abstract boolean isPresent();
 
   public abstract <R2> Either<L, R2> map(Function<R, R2> rightMapper);
 
-  public abstract <R2> Either<L, R2> fail(Function<R, L> rightMapper);
+  public abstract Either<R, L> swap();
 
   public abstract Either<L, Void> ifPresent(Consumer<R> rightConsumer);
 

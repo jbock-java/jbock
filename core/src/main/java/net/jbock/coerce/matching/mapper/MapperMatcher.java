@@ -1,21 +1,24 @@
 package net.jbock.coerce.matching.mapper;
 
 import com.google.common.collect.ImmutableList;
+import com.squareup.javapoet.CodeBlock;
 import net.jbock.Mapper;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.MapperClassValidator;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.coerce.matching.matcher.Matcher;
+import net.jbock.coerce.reference.FunctionType;
+import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
+import net.jbock.compiler.ValidationException;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
@@ -27,35 +30,38 @@ public class MapperMatcher extends ParameterScoped {
 
   private final ImmutableList<Matcher> matchers;
   private final TypeElement mapperClass;
-  private final MapperClassValidator mapperClassValidator;
+  private final ReferenceTool referenceTool;
 
   @Inject
   MapperMatcher(
       ParameterContext context,
       TypeElement mapperClass,
       ImmutableList<Matcher> matchers,
-      MapperClassValidator mapperClassValidator) {
+      ReferenceTool referenceTool) {
     super(context);
     this.mapperClass = mapperClass;
     this.matchers = matchers;
-    this.mapperClassValidator = mapperClassValidator;
+    this.referenceTool = referenceTool;
   }
 
   private Either<String, MapperSuccess> tryAllMatchers() {
-    List<UnwrapSuccess> successes = new ArrayList<>();
-    for (Matcher matcher : matchers) {
-      Either<String, UnwrapSuccess> success = matcher.tryUnwrapReturnType();
-      success.ifPresent(successes::add);
-      Either<String, MapperSuccess> matched = success
-          .flatMap(unwrapSuccess -> validateMapper(matcher, unwrapSuccess));
-      if (matched.isPresent()) {
-        return matched;
+    List<UnwrapSuccess> unwraps = new ArrayList<>();
+    return referenceTool.getReferencedType().flatMap(functionType -> {
+      for (Matcher matcher : matchers) {
+        Either<String, UnwrapSuccess> unwrap = matcher.tryUnwrapReturnType();
+        unwrap.ifPresent(unwraps::add);
+        Either<String, MapperSuccess> matched = unwrap
+            .flatMap(wrap -> validateMapper(matcher, wrap, functionType));
+        if (matched.isPresent()) {
+          return matched;
+        }
       }
-    }
-    Optional<UnwrapSuccess> success = successes.stream().max(Comparator.comparingInt(UnwrapSuccess::rank));
-    return Either.left(success.map(UnwrapSuccess::wrappedType)
-        .map(wrappedType -> "No match. Try returning " + wrappedType + " from the mapper")
-        .orElse("no match"));
+      return Either.<MapperSuccess, String>fromOptional(unwraps.stream()
+          .max(Comparator.comparingInt(UnwrapSuccess::rank))
+          .map(UnwrapSuccess::wrappedType)
+          .map(wrappedType -> "No match. Try returning " + wrappedType + " from the mapper"), null)
+          .swap();
+    });
   }
 
   public Coercion findCoercion() {
@@ -97,8 +103,29 @@ public class MapperMatcher extends ParameterScoped {
     return right();
   }
 
-  final Either<String, MapperSuccess> validateMapper(Matcher matcher, UnwrapSuccess unwrapSuccess) {
-    return mapperClassValidator.getMapExpr(unwrapSuccess.wrappedType())
+  final Either<String, MapperSuccess> validateMapper(
+      Matcher matcher,
+      UnwrapSuccess unwrapSuccess,
+      FunctionType functionType) {
+    return getMapExpr(unwrapSuccess.wrappedType(), functionType)
         .map(mapExpr -> new MapperSuccess(mapExpr, unwrapSuccess, matcher));
+  }
+
+  private Either<String, CodeBlock> getMapExpr(
+      TypeMirror expectedReturnType,
+      FunctionType functionType) {
+    if (!tool().isSameType(functionType.inputType(), String.class.getCanonicalName())) {
+      return Either.left("The function must accept an input of type String");
+    }
+    if (!tool().isSameType(functionType.outputType(), expectedReturnType)) {
+      return Either.left("The function must return " + expectedReturnType);
+    }
+    return Either.right(CodeBlock.of("new $T()$L",
+        tool().types().erasure(mapperClass.asType()),
+        functionType.isSupplier() ? ".get()" : ""));
+  }
+
+  private ValidationException mapperFailure(String message) {
+    return ValidationException.create(sourceMethod(), String.format("There is a problem with the mapper class: %s.", message));
   }
 }

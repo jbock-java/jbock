@@ -6,12 +6,12 @@ import java.util.function.Supplier;
 
 final class Left<L, R> extends Either<L, R> {
 
-  private final L left;
+  private final L value;
 
   private static final Left<String, ?> NO_MESSAGE = new Left<>("no message");
 
-  Left(L left) {
-    this.left = left;
+  Left(L value) {
+    this.value = value;
   }
 
   @SuppressWarnings("unchecked")
@@ -21,14 +21,14 @@ final class Left<L, R> extends Either<L, R> {
 
   @SuppressWarnings("unchecked")
   private <R2> Left<L, R2> createLeft(L newValue) {
-    if (newValue == left) {
+    if (newValue == value) {
       return (Left<L, R2>) this;
     }
     return new Left<>(newValue);
   }
 
   public L value() {
-    return left;
+    return value;
   }
 
   @Override
@@ -38,31 +38,31 @@ final class Left<L, R> extends Either<L, R> {
 
   @Override
   public <R2> Either<L, R2> map(Function<R, R2> rightMapper) {
-    return createLeft(left);
+    return createLeft(value);
   }
 
   @Override
-  public <R2> Either<L, R2> fail(Function<R, L> rightMapper) {
-    return createLeft(left);
+  public Either<R, L> swap() {
+    return right(value);
   }
 
   @Override
   public Either<L, Void> ifPresent(Consumer<R> rightConsumer) {
-    return createLeft(left);
+    return createLeft(value);
   }
 
   @Override
   public <R2> Either<L, R2> flatMap(Function<R, Either<L, R2>> rightMapper) {
-    return createLeft(left);
+    return createLeft(value);
   }
 
   @Override
   public <R2> Either<L, R2> flatMap(Supplier<Either<L, R2>> rightMapper) {
-    return createLeft(left);
+    return createLeft(value);
   }
 
   @Override
   public R orElseThrow(Function<L, ? extends RuntimeException> leftMapper) {
-    throw leftMapper.apply(left);
+    throw leftMapper.apply(value);
   }
 }

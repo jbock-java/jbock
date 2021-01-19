@@ -1,15 +1,12 @@
 package net.jbock.coerce;
 
-import com.squareup.javapoet.CodeBlock;
-import net.jbock.coerce.reference.FunctionType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
-import net.jbock.either.Either;
+import net.jbock.compiler.ValidationException;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 
 public final class MapperClassValidator extends ParameterScoped {
 
@@ -26,16 +23,7 @@ public final class MapperClassValidator extends ParameterScoped {
     this.referenceTool = referenceTool;
   }
 
-  public Either<String, CodeBlock> getMapExpr(TypeMirror expectedReturnType) {
-    FunctionType functionType = referenceTool.getReferencedType().orElseThrow(this::mapperFailure);
-    if (!tool().isSameType(functionType.inputType(), String.class.getCanonicalName())) {
-      return Either.left("The function must accept an input of type String");
-    }
-    if (!tool().isSameType(functionType.outputType(), expectedReturnType)) {
-      return Either.left("The function must return " + expectedReturnType);
-    }
-    return Either.right(CodeBlock.of("new $T()$L",
-        tool().types().erasure(mapperClass.asType()),
-        functionType.isSupplier() ? ".get()" : ""));
+  private ValidationException mapperFailure(String message) {
+    return ValidationException.create(sourceMethod(), String.format("There is a problem with the mapper class: %s.", message));
   }
 }

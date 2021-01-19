@@ -60,14 +60,6 @@ public class ParameterScoped {
     return ParameterSpec.builder(TypeName.get(constructorParamType), enumName().camel()).build();
   }
 
-  public final ValidationException failure(String message) {
-    return ValidationException.create(sourceMethod(), message);
-  }
-
-  public final ValidationException mapperFailure(String message) {
-    return failure(String.format("There is a problem with the mapper class: %s.", message));
-  }
-
   public final TypeMirror boxedReturnType() {
     PrimitiveType primitive = returnType().accept(TypeTool.AS_PRIMITIVE, null);
     return primitive == null ? returnType() : tool().types().boxedClass(primitive).asType();

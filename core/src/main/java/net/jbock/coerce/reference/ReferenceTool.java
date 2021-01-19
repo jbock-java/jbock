@@ -1,7 +1,7 @@
 package net.jbock.coerce.reference;
 
-import net.jbock.either.Either;
 import net.jbock.compiler.TypeTool;
+import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -16,9 +16,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import static net.jbock.compiler.TypeTool.asDeclared;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
-import static net.jbock.compiler.TypeTool.asDeclared;
 
 
 public class ReferenceTool {

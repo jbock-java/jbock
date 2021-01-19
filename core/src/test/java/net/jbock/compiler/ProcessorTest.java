@@ -68,7 +68,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.lang.StringBuilder. Try defining a custom mapper or collector.");
+        .withErrorContaining("Unknown parameter type: java.lang.StringBuilder. Try defining a custom mapper.");
   }
 
   @Test
@@ -113,7 +113,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.util.List. Try defining a custom mapper or collector.");
+        .withErrorContaining("Unknown parameter type: java.util.List. Try defining a custom mapper.");
   }
 
   @Test
@@ -128,7 +128,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.util.Optional. Try defining a custom mapper or collector.");
+        .withErrorContaining("Unknown parameter type: java.util.Optional. Try defining a custom mapper.");
   }
 
   @Test
@@ -143,7 +143,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.util.Set<java.lang.String>. Try defining a custom mapper or collector.");
+        .withErrorContaining("Unknown parameter type: java.util.Set<java.lang.String>. Try defining a custom mapper.");
   }
 
   @Test
@@ -158,7 +158,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: int[]. Try defining a custom mapper or collector.");
+        .withErrorContaining("Unknown parameter type: int[]. Try defining a custom mapper.");
   }
 
   @Test
@@ -173,7 +173,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.util.Date. Try defining a custom mapper or collector.");
+        .withErrorContaining("Unknown parameter type: java.util.Date. Try defining a custom mapper.");
   }
 
   @Test
@@ -367,7 +367,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: boolean. Try defining a custom mapper or collector.");
+        .withErrorContaining("Unknown parameter type: boolean. Try defining a custom mapper.");
   }
 
   @Test

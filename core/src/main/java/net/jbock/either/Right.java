@@ -13,10 +13,10 @@ final class Right<L, R> extends Either<L, R> {
     return (Right<__IGNORE, Void>) CONTAINS_NULL;
   }
 
-  private final R right;
+  private final R value;
 
-  Right(R right) {
-    this.right = right;
+  Right(R value) {
+    this.value = value;
   }
 
   @Override
@@ -26,23 +26,23 @@ final class Right<L, R> extends Either<L, R> {
 
   @Override
   public <R2> Either<L, R2> map(Function<R, R2> rightMapper) {
-    return right(rightMapper.apply(right));
+    return right(rightMapper.apply(value));
   }
 
   @Override
-  public <R2> Either<L, R2> fail(Function<R, L> rightMapper) {
-    return Either.left(rightMapper.apply(right));
+  public Either<R, L> swap() {
+    return left(value);
   }
 
   @Override
   public Either<L, Void> ifPresent(Consumer<R> rightConsumer) {
-    rightConsumer.accept(right);
+    rightConsumer.accept(value);
     return right();
   }
 
   @Override
   public <R2> Either<L, R2> flatMap(Function<R, Either<L, R2>> rightMapper) {
-    return rightMapper.apply(right);
+    return rightMapper.apply(value);
   }
 
   @Override
@@ -52,6 +52,6 @@ final class Right<L, R> extends Either<L, R> {
 
   @Override
   public R orElseThrow(Function<L, ? extends RuntimeException> leftMapper) {
-    return right;
+    return value;
   }
 }

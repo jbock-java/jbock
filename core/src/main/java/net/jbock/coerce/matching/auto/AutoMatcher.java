@@ -8,6 +8,7 @@ import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
+import net.jbock.compiler.ValidationException;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
@@ -44,8 +45,8 @@ public class AutoMatcher extends ParameterScoped {
               new Coercion(enumName(), mapExpr, matcher.tailExpr(),
                   unwrapSuccess.extractExpr(), matcher.skew().widen(), unwrapSuccess.constructorParam()));
         })
-        .orElseThrow(message -> failure(String.format("Unknown parameter type: %s. Try defining a custom mapper or collector.",
-            returnType())));
+        .orElseThrow(message -> ValidationException.create(sourceMethod(),
+            String.format("Unknown parameter type: %s. Try defining a custom mapper.", returnType())));
   }
 
   private Either<String, Map.Entry<Matcher, UnwrapSuccess>> tryFindCoercion() {
@@ -73,4 +74,5 @@ public class AutoMatcher extends ParameterScoped {
     return types().directSupertypes(type).stream()
         .anyMatch(t -> tool().isSameErasure(t, ENUM));
   }
+
 }
