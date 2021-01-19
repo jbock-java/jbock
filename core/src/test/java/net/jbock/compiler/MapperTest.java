@@ -70,123 +70,6 @@ class MapperTest {
   }
 
   @Test
-  void validMapperWithTypeParameter() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
-        "  abstract String string();",
-        "",
-        "  @Mapper",
-        "  static class IdentityMapper<E> implements Function<E, E> {",
-        "    public E apply(E e) { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void validMapperWithTypeParameters() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
-        "  abstract String string();",
-        "",
-        "  @Mapper",
-        "  static class IdentityMapper<E, F> implements Function<E, F> {",
-        "    public F apply(E e) { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void invalidMapperTypeParameterWithBounds() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
-        "  abstract String string();",
-        "",
-        "  @Mapper",
-        "  static class IdentityMapper<E extends Integer> implements Function<E, E> {",
-        "    public E apply(E e) { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't choose E to be java.lang.String.");
-  }
-
-  @Test
-  void validMapperTypeParameterWithBounds() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
-        "  abstract String string();",
-        "",
-        "  @Mapper",
-        "  static class IdentityMapper<E extends java.lang.CharSequence> implements Function<E, E> {",
-        "    public E apply(E e) { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void validMapperTypeParameterSupplierWithBounds() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
-        "  abstract String string();",
-        "",
-        "  @Mapper",
-        "  static class IdentityMapper<E extends java.lang.CharSequence> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void invalidMapperTypeParameterSupplierWithBounds() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = IdentityMapper.class)",
-        "  abstract String string();",
-        "",
-        "  @Mapper",
-        "  static class IdentityMapper<E extends Integer> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't choose E to be java.lang.String.");
-  }
-
-
-  @Test
   void invalidFlagMapper() {
     JavaFileObject javaFile = fromSource(
         "@Command",
@@ -392,7 +275,47 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: java.lang.String and java.lang.Integer have different erasure.");
+        .withErrorContaining("There is a problem with the mapper class: No match. Try returning java.lang.Integer from the mapper.");
+  }
+
+  @Test
+  void mapperInvalidReturnsStringOptional() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = MapMap.class)",
+        "  abstract java.util.OptionalInt number();",
+        "",
+        "  @Mapper",
+        "  static class MapMap implements Supplier<Function<String, String>> {",
+        "    public Function<String, String> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: No match. Try returning java.lang.Integer from the mapper.");
+  }
+
+  @Test
+  void mapperInvalidReturnsStringList() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = MapMap.class)",
+        "  abstract List<Integer> number();",
+        "",
+        "  @Mapper",
+        "  static class MapMap implements Supplier<Function<String, String>> {",
+        "    public Function<String, String> get() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("There is a problem with the mapper class: No match. Try returning java.lang.Integer from the mapper.");
   }
 
   @Test
@@ -463,8 +386,8 @@ class MapperTest {
         "  abstract Integer number();",
         "",
         "  @Mapper",
-        "  static class MapMap<E> implements Supplier<StringFunction<E, Integer>> {",
-        "    public StringFunction<E, Integer> get() { return null; }",
+        "  static class MapMap implements Supplier<StringFunction<String, Integer>> {",
+        "    public StringFunction<String, Integer> get() { return null; }",
         "  }",
         "",
         "  interface StringFunction<V, X> extends Function<V, X> {}",
@@ -473,7 +396,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("expected java.util.function.Function but found test.Arguments.StringFunction<E,java.lang.Integer>");
+        .withErrorContaining("expected java.util.function.Function but found test.Arguments.StringFunction<java.lang.String,java.lang.Integer>");
   }
 
   @Test
@@ -529,8 +452,8 @@ class MapperTest {
         "  abstract java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<java.util.Collection<Integer>>>>>>>>>>>>>> numbers();",
         "",
         "  @Mapper",
-        "  static class MapMap<M extends Integer> implements Supplier<Function<String, java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<java.util.Collection<M>>>>>>>>>>>>>>>> {",
-        "    public Foo1<Set<Set<Set<Set<Set<Set<java.util.Collection<M>>>>>>>> get() { return null; }",
+        "  static class MapMap implements Supplier<Function<String, java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<java.util.Collection<Integer>>>>>>>>>>>>>>>> {",
+        "    public Foo1<Set<Set<Set<Set<Set<Set<java.util.Collection<Integer>>>>>>>> get() { return null; }",
         "  }",
         "  interface Foo1<A> extends Foo2<List<A>> { }",
         "  interface Foo2<B> extends Foo3<List<B>> { }",
@@ -607,26 +530,6 @@ class MapperTest {
   }
 
   @Test
-  void mapperInvalidSupplyingTypevar() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = MapMap.class)",
-        "  abstract Integer number();",
-        "",
-        "  @Mapper",
-        "  static  class MapMap<E> implements Supplier<E> {",
-        "    public E get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: not a java.util.function.Function or java.util.function.Supplier<java.util.function.Function>");
-  }
-
-  @Test
   void mapperValid() {
     JavaFileObject javaFile = fromSource(
         "@Command",
@@ -700,65 +603,6 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
-  }
-
-  @Test
-  void mapperValidOptionalStringTypevar() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = MapMap.class)",
-        "  abstract Optional<String> number();",
-        "",
-        "  @Mapper",
-        "  static  class MapMap<E> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void mapperValidStringListTypevar() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = MapMap.class)",
-        "  abstract List<String> number();",
-        "",
-        "  @Mapper",
-        "  static class MapMap<E> implements Supplier<Function<E, List<E>>> {",
-        "    public Function<E, List<E>> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper must not return one of the special types [java.util.Optional, java.util.List]");
-  }
-
-  @Test
-  void charSequence() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = MapMap.class)",
-        "  abstract java.util.ArrayList<List<java.lang.CharSequence>> number();",
-        "",
-        "  @Mapper",
-        "  static class MapMap implements Supplier<Function<String, java.util.ArrayList<List<String>>>> {",
-        "    public Function<String, java.util.ArrayList<List<String>>> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: java.lang.String and java.lang.CharSequence have different erasure.");
   }
 
   @Test
@@ -856,106 +700,5 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .compilesWithoutError();
-  }
-
-  @Test
-  void mapperHasTypeargsImpossibleFromString() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = Identity.class)",
-        "  abstract Integer ints();",
-        "",
-        "  @Mapper",
-        "  static class Identity<E> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.lang.Integer.");
-  }
-
-  @Test
-  void mapperHasTypeargsImpossibleFromStringList() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = Identity.class)",
-        "  abstract List<Integer> ints();",
-        "",
-        "  @Mapper",
-        "  static class Identity<E> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.util.List<java.lang.Integer>.");
-  }
-
-  @Test
-  void mapperHasTypeargsImpossibleFromStringListList() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = Identity.class)",
-        "  abstract java.util.ArrayList<Integer> ints();",
-        "",
-        "  @Mapper",
-        "  static class Identity<E> implements Supplier<Function<E, java.util.ArrayList<E>>> {",
-        "    public Function<E, E> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.lang.Integer.");
-  }
-
-  @Test
-  void mapperHasTypeargsImpossibleFromStringOptional() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\", mappedBy = Identity.class)",
-        "  abstract Optional<Integer> ints();",
-        "",
-        "  @Mapper",
-        "  static class Identity<E> implements Supplier<Function<E, E>> {",
-        "    public Function<E, E> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Conflicting solutions for E: java.lang.String vs java.util.Optional<java.lang.Integer>.");
-  }
-
-  @Test
-  void freeTypeVariableInMapper() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(value = \"x\",",
-        "          mappedBy = MyMapper.class)",
-        "  abstract Set<Integer> integers();",
-        "",
-        "  @Mapper",
-        "  static class MyMapper<F extends String> implements Supplier<Function<String, F>> {",
-        "    public Function<String, F> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: Unification failed: can't choose F to be java.util.Set<java.lang.Integer>.");
   }
 }

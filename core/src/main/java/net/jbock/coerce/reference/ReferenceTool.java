@@ -1,6 +1,6 @@
 package net.jbock.coerce.reference;
 
-import net.jbock.coerce.either.Either;
+import net.jbock.either.Either;
 import net.jbock.compiler.TypeTool;
 
 import javax.inject.Inject;
@@ -16,8 +16,8 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static net.jbock.coerce.either.Either.left;
-import static net.jbock.coerce.either.Either.right;
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 import static net.jbock.compiler.TypeTool.asDeclared;
 
 

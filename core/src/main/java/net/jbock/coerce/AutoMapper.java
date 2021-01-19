@@ -3,6 +3,7 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.TypeTool;
+import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
@@ -63,14 +64,14 @@ public class AutoMapper {
       create(BigInteger.class, NEW),
       create(BigDecimal.class, NEW));
 
-  public Optional<CodeBlock> findAutoMapper(TypeMirror unwrappedReturnType) {
+  public Either<String, CodeBlock> findAutoMapper(TypeMirror unwrappedReturnType) {
     for (Entry<String, CodeBlock> coercion : MAPPERS) {
       if (tool.isSameType(unwrappedReturnType, coercion.getKey())) {
         CodeBlock mapExpr = coercion.getValue();
-        return Optional.of(mapExpr);
+        return Either.right(mapExpr);
       }
     }
-    return Optional.empty();
+    return Either.left();
   }
 
   private static CodeBlock autoMapperFile() {

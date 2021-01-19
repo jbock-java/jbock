@@ -1,4 +1,4 @@
-package net.jbock.coerce.either;
+package net.jbock.either;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -10,6 +10,10 @@ public abstract class Either<L, R> {
     return new Left<>(value);
   }
 
+  public static <R> Either<String, R> left() {
+    return Left.noMessage();
+  }
+
   public static <L, R> Either<L, R> right(R value) {
     return new Right<>(value);
   }
@@ -18,11 +22,13 @@ public abstract class Either<L, R> {
     return Right.containsNull();
   }
 
-  public abstract boolean isRight();
+  public abstract boolean isPresent();
 
   public abstract <R2> Either<L, R2> map(Function<R, R2> rightMapper);
 
-  public abstract Either<L, Void> accept(Consumer<R> rightConsumer);
+  public abstract <R2> Either<L, R2> fail(Function<R, L> rightMapper);
+
+  public abstract Either<L, Void> ifPresent(Consumer<R> rightConsumer);
 
   public abstract <R2> Either<L, R2> flatMap(Function<R, Either<L, R2>> rightMapper);
 

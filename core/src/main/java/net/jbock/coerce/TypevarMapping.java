@@ -1,6 +1,6 @@
 package net.jbock.coerce;
 
-import net.jbock.coerce.either.Either;
+import net.jbock.either.Either;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
 
@@ -16,8 +16,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 
-import static net.jbock.coerce.either.Either.left;
-import static net.jbock.coerce.either.Either.right;
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static net.jbock.compiler.TypeTool.AS_INTERSECTION;
 import static net.jbock.compiler.TypeTool.AS_TYPEVAR;

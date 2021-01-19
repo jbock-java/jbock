@@ -1,8 +1,8 @@
 package net.jbock.coerce;
 
-import net.jbock.coerce.either.Either;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
+import net.jbock.either.Either;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -14,8 +14,8 @@ import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.List;
 
-import static net.jbock.coerce.either.Either.left;
-import static net.jbock.coerce.either.Either.right;
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 public class SuppliedClassValidator {
 

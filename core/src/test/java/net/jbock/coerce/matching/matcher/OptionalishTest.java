@@ -1,10 +1,10 @@
 package net.jbock.coerce.matching.matcher;
 
 import com.squareup.javapoet.TypeName;
-import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import javax.lang.model.element.TypeElement;
@@ -15,8 +15,6 @@ import java.util.Optional;
 import java.util.OptionalInt;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class OptionalishTest {
 
@@ -26,10 +24,10 @@ class OptionalishTest {
       TypeMirror optionalInt = elements.getTypeElement(OptionalInt.class.getCanonicalName()).asType();
       TypeTool tool = new TypeTool(elements, types);
       Optionalish optionalish = new Optionalish(tool, EnumName.create("foo"));
-      Optional<UnwrapSuccess> opt = optionalish.unwrap(optionalInt);
-      assertTrue(opt.isPresent());
-      TypeName liftedType = opt.get().constructorParam().type;
-      assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
+      optionalish.unwrap(optionalInt).ifPresent(unwrapSuccess -> {
+        TypeName liftedType = unwrapSuccess.constructorParam().type;
+        assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
+      }).orElseThrow(Assertions::fail);
     });
   }
 
@@ -41,10 +39,10 @@ class OptionalishTest {
       TypeTool tool = new TypeTool(elements, types);
       DeclaredType optionalInteger = types.getDeclaredType(optional, integer);
       Optionalish optionalish = new Optionalish(tool, EnumName.create("foo"));
-      Optional<UnwrapSuccess> opt = optionalish.unwrap(optionalInteger);
-      assertTrue(opt.isPresent());
-      TypeName liftedType = opt.get().constructorParam().type;
-      assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
+      optionalish.unwrap(optionalInteger).ifPresent(unwrapSuccess -> {
+        TypeName liftedType = unwrapSuccess.constructorParam().type;
+        assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
+      }).orElseThrow(Assertions::fail);
     });
   }
 
@@ -54,8 +52,7 @@ class OptionalishTest {
       TypeMirror primitiveInt = types.getPrimitiveType(TypeKind.INT);
       TypeTool tool = new TypeTool(elements, types);
       Optionalish optionalish = new Optionalish(tool, EnumName.create("foo"));
-      Optional<UnwrapSuccess> opt = optionalish.unwrap(primitiveInt);
-      assertFalse(opt.isPresent());
+      Assertions.assertFalse(optionalish.unwrap(primitiveInt).isPresent());
     });
   }
 
@@ -65,8 +62,7 @@ class OptionalishTest {
       TypeMirror string = elements.getTypeElement(String.class.getCanonicalName()).asType();
       TypeTool tool = new TypeTool(elements, types);
       Optionalish optionalish = new Optionalish(tool, EnumName.create("foo"));
-      Optional<UnwrapSuccess> opt = optionalish.unwrap(string);
-      assertFalse(opt.isPresent());
+      Assertions.assertFalse(optionalish.unwrap(string).isPresent());
     });
   }
 }

@@ -1,6 +1,6 @@
 package net.jbock.coerce;
 
-import net.jbock.coerce.either.Either;
+import net.jbock.either.Either;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationException;
@@ -40,8 +40,8 @@ class TypevarMappingTest {
       TypeMirror returnType = getSetMethod.getReturnType();
       Function<String, ValidationException> errorHandler = s -> ValidationException.create(Mockito.mock(Element.class), s);
       Either<String, TypevarMapping> result = tool.unify(types.getDeclaredType(set, string.asType()), returnType, errorHandler);
-      assertTrue(result.isRight());
-      result.accept(solution -> {
+      assertTrue(result.isPresent());
+      result.ifPresent(solution -> {
         assertNotNull(solution.get("E"));
         TypeMirror value = solution.get("E");
         assertTrue(types.isSameType(value, string.asType()));

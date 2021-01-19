@@ -2,7 +2,7 @@ package net.jbock.compiler;
 
 import net.jbock.coerce.TypevarMapping;
 import net.jbock.coerce.Unifier;
-import net.jbock.coerce.either.Either;
+import net.jbock.either.Either;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
@@ -18,11 +18,10 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
-import java.util.Optional;
 import java.util.function.Function;
 
-import static net.jbock.coerce.either.Either.left;
-import static net.jbock.coerce.either.Either.right;
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 public class TypeTool {
 
@@ -90,18 +89,22 @@ public class TypeTool {
     return types.isSameType(mirror, asTypeElement(canonicalName).asType());
   }
 
+  public boolean isSameType(TypeMirror mirror, TypeMirror otherType) {
+    return types.isSameType(mirror, otherType);
+  }
+
   /**
    * The canonical name must be a class with exactly one type parameter.
    */
-  public Optional<TypeMirror> getSingleTypeArgument(TypeMirror mirror, String canonicalName) {
+  public Either<String, TypeMirror> getSingleTypeArgument(TypeMirror mirror, String canonicalName) {
     if (!isSameErasure(mirror, canonicalName)) {
-      return Optional.empty();
+      return left("different erasure");
     }
     DeclaredType declaredType = asDeclared(mirror);
     if (declaredType.getTypeArguments().isEmpty()) {
-      return Optional.empty();
+      return left("different number of type arguments");
     }
-    return Optional.of(declaredType.getTypeArguments().get(0));
+    return right(declaredType.getTypeArguments().get(0));
   }
 
   public boolean isSameErasure(TypeMirror x, String y) {

@@ -5,6 +5,7 @@ import net.jbock.coerce.NonFlagSkew;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
+import net.jbock.either.Either;
 
 import java.util.Optional;
 
@@ -14,7 +15,7 @@ public abstract class Matcher extends ParameterScoped {
     super(parameterContext);
   }
 
-  public abstract Optional<UnwrapSuccess> tryUnwrapReturnType();
+  public abstract Either<String, UnwrapSuccess> tryUnwrapReturnType();
 
   public abstract NonFlagSkew skew();
 

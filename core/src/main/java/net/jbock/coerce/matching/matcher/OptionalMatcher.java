@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.NonFlagSkew;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.ParameterContext;
+import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -19,7 +20,7 @@ public class OptionalMatcher extends Matcher {
   }
 
   @Override
-  public Optional<UnwrapSuccess> tryUnwrapReturnType() {
+  public Either<String, UnwrapSuccess> tryUnwrapReturnType() {
     return optionalish.unwrap(returnType());
   }
 

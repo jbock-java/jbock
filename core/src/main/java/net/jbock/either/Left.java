@@ -1,4 +1,4 @@
-package net.jbock.coerce.either;
+package net.jbock.either;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -8,8 +8,15 @@ final class Left<L, R> extends Either<L, R> {
 
   private final L left;
 
+  private static final Left<String, ?> NO_MESSAGE = new Left<>("no message");
+
   Left(L left) {
     this.left = left;
+  }
+
+  @SuppressWarnings("unchecked")
+  static <__IGNORE> Left<String, __IGNORE> noMessage() {
+    return (Left<String, __IGNORE>) NO_MESSAGE;
   }
 
   @SuppressWarnings("unchecked")
@@ -25,7 +32,7 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public boolean isRight() {
+  public boolean isPresent() {
     return false;
   }
 
@@ -35,7 +42,12 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public Either<L, Void> accept(Consumer<R> rightConsumer) {
+  public <R2> Either<L, R2> fail(Function<R, L> rightMapper) {
+    return createLeft(left);
+  }
+
+  @Override
+  public Either<L, Void> ifPresent(Consumer<R> rightConsumer) {
     return createLeft(left);
   }
 

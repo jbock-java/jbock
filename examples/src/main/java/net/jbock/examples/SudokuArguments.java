@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
+import net.jbock.Mapper;
 import net.jbock.Param;
 
 import java.util.ArrayList;
@@ -13,12 +14,12 @@ import java.util.function.Supplier;
 @Command
 abstract class SudokuArguments {
 
-  @Param(value = 1, mappedBy = Mapper.class)
+  @Param(value = 1, mappedBy = MapMap.class)
   abstract java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> number();
 
-  @net.jbock.Mapper
-  static class Mapper<M extends Integer> implements Supplier<Function<String, java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>>>>>>>>>> {
-    public Foo1<Set<Set<Set<Set<Set<Set<Collection<M>>>>>>>> get() {
+  @Mapper
+  static class MapMap implements Supplier<Function<String, java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>>>> {
+    public Foo1<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>> get() {
       return s -> new ArrayList<>();
     }
   }
@@ -46,5 +47,4 @@ abstract class SudokuArguments {
 
   interface Foo8<H> extends Function<String, H> {
   }
-
 }

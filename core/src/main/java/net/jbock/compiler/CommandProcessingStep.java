@@ -42,8 +42,8 @@ import java.util.stream.Stream;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static net.jbock.coerce.either.Either.left;
-import static net.jbock.coerce.either.Either.right;
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 
 class CommandProcessingStep implements BasicAnnotationProcessor.Step {
