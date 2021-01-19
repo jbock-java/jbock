@@ -1,7 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.coerce.TypevarMapping;
-import net.jbock.coerce.Unifier;
 import net.jbock.either.Either;
 
 import javax.lang.model.element.Element;
@@ -18,7 +16,6 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
-import java.util.function.Function;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
@@ -116,14 +113,6 @@ public class TypeTool {
     return elements.getTypeElement(canonicalName);
   }
 
-  public TypeElement asTypeElement(TypeMirror mirror) {
-    Element element = types.asElement(mirror);
-    if (element == null) {
-      throw new IllegalArgumentException("not an element: " + mirror);
-    }
-    return asTypeElement(element);
-  }
-
   public static TypeElement asTypeElement(Element element) {
     TypeElement result = element.accept(AS_TYPE_ELEMENT, null);
     if (result == null) {
@@ -138,21 +127,6 @@ public class TypeTool {
       throw new IllegalArgumentException("not declared: " + mirror);
     }
     return result;
-  }
-
-  public TypeMirror getArrayType(TypeMirror componentType) {
-    return types.getArrayType(componentType);
-  }
-
-  public Either<String, TypevarMapping> unify(
-      TypeMirror concreteType,
-      TypeMirror ym,
-      Function<String, ValidationException> errorHandler) {
-    Unifier unifier = new Unifier(types);
-    String failure = unifier.unify(concreteType, ym);
-    return failure != null ?
-        left("Unification failed: " + failure) :
-        right(new TypevarMapping(unifier.getResult(), this, errorHandler));
   }
 
   public Types types() {
