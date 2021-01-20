@@ -74,7 +74,7 @@ public class MapperMatcher extends ParameterScoped {
             success.mapExpr(),
             success.tailExpr(),
             success.extractExpr(),
-            success.skew().widen(),
+            success.skew(),
             success.constructorParam()))
         .orElseThrow(this::mapperFailure);
   }

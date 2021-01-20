@@ -2,14 +2,13 @@ package net.jbock.coerce.matching.matcher;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.coerce.NonFlagSkew;
+import net.jbock.coerce.Skew;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ListMatcher extends Matcher {
@@ -27,8 +26,8 @@ public class ListMatcher extends Matcher {
   }
 
   @Override
-  public NonFlagSkew skew() {
-    return NonFlagSkew.REPEATABLE;
+  public Skew skew() {
+    return Skew.REPEATABLE;
   }
 
   @Override

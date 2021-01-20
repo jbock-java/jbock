@@ -43,7 +43,7 @@ public class AutoMatcher extends ParameterScoped {
           UnwrapSuccess unwrapSuccess = entry.getValue();
           return findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr ->
               new Coercion(enumName(), mapExpr, matcher.tailExpr(),
-                  unwrapSuccess.extractExpr(), matcher.skew().widen(), unwrapSuccess.constructorParam()));
+                  unwrapSuccess.extractExpr(), matcher.skew(), unwrapSuccess.constructorParam()));
         })
         .orElseThrow(message -> ValidationException.create(sourceMethod(),
             String.format("Unknown parameter type: %s. Try defining a custom mapper.", returnType())));

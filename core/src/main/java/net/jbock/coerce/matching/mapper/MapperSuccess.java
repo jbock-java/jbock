@@ -2,7 +2,7 @@ package net.jbock.coerce.matching.mapper;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.coerce.NonFlagSkew;
+import net.jbock.coerce.Skew;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.coerce.matching.matcher.Matcher;
 
@@ -33,7 +33,7 @@ class MapperSuccess {
     return unwrapSuccess.constructorParam();
   }
 
-  NonFlagSkew skew() {
+  Skew skew() {
     return matcher.skew();
   }
 

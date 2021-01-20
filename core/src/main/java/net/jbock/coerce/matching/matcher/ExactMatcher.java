@@ -2,7 +2,7 @@ package net.jbock.coerce.matching.matcher;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.coerce.NonFlagSkew;
+import net.jbock.coerce.Skew;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.either.Either;
@@ -23,8 +23,8 @@ public class ExactMatcher extends Matcher {
   }
 
   @Override
-  public NonFlagSkew skew() {
-    return NonFlagSkew.REQUIRED;
+  public Skew skew() {
+    return Skew.REQUIRED;
   }
 
   @Override
