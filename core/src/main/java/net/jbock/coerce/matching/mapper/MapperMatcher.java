@@ -46,13 +46,13 @@ public class MapperMatcher extends ParameterScoped {
   }
 
   private Either<String, MapperSuccess> tryAllMatchers() {
-    return referenceTool.getReferencedType().choose(functionType -> {
+    return referenceTool.getReferencedType().chooseRight(functionType -> {
       List<UnwrapSuccess> unwraps = new ArrayList<>();
       for (Matcher matcher : matchers) {
         Either<String, UnwrapSuccess> unwrap = matcher.tryUnwrapReturnType();
         unwrap.ifPresent(unwraps::add);
         Either<String, MapperSuccess> matched = unwrap
-            .choose(wrap -> validateMapper(matcher, wrap, functionType));
+            .chooseRight(wrap -> validateMapper(matcher, wrap, functionType));
         if (matched.isPresent()) {
           return matched;
         }
@@ -67,10 +67,10 @@ public class MapperMatcher extends ParameterScoped {
 
   public Coercion findCoercion() {
     return commonChecks(mapperClass)
-        .choose(this::checkNotAbstract)
-        .choose(this::checkNoTypevars)
-        .choose(this::checkMapperAnnotation)
-        .choose(this::tryAllMatchers)
+        .chooseRight(this::checkNotAbstract)
+        .chooseRight(this::checkNoTypevars)
+        .chooseRight(this::checkMapperAnnotation)
+        .chooseRight(this::tryAllMatchers)
         .map(success -> new Coercion(enumName(),
             success.mapExpr(),
             success.tailExpr(),

@@ -24,21 +24,33 @@ public abstract class Either<L, R> {
   }
 
   public static <L, R> Either<L, R> fromOptional(L emptyValue, Optional<R> optional) {
+    return fromOptional(() -> emptyValue, optional);
+  }
+
+  public static <L, R> Either<L, R> fromOptional(Supplier<L> emptyValue, Optional<R> optional) {
     return optional.<Either<L, R>>map(Right::create)
-        .orElseGet(() -> Left.create(emptyValue));
+        .orElseGet(() -> Left.create(emptyValue.get()));
   }
 
   public abstract boolean isPresent();
 
   public abstract <R2> Either<L, R2> map(Function<R, R2> rightMapper);
 
-  public abstract <R2> Either<L, R2> choose(Function<R, Either<L, R2>> rightMapper);
+  public abstract <R2> Either<L, R2> chooseRight(Function<R, Either<L, R2>> rightMapper);
 
-  public abstract <R2> Either<L, R2> choose(Supplier<Either<L, R2>> rightMapper);
+  public final <R2> Either<L, R2> chooseRight(Supplier<Either<L, R2>> rightMapper) {
+    return chooseRight(right -> rightMapper.get());
+  }
 
   public abstract <L2> Either<L2, R> mapLeft(Function<L, L2> leftMapper);
 
   public abstract <L2> Either<L2, R> chooseLeft(Function<L, Either<L2, R>> leftMapper);
+
+  public abstract R orElse(Function<L, R> leftMapper);
+
+  public final R orElse(Supplier<R> supplier) {
+    return orElse(left -> supplier.get());
+  }
 
   public abstract Either<R, L> swap();
 

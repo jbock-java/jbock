@@ -59,12 +59,7 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <R2> Either<L, R2> choose(Function<R, Either<L, R2>> rightMapper) {
-    return createLeft(value);
-  }
-
-  @Override
-  public <R2> Either<L, R2> choose(Supplier<Either<L, R2>> rightMapper) {
+  public <R2> Either<L, R2> chooseRight(Function<R, Either<L, R2>> rightMapper) {
     return createLeft(value);
   }
 
@@ -75,6 +70,11 @@ final class Left<L, R> extends Either<L, R> {
 
   @Override
   public <L2> Either<L2, R> chooseLeft(Function<L, Either<L2, R>> leftMapper) {
+    return leftMapper.apply(value);
+  }
+
+  @Override
+  public R orElse(Function<L, R> leftMapper) {
     return leftMapper.apply(value);
   }
 

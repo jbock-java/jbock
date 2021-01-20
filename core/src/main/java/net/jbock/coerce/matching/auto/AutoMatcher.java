@@ -38,7 +38,7 @@ public class AutoMatcher extends ParameterScoped {
 
   public Coercion findCoercion() {
     return tryFindCoercion()
-        .choose(entry -> {
+        .chooseRight(entry -> {
           Matcher matcher = entry.getKey();
           UnwrapSuccess unwrapSuccess = entry.getValue();
           return findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr ->

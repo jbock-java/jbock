@@ -10,7 +10,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
@@ -31,17 +30,17 @@ public class ReferenceTool {
 
   public Either<String, FunctionType> getReferencedType() {
     return checkImplements(Supplier.class.getCanonicalName())
-        .choose(typeArguments -> handleSupplier(typeArguments).mapLeft(Optional::of))
-        .chooseLeft(message -> message.<Either<String, FunctionType>>map(Either::left)
-            .orElseGet(this::handleNotSupplier));
+        .chooseRight(typeArguments -> handleSupplier(typeArguments).mapLeft(Either::left))
+        .chooseLeft(message -> message.chooseRight(this::handleNotSupplier));
   }
 
   private Either<String, FunctionType> handleNotSupplier() {
     return checkImplements(Function.class.getCanonicalName())
         .map(expected -> new FunctionType(expected, false))
-        .mapLeft(message -> message.orElse("not a " + Function.class.getCanonicalName() +
-            " or " + Supplier.class.getCanonicalName() +
-            "<" + Function.class.getCanonicalName() + ">"));
+        .mapLeft(message -> message.swap().orElse(() ->
+            "not a " + Function.class.getCanonicalName() +
+                " or " + Supplier.class.getCanonicalName() +
+                "<" + Function.class.getCanonicalName() + ">"));
   }
 
   private Either<String, FunctionType> handleSupplier(List<? extends TypeMirror> typeArguments) {
@@ -60,18 +59,18 @@ public class ReferenceTool {
     return right(new FunctionType(actual.getTypeArguments(), true));
   }
 
-  private Either<Optional<String>, List<? extends TypeMirror>> checkImplements(String candidate) {
-    return Either.<Optional<String>, DeclaredType>fromOptional(
-        Optional.empty(),
+  private Either<Either<String, Void>, List<? extends TypeMirror>> checkImplements(String candidate) {
+    return Either.<Either<String, Void>, DeclaredType>fromOptional(
+        right(),
         mapperClass.getInterfaces().stream()
             .filter(inter -> tool.isSameErasure(inter, candidate))
             .map(TypeTool::asDeclared)
             .findFirst())
-        .choose(declared -> {
+        .chooseRight(declared -> {
           List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
           List<? extends TypeParameterElement> typeParams = tool.asTypeElement(candidate).getTypeParameters();
           if (typeArguments.size() != typeParams.size()) {
-            return left(Optional.of("raw type: " + declared));
+            return left(left("raw type: " + declared));
           }
           return right(typeArguments);
         });
