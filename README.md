@@ -40,7 +40,7 @@ The generated class will, in this case, be called
 `MyCommand_Parser`. It can be used as follows:
 
 ````java
-String[] args = { "--verbosity", "2", "file.txt" }; // sample psvm input
+String[] args = { "--verbosity=2", "file.txt" }; // sample psvm input
 MyCommand c = new MyCommand_Parser().parseOrExit(args);
 
 // Works as expected!
