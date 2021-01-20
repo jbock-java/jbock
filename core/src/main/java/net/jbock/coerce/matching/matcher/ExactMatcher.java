@@ -9,6 +9,8 @@ import net.jbock.either.Either;
 
 import javax.inject.Inject;
 
+import static net.jbock.either.Either.right;
+
 public class ExactMatcher extends Matcher {
 
   @Inject
@@ -19,7 +21,7 @@ public class ExactMatcher extends Matcher {
   @Override
   public Either<String, UnwrapSuccess> tryUnwrapReturnType() {
     ParameterSpec constructorParam = constructorParam(boxedReturnType());
-    return Either.right(UnwrapSuccess.create(boxedReturnType(), constructorParam, 0));
+    return right(UnwrapSuccess.create(boxedReturnType(), constructorParam, 0));
   }
 
   @Override

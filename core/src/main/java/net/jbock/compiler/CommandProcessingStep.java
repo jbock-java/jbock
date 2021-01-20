@@ -220,7 +220,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private void validateSourceElement(TypeElement sourceElement) {
     SuppliedClassValidator.commonChecks(sourceElement)
-        .flatMap(() -> {
+        .choose(() -> {
           if (!tool.isSameType(sourceElement.getSuperclass(), Object.class.getCanonicalName()) || !sourceElement.getInterfaces().isEmpty()) {
             return left("The model class may not implement or extend anything.");
           }

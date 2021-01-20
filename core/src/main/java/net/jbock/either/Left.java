@@ -8,15 +8,22 @@ final class Left<L, R> extends Either<L, R> {
 
   private final L value;
 
-  private static final Left<String, ?> NO_MESSAGE = new Left<>("no message");
+  private static final Left<?, ?> NOTHING = new Left<>(null);
 
-  Left(L value) {
+  private Left(L value) {
     this.value = value;
   }
 
+  static <L, R> Left<L, R> create(L value) {
+    if (value == null) {
+      return (Left<L, R>) NOTHING;
+    }
+    return new Left<>(value);
+  }
+
   @SuppressWarnings("unchecked")
-  static <__IGNORE> Left<String, __IGNORE> noMessage() {
-    return (Left<String, __IGNORE>) NO_MESSAGE;
+  static <L, R> Left<L, R> nothing() {
+    return (Left<L, R>) NOTHING;
   }
 
   @SuppressWarnings("unchecked")
@@ -24,7 +31,7 @@ final class Left<L, R> extends Either<L, R> {
     if (newValue == value) {
       return (Left<L, R2>) this;
     }
-    return new Left<>(newValue);
+    return create(newValue);
   }
 
   public L value() {
@@ -52,13 +59,23 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <R2> Either<L, R2> flatMap(Function<R, Either<L, R2>> rightMapper) {
+  public <R2> Either<L, R2> choose(Function<R, Either<L, R2>> rightMapper) {
     return createLeft(value);
   }
 
   @Override
-  public <R2> Either<L, R2> flatMap(Supplier<Either<L, R2>> rightMapper) {
+  public <R2> Either<L, R2> choose(Supplier<Either<L, R2>> rightMapper) {
     return createLeft(value);
+  }
+
+  @Override
+  public <L2> Either<L2, R> mapLeft(Function<L, L2> leftMapper) {
+    return left(leftMapper.apply(value));
+  }
+
+  @Override
+  public <L2> Either<L2, R> chooseLeft(Function<L, Either<L2, R>> leftMapper) {
+    return leftMapper.apply(value);
   }
 
   @Override

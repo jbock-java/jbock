@@ -659,8 +659,7 @@ class MapperTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The mapper must not return one of the special types [java.util.Optional, java.util.List].");
+        .compilesWithoutError();
   }
 
   @Test

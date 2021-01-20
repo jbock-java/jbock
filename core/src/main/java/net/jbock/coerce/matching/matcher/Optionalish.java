@@ -14,6 +14,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
 import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 class Optionalish {
 
@@ -40,7 +41,7 @@ class Optionalish {
     for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
       if (tool.isSameType(type, optionalPrimitive.type())) {
         ParameterSpec constructorParam = constructorParam(asOptional(optionalPrimitive));
-        return Either.right(UnwrapSuccess.create(
+        return right(UnwrapSuccess.create(
             tool.asTypeElement(optionalPrimitive.wrappedObjectType()).asType(),
             constructorParam,
             1,

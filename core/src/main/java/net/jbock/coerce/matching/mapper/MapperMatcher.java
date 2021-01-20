@@ -19,6 +19,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
@@ -45,31 +46,31 @@ public class MapperMatcher extends ParameterScoped {
   }
 
   private Either<String, MapperSuccess> tryAllMatchers() {
-    List<UnwrapSuccess> unwraps = new ArrayList<>();
-    return referenceTool.getReferencedType().flatMap(functionType -> {
+    return referenceTool.getReferencedType().choose(functionType -> {
+      List<UnwrapSuccess> unwraps = new ArrayList<>();
       for (Matcher matcher : matchers) {
         Either<String, UnwrapSuccess> unwrap = matcher.tryUnwrapReturnType();
         unwrap.ifPresent(unwraps::add);
         Either<String, MapperSuccess> matched = unwrap
-            .flatMap(wrap -> validateMapper(matcher, wrap, functionType));
+            .choose(wrap -> validateMapper(matcher, wrap, functionType));
         if (matched.isPresent()) {
           return matched;
         }
       }
-      return Either.<MapperSuccess, String>fromOptional(unwraps.stream()
+      Optional<String> message = unwraps.stream()
           .max(Comparator.comparingInt(UnwrapSuccess::rank))
           .map(UnwrapSuccess::wrappedType)
-          .map(wrappedType -> "No match. Try returning " + wrappedType + " from the mapper"), null)
-          .swap();
+          .map(wrappedType -> "No match. Try returning " + wrappedType + " from the mapper");
+      return Either.<MapperSuccess, String>fromOptional(null, message).swap();
     });
   }
 
   public Coercion findCoercion() {
     return commonChecks(mapperClass)
-        .flatMap(this::checkNotAbstract)
-        .flatMap(this::checkNoTypevars)
-        .flatMap(this::checkMapperAnnotation)
-        .flatMap(this::tryAllMatchers)
+        .choose(this::checkNotAbstract)
+        .choose(this::checkNoTypevars)
+        .choose(this::checkMapperAnnotation)
+        .choose(this::tryAllMatchers)
         .map(success -> new Coercion(enumName(),
             success.mapExpr(),
             success.tailExpr(),
@@ -115,12 +116,12 @@ public class MapperMatcher extends ParameterScoped {
       TypeMirror expectedReturnType,
       FunctionType functionType) {
     if (!tool().isSameType(functionType.inputType(), String.class.getCanonicalName())) {
-      return Either.left("The function must accept an input of type String");
+      return left("The function must accept an input of type String");
     }
     if (!tool().isSameType(functionType.outputType(), expectedReturnType)) {
-      return Either.left("The function must return " + expectedReturnType);
+      return left("The function must return " + expectedReturnType);
     }
-    return Either.right(CodeBlock.of("new $T()$L",
+    return right(CodeBlock.of("new $T()$L",
         tool().types().erasure(mapperClass.asType()),
         functionType.isSupplier() ? ".get()" : ""));
   }

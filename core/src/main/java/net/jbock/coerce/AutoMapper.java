@@ -18,11 +18,12 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 public class AutoMapper {
 
@@ -68,10 +69,10 @@ public class AutoMapper {
     for (Entry<String, CodeBlock> coercion : MAPPERS) {
       if (tool.isSameType(unwrappedReturnType, coercion.getKey())) {
         CodeBlock mapExpr = coercion.getValue();
-        return Either.right(mapExpr);
+        return right(mapExpr);
       }
     }
-    return Either.left();
+    return left();
   }
 
   private static CodeBlock autoMapperFile() {
