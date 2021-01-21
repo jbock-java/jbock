@@ -3,18 +3,15 @@ package net.jbock.compiler;
 import net.jbock.Option;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.Skew;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
 
 import javax.inject.Inject;
-import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeKind;
-import javax.lang.model.type.TypeMirror;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 
 import static java.lang.Character.isWhitespace;
 
@@ -22,29 +19,22 @@ class NamedOptionFactory extends ParameterScoped {
 
   private final BasicInfo basicInfo;
 
-  private final Optional<TypeElement> mapperClass;
-
   @Inject
   NamedOptionFactory(
       ParameterContext parameterContext,
-      BasicInfo basicInfo,
-      @MapperClass Optional<TypeElement> mapperClass) {
+      BasicInfo basicInfo) {
     super(parameterContext);
     this.basicInfo = basicInfo;
-    this.mapperClass = mapperClass;
   }
 
   Parameter createNamedOption(boolean anyMnemonics) {
     checkBundleKey();
     String optionName = optionName();
     char mnemonic = mnemonic();
-    boolean flag = !mapperClass.isPresent() && isReturnTypeBoolean();
-    Coercion coercion = flag ?
-        Coercion.createFlag(enumName(), sourceMethod()) :
-        basicInfo.coercion().orElseThrow(s -> ValidationException.create(sourceMethod(), s));
+    Coercion coercion = basicInfo.coercion().orElseThrow(s -> ValidationException.create(sourceMethod(), s));
     List<String> dashedNames = dashedNames(optionName, mnemonic);
     return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
-        sample(flag, enumName(), dashedNames, anyMnemonics),
+        sample(coercion.skew(), enumName(), dashedNames, anyMnemonics),
         dashedNames, coercion, Arrays.asList(description()));
   }
 
@@ -103,11 +93,6 @@ class NamedOptionFactory extends ParameterScoped {
     return name;
   }
 
-  private boolean isReturnTypeBoolean() {
-    TypeMirror mirror = sourceMethod().getReturnType();
-    return mirror.getKind() == TypeKind.BOOLEAN || tool().isSameType(mirror, Boolean.class.getCanonicalName());
-  }
-
   private static List<String> dashedNames(String optionName, char mnemonic) {
     if (optionName != null && mnemonic == ' ') {
       return Collections.singletonList("--" + optionName);
@@ -119,11 +104,11 @@ class NamedOptionFactory extends ParameterScoped {
     return Arrays.asList("-" + mnemonic, "--" + optionName);
   }
 
-  private static String sample(boolean flag, EnumName name, List<String> names, boolean anyMnemonics) {
+  private static String sample(Skew skew, EnumName name, List<String> names, boolean anyMnemonics) {
     if (names.isEmpty() || names.size() >= 3) {
       throw new AssertionError();
     }
-    String argname = flag ? "" : ' ' + name.enumConstant();
+    String argname = skew == Skew.FLAG ? "" : ' ' + name.enumConstant();
     if (names.size() == 1) {
       // Note: The padding has the same length as the string "-f, "
       return (anyMnemonics ? "    " : "") + names.get(0) + argname;

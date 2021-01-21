@@ -2,6 +2,7 @@ package net.jbock.coerce.matching.auto;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
+import net.jbock.Option;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Util;
@@ -35,6 +36,10 @@ public class AutoMatcher extends ParameterScoped {
   }
 
   public Either<String, Coercion> findCoercion() {
+    if (sourceMethod().getAnnotation(Option.class) != null &&
+        tool().isSameType(boxedReturnType(), Boolean.class.getCanonicalName())) {
+      return right(Coercion.createFlag(enumName(), sourceMethod()));
+    }
     for (Matcher matcher : matchers) {
       Either<String, UnwrapSuccess> success = matcher.tryUnwrapReturnType();
       if (success.isPresent()) {
