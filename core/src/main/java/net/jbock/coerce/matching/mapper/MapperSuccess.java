@@ -6,7 +6,7 @@ import net.jbock.coerce.Skew;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.coerce.matching.matcher.Matcher;
 
-class MapperSuccess {
+public class MapperSuccess {
 
   private final CodeBlock mapExpr;
   private final UnwrapSuccess unwrapSuccess;
@@ -21,23 +21,23 @@ class MapperSuccess {
     this.matcher = matcher;
   }
 
-  CodeBlock mapExpr() {
+  public CodeBlock mapExpr() {
     return mapExpr;
   }
 
-  CodeBlock extractExpr() {
+  public CodeBlock extractExpr() {
     return unwrapSuccess.extractExpr();
   }
 
-  ParameterSpec constructorParam() {
+  public ParameterSpec constructorParam() {
     return unwrapSuccess.constructorParam();
   }
 
-  Skew skew() {
+  public Skew skew() {
     return matcher.skew();
   }
 
-  CodeBlock tailExpr() {
+  public CodeBlock tailExpr() {
     return matcher.tailExpr();
   }
 }

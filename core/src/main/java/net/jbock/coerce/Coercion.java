@@ -3,6 +3,9 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.matching.UnwrapSuccess;
+import net.jbock.coerce.matching.mapper.MapperSuccess;
+import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.EnumName;
 
 import javax.lang.model.element.ExecutableElement;
@@ -22,7 +25,7 @@ public class Coercion {
 
   private final Skew skew;
 
-  public Coercion(
+  private Coercion(
       EnumName enumName,
       CodeBlock mapExpr,
       CodeBlock tailExpr,
@@ -35,6 +38,23 @@ public class Coercion {
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
     this.skew = skew;
+  }
+
+  public static Coercion create(Matcher matcher, UnwrapSuccess unwrapSuccess, CodeBlock mapExpr) {
+    CodeBlock tailExpr = matcher.tailExpr();
+    CodeBlock extractExpr = unwrapSuccess.extractExpr();
+    Skew skew = matcher.skew();
+    ParameterSpec constructorParam = unwrapSuccess.constructorParam();
+    return new Coercion(matcher.enumName(), mapExpr, tailExpr, extractExpr, skew, constructorParam);
+  }
+
+  public static Coercion create(MapperSuccess success, EnumName enumName) {
+    CodeBlock mapExpr = success.mapExpr();
+    CodeBlock tailExpr = success.tailExpr();
+    CodeBlock extractExpr = success.extractExpr();
+    Skew skew = success.skew();
+    ParameterSpec constructorParam = success.constructorParam();
+    return new Coercion(enumName, mapExpr, tailExpr, extractExpr, skew, constructorParam);
   }
 
   public static Coercion createFlag(EnumName enumName, ExecutableElement sourceMethod) {

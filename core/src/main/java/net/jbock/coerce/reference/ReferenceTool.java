@@ -31,7 +31,7 @@ public class ReferenceTool {
   public Either<String, FunctionType> getReferencedType() {
     return checkImplements(Supplier.class.getCanonicalName())
         .chooseRight(typeArguments -> handleSupplier(typeArguments).mapLeft(Either::left))
-        .chooseLeft(either -> either.maybeFail(this::handleNotSupplier));
+        .chooseLeft(stringOrVoid -> stringOrVoid.chooseRight(v -> handleNotSupplier()));
   }
 
   private Either<String, FunctionType> handleNotSupplier() {

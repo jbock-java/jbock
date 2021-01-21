@@ -51,15 +51,10 @@ public class MapperMatcher extends ParameterScoped {
         .maybeFail(this::checkNotAbstract)
         .maybeFail(this::checkNoTypevars)
         .maybeFail(this::checkMapperAnnotation)
-        .maybeFail(referenceTool::getReferencedType)
-        .chooseRight(this::checkStringInput)
+        .chooseRight(v -> referenceTool.getReferencedType())
+        .maybeFail(this::checkStringInput)
         .chooseRight(this::tryAllMatchers)
-        .map(success -> new Coercion(enumName(),
-            success.mapExpr(),
-            success.tailExpr(),
-            success.extractExpr(),
-            success.skew(),
-            success.constructorParam()));
+        .map(success -> Coercion.create(success, enumName()));
   }
 
   private Either<String, MapperSuccess> tryAllMatchers(FunctionType functionType) {

@@ -2,7 +2,6 @@ package net.jbock.either;
 
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 final class Left<L, R> extends Either<L, R> {
 
@@ -64,6 +63,11 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
+  public Either<L, R> maybeFail(Function<R, Either<L, ?>> maybe) {
+    return createLeft(value);
+  }
+
+  @Override
   public <L2> Either<L2, R> mapLeft(Function<L, L2> leftMapper) {
     return left(leftMapper.apply(value));
   }
@@ -71,6 +75,11 @@ final class Left<L, R> extends Either<L, R> {
   @Override
   public <L2> Either<L2, R> chooseLeft(Function<L, Either<L2, R>> leftMapper) {
     return leftMapper.apply(value);
+  }
+
+  @Override
+  public Either<L, R> maybeRecover(Function<L, Either<?, R>> maybe) {
+    return maybe.apply(value).chooseLeft(v -> this);
   }
 
   @Override

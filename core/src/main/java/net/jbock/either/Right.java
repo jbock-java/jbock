@@ -60,12 +60,22 @@ final class Right<L, R> extends Either<L, R> {
   }
 
   @Override
+  public Either<L, R> maybeFail(Function<R, Either<L, ?>> maybe) {
+    return maybe.apply(value).chooseRight(v -> this);
+  }
+
+  @Override
   public <L2> Either<L2, R> mapLeft(Function<L, L2> leftMapper) {
     return createRight(value);
   }
 
   @Override
   public <L2> Either<L2, R> chooseLeft(Function<L, Either<L2, R>> leftMapper) {
+    return createRight(value);
+  }
+
+  @Override
+  public Either<L, R> maybeRecover(Function<L, Either<?, R>> maybe) {
     return createRight(value);
   }
 

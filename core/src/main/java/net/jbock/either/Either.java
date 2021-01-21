@@ -38,16 +38,20 @@ public abstract class Either<L, R> {
 
   public abstract <R2> Either<L, R2> chooseRight(Function<R, Either<L, R2>> rightMapper);
 
-  public final <R2> Either<L, R2> maybeFail(Supplier<Either<L, R2>> rightMapper) {
-    return chooseRight(right -> rightMapper.get());
+  public abstract Either<L, R> maybeFail(Function<R, Either<L, ?>> maybe);
+
+  public final Either<L, R> maybeFail(Supplier<Either<L, ?>> maybe) {
+    return maybeFail(r -> maybe.get());
   }
 
   public abstract <L2> Either<L2, R> mapLeft(Function<L, L2> leftMapper);
 
   public abstract <L2> Either<L2, R> chooseLeft(Function<L, Either<L2, R>> leftMapper);
 
-  public final Either<L, R> maybeRecover(Supplier<Optional<R>> maybe) {
-    return maybe.get().<Either<L, R>>map(Right::create).orElse(this);
+  public abstract Either<L, R> maybeRecover(Function<L, Either<?, R>> maybe);
+
+  public final Either<L, R> maybeRecover(Supplier<Either<?, R>> maybe) {
+    return maybeRecover(l -> maybe.get());
   }
 
   public abstract R orElse(Function<L, R> leftMapper);

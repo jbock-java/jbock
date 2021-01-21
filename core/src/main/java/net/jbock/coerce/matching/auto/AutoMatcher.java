@@ -2,10 +2,8 @@ package net.jbock.coerce.matching.auto;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.Skew;
 import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.coerce.matching.matcher.Matcher;
@@ -15,9 +13,9 @@ import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
-import java.util.Optional;
 
 import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 public class AutoMatcher extends ParameterScoped {
 
@@ -41,13 +39,8 @@ public class AutoMatcher extends ParameterScoped {
       Either<String, UnwrapSuccess> success = matcher.tryUnwrapReturnType();
       if (success.isPresent()) {
         return success.chooseRight(unwrapSuccess ->
-            findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr -> {
-              CodeBlock tailExpr = matcher.tailExpr();
-              CodeBlock extractExpr = unwrapSuccess.extractExpr();
-              Skew skew = matcher.skew();
-              ParameterSpec constructorParam = unwrapSuccess.constructorParam();
-              return new Coercion(enumName(), mapExpr, tailExpr, extractExpr, skew, constructorParam);
-            }));
+            findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr ->
+                Coercion.create(matcher, unwrapSuccess, mapExpr)));
       }
     }
     return left(Util.noMatchError(returnType()));
@@ -56,8 +49,9 @@ public class AutoMatcher extends ParameterScoped {
   private Either<String, CodeBlock> findMapExpr(TypeMirror unwrappedReturnType) {
     return autoMapper.findAutoMapper(unwrappedReturnType)
         .maybeRecover(() -> isEnumType(unwrappedReturnType) ?
-            Optional.of(CodeBlock.of("$T::valueOf", unwrappedReturnType)) :
-            Optional.empty()).mapLeft(s -> Util.noMatchError(unwrappedReturnType));
+            right(CodeBlock.of("$T::valueOf", unwrappedReturnType)) :
+            left())
+        .mapLeft(s -> Util.noMatchError(unwrappedReturnType));
   }
 
   private boolean isEnumType(TypeMirror type) {
