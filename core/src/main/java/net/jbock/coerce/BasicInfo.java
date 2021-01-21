@@ -11,6 +11,7 @@ import net.jbock.compiler.MapperClass;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.TypeTool;
+import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -61,7 +62,7 @@ public class BasicInfo extends ParameterScoped {
     }
   }
 
-  public Coercion coercion() {
+  public Either<String, Coercion> coercion() {
     return mapperClass
         .map(mapper -> {
           ParameterWithMapperComponent component = DaggerBasicInfo_ParameterWithMapperComponent.builder()

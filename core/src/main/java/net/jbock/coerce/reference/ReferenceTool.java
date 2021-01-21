@@ -37,26 +37,22 @@ public class ReferenceTool {
   private Either<String, FunctionType> handleNotSupplier() {
     return checkImplements(Function.class.getCanonicalName())
         .map(expected -> new FunctionType(expected, false))
-        .mapLeft(message -> message.swap().orElse(() ->
-            "not a " + Function.class.getCanonicalName() +
-                " or " + Supplier.class.getCanonicalName() +
-                "<" + Function.class.getCanonicalName() + ">"));
+        .mapLeft(message -> message.swap().orElse(this::mapperNotFunction));
   }
 
   private Either<String, FunctionType> handleSupplier(List<? extends TypeMirror> typeArguments) {
     TypeMirror typearg = typeArguments.get(0);
     if (typearg.getKind() != TypeKind.DECLARED) {
-      return left("not a " + Function.class.getCanonicalName() + " or " + Supplier.class.getCanonicalName() +
-          "<" + Function.class.getCanonicalName() + ">");
+      return left(mapperNotFunction());
     }
-    DeclaredType actual = asDeclared(typearg);
-    if (!tool.isSameErasure(actual, Function.class.getCanonicalName())) {
-      return left("expected " + Function.class.getCanonicalName() + " but found " + actual);
+    DeclaredType suppliedFunction = asDeclared(typearg);
+    if (!tool.isSameErasure(suppliedFunction, Function.class.getCanonicalName())) {
+      return left(mapperNotFunction());
     }
-    if (actual.getTypeArguments().size() != tool.asTypeElement(Function.class.getCanonicalName()).getTypeParameters().size()) {
-      return left("raw type: " + actual);
+    if (suppliedFunction.getTypeArguments().size() != 2) {
+      return left(mapperRawType());
     }
-    return right(new FunctionType(actual.getTypeArguments(), true));
+    return right(new FunctionType(suppliedFunction.getTypeArguments(), true));
   }
 
   private Either<Either<String, Void>, List<? extends TypeMirror>> checkImplements(String candidate) {
@@ -70,9 +66,19 @@ public class ReferenceTool {
           List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
           List<? extends TypeParameterElement> typeParams = tool.asTypeElement(candidate).getTypeParameters();
           if (typeArguments.size() != typeParams.size()) {
-            return left(left("raw type: " + declared));
+            return left(left(mapperRawType()));
           }
           return right(typeArguments);
         });
+  }
+
+  private String mapperNotFunction() {
+    return "expecting mapper of type " + Function.class.getSimpleName() +
+        " or " + Supplier.class.getSimpleName() +
+        "<" + Function.class.getSimpleName() + ">";
+  }
+
+  private String mapperRawType() {
+    return "raw type in mapper class";
   }
 }

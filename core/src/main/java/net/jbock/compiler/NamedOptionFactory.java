@@ -41,7 +41,7 @@ class NamedOptionFactory extends ParameterScoped {
     boolean flag = !mapperClass.isPresent() && isReturnTypeBoolean();
     Coercion coercion = flag ?
         Coercion.createFlag(enumName(), sourceMethod()) :
-        basicInfo.coercion();
+        basicInfo.coercion().orElseThrow(s -> ValidationException.create(sourceMethod(), s));
     List<String> dashedNames = dashedNames(optionName, mnemonic);
     return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
         sample(flag, enumName(), dashedNames, anyMnemonics),

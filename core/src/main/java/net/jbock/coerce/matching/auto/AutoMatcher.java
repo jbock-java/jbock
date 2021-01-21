@@ -2,19 +2,19 @@ package net.jbock.coerce.matching.auto;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.Skew;
+import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
-import net.jbock.compiler.ValidationException;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
-import java.util.AbstractMap;
-import java.util.Map;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
@@ -36,27 +36,21 @@ public class AutoMatcher extends ParameterScoped {
     this.matchers = matchers;
   }
 
-  public Coercion findCoercion() {
-    return tryFindCoercion()
-        .chooseRight(entry -> {
-          Matcher matcher = entry.getKey();
-          UnwrapSuccess unwrapSuccess = entry.getValue();
-          return findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr ->
-              new Coercion(enumName(), mapExpr, matcher.tailExpr(),
-                  unwrapSuccess.extractExpr(), matcher.skew(), unwrapSuccess.constructorParam()));
-        })
-        .orElseThrow(message -> ValidationException.create(sourceMethod(),
-            String.format("Unknown parameter type: %s. Try defining a custom mapper.", returnType())));
-  }
-
-  private Either<String, Map.Entry<Matcher, UnwrapSuccess>> tryFindCoercion() {
+  public Either<String, Coercion> findCoercion() {
     for (Matcher matcher : matchers) {
       Either<String, UnwrapSuccess> success = matcher.tryUnwrapReturnType();
       if (success.isPresent()) {
-        return success.map(s -> new AbstractMap.SimpleImmutableEntry<>(matcher, s));
+        return success.chooseRight(unwrapSuccess ->
+            findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr -> {
+              CodeBlock tailExpr = matcher.tailExpr();
+              CodeBlock extractExpr = unwrapSuccess.extractExpr();
+              Skew skew = matcher.skew();
+              ParameterSpec constructorParam = unwrapSuccess.constructorParam();
+              return new Coercion(enumName(), mapExpr, tailExpr, extractExpr, skew, constructorParam);
+            }));
       }
     }
-    return left();
+    return left(Util.noMatchError(returnType()));
   }
 
   private Either<String, CodeBlock> findMapExpr(TypeMirror unwrappedReturnType) {
@@ -67,12 +61,11 @@ public class AutoMatcher extends ParameterScoped {
     if (isEnumType(unwrappedReturnType)) {
       return right(CodeBlock.of("$T::valueOf", unwrappedReturnType));
     }
-    return left();
+    return left(Util.noMatchError(unwrappedReturnType));
   }
 
   private boolean isEnumType(TypeMirror type) {
     return types().directSupertypes(type).stream()
         .anyMatch(t -> tool().isSameErasure(t, ENUM));
   }
-
 }

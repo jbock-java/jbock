@@ -42,9 +42,9 @@ import java.util.stream.Stream;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
+import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
-import static net.jbock.compiler.TypeTool.AS_DECLARED;
 
 class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
@@ -220,12 +220,19 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private void validateSourceElement(TypeElement sourceElement) {
     SuppliedClassValidator.commonChecks(sourceElement)
+        .mapLeft(s -> "command " + s)
         .chooseRight(() -> {
-          if (!tool.isSameType(sourceElement.getSuperclass(), Object.class.getCanonicalName()) || !sourceElement.getInterfaces().isEmpty()) {
-            return left("The model class may not implement or extend anything.");
+          List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
+          if (!interfaces.isEmpty()) {
+            return left("command cannot implement " + interfaces.get(0));
           }
-          if (!sourceElement.getTypeParameters().isEmpty()) {
-            return left("The class cannot have type parameters.");
+          return right(sourceElement);
+        })
+        .chooseRight(() -> {
+          TypeMirror superclass = sourceElement.getSuperclass();
+          boolean isObject = tool.isSameType(superclass, Object.class.getCanonicalName());
+          if (!isObject) {
+            return left("command cannot inherit from " + superclass);
           }
           return right(sourceElement);
         })

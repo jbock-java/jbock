@@ -22,7 +22,7 @@ class PositionalParamFactory extends ParameterScoped {
 
   Parameter createPositionalParam(int positionalIndex) {
     checkBundleKey();
-    Coercion coercion = basicInfo.coercion();
+    Coercion coercion = basicInfo.coercion().orElseThrow(s -> ValidationException.create(sourceMethod(), s));
     return new PositionalParameter(sourceMethod(), bundleKey(), enumName().snake().toLowerCase(Locale.US),
         Collections.emptyList(), coercion, Arrays.asList(description()), positionalIndex);
   }

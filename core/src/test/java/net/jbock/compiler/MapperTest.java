@@ -28,7 +28,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: The class must either be an inner class of test.Arguments, or carry the net.jbock.Mapper annotation.");
+        .withErrorContaining("mapper must be a static inner class of the @Command annotated class, or carry the @Mapper annotation");
   }
 
   @Test
@@ -146,7 +146,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("not a java.util.function.Function or java.util.function.Supplier<java.util.function.Function>");
+        .withErrorContaining("expecting mapper of type Function or Supplier<Function>");
   }
 
   @Test
@@ -192,7 +192,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("must have a default constructor");
+        .withErrorContaining("mapper missing default constructor");
   }
 
   @Test
@@ -215,7 +215,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class must have a default constructor");
+        .withErrorContaining("mapper missing default constructor");
   }
 
   @Test
@@ -235,7 +235,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("class must be static");
+        .withErrorContaining("mapper must be static or top-level");
   }
 
   @Test
@@ -255,7 +255,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class");
+        .withErrorContaining("mapper must accept an input of type String");
   }
 
   @Test
@@ -275,7 +275,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: No match. Try returning java.lang.Integer from the mapper.");
+        .withErrorContaining("expecting mapper of type Function<String, Integer>");
   }
 
   @Test
@@ -295,7 +295,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: No match. Try returning java.lang.Integer from the mapper.");
+        .withErrorContaining("expecting mapper of type Function<String, Integer>");
   }
 
   @Test
@@ -315,7 +315,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: No match. Try returning java.lang.Integer from the mapper.");
+        .withErrorContaining("expecting mapper of type Function<String, Integer>");
   }
 
   @Test
@@ -396,7 +396,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("expected java.util.function.Function but found test.Arguments.StringFunction<java.lang.String,java.lang.Integer>");
+        .withErrorContaining("expecting mapper of type Function or Supplier<Function>");
   }
 
   @Test
@@ -419,7 +419,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("expected java.util.function.Function but found test.Arguments.StringFunction<java.lang.Integer>");
+        .withErrorContaining("expecting mapper of type Function or Supplier<Function>");
   }
 
   @Test
@@ -439,7 +439,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class");
+        .withErrorContaining("found type parameters in mapper class declaration");
   }
 
   @Test
@@ -486,7 +486,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: raw type: java.util.function.Function.");
+        .withErrorContaining("raw type in mapper class");
   }
 
   @Test
@@ -506,7 +506,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: raw type: java.util.function.Supplier.");
+        .withErrorContaining("raw type in mapper class");
   }
 
   @Test
@@ -526,7 +526,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There is a problem with the mapper class: raw type: java.util.function.Function.");
+        .withErrorContaining("raw type in mapper class");
   }
 
   @Test

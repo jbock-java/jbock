@@ -1,7 +1,6 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.ValidationException;
 import net.jbock.either.Either;
 
 import javax.lang.model.element.Element;
@@ -20,26 +19,19 @@ import static net.jbock.either.Either.right;
 public class SuppliedClassValidator {
 
   public static Either<String, Void> commonChecks(TypeElement classToCheck) {
-    if (classToCheck.getNestingKind().isNested() && classToCheck.getNestingKind() != NestingKind.MEMBER) {
-      return left("Use a top level class or static inner class");
-    }
-    if (classToCheck.getNestingKind().isNested() &&
-        !classToCheck.getModifiers().contains(Modifier.STATIC)) {
-      return left("The nested class must be static");
-    }
-    if (classToCheck.getModifiers().contains(Modifier.PRIVATE)) {
-      return left("The class may not be private");
+    if (classToCheck.getNestingKind().isNested() && !classToCheck.getModifiers().contains(Modifier.STATIC)) {
+      return left("must be static or top-level");
     }
     if (classToCheck.getKind() == ElementKind.INTERFACE) {
-      return left("Use a class, not an interface");
+      return left("cannot be an interface");
     }
-    getEnclosingElements(classToCheck).forEach(element -> {
+    for (TypeElement element : getEnclosingElements(classToCheck)) {
       if (element.getModifiers().contains(Modifier.PRIVATE)) {
-        throw ValidationException.create(element, "The class may not not be private");
+        return left("class cannot be private");
       }
-    });
+    }
     if (!hasDefaultConstructor(classToCheck)) {
-      return left("The class must have a default constructor");
+      return left("missing default constructor");
     }
     return right();
   }

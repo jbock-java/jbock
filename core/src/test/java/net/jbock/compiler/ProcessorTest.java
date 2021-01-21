@@ -68,7 +68,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.lang.StringBuilder. Try defining a custom mapper.");
+        .withErrorContaining("expecting mapper of type Function<String, StringBuilder>");
   }
 
   @Test
@@ -113,7 +113,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.util.List. Try defining a custom mapper.");
+        .withErrorContaining("expecting mapper of type Function<String, List>");
   }
 
   @Test
@@ -128,7 +128,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.util.Optional. Try defining a custom mapper.");
+        .withErrorContaining("expecting mapper of type Function<String, Optional>");
   }
 
   @Test
@@ -143,7 +143,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.util.Set<java.lang.String>. Try defining a custom mapper.");
+        .withErrorContaining("expecting mapper of type Function<String, java.util.Set<java.lang.String>>");
   }
 
   @Test
@@ -158,7 +158,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: int[]. Try defining a custom mapper.");
+        .withErrorContaining("expecting mapper of type Function<String, int[]>");
   }
 
   @Test
@@ -173,11 +173,11 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: java.util.Date. Try defining a custom mapper.");
+        .withErrorContaining("expecting mapper of type Function<String, Date>");
   }
 
   @Test
-  void interfaceNotClass() {
+  void commandInterface() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "interface Arguments {",
@@ -186,7 +186,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Use a class, not an interface");
+        .withErrorContaining("command cannot be an interface");
   }
 
   @Test
@@ -284,7 +284,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The model class may not implement or extend anything");
+        .withErrorContaining("command cannot inherit from test.Arguments");
   }
 
   @Test
@@ -367,7 +367,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unknown parameter type: boolean. Try defining a custom mapper.");
+        .withErrorContaining("expecting mapper of type Function<String, Boolean>");
   }
 
   @Test
@@ -474,7 +474,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The class may not not be private");
+        .withErrorContaining("command class cannot be private");
   }
 
   static JavaFileObject fromSource(String... lines) {
