@@ -48,10 +48,10 @@ public class MapperMatcher extends ParameterScoped {
 
   public Either<String, Coercion> findCoercion() {
     return commonChecks(mapperClass).mapLeft(s -> "mapper " + s)
-        .chooseRight(this::checkNotAbstract)
-        .chooseRight(this::checkNoTypevars)
-        .chooseRight(this::checkMapperAnnotation)
-        .chooseRight(referenceTool::getReferencedType)
+        .maybeFail(this::checkNotAbstract)
+        .maybeFail(this::checkNoTypevars)
+        .maybeFail(this::checkMapperAnnotation)
+        .maybeFail(referenceTool::getReferencedType)
         .chooseRight(this::checkStringInput)
         .chooseRight(this::tryAllMatchers)
         .map(success -> new Coercion(enumName(),

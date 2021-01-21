@@ -221,14 +221,14 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private void validateSourceElement(TypeElement sourceElement) {
     SuppliedClassValidator.commonChecks(sourceElement)
         .mapLeft(s -> "command " + s)
-        .chooseRight(() -> {
+        .maybeFail(() -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
           if (!interfaces.isEmpty()) {
             return left("command cannot implement " + interfaces.get(0));
           }
           return right(sourceElement);
         })
-        .chooseRight(() -> {
+        .maybeFail(() -> {
           TypeMirror superclass = sourceElement.getSuperclass();
           boolean isObject = tool.isSameType(superclass, Object.class.getCanonicalName());
           if (!isObject) {
