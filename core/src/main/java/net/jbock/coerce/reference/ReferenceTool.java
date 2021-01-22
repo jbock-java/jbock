@@ -37,7 +37,7 @@ public class ReferenceTool {
   private Either<String, FunctionType> handleNotSupplier() {
     return checkImplements(Function.class.getCanonicalName())
         .map(expected -> new FunctionType(expected, false))
-        .mapLeft(message -> message.swap().orElse(this::mapperNotFunction));
+        .mapLeft(message -> message.swap().orRecover(this::mapperNotFunction));
   }
 
   private Either<String, FunctionType> handleSupplier(List<? extends TypeMirror> typeArguments) {
@@ -56,8 +56,8 @@ public class ReferenceTool {
   }
 
   private Either<Either<String, Void>, List<? extends TypeMirror>> checkImplements(String candidate) {
-    return Either.<Either<String, Void>, DeclaredType>fromOptional(
-        right(),
+    return Either.<Either<String, Void>, DeclaredType>fromOptionalSuccess(
+        Either::right,
         mapperClass.getInterfaces().stream()
             .filter(inter -> tool.isSameErasure(inter, candidate))
             .map(AS_DECLARED::visit)
@@ -73,9 +73,9 @@ public class ReferenceTool {
   }
 
   private String mapperNotFunction() {
-    return "expecting mapper of type " + Function.class.getSimpleName() +
-        " or " + Supplier.class.getSimpleName() +
-        "<" + Function.class.getSimpleName() + ">";
+    return "mapper should implement " + Function.class.getSimpleName() +
+        "<String, ?> or " + Supplier.class.getSimpleName() +
+        "<" + Function.class.getSimpleName() + "<String, ?>>";
   }
 
   private String mapperRawType() {

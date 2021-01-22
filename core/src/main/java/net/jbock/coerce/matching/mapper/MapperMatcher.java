@@ -69,11 +69,11 @@ public class MapperMatcher extends ParameterScoped {
         return success;
       }
     }
-    Optional<String> message = unwraps.stream()
-        .max(Comparator.comparingInt(UnwrapSuccess::rank))
-        .map(UnwrapSuccess::wrappedType)
-        .map(Util::noMatchError);
-    return Either.<MapperSuccess, String>fromOptional(null, message).swap();
+    Optional<UnwrapSuccess> message = unwraps.stream()
+        .max(Comparator.comparingInt(UnwrapSuccess::rank));
+    return Either.<UnwrapSuccess, MapperSuccess>fromOptionalFailure(null, message)
+        .mapLeft(UnwrapSuccess::wrappedType)
+        .mapLeft(MapperMatcher::noMatchError);
   }
 
   private Either<String, Void> checkMapperAnnotation() {
@@ -113,8 +113,12 @@ public class MapperMatcher extends ParameterScoped {
 
   private Either<String, FunctionType> checkStringInput(FunctionType functionType) {
     if (!tool().isSameType(functionType.inputType(), String.class.getCanonicalName())) {
-      return left("mapper must accept an input of type String");
+      return left("mapper should implement Function<String, ?>");
     }
     return right(functionType);
+  }
+
+  private static String noMatchError(TypeMirror type) {
+    return "mapper should implement Function<String, " + Util.typeToString(type) + ">";
   }
 }

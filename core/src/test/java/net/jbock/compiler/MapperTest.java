@@ -146,7 +146,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("expecting mapper of type Function or Supplier<Function>");
+        .withErrorContaining("mapper should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
 
   @Test
@@ -255,7 +255,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper must accept an input of type String");
+        .withErrorContaining("mapper should implement Function<String, ?>");
   }
 
   @Test
@@ -275,7 +275,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("expecting mapper of type Function<String, Integer>");
+        .withErrorContaining("mapper should implement Function<String, Integer>");
   }
 
   @Test
@@ -295,7 +295,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("expecting mapper of type Function<String, Integer>");
+        .withErrorContaining("mapper should implement Function<String, Integer>");
   }
 
   @Test
@@ -315,7 +315,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("expecting mapper of type Function<String, Integer>");
+        .withErrorContaining("mapper should implement Function<String, Integer>");
   }
 
   @Test
@@ -396,7 +396,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("expecting mapper of type Function or Supplier<Function>");
+        .withErrorContaining("mapper should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
 
   @Test
@@ -419,7 +419,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("expecting mapper of type Function or Supplier<Function>");
+        .withErrorContaining("mapper should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
 
   @Test

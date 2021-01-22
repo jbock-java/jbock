@@ -48,7 +48,7 @@ public class AutoMatcher extends ParameterScoped {
                 Coercion.create(matcher, unwrapSuccess, mapExpr)));
       }
     }
-    return left(Util.noMatchError(returnType()));
+    return left(noMatchError(returnType()));
   }
 
   private Either<String, CodeBlock> findMapExpr(TypeMirror unwrappedReturnType) {
@@ -56,11 +56,15 @@ public class AutoMatcher extends ParameterScoped {
         .maybeRecover(() -> isEnumType(unwrappedReturnType) ?
             right(CodeBlock.of("$T::valueOf", unwrappedReturnType)) :
             left())
-        .mapLeft(s -> Util.noMatchError(unwrappedReturnType));
+        .mapLeft(s -> noMatchError(unwrappedReturnType));
   }
 
   private boolean isEnumType(TypeMirror type) {
     return types().directSupertypes(type).stream()
         .anyMatch(t -> tool().isSameErasure(t, ENUM));
+  }
+
+  private static String noMatchError(TypeMirror type) {
+    return "define a mapper that implements Function<String, " + Util.typeToString(type) + ">";
   }
 }

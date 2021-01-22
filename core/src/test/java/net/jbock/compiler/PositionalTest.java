@@ -95,7 +95,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("expecting mapper of type Function<String, StringBuilder>");
+        .withErrorContaining("define a mapper that implements Function<String, StringBuilder>");
   }
 
   @Test
