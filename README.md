@@ -19,10 +19,10 @@ abstract class MyCommand {
 
   /**
    * A {@code @Param} is a positional parameter.
-   * This particular param is in the first position,
+   * This particular param is in the front position,
    * since there are no other params in lower positions.
    */
-  @Param(1)
+  @Param(0)
   abstract Path path();
 
   /**
