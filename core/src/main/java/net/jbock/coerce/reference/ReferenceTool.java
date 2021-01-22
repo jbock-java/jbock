@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static net.jbock.compiler.TypeTool.asDeclared;
+import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
@@ -45,7 +45,7 @@ public class ReferenceTool {
     if (typearg.getKind() != TypeKind.DECLARED) {
       return left(mapperNotFunction());
     }
-    DeclaredType suppliedFunction = asDeclared(typearg);
+    DeclaredType suppliedFunction = AS_DECLARED.visit(typearg);
     if (!tool.isSameErasure(suppliedFunction, Function.class.getCanonicalName())) {
       return left(mapperNotFunction());
     }
@@ -60,7 +60,7 @@ public class ReferenceTool {
         right(),
         mapperClass.getInterfaces().stream()
             .filter(inter -> tool.isSameErasure(inter, candidate))
-            .map(TypeTool::asDeclared)
+            .map(AS_DECLARED::visit)
             .findFirst())
         .chooseRight(declared -> {
           List<? extends TypeMirror> typeArguments = declared.getTypeArguments();

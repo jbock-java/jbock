@@ -6,7 +6,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
-import static net.jbock.compiler.TypeTool.asDeclared;
+import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TypeToolTest {
@@ -24,10 +24,10 @@ class TypeToolTest {
           types.erasure(elements.getTypeElement("java.util.List").asType()),
           types.erasure(key),
           types);
-      assertEquals(1, asDeclared(key).getTypeArguments().size());
+      assertEquals(1, AS_DECLARED.visit(key).getTypeArguments().size());
       assertSameType(
           types.getDeclaredType(elements.getTypeElement("java.lang.String")),
-          asDeclared(key).getTypeArguments().get(0),
+          AS_DECLARED.visit(key).getTypeArguments().get(0),
           types);
       assertSameType(
           types.getDeclaredType(elements.getTypeElement("java.lang.String")),

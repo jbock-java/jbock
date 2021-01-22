@@ -2,15 +2,11 @@ package net.jbock.compiler;
 
 import net.jbock.either.Either;
 
-import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.ArrayType;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.IntersectionType;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.type.TypeVariable;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor8;
@@ -46,32 +42,6 @@ public class TypeTool {
         }
       };
 
-  public static final TypeVisitor<TypeVariable, Void> AS_TYPEVAR =
-      new SimpleTypeVisitor8<TypeVariable, Void>() {
-
-        @Override
-        public TypeVariable visitTypeVariable(TypeVariable t, Void unused) {
-          return t;
-        }
-      };
-
-  public static final TypeVisitor<IntersectionType, Void> AS_INTERSECTION =
-      new SimpleTypeVisitor8<IntersectionType, Void>() {
-
-        @Override
-        public IntersectionType visitIntersection(IntersectionType t, Void unused) {
-          return t;
-        }
-      };
-
-  public static final TypeVisitor<ArrayType, Void> AS_ARRAY =
-      new SimpleTypeVisitor8<ArrayType, Void>() {
-        @Override
-        public ArrayType visitArray(ArrayType t, Void unused) {
-          return t;
-        }
-      };
-
   private final Types types;
 
   private final Elements elements;
@@ -97,7 +67,7 @@ public class TypeTool {
     if (!isSameErasure(mirror, canonicalName)) {
       return left("different erasure");
     }
-    DeclaredType declaredType = asDeclared(mirror);
+    DeclaredType declaredType = AS_DECLARED.visit(mirror);
     if (declaredType.getTypeArguments().isEmpty()) {
       return left("different number of type arguments");
     }
@@ -111,22 +81,6 @@ public class TypeTool {
 
   public TypeElement asTypeElement(String canonicalName) {
     return elements.getTypeElement(canonicalName);
-  }
-
-  public static TypeElement asTypeElement(Element element) {
-    TypeElement result = element.accept(AS_TYPE_ELEMENT, null);
-    if (result == null) {
-      throw new IllegalArgumentException("not a type element: " + element);
-    }
-    return result;
-  }
-
-  public static DeclaredType asDeclared(TypeMirror mirror) {
-    DeclaredType result = mirror.accept(AS_DECLARED, null);
-    if (result == null) {
-      throw new IllegalArgumentException("not declared: " + mirror);
-    }
-    return result;
   }
 
   public Types types() {

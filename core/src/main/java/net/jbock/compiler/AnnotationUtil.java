@@ -28,7 +28,7 @@ class AnnotationUtil {
   private static final AnnotationValueVisitor<TypeMirror, Void> GET_TYPE = new SimpleAnnotationValueVisitor8<TypeMirror, Void>() {
 
     @Override
-    public TypeMirror visitType(TypeMirror mirror, Void _null) {
+    public TypeMirror visitType(TypeMirror mirror, Void unused) {
       return mirror;
     }
   };
@@ -36,7 +36,7 @@ class AnnotationUtil {
   Optional<TypeElement> getMapper(ExecutableElement sourceMethod) {
     return getAnnotationMirror(sourceMethod)
         .map(AnnotationUtil::getAnnotationValue)
-        .map(AnnotationUtil::asType)
+        .map(GET_TYPE::visit)
         .map(MoreTypes::asTypeElement)
         .filter(AnnotationUtil::isNotVoid);
   }
@@ -55,10 +55,6 @@ class AnnotationUtil {
 
   private static AnnotationValue getAnnotationValue(AnnotationMirror annotationMirror) {
     return AnnotationMirrors.getAnnotationValue(annotationMirror, MAPPER_ATTRIBUTE);
-  }
-
-  private static TypeMirror asType(AnnotationValue annotationValue) {
-    return GET_TYPE.visit(annotationValue);
   }
 
   private static boolean isNotVoid(TypeElement typeElement) {

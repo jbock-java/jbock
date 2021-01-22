@@ -45,7 +45,7 @@ public class SuppliedClassValidator {
       if (enclosingElement.getKind() != ElementKind.CLASS) {
         return result;
       }
-      current = TypeTool.asTypeElement(enclosingElement);
+      current = TypeTool.AS_TYPE_ELEMENT.visit(enclosingElement);
       result.add(current);
     }
     return result;
