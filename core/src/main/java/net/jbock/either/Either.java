@@ -19,51 +19,56 @@ public abstract class Either<L, R> {
     return Right.create(value);
   }
 
-  public static <L> Either<L, Void> right() {
-    return Right.containsNull();
+  public static <L, R> Either<L, R> right() {
+    return Right.nothing();
   }
 
-  public static <L, R> Either<L, R> fromOptionalSuccess(Supplier<L> failure, Optional<R> maybeSuccess) {
+  public static <L, R> Either<L, R> fromOptionalSuccess(Supplier<L> failure, Optional<? extends R> maybeSuccess) {
     return maybeSuccess.<Either<L, R>>map(Right::create)
         .orElseGet(() -> Left.create(failure.get()));
   }
 
-  public static <L, R> Either<L, R> fromOptionalFailure(Supplier<R> success, Optional<L> maybeFailure) {
+  public static <L, R> Either<L, R> fromOptionalFailure(Supplier<R> success, Optional<? extends L> maybeFailure) {
     return maybeFailure.<Either<L, R>>map(Left::create)
         .orElseGet(() -> Right.create(success.get()));
   }
 
   public abstract boolean isPresent();
 
-  public abstract <R2> Either<L, R2> map(Function<R, R2> rightMapper);
+  public abstract <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper);
 
-  public abstract <R2> Either<L, R2> chooseRight(Function<R, Either<L, R2>> choice);
+  public abstract <R2> Either<L, R2> chooseRight(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice);
 
-  public abstract Either<L, R> maybeFail(Function<R, Either<L, ?>> choice);
+  public abstract Either<L, R> maybeFail(Function<? super R, ? extends Either<? extends L, ?>> choice);
 
-  public final Either<L, R> maybeFail(Supplier<Either<L, ?>> choice) {
+  public final Either<L, R> maybeFail(Supplier<? extends Either<? extends L, ?>> choice) {
     return maybeFail(r -> choice.get());
   }
 
-  public abstract <L2> Either<L2, R> mapLeft(Function<L, L2> leftMapper);
+  public abstract <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper);
 
-  public abstract <L2> Either<L2, R> chooseLeft(Function<L, Either<L2, R>> leftMapper);
+  public abstract <L2> Either<L2, R> chooseLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> leftMapper);
 
-  public abstract Either<L, R> maybeRecover(Function<L, Either<?, R>> choice);
+  public abstract Either<L, R> maybeRecover(Function<? super L, ? extends Either<?, ? extends R>> choice);
 
-  public final Either<L, R> maybeRecover(Supplier<Either<?, R>> choice) {
+  public final Either<L, R> maybeRecover(Supplier<? extends Either<?, ? extends R>> choice) {
     return maybeRecover(l -> choice.get());
   }
 
-  public abstract R orRecover(Function<L, R> success);
+  public abstract R orRecover(Function<? super L, ? extends R> recover);
 
-  public final R orRecover(Supplier<R> success) {
+  public final R orRecover(Supplier<? extends R> success) {
     return orRecover(left -> success.get());
   }
 
   public abstract Either<R, L> swap();
 
-  public abstract Either<L, Void> ifPresent(Consumer<R> rightConsumer);
+  public final void ifPresent(Consumer<R> rightConsumer) {
+    ifPresentOrElse(rightConsumer, l -> {
+    });
+  }
 
-  public abstract R orElseThrow(Function<L, ? extends RuntimeException> leftMapper);
+  public abstract void ifPresentOrElse(Consumer<R> rightConsumer, Consumer<L> leftConsumer);
+
+  public abstract <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> leftMapper) throws X;
 }

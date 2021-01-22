@@ -2,10 +2,10 @@ package net.jbock.compiler;
 
 import net.jbock.Option;
 import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Skew;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
+import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -27,15 +27,17 @@ class NamedOptionFactory extends ParameterScoped {
     this.basicInfo = basicInfo;
   }
 
-  Parameter createNamedOption(boolean anyMnemonics) {
+  Either<String, Parameter> createNamedOption(boolean anyMnemonics) {
     checkBundleKey();
     String optionName = optionName();
     char mnemonic = mnemonic();
-    Coercion coercion = basicInfo.coercion().orElseThrow(s -> ValidationException.create(sourceMethod(), s));
-    List<String> dashedNames = dashedNames(optionName, mnemonic);
-    return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
-        sample(coercion.skew(), enumName(), dashedNames, anyMnemonics),
-        dashedNames, coercion, Arrays.asList(description()));
+    return basicInfo.coercion()
+        .map(coercion -> {
+          List<String> dashedNames = dashedNames(optionName, mnemonic);
+          return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
+              sample(coercion.skew(), enumName(), dashedNames, anyMnemonics),
+              dashedNames, coercion, Arrays.asList(description()));
+        });
   }
 
   private Character mnemonic() {

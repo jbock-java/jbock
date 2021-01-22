@@ -101,12 +101,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   @Override
   public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
-    try {
-      for (TypeElement typeElement : ElementFilter.typesIn(elementsByAnnotation.values())) {
-        processSourceElement(typeElement);
-      }
-    } catch (ValidationException e) {
-      messager.printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
+    for (TypeElement typeElement : ElementFilter.typesIn(elementsByAnnotation.values())) {
+      processSourceElement(typeElement);
     }
     return Collections.emptySet();
   }
@@ -157,17 +153,19 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     List<Parameter> params = new ArrayList<>();
     AnnotationUtil annotationUtil = new AnnotationUtil();
     for (int i = 0; i < methods.params().size(); i++) {
-      Optional<TypeElement> mapperClass = annotationUtil.getMapper(methods.params().get(i));
-      Param param = methods.params().get(i).getAnnotation(Param.class);
+      ExecutableElement sourceMethod = methods.params().get(i);
+      Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
+      Param param = sourceMethod.getAnnotation(Param.class);
       ParameterModule module = new ParameterModule(sourceElement, mapperClass, param.bundleKey());
       ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
           .optionType(optionType)
-          .sourceMethod(methods.params().get(i))
+          .sourceMethod(sourceMethod)
           .typeTool(tool)
           .alreadyCreated(ImmutableList.copyOf(params))
           .parameterModule(module)
-          .description(getDescription(methods.params().get(i)));
-      params.add(builder.build().positionalParameterFactory().createPositionalParam(i));
+          .description(getDescription(sourceMethod));
+      params.add(builder.build().positionalParameterFactory().createPositionalParam(i)
+          .orElseThrow(s -> ValidationException.create(sourceMethod, s)));
     }
     boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
     for (ExecutableElement option : methods.options()) {
@@ -180,7 +178,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           .alreadyCreated(ImmutableList.copyOf(params))
           .parameterModule(module)
           .description(getDescription(option));
-      params.add(builder.build().namedOptionFactory().createNamedOption(anyMnemonics));
+      params.add(builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
+          .orElseThrow(s -> ValidationException.create(option, s)));
     }
     if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {
       methods.options().forEach(this::checkHelp);

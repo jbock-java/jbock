@@ -5,12 +5,7 @@ import java.util.function.Function;
 
 final class Right<L, R> extends Either<L, R> {
 
-  private static final Right<?, Void> NOTHING = new Right<>(null);
-
-  @SuppressWarnings("unchecked")
-  static <__IGNORE> Right<__IGNORE, Void> containsNull() {
-    return (Right<__IGNORE, Void>) NOTHING;
-  }
+  private static final Right<?, ?> NOTHING = new Right<>(null);
 
   private final R value;
 
@@ -18,17 +13,26 @@ final class Right<L, R> extends Either<L, R> {
     this.value = value;
   }
 
+  static <L, R> Right<L, R> nothing() {
+    @SuppressWarnings("unchecked")
+    Right<L, R> result = (Right<L, R>) NOTHING;
+    return result;
+  }
+
   static <L, R> Right<L, R> create(R value) {
     if (value == null) {
-      return (Right<L, R>) NOTHING;
+      @SuppressWarnings("unchecked")
+      Right<L, R> result = (Right<L, R>) NOTHING;
+      return result;
     }
     return new Right<>(value);
   }
 
-  @SuppressWarnings("unchecked")
-  private <L2> Right<L2, R> createRight(R newValue) {
+  private <L2> Right<L2, R> createIfNecessary(R newValue) {
     if (newValue == value) {
-      return (Right<L2, R>) this;
+      @SuppressWarnings("unchecked")
+      Right<L2, R> result = (Right<L2, R>) this;
+      return result;
     }
     return create(newValue);
   }
@@ -39,7 +43,7 @@ final class Right<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <R2> Either<L, R2> map(Function<R, R2> rightMapper) {
+  public <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper) {
     return right(rightMapper.apply(value));
   }
 
@@ -49,43 +53,46 @@ final class Right<L, R> extends Either<L, R> {
   }
 
   @Override
-  public Either<L, Void> ifPresent(Consumer<R> rightConsumer) {
+  public void ifPresentOrElse(Consumer<R> rightConsumer, Consumer<L> leftConsumer) {
     rightConsumer.accept(value);
-    return right();
   }
 
   @Override
-  public <R2> Either<L, R2> chooseRight(Function<R, Either<L, R2>> choice) {
-    return choice.apply(value);
+  public <R2> Either<L, R2> chooseRight(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice) {
+    @SuppressWarnings("unchecked")
+    Either<L, R2> either = (Either<L, R2>) choice.apply(value);
+    return either;
   }
 
   @Override
-  public Either<L, R> maybeFail(Function<R, Either<L, ?>> choice) {
-    return choice.apply(value).chooseRight(v -> this);
+  public Either<L, R> maybeFail(Function<? super R, ? extends Either<? extends L, ?>> choice) {
+    @SuppressWarnings("unchecked")
+    Either<L, ?> either = (Either<L, ?>) choice.apply(value);
+    return either.chooseRight(v -> this);
   }
 
   @Override
-  public <L2> Either<L2, R> mapLeft(Function<L, L2> leftMapper) {
-    return createRight(value);
+  public <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper) {
+    return createIfNecessary(value);
   }
 
   @Override
-  public <L2> Either<L2, R> chooseLeft(Function<L, Either<L2, R>> leftMapper) {
-    return createRight(value);
+  public <L2> Either<L2, R> chooseLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> leftMapper) {
+    return createIfNecessary(value);
   }
 
   @Override
-  public Either<L, R> maybeRecover(Function<L, Either<?, R>> choice) {
-    return createRight(value);
+  public Either<L, R> maybeRecover(Function<? super L, ? extends Either<?, ? extends R>> choice) {
+    return createIfNecessary(value);
   }
 
   @Override
-  public R orRecover(Function<L, R> leftMapper) {
+  public R orRecover(Function<? super L, ? extends R> recover) {
     return value;
   }
 
   @Override
-  public R orElseThrow(Function<L, ? extends RuntimeException> leftMapper) {
+  public <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> leftMapper) throws X {
     return value;
   }
 }
