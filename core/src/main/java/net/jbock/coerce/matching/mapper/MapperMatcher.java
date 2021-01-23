@@ -47,7 +47,8 @@ public class MapperMatcher extends ParameterScoped {
   }
 
   public Either<String, Coercion> findCoercion() {
-    return Either.<String, Void>fromOptionalFailure(() -> null, commonChecks(mapperClass).map(s -> "mapper " + s))
+    Optional<String> maybeFailure = commonChecks(mapperClass).map(s -> "mapper " + s);
+    return Either.<String, Void>fromOptionalFailure(maybeFailure)
         .filter(this::checkNotAbstract)
         .filter(this::checkNoTypevars)
         .filter(this::checkMapperAnnotation)
@@ -71,7 +72,7 @@ public class MapperMatcher extends ParameterScoped {
     }
     Optional<UnwrapSuccess> message = unwraps.stream()
         .max(Comparator.comparingInt(UnwrapSuccess::rank));
-    return Either.<UnwrapSuccess, MapperSuccess>fromOptionalFailure(null, message)
+    return Either.<UnwrapSuccess, MapperSuccess>fromOptionalFailure(message)
         .mapLeft(UnwrapSuccess::wrappedType)
         .mapLeft(MapperMatcher::noMatchError);
   }

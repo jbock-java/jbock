@@ -25,6 +25,10 @@ public abstract class Either<L, R> {
         .orElseGet(() -> Right.create(success.get()));
   }
 
+  public static <L, R> Either<L, R> fromOptionalFailure(Optional<? extends L> maybeFailure) {
+    return fromOptionalFailure(() -> null, maybeFailure);
+  }
+
   public abstract boolean isPresent();
 
   public abstract <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper);

@@ -217,7 +217,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private void validateSourceElement(TypeElement sourceElement) {
-    Either.fromOptionalFailure(() -> null, SuppliedClassValidator.commonChecks(sourceElement))
+    Either.fromOptionalFailure(SuppliedClassValidator.commonChecks(sourceElement))
         .mapLeft(s -> "command " + s)
         .filter(s -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
