@@ -72,11 +72,6 @@ final class Right<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <L2> Either<L2, R> selectLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> leftMapper) {
-    return createIfNecessary(value);
-  }
-
-  @Override
   public Either<L, R> maybeRecover(Function<? super L, ? extends Either<?, ? extends R>> choice) {
     return createIfNecessary(value);
   }

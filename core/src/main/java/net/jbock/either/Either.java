@@ -51,7 +51,11 @@ public abstract class Either<L, R> {
     return result;
   }
 
-  public abstract <L2> Either<L2, R> selectLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> leftMapper);
+  public final <L2> Either<L2, R> selectLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> leftMapper) {
+    @SuppressWarnings("unchecked")
+    Either<L2, R> result = (Either<L2, R>) swap().select(l -> leftMapper.apply(l).swap()).swap();
+    return result;
+  }
 
   public abstract Either<L, R> maybeRecover(Function<? super L, ? extends Either<?, ? extends R>> choice);
 
