@@ -62,7 +62,7 @@ class NamedOptionFactory extends ParameterScoped {
     }
     for (Parameter param : alreadyCreated()) {
       if (option.mnemonic() == param.mnemonic()) {
-        throw ValidationException.create(sourceMethod(), "Duplicate mnemonic");
+        return left("duplicate mnemonic");
       }
     }
     return checkMnemonic(option.mnemonic());

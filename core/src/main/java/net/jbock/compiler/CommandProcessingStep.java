@@ -291,7 +291,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private void checkHelp(ExecutableElement option) {
     if ("help".equals(option.getAnnotation(Option.class).value())) {
-      throw ValidationException.create(option, "'help' is reserved. Either disable the help feature or change the option name to something else.");
+      throw ValidationException.create(option, "'help' cannot be an option name. Disable the help feature via @Command.helpDisabled = true.");
     }
   }
 

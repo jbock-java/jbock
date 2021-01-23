@@ -53,7 +53,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Duplicate mnemonic");
+        .withErrorContaining("duplicate mnemonic");
   }
 
   @Test
