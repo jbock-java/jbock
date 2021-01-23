@@ -11,7 +11,6 @@ import dagger.Component;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
-import net.jbock.coerce.SuppliedClassValidator;
 import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.view.GeneratedClass;
 import net.jbock.either.Either;
@@ -43,6 +42,7 @@ import java.util.stream.Stream;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
+import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 
 class CommandProcessingStep implements BasicAnnotationProcessor.Step {
@@ -217,8 +217,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private void validateSourceElement(TypeElement sourceElement) {
-    Either.fromOptionalFailure(SuppliedClassValidator.commonChecks(sourceElement))
-        .mapLeft(s -> "command " + s)
+    Optional<String> maybeFailure = commonChecks(sourceElement).map(s -> "command " + s);
+    Either.fromOptionalFailure(maybeFailure)
         .filter(s -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
           if (!interfaces.isEmpty()) {
