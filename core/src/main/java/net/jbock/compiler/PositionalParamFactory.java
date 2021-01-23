@@ -20,10 +20,11 @@ class PositionalParamFactory extends ParameterScoped {
     this.basicInfo = basicInfo;
   }
 
-  Either<String, Parameter> createPositionalParam(int positionalIndex) {
+  Either<ValidationFailure, ? extends Parameter> createPositionalParam(int positionalIndex) {
     checkBundleKey();
     return basicInfo.coercion()
         .map(coercion -> new PositionalParameter(sourceMethod(), bundleKey(), enumName().snake().toLowerCase(Locale.US),
-            Collections.emptyList(), coercion, Arrays.asList(description()), positionalIndex));
+            Collections.emptyList(), coercion, Arrays.asList(description()), positionalIndex))
+        .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
   }
 }

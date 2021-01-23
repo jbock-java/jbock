@@ -44,6 +44,8 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
@@ -111,17 +113,23 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     try {
       validateSourceElement(sourceElement);
       ClassName optionType = generatedClass.nestedClass("Option");
-      List<Parameter> parameters = getParams(sourceElement, optionType);
-      if (parameters.isEmpty()) { // javapoet #739
-        throw ValidationException.create(sourceElement, "Define at least one abstract method");
-      }
+      Either<List<ValidationFailure>, List<Parameter>> either = getParams(sourceElement, optionType);
+      either.ifPresentOrElse(parameters -> {
+        if (parameters.isEmpty()) { // javapoet #739
+          throw ValidationException.create(sourceElement, "Define at least one abstract method");
+        }
 
-      checkOnlyOnePositionalList(parameters);
-      checkRankConsistentWithPosition(parameters);
+        checkOnlyOnePositionalList(parameters);
+        checkRankConsistentWithPosition(parameters);
 
-      Context context = new Context(sourceElement, generatedClass, optionType, parameters);
-      TypeSpec typeSpec = GeneratedClass.create(context).define();
-      write(sourceElement, context.generatedClass(), typeSpec);
+        Context context = new Context(sourceElement, generatedClass, optionType, parameters);
+        TypeSpec typeSpec = GeneratedClass.create(context).define();
+        write(sourceElement, context.generatedClass(), typeSpec);
+      }, failures -> {
+        for (ValidationFailure failure : failures) {
+          messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
+        }
+      });
     } catch (ValidationException e) {
       messager.printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
     } catch (AssertionError error) {
@@ -145,12 +153,13 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     }
   }
 
-  private List<Parameter> getParams(TypeElement sourceElement, ClassName optionType) {
+  private Either<List<ValidationFailure>, List<Parameter>> getParams(TypeElement sourceElement, ClassName optionType) {
     Methods methods = Methods.create(methodsIn(sourceElement.getEnclosedElements()).stream()
         .filter(CommandProcessingStep::validateParameterMethod)
         .collect(Collectors.toList()));
     List<Parameter> params = new ArrayList<>();
     AnnotationUtil annotationUtil = new AnnotationUtil();
+    List<ValidationFailure> failures = new ArrayList<>();
     for (int i = 0; i < methods.params().size(); i++) {
       ExecutableElement sourceMethod = methods.params().get(i);
       Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
@@ -163,8 +172,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           .alreadyCreated(ImmutableList.copyOf(params))
           .parameterModule(module)
           .description(getDescription(sourceMethod));
-      params.add(builder.build().positionalParameterFactory().createPositionalParam(i)
-          .orElseThrow(s -> ValidationException.create(sourceMethod, s)));
+      builder.build().positionalParameterFactory().createPositionalParam(i)
+          .ifPresentOrElse(params::add, failures::add);
     }
     boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
     for (ExecutableElement option : methods.options()) {
@@ -177,13 +186,13 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           .alreadyCreated(ImmutableList.copyOf(params))
           .parameterModule(module)
           .description(getDescription(option));
-      params.add(builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
-          .orElseThrow(s -> ValidationException.create(option, s)));
+      builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
+          .ifPresentOrElse(params::add, failures::add);
     }
     if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {
       methods.options().forEach(this::checkHelp);
     }
-    return params;
+    return failures.isEmpty() ? right(params) : left(failures);
   }
 
   private static boolean validateParameterMethod(ExecutableElement method) {

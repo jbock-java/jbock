@@ -42,8 +42,8 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public void ifPresentOrElse(Consumer<? super R> rightConsumer, Consumer<? super L> leftConsumer) {
-    leftConsumer.accept(value);
+  public void ifPresentOrElse(Consumer<? super R> action, Consumer<? super L> leftAction) {
+    leftAction.accept(value);
   }
 
   @Override
@@ -62,7 +62,7 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> leftMapper) throws X {
-    throw leftMapper.apply(value);
+  public <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> exceptionFactory) throws X {
+    throw exceptionFactory.apply(value);
   }
 }

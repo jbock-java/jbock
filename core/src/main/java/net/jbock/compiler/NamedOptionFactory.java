@@ -27,7 +27,7 @@ class NamedOptionFactory extends ParameterScoped {
     this.basicInfo = basicInfo;
   }
 
-  Either<String, Parameter> createNamedOption(boolean anyMnemonics) {
+  Either<ValidationFailure, ? extends Parameter> createNamedOption(boolean anyMnemonics) {
     checkBundleKey();
     String optionName = optionName();
     char mnemonic = mnemonic();
@@ -37,7 +37,8 @@ class NamedOptionFactory extends ParameterScoped {
           return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
               sample(coercion.skew(), enumName(), dashedNames, anyMnemonics),
               dashedNames, coercion, Arrays.asList(description()));
-        });
+        })
+        .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
   }
 
   private Character mnemonic() {

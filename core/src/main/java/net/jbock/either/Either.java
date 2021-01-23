@@ -47,9 +47,9 @@ public abstract class Either<L, R> {
     return result;
   }
 
-  public final <L2> Either<L2, R> selectLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> leftMapper) {
+  public final <L2> Either<L2, R> selectLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> choice) {
     @SuppressWarnings("unchecked")
-    Either<L2, R> result = (Either<L2, R>) swap().select(l -> leftMapper.apply(l).swap()).swap();
+    Either<L2, R> result = (Either<L2, R>) swap().select(l -> choice.apply(l).swap()).swap();
     return result;
   }
 
@@ -69,12 +69,12 @@ public abstract class Either<L, R> {
 
   public abstract Either<R, L> swap();
 
-  public final void ifPresent(Consumer<? super R> rightConsumer) {
-    ifPresentOrElse(rightConsumer, l -> {
+  public final void ifPresent(Consumer<? super R> action) {
+    ifPresentOrElse(action, l -> {
     });
   }
 
-  public abstract void ifPresentOrElse(Consumer<? super R> rightConsumer, Consumer<? super L> leftConsumer);
+  public abstract void ifPresentOrElse(Consumer<? super R> action, Consumer<? super L> leftAction);
 
-  public abstract <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> leftMapper) throws X;
+  public abstract <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> exceptionFactory) throws X;
 }
