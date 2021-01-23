@@ -76,28 +76,28 @@ public class MapperMatcher extends ParameterScoped {
         .mapLeft(MapperMatcher::noMatchError);
   }
 
-  private Either<String, Void> checkMapperAnnotation() {
+  private Optional<String> checkMapperAnnotation() {
     Mapper mapperAnnotation = mapperClass.getAnnotation(Mapper.class);
     boolean nestedMapper = getEnclosingElements(mapperClass).contains(sourceElement());
     if (mapperAnnotation == null && !nestedMapper) {
-      return left("mapper must be a static inner class of the @" + Command.class.getSimpleName() +
+      return Optional.of("mapper must be a static inner class of the @" + Command.class.getSimpleName() +
           " annotated class, or carry the @" + Mapper.class.getSimpleName() + " annotation");
     }
-    return right();
+    return Optional.empty();
   }
 
-  private Either<String, Void> checkNotAbstract() {
+  private Optional<String> checkNotAbstract() {
     if (mapperClass.getModifiers().contains(ABSTRACT)) {
-      return left("non-abstract mapper class");
+      return Optional.of("non-abstract mapper class");
     }
-    return right();
+    return Optional.empty();
   }
 
-  private Either<String, Void> checkNoTypevars() {
+  private Optional<String> checkNoTypevars() {
     if (!mapperClass.getTypeParameters().isEmpty()) {
-      return left("found type parameters in mapper class declaration");
+      return Optional.of("found type parameters in mapper class declaration");
     }
-    return right();
+    return Optional.empty();
   }
 
   private Either<String, CodeBlock> getMapExpr(
@@ -111,11 +111,11 @@ public class MapperMatcher extends ParameterScoped {
     return right(mapExpr);
   }
 
-  private Either<String, FunctionType> checkStringInput(FunctionType functionType) {
+  private Optional<String> checkStringInput(FunctionType functionType) {
     if (!tool().isSameType(functionType.inputType(), String.class.getCanonicalName())) {
-      return left("mapper should implement Function<String, ?>");
+      return Optional.of("mapper should implement Function<String, ?>");
     }
-    return right(functionType);
+    return Optional.empty();
   }
 
   private static String noMatchError(TypeMirror type) {

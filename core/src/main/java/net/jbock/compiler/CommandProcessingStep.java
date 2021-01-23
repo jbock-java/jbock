@@ -43,8 +43,6 @@ import java.util.stream.Stream;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
-import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
 
 class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
@@ -223,17 +221,17 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .filter(s -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
           if (!interfaces.isEmpty()) {
-            return left("command cannot implement " + interfaces.get(0));
+            return Optional.of("command cannot implement " + interfaces.get(0));
           }
-          return right(sourceElement);
+          return Optional.empty();
         })
         .filter(s -> {
           TypeMirror superclass = sourceElement.getSuperclass();
           boolean isObject = tool.isSameType(superclass, Object.class.getCanonicalName());
           if (!isObject) {
-            return left("command cannot inherit from " + superclass);
+            return Optional.of("command cannot inherit from " + superclass);
           }
-          return right(sourceElement);
+          return Optional.empty();
         })
         .orElseThrow(message -> ValidationException.create(sourceElement, message));
   }

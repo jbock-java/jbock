@@ -14,6 +14,7 @@ import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
@@ -54,8 +55,8 @@ public class AutoMatcher extends ParameterScoped {
   private Either<String, CodeBlock> findMapExpr(TypeMirror unwrappedReturnType) {
     return autoMapper.findAutoMapper(unwrappedReturnType)
         .maybeRecover(() -> isEnumType(unwrappedReturnType) ?
-            right(CodeBlock.of("$T::valueOf", unwrappedReturnType)) :
-            left())
+            Optional.of(CodeBlock.of("$T::valueOf", unwrappedReturnType)) :
+            Optional.empty())
         .mapLeft(s -> noMatchError(unwrappedReturnType));
   }
 

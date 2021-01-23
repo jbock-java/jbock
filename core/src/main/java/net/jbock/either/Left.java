@@ -1,5 +1,6 @@
 package net.jbock.either;
 
+import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -28,13 +29,10 @@ final class Left<L, R> extends Either<L, R> {
     return new Left<>(value);
   }
 
-  private <R2> Left<L, R2> createIfNecessary(L newValue) {
-    if (newValue == value) {
-      @SuppressWarnings("unchecked")
-      Left<L, R2> result = (Left<L, R2>) this;
-      return result;
-    }
-    return create(newValue);
+  private <R2> Left<L, R2> theSame() {
+    @SuppressWarnings("unchecked")
+    Left<L, R2> result = (Left<L, R2>) this;
+    return result;
   }
 
   public L value() {
@@ -48,7 +46,7 @@ final class Left<L, R> extends Either<L, R> {
 
   @Override
   public <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper) {
-    return createIfNecessary(value);
+    return theSame();
   }
 
   @Override
@@ -63,19 +61,19 @@ final class Left<L, R> extends Either<L, R> {
 
   @Override
   public <R2> Either<L, R2> select(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice) {
-    return createIfNecessary(value);
+    return theSame();
   }
 
   @Override
-  public Either<L, R> filter(Function<? super R, ? extends Either<? extends L, ?>> choice) {
-    return createIfNecessary(value);
+  public Either<L, R> filter(Function<? super R, ? extends Optional<? extends L>> fail) {
+    return this;
   }
 
   @Override
-  public Either<L, R> maybeRecover(Function<? super L, ? extends Either<?, ? extends R>> choice) {
+  public Either<L, R> maybeRecover(Function<? super L, ? extends Optional<? extends R>> succeed) {
     @SuppressWarnings("unchecked")
-    Either<?, R> either = (Either<?, R>) choice.apply(value);
-    return either.selectLeft(v -> this);
+    Optional<R> opt = (Optional<R>) succeed.apply(value);
+    return opt.<Either<L, R>>map(Either::right).orElse(this);
   }
 
   @Override

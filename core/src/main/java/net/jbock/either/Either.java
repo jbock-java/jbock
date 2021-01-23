@@ -39,10 +39,10 @@ public abstract class Either<L, R> {
 
   public abstract <R2> Either<L, R2> select(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice);
 
-  public abstract Either<L, R> filter(Function<? super R, ? extends Either<? extends L, ?>> choice);
+  public abstract Either<L, R> filter(Function<? super R, ? extends Optional<? extends L>> fail);
 
-  public final Either<L, R> filter(Supplier<? extends Either<? extends L, ?>> choice) {
-    return filter(r -> choice.get());
+  public final Either<L, R> filter(Supplier<? extends Optional<? extends L>> fail) {
+    return filter(r -> fail.get());
   }
 
   public final <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper) {
@@ -57,9 +57,9 @@ public abstract class Either<L, R> {
     return result;
   }
 
-  public abstract Either<L, R> maybeRecover(Function<? super L, ? extends Either<?, ? extends R>> choice);
+  public abstract Either<L, R> maybeRecover(Function<? super L, ? extends Optional<? extends R>> choice);
 
-  public final Either<L, R> maybeRecover(Supplier<? extends Either<?, ? extends R>> choice) {
+  public final Either<L, R> maybeRecover(Supplier<? extends Optional<? extends R>> choice) {
     return maybeRecover(value -> choice.get());
   }
 
