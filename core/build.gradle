@@ -41,10 +41,15 @@ shadowJar {
         exclude(dependency('javax.annotation:jsr250-api:.*'))
     }
     archiveClassifier.set('')
+    relocate 'dagger', 'net.jbock.dagger'
     relocate 'com.squareup.javapoet', 'net.jbock.javapoet'
     relocate 'com.google.auto', 'net.jbock.google.auto'
     relocate 'com.google.common', 'net.jbock.google.common'
     relocate 'com.google.thirdparty', 'net.jbock.google.thirdparty'
+    relocate 'com.google.j2objc', 'net.jbock.google.j2objc'
+    relocate 'com.google.errorprone', 'net.jbock.google.errorprone'
+    relocate 'org.checkerframework', 'net.jbock.org.checkerframework'
+    relocate 'javax.inject', 'net.jbock.javax.inject'
 }
 
 dependencies {
