@@ -49,7 +49,9 @@ public abstract class Either<L, R> {
     return result;
   }
 
-  public abstract Either<L, R> maybeRecover(Function<? super L, ? extends Optional<? extends R>> choice);
+  public final Either<L, R> maybeRecover(Function<? super L, ? extends Optional<? extends R>> choice) {
+    return swap().filter(choice).swap();
+  }
 
   public final Either<L, R> maybeRecover(Supplier<? extends Optional<? extends R>> choice) {
     return maybeRecover(value -> choice.get());
@@ -63,12 +65,12 @@ public abstract class Either<L, R> {
 
   public abstract Either<R, L> swap();
 
-  public final void ifPresent(Consumer<R> rightConsumer) {
+  public final void ifPresent(Consumer<? super R> rightConsumer) {
     ifPresentOrElse(rightConsumer, l -> {
     });
   }
 
-  public abstract void ifPresentOrElse(Consumer<R> rightConsumer, Consumer<L> leftConsumer);
+  public abstract void ifPresentOrElse(Consumer<? super R> rightConsumer, Consumer<? super L> leftConsumer);
 
   public abstract <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> leftMapper) throws X;
 }

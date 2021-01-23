@@ -42,7 +42,7 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public void ifPresentOrElse(Consumer<R> rightConsumer, Consumer<L> leftConsumer) {
+  public void ifPresentOrElse(Consumer<? super R> rightConsumer, Consumer<? super L> leftConsumer) {
     leftConsumer.accept(value);
   }
 
@@ -54,13 +54,6 @@ final class Left<L, R> extends Either<L, R> {
   @Override
   public Either<L, R> filter(Function<? super R, ? extends Optional<? extends L>> fail) {
     return this;
-  }
-
-  @Override
-  public Either<L, R> maybeRecover(Function<? super L, ? extends Optional<? extends R>> succeed) {
-    @SuppressWarnings("unchecked")
-    Optional<R> opt = (Optional<R>) succeed.apply(value);
-    return opt.<Either<L, R>>map(Either::right).orElse(this);
   }
 
   @Override
