@@ -48,7 +48,7 @@ class Optionalish {
             optionalPrimitive.extractExpr(constructorParam)));
       }
     }
-    return left();
+    return left("");
   }
 
   private DeclaredType asOptional(OptionalPrimitive optionalPrimitive) {

@@ -1,7 +1,6 @@
 package net.jbock.coerce;
 
 import net.jbock.compiler.TypeTool;
-import net.jbock.either.Either;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -12,28 +11,26 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
 import java.util.ArrayList;
 import java.util.List;
-
-import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
+import java.util.Optional;
 
 public class SuppliedClassValidator {
 
-  public static Either<String, Void> commonChecks(TypeElement classToCheck) {
+  public static Optional<String> commonChecks(TypeElement classToCheck) {
     if (classToCheck.getNestingKind().isNested() && !classToCheck.getModifiers().contains(Modifier.STATIC)) {
-      return left("must be static or top-level");
+      return Optional.of("must be static or top-level");
     }
     if (classToCheck.getKind() == ElementKind.INTERFACE) {
-      return left("cannot be an interface");
+      return Optional.of("cannot be an interface");
     }
     for (TypeElement element : getEnclosingElements(classToCheck)) {
       if (element.getModifiers().contains(Modifier.PRIVATE)) {
-        return left("class cannot be private");
+        return Optional.of("class cannot be private");
       }
     }
     if (!hasDefaultConstructor(classToCheck)) {
-      return left("missing default constructor");
+      return Optional.of("missing default constructor");
     }
-    return right();
+    return Optional.empty();
   }
 
   public static List<TypeElement> getEnclosingElements(TypeElement sourceElement) {

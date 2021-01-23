@@ -6,26 +6,13 @@ import java.util.function.Function;
 
 final class Right<L, R> extends Either<L, R> {
 
-  private static final Right<?, ?> NOTHING = new Right<>(null);
-
   private final R value;
 
   private Right(R value) {
     this.value = value;
   }
 
-  static <L, R> Right<L, R> nothing() {
-    @SuppressWarnings("unchecked")
-    Right<L, R> result = (Right<L, R>) NOTHING;
-    return result;
-  }
-
   static <L, R> Right<L, R> create(R value) {
-    if (value == null) {
-      @SuppressWarnings("unchecked")
-      Right<L, R> result = (Right<L, R>) NOTHING;
-      return result;
-    }
     return new Right<>(value);
   }
 

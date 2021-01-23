@@ -72,7 +72,7 @@ public class AutoMapper {
         return right(mapExpr);
       }
     }
-    return left();
+    return left("");
   }
 
   private static CodeBlock autoMapperFile() {

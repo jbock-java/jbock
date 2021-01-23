@@ -57,7 +57,7 @@ public class ReferenceTool {
 
   private Either<Either<String, Void>, List<? extends TypeMirror>> checkImplements(String candidate) {
     return Either.<Either<String, Void>, DeclaredType>fromOptionalSuccess(
-        Either::right,
+        () -> Either.right(null),
         mapperClass.getInterfaces().stream()
             .filter(inter -> tool.isSameErasure(inter, candidate))
             .map(AS_DECLARED::visit)

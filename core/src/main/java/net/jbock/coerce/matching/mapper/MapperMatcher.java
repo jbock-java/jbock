@@ -47,7 +47,7 @@ public class MapperMatcher extends ParameterScoped {
   }
 
   public Either<String, Coercion> findCoercion() {
-    return commonChecks(mapperClass).mapLeft(s -> "mapper " + s)
+    return Either.<String, Void>fromOptionalFailure(() -> null, commonChecks(mapperClass).map(s -> "mapper " + s))
         .filter(this::checkNotAbstract)
         .filter(this::checkNoTypevars)
         .filter(this::checkMapperAnnotation)
@@ -104,7 +104,7 @@ public class MapperMatcher extends ParameterScoped {
       TypeMirror expectedReturnType,
       FunctionType functionType) {
     if (!tool().isSameType(functionType.outputType(), expectedReturnType)) {
-      return left();
+      return left("");
     }
     CodeBlock mapExpr = CodeBlock.of("new $T()$L", mapperClass.asType(),
         functionType.isSupplier() ? ".get()" : "");

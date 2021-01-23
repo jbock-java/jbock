@@ -14,6 +14,7 @@ import net.jbock.Param;
 import net.jbock.coerce.SuppliedClassValidator;
 import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.view.GeneratedClass;
+import net.jbock.either.Either;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -216,7 +217,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private void validateSourceElement(TypeElement sourceElement) {
-    SuppliedClassValidator.commonChecks(sourceElement)
+    Either.fromOptionalFailure(() -> null, SuppliedClassValidator.commonChecks(sourceElement))
         .mapLeft(s -> "command " + s)
         .filter(s -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();

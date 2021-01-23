@@ -11,24 +11,16 @@ public abstract class Either<L, R> {
     return Left.create(value);
   }
 
-  public static <L, R> Either<L, R> left() {
-    return Left.nothing();
-  }
-
   public static <L, R> Either<L, R> right(R value) {
     return Right.create(value);
   }
 
-  public static <L, R> Either<L, R> right() {
-    return Right.nothing();
-  }
-
-  public static <L, R> Either<L, R> fromOptionalSuccess(Supplier<L> failure, Optional<? extends R> maybeSuccess) {
+  public static <L, R> Either<L, R> fromOptionalSuccess(Supplier<? extends L> failure, Optional<? extends R> maybeSuccess) {
     return maybeSuccess.<Either<L, R>>map(Right::create)
         .orElseGet(() -> Left.create(failure.get()));
   }
 
-  public static <L, R> Either<L, R> fromOptionalFailure(Supplier<R> success, Optional<? extends L> maybeFailure) {
+  public static <L, R> Either<L, R> fromOptionalFailure(Supplier<? extends R> success, Optional<? extends L> maybeFailure) {
     return maybeFailure.<Either<L, R>>map(Left::create)
         .orElseGet(() -> Right.create(success.get()));
   }
