@@ -25,7 +25,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The name may not be empty");
+        .withErrorContaining("empty name");
   }
 
   @Test
@@ -39,7 +39,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Duplicate option name");
+        .withErrorContaining("duplicate option name");
   }
 
   @Test
@@ -200,7 +200,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("may not contain whitespace");
+        .withErrorContaining("name contains whitespace characters");
   }
 
   @Test

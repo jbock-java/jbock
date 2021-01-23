@@ -11,6 +11,7 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import java.util.Optional;
 
 public class ParameterScoped {
 
@@ -69,20 +70,23 @@ public class ParameterScoped {
     return tool().types();
   }
 
-  void checkBundleKey() {
+  Optional<String> checkBundleKey() {
     String key = bundleKey();
     if (key.isEmpty()) {
-      return;
+      return Optional.empty();
     }
     if (key.matches(".*\\s+.*")) {
-      throw ValidationException.create(sourceMethod(), "The bundle key may not contain whitespace characters.");
+      return Optional.of("bundle key contains whitespace characters");
     }
     for (Parameter param : alreadyCreated()) {
-      param.bundleKey().filter(bundleKey -> bundleKey.equals(key))
-          .ifPresent(k -> {
-            throw ValidationException.create(sourceMethod(), "Duplicate bundle key.");
-          });
+      Optional<String> failure = param.bundleKey()
+          .filter(bundleKey -> bundleKey.equals(key))
+          .map(k -> "duplicate bundle key");
+      if (failure.isPresent()) {
+        return failure;
+      }
     }
+    return Optional.empty();
   }
 
   public ParameterContext parameterContext() {

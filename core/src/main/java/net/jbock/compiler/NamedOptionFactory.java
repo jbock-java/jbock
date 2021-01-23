@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Objects;
 
 import static java.lang.Character.isWhitespace;
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 class NamedOptionFactory extends ParameterScoped {
 
@@ -28,23 +30,35 @@ class NamedOptionFactory extends ParameterScoped {
   }
 
   Either<ValidationFailure, ? extends Parameter> createNamedOption(boolean anyMnemonics) {
-    checkBundleKey();
-    String optionName = optionName();
-    char mnemonic = mnemonic();
-    return basicInfo.coercion()
-        .map(coercion -> {
-          List<String> dashedNames = dashedNames(optionName, mnemonic);
-          return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
-              sample(coercion.skew(), enumName(), dashedNames, anyMnemonics),
-              dashedNames, coercion, Arrays.asList(description()));
-        })
+    return Either.<String, Void>fromOptionalFailure(checkBundleKey())
+        .select(this::optionName)
+        .select(optionName -> mnemonic().map(mnemonic -> new Names(optionName, mnemonic)))
+        .select(names -> basicInfo.coercion()
+            .map(coercion -> {
+              String optionName = names.optionName;
+              Character mnemonic = names.mnemonic;
+              List<String> dashedNames = dashedNames(optionName, mnemonic);
+              return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
+                  sample(coercion.skew(), enumName(), dashedNames, anyMnemonics),
+                  dashedNames, coercion, Arrays.asList(description()));
+            }))
         .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
   }
 
-  private Character mnemonic() {
+  private static class Names {
+    final String optionName;
+    final Character mnemonic;
+
+    Names(String optionName, Character mnemonic) {
+      this.optionName = optionName;
+      this.mnemonic = mnemonic;
+    }
+  }
+
+  private Either<String, Character> mnemonic() {
     Option option = sourceMethod().getAnnotation(Option.class);
     if (option == null || option.mnemonic() == ' ') {
-      return ' ';
+      return right(' ');
     }
     for (Parameter param : alreadyCreated()) {
       if (option.mnemonic() == param.mnemonic()) {
@@ -54,46 +68,47 @@ class NamedOptionFactory extends ParameterScoped {
     return checkMnemonic(option.mnemonic());
   }
 
-  private String optionName() {
+  private Either<String, String> optionName() {
     Option option = sourceMethod().getAnnotation(Option.class);
     if (option == null) {
-      return null;
+      return right("");
     }
     if (Objects.toString(option.value(), "").isEmpty()) {
-      throw ValidationException.create(sourceMethod(), "The name may not be empty");
+      return left("empty name");
     }
     for (Parameter param : alreadyCreated()) {
       if (option.value().equals(param.optionName())) {
-        throw ValidationException.create(sourceMethod(), "Duplicate option name: " + option.value());
+        return left("duplicate option name");
       }
     }
     return checkName(option.value());
   }
 
-  private char checkMnemonic(char mnemonic) {
+  private Either<String, Character> checkMnemonic(char mnemonic) {
     if (mnemonic != ' ') {
-      checkName(Character.toString(mnemonic));
+      return checkName(Character.toString(mnemonic))
+          .map(s -> s.charAt(0));
     }
-    return mnemonic;
+    return right(' ');
   }
 
-  private String checkName(String name) {
+  private Either<String, String> checkName(String name) {
     if (Objects.toString(name, "").isEmpty()) {
-      throw ValidationException.create(sourceMethod(), "The name may not be empty");
+      return left("empty name");
     }
     if (name.charAt(0) == '-') {
-      throw ValidationException.create(sourceMethod(), "The name may not start with '-'");
+      return left("name starts with '-'");
     }
     for (int i = 0; i < name.length(); i++) {
       char c = name.charAt(i);
       if (isWhitespace(c)) {
-        throw ValidationException.create(sourceMethod(), "The name may not contain whitespace characters");
+        return left("name contains whitespace characters");
       }
       if (c == '=') {
-        throw ValidationException.create(sourceMethod(), "The name may not contain '='");
+        return left("name contains '='");
       }
     }
-    return name;
+    return right(name);
   }
 
   private static List<String> dashedNames(String optionName, char mnemonic) {

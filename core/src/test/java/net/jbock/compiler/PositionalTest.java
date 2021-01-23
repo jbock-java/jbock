@@ -40,7 +40,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Duplicate bundle key.");
+        .withErrorContaining("duplicate bundle key");
   }
 
   @Test

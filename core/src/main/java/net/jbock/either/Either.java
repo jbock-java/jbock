@@ -35,6 +35,10 @@ public abstract class Either<L, R> {
 
   public abstract <R2> Either<L, R2> select(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice);
 
+  public final <R2> Either<L, R2> select(Supplier<? extends Either<? extends L, ? extends R2>> choice) {
+    return select(r -> choice.get());
+  }
+
   public abstract Either<L, R> filter(Function<? super R, ? extends Optional<? extends L>> fail);
 
   public final Either<L, R> filter(Supplier<? extends Optional<? extends L>> fail) {
