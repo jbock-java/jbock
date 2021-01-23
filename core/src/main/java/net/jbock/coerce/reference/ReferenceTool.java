@@ -30,8 +30,8 @@ public class ReferenceTool {
 
   public Either<String, FunctionType> getReferencedType() {
     return checkImplements(Supplier.class.getCanonicalName())
-        .chooseRight(typeArguments -> handleSupplier(typeArguments).mapLeft(Either::left))
-        .chooseLeft(stringOrVoid -> stringOrVoid.chooseRight(v -> handleNotSupplier()));
+        .select(typeArguments -> handleSupplier(typeArguments).mapLeft(Either::left))
+        .selectLeft(stringOrVoid -> stringOrVoid.select(v -> handleNotSupplier()));
   }
 
   private Either<String, FunctionType> handleNotSupplier() {
@@ -62,7 +62,7 @@ public class ReferenceTool {
             .filter(inter -> tool.isSameErasure(inter, candidate))
             .map(AS_DECLARED::visit)
             .findFirst())
-        .chooseRight(declared -> {
+        .select(declared -> {
           List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
           List<? extends TypeParameterElement> typeParams = tool.asTypeElement(candidate).getTypeParameters();
           if (typeArguments.size() != typeParams.size()) {

@@ -37,22 +37,26 @@ public abstract class Either<L, R> {
 
   public abstract <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper);
 
-  public abstract <R2> Either<L, R2> chooseRight(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice);
+  public abstract <R2> Either<L, R2> select(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice);
 
-  public abstract Either<L, R> maybeFail(Function<? super R, ? extends Either<? extends L, ?>> choice);
+  public abstract Either<L, R> filter(Function<? super R, ? extends Either<? extends L, ?>> choice);
 
-  public final Either<L, R> maybeFail(Supplier<? extends Either<? extends L, ?>> choice) {
-    return maybeFail(r -> choice.get());
+  public final Either<L, R> filter(Supplier<? extends Either<? extends L, ?>> choice) {
+    return filter(r -> choice.get());
   }
 
-  public abstract <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper);
+  public final <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper) {
+    @SuppressWarnings("unchecked")
+    Either<L2, R> result = (Either<L2, R>) swap().map(leftMapper).swap();
+    return result;
+  }
 
-  public abstract <L2> Either<L2, R> chooseLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> leftMapper);
+  public abstract <L2> Either<L2, R> selectLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> leftMapper);
 
   public abstract Either<L, R> maybeRecover(Function<? super L, ? extends Either<?, ? extends R>> choice);
 
   public final Either<L, R> maybeRecover(Supplier<? extends Either<?, ? extends R>> choice) {
-    return maybeRecover(l -> choice.get());
+    return maybeRecover(value -> choice.get());
   }
 
   public abstract R orRecover(Function<? super L, ? extends R> recover);

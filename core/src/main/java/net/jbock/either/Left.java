@@ -62,22 +62,17 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <R2> Either<L, R2> chooseRight(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice) {
+  public <R2> Either<L, R2> select(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice) {
     return createIfNecessary(value);
   }
 
   @Override
-  public Either<L, R> maybeFail(Function<? super R, ? extends Either<? extends L, ?>> choice) {
+  public Either<L, R> filter(Function<? super R, ? extends Either<? extends L, ?>> choice) {
     return createIfNecessary(value);
   }
 
   @Override
-  public <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper) {
-    return left(leftMapper.apply(value));
-  }
-
-  @Override
-  public <L2> Either<L2, R> chooseLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> leftMapper) {
+  public <L2> Either<L2, R> selectLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> leftMapper) {
     @SuppressWarnings("unchecked")
     Either<L2, R> result = (Either<L2, R>) leftMapper.apply(value);
     return result;
@@ -87,7 +82,7 @@ final class Left<L, R> extends Either<L, R> {
   public Either<L, R> maybeRecover(Function<? super L, ? extends Either<?, ? extends R>> choice) {
     @SuppressWarnings("unchecked")
     Either<?, R> either = (Either<?, R>) choice.apply(value);
-    return either.chooseLeft(v -> this);
+    return either.selectLeft(v -> this);
   }
 
   @Override
