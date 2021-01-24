@@ -17,14 +17,18 @@ class Methods {
   private final List<ExecutableElement> options;
 
   private Methods(List<ExecutableElement> params, List<ExecutableElement> options) {
-    this.params = params.stream().sorted(POSITION_COMPARATOR)
-        .collect(Collectors.toList());
+    this.params = params;
     this.options = options;
   }
 
   static Methods create(List<ExecutableElement> methods) {
-    List<ExecutableElement> params = methods.stream().filter(m -> m.getAnnotation(Param.class) != null).collect(Collectors.toList());
-    List<ExecutableElement> options = methods.stream().filter(m -> m.getAnnotation(Option.class) != null).collect(Collectors.toList());
+    List<ExecutableElement> params = methods.stream()
+        .filter(m -> m.getAnnotation(Param.class) != null)
+        .sorted(POSITION_COMPARATOR)
+        .collect(Collectors.toList());
+    List<ExecutableElement> options = methods.stream()
+        .filter(m -> m.getAnnotation(Option.class) != null)
+        .collect(Collectors.toList());
     return new Methods(params, options);
   }
 
