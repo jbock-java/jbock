@@ -36,7 +36,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -118,13 +117,6 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       ClassName optionType = generatedClass.nestedClass("Option");
       Either<List<ValidationFailure>, List<Parameter>> either = getParams(sourceElement, optionType);
       either.ifPresentOrElse(parameters -> {
-        if (parameters.isEmpty()) { // javapoet #739
-          throw ValidationException.create(sourceElement, "Define at least one abstract method");
-        }
-
-        checkOnlyOnePositionalList(parameters);
-        checkRankConsistentWithPosition(parameters);
-
         Context context = new Context(sourceElement, generatedClass, optionType, parameters);
         TypeSpec typeSpec = GeneratedClass.create(context).define();
         write(sourceElement, context.generatedClass(), typeSpec);
@@ -161,8 +153,9 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       List<Parameter> params = new ArrayList<>();
       AnnotationUtil annotationUtil = new AnnotationUtil();
       List<ValidationFailure> failures = new ArrayList<>();
-      for (int i = 0; i < methods.params().size(); i++) {
-        ExecutableElement sourceMethod = methods.params().get(i);
+      List<ExecutableElement> positionalParameters = methods.params();
+      for (int i = 0, executableElementsSize = positionalParameters.size(); i < executableElementsSize; i++) {
+        ExecutableElement sourceMethod = positionalParameters.get(i);
         Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
         Param param = sourceMethod.getAnnotation(Param.class);
         ParameterModule module = new ParameterModule(sourceElement, mapperClass, param.bundleKey());
@@ -201,10 +194,14 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .filter(sourceMethod -> sourceMethod.getModifiers().contains(ABSTRACT))
         .collect(Collectors.toList());
     for (ExecutableElement sourceMethod : sourceMethods) {
-      validateParameterMethod(sourceMethod).ifPresent(msg -> failures.add(new ValidationFailure(msg, sourceMethod)));
+      validateParameterMethod(sourceMethod)
+          .ifPresent(msg -> failures.add(new ValidationFailure(msg, sourceMethod)));
     }
     if (!failures.isEmpty()) {
       return left(failures);
+    }
+    if (sourceMethods.isEmpty()) { // javapoet #739
+      return left(Collections.singletonList(new ValidationFailure("expecting at least one abstract method", sourceElement)));
     }
     return right(Methods.create(sourceMethods));
   }
@@ -299,27 +296,6 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       }
     }
     return result.toArray(new String[0]);
-  }
-
-  private static void checkOnlyOnePositionalList(List<Parameter> allParams) {
-    allParams.stream().filter(p -> p.isRepeatable() && p.isPositional())
-        .skip(1).findAny().ifPresent(p -> {
-      throw p.validationError("There can only be one repeatable param.");
-    });
-  }
-
-  private static void checkRankConsistentWithPosition(List<Parameter> allParams) {
-    int currentOrdinal = -1;
-    for (Parameter param : allParams) {
-      OptionalInt order = param.positionalOrder();
-      if (!order.isPresent()) {
-        continue;
-      }
-      if (order.getAsInt() < currentOrdinal) {
-        throw param.validationError("Bad position, expecting Optional < Required < Repeatable");
-      }
-      currentOrdinal = order.getAsInt();
-    }
   }
 
   private void handleUnknownError(TypeElement sourceType, Throwable e) {

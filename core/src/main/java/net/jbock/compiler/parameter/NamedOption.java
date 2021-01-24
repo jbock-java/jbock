@@ -32,11 +32,6 @@ public class NamedOption extends Parameter {
   }
 
   @Override
-  public OptionalInt positionalOrder() {
-    return OptionalInt.empty();
-  }
-
-  @Override
   public List<String> dashedNames() {
     return dashedNames;
   }

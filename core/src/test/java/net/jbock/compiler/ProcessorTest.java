@@ -212,7 +212,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Define at least one abstract method");
+        .withErrorContaining("expecting at least one abstract method");
   }
 
   @Test

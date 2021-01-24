@@ -1,5 +1,6 @@
 package net.jbock.compiler.parameter;
 
+import net.jbock.Param;
 import net.jbock.coerce.Coercion;
 
 import javax.lang.model.element.ExecutableElement;
@@ -11,7 +12,13 @@ public class PositionalParameter extends Parameter {
 
   private final int positionalIndex;
 
-  public PositionalParameter(ExecutableElement sourceMethod, String bundleKey, String sample, List<String> dashedNames, Coercion coercion, List<String> description, int positionalIndex) {
+  public PositionalParameter(
+      ExecutableElement sourceMethod,
+      String bundleKey,
+      String sample,
+      Coercion coercion,
+      List<String> description,
+      int positionalIndex) {
     super(sourceMethod, bundleKey, sample, coercion, description);
     this.positionalIndex = positionalIndex;
   }
@@ -27,11 +34,6 @@ public class PositionalParameter extends Parameter {
   }
 
   @Override
-  public OptionalInt positionalOrder() {
-    return OptionalInt.of(isRepeatable() ? 2 : isOptional() ? 1 : 0);
-  }
-
-  @Override
   public List<String> dashedNames() {
     return Collections.emptyList();
   }
@@ -44,5 +46,9 @@ public class PositionalParameter extends Parameter {
   @Override
   public char mnemonic() {
     return ' ';
+  }
+
+  public int position() {
+    return sourceMethod().getAnnotation(Param.class).value();
   }
 }

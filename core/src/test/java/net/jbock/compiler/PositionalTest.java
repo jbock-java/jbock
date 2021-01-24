@@ -81,7 +81,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Duplicate position: 1");
+        .withErrorContaining("duplicate position");
   }
 
 
@@ -123,7 +123,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("There can only be one repeatable param.");
+        .withErrorContaining("positional parameter A is also repeatable");
   }
 
   @Test
@@ -149,7 +149,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Bad position, expecting Optional < Required < Repeatable");
+        .withErrorContaining("position must be less than position of optional parameter A");
   }
 
   @Test
@@ -163,7 +163,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Bad position, expecting Optional < Required < Repeatable");
+        .withErrorContaining("position must be less than position of repeatable parameter A");
   }
 
   @Test
@@ -177,7 +177,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Bad position, expecting Optional < Required < Repeatable");
+        .withErrorContaining("position must be less than position of repeatable parameter A");
   }
 
   @Test

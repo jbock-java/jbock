@@ -87,4 +87,9 @@ public class EnumName {
   public String enumConstant() {
     return snake().toUpperCase(Locale.US);
   }
+
+  @Override
+  public String toString() {
+    return enumConstant();
+  }
 }

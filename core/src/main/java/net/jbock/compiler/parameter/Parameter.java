@@ -6,7 +6,6 @@ import net.jbock.Param;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Skew;
 import net.jbock.compiler.EnumName;
-import net.jbock.compiler.ValidationException;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -87,14 +86,8 @@ public abstract class Parameter {
     return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);
   }
 
-  public abstract OptionalInt positionalOrder();
-
   public EnumName paramName() {
     return coercion.paramName();
-  }
-
-  public ValidationException validationError(String message) {
-    return ValidationException.create(sourceMethod, message);
   }
 
   public Set<Modifier> getAccessModifiers() {
@@ -112,4 +105,8 @@ public abstract class Parameter {
   public abstract String optionName();
 
   public abstract char mnemonic();
+
+  ExecutableElement sourceMethod() {
+    return sourceMethod;
+  }
 }
