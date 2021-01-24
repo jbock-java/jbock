@@ -111,7 +111,9 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private void processSourceElement(TypeElement sourceElement) {
     ClassName generatedClass = generatedClass(sourceElement);
     try {
-      validateSourceElement(sourceElement);
+      validateSourceElement(sourceElement).ifPresent(msg -> {
+        throw ValidationException.create(sourceElement, msg);
+      });
       ClassName optionType = generatedClass.nestedClass("Option");
       Either<List<ValidationFailure>, List<Parameter>> either = getParams(sourceElement, optionType);
       either.ifPresentOrElse(parameters -> {
@@ -176,66 +178,63 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           .ifPresentOrElse(params::add, failures::add);
     }
     boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
-    for (ExecutableElement option : methods.options()) {
-      Optional<TypeElement> mapperClass = annotationUtil.getMapper(option);
-      ParameterModule module = new ParameterModule(sourceElement, mapperClass, option.getAnnotation(Option.class).bundleKey());
+    for (ExecutableElement sourceMethod : methods.options()) {
+      Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
+      ParameterModule module = new ParameterModule(sourceElement, mapperClass, sourceMethod.getAnnotation(Option.class).bundleKey());
       ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
           .optionType(optionType)
-          .sourceMethod(option)
+          .sourceMethod(sourceMethod)
           .typeTool(tool)
           .alreadyCreated(ImmutableList.copyOf(params))
           .parameterModule(module)
-          .description(getDescription(option));
+          .description(getDescription(sourceMethod));
       builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
           .ifPresentOrElse(params::add, failures::add);
-    }
-    if (!sourceElement.getAnnotation(Command.class).helpDisabled()) {
-      methods.options().forEach(this::checkHelp);
     }
     return failures.isEmpty() ? right(params) : left(failures);
   }
 
-  private static boolean validateParameterMethod(ExecutableElement method) {
-    if (!method.getModifiers().contains(ABSTRACT)) {
-      if (method.getAnnotation(Param.class) != null || method.getAnnotation(Option.class) != null) {
-        throw ValidationException.create(method, "The method must be abstract.");
+  private static boolean validateParameterMethod(ExecutableElement sourceMethod) {
+    if (!sourceMethod.getModifiers().contains(ABSTRACT)) {
+      if (sourceMethod.getAnnotation(Param.class) != null || sourceMethod.getAnnotation(Option.class) != null) {
+        throw ValidationException.create(sourceMethod, "The method must be abstract.");
       }
       return false;
     }
-    if (!method.getParameters().isEmpty()) {
-      throw ValidationException.create(method, "The method may not have any parameters.");
+    if (!sourceMethod.getParameters().isEmpty()) {
+      throw ValidationException.create(sourceMethod, "The method may not have any parameters.");
     }
-    if (!method.getTypeParameters().isEmpty()) {
-      throw ValidationException.create(method, "The method may not have any type parameters.");
+    if (!sourceMethod.getTypeParameters().isEmpty()) {
+      throw ValidationException.create(sourceMethod, "The method may not have any type parameters.");
     }
-    if (!method.getThrownTypes().isEmpty()) {
-      throw ValidationException.create(method, "The method may not declare any exceptions.");
+    if (!sourceMethod.getThrownTypes().isEmpty()) {
+      throw ValidationException.create(sourceMethod, "The method may not declare any exceptions.");
     }
-    if (method.getAnnotation(Param.class) == null && method.getAnnotation(Option.class) == null) {
-      throw ValidationException.create(method, String.format("Annotate this method with either @%s or @%s",
+    if (sourceMethod.getAnnotation(Param.class) == null && sourceMethod.getAnnotation(Option.class) == null) {
+      throw ValidationException.create(sourceMethod, String.format("Annotate this method with either @%s or @%s",
           Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
-    if (method.getAnnotation(Param.class) != null && method.getAnnotation(Option.class) != null) {
-      throw ValidationException.create(method, String.format("Use either @%s or @%s annotation, but not both",
+    if (sourceMethod.getAnnotation(Param.class) != null && sourceMethod.getAnnotation(Option.class) != null) {
+      throw ValidationException.create(sourceMethod, String.format("Use either @%s or @%s annotation, but not both",
           Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
-    if (isUnreachable(method.getReturnType())) {
-      throw ValidationException.create(method, "Unreachable parameter type.");
+    if (isUnreachable(sourceMethod.getReturnType())) {
+      throw ValidationException.create(sourceMethod, "Unreachable parameter type.");
     }
     return true;
   }
 
-  private void validateSourceElement(TypeElement sourceElement) {
+  private Optional<String> validateSourceElement(TypeElement sourceElement) {
     Optional<String> maybeFailure = commonChecks(sourceElement).map(s -> "command " + s);
-    Either.fromOptionalFailure(maybeFailure)
-        .filter(s -> {
+    return Either.<String, Void>fromOptionalFailure(maybeFailure)
+        .filter(nothing -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
           if (!interfaces.isEmpty()) {
             return Optional.of("command cannot implement " + interfaces.get(0));
           }
           return Optional.empty();
         })
-        .filter(s -> {
+        .filter(nothing -> {
           TypeMirror superclass = sourceElement.getSuperclass();
           boolean isObject = tool.isSameType(superclass, Object.class.getCanonicalName());
           if (!isObject) {
@@ -243,7 +242,9 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           }
           return Optional.empty();
         })
-        .orElseThrow(message -> ValidationException.create(sourceElement, message));
+        .swap()
+        .map(Optional::of)
+        .orRecover(nothing -> Optional.empty());
   }
 
   private static ClassName generatedClass(TypeElement sourceElement) {
@@ -287,12 +288,6 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       }
     }
     return result.toArray(new String[0]);
-  }
-
-  private void checkHelp(ExecutableElement option) {
-    if ("help".equals(option.getAnnotation(Option.class).value())) {
-      throw ValidationException.create(option, "'help' cannot be an option name. Disable the help feature via @Command.helpDisabled = true.");
-    }
   }
 
   private static void checkOnlyOnePositionalList(List<Parameter> allParams) {

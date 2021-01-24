@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import net.jbock.Command;
 import net.jbock.compiler.parameter.Parameter;
 
 import javax.lang.model.element.ExecutableElement;
@@ -80,10 +81,9 @@ public class ParameterScoped {
     }
     for (Parameter param : alreadyCreated()) {
       Optional<String> failure = param.bundleKey()
-          .filter(bundleKey -> bundleKey.equals(key))
-          .map(k -> "duplicate bundle key");
+          .filter(bundleKey -> bundleKey.equals(key));
       if (failure.isPresent()) {
-        return failure;
+        return Optional.of("duplicate bundle key");
       }
     }
     return Optional.empty();
@@ -91,5 +91,9 @@ public class ParameterScoped {
 
   public ParameterContext parameterContext() {
     return parameterContext;
+  }
+
+  boolean isHelpEnabled() {
+    return !parameterContext.sourceElement.getAnnotation(Command.class).helpDisabled();
   }
 }

@@ -20,13 +20,13 @@ public abstract class Either<L, R> {
         .orElseGet(() -> Left.create(failure.get()));
   }
 
-  public static <L, R> Either<L, R> fromOptionalFailure(Supplier<? extends R> success, Optional<? extends L> maybeFailure) {
+  public static <L, R> Either<L, R> fromOptionalFailure(Optional<? extends L> maybeFailure, Supplier<? extends R> success) {
     return maybeFailure.<Either<L, R>>map(Left::create)
         .orElseGet(() -> Right.create(success.get()));
   }
 
   public static <L, R> Either<L, R> fromOptionalFailure(Optional<? extends L> maybeFailure) {
-    return fromOptionalFailure(() -> null, maybeFailure);
+    return fromOptionalFailure(maybeFailure, () -> null);
   }
 
   public abstract boolean isPresent();
