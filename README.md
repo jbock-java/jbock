@@ -65,30 +65,35 @@ as in the `MyCommand` example:
 
 #### Skew table A
 
-Return type of the `abstract` method          | *Skew*
---------------------------------------------- | --------------------------------
-`boolean` or `Boolean`                        | *flag* (only for `@Option`)
-`Optional<A>`                                 | *optional*
-`OptionalInt`,`OptionalLong`,`OptionalDouble` | *optional*
-`List<A>`                                     | *repeatable*
-`A` (exact match)                             | *required*
+Return type of the `abstract` method      | *Skew*
+----------------------------------------- | --------------------------------
+`{boolean,Boolean}`                       | *flag* (only for `@Option`)
+`Optional<A>`                             | *optional*
+`Optional{Int,Long,Double}`               | *optional*
+`List<A>`                                 | *repeatable*
+`A` (exact match)                         | *required*
 
 where `A` must be one of the
 [auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java),
 otherwise compilation will fail.
 
+Both `@Option` and `@Param` have an optional attribute
+`mappedBy` which takes a single value of type `Class<?>`.
+Any such mapper class must implement `Function<String, E>` or `Supplier<Function<String, E>>` for some `E`.
+
 If a custom mapper is defined,
-then the skew is determined by comparing the mapper's return type `M`
-to the method's return type:
+then the skew is determined by comparing
+the method's return type to the type of its mapper:
 
 #### Skew table B
 
-Mapper return type        | Return type of the `abstract` method          | *Skew*
-------------------------- | --------------------------------------------- | ------------
-`M`                       | `Optional<M>`                                 | *optional*
-`Integer`,`Long`,`Double` | `OptionalInt`,`OptionalLong`,`OptionalDouble` | *optional*
-`M`                       | `List<M>`                                     | *repeatable*
-`M`                       | `M` (exact match)                             | *required*
+Mapper type                                     | Return type of the `abstract` method | *Skew*
+----------------------------------------------- | ------------------------------------ | ------------
+Function&lt;String, `M`&gt;                     | `Optional<M>`                        | *optional*
+Function&lt;String, `{Integer,Long,Double}`&gt; | `Optional{Int,Long,Double}`          | *optional*
+Function&lt;String, `M`&gt;                     | `List<M>`                            | *repeatable*
+Function&lt;String, `M`&gt;                     | `M`                                  | *required*
+Function&lt;String, `{Integer,Float,...}`&gt;   | `{int,float,...}`                    | *required*
 
 When none of these rules apply, compilation will fail.
 
