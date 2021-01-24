@@ -10,6 +10,7 @@ import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
 import java.util.Collections;
@@ -45,7 +46,10 @@ class ParameterMethodProcessingStep implements BasicAnnotationProcessor.Step {
     Element enclosingElement = method.getEnclosingElement();
     if (enclosingElement.getAnnotation(Command.class) == null) {
       messager.printMessage(Diagnostic.Kind.ERROR,
-          "The enclosing class is missing the @" + Command.class.getSimpleName() + " annotation.", method);
+          "put @" + Command.class.getSimpleName() + " annotation on the enclosing class", method);
+    }
+    if (!method.getModifiers().contains(Modifier.ABSTRACT)) {
+      messager.printMessage(Diagnostic.Kind.ERROR, "abstract method expected");
     }
   }
 }

@@ -11,6 +11,7 @@ import dagger.Component;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
+import net.jbock.coerce.Util;
 import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.view.GeneratedClass;
 import net.jbock.either.Either;
@@ -156,72 +157,56 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private Either<List<ValidationFailure>, List<Parameter>> getParams(TypeElement sourceElement, ClassName optionType) {
-    Methods methods = Methods.create(methodsIn(sourceElement.getEnclosedElements()).stream()
-        .filter(CommandProcessingStep::validateParameterMethod)
-        .collect(Collectors.toList()));
-    List<Parameter> params = new ArrayList<>();
-    AnnotationUtil annotationUtil = new AnnotationUtil();
-    List<ValidationFailure> failures = new ArrayList<>();
-    for (int i = 0; i < methods.params().size(); i++) {
-      ExecutableElement sourceMethod = methods.params().get(i);
-      Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
-      Param param = sourceMethod.getAnnotation(Param.class);
-      ParameterModule module = new ParameterModule(sourceElement, mapperClass, param.bundleKey());
-      ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
-          .optionType(optionType)
-          .sourceMethod(sourceMethod)
-          .typeTool(tool)
-          .alreadyCreated(ImmutableList.copyOf(params))
-          .parameterModule(module)
-          .description(getDescription(sourceMethod));
-      builder.build().positionalParameterFactory().createPositionalParam(i)
-          .ifPresentOrElse(params::add, failures::add);
-    }
-    boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
-    for (ExecutableElement sourceMethod : methods.options()) {
-      Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
-      ParameterModule module = new ParameterModule(sourceElement, mapperClass, sourceMethod.getAnnotation(Option.class).bundleKey());
-      ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
-          .optionType(optionType)
-          .sourceMethod(sourceMethod)
-          .typeTool(tool)
-          .alreadyCreated(ImmutableList.copyOf(params))
-          .parameterModule(module)
-          .description(getDescription(sourceMethod));
-      builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
-          .ifPresentOrElse(params::add, failures::add);
-    }
-    return failures.isEmpty() ? right(params) : left(failures);
+    return createMethods(sourceElement).select(methods -> {
+      List<Parameter> params = new ArrayList<>();
+      AnnotationUtil annotationUtil = new AnnotationUtil();
+      List<ValidationFailure> failures = new ArrayList<>();
+      for (int i = 0; i < methods.params().size(); i++) {
+        ExecutableElement sourceMethod = methods.params().get(i);
+        Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
+        Param param = sourceMethod.getAnnotation(Param.class);
+        ParameterModule module = new ParameterModule(sourceElement, mapperClass, param.bundleKey());
+        ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
+            .optionType(optionType)
+            .sourceMethod(sourceMethod)
+            .typeTool(tool)
+            .alreadyCreated(ImmutableList.copyOf(params))
+            .parameterModule(module)
+            .description(getDescription(sourceMethod));
+        builder.build().positionalParameterFactory().createPositionalParam(i)
+            .ifPresentOrElse(params::add, failures::add);
+      }
+      boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
+      for (ExecutableElement sourceMethod : methods.options()) {
+        Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
+        ParameterModule module = new ParameterModule(sourceElement, mapperClass, sourceMethod.getAnnotation(Option.class).bundleKey());
+        ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
+            .optionType(optionType)
+            .sourceMethod(sourceMethod)
+            .typeTool(tool)
+            .alreadyCreated(ImmutableList.copyOf(params))
+            .parameterModule(module)
+            .description(getDescription(sourceMethod));
+        builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
+            .ifPresentOrElse(params::add, failures::add);
+      }
+      return failures.isEmpty() ? right(params) : left(failures);
+    });
   }
 
-  private static boolean validateParameterMethod(ExecutableElement sourceMethod) {
-    if (!sourceMethod.getModifiers().contains(ABSTRACT)) {
-      if (sourceMethod.getAnnotation(Param.class) != null || sourceMethod.getAnnotation(Option.class) != null) {
-        throw ValidationException.create(sourceMethod, "The method must be abstract.");
-      }
-      return false;
+  private Either<List<ValidationFailure>, Methods> createMethods(TypeElement sourceElement) {
+    List<ValidationFailure> failures = new ArrayList<>();
+    List<ExecutableElement> sourceMethods = methodsIn(sourceElement.getEnclosedElements())
+        .stream()
+        .filter(sourceMethod -> sourceMethod.getModifiers().contains(ABSTRACT))
+        .collect(Collectors.toList());
+    for (ExecutableElement sourceMethod : sourceMethods) {
+      validateParameterMethod(sourceMethod).ifPresent(msg -> failures.add(new ValidationFailure(msg, sourceMethod)));
     }
-    if (!sourceMethod.getParameters().isEmpty()) {
-      throw ValidationException.create(sourceMethod, "The method may not have any parameters.");
+    if (!failures.isEmpty()) {
+      return left(failures);
     }
-    if (!sourceMethod.getTypeParameters().isEmpty()) {
-      throw ValidationException.create(sourceMethod, "The method may not have any type parameters.");
-    }
-    if (!sourceMethod.getThrownTypes().isEmpty()) {
-      throw ValidationException.create(sourceMethod, "The method may not declare any exceptions.");
-    }
-    if (sourceMethod.getAnnotation(Param.class) == null && sourceMethod.getAnnotation(Option.class) == null) {
-      throw ValidationException.create(sourceMethod, String.format("Annotate this method with either @%s or @%s",
-          Option.class.getSimpleName(), Param.class.getSimpleName()));
-    }
-    if (sourceMethod.getAnnotation(Param.class) != null && sourceMethod.getAnnotation(Option.class) != null) {
-      throw ValidationException.create(sourceMethod, String.format("Use either @%s or @%s annotation, but not both",
-          Option.class.getSimpleName(), Param.class.getSimpleName()));
-    }
-    if (isUnreachable(sourceMethod.getReturnType())) {
-      throw ValidationException.create(sourceMethod, "Unreachable parameter type.");
-    }
-    return true;
+    return right(Methods.create(sourceMethods));
   }
 
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
@@ -250,6 +235,32 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private static ClassName generatedClass(TypeElement sourceElement) {
     String name = String.join("_", ClassName.get(sourceElement).simpleNames()) + "_Parser";
     return ClassName.get(sourceElement).topLevelClassName().peerClass(name);
+  }
+
+  private static Optional<String> validateParameterMethod(ExecutableElement sourceMethod) {
+    if (!sourceMethod.getParameters().isEmpty()) {
+      return Optional.of("empty argument list expected");
+    }
+    if (!sourceMethod.getTypeParameters().isEmpty()) {
+      return Optional.of("type parameter" +
+          (sourceMethod.getTypeParameters().size() >= 2 ? "s" : "") +
+          " not expected here");
+    }
+    if (!sourceMethod.getThrownTypes().isEmpty()) {
+      return Optional.of("method may not declare any exceptions");
+    }
+    if (sourceMethod.getAnnotation(Param.class) == null && sourceMethod.getAnnotation(Option.class) == null) {
+      return Optional.of(String.format("add @%s or @%s annotation",
+          Option.class.getSimpleName(), Param.class.getSimpleName()));
+    }
+    if (sourceMethod.getAnnotation(Param.class) != null && sourceMethod.getAnnotation(Option.class) != null) {
+      return Optional.of(String.format("use @%s or @%s annotation but not both",
+          Option.class.getSimpleName(), Param.class.getSimpleName()));
+    }
+    if (isUnreachable(sourceMethod.getReturnType())) {
+      return Optional.of("unreachable type: " + Util.typeToString(sourceMethod.getReturnType()));
+    }
+    return Optional.empty();
   }
 
   private static boolean isUnreachable(TypeMirror mirror) {
@@ -312,7 +323,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private void handleUnknownError(TypeElement sourceType, Throwable e) {
-    String message = String.format("JBOCK: Unexpected error while processing %s: %s", sourceType, e.getMessage());
+    String message = String.format("Unexpected error while processing %s: %s", sourceType, e.getMessage());
     e.printStackTrace(System.err);
     messager.printMessage(Diagnostic.Kind.ERROR, message, sourceType);
   }

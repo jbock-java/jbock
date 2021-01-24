@@ -98,7 +98,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The method must be abstract.");
+        .withErrorContaining("abstract method expected");
   }
 
   @Test
@@ -312,7 +312,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The enclosing class is missing the @Command annotation.");
+        .withErrorContaining("put @Command annotation on the enclosing class");
   }
 
   @Test
@@ -325,7 +325,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The method may not have any parameters.");
+        .withErrorContaining("empty argument list expected");
   }
 
   @Test
@@ -338,7 +338,20 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("The method may not have any type parameters.");
+        .withErrorContaining("type parameter not expected here");
+  }
+
+  @Test
+  void typeParameters() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "  @Option(\"x\") abstract <E, F> String a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("type parameters not expected here");
   }
 
   @Test
@@ -352,7 +365,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Annotate this method with either @Option or @Param");
+        .withErrorContaining("add @Option or @Param annotation");
   }
 
   @Test
@@ -383,7 +396,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Use either @Option or @Param annotation, but not both");
+        .withErrorContaining("use @Option or @Param annotation but not both");
   }
 
   @Test
@@ -437,7 +450,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unreachable parameter type.");
+        .withErrorContaining("unreachable type: Foo");
   }
 
   @Test
@@ -456,7 +469,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Unreachable parameter type.");
+        .withErrorContaining("unreachable type: List<Foo>");
   }
 
 
