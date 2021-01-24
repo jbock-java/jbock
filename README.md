@@ -79,7 +79,7 @@ otherwise compilation will fail.
 
 If a custom mapper is defined,
 then the skew is determined by comparing the mapper's return type `M`
-and the return type of the option's `abstract` method:
+to the method's return type:
 
 #### Skew table B
 
@@ -92,7 +92,7 @@ Mapper return type        | Return type of the `abstract` method          | *Ske
 
 When none of these rules apply, compilation will fail.
 
-Both rule tables can be summarized in yet another table:
+Both rule tables can be summarized in a third table:
 
 #### Skew rules overview
 
