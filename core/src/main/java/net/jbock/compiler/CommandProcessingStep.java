@@ -111,23 +111,21 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private void processSourceElement(TypeElement sourceElement) {
     ClassName generatedClass = generatedClass(sourceElement);
     try {
-      validateSourceElement(sourceElement).ifPresent(msg -> {
-        throw ValidationException.create(sourceElement, msg);
-      });
       ClassName optionType = generatedClass.nestedClass("Option");
-      Either<List<ValidationFailure>, List<Parameter>> either = getParams(sourceElement, optionType);
-      either.ifPresentOrElse(parameters -> {
-        Context context = new Context(sourceElement, generatedClass, optionType, parameters);
-        TypeSpec typeSpec = GeneratedClass.create(context).define();
-        write(sourceElement, context.generatedClass(), typeSpec);
-      }, failures -> {
-        for (ValidationFailure failure : failures) {
-          messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
-        }
-      });
-    } catch (ValidationException e) {
-      messager.printMessage(Diagnostic.Kind.ERROR, e.getMessage(), e.about);
-    } catch (AssertionError error) {
+      Either.fromOptionalFailure(validateSourceElement(sourceElement))
+          .mapLeft(msg -> new ValidationFailure(msg, sourceElement))
+          .mapLeft(Collections::singletonList)
+          .select(nothing -> getParams(sourceElement, optionType))
+          .ifPresentOrElse(parameters -> {
+            Context context = new Context(sourceElement, generatedClass, optionType, parameters);
+            TypeSpec typeSpec = GeneratedClass.create(context).define();
+            write(sourceElement, context.generatedClass(), typeSpec);
+          }, failures -> {
+            for (ValidationFailure failure : failures) {
+              messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
+            }
+          });
+    } catch (Throwable error) {
       handleUnknownError(sourceElement, error);
     }
   }

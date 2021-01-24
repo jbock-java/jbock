@@ -60,9 +60,4 @@ final class Left<L, R> extends Either<L, R> {
   public R orRecover(Function<? super L, ? extends R> recover) {
     return recover.apply(value);
   }
-
-  @Override
-  public <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> exceptionFactory) throws X {
-    throw exceptionFactory.apply(value);
-  }
 }

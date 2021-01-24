@@ -79,6 +79,4 @@ public abstract class Either<L, R> {
   }
 
   public abstract void ifPresentOrElse(Consumer<? super R> action, Consumer<? super L> leftAction);
-
-  public abstract <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> exceptionFactory) throws X;
 }

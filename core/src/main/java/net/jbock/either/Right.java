@@ -54,9 +54,4 @@ final class Right<L, R> extends Either<L, R> {
   public R orRecover(Function<? super L, ? extends R> recover) {
     return value;
   }
-
-  @Override
-  public <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> exceptionFactory) {
-    return value;
-  }
 }
