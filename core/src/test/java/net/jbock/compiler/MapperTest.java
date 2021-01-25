@@ -12,6 +12,47 @@ import static net.jbock.compiler.ProcessorTest.fromSource;
 class MapperTest {
 
   @Test
+  void implementsBothFunctionAndSupplier() {
+    JavaFileObject javaFile = fromSource(
+        "@Mapper",
+        "class MapMap implements Function<String, String>, Supplier<Function<String, String>> {",
+        "  public String apply(String s) { return null; }",
+        "  public Function<String, String> get() { return null; }",
+        "}",
+        "",
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = MapMap.class)",
+        "  abstract String foo();",
+        "",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("mapper should implement Function<String, ?> or Supplier<Function<String, ?>> but not both");
+  }
+
+  @Test
+  void doesNotImplementFunction() {
+    JavaFileObject javaFile = fromSource(
+        "@Mapper",
+        "class MapMap {}",
+        "",
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(value = \"x\", mappedBy = MapMap.class)",
+        "  abstract String foo();",
+        "",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("mapper should implement Function<String, ?> or Supplier<Function<String, ?>>");
+  }
+
+  @Test
   void missingMapperAnnotation() {
     JavaFileObject javaFile = fromSource(
         "class MapMap implements Function<String, String> {",
