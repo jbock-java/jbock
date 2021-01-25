@@ -1,24 +1,24 @@
 plugins {
-    id 'java'
-    id 'com.github.johnrengelman.shadow' version '6.1.0'
-    id 'maven-publish'
-    id 'signing'
+    id("java")
+    id("com.github.johnrengelman.shadow") version("6.1.0")
+    id("maven-publish")
+    id("signing")
 }
 
-group = 'com.github.h908714124'
+group = "com.github.h908714124"
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(15)
+        languageVersion.set(JavaLanguageVersion.of(15))
     }
 }
 
 compileJava {
-    options.encoding = 'UTF-8'
-    sourceCompatibility = '8'
-    targetCompatibility = '8'
-    options.compilerArgs << '--release'
-    options.compilerArgs << '8'
+    options.encoding = "UTF-8"
+    sourceCompatibility = "8"
+    targetCompatibility = "8"
+    options.compilerArgs << "--release"
+    options.compilerArgs << "8"
 }
 
 repositories {
@@ -37,40 +37,36 @@ tasks.withType(GenerateModuleMetadata) {
 shadowJar {
     minimize()
     dependencies {
-        exclude(dependency('com.github.h908714124:jbock-annotations:.*'))
-        exclude(dependency('javax.annotation:jsr250-api:.*'))
+        exclude(dependency("com.github.h908714124:jbock-annotations:.*"))
+        exclude(dependency("javax.annotation:jsr250-api:.*"))
     }
-    archiveClassifier.set('')
-    relocate 'dagger', 'net.jbock.dagger'
-    relocate 'com.squareup.javapoet', 'net.jbock.javapoet'
-    relocate 'com.google.auto', 'net.jbock.google.auto'
-    relocate 'com.google.common', 'net.jbock.google.common'
-    relocate 'com.google.thirdparty', 'net.jbock.google.thirdparty'
-    relocate 'com.google.j2objc', 'net.jbock.google.j2objc'
-    relocate 'com.google.errorprone', 'net.jbock.google.errorprone'
-    relocate 'org.checkerframework', 'net.jbock.org.checkerframework'
-    relocate 'javax.inject', 'net.jbock.javax.inject'
+    archiveClassifier.set("")
+    relocate("dagger", "net.jbock.dagger")
+    relocate("com.squareup.javapoet", "net.jbock.javapoet")
+    relocate("com.google", "net.jbock.google")
+    relocate("org.checkerframework", "net.jbock.org.checkerframework")
+    relocate("javax.inject", "net.jbock.javax.inject")
 }
 
 dependencies {
-    implementation 'com.squareup:javapoet:1.13.0'
-    implementation 'com.google.auto:auto-common:0.11'
-    implementation 'com.google.guava:guava:30.1-jre'
-    shadow 'com.github.h908714124:jbock-annotations:3.5'
-    implementation 'com.google.dagger:dagger:2.30.1'
-    annotationProcessor 'com.google.dagger:dagger-compiler:2.30.1'
-    implementation 'javax.annotation:jsr250-api:1.0'
-    testImplementation 'com.github.h908714124:jbock-annotations:3.5'
-    testImplementation 'com.google.testing.compile:compile-testing:0.19'
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
-    testImplementation 'org.mockito:mockito-core:3.6.0'
+    implementation("com.squareup:javapoet:1.13.0")
+    implementation("com.google.auto:auto-common:0.11")
+    implementation("com.google.guava:guava:30.1-jre")
+    shadow("com.github.h908714124:jbock-annotations:3.5")
+    implementation("com.google.dagger:dagger:2.30.1")
+    annotationProcessor("com.google.dagger:dagger-compiler:2.30.1")
+    implementation("javax.annotation:jsr250-api:1.0")
+    testImplementation("com.github.h908714124:jbock-annotations:3.5")
+    testImplementation("com.google.testing.compile:compile-testing:0.19")
+    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
+    testImplementation("org.mockito:mockito-core:3.6.0")
 }
 
 jar {
     manifest {
         attributes(
-                'Automatic-Module-Name': 'net.jbock.compiler',
-                'Implementation-Version': project.properties['version']
+                "Automatic-Module-Name": "net.jbock.compiler",
+                "Implementation-Version": project.properties["version"]
         )
     }
 }
@@ -78,30 +74,30 @@ jar {
 test {
     useJUnitPlatform()
     testLogging {
-        events "failed"
+        events("failed")
     }
 }
 
 task javadocJar(type: Jar) {
     from javadoc
-    archiveClassifier.set('javadoc')
+    archiveClassifier.set("javadoc")
 }
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    archiveClassifier.set('sources')
+    archiveClassifier.set("sources")
 }
 
 artifacts {
-    archives javadocJar, sourcesJar
+    archives(javadocJar, sourcesJar)
 }
 
 // https://docs.gradle.org/current/userguide/signing_plugin.html
 gradle.taskGraph.whenReady { taskGraph ->
     if (taskGraph.allTasks.any { it instanceof Sign }) {
         allprojects {
-            ext."signatory.keyId" = System.getenv('SIGNING_KEY_ID')
-            ext."signatory.password" = System.getenv('SIGNING_PASSWORD')
+            ext."signatory.keyId" = System.getenv("SIGNING_KEY_ID")
+            ext."signatory.password" = System.getenv("SIGNING_PASSWORD")
         }
     }
 }
@@ -111,52 +107,49 @@ publishing {
     publications {
         mavenJava(MavenPublication) { publication ->
             project.shadow.component(publication)
-            artifactId = 'jbock'
-
-            artifact sourcesJar
-            artifact javadocJar
+            artifactId = "jbock"
 
             pom {
-                name = 'jbock'
-                packaging = 'jar'
-                description = 'The jbock command line parser'
-                url = 'https://github.com/h908714124/jbock'
+                name = "jbock"
+                packaging = "jar"
+                description = "The jbock command line parser"
+                url = "https://github.com/h908714124/jbock"
 
                 licenses {
                     license {
-                        name = 'MIT License'
-                        url = 'https://opensource.org/licenses/MIT'
+                        name = "MIT License"
+                        url = "https://opensource.org/licenses/MIT"
                     }
                 }
                 developers {
                     developer {
-                        id = 'h908714124'
-                        name = 'h908714124'
-                        email = 'kraftdurchblumen@gmx.de'
+                        id = "h908714124"
+                        name = "h908714124"
+                        email = "kraftdurchblumen@gmx.de"
                     }
                 }
                 scm {
-                    connection = 'scm:svn:https://github.com/h908714124/jbock.git'
-                    developerConnection = 'scm:svn:https://github.com/h908714124/jbock.git'
-                    url = 'https://github.com/h908714124/jbock'
+                    connection = "scm:svn:https://github.com/h908714124/jbock.git"
+                    developerConnection = "scm:svn:https://github.com/h908714124/jbock.git"
+                    url = "https://github.com/h908714124/jbock"
                 }
             }
         }
     }
     repositories {
         maven {
-            url = 'https://oss.sonatype.org/service/local/staging/deploy/maven2/'
+            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
             credentials {
-                username = System.getenv('OSS_USER')
-                password = System.getenv('OSS_PASS')
+                username = System.getenv("OSS_USER")
+                password = System.getenv("OSS_PASS")
             }
         }
     }
 }
 
 signing {
-    def signingKey = findProperty('signingKey')
-    def signingPassword = findProperty('signingPassword')
+    def signingKey = findProperty("signingKey")
+    def signingPassword = findProperty("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign publishing.publications.mavenJava
 }
