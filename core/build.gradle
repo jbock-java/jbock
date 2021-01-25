@@ -109,6 +109,9 @@ publishing {
             project.shadow.component(publication)
             artifactId = "jbock"
 
+            artifact sourcesJar
+            artifact javadocJar
+
             pom {
                 name = "jbock"
                 packaging = "jar"
