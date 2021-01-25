@@ -84,12 +84,12 @@ test {
 
 task javadocJar(type: Jar) {
     from javadoc
-    archiveClassifier = 'javadoc'
+    archiveClassifier.set('javadoc')
 }
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    archiveClassifier = 'sources'
+    archiveClassifier.set('sources')
 }
 
 artifacts {
@@ -152,10 +152,6 @@ publishing {
             }
         }
     }
-}
-
-signing {
-    sign configurations.archives
 }
 
 signing {
