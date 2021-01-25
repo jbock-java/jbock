@@ -57,7 +57,7 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public R orRecover(Function<? super L, ? extends R> recover) {
+  public R orElse(Function<? super L, ? extends R> recover) {
     return recover.apply(value);
   }
 }

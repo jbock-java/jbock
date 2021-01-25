@@ -51,12 +51,6 @@ public abstract class Either<L, R> {
     return result;
   }
 
-  public final <L2> Either<L2, R> selectLeft(Function<? super L, ? extends Either<? extends L2, ? extends R>> choice) {
-    @SuppressWarnings("unchecked")
-    Either<L2, R> result = (Either<L2, R>) swap().select(l -> choice.apply(l).swap()).swap();
-    return result;
-  }
-
   public final Either<L, R> maybeRecover(Function<? super L, ? extends Optional<? extends R>> choice) {
     return swap().filter(choice).swap();
   }
@@ -65,11 +59,7 @@ public abstract class Either<L, R> {
     return maybeRecover(value -> choice.get());
   }
 
-  public abstract R orRecover(Function<? super L, ? extends R> recover);
-
-  public final R orRecover(Supplier<? extends R> success) {
-    return orRecover(left -> success.get());
-  }
+  public abstract R orElse(Function<? super L, ? extends R> recover);
 
   public abstract Either<R, L> swap();
 

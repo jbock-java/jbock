@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -206,7 +207,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
     Optional<String> maybeFailure = commonChecks(sourceElement).map(s -> "command " + s);
-    return Either.<String, Void>fromOptionalFailure(maybeFailure)
+    // the following _should_ be done with Optional#or but we're on Java 8 :-/
+    return Either.<String, Optional<String>>fromOptionalFailure(maybeFailure, Optional::empty)
         .filter(nothing -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
           if (!interfaces.isEmpty()) {
@@ -224,7 +226,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         })
         .swap()
         .map(Optional::of)
-        .orRecover(nothing -> Optional.empty());
+        .orElse(Function.identity());
   }
 
   private static ClassName generatedClass(TypeElement sourceElement) {
