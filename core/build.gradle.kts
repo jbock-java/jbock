@@ -1,6 +1,8 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+
 plugins {
     id("java")
-    id("com.github.johnrengelman.shadow") version("6.1.0")
+    id("com.github.johnrengelman.shadow") version ("6.1.0")
     id("maven-publish")
     id("signing")
 }
@@ -13,28 +15,27 @@ java {
     }
 }
 
-compileJava {
+tasks.withType<JavaCompile>() {
     options.encoding = "UTF-8"
     sourceCompatibility = "8"
     targetCompatibility = "8"
-    options.compilerArgs << "--release"
-    options.compilerArgs << "8"
+    options.compilerArgs.addAll(listOf("--release", "8"))
 }
 
 repositories {
     mavenCentral()
 }
 
-tasks.withType(AbstractArchiveTask) {
-    preserveFileTimestamps = false
-    reproducibleFileOrder = true
+tasks.withType<AbstractArchiveTask>() {
+    setPreserveFileTimestamps(false)
+    setReproducibleFileOrder(true)
 }
 
-tasks.withType(GenerateModuleMetadata) {
+tasks.withType<GenerateModuleMetadata>() {
     enabled = true
 }
 
-shadowJar {
+tasks.withType<ShadowJar>() {
     minimize()
     dependencies {
         exclude(dependency("com.github.h908714124:jbock-annotations:.*"))
@@ -61,13 +62,11 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
     testImplementation("org.mockito:mockito-core:3.6.0")
 }
-
-jar {
+val version: String by project
+tasks.withType<Jar>() {
     manifest {
-        attributes(
-                "Automatic-Module-Name": "net.jbock.compiler",
-                "Implementation-Version": project.properties["version"]
-        )
+        attributes["Automatic-Module-Name"] = "net.jbock.compiler"
+        attributes["Implementation-Version"] = "${version}"
     }
 }
 
@@ -78,14 +77,14 @@ test {
     }
 }
 
-task javadocJar(type: Jar) {
+task javadocJar (type: Jar) {
     from javadoc
-    archiveClassifier.set("javadoc")
+            archiveClassifier.set("javadoc")
 }
 
-task sourcesJar(type: Jar) {
-    from sourceSets.main.allJava
-    archiveClassifier.set("sources")
+task sourcesJar (type: Jar) {
+    from sourceSets . main . allJava
+            archiveClassifier.set("sources")
 }
 
 artifacts {
@@ -110,33 +109,33 @@ publishing {
             artifactId = "jbock"
 
             artifact sourcesJar
-            artifact javadocJar
+                    artifact javadocJar
 
-            pom {
-                name = "jbock"
-                packaging = "jar"
-                description = "The jbock command line parser"
-                url = "https://github.com/h908714124/jbock"
+                    pom {
+                        name = "jbock"
+                        packaging = "jar"
+                        description = "The jbock command line parser"
+                        url = "https://github.com/h908714124/jbock"
 
-                licenses {
-                    license {
-                        name = "MIT License"
-                        url = "https://opensource.org/licenses/MIT"
+                        licenses {
+                            license {
+                                name = "MIT License"
+                                url = "https://opensource.org/licenses/MIT"
+                            }
+                        }
+                        developers {
+                            developer {
+                                id = "h908714124"
+                                name = "h908714124"
+                                email = "kraftdurchblumen@gmx.de"
+                            }
+                        }
+                        scm {
+                            connection = "scm:svn:https://github.com/h908714124/jbock.git"
+                            developerConnection = "scm:svn:https://github.com/h908714124/jbock.git"
+                            url = "https://github.com/h908714124/jbock"
+                        }
                     }
-                }
-                developers {
-                    developer {
-                        id = "h908714124"
-                        name = "h908714124"
-                        email = "kraftdurchblumen@gmx.de"
-                    }
-                }
-                scm {
-                    connection = "scm:svn:https://github.com/h908714124/jbock.git"
-                    developerConnection = "scm:svn:https://github.com/h908714124/jbock.git"
-                    url = "https://github.com/h908714124/jbock"
-                }
-            }
         }
     }
     repositories {
@@ -151,8 +150,8 @@ publishing {
 }
 
 signing {
-    def signingKey = findProperty("signingKey")
-    def signingPassword = findProperty("signingPassword")
+    def signingKey = findProperty ("signingKey")
+    def signingPassword = findProperty ("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing.publications.mavenJava
+    sign publishing . publications . mavenJava
 }
