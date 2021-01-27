@@ -82,6 +82,13 @@ tasks.create<ConfigureShadowRelocation>("relocateShadowJar") {
     target = tasks["shadowJar"] as ShadowJar
 }
 
+// Configure Shadow to output with normal jar file name:
+tasks.named<ShadowJar>("shadowJar").configure {
+    dependsOn(tasks["relocateShadowJar"])
+    minimize()
+    archiveClassifier.set("")
+}
+
 // Disabling default jar task as jar is output by shadowJar
 tasks.named("jar").configure {
     enabled = false
