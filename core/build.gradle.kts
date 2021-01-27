@@ -1,4 +1,5 @@
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import org.gradle.plugins.signing.Sign
 
 plugins {
     id("java")
@@ -10,6 +11,8 @@ plugins {
 group = "com.github.h908714124"
 
 java {
+    withSourcesJar()
+    withJavadocJar()
     toolchain {
         languageVersion.set(JavaLanguageVersion.of(15))
     }
@@ -31,11 +34,7 @@ tasks.withType<AbstractArchiveTask>() {
     setReproducibleFileOrder(true)
 }
 
-tasks.withType<GenerateModuleMetadata>() {
-    enabled = true
-}
-
-tasks.withType<ShadowJar>() {
+tasks.named<ShadowJar>("shadowJar").configure {
     minimize()
     dependencies {
         exclude(dependency("com.github.h908714124:jbock-annotations:.*"))
@@ -70,34 +69,36 @@ tasks.withType<Jar>() {
     }
 }
 
-test {
+// Disabling default jar task as jar is output by shadowJar
+tasks.named("jar").configure {
+    enabled = false
+}
+
+// Disable Gradle module.json as it lists wrong dependencies
+tasks.withType<GenerateModuleMetadata> {
+    enabled = false
+}
+
+tasks.test {
     useJUnitPlatform()
     testLogging {
         events("failed")
     }
 }
 
-task javadocJar (type: Jar) {
-    from javadoc
-            archiveClassifier.set("javadoc")
-}
-
-task sourcesJar (type: Jar) {
-    from sourceSets . main . allJava
-            archiveClassifier.set("sources")
-}
-
-artifacts {
-    archives(javadocJar, sourcesJar)
-}
-
 // https://docs.gradle.org/current/userguide/signing_plugin.html
-gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.allTasks.any { it instanceof Sign }) {
+gradle.taskGraph.whenReady {
+    allTasks.filterIsInstance<Sign>().forEach { task ->
         allprojects {
-            ext."signatory.keyId" = System.getenv("SIGNING_KEY_ID")
-            ext."signatory.password" = System.getenv("SIGNING_PASSWORD")
+            ext["signatory.keyId"] = System.getenv("SIGNING_KEY_ID")
+            ext["signatory.password"] = System.getenv("SIGNING_PASSWORD")
         }
+
+    //    if (taskGraph.allTasks.any { it instanceof Sign }) {
+//        allprojects {
+//            ext."signatory.keyId" = System.getenv("SIGNING_KEY_ID")
+//            ext."signatory.password" = System.getenv("SIGNING_PASSWORD")
+//        }
     }
 }
 
@@ -153,5 +154,5 @@ signing {
     def signingKey = findProperty ("signingKey")
     def signingPassword = findProperty ("signingPassword")
     useInMemoryPgpKeys(signingKey, signingPassword)
-    sign publishing . publications . mavenJava
+    sign(publishing.publications["mavenJava"])
 }
