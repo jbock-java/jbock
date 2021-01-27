@@ -156,7 +156,7 @@ configure<PublishingExtension> {
                     val dependencyNodes: NodeList = pomNode.get("dependencies") as NodeList
                     dependencyNodes.forEach {
                         val node = it as Node
-                        node.parent().remove(it)
+                        node.parent().remove(node)
                     }
                 }
             }
