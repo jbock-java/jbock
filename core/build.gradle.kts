@@ -150,6 +150,24 @@ publishing {
     }
 }
 
+// Remove dependencies from POM: uber jar has no dependencies
+configure<PublishingExtension> {
+    publications {
+        withType(MavenPublication::class.java) {
+            if (name == "pluginMaven") {
+                pom.withXml {
+                    val pomNode = asNode()
+
+                    val dependencyNodes: NodeList = pomNode.get("dependencies") as NodeList
+                    dependencyNodes.forEach {
+                        (it as Node).parent().remove(it)
+                    }
+                }
+            }
+        }
+    }
+}
+
 signing {
     def signingKey = findProperty ("signingKey")
     def signingPassword = findProperty ("signingPassword")
