@@ -1,12 +1,7 @@
-import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
-import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import groovy.util.Node
-import groovy.util.NodeList
 import org.gradle.plugins.signing.Sign
 
 plugins {
     id("java")
-    id("com.github.johnrengelman.shadow") version ("6.1.0")
     id("maven-publish")
     id("signing")
 }
@@ -44,51 +39,6 @@ tasks.withType<AbstractArchiveTask>() {
     setReproducibleFileOrder(true)
 }
 
-tasks.named<ShadowJar>("shadowJar").configure {
-    minimize()
-    dependencies {
-        exclude(dependency("com.github.h908714124:jbock-annotations:.*"))
-        exclude(dependency("javax.annotation:jsr250-api:.*"))
-    }
-    archiveClassifier.set("")
-    relocate("dagger", "net.jbock.dagger")
-    relocate("com.squareup.javapoet", "net.jbock.javapoet")
-    relocate("com.google", "net.jbock.google")
-    relocate("org.checkerframework", "net.jbock.org.checkerframework")
-    relocate("javax.inject", "net.jbock.javax.inject")
-}
-
-dependencies {
-    implementation("com.squareup:javapoet:1.13.0")
-    implementation("com.google.auto:auto-common:0.11")
-    implementation("com.google.guava:guava:30.1-jre")
-    shadow("com.github.h908714124:jbock-annotations:3.5")
-    implementation("com.google.dagger:dagger:2.30.1")
-    annotationProcessor("com.google.dagger:dagger-compiler:2.30.1")
-    implementation("javax.annotation:jsr250-api:1.0")
-    testImplementation("com.github.h908714124:jbock-annotations:3.5")
-    testImplementation("com.google.testing.compile:compile-testing:0.19")
-    testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
-    testImplementation("org.mockito:mockito-core:3.6.0")
-}
-val version: String by project
-tasks.withType<Jar>() {
-    manifest {
-        attributes["Automatic-Module-Name"] = "net.jbock.compiler"
-        attributes["Implementation-Version"] = "${version}"
-    }
-}
-
-// Shadow ALL dependencies:
-tasks.create<ConfigureShadowRelocation>("relocateShadowJar") {
-    target = tasks["shadowJar"] as ShadowJar
-}
-
-// Disabling default jar task as jar is output by shadowJar
-tasks.named("jar").configure {
-    enabled = false
-}
-
 // Disable Gradle module.json as it lists wrong dependencies
 tasks.withType<GenerateModuleMetadata> {
     enabled = false
@@ -108,11 +58,11 @@ gradle.taskGraph.whenReady {
 publishing {
     publications {
         create<MavenPublication>("mavenJava") {
-            artifactId = "jbock"
+            artifactId = "jbock-annotations"
 
             pom {
                 name.set("jbock")
-                description.set("A command line parser generator")
+                description.set("A command line parser generator ")
                 url.set("https://github.com/h908714124/jbock")
 
                 licenses {
@@ -142,24 +92,6 @@ publishing {
             credentials {
                 username = System.getenv("OSS_USER")
                 password = System.getenv("OSS_PASS")
-            }
-        }
-    }
-}
-
-// Remove dependencies from POM: uber jar has no dependencies
-configure<PublishingExtension> {
-    publications {
-        withType(MavenPublication::class.java) {
-            if (name == "pluginMaven") {
-                pom.withXml {
-                    val pomNode = asNode()
-
-                    val dependencyNodes: NodeList = pomNode.get("dependencies") as NodeList
-                    dependencyNodes.forEach {
-                        (it as Node).parent().remove(it)
-                    }
-                }
             }
         }
     }
