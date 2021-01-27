@@ -31,9 +31,15 @@ public abstract class Either<L, R> {
 
   public abstract boolean isPresent();
 
-  public abstract <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper);
+  public final <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper) {
+    return select(r -> right(rightMapper.apply(r)));
+  }
 
-  public abstract <R2> Either<L, R2> select(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice);
+  /**
+   * aka flatMap
+   */
+  public abstract <R2> Either<L, R2> select(
+      Function<? super R, ? extends Either<? extends L, ? extends R2>> choice);
 
   public final <R2> Either<L, R2> select(Supplier<? extends Either<? extends L, ? extends R2>> choice) {
     return select(r -> choice.get());
@@ -59,7 +65,13 @@ public abstract class Either<L, R> {
     return maybeRecover(value -> choice.get());
   }
 
-  public abstract R orElse(Function<? super L, ? extends R> recover);
+  public abstract <T> T fold(
+      Function<? super L, ? extends T> leftMapper,
+      Function<? super R, ? extends T> rightMapper);
+
+  public final R orElse(Function<? super L, ? extends R> recover) {
+    return fold(recover, Function.identity());
+  }
 
   public abstract Either<R, L> swap();
 

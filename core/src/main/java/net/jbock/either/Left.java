@@ -32,11 +32,6 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper) {
-    return theSame();
-  }
-
-  @Override
   public Either<R, L> swap() {
     return right(value);
   }
@@ -57,7 +52,7 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public R orElse(Function<? super L, ? extends R> recover) {
-    return recover.apply(value);
+  public <T> T fold(Function<? super L, ? extends T> leftMapper, Function<? super R, ? extends T> rightMapper) {
+    return leftMapper.apply(value);
   }
 }
