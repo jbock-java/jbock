@@ -1,4 +1,7 @@
+import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocation
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
+import groovy.util.Node
+import groovy.util.NodeList
 import org.gradle.plugins.signing.Sign
 
 plugins {
@@ -6,6 +9,10 @@ plugins {
     id("com.github.johnrengelman.shadow") version ("6.1.0")
     id("maven-publish")
     id("signing")
+}
+
+repositories {
+    mavenCentral()
 }
 
 group = "com.github.h908714124"
@@ -25,8 +32,11 @@ tasks.withType<JavaCompile>() {
     options.compilerArgs.addAll(listOf("--release", "8"))
 }
 
-repositories {
-    mavenCentral()
+tasks.test {
+    useJUnitPlatform()
+    testLogging {
+        events("failed")
+    }
 }
 
 tasks.withType<AbstractArchiveTask>() {
@@ -69,6 +79,11 @@ tasks.withType<Jar>() {
     }
 }
 
+// Shadow ALL dependencies:
+tasks.create<ConfigureShadowRelocation>("relocateShadowJar") {
+    target = tasks["shadowJar"] as ShadowJar
+}
+
 // Disabling default jar task as jar is output by shadowJar
 tasks.named("jar").configure {
     enabled = false
@@ -77,13 +92,6 @@ tasks.named("jar").configure {
 // Disable Gradle module.json as it lists wrong dependencies
 tasks.withType<GenerateModuleMetadata> {
     enabled = false
-}
-
-tasks.test {
-    useJUnitPlatform()
-    testLogging {
-        events("failed")
-    }
 }
 
 // https://docs.gradle.org/current/userguide/signing_plugin.html
@@ -105,43 +113,38 @@ gradle.taskGraph.whenReady {
 // https://central.sonatype.org/pages/gradle.html
 publishing {
     publications {
-        mavenJava(MavenPublication) { publication ->
-            project.shadow.component(publication)
+        create<MavenPublication>("mavenJava") {
             artifactId = "jbock"
 
-            artifact sourcesJar
-                    artifact javadocJar
-
                     pom {
-                        name = "jbock"
-                        packaging = "jar"
-                        description = "The jbock command line parser"
-                        url = "https://github.com/h908714124/jbock"
+                        name.set("jbock")
+                        description.set("A command line parser generator ")
+                        url.set("https://github.com/h908714124/jbock")
 
                         licenses {
                             license {
-                                name = "MIT License"
-                                url = "https://opensource.org/licenses/MIT"
+                                name.set("MIT License")
+                                url.set("https://opensource.org/licenses/MIT")
                             }
                         }
                         developers {
                             developer {
-                                id = "h908714124"
-                                name = "h908714124"
-                                email = "kraftdurchblumen@gmx.de"
+                                id.set("h908714124")
+                                name.set("h908714124")
+                                email.set("kraftdurchblumen@gmx.de")
                             }
                         }
                         scm {
-                            connection = "scm:svn:https://github.com/h908714124/jbock.git"
-                            developerConnection = "scm:svn:https://github.com/h908714124/jbock.git"
-                            url = "https://github.com/h908714124/jbock"
+                            connection.set("scm:svn:https://github.com/h908714124/jbock.git")
+                            developerConnection.set("scm:svn:https://github.com/h908714124/jbock.git")
+                            url.set("https://github.com/h908714124/jbock")
                         }
                     }
         }
     }
     repositories {
         maven {
-            url = "https://oss.sonatype.org/service/local/staging/deploy/maven2/"
+            url = uri("https://oss.sonatype.org/service/local/staging/deploy/maven2/")
             credentials {
                 username = System.getenv("OSS_USER")
                 password = System.getenv("OSS_PASS")
@@ -169,8 +172,8 @@ configure<PublishingExtension> {
 }
 
 signing {
-    def signingKey = findProperty ("signingKey")
-    def signingPassword = findProperty ("signingPassword")
-    useInMemoryPgpKeys(signingKey, signingPassword)
+    val signingKey = findProperty ("signingKey")
+    val signingPassword = findProperty ("signingPassword")
+    useInMemoryPgpKeys("" + signingKey, "" + signingPassword)
     sign(publishing.publications["mavenJava"])
 }

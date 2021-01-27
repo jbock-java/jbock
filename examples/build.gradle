@@ -21,9 +21,9 @@ compileJava {
 }
 
 dependencies {
-    compileOnly project(':annotations')
-    annotationProcessor project(':core')
-    annotationProcessor project(':annotations')
+    compileOnly "com.github.h908714124:jbock-annotations:3.5"
+    annotationProcessor "com.github.h908714124:jbock:3.5.005"
+    annotationProcessor "com.github.h908714124:jbock-annotations:3.5"
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
     testImplementation 'org.mockito:mockito-core:3.6.0' //  for mocking resourcebundle
 }
