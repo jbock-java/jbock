@@ -70,28 +70,12 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
     testImplementation("org.mockito:mockito-core:3.6.0")
 }
+
 tasks.withType<Jar> {
     manifest {
         attributes["Automatic-Module-Name"] = "net.jbock.compiler"
         attributes["Implementation-Version"] = project.version.toString()
     }
-}
-
-// Shadow ALL dependencies:
-tasks.create<ConfigureShadowRelocation>("relocateShadowJar") {
-    target = tasks["shadowJar"] as ShadowJar
-}
-
-// Configure Shadow to output with normal jar file name:
-tasks.named<ShadowJar>("shadowJar").configure {
-    dependsOn(tasks["relocateShadowJar"])
-    minimize()
-    archiveClassifier.set("")
-}
-
-// Disabling default jar task as jar is output by shadowJar
-tasks.named("jar").configure {
-    enabled = false
 }
 
 // Disable Gradle module.json as it lists wrong dependencies
