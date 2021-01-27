@@ -2,11 +2,10 @@ import com.github.jengelman.gradle.plugins.shadow.tasks.ConfigureShadowRelocatio
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
 import groovy.util.Node
 import groovy.util.NodeList
-import org.gradle.plugins.signing.Sign
 
 plugins {
     id("java")
-    id("com.github.johnrengelman.shadow") version ("6.1.0")
+    id("com.github.johnrengelman.shadow").version("6.1.0")
     id("maven-publish")
     id("signing")
 }
@@ -25,7 +24,7 @@ java {
     }
 }
 
-tasks.withType<JavaCompile>() {
+tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"
     sourceCompatibility = "8"
     targetCompatibility = "8"
@@ -39,9 +38,9 @@ tasks.test {
     }
 }
 
-tasks.withType<AbstractArchiveTask>() {
-    setPreserveFileTimestamps(false)
-    setReproducibleFileOrder(true)
+tasks.withType<AbstractArchiveTask> {
+    isPreserveFileTimestamps = false
+    isReproducibleFileOrder = true
 }
 
 tasks.named<ShadowJar>("shadowJar").configure {
@@ -71,11 +70,10 @@ dependencies {
     testImplementation("org.junit.jupiter:junit-jupiter:5.7.0")
     testImplementation("org.mockito:mockito-core:3.6.0")
 }
-val version: String by project
-tasks.withType<Jar>() {
+tasks.withType<Jar> {
     manifest {
         attributes["Automatic-Module-Name"] = "net.jbock.compiler"
-        attributes["Implementation-Version"] = "${version}"
+        attributes["Implementation-Version"] = project.version.toString()
     }
 }
 
@@ -96,7 +94,7 @@ tasks.withType<GenerateModuleMetadata> {
 
 // https://docs.gradle.org/current/userguide/signing_plugin.html
 gradle.taskGraph.whenReady {
-    allTasks.filterIsInstance<Sign>().forEach { task ->
+    if (allTasks.filterIsInstance<Sign>().isNotEmpty()) {
         allprojects {
             ext["signatory.keyId"] = System.getenv("SIGNING_KEY_ID")
             ext["signatory.password"] = System.getenv("SIGNING_PASSWORD")
@@ -157,7 +155,8 @@ configure<PublishingExtension> {
 
                     val dependencyNodes: NodeList = pomNode.get("dependencies") as NodeList
                     dependencyNodes.forEach {
-                        (it as Node).parent().remove(it)
+                        val node = it as Node
+                        node.parent().remove(it)
                     }
                 }
             }
