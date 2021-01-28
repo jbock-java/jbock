@@ -1,7 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.either.Either;
-
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -12,9 +10,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor8;
 import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
-
-import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
+import java.util.Optional;
 
 public class TypeTool {
 
@@ -63,15 +59,16 @@ public class TypeTool {
   /**
    * The canonical name must be a class with exactly one type parameter.
    */
-  public Either<String, TypeMirror> getSingleTypeArgument(TypeMirror mirror, String canonicalName) {
+  public Optional<TypeMirror> getSingleTypeArgument(TypeMirror mirror, Class<?> someClass) {
+    String canonicalName = someClass.getCanonicalName();
     if (!isSameErasure(mirror, canonicalName)) {
-      return left("different erasure");
+      return Optional.empty();
     }
     DeclaredType declaredType = AS_DECLARED.visit(mirror);
     if (declaredType.getTypeArguments().isEmpty()) {
-      return left("different number of type arguments");
+      return Optional.empty();
     }
-    return right(declaredType.getTypeArguments().get(0));
+    return Optional.of(declaredType.getTypeArguments().get(0));
   }
 
   public boolean isSameErasure(TypeMirror x, String y) {

@@ -7,17 +7,17 @@ import javax.lang.model.type.TypeMirror;
 
 public class UnwrapSuccess {
 
-  private final TypeMirror wrappedType;
+  private final TypeMirror typeArg;
   private final ParameterSpec constructorParam;
   private final CodeBlock extractExpr;
   private final int rank;
 
   private UnwrapSuccess(
-      TypeMirror wrappedType,
+      TypeMirror typeArg,
       ParameterSpec constructorParam,
       CodeBlock extractExpr,
       int rank) {
-    this.wrappedType = wrappedType;
+    this.typeArg = typeArg;
     this.constructorParam = constructorParam;
     this.extractExpr = extractExpr;
     this.rank = rank;
@@ -35,8 +35,8 @@ public class UnwrapSuccess {
     return new UnwrapSuccess(wrappedType, constructorParam, extractExpr, rank);
   }
 
-  public TypeMirror wrappedType() {
-    return wrappedType;
+  public TypeMirror typeArg() {
+    return typeArg;
   }
 
   public ParameterSpec constructorParam() {

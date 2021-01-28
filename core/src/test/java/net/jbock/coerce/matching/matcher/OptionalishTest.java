@@ -24,10 +24,11 @@ class OptionalishTest {
       TypeMirror optionalInt = elements.getTypeElement(OptionalInt.class.getCanonicalName()).asType();
       TypeTool tool = new TypeTool(elements, types);
       Optionalish optionalish = new Optionalish(tool, EnumName.create("foo"));
-      optionalish.unwrap(optionalInt).foldVoid(Assertions::fail, unwrapSuccess -> {
+      optionalish.unwrap(optionalInt).map(unwrapSuccess -> {
         TypeName liftedType = unwrapSuccess.constructorParam().type;
         assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
-      });
+        return unwrapSuccess;
+      }).orElseGet(Assertions::fail);
     });
   }
 
@@ -39,10 +40,11 @@ class OptionalishTest {
       TypeTool tool = new TypeTool(elements, types);
       DeclaredType optionalInteger = types.getDeclaredType(optional, integer);
       Optionalish optionalish = new Optionalish(tool, EnumName.create("foo"));
-      optionalish.unwrap(optionalInteger).foldVoid(Assertions::fail, unwrapSuccess -> {
+      optionalish.unwrap(optionalInteger).map(unwrapSuccess -> {
         TypeName liftedType = unwrapSuccess.constructorParam().type;
         assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
-      });
+        return unwrapSuccess;
+      }).orElseGet(Assertions::fail);
     });
   }
 

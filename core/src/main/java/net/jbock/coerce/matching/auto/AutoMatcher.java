@@ -42,11 +42,11 @@ public class AutoMatcher extends ParameterScoped {
       return right(Coercion.createFlag(enumName(), sourceMethod()));
     }
     for (Matcher matcher : matchers) {
-      Either<String, UnwrapSuccess> success = matcher.tryUnwrapReturnType();
+      Optional<UnwrapSuccess> success = matcher.tryUnwrapReturnType();
       if (success.isPresent()) {
-        return success.flatMap(unwrapSuccess ->
-            findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr ->
-                Coercion.create(matcher, unwrapSuccess, mapExpr)));
+        return Either.fromSuccess("", success).flatMap(unwrapSuccess ->
+            findMapExpr(unwrapSuccess.typeArg())
+                .map(mapExpr -> Coercion.create(matcher, unwrapSuccess, mapExpr)));
       }
     }
     return left(noMatchError(returnType()));

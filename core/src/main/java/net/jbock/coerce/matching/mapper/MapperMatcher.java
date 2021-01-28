@@ -25,8 +25,6 @@ import java.util.Optional;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.SuppliedClassValidator.getEnclosingElements;
-import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
 
 public class MapperMatcher extends ParameterScoped {
 
@@ -61,20 +59,19 @@ public class MapperMatcher extends ParameterScoped {
   private Either<String, MapperSuccess> tryAllMatchers(FunctionType functionType) {
     List<UnwrapSuccess> unwraps = new ArrayList<>();
     for (Matcher matcher : matchers) {
-      Either<String, UnwrapSuccess> unwrap = matcher.tryUnwrapReturnType();
+      Optional<UnwrapSuccess> unwrap = matcher.tryUnwrapReturnType();
       unwrap.ifPresent(unwraps::add);
-      Either<String, MapperSuccess> success = unwrap
-          .flatMap(wrap -> getMapExpr(wrap.wrappedType(), functionType)
+      Optional<MapperSuccess> success = unwrap
+          .flatMap(wrap -> getMapExpr(wrap.typeArg(), functionType)
               .map(mapExpr -> new MapperSuccess(mapExpr, wrap, matcher)));
       if (success.isPresent()) {
-        return success;
+        return Either.fromSuccess("", success);
       }
     }
-    Optional<UnwrapSuccess> message = unwraps.stream()
-        .max(Comparator.comparingInt(UnwrapSuccess::rank));
-    return Either.<UnwrapSuccess, MapperSuccess>fromFailure(message, null)
-        .mapLeft(UnwrapSuccess::wrappedType)
-        .mapLeft(MapperMatcher::noMatchError);
+    UnwrapSuccess message = unwraps.stream()
+        .max(Comparator.comparingInt(UnwrapSuccess::rank))
+        .orElseThrow(AssertionError::new);
+    return Either.left(MapperMatcher.noMatchError(message.typeArg()));
   }
 
   private Optional<String> checkMapperAnnotation() {
@@ -101,15 +98,15 @@ public class MapperMatcher extends ParameterScoped {
     return Optional.empty();
   }
 
-  private Either<String, CodeBlock> getMapExpr(
+  private Optional<CodeBlock> getMapExpr(
       TypeMirror expectedReturnType,
       FunctionType functionType) {
     if (!tool().isSameType(functionType.outputType(), expectedReturnType)) {
-      return left("");
+      return Optional.empty();
     }
     CodeBlock mapExpr = CodeBlock.of("new $T()$L", mapperClass.asType(),
         functionType.isSupplier() ? ".get()" : "");
-    return right(mapExpr);
+    return Optional.of(mapExpr);
   }
 
   private Optional<String> checkStringInput(FunctionType functionType) {

@@ -5,10 +5,10 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.Skew;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.ParameterContext;
-import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class ListMatcher extends Matcher {
@@ -19,10 +19,10 @@ public class ListMatcher extends Matcher {
   }
 
   @Override
-  public Either<String, UnwrapSuccess> tryUnwrapReturnType() {
+  public Optional<UnwrapSuccess> tryUnwrapReturnType() {
     ParameterSpec constructorParam = constructorParam(returnType());
-    return tool().getSingleTypeArgument(returnType(), List.class.getCanonicalName())
-        .map(wrapped -> UnwrapSuccess.create(wrapped, constructorParam, 1));
+    return tool().getSingleTypeArgument(returnType(), List.class)
+        .map(typeArg -> UnwrapSuccess.create(typeArg, constructorParam, 1));
   }
 
   @Override

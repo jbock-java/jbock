@@ -5,11 +5,9 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.Skew;
 import net.jbock.coerce.matching.UnwrapSuccess;
 import net.jbock.compiler.ParameterContext;
-import net.jbock.either.Either;
 
 import javax.inject.Inject;
-
-import static net.jbock.either.Either.right;
+import java.util.Optional;
 
 public class ExactMatcher extends Matcher {
 
@@ -19,9 +17,9 @@ public class ExactMatcher extends Matcher {
   }
 
   @Override
-  public Either<String, UnwrapSuccess> tryUnwrapReturnType() {
+  public Optional<UnwrapSuccess> tryUnwrapReturnType() {
     ParameterSpec constructorParam = constructorParam(boxedReturnType());
-    return right(UnwrapSuccess.create(boxedReturnType(), constructorParam, 0));
+    return Optional.of(UnwrapSuccess.create(boxedReturnType(), constructorParam, 0));
   }
 
   @Override
