@@ -3,7 +3,7 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.coerce.matching.UnwrapSuccess;
+import net.jbock.coerce.matching.Match;
 import net.jbock.coerce.matching.mapper.MapperSuccess;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.EnumName;
@@ -40,10 +40,10 @@ public class Coercion {
     this.skew = skew;
   }
 
-  public static Coercion create(Matcher matcher, UnwrapSuccess unwrapSuccess, CodeBlock mapExpr) {
+  public static Coercion create(Matcher matcher, Match unwrapSuccess, CodeBlock mapExpr) {
     CodeBlock tailExpr = matcher.tailExpr();
     CodeBlock extractExpr = unwrapSuccess.extractExpr();
-    Skew skew = matcher.skew();
+    Skew skew = unwrapSuccess.skew();
     ParameterSpec constructorParam = unwrapSuccess.constructorParam();
     return new Coercion(matcher.enumName(), mapExpr, tailExpr, extractExpr, skew, constructorParam);
   }

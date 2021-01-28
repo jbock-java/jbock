@@ -6,7 +6,7 @@ import net.jbock.Option;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Util;
-import net.jbock.coerce.matching.UnwrapSuccess;
+import net.jbock.coerce.matching.Match;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
@@ -42,7 +42,7 @@ public class AutoMatcher extends ParameterScoped {
       return right(Coercion.createFlag(enumName(), sourceMethod()));
     }
     for (Matcher matcher : matchers) {
-      Optional<UnwrapSuccess> success = matcher.tryUnwrapReturnType();
+      Optional<Match> success = matcher.tryMatch();
       if (success.isPresent()) {
         return Either.fromSuccess("", success).flatMap(unwrapSuccess ->
             findMapExpr(unwrapSuccess.typeArg())

@@ -22,7 +22,7 @@ public class ParameterContext {
   final EnumName enumName;
 
   @Inject
-  ParameterContext(
+  public ParameterContext(
       ExecutableElement sourceMethod,
       @SourceElement TypeElement sourceElement,
       TypeTool tool,

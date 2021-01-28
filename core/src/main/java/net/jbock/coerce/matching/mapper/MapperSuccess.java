@@ -3,18 +3,18 @@ package net.jbock.coerce.matching.mapper;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.Skew;
-import net.jbock.coerce.matching.UnwrapSuccess;
+import net.jbock.coerce.matching.Match;
 import net.jbock.coerce.matching.matcher.Matcher;
 
 public class MapperSuccess {
 
   private final CodeBlock mapExpr;
-  private final UnwrapSuccess unwrapSuccess;
+  private final Match unwrapSuccess;
   private final Matcher matcher;
 
   MapperSuccess(
       CodeBlock mapExpr,
-      UnwrapSuccess unwrapSuccess,
+      Match unwrapSuccess,
       Matcher matcher) {
     this.mapExpr = mapExpr;
     this.unwrapSuccess = unwrapSuccess;
@@ -34,7 +34,7 @@ public class MapperSuccess {
   }
 
   public Skew skew() {
-    return matcher.skew();
+    return unwrapSuccess.skew();
   }
 
   public CodeBlock tailExpr() {

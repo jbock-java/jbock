@@ -3,7 +3,7 @@ package net.jbock.coerce.matching.matcher;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.Skew;
-import net.jbock.coerce.matching.UnwrapSuccess;
+import net.jbock.coerce.matching.Match;
 import net.jbock.compiler.ParameterContext;
 
 import javax.inject.Inject;
@@ -19,15 +19,10 @@ public class ListMatcher extends Matcher {
   }
 
   @Override
-  public Optional<UnwrapSuccess> tryUnwrapReturnType() {
+  public Optional<Match> tryMatch() {
     ParameterSpec constructorParam = constructorParam(returnType());
     return tool().getSingleTypeArgument(returnType(), List.class)
-        .map(typeArg -> UnwrapSuccess.create(typeArg, constructorParam, 1));
-  }
-
-  @Override
-  public Skew skew() {
-    return Skew.REPEATABLE;
+        .map(typeArg -> Match.create(typeArg, constructorParam, Skew.REPEATABLE));
   }
 
   @Override

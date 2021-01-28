@@ -6,7 +6,7 @@ import net.jbock.Command;
 import net.jbock.Mapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Util;
-import net.jbock.coerce.matching.UnwrapSuccess;
+import net.jbock.coerce.matching.Match;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.coerce.reference.FunctionType;
 import net.jbock.coerce.reference.ReferenceTool;
@@ -57,9 +57,9 @@ public class MapperMatcher extends ParameterScoped {
   }
 
   private Either<String, MapperSuccess> tryAllMatchers(FunctionType functionType) {
-    List<UnwrapSuccess> unwraps = new ArrayList<>();
+    List<Match> unwraps = new ArrayList<>();
     for (Matcher matcher : matchers) {
-      Optional<UnwrapSuccess> unwrap = matcher.tryUnwrapReturnType();
+      Optional<Match> unwrap = matcher.tryMatch();
       unwrap.ifPresent(unwraps::add);
       Optional<MapperSuccess> success = unwrap
           .flatMap(wrap -> getMapExpr(wrap.typeArg(), functionType)
@@ -68,8 +68,8 @@ public class MapperMatcher extends ParameterScoped {
         return Either.fromSuccess("", success);
       }
     }
-    UnwrapSuccess message = unwraps.stream()
-        .max(Comparator.comparingInt(UnwrapSuccess::rank))
+    Match message = unwraps.stream()
+        .max(Comparator.comparing(Match::skew))
         .orElseThrow(AssertionError::new);
     return Either.left(MapperMatcher.noMatchError(message.typeArg()));
   }

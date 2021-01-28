@@ -4,7 +4,7 @@ import java.util.Locale;
 
 public enum Skew {
 
-  REPEATABLE, OPTIONAL, REQUIRED, FLAG;
+  REQUIRED, OPTIONAL, REPEATABLE, FLAG;
 
   public String toString() {
     return name().toLowerCase(Locale.US);

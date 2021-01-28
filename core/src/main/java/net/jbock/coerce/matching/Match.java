@@ -2,37 +2,38 @@ package net.jbock.coerce.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.coerce.Skew;
 
 import javax.lang.model.type.TypeMirror;
 
-public class UnwrapSuccess {
+public class Match {
 
   private final TypeMirror typeArg;
   private final ParameterSpec constructorParam;
   private final CodeBlock extractExpr;
-  private final int rank;
+  private final Skew skew;
 
-  private UnwrapSuccess(
+  private Match(
       TypeMirror typeArg,
       ParameterSpec constructorParam,
       CodeBlock extractExpr,
-      int rank) {
+      Skew skew) {
     this.typeArg = typeArg;
     this.constructorParam = constructorParam;
     this.extractExpr = extractExpr;
-    this.rank = rank;
+    this.skew = skew;
   }
 
-  public static UnwrapSuccess create(TypeMirror wrappedType, ParameterSpec constructorParam, int rank) {
-    return create(wrappedType, constructorParam, rank, CodeBlock.of("$N", constructorParam));
+  public static Match create(TypeMirror wrappedType, ParameterSpec constructorParam, Skew skew) {
+    return create(wrappedType, constructorParam, skew, CodeBlock.of("$N", constructorParam));
   }
 
-  public static UnwrapSuccess create(
+  public static Match create(
       TypeMirror wrappedType,
       ParameterSpec constructorParam,
-      int rank,
+      Skew skew,
       CodeBlock extractExpr) {
-    return new UnwrapSuccess(wrappedType, constructorParam, extractExpr, rank);
+    return new Match(wrappedType, constructorParam, extractExpr, skew);
   }
 
   public TypeMirror typeArg() {
@@ -47,7 +48,7 @@ public class UnwrapSuccess {
     return extractExpr;
   }
 
-  public int rank() {
-    return rank;
+  public Skew skew() {
+    return skew;
   }
 }

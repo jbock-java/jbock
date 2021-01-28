@@ -3,7 +3,7 @@ package net.jbock.coerce.matching.matcher;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.Skew;
-import net.jbock.coerce.matching.UnwrapSuccess;
+import net.jbock.coerce.matching.Match;
 import net.jbock.compiler.ParameterContext;
 
 import javax.inject.Inject;
@@ -17,14 +17,9 @@ public class ExactMatcher extends Matcher {
   }
 
   @Override
-  public Optional<UnwrapSuccess> tryUnwrapReturnType() {
+  public Optional<Match> tryMatch() {
     ParameterSpec constructorParam = constructorParam(boxedReturnType());
-    return Optional.of(UnwrapSuccess.create(boxedReturnType(), constructorParam, 0));
-  }
-
-  @Override
-  public Skew skew() {
-    return Skew.REQUIRED;
+    return Optional.of(Match.create(boxedReturnType(), constructorParam, Skew.REQUIRED));
   }
 
   @Override
