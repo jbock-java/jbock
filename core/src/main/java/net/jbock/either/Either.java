@@ -88,8 +88,7 @@ public abstract class Either<L, R> {
   public abstract Either<R, L> flip();
 
   public final void ifPresent(Consumer<? super R> rightAction) {
-    foldVoid(l -> {
-    }, rightAction);
+    getValue().ifPresent(rightAction);
   }
 
   public final void foldVoid(Consumer<? super L> leftAction, Consumer<? super R> rightAction) {
