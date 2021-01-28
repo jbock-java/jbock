@@ -51,7 +51,7 @@ public class ParameterModule {
     String methodName = sourceMethod.getSimpleName().toString();
     EnumName result = EnumName.create(methodName);
     for (Parameter param : alreadyCreated) {
-      if (param.paramName().enumConstant().equals(result.enumConstant())) {
+      if (param.enumName().enumConstant().equals(result.enumConstant())) {
         return result.append(Integer.toString(alreadyCreated.size()));
       }
     }

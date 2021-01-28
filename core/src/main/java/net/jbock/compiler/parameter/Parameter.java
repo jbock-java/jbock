@@ -59,7 +59,7 @@ public abstract class Parameter {
   }
 
   public String enumConstant() {
-    return paramName().enumConstant();
+    return enumName().enumConstant();
   }
 
   public abstract boolean isPositional();
@@ -86,8 +86,8 @@ public abstract class Parameter {
     return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);
   }
 
-  public EnumName paramName() {
-    return coercion.paramName();
+  public EnumName enumName() { // TODO
+    return coercion.enumName();
   }
 
   public Set<Modifier> getAccessModifiers() {

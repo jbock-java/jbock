@@ -26,11 +26,10 @@ public class OptionalMatcher extends Matcher {
       return optionalPrimitive;
     }
     return tool().getSingleTypeArgument(returnType(), Optional.class)
-        .map(typeArg -> Match.create(typeArg, constructorParam(returnType()), Skew.OPTIONAL));
+        .map(typeArg -> Match.create(typeArg, constructorParam(returnType()), Skew.OPTIONAL, tailExpr()));
   }
 
-  @Override
-  public CodeBlock tailExpr() {
+  private CodeBlock tailExpr() {
     return CodeBlock.of(".findAny()");
   }
 
@@ -42,6 +41,7 @@ public class OptionalMatcher extends Matcher {
             tool().asTypeElement(optionalPrimitive.wrappedObjectType()).asType(),
             constructorParam,
             Skew.OPTIONAL,
+            tailExpr(),
             optionalPrimitive.extractExpr(constructorParam)));
       }
     }

@@ -19,11 +19,10 @@ public class ExactMatcher extends Matcher {
   @Override
   public Optional<Match> tryMatch() {
     ParameterSpec constructorParam = constructorParam(boxedReturnType());
-    return Optional.of(Match.create(boxedReturnType(), constructorParam, Skew.REQUIRED));
+    return Optional.of(Match.create(boxedReturnType(), constructorParam, Skew.REQUIRED, tailExpr()));
   }
 
-  @Override
-  public CodeBlock tailExpr() {
+  private CodeBlock tailExpr() {
     return CodeBlock.of(".findAny().orElseThrow($T.$L::missingRequired)", optionType(),
         enumName().enumConstant());
   }

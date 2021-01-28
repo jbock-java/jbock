@@ -22,11 +22,10 @@ public class ListMatcher extends Matcher {
   public Optional<Match> tryMatch() {
     ParameterSpec constructorParam = constructorParam(returnType());
     return tool().getSingleTypeArgument(returnType(), List.class)
-        .map(typeArg -> Match.create(typeArg, constructorParam, Skew.REPEATABLE));
+        .map(typeArg -> Match.create(typeArg, constructorParam, Skew.REPEATABLE, tailExpr()));
   }
 
-  @Override
-  public CodeBlock tailExpr() {
+  private CodeBlock tailExpr() {
     return CodeBlock.of(".collect($T.toList())", Collectors.class);
   }
 }

@@ -60,11 +60,11 @@ class PositionalParamFactory extends ParameterScoped {
       }
       if (thisOrder > otherOrder && thisPosition < other.position()) {
         return Optional.of("position must be greater than position of " +
-            other.coercion().skew() + " parameter " + other.paramName());
+            other.coercion().skew() + " parameter " + other.enumName());
       }
       if (thisOrder < otherOrder && thisPosition > other.position()) {
         return Optional.of("position must be less than position of " +
-            other.coercion().skew() + " parameter " + other.paramName());
+            other.coercion().skew() + " parameter " + other.enumName());
       }
     }
     return Optional.empty();

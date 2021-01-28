@@ -390,11 +390,11 @@ public final class GeneratedClass {
 
     for (Parameter param : context.params()) {
       if (param.isOptional()) {
-        spec.addCode("$Z.add($S)", "[<" + param.paramName().snake() + ">]");
+        spec.addCode("$Z.add($S)", "[<" + param.enumName().snake() + ">]");
       } else if (param.isRequired()) {
-        spec.addCode("$Z.add($S)", "<" + param.paramName().snake() + ">");
+        spec.addCode("$Z.add($S)", "<" + param.enumName().snake() + ">");
       } else if (param.isRepeatable()) {
-        spec.addCode("$Z.add($S)", "<" + param.paramName().snake() + ">...");
+        spec.addCode("$Z.add($S)", "<" + param.enumName().snake() + ">...");
       } else {
         throw new AssertionError("all cases handled (param can't be flag)");
       }

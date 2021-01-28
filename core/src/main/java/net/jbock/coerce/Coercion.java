@@ -15,7 +15,7 @@ public class Coercion {
 
   private final ParameterSpec constructorParam;
 
-  private final EnumName paramName;
+  private final EnumName enumName;
 
   private final CodeBlock tailExpr;
 
@@ -33,18 +33,18 @@ public class Coercion {
       Skew skew,
       ParameterSpec constructorParam) {
     this.constructorParam = constructorParam;
-    this.paramName = enumName;
+    this.enumName = enumName;
     this.tailExpr = tailExpr;
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
     this.skew = skew;
   }
 
-  public static Coercion create(Matcher matcher, Match unwrapSuccess, CodeBlock mapExpr) {
-    CodeBlock tailExpr = matcher.tailExpr();
-    CodeBlock extractExpr = unwrapSuccess.extractExpr();
-    Skew skew = unwrapSuccess.skew();
-    ParameterSpec constructorParam = unwrapSuccess.constructorParam();
+  public static Coercion create(Matcher matcher, Match match, CodeBlock mapExpr) {
+    CodeBlock tailExpr = match.tailExpr();
+    CodeBlock extractExpr = match.extractExpr();
+    Skew skew = match.skew();
+    ParameterSpec constructorParam = match.constructorParam();
     return new Coercion(matcher.enumName(), mapExpr, tailExpr, extractExpr, skew, constructorParam);
   }
 
@@ -85,7 +85,7 @@ public class Coercion {
     return constructorParam;
   }
 
-  public EnumName paramName() {
-    return paramName;
+  public EnumName enumName() {
+    return enumName;
   }
 }

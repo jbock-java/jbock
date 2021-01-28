@@ -1,6 +1,5 @@
 package net.jbock.coerce.matching.matcher;
 
-import com.squareup.javapoet.CodeBlock;
 import net.jbock.coerce.matching.Match;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
@@ -14,6 +13,4 @@ public abstract class Matcher extends ParameterScoped {
   }
 
   public abstract Optional<Match> tryMatch();
-
-  public abstract CodeBlock tailExpr();
 }

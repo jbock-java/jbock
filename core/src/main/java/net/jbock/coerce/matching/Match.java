@@ -11,29 +11,33 @@ public class Match {
   private final TypeMirror typeArg;
   private final ParameterSpec constructorParam;
   private final CodeBlock extractExpr;
+  private final CodeBlock tailExpr;
   private final Skew skew;
 
   private Match(
       TypeMirror typeArg,
       ParameterSpec constructorParam,
       CodeBlock extractExpr,
+      CodeBlock tailExpr,
       Skew skew) {
     this.typeArg = typeArg;
     this.constructorParam = constructorParam;
     this.extractExpr = extractExpr;
+    this.tailExpr = tailExpr;
     this.skew = skew;
   }
 
-  public static Match create(TypeMirror wrappedType, ParameterSpec constructorParam, Skew skew) {
-    return create(wrappedType, constructorParam, skew, CodeBlock.of("$N", constructorParam));
+  public static Match create(TypeMirror wrappedType, ParameterSpec constructorParam, Skew skew, CodeBlock tailExpr) {
+    return create(wrappedType, constructorParam, skew, tailExpr, CodeBlock.of("$N", constructorParam));
   }
 
   public static Match create(
       TypeMirror wrappedType,
       ParameterSpec constructorParam,
       Skew skew,
+      CodeBlock tailExpr,
       CodeBlock extractExpr) {
-    return new Match(wrappedType, constructorParam, extractExpr, skew);
+    return new Match(wrappedType, constructorParam, extractExpr, tailExpr, skew);
   }
 
   public TypeMirror typeArg() {
@@ -46,6 +50,10 @@ public class Match {
 
   public CodeBlock extractExpr() {
     return extractExpr;
+  }
+
+  public CodeBlock tailExpr() {
+    return tailExpr;
   }
 
   public Skew skew() {

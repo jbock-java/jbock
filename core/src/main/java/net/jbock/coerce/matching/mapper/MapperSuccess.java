@@ -38,6 +38,6 @@ public class MapperSuccess {
   }
 
   public CodeBlock tailExpr() {
-    return matcher.tailExpr();
+    return unwrapSuccess.tailExpr();
   }
 }
