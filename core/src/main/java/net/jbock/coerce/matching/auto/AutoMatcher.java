@@ -44,7 +44,7 @@ public class AutoMatcher extends ParameterScoped {
     for (Matcher matcher : matchers) {
       Either<String, UnwrapSuccess> success = matcher.tryUnwrapReturnType();
       if (success.isPresent()) {
-        return success.select(unwrapSuccess ->
+        return success.flatMap(unwrapSuccess ->
             findMapExpr(unwrapSuccess.wrappedType()).map(mapExpr ->
                 Coercion.create(matcher, unwrapSuccess, mapExpr)));
       }

@@ -7,7 +7,6 @@ import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -24,8 +23,8 @@ class PositionalParamFactory extends ParameterScoped {
   }
 
   Either<ValidationFailure, ? extends Parameter> createPositionalParam(int positionalIndex) {
-    return Either.<String, Void>fromOptionalFailure(checkBundleKey())
-        .select(() -> basicInfo.coercion()
+    return Either.<String, Void>fromFailure(checkBundleKey(), null)
+        .flatMap(() -> basicInfo.coercion()
             .map(coercion -> new PositionalParameter(
                 sourceMethod(),
                 bundleKey(),

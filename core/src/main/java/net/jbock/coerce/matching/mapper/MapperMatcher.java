@@ -48,13 +48,13 @@ public class MapperMatcher extends ParameterScoped {
 
   public Either<String, Coercion> findCoercion() {
     Optional<String> maybeFailure = commonChecks(mapperClass).map(s -> "mapper " + s);
-    return Either.<String, Void>fromOptionalFailure(maybeFailure)
+    return Either.<String, Void>fromFailure(maybeFailure, null)
         .filter(this::checkNotAbstract)
         .filter(this::checkNoTypevars)
         .filter(this::checkMapperAnnotation)
-        .select(v -> referenceTool.getReferencedType())
+        .flatMap(v -> referenceTool.getReferencedType())
         .filter(this::checkStringInput)
-        .select(this::tryAllMatchers)
+        .flatMap(this::tryAllMatchers)
         .map(success -> Coercion.create(success, enumName()));
   }
 
@@ -64,7 +64,7 @@ public class MapperMatcher extends ParameterScoped {
       Either<String, UnwrapSuccess> unwrap = matcher.tryUnwrapReturnType();
       unwrap.ifPresent(unwraps::add);
       Either<String, MapperSuccess> success = unwrap
-          .select(wrap -> getMapExpr(wrap.wrappedType(), functionType)
+          .flatMap(wrap -> getMapExpr(wrap.wrappedType(), functionType)
               .map(mapExpr -> new MapperSuccess(mapExpr, wrap, matcher)));
       if (success.isPresent()) {
         return success;
@@ -72,7 +72,7 @@ public class MapperMatcher extends ParameterScoped {
     }
     Optional<UnwrapSuccess> message = unwraps.stream()
         .max(Comparator.comparingInt(UnwrapSuccess::rank));
-    return Either.<UnwrapSuccess, MapperSuccess>fromOptionalFailure(message)
+    return Either.<UnwrapSuccess, MapperSuccess>fromFailure(message, null)
         .mapLeft(UnwrapSuccess::wrappedType)
         .mapLeft(MapperMatcher::noMatchError);
   }

@@ -1,7 +1,6 @@
 package net.jbock.either;
 
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Function;
 
 final class Right<L, R> extends Either<L, R> {
@@ -16,33 +15,25 @@ final class Right<L, R> extends Either<L, R> {
     return new Right<>(value);
   }
 
-  @Override
-  public boolean isPresent() {
-    return true;
+  R value() {
+    return value;
   }
 
   @Override
-  public Either<R, L> swap() {
+  public Optional<R> getValue() {
+    return Optional.of(value);
+  }
+
+  @Override
+  public Either<R, L> flip() {
     return left(value);
   }
 
   @Override
-  public void ifPresentOrElse(Consumer<? super R> action, Consumer<? super L> leftAction) {
-    action.accept(value);
-  }
-
-  @Override
-  public <R2> Either<L, R2> select(Function<? super R, ? extends Either<? extends L, ? extends R2>> choice) {
+  <R2> Either<L, R2> flatMapInternal(Function<Right<L, R>, ? extends Either<? extends L, ? extends R2>> choice) {
     @SuppressWarnings("unchecked")
-    Either<L, R2> either = (Either<L, R2>) choice.apply(value);
+    Either<L, R2> either = (Either<L, R2>) choice.apply(this);
     return either;
-  }
-
-  @Override
-  public Either<L, R> filter(Function<? super R, ? extends Optional<? extends L>> fail) {
-    @SuppressWarnings("unchecked")
-    Optional<L> opt = (Optional<L>) fail.apply(value);
-    return opt.<Either<L, R>>map(Either::left).orElse(this);
   }
 
   @Override

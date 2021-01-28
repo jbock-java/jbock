@@ -30,10 +30,10 @@ class NamedOptionFactory extends ParameterScoped {
   }
 
   Either<ValidationFailure, ? extends Parameter> createNamedOption(boolean anyMnemonics) {
-    return Either.<String, Void>fromOptionalFailure(checkBundleKey())
-        .select(this::checkFullName)
-        .select(optionName -> mnemonic().map(mnemonic -> new Names(optionName, mnemonic)))
-        .select(names -> basicInfo.coercion()
+    return Either.<String, Void>fromFailure(checkBundleKey(), null)
+        .flatMap(this::checkFullName)
+        .flatMap(optionName -> mnemonic().map(mnemonic -> new Names(optionName, mnemonic)))
+        .flatMap(names -> basicInfo.coercion()
             .map(coercion -> {
               String optionName = names.optionName;
               Character mnemonic = names.mnemonic;

@@ -113,18 +113,18 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     ClassName generatedClass = generatedClass(sourceElement);
     try {
       ClassName optionType = generatedClass.nestedClass("Option");
-      Either.fromOptionalFailure(validateSourceElement(sourceElement))
+      Either.fromFailure(validateSourceElement(sourceElement), null)
           .mapLeft(msg -> new ValidationFailure(msg, sourceElement))
           .mapLeft(Collections::singletonList)
-          .select(nothing -> getParams(sourceElement, optionType))
-          .ifPresentOrElse(parameters -> {
-            Context context = new Context(sourceElement, generatedClass, optionType, parameters);
-            TypeSpec typeSpec = GeneratedClass.create(context).define();
-            write(sourceElement, context.generatedClass(), typeSpec);
-          }, failures -> {
+          .flatMap(nothing -> getParams(sourceElement, optionType))
+          .foldVoid(failures -> {
             for (ValidationFailure failure : failures) {
               messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
             }
+          }, parameters -> {
+            Context context = new Context(sourceElement, generatedClass, optionType, parameters);
+            TypeSpec typeSpec = GeneratedClass.create(context).define();
+            write(sourceElement, context.generatedClass(), typeSpec);
           });
     } catch (Throwable error) {
       handleUnknownError(sourceElement, error);
@@ -148,7 +148,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private Either<List<ValidationFailure>, List<Parameter>> getParams(TypeElement sourceElement, ClassName optionType) {
-    return createMethods(sourceElement).select(methods -> {
+    return createMethods(sourceElement).flatMap(methods -> {
       List<Parameter> params = new ArrayList<>();
       AnnotationUtil annotationUtil = new AnnotationUtil();
       List<ValidationFailure> failures = new ArrayList<>();
@@ -166,7 +166,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .parameterModule(module)
             .description(getDescription(sourceMethod));
         builder.build().positionalParameterFactory().createPositionalParam(i)
-            .ifPresentOrElse(params::add, failures::add);
+            .foldVoid(failures::add, params::add);
       }
       boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
       for (ExecutableElement sourceMethod : methods.options()) {
@@ -180,7 +180,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .parameterModule(module)
             .description(getDescription(sourceMethod));
         builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
-            .ifPresentOrElse(params::add, failures::add);
+            .foldVoid(failures::add, params::add);
       }
       return failures.isEmpty() ? right(params) : left(failures);
     });
@@ -208,7 +208,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
     Optional<String> maybeFailure = commonChecks(sourceElement).map(s -> "command " + s);
     // the following _should_ be done with Optional#or but we're on Java 8 :-/
-    return Either.<String, Optional<String>>fromOptionalFailure(maybeFailure, Optional::empty)
+    return Either.<String, Optional<String>>fromFailure(maybeFailure, Optional.empty())
         .filter(nothing -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
           if (!interfaces.isEmpty()) {
@@ -224,7 +224,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           }
           return Optional.empty();
         })
-        .swap()
+        .flip()
         .map(Optional::of)
         .orElse(Function.identity());
   }

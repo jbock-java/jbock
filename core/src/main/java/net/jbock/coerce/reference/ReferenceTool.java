@@ -15,7 +15,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
-import static net.jbock.either.Either.fromOptionalSuccess;
+import static net.jbock.either.Either.fromSuccess;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
@@ -40,11 +40,11 @@ public class ReferenceTool {
       return left(mapperNotFunction());
     }
     if (implementsSupplier.isPresent()) {
-      return fromOptionalSuccess(() -> "", implementsSupplier)
+      return fromSuccess("", implementsSupplier)
           .filter(typeArguments -> checkNotRaw(Supplier.class, typeArguments))
-          .select(this::handleSupplier);
+          .flatMap(this::handleSupplier);
     }
-    return fromOptionalSuccess(() -> "", implementsFunction)
+    return fromSuccess("", implementsFunction)
         .filter(typeArguments -> checkNotRaw(Function.class, typeArguments))
         .map(DeclaredType::getTypeArguments)
         .map(typeArguments -> new FunctionType(typeArguments, false));
