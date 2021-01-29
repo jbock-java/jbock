@@ -13,15 +13,10 @@ import javax.inject.Inject;
 public class Coercion {
 
   private final ParameterSpec constructorParam;
-
   private final EnumName enumName;
-
   private final CodeBlock tailExpr;
-
   private final CodeBlock mapExpr;
-
   private final CodeBlock extractExpr;
-
   private final Skew skew;
 
   @Inject
