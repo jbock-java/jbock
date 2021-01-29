@@ -2,14 +2,13 @@ package net.jbock.coerce;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
-import net.jbock.coerce.matching.Match;
-import net.jbock.coerce.matching.mapper.MapperSuccess;
-import net.jbock.coerce.matching.matcher.Matcher;
+import net.jbock.compiler.ConstructorParam;
 import net.jbock.compiler.EnumName;
+import net.jbock.compiler.ExtractExpr;
+import net.jbock.compiler.MapExpr;
+import net.jbock.compiler.TailExpr;
 
-import javax.lang.model.element.ExecutableElement;
-import java.util.function.Function;
+import javax.inject.Inject;
 
 public class Coercion {
 
@@ -25,44 +24,20 @@ public class Coercion {
 
   private final Skew skew;
 
-  private Coercion(
+  @Inject
+  Coercion(
       EnumName enumName,
-      CodeBlock mapExpr,
-      CodeBlock tailExpr,
-      CodeBlock extractExpr,
+      @MapExpr CodeBlock mapExpr,
+      @TailExpr CodeBlock tailExpr,
+      @ExtractExpr CodeBlock extractExpr,
       Skew skew,
-      ParameterSpec constructorParam) {
+      @ConstructorParam ParameterSpec constructorParam) {
     this.constructorParam = constructorParam;
     this.enumName = enumName;
     this.tailExpr = tailExpr;
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
     this.skew = skew;
-  }
-
-  public static Coercion create(Matcher matcher, Match match, CodeBlock mapExpr) {
-    CodeBlock tailExpr = match.tailExpr();
-    CodeBlock extractExpr = match.extractExpr();
-    Skew skew = match.skew();
-    ParameterSpec constructorParam = match.constructorParam();
-    return new Coercion(matcher.enumName(), mapExpr, tailExpr, extractExpr, skew, constructorParam);
-  }
-
-  public static Coercion create(MapperSuccess success, EnumName enumName) {
-    CodeBlock mapExpr = success.mapExpr();
-    CodeBlock tailExpr = success.tailExpr();
-    CodeBlock extractExpr = success.extractExpr();
-    Skew skew = success.skew();
-    ParameterSpec constructorParam = success.constructorParam();
-    return new Coercion(enumName, mapExpr, tailExpr, extractExpr, skew, constructorParam);
-  }
-
-  public static Coercion createFlag(EnumName enumName, ExecutableElement sourceMethod) {
-    ParameterSpec constructorParam = ParameterSpec.builder(TypeName.get(sourceMethod.getReturnType()), enumName.snake()).build();
-    CodeBlock mapExpr = CodeBlock.of("$T.identity()", Function.class);
-    CodeBlock tailExpr = CodeBlock.of(".findAny().isPresent()");
-    CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
-    return new Coercion(enumName, mapExpr, tailExpr, extractExpr, Skew.FLAG, constructorParam);
   }
 
   public CodeBlock mapExpr() {

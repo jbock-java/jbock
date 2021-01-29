@@ -7,6 +7,7 @@ import dagger.Lazy;
 import net.jbock.coerce.matching.auto.AutoMatcher;
 import net.jbock.coerce.matching.mapper.MapperMatcher;
 import net.jbock.coerce.matching.matcher.Matcher;
+import net.jbock.compiler.EnumName;
 import net.jbock.compiler.MapperClass;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
@@ -56,6 +57,9 @@ public class BasicInfo extends ParameterScoped {
       Builder matchers(ImmutableList<Matcher> matchers);
 
       @BindsInstance
+      Builder enumName(EnumName enumName);
+
+      @BindsInstance
       Builder typeTool(TypeTool typeTool);
 
       ParameterWithMapperComponent build();
@@ -70,6 +74,7 @@ public class BasicInfo extends ParameterScoped {
               .mapperClass(mapper)
               .matchers(matchers)
               .typeTool(tool())
+              .enumName(enumName())
               .build();
           return component.mapperMatcher().findCoercion();
         })

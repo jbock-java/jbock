@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import net.jbock.Command;
 import net.jbock.Mapper;
 import net.jbock.coerce.Coercion;
+import net.jbock.coerce.CoercionFactory;
 import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.Match;
 import net.jbock.coerce.matching.matcher.Matcher;
@@ -31,17 +32,20 @@ public class MapperMatcher extends ParameterScoped {
   private final ImmutableList<Matcher> matchers;
   private final TypeElement mapperClass;
   private final ReferenceTool referenceTool;
+  private final CoercionFactory coercionFactory;
 
   @Inject
   MapperMatcher(
       ParameterContext context,
       TypeElement mapperClass,
       ImmutableList<Matcher> matchers,
-      ReferenceTool referenceTool) {
+      ReferenceTool referenceTool,
+      CoercionFactory coercionFactory) {
     super(context);
     this.mapperClass = mapperClass;
     this.matchers = matchers;
     this.referenceTool = referenceTool;
+    this.coercionFactory = coercionFactory;
   }
 
   public Either<String, Coercion> findCoercion() {
@@ -53,7 +57,7 @@ public class MapperMatcher extends ParameterScoped {
         .flatMap(v -> referenceTool.getReferencedType())
         .filter(this::checkStringInput)
         .flatMap(this::tryAllMatchers)
-        .map(success -> Coercion.create(success, enumName()));
+        .map(success -> coercionFactory.create(success));
   }
 
   private Either<String, MapperSuccess> tryAllMatchers(FunctionType functionType) {
