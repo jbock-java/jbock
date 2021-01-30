@@ -8,6 +8,7 @@ import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionFactory;
 import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.Match;
+import net.jbock.coerce.matching.MatchWithMap;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
@@ -43,25 +44,27 @@ public class AutoMatcher extends ParameterScoped {
   public Either<String, Coercion> findCoercion() {
     if (sourceMethod().getAnnotation(Option.class) != null &&
         tool().isSameType(boxedReturnType(), Boolean.class.getCanonicalName())) {
-      return right(coercionFactory.createFlag(sourceMethod()));
+      return right(coercionFactory.createFlag());
     }
     for (Matcher matcher : matchers) {
-      Optional<Match> success = matcher.tryMatch();
-      if (success.isPresent()) {
-        return Either.fromSuccess("", success).flatMap(unwrapSuccess ->
-            findMapExpr(unwrapSuccess.typeArg())
-                .map(mapExpr -> coercionFactory.create(unwrapSuccess, mapExpr)));
+      Optional<Match> match = matcher.tryMatch();
+      if (match.isPresent()) {
+        return Either.fromSuccess("", match)
+            .flatMap(this::findMapper);
       }
     }
     return left(noMatchError(returnType()));
   }
 
-  private Either<String, CodeBlock> findMapExpr(TypeMirror unwrappedReturnType) {
-    return autoMapper.findAutoMapper(unwrappedReturnType)
-        .maybeRecover(() -> isEnumType(unwrappedReturnType) ?
-            Optional.of(CodeBlock.of("$T::valueOf", unwrappedReturnType)) :
+  private Either<String, Coercion> findMapper(Match match) {
+    TypeMirror baseReturnType = match.baseReturnType();
+    return autoMapper.findAutoMapper(baseReturnType)
+        .maybeRecover(() -> isEnumType(baseReturnType) ?
+            Optional.of(CodeBlock.of("$T::valueOf", baseReturnType)) :
             Optional.empty())
-        .mapLeft(s -> noMatchError(unwrappedReturnType));
+        .mapLeft(s -> noMatchError(baseReturnType))
+        .map(mapExpr -> new MatchWithMap(mapExpr, match))
+        .map(coercionFactory::create);
   }
 
   private boolean isEnumType(TypeMirror type) {

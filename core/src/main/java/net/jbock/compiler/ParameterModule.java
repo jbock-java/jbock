@@ -9,6 +9,9 @@ import net.jbock.coerce.matching.matcher.ListMatcher;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.coerce.matching.matcher.OptionalMatcher;
 import net.jbock.compiler.parameter.Parameter;
+import net.jbock.qualifier.BundleKey;
+import net.jbock.qualifier.MapperClass;
+import net.jbock.qualifier.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;

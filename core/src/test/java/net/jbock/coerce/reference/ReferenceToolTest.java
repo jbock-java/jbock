@@ -20,7 +20,7 @@ class ReferenceToolTest {
         "import java.util.function.Function;",
         "import java.util.Set;",
         "", "",
-        "abstract class Foo<E> implements Supplier<Function<E, Set<E>>> { }"
+        "abstract class Foo implements Supplier<Function<String, Set<String>>> { }"
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement typeElement = elements.getTypeElement("test.Foo");

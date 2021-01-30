@@ -2,11 +2,11 @@ package net.jbock.coerce;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.compiler.ConstructorParam;
+import net.jbock.qualifier.ConstructorParam;
 import net.jbock.compiler.EnumName;
-import net.jbock.compiler.ExtractExpr;
-import net.jbock.compiler.MapExpr;
-import net.jbock.compiler.TailExpr;
+import net.jbock.qualifier.ExtractExpr;
+import net.jbock.qualifier.MapExpr;
+import net.jbock.qualifier.TailExpr;
 
 import javax.inject.Inject;
 

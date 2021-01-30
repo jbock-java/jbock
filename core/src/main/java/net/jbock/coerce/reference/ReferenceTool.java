@@ -5,11 +5,9 @@ import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.element.TypeParameterElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -41,16 +39,16 @@ public class ReferenceTool {
     }
     if (implementsSupplier.isPresent()) {
       return fromSuccess("", implementsSupplier)
-          .filter(typeArguments -> checkNotRaw(Supplier.class, typeArguments))
           .flatMap(this::handleSupplier);
     }
     return fromSuccess("", implementsFunction)
-        .filter(typeArguments -> checkNotRaw(Function.class, typeArguments))
-        .map(DeclaredType::getTypeArguments)
-        .map(typeArguments -> new FunctionType(typeArguments, false));
+        .flatMap(declaredType -> handleFunction(declaredType, false));
   }
 
   private Either<String, FunctionType> handleSupplier(DeclaredType declaredType) {
+    if (declaredType.getTypeArguments().size() != 1) {
+      return left(mapperRawType());
+    }
     TypeMirror typearg = declaredType.getTypeArguments().get(0);
     if (typearg.getKind() != TypeKind.DECLARED) {
       return left(mapperNotFunction());
@@ -59,10 +57,18 @@ public class ReferenceTool {
     if (!tool.isSameErasure(suppliedFunction, Function.class.getCanonicalName())) {
       return left(mapperNotFunction());
     }
+    return handleFunction(suppliedFunction, true);
+  }
+
+  private Either<String, FunctionType> handleFunction(DeclaredType suppliedFunction, boolean isSupplier) {
     if (suppliedFunction.getTypeArguments().size() != 2) {
       return left(mapperRawType());
     }
-    return right(new FunctionType(suppliedFunction.getTypeArguments(), true));
+    TypeMirror inputType = suppliedFunction.getTypeArguments().get(0);
+    if (!tool.isSameType(inputType, String.class.getCanonicalName())) {
+      return left("mapper should implement Function<String, ?>");
+    }
+    return right(new FunctionType(suppliedFunction.getTypeArguments(), isSupplier));
   }
 
   private Optional<DeclaredType> checkImplements(Class<?> candidate) {
@@ -70,14 +76,6 @@ public class ReferenceTool {
         .filter(inter -> tool.isSameErasure(inter, candidate.getCanonicalName()))
         .map(AS_DECLARED::visit)
         .findFirst();
-  }
-
-  private Optional<String> checkNotRaw(Class<?> candidate, DeclaredType declaredType) {
-    List<? extends TypeParameterElement> typeParams = tool.asTypeElement(candidate.getCanonicalName()).getTypeParameters();
-    if (declaredType.getTypeArguments().size() != typeParams.size()) {
-      return Optional.of(mapperRawType());
-    }
-    return Optional.empty();
   }
 
   private String mapperNotFunction() {

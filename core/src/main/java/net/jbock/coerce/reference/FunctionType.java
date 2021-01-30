@@ -17,10 +17,6 @@ public class FunctionType {
     return supplier;
   }
 
-  public TypeMirror inputType() {
-    return typeArguments.get(0);
-  }
-
   public TypeMirror outputType() {
     return typeArguments.get(1);
   }

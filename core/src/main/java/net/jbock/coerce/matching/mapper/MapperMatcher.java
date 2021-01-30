@@ -8,6 +8,7 @@ import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionFactory;
 import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.Match;
+import net.jbock.coerce.matching.MatchWithMap;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.coerce.reference.FunctionType;
 import net.jbock.coerce.reference.ReferenceTool;
@@ -54,28 +55,26 @@ public class MapperMatcher extends ParameterScoped {
         .filter(this::checkNotAbstract)
         .filter(this::checkNoTypevars)
         .filter(this::checkMapperAnnotation)
-        .flatMap(v -> referenceTool.getReferencedType())
-        .filter(this::checkStringInput)
-        .flatMap(this::tryAllMatchers)
-        .map(success -> coercionFactory.create(success));
+        .flatMap(nothing -> referenceTool.getReferencedType())
+        .flatMap(this::tryAllMatchers);
   }
 
-  private Either<String, MapperSuccess> tryAllMatchers(FunctionType functionType) {
-    List<Match> unwraps = new ArrayList<>();
+  private Either<String, Coercion> tryAllMatchers(FunctionType functionType) {
+    List<Match> matches = new ArrayList<>();
     for (Matcher matcher : matchers) {
-      Optional<Match> unwrap = matcher.tryMatch();
-      unwrap.ifPresent(unwraps::add);
-      Optional<MapperSuccess> success = unwrap
-          .flatMap(wrap -> getMapExpr(wrap.typeArg(), functionType)
-              .map(mapExpr -> new MapperSuccess(mapExpr, wrap, matcher)));
-      if (success.isPresent()) {
-        return Either.fromSuccess("", success);
+      Optional<Match> match = matcher.tryMatch();
+      match.ifPresent(matches::add);
+      match = match.filter(m -> isValidMatch(m, functionType));
+      if (match.isPresent()) {
+        return Either.fromSuccess("", match)
+            .map(m -> addMapExpr(m, functionType))
+            .map(coercionFactory::create);
       }
     }
-    Match message = unwraps.stream()
+    Match message = matches.stream()
         .max(Comparator.comparing(Match::skew))
-        .orElseThrow(AssertionError::new);
-    return Either.left(MapperMatcher.noMatchError(message.typeArg()));
+        .orElseThrow(AssertionError::new); // exact matcher always matches
+    return Either.left(MapperMatcher.noMatchError(message.baseReturnType()));
   }
 
   private Optional<String> checkMapperAnnotation() {
@@ -102,22 +101,14 @@ public class MapperMatcher extends ParameterScoped {
     return Optional.empty();
   }
 
-  private Optional<CodeBlock> getMapExpr(
-      TypeMirror expectedReturnType,
-      FunctionType functionType) {
-    if (!tool().isSameType(functionType.outputType(), expectedReturnType)) {
-      return Optional.empty();
-    }
+  public MatchWithMap addMapExpr(Match match, FunctionType functionType) {
     CodeBlock mapExpr = CodeBlock.of("new $T()$L", mapperClass.asType(),
         functionType.isSupplier() ? ".get()" : "");
-    return Optional.of(mapExpr);
+    return new MatchWithMap(mapExpr, match);
   }
 
-  private Optional<String> checkStringInput(FunctionType functionType) {
-    if (!tool().isSameType(functionType.inputType(), String.class.getCanonicalName())) {
-      return Optional.of("mapper should implement Function<String, ?>");
-    }
-    return Optional.empty();
+  public boolean isValidMatch(Match match, FunctionType functionType) {
+    return tool().isSameType(functionType.outputType(), match.baseReturnType());
   }
 
   private static String noMatchError(TypeMirror type) {
