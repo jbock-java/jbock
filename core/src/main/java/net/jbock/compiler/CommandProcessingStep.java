@@ -117,7 +117,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           .mapLeft(msg -> new ValidationFailure(msg, sourceElement))
           .mapLeft(Collections::singletonList)
           .flatMap(nothing -> getParams(sourceElement, optionType))
-          .foldVoid(failures -> {
+          .accept(failures -> {
             for (ValidationFailure failure : failures) {
               messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
             }
@@ -166,7 +166,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .parameterModule(module)
             .description(getDescription(sourceMethod));
         builder.build().positionalParameterFactory().createPositionalParam(i)
-            .foldVoid(failures::add, params::add);
+            .accept(failures::add, params::add);
       }
       boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
       for (ExecutableElement sourceMethod : methods.options()) {
@@ -180,7 +180,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .parameterModule(module)
             .description(getDescription(sourceMethod));
         builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
-            .foldVoid(failures::add, params::add);
+            .accept(failures::add, params::add);
       }
       return failures.isEmpty() ? right(params) : left(failures);
     });

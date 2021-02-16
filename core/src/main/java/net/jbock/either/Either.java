@@ -33,12 +33,6 @@ public abstract class Either<L, R> {
         .orElseGet(() -> Right.create(success.get()));
   }
 
-  public final boolean isPresent() {
-    return getValue().isPresent();
-  }
-
-  public abstract Optional<R> getValue();
-
   abstract <R2> Either<L, R2> flatMapInternal(
       Function<Right<L, R>, ? extends Either<? extends L, ? extends R2>> choice);
 
@@ -87,11 +81,7 @@ public abstract class Either<L, R> {
 
   public abstract Either<R, L> flip();
 
-  public final void ifPresent(Consumer<? super R> rightAction) {
-    getValue().ifPresent(rightAction);
-  }
-
-  public final void foldVoid(Consumer<? super L> leftAction, Consumer<? super R> rightAction) {
+  public final void accept(Consumer<? super L> leftAction, Consumer<? super R> rightAction) {
     fold(l -> {
       leftAction.accept(l);
       return null;

@@ -16,11 +16,6 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public Optional<R> getValue() {
-    return Optional.empty();
-  }
-
-  @Override
   public Either<R, L> flip() {
     return right(value);
   }

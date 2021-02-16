@@ -1,6 +1,5 @@
 package net.jbock.either;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 final class Right<L, R> extends Either<L, R> {
@@ -17,11 +16,6 @@ final class Right<L, R> extends Either<L, R> {
 
   R value() {
     return value;
-  }
-
-  @Override
-  public Optional<R> getValue() {
-    return Optional.of(value);
   }
 
   @Override

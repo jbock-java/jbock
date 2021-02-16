@@ -1,8 +1,8 @@
 package net.jbock.coerce.reference;
 
-import net.jbock.either.Either;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
+import net.jbock.either.Either;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -26,8 +26,7 @@ class ReferenceToolTest {
       TypeElement typeElement = elements.getTypeElement("test.Foo");
       ReferenceTool referenceTool = new ReferenceTool(tool, typeElement);
       Either<String, FunctionType> result = referenceTool.getReferencedType();
-      Assertions.assertTrue(result.isPresent());
-      result.ifPresent(functionType -> Assertions.assertTrue(functionType.isSupplier()));
+      result.accept(l -> Assertions.fail(), functionType -> Assertions.assertTrue(functionType.isSupplier()));
     });
   }
 }
