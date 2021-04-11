@@ -9,7 +9,7 @@ group = "com.github.h908714124"
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(15))
+        languageVersion.set(JavaLanguageVersion.of(16))
     }
 }
 
