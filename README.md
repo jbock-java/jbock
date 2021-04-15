@@ -18,15 +18,13 @@ In this class, each `abstract` method corresponds either to a *named option* or 
 abstract class MyCommand {
 
   /**
-   * A {@code @Param} is a positional parameter.
-   * This particular param is in the front position,
-   * since there are no other params in lower positions.
+   * A positional parameter.
    */
   @Param(0)
   abstract Path path();
 
   /**
-   * An {@code @Option} is a named option.
+   * A named option.
    */
   @Option("verbosity")
   abstract OptionalInt verbosity();
