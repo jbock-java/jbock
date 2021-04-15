@@ -106,7 +106,7 @@ public abstract class Parameter {
 
   public abstract char mnemonic();
 
-  ExecutableElement sourceMethod() {
+  public ExecutableElement sourceMethod() {
     return sourceMethod;
   }
 }

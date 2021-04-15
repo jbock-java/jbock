@@ -12,7 +12,9 @@ import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 import net.jbock.coerce.Util;
+import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.compiler.view.GeneratedClass;
 import net.jbock.either.Either;
 
@@ -34,6 +36,7 @@ import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -149,7 +152,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private Either<List<ValidationFailure>, List<Parameter>> getParams(TypeElement sourceElement, ClassName optionType) {
     return createMethods(sourceElement).flatMap(methods -> {
-      List<Parameter> params = new ArrayList<>();
+      List<PositionalParameter> positionalParams = new ArrayList<>();
       AnnotationUtil annotationUtil = new AnnotationUtil();
       List<ValidationFailure> failures = new ArrayList<>();
       List<ExecutableElement> positionalParameters = methods.params();
@@ -162,12 +165,14 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .optionType(optionType)
             .sourceMethod(sourceMethod)
             .typeTool(tool)
-            .alreadyCreated(ImmutableList.copyOf(params))
+            .alreadyCreated(ImmutableList.copyOf(positionalParams))
             .parameterModule(module)
             .description(getDescription(sourceMethod));
         builder.build().positionalParameterFactory().createPositionalParam(i)
-            .accept(failures::add, params::add);
+            .accept(failures::add, positionalParams::add);
       }
+      failures.addAll(validatePositions(positionalParams));
+      List<NamedOption> namedOptions = new ArrayList<>();
       boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
       for (ExecutableElement sourceMethod : methods.options()) {
         Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
@@ -176,14 +181,57 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .optionType(optionType)
             .sourceMethod(sourceMethod)
             .typeTool(tool)
-            .alreadyCreated(ImmutableList.copyOf(params))
+            .alreadyCreated(ImmutableList.copyOf(namedOptions))
             .parameterModule(module)
             .description(getDescription(sourceMethod));
         builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
-            .accept(failures::add, params::add);
+            .accept(failures::add, namedOptions::add);
+      }
+      List<Parameter> params = new ArrayList<>();
+      params.addAll(positionalParams);
+      params.addAll(namedOptions);
+      for (int i = 0; i < params.size(); i++) {
+        Parameter p = params.get(i);
+        checkBundleKey(p, params.subList(0, i))
+            .map(s -> new ValidationFailure(s, p.sourceMethod()))
+            .ifPresent(failures::add);
       }
       return failures.isEmpty() ? right(params) : left(failures);
     });
+  }
+
+  Optional<String> checkBundleKey(Parameter p, List<Parameter> alreadyCreated) {
+    return p.bundleKey().flatMap(key -> {
+      if (key.isEmpty()) {
+        return Optional.empty();
+      }
+      if (key.matches(".*\\s+.*")) {
+        return Optional.of("bundle key contains whitespace characters");
+      }
+      for (Parameter param : alreadyCreated) {
+        Optional<String> failure = param.bundleKey()
+            .filter(bundleKey -> bundleKey.equals(key));
+        if (failure.isPresent()) {
+          return Optional.of("duplicate bundle key");
+        }
+      }
+      return Optional.empty();
+    });
+  }
+
+  static List<ValidationFailure> validatePositions(List<PositionalParameter> params) {
+    List<PositionalParameter> sorted = params.stream()
+        .sorted(Comparator.comparing(PositionalParameter::position))
+        .collect(Collectors.toList());
+    List<ValidationFailure> result = new ArrayList<>();
+    for (int i = 0; i < sorted.size(); i++) {
+      PositionalParameter p = sorted.get(i);
+      if (p.position() != i) {
+        result.add(new ValidationFailure("Position " + p.position() + " is not available." +
+            " Suggested position: " + i, p.sourceMethod()));
+      }
+    }
+    return result;
   }
 
   private Either<List<ValidationFailure>, Methods> createMethods(TypeElement sourceElement) {
@@ -207,7 +255,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
     Optional<String> maybeFailure = commonChecks(sourceElement).map(s -> "command " + s);
-    // the following _should_ be done with Optional#or but we're on Java 8 :-/
+    // the following *should* be done with Optional#or but we're currently limited to 1.8 API
     return Either.<String, Optional<String>>fromFailure(maybeFailure, Optional.empty())
         .filter(nothing -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();

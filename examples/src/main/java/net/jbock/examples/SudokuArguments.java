@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 @Command
 abstract class SudokuArguments {
 
-  @Param(value = 1, mappedBy = MapMap.class)
+  @Param(value = 0, mappedBy = MapMap.class)
   abstract java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> number();
 
   @Mapper

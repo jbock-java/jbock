@@ -17,7 +17,7 @@ class PositionalTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Param(1)",
+        "  @Param(0)",
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -31,7 +31,7 @@ class PositionalTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Param(value = 1, bundleKey = \"x\")",
+        "  @Param(value = 0, bundleKey = \"x\")",
         "  abstract String a();",
         "",
         "  @Option(value = \"x\", bundleKey = \"x\")",
@@ -48,7 +48,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(1) abstract Optional<Integer> a();",
+        "  @Param(0) abstract Optional<Integer> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -56,18 +56,46 @@ class PositionalTest {
   }
 
   @Test
-  void positionalOptionalsAnyOrder() {
+  void positionalOptionalsGaps() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "  @Param(0) abstract Optional<Integer> b();",
+        "  @Param(10) abstract Optional<String> c();",
+        "  @Param(100) abstract Optional<Integer> d();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Position 10 is not available. Suggested position: 1");
+  }
+
+
+  @Test
+  void positionalOptionalsOne() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "  @Param(1) abstract Optional<Integer> b();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Position 1 is not available. Suggested position: 0");
+  }
+
+
+  @Test
+  void positionalOptionalsNegative() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
         "  @Param(-1) abstract Optional<String> a();",
-        "  @Param(10) abstract Optional<Integer> b();",
-        "  @Param(100) abstract Optional<String> c();",
-        "  @Param(1000) abstract Optional<Integer> d();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .compilesWithoutError();
+        .failsToCompile()
+        .withErrorContaining("negative positions are not allowed");
   }
 
   @Test
@@ -103,9 +131,9 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(1) abstract String b();",
-        "  @Param(2) abstract Optional<String> c();",
-        "  @Param(3) abstract List<String> a();",
+        "  @Param(0) abstract String b();",
+        "  @Param(1) abstract Optional<String> c();",
+        "  @Param(2) abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -117,8 +145,8 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(1) abstract List<String> a();",
-        "  @Param(2) abstract List<String> b();",
+        "  @Param(0) abstract List<String> a();",
+        "  @Param(1) abstract List<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -131,7 +159,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(1) abstract List<String> a();",
+        "  @Param(0) abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -185,7 +213,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(1) abstract Optional<Integer> a();",
+        "  @Param(0) abstract Optional<Integer> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())

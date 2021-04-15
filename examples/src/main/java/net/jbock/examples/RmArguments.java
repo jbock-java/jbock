@@ -31,6 +31,6 @@ abstract class RmArguments {
   /**
    * This is a list that may be empty.
    */
-  @Param(1)
+  @Param(0)
   abstract List<String> otherTokens();
 }

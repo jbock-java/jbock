@@ -10,7 +10,7 @@ import java.util.Optional;
 @Command
 abstract class AllDoublesArguments {
 
-  @Param(1)
+  @Param(0)
   abstract List<Double> positional();
 
   @Option(value = "i", mnemonic = 'i')

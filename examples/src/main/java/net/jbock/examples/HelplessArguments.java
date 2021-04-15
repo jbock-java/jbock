@@ -7,7 +7,7 @@ import net.jbock.Param;
 @Command(helpDisabled = true)
 abstract class HelplessArguments {
 
-  @Param(1)
+  @Param(0)
   abstract String required();
 
   @Option("help")

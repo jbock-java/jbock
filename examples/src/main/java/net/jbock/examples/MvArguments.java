@@ -6,9 +6,9 @@ import net.jbock.Param;
 @Command
 abstract class MvArguments {
 
-  @Param(1)
+  @Param(0)
   abstract String source();
 
-  @Param(2)
+  @Param(1)
   abstract String dest();
 }

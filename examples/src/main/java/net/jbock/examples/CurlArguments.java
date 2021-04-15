@@ -40,6 +40,6 @@ abstract class CurlArguments {
   @Option(value = "include", mnemonic = 'i')
   abstract boolean include();
 
-  @Param(1)
+  @Param(0)
   abstract List<String> urls();
 }

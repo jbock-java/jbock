@@ -408,7 +408,7 @@ class ProcessorTest {
         "  @Option(\"x\")",
         "  abstract List<String> a();",
         "",
-        "  @Param(1)",
+        "  @Param(0)",
         "  abstract List<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))

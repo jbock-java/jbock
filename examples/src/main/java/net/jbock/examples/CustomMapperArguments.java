@@ -49,7 +49,7 @@ abstract class CustomMapperArguments {
   @Option(value = "enumSet", mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
-  @Param(value = 1, mappedBy = BooleanMapper.class)
+  @Param(value = 0, mappedBy = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
   @Option(value = "optionalInts", mappedBy = OptionalIntMapper.class)

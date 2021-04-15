@@ -22,16 +22,16 @@ class PositionalParamFactory extends ParameterScoped {
     this.basicInfo = basicInfo;
   }
 
-  Either<ValidationFailure, ? extends Parameter> createPositionalParam(int positionalIndex) {
-    return Either.<String, Void>fromFailure(checkBundleKey(), null)
-        .flatMap(() -> basicInfo.coercion()
-            .map(coercion -> new PositionalParameter(
-                sourceMethod(),
-                bundleKey(),
-                enumName().snake().toLowerCase(Locale.US),
-                coercion,
-                Arrays.asList(description()),
-                positionalIndex)))
+  Either<ValidationFailure, PositionalParameter> createPositionalParam(int positionalIndex) {
+    return basicInfo.coercion()
+        .map(coercion -> new PositionalParameter(
+            sourceMethod(),
+            bundleKey(),
+            enumName().snake().toLowerCase(Locale.US),
+            coercion,
+            Arrays.asList(description()),
+            positionalIndex))
+        .filter(this::checkPositionNotNegative)
         .filter(this::checkOnlyOnePositionalList)
         .filter(this::checkRankConsistentWithPosition)
         .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
@@ -45,6 +45,13 @@ class PositionalParamFactory extends ParameterScoped {
         .filter(p -> p.isRepeatable() && p.isPositional())
         .map(p -> "positional parameter " + p.enumConstant() + " is also repeatable")
         .findAny();
+  }
+
+  private Optional<String> checkPositionNotNegative(PositionalParameter p) {
+    if (p.position() < 0) {
+      return Optional.of("negative positions are not allowed");
+    }
+    return Optional.empty();
   }
 
   private Optional<String> checkRankConsistentWithPosition(PositionalParameter p) {

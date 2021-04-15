@@ -16,10 +16,10 @@ abstract class CpArguments {
     SIMPLE
   }
 
-  @Param(1)
+  @Param(0)
   abstract String source();
 
-  @Param(2)
+  @Param(1)
   abstract String dest();
 
   @Option(value = "r", mnemonic = 'r')

@@ -10,7 +10,7 @@ import java.util.Optional;
 @Command
 abstract class AllIntegersArguments {
 
-  @Param(1)
+  @Param(0)
   abstract List<Integer> positional();
 
   @Option(value = "i", mnemonic = 'i')

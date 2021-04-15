@@ -13,6 +13,6 @@ abstract class RequiredArguments {
   @Option("dir")
   abstract String dir();
 
-  @Param(1)
+  @Param(0)
   abstract List<String> otherTokens();
 }

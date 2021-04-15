@@ -26,7 +26,7 @@ abstract class VariousArguments {
   @Option("bigDecimalOpt")
   abstract Optional<BigDecimal> bigDecimalOpt();
 
-  @Param(1)
+  @Param(0)
   abstract Optional<BigDecimal> bigDecimalPos();
 
   @Option("bigInteger")
@@ -38,7 +38,7 @@ abstract class VariousArguments {
   @Option("bigIntegerOpt")
   abstract Optional<BigInteger> bigIntegerOpt();
 
-  @Param(2)
+  @Param(1)
   abstract Optional<BigInteger> bigIntegerPos();
 
   @Option("fileList")
@@ -47,7 +47,7 @@ abstract class VariousArguments {
   @Option("fileOpt")
   abstract Optional<File> fileOpt();
 
-  @Param(3)
+  @Param(2)
   abstract Optional<File> filePos();
 
   @Option("path")
@@ -59,7 +59,7 @@ abstract class VariousArguments {
   @Option("pathOpt")
   abstract Optional<Path> pathOpt();
 
-  @Param(4)
+  @Param(3)
   abstract Optional<Path> pathPos();
 
   @Option("localDate")
@@ -71,7 +71,7 @@ abstract class VariousArguments {
   @Option("localDateOpt")
   abstract Optional<LocalDate> localDateOpt();
 
-  @Param(5)
+  @Param(4)
   abstract Optional<LocalDate> localDatePos();
 
   @Option("uri")
@@ -83,7 +83,7 @@ abstract class VariousArguments {
   @Option("uriOpt")
   abstract Optional<URI> uriOpt();
 
-  @Param(8)
+  @Param(5)
   abstract Optional<URI> uriPos();
 
   @Option("pattern")
@@ -95,6 +95,6 @@ abstract class VariousArguments {
   @Option("patternOpt")
   abstract Optional<Pattern> patternOpt();
 
-  @Param(10)
+  @Param(6)
   abstract Optional<Pattern> patternPos();
 }

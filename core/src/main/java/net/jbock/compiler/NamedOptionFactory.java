@@ -29,9 +29,8 @@ class NamedOptionFactory extends ParameterScoped {
     this.basicInfo = basicInfo;
   }
 
-  Either<ValidationFailure, ? extends Parameter> createNamedOption(boolean anyMnemonics) {
-    return Either.<String, Void>fromFailure(checkBundleKey(), null)
-        .flatMap(this::checkFullName)
+  Either<ValidationFailure, NamedOption> createNamedOption(boolean anyMnemonics) {
+    return checkFullName()
         .flatMap(optionName -> mnemonic().map(mnemonic -> new Names(optionName, mnemonic)))
         .flatMap(names -> basicInfo.coercion()
             .map(coercion -> {

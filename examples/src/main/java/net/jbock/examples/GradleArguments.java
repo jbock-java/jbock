@@ -45,7 +45,7 @@ abstract class GradleArguments {
       mnemonic = 'v')
   abstract boolean verbose();
 
-  @Param(1)
+  @Param(0)
   abstract List<String> otherTokens();
 
   @Command

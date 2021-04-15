@@ -8,9 +8,9 @@ import java.util.List;
 @Command
 abstract class GitArguments {
 
-  @Param(1)
+  @Param(0)
   abstract String command();
 
-  @Param(2)
+  @Param(1)
   abstract List<String> remainingArgs();
 }

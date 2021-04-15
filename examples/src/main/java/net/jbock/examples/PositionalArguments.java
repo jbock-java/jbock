@@ -9,13 +9,13 @@ import java.util.Optional;
 @Command
 abstract class PositionalArguments {
 
-  @Param(-10)
+  @Param(0)
   abstract String source();
 
   /**
    * Desc of dest.
    */
-  @Param(-1)
+  @Param(1)
   abstract String dest();
 
   @Param(2)
