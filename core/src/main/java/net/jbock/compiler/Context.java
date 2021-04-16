@@ -1,15 +1,17 @@
 package net.jbock.compiler;
 
+import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Command;
+import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.PositionalParameter;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
 
@@ -24,9 +26,9 @@ public final class Context {
   // the abstract methods in the annotated class
   private final List<Parameter> parameters;
 
-  private final List<Parameter> params;
+  private final List<PositionalParameter> params;
 
-  private final List<Parameter> options;
+  private final List<NamedOption> options;
 
   // whether "--help" is a special token
   private final boolean helpParameterEnabled;
@@ -36,12 +38,12 @@ public final class Context {
 
   private final ClassName optionType;
 
-  Context(TypeElement sourceElement, ClassName generatedClass, ClassName optionType, List<Parameter> parameters) {
+  Context(TypeElement sourceElement, ClassName generatedClass, ClassName optionType, Params parameters) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
-    this.parameters = parameters;
-    this.params = parameters.stream().filter(Parameter::isPositional).collect(Collectors.toList());
-    this.options = parameters.stream().filter(parameter -> !parameter.isPositional()).collect(Collectors.toList());
+    this.params = parameters.positionalParams;
+    this.options = parameters.namedOptions;
+    this.parameters = ImmutableList.<Parameter>builder().addAll(params).addAll(options).build();
     this.helpParameterEnabled = !sourceElement.getAnnotation(Command.class).helpDisabled();
     this.programName = programName(sourceElement);
     this.optionType = optionType;
@@ -118,11 +120,11 @@ public final class Context {
     return parameters;
   }
 
-  public List<Parameter> params() {
+  public List<PositionalParameter> params() {
     return params;
   }
 
-  public List<Parameter> options() {
+  public List<NamedOption> options() {
     return options;
   }
 

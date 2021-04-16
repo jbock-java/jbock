@@ -75,8 +75,8 @@ class OptionalMatcherTest {
   private OptionalMatcher createMatcher(TypeTool tool, TypeMirror returnType) {
     ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
-    ParameterContext context = new ParameterContext(sourceMethod, null, tool, null, ImmutableList.of(),
-        new String[0], "", EnumName.create("a"));
+    ParameterContext context = new ParameterContext(sourceMethod, null, tool, null,
+        ImmutableList.of(), ImmutableList.of(), new String[0], "", EnumName.create("a"));
     return new OptionalMatcher(context);
   }
 }

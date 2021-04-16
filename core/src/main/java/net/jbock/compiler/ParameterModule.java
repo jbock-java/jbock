@@ -8,6 +8,7 @@ import net.jbock.coerce.matching.matcher.ExactMatcher;
 import net.jbock.coerce.matching.matcher.ListMatcher;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.coerce.matching.matcher.OptionalMatcher;
+import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
 import net.jbock.qualifier.BundleKey;
 import net.jbock.qualifier.MapperClass;
@@ -50,7 +51,7 @@ public class ParameterModule {
 
   @Reusable
   @Provides
-  EnumName enumName(ExecutableElement sourceMethod, ImmutableList<Parameter> alreadyCreated) {
+  EnumName enumName(ExecutableElement sourceMethod, ImmutableList<NamedOption> alreadyCreated) {
     String methodName = sourceMethod.getSimpleName().toString();
     EnumName result = EnumName.create(methodName);
     for (Parameter param : alreadyCreated) {

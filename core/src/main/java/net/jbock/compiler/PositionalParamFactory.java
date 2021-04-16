@@ -1,7 +1,6 @@
 package net.jbock.compiler;
 
 import net.jbock.coerce.BasicInfo;
-import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.either.Either;
 
@@ -10,7 +9,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 class PositionalParamFactory extends ParameterScoped {
 
@@ -41,7 +39,7 @@ class PositionalParamFactory extends ParameterScoped {
     if (!param.isRepeatable()) {
       return Optional.empty();
     }
-    return alreadyCreated().stream()
+    return alreadyCreatedParams().stream()
         .filter(p -> p.isRepeatable() && p.isPositional())
         .map(p -> "positional parameter " + p.enumConstant() + " is also repeatable")
         .findAny();
@@ -57,9 +55,7 @@ class PositionalParamFactory extends ParameterScoped {
   private Optional<String> checkRankConsistentWithPosition(PositionalParameter p) {
     int thisOrder = p.isRepeatable() ? 2 : p.isOptional() ? 1 : 0;
     int thisPosition = p.position();
-    List<PositionalParameter> allPositional = alreadyCreated().stream().filter(Parameter::isPositional)
-        .map(parameter -> (PositionalParameter) parameter)
-        .collect(Collectors.toList());
+    List<PositionalParameter> allPositional = alreadyCreatedParams();
     for (PositionalParameter other : allPositional) {
       int otherOrder = other.isRepeatable() ? 2 : other.isOptional() ? 1 : 0;
       if (thisPosition == other.position()) {

@@ -5,7 +5,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Command;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.NamedOption;
+import net.jbock.compiler.parameter.PositionalParameter;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -37,8 +38,12 @@ public class ParameterScoped {
     return parameterContext.optionType;
   }
 
-  final ImmutableList<Parameter> alreadyCreated() {
-    return parameterContext.alreadyCreated;
+  final ImmutableList<NamedOption> alreadyCreatedOptions() {
+    return parameterContext.alreadyCreatedOptions;
+  }
+
+  final ImmutableList<PositionalParameter> alreadyCreatedParams() {
+    return parameterContext.alreadyCreatedParams;
   }
 
   final String[] description() {

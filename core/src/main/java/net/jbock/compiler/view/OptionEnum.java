@@ -7,7 +7,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
+import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.PositionalParameter;
 
 import java.util.Arrays;
 import java.util.Collections;
@@ -169,7 +171,7 @@ final class OptionEnum {
   }
 
   private static CodeBlock optionParsersMethodCode(Context context, ParameterSpec parsers) {
-    List<Parameter> options = context.options();
+    List<NamedOption> options = context.options();
     if (options.isEmpty()) {
       return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
     }
@@ -208,7 +210,7 @@ final class OptionEnum {
   }
 
   private static CodeBlock paramParsersMethodCode(Context context) {
-    List<Parameter> params = context.params();
+    List<PositionalParameter> params = context.params();
     if (params.isEmpty()) {
       return CodeBlock.of("return $T.emptyList()", Collections.class);
     }

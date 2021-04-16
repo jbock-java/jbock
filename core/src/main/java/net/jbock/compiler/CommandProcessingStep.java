@@ -89,7 +89,10 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       Builder description(String[] description);
 
       @BindsInstance
-      Builder alreadyCreated(ImmutableList<Parameter> alreadyCreated);
+      Builder alreadyCreatedParams(ImmutableList<PositionalParameter> alreadyCreated);
+
+      @BindsInstance
+      Builder alreadyCreatedOptions(ImmutableList<NamedOption> alreadyCreated);
 
       Builder parameterModule(ParameterModule module);
 
@@ -150,7 +153,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     }
   }
 
-  private Either<List<ValidationFailure>, List<Parameter>> getParams(TypeElement sourceElement, ClassName optionType) {
+  private Either<List<ValidationFailure>, Params> getParams(TypeElement sourceElement, ClassName optionType) {
     return createMethods(sourceElement).flatMap(methods -> {
       List<PositionalParameter> positionalParams = new ArrayList<>();
       AnnotationUtil annotationUtil = new AnnotationUtil();
@@ -165,7 +168,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .optionType(optionType)
             .sourceMethod(sourceMethod)
             .typeTool(tool)
-            .alreadyCreated(ImmutableList.copyOf(positionalParams))
+            .alreadyCreatedParams(ImmutableList.copyOf(positionalParams))
+            .alreadyCreatedOptions(ImmutableList.of())
             .parameterModule(module)
             .description(getDescription(sourceMethod));
         builder.build().positionalParameterFactory().createPositionalParam(i)
@@ -181,7 +185,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .optionType(optionType)
             .sourceMethod(sourceMethod)
             .typeTool(tool)
-            .alreadyCreated(ImmutableList.copyOf(namedOptions))
+            .alreadyCreatedParams(ImmutableList.of())
+            .alreadyCreatedOptions(ImmutableList.copyOf(namedOptions))
             .parameterModule(module)
             .description(getDescription(sourceMethod));
         builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
@@ -196,7 +201,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .map(s -> new ValidationFailure(s, p.sourceMethod()))
             .ifPresent(failures::add);
       }
-      return failures.isEmpty() ? right(params) : left(failures);
+      return failures.isEmpty() ? right(new Params(positionalParams, namedOptions)) : left(failures);
     });
   }
 

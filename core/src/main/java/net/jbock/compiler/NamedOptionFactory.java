@@ -59,7 +59,7 @@ class NamedOptionFactory extends ParameterScoped {
     if (option == null || option.mnemonic() == ' ') {
       return right(' ');
     }
-    for (Parameter param : alreadyCreated()) {
+    for (NamedOption param : alreadyCreatedOptions()) {
       if (option.mnemonic() == param.mnemonic()) {
         return left("duplicate mnemonic");
       }
@@ -79,7 +79,7 @@ class NamedOptionFactory extends ParameterScoped {
       return left("'help' cannot be an option name, unless the help feature is disabled. " +
           "The help feature can be disabled by setting @Command.helpDisabled = true.");
     }
-    for (Parameter param : alreadyCreated()) {
+    for (Parameter param : alreadyCreatedOptions()) {
       if (option.value().equals(param.optionName())) {
         return left("duplicate option name");
       }
