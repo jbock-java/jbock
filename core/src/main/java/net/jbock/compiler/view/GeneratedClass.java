@@ -477,7 +477,7 @@ public final class GeneratedClass {
         .addStatement(throwInvalidOptionStatement(token, "Invalid option"))
         .unindent();
 
-    code.add("if ($N >= $N.$N.size())\n", position, state, parserState.positionalParsersField()).indent()
+    code.add("if ($N == $L)\n", position, context.params().size()).indent()
         .addStatement(throwInvalidOptionStatement(token, "Excess param"))
         .unindent();
 
