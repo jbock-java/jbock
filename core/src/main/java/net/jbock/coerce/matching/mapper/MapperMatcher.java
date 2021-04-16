@@ -8,7 +8,6 @@ import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionFactory;
 import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.Match;
-import net.jbock.coerce.matching.MatchWithMap;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.coerce.reference.FunctionType;
 import net.jbock.coerce.reference.ReferenceTool;
@@ -67,8 +66,10 @@ public class MapperMatcher extends ParameterScoped {
       match = match.filter(m -> isValidMatch(m, functionType));
       if (match.isPresent()) {
         return Either.fromSuccess("", match)
-            .map(m -> addMapExpr(m, functionType))
-            .map(coercionFactory::create);
+            .map(m -> {
+              CodeBlock mapExpr = getMapExpr(functionType);
+              return coercionFactory.create(mapExpr, m);
+            });
       }
     }
     Match message = matches.stream()
@@ -101,13 +102,12 @@ public class MapperMatcher extends ParameterScoped {
     return Optional.empty();
   }
 
-  public MatchWithMap addMapExpr(Match match, FunctionType functionType) {
-    CodeBlock mapExpr = CodeBlock.of("new $T()$L", mapperClass.asType(),
+  private CodeBlock getMapExpr(FunctionType functionType) {
+    return CodeBlock.of("new $T()$L", mapperClass.asType(),
         functionType.isSupplier() ? ".get()" : "");
-    return new MatchWithMap(mapExpr, match);
   }
 
-  public boolean isValidMatch(Match match, FunctionType functionType) {
+  private boolean isValidMatch(Match match, FunctionType functionType) {
     return tool().isSameType(functionType.outputType(), match.baseReturnType());
   }
 

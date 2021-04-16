@@ -8,7 +8,6 @@ import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionFactory;
 import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.Match;
-import net.jbock.coerce.matching.MatchWithMap;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
@@ -63,8 +62,7 @@ public class AutoMatcher extends ParameterScoped {
             Optional.of(CodeBlock.of("$T::valueOf", baseReturnType)) :
             Optional.empty())
         .mapLeft(s -> noMatchError(baseReturnType))
-        .map(mapExpr -> new MatchWithMap(mapExpr, match))
-        .map(coercionFactory::create);
+        .map(mapExpr -> coercionFactory.create(mapExpr, match));
   }
 
   private boolean isEnumType(TypeMirror type) {
