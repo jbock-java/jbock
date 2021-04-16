@@ -27,6 +27,7 @@ import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -315,18 +316,6 @@ public final class GeneratedClass {
         .build();
   }
 
-  private CodeBlock handleEndOfOptionParsing(ParameterSpec state, ParameterSpec it, ParameterSpec position, ParameterSpec token) {
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.beginControlFlow("while ($N.hasNext())", it); // begin loop
-    code.addStatement("$N = $N.next()", token, it);
-    code.add("if ($N >= $N.$N.size())\n", position, state, parserState.positionalParsersField()).indent()
-        .addStatement(throwInvalidOptionStatement(token, "Excess param"))
-        .unindent();
-    code.addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token);
-    code.endControlFlow(); // end loop
-    return code.build();
-  }
-
   private static CodeBlock throwInvalidOptionStatement(ParameterSpec token, String message) {
     return CodeBlock.builder()
         .add("throw new $T($S + $N)", RuntimeException.class,
@@ -453,10 +442,13 @@ public final class GeneratedClass {
     ParameterSpec option = builder(context.optionType(), "option").build();
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec position = builder(INT, "position").build();
+    ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
 
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = $L", position.type, position, 0);
     code.addStatement("$T $N = new $T()", state.type, state, state.type);
+
+    code.addStatement("$T $N = $L", endOfOptionParsing.type, endOfOptionParsing, false);
 
     // begin parsing loop
     code.beginControlFlow("while ($N.hasNext())", it);
@@ -464,22 +456,24 @@ public final class GeneratedClass {
     code.addStatement("$T $N = $N.next()", STRING, token, it);
 
     if (!context.params().isEmpty()) {
-      code.beginControlFlow("if ($S.equals($N))", "--", token)
-          .add(handleEndOfOptionParsing(state, it, position, token))
-          .addStatement("return $N.build()", state)
+      code.beginControlFlow("if (!$N && $S.equals($N))", endOfOptionParsing, "--", token)
+          .addStatement("$N = $L", endOfOptionParsing, true)
+          .addStatement("continue")
           .endControlFlow();
     }
 
     if (!context.options().isEmpty()) {
+      code.beginControlFlow("if (!$N)", endOfOptionParsing);
       code.addStatement("$T $N = $N.$N($N)", context.optionType(), option, state, parserState.tryReadOption(), token);
       code.beginControlFlow("if ($N != null)", option)
           .addStatement("$N.$N.get($N).read($N, $N, $N)", state, parserState.parsersField(), option, option, token, it)
           .addStatement("continue")
           .endControlFlow();
+      code.endControlFlow();
     }
 
     // handle unknown token
-    code.add("if (!$N.isEmpty() && $N.charAt(0) == '-')\n", token, token).indent()
+    code.add("if (!$N && !$N.isEmpty() && $N.charAt(0) == '-')\n", endOfOptionParsing, token, token).indent()
         .addStatement(throwInvalidOptionStatement(token, "Invalid option"))
         .unindent();
 

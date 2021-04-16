@@ -3,6 +3,7 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.RepeatedTest;
 
+import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
@@ -24,7 +25,7 @@ class GitArgumentsTest {
     String[] remainingArgs = result.remainingArgs().toArray(new String[0]);
 
     // check that escape sequence works
-    assertArrayEquals(randomStrings, remainingArgs);
+    assertArrayEquals(randomStrings, remainingArgs, Arrays.toString(args));
   }
 
   private String[] randomArgs() {
