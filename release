@@ -33,7 +33,7 @@ if [[ "${VERSION:0:1}" == $TAG_PREFIX ]]; then
 fi
 
 git pull origin $(git rev-parse --abbrev-ref HEAD)
-./gradlew core:clean core:test examples:clean examples:test
+./gradlew clean core:test examples:test
 ./gradlew -Pversion=${VERSION} ${MODULE}:publish
 
 read -e -p "Upload successful. Also tag? [y/N]"
