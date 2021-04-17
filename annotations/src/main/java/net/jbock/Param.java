@@ -17,19 +17,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface Param {
 
   /**
-   * This number determines the parameter's relative position
-   * among all positional parameters.
+   * This parameter's position.
+   * The first parameter's position is {@code 0}.
    *
-   * <ul>
-   * <li>The method's position in the source file is irrelevant.</li>
-   * <li>Negative numbers are allowed.</li>
-   * <li>The number must be unique among all params.</li>
-   * <li>Required parameters must have lower positions than optional or repeatable parameters.</li>
-   * <li>There can only be one repeatable {@code Param},
-   * and it must have the greatest position.</li>
-   * </ul>
-   *
-   * @return a number that determines the param's position
+   * @return the param's position
    */
   int value();
 
@@ -47,12 +38,12 @@ public @interface Param {
   Class<?> mappedBy() default Void.class;
 
   /**
-   * The key that is used to find the parameter
-   * description in the i18 resource bundle for the online help.
-   * If no bundleKey is defined,
+   * The key that is used to look up the parameter
+   * description in the internationalization resource bundle for the online help.
+   * If no such key is defined,
    * or no bundle is supplied at runtime,
-   * or a bundle is supplied but does not contain the bundle key,
-   * then the {@code abstract} method's javadoc is used as description.
+   * or the bundle supplied at runtime does not contain the bundle key,
+   * then the {@code abstract} method's javadoc is used as the param's description.
    *
    * @return an optional bundle key
    */

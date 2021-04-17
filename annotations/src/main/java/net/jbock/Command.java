@@ -17,8 +17,10 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface Command {
 
   /**
-   * The handle that will be used when the full
+   * The name that the program will be addressed by when the full
    * usage information is printed.
+   * If an empty string is used, the name will be based on the
+   * name of the annotated class.
    *
    * @return the intended file name of the final executable
    */
