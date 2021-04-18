@@ -1,23 +1,36 @@
 plugins {
-    id 'java'
-    id 'maven-publish'
-    id 'signing'
+    id('java')
+    id('maven-publish')
+    id('signing')
 }
 
 group = 'com.github.h908714124'
+
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(16))
+    }
+}
 
 compileJava {
     options.encoding = 'UTF-8'
     sourceCompatibility = '8'
     targetCompatibility = '8'
-}
-
-tasks.withType(GenerateModuleMetadata) {
-    enabled = true
+    options.compilerArgs << '--release'
+    options.compilerArgs << '8'
 }
 
 repositories {
     mavenCentral()
+}
+
+tasks.withType(AbstractArchiveTask) {
+    preserveFileTimestamps = false
+    reproducibleFileOrder = true
+}
+
+tasks.withType(GenerateModuleMetadata) {
+    enabled = true
 }
 
 dependencies {
@@ -35,36 +48,22 @@ jar {
 test {
     useJUnitPlatform()
     testLogging {
-        events "passed", "skipped", "failed"
+        events('failed')
     }
 }
 
 task javadocJar(type: Jar) {
     from javadoc
-    archiveClassifier = 'javadoc'
+    archiveClassifier.set('javadoc')
 }
 
 task sourcesJar(type: Jar) {
     from sourceSets.main.allJava
-    archiveClassifier = 'sources'
+    archiveClassifier.set('sources')
 }
 
 artifacts {
-    archives javadocJar, sourcesJar
-}
-
-signing {
-    sign configurations.archives
-}
-
-// https://docs.gradle.org/current/userguide/signing_plugin.html
-gradle.taskGraph.whenReady { taskGraph ->
-    if (taskGraph.allTasks.any { it instanceof Sign }) {
-        allprojects {
-            ext."signatory.keyId" = System.getenv('SIGNING_KEY_ID')
-            ext."signatory.password" = System.getenv('SIGNING_PASSWORD')
-        }
-    }
+    archives(javadocJar, sourcesJar)
 }
 
 // https://central.sonatype.org/pages/gradle.html
@@ -115,6 +114,7 @@ publishing {
     }
 }
 
+// https://docs.gradle.org/current/userguide/signing_plugin.html
 signing {
     def signingKey = findProperty('signingKey')
     def signingPassword = findProperty('signingPassword')

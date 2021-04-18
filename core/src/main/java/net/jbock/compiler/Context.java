@@ -38,13 +38,21 @@ public final class Context {
 
   private final ClassName optionType;
 
-  Context(TypeElement sourceElement, ClassName generatedClass, ClassName optionType, Params parameters) {
+  private final boolean isSuperCommand;
+
+  Context(
+      TypeElement sourceElement,
+      ClassName generatedClass,
+      ClassName optionType,
+      Params parameters,
+      boolean isSuperCommand) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.params = parameters.positionalParams;
     this.options = parameters.namedOptions;
+    this.isSuperCommand = isSuperCommand;
     this.parameters = ImmutableList.<Parameter>builder().addAll(params).addAll(options).build();
-    this.helpParameterEnabled = !sourceElement.getAnnotation(Command.class).helpDisabled();
+    this.helpParameterEnabled = !isSuperCommand && !sourceElement.getAnnotation(Command.class).helpDisabled();
     this.programName = programName(sourceElement);
     this.optionType = optionType;
   }
@@ -60,8 +68,16 @@ public final class Context {
     return generatedClass.nestedClass("OptionParser");
   }
 
-  public ClassName repeatableParamParserType() {
+  public ClassName repeatableOptionParserType() {
+    return generatedClass.nestedClass("RepeatableOptionParser");
+  }
+
+  public ClassName paramParserType() {
     return generatedClass.nestedClass("ParamParser");
+  }
+
+  public ClassName repeatableParamParserType() {
+    return generatedClass.nestedClass("RepeatableParamParser");
   }
 
   public ClassName flagParserType() {
@@ -134,5 +150,9 @@ public final class Context {
 
   public String programName() {
     return programName;
+  }
+
+  public boolean isSuperCommand() {
+    return isSuperCommand;
   }
 }

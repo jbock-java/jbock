@@ -10,9 +10,28 @@ import javax.lang.model.SourceVersion;
 
 public final class Processor extends BasicAnnotationProcessor {
 
+  private final OperationMode operationMode;
+
+  public Processor() {
+    this(OperationMode.PRODUCTION);
+  }
+
+  // visible for testing
+  @SuppressWarnings("unused")
+  Processor(boolean test) {
+    this(test ? OperationMode.TEST : OperationMode.PRODUCTION);
+  }
+
+  private Processor(OperationMode operationMode) {
+    this.operationMode = operationMode;
+  }
+
   @Override
   protected Iterable<? extends Step> steps() {
-    ProcessorComponent component = DaggerProcessor_ProcessorComponent.factory().create(processingEnv);
+    ProcessorComponent component = DaggerProcessor_ProcessorComponent.builder()
+        .processingEnv(processingEnv)
+        .operationMode(operationMode)
+        .build();
     return ImmutableList.of(
         component.commandProcessingStep(),
         component.mapperProcessingStep(),
@@ -28,9 +47,16 @@ public final class Processor extends BasicAnnotationProcessor {
 
     ParameterMethodProcessingStep parameterMethodProcessingStep();
 
-    @Component.Factory
-    interface Factory {
-      ProcessorComponent create(@BindsInstance ProcessingEnvironment processingEnv);
+    @Component.Builder
+    interface Builder {
+
+      @BindsInstance
+      Builder processingEnv(ProcessingEnvironment processingEnvironment);
+
+      @BindsInstance
+      Builder operationMode(OperationMode mode);
+
+      ProcessorComponent build();
     }
   }
 

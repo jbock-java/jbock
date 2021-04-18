@@ -175,11 +175,6 @@ final class OptionEnum {
     if (options.isEmpty()) {
       return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
     }
-    if (options.size() == 1) {
-      Parameter param = options.get(0);
-      return CodeBlock.builder().addStatement("return $T.singletonMap($L, new $T())",
-          Collections.class, param.enumConstant(), optionParserType(context, param)).build();
-    }
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, context.optionType());
     for (Parameter param : options) {
@@ -191,7 +186,7 @@ final class OptionEnum {
 
   private static ClassName optionParserType(Context context, Parameter param) {
     if (param.isRepeatable()) {
-      return context.optionParserType();
+      return context.repeatableOptionParserType();
     }
     if (param.isFlag()) {
       return context.flagParserType();
@@ -200,7 +195,7 @@ final class OptionEnum {
   }
 
   private static MethodSpec paramParsersMethod(Context context) {
-    ParameterSpec parsers = builder(listOf(context.repeatableParamParserType()), "parsers").build();
+    ParameterSpec parsers = builder(listOf(context.paramParserType()), "parsers").build();
     CodeBlock code = paramParsersMethodCode(context);
     return MethodSpec.methodBuilder("paramParsers")
         .returns(parsers.type)
@@ -213,10 +208,6 @@ final class OptionEnum {
     List<PositionalParameter> params = context.params();
     if (params.isEmpty()) {
       return CodeBlock.of("return $T.emptyList()", Collections.class);
-    }
-    if (params.size() == 1) {
-      Parameter param = params.get(0);
-      return CodeBlock.of("return $T.singletonList(new $T())", Collections.class, param.isRepeatable() ? context.repeatableParamParserType() : context.regularParamParserType());
     }
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("return $T.asList(", Arrays.class);

@@ -473,7 +473,7 @@ public final class GeneratedClass {
     }
 
     // handle unknown token
-    code.add("if (!$N && !$N.isEmpty() && $N.charAt(0) == '-')\n", endOfOptionParsing, token, token).indent()
+    code.add("if (!$N && $N.startsWith($S))\n", endOfOptionParsing, token, "-").indent()
         .addStatement(throwInvalidOptionStatement(token, "Invalid option"))
         .unindent();
 

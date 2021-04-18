@@ -54,7 +54,7 @@ final class ParserState {
         .initializer("$T.$N()", context.optionType(), optionEnum.optionParsersMethod())
         .build();
 
-    FieldSpec paramParsersField = FieldSpec.builder(listOf(context.repeatableParamParserType()), "paramParsers")
+    FieldSpec paramParsersField = FieldSpec.builder(listOf(context.paramParserType()), "paramParsers")
         .initializer("$T.$N()", context.optionType(), optionEnum.paramParsersMethod())
         .build();
 
@@ -111,7 +111,7 @@ final class ParserState {
 
   private CodeBlock extractExpression(Parameter param) {
     return getStreamExpression(param)
-        .add(".values.stream()")
+        .add(".stream()")
         .add(".map($L)", param.coercion().mapExpr())
         .add(param.coercion().tailExpr())
         .build();

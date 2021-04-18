@@ -11,6 +11,7 @@ import dagger.Component;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
+import net.jbock.SuperCommand;
 import net.jbock.coerce.Util;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
@@ -47,6 +48,7 @@ import java.util.stream.Stream;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
+import static net.jbock.compiler.OperationMode.TEST;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
@@ -57,13 +59,15 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private final Messager messager;
   private final Filer filer;
   private final Elements elements;
+  private final OperationMode operationMode;
 
   @Inject
-  CommandProcessingStep(TypeTool tool, Messager messager, Filer filer, Elements elements) {
+  CommandProcessingStep(TypeTool tool, Messager messager, Filer filer, Elements elements, OperationMode operationMode) {
     this.tool = tool;
     this.messager = messager;
     this.filer = filer;
     this.elements = elements;
+    this.operationMode = operationMode;
   }
 
   @Component(modules = ParameterModule.class)
@@ -102,7 +106,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   @Override
   public Set<String> annotations() {
-    return Stream.of(Command.class)
+    return Stream.of(Command.class, SuperCommand.class)
         .map(Class::getCanonicalName)
         .collect(Collectors.toSet());
   }
@@ -128,7 +132,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
               messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
             }
           }, parameters -> {
-            Context context = new Context(sourceElement, generatedClass, optionType, parameters);
+            boolean isSuperCommand = sourceElement.getAnnotation(SuperCommand.class) != null;
+            Context context = new Context(sourceElement, generatedClass, optionType, parameters, isSuperCommand);
             TypeSpec typeSpec = GeneratedClass.create(context).define();
             write(sourceElement, context.generatedClass(), typeSpec);
           });
@@ -144,6 +149,10 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       JavaFileObject sourceFile = filer.createSourceFile(generatedType.toString(), sourceElement);
       try (Writer writer = sourceFile.openWriter()) {
         String sourceCode = javaFile.toString();
+        if (operationMode == TEST) {
+          System.out.println("Printing generated code in OperationMode TEST");
+          System.err.println(sourceCode);
+        }
         writer.write(sourceCode);
       } catch (IOException e) {
         handleUnknownError(sourceElement, e);
@@ -259,6 +268,12 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
+    boolean isCommand = sourceElement.getAnnotation(Command.class) != null;
+    boolean isSuperCommand = sourceElement.getAnnotation(SuperCommand.class) != null;
+    if (isCommand && isSuperCommand) {
+      return Optional.of("annotate with @" + Command.class.getSimpleName() + " or @" +
+          SuperCommand.class.getSimpleName() + " but not both");
+    }
     Optional<String> maybeFailure = commonChecks(sourceElement).map(s -> "command " + s);
     // the following *should* be done with Optional#or but we're currently limited to 1.8 API
     return Either.<String, Optional<String>>fromFailure(maybeFailure, Optional.empty())
