@@ -1,5 +1,6 @@
 package net.jbock.compiler;
 
+import net.jbock.SuperCommand;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.either.Either;
@@ -13,11 +14,16 @@ import java.util.Optional;
 class PositionalParamFactory extends ParameterScoped {
 
   private final BasicInfo basicInfo;
+  private final ParserFlavour flavour;
 
   @Inject
-  PositionalParamFactory(ParameterContext parameterContext, BasicInfo basicInfo) {
+  PositionalParamFactory(
+      ParameterContext parameterContext,
+      BasicInfo basicInfo,
+      ParserFlavour flavour) {
     super(parameterContext);
     this.basicInfo = basicInfo;
+    this.flavour = flavour;
   }
 
   Either<ValidationFailure, PositionalParameter> createPositionalParam(int positionalIndex) {
@@ -30,6 +36,7 @@ class PositionalParamFactory extends ParameterScoped {
             Arrays.asList(description()),
             positionalIndex))
         .filter(this::checkPositionNotNegative)
+        .filter(this::checkSuperNotRepeatable)
         .filter(this::checkOnlyOnePositionalList)
         .filter(this::checkRankConsistentWithPosition)
         .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
@@ -48,6 +55,14 @@ class PositionalParamFactory extends ParameterScoped {
   private Optional<String> checkPositionNotNegative(PositionalParameter p) {
     if (p.position() < 0) {
       return Optional.of("negative positions are not allowed");
+    }
+    return Optional.empty();
+  }
+
+  private Optional<String> checkSuperNotRepeatable(PositionalParameter p) {
+    if (flavour.isSuperCommand() && p.isRepeatable()) {
+      return Optional.of("when using @" + SuperCommand.class.getSimpleName() +
+          ", repeatable params are not supported");
     }
     return Optional.empty();
   }

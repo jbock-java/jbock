@@ -312,7 +312,8 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("put @Command annotation on the enclosing class");
+        .withErrorContaining("put either the @Command or @SuperCommand annotation" +
+            " on the enclosing class");
   }
 
   @Test
@@ -507,6 +508,7 @@ class ProcessorTest {
         "import java.util.stream.Collector;",
         "",
         "import net.jbock.Command;",
+        "import net.jbock.SuperCommand;",
         "import net.jbock.Param;",
         "import net.jbock.Option;",
         "import net.jbock.Mapper;",

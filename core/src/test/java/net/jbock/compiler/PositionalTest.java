@@ -26,6 +26,51 @@ class PositionalTest {
   }
 
   @Test
+  void superSimpleOptional() {
+    JavaFileObject javaFile = fromSource(
+        "@SuperCommand",
+        "abstract class Arguments {",
+        "",
+        "  @Param(0)",
+        "  abstract Optional<String> a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void mixTypeAnnotations() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "@SuperCommand",
+        "abstract class Arguments {",
+        "",
+        "  @Param(0)",
+        "  abstract Optional<String> a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("annotate with @Command or @SuperCommand but not both");
+  }
+
+  @Test
+  void repeatableSuperCommand() {
+    JavaFileObject javaFile = fromSource(
+        "@SuperCommand",
+        "abstract class Arguments {",
+        "",
+        "  @Param(0)",
+        "  abstract List<String> a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("when using @SuperCommand, repeatable params are not supported");
+  }
+
+  @Test
   void bundleKeyNotUnique() {
     JavaFileObject javaFile = fromSource(
         "@Command",

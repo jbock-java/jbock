@@ -98,6 +98,9 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       @BindsInstance
       Builder alreadyCreatedOptions(ImmutableList<NamedOption> alreadyCreated);
 
+      @BindsInstance
+      Builder flavour(ParserFlavour flavour);
+
       Builder parameterModule(ParameterModule module);
 
       ParameterComponent build();
@@ -121,19 +124,21 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private void processSourceElement(TypeElement sourceElement) {
     ClassName generatedClass = generatedClass(sourceElement);
+    ParserFlavour flavour = sourceElement.getAnnotation(SuperCommand.class) != null ?
+        ParserFlavour.SUPER_COMMAND :
+        ParserFlavour.COMMAND;
     try {
       ClassName optionType = generatedClass.nestedClass("Option");
       Either.fromFailure(validateSourceElement(sourceElement), null)
           .mapLeft(msg -> new ValidationFailure(msg, sourceElement))
           .mapLeft(Collections::singletonList)
-          .flatMap(nothing -> getParams(sourceElement, optionType))
+          .flatMap(nothing -> getParams(sourceElement, optionType, flavour))
           .accept(failures -> {
             for (ValidationFailure failure : failures) {
               messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
             }
           }, parameters -> {
-            boolean isSuperCommand = sourceElement.getAnnotation(SuperCommand.class) != null;
-            Context context = new Context(sourceElement, generatedClass, optionType, parameters, isSuperCommand);
+            Context context = new Context(sourceElement, generatedClass, optionType, parameters, flavour);
             TypeSpec typeSpec = GeneratedClass.create(context).define();
             write(sourceElement, context.generatedClass(), typeSpec);
           });
@@ -162,7 +167,10 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     }
   }
 
-  private Either<List<ValidationFailure>, Params> getParams(TypeElement sourceElement, ClassName optionType) {
+  private Either<List<ValidationFailure>, Params> getParams(
+      TypeElement sourceElement,
+      ClassName optionType,
+      ParserFlavour flavour) {
     return createMethods(sourceElement).flatMap(methods -> {
       List<PositionalParameter> positionalParams = new ArrayList<>();
       AnnotationUtil annotationUtil = new AnnotationUtil();
@@ -177,6 +185,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .optionType(optionType)
             .sourceMethod(sourceMethod)
             .typeTool(tool)
+            .flavour(flavour)
             .alreadyCreatedParams(ImmutableList.copyOf(positionalParams))
             .alreadyCreatedOptions(ImmutableList.of())
             .parameterModule(module)
@@ -194,6 +203,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .optionType(optionType)
             .sourceMethod(sourceMethod)
             .typeTool(tool)
+            .flavour(flavour)
             .alreadyCreatedParams(ImmutableList.of())
             .alreadyCreatedOptions(ImmutableList.copyOf(namedOptions))
             .parameterModule(module)

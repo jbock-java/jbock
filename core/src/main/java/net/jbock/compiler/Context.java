@@ -3,7 +3,6 @@ package net.jbock.compiler;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
-import net.jbock.Command;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.parameter.PositionalParameter;
@@ -38,30 +37,23 @@ public final class Context {
 
   private final ClassName optionType;
 
-  private final boolean isSuperCommand;
+  private final ParserFlavour flavour;
 
   Context(
       TypeElement sourceElement,
       ClassName generatedClass,
       ClassName optionType,
       Params parameters,
-      boolean isSuperCommand) {
+      ParserFlavour flavour) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.params = parameters.positionalParams;
     this.options = parameters.namedOptions;
-    this.isSuperCommand = isSuperCommand;
+    this.flavour = flavour;
     this.parameters = ImmutableList.<Parameter>builder().addAll(params).addAll(options).build();
-    this.helpParameterEnabled = !isSuperCommand && !sourceElement.getAnnotation(Command.class).helpDisabled();
-    this.programName = programName(sourceElement);
+    this.helpParameterEnabled = !flavour.helpDisabled(sourceElement);
+    this.programName = flavour.programName(sourceElement);
     this.optionType = optionType;
-  }
-
-  private static String programName(TypeElement sourceType) {
-    if (!sourceType.getAnnotation(Command.class).value().isEmpty()) {
-      return sourceType.getAnnotation(Command.class).value();
-    }
-    return EnumName.create(sourceType.getSimpleName().toString()).snake('-');
   }
 
   public ClassName optionParserType() {
@@ -153,6 +145,6 @@ public final class Context {
   }
 
   public boolean isSuperCommand() {
-    return isSuperCommand;
+    return flavour.isSuperCommand();
   }
 }
