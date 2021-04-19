@@ -1,11 +1,13 @@
 package net.jbock.compiler.view;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
+import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.Parameter;
 
 import javax.inject.Inject;
@@ -26,6 +28,8 @@ final class ParserState {
 
   private final Context context;
 
+  private final GeneratedTypes generatedTypes;
+
   private final FieldSpec optionNamesField;
 
   private final FieldSpec optionParsersField;
@@ -35,23 +39,27 @@ final class ParserState {
   private final MethodSpec tryReadOptionMethod;
 
   @Inject
-  ParserState(Context context, OptionEnum optionEnum) {
+  ParserState(Context context, GeneratedTypes generatedTypes, OptionEnum optionEnum) {
+    this.context = context;
+    this.generatedTypes = generatedTypes;
+
+    ClassName optionType = generatedTypes.optionType();
+
     // read-only lookups
-    FieldSpec optionNamesField = FieldSpec.builder(mapOf(STRING, context.optionType()), "optionNames")
-        .initializer("$T.$N()", context.optionType(), optionEnum.optionNamesMethod())
+    FieldSpec optionNamesField = FieldSpec.builder(mapOf(STRING, optionType), "optionNames")
+        .initializer("$T.$N()", optionType, optionEnum.optionNamesMethod())
         .build();
 
     // stateful parsers
-    FieldSpec optionParsersField = FieldSpec.builder(mapOf(context.optionType(), context.optionParserType()), "optionParsers")
-        .initializer("$T.$N()", context.optionType(), optionEnum.optionParsersMethod())
+    FieldSpec optionParsersField = FieldSpec.builder(mapOf(optionType, generatedTypes.optionParserType()), "optionParsers")
+        .initializer("$T.$N()", optionType, optionEnum.optionParsersMethod())
         .build();
 
-    FieldSpec paramParsersField = FieldSpec.builder(listOf(context.paramParserType()), "paramParsers")
-        .initializer("$T.$N()", context.optionType(), optionEnum.paramParsersMethod())
+    FieldSpec paramParsersField = FieldSpec.builder(listOf(generatedTypes.paramParserType()), "paramParsers")
+        .initializer("$T.$N()", optionType, optionEnum.paramParsersMethod())
         .build();
 
-    MethodSpec tryReadOptionMethod = tryReadOptionMethod(context, optionNamesField);
-    this.context = context;
+    MethodSpec tryReadOptionMethod = tryReadOptionMethod(generatedTypes, optionNamesField);
     this.optionNamesField = optionNamesField;
     this.optionParsersField = optionParsersField;
     this.paramParsersField = paramParsersField;
@@ -59,7 +67,7 @@ final class ParserState {
   }
 
   TypeSpec define() {
-    return TypeSpec.classBuilder(context.parserStateType())
+    return TypeSpec.classBuilder(generatedTypes.parserStateType())
         .addModifiers(PRIVATE, STATIC)
         .addMethod(buildMethod())
         .addMethod(tryReadOptionMethod)
@@ -67,7 +75,7 @@ final class ParserState {
         .build();
   }
 
-  private static MethodSpec tryReadOptionMethod(Context context, FieldSpec optionNamesField) {
+  private static MethodSpec tryReadOptionMethod(GeneratedTypes generatedTypes, FieldSpec optionNamesField) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
 
@@ -85,7 +93,7 @@ final class ParserState {
     return MethodSpec.methodBuilder("tryReadOption")
         .addParameter(token)
         .addCode(code.build())
-        .returns(context.optionType()).build();
+        .returns(generatedTypes.optionType()).build();
   }
 
   private MethodSpec buildMethod() {
@@ -99,7 +107,7 @@ final class ParserState {
       }
     }
     return MethodSpec.methodBuilder("build")
-        .addStatement("return new $T($L)", context.implType(), args.build())
+        .addStatement("return new $T($L)", generatedTypes.implType(), args.build())
         .returns(context.sourceType())
         .build();
   }
@@ -131,7 +139,7 @@ final class ParserState {
     }
     return CodeBlock.builder().add(
         "$N.get($T.$N)", optionParsersField,
-        context.optionType(), param.enumConstant());
+        generatedTypes.optionType(), param.enumConstant());
   }
 
   MethodSpec tryReadOption() {

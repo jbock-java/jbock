@@ -4,8 +4,10 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
+import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.Parameter;
 
+import javax.inject.Inject;
 import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -18,8 +20,18 @@ import static javax.lang.model.element.Modifier.STATIC;
  */
 final class Impl {
 
-  static TypeSpec define(Context context) {
-    TypeSpec.Builder spec = TypeSpec.classBuilder(context.implType())
+  private final Context context;
+
+  private final GeneratedTypes generatedTypes;
+
+  @Inject
+  Impl(Context context, GeneratedTypes generatedTypes) {
+    this.context = context;
+    this.generatedTypes = generatedTypes;
+  }
+
+  TypeSpec define() {
+    TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType())
         .superclass(context.sourceType());
     for (Parameter param : context.parameters()) {
       spec.addField(FieldSpec.builder(param.returnType(), param.enumName().camel()).build());

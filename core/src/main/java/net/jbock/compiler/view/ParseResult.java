@@ -6,7 +6,9 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
+import net.jbock.compiler.GeneratedTypes;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,15 +28,19 @@ final class ParseResult {
 
   private final Context context;
 
+  private final GeneratedTypes generatedTypes;
+
   private final FieldSpec result;
 
-  ParseResult(Context context) {
+  @Inject
+  ParseResult(Context context, GeneratedTypes generatedTypes) {
     this.context = context;
     this.result = FieldSpec.builder(context.sourceType(), "result", PRIVATE, FINAL).build();
+    this.generatedTypes = generatedTypes;
   }
 
   List<TypeSpec> defineResultTypes() {
-    TypeSpec.Builder spec = classBuilder(context.parseResultType())
+    TypeSpec.Builder spec = classBuilder(generatedTypes.parseResultType())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addModifiers(ABSTRACT, STATIC)
         .addModifiers(context.getAccessModifiers());
@@ -42,7 +48,7 @@ final class ParseResult {
     result.add(spec.build());
     result.add(defineErrorResult());
     result.add(defineSuccessResult());
-    context.helpRequestedType()
+    generatedTypes.helpRequestedType()
         .map(this::defineHelpRequestedResult)
         .ifPresent(result::add);
     return result;
@@ -50,7 +56,7 @@ final class ParseResult {
 
   private TypeSpec defineHelpRequestedResult(ClassName helpRequestedType) {
     return classBuilder(helpRequestedType)
-        .superclass(context.parseResultType())
+        .superclass(generatedTypes.parseResultType())
         .addModifiers(STATIC, FINAL)
         .addModifiers(context.getAccessModifiers())
         .build();
@@ -59,8 +65,8 @@ final class ParseResult {
   private TypeSpec defineErrorResult() {
     ParameterSpec paramError = builder(RuntimeException.class, "error").build();
     FieldSpec fieldError = FieldSpec.builder(paramError.type, paramError.name, PRIVATE, FINAL).build();
-    return classBuilder(context.parsingFailedType())
-        .superclass(context.parseResultType())
+    return classBuilder(generatedTypes.parsingFailedType())
+        .superclass(generatedTypes.parseResultType())
         .addField(fieldError)
         .addMethod(constructorBuilder()
             .addModifiers(PRIVATE)
@@ -79,8 +85,8 @@ final class ParseResult {
 
   private TypeSpec defineSuccessResult() {
     ParameterSpec paramResult = builder(result.type, result.name).build();
-    return classBuilder(context.parsingSuccessType())
-        .superclass(context.parseResultType())
+    return classBuilder(generatedTypes.parsingSuccessType())
+        .superclass(generatedTypes.parseResultType())
         .addField(result)
         .addMethod(constructorBuilder()
             .addModifiers(PRIVATE)

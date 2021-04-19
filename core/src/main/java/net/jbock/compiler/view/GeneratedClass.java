@@ -10,6 +10,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
+import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.Parameter;
 
 import javax.inject.Inject;
@@ -22,7 +23,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
 import java.util.StringJoiner;
-import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -52,6 +52,10 @@ public final class GeneratedClass {
   private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
 
   private final Context context;
+  private final Impl impl;
+  private final GeneratedTypes generatedTypes;
+  private final OptionParser optionParser;
+  private final ParamParser paramParser;
   private final OptionEnum optionEnum;
   private final ParserState parserState;
   private final ParseResult parseResult;
@@ -71,16 +75,24 @@ public final class GeneratedClass {
   private final FieldSpec runBeforeExit;
 
   @Inject
-  GeneratedClass(Context context, OptionEnum optionEnum, ParserState state) {
-    ParseResult parseResult = new ParseResult(context);
-    FieldSpec runBeforeExit = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), context.parseResultType()), "runBeforeExit").addModifiers(PRIVATE)
-        .initializer("r -> {}")
-        .build();
+  GeneratedClass(
+      Context context,
+      Impl impl,
+      GeneratedTypes generatedTypes,
+      OptionParser optionParser,
+      ParamParser paramParser,
+      OptionEnum optionEnum,
+      ParserState state,
+      ParseResult parseResult) {
     this.context = context;
+    this.impl = impl;
+    this.generatedTypes = generatedTypes;
+    this.optionParser = optionParser;
+    this.paramParser = paramParser;
     this.optionEnum = optionEnum;
     this.parserState = state;
     this.parseResult = parseResult;
-    this.runBeforeExit = runBeforeExit;
+    this.runBeforeExit = context.runBeforeExit();
   }
 
   public TypeSpec define() {
@@ -111,10 +123,10 @@ public final class GeneratedClass {
     spec.addFields(Arrays.asList(err, maxLineWidth, runBeforeExit, messages));
 
     spec.addType(parserState.define())
-        .addType(Impl.define(context))
+        .addType(impl.define())
         .addType(optionEnum.define())
-        .addTypes(OptionParser.define(context))
-        .addTypes(ParamParser.define(context))
+        .addTypes(optionParser.define())
+        .addTypes(paramParser.define())
         .addTypes(parseResult.defineResultTypes());
 
     return spec.addModifiers(FINAL)
@@ -124,10 +136,10 @@ public final class GeneratedClass {
 
   private MethodSpec buildRowsMethod(Modifier[] accessModifiers) {
     ParameterSpec rows = builder(Constants.listOf(ENTRY_STRING_STRING), "rows").build();
-    ParameterSpec optionParam = builder(context.optionType(), "option").build();
+    ParameterSpec optionParam = builder(generatedTypes.optionType(), "option").build();
     ParameterSpec message = builder(STRING, "message").build();
     CodeBlock.Builder builder = CodeBlock.builder();
-    builder.add("return $T.stream($T.values()).map($N -> {\n", Arrays.class, context.optionType(), optionParam).indent()
+    builder.add("return $T.stream($T.values()).map($N -> {\n", Arrays.class, generatedTypes.optionType(), optionParam).indent()
         .addStatement("$T $N = $N.getOrDefault($N.bundleKey, $T.join($S, $N.description)).trim()",
             STRING, message, messages, optionParam, String.class, " ", optionParam)
         .addStatement("return new $T($N.shape, $N)", ParameterizedTypeName.get(ClassName.get(SimpleImmutableEntry.class), STRING, STRING),
@@ -283,22 +295,22 @@ public final class GeneratedClass {
     ParameterSpec e = builder(RuntimeException.class, "e").build();
     CodeBlock.Builder code = CodeBlock.builder();
 
-    context.helpRequestedType().ifPresent(helpRequestedType ->
+    generatedTypes.helpRequestedType().ifPresent(helpRequestedType ->
         code.add("if ($N.length >= 1 && $S.equals($N[0]))\n", args, "--help", args).indent()
             .addStatement("return new $T()", helpRequestedType)
             .unindent());
 
     code.beginControlFlow("try")
-        .addStatement("return new $T(parse($T.asList($N).iterator()))", context.parsingSuccessType(), Arrays.class, args)
+        .addStatement("return new $T(parse($T.asList($N).iterator()))", generatedTypes.parsingSuccessType(), Arrays.class, args)
         .endControlFlow();
 
     code.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
         .addStatement("return new $T($N)",
-            context.parsingFailedType(), e)
+            generatedTypes.parsingFailedType(), e)
         .endControlFlow();
 
     return MethodSpec.methodBuilder("parse").addParameter(args)
-        .returns(context.parseResultType())
+        .returns(generatedTypes.parseResultType())
         .addCode(code.build())
         .addModifiers(accessModifiers)
         .addJavadoc("This parse method has no side effects.\n" +
@@ -364,8 +376,8 @@ public final class GeneratedClass {
     for (Parameter option : requiredOptions) {
       spec.addCode(addBreaks(".add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))"),
           String.class, "%s <%s>",
-          context.optionType(), option.enumConstant(),
-          context.optionType(), option.enumConstant(), Locale.class);
+          generatedTypes.optionType(), option.enumConstant(),
+          generatedTypes.optionType(), option.enumConstant(), Locale.class);
     }
 
     for (Parameter param : context.params()) {
@@ -387,16 +399,16 @@ public final class GeneratedClass {
   private MethodSpec parseOrExitMethod(Modifier[] accessModifiers) {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
-    ParameterSpec result = builder(context.parseResultType(), "result").build();
+    ParameterSpec result = builder(generatedTypes.parseResultType(), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
 
     code.addStatement("$T $N = parse($N)", result.type, result, args);
 
-    code.add("if ($N instanceof $T)\n", result, context.parsingSuccessType()).indent()
-        .addStatement("return (($T) $N).getResult()", context.parsingSuccessType(), result)
+    code.add("if ($N instanceof $T)\n", result, generatedTypes.parsingSuccessType()).indent()
+        .addStatement("return (($T) $N).getResult()", generatedTypes.parsingSuccessType(), result)
         .unindent();
 
-    context.helpRequestedType().ifPresent(helpRequestedType -> code
+    generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> code
         .beginControlFlow("if ($N instanceof $T)", result, helpRequestedType)
         .addStatement("printOnlineHelp($N)", out)
         .addStatement("$N.flush()", out)
@@ -404,13 +416,13 @@ public final class GeneratedClass {
         .addStatement("$T.exit(0)", System.class)
         .endControlFlow());
 
-    code.addStatement("(($T) $N).getError().printStackTrace($N)", context.parsingFailedType(), result, err);
+    code.addStatement("(($T) $N).getError().printStackTrace($N)", generatedTypes.parsingFailedType(), result, err);
     if (!context.isHelpParameterEnabled()) {
       code.addStatement("printOnlineHelp($N)", err);
     } else {
       code.addStatement("printWrap($N, 8, $S, $S + synopsis())", err, "", "Usage: ");
     }
-    code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", context.parsingFailedType(), result);
+    code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", generatedTypes.parsingFailedType(), result);
     if (context.isHelpParameterEnabled()) {
       code.addStatement("$N.println($S)", err, "Try '--help' for more information.");
     }
@@ -428,9 +440,9 @@ public final class GeneratedClass {
 
   private MethodSpec parseMethodOverloadIterator() {
 
-    ParameterSpec state = builder(context.parserStateType(), "state").build();
+    ParameterSpec state = builder(generatedTypes.parserStateType(), "state").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-    ParameterSpec option = builder(context.optionType(), "option").build();
+    ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec position = builder(INT, "position").build();
     ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
@@ -455,7 +467,7 @@ public final class GeneratedClass {
 
     if (!context.options().isEmpty()) {
       code.beginControlFlow("if (!$N)", endOfOptionParsing);
-      code.addStatement("$T $N = $N.$N($N)", context.optionType(), option, state, parserState.tryReadOption(), token);
+      code.addStatement("$T $N = $N.$N($N)", generatedTypes.optionType(), option, state, parserState.tryReadOption(), token);
       code.beginControlFlow("if ($N != null)", option)
           .addStatement("$N.$N.get($N).read($N, $N, $N)", state, parserState.parsersField(), option, option, token, it)
           .addStatement("continue")

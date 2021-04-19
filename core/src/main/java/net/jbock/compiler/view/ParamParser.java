@@ -6,8 +6,10 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
+import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.PositionalParameter;
 
+import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,33 +24,47 @@ import static net.jbock.compiler.Constants.STRING;
  */
 final class ParamParser {
 
-  static List<TypeSpec> define(Context context) {
+  private final Context context;
+
+  private final GeneratedTypes generatedTypes;
+
+  private final OptionParser optionParser;
+
+  @Inject
+  ParamParser(Context context, GeneratedTypes generatedTypes, OptionParser optionParser) {
+    this.context = context;
+    this.generatedTypes = generatedTypes;
+    this.optionParser = optionParser;
+  }
+
+
+  List<TypeSpec> define() {
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
         .build();
     FieldSpec value = FieldSpec.builder(STRING, "value")
         .build();
     List<TypeSpec> result = new ArrayList<>();
-    result.add(TypeSpec.classBuilder(context.paramParserType())
+    result.add(TypeSpec.classBuilder(generatedTypes.paramParserType())
         .addMethod(readMethodAbstract())
-        .addMethod(OptionParser.streamMethodAbstract())
+        .addMethod(optionParser.streamMethodAbstract())
         .addModifiers(PRIVATE, STATIC, ABSTRACT)
         .build());
     boolean anyRepeatable = context.params().stream().anyMatch(PositionalParameter::isRepeatable);
     boolean anyRegular = context.params().stream().anyMatch(param -> !param.isRepeatable());
     if (anyRegular) {
-      result.add(TypeSpec.classBuilder(context.regularParamParserType())
+      result.add(TypeSpec.classBuilder(generatedTypes.regularParamParserType())
           .addField(value)
-          .superclass(context.paramParserType())
+          .superclass(generatedTypes.paramParserType())
           .addMethod(readMethodRegular(value))
-          .addMethod(OptionParser.streamMethodRegular(value))
+          .addMethod(optionParser.streamMethodRegular(value))
           .addModifiers(PRIVATE, STATIC).build());
     }
     if (anyRepeatable) {
-      result.add(TypeSpec.classBuilder(context.repeatableParamParserType())
+      result.add(TypeSpec.classBuilder(generatedTypes.repeatableParamParserType())
           .addField(values)
-          .superclass(context.paramParserType())
+          .superclass(generatedTypes.paramParserType())
           .addMethod(readMethodRepeatable(values))
-          .addMethod(OptionParser.streamMethodRepeatable(values))
+          .addMethod(optionParser.streamMethodRepeatable(values))
           .addModifiers(PRIVATE, STATIC).build());
     }
     return result;

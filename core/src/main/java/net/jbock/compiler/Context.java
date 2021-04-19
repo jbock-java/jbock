@@ -2,6 +2,8 @@ package net.jbock.compiler;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
@@ -11,8 +13,9 @@ import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
-import java.util.Optional;
+import java.util.function.Consumer;
 
+import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
 
 public final class Context {
@@ -40,7 +43,8 @@ public final class Context {
       ClassName generatedClass,
       List<NamedOption> namedOptions,
       List<PositionalParameter> params,
-      ParserFlavour flavour, GeneratedTypes generatedTypes) {
+      ParserFlavour flavour,
+      GeneratedTypes generatedTypes) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
     this.params = params;
@@ -48,62 +52,6 @@ public final class Context {
     this.flavour = flavour;
     this.parameters = ImmutableList.<Parameter>builder().addAll(params).addAll(options).build();
     this.generatedTypes = generatedTypes;
-  }
-
-  public ClassName optionParserType() {
-    return generatedTypes.optionParserType();
-  }
-
-  public ClassName repeatableOptionParserType() {
-    return generatedTypes.repeatableOptionParserType();
-  }
-
-  public ClassName paramParserType() {
-    return generatedTypes.paramParserType();
-  }
-
-  public ClassName repeatableParamParserType() {
-    return generatedTypes.repeatableParamParserType();
-  }
-
-  public ClassName flagParserType() {
-    return generatedTypes.flagParserType();
-  }
-
-  public ClassName regularOptionParserType() {
-    return generatedTypes.regularOptionParserType();
-  }
-
-  public ClassName regularParamParserType() {
-    return generatedTypes.regularParamParserType();
-  }
-
-  public ClassName optionType() {
-    return generatedTypes.optionType();
-  }
-
-  public ClassName parserStateType() {
-    return generatedTypes.parserStateType();
-  }
-
-  public ClassName implType() {
-    return generatedTypes.implType();
-  }
-
-  public ClassName parseResultType() {
-    return generatedTypes.parseResultType();
-  }
-
-  public ClassName parsingSuccessType() {
-    return generatedTypes.parsingSuccessType();
-  }
-
-  public ClassName parsingFailedType() {
-    return generatedTypes.parsingFailedType();
-  }
-
-  public Optional<ClassName> helpRequestedType() {
-    return generatedTypes.helpRequestedType();
   }
 
   public TypeName sourceType() {
@@ -136,6 +84,14 @@ public final class Context {
 
   public String programName() {
     return flavour.programName(sourceElement);
+  }
+
+  public FieldSpec runBeforeExit() {
+    ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(Consumer.class), generatedTypes.parseResultType());
+    return FieldSpec.builder(consumer, "runBeforeExit")
+        .addModifiers(PRIVATE)
+        .initializer("r -> {}")
+        .build();
   }
 
   public boolean isSuperCommand() {
