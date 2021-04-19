@@ -1,6 +1,7 @@
 package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.TypeElement;
 import java.util.Optional;
@@ -19,6 +20,10 @@ public class GeneratedTypes {
     this.generatedClass = generatedClass;
     this.flavour = flavour;
     this.sourceElement = sourceElement;
+  }
+
+  public TypeName sourceType() {
+    return TypeName.get(sourceElement.asType());
   }
 
   public ClassName generatedClass() {

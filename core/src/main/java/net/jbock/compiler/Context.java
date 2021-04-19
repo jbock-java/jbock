@@ -12,6 +12,7 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import java.util.AbstractList;
 import java.util.List;
 import java.util.function.Consumer;
 
@@ -52,10 +53,6 @@ public final class Context {
     this.flavour = flavour;
     this.parameters = ImmutableList.<Parameter>builder().addAll(params).addAll(options).build();
     this.generatedTypes = generatedTypes;
-  }
-
-  public TypeName sourceType() {
-    return TypeName.get(sourceElement.asType());
   }
 
   public Modifier[] getAccessModifiers() {

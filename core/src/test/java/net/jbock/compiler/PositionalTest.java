@@ -35,7 +35,7 @@ class PositionalTest {
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(new Processor(true))
         .compilesWithoutError();
   }
 

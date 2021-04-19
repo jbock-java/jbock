@@ -32,7 +32,7 @@ final class Impl {
 
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType())
-        .superclass(context.sourceType());
+        .superclass(generatedTypes.sourceType());
     for (Parameter param : context.parameters()) {
       spec.addField(FieldSpec.builder(param.returnType(), param.enumName().camel()).build());
     }

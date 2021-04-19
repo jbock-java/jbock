@@ -108,7 +108,7 @@ final class ParserState {
     }
     return MethodSpec.methodBuilder("build")
         .addStatement("return new $T($L)", generatedTypes.implType(), args.build())
-        .returns(context.sourceType())
+        .returns(generatedTypes.sourceType())
         .build();
   }
 

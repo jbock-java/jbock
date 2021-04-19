@@ -433,7 +433,7 @@ public final class GeneratedClass {
 
     return methodBuilder("parseOrExit").addParameter(args)
         .addModifiers(accessModifiers)
-        .returns(context.sourceType())
+        .returns(generatedTypes.sourceType())
         .addCode(code.build())
         .build();
   }
@@ -497,7 +497,7 @@ public final class GeneratedClass {
         .addParameter(it)
         .addCode(code.build())
         .addModifiers(PRIVATE)
-        .returns(context.sourceType())
+        .returns(generatedTypes.sourceType())
         .build();
   }
 }
