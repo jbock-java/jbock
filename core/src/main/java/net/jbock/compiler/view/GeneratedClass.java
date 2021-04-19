@@ -12,6 +12,7 @@ import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.parameter.Parameter;
 
+import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import java.io.PrintStream;
 import java.util.AbstractMap.SimpleImmutableEntry;
@@ -69,27 +70,17 @@ public final class GeneratedClass {
 
   private final FieldSpec runBeforeExit;
 
-  private GeneratedClass(
-      Context context,
-      OptionEnum optionEnum,
-      ParserState parserState,
-      ParseResult parseResult,
-      FieldSpec runBeforeExit) {
-    this.context = context;
-    this.optionEnum = optionEnum;
-    this.parserState = parserState;
-    this.parseResult = parseResult;
-    this.runBeforeExit = runBeforeExit;
-  }
-
-  public static GeneratedClass create(Context context) {
-    OptionEnum optionEnum = OptionEnum.create(context);
-    ParserState state = ParserState.create(context, optionEnum);
+  @Inject
+  GeneratedClass(Context context, OptionEnum optionEnum, ParserState state) {
     ParseResult parseResult = new ParseResult(context);
     FieldSpec runBeforeExit = FieldSpec.builder(ParameterizedTypeName.get(ClassName.get(Consumer.class), context.parseResultType()), "runBeforeExit").addModifiers(PRIVATE)
         .initializer("r -> {}")
         .build();
-    return new GeneratedClass(context, optionEnum, state, parseResult, runBeforeExit);
+    this.context = context;
+    this.optionEnum = optionEnum;
+    this.parserState = state;
+    this.parseResult = parseResult;
+    this.runBeforeExit = runBeforeExit;
   }
 
   public TypeSpec define() {

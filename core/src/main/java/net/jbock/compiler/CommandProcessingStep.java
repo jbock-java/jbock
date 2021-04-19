@@ -107,6 +107,33 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     }
   }
 
+  @Component(modules = ContextModule.class)
+  interface ContextComponent {
+
+    GeneratedClass generatedClass();
+
+    @Component.Builder
+    interface Builder {
+
+      @BindsInstance
+      Builder sourceElement(TypeElement sourceElement);
+
+      @BindsInstance
+      Builder generatedClass(ClassName generatedClass);
+
+      @BindsInstance
+      Builder params(List<PositionalParameter> parameters);
+
+      @BindsInstance
+      Builder options(List<NamedOption> options);
+
+      @BindsInstance
+      Builder flavour(ParserFlavour flavour);
+
+      ContextComponent build();
+    }
+  }
+
   @Override
   public Set<String> annotations() {
     return Stream.of(Command.class, SuperCommand.class)
@@ -138,9 +165,15 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
               messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
             }
           }, parameters -> {
-            Context context = new Context(sourceElement, generatedClass, optionType, parameters, flavour);
-            TypeSpec typeSpec = GeneratedClass.create(context).define();
-            write(sourceElement, context.generatedClass(), typeSpec);
+            ContextComponent context = DaggerCommandProcessingStep_ContextComponent.builder()
+                .flavour(flavour)
+                .sourceElement(sourceElement)
+                .generatedClass(generatedClass)
+                .options(parameters.namedOptions)
+                .params(parameters.positionalParams)
+                .build();
+            TypeSpec typeSpec = context.generatedClass().define();
+            write(sourceElement, generatedClass, typeSpec);
           });
     } catch (Throwable error) {
       handleUnknownError(sourceElement, error);

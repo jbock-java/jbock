@@ -11,6 +11,7 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.parameter.PositionalParameter;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
@@ -53,8 +54,15 @@ final class OptionEnum {
 
   private final FieldSpec shapeField;
 
-  private OptionEnum(Context context, FieldSpec bundleKeyField, FieldSpec descriptionField, FieldSpec namesField,
-                     MethodSpec optionNamesMethod, MethodSpec optionParsersMethod, FieldSpec shapeField, MethodSpec paramParsersMethod) {
+  @Inject
+  OptionEnum(Context context) {
+    FieldSpec namesField = FieldSpec.builder(LIST_OF_STRING, "names").build();
+    FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").build();
+    FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").build();
+    FieldSpec shapeField = FieldSpec.builder(STRING, "shape").build();
+    MethodSpec optionNamesMethod = optionNamesMethod(context.optionType(), namesField);
+    MethodSpec optionParsersMethod = optionParsersMethod(context);
+    MethodSpec paramParsersMethod = paramParsersMethod(context);
     this.context = context;
     this.bundleKeyField = bundleKeyField;
     this.descriptionField = descriptionField;
@@ -63,19 +71,6 @@ final class OptionEnum {
     this.optionParsersMethod = optionParsersMethod;
     this.shapeField = shapeField;
     this.paramParsersMethod = paramParsersMethod;
-  }
-
-  static OptionEnum create(Context context) {
-    FieldSpec namesField = FieldSpec.builder(LIST_OF_STRING, "names").build();
-    FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").build();
-    FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").build();
-    FieldSpec shapeField = FieldSpec.builder(STRING, "shape").build();
-    MethodSpec optionNamesMethod = optionNamesMethod(context.optionType(), namesField);
-    MethodSpec optionParsersMethod = optionParsersMethod(context);
-    MethodSpec paramParsersMethod = paramParsersMethod(context);
-
-    return new OptionEnum(context, bundleKeyField, descriptionField, namesField, optionNamesMethod,
-        optionParsersMethod, shapeField, paramParsersMethod);
   }
 
   TypeSpec define() {

@@ -8,6 +8,7 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.parameter.Parameter;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 
 import static com.squareup.javapoet.TypeName.INT;
@@ -33,17 +34,8 @@ final class ParserState {
 
   private final MethodSpec tryReadOptionMethod;
 
-  private ParserState(Context context, FieldSpec optionNamesField, FieldSpec optionParsersField,
-                      FieldSpec paramParsersField, MethodSpec tryReadOptionMethod) {
-    this.context = context;
-    this.optionNamesField = optionNamesField;
-    this.optionParsersField = optionParsersField;
-    this.paramParsersField = paramParsersField;
-    this.tryReadOptionMethod = tryReadOptionMethod;
-  }
-
-  static ParserState create(Context context, OptionEnum optionEnum) {
-
+  @Inject
+  ParserState(Context context, OptionEnum optionEnum) {
     // read-only lookups
     FieldSpec optionNamesField = FieldSpec.builder(mapOf(STRING, context.optionType()), "optionNames")
         .initializer("$T.$N()", context.optionType(), optionEnum.optionNamesMethod())
@@ -59,8 +51,11 @@ final class ParserState {
         .build();
 
     MethodSpec tryReadOptionMethod = tryReadOptionMethod(context, optionNamesField);
-
-    return new ParserState(context, optionNamesField, optionParsersField, paramParsersField, tryReadOptionMethod);
+    this.context = context;
+    this.optionNamesField = optionNamesField;
+    this.optionParsersField = optionParsersField;
+    this.paramParsersField = paramParsersField;
+    this.tryReadOptionMethod = tryReadOptionMethod;
   }
 
   TypeSpec define() {

@@ -7,6 +7,7 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.parameter.PositionalParameter;
 
+import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
@@ -29,87 +30,80 @@ public final class Context {
 
   private final List<NamedOption> options;
 
-  // whether "--help" is a special token
-  private final boolean helpParameterEnabled;
-
-  // program name from attribute
-  private final String programName;
-
-  private final ClassName optionType;
-
   private final ParserFlavour flavour;
 
+  private final GeneratedTypes generatedTypes;
+
+  @Inject
   Context(
       TypeElement sourceElement,
       ClassName generatedClass,
-      ClassName optionType,
-      Params parameters,
-      ParserFlavour flavour) {
+      List<NamedOption> namedOptions,
+      List<PositionalParameter> params,
+      ParserFlavour flavour, GeneratedTypes generatedTypes) {
     this.sourceElement = sourceElement;
     this.generatedClass = generatedClass;
-    this.params = parameters.positionalParams;
-    this.options = parameters.namedOptions;
+    this.params = params;
+    this.options = namedOptions;
     this.flavour = flavour;
     this.parameters = ImmutableList.<Parameter>builder().addAll(params).addAll(options).build();
-    this.helpParameterEnabled = !flavour.helpDisabled(sourceElement);
-    this.programName = flavour.programName(sourceElement);
-    this.optionType = optionType;
+    this.generatedTypes = generatedTypes;
   }
 
   public ClassName optionParserType() {
-    return generatedClass.nestedClass("OptionParser");
+    return generatedTypes.optionParserType();
   }
 
   public ClassName repeatableOptionParserType() {
-    return generatedClass.nestedClass("RepeatableOptionParser");
+    return generatedTypes.repeatableOptionParserType();
   }
 
   public ClassName paramParserType() {
-    return generatedClass.nestedClass("ParamParser");
+    return generatedTypes.paramParserType();
   }
 
   public ClassName repeatableParamParserType() {
-    return generatedClass.nestedClass("RepeatableParamParser");
+    return generatedTypes.repeatableParamParserType();
   }
 
   public ClassName flagParserType() {
-    return generatedClass.nestedClass("FlagParser");
+    return generatedTypes.flagParserType();
   }
 
   public ClassName regularOptionParserType() {
-    return generatedClass.nestedClass("RegularOptionParser");
+    return generatedTypes.regularOptionParserType();
   }
 
   public ClassName regularParamParserType() {
-    return generatedClass.nestedClass("RegularParamParser");
+    return generatedTypes.regularParamParserType();
   }
 
   public ClassName optionType() {
-    return optionType;
+    return generatedTypes.optionType();
   }
 
   public ClassName parserStateType() {
-    return generatedClass.nestedClass("ParserState");
+    return generatedTypes.parserStateType();
   }
 
   public ClassName implType() {
-    return generatedClass.nestedClass(sourceElement.getSimpleName() + "Impl");
+    return generatedTypes.implType();
   }
 
   public ClassName parseResultType() {
-    return generatedClass.nestedClass("ParseResult");
+    return generatedTypes.parseResultType();
   }
 
   public ClassName parsingSuccessType() {
-    return generatedClass.nestedClass("ParsingSuccess");
+    return generatedTypes.parsingSuccessType();
   }
 
   public ClassName parsingFailedType() {
-    return generatedClass.nestedClass("ParsingFailed");
+    return generatedTypes.parsingFailedType();
   }
 
   public Optional<ClassName> helpRequestedType() {
-    return helpParameterEnabled ? Optional.of(generatedClass.nestedClass("HelpRequested")) : Optional.empty();
+    return generatedTypes.helpRequestedType();
   }
 
   public TypeName sourceType() {
@@ -137,11 +131,11 @@ public final class Context {
   }
 
   public boolean isHelpParameterEnabled() {
-    return helpParameterEnabled;
+    return !flavour.helpDisabled(sourceElement);
   }
 
   public String programName() {
-    return programName;
+    return flavour.programName(sourceElement);
   }
 
   public boolean isSuperCommand() {
