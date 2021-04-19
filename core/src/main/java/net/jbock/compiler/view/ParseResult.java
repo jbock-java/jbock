@@ -35,7 +35,7 @@ final class ParseResult {
   @Inject
   ParseResult(Context context, GeneratedTypes generatedTypes) {
     this.context = context;
-    this.result = FieldSpec.builder(generatedTypes.sourceType(), "result", PRIVATE, FINAL).build();
+    this.result = FieldSpec.builder(generatedTypes.parseSuccessType(), "result", PRIVATE, FINAL).build();
     this.generatedTypes = generatedTypes;
   }
 
@@ -102,7 +102,7 @@ final class ParseResult {
   private MethodSpec getResultMethod() {
     return methodBuilder("getResult")
         .addStatement("return $N", result)
-        .returns(generatedTypes.sourceType())
+        .returns(generatedTypes.parseSuccessType())
         .addModifiers(context.getAccessModifiers())
         .build();
   }

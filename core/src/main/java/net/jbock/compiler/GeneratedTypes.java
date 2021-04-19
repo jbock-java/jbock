@@ -5,6 +5,7 @@ import com.squareup.javapoet.TypeName;
 
 import javax.lang.model.element.TypeElement;
 import java.util.Optional;
+import java.util.function.Function;
 
 public class GeneratedTypes {
 
@@ -24,6 +25,18 @@ public class GeneratedTypes {
 
   public TypeName sourceType() {
     return TypeName.get(sourceElement.asType());
+  }
+
+  public TypeName parseSuccessType() {
+    Optional<TypeName> className = parseResultWithRestType().map(Function.identity());
+    return className.orElse(sourceType());
+  }
+
+  public Optional<ClassName> parseResultWithRestType() {
+    if (!flavour.isSuperCommand()) {
+      return Optional.empty();
+    }
+    return Optional.of(generatedClass.nestedClass(sourceElement.getSimpleName() + "WithRest"));
   }
 
   public ClassName generatedClass() {

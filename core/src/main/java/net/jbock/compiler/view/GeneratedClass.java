@@ -17,6 +17,7 @@ import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import java.io.PrintStream;
 import java.util.AbstractMap.SimpleImmutableEntry;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -26,6 +27,7 @@ import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
+import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
@@ -36,6 +38,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.coerce.Util.addBreaks;
 import static net.jbock.compiler.Constants.ENTRY_STRING_STRING;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
@@ -128,6 +131,26 @@ public final class GeneratedClass {
         .addTypes(optionParser.define())
         .addTypes(paramParser.define())
         .addTypes(parseResult.defineResultTypes());
+
+    // move this elsewhere
+    generatedTypes.parseResultWithRestType().ifPresent(resultWithRestType -> {
+      FieldSpec result = FieldSpec.builder(generatedTypes.sourceType(), "result", PRIVATE, FINAL).build();
+      FieldSpec rest = FieldSpec.builder(ArrayTypeName.of(String.class), "rest", PRIVATE, FINAL).build();
+      spec.addType(TypeSpec.classBuilder(resultWithRestType)
+          .addModifiers(accessModifiers)
+          .addModifiers(FINAL)
+          .addField(result)
+          .addField(rest)
+          .addMethod(constructorBuilder()
+              .addParameter(ParameterSpec.builder(result.type, result.name).build())
+              .addParameter(ParameterSpec.builder(rest.type, rest.name).build())
+              .addStatement("this.$N = $N", result, result)
+              .addStatement("this.$N = $N", rest, rest)
+              .build())
+          .addMethod(methodBuilder("rest").returns(rest.type).addStatement("return $N", rest).build())
+          .addMethod(methodBuilder("result").returns(result.type).addStatement("return $N", result).build())
+          .build());
+    });
 
     return spec.addModifiers(FINAL)
         .addModifiers(accessModifiers)
@@ -433,18 +456,20 @@ public final class GeneratedClass {
 
     return methodBuilder("parseOrExit").addParameter(args)
         .addModifiers(accessModifiers)
-        .returns(generatedTypes.sourceType())
+        .returns(generatedTypes.parseSuccessType())
         .addCode(code.build())
         .build();
   }
 
   private MethodSpec parseMethodOverloadIterator() {
 
+    // TODO supercommand
     ParameterSpec state = builder(generatedTypes.parserStateType(), "state").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec position = builder(INT, "position").build();
+    ParameterSpec rest = builder(LIST_OF_STRING, "rest").build();
     ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
 
     CodeBlock.Builder code = CodeBlock.builder();
@@ -452,6 +477,10 @@ public final class GeneratedClass {
     code.addStatement("$T $N = new $T()", state.type, state, state.type);
 
     code.addStatement("$T $N = $L", endOfOptionParsing.type, endOfOptionParsing, false);
+
+    if (context.isSuperCommand()) {
+      code.addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class);
+    }
 
     // begin parsing loop
     code.beginControlFlow("while ($N.hasNext())", it);
@@ -491,13 +520,15 @@ public final class GeneratedClass {
     // end parsing loop
     code.endControlFlow();
 
-    code.addStatement("return $N.build()", state);
+    code.addStatement(generatedTypes.parseResultWithRestType().map(type ->
+        CodeBlock.of("return new $T($N.build(), $N.toArray(new $T[0]))", type, state, rest, String.class))
+        .orElseGet(() -> CodeBlock.of("return $N.build()", state)));
 
     return MethodSpec.methodBuilder("parse")
         .addParameter(it)
         .addCode(code.build())
         .addModifiers(PRIVATE)
-        .returns(generatedTypes.sourceType())
+        .returns(generatedTypes.parseSuccessType())
         .build();
   }
 }
