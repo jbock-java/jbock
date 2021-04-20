@@ -10,7 +10,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -49,7 +49,7 @@ public final class ParserTestFixture<E> {
 
     Parser<E> maxLineWidth(int chars);
 
-    Parser<E> runBeforeExit(Consumer<?> run);
+    Parser<E> exitHook(BiConsumer<?, Integer> exitHook);
   }
 
   private final Parser<E> parser;
@@ -135,8 +135,8 @@ public final class ParserTestFixture<E> {
       }
 
       @Override
-      public Parser<E> runBeforeExit(Consumer<?> callback) {
-        return callSetter("runBeforeExit", callback, Consumer.class);
+      public Parser<E> exitHook(BiConsumer<?, Integer> exitHook) {
+        return callSetter("exitHook", exitHook, BiConsumer.class);
       }
     });
     return new ParserTestFixture<>(parser.get(0));
@@ -266,7 +266,7 @@ public final class ParserTestFixture<E> {
       try {
         parser.withHelpStream(stdout.out)
             .withErrorStream(stderr.out)
-            .runBeforeExit(r -> {
+            .exitHook((r, code) -> {
               throw new Abort();
             })
             .maxLineWidth(MAX_LINE_WIDTH)
@@ -324,7 +324,7 @@ public final class ParserTestFixture<E> {
     try {
       parser.withHelpStream(stdout.out)
           .withErrorStream(stderr.out)
-          .runBeforeExit(r -> {
+          .exitHook((r, code) -> {
             throw new Abort();
           })
           .maxLineWidth(MAX_LINE_WIDTH)

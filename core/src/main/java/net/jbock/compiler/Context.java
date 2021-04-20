@@ -4,7 +4,6 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.parameter.PositionalParameter;
@@ -12,9 +11,8 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import java.util.AbstractList;
 import java.util.List;
-import java.util.function.Consumer;
+import java.util.function.BiConsumer;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
@@ -83,11 +81,12 @@ public final class Context {
     return flavour.programName(sourceElement);
   }
 
-  public FieldSpec runBeforeExit() {
-    ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(Consumer.class), generatedTypes.parseResultType());
-    return FieldSpec.builder(consumer, "runBeforeExit")
+  public FieldSpec exitHookField() {
+    ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(BiConsumer.class),
+        generatedTypes.parseResultType(), ClassName.get(Integer.class));
+    return FieldSpec.builder(consumer, "exitHook")
         .addModifiers(PRIVATE)
-        .initializer("r -> {}")
+        .initializer("(r, code) -> $T.exit(code)", System.class)
         .build();
   }
 

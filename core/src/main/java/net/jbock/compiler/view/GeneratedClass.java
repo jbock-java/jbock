@@ -50,7 +50,6 @@ import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
 public final class GeneratedClass {
 
   private static final int DEFAULT_WRAP_AFTER = 80;
-  private static final int EXITCODE_ON_ERROR = 1;
 
   private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
 
@@ -75,7 +74,7 @@ public final class GeneratedClass {
   private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages", PRIVATE)
       .initializer("$T.emptyMap()", Collections.class).build();
 
-  private final FieldSpec runBeforeExit;
+  private final FieldSpec exitHook;
 
   @Inject
   GeneratedClass(
@@ -95,35 +94,33 @@ public final class GeneratedClass {
     this.optionEnum = optionEnum;
     this.parserState = state;
     this.parseResult = parseResult;
-    this.runBeforeExit = context.runBeforeExit();
+    this.exitHook = context.exitHookField();
   }
 
   public TypeSpec define() {
     Modifier[] accessModifiers = context.getAccessModifiers();
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass())
         .addMethod(parseMethod(accessModifiers))
+        .addMethod(parseOrExitMethod(accessModifiers))
+        .addMethod(parseMethodOverloadIterator())
         .addMethod(maxLineWidthMethod(accessModifiers))
         .addMethod(withMessagesMethod(accessModifiers))
         .addMethod(withResourceBundleMethod(accessModifiers))
-        .addMethod(runBeforeExitMethod(accessModifiers))
+        .addMethod(exitHookMethod(accessModifiers))
         .addMethod(withErrorStreamMethod(accessModifiers));
     if (context.isHelpParameterEnabled()) {
       spec.addMethod(withHelpStreamMethod(accessModifiers));
     }
-    spec.addMethod(parseOrExitMethod(accessModifiers))
-        .addMethod(buildRowsMethod(accessModifiers))
+    spec.addMethod(buildRowsMethod(accessModifiers))
         .addMethod(printOnlineHelpMethod(accessModifiers))
         .addMethod(printWrapMethod(accessModifiers))
-        .addMethod(synopsisMethod(accessModifiers));
-
-    // PRIVATE Methods
-    spec.addMethod(parseMethodOverloadIterator())
+        .addMethod(synopsisMethod(accessModifiers))
         .addMethod(readOptionArgumentMethod());
 
     if (context.isHelpParameterEnabled()) {
       spec.addField(out);
     }
-    spec.addFields(Arrays.asList(err, maxLineWidth, runBeforeExit, messages));
+    spec.addFields(Arrays.asList(err, maxLineWidth, exitHook, messages));
 
     spec.addType(parserState.define())
         .addType(impl.define())
@@ -258,11 +255,11 @@ public final class GeneratedClass {
         .build();
   }
 
-  private MethodSpec runBeforeExitMethod(Modifier[] accessModifiers) {
-    ParameterSpec param = builder(runBeforeExit.type, runBeforeExit.name).build();
-    return methodBuilder("runBeforeExit")
+  private MethodSpec exitHookMethod(Modifier[] accessModifiers) {
+    ParameterSpec param = builder(exitHook.type, exitHook.name).build();
+    return methodBuilder("exitHook")
         .addParameter(param)
-        .addStatement("this.$N = $N", runBeforeExit, param)
+        .addStatement("this.$N = $N", exitHook, param)
         .addStatement("return this")
         .returns(context.generatedClass())
         .addModifiers(accessModifiers)
@@ -435,8 +432,8 @@ public final class GeneratedClass {
         .beginControlFlow("if ($N instanceof $T)", result, helpRequestedType)
         .addStatement("printOnlineHelp($N)", out)
         .addStatement("$N.flush()", out)
-        .addStatement("$N.accept($N)", runBeforeExit, result)
-        .addStatement("$T.exit(0)", System.class)
+        .addStatement("$N.accept($N, 0)", exitHook, result)
+        .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
         .endControlFlow());
 
     code.addStatement("(($T) $N).getError().printStackTrace($N)", generatedTypes.parsingFailedType(), result, err);
@@ -450,9 +447,8 @@ public final class GeneratedClass {
       code.addStatement("$N.println($S)", err, "Try '--help' for more information.");
     }
     code.addStatement("$N.flush()", err)
-        .addStatement("$N.accept($N)", runBeforeExit, result)
-        .addStatement("$T.exit($L)", System.class, EXITCODE_ON_ERROR)
-        .addStatement("throw new $T()", RuntimeException.class);
+        .addStatement("$N.accept($N, 1)", exitHook, result)
+        .addStatement("throw new $T($S)", RuntimeException.class, "parsing error");
 
     return methodBuilder("parseOrExit").addParameter(args)
         .addModifiers(accessModifiers)
@@ -463,7 +459,6 @@ public final class GeneratedClass {
 
   private MethodSpec parseMethodOverloadIterator() {
 
-    // TODO supercommand
     ParameterSpec state = builder(generatedTypes.parserStateType(), "state").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
@@ -487,7 +482,7 @@ public final class GeneratedClass {
 
     code.addStatement("$T $N = $N.next()", STRING, token, it);
 
-    if (!context.params().isEmpty()) {
+    if (!context.isSuperCommand() && !context.params().isEmpty()) {
       code.beginControlFlow("if (!$N && $S.equals($N))", endOfOptionParsing, "--", token)
           .addStatement("$N = $L", endOfOptionParsing, true)
           .addStatement("continue")
@@ -509,12 +504,20 @@ public final class GeneratedClass {
         .addStatement(throwInvalidOptionStatement(token, "Invalid option"))
         .unindent();
 
-    code.add("if ($N == $L)\n", position, context.params().size()).indent()
-        .addStatement(throwInvalidOptionStatement(token, "Excess param"))
-        .unindent();
+    if (!context.isSuperCommand()) {
+      code.add("if ($N == $L)\n", position, context.params().size()).indent()
+          .addStatement(throwInvalidOptionStatement(token, "Excess param"))
+          .unindent();
+    }
 
     if (!context.params().isEmpty()) {
       code.addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token);
+    }
+
+    if (context.isSuperCommand()) {
+      code.add("if ($N == $L)\n", position, context.params().size()).indent()
+          .addStatement("$N = $L", endOfOptionParsing, true)
+          .unindent();
     }
 
     // end parsing loop

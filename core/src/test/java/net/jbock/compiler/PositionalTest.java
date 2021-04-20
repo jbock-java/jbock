@@ -35,7 +35,24 @@ class PositionalTest {
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(new Processor(true))
+        .compilesWithoutError();
+  }
+
+  @Test
+  void superComplexOptional() {
+    JavaFileObject javaFile = fromSource(
+        "@SuperCommand",
+        "abstract class Arguments {",
+        "",
+        "  @Param(0)",
+        "  abstract Optional<String> a();",
+        "",
+        "  @Option(\"b\")",
+        "  abstract Optional<String> b();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor(true))
         .compilesWithoutError();
   }
 

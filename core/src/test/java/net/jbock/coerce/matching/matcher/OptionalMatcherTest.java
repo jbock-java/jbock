@@ -5,6 +5,7 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.ParameterContext;
+import net.jbock.compiler.ParserFlavour;
 import net.jbock.compiler.TypeTool;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -76,7 +77,7 @@ class OptionalMatcherTest {
     ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
     ParameterContext context = new ParameterContext(sourceMethod, null, tool, null,
-        ImmutableList.of(), ImmutableList.of(), new String[0], "", EnumName.create("a"));
+        ImmutableList.of(), ImmutableList.of(), new String[0], "", EnumName.create("a"), ParserFlavour.COMMAND);
     return new OptionalMatcher(context);
   }
 }

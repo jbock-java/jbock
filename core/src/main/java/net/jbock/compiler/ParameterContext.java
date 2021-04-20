@@ -24,6 +24,7 @@ public class ParameterContext {
   final String[] description;
   final String bundleKey;
   final EnumName enumName;
+  final ParserFlavour flavour;
 
   @Inject
   public ParameterContext(
@@ -35,7 +36,8 @@ public class ParameterContext {
       ImmutableList<NamedOption> alreadyCreatedOptions,
       String[] description,
       @BundleKey String bundleKey,
-      EnumName enumName) {
+      EnumName enumName,
+      ParserFlavour flavour) {
     this.sourceMethod = sourceMethod;
     this.sourceElement = sourceElement;
     this.tool = tool;
@@ -45,5 +47,6 @@ public class ParameterContext {
     this.description = description;
     this.bundleKey = bundleKey;
     this.enumName = enumName;
+    this.flavour = flavour;
   }
 }
