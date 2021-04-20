@@ -226,6 +226,10 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         builder.build().positionalParameterFactory().createPositionalParam(i)
             .accept(failures::add, positionalParams::add);
       }
+      if (flavour.isSuperCommand() && positionalParameters.isEmpty()) {
+        failures.add(new ValidationFailure("in a @" + SuperCommand.class.getSimpleName() +
+            ", at least one @" + Param.class.getSimpleName() + " must be defined", sourceElement));
+      }
       failures.addAll(validatePositions(positionalParams));
       List<NamedOption> namedOptions = new ArrayList<>();
       boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');

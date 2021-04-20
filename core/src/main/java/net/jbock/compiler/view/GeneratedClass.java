@@ -143,9 +143,16 @@ public final class GeneratedClass {
               .addParameter(ParameterSpec.builder(rest.type, rest.name).build())
               .addStatement("this.$N = $N", result, result)
               .addStatement("this.$N = $N", rest, rest)
+              .addModifiers(PRIVATE)
               .build())
-          .addMethod(methodBuilder("rest").returns(rest.type).addStatement("return $N", rest).build())
-          .addMethod(methodBuilder("result").returns(result.type).addStatement("return $N", result).build())
+          .addMethod(methodBuilder("getRest")
+              .returns(rest.type)
+              .addModifiers(accessModifiers)
+              .addStatement("return $N", rest).build())
+          .addMethod(methodBuilder("getResult")
+              .returns(result.type)
+              .addModifiers(accessModifiers)
+              .addStatement("return $N", result).build())
           .build());
     });
 
@@ -425,7 +432,7 @@ public final class GeneratedClass {
     code.addStatement("$T $N = parse($N)", result.type, result, args);
 
     code.add("if ($N instanceof $T)\n", result, generatedTypes.parsingSuccessType()).indent()
-        .addStatement("return (($T) $N).getResult()", generatedTypes.parsingSuccessType(), result)
+        .addStatement("return (($T) $N).$L()", generatedTypes.parsingSuccessType(), result, context.getSuccessResultMethodName())
         .unindent();
 
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> code
@@ -511,7 +518,18 @@ public final class GeneratedClass {
     }
 
     if (!context.params().isEmpty()) {
-      code.addStatement("$N += $N.$N.get($N).read($N)", position, state, parserState.positionalParsersField(), position, token);
+      CodeBlock readParam = CodeBlock.of("$N += $N.$N.get($N).read($N)",
+          position, state, parserState.positionalParsersField(), position, token);
+      if (context.isSuperCommand()) {
+        code.beginControlFlow("if ($N)", endOfOptionParsing)
+            .addStatement("$N.add($N)", rest, token)
+            .endControlFlow()
+            .beginControlFlow("else")
+            .addStatement(readParam)
+            .endControlFlow();
+      } else {
+        code.addStatement(readParam);
+      }
     }
 
     if (context.isSuperCommand()) {

@@ -52,7 +52,7 @@ class PositionalTest {
         "  abstract Optional<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor(true))
+        .processedWith(new Processor())
         .compilesWithoutError();
   }
 
@@ -85,6 +85,21 @@ class PositionalTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("when using @SuperCommand, repeatable params are not supported");
+  }
+
+  @Test
+  void missingParamSuperCommand() {
+    JavaFileObject javaFile = fromSource(
+        "@SuperCommand",
+        "abstract class Arguments {",
+        "",
+        "  @Option(\"a\")",
+        "  abstract String a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("in a @SuperCommand, at least one @Param must be defined");
   }
 
   @Test

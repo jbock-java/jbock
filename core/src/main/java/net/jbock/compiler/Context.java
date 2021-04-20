@@ -93,4 +93,8 @@ public final class Context {
   public boolean isSuperCommand() {
     return flavour.isSuperCommand();
   }
+
+  public String getSuccessResultMethodName() {
+    return isSuperCommand() ? "getResultWithRest" : "getResult";
+  }
 }

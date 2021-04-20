@@ -100,7 +100,7 @@ final class ParseResult {
   }
 
   private MethodSpec getResultMethod() {
-    return methodBuilder("getResult")
+    return methodBuilder(context.getSuccessResultMethodName())
         .addStatement("return $N", result)
         .returns(generatedTypes.parseSuccessType())
         .addModifiers(context.getAccessModifiers())
