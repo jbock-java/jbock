@@ -28,7 +28,6 @@ class ParseMethod {
   private final ParameterSpec option;
   private final ParameterSpec token;
   private final ParameterSpec position;
-  private final ParameterSpec endOfOptionParsing;
   private final ParserState parserState;
 
   @Inject
@@ -41,7 +40,6 @@ class ParseMethod {
     this.option = builder(generatedTypes.optionType(), "option").build();
     this.token = builder(STRING, "token").build();
     this.position = builder(INT, "position").build();
-    this.endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
   }
 
   MethodSpec parseMethod() {
@@ -58,6 +56,8 @@ class ParseMethod {
 
   private CodeBlock superCommandCode(ClassName parseResultWithRestType) {
     CodeBlock.Builder code = initVariables();
+    ParameterSpec endOfParsing = builder(BOOLEAN, "endOfParsing").build();
+    code.addStatement("$T $N = $L", endOfParsing.type, endOfParsing, false);
     ParameterSpec rest = builder(LIST_OF_STRING, "rest").build();
     code.addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class);
 
@@ -65,7 +65,7 @@ class ParseMethod {
     code.beginControlFlow("while ($N.hasNext())", it)
         .addStatement("$T $N = $N.next()", STRING, token, it);
 
-    code.beginControlFlow("if ($N)", endOfOptionParsing)
+    code.beginControlFlow("if ($N)", endOfParsing)
         .addStatement("$N.add($N)", rest, token)
         .addStatement("continue")
         .endControlFlow();
@@ -78,7 +78,7 @@ class ParseMethod {
     code.addStatement(readParamCode());
 
     code.add("if ($N == $L)\n", position, context.params().size()).indent()
-        .addStatement("$N = $L", endOfOptionParsing, true)
+        .addStatement("$N = $L", endOfParsing, true)
         .unindent();
 
     // end parsing loop
@@ -91,6 +91,8 @@ class ParseMethod {
 
   private CodeBlock regularCode() {
     CodeBlock.Builder code = initVariables();
+    ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
+    code.addStatement("$T $N = $L", endOfOptionParsing.type, endOfOptionParsing, false);
 
     // begin parsing loop
     code.beginControlFlow("while ($N.hasNext())", it)
@@ -144,7 +146,6 @@ class ParseMethod {
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = $L", position.type, position, 0);
     code.addStatement("$T $N = new $T()", state.type, state, state.type);
-    code.addStatement("$T $N = $L", endOfOptionParsing.type, endOfOptionParsing, false);
     return code;
   }
 
