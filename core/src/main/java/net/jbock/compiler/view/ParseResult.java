@@ -85,7 +85,7 @@ final class ParseResult {
 
   private TypeSpec defineSuccessResult() {
     ParameterSpec paramResult = builder(result.type, result.name).build();
-    return classBuilder(generatedTypes.parsingSuccessType())
+    return classBuilder(generatedTypes.parsingSuccessWrapperType())
         .superclass(generatedTypes.parseResultType())
         .addField(result)
         .addMethod(constructorBuilder()

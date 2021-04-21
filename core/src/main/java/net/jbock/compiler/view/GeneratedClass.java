@@ -1,12 +1,10 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
@@ -16,7 +14,6 @@ import net.jbock.compiler.parameter.Parameter;
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import java.io.PrintStream;
-import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -35,7 +32,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.coerce.Util.addBreaks;
-import static net.jbock.compiler.Constants.ENTRY_STRING_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
@@ -99,18 +95,17 @@ public final class GeneratedClass {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass())
         .addMethod(parseMethod(accessModifiers))
         .addMethod(parseOrExitMethod(accessModifiers))
-        .addMethod(maxLineWidthMethod(accessModifiers))
+        .addMethod(withMaxLineWidthMethod(accessModifiers))
         .addMethod(withMessagesMethod(accessModifiers))
         .addMethod(withResourceBundleMethod(accessModifiers))
-        .addMethod(exitHookMethod(accessModifiers))
+        .addMethod(withExitHookMethod(accessModifiers))
         .addMethod(withErrorStreamMethod(accessModifiers));
     if (context.isHelpParameterEnabled()) {
       spec.addMethod(withHelpStreamMethod(accessModifiers));
     }
-    spec.addMethod(buildRowsMethod(accessModifiers))
-        .addMethod(printOnlineHelpMethod(accessModifiers))
-        .addMethod(printWrapMethod(accessModifiers))
-        .addMethod(synopsisMethod(accessModifiers))
+    spec.addMethod(printOnlineHelpMethod(accessModifiers))
+        .addMethod(printWrapMethod())
+        .addMethod(synopsisMethod())
         .addMethod(readOptionArgumentMethod());
 
     if (context.isHelpParameterEnabled()) {
@@ -157,45 +152,30 @@ public final class GeneratedClass {
         .addJavadoc(javadoc()).build();
   }
 
-  private MethodSpec buildRowsMethod(Modifier[] accessModifiers) {
-    ParameterSpec rows = builder(Constants.listOf(ENTRY_STRING_STRING), "rows").build();
-    ParameterSpec optionParam = builder(generatedTypes.optionType(), "option").build();
-    ParameterSpec message = builder(STRING, "message").build();
-    CodeBlock.Builder builder = CodeBlock.builder();
-    builder.add("return $T.stream($T.values()).map($N -> {\n", Arrays.class, generatedTypes.optionType(), optionParam).indent()
-        .addStatement("$T $N = $N.getOrDefault($N.bundleKey, $T.join($S, $N.description)).trim()",
-            STRING, message, messages, optionParam, String.class, " ", optionParam)
-        .addStatement("return new $T($N.shape, $N)", ParameterizedTypeName.get(ClassName.get(SimpleImmutableEntry.class), STRING, STRING),
-            optionParam, message)
-        .unindent()
-        .add("}).collect($T.toList());\n", Collectors.class);
-    return methodBuilder("buildRows").returns(rows.type)
-        .addCode(builder.build())
-        .addModifiers(accessModifiers)
-        .build();
-  }
-
   private MethodSpec printOnlineHelpMethod(Modifier[] accessModifiers) {
     List<Parameter> params = context.parameters();
     // 2 space padding on both sides
     int totalPadding = 4;
     int width = params.stream().map(Parameter::sample).mapToInt(String::length).max().orElse(0) + totalPadding;
     String format = "  %1$-" + (width - 2) + "s";
-    ParameterSpec row = builder(ENTRY_STRING_STRING, "row").build();
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec key = builder(STRING, "key").build();
     MethodSpec.Builder spec = methodBuilder("printOnlineHelp");
+    ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
+    ParameterSpec message = builder(STRING, "message").build();
     spec.addStatement("printWrap($N, 8, $S, $S + synopsis())", printStream, "", "Usage: ");
-    spec.beginControlFlow("for ($T $N : buildRows())", row.type, row)
-        .addStatement("$T $N = $T.format($S, $N.getKey())", STRING, key, STRING, format, row)
-        .addStatement("printWrap($N, $L, $N, $N.getValue())", printStream, width, key, row)
+    spec.beginControlFlow("for ($T $N : $T.values())", generatedTypes.optionType(), option, generatedTypes.optionType())
+        .addStatement("$T $N = $N.getOrDefault($N.bundleKey, $T.join($S, $N.description)).trim()",
+            STRING, message, messages, option, String.class, " ", option)
+        .addStatement("$T $N = $T.format($S, $N.shape)", STRING, key, STRING, format, option)
+        .addStatement("printWrap($N, $L, $N, $N)", printStream, width, key, message)
         .endControlFlow();
     return spec.addParameter(printStream)
         .addModifiers(accessModifiers)
         .build();
   }
 
-  private MethodSpec printWrapMethod(Modifier[] accessModifiers) {
+  private MethodSpec printWrapMethod() {
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec continuationIndent = builder(INT, "continuationIndent").build();
     ParameterSpec i = builder(INT, "i").build();
@@ -241,15 +221,15 @@ public final class GeneratedClass {
     code.add("if ($N.length() > 0)\n", sb).indent()
         .addStatement("$N.println($N)", printStream, sb).unindent();
     return methodBuilder("printWrap")
-        .addModifiers(accessModifiers)
+        .addModifiers(PRIVATE)
         .addCode(code.build())
         .addParameters(Arrays.asList(printStream, continuationIndent, init, input))
         .build();
   }
 
-  private MethodSpec maxLineWidthMethod(Modifier[] accessModifiers) {
+  private MethodSpec withMaxLineWidthMethod(Modifier[] accessModifiers) {
     ParameterSpec indentParam = builder(maxLineWidth.type, "chars").build();
-    return methodBuilder("maxLineWidth")
+    return methodBuilder("withMaxLineWidth")
         .addParameter(indentParam)
         .addStatement("this.$N = $N", maxLineWidth, indentParam)
         .addStatement("return this")
@@ -258,9 +238,9 @@ public final class GeneratedClass {
         .build();
   }
 
-  private MethodSpec exitHookMethod(Modifier[] accessModifiers) {
+  private MethodSpec withExitHookMethod(Modifier[] accessModifiers) {
     ParameterSpec param = builder(exitHook.type, exitHook.name).build();
-    return methodBuilder("exitHook")
+    return methodBuilder("withExitHook")
         .addParameter(param)
         .addStatement("this.$N = $N", exitHook, param)
         .addStatement("return this")
@@ -325,11 +305,12 @@ public final class GeneratedClass {
 
     ParameterSpec state = builder(generatedTypes.parserStateType(), "state").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
+    ParameterSpec result = builder(generatedTypes.parseSuccessType(), "result").build();
     code.addStatement("$T $N = new $T()", state.type, state, state.type);
     code.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
     code.beginControlFlow("try")
-        .addStatement("return new $T($N.parse($N))",
-            generatedTypes.parsingSuccessType(), state, it)
+        .addStatement("$T $N = $N.parse($N)", result.type, result, state, it)
+        .addStatement("return new $T($N)", generatedTypes.parsingSuccessWrapperType(), result)
         .endControlFlow();
 
     code.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
@@ -378,7 +359,7 @@ public final class GeneratedClass {
         .build();
   }
 
-  private MethodSpec synopsisMethod(Modifier[] accessModifiers) {
+  private MethodSpec synopsisMethod() {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("synopsis");
 
     ParameterSpec joiner = builder(StringJoiner.class, "joiner").build();
@@ -414,7 +395,7 @@ public final class GeneratedClass {
     }
 
     spec.addCode("$Z.toString();\n", joiner);
-    return spec.returns(STRING).addModifiers(accessModifiers).build();
+    return spec.returns(STRING).addModifiers(PRIVATE).build();
   }
 
   private MethodSpec parseOrExitMethod(Modifier[] accessModifiers) {
@@ -425,8 +406,8 @@ public final class GeneratedClass {
 
     code.addStatement("$T $N = parse($N)", result.type, result, args);
 
-    code.add("if ($N instanceof $T)\n", result, generatedTypes.parsingSuccessType()).indent()
-        .addStatement("return (($T) $N).$L()", generatedTypes.parsingSuccessType(), result, context.getSuccessResultMethodName())
+    code.add("if ($N instanceof $T)\n", result, generatedTypes.parsingSuccessWrapperType()).indent()
+        .addStatement("return (($T) $N).$L()", generatedTypes.parsingSuccessWrapperType(), result, context.getSuccessResultMethodName())
         .unindent();
 
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> code

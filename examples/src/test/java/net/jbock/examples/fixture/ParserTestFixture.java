@@ -49,7 +49,7 @@ public final class ParserTestFixture<E> {
 
     Parser<E> maxLineWidth(int chars);
 
-    Parser<E> exitHook(BiConsumer<?, Integer> exitHook);
+    Parser<E> withExitHook(BiConsumer<?, Integer> exitHook);
   }
 
   private final Parser<E> parser;
@@ -131,12 +131,12 @@ public final class ParserTestFixture<E> {
 
       @Override
       public Parser<E> maxLineWidth(int chars) {
-        return callSetter("maxLineWidth", chars, Integer.TYPE);
+        return callSetter("withMaxLineWidth", chars, Integer.TYPE);
       }
 
       @Override
-      public Parser<E> exitHook(BiConsumer<?, Integer> exitHook) {
-        return callSetter("exitHook", exitHook, BiConsumer.class);
+      public Parser<E> withExitHook(BiConsumer<?, Integer> exitHook) {
+        return callSetter("withExitHook", exitHook, BiConsumer.class);
       }
     });
     return new ParserTestFixture<>(parser.get(0));
@@ -266,7 +266,7 @@ public final class ParserTestFixture<E> {
       try {
         parser.withHelpStream(stdout.out)
             .withErrorStream(stderr.out)
-            .exitHook((r, code) -> {
+            .withExitHook((r, code) -> {
               throw new Abort();
             })
             .maxLineWidth(MAX_LINE_WIDTH)
@@ -324,7 +324,7 @@ public final class ParserTestFixture<E> {
     try {
       parser.withHelpStream(stdout.out)
           .withErrorStream(stderr.out)
-          .exitHook((r, code) -> {
+          .withExitHook((r, code) -> {
             throw new Abort();
           })
           .maxLineWidth(MAX_LINE_WIDTH)

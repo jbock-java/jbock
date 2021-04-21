@@ -87,7 +87,7 @@ public class GeneratedTypes {
     return generatedClass.nestedClass("ParseResult");
   }
 
-  public ClassName parsingSuccessType() {
+  public ClassName parsingSuccessWrapperType() {
     return generatedClass.nestedClass("ParsingSuccess");
   }
 
