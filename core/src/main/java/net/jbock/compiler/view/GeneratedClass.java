@@ -58,7 +58,6 @@ public final class GeneratedClass {
   private final OptionEnum optionEnum;
   private final ParserState parserState;
   private final ParseResult parseResult;
-  private final ParseMethod parseMethod;
 
   private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out", PRIVATE)
       .initializer("$T.out", System.class).build();
@@ -82,19 +81,17 @@ public final class GeneratedClass {
       OptionParser optionParser,
       ParamParser paramParser,
       OptionEnum optionEnum,
-      ParserState state,
-      ParseResult parseResult,
-      ParseMethod parseMethod) {
+      ParserState parserState,
+      ParseResult parseResult) {
     this.context = context;
     this.impl = impl;
     this.generatedTypes = generatedTypes;
     this.optionParser = optionParser;
     this.paramParser = paramParser;
     this.optionEnum = optionEnum;
-    this.parserState = state;
+    this.parserState = parserState;
     this.parseResult = parseResult;
     this.exitHook = context.exitHookField();
-    this.parseMethod = parseMethod;
   }
 
   public TypeSpec define() {
@@ -102,7 +99,6 @@ public final class GeneratedClass {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass())
         .addMethod(parseMethod(accessModifiers))
         .addMethod(parseOrExitMethod(accessModifiers))
-        .addMethod(parseMethod.parseMethod())
         .addMethod(maxLineWidthMethod(accessModifiers))
         .addMethod(withMessagesMethod(accessModifiers))
         .addMethod(withResourceBundleMethod(accessModifiers))
@@ -135,7 +131,7 @@ public final class GeneratedClass {
       FieldSpec rest = FieldSpec.builder(ArrayTypeName.of(String.class), "rest", PRIVATE, FINAL).build();
       spec.addType(TypeSpec.classBuilder(resultWithRestType)
           .addModifiers(accessModifiers)
-          .addModifiers(FINAL)
+          .addModifiers(STATIC, FINAL)
           .addField(result)
           .addField(rest)
           .addMethod(constructorBuilder()
@@ -327,8 +323,13 @@ public final class GeneratedClass {
             .addStatement("return new $T()", helpRequestedType)
             .unindent());
 
+    ParameterSpec state = builder(generatedTypes.parserStateType(), "state").build();
+    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
+    code.addStatement("$T $N = new $T()", state.type, state, state.type);
+    code.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
     code.beginControlFlow("try")
-        .addStatement("return new $T(parse($T.asList($N).iterator()))", generatedTypes.parsingSuccessType(), Arrays.class, args)
+        .addStatement("return new $T($N.parse($N))",
+            generatedTypes.parsingSuccessType(), state, it)
         .endControlFlow();
 
     code.beginControlFlow("catch ($T $N)", RuntimeException.class, e)

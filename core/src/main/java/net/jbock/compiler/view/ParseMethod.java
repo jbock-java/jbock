@@ -13,7 +13,6 @@ import java.util.ArrayList;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
-import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
@@ -23,19 +22,15 @@ class ParseMethod {
   private final Context context;
   private final GeneratedTypes generatedTypes;
 
-  private final ParameterSpec state;
   private final ParameterSpec it;
   private final ParameterSpec option;
   private final ParameterSpec token;
   private final ParameterSpec position;
-  private final ParserState parserState;
 
   @Inject
-  ParseMethod(Context context, GeneratedTypes generatedTypes, ParserState parserState) {
+  ParseMethod(Context context, GeneratedTypes generatedTypes) {
     this.context = context;
     this.generatedTypes = generatedTypes;
-    this.state = builder(generatedTypes.parserStateType(), "state").build();
-    this.parserState = parserState;
     this.it = builder(STRING_ITERATOR, "it").build();
     this.option = builder(generatedTypes.optionType(), "option").build();
     this.token = builder(STRING, "token").build();
@@ -49,15 +44,12 @@ class ParseMethod {
         .addCode(generatedTypes.parseResultWithRestType()
             .map(this::superCommandCode)
             .orElseGet(this::regularCode))
-        .addModifiers(PRIVATE)
         .returns(generatedTypes.parseSuccessType())
         .build();
   }
 
   private CodeBlock superCommandCode(ClassName parseResultWithRestType) {
     CodeBlock.Builder code = initVariables();
-    ParameterSpec endOfParsing = builder(BOOLEAN, "endOfParsing").build();
-    code.addStatement("$T $N = $L", endOfParsing.type, endOfParsing, false);
     ParameterSpec rest = builder(LIST_OF_STRING, "rest").build();
     code.addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class);
 
@@ -65,7 +57,7 @@ class ParseMethod {
     code.beginControlFlow("while ($N.hasNext())", it)
         .addStatement("$T $N = $N.next()", STRING, token, it);
 
-    code.beginControlFlow("if ($N)", endOfParsing)
+    code.beginControlFlow("if ($N == $L)", position, context.params().size())
         .addStatement("$N.add($N)", rest, token)
         .addStatement("continue")
         .endControlFlow();
@@ -77,15 +69,11 @@ class ParseMethod {
 
     code.addStatement(readParamCode());
 
-    code.add("if ($N == $L)\n", position, context.params().size()).indent()
-        .addStatement("$N = $L", endOfParsing, true)
-        .unindent();
-
     // end parsing loop
     code.endControlFlow();
 
-    code.addStatement("return new $T($N.build(), $N.toArray(new $T[0]))",
-        parseResultWithRestType, state, rest, String.class);
+    code.addStatement("return new $T(build(), $N.toArray(new $T[0]))",
+        parseResultWithRestType, rest, String.class);
     return code.build();
   }
 
@@ -121,14 +109,14 @@ class ParseMethod {
     // end parsing loop
     code.endControlFlow();
 
-    return code.addStatement("return $N.build()", state).build();
+    return code.addStatement("return build()").build();
   }
 
   private CodeBlock optionBlock() {
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $N.$N($N)", generatedTypes.optionType(), option, state, parserState.tryReadOption(), token);
+    code.addStatement("$T $N = tryReadOption($N)", generatedTypes.optionType(), option, token);
     code.beginControlFlow("if ($N != null)", option)
-        .addStatement("$N.$N.get($N).read($N, $N, $N)", state, parserState.parsersField(), option, option, token, it)
+        .addStatement("optionParsers.get($N).read($N, $N, $N)", option, option, token, it)
         .addStatement("continue")
         .endControlFlow();
     return code.build();
@@ -145,13 +133,12 @@ class ParseMethod {
   private CodeBlock.Builder initVariables() {
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = $L", position.type, position, 0);
-    code.addStatement("$T $N = new $T()", state.type, state, state.type);
     return code;
   }
 
   private CodeBlock readParamCode() {
-    return CodeBlock.of("$N += $N.$N.get($N).read($N)",
-        position, state, parserState.positionalParsersField(), position, token);
+    return CodeBlock.of("$N += paramParsers.get($N).read($N)",
+        position, position, token);
   }
 
   private CodeBlock throwInvalidOptionStatement(String message) {

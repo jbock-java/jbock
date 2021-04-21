@@ -28,6 +28,8 @@ final class ParserState {
 
   private final Context context;
 
+  private final ParseMethod parseMethod;
+
   private final GeneratedTypes generatedTypes;
 
   private final FieldSpec optionNamesField;
@@ -39,9 +41,10 @@ final class ParserState {
   private final MethodSpec tryReadOptionMethod;
 
   @Inject
-  ParserState(Context context, GeneratedTypes generatedTypes, OptionEnum optionEnum) {
+  ParserState(Context context, GeneratedTypes generatedTypes, OptionEnum optionEnum, ParseMethod parseMethod) {
     this.context = context;
     this.generatedTypes = generatedTypes;
+    this.parseMethod = parseMethod;
 
     ClassName optionType = generatedTypes.optionType();
 
@@ -70,6 +73,7 @@ final class ParserState {
     return TypeSpec.classBuilder(generatedTypes.parserStateType())
         .addModifiers(PRIVATE, STATIC)
         .addMethod(buildMethod())
+        .addMethod(parseMethod.parseMethod())
         .addMethod(tryReadOptionMethod)
         .addFields(Arrays.asList(optionNamesField, optionParsersField, paramParsersField))
         .build();
