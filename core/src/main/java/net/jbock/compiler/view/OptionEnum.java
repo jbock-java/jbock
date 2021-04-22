@@ -177,7 +177,9 @@ final class OptionEnum {
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, generatedTypes.optionType());
     for (Parameter param : options) {
-      code.addStatement("$N.put($L, new $T())", parsers, param.enumConstant(), optionParserType(generatedTypes, param));
+      String enumConstant = param.enumConstant();
+      code.addStatement("$N.put($L, new $T($L))",
+          parsers, enumConstant, optionParserType(generatedTypes, param), enumConstant);
     }
     code.addStatement("return $N", parsers);
     return code.build();

@@ -16,7 +16,6 @@ import java.util.Arrays;
 import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.coerce.Util.addBreaks;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.listOf;
 import static net.jbock.compiler.Constants.mapOf;
@@ -124,13 +123,6 @@ final class ParserState {
         .build();
   }
 
-  static CodeBlock throwRepetitionErrorStatement(ParameterSpec optionParam) {
-    return CodeBlock.of(addBreaks("throw new $T($T.format($S, $N, $T.join($S, $N.names)))"),
-        RuntimeException.class, String.class,
-        "Option %s (%s) is not repeatable",
-        optionParam, String.class, ", ", optionParam);
-  }
-
   /**
    * @return An expression that extracts the value of the given param from the parser state.
    * This expression will evaluate either to a {@link java.util.stream.Stream} or a {@link java.util.Optional}.
@@ -144,17 +136,5 @@ final class ParserState {
     return CodeBlock.builder().add(
         "$N.get($T.$N)", optionParsersField,
         generatedTypes.optionType(), param.enumConstant());
-  }
-
-  MethodSpec tryReadOption() {
-    return tryReadOptionMethod;
-  }
-
-  FieldSpec parsersField() {
-    return optionParsersField;
-  }
-
-  FieldSpec positionalParsersField() {
-    return paramParsersField;
   }
 }
