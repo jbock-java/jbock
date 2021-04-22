@@ -18,11 +18,8 @@ class SuperArgumentsTest {
 
   @Test
   void testEscapeSequenceNotRecognized() {
-    SuperArguments_Parser.SuperArgumentsWithRest success = parseOrFail("-q", "--", "1");
-    SuperArguments result = success.getResult();
-    Assertions.assertEquals("--", result.command());
-    Assertions.assertFalse(result.quiet());
-    Assertions.assertArrayEquals(new String[]{"1"}, success.getRest());
+    SuperArguments_Parser.ParseResult result = parser.parse(new String[]{"-q", "--", "1"});
+    Assertions.assertTrue(result instanceof SuperArguments_Parser.ParsingFailed);
   }
 
   @Test
