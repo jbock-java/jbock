@@ -1,9 +1,9 @@
 package net.jbock.compiler.view;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
@@ -13,6 +13,8 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.squareup.javapoet.TypeName.INT;
+import static com.squareup.javapoet.TypeName.VOID;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -36,7 +38,6 @@ final class ParamParser {
     this.generatedTypes = generatedTypes;
     this.optionParser = optionParser;
   }
-
 
   List<TypeSpec> define() {
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
@@ -70,33 +71,41 @@ final class ParamParser {
     return result;
   }
 
-  private static MethodSpec readMethodAbstract() {
+  private MethodSpec readMethodAbstract() {
     ParameterSpec valueParam = ParameterSpec.builder(STRING, "token").build();
     return MethodSpec.methodBuilder("read")
         .addParameter(valueParam)
-        .returns(TypeName.INT)
+        .returns(context.isSuperCommand() ? VOID : INT)
         .addModifiers(ABSTRACT)
         .build();
   }
 
-  private static MethodSpec readMethodRepeatable(FieldSpec values) {
+  private MethodSpec readMethodRepeatable(FieldSpec values) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    CodeBlock.Builder code = CodeBlock.builder()
+        .addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class)
+        .addStatement("$N.add($N)", values, token);
+    if (!context.isSuperCommand()) {
+      code.addStatement("return $L", 0);
+    }
     return MethodSpec.methodBuilder("read")
         .addParameter(token)
-        .returns(TypeName.INT)
-        .addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class)
-        .addStatement("$N.add($N)", values, token)
-        .addStatement("return $L", 0)
+        .returns(context.isSuperCommand() ? VOID : INT)
+        .addCode(code.build())
         .build();
   }
 
-  private static MethodSpec readMethodRegular(FieldSpec value) {
+  private MethodSpec readMethodRegular(FieldSpec value) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
+    CodeBlock.Builder code = CodeBlock.builder()
+        .addStatement("$N = $N", value, token);
+    if (!context.isSuperCommand()) {
+      code.addStatement("return $L", 1);
+    }
     return MethodSpec.methodBuilder("read")
         .addParameter(token)
-        .returns(TypeName.INT)
-        .addStatement("$N = $N", value, token)
-        .addStatement("return $L", 1)
+        .returns(context.isSuperCommand() ? VOID : INT)
+        .addCode(code.build())
         .build();
   }
 }
