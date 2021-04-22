@@ -67,7 +67,8 @@ class ParseMethod {
     }
     code.add(handleDashTokenBlock());
 
-    code.addStatement(readParamCode());
+    code.addStatement("paramParsers.get($N).read($N)", position, token)
+        .addStatement("$N++", position);
 
     // end parsing loop
     code.endControlFlow();
@@ -103,7 +104,8 @@ class ParseMethod {
         .unindent();
 
     if (!context.params().isEmpty()) {
-      code.addStatement(readParamCode());
+      code.addStatement("$N += paramParsers.get($N).read($N)",
+          position, position, token);
     }
 
     // end parsing loop
@@ -132,11 +134,6 @@ class ParseMethod {
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = $L", position.type, position, 0);
     return code;
-  }
-
-  private CodeBlock readParamCode() {
-    return CodeBlock.of("$N += paramParsers.get($N).read($N)",
-        position, position, token);
   }
 
   private CodeBlock throwInvalidOptionStatement(String message) {
