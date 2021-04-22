@@ -114,11 +114,9 @@ class ParseMethod {
 
   private CodeBlock optionBlock() {
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = tryReadOption($N)", generatedTypes.optionType(), option, token);
-    code.beginControlFlow("if ($N != null)", option)
-        .addStatement("optionParsers.get($N).read($N, $N)", option, token, it)
+    code.add("if (tryParseOption($N, $N))\n", token, it).indent()
         .addStatement("continue")
-        .endControlFlow();
+        .unindent();
     return code.build();
   }
 
