@@ -84,7 +84,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("when using @SuperCommand, repeatable params are not supported");
+        .withErrorContaining("in a @SuperCommand, repeatable params are not supported");
   }
 
   @Test

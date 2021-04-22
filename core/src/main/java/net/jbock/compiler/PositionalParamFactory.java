@@ -61,7 +61,7 @@ class PositionalParamFactory extends ParameterScoped {
 
   private Optional<String> checkSuperNotRepeatable(PositionalParameter p) {
     if (flavour.isSuperCommand() && p.isRepeatable()) {
-      return Optional.of("when using @" + SuperCommand.class.getSimpleName() +
+      return Optional.of("in a @" + SuperCommand.class.getSimpleName() +
           ", repeatable params are not supported");
     }
     return Optional.empty();
