@@ -75,8 +75,8 @@ public class GeneratedTypes {
     return generatedClass.nestedClass("Option");
   }
 
-  public ClassName parserStateType() {
-    return generatedClass.nestedClass("ParserState");
+  public ClassName statefulParserType() {
+    return generatedClass.nestedClass("StatefulParser");
   }
 
   public ClassName implType() {

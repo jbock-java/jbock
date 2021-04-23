@@ -23,9 +23,9 @@ import static net.jbock.compiler.Constants.listOf;
 import static net.jbock.compiler.Constants.mapOf;
 
 /**
- * Defines the inner class ParserState
+ * Defines the inner class StatefulParser
  */
-final class ParserState {
+final class StatefulParser {
 
   private final Context context;
 
@@ -40,7 +40,7 @@ final class ParserState {
   private final FieldSpec paramParsersField;
 
   @Inject
-  ParserState(Context context, GeneratedTypes generatedTypes, OptionEnum optionEnum, ParseMethod parseMethod) {
+  StatefulParser(Context context, GeneratedTypes generatedTypes, OptionEnum optionEnum, ParseMethod parseMethod) {
     this.context = context;
     this.generatedTypes = generatedTypes;
     this.parseMethod = parseMethod;
@@ -62,7 +62,7 @@ final class ParserState {
   }
 
   TypeSpec define() {
-    return TypeSpec.classBuilder(generatedTypes.parserStateType())
+    return TypeSpec.classBuilder(generatedTypes.statefulParserType())
         .addModifiers(PRIVATE, STATIC)
         .addMethod(buildMethod())
         .addMethod(parseMethod.parseMethod())
@@ -136,10 +136,6 @@ final class ParserState {
         .build();
   }
 
-  /**
-   * @return An expression that extracts the value of the given param from the parser state.
-   * This expression will evaluate either to a {@link java.util.stream.Stream} or a {@link java.util.Optional}.
-   */
   private CodeBlock.Builder getStreamExpression(Parameter param) {
     if (param.isPositional()) {
       return CodeBlock.builder().add(

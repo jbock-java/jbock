@@ -52,7 +52,7 @@ public final class GeneratedClass {
   private final OptionParser optionParser;
   private final ParamParser paramParser;
   private final OptionEnum optionEnum;
-  private final ParserState parserState;
+  private final StatefulParser parserState;
   private final ParseResult parseResult;
 
   private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out", PRIVATE)
@@ -77,7 +77,7 @@ public final class GeneratedClass {
       OptionParser optionParser,
       ParamParser paramParser,
       OptionEnum optionEnum,
-      ParserState parserState,
+      StatefulParser parserState,
       ParseResult parseResult) {
     this.context = context;
     this.impl = impl;
@@ -303,7 +303,7 @@ public final class GeneratedClass {
             .addStatement("return new $T()", helpRequestedType)
             .unindent());
 
-    ParameterSpec state = builder(generatedTypes.parserStateType(), "state").build();
+    ParameterSpec state = builder(generatedTypes.statefulParserType(), "state").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec result = builder(generatedTypes.parseSuccessType(), "result").build();
     code.addStatement("$T $N = new $T()", state.type, state, state.type);
