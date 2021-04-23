@@ -36,6 +36,7 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
+import static net.jbock.compiler.Constants.mapOf;
 
 /**
  * Generates the *_Parser class.
@@ -111,7 +112,16 @@ public final class GeneratedClass {
     if (context.isHelpParameterEnabled()) {
       spec.addField(out);
     }
-    spec.addFields(Arrays.asList(err, maxLineWidth, exitHook, messages));
+    spec.addField(err);
+    spec.addField(maxLineWidth);
+    spec.addField(exitHook);
+    spec.addField(messages);
+    if (!context.options().isEmpty()) {
+      spec.addField(FieldSpec.builder(mapOf(STRING, generatedTypes.optionType()), "OPTIONS_BY_NAME")
+          .initializer("$T.$N()", generatedTypes.optionType(), optionEnum.optionsByNameMethod())
+          .addModifiers(PRIVATE, STATIC, FINAL)
+          .build());
+    }
 
     spec.addType(parserState.define())
         .addType(impl.define())

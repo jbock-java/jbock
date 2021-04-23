@@ -65,7 +65,7 @@ class ParseMethod {
     }
     code.add(handleDashTokenBlock());
 
-    code.addStatement("paramParsers.get($N).read($N)", position, token)
+    code.addStatement("paramParsers[$N].read($N)", position, token)
         .addStatement("$N++", position);
 
     // end parsing loop
@@ -107,13 +107,13 @@ class ParseMethod {
 
     if (context.anyRepeatableParam()) {
       ParameterSpec incrementPosition = builder(BOOLEAN, "incrementPosition").build();
-      code.addStatement("$T $N = paramParsers.get($N).read($N)",
+      code.addStatement("$T $N = paramParsers[$N].read($N)",
           incrementPosition.type, incrementPosition, position, token);
       code.add("if ($N)\n", incrementPosition).indent()
           .addStatement("$N++", position)
           .unindent();
     } else if (!context.params().isEmpty()) {
-      code.addStatement("paramParsers.get($N).read($N)", position, token)
+      code.addStatement("paramParsers[$N].read($N)", position, token)
           .addStatement("$N++", position);
     }
 

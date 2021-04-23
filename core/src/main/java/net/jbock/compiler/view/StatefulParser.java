@@ -1,5 +1,6 @@
 package net.jbock.compiler.view;
 
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -11,7 +12,6 @@ import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.Parameter;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
@@ -19,7 +19,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.Constants.listOf;
 import static net.jbock.compiler.Constants.mapOf;
 
 /**
@@ -33,8 +32,6 @@ final class StatefulParser {
 
   private final GeneratedTypes generatedTypes;
 
-  private final FieldSpec optionNamesField;
-
   private final FieldSpec optionParsersField;
 
   private final FieldSpec paramParsersField;
@@ -46,30 +43,30 @@ final class StatefulParser {
     this.parseMethod = parseMethod;
     ClassName optionType = generatedTypes.optionType();
 
-    // read-only lookups
-    this.optionNamesField = FieldSpec.builder(mapOf(STRING, optionType), "optionNames")
-        .initializer("$T.$N()", optionType, optionEnum.optionNamesMethod())
-        .build();
-
     // stateful parsers
     this.optionParsersField = FieldSpec.builder(mapOf(optionType, generatedTypes.optionParserType()), "optionParsers")
         .initializer("$T.$N()", optionType, optionEnum.optionParsersMethod())
         .build();
 
-    this.paramParsersField = FieldSpec.builder(listOf(generatedTypes.paramParserType()), "paramParsers")
+    this.paramParsersField = FieldSpec.builder(ArrayTypeName.of(generatedTypes.paramParserType()), "paramParsers")
         .initializer("$T.$N()", optionType, optionEnum.paramParsersMethod())
         .build();
   }
 
   TypeSpec define() {
-    return TypeSpec.classBuilder(generatedTypes.statefulParserType())
+    TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.statefulParserType())
         .addModifiers(PRIVATE, STATIC)
         .addMethod(buildMethod())
-        .addMethod(parseMethod.parseMethod())
-        .addMethod(tryParseOptionMethod())
-        .addMethod(tryReadOptionMethod())
-        .addFields(Arrays.asList(optionNamesField, optionParsersField, paramParsersField))
-        .build();
+        .addMethod(parseMethod.parseMethod());
+    if (!context.options().isEmpty()) {
+      spec.addMethod(tryParseOptionMethod())
+          .addMethod(tryReadOptionMethod());
+      spec.addField(optionParsersField);
+    }
+    if (!context.params().isEmpty()) {
+      spec.addField(paramParsersField);
+    }
+    return spec.build();
   }
 
   private MethodSpec tryParseOptionMethod() {
@@ -100,11 +97,11 @@ final class StatefulParser {
         .addStatement("return null").unindent();
 
     code.add("if ($N.charAt(1) != '-')\n", token).indent()
-        .addStatement("return $N.get($N.substring(0, 2))", optionNamesField, token).unindent();
+        .addStatement("return OPTIONS_BY_NAME.get($N.substring(0, 2))", token).unindent();
 
     code.addStatement("$T $N = $N.indexOf('=')", INT, index, token)
-        .addStatement("return $N.get($N.substring(0, $N < 0 ? $N.length() : $N))",
-            optionNamesField, token, index, token, index);
+        .addStatement("return OPTIONS_BY_NAME.get($N.substring(0, $N < 0 ? $N.length() : $N))",
+            token, index, token, index);
 
     return MethodSpec.methodBuilder("tryReadOption")
         .addParameter(token)
@@ -139,7 +136,7 @@ final class StatefulParser {
   private CodeBlock.Builder getStreamExpression(Parameter param) {
     if (param.isPositional()) {
       return CodeBlock.builder().add(
-          "$N.get($L)", paramParsersField,
+          "$N[$L]", paramParsersField,
           param.positionalIndex().orElseThrow(AssertionError::new));
     }
     return CodeBlock.builder().add(
