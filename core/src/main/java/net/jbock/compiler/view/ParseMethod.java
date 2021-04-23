@@ -99,22 +99,21 @@ class ParseMethod {
 
     if (context.params().isEmpty()) {
       code.addStatement(throwInvalidOptionStatement("Excess param"));
-    } else {
+    } else if (!context.anyRepeatableParam()) {
       code.add("if ($N == $L)\n", position, context.params().size()).indent()
           .addStatement(throwInvalidOptionStatement("Excess param"))
           .unindent();
     }
 
-    if (context.anyRepeatableParam()) {
-      ParameterSpec incrementPosition = builder(BOOLEAN, "incrementPosition").build();
-      code.addStatement("$T $N = paramParsers[$N].read($N)",
-          incrementPosition.type, incrementPosition, position, token);
-      code.add("if ($N)\n", incrementPosition).indent()
-          .addStatement("$N++", position)
-          .unindent();
-    } else if (!context.params().isEmpty()) {
-      code.addStatement("paramParsers[$N].read($N)", position, token)
-          .addStatement("$N++", position);
+    if (!context.params().isEmpty()) {
+      code.addStatement("paramParsers[$N].read($N)", position, token);
+      if (context.anyRepeatableParam()) {
+        code.add("if ($N < $L)\n", position, context.params().size() - 1).indent()
+            .addStatement("$N++", position)
+            .unindent();
+      } else {
+        code.addStatement("$N++", position);
+      }
     }
 
     // end parsing loop
