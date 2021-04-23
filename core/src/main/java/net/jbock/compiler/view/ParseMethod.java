@@ -23,7 +23,6 @@ class ParseMethod {
   private final GeneratedTypes generatedTypes;
 
   private final ParameterSpec it;
-  private final ParameterSpec option;
   private final ParameterSpec token;
   private final ParameterSpec position;
 
@@ -32,7 +31,6 @@ class ParseMethod {
     this.context = context;
     this.generatedTypes = generatedTypes;
     this.it = builder(STRING_ITERATOR, "it").build();
-    this.option = builder(generatedTypes.optionType(), "option").build();
     this.token = builder(STRING, "token").build();
     this.position = builder(INT, "position").build();
   }
@@ -99,13 +97,20 @@ class ParseMethod {
     code.add(handleDashTokenBlock());
     code.endControlFlow();
 
-    code.add("if ($N == $L)\n", position, context.params().size()).indent()
-        .addStatement(throwInvalidOptionStatement("Excess param"))
-        .unindent();
+    if (context.params().isEmpty()) {
+      code.addStatement(throwInvalidOptionStatement("Excess param"));
+    } else {
+      code.add("if ($N == $L)\n", position, context.params().size()).indent()
+          .addStatement(throwInvalidOptionStatement("Excess param"))
+          .unindent();
+    }
 
-    if (!context.params().isEmpty()) {
+    if (context.anyRepeatableParam()) {
       code.addStatement("$N += paramParsers.get($N).read($N)",
           position, position, token);
+    } else if (!context.params().isEmpty()) {
+      code.addStatement("paramParsers.get($N).read($N)", position, token)
+          .addStatement("$N++", position);
     }
 
     // end parsing loop
@@ -132,7 +137,9 @@ class ParseMethod {
 
   private CodeBlock.Builder initVariables() {
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $L", position.type, position, 0);
+    if (!context.params().isEmpty()) {
+      code.addStatement("$T $N = $L", position.type, position, 0);
+    }
     return code;
   }
 

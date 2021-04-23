@@ -75,7 +75,7 @@ final class ParamParser {
     ParameterSpec valueParam = ParameterSpec.builder(STRING, "token").build();
     return MethodSpec.methodBuilder("read")
         .addParameter(valueParam)
-        .returns(context.isSuperCommand() ? VOID : INT)
+        .returns(context.anyRepeatableParam() ? INT : VOID)
         .addModifiers(ABSTRACT)
         .build();
   }
@@ -85,12 +85,12 @@ final class ParamParser {
     CodeBlock.Builder code = CodeBlock.builder()
         .addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class)
         .addStatement("$N.add($N)", values, token);
-    if (!context.isSuperCommand()) {
+    if (context.anyRepeatableParam()) {
       code.addStatement("return $L", 0);
     }
     return MethodSpec.methodBuilder("read")
         .addParameter(token)
-        .returns(context.isSuperCommand() ? VOID : INT)
+        .returns(context.anyRepeatableParam() ? INT : VOID)
         .addCode(code.build())
         .build();
   }
@@ -99,12 +99,12 @@ final class ParamParser {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     CodeBlock.Builder code = CodeBlock.builder()
         .addStatement("$N = $N", value, token);
-    if (!context.isSuperCommand()) {
+    if (context.anyRepeatableParam()) {
       code.addStatement("return $L", 1);
     }
     return MethodSpec.methodBuilder("read")
         .addParameter(token)
-        .returns(context.isSuperCommand() ? VOID : INT)
+        .returns(context.anyRepeatableParam() ? INT : VOID)
         .addCode(code.build())
         .build();
   }

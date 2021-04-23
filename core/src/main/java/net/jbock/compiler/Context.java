@@ -30,6 +30,8 @@ public final class Context {
 
   private final List<PositionalParameter> params;
 
+  private final boolean anyRepeatableParam;
+
   private final List<NamedOption> options;
 
   private final ParserFlavour flavour;
@@ -50,6 +52,7 @@ public final class Context {
     this.options = namedOptions;
     this.flavour = flavour;
     this.parameters = ImmutableList.<Parameter>builder().addAll(params).addAll(options).build();
+    this.anyRepeatableParam = params.stream().anyMatch(PositionalParameter::isRepeatable);
     this.generatedTypes = generatedTypes;
   }
 
@@ -92,6 +95,10 @@ public final class Context {
 
   public boolean isSuperCommand() {
     return flavour.isSuperCommand();
+  }
+
+  public boolean anyRepeatableParam() {
+    return anyRepeatableParam;
   }
 
   public String getSuccessResultMethodName() {
