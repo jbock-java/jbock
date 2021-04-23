@@ -1,7 +1,5 @@
 package net.jbock.compiler.view;
 
-import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
@@ -9,15 +7,11 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
-import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
-import net.jbock.compiler.parameter.PositionalParameter;
 
 import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,10 +21,8 @@ import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static java.util.Arrays.asList;
 import static java.util.Collections.nCopies;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.mapOf;
 
 /**
  * Defines the *_Parser.Option enum.
@@ -49,12 +41,6 @@ final class OptionEnum {
 
   private final FieldSpec bundleKeyField;
 
-  private final MethodSpec optionsByNameMethod;
-
-  private final MethodSpec optionParsersMethod;
-
-  private final MethodSpec paramParsersMethod;
-
   private final FieldSpec shapeField;
 
   @Inject
@@ -65,16 +51,10 @@ final class OptionEnum {
     FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").build();
     FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").build();
     FieldSpec shapeField = FieldSpec.builder(STRING, "shape").build();
-    MethodSpec optionsByNameMethod = optionsByNameMethod(generatedTypes.optionType(), namesField);
-    MethodSpec optionParsersMethod = optionParsersMethod(context, generatedTypes);
-    MethodSpec paramParsersMethod = paramParsersMethod(context, generatedTypes);
     this.bundleKeyField = bundleKeyField;
     this.descriptionField = descriptionField;
     this.namesField = namesField;
-    this.optionsByNameMethod = optionsByNameMethod;
-    this.optionParsersMethod = optionParsersMethod;
     this.shapeField = shapeField;
-    this.paramParsersMethod = paramParsersMethod;
   }
 
   TypeSpec define() {
@@ -91,9 +71,6 @@ final class OptionEnum {
         .addField(shapeField)
         .addMethod(missingRequiredMethod())
         .addMethod(privateConstructor())
-        .addMethod(optionsByNameMethod)
-        .addMethod(optionParsersMethod)
-        .addMethod(paramParsersMethod)
         .build();
   }
 
@@ -142,84 +119,6 @@ final class OptionEnum {
         String.join(",$W", nCopies(strings.size(), "$S"))), args);
   }
 
-  private static MethodSpec optionsByNameMethod(ClassName optionType, FieldSpec namesField) {
-    ParameterSpec result = builder(mapOf(STRING, optionType), "result").build();
-    ParameterSpec option = builder(optionType, "option").build();
-    ParameterSpec name = builder(STRING, "name").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T<>($T.values().length)",
-        result.type, result, HashMap.class, option.type);
-
-    code.add("for ($T $N : $T.values())\n", option.type, option, option.type).indent()
-        .addStatement("$N.$N.forEach($N -> $N.put($N, $N))", option, namesField, name, result, name, option)
-        .unindent();
-    code.addStatement("return $N", result);
-
-    return MethodSpec.methodBuilder("optionsByName").returns(result.type)
-        .addCode(code.build())
-        .addModifiers(STATIC)
-        .build();
-  }
-
-  private static MethodSpec optionParsersMethod(Context context, GeneratedTypes generatedTypes) {
-    ParameterSpec parsers = builder(mapOf(generatedTypes.optionType(), generatedTypes.optionParserType()), "parsers").build();
-
-    return MethodSpec.methodBuilder("optionParsers").returns(parsers.type)
-        .addCode(optionParsersMethodCode(context, generatedTypes, parsers))
-        .addModifiers(STATIC).build();
-  }
-
-  private static CodeBlock optionParsersMethodCode(Context context, GeneratedTypes generatedTypes, ParameterSpec parsers) {
-    List<NamedOption> options = context.options();
-    if (options.isEmpty()) {
-      return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
-    }
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, generatedTypes.optionType());
-    for (Parameter param : options) {
-      String enumConstant = param.enumConstant();
-      code.addStatement("$N.put($L, new $T($L))",
-          parsers, enumConstant, optionParserType(generatedTypes, param), enumConstant);
-    }
-    code.addStatement("return $N", parsers);
-    return code.build();
-  }
-
-  private static ClassName optionParserType(GeneratedTypes generatedTypes, Parameter param) {
-    if (param.isRepeatable()) {
-      return generatedTypes.repeatableOptionParserType();
-    }
-    if (param.isFlag()) {
-      return generatedTypes.flagParserType();
-    }
-    return generatedTypes.regularOptionParserType();
-  }
-
-  private static MethodSpec paramParsersMethod(Context context, GeneratedTypes generatedTypes) {
-    CodeBlock code = paramParsersMethodCode(context, generatedTypes);
-    return MethodSpec.methodBuilder("paramParsers")
-        .returns(ArrayTypeName.of(generatedTypes.paramParserType()))
-        .addModifiers(STATIC)
-        .addCode(code)
-        .build();
-  }
-
-  private static CodeBlock paramParsersMethodCode(Context context, GeneratedTypes generatedTypes) {
-    List<PositionalParameter> params = context.params();
-    ParameterSpec parsers = builder(ArrayTypeName.of(generatedTypes.paramParserType()), "parsers").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T[$L]", parsers.type, parsers, generatedTypes.paramParserType(), params.size());
-    for (int i = 0; i < params.size(); i++) {
-      Parameter param = params.get(i);
-      ClassName parserType = param.isRepeatable() ?
-          generatedTypes.repeatableParamParserType() :
-          generatedTypes.regularParamParserType();
-      code.addStatement("$N[$L] = new $T()", parsers, i, parserType);
-    }
-    return code.addStatement("return $N", parsers).build();
-
-  }
-
   private MethodSpec privateConstructor() {
     ParameterSpec names = builder(namesField.type, namesField.name).build();
     ParameterSpec bundleKey = builder(bundleKeyField.type, bundleKeyField.name).build();
@@ -242,17 +141,5 @@ final class OptionEnum {
         .returns(RuntimeException.class)
         .addCode(code.build())
         .build();
-  }
-
-  MethodSpec optionsByNameMethod() {
-    return optionsByNameMethod;
-  }
-
-  MethodSpec optionParsersMethod() {
-    return optionParsersMethod;
-  }
-
-  MethodSpec paramParsersMethod() {
-    return paramParsersMethod;
   }
 }

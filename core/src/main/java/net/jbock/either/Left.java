@@ -1,6 +1,5 @@
 package net.jbock.either;
 
-import java.util.Optional;
 import java.util.function.Function;
 
 final class Left<L, R> extends Either<L, R> {

@@ -8,11 +8,11 @@ import net.jbock.coerce.matching.auto.AutoMatcher;
 import net.jbock.coerce.matching.mapper.MapperMatcher;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.EnumName;
-import net.jbock.qualifier.MapperClass;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.TypeTool;
 import net.jbock.either.Either;
+import net.jbock.qualifier.MapperClass;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;

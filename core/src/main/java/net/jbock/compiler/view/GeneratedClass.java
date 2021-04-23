@@ -1,6 +1,7 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.ArrayTypeName;
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
@@ -9,13 +10,17 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.PositionalParameter;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import java.io.PrintStream;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.ResourceBundle;
@@ -32,6 +37,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.coerce.Util.addBreaks;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
@@ -100,7 +106,10 @@ public final class GeneratedClass {
         .addMethod(withMessagesMethod(accessModifiers))
         .addMethod(withResourceBundleMethod(accessModifiers))
         .addMethod(withExitHookMethod(accessModifiers))
-        .addMethod(withErrorStreamMethod(accessModifiers));
+        .addMethod(withErrorStreamMethod(accessModifiers))
+        .addMethod(optionsByNameMethod())
+        .addMethod(optionParsersMethod())
+        .addMethod(paramParsersMethod());
     if (context.isHelpParameterEnabled()) {
       spec.addMethod(withHelpStreamMethod(accessModifiers));
     }
@@ -118,7 +127,7 @@ public final class GeneratedClass {
     spec.addField(messages);
     if (!context.options().isEmpty()) {
       spec.addField(FieldSpec.builder(mapOf(STRING, generatedTypes.optionType()), "OPTIONS_BY_NAME")
-          .initializer("$T.$N()", generatedTypes.optionType(), optionEnum.optionsByNameMethod())
+          .initializer("optionsByName()")
           .addModifiers(PRIVATE, STATIC, FINAL)
           .build());
     }
@@ -447,5 +456,87 @@ public final class GeneratedClass {
         .returns(generatedTypes.parseSuccessType())
         .addCode(code.build())
         .build();
+  }
+
+
+  private MethodSpec optionsByNameMethod() {
+    ClassName optionType = generatedTypes.optionType();
+    FieldSpec namesField = FieldSpec.builder(LIST_OF_STRING, "names").build();
+    ParameterSpec result = builder(mapOf(STRING, optionType), "result").build();
+    ParameterSpec option = builder(optionType, "option").build();
+    ParameterSpec name = builder(STRING, "name").build();
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = new $T<>($T.values().length)",
+        result.type, result, HashMap.class, option.type);
+
+    code.add("for ($T $N : $T.values())\n", option.type, option, option.type).indent()
+        .addStatement("$N.$N.forEach($N -> $N.put($N, $N))", option, namesField, name, result, name, option)
+        .unindent();
+    code.addStatement("return $N", result);
+
+    return MethodSpec.methodBuilder("optionsByName").returns(result.type)
+        .addCode(code.build())
+        .addModifiers(PRIVATE, STATIC)
+        .build();
+  }
+
+  private MethodSpec optionParsersMethod() {
+    ParameterSpec parsers = builder(mapOf(generatedTypes.optionType(), generatedTypes.optionParserType()), "parsers").build();
+
+    return MethodSpec.methodBuilder("optionParsers").returns(parsers.type)
+        .addCode(optionParsersMethodCode(context, generatedTypes, parsers))
+        .addModifiers(PRIVATE, STATIC).build();
+  }
+
+  private CodeBlock optionParsersMethodCode(Context context, GeneratedTypes generatedTypes, ParameterSpec parsers) {
+    List<NamedOption> options = context.options();
+    if (options.isEmpty()) {
+      return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
+    }
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, generatedTypes.optionType());
+    for (Parameter param : options) {
+      String enumConstant = param.enumConstant();
+      code.addStatement("$N.put($T.$L, new $T($T.$L))",
+          parsers, generatedTypes.optionType(), enumConstant, optionParserType(generatedTypes, param),
+          generatedTypes.optionType(), enumConstant);
+    }
+    code.addStatement("return $N", parsers);
+    return code.build();
+  }
+
+  private static ClassName optionParserType(GeneratedTypes generatedTypes, Parameter param) {
+    if (param.isRepeatable()) {
+      return generatedTypes.repeatableOptionParserType();
+    }
+    if (param.isFlag()) {
+      return generatedTypes.flagParserType();
+    }
+    return generatedTypes.regularOptionParserType();
+  }
+
+  private MethodSpec paramParsersMethod() {
+    CodeBlock code = paramParsersMethodCode(context, generatedTypes);
+    return MethodSpec.methodBuilder("paramParsers")
+        .returns(ArrayTypeName.of(generatedTypes.paramParserType()))
+        .addModifiers(PRIVATE, STATIC)
+        .addCode(code)
+        .build();
+  }
+
+  private static CodeBlock paramParsersMethodCode(Context context, GeneratedTypes generatedTypes) {
+    List<PositionalParameter> params = context.params();
+    ParameterSpec parsers = builder(ArrayTypeName.of(generatedTypes.paramParserType()), "parsers").build();
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = new $T[$L]", parsers.type, parsers, generatedTypes.paramParserType(), params.size());
+    for (int i = 0; i < params.size(); i++) {
+      Parameter param = params.get(i);
+      ClassName parserType = param.isRepeatable() ?
+          generatedTypes.repeatableParamParserType() :
+          generatedTypes.regularParamParserType();
+      code.addStatement("$N[$L] = new $T()", parsers, i, parserType);
+    }
+    return code.addStatement("return $N", parsers).build();
+
   }
 }

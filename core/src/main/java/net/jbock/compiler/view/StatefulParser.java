@@ -37,7 +37,7 @@ final class StatefulParser {
   private final FieldSpec paramParsersField;
 
   @Inject
-  StatefulParser(Context context, GeneratedTypes generatedTypes, OptionEnum optionEnum, ParseMethod parseMethod) {
+  StatefulParser(Context context, GeneratedTypes generatedTypes, ParseMethod parseMethod) {
     this.context = context;
     this.generatedTypes = generatedTypes;
     this.parseMethod = parseMethod;
@@ -45,11 +45,11 @@ final class StatefulParser {
 
     // stateful parsers
     this.optionParsersField = FieldSpec.builder(mapOf(optionType, generatedTypes.optionParserType()), "optionParsers")
-        .initializer("$T.$N()", optionType, optionEnum.optionParsersMethod())
+        .initializer("optionParsers()")
         .build();
 
     this.paramParsersField = FieldSpec.builder(ArrayTypeName.of(generatedTypes.paramParserType()), "paramParsers")
-        .initializer("$T.$N()", optionType, optionEnum.paramParsersMethod())
+        .initializer("paramParsers()")
         .build();
   }
 
