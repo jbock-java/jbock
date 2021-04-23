@@ -107,11 +107,11 @@ class ParseMethod {
 
     if (!context.params().isEmpty()) {
       code.addStatement("paramParsers[$N].read($N)", position, token);
-      if (context.anyRepeatableParam()) {
+      if (context.anyRepeatableParam() && context.params().size() >= 2) {
         code.add("if ($N < $L)\n", position, context.params().size() - 1).indent()
             .addStatement("$N++", position)
             .unindent();
-      } else {
+      } else if (!context.anyRepeatableParam()) {
         code.addStatement("$N++", position);
       }
     }
