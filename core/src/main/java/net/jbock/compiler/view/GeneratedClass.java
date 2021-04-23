@@ -17,14 +17,15 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.StringJoiner;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -36,7 +37,6 @@ import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.coerce.Util.addBreaks;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
@@ -52,6 +52,8 @@ public final class GeneratedClass {
   private static final int DEFAULT_WRAP_AFTER = 80;
 
   private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
+
+  private static final int INDENT_SYNOPSIS = 8;
 
   private final Context context;
   private final Impl impl;
@@ -179,70 +181,89 @@ public final class GeneratedClass {
     String format = "  %1$-" + (width - 2) + "s";
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec key = builder(STRING, "key").build();
-    MethodSpec.Builder spec = methodBuilder("printOnlineHelp");
     ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
-    ParameterSpec message = builder(STRING, "message").build();
-    spec.addStatement("printWrap($N, 8, $S, $S + synopsis())", printStream, "", "Usage: ");
-    spec.beginControlFlow("for ($T $N : $T.values())", generatedTypes.optionType(), option, generatedTypes.optionType())
-        .addStatement("$T $N = $N.getOrDefault($N.bundleKey, $T.join($S, $N.description)).trim()",
-            STRING, message, messages, option, String.class, " ", option)
-        .addStatement("$T $N = $T.format($S, $N.shape)", STRING, key, STRING, format, option)
+    ParameterSpec message = builder(LIST_OF_STRING, "message").build();
+    ParameterSpec description = builder(LIST_OF_STRING, "description").build();
+    ParameterSpec s = builder(STRING, "s").build();
+    ParameterSpec line = builder(STRING, "s").build();
+    ParameterSpec synopsis = builder(LIST_OF_STRING, "synopsis").build();
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = new $T<>()", synopsis.type, synopsis, ArrayList.class);
+    code.addStatement("$N.add($S)", synopsis, "Usage:");
+    code.addStatement("$N.addAll(synopsis())", synopsis);
+    code.addStatement("printWrap($N, $L, $S, $N)", printStream, INDENT_SYNOPSIS, "", synopsis);
+    code.beginControlFlow("for ($T $N : $T.values())", generatedTypes.optionType(), option, generatedTypes.optionType());
+
+    code.addStatement(CodeBlock.builder().add("$T $N = $T.ofNullable($N.get($N.bundleKey))\n",
+        message.type, message, Optional.class, messages, option).indent()
+        .add(".map($T::trim)\n", String.class)
+        .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
+        .add(".map($T::asList)\n", Arrays.class)
+        .add(".orElseGet(() -> {\n", option).indent()
+        .add("$T $N = new $T<>();\n", description.type, description, ArrayList.class)
+        .add("for ($T $N : $N.description)\n", line.type, line, option).indent()
+        .add("$T.addAll($N, $N.split($S, $L));\n", Collections.class, description, line, "\\s+", -1)
+        .unindent()
+        .add("return $N;\n", description)
+        .add("})")
+        .unindent()
+        .unindent().build());
+
+    code.addStatement("$T $N = $T.format($S, $N.shape)", STRING, key, STRING, format, option)
         .addStatement("printWrap($N, $L, $N, $N)", printStream, width, key, message)
         .endControlFlow();
-    return spec.addParameter(printStream)
+    return methodBuilder("printOnlineHelp")
+        .addParameter(printStream)
         .addModifiers(accessModifiers)
+        .addCode(code.build())
         .build();
   }
 
   private MethodSpec printWrapMethod() {
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec continuationIndent = builder(INT, "continuationIndent").build();
-    ParameterSpec i = builder(INT, "i").build();
     ParameterSpec trim = builder(STRING, "trim").build();
-    ParameterSpec init = builder(STRING, "init").build();
-    ParameterSpec input = builder(STRING, "input").build();
+    ParameterSpec left = builder(STRING, "left").build();
     ParameterSpec sb = builder(StringBuilder.class, "sb").build();
     ParameterSpec token = builder(STRING, "token").build();
-    ParameterSpec tokens = builder(ArrayTypeName.of(String.class), "tokens").build();
+    ParameterSpec right = builder(LIST_OF_STRING, "right").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.beginControlFlow("if ($N.isEmpty())", input)
-        .addStatement("$T $N = $N.trim()", STRING, trim, init)
+    code.beginControlFlow("if ($N.isEmpty())", right)
+        .addStatement("$T $N = $N.trim()", STRING, trim, left)
         .addStatement("$N.println($N.substring(0, $N.indexOf($N)) + $N)",
-            printStream, init, init, trim, trim)
+            printStream, left, left, trim, trim)
         .addStatement("return")
         .endControlFlow();
-    code.addStatement("$T $N = $N.split($S, $L)", tokens.type, tokens, input, "\\s+", -1);
-    code.addStatement("$T $N = new $T($N)", sb.type, sb, StringBuilder.class, init);
-    code.beginControlFlow("for ($T $N : $N)", STRING, token, tokens);
+    code.addStatement("$T $N = new $T()", sb.type, sb, StringBuilder.class);
+    code.addStatement("$N.append($N)", sb, left);
+    code.beginControlFlow("for ($T $N : $N)", STRING, token, right);
 
     code.beginControlFlow("if ($N.length() + $N.length() + 1 > $N)",
         token, sb, maxLineWidth);
     code.beginControlFlow("if ($N.toString().isEmpty())", sb)
         .addStatement("$N.println($N)", printStream, token)
+        .addStatement("continue")
         .endControlFlow();
-    code.beginControlFlow("else")
-        .addStatement("$N.println($N)", printStream, sb)
+    code.addStatement("$N.println($N)", printStream, sb)
         .addStatement("$N.setLength(0)", sb)
-        .add("for ($T $N = 0; $N < $N; $N++)\n",
-            INT, i, i, continuationIndent, i).indent()
-        .addStatement(" $N.append(' ')", sb).unindent()
+        .addStatement("$N.append($T.join($S, $T.nCopies($N, $S)))",
+            sb, String.class, "", Collections.class, continuationIndent, " ")
+        .addStatement("$N.append($N)", sb, token)
+        .addStatement("continue");
+    code.endControlFlow();
+    code.beginControlFlow("if ($N.length() > 0 && !$T.isWhitespace($N.charAt($N.length() - 1)))",
+        sb, Character.class, sb, sb)
+        .addStatement("$N.append(' ')", sb)
+        .endControlFlow()
         .addStatement("$N.append($N)", sb, token)
         .endControlFlow();
-    code.endControlFlow();
-    code.beginControlFlow("else")
-        .add("if ($N.length() > 0 && !$T.isWhitespace($N.charAt($N.length() - 1)))\n",
-            sb, Character.class, sb, sb).indent()
-        .addStatement("$N.append(' ')", sb).unindent()
-        .addStatement("$N.append($N)", sb, token)
-        .endControlFlow();
-    code.endControlFlow();
 
     code.add("if ($N.length() > 0)\n", sb).indent()
         .addStatement("$N.println($N)", printStream, sb).unindent();
     return methodBuilder("printWrap")
         .addModifiers(PRIVATE)
         .addCode(code.build())
-        .addParameters(Arrays.asList(printStream, continuationIndent, init, input))
+        .addParameters(Arrays.asList(printStream, continuationIndent, left, right))
         .build();
   }
 
@@ -381,40 +402,40 @@ public final class GeneratedClass {
   private MethodSpec synopsisMethod() {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("synopsis");
 
-    ParameterSpec joiner = builder(StringJoiner.class, "joiner").build();
+    ParameterSpec result = builder(LIST_OF_STRING, "result").build();
 
-    spec.addCode("return new $T($S)", StringJoiner.class, " ");
+    spec.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
 
     List<Parameter> requiredOptions = context.options().stream().filter(Parameter::isRequired).collect(Collectors.toList());
     List<Parameter> optionalOptions = context.options().stream().filter(p -> !p.isRequired()).collect(Collectors.toList());
 
-    spec.addCode(".add($S)", context.programName());
+    spec.addStatement("$N.add($S)", result, context.programName());
 
     if (!optionalOptions.isEmpty()) {
-      spec.addCode(".add($S)", "[options...]");
+      spec.addStatement("$N.add($S)", result, "[options...]");
     }
 
     for (Parameter option : requiredOptions) {
-      spec.addCode(addBreaks(".add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))"),
-          String.class, "%s <%s>",
+      spec.addStatement("$N.add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))",
+          result, String.class, "%s <%s>",
           generatedTypes.optionType(), option.enumConstant(),
           generatedTypes.optionType(), option.enumConstant(), Locale.class);
     }
 
     for (Parameter param : context.params()) {
       if (param.isOptional()) {
-        spec.addCode("$Z.add($S)", "[<" + param.enumName().snake() + ">]");
+        spec.addStatement("$N.add($S)", result, "[<" + param.enumName().snake() + ">]");
       } else if (param.isRequired()) {
-        spec.addCode("$Z.add($S)", "<" + param.enumName().snake() + ">");
+        spec.addStatement("$N.add($S)", result, "<" + param.enumName().snake() + ">");
       } else if (param.isRepeatable()) {
-        spec.addCode("$Z.add($S)", "<" + param.enumName().snake() + ">...");
+        spec.addStatement("$N.add($S)", result, "<" + param.enumName().snake() + ">...");
       } else {
         throw new AssertionError("all cases handled (param can't be flag)");
       }
     }
 
-    spec.addCode("$Z.toString();\n", joiner);
-    return spec.returns(STRING).addModifiers(PRIVATE).build();
+    spec.addStatement("return $N", result);
+    return spec.returns(LIST_OF_STRING).addModifiers(PRIVATE).build();
   }
 
   private MethodSpec parseOrExitMethod(Modifier[] accessModifiers) {
@@ -441,7 +462,11 @@ public final class GeneratedClass {
     if (!context.isHelpParameterEnabled()) {
       code.addStatement("printOnlineHelp($N)", err);
     } else {
-      code.addStatement("printWrap($N, 8, $S, $S + synopsis())", err, "", "Usage: ");
+      ParameterSpec synopsis = builder(LIST_OF_STRING, "synopsis").build();
+      code.addStatement("$T $N = new $T<>()", synopsis.type, synopsis, ArrayList.class);
+      code.addStatement("$N.add($S)", synopsis, "Usage:");
+      code.addStatement("$N.addAll(synopsis())", synopsis);
+      code.addStatement("printWrap($N, $L, $S, $N)", err, INDENT_SYNOPSIS, "", synopsis);
     }
     code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", generatedTypes.parsingFailedType(), result);
     if (context.isHelpParameterEnabled()) {
