@@ -13,7 +13,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 
-import static com.squareup.javapoet.TypeName.INT;
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.VOID;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -75,7 +75,7 @@ final class ParamParser {
     ParameterSpec valueParam = ParameterSpec.builder(STRING, "token").build();
     return MethodSpec.methodBuilder("read")
         .addParameter(valueParam)
-        .returns(context.anyRepeatableParam() ? INT : VOID)
+        .returns(context.anyRepeatableParam() ? BOOLEAN : VOID)
         .addModifiers(ABSTRACT)
         .build();
   }
@@ -86,11 +86,11 @@ final class ParamParser {
         .addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class)
         .addStatement("$N.add($N)", values, token);
     if (context.anyRepeatableParam()) {
-      code.addStatement("return $L", 0);
+      code.addStatement("return $L", false);
     }
     return MethodSpec.methodBuilder("read")
         .addParameter(token)
-        .returns(context.anyRepeatableParam() ? INT : VOID)
+        .returns(context.anyRepeatableParam() ? BOOLEAN : VOID)
         .addCode(code.build())
         .build();
   }
@@ -100,11 +100,11 @@ final class ParamParser {
     CodeBlock.Builder code = CodeBlock.builder()
         .addStatement("$N = $N", value, token);
     if (context.anyRepeatableParam()) {
-      code.addStatement("return $L", 1);
+      code.addStatement("return $L", true);
     }
     return MethodSpec.methodBuilder("read")
         .addParameter(token)
-        .returns(context.anyRepeatableParam() ? INT : VOID)
+        .returns(context.anyRepeatableParam() ? BOOLEAN : VOID)
         .addCode(code.build())
         .build();
   }

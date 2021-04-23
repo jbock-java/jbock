@@ -106,8 +106,12 @@ class ParseMethod {
     }
 
     if (context.anyRepeatableParam()) {
-      code.addStatement("$N += paramParsers.get($N).read($N)",
-          position, position, token);
+      ParameterSpec incrementPosition = builder(BOOLEAN, "incrementPosition").build();
+      code.addStatement("$T $N = paramParsers.get($N).read($N)",
+          incrementPosition.type, incrementPosition, position, token);
+      code.add("if ($N)\n", incrementPosition).indent()
+          .addStatement("$N++", position)
+          .unindent();
     } else if (!context.params().isEmpty()) {
       code.addStatement("paramParsers.get($N).read($N)", position, token)
           .addStatement("$N++", position);
