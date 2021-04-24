@@ -117,6 +117,7 @@ public final class GeneratedClass {
     }
     spec.addMethod(printOnlineHelpMethod(accessModifiers))
         .addMethod(printWrapMethod())
+        .addMethod(printWrapMethodOverload())
         .addMethod(synopsisMethod())
         .addMethod(readOptionArgumentMethod());
 
@@ -222,24 +223,40 @@ public final class GeneratedClass {
   private MethodSpec printWrapMethod() {
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec continuationIndent = builder(INT, "continuationIndent").build();
+    ParameterSpec left = builder(STRING, "left").build();
+    ParameterSpec right = builder(LIST_OF_STRING, "right").build();
+    ParameterSpec lines = builder(LIST_OF_STRING, "lines").build();
+    ParameterSpec line = builder(STRING, "line").build();
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = printWrap($N, $N, $N)", lines.type, lines, continuationIndent, left, right);
+    code.add("for ($T $N : $N)\n", STRING, line, lines).indent()
+        .addStatement("$N.println($N)", printStream, line)
+        .unindent();
+    return methodBuilder("printWrap")
+        .addModifiers(PRIVATE)
+        .addCode(code.build())
+        .addParameters(Arrays.asList(printStream, continuationIndent, left, right))
+        .build();
+  }
+
+  private MethodSpec printWrapMethodOverload() {
+    ParameterSpec lines = builder(LIST_OF_STRING, "lines").build();
+    ParameterSpec continuationIndent = builder(INT, "continuationIndent").build();
     ParameterSpec i = builder(INT, "i").build();
     ParameterSpec left = builder(STRING, "left").build();
     ParameterSpec sb = builder(StringBuilder.class, "sb").build();
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec right = builder(LIST_OF_STRING, "right").build();
     CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("$T $N = new $T<>()", lines.type, lines, ArrayList.class);
     code.addStatement("$T $N = new $T()", sb.type, sb, StringBuilder.class);
     code.addStatement("$N.append($N)", sb, left);
     code.beginControlFlow("for ($T $N = 0; $N < $N.size(); $N++)", i.type, i, i, right, i);
     code.addStatement("$T $N = $N.get($N)", STRING, token, right, i);
     code.beginControlFlow("if ($N.length() + $N.length() + 1 > $N)",
         token, sb, maxLineWidth);
-    code.beginControlFlow("if ($N.toString().isEmpty())", sb)
-        .addStatement("$N.println($N)", printStream, token)
-        .addStatement("continue")
-        .endControlFlow();
-    code.addStatement("$N.println($N)", printStream, sb)
-        .addStatement("$N.setLength(0)", sb)
+    code.addStatement("$N.add($N.toString())", lines, sb);
+    code.addStatement("$N.setLength(0)", sb)
         .addStatement("$N.append($T.join($S, $T.nCopies($N, $S)))",
             sb, String.class, "", Collections.class, continuationIndent, " ")
         .addStatement("$N.append($N)", sb, token)
@@ -252,11 +269,14 @@ public final class GeneratedClass {
     code.endControlFlow();
 
     code.add("if ($N.length() > 0)\n", sb).indent()
-        .addStatement("$N.println($N)", printStream, sb).unindent();
+        .addStatement("$N.add($N.toString())", lines, sb)
+        .unindent();
+    code.addStatement("return $N", lines);
     return methodBuilder("printWrap")
         .addModifiers(PRIVATE)
         .addCode(code.build())
-        .addParameters(Arrays.asList(printStream, continuationIndent, left, right))
+        .addParameters(Arrays.asList(continuationIndent, left, right))
+        .returns(LIST_OF_STRING)
         .build();
   }
 
