@@ -205,26 +205,15 @@ class CurlArgumentsTest {
         "Option METHOD (-X, --request) is not repeatable");
   }
 
-  static class A {
-    private String foo;
-
-  }
-
-  static class B extends A {
-    void baba() {
-      System.out.println(super.foo);
-    }
-  }
-
   @Test
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: curl [options...] <urls>...",
-        "  urls                  ",
+        "  urls                 ",
         "  -X, --request METHOD  Optional<String> for regular arguments",
         "  -H, --H HEADERS       List<String> for repeatable arguments",
         "  -v, --verbose         boolean for flags",
-        "  -i, --include         ",
+        "  -i, --include        ",
         "");
   }
 }

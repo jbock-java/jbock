@@ -30,8 +30,8 @@ class SimpleArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: simple-arguments [options...]",
-        "  -x, --x          ",
-        "      --file FILE  ",
+        "  -x, --x         ",
+        "      --file FILE ",
         "");
   }
 }

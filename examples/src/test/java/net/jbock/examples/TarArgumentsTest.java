@@ -34,11 +34,11 @@ class TarArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: tar-arguments [options...] -f <file>",
-        "  -x, --x       ",
-        "  -c, --c       ",
-        "  -v, --v       ",
-        "  -z, --z       ",
-        "  -f, --f FILE  ",
+        "  -x, --x      ",
+        "  -c, --c      ",
+        "  -v, --v      ",
+        "  -z, --z      ",
+        "  -f, --f FILE ",
         "");
   }
 }
