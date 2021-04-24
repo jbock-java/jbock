@@ -2,6 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -17,6 +18,15 @@ class CpArgumentsTest {
   void errorMissingSource() {
     f.assertThat().failsWithMessage("Missing required: SOURCE");
     f.assertThat("-r").failsWithMessage("Missing required: SOURCE");
+  }
+
+  @Test
+  void enumValuesInMessage() {
+    CpArguments_Parser.ParseResult result = new CpArguments_Parser().parse(new String[]{"a", "b", "--backup", "CLOUD"});
+    Assertions.assertTrue(result instanceof CpArguments_Parser.ParsingFailed);
+    CpArguments_Parser.ParsingFailed failure = (CpArguments_Parser.ParsingFailed) result;
+    String message = failure.getError().getMessage();
+    Assertions.assertEquals("No enum constant net.jbock.examples.CpArguments.Control.CLOUD, possible values: [NONE, NUMBERED, EXISTING, SIMPLE]", message);
   }
 
   @Test
