@@ -2,6 +2,7 @@ package net.jbock.compiler.view;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.Context;
@@ -63,7 +64,9 @@ class ParseMethod {
     if (!context.options().isEmpty()) {
       code.add(optionBlock());
     }
-    code.add(handleDashTokenBlock());
+    code.add("if ($N.startsWith($S))\n", token, "-").indent()
+        .addStatement(throwInvalidOptionStatement("Invalid option"))
+        .unindent();
 
     code.addStatement("paramParsers[$N].read($N)", position, token)
         .addStatement("$N++", position);
@@ -78,8 +81,7 @@ class ParseMethod {
 
   private CodeBlock regularCode() {
     CodeBlock.Builder code = initVariables();
-    ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
-    code.addStatement("$T $N = $L", endOfOptionParsing.type, endOfOptionParsing, false);
+    FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
 
     // begin parsing loop
     code.beginControlFlow("while ($N.hasNext())", it)
@@ -90,12 +92,12 @@ class ParseMethod {
         .addStatement("continue")
         .endControlFlow();
 
-    code.beginControlFlow("if (!$N)", endOfOptionParsing);
     if (!context.options().isEmpty()) {
       code.add(optionBlock());
     }
-    code.add(handleDashTokenBlock());
-    code.endControlFlow();
+    code.add("if (!$N && $N.startsWith($S))\n", endOfOptionParsing, token, "-").indent()
+        .addStatement(throwInvalidOptionStatement("Invalid option"))
+        .unindent();
 
     if (context.params().isEmpty()) {
       code.addStatement(throwInvalidOptionStatement("Excess param"));
@@ -126,14 +128,6 @@ class ParseMethod {
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if (tryParseOption($N, $N))\n", token, it).indent()
         .addStatement("continue")
-        .unindent();
-    return code.build();
-  }
-
-  private CodeBlock handleDashTokenBlock() {
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.add("if ($N.startsWith($S))\n", token, "-").indent()
-        .addStatement(throwInvalidOptionStatement("Invalid option"))
         .unindent();
     return code.build();
   }

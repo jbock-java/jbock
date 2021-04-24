@@ -36,6 +36,8 @@ final class StatefulParser {
 
   private final FieldSpec paramParsersField;
 
+  private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
+
   @Inject
   StatefulParser(Context context, GeneratedTypes generatedTypes, ParseMethod parseMethod) {
     this.context = context;
@@ -58,6 +60,9 @@ final class StatefulParser {
         .addModifiers(PRIVATE, STATIC)
         .addMethod(buildMethod())
         .addMethod(parseMethod.parseMethod());
+    if (!context.isSuperCommand()) {
+      spec.addField(endOfOptionParsing);
+    }
     if (!context.options().isEmpty()) {
       spec.addMethod(tryParseOptionMethod())
           .addMethod(tryReadOptionMethod());
@@ -74,12 +79,17 @@ final class StatefulParser {
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     ParameterSpec option = ParameterSpec.builder(generatedTypes.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
+    if (!context.isSuperCommand()) {
+      code.add("if ($N)\n", endOfOptionParsing).indent()
+          .addStatement("return false")
+          .unindent();
+    }
     code.addStatement("$T $N = tryReadOption($N)", generatedTypes.optionType(), option, token);
-    code.beginControlFlow("if ($N != null)", option)
-        .addStatement("$N.get($N).read($N, $N)", optionParsersField, option, token, it)
-        .addStatement("return true")
-        .endControlFlow();
-    code.addStatement("return false");
+    code.add("if ($N == null)\n", option).indent()
+        .addStatement("return false")
+        .unindent();
+    code.addStatement("$N.get($N).read($N, $N)", optionParsersField, option, token, it)
+        .addStatement("return true");
     return MethodSpec.methodBuilder("tryParseOption")
         .addParameter(token)
         .addParameter(it)
