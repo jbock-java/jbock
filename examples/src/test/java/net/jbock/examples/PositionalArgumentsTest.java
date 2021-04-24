@@ -95,11 +95,11 @@ class PositionalArgumentsTest {
     f.assertPrintsHelp(
         "Usage: positional-arguments <source> <dest> <another_int> [<opt_string>]",
         "        <other_tokens>...",
-        "  source",
+        "  source        ",
         "  dest          Desc of dest.",
-        "  another_int",
-        "  opt_string",
-        "  other_tokens",
+        "  another_int   ",
+        "  opt_string    ",
+        "  other_tokens  ",
         "");
   }
 }

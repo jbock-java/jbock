@@ -222,22 +222,16 @@ public final class GeneratedClass {
   private MethodSpec printWrapMethod() {
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec continuationIndent = builder(INT, "continuationIndent").build();
-    ParameterSpec trim = builder(STRING, "trim").build();
+    ParameterSpec i = builder(INT, "i").build();
     ParameterSpec left = builder(STRING, "left").build();
     ParameterSpec sb = builder(StringBuilder.class, "sb").build();
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec right = builder(LIST_OF_STRING, "right").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.beginControlFlow("if ($N.isEmpty())", right)
-        .addStatement("$T $N = $N.trim()", STRING, trim, left)
-        .addStatement("$N.println($N.substring(0, $N.indexOf($N)) + $N)",
-            printStream, left, left, trim, trim)
-        .addStatement("return")
-        .endControlFlow();
     code.addStatement("$T $N = new $T()", sb.type, sb, StringBuilder.class);
     code.addStatement("$N.append($N)", sb, left);
-    code.beginControlFlow("for ($T $N : $N)", STRING, token, right);
-
+    code.beginControlFlow("for ($T $N = 0; $N < $N.size(); $N++)", i.type, i, i, right, i);
+    code.addStatement("$T $N = $N.get($N)", STRING, token, right, i);
     code.beginControlFlow("if ($N.length() + $N.length() + 1 > $N)",
         token, sb, maxLineWidth);
     code.beginControlFlow("if ($N.toString().isEmpty())", sb)
@@ -251,12 +245,11 @@ public final class GeneratedClass {
         .addStatement("$N.append($N)", sb, token)
         .addStatement("continue");
     code.endControlFlow();
-    code.beginControlFlow("if ($N.length() > 0 && !$T.isWhitespace($N.charAt($N.length() - 1)))",
-        sb, Character.class, sb, sb)
+    code.add("if ($N > 0)\n", i).indent()
         .addStatement("$N.append(' ')", sb)
-        .endControlFlow()
-        .addStatement("$N.append($N)", sb, token)
-        .endControlFlow();
+        .unindent();
+    code.addStatement("$N.append($N)", sb, token);
+    code.endControlFlow();
 
     code.add("if ($N.length() > 0)\n", sb).indent()
         .addStatement("$N.println($N)", printStream, sb).unindent();
