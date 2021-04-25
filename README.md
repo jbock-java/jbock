@@ -5,7 +5,7 @@ jbock is a command line parser.
 In contrast to tools like [airline](https://github.com/airlift/airline) and
 [picocli](https://github.com/remkop/picocli), which scan for annotations at runtime, jbock is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
-that generates all the parsing code at compile time already.
+that generates custom parsing code at compile time already.
 
 ### Overview
 
