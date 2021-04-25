@@ -8,29 +8,27 @@ repositories {
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(15)
+        languageVersion = JavaLanguageVersion.of(16)
     }
 }
 
 compileJava {
     options.encoding = 'UTF-8'
-    sourceCompatibility = '8'
-    targetCompatibility = '8'
-    options.compilerArgs << '--release'
-    options.compilerArgs << '8'
+    sourceCompatibility = '16'
+    targetCompatibility = '16'
 }
 
 dependencies {
     compileOnly project(':annotations')
     annotationProcessor project(':core')
     annotationProcessor project(':annotations')
-    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.0'
-    testImplementation 'org.mockito:mockito-core:3.6.0' //  for mocking resourcebundle
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
+    testImplementation 'org.mockito:mockito-core:3.9.0' //  for mocking resourcebundle
 }
 
 test {
     useJUnitPlatform()
     testLogging {
-        events "failed"
+        events 'failed'
     }
 }
