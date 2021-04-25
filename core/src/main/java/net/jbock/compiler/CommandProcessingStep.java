@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
@@ -298,7 +299,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private Either<List<ValidationFailure>, Methods> createMethods(TypeElement sourceElement) {
     List<ValidationFailure> failures = new ArrayList<>();
-    List<ExecutableElement> sourceMethods = findAllAbstractMethods(sourceElement.asType());
+    List<ExecutableElement> sourceMethods = findRelevantMethods(sourceElement.asType());
     for (ExecutableElement sourceMethod : sourceMethods) {
       validateParameterMethod(sourceMethod)
           .ifPresent(msg -> failures.add(new ValidationFailure(msg, sourceMethod)));
@@ -312,17 +313,19 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return right(Methods.create(sourceMethods));
   }
 
-  private List<ExecutableElement> findAllAbstractMethods(TypeMirror sourceElement) {
+  private List<ExecutableElement> findRelevantMethods(TypeMirror sourceElement) {
     List<ExecutableElement> acc = new ArrayList<>();
     TypeElement element;
-    while ((element = findAllAbstractMethods(sourceElement, acc)) != null) {
+    while ((element = findRelevantMethods(sourceElement, acc)) != null) {
       sourceElement = element.getSuperclass();
     }
-    return acc;
+    Map<Boolean, List<ExecutableElement>> map = acc.stream()
+        .collect(Collectors.partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
+    return AbstractMethods.create(map.get(true), map.get(false)).unimplementedAbstract();
   }
 
-  private TypeElement findAllAbstractMethods(TypeMirror sourceElement, List<ExecutableElement> acc) {
-    if (sourceElement.getKind() != TypeKind.DECLARED || isObject(sourceElement)) {
+  private TypeElement findRelevantMethods(TypeMirror sourceElement, List<ExecutableElement> acc) {
+    if (sourceElement.getKind() != TypeKind.DECLARED) {
       return null;
     }
     DeclaredType declared = AS_DECLARED.visit(sourceElement);
@@ -333,10 +336,10 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     if (typeElement == null) {
       return null;
     }
-    methodsIn(typeElement.getEnclosedElements())
-        .stream()
-        .filter(sourceMethod -> sourceMethod.getModifiers().contains(ABSTRACT))
-        .forEach(acc::add);
+    if (!typeElement.getModifiers().contains(ABSTRACT)) {
+      return null;
+    }
+    acc.addAll(methodsIn(typeElement.getEnclosedElements()));
     return typeElement;
   }
 
@@ -360,10 +363,6 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .flip()
         .map(Optional::of)
         .orElse(Function.identity());
-  }
-
-  private boolean isObject(TypeMirror superclass) {
-    return tool.isSameType(superclass, Object.class.getCanonicalName());
   }
 
   private static ClassName generatedClass(TypeElement sourceElement) {

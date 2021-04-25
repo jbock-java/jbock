@@ -272,23 +272,6 @@ class ProcessorTest {
   }
 
   @Test
-  void simpleExtends() {
-    JavaFileObject javaFile = fromSource(
-        "abstract class Arguments {",
-        "",
-        "  @Param(0)",
-        "  abstract String something();",
-        "",
-        "  @SuperCommand",
-        "  static abstract class Foo extends Arguments {",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
   void implementsNotAllowed() {
     JavaFileObject javaFile = fromSource(
         "interface Arguments {",
