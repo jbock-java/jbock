@@ -154,7 +154,7 @@ public final class GeneratedClass {
     // move this elsewhere
     generatedTypes.parseResultWithRestType().ifPresent(resultWithRestType -> {
       FieldSpec result = FieldSpec.builder(generatedTypes.sourceType(), "result", PRIVATE, FINAL).build();
-      FieldSpec rest = FieldSpec.builder(ArrayTypeName.of(STRING), "rest", PRIVATE, FINAL).build();
+      FieldSpec rest = FieldSpec.builder(STRING_ARRAY, "rest", PRIVATE, FINAL).build();
       spec.addType(TypeSpec.classBuilder(resultWithRestType)
           .addModifiers(accessModifiers)
           .addModifiers(STATIC, FINAL)
