@@ -27,8 +27,6 @@ public final class Constants {
 
   public static final TypeName STRING_ARRAY = ArrayTypeName.of(STRING);
 
-  public static final TypeName ENTRY_STRING_STRING = ParameterizedTypeName.get(ClassName.get(Map.Entry.class), STRING, STRING);
-
   public static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
 
   public static TypeName listOf(TypeName typeName) {

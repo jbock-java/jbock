@@ -7,7 +7,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
@@ -76,6 +75,8 @@ public final class GeneratedClass {
   private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages", PRIVATE)
       .initializer("$T.emptyMap()", Collections.class).build();
 
+  private final FieldSpec programName;
+
   private final FieldSpec exitHook;
 
   @Inject
@@ -97,6 +98,8 @@ public final class GeneratedClass {
     this.parserState = parserState;
     this.parseResult = parseResult;
     this.exitHook = context.exitHookField();
+    this.programName = FieldSpec.builder(STRING, "programName", PRIVATE)
+        .initializer("$S", context.programName()).build();
   }
 
   public TypeSpec define() {
@@ -104,6 +107,7 @@ public final class GeneratedClass {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass())
         .addMethod(parseMethod(accessModifiers))
         .addMethod(parseOrExitMethod(accessModifiers))
+        .addMethod(withProgramNameMethod(accessModifiers))
         .addMethod(withMaxLineWidthMethod(accessModifiers))
         .addMethod(withMessagesMethod(accessModifiers))
         .addMethod(withResourceBundleMethod(accessModifiers))
@@ -129,6 +133,7 @@ public final class GeneratedClass {
       spec.addField(out);
     }
     spec.addField(err);
+    spec.addField(programName);
     spec.addField(maxLineWidth);
     spec.addField(exitHook);
     spec.addField(messages);
@@ -149,7 +154,7 @@ public final class GeneratedClass {
     // move this elsewhere
     generatedTypes.parseResultWithRestType().ifPresent(resultWithRestType -> {
       FieldSpec result = FieldSpec.builder(generatedTypes.sourceType(), "result", PRIVATE, FINAL).build();
-      FieldSpec rest = FieldSpec.builder(ArrayTypeName.of(String.class), "rest", PRIVATE, FINAL).build();
+      FieldSpec rest = FieldSpec.builder(ArrayTypeName.of(STRING), "rest", PRIVATE, FINAL).build();
       spec.addType(TypeSpec.classBuilder(resultWithRestType)
           .addModifiers(accessModifiers)
           .addModifiers(STATIC, FINAL)
@@ -200,7 +205,7 @@ public final class GeneratedClass {
     code.addStatement("$N.add($N)", tokens, shape);
     code.addStatement(CodeBlock.builder().add("$N.addAll($T.ofNullable($N)\n",
         tokens, Optional.class, message).indent()
-        .add(".map($T::trim)\n", String.class)
+        .add(".map($T::trim)\n", STRING)
         .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
         .add(".map($T::asList)\n", Arrays.class)
         .add(".orElseGet(() -> $N.description.stream()\n", option).indent()
@@ -257,7 +262,7 @@ public final class GeneratedClass {
     code.addStatement("$N.add($N.toString())", lines, sb);
     code.addStatement("$N.setLength(0)", sb)
         .addStatement("$N.append($T.join($S, $T.nCopies($N, $S)))",
-            sb, String.class, "", Collections.class, continuationIndent, " ")
+            sb, STRING, "", Collections.class, continuationIndent, " ")
         .addStatement("$N.append($N)", sb, token)
         .addStatement("continue");
     code.endControlFlow();
@@ -277,6 +282,17 @@ public final class GeneratedClass {
         .addParameter(continuationIndent)
         .addParameter(tokens)
         .returns(LIST_OF_STRING)
+        .build();
+  }
+
+  private MethodSpec withProgramNameMethod(Modifier[] accessModifiers) {
+    ParameterSpec programNameParam = builder(STRING, "programName").build();
+    return methodBuilder("withProgramName")
+        .addParameter(programNameParam)
+        .addStatement("this.$N = $N", programName, programNameParam)
+        .addStatement("return this")
+        .returns(context.generatedClass())
+        .addModifiers(accessModifiers)
         .build();
   }
 
@@ -347,7 +363,7 @@ public final class GeneratedClass {
 
   private MethodSpec parseMethod(Modifier[] accessModifiers) {
 
-    ParameterSpec args = builder(Constants.STRING_ARRAY, "args").build();
+    ParameterSpec args = builder(STRING_ARRAY, "args").build();
     ParameterSpec e = builder(RuntimeException.class, "e").build();
     CodeBlock.Builder code = CodeBlock.builder();
 
@@ -424,7 +440,7 @@ public final class GeneratedClass {
 
     spec.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
     spec.addStatement("$N.add($S)", result, "Usage:");
-    spec.addStatement("$N.add($S)", result, context.programName());
+    spec.addStatement("$N.add($N)", result, programName);
 
     if (!optionalOptions.isEmpty()) {
       spec.addStatement("$N.add($S)", result, "[options...]");
@@ -432,7 +448,7 @@ public final class GeneratedClass {
 
     for (Parameter option : requiredOptions) {
       spec.addStatement("$N.add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))",
-          result, String.class, "%s <%s>",
+          result, STRING, "%s <%s>",
           generatedTypes.optionType(), option.enumConstant(),
           generatedTypes.optionType(), option.enumConstant(), Locale.class);
     }
