@@ -2,7 +2,7 @@
 [![annotations](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations/badge.svg?color=red&style=plastic&subject=jbock-annotations)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations)
 
 jbock is a command line parser.
-While other tools like [airline](https://github.com/airlift/airline) and
+While tools like [airline](https://github.com/airlift/airline) and
 [picocli](https://github.com/remkop/picocli) scan for annotations at runtime, jbock is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
 that generates all the parsing code at compile time already.
