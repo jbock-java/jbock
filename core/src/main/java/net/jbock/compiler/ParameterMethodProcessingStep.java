@@ -2,10 +2,8 @@ package net.jbock.compiler;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
-import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
-import net.jbock.SuperCommand;
 
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
@@ -44,14 +42,6 @@ class ParameterMethodProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private void checkEnclosingElementIsAnnotated(ExecutableElement method) {
-    Element enclosingElement = method.getEnclosingElement();
-    if (enclosingElement.getAnnotation(Command.class) == null &&
-        enclosingElement.getAnnotation(SuperCommand.class) == null) {
-      messager.printMessage(Diagnostic.Kind.ERROR,
-          "put either the @" + Command.class.getSimpleName() + " or @" +
-              SuperCommand.class.getSimpleName() +
-              " annotation on the enclosing class", method);
-    }
     if (!method.getModifiers().contains(Modifier.ABSTRACT)) {
       messager.printMessage(Diagnostic.Kind.ERROR, "abstract method expected");
     }

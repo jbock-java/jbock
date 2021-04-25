@@ -274,19 +274,20 @@ class ProcessorTest {
   }
 
   @Test
-  void extendsNotAllowed() {
+  void simpleExtends() {
     JavaFileObject javaFile = fromSource(
         "abstract class Arguments {",
         "",
-        "  @Command",
+        "  @Param(0)",
+        "  abstract String something();",
+        "",
+        "  @SuperCommand",
         "  static abstract class Foo extends Arguments {",
-        "    abstract String a();",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("command cannot inherit from test.Arguments");
+        .compilesWithoutError();
   }
 
   @Test
@@ -303,19 +304,6 @@ class ProcessorTest {
         .processedWith(new Processor())
         .failsToCompile()
         .withErrorContaining("implement");
-  }
-
-  @Test
-  void missingCommandAnnotation() {
-    JavaFileObject javaFile = fromSource(
-        "abstract class Arguments {",
-        "  @Option(\"a\") abstract String a();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("put either the @Command or @SuperCommand annotation" +
-            " on the enclosing class");
   }
 
   @Test

@@ -50,6 +50,7 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.compiler.OperationMode.TEST;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
+import static net.jbock.compiler.TypeTool.AS_TYPE_ELEMENT;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
@@ -297,10 +298,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private Either<List<ValidationFailure>, Methods> createMethods(TypeElement sourceElement) {
     List<ValidationFailure> failures = new ArrayList<>();
-    List<ExecutableElement> sourceMethods = methodsIn(sourceElement.getEnclosedElements())
-        .stream()
-        .filter(sourceMethod -> sourceMethod.getModifiers().contains(ABSTRACT))
-        .collect(Collectors.toList());
+    List<ExecutableElement> sourceMethods = findAllAbstractMethods(sourceElement.asType());
     for (ExecutableElement sourceMethod : sourceMethods) {
       validateParameterMethod(sourceMethod)
           .ifPresent(msg -> failures.add(new ValidationFailure(msg, sourceMethod)));
@@ -312,6 +310,34 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       return left(Collections.singletonList(new ValidationFailure("expecting at least one abstract method", sourceElement)));
     }
     return right(Methods.create(sourceMethods));
+  }
+
+  private List<ExecutableElement> findAllAbstractMethods(TypeMirror sourceElement) {
+    List<ExecutableElement> acc = new ArrayList<>();
+    TypeElement element;
+    while ((element = findAllAbstractMethods(sourceElement, acc)) != null) {
+      sourceElement = element.getSuperclass();
+    }
+    return acc;
+  }
+
+  private TypeElement findAllAbstractMethods(TypeMirror sourceElement, List<ExecutableElement> acc) {
+    if (sourceElement.getKind() != TypeKind.DECLARED || isObject(sourceElement)) {
+      return null;
+    }
+    DeclaredType declared = AS_DECLARED.visit(sourceElement);
+    if (declared == null) {
+      return null;
+    }
+    TypeElement typeElement = AS_TYPE_ELEMENT.visit(declared.asElement());
+    if (typeElement == null) {
+      return null;
+    }
+    methodsIn(typeElement.getEnclosedElements())
+        .stream()
+        .filter(sourceMethod -> sourceMethod.getModifiers().contains(ABSTRACT))
+        .forEach(acc::add);
+    return typeElement;
   }
 
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
@@ -331,17 +357,13 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           }
           return Optional.empty();
         })
-        .filter(nothing -> {
-          TypeMirror superclass = sourceElement.getSuperclass();
-          boolean isObject = tool.isSameType(superclass, Object.class.getCanonicalName());
-          if (!isObject) {
-            return Optional.of("command cannot inherit from " + superclass);
-          }
-          return Optional.empty();
-        })
         .flip()
         .map(Optional::of)
         .orElse(Function.identity());
+  }
+
+  private boolean isObject(TypeMirror superclass) {
+    return tool.isSameType(superclass, Object.class.getCanonicalName());
   }
 
   private static ClassName generatedClass(TypeElement sourceElement) {
