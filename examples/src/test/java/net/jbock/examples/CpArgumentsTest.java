@@ -26,7 +26,7 @@ class CpArgumentsTest {
     Assertions.assertTrue(result instanceof CpArguments_Parser.ParsingFailed);
     CpArguments_Parser.ParsingFailed failure = (CpArguments_Parser.ParsingFailed) result;
     String message = failure.getError().getMessage();
-    Assertions.assertEquals("No enum constant net.jbock.examples.CpArguments.Control.CLOUD, possible values: [NONE, NUMBERED, EXISTING, SIMPLE]", message);
+    Assertions.assertEquals("No enum constant net.jbock.examples.CpArguments.Control.CLOUD [NONE, NUMBERED, EXISTING, SIMPLE]", message);
   }
 
   @Test
