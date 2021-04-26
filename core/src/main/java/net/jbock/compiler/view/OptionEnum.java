@@ -81,7 +81,7 @@ final class OptionEnum {
     map.put("bundleKey", param.bundleKey().orElse(null));
     map.put("descExpression", descExpression(param.description()));
     map.put("shape", param.sample());
-    String format = String.join(", ", "$names:L", "$bundleKey:S", "$descExpression:L", "$shape:S");
+    String format = String.join(",$W", "$names:L", "$bundleKey:S", "$descExpression:L", "$shape:S");
 
     return anonymousClassBuilder(CodeBlock.builder().addNamed(format, map).build()).build();
   }
