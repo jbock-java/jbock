@@ -490,14 +490,14 @@ public final class GeneratedClass {
         .endControlFlow());
 
     code.addStatement("(($T) $N).getError().printStackTrace($N)", generatedTypes.parsingFailedType(), result, err);
+    code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", generatedTypes.parsingFailedType(), result);
     if (!context.isHelpParameterEnabled()) {
       code.addStatement("printOnlineHelp($N)", err);
     } else {
       code.addStatement("printTokens($N, $L, synopsis())", err, INDENT_SYNOPSIS);
     }
-    code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", generatedTypes.parsingFailedType(), result);
     if (context.isHelpParameterEnabled()) {
-      code.addStatement("$N.println($S)", err, "Try '--help' for more information.");
+      code.addStatement("$N.println($S + $N + $S)", err, "Try '", programName, " --help' for more information.");
     }
     code.addStatement("$N.flush()", err)
         .addStatement("$N.accept($N, 1)", exitHook, result)
