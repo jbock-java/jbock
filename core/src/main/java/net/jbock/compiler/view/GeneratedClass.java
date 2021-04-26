@@ -53,7 +53,7 @@ public final class GeneratedClass {
 
   private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
 
-  private static final int INDENT_SYNOPSIS = 8;
+  private static final int CONTINUATION_INDENT_USAGE = 8;
 
   private final Context context;
   private final Description description;
@@ -124,7 +124,7 @@ public final class GeneratedClass {
         .addMethod(printOptionMethod())
         .addMethod(printTokensMethod())
         .addMethod(makeLinesMethod())
-        .addMethod(synopsisMethod())
+        .addMethod(usageMethod())
         .addMethod(readOptionArgumentMethod());
     if (!context.options().isEmpty()) {
       spec.addMethod(optionsByNameMethod());
@@ -191,7 +191,7 @@ public final class GeneratedClass {
   private MethodSpec printOnlineHelpMethod(Modifier[] accessModifiers) {
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("printTokens($N, $L, synopsis())", printStream, INDENT_SYNOPSIS);
+    code.addStatement("printTokens($N, $L, usage())", printStream, CONTINUATION_INDENT_USAGE);
 
     if (description.getValue().length > 0) {
       ParameterSpec descriptionBuilder = builder(LIST_OF_STRING, "description").build();
@@ -462,8 +462,8 @@ public final class GeneratedClass {
         .build();
   }
 
-  private MethodSpec synopsisMethod() {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("synopsis");
+  private MethodSpec usageMethod() {
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("usage");
 
     ParameterSpec result = builder(LIST_OF_STRING, "result").build();
 
@@ -521,12 +521,11 @@ public final class GeneratedClass {
         .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
         .endControlFlow());
 
-    code.addStatement("(($T) $N).getError().printStackTrace($N)", generatedTypes.parsingFailedType(), result, err);
     code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", generatedTypes.parsingFailedType(), result);
     if (!context.isHelpParameterEnabled()) {
       code.addStatement("printOnlineHelp($N)", err);
     } else {
-      code.addStatement("printTokens($N, $L, synopsis())", err, INDENT_SYNOPSIS);
+      code.addStatement("printTokens($N, $L, usage())", err, CONTINUATION_INDENT_USAGE);
     }
     if (context.isHelpParameterEnabled()) {
       code.addStatement("$N.println($S + $N + $S)", err, "Try '", programName, " --help' for more information.");
