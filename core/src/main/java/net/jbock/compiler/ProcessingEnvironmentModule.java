@@ -7,6 +7,7 @@ import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 @Module
 public interface ProcessingEnvironmentModule {
@@ -24,6 +25,11 @@ public interface ProcessingEnvironmentModule {
   @Provides
   static Elements elements(ProcessingEnvironment processingEnvironment) {
     return processingEnvironment.getElementUtils();
+  }
+
+  @Provides
+  static Types types(ProcessingEnvironment processingEnvironment) {
+    return processingEnvironment.getTypeUtils();
   }
 
   @Provides

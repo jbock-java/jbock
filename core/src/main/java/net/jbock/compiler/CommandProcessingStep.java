@@ -31,6 +31,7 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.IOException;
@@ -58,14 +59,16 @@ import static net.jbock.either.Either.right;
 class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private final TypeTool tool;
+  private final Types types;
   private final Messager messager;
   private final Filer filer;
   private final Elements elements;
   private final OperationMode operationMode;
 
   @Inject
-  CommandProcessingStep(TypeTool tool, Messager messager, Filer filer, Elements elements, OperationMode operationMode) {
+  CommandProcessingStep(TypeTool tool, Types types, Messager messager, Filer filer, Elements elements, OperationMode operationMode) {
     this.tool = tool;
+    this.types = types;
     this.messager = messager;
     this.filer = filer;
     this.elements = elements;
@@ -299,48 +302,57 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private Either<List<ValidationFailure>, Methods> createMethods(TypeElement sourceElement) {
     List<ValidationFailure> failures = new ArrayList<>();
-    List<ExecutableElement> sourceMethods = findRelevantMethods(sourceElement.asType());
-    for (ExecutableElement sourceMethod : sourceMethods) {
-      validateParameterMethod(sourceMethod)
-          .ifPresent(msg -> failures.add(new ValidationFailure(msg, sourceMethod)));
-    }
-    if (!failures.isEmpty()) {
-      return left(failures);
-    }
-    if (sourceMethods.isEmpty()) { // javapoet #739
-      return left(Collections.singletonList(new ValidationFailure("expecting at least one abstract method", sourceElement)));
-    }
-    return right(Methods.create(sourceMethods));
+    return findRelevantMethods(sourceElement.asType()).flatMap(sourceMethods -> {
+      for (ExecutableElement sourceMethod : sourceMethods) {
+        validateParameterMethod(sourceMethod)
+            .ifPresent(msg -> failures.add(new ValidationFailure(msg, sourceMethod)));
+      }
+      if (!failures.isEmpty()) {
+        return left(failures);
+      }
+      if (sourceMethods.isEmpty()) { // javapoet #739
+        return left(Collections.singletonList(new ValidationFailure("expecting at least one abstract method", sourceElement)));
+      }
+      return right(Methods.create(sourceMethods));
+    });
   }
 
-  private List<ExecutableElement> findRelevantMethods(TypeMirror sourceElement) {
+  private Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantMethods(TypeMirror sourceElement) {
     List<ExecutableElement> acc = new ArrayList<>();
-    TypeElement element;
-    while ((element = findRelevantMethods(sourceElement, acc)) != null) {
-      sourceElement = element.getSuperclass();
+    Either<List<ValidationFailure>, TypeElement> element;
+    while ((element = findRelevantMethods(sourceElement, acc)).isRight()) {
+      sourceElement = element.orElse(null).getSuperclass();
+    }
+    if (!element.flip().orElse(Collections.emptyList()).isEmpty()) {
+      return left(element.flip().orElse(Collections.emptyList()));
     }
     Map<Boolean, List<ExecutableElement>> map = acc.stream()
         .collect(Collectors.partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
-    return AbstractMethods.create(map.get(true), map.get(false)).unimplementedAbstract();
+    return right(AbstractMethods.create(map.get(true), map.get(false), types).unimplementedAbstract());
   }
 
-  private TypeElement findRelevantMethods(TypeMirror sourceElement, List<ExecutableElement> acc) {
+  private Either<List<ValidationFailure>, TypeElement> findRelevantMethods(TypeMirror sourceElement, List<ExecutableElement> acc) {
     if (sourceElement.getKind() != TypeKind.DECLARED) {
-      return null;
+      return left(Collections.emptyList());
     }
     DeclaredType declared = AS_DECLARED.visit(sourceElement);
     if (declared == null) {
-      return null;
+      return left(Collections.emptyList());
     }
     TypeElement typeElement = AS_TYPE_ELEMENT.visit(declared.asElement());
     if (typeElement == null) {
-      return null;
+      return left(Collections.emptyList());
     }
     if (!typeElement.getModifiers().contains(ABSTRACT)) {
-      return null;
+      return left(Collections.emptyList());
+    }
+    List<? extends TypeMirror> interfaces = typeElement.getInterfaces();
+    if (!interfaces.isEmpty()) {
+      return left(Collections.singletonList(
+          new ValidationFailure("this abstract class may not implement any interfaces", typeElement)));
     }
     acc.addAll(methodsIn(typeElement.getEnclosedElements()));
-    return typeElement;
+    return right(typeElement);
   }
 
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
@@ -362,7 +374,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         })
         .flip()
         .map(Optional::of)
-        .orElse(Function.identity());
+        .orElseGet(Function.identity());
   }
 
   private static ClassName generatedClass(TypeElement sourceElement) {
@@ -371,6 +383,14 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private static Optional<String> validateParameterMethod(ExecutableElement sourceMethod) {
+    if (sourceMethod.getAnnotation(Param.class) == null && sourceMethod.getAnnotation(Option.class) == null) {
+      return Optional.of(String.format("add @%s or @%s annotation",
+          Option.class.getSimpleName(), Param.class.getSimpleName()));
+    }
+    if (sourceMethod.getAnnotation(Param.class) != null && sourceMethod.getAnnotation(Option.class) != null) {
+      return Optional.of(String.format("use @%s or @%s annotation but not both",
+          Option.class.getSimpleName(), Param.class.getSimpleName()));
+    }
     if (!sourceMethod.getParameters().isEmpty()) {
       return Optional.of("empty argument list expected");
     }
@@ -381,14 +401,6 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     }
     if (!sourceMethod.getThrownTypes().isEmpty()) {
       return Optional.of("method may not declare any exceptions");
-    }
-    if (sourceMethod.getAnnotation(Param.class) == null && sourceMethod.getAnnotation(Option.class) == null) {
-      return Optional.of(String.format("add @%s or @%s annotation",
-          Option.class.getSimpleName(), Param.class.getSimpleName()));
-    }
-    if (sourceMethod.getAnnotation(Param.class) != null && sourceMethod.getAnnotation(Option.class) != null) {
-      return Optional.of(String.format("use @%s or @%s annotation but not both",
-          Option.class.getSimpleName(), Param.class.getSimpleName()));
     }
     if (isUnreachable(sourceMethod.getReturnType())) {
       return Optional.of("unreachable type: " + Util.typeToString(sourceMethod.getReturnType()));
