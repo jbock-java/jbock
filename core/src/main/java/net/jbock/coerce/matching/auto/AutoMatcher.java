@@ -84,7 +84,7 @@ public class AutoMatcher extends ParameterScoped {
         .add(".map($T::name)\n", baseReturnType)
         .add(".collect($T.joining($S, $S, $S));\n", Collectors.class, ", ", "[", "]")
         .unindent()
-        .add("$T $N = $N.getMessage() + $S + $N;\n", STRING, message, e, ", possible values: ", values)
+        .add("$T $N = $N.getMessage() + $S + $N;\n", STRING, message, e, " ", values)
         .add("throw new $T($N);\n", IllegalArgumentException.class, message)
         .unindent().add("}\n")
         .unindent().add("}").build();
