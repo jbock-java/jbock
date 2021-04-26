@@ -12,6 +12,7 @@ class PsArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: ps-arguments [options...]",
+        "Options:",
         "  -a, --all         ",
         "  -w, --width WIDTH  This is the description.",
         "");

@@ -186,7 +186,9 @@ class GradleArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: gradle-arguments [options...] <other_tokens>...",
+        "Parameters:",
         "  other_tokens          ",
+        "Options:",
         "  -m, --message MESSAGE  the message message goes here",
         "  -f, --file FILE        the files",
         "      --dir DIR          the dir",

@@ -95,7 +95,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       Builder optionType(ClassName optionType);
 
       @BindsInstance
-      Builder description(String[] description);
+      Builder description(Description description);
 
       @BindsInstance
       Builder alreadyCreatedParams(ImmutableList<PositionalParameter> alreadyCreated);
@@ -134,6 +134,9 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
       @BindsInstance
       Builder flavour(ParserFlavour flavour);
+
+      @BindsInstance
+      Builder description(Description description);
 
       ContextComponent build();
     }
@@ -176,6 +179,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
                 .generatedClass(generatedClass)
                 .options(parameters.namedOptions)
                 .params(parameters.positionalParams)
+                .description(getDescription(sourceElement))
                 .build();
             TypeSpec typeSpec = context.generatedClass().define();
             write(sourceElement, generatedClass, typeSpec);
@@ -426,9 +430,9 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return false;
   }
 
-  private String[] getDescription(ExecutableElement method) {
+  private Description getDescription(Element method) {
     String docComment = elements.getDocComment(method);
-    return docComment == null ? new String[0] : tokenizeJavadoc(docComment);
+    return new Description(docComment == null ? new String[0] : tokenizeJavadoc(docComment));
   }
 
   private static String[] tokenizeJavadoc(String docComment) {

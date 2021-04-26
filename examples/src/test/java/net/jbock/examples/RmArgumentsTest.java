@@ -22,7 +22,9 @@ class RmArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: rm-arguments [options...] <other_tokens>...",
+        "Parameters:",
         "  other_tokens     This is a list that may be empty.",
+        "Options:",
         "  -r, --recursive  ALLES TURISTEN UND NONTEKNISCHEN LOOKENSPEEPERS! DAS",
         "                   KOMPUTERMASCHINE IST NICHT FUR DER GEFINGERPOKEN UND",
         "                   MITTENGRABEN! ODERWISE IST EASY TO SCHNAPPEN DER SPRINGENWERK,",

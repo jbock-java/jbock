@@ -8,6 +8,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
+import net.jbock.compiler.Description;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
@@ -55,6 +56,7 @@ public final class GeneratedClass {
   private static final int INDENT_SYNOPSIS = 8;
 
   private final Context context;
+  private final Description description;
   private final Impl impl;
   private final GeneratedTypes generatedTypes;
   private final OptionParser optionParser;
@@ -82,6 +84,7 @@ public final class GeneratedClass {
   @Inject
   GeneratedClass(
       Context context,
+      Description description,
       Impl impl,
       GeneratedTypes generatedTypes,
       OptionParser optionParser,
@@ -90,6 +93,7 @@ public final class GeneratedClass {
       StatefulParser parserState,
       ParseResult parseResult) {
     this.context = context;
+    this.description = description;
     this.impl = impl;
     this.generatedTypes = generatedTypes;
     this.optionParser = optionParser;
@@ -117,6 +121,7 @@ public final class GeneratedClass {
       spec.addMethod(withHelpStreamMethod(accessModifiers));
     }
     spec.addMethod(printOnlineHelpMethod(accessModifiers))
+        .addMethod(printOptionMethod())
         .addMethod(printTokensMethod())
         .addMethod(makeLinesMethod())
         .addMethod(synopsisMethod())
@@ -184,21 +189,49 @@ public final class GeneratedClass {
   }
 
   private MethodSpec printOnlineHelpMethod(Modifier[] accessModifiers) {
+    ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("printTokens($N, $L, synopsis())", printStream, INDENT_SYNOPSIS);
+
+    if (description.getValue().length > 0) {
+      ParameterSpec descriptionBuilder = builder(LIST_OF_STRING, "description").build();
+      code.addStatement("$T $N = new $T<>()", descriptionBuilder.type, descriptionBuilder, ArrayList.class);
+      for (String line : description.getValue()) {
+        code.addStatement("$T.addAll($N, $S.split($S, $L))", Collections.class, descriptionBuilder, line, "\\s+", -1);
+      }
+      code.addStatement("printTokens($N, $L, $N)", printStream, 0, descriptionBuilder);
+    }
+    if (!context.params().isEmpty()) {
+      code.addStatement("$N.println($S)", printStream, "Parameters:");
+    }
+    context.params().forEach(p ->
+        code.addStatement("printOption($N, $T.$L)", printStream, generatedTypes.optionType(), p.enumConstant()));
+    if (!context.options().isEmpty()) {
+      code.addStatement("$N.println($S)", printStream, "Options:");
+    }
+    context.options().forEach(p ->
+        code.addStatement("printOption($N, $T.$L)", printStream, generatedTypes.optionType(), p.enumConstant()));
+    return methodBuilder("printOnlineHelp")
+        .addParameter(printStream)
+        .addModifiers(accessModifiers)
+        .addCode(code.build())
+        .build();
+  }
+
+  MethodSpec printOptionMethod() {
     List<Parameter> params = context.parameters();
-    // 2 space padding on both sides
-    int totalPadding = 4;
-    int width = params.stream().map(Parameter::sample).mapToInt(String::length).max().orElse(0) + totalPadding;
-    String format = "  %1$-" + (width - 3) + "s";
+    int totalPadding = 3;
+    int width = params.stream()
+        .map(Parameter::sample)
+        .mapToInt(String::length).max().orElse(0) + totalPadding;
+    String format = "  %1$-" + (width - 2) + "s";
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec message = builder(STRING, "message").build();
     ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec s = builder(STRING, "s").build();
-    ParameterSpec shape = builder(STRING, "shape_padded_" + (width - 1) + "_characters").build();
+    ParameterSpec shape = builder(STRING, "shape_padded_" + width + "_characters").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("printTokens($N, $L, synopsis())", printStream, INDENT_SYNOPSIS);
-    code.beginControlFlow("for ($T $N : $T.values())", generatedTypes.optionType(), option, generatedTypes.optionType());
-
     code.addStatement("$T $N = $T.format($S, $N.shape)", shape.type, shape, STRING, format, option);
     code.addStatement("$T $N = $N.get($N.bundleKey)", message.type, message, messages, option);
     code.addStatement("$T $N = new $T<>()", tokens.type, tokens, ArrayList.class);
@@ -215,12 +248,11 @@ public final class GeneratedClass {
         .unindent()
         .unindent()
         .build());
-
-    code.addStatement("printTokens($N, $L, $N)", printStream, width, tokens)
-        .endControlFlow();
-    return methodBuilder("printOnlineHelp")
+    code.addStatement("printTokens($N, $L, $N)", printStream, width + 1, tokens);
+    return methodBuilder("printOption")
         .addParameter(printStream)
-        .addModifiers(accessModifiers)
+        .addParameter(option)
+        .addModifiers(PRIVATE)
         .addCode(code.build())
         .build();
   }

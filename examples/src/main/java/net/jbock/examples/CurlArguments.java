@@ -10,9 +10,7 @@ import java.util.Optional;
 /**
  * curl  is  a  tool  to  transfer data from or to a server
  * using one of the supported protocols.
- * <p>
  * curl offers a busload of useful tricks.
- * <p>
  * curl is powered by libcurl for all transfer-related features.
  * See libcurl(3) for details.
  */

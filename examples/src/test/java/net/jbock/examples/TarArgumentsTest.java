@@ -34,6 +34,7 @@ class TarArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "Usage: tar-arguments [options...] -f <file>",
+        "Options:",
         "  -x, --x      ",
         "  -c, --c      ",
         "  -v, --v      ",

@@ -21,7 +21,7 @@ public class ParameterContext {
   final ClassName optionType;
   final ImmutableList<PositionalParameter> alreadyCreatedParams;
   final ImmutableList<NamedOption> alreadyCreatedOptions;
-  final String[] description;
+  final Description description;
   final String bundleKey;
   final EnumName enumName;
   final ParserFlavour flavour;
@@ -34,7 +34,7 @@ public class ParameterContext {
       ClassName optionType,
       ImmutableList<PositionalParameter> alreadyCreatedParams,
       ImmutableList<NamedOption> alreadyCreatedOptions,
-      String[] description,
+      Description description,
       @BundleKey String bundleKey,
       EnumName enumName,
       ParserFlavour flavour) {

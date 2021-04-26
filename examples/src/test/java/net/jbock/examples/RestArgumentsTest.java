@@ -23,7 +23,9 @@ class RestArgumentsTest {
 
   private final String[] expected = {
       "Usage: rest-arguments [options...] <rest>...",
+      "Parameters:",
       "  rest         Hello yes",
+      "Options:",
       "  --file FILE  This is dog",
       ""
   };

@@ -46,7 +46,7 @@ public class ParameterScoped {
   }
 
   final String[] description() {
-    return parameterContext.description;
+    return parameterContext.description.getValue();
   }
 
   final String bundleKey() {
