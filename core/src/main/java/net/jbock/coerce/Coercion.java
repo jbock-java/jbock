@@ -3,12 +3,6 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.EnumName;
-import net.jbock.qualifier.ConstructorParam;
-import net.jbock.qualifier.ExtractExpr;
-import net.jbock.qualifier.MapExpr;
-import net.jbock.qualifier.TailExpr;
-
-import javax.inject.Inject;
 
 public class Coercion {
 
@@ -19,14 +13,13 @@ public class Coercion {
   private final CodeBlock extractExpr;
   private final Skew skew;
 
-  @Inject
-  Coercion(
+  public Coercion(
       EnumName enumName,
-      @MapExpr CodeBlock mapExpr,
-      @TailExpr CodeBlock tailExpr,
-      @ExtractExpr CodeBlock extractExpr,
+      CodeBlock mapExpr,
+      CodeBlock tailExpr,
+      CodeBlock extractExpr,
       Skew skew,
-      @ConstructorParam ParameterSpec constructorParam) {
+      ParameterSpec constructorParam) {
     this.constructorParam = constructorParam;
     this.enumName = enumName;
     this.tailExpr = tailExpr;

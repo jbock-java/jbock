@@ -8,7 +8,4 @@ abstract class AllFlagsArguments {
 
   @Option("smallFlag")
   abstract boolean smallFlag();
-
-  @Option("bigFlag")
-  abstract Boolean bigFlag();
 }

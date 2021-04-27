@@ -3,7 +3,6 @@ package net.jbock.coerce.matching.auto;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.Option;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.CoercionFactory;
@@ -22,7 +21,6 @@ import java.util.stream.Collectors;
 
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
 
 public class AutoMatcher extends ParameterScoped {
 
@@ -45,10 +43,6 @@ public class AutoMatcher extends ParameterScoped {
   }
 
   public Either<String, Coercion> findCoercion() {
-    if (sourceMethod().getAnnotation(Option.class) != null &&
-        tool().isSameType(boxedReturnType(), Boolean.class.getCanonicalName())) {
-      return right(coercionFactory.createFlag());
-    }
     for (Matcher matcher : matchers) {
       Optional<Match> match = matcher.tryMatch();
       if (match.isPresent()) {

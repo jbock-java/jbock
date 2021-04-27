@@ -10,17 +10,7 @@ class AllFlagsArgumentsTest {
 
   @Test
   void tests() {
-    f.assertThat().succeeds(
-        "smallFlag", false,
-        "bigFlag", false);
-    f.assertThat("--smallFlag").succeeds(
-        "smallFlag", true,
-        "bigFlag", false);
-    f.assertThat("--bigFlag").succeeds(
-        "smallFlag", false,
-        "bigFlag", true);
-    f.assertThat("--smallFlag", "--bigFlag").succeeds(
-        "smallFlag", true,
-        "bigFlag", true);
+    f.assertThat().succeeds("smallFlag", false);
+    f.assertThat("--smallFlag").succeeds("smallFlag", true);
   }
 }

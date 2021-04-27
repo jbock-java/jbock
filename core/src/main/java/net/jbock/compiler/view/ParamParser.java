@@ -11,10 +11,9 @@ import net.jbock.compiler.parameter.PositionalParameter;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import static com.squareup.javapoet.TypeName.BOOLEAN;
-import static com.squareup.javapoet.TypeName.VOID;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
@@ -40,6 +39,9 @@ final class ParamParser {
   }
 
   List<TypeSpec> define() {
+    if (context.params().isEmpty()) {
+      return Collections.emptyList();
+    }
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
         .build();
     FieldSpec value = FieldSpec.builder(STRING, "value")

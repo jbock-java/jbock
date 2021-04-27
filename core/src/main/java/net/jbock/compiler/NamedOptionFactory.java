@@ -1,57 +1,57 @@
 package net.jbock.compiler;
 
+import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.coerce.BasicInfo;
+import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Skew;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
 import net.jbock.either.Either;
+import net.jbock.qualifier.MapperClass;
 
 import javax.inject.Inject;
+import javax.lang.model.element.TypeElement;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Function;
 
 import static java.lang.Character.isWhitespace;
+import static javax.lang.model.type.TypeKind.BOOLEAN;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
 class NamedOptionFactory extends ParameterScoped {
 
   private final BasicInfo basicInfo;
+  private final boolean mapperPresent;
 
   @Inject
   NamedOptionFactory(
       ParameterContext parameterContext,
+      @MapperClass Optional<TypeElement> mapperClass,
       BasicInfo basicInfo) {
     super(parameterContext);
     this.basicInfo = basicInfo;
+    this.mapperPresent = mapperClass.isPresent();
   }
 
   Either<ValidationFailure, NamedOption> createNamedOption(boolean anyMnemonics) {
     return checkFullName()
-        .flatMap(optionName -> mnemonic().map(mnemonic -> new Names(optionName, mnemonic)))
-        .flatMap(names -> basicInfo.coercion()
-            .map(coercion -> {
-              String optionName = names.optionName;
-              Character mnemonic = names.mnemonic;
-              List<String> dashedNames = dashedNames(optionName, mnemonic);
-              return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
-                  sample(coercion.skew(), enumName(), dashedNames, anyMnemonics),
-                  dashedNames, coercion, Arrays.asList(description()));
-            }))
+        .flatMap(optionName -> mnemonic().map(mnemonic -> new OptionNames(optionName, mnemonic)))
+        .flatMap(names -> {
+          if (!mapperPresent && returnType().getKind() == BOOLEAN) {
+            return right(createNamedOption(anyMnemonics, names, createFlag()));
+          }
+          return basicInfo.coercion()
+              .map(coercion -> createNamedOption(anyMnemonics, names, coercion));
+        })
         .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
-  }
-
-  private static class Names {
-    final String optionName;
-    final Character mnemonic;
-
-    Names(String optionName, Character mnemonic) {
-      this.optionName = optionName;
-      this.mnemonic = mnemonic;
-    }
   }
 
   private Either<String, Character> mnemonic() {
@@ -135,5 +135,22 @@ class NamedOptionFactory extends ParameterScoped {
       return (anyMnemonics ? "    " : "") + names.get(0) + argname;
     }
     return names.get(0) + ", " + names.get(1) + argname;
+  }
+
+  private NamedOption createNamedOption(boolean anyMnemonics, OptionNames names, Coercion coercion) {
+    String optionName = names.optionName;
+    Character mnemonic = names.mnemonic;
+    List<String> dashedNames = dashedNames(optionName, mnemonic);
+    return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
+        sample(coercion.skew(), enumName(), dashedNames, anyMnemonics),
+        dashedNames, coercion, Arrays.asList(description()));
+  }
+
+  private Coercion createFlag() {
+    ParameterSpec constructorParam = ParameterSpec.builder(TypeName.get(returnType()), enumName().snake()).build();
+    CodeBlock mapExpr = CodeBlock.of("$T.identity()", Function.class);
+    CodeBlock tailExpr = CodeBlock.of(".findAny().isPresent()");
+    CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
+    return new Coercion(enumName(), mapExpr, tailExpr, extractExpr, Skew.FLAG, constructorParam);
   }
 }

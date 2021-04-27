@@ -13,6 +13,7 @@ import net.jbock.compiler.parameter.NamedOption;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
@@ -47,6 +48,9 @@ final class OptionParser {
   }
 
   List<TypeSpec> define() {
+    if (context.options().isEmpty()) {
+      return Collections.emptyList();
+    }
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
         .build();
     FieldSpec value = FieldSpec.builder(STRING, "value")

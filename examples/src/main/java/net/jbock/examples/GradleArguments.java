@@ -38,7 +38,7 @@ abstract class GradleArguments {
    * cmos flag
    */
   @Option(value = "c", mnemonic = 'c')
-  abstract Boolean cmos();
+  abstract boolean cmos();
 
   @Option(
       value = "verbose",

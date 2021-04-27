@@ -258,6 +258,21 @@ class ProcessorTest {
   }
 
   @Test
+  void badFlag() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(\"x\")",
+        "  abstract java.lang.Boolean x();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("define a mapper that implements Function<String, Boolean>");
+  }
+
+  @Test
   void simpleInt() {
     JavaFileObject javaFile = fromSource(
         "@Command",
