@@ -191,7 +191,8 @@ public final class GeneratedClass {
   private MethodSpec printOnlineHelpMethod(Modifier[] accessModifiers) {
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("printTokens($N, $L, usage())", printStream, CONTINUATION_INDENT_USAGE);
+    String continuationIndent = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
+    code.addStatement("printTokens($N, $S, usage())", printStream, continuationIndent);
 
     if (description.getValue().length > 0) {
       ParameterSpec descriptionBuilder = builder(LIST_OF_STRING, "description").build();
@@ -199,7 +200,7 @@ public final class GeneratedClass {
       for (String line : description.getValue()) {
         code.addStatement("$T.addAll($N, $S.split($S, $L))", Collections.class, descriptionBuilder, line, "\\s+", -1);
       }
-      code.addStatement("printTokens($N, $L, $N)", printStream, 0, descriptionBuilder);
+      code.addStatement("printTokens($N, $S, $N)", printStream, "", descriptionBuilder);
     }
     if (!context.params().isEmpty()) {
       code.addStatement("$N.println($S)", printStream, "Parameters:");
@@ -248,7 +249,8 @@ public final class GeneratedClass {
         .unindent()
         .unindent()
         .build());
-    code.addStatement("printTokens($N, $L, $N)", printStream, width + 1, tokens);
+    code.addStatement("printTokens($N, $S, $N)",
+        printStream, String.join("", Collections.nCopies(width + 1, " ")), tokens);
     return methodBuilder("printOption")
         .addParameter(printStream)
         .addParameter(option)
@@ -259,7 +261,7 @@ public final class GeneratedClass {
 
   private MethodSpec printTokensMethod() {
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
-    ParameterSpec continuationIndent = builder(INT, "continuationIndent").build();
+    ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec lines = builder(LIST_OF_STRING, "lines").build();
     ParameterSpec line = builder(STRING, "line").build();
@@ -279,7 +281,7 @@ public final class GeneratedClass {
 
   private MethodSpec makeLinesMethod() {
     ParameterSpec lines = builder(LIST_OF_STRING, "lines").build();
-    ParameterSpec continuationIndent = builder(INT, "continuationIndent").build();
+    ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
     ParameterSpec i = builder(INT, "i").build();
     ParameterSpec sb = builder(StringBuilder.class, "sb").build();
     ParameterSpec token = builder(STRING, "token").build();
@@ -293,8 +295,7 @@ public final class GeneratedClass {
         token, sb, maxLineWidth);
     code.addStatement("$N.add($N.toString())", lines, sb);
     code.addStatement("$N.setLength(0)", sb)
-        .addStatement("$N.append($T.join($S, $T.nCopies($N, $S)))",
-            sb, STRING, "", Collections.class, continuationIndent, " ")
+        .addStatement("$N.append($N)", sb, continuationIndent)
         .addStatement("$N.append($N)", sb, token)
         .addStatement("continue");
     code.endControlFlow();
@@ -525,7 +526,7 @@ public final class GeneratedClass {
     if (!context.isHelpParameterEnabled()) {
       code.addStatement("printOnlineHelp($N)", err);
     } else {
-      code.addStatement("printTokens($N, $L, usage())", err, CONTINUATION_INDENT_USAGE);
+      code.addStatement("printTokens($N, $S, usage())", err, String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " ")));
     }
     if (context.isHelpParameterEnabled()) {
       code.addStatement("$N.println($S + $N + $S)", err, "Try '", programName, " --help' for more information.");
