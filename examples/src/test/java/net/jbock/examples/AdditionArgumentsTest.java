@@ -43,8 +43,10 @@ class AdditionArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "Usage: addition-arguments <a> <b> [<c>]",
-        "Parameters:",
+        "USAGE",
+        "  addition-arguments <a> <b> [<c>]",
+        "",
+        "PARAMETERS",
         "  a  First argument",
         "  b  Second argument",
         "  c  Optional third argument",

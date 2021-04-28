@@ -3,6 +3,8 @@ package net.jbock.compiler.parameter;
 import net.jbock.coerce.Coercion;
 
 import javax.lang.model.element.ExecutableElement;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.OptionalInt;
 
@@ -12,11 +14,14 @@ public class NamedOption extends Parameter {
 
   private final char mnemonic;
 
-  private final List<String> dashedNames;
-
-  public NamedOption(char mnemonic, String optionName, ExecutableElement sourceMethod, String bundleKey, String sample, List<String> dashedNames, Coercion coercion, List<String> description) {
-    super(sourceMethod, bundleKey, sample, coercion, description);
-    this.dashedNames = dashedNames;
+  public NamedOption(
+      char mnemonic,
+      String optionName,
+      ExecutableElement sourceMethod,
+      String bundleKey,
+      Coercion coercion,
+      List<String> description) {
+    super(sourceMethod, bundleKey, coercion, description);
     this.mnemonic = mnemonic;
     this.optionName = optionName;
   }
@@ -33,7 +38,24 @@ public class NamedOption extends Parameter {
 
   @Override
   public List<String> dashedNames() {
-    return dashedNames;
+    if (optionName != null && mnemonic == ' ') {
+      return Collections.singletonList("--" + optionName);
+    } else if (optionName == null && mnemonic != ' ') {
+      return Collections.singletonList("-" + mnemonic);
+    } else if (optionName == null) {
+      return Collections.emptyList();
+    }
+    return Arrays.asList("-" + mnemonic, "--" + optionName);
+  }
+
+  @Override
+  public String sample() {
+    List<String> names = dashedNames();
+    if (names.isEmpty() || names.size() >= 3) {
+      throw new AssertionError();
+    }
+    String sample = String.join(", ", names);
+    return isFlag() ? sample : sample + ' ' + enumConstant();
   }
 
   @Override

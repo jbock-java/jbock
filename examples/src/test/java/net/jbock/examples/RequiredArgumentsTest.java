@@ -40,10 +40,13 @@ class RequiredArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "Usage: required-arguments --dir <dir> <other_tokens>...",
-        "Parameters:",
+        "USAGE",
+        "  required-arguments --dir <dir> <other_tokens>...",
+        "",
+        "PARAMETERS",
         "  other_tokens ",
-        "Options:",
+        "",
+        "OPTIONS",
         "  --dir DIR    ",
         "");
   }

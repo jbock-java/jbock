@@ -98,14 +98,17 @@ class CpArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "Usage: cp-arguments [options...] <source> <dest>",
-        "Parameters:",
-        "  source              ",
-        "  dest                ",
-        "Options:",
-        "  -r, --r             ",
-        "      --backup BACKUP ",
-        "  -s, --s SUFFIX       Override the usual backup suffix",
+        "USAGE",
+        "  cp-arguments [options...] <source> <dest>",
+        "",
+        "PARAMETERS",
+        "  source          ",
+        "  dest            ",
+        "",
+        "OPTIONS",
+        "  -r, --r         ",
+        "  --backup BACKUP ",
+        "  -s, --s SUFFIX   Override the usual backup suffix",
         "");
   }
 }

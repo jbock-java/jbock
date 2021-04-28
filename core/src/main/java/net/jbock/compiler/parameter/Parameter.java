@@ -30,17 +30,14 @@ public abstract class Parameter {
 
   private final String bundleKey;
 
-  private final String sample;
-
   private final Coercion coercion;
 
   private final List<String> description;
 
-  Parameter(ExecutableElement sourceMethod, String bundleKey, String sample,
+  Parameter(ExecutableElement sourceMethod, String bundleKey,
             Coercion coercion, List<String> description) {
     this.sourceMethod = sourceMethod;
     this.bundleKey = bundleKey;
-    this.sample = sample;
     this.coercion = coercion;
     this.description = description;
   }
@@ -101,9 +98,7 @@ public abstract class Parameter {
 
   public abstract List<String> dashedNames();
 
-  public String sample() {
-    return sample;
-  }
+  public abstract String sample();
 
   public abstract String optionName();
 

@@ -40,8 +40,6 @@ final class OptionEnum {
 
   private final FieldSpec bundleKeyField;
 
-  private final FieldSpec shapeField;
-
   @Inject
   OptionEnum(Context context, GeneratedTypes generatedTypes) {
     this.context = context;
@@ -49,11 +47,9 @@ final class OptionEnum {
     FieldSpec namesField = FieldSpec.builder(LIST_OF_STRING, "names").build();
     FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").build();
     FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").build();
-    FieldSpec shapeField = FieldSpec.builder(STRING, "shape").build();
     this.bundleKeyField = bundleKeyField;
     this.descriptionField = descriptionField;
     this.namesField = namesField;
-    this.shapeField = shapeField;
   }
 
   TypeSpec define() {
@@ -67,7 +63,6 @@ final class OptionEnum {
         .addField(namesField)
         .addField(bundleKeyField)
         .addField(descriptionField)
-        .addField(shapeField)
         .addMethod(missingRequiredMethod())
         .addMethod(privateConstructor())
         .build();
@@ -79,8 +74,7 @@ final class OptionEnum {
     map.put("names", names);
     map.put("bundleKey", param.bundleKey().orElse(null));
     map.put("descExpression", descExpression(param.description()));
-    map.put("shape", param.sample());
-    String format = String.join(",$W", "$names:L", "$bundleKey:S", "$descExpression:L", "$shape:S");
+    String format = String.join(",$W", "$names:L", "$bundleKey:S", "$descExpression:L");
 
     return anonymousClassBuilder(CodeBlock.builder().addNamed(format, map).build()).build();
   }
@@ -100,13 +94,11 @@ final class OptionEnum {
     ParameterSpec names = builder(namesField.type, namesField.name).build();
     ParameterSpec bundleKey = builder(bundleKeyField.type, bundleKeyField.name).build();
     ParameterSpec description = builder(descriptionField.type, descriptionField.name).build();
-    ParameterSpec shape = builder(shapeField.type, shapeField.name).build();
     return MethodSpec.constructorBuilder()
         .addStatement("this.$N = $N", namesField, names)
         .addStatement("this.$N = $N", bundleKeyField, bundleKey)
         .addStatement("this.$N = $N", descriptionField, description)
-        .addStatement("this.$N = $N", shapeField, shape)
-        .addParameters(asList(names, bundleKey, description, shape))
+        .addParameters(asList(names, bundleKey, description))
         .build();
   }
 

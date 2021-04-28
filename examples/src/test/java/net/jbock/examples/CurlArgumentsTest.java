@@ -208,13 +208,17 @@ class CurlArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "Usage: curl [options...] <urls>...",
         "curl is a tool to transfer data from or to a server using one of the supported",
         "protocols. curl offers a busload of useful tricks. curl is powered by libcurl for",
         "all transfer-related features. See libcurl(3) for details.",
-        "Parameters:",
+        "",
+        "USAGE",
+        "  curl [options...] <urls>...",
+        "",
+        "PARAMETERS",
         "  urls                 ",
-        "Options:",
+        "",
+        "OPTIONS",
         "  -X, --request METHOD  Optional<String> for regular arguments",
         "  -H, --H HEADERS       List<String> for repeatable arguments",
         "  -v, --verbose         boolean for flags",

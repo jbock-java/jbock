@@ -193,7 +193,6 @@ public final class GeneratedClass {
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     CodeBlock.Builder code = CodeBlock.builder();
     String continuationIndent = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
-    code.addStatement("printTokens($N, $S, usage())", printStream, continuationIndent);
 
     if (description.getValue().length > 0) {
       ParameterSpec descriptionBuilder = builder(LIST_OF_STRING, "description").build();
@@ -202,17 +201,24 @@ public final class GeneratedClass {
         code.addStatement("$T.addAll($N, $S.split($S, $L))", Collections.class, descriptionBuilder, line, "\\s+", -1);
       }
       code.addStatement("printTokens($N, $S, $N)", printStream, "", descriptionBuilder);
+      code.addStatement("$N.println()", printStream);
     }
+
+    code.addStatement("$N.println($S)", printStream, "USAGE");
+    code.addStatement("printTokens($N, $S, usage())", printStream, continuationIndent);
+    
     if (!context.params().isEmpty()) {
-      code.addStatement("$N.println($S)", printStream, "Parameters:");
+      code.addStatement("$N.println()", printStream);
+      code.addStatement("$N.println($S)", printStream, "PARAMETERS");
     }
     context.params().forEach(p ->
-        code.addStatement("printOption($N, $T.$L)", printStream, generatedTypes.optionType(), p.enumConstant()));
+        code.addStatement("printOption($N, $T.$L, $S)", printStream, generatedTypes.optionType(), p.enumConstant(), p.sample()));
     if (!context.options().isEmpty()) {
-      code.addStatement("$N.println($S)", printStream, "Options:");
+      code.addStatement("$N.println()", printStream);
+      code.addStatement("$N.println($S)", printStream, "OPTIONS");
     }
     context.options().forEach(p ->
-        code.addStatement("printOption($N, $T.$L)", printStream, generatedTypes.optionType(), p.enumConstant()));
+        code.addStatement("printOption($N, $T.$L, $S)", printStream, generatedTypes.optionType(), p.enumConstant(), p.sample()));
     return methodBuilder("printOnlineHelp")
         .addParameter(printStream)
         .addModifiers(accessModifiers)
@@ -230,11 +236,12 @@ public final class GeneratedClass {
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec message = builder(STRING, "message").build();
     ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
+    ParameterSpec sample = builder(STRING, "sample").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec s = builder(STRING, "s").build();
     ParameterSpec shape = builder(STRING, "shape_padded_" + width + "_characters").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $T.format($S, $N.shape)", shape.type, shape, STRING, format, option);
+    code.addStatement("$T $N = $T.format($S, $N)", shape.type, shape, STRING, format, sample);
     code.addStatement("$T $N = $N.get($N.bundleKey)", message.type, message, messages, option);
     code.addStatement("$T $N = new $T<>()", tokens.type, tokens, ArrayList.class);
     code.addStatement("$N.add($N)", tokens, shape);
@@ -255,6 +262,7 @@ public final class GeneratedClass {
     return methodBuilder("printOption")
         .addParameter(printStream)
         .addParameter(option)
+        .addParameter(sample)
         .addModifiers(PRIVATE)
         .addCode(code.build())
         .build();
@@ -475,7 +483,7 @@ public final class GeneratedClass {
     List<Parameter> optionalOptions = context.options().stream().filter(p -> !p.isRequired()).collect(Collectors.toList());
 
     spec.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
-    spec.addStatement("$N.add($S)", result, "Usage:");
+    spec.addStatement("$N.add($S)", result, " ");
     spec.addStatement("$N.add($N)", result, programName);
 
     if (!optionalOptions.isEmpty()) {

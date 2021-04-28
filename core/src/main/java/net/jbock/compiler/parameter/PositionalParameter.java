@@ -6,6 +6,7 @@ import net.jbock.coerce.Coercion;
 import javax.lang.model.element.ExecutableElement;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.OptionalInt;
 
 public class PositionalParameter extends Parameter {
@@ -15,11 +16,10 @@ public class PositionalParameter extends Parameter {
   public PositionalParameter(
       ExecutableElement sourceMethod,
       String bundleKey,
-      String sample,
       Coercion coercion,
       List<String> description,
       int positionalIndex) {
-    super(sourceMethod, bundleKey, sample, coercion, description);
+    super(sourceMethod, bundleKey, coercion, description);
     this.positionalIndex = positionalIndex;
   }
 
@@ -36,6 +36,11 @@ public class PositionalParameter extends Parameter {
   @Override
   public List<String> dashedNames() {
     return Collections.emptyList();
+  }
+
+  @Override
+  public String sample() {
+    return enumName().snake().toLowerCase(Locale.US);
   }
 
   @Override

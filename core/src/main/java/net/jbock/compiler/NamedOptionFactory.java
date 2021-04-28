@@ -15,8 +15,6 @@ import net.jbock.qualifier.MapperClass;
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -114,36 +112,11 @@ class NamedOptionFactory extends ParameterScoped {
     return right(name);
   }
 
-  private static List<String> dashedNames(String optionName, char mnemonic) {
-    if (optionName != null && mnemonic == ' ') {
-      return Collections.singletonList("--" + optionName);
-    } else if (optionName == null && mnemonic != ' ') {
-      return Collections.singletonList("-" + mnemonic);
-    } else if (optionName == null) {
-      return Collections.emptyList();
-    }
-    return Arrays.asList("-" + mnemonic, "--" + optionName);
-  }
-
-  private static String sample(Skew skew, EnumName name, List<String> names, boolean anyMnemonics) {
-    if (names.isEmpty() || names.size() >= 3) {
-      throw new AssertionError();
-    }
-    String argname = skew == Skew.FLAG ? "" : ' ' + name.enumConstant();
-    if (names.size() == 1) {
-      // Note: The padding has the same length as the string "-f, "
-      return (anyMnemonics ? "    " : "") + names.get(0) + argname;
-    }
-    return names.get(0) + ", " + names.get(1) + argname;
-  }
-
   private NamedOption createNamedOption(boolean anyMnemonics, OptionNames names, Coercion coercion) {
     String optionName = names.optionName;
     Character mnemonic = names.mnemonic;
-    List<String> dashedNames = dashedNames(optionName, mnemonic);
     return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
-        sample(coercion.skew(), enumName(), dashedNames, anyMnemonics),
-        dashedNames, coercion, Arrays.asList(description()));
+        coercion, Arrays.asList(description()));
   }
 
   private Coercion createFlag() {

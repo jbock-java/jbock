@@ -31,7 +31,6 @@ class PositionalParamFactory extends ParameterScoped {
         .map(coercion -> new PositionalParameter(
             sourceMethod(),
             bundleKey(),
-            enumName().snake().toLowerCase(Locale.US),
             coercion,
             Arrays.asList(description()),
             positionalIndex))

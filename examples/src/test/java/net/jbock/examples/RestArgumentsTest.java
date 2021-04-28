@@ -22,13 +22,15 @@ class RestArgumentsTest {
   private final Map<String, String> messages = new HashMap<>();
 
   private final String[] expected = {
-      "Usage: rest-arguments [options...] <rest>...",
-      "Parameters:",
+      "USAGE",
+      "  rest-arguments [options...] <rest>...",
+      "",
+      "PARAMETERS",
       "  rest         Hello yes",
-      "Options:",
+      "",
+      "OPTIONS",
       "  --file FILE  This is dog",
-      ""
-  };
+      ""};
 
   @BeforeEach
   void setup() {

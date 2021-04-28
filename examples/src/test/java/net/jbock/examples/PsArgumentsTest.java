@@ -11,8 +11,10 @@ class PsArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "Usage: ps-arguments [options...]",
-        "Options:",
+        "USAGE",
+        "  ps-arguments [options...]",
+        "",
+        "OPTIONS",
         "  -a, --all         ",
         "  -w, --width WIDTH  This is the description.",
         "");

@@ -21,10 +21,13 @@ class RmArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "Usage: rm-arguments [options...] <other_tokens>...",
-        "Parameters:",
+        "USAGE",
+        "  rm-arguments [options...] <other_tokens>...",
+        "",
+        "PARAMETERS",
         "  other_tokens     This is a list that may be empty.",
-        "Options:",
+        "",
+        "OPTIONS",
         "  -r, --recursive  ALLES TURISTEN UND NONTEKNISCHEN LOOKENSPEEPERS! DAS",
         "                   KOMPUTERMASCHINE IST NICHT FUR DER GEFINGERPOKEN UND",
         "                   MITTENGRABEN! ODERWISE IST EASY TO SCHNAPPEN DER SPRINGENWERK,",

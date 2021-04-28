@@ -46,8 +46,10 @@ class MvArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "Usage: mv-arguments <source> <dest>",
-        "Parameters:",
+        "USAGE",
+        "  mv-arguments <source> <dest>",
+        "",
+        "PARAMETERS",
         "  source ",
         "  dest   ",
         "");
