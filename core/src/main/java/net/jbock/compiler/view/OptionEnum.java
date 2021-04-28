@@ -10,7 +10,6 @@ import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.Parameter;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -19,8 +18,8 @@ import java.util.Map;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static java.util.Arrays.asList;
-import static java.util.Collections.nCopies;
 import static javax.lang.model.element.Modifier.PRIVATE;
+import static net.jbock.coerce.Util.arraysOfStringInvocation;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
@@ -76,7 +75,7 @@ final class OptionEnum {
 
   private TypeSpec optionEnumConstant(Parameter param) {
     Map<String, Object> map = new LinkedHashMap<>();
-    CodeBlock names = getNames(param);
+    CodeBlock names = param.getNames();
     map.put("names", names);
     map.put("bundleKey", param.bundleKey().orElse(null));
     map.put("descExpression", descExpression(param.description()));
@@ -84,18 +83,6 @@ final class OptionEnum {
     String format = String.join(",$W", "$names:L", "$bundleKey:S", "$descExpression:L", "$shape:S");
 
     return anonymousClassBuilder(CodeBlock.builder().addNamed(format, map).build()).build();
-  }
-
-  private CodeBlock getNames(Parameter param) {
-    List<String> names = param.dashedNames();
-    switch (names.size()) {
-      case 0:
-        return CodeBlock.of("$T.emptyList()", Collections.class);
-      case 1:
-        return CodeBlock.of("$T.singletonList($S)", Collections.class, names.get(0));
-      default:
-        return arraysOfStringInvocation(names);
-    }
   }
 
   private CodeBlock descExpression(List<String> desc) {
@@ -107,16 +94,6 @@ final class OptionEnum {
       default:
         return arraysOfStringInvocation(desc);
     }
-  }
-
-  private CodeBlock arraysOfStringInvocation(List<String> strings) {
-    Object[] args = new Object[1 + strings.size()];
-    args[0] = Arrays.class;
-    for (int i = 0; i < strings.size(); i++) {
-      args[i + 1] = strings.get(i);
-    }
-    return CodeBlock.of(String.format("$T.asList($Z%s)",
-        String.join(",$W", nCopies(strings.size(), "$S"))), args);
   }
 
   private MethodSpec privateConstructor() {

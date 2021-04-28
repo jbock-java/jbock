@@ -1,14 +1,17 @@
 package net.jbock.compiler.parameter;
 
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.Param;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Skew;
+import net.jbock.coerce.Util;
 import net.jbock.compiler.EnumName;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -108,5 +111,17 @@ public abstract class Parameter {
 
   public ExecutableElement sourceMethod() {
     return sourceMethod;
+  }
+
+  public CodeBlock getNames() {
+    List<String> names = dashedNames();
+    switch (names.size()) {
+      case 0:
+        return CodeBlock.of("$T.emptyList()", Collections.class);
+      case 1:
+        return CodeBlock.of("$T.singletonList($S)", Collections.class, names.get(0));
+      default:
+        return Util.arraysOfStringInvocation(names);
+    }
   }
 }

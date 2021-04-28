@@ -548,17 +548,17 @@ public final class GeneratedClass {
 
   private MethodSpec optionsByNameMethod() {
     ClassName optionType = generatedTypes.optionType();
-    FieldSpec namesField = FieldSpec.builder(LIST_OF_STRING, "names").build();
     ParameterSpec result = builder(mapOf(STRING, optionType), "result").build();
     ParameterSpec option = builder(optionType, "option").build();
-    ParameterSpec name = builder(STRING, "name").build();
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = new $T<>($T.values().length)",
         result.type, result, HashMap.class, option.type);
-
-    code.add("for ($T $N : $T.values())\n", option.type, option, option.type).indent()
-        .addStatement("$N.$N.forEach($N -> $N.put($N, $N))", option, namesField, name, result, name, option)
-        .unindent();
+    for (NamedOption namedOption : context.options()) {
+      for (String dashedName : namedOption.dashedNames()) {
+        code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedTypes.optionType(),
+            namedOption.enumConstant());
+      }
+    }
     code.addStatement("return $N", result);
 
     return MethodSpec.methodBuilder("optionsByName").returns(result.type)
