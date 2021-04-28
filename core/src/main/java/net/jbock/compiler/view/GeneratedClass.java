@@ -32,6 +32,7 @@ import java.util.stream.Collectors;
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -280,35 +281,37 @@ public final class GeneratedClass {
   }
 
   private MethodSpec makeLinesMethod() {
-    ParameterSpec lines = builder(LIST_OF_STRING, "lines").build();
+    ParameterSpec result = builder(LIST_OF_STRING, "result").build();
     ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
     ParameterSpec i = builder(INT, "i").build();
-    ParameterSpec sb = builder(StringBuilder.class, "sb").build();
+    ParameterSpec fresh = builder(BOOLEAN, "fresh").build();
+    ParameterSpec line = builder(StringBuilder.class, "line").build();
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T<>()", lines.type, lines, ArrayList.class);
-    code.addStatement("$T $N = new $T()", sb.type, sb, StringBuilder.class);
-    code.beginControlFlow("for ($T $N = 0; $N < $N.size(); $N++)", i.type, i, i, tokens, i);
+    code.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
+    code.addStatement("$T $N = new $T()", line.type, line, StringBuilder.class);
+    code.addStatement("$T $N = $L", INT, i, 0);
+    code.beginControlFlow("while ($N < $N.size())", i, tokens);
     code.addStatement("$T $N = $N.get($N)", STRING, token, tokens, i);
-    code.beginControlFlow("if ($N.length() + $N.length() + 1 > $N)",
-        token, sb, maxLineWidth);
-    code.addStatement("$N.add($N.toString())", lines, sb);
-    code.addStatement("$N.setLength(0)", sb)
-        .addStatement("$N.append($N)", sb, continuationIndent)
-        .addStatement("$N.append($N)", sb, token)
-        .addStatement("continue");
+    code.addStatement("$T $N = $N.length() == $L", BOOLEAN, fresh, line, 0);
+    code.beginControlFlow("if (!$N && $N.length() + $N.length() + 1 > $N)",
+        fresh, token, line, maxLineWidth);
+    code.addStatement("$N.add($N.toString())", result, line);
+    code.addStatement("$N.setLength(0)", line);
+    code.addStatement("continue");
     code.endControlFlow();
-    code.add("if ($N > 0)\n", i).indent()
-        .addStatement("$N.append(' ')", sb)
-        .unindent();
-    code.addStatement("$N.append($N)", sb, token);
+    code.beginControlFlow("if ($N > 0)", i)
+        .addStatement("$N.append($N ? $N : $S)", line, fresh, continuationIndent, " ")
+        .endControlFlow();
+    code.addStatement("$N.append($N)", line, token);
+    code.addStatement("$N++", i);
     code.endControlFlow();
 
-    code.add("if ($N.length() > 0)\n", sb).indent()
-        .addStatement("$N.add($N.toString())", lines, sb)
-        .unindent();
-    code.addStatement("return $N", lines);
+    code.beginControlFlow("if ($N.length() > 0)", line)
+        .addStatement("$N.add($N.toString())", result, line)
+        .endControlFlow();
+    code.addStatement("return $N", result);
     return methodBuilder("makeLines")
         .addModifiers(PRIVATE)
         .addCode(code.build())
