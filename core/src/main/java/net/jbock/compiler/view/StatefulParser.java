@@ -58,8 +58,8 @@ final class StatefulParser {
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.statefulParserType())
         .addModifiers(PRIVATE, STATIC)
-        .addMethod(buildMethod())
-        .addMethod(parseMethod.parseMethod());
+        .addMethod(parseMethod.parseMethod())
+        .addMethod(buildMethod());
     if (!context.isSuperCommand()) {
       spec.addField(endOfOptionParsing);
     }

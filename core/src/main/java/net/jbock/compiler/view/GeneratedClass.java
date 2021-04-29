@@ -151,8 +151,8 @@ public final class GeneratedClass {
     }
 
     spec.addType(parserState.define())
-        .addType(impl.define())
         .addType(optionEnum.define())
+        .addType(impl.define())
         .addTypes(optionParser.define())
         .addTypes(paramParser.define())
         .addTypes(parseResult.defineResultTypes());
