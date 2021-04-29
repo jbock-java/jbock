@@ -12,6 +12,7 @@ import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 import net.jbock.SuperCommand;
+import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Util;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
@@ -98,10 +99,10 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       Builder description(Description description);
 
       @BindsInstance
-      Builder alreadyCreatedParams(ImmutableList<PositionalParameter> alreadyCreated);
+      Builder alreadyCreatedParams(ImmutableList<Coercion<PositionalParameter>> alreadyCreated);
 
       @BindsInstance
-      Builder alreadyCreatedOptions(ImmutableList<NamedOption> alreadyCreated);
+      Builder alreadyCreatedOptions(ImmutableList<Coercion<NamedOption>> alreadyCreated);
 
       @BindsInstance
       Builder flavour(ParserFlavour flavour);
@@ -127,10 +128,10 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       Builder generatedClass(ClassName generatedClass);
 
       @BindsInstance
-      Builder params(List<PositionalParameter> parameters);
+      Builder params(List<Coercion<PositionalParameter>> parameters);
 
       @BindsInstance
-      Builder options(List<NamedOption> options);
+      Builder options(List<Coercion<NamedOption>> options);
 
       @BindsInstance
       Builder flavour(ParserFlavour flavour);
@@ -214,7 +215,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       ClassName optionType,
       ParserFlavour flavour) {
     return createMethods(sourceElement).flatMap(methods -> {
-      List<PositionalParameter> positionalParams = new ArrayList<>();
+      List<Coercion<PositionalParameter>> positionalParams = new ArrayList<>();
       AnnotationUtil annotationUtil = new AnnotationUtil();
       List<ValidationFailure> failures = new ArrayList<>();
       List<ExecutableElement> positionalParameters = methods.params();
@@ -240,8 +241,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             ", at least one @" + Param.class.getSimpleName() + " must be defined", sourceElement));
       }
       failures.addAll(validatePositions(positionalParams));
-      List<NamedOption> namedOptions = new ArrayList<>();
-      boolean anyMnemonics = methods.options().stream().anyMatch(method -> method.getAnnotation(Option.class).mnemonic() != ' ');
+      List<Coercion<NamedOption>> namedOptions = new ArrayList<>();
       for (ExecutableElement sourceMethod : methods.options()) {
         Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
         ParameterModule module = new ParameterModule(sourceElement, mapperClass, sourceMethod.getAnnotation(Option.class).bundleKey());
@@ -254,32 +254,32 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .alreadyCreatedOptions(ImmutableList.copyOf(namedOptions))
             .parameterModule(module)
             .description(getDescription(sourceMethod));
-        builder.build().namedOptionFactory().createNamedOption(anyMnemonics)
+        builder.build().namedOptionFactory().createNamedOption()
             .accept(failures::add, namedOptions::add);
       }
-      List<Parameter> params = new ArrayList<>();
+      List<Coercion<? extends Parameter>> params = new ArrayList<>();
       params.addAll(positionalParams);
       params.addAll(namedOptions);
       for (int i = 0; i < params.size(); i++) {
-        Parameter p = params.get(i);
-        checkBundleKey(p, params.subList(0, i))
-            .map(s -> new ValidationFailure(s, p.sourceMethod()))
+        Coercion<? extends Parameter> c = params.get(i);
+        checkBundleKey(c, params.subList(0, i))
+            .map(s -> new ValidationFailure(s, c.parameter().sourceMethod()))
             .ifPresent(failures::add);
       }
       return failures.isEmpty() ? right(new Params(positionalParams, namedOptions)) : left(failures);
     });
   }
 
-  Optional<String> checkBundleKey(Parameter p, List<Parameter> alreadyCreated) {
-    return p.bundleKey().flatMap(key -> {
+  Optional<String> checkBundleKey(Coercion<? extends Parameter> p, List<Coercion<? extends Parameter>> alreadyCreated) {
+    return p.parameter().bundleKey().flatMap(key -> {
       if (key.isEmpty()) {
         return Optional.empty();
       }
       if (key.matches(".*\\s+.*")) {
         return Optional.of("bundle key contains whitespace characters");
       }
-      for (Parameter param : alreadyCreated) {
-        Optional<String> failure = param.bundleKey()
+      for (Coercion<? extends Parameter> c : alreadyCreated) {
+        Optional<String> failure = c.parameter().bundleKey()
             .filter(bundleKey -> bundleKey.equals(key));
         if (failure.isPresent()) {
           return Optional.of("duplicate bundle key");
@@ -289,16 +289,16 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     });
   }
 
-  static List<ValidationFailure> validatePositions(List<PositionalParameter> params) {
-    List<PositionalParameter> sorted = params.stream()
-        .sorted(Comparator.comparing(PositionalParameter::position))
+  static List<ValidationFailure> validatePositions(List<Coercion<PositionalParameter>> params) {
+    List<Coercion<PositionalParameter>> sorted = params.stream()
+        .sorted(Comparator.comparing(c -> c.parameter().position()))
         .collect(Collectors.toList());
     List<ValidationFailure> result = new ArrayList<>();
     for (int i = 0; i < sorted.size(); i++) {
-      PositionalParameter p = sorted.get(i);
-      if (p.position() != i) {
-        result.add(new ValidationFailure("Position " + p.position() + " is not available." +
-            " Suggested position: " + i, p.sourceMethod()));
+      Coercion<PositionalParameter> p = sorted.get(i);
+      if (p.parameter().position() != i) {
+        result.add(new ValidationFailure("Position " + p.parameter().position() + " is not available." +
+            " Suggested position: " + i, p.parameter().sourceMethod()));
       }
     }
     return result;

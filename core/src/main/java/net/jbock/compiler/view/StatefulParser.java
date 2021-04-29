@@ -7,6 +7,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.coerce.Coercion;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.Parameter;
@@ -123,7 +124,7 @@ final class StatefulParser {
 
     CodeBlock.Builder args = CodeBlock.builder().add("\n");
     for (int j = 0; j < context.parameters().size(); j++) {
-      Parameter param = context.parameters().get(j);
+      Coercion<? extends Parameter> param = context.parameters().get(j);
       args.add(extractExpression(param));
       if (j < context.parameters().size() - 1) {
         args.add(",\n");
@@ -135,19 +136,19 @@ final class StatefulParser {
         .build();
   }
 
-  private CodeBlock extractExpression(Parameter param) {
+  private CodeBlock extractExpression(Coercion<? extends Parameter> param) {
     return getStreamExpression(param)
         .add(".stream()")
-        .add(".map($L)", param.coercion().mapExpr())
-        .add(param.coercion().tailExpr())
+        .add(".map($L)", param.mapExpr())
+        .add(param.tailExpr())
         .build();
   }
 
-  private CodeBlock.Builder getStreamExpression(Parameter param) {
-    if (param.isPositional()) {
+  private CodeBlock.Builder getStreamExpression(Coercion<? extends Parameter> param) {
+    if (param.parameter().isPositional()) {
       return CodeBlock.builder().add(
           "$N[$L]", paramParsersField,
-          param.positionalIndex().orElseThrow(AssertionError::new));
+          param.parameter().positionalIndex().orElseThrow(AssertionError::new));
     }
     return CodeBlock.builder().add(
         "$N.get($T.$N)", optionParsersField,

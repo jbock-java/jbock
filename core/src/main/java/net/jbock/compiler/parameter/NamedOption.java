@@ -1,6 +1,6 @@
 package net.jbock.compiler.parameter;
 
-import net.jbock.coerce.Coercion;
+import net.jbock.compiler.EnumName;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.Arrays;
@@ -19,9 +19,8 @@ public class NamedOption extends Parameter {
       String optionName,
       ExecutableElement sourceMethod,
       String bundleKey,
-      Coercion coercion,
       List<String> description) {
-    super(sourceMethod, bundleKey, coercion, description);
+    super(sourceMethod, bundleKey, description);
     this.mnemonic = mnemonic;
     this.optionName = optionName;
   }
@@ -49,13 +48,13 @@ public class NamedOption extends Parameter {
   }
 
   @Override
-  public String sample() {
+  public String sample(boolean isFlag, EnumName enumName) {
     List<String> names = dashedNames();
     if (names.isEmpty() || names.size() >= 3) {
       throw new AssertionError();
     }
     String sample = String.join(", ", names);
-    return isFlag() ? sample : sample + ' ' + enumConstant();
+    return isFlag ? sample : sample + ' ' + enumName.enumConstant();
   }
 
   @Override

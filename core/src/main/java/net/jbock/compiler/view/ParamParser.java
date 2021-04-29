@@ -5,9 +5,9 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.coerce.Coercion;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
-import net.jbock.compiler.parameter.PositionalParameter;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -52,7 +52,7 @@ final class ParamParser {
         .addMethod(optionParser.streamMethodAbstract())
         .addModifiers(PRIVATE, STATIC, ABSTRACT)
         .build());
-    boolean anyRepeatable = context.params().stream().anyMatch(PositionalParameter::isRepeatable);
+    boolean anyRepeatable = context.params().stream().anyMatch(Coercion::isRepeatable);
     boolean anyRegular = context.params().stream().anyMatch(param -> !param.isRepeatable());
     if (anyRegular) {
       result.add(TypeSpec.classBuilder(generatedTypes.regularParamParserType())

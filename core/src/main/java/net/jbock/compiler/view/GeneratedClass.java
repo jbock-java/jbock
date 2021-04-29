@@ -7,6 +7,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.coerce.Coercion;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.GeneratedTypes;
@@ -206,13 +207,14 @@ public final class GeneratedClass {
 
     code.addStatement("$N.println($S)", printStream, "USAGE");
     code.addStatement("printTokens($N, $S, usage())", printStream, continuationIndent);
-    
+
     if (!context.params().isEmpty()) {
       code.addStatement("$N.println()", printStream);
       code.addStatement("$N.println($S)", printStream, "PARAMETERS");
     }
     context.params().forEach(p ->
-        code.addStatement("printOption($N, $T.$L, $S)", printStream, generatedTypes.optionType(), p.enumConstant(), p.sample()));
+        code.addStatement("printOption($N, $T.$L, $S)", printStream, generatedTypes.optionType(), p.enumConstant(),
+            p.sample()));
     if (!context.options().isEmpty()) {
       code.addStatement("$N.println()", printStream);
       code.addStatement("$N.println($S)", printStream, "OPTIONS");
@@ -227,10 +229,10 @@ public final class GeneratedClass {
   }
 
   MethodSpec printOptionMethod() {
-    List<Parameter> params = context.parameters();
+    List<Coercion<? extends Parameter>> params = context.parameters();
     int totalPadding = 3;
     int width = params.stream()
-        .map(Parameter::sample)
+        .map(Coercion::sample)
         .mapToInt(String::length).max().orElse(0) + totalPadding;
     String format = "  %1$-" + (width - 2) + "s";
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
@@ -479,8 +481,8 @@ public final class GeneratedClass {
 
     ParameterSpec result = builder(LIST_OF_STRING, "result").build();
 
-    List<Parameter> requiredOptions = context.options().stream().filter(Parameter::isRequired).collect(Collectors.toList());
-    List<Parameter> optionalOptions = context.options().stream().filter(p -> !p.isRequired()).collect(Collectors.toList());
+    List<Coercion<NamedOption>> requiredOptions = context.options().stream().filter(Coercion::isRequired).collect(Collectors.toList());
+    List<Coercion<NamedOption>> optionalOptions = context.options().stream().filter(p -> !p.isRequired()).collect(Collectors.toList());
 
     spec.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
     spec.addStatement("$N.add($S)", result, " ");
@@ -490,14 +492,14 @@ public final class GeneratedClass {
       spec.addStatement("$N.add($S)", result, "[options...]");
     }
 
-    for (Parameter option : requiredOptions) {
+    for (Coercion<NamedOption> option : requiredOptions) {
       spec.addStatement("$N.add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))",
           result, STRING, "%s <%s>",
           generatedTypes.optionType(), option.enumConstant(),
           generatedTypes.optionType(), option.enumConstant(), Locale.class);
     }
 
-    for (Parameter param : context.params()) {
+    for (Coercion<PositionalParameter> param : context.params()) {
       if (param.isOptional()) {
         spec.addStatement("$N.add($S)", result, "[<" + param.enumName().snake() + ">]");
       } else if (param.isRequired()) {
@@ -561,7 +563,7 @@ public final class GeneratedClass {
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = new $T<>($T.values().length)",
         result.type, result, HashMap.class, option.type);
-    for (NamedOption namedOption : context.options()) {
+    for (Coercion<NamedOption> namedOption : context.options()) {
       for (String dashedName : namedOption.dashedNames()) {
         code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedTypes.optionType(),
             namedOption.enumConstant());
@@ -584,13 +586,13 @@ public final class GeneratedClass {
   }
 
   private CodeBlock optionParsersMethodCode(Context context, GeneratedTypes generatedTypes, ParameterSpec parsers) {
-    List<NamedOption> options = context.options();
+    List<Coercion<NamedOption>> options = context.options();
     if (options.isEmpty()) {
       return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
     }
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, generatedTypes.optionType());
-    for (Parameter param : options) {
+    for (Coercion<NamedOption> param : options) {
       String enumConstant = param.enumConstant();
       code.addStatement("$N.put($T.$L, new $T($T.$L))",
           parsers, generatedTypes.optionType(), enumConstant, optionParserType(generatedTypes, param),
@@ -600,7 +602,7 @@ public final class GeneratedClass {
     return code.build();
   }
 
-  private static ClassName optionParserType(GeneratedTypes generatedTypes, Parameter param) {
+  private static ClassName optionParserType(GeneratedTypes generatedTypes, Coercion<NamedOption> param) {
     if (param.isRepeatable()) {
       return generatedTypes.repeatableOptionParserType();
     }
@@ -620,12 +622,12 @@ public final class GeneratedClass {
   }
 
   private static CodeBlock paramParsersMethodCode(Context context, GeneratedTypes generatedTypes) {
-    List<PositionalParameter> params = context.params();
+    List<Coercion<PositionalParameter>> params = context.params();
     ParameterSpec parsers = builder(ArrayTypeName.of(generatedTypes.paramParserType()), "parsers").build();
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = new $T[$L]", parsers.type, parsers, generatedTypes.paramParserType(), params.size());
     for (int i = 0; i < params.size(); i++) {
-      Parameter param = params.get(i);
+      Coercion<PositionalParameter> param = params.get(i);
       ClassName parserType = param.isRepeatable() ?
           generatedTypes.repeatableParamParserType() :
           generatedTypes.regularParamParserType();

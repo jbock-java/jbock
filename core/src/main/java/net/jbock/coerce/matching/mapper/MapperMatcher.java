@@ -13,6 +13,7 @@ import net.jbock.coerce.reference.FunctionType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
+import net.jbock.compiler.parameter.Parameter;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
@@ -48,17 +49,19 @@ public class MapperMatcher extends ParameterScoped {
     this.coercionFactory = coercionFactory;
   }
 
-  public Either<String, Coercion> findCoercion() {
+  public <P extends Parameter> Either<String, Coercion<P>> findCoercion(P parameter) {
     Optional<String> maybeFailure = commonChecks(mapperClass).map(s -> "mapper " + s);
     return Either.<String, Void>fromFailure(maybeFailure, null)
         .filter(this::checkNotAbstract)
         .filter(this::checkNoTypevars)
         .filter(this::checkMapperAnnotation)
         .flatMap(nothing -> referenceTool.getReferencedType())
-        .flatMap(this::tryAllMatchers);
+        .flatMap(functionType -> tryAllMatchers(functionType, parameter));
   }
 
-  private Either<String, Coercion> tryAllMatchers(FunctionType functionType) {
+  private <P extends Parameter> Either<String, Coercion<P>> tryAllMatchers(
+      FunctionType functionType,
+      P parameter) {
     List<Match> matches = new ArrayList<>();
     for (Matcher matcher : matchers) {
       Optional<Match> match = matcher.tryMatch();
@@ -68,7 +71,7 @@ public class MapperMatcher extends ParameterScoped {
         return Either.fromSuccess("", match)
             .map(m -> {
               CodeBlock mapExpr = getMapExpr(functionType);
-              return coercionFactory.create(mapExpr, m);
+              return coercionFactory.create(mapExpr, m, parameter);
             });
       }
     }

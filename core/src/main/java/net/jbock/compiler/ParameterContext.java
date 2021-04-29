@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import dagger.Reusable;
+import net.jbock.coerce.Coercion;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.qualifier.BundleKey;
@@ -19,8 +20,8 @@ public class ParameterContext {
   final TypeElement sourceElement;
   final TypeTool tool;
   final ClassName optionType;
-  final ImmutableList<PositionalParameter> alreadyCreatedParams;
-  final ImmutableList<NamedOption> alreadyCreatedOptions;
+  final ImmutableList<Coercion<PositionalParameter>> alreadyCreatedParams;
+  final ImmutableList<Coercion<NamedOption>> alreadyCreatedOptions;
   final Description description;
   final String bundleKey;
   final EnumName enumName;
@@ -32,8 +33,8 @@ public class ParameterContext {
       @SourceElement TypeElement sourceElement,
       TypeTool tool,
       ClassName optionType,
-      ImmutableList<PositionalParameter> alreadyCreatedParams,
-      ImmutableList<NamedOption> alreadyCreatedOptions,
+      ImmutableList<Coercion<PositionalParameter>> alreadyCreatedParams,
+      ImmutableList<Coercion<NamedOption>> alreadyCreatedOptions,
       Description description,
       @BundleKey String bundleKey,
       EnumName enumName,

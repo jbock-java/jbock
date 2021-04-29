@@ -8,7 +8,6 @@ import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Skew;
 import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.compiler.parameter.Parameter;
 import net.jbock.either.Either;
 import net.jbock.qualifier.MapperClass;
 
@@ -39,15 +38,15 @@ class NamedOptionFactory extends ParameterScoped {
     this.mapperPresent = mapperClass.isPresent();
   }
 
-  Either<ValidationFailure, NamedOption> createNamedOption(boolean anyMnemonics) {
+  Either<ValidationFailure, Coercion<NamedOption>> createNamedOption() {
     return checkFullName()
         .flatMap(optionName -> mnemonic().map(mnemonic -> new OptionNames(optionName, mnemonic)))
-        .flatMap(names -> {
+        .map(this::createNamedOption)
+        .flatMap(namedOption -> {
           if (!mapperPresent && returnType().getKind() == BOOLEAN) {
-            return right(createNamedOption(anyMnemonics, names, createFlag()));
+            return right(createFlag(namedOption));
           }
-          return basicInfo.coercion()
-              .map(coercion -> createNamedOption(anyMnemonics, names, coercion));
+          return basicInfo.coercion(namedOption);
         })
         .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
   }
@@ -57,8 +56,8 @@ class NamedOptionFactory extends ParameterScoped {
     if (option == null || option.mnemonic() == ' ') {
       return right(' ');
     }
-    for (NamedOption param : alreadyCreatedOptions()) {
-      if (option.mnemonic() == param.mnemonic()) {
+    for (Coercion<NamedOption> c : alreadyCreatedOptions()) {
+      if (option.mnemonic() == c.parameter().mnemonic()) {
         return left("duplicate mnemonic");
       }
     }
@@ -77,8 +76,8 @@ class NamedOptionFactory extends ParameterScoped {
       return left("'help' cannot be an option name, unless the help feature is disabled. " +
           "The help feature can be disabled by setting @Command.helpDisabled = true.");
     }
-    for (Parameter param : alreadyCreatedOptions()) {
-      if (option.value().equals(param.optionName())) {
+    for (Coercion<NamedOption> c : alreadyCreatedOptions()) {
+      if (option.value().equals(c.parameter().optionName())) {
         return left("duplicate option name");
       }
     }
@@ -112,18 +111,18 @@ class NamedOptionFactory extends ParameterScoped {
     return right(name);
   }
 
-  private NamedOption createNamedOption(boolean anyMnemonics, OptionNames names, Coercion coercion) {
+  private NamedOption createNamedOption(OptionNames names) {
     String optionName = names.optionName;
     Character mnemonic = names.mnemonic;
     return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
-        coercion, Arrays.asList(description()));
+        Arrays.asList(description()));
   }
 
-  private Coercion createFlag() {
+  private Coercion<NamedOption> createFlag(NamedOption namedOption) {
     ParameterSpec constructorParam = ParameterSpec.builder(TypeName.get(returnType()), enumName().snake()).build();
     CodeBlock mapExpr = CodeBlock.of("$T.identity()", Function.class);
     CodeBlock tailExpr = CodeBlock.of(".findAny().isPresent()");
     CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
-    return new Coercion(enumName(), mapExpr, tailExpr, extractExpr, Skew.FLAG, constructorParam);
+    return new Coercion<>(enumName(), mapExpr, tailExpr, extractExpr, Skew.FLAG, constructorParam, namedOption);
   }
 }

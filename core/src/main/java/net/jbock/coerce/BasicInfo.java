@@ -11,6 +11,7 @@ import net.jbock.compiler.EnumName;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.parameter.Parameter;
 import net.jbock.either.Either;
 import net.jbock.qualifier.MapperClass;
 
@@ -66,7 +67,7 @@ public class BasicInfo extends ParameterScoped {
     }
   }
 
-  public Either<String, Coercion> coercion() {
+  public <P extends Parameter> Either<String, Coercion<P>> coercion(P parameter) {
     return mapperClass
         .map(mapper -> {
           ParameterWithMapperComponent component = DaggerBasicInfo_ParameterWithMapperComponent.builder()
@@ -76,8 +77,8 @@ public class BasicInfo extends ParameterScoped {
               .typeTool(tool())
               .enumName(enumName())
               .build();
-          return component.mapperMatcher().findCoercion();
+          return component.mapperMatcher().findCoercion(parameter);
         })
-        .orElseGet(() -> autoMatcher.get().findCoercion());
+        .orElseGet(() -> autoMatcher.get().findCoercion(parameter));
   }
 }

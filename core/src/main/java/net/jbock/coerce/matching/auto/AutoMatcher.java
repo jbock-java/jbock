@@ -11,6 +11,7 @@ import net.jbock.coerce.matching.Match;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
+import net.jbock.compiler.parameter.Parameter;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
@@ -42,25 +43,25 @@ public class AutoMatcher extends ParameterScoped {
     this.coercionFactory = coercionFactory;
   }
 
-  public Either<String, Coercion> findCoercion() {
+  public <P extends Parameter> Either<String, Coercion<P>> findCoercion(P parameter) {
     for (Matcher matcher : matchers) {
       Optional<Match> match = matcher.tryMatch();
       if (match.isPresent()) {
-        return Either.fromSuccess("", match)
-            .flatMap(this::findMapper);
+        return Either.<String, Match>right(match.get())
+            .flatMap(m -> findMapper(m, parameter));
       }
     }
     return left(noMatchError(returnType()));
   }
 
-  private Either<String, Coercion> findMapper(Match match) {
+  private <P extends Parameter> Either<String, Coercion<P>> findMapper(Match match, P parameter) {
     TypeMirror baseReturnType = match.baseReturnType();
     return autoMapper.findAutoMapper(baseReturnType)
         .maybeRecover(() -> isEnumType(baseReturnType) ?
             Optional.of(autoMapperEnum(baseReturnType)) :
             Optional.empty())
         .mapLeft(s -> noMatchError(baseReturnType))
-        .map(mapExpr -> coercionFactory.create(mapExpr, match));
+        .map(mapExpr -> coercionFactory.create(mapExpr, match, parameter));
   }
 
   private CodeBlock autoMapperEnum(TypeMirror baseReturnType) {

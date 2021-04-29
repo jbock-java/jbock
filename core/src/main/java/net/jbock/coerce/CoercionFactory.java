@@ -5,6 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.matching.Match;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
+import net.jbock.compiler.parameter.Parameter;
 
 import javax.inject.Inject;
 
@@ -15,11 +16,15 @@ public class CoercionFactory extends ParameterScoped {
     super(parameterContext);
   }
 
-  public Coercion create(CodeBlock mapExpr, Match match) {
+  public <P extends Parameter> Coercion<P> create(
+      CodeBlock mapExpr,
+      Match match,
+      P parameter) {
     CodeBlock tailExpr = match.tailExpr();
     CodeBlock extractExpr = match.extractExpr();
     Skew skew = match.skew();
     ParameterSpec constructorParam = match.constructorParam();
-    return new Coercion(enumName(), mapExpr, tailExpr, extractExpr, skew, constructorParam);
+    return new Coercion<>(enumName(), mapExpr, tailExpr,
+        extractExpr, skew, constructorParam, parameter);
   }
 }

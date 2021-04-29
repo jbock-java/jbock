@@ -2,7 +2,9 @@ package net.jbock.compiler.view;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.coerce.Coercion;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.Parameter;
@@ -33,8 +35,8 @@ final class Impl {
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType())
         .superclass(generatedTypes.sourceType());
-    for (Parameter param : context.parameters()) {
-      spec.addField(FieldSpec.builder(param.returnType(), param.enumName().camel()).build());
+    for (Coercion<? extends Parameter> c : context.parameters()) {
+      spec.addField(FieldSpec.builder(c.parameter().returnType(), c.enumName().camel()).build());
     }
     return spec.addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor(context))
@@ -44,19 +46,21 @@ final class Impl {
         .build();
   }
 
-  private static MethodSpec parameterMethodOverride(Parameter param) {
+  private static MethodSpec parameterMethodOverride(Coercion<? extends Parameter> c) {
+    Parameter param = c.parameter();
     return MethodSpec.methodBuilder(param.methodName())
         .returns(param.returnType())
         .addModifiers(param.getAccessModifiers())
-        .addStatement("return $N", FieldSpec.builder(param.returnType(), param.enumName().camel()).build())
+        .addStatement("return $N", FieldSpec.builder(param.returnType(), c.enumName().camel()).build())
         .build();
   }
 
   private static MethodSpec implConstructor(Context context) {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-    for (Parameter p : context.parameters()) {
-      spec.addStatement("this.$N = $L", FieldSpec.builder(p.returnType(), p.enumName().camel()).build(), p.coercion().extractExpr());
-      spec.addParameter(p.coercion().constructorParam());
+    for (Coercion<? extends Parameter> c : context.parameters()) {
+      TypeName returnType = c.parameter().returnType();
+      spec.addStatement("this.$N = $L", FieldSpec.builder(returnType, c.enumName().camel()).build(), c.extractExpr());
+      spec.addParameter(c.constructorParam());
     }
     return spec.build();
   }

@@ -1,7 +1,7 @@
 package net.jbock.compiler.parameter;
 
 import net.jbock.Param;
-import net.jbock.coerce.Coercion;
+import net.jbock.compiler.EnumName;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.Collections;
@@ -16,10 +16,9 @@ public class PositionalParameter extends Parameter {
   public PositionalParameter(
       ExecutableElement sourceMethod,
       String bundleKey,
-      Coercion coercion,
       List<String> description,
       int positionalIndex) {
-    super(sourceMethod, bundleKey, coercion, description);
+    super(sourceMethod, bundleKey, description);
     this.positionalIndex = positionalIndex;
   }
 
@@ -39,8 +38,8 @@ public class PositionalParameter extends Parameter {
   }
 
   @Override
-  public String sample() {
-    return enumName().snake().toLowerCase(Locale.US);
+  public String sample(boolean isFlag, EnumName enumName) {
+    return enumName.snake().toLowerCase(Locale.US);
   }
 
   @Override

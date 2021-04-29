@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
+import net.jbock.coerce.Coercion;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 
@@ -37,11 +38,11 @@ public class ParameterScoped {
     return parameterContext.optionType;
   }
 
-  final ImmutableList<NamedOption> alreadyCreatedOptions() {
+  final ImmutableList<Coercion<NamedOption>> alreadyCreatedOptions() {
     return parameterContext.alreadyCreatedOptions;
   }
 
-  final ImmutableList<PositionalParameter> alreadyCreatedParams() {
+  final ImmutableList<Coercion<PositionalParameter>> alreadyCreatedParams() {
     return parameterContext.alreadyCreatedParams;
   }
 

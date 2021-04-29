@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import net.jbock.coerce.Coercion;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.parameter.PositionalParameter;
@@ -26,13 +27,13 @@ public final class Context {
   private final ClassName generatedClass;
 
   // the abstract methods in the annotated class
-  private final List<Parameter> parameters;
+  private final List<Coercion<? extends Parameter>> parameters;
 
-  private final List<PositionalParameter> params;
+  private final List<Coercion<PositionalParameter>> params;
 
   private final boolean anyRepeatableParam;
 
-  private final List<NamedOption> options;
+  private final List<Coercion<NamedOption>> options;
 
   private final ParserFlavour flavour;
 
@@ -42,8 +43,8 @@ public final class Context {
   Context(
       TypeElement sourceElement,
       ClassName generatedClass,
-      List<NamedOption> namedOptions,
-      List<PositionalParameter> params,
+      List<Coercion<NamedOption>> namedOptions,
+      List<Coercion<PositionalParameter>> params,
       ParserFlavour flavour,
       GeneratedTypes generatedTypes) {
     this.sourceElement = sourceElement;
@@ -51,8 +52,8 @@ public final class Context {
     this.params = params;
     this.options = namedOptions;
     this.flavour = flavour;
-    this.parameters = ImmutableList.<Parameter>builder().addAll(params).addAll(options).build();
-    this.anyRepeatableParam = params.stream().anyMatch(PositionalParameter::isRepeatable);
+    this.parameters = ImmutableList.<Coercion<? extends Parameter>>builder().addAll(params).addAll(options).build();
+    this.anyRepeatableParam = params.stream().anyMatch(Coercion::isRepeatable);
     this.generatedTypes = generatedTypes;
   }
 
@@ -64,15 +65,15 @@ public final class Context {
     return generatedClass;
   }
 
-  public List<Parameter> parameters() {
+  public List<Coercion<? extends Parameter>> parameters() {
     return parameters;
   }
 
-  public List<PositionalParameter> params() {
+  public List<Coercion<PositionalParameter>> params() {
     return params;
   }
 
-  public List<NamedOption> options() {
+  public List<Coercion<NamedOption>> options() {
     return options;
   }
 

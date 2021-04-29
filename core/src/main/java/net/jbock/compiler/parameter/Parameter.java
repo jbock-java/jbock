@@ -4,8 +4,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.Param;
-import net.jbock.coerce.Coercion;
-import net.jbock.coerce.Skew;
 import net.jbock.coerce.Util;
 import net.jbock.compiler.EnumName;
 
@@ -30,20 +28,12 @@ public abstract class Parameter {
 
   private final String bundleKey;
 
-  private final Coercion coercion;
-
   private final List<String> description;
 
-  Parameter(ExecutableElement sourceMethod, String bundleKey,
-            Coercion coercion, List<String> description) {
+  Parameter(ExecutableElement sourceMethod, String bundleKey, List<String> description) {
     this.sourceMethod = sourceMethod;
     this.bundleKey = bundleKey;
-    this.coercion = coercion;
     this.description = description;
-  }
-
-  public Coercion coercion() {
-    return coercion;
   }
 
   public List<String> description() {
@@ -58,36 +48,12 @@ public abstract class Parameter {
     return TypeName.get(sourceMethod.getReturnType());
   }
 
-  public String enumConstant() {
-    return enumName().enumConstant();
-  }
-
   public abstract boolean isPositional();
 
   public abstract OptionalInt positionalIndex();
 
-  public boolean isRequired() {
-    return coercion.skew() == Skew.REQUIRED;
-  }
-
-  public boolean isRepeatable() {
-    return coercion.skew() == Skew.REPEATABLE;
-  }
-
-  public boolean isOptional() {
-    return coercion.skew() == Skew.OPTIONAL;
-  }
-
-  public boolean isFlag() {
-    return coercion.skew() == Skew.FLAG;
-  }
-
   public Optional<String> bundleKey() {
     return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);
-  }
-
-  public EnumName enumName() { // TODO
-    return coercion.enumName();
   }
 
   public Set<Modifier> getAccessModifiers() {
@@ -98,7 +64,7 @@ public abstract class Parameter {
 
   public abstract List<String> dashedNames();
 
-  public abstract String sample();
+  public abstract String sample(boolean isFlag, EnumName enumName);
 
   public abstract String optionName();
 

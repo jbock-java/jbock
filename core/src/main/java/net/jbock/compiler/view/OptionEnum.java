@@ -5,6 +5,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.coerce.Coercion;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.Parameter;
@@ -53,9 +54,9 @@ final class OptionEnum {
   }
 
   TypeSpec define() {
-    List<Parameter> parameters = context.parameters();
+    List<Coercion<? extends Parameter>> parameters = context.parameters();
     TypeSpec.Builder spec = TypeSpec.enumBuilder(generatedTypes.optionType());
-    for (Parameter param : parameters) {
+    for (Coercion<? extends Parameter> param : parameters) {
       String enumConstant = param.enumConstant();
       spec.addEnumConstant(enumConstant, optionEnumConstant(param));
     }
@@ -68,12 +69,12 @@ final class OptionEnum {
         .build();
   }
 
-  private TypeSpec optionEnumConstant(Parameter param) {
+  private TypeSpec optionEnumConstant(Coercion<? extends Parameter> c) {
     Map<String, Object> map = new LinkedHashMap<>();
-    CodeBlock names = param.getNames();
+    CodeBlock names = c.parameter().getNames();
     map.put("names", names);
-    map.put("bundleKey", param.bundleKey().orElse(null));
-    map.put("descExpression", descExpression(param.description()));
+    map.put("bundleKey", c.parameter().bundleKey().orElse(null));
+    map.put("descExpression", descExpression(c.parameter().description()));
     String format = String.join(",$W", "$names:L", "$bundleKey:S", "$descExpression:L");
 
     return anonymousClassBuilder(CodeBlock.builder().addNamed(format, map).build()).build();
