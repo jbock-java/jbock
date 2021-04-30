@@ -5,7 +5,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.AutoMapper;
 import net.jbock.coerce.Coercion;
-import net.jbock.coerce.CoercionFactory;
 import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.Match;
 import net.jbock.coerce.matching.matcher.Matcher;
@@ -29,18 +28,15 @@ public class AutoMatcher extends ParameterScoped {
 
   private final AutoMapper autoMapper;
   private final ImmutableList<Matcher> matchers;
-  private final CoercionFactory coercionFactory;
 
   @Inject
   AutoMatcher(
       ParameterContext context,
       AutoMapper autoMapper,
-      ImmutableList<Matcher> matchers,
-      CoercionFactory coercionFactory) {
+      ImmutableList<Matcher> matchers) {
     super(context);
     this.autoMapper = autoMapper;
     this.matchers = matchers;
-    this.coercionFactory = coercionFactory;
   }
 
   public <P extends Parameter> Either<String, Coercion<P>> findCoercion(P parameter) {
@@ -61,7 +57,7 @@ public class AutoMatcher extends ParameterScoped {
             Optional.of(autoMapperEnum(baseReturnType)) :
             Optional.empty())
         .mapLeft(s -> noMatchError(baseReturnType))
-        .map(mapExpr -> coercionFactory.create(mapExpr, match, parameter));
+        .map(mapExpr -> match.toCoercion(mapExpr, parameter));
   }
 
   private CodeBlock autoMapperEnum(TypeMirror baseReturnType) {

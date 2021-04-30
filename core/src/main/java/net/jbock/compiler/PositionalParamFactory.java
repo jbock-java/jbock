@@ -29,6 +29,7 @@ class PositionalParamFactory extends ParameterScoped {
   Either<ValidationFailure, Coercion<PositionalParameter>> createPositionalParam(int positionalIndex) {
     PositionalParameter positionalParameter = new PositionalParameter(
         sourceMethod(),
+        enumName(),
         bundleKey(),
         Arrays.asList(description()),
         positionalIndex);

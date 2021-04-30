@@ -15,10 +15,11 @@ public class PositionalParameter extends Parameter {
 
   public PositionalParameter(
       ExecutableElement sourceMethod,
+      EnumName enumName,
       String bundleKey,
       List<String> description,
       int positionalIndex) {
-    super(sourceMethod, bundleKey, description);
+    super(sourceMethod, enumName, bundleKey, description);
     this.positionalIndex = positionalIndex;
   }
 

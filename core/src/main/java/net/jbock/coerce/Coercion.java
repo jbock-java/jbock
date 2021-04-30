@@ -10,7 +10,6 @@ import java.util.List;
 public class Coercion<P extends Parameter> {
 
   private final ParameterSpec constructorParam;
-  private final EnumName enumName;
   private final CodeBlock tailExpr;
   private final CodeBlock mapExpr;
   private final CodeBlock extractExpr;
@@ -18,7 +17,6 @@ public class Coercion<P extends Parameter> {
   private final P parameter;
 
   public Coercion(
-      EnumName enumName,
       CodeBlock mapExpr,
       CodeBlock tailExpr,
       CodeBlock extractExpr,
@@ -26,7 +24,6 @@ public class Coercion<P extends Parameter> {
       ParameterSpec constructorParam,
       P parameter) {
     this.constructorParam = constructorParam;
-    this.enumName = enumName;
     this.tailExpr = tailExpr;
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
@@ -55,7 +52,7 @@ public class Coercion<P extends Parameter> {
   }
 
   public final EnumName enumName() {
-    return enumName;
+    return parameter.enumName();
   }
 
   public boolean isRequired() {

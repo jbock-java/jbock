@@ -26,12 +26,15 @@ public abstract class Parameter {
 
   private final ExecutableElement sourceMethod;
 
+  private final EnumName enumName;
+
   private final String bundleKey;
 
   private final List<String> description;
 
-  Parameter(ExecutableElement sourceMethod, String bundleKey, List<String> description) {
+  Parameter(ExecutableElement sourceMethod, EnumName enumName, String bundleKey, List<String> description) {
     this.sourceMethod = sourceMethod;
+    this.enumName = enumName;
     this.bundleKey = bundleKey;
     this.description = description;
   }
@@ -84,5 +87,9 @@ public abstract class Parameter {
       default:
         return Util.arraysOfStringInvocation(names);
     }
+  }
+
+  public EnumName enumName() {
+    return enumName;
   }
 }

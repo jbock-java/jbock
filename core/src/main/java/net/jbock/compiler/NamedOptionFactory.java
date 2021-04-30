@@ -114,7 +114,7 @@ class NamedOptionFactory extends ParameterScoped {
   private NamedOption createNamedOption(OptionNames names) {
     String optionName = names.optionName;
     Character mnemonic = names.mnemonic;
-    return new NamedOption(mnemonic, optionName, sourceMethod(), bundleKey(),
+    return new NamedOption(mnemonic, enumName(), optionName, sourceMethod(), bundleKey(),
         Arrays.asList(description()));
   }
 
@@ -123,6 +123,6 @@ class NamedOptionFactory extends ParameterScoped {
     CodeBlock mapExpr = CodeBlock.of("$T.identity()", Function.class);
     CodeBlock tailExpr = CodeBlock.of(".findAny().isPresent()");
     CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
-    return new Coercion<>(enumName(), mapExpr, tailExpr, extractExpr, Skew.FLAG, constructorParam, namedOption);
+    return new Coercion<>(mapExpr, tailExpr, extractExpr, Skew.FLAG, constructorParam, namedOption);
   }
 }

@@ -16,11 +16,12 @@ public class NamedOption extends Parameter {
 
   public NamedOption(
       char mnemonic,
+      EnumName enumName,
       String optionName,
       ExecutableElement sourceMethod,
       String bundleKey,
       List<String> description) {
-    super(sourceMethod, bundleKey, description);
+    super(sourceMethod, enumName, bundleKey, description);
     this.mnemonic = mnemonic;
     this.optionName = optionName;
   }
