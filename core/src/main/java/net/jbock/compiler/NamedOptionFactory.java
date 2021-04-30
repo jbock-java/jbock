@@ -40,8 +40,7 @@ class NamedOptionFactory extends ParameterScoped {
 
   Either<ValidationFailure, Coercion<NamedOption>> createNamedOption() {
     return checkFullName()
-        .flatMap(optionName -> mnemonic().map(mnemonic -> new OptionNames(optionName, mnemonic)))
-        .map(this::createNamedOption)
+        .flatMap(optionName -> mnemonic().map(mnemonic -> createNamedOption(optionName, mnemonic)))
         .flatMap(namedOption -> {
           if (!mapperPresent && returnType().getKind() == BOOLEAN) {
             return right(createFlag(namedOption));
@@ -72,7 +71,7 @@ class NamedOptionFactory extends ParameterScoped {
     if (Objects.toString(option.value(), "").isEmpty()) {
       return left("empty name");
     }
-    if (isHelpEnabled() && "help".equals(option.value())) {
+    if (!flavour().helpDisabled(sourceElement()) && "help".equals(option.value())) {
       return left("'help' cannot be an option name, unless the help feature is disabled. " +
           "The help feature can be disabled by setting @Command.helpDisabled = true.");
     }
@@ -111,9 +110,7 @@ class NamedOptionFactory extends ParameterScoped {
     return right(name);
   }
 
-  private NamedOption createNamedOption(OptionNames names) {
-    String optionName = names.optionName;
-    Character mnemonic = names.mnemonic;
+  private NamedOption createNamedOption(String optionName, Character mnemonic) {
     return new NamedOption(mnemonic, enumName(), optionName, sourceMethod(), bundleKey(),
         Arrays.asList(description()));
   }

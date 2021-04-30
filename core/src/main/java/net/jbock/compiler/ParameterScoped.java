@@ -79,7 +79,7 @@ public class ParameterScoped {
     return parameterContext;
   }
 
-  boolean isHelpEnabled() {
-    return !parameterContext.flavour.helpDisabled(sourceElement());
+  public ParserFlavour flavour() {
+    return parameterContext.flavour;
   }
 }
