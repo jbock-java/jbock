@@ -216,14 +216,17 @@ public final class GeneratedClass {
       code.addStatement("$N.println($S)", printStream, "PARAMETERS");
     }
     context.params().forEach(p ->
-        code.addStatement("printOption($N, $T.$L, $S)", printStream, generatedTypes.optionType(), p.enumConstant(),
+        code.addStatement("printOption($N, $T.$L, $S, $S)", printStream, generatedTypes.optionType(), p.enumConstant(),
+            p.parameter().bundleKey().orElse(""),
             p.sample()));
     if (!context.options().isEmpty()) {
       code.addStatement("$N.println()", printStream);
       code.addStatement("$N.println($S)", printStream, "OPTIONS");
     }
     context.options().forEach(p ->
-        code.addStatement("printOption($N, $T.$L, $S)", printStream, generatedTypes.optionType(), p.enumConstant(), p.sample()));
+        code.addStatement("printOption($N, $T.$L, $S, $S)", printStream, generatedTypes.optionType(), p.enumConstant(),
+            p.parameter().bundleKey().orElse(""),
+            p.sample()));
     return methodBuilder("printOnlineHelp")
         .addParameter(printStream)
         .addModifiers(accessModifiers)
@@ -239,6 +242,7 @@ public final class GeneratedClass {
         .mapToInt(String::length).max().orElse(0) + totalPadding;
     String format = "  %1$-" + (width - 2) + "s";
     ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
+    ParameterSpec messageKey = builder(STRING, "messageKey").build();
     ParameterSpec message = builder(STRING, "message").build();
     ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
     ParameterSpec sample = builder(STRING, "sample").build();
@@ -247,7 +251,7 @@ public final class GeneratedClass {
     ParameterSpec shape = builder(STRING, "shape_padded_" + width + "_characters").build();
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = $T.format($S, $N)", shape.type, shape, STRING, format, sample);
-    code.addStatement("$T $N = $N.get($N.bundleKey)", message.type, message, messages, option);
+    code.addStatement("$T $N = $N.isEmpty() ? null : $N.get($N)", message.type, message, messageKey, messages, messageKey);
     code.addStatement("$T $N = new $T<>()", tokens.type, tokens, ArrayList.class);
     code.addStatement("$N.add($N)", tokens, shape);
     code.addStatement(CodeBlock.builder().add("$N.addAll($T.ofNullable($N)\n",
@@ -267,6 +271,7 @@ public final class GeneratedClass {
     return methodBuilder("printOption")
         .addParameter(printStream)
         .addParameter(option)
+        .addParameter(messageKey)
         .addParameter(sample)
         .addModifiers(PRIVATE)
         .addCode(code.build())

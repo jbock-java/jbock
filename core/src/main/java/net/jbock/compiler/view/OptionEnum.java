@@ -21,7 +21,6 @@ import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.coerce.Util.arraysOfStringInvocation;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
 
 /**
  * Defines the *_Parser.Option enum.
@@ -36,16 +35,11 @@ final class OptionEnum {
 
   private final FieldSpec descriptionField;
 
-  private final FieldSpec bundleKeyField;
-
   @Inject
   OptionEnum(Context context, GeneratedTypes generatedTypes) {
     this.context = context;
     this.generatedTypes = generatedTypes;
-    FieldSpec bundleKeyField = FieldSpec.builder(STRING, "bundleKey").build();
-    FieldSpec descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").build();
-    this.bundleKeyField = bundleKeyField;
-    this.descriptionField = descriptionField;
+    this.descriptionField = FieldSpec.builder(LIST_OF_STRING, "description").build();
   }
 
   TypeSpec define() {
@@ -56,7 +50,6 @@ final class OptionEnum {
       spec.addEnumConstant(enumConstant, optionEnumConstant(param));
     }
     return spec.addModifiers(PRIVATE)
-        .addField(bundleKeyField)
         .addField(descriptionField)
         .addMethod(privateConstructor())
         .build();
@@ -64,9 +57,8 @@ final class OptionEnum {
 
   private TypeSpec optionEnumConstant(Coercion<? extends Parameter> c) {
     Map<String, Object> map = new LinkedHashMap<>();
-    map.put("bundleKey", c.parameter().bundleKey().orElse(null));
     map.put("descExpression", descExpression(c.parameter().description()));
-    String format = String.join(",$W", "$bundleKey:S", "$descExpression:L");
+    String format = "$descExpression:L";
 
     return anonymousClassBuilder(CodeBlock.builder().addNamed(format, map).build()).build();
   }
@@ -83,12 +75,9 @@ final class OptionEnum {
   }
 
   private MethodSpec privateConstructor() {
-    ParameterSpec bundleKey = builder(bundleKeyField.type, bundleKeyField.name).build();
     ParameterSpec description = builder(descriptionField.type, descriptionField.name).build();
     return MethodSpec.constructorBuilder()
-        .addStatement("this.$N = $N", bundleKeyField, bundleKey)
         .addStatement("this.$N = $N", descriptionField, description)
-        .addParameter(bundleKey)
         .addParameter(description)
         .build();
   }
