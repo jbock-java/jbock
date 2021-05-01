@@ -8,6 +8,7 @@ import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.parameter.Parameter;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.Optional;
 
 public class ExactMatcher extends Matcher {
@@ -24,7 +25,11 @@ public class ExactMatcher extends Matcher {
   }
 
   private CodeBlock tailExpr(Parameter parameter) {
-    return CodeBlock.of(".findAny().orElseThrow(() -> missingRequired($S, $L))",
-        enumName().enumConstant(), parameter.getNames());
+    List<String> dashedNames = parameter.dashedNames();
+    String enumConstant = parameter.enumName().enumConstant();
+    String s = dashedNames.isEmpty() ?
+        enumConstant :
+        enumConstant + " (" + String.join(", ", dashedNames) + ")";
+    return CodeBlock.of(".findAny().orElseThrow(() -> missingRequired($S))", s);
   }
 }

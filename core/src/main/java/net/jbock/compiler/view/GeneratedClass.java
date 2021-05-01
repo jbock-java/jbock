@@ -646,17 +646,10 @@ public final class GeneratedClass {
 
   private MethodSpec missingRequiredMethod() {
     ParameterSpec name = builder(STRING, "name").build();
-    ParameterSpec names = builder(LIST_OF_STRING, "names").build();
-    CodeBlock.Builder code = CodeBlock.builder()
-        .add("return new $T($S + $N +\n", RuntimeException.class, "Missing required: ", name).indent()
-        .addStatement("($N.isEmpty() ? $S : $S + $T.join($S, $N) + $S))",
-            names,
-            "", " (", String.class, ", ", names, ")").unindent();
     return methodBuilder("missingRequired")
         .returns(RuntimeException.class)
-        .addCode(code.build())
+        .addStatement("return new $T($S + $N)", RuntimeException.class, "Missing required: ", name)
         .addParameter(name)
-        .addParameter(names)
         .addModifiers(PRIVATE, STATIC)
         .build();
   }
