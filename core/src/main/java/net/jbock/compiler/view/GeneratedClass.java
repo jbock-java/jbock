@@ -259,7 +259,7 @@ public final class GeneratedClass {
         .add(".map($T::trim)\n", STRING)
         .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
         .add(".map($T::asList)\n", Arrays.class)
-        .add(".orElseGet(() -> $N.description.stream()\n", option).indent()
+        .add(".orElseGet(() -> $T.stream($N.description)\n", Arrays.class, option).indent()
         .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
         .add(".flatMap($T::stream)\n", Arrays.class)
         .add(".collect($T.toList())))", Collectors.class)
