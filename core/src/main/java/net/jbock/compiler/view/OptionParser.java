@@ -135,7 +135,7 @@ final class OptionParser {
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N != null)\n", value).indent()
-        .addStatement(throwRepetitionErrorStatement())
+        .addStatement(throwRepetitionErrorStatement(token))
         .unindent();
 
     code.addStatement("$N = readOptionArgument($N, $N)", value, token, it);
@@ -155,7 +155,7 @@ final class OptionParser {
         .addStatement("throw new $T($S + $N)", RuntimeException.class, "Invalid token: ", token)
         .unindent();
     code.add("if ($N)\n", seen).indent()
-        .addStatement(throwRepetitionErrorStatement())
+        .addStatement(throwRepetitionErrorStatement(token))
         .unindent();
     code.addStatement("$N = $L", seen, true);
     return MethodSpec.methodBuilder("read")
@@ -195,9 +195,9 @@ final class OptionParser {
         .build();
   }
 
-  private CodeBlock throwRepetitionErrorStatement() {
-    return CodeBlock.of(addBreaks("throw new $T($T.format($S, $N, $T.join($S, $N.names)))"),
+  private CodeBlock throwRepetitionErrorStatement(ParameterSpec token) {
+    return CodeBlock.of(addBreaks("throw new $T($T.format($S, $N))"),
         RuntimeException.class, String.class,
-        "Option %s (%s) is not repeatable", optionField, String.class, ", ", optionField);
+        "Option '%s' is a repetition", token);
   }
 }

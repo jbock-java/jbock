@@ -185,24 +185,24 @@ class CurlArgumentsTest {
   @Test
   void errorDuplicateNonRepeatableLong() {
     f.assertThat("--request", "GET", "--request", "POST").failsWithMessage(
-        "Option METHOD (-X, --request) is not repeatable");
+        "Option '--request' is a repetition");
   }
 
   @Test
   void errorDuplicateNonRepeatableShort() {
-    f.assertThat("-X1", "-X2").failsWithMessage("Option METHOD (-X, --request) is not repeatable");
+    f.assertThat("-X1", "-X2").failsWithMessage("Option '-X2' is a repetition");
   }
 
   @Test
   void errorDuplicateNonRepeatableLongDetachedShortAttached() {
     f.assertThat("--request", "1", "-X2").failsWithMessage(
-        "Option METHOD (-X, --request) is not repeatable");
+        "Option '-X2' is a repetition");
   }
 
   @Test
   void errorDuplicateNonRepeatableLongAttachedShortDetached() {
     f.assertThat("--request=1", "-X", "2").failsWithMessage(
-        "Option METHOD (-X, --request) is not repeatable");
+        "Option '-X' is a repetition");
   }
 
   @Test

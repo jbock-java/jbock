@@ -7,7 +7,7 @@ import net.jbock.compiler.parameter.Parameter;
 
 import java.util.List;
 
-public class Coercion<P extends Parameter> {
+public final class Coercion<P extends Parameter> {
 
   private final ParameterSpec constructorParam;
   private final CodeBlock tailExpr;
@@ -31,27 +31,27 @@ public class Coercion<P extends Parameter> {
     this.parameter = parameter;
   }
 
-  public final CodeBlock mapExpr() {
+  public CodeBlock mapExpr() {
     return mapExpr;
   }
 
-  public final CodeBlock extractExpr() {
+  public CodeBlock extractExpr() {
     return extractExpr;
   }
 
-  public final CodeBlock tailExpr() {
+  public CodeBlock tailExpr() {
     return tailExpr;
   }
 
-  public final Skew skew() {
+  public Skew skew() {
     return skew;
   }
 
-  public final ParameterSpec constructorParam() {
+  public ParameterSpec constructorParam() {
     return constructorParam;
   }
 
-  public final EnumName enumName() {
+  public EnumName enumName() {
     return parameter.enumName();
   }
 
@@ -71,7 +71,7 @@ public class Coercion<P extends Parameter> {
     return skew == Skew.FLAG;
   }
 
-  public final P parameter() {
+  public P parameter() {
     return parameter;
   }
 

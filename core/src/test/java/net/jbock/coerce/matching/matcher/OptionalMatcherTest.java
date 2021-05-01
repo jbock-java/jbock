@@ -8,6 +8,7 @@ import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParserFlavour;
 import net.jbock.compiler.TypeTool;
+import net.jbock.compiler.parameter.Parameter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -24,13 +25,15 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OptionalMatcherTest {
 
+  private final Parameter parameter = Mockito.mock(Parameter.class);
+
   @Test
   void testLiftOptionalInt() {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeMirror optionalInt = elements.getTypeElement(OptionalInt.class.getCanonicalName()).asType();
       TypeTool tool = new TypeTool(elements, types);
       OptionalMatcher optionalish = createMatcher(tool, optionalInt);
-      optionalish.tryMatch().map(unwrapSuccess -> {
+      optionalish.tryMatch(parameter).map(unwrapSuccess -> {
         TypeName liftedType = unwrapSuccess.constructorParam().type;
         assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
         return unwrapSuccess;
@@ -46,7 +49,7 @@ class OptionalMatcherTest {
       TypeTool tool = new TypeTool(elements, types);
       DeclaredType optionalInteger = types.getDeclaredType(optional, integer);
       OptionalMatcher optionalish = createMatcher(tool, optionalInteger);
-      optionalish.tryMatch().map(unwrapSuccess -> {
+      optionalish.tryMatch(parameter).map(unwrapSuccess -> {
         TypeName liftedType = unwrapSuccess.constructorParam().type;
         assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
         return unwrapSuccess;
@@ -60,7 +63,7 @@ class OptionalMatcherTest {
       TypeMirror primitiveInt = types.getPrimitiveType(TypeKind.INT);
       TypeTool tool = new TypeTool(elements, types);
       OptionalMatcher optionalish = createMatcher(tool, primitiveInt);
-      Assertions.assertFalse(optionalish.tryMatch().isPresent());
+      Assertions.assertFalse(optionalish.tryMatch(parameter).isPresent());
     });
   }
 
@@ -70,7 +73,7 @@ class OptionalMatcherTest {
       TypeMirror string = elements.getTypeElement(String.class.getCanonicalName()).asType();
       TypeTool tool = new TypeTool(elements, types);
       OptionalMatcher optionalish = createMatcher(tool, string);
-      Assertions.assertFalse(optionalish.tryMatch().isPresent());
+      Assertions.assertFalse(optionalish.tryMatch(parameter).isPresent());
     });
   }
 

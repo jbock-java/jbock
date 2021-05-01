@@ -135,6 +135,9 @@ public final class GeneratedClass {
     if (!context.params().isEmpty()) {
       spec.addMethod(paramParsersMethod());
     }
+    if (context.parameters().stream().anyMatch(Coercion::isRequired)) {
+      spec.addMethod(missingRequiredMethod());
+    }
 
     if (context.isHelpParameterEnabled()) {
       spec.addField(out);
@@ -493,10 +496,10 @@ public final class GeneratedClass {
     }
 
     for (Coercion<NamedOption> option : requiredOptions) {
-      spec.addStatement("$N.add($T.format($S, $T.$L.names.get(0), $T.$L.name().toLowerCase($T.US)))",
+      spec.addStatement("$N.add($T.format($S, $S, $S))",
           result, STRING, "%s <%s>",
-          generatedTypes.optionType(), option.enumConstant(),
-          generatedTypes.optionType(), option.enumConstant(), Locale.class);
+          option.dashedNames().get(0),
+          option.enumConstant().toLowerCase(Locale.US));
     }
 
     for (Coercion<PositionalParameter> param : context.params()) {
@@ -634,6 +637,22 @@ public final class GeneratedClass {
       code.addStatement("$N[$L] = new $T()", parsers, i, parserType);
     }
     return code.addStatement("return $N", parsers).build();
+  }
 
+  private MethodSpec missingRequiredMethod() {
+    ParameterSpec name = builder(STRING, "name").build();
+    ParameterSpec names = builder(LIST_OF_STRING, "names").build();
+    CodeBlock.Builder code = CodeBlock.builder()
+        .add("return new $T($S + $N +\n", RuntimeException.class, "Missing required: ", name).indent()
+        .addStatement("($N.isEmpty() ? $S : $S + $T.join($S, $N) + $S))",
+            names,
+            "", " (", String.class, ", ", names, ")").unindent();
+    return methodBuilder("missingRequired")
+        .returns(RuntimeException.class)
+        .addCode(code.build())
+        .addParameter(name)
+        .addParameter(names)
+        .addModifiers(PRIVATE, STATIC)
+        .build();
   }
 }

@@ -23,18 +23,18 @@ class RequiredArgumentsTest {
   @Test
   void errorRepeatedArgument() {
     f.assertThat("--dir", "A", "--dir", "B").failsWithMessage(
-        "Option DIR (--dir) is not repeatable");
+        "Option '--dir' is a repetition");
     f.assertThat("--dir=A", "--dir", "B").failsWithMessage(
-        "Option DIR (--dir) is not repeatable");
+        "Option '--dir' is a repetition");
     f.assertThat("--dir=A", "--dir=B").failsWithMessage(
-        "Option DIR (--dir) is not repeatable");
+        "Option '--dir=B' is a repetition");
     f.assertThat("--dir", "A", "--dir=B").failsWithMessage(
-        "Option DIR (--dir) is not repeatable");
+        "Option '--dir=B' is a repetition");
   }
 
   @Test
   void errorDetachedAttached() {
-    f.assertThat("--dir", "A", "--dir=B").failsWithMessage("Option DIR (--dir) is not repeatable");
+    f.assertThat("--dir", "A", "--dir=B").failsWithMessage("Option '--dir=B' is a repetition");
   }
 
   @Test

@@ -17,7 +17,7 @@ class GradleArgumentsTest {
   @Test
   void errorShortLongConflict() {
     f.assertThat("-m", "hello", "--message=goodbye").failsWithMessage(
-        "Option MESSAGE (-m, --message) is not repeatable");
+        "Option '--message=goodbye' is a repetition");
   }
 
   @Test
@@ -29,13 +29,13 @@ class GradleArgumentsTest {
   @Test
   void errorLongShortConflict() {
     f.assertThat("--message=hello", "-m", "goodbye").failsWithMessage(
-        "Option MESSAGE (-m, --message) is not repeatable");
+        "Option '-m' is a repetition");
   }
 
   @Test
   void errorLongLongConflict() {
     f.assertThat("--message=hello", "--message=goodbye").failsWithMessage(
-        "Option MESSAGE (-m, --message) is not repeatable");
+        "Option '--message=goodbye' is a repetition");
   }
 
   @Test

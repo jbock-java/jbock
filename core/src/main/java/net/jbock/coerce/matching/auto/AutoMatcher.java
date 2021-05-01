@@ -41,7 +41,7 @@ public class AutoMatcher extends ParameterScoped {
 
   public <P extends Parameter> Either<String, Coercion<P>> findCoercion(P parameter) {
     for (Matcher matcher : matchers) {
-      Optional<Match> match = matcher.tryMatch();
+      Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
         return Either.<String, Match>right(match.get())
             .flatMap(m -> findMapper(m, parameter));

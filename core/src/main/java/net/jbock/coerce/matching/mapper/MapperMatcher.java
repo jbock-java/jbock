@@ -60,7 +60,7 @@ public class MapperMatcher extends ParameterScoped {
       P parameter) {
     List<Match> matches = new ArrayList<>();
     for (Matcher matcher : matchers) {
-      Optional<Match> match = matcher.tryMatch();
+      Optional<Match> match = matcher.tryMatch(parameter);
       match.ifPresent(matches::add);
       match = match.filter(m -> isValidMatch(m, functionType));
       if (match.isPresent()) {
