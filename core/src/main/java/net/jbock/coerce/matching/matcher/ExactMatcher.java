@@ -30,6 +30,6 @@ public class ExactMatcher extends Matcher {
     String s = dashedNames.isEmpty() ?
         enumConstant :
         enumConstant + " (" + String.join(", ", dashedNames) + ")";
-    return CodeBlock.of(".findAny().orElseThrow(() -> missingRequired($S))", s);
+    return CodeBlock.of(".findAny()\n.orElseThrow(() -> missingRequired($S))", s);
   }
 }

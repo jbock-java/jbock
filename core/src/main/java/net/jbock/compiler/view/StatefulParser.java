@@ -21,6 +21,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Constants.mapOf;
+import static net.jbock.compiler.view.GeneratedClass.OPTIONS_BY_NAME;
 
 /**
  * Defines the inner class StatefulParser
@@ -102,17 +103,21 @@ final class StatefulParser {
   private MethodSpec tryReadOptionMethod() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
+    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, generatedTypes.optionType()),
+        OPTIONS_BY_NAME).build();
 
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N.length() <= 1 || $N.charAt(0) != '-')\n", token, token).indent()
         .addStatement("return null").unindent();
 
     code.add("if ($N.charAt(1) != '-')\n", token).indent()
-        .addStatement("return OPTIONS_BY_NAME.get($N.substring(0, 2))", token).unindent();
+        .addStatement("return $N.get($N.substring(0, 2))", optionsByName, token).unindent();
 
-    code.addStatement("$T $N = $N.indexOf('=')", INT, index, token)
-        .addStatement("return OPTIONS_BY_NAME.get($N.substring(0, $N < 0 ? $N.length() : $N))",
-            token, index, token, index);
+    code.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
+    code.add("if ($N < 0)\n", index).indent()
+        .addStatement("return $N.get($N)", optionsByName, token)
+        .unindent();
+    code.addStatement("return $N.get($N.substring(0, $N))", optionsByName, token, index);
 
     return MethodSpec.methodBuilder("tryReadOption")
         .addParameter(token)
@@ -138,9 +143,9 @@ final class StatefulParser {
 
   private CodeBlock extractExpression(Coercion<? extends Parameter> param) {
     return getStreamExpression(param)
-        .add(".stream()")
-        .add(".map($L)", param.mapExpr())
-        .add(param.tailExpr())
+        .add(".stream()\n").indent()
+        .add(".map($L)\n", param.mapExpr())
+        .add(param.tailExpr()).unindent()
         .build();
   }
 

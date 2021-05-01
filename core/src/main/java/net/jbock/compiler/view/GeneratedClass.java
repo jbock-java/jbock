@@ -56,6 +56,7 @@ public final class GeneratedClass {
   private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
 
   private static final int CONTINUATION_INDENT_USAGE = 8;
+  static final String OPTIONS_BY_NAME = "OPTIONS_BY_NAME";
 
   private final Context context;
   private final Description description;
@@ -126,9 +127,9 @@ public final class GeneratedClass {
         .addMethod(printOptionMethod())
         .addMethod(printTokensMethod())
         .addMethod(makeLinesMethod())
-        .addMethod(usageMethod())
-        .addMethod(readOptionArgumentMethod());
+        .addMethod(usageMethod());
     if (!context.options().isEmpty()) {
+      spec.addMethod(readOptionArgumentMethod());
       spec.addMethod(optionsByNameMethod());
       spec.addMethod(optionParsersMethod());
     }
@@ -148,7 +149,7 @@ public final class GeneratedClass {
     spec.addField(exitHook);
     spec.addField(messages);
     if (!context.options().isEmpty()) {
-      spec.addField(FieldSpec.builder(mapOf(STRING, generatedTypes.optionType()), "OPTIONS_BY_NAME")
+      spec.addField(FieldSpec.builder(mapOf(STRING, generatedTypes.optionType()), OPTIONS_BY_NAME)
           .initializer("optionsByName()")
           .addModifiers(PRIVATE, STATIC, FINAL)
           .build());
