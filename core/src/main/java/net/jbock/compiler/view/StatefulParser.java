@@ -60,8 +60,7 @@ final class StatefulParser {
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.statefulParserType())
         .addModifiers(PRIVATE, STATIC)
-        .addMethod(parseMethod.parseMethod())
-        .addMethod(buildMethod());
+        .addMethod(parseMethod.parseMethod());
     if (!context.isSuperCommand()) {
       spec.addField(endOfOptionParsing);
     }
@@ -73,12 +72,49 @@ final class StatefulParser {
     if (!context.params().isEmpty()) {
       spec.addField(paramParsersField);
     }
+    spec.addMethod(buildMethod());
     return spec.build();
   }
 
   private MethodSpec tryParseOptionMethod() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
+    return MethodSpec.methodBuilder("tryParseOption")
+        .addParameter(token)
+        .addParameter(it)
+        .addCode(context.isUnixClusteringSupported() ?
+            tryParseOptionCodeClustering(token, it) :
+            tryParseOptionCodeSimple(token, it))
+        .returns(BOOLEAN)
+        .build();
+  }
+
+  private CodeBlock tryParseOptionCodeClustering(ParameterSpec token, ParameterSpec it) {
+    ParameterSpec clusterToken = ParameterSpec.builder(STRING, "clusterToken").build();
+    ParameterSpec option = ParameterSpec.builder(generatedTypes.optionType(), "option").build();
+    CodeBlock.Builder code = CodeBlock.builder();
+    if (!context.isSuperCommand()) {
+      code.add("if ($N)\n", endOfOptionParsing).indent()
+          .addStatement("return false")
+          .unindent();
+    }
+    code.addStatement("$T $N = tryReadOption($N)", generatedTypes.optionType(), option, token);
+    code.add("if ($N == null)\n", option).indent()
+        .addStatement("return false")
+        .unindent();
+    code.addStatement("$T $N = $N", clusterToken.type, clusterToken, token);
+    code.beginControlFlow("while ($N.get($N).read($N, $N))", optionParsersField, option, clusterToken, it);
+    code.addStatement("$1N = '-' + $1N.substring(2, $1N.length())", clusterToken);
+    code.addStatement("$N = tryReadOption($N)", option, clusterToken);
+    code.add("if ($N == null)\n", option).indent()
+        .addStatement("throw new $T($S + $N)", RuntimeException.class, "Invalid token: ", token)
+        .unindent();
+    code.endControlFlow();
+    code.addStatement("return true");
+    return code.build();
+  }
+
+  private CodeBlock tryParseOptionCodeSimple(ParameterSpec token, ParameterSpec it) {
     ParameterSpec option = ParameterSpec.builder(generatedTypes.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
     if (!context.isSuperCommand()) {
@@ -92,12 +128,7 @@ final class StatefulParser {
         .unindent();
     code.addStatement("$N.get($N).read($N, $N)", optionParsersField, option, token, it)
         .addStatement("return true");
-    return MethodSpec.methodBuilder("tryParseOption")
-        .addParameter(token)
-        .addParameter(it)
-        .addCode(code.build())
-        .returns(BOOLEAN)
-        .build();
+    return code.build();
   }
 
   private MethodSpec tryReadOptionMethod() {

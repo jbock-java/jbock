@@ -14,6 +14,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
@@ -39,6 +40,8 @@ public final class Context {
 
   private final GeneratedTypes generatedTypes;
 
+  private final boolean unixClusteringSupported;
+
   @Inject
   Context(
       TypeElement sourceElement,
@@ -51,6 +54,7 @@ public final class Context {
     this.generatedClass = generatedClass;
     this.params = params;
     this.options = namedOptions;
+    this.unixClusteringSupported = isUnixClusteringSupported(namedOptions);
     this.flavour = flavour;
     this.parameters = ImmutableList.<Coercion<? extends Parameter>>builder().addAll(params).addAll(options).build();
     this.anyRepeatableParam = params.stream().anyMatch(Coercion::isRepeatable);
@@ -100,6 +104,17 @@ public final class Context {
 
   public boolean anyRepeatableParam() {
     return anyRepeatableParam;
+  }
+
+  public boolean isUnixClusteringSupported() {
+    return unixClusteringSupported;
+  }
+
+  private static boolean isUnixClusteringSupported(List<Coercion<NamedOption>> options) {
+    List<Coercion<NamedOption>> unixOptions = options.stream()
+        .filter(option -> option.parameter().hasUnixName())
+        .collect(Collectors.toList());
+    return unixOptions.size() >= 2 && unixOptions.stream().anyMatch(Coercion::isFlag);
   }
 
   public String getSuccessResultMethodName() {

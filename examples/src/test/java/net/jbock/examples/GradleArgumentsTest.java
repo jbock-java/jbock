@@ -46,9 +46,9 @@ class GradleArgumentsTest {
     f.assertThat("-c=v").failsWithMessage("Invalid token: -c=v");
     f.assertThat("-c=").failsWithMessage("Invalid token: -c=");
     f.assertThat("-cX=1").failsWithMessage("Invalid token: -cX=1");
-    f.assertThat("-cvv").failsWithMessage("Invalid token: -cvv");
+    f.assertThat("-cvv").failsWithMessage("Option '-v' is a repetition");
     f.assertThat("-cvx").failsWithMessage("Invalid token: -cvx");
-    f.assertThat("-cvm").failsWithMessage("Invalid token: -cvm");
+    f.assertThat("-cvm").failsWithMessage("Missing value after token: -m");
   }
 
   @Test
@@ -178,8 +178,28 @@ class GradleArgumentsTest {
   }
 
   @Test
-  void errorSuspiciousInput() {
-    f.assertThat("-cvm", "hello").failsWithMessage("Invalid token: -cvm");
+  void testClustering() {
+    f.assertThat("-cv").succeeds(
+        "message", Optional.empty(),
+        "file", emptyList(),
+        "dir", Optional.empty(),
+        "cmos", true,
+        "verbose", true,
+        "otherTokens", emptyList());
+    f.assertThat("-cvm", "hello").succeeds(
+        "message", Optional.of("hello"),
+        "file", emptyList(),
+        "dir", Optional.empty(),
+        "cmos", true,
+        "verbose", true,
+        "otherTokens", emptyList());
+    f.assertThat("-cvmhello").succeeds(
+        "message", Optional.of("hello"),
+        "file", emptyList(),
+        "dir", Optional.empty(),
+        "cmos", true,
+        "verbose", true,
+        "otherTokens", emptyList());
   }
 
   @Test

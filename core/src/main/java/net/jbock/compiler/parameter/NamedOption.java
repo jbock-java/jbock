@@ -63,6 +63,10 @@ public class NamedOption extends Parameter {
     return optionName;
   }
 
+  public boolean hasUnixName() {
+    return mnemonic != ' ';
+  }
+
   @Override
   public char mnemonic() {
     return mnemonic;

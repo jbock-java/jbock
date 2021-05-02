@@ -157,19 +157,25 @@ class CurlArgumentsTest {
   }
 
   @Test
-  void errorInvalidGrouping() {
-    f.assertThat("-vH1").failsWithMessage("Invalid token: -vH1");
-  }
-
-  @Test
-  void errorInvalidGroupingLong() {
-    f.assertThat("-vXPOST").failsWithMessage("Invalid token: -vXPOST");
+  void testClustering() {
+    f.assertThat("-H0", "-vH1", "-H2").succeeds(
+        "method", Optional.empty(),
+        "headers", asList("0", "1", "2"),
+        "verbose", true,
+        "include", false,
+        "urls", emptyList());
+    f.assertThat("-vXPOST").succeeds(
+        "method", Optional.of("POST"),
+        "headers", emptyList(),
+        "verbose", true,
+        "include", false,
+        "urls", emptyList());
   }
 
   @Test
   void errorGroupingDuplicateFlag() {
     f.assertThat("-v", "-vH'Content-Type: application/xml'").failsWithMessage(
-        "Invalid token: -vH'Content-Type: application/xml'");
+        "Option '-vH'Content-Type: application/xml'' is a repetition");
   }
 
   @Test

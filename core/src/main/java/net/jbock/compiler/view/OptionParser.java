@@ -5,6 +5,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.coerce.Coercion;
 import net.jbock.compiler.Constants;
@@ -19,6 +20,7 @@ import java.util.stream.Stream;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
+import static com.squareup.javapoet.TypeName.VOID;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
@@ -117,16 +119,23 @@ final class OptionParser {
     return MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it))
         .addModifiers(ABSTRACT)
+        .returns(readMethodReturnType())
         .build();
   }
 
   private MethodSpec readMethodRepeatable(FieldSpec values) {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class);
+    code.addStatement("values.add(readOptionArgument($N, $N))", token, it);
+    if (context.isUnixClusteringSupported()) {
+      code.addStatement("return false");
+    }
     return MethodSpec.methodBuilder("read")
         .addParameters(asList(token, it))
-        .addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class)
-        .addStatement("values.add(readOptionArgument($N, $N))", token, it)
+        .addCode(code.build())
+        .returns(readMethodReturnType())
         .build();
   }
 
@@ -137,11 +146,13 @@ final class OptionParser {
     code.add("if ($N != null)\n", value).indent()
         .addStatement(throwRepetitionErrorStatement(token))
         .unindent();
-
     code.addStatement("$N = readOptionArgument($N, $N)", value, token, it);
-
+    if (context.isUnixClusteringSupported()) {
+      code.addStatement("return false");
+    }
     return MethodSpec.methodBuilder("read")
         .addCode(code.build())
+        .returns(readMethodReturnType())
         .addParameters(asList(token, it)).build();
   }
 
@@ -149,8 +160,29 @@ final class OptionParser {
   private MethodSpec readMethodFlag(FieldSpec seen) {
     ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
-    CodeBlock.Builder code = CodeBlock.builder();
+    return MethodSpec.methodBuilder("read")
+        .addCode(context.isUnixClusteringSupported() ?
+            readMethodFlagCodeClustering(seen, token) :
+            readMethodFlagCodeSimple(seen, token))
+        .returns(readMethodReturnType())
+        .addParameters(asList(token, it)).build();
+  }
 
+  private CodeBlock readMethodFlagCodeClustering(FieldSpec seen, ParameterSpec token) {
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.add("if ($N.contains($S))\n", token, "=").indent()
+        .addStatement("throw new $T($S + $N)", RuntimeException.class, "Invalid token: ", token)
+        .unindent();
+    code.add("if ($N)\n", seen).indent()
+        .addStatement(throwRepetitionErrorStatement(token))
+        .unindent();
+    code.addStatement("$N = $L", seen, true);
+    code.addStatement("return $N.charAt(1) != '-' && $N.length() >= 3", token, token);
+    return code.build();
+  }
+
+  private CodeBlock readMethodFlagCodeSimple(FieldSpec seen, ParameterSpec token) {
+    CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))\n", token, token, token, "=").indent()
         .addStatement("throw new $T($S + $N)", RuntimeException.class, "Invalid token: ", token)
         .unindent();
@@ -158,9 +190,7 @@ final class OptionParser {
         .addStatement(throwRepetitionErrorStatement(token))
         .unindent();
     code.addStatement("$N = $L", seen, true);
-    return MethodSpec.methodBuilder("read")
-        .addCode(code.build())
-        .addParameters(asList(token, it)).build();
+    return code.build();
   }
 
   MethodSpec streamMethodAbstract() {
@@ -199,5 +229,9 @@ final class OptionParser {
     return CodeBlock.of(addBreaks("throw new $T($T.format($S, $N))"),
         RuntimeException.class, String.class,
         "Option '%s' is a repetition", token);
+  }
+
+  private TypeName readMethodReturnType() {
+    return context.isUnixClusteringSupported() ? BOOLEAN : VOID;
   }
 }

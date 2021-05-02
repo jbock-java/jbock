@@ -26,7 +26,7 @@ class TarArgumentsTest {
 
   @Test
   void flagWithArgument() {
-    f.assertThat("-xf").failsWithMessage("Invalid token: -xf");
+    f.assertThat("-xf").failsWithMessage("Missing value after token: -f");
     f.assertThat("--x=f").failsWithMessage("Invalid token: --x=f");
   }
 
