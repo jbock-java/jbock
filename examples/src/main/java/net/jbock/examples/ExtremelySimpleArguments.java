@@ -5,7 +5,7 @@ import net.jbock.Parameter;
 
 import java.util.OptionalInt;
 
-@Command
+@Command(helpEnabled = false)
 abstract class ExtremelySimpleArguments {
 
   @Parameter(index = 0)

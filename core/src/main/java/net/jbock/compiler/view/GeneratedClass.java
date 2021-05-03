@@ -58,8 +58,7 @@ public final class GeneratedClass {
 
   private static final int CONTINUATION_INDENT_USAGE = 8;
   static final String OPTIONS_BY_NAME = "OPTIONS_BY_NAME";
-  static final String SUSPICIOUS_PATTERN_1 = "SUS1";
-  static final String SUSPICIOUS_PATTERN_2 = "SUS2";
+  static final String SUSPICIOUS_PATTERN = "SUSPICOUS";
 
   private final Context context;
   private final Description description;
@@ -150,13 +149,8 @@ public final class GeneratedClass {
           .build());
     }
 
-    spec.addField(FieldSpec.builder(Pattern.class, SUSPICIOUS_PATTERN_1)
-        .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+")
-        .addModifiers(PRIVATE, STATIC, FINAL)
-        .build());
-
-    spec.addField(FieldSpec.builder(Pattern.class, SUSPICIOUS_PATTERN_2)
-        .initializer("$T.compile($S)", Pattern.class, "--[a-zA-Z0-9-]+")
+    spec.addField(FieldSpec.builder(Pattern.class, SUSPICIOUS_PATTERN)
+        .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
         .addModifiers(PRIVATE, STATIC, FINAL)
         .build());
 

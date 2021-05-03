@@ -19,6 +19,11 @@ class RmArgumentsTest {
   }
 
   @Test
+  void testInvalidToken() {
+    f.assertThat("--foo-bar").failsWithMessage("Invalid option: --foo-bar");
+  }
+
+  @Test
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",

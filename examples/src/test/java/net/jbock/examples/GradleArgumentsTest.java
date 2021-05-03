@@ -49,6 +49,7 @@ class GradleArgumentsTest {
     f.assertThat("-cvv").failsWithMessage("Option '-v' is a repetition");
     f.assertThat("-cvx").failsWithMessage("Invalid token: -cvx");
     f.assertThat("-cvm").failsWithMessage("Missing value after token: -m");
+    f.assertThat("--column-count").failsWithMessage("Invalid option: --column-count");
   }
 
   @Test

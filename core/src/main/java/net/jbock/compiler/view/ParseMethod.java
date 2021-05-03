@@ -17,8 +17,7 @@ import static com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.view.GeneratedClass.SUSPICIOUS_PATTERN_1;
-import static net.jbock.compiler.view.GeneratedClass.SUSPICIOUS_PATTERN_2;
+import static net.jbock.compiler.view.GeneratedClass.SUSPICIOUS_PATTERN;
 
 class ParseMethod {
 
@@ -141,8 +140,8 @@ class ParseMethod {
   }
 
   CodeBlock errorUnrecognizedOption() {
-    return CodeBlock.builder().add("if ($L.matcher($N).matches() || $L.matcher($N).matches())\n",
-        SUSPICIOUS_PATTERN_1, token, SUSPICIOUS_PATTERN_2, token).indent()
+    return CodeBlock.builder().add("if ($L.matcher($N).matches())\n",
+        SUSPICIOUS_PATTERN, token).indent()
         .addStatement(throwInvalidOptionStatement("Invalid option"))
         .unindent().build();
   }
