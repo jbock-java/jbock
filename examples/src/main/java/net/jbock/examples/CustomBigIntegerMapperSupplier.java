@@ -1,12 +1,12 @@
 package net.jbock.examples;
 
-import net.jbock.Mapper;
+import net.jbock.Converter;
 
 import java.math.BigInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-@Mapper
+@Converter
 class CustomBigIntegerMapperSupplier implements Supplier<Function<String, BigInteger>> {
 
   @Override

@@ -20,7 +20,7 @@ import static java.util.stream.Collectors.toSet;
 
 class AnnotationUtil {
 
-  private static final String MAPPER_ATTRIBUTE = "mappedBy";
+  private static final String CONVERTER_ATTRIBUTE = "converter";
 
   private static final Set<String> ANNOTATIONS = Stream.of(Param.class, Option.class)
       .map(Class::getCanonicalName).collect(toSet());
@@ -54,7 +54,7 @@ class AnnotationUtil {
   }
 
   private static AnnotationValue getAnnotationValue(AnnotationMirror annotationMirror) {
-    return AnnotationMirrors.getAnnotationValue(annotationMirror, MAPPER_ATTRIBUTE);
+    return AnnotationMirrors.getAnnotationValue(annotationMirror, CONVERTER_ATTRIBUTE);
   }
 
   private static boolean isNotVoid(TypeElement typeElement) {

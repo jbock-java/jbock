@@ -2,7 +2,7 @@ package net.jbock.compiler;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
-import net.jbock.Mapper;
+import net.jbock.Converter;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
@@ -19,7 +19,7 @@ class MapperProcessingStep implements BasicAnnotationProcessor.Step {
 
   @Override
   public Set<String> annotations() {
-    return Stream.of(Mapper.class)
+    return Stream.of(Converter.class)
         .map(Class::getCanonicalName)
         .collect(Collectors.toSet());
   }

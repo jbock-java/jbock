@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Mapper;
+import net.jbock.Converter;
 import net.jbock.Param;
 
 import java.util.ArrayList;
@@ -14,10 +14,10 @@ import java.util.function.Supplier;
 @Command
 abstract class SudokuArguments {
 
-  @Param(value = 0, mappedBy = MapMap.class)
+  @Param(value = 0, converter = MapMap.class)
   abstract java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> number();
 
-  @Mapper
+  @Converter
   static class MapMap implements Supplier<Function<String, java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>>>> {
     public Foo1<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>> get() {
       return s -> new ArrayList<>();

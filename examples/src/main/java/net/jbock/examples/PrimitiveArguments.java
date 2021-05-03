@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Mapper;
+import net.jbock.Converter;
 import net.jbock.Option;
 
 import java.util.function.Function;
@@ -33,31 +33,31 @@ abstract class PrimitiveArguments {
 
   // there's no simple boolean -- that would be a flag!
 
-  @Option(names = {"--b", "-b"}, mappedBy = ByteMapper.class)
+  @Option(names = {"--b", "-b"}, converter = ByteMapper.class)
   abstract byte mappedByte();
 
-  @Option(names = {"--s", "-s"}, mappedBy = ShortMapper.class)
+  @Option(names = {"--s", "-s"}, converter = ShortMapper.class)
   abstract short mappedShort();
 
-  @Option(names = {"--i", "-i"}, mappedBy = IntMapper.class)
+  @Option(names = {"--i", "-i"}, converter = IntMapper.class)
   abstract int mappedInt();
 
-  @Option(names = {"--l", "-l"}, mappedBy = LongMapper.class)
+  @Option(names = {"--l", "-l"}, converter = LongMapper.class)
   abstract long mappedLong();
 
-  @Option(names = {"--f", "-f"}, mappedBy = FloatMapper.class)
+  @Option(names = {"--f", "-f"}, converter = FloatMapper.class)
   abstract float mappedFloat();
 
-  @Option(names = {"--d", "-d"}, mappedBy = DoubleMapper.class)
+  @Option(names = {"--d", "-d"}, converter = DoubleMapper.class)
   abstract double mappedDouble();
 
-  @Option(names = {"--c", "-c"}, mappedBy = CharMapper.class)
+  @Option(names = {"--c", "-c"}, converter = CharMapper.class)
   abstract char mappedChar();
 
-  @Option(names = {"--x", "-x"}, mappedBy = BooleanMapper.class)
+  @Option(names = {"--x", "-x"}, converter = BooleanMapper.class)
   abstract boolean mappedBoolean();
 
-  @Mapper
+  @Converter
   static class IntMapper implements Supplier<Function<String, Integer>> {
     @Override
     public Function<String, Integer> get() {
@@ -65,7 +65,7 @@ abstract class PrimitiveArguments {
     }
   }
 
-  @Mapper
+  @Converter
   static class LongMapper implements Supplier<Function<String, Long>> {
     @Override
     public Function<String, Long> get() {
@@ -73,7 +73,7 @@ abstract class PrimitiveArguments {
     }
   }
 
-  @Mapper
+  @Converter
   static class DoubleMapper implements Supplier<Function<String, Double>> {
     @Override
     public Function<String, Double> get() {
@@ -81,7 +81,7 @@ abstract class PrimitiveArguments {
     }
   }
 
-  @Mapper
+  @Converter
   static class ByteMapper implements Supplier<Function<String, Byte>> {
     @Override
     public Function<String, Byte> get() {
@@ -89,7 +89,7 @@ abstract class PrimitiveArguments {
     }
   }
 
-  @Mapper
+  @Converter
   static class ShortMapper implements Supplier<Function<String, Short>> {
     @Override
     public Function<String, Short> get() {
@@ -97,7 +97,7 @@ abstract class PrimitiveArguments {
     }
   }
 
-  @Mapper
+  @Converter
   static class FloatMapper implements Supplier<Function<String, Float>> {
     @Override
     public Function<String, Float> get() {
@@ -105,7 +105,7 @@ abstract class PrimitiveArguments {
     }
   }
 
-  @Mapper
+  @Converter
   static class CharMapper implements Supplier<Function<String, Character>> {
     @Override
     public Function<String, Character> get() {
@@ -113,7 +113,7 @@ abstract class PrimitiveArguments {
     }
   }
 
-  @Mapper
+  @Converter
   static class BooleanMapper implements Supplier<Function<String, Boolean>> {
     @Override
     public Function<String, Boolean> get() {

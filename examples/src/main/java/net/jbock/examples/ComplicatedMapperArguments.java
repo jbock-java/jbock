@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
+import net.jbock.Converter;
 import net.jbock.Option;
 
 import java.util.List;
@@ -12,15 +13,15 @@ abstract class ComplicatedMapperArguments {
 
   @Option(
       names = "--number",
-      mappedBy = Mapper.class)
+      converter = Mapper.class)
   abstract Integer number();
 
   @Option(
       names = "--numbers",
-      mappedBy = LazyNumberMapper.class)
+      converter = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();
 
-  @net.jbock.Mapper
+  @Converter
   static class LazyNumberMapper implements Supplier<Function<String, LazyNumber>> {
     @Override
     public Function<String, LazyNumber> get() {
@@ -31,8 +32,7 @@ abstract class ComplicatedMapperArguments {
   interface LazyNumber extends Supplier<Integer> {
   }
 
-  // parser must understand that this implements Function<String, Integer>
-  @net.jbock.Mapper
+  @Converter
   static class Mapper implements Supplier<Function<String, Integer>> {
     @Override
     public Function<String, Integer> get() {

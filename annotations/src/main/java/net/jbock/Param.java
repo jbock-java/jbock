@@ -26,17 +26,17 @@ public @interface Param {
   int value();
 
   /**
-   * Declare a custom mapper for this positional parameter.
+   * Declare a custom converter for this positional parameter.
    * This is either a
    * {@link java.util.function.Function Function}
    * accepting strings,
    * or a {@link java.util.function.Supplier Supplier} thereof.
    * It must either be a {@code static} inner class of the class carrying the {@link Command} annotation,
-   * or, if it is declared in a separate source file, it must carry the {@link Mapper} annotation.
+   * or, if it is declared in a separate source file, it must carry the {@link Converter} annotation.
    *
    * @return a mapper class, or {@code Void.class}
    */
-  Class<?> mappedBy() default Void.class;
+  Class<?> converter() default Void.class;
 
   /**
    * The key that is used to look up the parameter

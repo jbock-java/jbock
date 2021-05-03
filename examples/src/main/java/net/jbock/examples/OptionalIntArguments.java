@@ -1,6 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
+import net.jbock.Converter;
 import net.jbock.Option;
 
 import java.util.OptionalInt;
@@ -12,10 +13,10 @@ abstract class OptionalIntArguments {
 
   private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
 
-  @Option(names = {"--a", "-a"}, mappedBy = Mapper.class)
+  @Option(names = {"--a", "-a"}, converter = Mapper.class)
   abstract OptionalInt a();
 
-  @net.jbock.Mapper
+  @Converter
   static class Mapper implements Supplier<Function<String, OptionalInt>> {
 
     @Override

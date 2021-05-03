@@ -8,8 +8,9 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * Marker annotation for a mapper class.
- * This annotation is mandatory only for standalone classes. Those are the
- * classes which are not an inner class of the class that carries the {@link Command} annotation.
+ * This annotation is mandatory only standalone classes.
+ * Those are the classes that are not an inner class
+ * of the class where the converter is referenced.
  * The mapper class must implement either {@code Function<String, M>} or
  * {@code Supplier<Function<String, M>>},
  * where one of the following holds:
@@ -30,5 +31,5 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  */
 @Target(TYPE)
 @Retention(SOURCE)
-public @interface Mapper {
+public @interface Converter {
 }

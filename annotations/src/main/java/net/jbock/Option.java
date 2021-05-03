@@ -28,17 +28,17 @@ public @interface Option {
   String[] names() default {};
 
   /**
-   * Declare a custom mapper for this named option.
+   * Declare a custom converter for this named option.
    * This is either a
    * {@link java.util.function.Function Function}
    * accepting strings,
    * or a {@link java.util.function.Supplier Supplier} thereof.
    * It must either be a {@code static} inner class of the class carrying the {@link Command} annotation,
-   * or, if it is declared in a separate source file, it must carry the {@link Mapper} annotation.
+   * or, if it is declared in a separate source file, it must carry the {@link Converter} annotation.
    *
    * @return an optional mapper class, or {@code Void.class} to represent "none"
    */
-  Class<?> mappedBy() default Void.class;
+  Class<?> converter() default Void.class;
 
   /**
    * The key that is used to find the parameter

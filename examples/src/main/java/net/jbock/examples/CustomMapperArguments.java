@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Mapper;
+import net.jbock.Converter;
 import net.jbock.Option;
 import net.jbock.Param;
 
@@ -25,43 +25,43 @@ abstract class CustomMapperArguments {
    * The mapper must be a Function from String to whatever-this-returns.
    * It must also have a package-visible no-arg constructor.
    */
-  @Option(names = "--date", mappedBy = DateMapper.class)
+  @Option(names = "--date", converter = DateMapper.class)
   abstract Date date();
 
-  @Option(names = "--optDate", mappedBy = DateMapper.class)
+  @Option(names = "--optDate", converter = DateMapper.class)
   abstract Optional<Date> optDate();
 
-  @Option(names = "--dateList", mappedBy = DateMapper.class)
+  @Option(names = "--dateList", converter = DateMapper.class)
   abstract List<Date> dateList();
 
-  @Option(names = "--verbosity", mappedBy = CustomBigIntegerMapperSupplier.class)
+  @Option(names = "--verbosity", converter = CustomBigIntegerMapperSupplier.class)
   abstract Optional<BigInteger> verbosity();
 
-  @Option(names = "--aRequiredInt", mappedBy = PositiveNumberMapper.class)
+  @Option(names = "--aRequiredInt", converter = PositiveNumberMapper.class)
   abstract int aRequiredInt();
 
-  @Option(names = "--stringArray", mappedBy = ArrayMapper.class)
+  @Option(names = "--stringArray", converter = ArrayMapper.class)
   abstract Optional<String[]> stringArray();
 
-  @Option(names = "--integerList", mappedBy = IntegerListMapper.class)
+  @Option(names = "--integerList", converter = IntegerListMapper.class)
   abstract Optional<ArrayList<Integer>> integerList();
 
-  @Option(names = "--enumSet", mappedBy = EnumSetMapper.class)
+  @Option(names = "--enumSet", converter = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
-  @Param(value = 0, mappedBy = BooleanMapper.class)
+  @Param(value = 0, converter = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
-  @Option(names = "--optionalInts", mappedBy = OptionalIntMapper.class)
+  @Option(names = "--optionalInts", converter = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
-  @Option(names = "--listWrapper", mappedBy = ListWrapperMapper.class)
+  @Option(names = "--listWrapper", converter = ListWrapperMapper.class)
   abstract Optional<java.util.ArrayList<String>> listWrapper();
 
-  @Option(names = "--notFlag", mappedBy = BooleanMapper.class)
+  @Option(names = "--notFlag", converter = BooleanMapper.class)
   abstract Boolean notFlag();
 
-  @Mapper
+  @Converter
   static class DateMapper implements Supplier<Function<String, Date>> {
 
     @Override
@@ -70,7 +70,7 @@ abstract class CustomMapperArguments {
     }
   }
 
-  @Mapper
+  @Converter
   static class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
 
     @Override

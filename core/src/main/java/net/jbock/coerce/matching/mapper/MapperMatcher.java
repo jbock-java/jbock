@@ -3,7 +3,7 @@ package net.jbock.coerce.matching.mapper;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Command;
-import net.jbock.Mapper;
+import net.jbock.Converter;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.Match;
@@ -78,11 +78,11 @@ public class MapperMatcher extends ParameterScoped {
   }
 
   private Optional<String> checkMapperAnnotation() {
-    Mapper mapperAnnotation = mapperClass.getAnnotation(Mapper.class);
+    Converter mapperAnnotation = mapperClass.getAnnotation(Converter.class);
     boolean nestedMapper = getEnclosingElements(mapperClass).contains(sourceElement());
     if (mapperAnnotation == null && !nestedMapper) {
       return Optional.of("mapper must be a static inner class of the @" + Command.class.getSimpleName() +
-          " annotated class, or carry the @" + Mapper.class.getSimpleName() + " annotation");
+          " annotated class, or carry the @" + Converter.class.getSimpleName() + " annotation");
     }
     return Optional.empty();
   }

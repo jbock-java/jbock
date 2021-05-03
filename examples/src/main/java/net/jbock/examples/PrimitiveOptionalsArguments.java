@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Mapper;
+import net.jbock.Converter;
 import net.jbock.Option;
 
 import java.util.OptionalDouble;
@@ -13,25 +13,25 @@ import java.util.function.Supplier;
 @Command
 abstract class PrimitiveOptionalsArguments {
 
-  @Option(names = {"--I", "-I"}, mappedBy = IntegerMapper.class)
+  @Option(names = {"--I", "-I"}, converter = IntegerMapper.class)
   abstract OptionalInt simpleInt();
 
-  @Option(names = {"--L", "-L"}, mappedBy = LongMapper.class)
+  @Option(names = {"--L", "-L"}, converter = LongMapper.class)
   abstract OptionalLong simpleLong();
 
-  @Option(names = {"--D", "-D"}, mappedBy = DoubleMapper.class)
+  @Option(names = {"--D", "-D"}, converter = DoubleMapper.class)
   abstract OptionalDouble simpleDouble();
 
-  @Option(names = {"--i", "-i"}, mappedBy = IntegerMapper.class)
+  @Option(names = {"--i", "-i"}, converter = IntegerMapper.class)
   abstract OptionalInt mappedInt();
 
-  @Option(names = {"--l", "-l"}, mappedBy = LongMapper.class)
+  @Option(names = {"--l", "-l"}, converter = LongMapper.class)
   abstract OptionalLong mappedLong();
 
-  @Option(names = {"--d", "-d"}, mappedBy = DoubleMapper.class)
+  @Option(names = {"--d", "-d"}, converter = DoubleMapper.class)
   abstract OptionalDouble mappedDouble();
 
-  @Mapper
+  @Converter
   static class IntegerMapper implements Supplier<Function<String, Integer>> {
     @Override
     public Function<String, Integer> get() {
@@ -39,7 +39,7 @@ abstract class PrimitiveOptionalsArguments {
     }
   }
 
-  @Mapper
+  @Converter
   static class LongMapper implements Supplier<Function<String, Long>> {
     @Override
     public Function<String, Long> get() {
@@ -47,7 +47,7 @@ abstract class PrimitiveOptionalsArguments {
     }
   }
 
-  @Mapper
+  @Converter
   static class DoubleMapper implements Supplier<Function<String, Double>> {
     @Override
     public Function<String, Double> get() {
