@@ -71,9 +71,6 @@ public final class GeneratedClass {
   private final StatefulParser parserState;
   private final ParseResult parseResult;
 
-  private final FieldSpec out = FieldSpec.builder(PrintStream.class, "out", PRIVATE)
-      .initializer("$T.out", System.class).build();
-
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
 
@@ -123,9 +120,6 @@ public final class GeneratedClass {
         .addMethod(withResourceBundleMethod(accessModifiers))
         .addMethod(withExitHookMethod(accessModifiers))
         .addMethod(withErrorStreamMethod(accessModifiers));
-    if (context.isHelpParameterEnabled()) {
-      spec.addMethod(withHelpStreamMethod(accessModifiers));
-    }
     spec.addMethod(printOnlineHelpMethod(accessModifiers))
         .addMethod(printOptionMethod())
         .addMethod(printTokensMethod())
@@ -143,9 +137,6 @@ public final class GeneratedClass {
       spec.addMethod(missingRequiredMethod());
     }
 
-    if (context.isHelpParameterEnabled()) {
-      spec.addField(out);
-    }
     spec.addField(err);
     spec.addField(programName);
     spec.addField(maxLineWidth);
@@ -209,7 +200,6 @@ public final class GeneratedClass {
   }
 
   private MethodSpec printOnlineHelpMethod(Modifier[] accessModifiers) {
-    ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     CodeBlock.Builder code = CodeBlock.builder();
     String continuationIndent = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
 
@@ -219,31 +209,32 @@ public final class GeneratedClass {
       for (String line : description.getValue()) {
         code.addStatement("$T.addAll($N, $S.split($S, $L))", Collections.class, descriptionBuilder, line, "\\s+", -1);
       }
-      code.addStatement("printTokens($N, $S, $N)", printStream, "", descriptionBuilder);
-      code.addStatement("$N.println()", printStream);
+      code.addStatement("printTokens($S, $N)", "", descriptionBuilder);
+      code.addStatement("$N.println()", err);
     }
 
-    code.addStatement("$N.println($S)", printStream, "USAGE");
-    code.addStatement("printTokens($N, $S, usage())", printStream, continuationIndent);
+    code.addStatement("$N.println($S)", err, "USAGE");
+    code.addStatement("printTokens($S, usage())", continuationIndent);
 
     if (!context.params().isEmpty()) {
-      code.addStatement("$N.println()", printStream);
-      code.addStatement("$N.println($S)", printStream, "PARAMETERS");
+      code.addStatement("$N.println()", err);
+      code.addStatement("$N.println($S)", err, "PARAMETERS");
     }
     context.params().forEach(p ->
-        code.addStatement("printOption($N, $T.$L, $S, $S)", printStream, generatedTypes.optionType(), p.enumConstant(),
+        code.addStatement("printOption($T.$L, $S, $S)",
+            generatedTypes.optionType(), p.enumConstant(),
             p.parameter().bundleKey().orElse(""),
             p.sample()));
     if (!context.options().isEmpty()) {
-      code.addStatement("$N.println()", printStream);
-      code.addStatement("$N.println($S)", printStream, "OPTIONS");
+      code.addStatement("$N.println()", err);
+      code.addStatement("$N.println($S)", err, "OPTIONS");
     }
     context.options().forEach(p ->
-        code.addStatement("printOption($N, $T.$L, $S, $S)", printStream, generatedTypes.optionType(), p.enumConstant(),
+        code.addStatement("printOption($T.$L, $S, $S)",
+            generatedTypes.optionType(), p.enumConstant(),
             p.parameter().bundleKey().orElse(""),
             p.sample()));
     return methodBuilder("printOnlineHelp")
-        .addParameter(printStream)
         .addModifiers(accessModifiers)
         .addCode(code.build())
         .build();
@@ -256,7 +247,6 @@ public final class GeneratedClass {
         .map(Coercion::sample)
         .mapToInt(String::length).max().orElse(0) + totalPadding;
     String format = "  %1$-" + (width - 2) + "s";
-    ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec messageKey = builder(STRING, "messageKey").build();
     ParameterSpec message = builder(STRING, "message").build();
     ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
@@ -281,10 +271,9 @@ public final class GeneratedClass {
         .unindent()
         .unindent()
         .build());
-    code.addStatement("printTokens($N, $S, $N)",
-        printStream, String.join("", Collections.nCopies(width + 1, " ")), tokens);
+    code.addStatement("printTokens($S, $N)",
+        String.join("", Collections.nCopies(width + 1, " ")), tokens);
     return methodBuilder("printOption")
-        .addParameter(printStream)
         .addParameter(option)
         .addParameter(messageKey)
         .addParameter(sample)
@@ -294,7 +283,6 @@ public final class GeneratedClass {
   }
 
   private MethodSpec printTokensMethod() {
-    ParameterSpec printStream = builder(PrintStream.class, "printStream").build();
     ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec lines = builder(LIST_OF_STRING, "lines").build();
@@ -302,12 +290,11 @@ public final class GeneratedClass {
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = makeLines($N, $N)", lines.type, lines, continuationIndent, tokens);
     code.add("for ($T $N : $N)\n", STRING, line, lines).indent()
-        .addStatement("$N.println($N)", printStream, line)
+        .addStatement("$N.println($N)", err, line)
         .unindent();
     return methodBuilder("printTokens")
         .addModifiers(PRIVATE)
         .addCode(code.build())
-        .addParameter(printStream)
         .addParameter(continuationIndent)
         .addParameter(tokens)
         .build();
@@ -410,20 +397,11 @@ public final class GeneratedClass {
         .build();
   }
 
-  private MethodSpec withHelpStreamMethod(Modifier[] accessModifiers) {
-    return withPrintStreamMethod("withHelpStream", context, out, accessModifiers);
-  }
-
   private MethodSpec withErrorStreamMethod(Modifier[] accessModifiers) {
-    return withPrintStreamMethod("withErrorStream", context, err, accessModifiers);
-  }
-
-  private static MethodSpec withPrintStreamMethod(
-      String methodName, Context context, FieldSpec stream, Modifier[] accessModifiers) {
-    ParameterSpec param = builder(stream.type, stream.name).build();
-    return methodBuilder(methodName)
+    ParameterSpec param = builder(err.type, err.name).build();
+    return methodBuilder("withErrorStream")
         .addParameter(param)
-        .addStatement("this.$N = $N", stream, param)
+        .addStatement("this.$N = $N", err, param)
         .addStatement("return this")
         .returns(context.generatedClass())
         .addModifiers(accessModifiers)
@@ -561,17 +539,17 @@ public final class GeneratedClass {
 
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> code
         .beginControlFlow("if ($N instanceof $T)", result, helpRequestedType)
-        .addStatement("printOnlineHelp($N)", out)
-        .addStatement("$N.flush()", out)
+        .addStatement("printOnlineHelp()")
+        .addStatement("$N.flush()", err)
         .addStatement("$N.accept($N, 0)", exitHook, result)
         .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
         .endControlFlow());
 
     code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", generatedTypes.parsingFailedType(), result);
     if (context.isHelpParameterEnabled()) {
-      code.addStatement("printTokens($N, $S, usage())", err, String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " ")));
+      code.addStatement("printTokens($S, usage())", String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " ")));
     } else {
-      code.addStatement("printOnlineHelp($N)", err);
+      code.addStatement("printOnlineHelp()");
     }
     if (context.isHelpParameterEnabled()) {
       code.addStatement("$N.println($S + $N + $S)", err, "Try '", programName, " --help' for more information.");

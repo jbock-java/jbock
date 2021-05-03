@@ -39,8 +39,6 @@ public final class ParserTestFixture<E> {
 
     Object parseOrExit(String[] args);
 
-    Parser<E> withHelpStream(PrintStream out);
-
     Parser<E> withErrorStream(PrintStream out);
 
     Parser<E> withMessages(Map<String, String> map);
@@ -106,15 +104,6 @@ public final class ParserTestFixture<E> {
       }
 
       @Override
-      public Parser<E> withHelpStream(PrintStream out) {
-        try {
-          return callSetter("withHelpStream", out);
-        } catch (RuntimeException e) {
-          return this;
-        }
-      }
-
-      @Override
       public Parser<E> withErrorStream(PrintStream err) {
         return callSetter("withErrorStream", err);
       }
@@ -147,9 +136,8 @@ public final class ParserTestFixture<E> {
   }
 
   public E parse(String... args) {
-    TestOutputStream stdout = new TestOutputStream();
     TestOutputStream stderr = new TestOutputStream();
-    Optional<E> result = parser.withHelpStream(stdout.out)
+    Optional<E> result = parser
         .withErrorStream(stderr.out).maxLineWidth(MAX_LINE_WIDTH).parse(args);
     if (!result.isPresent()) {
       throw new AssertionError(stderr.toString());
@@ -206,12 +194,10 @@ public final class ParserTestFixture<E> {
   public static final class JsonAssert<E> {
 
     class Parsed {
-      final String stdout;
       final String stderr;
       final Optional<E> result;
 
-      Parsed(String stdout, String stderr, Optional<E> result) {
-        this.stdout = stdout;
+      Parsed(String stderr, Optional<E> result) {
         this.stderr = stderr;
         this.result = result;
       }
@@ -226,11 +212,10 @@ public final class ParserTestFixture<E> {
     }
 
     Parsed getParsed() {
-      TestOutputStream stdout = new TestOutputStream();
       TestOutputStream stderr = new TestOutputStream();
-      Optional<E> result = parser.withHelpStream(stdout.out)
+      Optional<E> result = parser
           .withErrorStream(stderr.out).maxLineWidth(MAX_LINE_WIDTH).parse(args);
-      return new Parsed(stdout.toString(), stderr.toString(), result);
+      return new Parsed(stderr.toString(), result);
     }
 
     private final String[] args;
@@ -261,11 +246,9 @@ public final class ParserTestFixture<E> {
     }
 
     private String getErr() {
-      TestOutputStream stdout = new TestOutputStream();
       TestOutputStream stderr = new TestOutputStream();
       try {
-        parser.withHelpStream(stdout.out)
-            .withErrorStream(stderr.out)
+        parser.withErrorStream(stderr.out)
             .withExitHook((r, code) -> {
               throw new Abort();
             })
@@ -273,9 +256,7 @@ public final class ParserTestFixture<E> {
             .parseOrExit(args);
         fail("Expecting empty result");
       } catch (Abort e) {
-        if (!stdout.toString().isEmpty()) {
-          throw new AssertionError("Unexpected output on stdout: " + stdout);
-        }
+        // noop
       }
       return stderr.toString();
     }
@@ -291,7 +272,6 @@ public final class ParserTestFixture<E> {
       Parsed parsed = getParsed();
       try {
         assertTrue(parsed.isPresent(), "Parsing was not successful: " + parsed.stderr);
-        assertTrue(parsed.stdout.isEmpty());
         assertTrue(parsed.stderr.isEmpty());
         for (int i = 0; i < expected.length; i += 2) {
           String key = (String) expected[i];
@@ -319,11 +299,9 @@ public final class ParserTestFixture<E> {
   }
 
   private String[] getOut() {
-    TestOutputStream stdout = new TestOutputStream();
     TestOutputStream stderr = new TestOutputStream();
     try {
-      parser.withHelpStream(stdout.out)
-          .withErrorStream(stderr.out)
+      parser.withErrorStream(stderr.out)
           .withExitHook((r, code) -> {
             throw new Abort();
           })
@@ -331,11 +309,9 @@ public final class ParserTestFixture<E> {
           .parseOrExit(new String[]{"--help"});
       fail("Expecting empty result");
     } catch (Abort e) {
-      if (!stderr.toString().isEmpty()) {
-        throw new AssertionError("Unexpected output on stderr: " + stderr.toString());
-      }
+      // noop
     }
-    return stdout.toString().split("\\R", -1);
+    return stderr.toString().split("\\R", -1);
   }
 
   private static class Abort extends RuntimeException {

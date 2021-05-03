@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
+import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.coerce.Coercion;
 import net.jbock.compiler.parameter.AbstractParameter;
@@ -92,9 +93,11 @@ public final class Context {
   public FieldSpec exitHookField() {
     ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(BiConsumer.class),
         generatedTypes.parseResultType(), ClassName.get(Integer.class));
+    ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
+    ParameterSpec rc = ParameterSpec.builder(Integer.class, "rc").build();
     return FieldSpec.builder(consumer, "exitHook")
         .addModifiers(PRIVATE)
-        .initializer("(r, code) -> $T.exit(code)", System.class)
+        .initializer("($N, $N) -> $T.exit($N)", result, rc, System.class, rc)
         .build();
   }
 
