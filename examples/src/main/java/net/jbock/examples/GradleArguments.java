@@ -15,34 +15,28 @@ abstract class GradleArguments {
    * the message
    * message goes here
    */
-  @Option(
-      value = "message",
-      mnemonic = 'm')
+  @Option(names = {"--message", "-m"})
   abstract Optional<String> message();
 
   /**
    * the files
    */
-  @Option(
-      value = "file",
-      mnemonic = 'f')
+  @Option(names = {"--file", "-f"})
   abstract List<String> file();
 
   /**
    * the dir
    */
-  @Option("dir")
+  @Option(names = "--dir")
   abstract Optional<String> dir();
 
   /**
    * cmos flag
    */
-  @Option(value = "c", mnemonic = 'c')
+  @Option(names = {"--c", "-c"})
   abstract boolean cmos();
 
-  @Option(
-      value = "verbose",
-      mnemonic = 'v')
+  @Option(names = {"--verbose", "-v"})
   abstract boolean verbose();
 
   @Param(0)
@@ -51,14 +45,14 @@ abstract class GradleArguments {
   @Command
   static abstract class Foo {
 
-    @Option("bar")
+    @Option(names = "--bar")
     abstract Optional<Integer> bar();
   }
 
   @Command
   static abstract class Bar {
 
-    @Option("bar")
+    @Option(names = "--bar")
     abstract List<String> bar();
   }
 }

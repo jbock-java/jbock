@@ -22,16 +22,16 @@ abstract class CpArguments {
   @Param(1)
   abstract String dest();
 
-  @Option(value = "r", mnemonic = 'r')
+  @Option(names = {"--r", "-r"})
   abstract boolean recursive();
 
-  @Option("backup")
+  @Option(names = "--backup")
   abstract Optional<Control> backup();
 
 
   /**
    * Override the usual backup suffix
    */
-  @Option(value = "s", mnemonic = 's')
+  @Option(names = {"--s", "-s"})
   abstract Optional<String> suffix();
 }

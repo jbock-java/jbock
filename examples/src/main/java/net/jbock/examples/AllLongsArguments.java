@@ -13,15 +13,15 @@ abstract class AllLongsArguments {
   @Param(0)
   abstract List<Long> positional();
 
-  @Option(value = "i", mnemonic = 'i')
+  @Option(names = {"--i", "-i"})
   abstract List<Long> listOfLongs();
 
-  @Option("opt")
+  @Option(names = "--opt")
   abstract Optional<Long> optionalLong();
 
-  @Option("obj")
+  @Option(names = "--obj")
   abstract Long longObject();
 
-  @Option("prim")
+  @Option(names = "--prim")
   abstract long primitiveLong();
 }

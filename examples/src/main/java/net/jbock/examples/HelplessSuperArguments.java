@@ -4,10 +4,10 @@ import net.jbock.Option;
 import net.jbock.Param;
 import net.jbock.SuperCommand;
 
-@SuperCommand(helpDisabled = true)
+@SuperCommand(helpEnabled = false)
 abstract class HelplessSuperArguments {
 
-  @Option(value = "quiet", mnemonic = 'q')
+  @Option(names = {"--quiet", "-q"})
   abstract boolean quiet();
 
   @Param(0)

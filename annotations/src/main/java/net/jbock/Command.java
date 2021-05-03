@@ -31,7 +31,8 @@ public @interface Command {
    * then the generated parser will print the full usage information
    * if {@code --help} is encountered as the first token in the input array.
    *
-   * @return {@code true} to disable the {@code --help} mechanism
+   * @return {@code true} to disable the {@code --help} mechanism,
+   * {@code false} to enable it.
    */
-  boolean helpDisabled() default false;
+  boolean helpEnabled() default true;
 }

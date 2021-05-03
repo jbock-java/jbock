@@ -12,7 +12,7 @@ abstract class OptionalIntArguments {
 
   private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
 
-  @Option(value = "a", mnemonic = 'a', mappedBy = Mapper.class)
+  @Option(names = {"--a", "-a"}, mappedBy = Mapper.class)
   abstract OptionalInt a();
 
   @net.jbock.Mapper

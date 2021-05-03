@@ -13,15 +13,15 @@ abstract class AllFloatsArguments {
   @Param(0)
   abstract List<Float> positional();
 
-  @Option(value = "i", mnemonic = 'i')
+  @Option(names = {"--i", "-i"})
   abstract List<Float> listOfFloats();
 
-  @Option("opt")
+  @Option(names = "--opt")
   abstract Optional<Float> optionalFloat();
 
-  @Option("obj")
+  @Option(names = "--obj")
   abstract Float floatObject();
 
-  @Option("prim")
+  @Option(names = "--prim")
   abstract float primitiveFloat();
 }

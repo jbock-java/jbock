@@ -5,8 +5,6 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.parameter.Parameter;
 
-import java.util.List;
-
 public final class Coercion<P extends Parameter> {
 
   private final ParameterSpec constructorParam;
@@ -81,9 +79,5 @@ public final class Coercion<P extends Parameter> {
 
   public String sample() {
     return parameter.sample(isFlag(), enumName());
-  }
-
-  public List<String> dashedNames() {
-    return parameter.dashedNames();
   }
 }

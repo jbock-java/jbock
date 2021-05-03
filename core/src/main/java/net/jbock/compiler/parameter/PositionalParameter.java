@@ -43,16 +43,6 @@ public class PositionalParameter extends Parameter {
     return enumName.snake().toLowerCase(Locale.US);
   }
 
-  @Override
-  public String optionName() {
-    return null;
-  }
-
-  @Override
-  public char mnemonic() {
-    return ' ';
-  }
-
   public int position() {
     return sourceMethod().getAnnotation(Param.class).value();
   }

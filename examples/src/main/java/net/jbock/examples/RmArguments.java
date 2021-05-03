@@ -19,13 +19,13 @@ abstract class RmArguments {
    *
    * @return a boolean
    */
-  @Option(value = "recursive", mnemonic = 'r')
+  @Option(names = {"--recursive", "-r"})
   abstract boolean recursive();
 
   /**
    * Use the force, Luke.
    */
-  @Option(value = "force", mnemonic = 'f')
+  @Option(names = {"--force", "-f"})
   abstract boolean force();
 
   /**

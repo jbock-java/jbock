@@ -66,10 +66,6 @@ public abstract class Parameter {
 
   public abstract String sample(boolean isFlag, EnumName enumName);
 
-  public abstract String optionName();
-
-  public abstract char mnemonic();
-
   public ExecutableElement sourceMethod() {
     return sourceMethod;
   }

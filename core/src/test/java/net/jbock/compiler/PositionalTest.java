@@ -48,7 +48,7 @@ class PositionalTest {
         "  @Param(0)",
         "  abstract Optional<String> a();",
         "",
-        "  @Option(\"b\")",
+        "  @Option(names = \"--b\")",
         "  abstract Optional<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -93,7 +93,7 @@ class PositionalTest {
         "@SuperCommand",
         "abstract class Arguments {",
         "",
-        "  @Option(\"a\")",
+        "  @Option(names = \"--a\")",
         "  abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -111,7 +111,7 @@ class PositionalTest {
         "  @Param(value = 0, bundleKey = \"x\")",
         "  abstract String a();",
         "",
-        "  @Option(value = \"x\", bundleKey = \"x\")",
+        "  @Option(names = \"--x\", bundleKey = \"x\")",
         "  abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))

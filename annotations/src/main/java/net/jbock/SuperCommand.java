@@ -45,5 +45,5 @@ public @interface SuperCommand {
    * @return {@code true} to disable the {@code --help} mechanism,
    * {@code false} to enable it.
    */
-  boolean helpDisabled() default false;
+  boolean helpEnabled() default true;
 }

@@ -7,18 +7,18 @@ import net.jbock.Option;
 @Command
 abstract class TarArguments {
 
-  @Option(value = "x", mnemonic = 'x')
+  @Option(names = {"--x", "-x"})
   abstract boolean extract();
 
-  @Option(value = "c", mnemonic = 'c')
+  @Option(names = {"--c", "-c"})
   abstract boolean create();
 
-  @Option(value = "v", mnemonic = 'v')
+  @Option(names = {"--v", "-v"})
   abstract boolean verbose();
 
-  @Option(value = "z", mnemonic = 'z')
+  @Option(names = {"--z", "-z"})
   abstract boolean compress();
 
-  @Option(value = "f", mnemonic = 'f')
+  @Option(names = {"--f", "-f"})
   abstract String file();
 }

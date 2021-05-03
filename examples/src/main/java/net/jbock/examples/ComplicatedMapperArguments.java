@@ -11,12 +11,12 @@ import java.util.function.Supplier;
 abstract class ComplicatedMapperArguments {
 
   @Option(
-      value = "number",
+      names = "--number",
       mappedBy = Mapper.class)
   abstract Integer number();
 
   @Option(
-      value = "numbers",
+      names = "--numbers",
       mappedBy = LazyNumberMapper.class)
   abstract List<LazyNumber> numbers();
 

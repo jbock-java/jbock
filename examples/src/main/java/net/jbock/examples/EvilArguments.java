@@ -6,21 +6,21 @@ import net.jbock.Option;
 @Command
 abstract class EvilArguments {
 
-  @Option("fancy")
+  @Option(names = "--fancy")
   abstract protected String fancy();
 
-  @Option("fAncy")
+  @Option(names = "--fAncy")
   abstract String fAncy();
 
-  @Option("f_ancy")
+  @Option(names = "--f_ancy")
   abstract String f_ancy();
 
-  @Option("f__ancy")
+  @Option(names = "--f__ancy")
   abstract String f__ancy();
 
-  @Option("blub")
+  @Option(names = "--blub")
   abstract String blub();
 
-  @Option("Blub")
+  @Option(names = "--Blub")
   abstract String Blub();
 }

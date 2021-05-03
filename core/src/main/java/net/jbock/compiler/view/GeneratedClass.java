@@ -423,7 +423,8 @@ public final class GeneratedClass {
     CodeBlock.Builder code = CodeBlock.builder();
 
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType ->
-        code.add("if ($N.length >= 1 && $S.equals($N[0]))\n", args, "--help", args).indent()
+        code.add("if ($1N.length >= 1 && ($2S.equals($1N[0]) || $3S.equals($1N[0])))\n",
+            args, "--help", "-h").indent()
             .addStatement("return new $T()", helpRequestedType)
             .unindent());
 
@@ -504,7 +505,7 @@ public final class GeneratedClass {
     for (Coercion<NamedOption> option : requiredOptions) {
       spec.addStatement("$N.add($T.format($S, $S, $S))",
           result, STRING, "%s <%s>",
-          option.dashedNames().get(0),
+          option.parameter().dashedNames().get(0),
           option.enumConstant().toLowerCase(Locale.US));
     }
 
@@ -545,10 +546,10 @@ public final class GeneratedClass {
         .endControlFlow());
 
     code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", generatedTypes.parsingFailedType(), result);
-    if (!context.isHelpParameterEnabled()) {
-      code.addStatement("printOnlineHelp($N)", err);
-    } else {
+    if (context.isHelpParameterEnabled()) {
       code.addStatement("printTokens($N, $S, usage())", err, String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " ")));
+    } else {
+      code.addStatement("printOnlineHelp($N)", err);
     }
     if (context.isHelpParameterEnabled()) {
       code.addStatement("$N.println($S + $N + $S)", err, "Try '", programName, " --help' for more information.");
@@ -573,7 +574,7 @@ public final class GeneratedClass {
     code.addStatement("$T $N = new $T<>($T.values().length)",
         result.type, result, HashMap.class, option.type);
     for (Coercion<NamedOption> namedOption : context.options()) {
-      for (String dashedName : namedOption.dashedNames()) {
+      for (String dashedName : namedOption.parameter().dashedNames()) {
         code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedTypes.optionType(),
             namedOption.enumConstant());
       }

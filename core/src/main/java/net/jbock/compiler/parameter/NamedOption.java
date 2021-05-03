@@ -3,26 +3,20 @@ package net.jbock.compiler.parameter;
 import net.jbock.compiler.EnumName;
 
 import javax.lang.model.element.ExecutableElement;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.OptionalInt;
 
 public class NamedOption extends Parameter {
 
-  private final String optionName;
-
-  private final char mnemonic;
+  private final List<String> optionName;
 
   public NamedOption(
-      char mnemonic,
       EnumName enumName,
-      String optionName,
+      List<String> optionName,
       ExecutableElement sourceMethod,
       String bundleKey,
       List<String> description) {
     super(sourceMethod, enumName, bundleKey, description);
-    this.mnemonic = mnemonic;
     this.optionName = optionName;
   }
 
@@ -38,14 +32,7 @@ public class NamedOption extends Parameter {
 
   @Override
   public List<String> dashedNames() {
-    if (optionName != null && mnemonic == ' ') {
-      return Collections.singletonList("--" + optionName);
-    } else if (optionName == null && mnemonic != ' ') {
-      return Collections.singletonList("-" + mnemonic);
-    } else if (optionName == null) {
-      return Collections.emptyList();
-    }
-    return Arrays.asList("-" + mnemonic, "--" + optionName);
+    return optionName;
   }
 
   @Override
@@ -58,17 +45,7 @@ public class NamedOption extends Parameter {
     return isFlag ? sample : sample + ' ' + enumName.enumConstant();
   }
 
-  @Override
-  public String optionName() {
-    return optionName;
-  }
-
   public boolean hasUnixName() {
-    return mnemonic != ' ';
-  }
-
-  @Override
-  public char mnemonic() {
-    return mnemonic;
+    return optionName.stream().anyMatch(s -> s.length() == 2);
   }
 }

@@ -16,16 +16,29 @@ import static java.util.Collections.singletonList;
 class ProcessorTest {
 
   @Test
-  void emptyLongName() {
+  void missingDash() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Option(\"\") abstract String a();",
+        "  @Option(names = \"a\") abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("empty name");
+        .withErrorContaining("name must start with a dash character: a");
+  }
+
+  @Test
+  void emptyLongName() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "  @Option(names = \"--\") abstract String a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("not a valid name: --");
   }
 
   @Test
@@ -33,8 +46,8 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Option(\"x\") abstract String a();",
-        "  @Option(\"x\") abstract String b();",
+        "  @Option(names = \"--x\") abstract String a();",
+        "  @Option(names = \"--x\") abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -47,13 +60,65 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Option(value = \"x\", mnemonic = 'x') abstract String a();",
-        "  @Option(value = \"y\", mnemonic = 'x') abstract String b();",
+        "  @Option(names = {\"--x\", \"-x\"}) abstract String a();",
+        "  @Option(names = {\"--y\", \"-x\"}) abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("duplicate mnemonic");
+        .withErrorContaining("duplicate option name: -x");
+  }
+
+  @Test
+  void duplicateName() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "  @Option(names = {\"--x\", \"--x\"}) abstract String a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("duplicate option name: --x");
+  }
+
+  @Test
+  void helpName() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "  @Option(names = {\"--help\"}) abstract String a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("'--help' or '-h' cannot be option names");
+  }
+
+  @Test
+  void helpNameUnix() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "  @Option(names = {\"-h\"}) abstract String a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("'--help' or '-h' cannot be option names");
+  }
+
+  @Test
+  void multiCharacterUnixOption() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "  @Option(names = {\"-xx\"}) abstract String a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("single-dash names must be single-character names: -xx");
   }
 
   @Test
@@ -62,7 +127,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract StringBuilder a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -77,7 +142,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract String a() throws IllegalArgumentException;",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -92,7 +157,7 @@ class ProcessorTest {
         "@Command",
         "class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  String a() { return null; }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -107,7 +172,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract List a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -122,7 +187,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract Optional a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -137,7 +202,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract java.util.Set<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -152,7 +217,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract int[] a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -167,7 +232,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract java.util.Date a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -194,7 +259,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Option(\"a \")",
+        "  @Option(names = \"--a \")",
         "  abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -221,7 +286,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract java.util.OptionalInt b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -235,7 +300,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract java.util.OptionalInt b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -249,7 +314,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract boolean x();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -263,7 +328,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract java.lang.Boolean x();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -278,7 +343,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract int aRequiredInt();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -307,7 +372,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Option(\"x\") abstract String a(int b, int c);",
+        "  @Option(names = \"--x\") abstract String a(int b, int c);",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -320,7 +385,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Option(\"x\") abstract <E> String a();",
+        "  @Option(names = \"--x\") abstract <E> String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -333,7 +398,7 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Option(\"x\") abstract <E, F> String a();",
+        "  @Option(names = \"--x\") abstract <E, F> String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -376,7 +441,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  @Param(1)",
         "  abstract List<String> a();",
         "}");
@@ -392,7 +457,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract List<String> a();",
         "",
         "  @Param(0)",
@@ -409,7 +474,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract Foo foo();",
         "",
         "  enum Foo {",
@@ -427,7 +492,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract Foo foo();",
         "",
         "  private enum Foo {",
@@ -446,7 +511,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Option(\"x\")",
+        "  @Option(names = \"--x\")",
         "  abstract List<Foo> foo();",
         "",
         "  private enum Foo {",
@@ -467,7 +532,7 @@ class ProcessorTest {
         "  private static class Foo {",
         "    @Command",
         "    abstract static class Bar {",
-        "      @Option(\"x\") abstract String a();",
+        "      @Option(names = \"--x\") abstract String a();",
         "    }",
         "  }",
         "}");

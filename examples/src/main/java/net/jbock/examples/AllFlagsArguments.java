@@ -6,6 +6,6 @@ import net.jbock.Option;
 @Command
 abstract class AllFlagsArguments {
 
-  @Option("smallFlag")
+  @Option(names = "--smallFlag")
   abstract boolean smallFlag();
 }

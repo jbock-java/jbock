@@ -13,22 +13,22 @@ import java.util.function.Supplier;
 @Command
 abstract class PrimitiveOptionalsArguments {
 
-  @Option(value = "I", mnemonic = 'I', mappedBy = IntegerMapper.class)
+  @Option(names = {"--I", "-I"}, mappedBy = IntegerMapper.class)
   abstract OptionalInt simpleInt();
 
-  @Option(value = "L", mnemonic = 'L', mappedBy = LongMapper.class)
+  @Option(names = {"--L", "-L"}, mappedBy = LongMapper.class)
   abstract OptionalLong simpleLong();
 
-  @Option(value = "D", mnemonic = 'D', mappedBy = DoubleMapper.class)
+  @Option(names = {"--D", "-D"}, mappedBy = DoubleMapper.class)
   abstract OptionalDouble simpleDouble();
 
-  @Option(value = "i", mnemonic = 'i', mappedBy = IntegerMapper.class)
+  @Option(names = {"--i", "-i"}, mappedBy = IntegerMapper.class)
   abstract OptionalInt mappedInt();
 
-  @Option(value = "l", mnemonic = 'l', mappedBy = LongMapper.class)
+  @Option(names = {"--l", "-l"}, mappedBy = LongMapper.class)
   abstract OptionalLong mappedLong();
 
-  @Option(value = "d", mnemonic = 'd', mappedBy = DoubleMapper.class)
+  @Option(names = {"--d", "-d"}, mappedBy = DoubleMapper.class)
   abstract OptionalDouble mappedDouble();
 
   @Mapper

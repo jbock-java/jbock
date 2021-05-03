@@ -13,7 +13,10 @@ import net.jbock.qualifier.MapperClass;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
@@ -40,7 +43,7 @@ class NamedOptionFactory extends ParameterScoped {
 
   Either<ValidationFailure, Coercion<NamedOption>> createNamedOption() {
     return checkFullName()
-        .flatMap(optionName -> mnemonic().map(mnemonic -> createNamedOption(optionName, mnemonic)))
+        .map(this::createNamedOption)
         .flatMap(namedOption -> {
           if (!mapperPresent && returnType().getKind() == BOOLEAN) {
             return right(createFlag(namedOption));
@@ -50,68 +53,87 @@ class NamedOptionFactory extends ParameterScoped {
         .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
   }
 
-  private Either<String, Character> mnemonic() {
-    Option option = sourceMethod().getAnnotation(Option.class);
-    if (option == null || option.mnemonic() == ' ') {
-      return right(' ');
-    }
-    for (Coercion<NamedOption> c : alreadyCreatedOptions()) {
-      if (option.mnemonic() == c.parameter().mnemonic()) {
-        return left("duplicate mnemonic");
-      }
-    }
-    return checkMnemonic(option.mnemonic());
-  }
-
-  private Either<String, String> checkFullName() {
+  private Either<String, List<String>> checkFullName() {
     Option option = sourceMethod().getAnnotation(Option.class);
     if (option == null) {
-      return right("");
+      return right(Collections.emptyList());
     }
-    if (Objects.toString(option.value(), "").isEmpty()) {
+    if (Objects.toString(option.names(), "").isEmpty()) {
       return left("empty name");
     }
-    if (!flavour().helpDisabled(sourceElement()) && "help".equals(option.value())) {
-      return left("'help' cannot be an option name, unless the help feature is disabled. " +
-          "The help feature can be disabled by setting @Command.helpDisabled = true.");
-    }
     for (Coercion<NamedOption> c : alreadyCreatedOptions()) {
-      if (option.value().equals(c.parameter().optionName())) {
-        return left("duplicate option name");
+      for (String name : option.names()) {
+        for (String previousName : c.parameter().dashedNames()) {
+          if (name.equals(previousName)) {
+            return left("duplicate option name: " + name);
+          }
+        }
       }
     }
-    return checkName(option.value());
-  }
-
-  private Either<String, Character> checkMnemonic(char mnemonic) {
-    if (mnemonic != ' ') {
-      return checkName(Character.toString(mnemonic))
-          .map(s -> s.charAt(0));
+    List<String> result = new ArrayList<>();
+    for (String name : option.names()) {
+      Either<String, String> check = checkName(name);
+      if (!check.isRight()) {
+        return check.map(__ -> Collections.emptyList());
+      }
+      if (result.contains(name)) {
+        return left("duplicate option name: " + name);
+      }
+      result.add(name);
     }
-    return right(' ');
+    result.sort((n1, n2) -> {
+      boolean unix1 = n1.length() == 2;
+      boolean unix2 = n2.length() == 2;
+      if (unix1 && !unix2) {
+        return -1;
+      }
+      if (!unix1 && unix2) {
+        return 1;
+      }
+      return n1.compareTo(n2);
+    });
+    if (result.isEmpty()) {
+      return left("define at least one option name");
+    }
+    return right(result);
   }
 
   private Either<String, String> checkName(String name) {
     if (Objects.toString(name, "").isEmpty()) {
       return left("empty name");
     }
-    if (name.charAt(0) == '-') {
-      return left("name starts with '-'");
+    if (name.charAt(0) != '-') {
+      return left("the name must start with a dash character: " + name);
+    }
+    if (name.startsWith("---")) {
+      return left("the name must start with one or two dashes, not three:" + name);
+    }
+    if (name.equals("--") || name.length() < 2) {
+      return left("not a valid name: " + name);
+    }
+    if (name.charAt(1) != '-' && name.length() >= 3) {
+      return left("single-dash names must be single-character names: " + name);
+    }
+    if (flavour().helpEnabled(sourceElement())) {
+      if ("--help".equals(name) || "-h".equals(name)) {
+        return left("'--help' or '-h' cannot be option names, unless the help feature is disabled. " +
+            "The help feature can be disabled by setting @Command.helpDisabled = true.");
+      }
     }
     for (int i = 0; i < name.length(); i++) {
       char c = name.charAt(i);
       if (isWhitespace(c)) {
-        return left("name contains whitespace characters");
+        return left("the name contains whitespace characters: " + name);
       }
       if (c == '=') {
-        return left("name contains '='");
+        return left("the name contains '=': " + name);
       }
     }
     return right(name);
   }
 
-  private NamedOption createNamedOption(String optionName, Character mnemonic) {
-    return new NamedOption(mnemonic, enumName(), optionName, sourceMethod(), bundleKey(),
+  private NamedOption createNamedOption(List<String> optionName) {
+    return new NamedOption(enumName(), optionName, sourceMethod(), bundleKey(),
         Arrays.asList(description()));
   }
 

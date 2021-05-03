@@ -20,22 +20,22 @@ abstract class CurlArguments {
   /**
    * Optional<String> for regular arguments
    */
-  @Option(value = "request", mnemonic = 'X')
+  @Option(names = {"--request", "-X"})
   abstract Optional<String> method();
 
   /**
    * List<String> for repeatable arguments
    */
-  @Option(value = "H", mnemonic = 'H')
+  @Option(names = {"--H", "-H"})
   abstract List<String> headers();
 
   /**
    * boolean for flags
    */
-  @Option(value = "verbose", mnemonic = 'v')
+  @Option(names = {"--verbose", "-v"})
   abstract boolean verbose();
 
-  @Option(value = "include", mnemonic = 'i')
+  @Option(names = {"--include", "-i"})
   abstract boolean include();
 
   @Param(0)

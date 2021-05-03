@@ -8,12 +8,12 @@ import java.util.Optional;
 @Command
 abstract class PsArguments {
 
-  @Option(value = "all", mnemonic = 'a')
+  @Option(names = {"--all", "-a"})
   abstract boolean all();
 
   /**
    * This is the description.
    */
-  @Option(value = "width", mnemonic = 'w')
+  @Option(names = {"--width", "-w"})
   abstract Optional<Integer> width();
 }

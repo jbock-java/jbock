@@ -96,7 +96,7 @@ public class GeneratedTypes {
   }
 
   public Optional<ClassName> helpRequestedType() {
-    boolean helpParameterEnabled = !flavour.helpDisabled(sourceElement);
+    boolean helpParameterEnabled = flavour.helpEnabled(sourceElement);
     return helpParameterEnabled ? Optional.of(generatedClass.nestedClass("HelpRequested")) : Optional.empty();
   }
 }

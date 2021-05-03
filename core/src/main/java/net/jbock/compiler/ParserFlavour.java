@@ -9,8 +9,8 @@ public enum ParserFlavour {
 
   COMMAND {
     @Override
-    public boolean helpDisabled(TypeElement sourceElement) {
-      return sourceElement.getAnnotation(Command.class).helpDisabled();
+    public boolean helpEnabled(TypeElement sourceElement) {
+      return sourceElement.getAnnotation(Command.class).helpEnabled();
     }
 
     @Override
@@ -29,8 +29,8 @@ public enum ParserFlavour {
 
   SUPER_COMMAND {
     @Override
-    public boolean helpDisabled(TypeElement sourceElement) {
-      return sourceElement.getAnnotation(SuperCommand.class).helpDisabled();
+    public boolean helpEnabled(TypeElement sourceElement) {
+      return sourceElement.getAnnotation(SuperCommand.class).helpEnabled();
     }
 
     @Override
@@ -47,7 +47,7 @@ public enum ParserFlavour {
     }
   };
 
-  public abstract boolean helpDisabled(TypeElement sourceElement);
+  public abstract boolean helpEnabled(TypeElement sourceElement);
 
   public abstract String programName(TypeElement sourceElement);
 

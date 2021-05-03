@@ -7,7 +7,7 @@ import net.jbock.SuperCommand;
 @SuperCommand
 abstract class SuperArguments {
 
-  @Option(value = "quiet", mnemonic = 'q')
+  @Option(names = {"--quiet", "-q"})
   abstract boolean quiet();
 
   @Param(0)

@@ -17,82 +17,82 @@ import java.util.regex.Pattern;
 @Command
 abstract class VariousArguments {
 
-  @Option("bigDecimal")
+  @Option(names = "--bigDecimal")
   abstract BigDecimal bigDecimal();
 
-  @Option("bigDecimalList")
+  @Option(names = "--bigDecimalList")
   abstract List<BigDecimal> bigDecimalList();
 
-  @Option("bigDecimalOpt")
+  @Option(names = "--bigDecimalOpt")
   abstract Optional<BigDecimal> bigDecimalOpt();
 
   @Param(0)
   abstract Optional<BigDecimal> bigDecimalPos();
 
-  @Option("bigInteger")
+  @Option(names = "--bigInteger")
   abstract BigInteger bigInteger();
 
-  @Option("bigIntegerList")
+  @Option(names = "--bigIntegerList")
   abstract List<BigInteger> bigIntegerList();
 
-  @Option("bigIntegerOpt")
+  @Option(names = "--bigIntegerOpt")
   abstract Optional<BigInteger> bigIntegerOpt();
 
   @Param(1)
   abstract Optional<BigInteger> bigIntegerPos();
 
-  @Option("fileList")
+  @Option(names = "--fileList")
   abstract List<File> fileList();
 
-  @Option("fileOpt")
+  @Option(names = "--fileOpt")
   abstract Optional<File> fileOpt();
 
   @Param(2)
   abstract Optional<File> filePos();
 
-  @Option("path")
+  @Option(names = "--path")
   abstract Path path();
 
-  @Option("pathList")
+  @Option(names = "--pathList")
   abstract List<Path> pathList();
 
-  @Option("pathOpt")
+  @Option(names = "--pathOpt")
   abstract Optional<Path> pathOpt();
 
   @Param(3)
   abstract Optional<Path> pathPos();
 
-  @Option("localDate")
+  @Option(names = "--localDate")
   abstract LocalDate localDate();
 
-  @Option("localDateList")
+  @Option(names = "--localDateList")
   abstract List<LocalDate> localDateList();
 
-  @Option("localDateOpt")
+  @Option(names = "--localDateOpt")
   abstract Optional<LocalDate> localDateOpt();
 
   @Param(4)
   abstract Optional<LocalDate> localDatePos();
 
-  @Option("uri")
+  @Option(names = "--uri")
   abstract URI uri();
 
-  @Option("uriList")
+  @Option(names = "--uriList")
   abstract List<URI> uriList();
 
-  @Option("uriOpt")
+  @Option(names = "--uriOpt")
   abstract Optional<URI> uriOpt();
 
   @Param(5)
   abstract Optional<URI> uriPos();
 
-  @Option("pattern")
+  @Option(names = "--pattern")
   abstract Pattern pattern();
 
-  @Option("patternList")
+  @Option(names = "--patternList")
   abstract List<Pattern> patternList();
 
-  @Option("patternOpt")
+  @Option(names = "--patternOpt")
   abstract Optional<Pattern> patternOpt();
 
   @Param(6)

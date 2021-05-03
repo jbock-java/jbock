@@ -13,15 +13,15 @@ abstract class AllDoublesArguments {
   @Param(0)
   abstract List<Double> positional();
 
-  @Option(value = "i", mnemonic = 'i')
+  @Option(names = {"--i", "-i"})
   abstract List<Double> listOfDoubles();
 
-  @Option("opt")
+  @Option(names = "--opt")
   abstract Optional<Double> optionalDouble();
 
-  @Option("obj")
+  @Option(names = "--obj")
   abstract Double doubleObject();
 
-  @Option("prim")
+  @Option(names = "--prim")
   abstract double primitiveDouble();
 }

@@ -9,15 +9,15 @@ import java.util.Optional;
 @Command
 abstract class AllCharactersArguments {
 
-  @Option("smallChar")
+  @Option(names = "--smallChar")
   abstract char smallChar();
 
-  @Option("bigChar")
+  @Option(names = "--bigChar")
   abstract Character bigChar();
 
-  @Option("charOpt")
+  @Option(names = "--charOpt")
   abstract Optional<Character> charOpt();
 
-  @Option("charList")
+  @Option(names = "--charList")
   abstract List<Character> charList();
 }

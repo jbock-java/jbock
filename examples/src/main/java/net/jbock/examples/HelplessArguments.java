@@ -4,12 +4,12 @@ import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Param;
 
-@Command(helpDisabled = true)
+@Command(helpEnabled = false)
 abstract class HelplessArguments {
 
   @Param(0)
   abstract String required();
 
-  @Option("help")
+  @Option(names = "--help")
   abstract boolean help();
 }

@@ -13,15 +13,15 @@ abstract class AllIntegersArguments {
   @Param(0)
   abstract List<Integer> positional();
 
-  @Option(value = "i", mnemonic = 'i')
+  @Option(names = {"--i", "-i"})
   abstract List<Integer> listOfIntegers();
 
-  @Option("opt")
+  @Option(names = "--opt")
   abstract Optional<Integer> optionalInteger();
 
-  @Option("obj")
+  @Option(names = "--obj")
   abstract Integer integer();
 
-  @Option("prim")
+  @Option(names = "--prim")
   abstract int primitiveInt();
 }

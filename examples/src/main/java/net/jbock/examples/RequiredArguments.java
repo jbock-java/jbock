@@ -10,7 +10,7 @@ import java.util.List;
 @Command
 abstract class RequiredArguments {
 
-  @Option("dir")
+  @Option(names = "--dir")
   abstract String dir();
 
   @Param(0)

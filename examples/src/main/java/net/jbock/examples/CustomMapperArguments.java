@@ -25,40 +25,40 @@ abstract class CustomMapperArguments {
    * The mapper must be a Function from String to whatever-this-returns.
    * It must also have a package-visible no-arg constructor.
    */
-  @Option(value = "date", mappedBy = DateMapper.class)
+  @Option(names = "--date", mappedBy = DateMapper.class)
   abstract Date date();
 
-  @Option(value = "optDate", mappedBy = DateMapper.class)
+  @Option(names = "--optDate", mappedBy = DateMapper.class)
   abstract Optional<Date> optDate();
 
-  @Option(value = "dateList", mappedBy = DateMapper.class)
+  @Option(names = "--dateList", mappedBy = DateMapper.class)
   abstract List<Date> dateList();
 
-  @Option(value = "verbosity", mappedBy = CustomBigIntegerMapperSupplier.class)
+  @Option(names = "--verbosity", mappedBy = CustomBigIntegerMapperSupplier.class)
   abstract Optional<BigInteger> verbosity();
 
-  @Option(value = "aRequiredInt", mappedBy = PositiveNumberMapper.class)
+  @Option(names = "--aRequiredInt", mappedBy = PositiveNumberMapper.class)
   abstract int aRequiredInt();
 
-  @Option(value = "stringArray", mappedBy = ArrayMapper.class)
+  @Option(names = "--stringArray", mappedBy = ArrayMapper.class)
   abstract Optional<String[]> stringArray();
 
-  @Option(value = "integerList", mappedBy = IntegerListMapper.class)
+  @Option(names = "--integerList", mappedBy = IntegerListMapper.class)
   abstract Optional<ArrayList<Integer>> integerList();
 
-  @Option(value = "enumSet", mappedBy = EnumSetMapper.class)
+  @Option(names = "--enumSet", mappedBy = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
   @Param(value = 0, mappedBy = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
-  @Option(value = "optionalInts", mappedBy = OptionalIntMapper.class)
+  @Option(names = "--optionalInts", mappedBy = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
-  @Option(value = "listWrapper", mappedBy = ListWrapperMapper.class)
+  @Option(names = "--listWrapper", mappedBy = ListWrapperMapper.class)
   abstract Optional<java.util.ArrayList<String>> listWrapper();
 
-  @Option(value = "notFlag", mappedBy = BooleanMapper.class)
+  @Option(names = "--notFlag", mappedBy = BooleanMapper.class)
   abstract Boolean notFlag();
 
   @Mapper

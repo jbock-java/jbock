@@ -82,7 +82,7 @@ public final class Context {
   }
 
   public boolean isHelpParameterEnabled() {
-    return !flavour.helpDisabled(sourceElement);
+    return flavour.helpEnabled(sourceElement);
   }
 
   public String programName() {

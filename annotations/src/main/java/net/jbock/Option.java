@@ -17,20 +17,14 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface Option {
 
   /**
-   * The gnu names of this option,
-   * dashes not included.
+   * The names of this option.
+   * A name can be either a gnu name, prefixed with two dashes,
+   * or a unix name consisting of single dash, followed by
+   * a single-character option name.
    *
-   * @return gnu names
+   * @return list of option names
    */
-  String[] value();
-
-  /**
-   * The unix names of this option,
-   * dashes not included
-   *
-   * @return unix names
-   */
-  char[] mnemonic();
+  String[] names() default {};
 
   /**
    * Declare a custom mapper for this named option.

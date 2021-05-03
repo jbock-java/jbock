@@ -17,9 +17,9 @@ abstract class SimpleArguments {
    * AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
    * aa aa
    */
-  @Option(value = "x", mnemonic = 'x')
+  @Option(names = {"--x", "-x"})
   abstract boolean extract();
 
-  @Option("file")
+  @Option(names = "--file")
   abstract Optional<String> file();
 }
