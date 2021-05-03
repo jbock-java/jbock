@@ -1,9 +1,11 @@
 package net.jbock.examples;
 
+import net.jbock.examples.RequiredArguments_Parser.ParseResult;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RequiredArgumentsTest {
 
@@ -17,7 +19,8 @@ class RequiredArgumentsTest {
 
   @Test
   void errorDirMissing() {
-    f.assertThat().failsWithMessage("Missing required: DIR (--dir)");
+    ParseResult result = new RequiredArguments_Parser().parse(new String[0]);
+    assertTrue(result instanceof RequiredArguments_Parser.HelpRequested);
   }
 
   @Test

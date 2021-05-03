@@ -436,11 +436,19 @@ public final class GeneratedClass {
     ParameterSpec e = builder(RuntimeException.class, "e").build();
     CodeBlock.Builder code = CodeBlock.builder();
 
-    generatedTypes.helpRequestedType().ifPresent(helpRequestedType ->
-        code.add("if ($1N.length >= 1 && ($2S.equals($1N[0]) || $3S.equals($1N[0])))\n",
-            args, "--help", "-h").indent()
+
+    generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> {
+      if (context.parameters().stream().anyMatch(Coercion::isRequired)) {
+        code.add("if ($N.length == 0)\n",
+            args).indent()
             .addStatement("return new $T()", helpRequestedType)
-            .unindent());
+            .unindent();
+      }
+      code.add("if ($1N.length == 1 && ($2S.equals($1N[0]) || $3S.equals($1N[0])))\n",
+          args, "--help", "-h").indent()
+          .addStatement("return new $T()", helpRequestedType)
+          .unindent();
+    });
 
     ParameterSpec state = builder(generatedTypes.statefulParserType(), "state").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();

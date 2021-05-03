@@ -10,7 +10,6 @@ class MvArgumentsTest {
 
   @Test
   void notEnoughArguments() {
-    f.assertThat().failsWithMessage("Missing required: SOURCE");
     f.assertThat("a").failsWithMessage("Missing required: DEST");
   }
 

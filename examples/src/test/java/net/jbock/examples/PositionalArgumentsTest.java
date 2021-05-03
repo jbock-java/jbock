@@ -15,7 +15,6 @@ class PositionalArgumentsTest {
 
   @Test
   void errorMissingParameters() {
-    f.assertThat().failsWithMessage("Missing required: SOURCE");
     f.assertThat("a").failsWithMessage("Missing required: DEST");
     f.assertThat("a", "b").failsWithMessage("Missing required: ANOTHER_INT");
   }

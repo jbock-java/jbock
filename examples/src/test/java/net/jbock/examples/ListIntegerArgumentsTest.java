@@ -18,6 +18,6 @@ class ListIntegerArgumentsTest {
   @Test
   void testAbsent() {
     ListIntegerArguments_Parser.ParseResult result = new ListIntegerArguments_Parser().parse(new String[]{});
-    assertTrue(result instanceof ListIntegerArguments_Parser.ParsingFailed);
+    assertTrue(result instanceof ListIntegerArguments_Parser.HelpRequested);
   }
 }

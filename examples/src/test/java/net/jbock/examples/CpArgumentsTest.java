@@ -16,7 +16,6 @@ class CpArgumentsTest {
 
   @Test
   void errorMissingSource() {
-    f.assertThat().failsWithMessage("Missing required: SOURCE");
     f.assertThat("-r").failsWithMessage("Missing required: SOURCE");
   }
 

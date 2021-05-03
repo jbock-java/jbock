@@ -18,6 +18,6 @@ class OptionalIntArgumentsTest {
   @Test
   void testAbsent() {
     OptionalIntArguments_Parser.ParseResult result = new OptionalIntArguments_Parser().parse(new String[]{});
-    assertTrue(result instanceof OptionalIntArguments_Parser.ParsingFailed);
+    assertTrue(result instanceof OptionalIntArguments_Parser.HelpRequested);
   }
 }
