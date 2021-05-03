@@ -10,12 +10,13 @@ import dagger.BindsInstance;
 import dagger.Component;
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameter;
+import net.jbock.Parameters;
 import net.jbock.SuperCommand;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Util;
+import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.compiler.view.GeneratedClass;
 import net.jbock.either.Either;
@@ -219,11 +220,9 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       AnnotationUtil annotationUtil = new AnnotationUtil();
       List<ValidationFailure> failures = new ArrayList<>();
       List<ExecutableElement> positionalParameters = methods.params();
-      for (int i = 0, executableElementsSize = positionalParameters.size(); i < executableElementsSize; i++) {
-        ExecutableElement sourceMethod = positionalParameters.get(i);
+      for (ExecutableElement sourceMethod : positionalParameters) {
         Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
-        Param param = sourceMethod.getAnnotation(Param.class);
-        ParameterModule module = new ParameterModule(sourceElement, mapperClass, param.bundleKey());
+        ParameterModule module = new ParameterModule(sourceElement, mapperClass, getParameterBundleKey(sourceMethod));
         ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
             .optionType(optionType)
             .sourceMethod(sourceMethod)
@@ -233,12 +232,14 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .alreadyCreatedOptions(ImmutableList.of())
             .parameterModule(module)
             .description(getDescription(sourceMethod));
-        builder.build().positionalParameterFactory().createPositionalParam(i)
+        Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
+        builder.build().positionalParameterFactory().createPositionalParam(
+            parameter != null ? parameter.index() : positionalParameters.size() - 1)
             .accept(failures::add, positionalParams::add);
       }
       if (flavour.isSuperCommand() && positionalParameters.isEmpty()) {
         failures.add(new ValidationFailure("in a @" + SuperCommand.class.getSimpleName() +
-            ", at least one @" + Param.class.getSimpleName() + " must be defined", sourceElement));
+            ", at least one @" + Parameter.class.getSimpleName() + " must be defined", sourceElement));
       }
       failures.addAll(validatePositions(positionalParams));
       List<Coercion<NamedOption>> namedOptions = new ArrayList<>();
@@ -257,12 +258,12 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         builder.build().namedOptionFactory().createNamedOption()
             .accept(failures::add, namedOptions::add);
       }
-      List<Coercion<? extends Parameter>> params = new ArrayList<>();
-      params.addAll(positionalParams);
-      params.addAll(namedOptions);
-      for (int i = 0; i < params.size(); i++) {
-        Coercion<? extends Parameter> c = params.get(i);
-        checkBundleKey(c, params.subList(0, i))
+      List<Coercion<? extends AbstractParameter>> abstractParameters = new ArrayList<>();
+      abstractParameters.addAll(positionalParams);
+      abstractParameters.addAll(namedOptions);
+      for (int i = 0; i < abstractParameters.size(); i++) {
+        Coercion<? extends AbstractParameter> c = abstractParameters.get(i);
+        checkBundleKey(c, abstractParameters.subList(0, i))
             .map(s -> new ValidationFailure(s, c.parameter().sourceMethod()))
             .ifPresent(failures::add);
       }
@@ -270,7 +271,15 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     });
   }
 
-  Optional<String> checkBundleKey(Coercion<? extends Parameter> p, List<Coercion<? extends Parameter>> alreadyCreated) {
+  private String getParameterBundleKey(ExecutableElement method) {
+    Parameter parameter = method.getAnnotation(Parameter.class);
+    if (parameter != null) {
+      return parameter.bundleKey();
+    }
+    return method.getAnnotation(Parameters.class).bundleKey();
+  }
+
+  Optional<String> checkBundleKey(Coercion<? extends AbstractParameter> p, List<Coercion<? extends AbstractParameter>> alreadyCreated) {
     return p.parameter().bundleKey().flatMap(key -> {
       if (key.isEmpty()) {
         return Optional.empty();
@@ -278,7 +287,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       if (key.matches(".*\\s+.*")) {
         return Optional.of("bundle key contains whitespace characters");
       }
-      for (Coercion<? extends Parameter> c : alreadyCreated) {
+      for (Coercion<? extends AbstractParameter> c : alreadyCreated) {
         Optional<String> failure = c.parameter().bundleKey()
             .filter(bundleKey -> bundleKey.equals(key));
         if (failure.isPresent()) {
@@ -308,7 +317,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     List<ValidationFailure> failures = new ArrayList<>();
     return findRelevantMethods(sourceElement.asType()).flatMap(sourceMethods -> {
       for (ExecutableElement sourceMethod : sourceMethods) {
-        validateParameterMethod(sourceMethod)
+        validateParameterMethod(sourceElement, sourceMethod)
             .ifPresent(msg -> failures.add(new ValidationFailure(msg, sourceMethod)));
       }
       if (!failures.isEmpty()) {
@@ -316,6 +325,14 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       }
       if (sourceMethods.isEmpty()) { // javapoet #739
         return left(Collections.singletonList(new ValidationFailure("expecting at least one abstract method", sourceElement)));
+      }
+      List<ExecutableElement> parametersMethods = sourceMethods.stream()
+          .filter(m -> m.getAnnotation(Parameters.class) != null)
+          .collect(Collectors.toList());
+      if (parametersMethods.size() >= 2) {
+        return left(Collections.singletonList(
+            new ValidationFailure("duplicate @" + Parameters.class.getSimpleName()
+                + " method", sourceMethods.get(1))));
       }
       return right(Methods.create(sourceMethods));
     });
@@ -386,14 +403,28 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return ClassName.get(sourceElement).topLevelClassName().peerClass(name);
   }
 
-  private static Optional<String> validateParameterMethod(ExecutableElement sourceMethod) {
-    if (sourceMethod.getAnnotation(Param.class) == null && sourceMethod.getAnnotation(Option.class) == null) {
-      return Optional.of(String.format("add @%s or @%s annotation",
-          Option.class.getSimpleName(), Param.class.getSimpleName()));
+  private static Optional<String> validateParameterMethod(
+      TypeElement sourceElement,
+      ExecutableElement sourceMethod) {
+    boolean hasParameter = sourceMethod.getAnnotation(Parameter.class) != null;
+    boolean hasParameters = sourceMethod.getAnnotation(Parameters.class) != null;
+    boolean hasOption = sourceMethod.getAnnotation(Option.class) != null;
+    if (!hasParameter && !hasOption && !hasParameters) {
+      return Optional.of(String.format("add @%s, @%s or @%s annotation",
+          Option.class.getSimpleName(),
+          Parameter.class.getSimpleName(),
+          Parameters.class.getSimpleName()));
     }
-    if (sourceMethod.getAnnotation(Param.class) != null && sourceMethod.getAnnotation(Option.class) != null) {
-      return Optional.of(String.format("use @%s or @%s annotation but not both",
-          Option.class.getSimpleName(), Param.class.getSimpleName()));
+    if ((hasParameter && hasOption) || (hasParameter && hasParameters) || (hasOption && hasParameters)) {
+      return Optional.of(String.format("use only one of @%s, @%s or @%s",
+          Option.class.getSimpleName(),
+          Parameter.class.getSimpleName(),
+          Parameters.class.getSimpleName()));
+    }
+    boolean isSuperCommand = sourceElement.getAnnotation(SuperCommand.class) != null;
+    if (isSuperCommand && hasParameters) {
+      return Optional.of("@" + Parameters.class.getSimpleName()
+          + " cannot be used in a @" + SuperCommand.class.getSimpleName());
     }
     if (!sourceMethod.getParameters().isEmpty()) {
       return Optional.of("empty argument list expected");

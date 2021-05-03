@@ -17,7 +17,7 @@ class PositionalTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -31,7 +31,7 @@ class PositionalTest {
         "@SuperCommand",
         "abstract class Arguments {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -45,7 +45,7 @@ class PositionalTest {
         "@SuperCommand",
         "abstract class Arguments {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract Optional<String> a();",
         "",
         "  @Option(names = \"--b\")",
@@ -63,7 +63,7 @@ class PositionalTest {
         "@SuperCommand",
         "abstract class Arguments {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -78,13 +78,13 @@ class PositionalTest {
         "@SuperCommand",
         "abstract class Arguments {",
         "",
-        "  @Param(0)",
+        "  @Parameters",
         "  abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("in a @SuperCommand, repeatable params are not supported");
+        .withErrorContaining("@Parameters cannot be used in a @SuperCommand");
   }
 
   @Test
@@ -99,7 +99,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("in a @SuperCommand, at least one @Param must be defined");
+        .withErrorContaining("in a @SuperCommand, at least one @Parameter must be defined");
   }
 
   @Test
@@ -108,7 +108,7 @@ class PositionalTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Param(value = 0, bundleKey = \"x\")",
+        "  @Parameter(index = 0, bundleKey = \"x\")",
         "  abstract String a();",
         "",
         "  @Option(names = \"--x\", bundleKey = \"x\")",
@@ -125,7 +125,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(0) abstract Optional<Integer> a();",
+        "  @Parameter(index = 0) abstract Optional<Integer> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -137,9 +137,9 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(0) abstract Optional<Integer> b();",
-        "  @Param(10) abstract Optional<String> c();",
-        "  @Param(100) abstract Optional<Integer> d();",
+        "  @Parameter(index = 0) abstract Optional<Integer> b();",
+        "  @Parameter(index = 10) abstract Optional<String> c();",
+        "  @Parameter(index = 100) abstract Optional<Integer> d();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -153,7 +153,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(1) abstract Optional<Integer> b();",
+        "  @Parameter(index = 1) abstract Optional<Integer> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -167,7 +167,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(-1) abstract Optional<String> a();",
+        "  @Parameter(index = -1) abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -180,8 +180,8 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(1) abstract int a();",
-        "  @Param(1) abstract int b();",
+        "  @Parameter(index = 1) abstract int a();",
+        "  @Parameter(index = 1) abstract int b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -195,7 +195,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(1) abstract StringBuilder a();",
+        "  @Parameter(index = 1) abstract StringBuilder a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -208,9 +208,9 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(0) abstract String b();",
-        "  @Param(1) abstract Optional<String> c();",
-        "  @Param(2) abstract List<String> a();",
+        "  @Parameter(index = 0) abstract String b();",
+        "  @Parameter(index = 1) abstract Optional<String> c();",
+        "  @Parameters abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -222,13 +222,13 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(0) abstract List<String> a();",
-        "  @Param(1) abstract List<String> b();",
+        "  @Parameters abstract List<String> a();",
+        "  @Parameters abstract List<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("positional parameter A is also repeatable");
+        .withErrorContaining("duplicate @Parameters method");
   }
 
   @Test
@@ -236,7 +236,7 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(0) abstract List<String> a();",
+        "  @Parameters abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -248,8 +248,8 @@ class PositionalTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(0) abstract Optional<String> a();",
-        "  @Param(1) abstract String b();",
+        "  @Parameter(index = 0) abstract Optional<String> a();",
+        "  @Parameter(index = 1) abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
@@ -258,39 +258,11 @@ class PositionalTest {
   }
 
   @Test
-  void positionalListBeforeOptional() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "  @Param(0) abstract List<String> a();",
-        "  @Param(1) abstract Optional<String> b();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("position must be less than position of repeatable parameter A");
-  }
-
-  @Test
-  void positionalListBeforeRequired() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "  @Param(1) abstract List<String> a();",
-        "  @Param(2) abstract String b();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("position must be less than position of repeatable parameter A");
-  }
-
-  @Test
   void mayNotDeclareAsOptional() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
-        "  @Param(0) abstract Optional<Integer> a();",
+        "  @Parameter(index = 0) abstract Optional<Integer> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())

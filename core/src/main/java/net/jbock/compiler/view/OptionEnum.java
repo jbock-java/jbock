@@ -7,19 +7,16 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.coerce.Coercion;
-import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.List;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 
 /**
@@ -43,9 +40,9 @@ final class OptionEnum {
   }
 
   TypeSpec define() {
-    List<Coercion<? extends Parameter>> parameters = context.parameters();
+    List<Coercion<? extends AbstractParameter>> parameters = context.parameters();
     TypeSpec.Builder spec = TypeSpec.enumBuilder(generatedTypes.optionType());
-    for (Coercion<? extends Parameter> param : parameters) {
+    for (Coercion<? extends AbstractParameter> param : parameters) {
       String enumConstant = param.enumConstant();
       List<String> description = param.parameter().description();
       TypeSpec optionSpec = anonymousClassBuilder(descExpression(description)).build();

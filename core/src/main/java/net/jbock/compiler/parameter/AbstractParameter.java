@@ -2,7 +2,7 @@ package net.jbock.compiler.parameter;
 
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameter;
 import net.jbock.compiler.EnumName;
 
 import javax.lang.model.element.ExecutableElement;
@@ -17,9 +17,9 @@ import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
 
 /**
  * This class represents an {@code abstract} Method in the command class,
- * which can be either an {@link Option} or an {@link Param}.
+ * which can be either an {@link Option} or a {@link Parameter}.
  */
-public abstract class Parameter {
+public abstract class AbstractParameter {
 
   private final ExecutableElement sourceMethod;
 
@@ -29,22 +29,26 @@ public abstract class Parameter {
 
   private final List<String> description;
 
-  Parameter(ExecutableElement sourceMethod, EnumName enumName, String bundleKey, List<String> description) {
+  AbstractParameter(
+      ExecutableElement sourceMethod,
+      EnumName enumName,
+      String bundleKey,
+      List<String> description) {
     this.sourceMethod = sourceMethod;
     this.enumName = enumName;
     this.bundleKey = bundleKey;
     this.description = description;
   }
 
-  public List<String> description() {
+  public final List<String> description() {
     return description;
   }
 
-  public String methodName() {
+  public final String methodName() {
     return sourceMethod.getSimpleName().toString();
   }
 
-  public TypeName returnType() {
+  public final TypeName returnType() {
     return TypeName.get(sourceMethod.getReturnType());
   }
 
@@ -52,11 +56,11 @@ public abstract class Parameter {
 
   public abstract OptionalInt positionalIndex();
 
-  public Optional<String> bundleKey() {
+  public final Optional<String> bundleKey() {
     return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);
   }
 
-  public Set<Modifier> getAccessModifiers() {
+  public final Set<Modifier> getAccessModifiers() {
     return sourceMethod.getModifiers().stream()
         .filter(ALLOWED_MODIFIERS::contains)
         .collect(Collectors.toSet());
@@ -66,11 +70,14 @@ public abstract class Parameter {
 
   public abstract String sample(boolean isFlag, EnumName enumName);
 
-  public ExecutableElement sourceMethod() {
+  public final ExecutableElement sourceMethod() {
     return sourceMethod;
   }
 
-  public EnumName enumName() {
+  public final EnumName enumName() {
     return enumName;
   }
+
+  public abstract ParameterStyle style();
+
 }

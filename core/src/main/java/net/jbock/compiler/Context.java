@@ -5,8 +5,8 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.coerce.Coercion;
+import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.parameter.PositionalParameter;
 
 import javax.inject.Inject;
@@ -28,7 +28,7 @@ public final class Context {
   private final ClassName generatedClass;
 
   // the abstract methods in the annotated class
-  private final List<Coercion<? extends Parameter>> parameters;
+  private final List<Coercion<? extends AbstractParameter>> parameters;
 
   private final List<Coercion<PositionalParameter>> params;
 
@@ -56,7 +56,7 @@ public final class Context {
     this.options = namedOptions;
     this.unixClusteringSupported = isUnixClusteringSupported(namedOptions);
     this.flavour = flavour;
-    this.parameters = ImmutableList.<Coercion<? extends Parameter>>builder().addAll(params).addAll(options).build();
+    this.parameters = ImmutableList.<Coercion<? extends AbstractParameter>>builder().addAll(params).addAll(options).build();
     this.anyRepeatableParam = params.stream().anyMatch(Coercion::isRepeatable);
     this.generatedTypes = generatedTypes;
   }
@@ -69,7 +69,7 @@ public final class Context {
     return generatedClass;
   }
 
-  public List<Coercion<? extends Parameter>> parameters() {
+  public List<Coercion<? extends AbstractParameter>> parameters() {
     return parameters;
   }
 

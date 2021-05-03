@@ -3,7 +3,7 @@ package net.jbock.compiler;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameter;
 
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
@@ -29,7 +29,7 @@ class ParameterMethodProcessingStep implements BasicAnnotationProcessor.Step {
 
   @Override
   public Set<String> annotations() {
-    return Stream.of(Option.class, Param.class)
+    return Stream.of(Option.class, Parameter.class)
         .map(Class::getCanonicalName)
         .collect(Collectors.toSet());
   }

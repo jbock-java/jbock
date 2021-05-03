@@ -12,7 +12,7 @@ import net.jbock.coerce.reference.FunctionType;
 import net.jbock.coerce.reference.ReferenceTool;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
@@ -27,14 +27,14 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
 import static net.jbock.coerce.SuppliedClassValidator.getEnclosingElements;
 
-public class MapperMatcher extends ParameterScoped {
+public class ExplicitCoercionFinder extends ParameterScoped {
 
   private final ImmutableList<Matcher> matchers;
   private final TypeElement mapperClass;
   private final ReferenceTool referenceTool;
 
   @Inject
-  MapperMatcher(
+  ExplicitCoercionFinder(
       ParameterContext context,
       TypeElement mapperClass,
       ImmutableList<Matcher> matchers,
@@ -45,7 +45,7 @@ public class MapperMatcher extends ParameterScoped {
     this.referenceTool = referenceTool;
   }
 
-  public <P extends Parameter> Either<String, Coercion<P>> findCoercion(P parameter) {
+  public <P extends AbstractParameter> Either<String, Coercion<P>> findCoercion(P parameter) {
     Optional<String> maybeFailure = commonChecks(mapperClass).map(s -> "mapper " + s);
     return Either.<String, Void>fromFailure(maybeFailure, null)
         .filter(this::checkNotAbstract)
@@ -55,7 +55,7 @@ public class MapperMatcher extends ParameterScoped {
         .flatMap(functionType -> tryAllMatchers(functionType, parameter));
   }
 
-  private <P extends Parameter> Either<String, Coercion<P>> tryAllMatchers(
+  private <P extends AbstractParameter> Either<String, Coercion<P>> tryAllMatchers(
       FunctionType functionType,
       P parameter) {
     List<Match> matches = new ArrayList<>();
@@ -74,7 +74,7 @@ public class MapperMatcher extends ParameterScoped {
     Match message = matches.stream()
         .max(Comparator.comparing(Match::skew))
         .orElseThrow(AssertionError::new); // exact matcher always matches
-    return Either.left(MapperMatcher.noMatchError(message.baseReturnType()));
+    return Either.left(ExplicitCoercionFinder.noMatchError(message.baseReturnType()));
   }
 
   private Optional<String> checkMapperAnnotation() {

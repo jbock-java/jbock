@@ -17,6 +17,8 @@ import static com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.compiler.view.GeneratedClass.SUSPICIOUS_PATTERN_1;
+import static net.jbock.compiler.view.GeneratedClass.SUSPICIOUS_PATTERN_2;
 
 class ParseMethod {
 
@@ -64,9 +66,7 @@ class ParseMethod {
     if (!context.options().isEmpty()) {
       code.add(optionBlock());
     }
-    code.add("if ($N.startsWith($S))\n", token, "-").indent()
-        .addStatement(throwInvalidOptionStatement("Invalid option"))
-        .unindent();
+    code.add(errorUnrecognizedOption());
 
     code.addStatement("paramParsers[$N].read($N)", position, token)
         .addStatement("$N++", position);
@@ -95,9 +95,9 @@ class ParseMethod {
     if (!context.options().isEmpty()) {
       code.add(optionBlock());
     }
-    code.add("if (!$N && $N.startsWith($S))\n", endOfOptionParsing, token, "-").indent()
-        .addStatement(throwInvalidOptionStatement("Invalid option"))
-        .unindent();
+    code.beginControlFlow("if (!$N)", endOfOptionParsing)
+        .add(errorUnrecognizedOption())
+        .endControlFlow();
 
     if (context.params().isEmpty()) {
       code.addStatement(throwInvalidOptionStatement("Excess param"));
@@ -125,11 +125,11 @@ class ParseMethod {
   }
 
   private CodeBlock optionBlock() {
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.add("if (tryParseOption($N, $N))\n", token, it).indent()
+    return CodeBlock.builder()
+        .beginControlFlow("if (tryParseOption($N, $N))", token, it)
         .addStatement("continue")
-        .unindent();
-    return code.build();
+        .endControlFlow()
+        .build();
   }
 
   private CodeBlock.Builder initVariables() {
@@ -138,6 +138,13 @@ class ParseMethod {
       code.addStatement("$T $N = $L", position.type, position, 0);
     }
     return code;
+  }
+
+  CodeBlock errorUnrecognizedOption() {
+    return CodeBlock.builder().add("if ($L.matcher($N).matches() || $L.matcher($N).matches())\n",
+        SUSPICIOUS_PATTERN_1, token, SUSPICIOUS_PATTERN_2, token).indent()
+        .addStatement(throwInvalidOptionStatement("Invalid option"))
+        .unindent().build();
   }
 
   private CodeBlock throwInvalidOptionStatement(String message) {

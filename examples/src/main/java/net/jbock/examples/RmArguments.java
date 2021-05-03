@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameters;
 
 import java.util.List;
 
@@ -31,6 +31,6 @@ abstract class RmArguments {
   /**
    * This is a list that may be empty.
    */
-  @Param(0)
+  @Parameters
   abstract List<String> otherTokens();
 }

@@ -5,7 +5,8 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.Skew;
 import net.jbock.coerce.matching.Match;
 import net.jbock.compiler.ParameterContext;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.compiler.parameter.ParameterStyle;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -21,7 +22,11 @@ public class OptionalMatcher extends Matcher {
   }
 
   @Override
-  public Optional<Match> tryMatch(Parameter parameter) {
+  public Optional<Match> tryMatch(AbstractParameter parameter) {
+    if (parameter.style() == ParameterStyle.PARAMETERS) {
+      // @Parameters doesn't do optional
+      return Optional.empty();
+    }
     Optional<Match> optionalPrimitive = getOptionalPrimitive(returnType());
     if (optionalPrimitive.isPresent()) {
       return optionalPrimitive;

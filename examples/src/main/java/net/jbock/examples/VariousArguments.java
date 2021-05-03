@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameter;
 
 import java.io.File;
 import java.math.BigDecimal;
@@ -26,7 +26,7 @@ abstract class VariousArguments {
   @Option(names = "--bigDecimalOpt")
   abstract Optional<BigDecimal> bigDecimalOpt();
 
-  @Param(0)
+  @Parameter(index = 0)
   abstract Optional<BigDecimal> bigDecimalPos();
 
   @Option(names = "--bigInteger")
@@ -38,7 +38,7 @@ abstract class VariousArguments {
   @Option(names = "--bigIntegerOpt")
   abstract Optional<BigInteger> bigIntegerOpt();
 
-  @Param(1)
+  @Parameter(index = 1)
   abstract Optional<BigInteger> bigIntegerPos();
 
   @Option(names = "--fileList")
@@ -47,7 +47,7 @@ abstract class VariousArguments {
   @Option(names = "--fileOpt")
   abstract Optional<File> fileOpt();
 
-  @Param(2)
+  @Parameter(index = 2)
   abstract Optional<File> filePos();
 
   @Option(names = "--path")
@@ -59,7 +59,7 @@ abstract class VariousArguments {
   @Option(names = "--pathOpt")
   abstract Optional<Path> pathOpt();
 
-  @Param(3)
+  @Parameter(index = 3)
   abstract Optional<Path> pathPos();
 
   @Option(names = "--localDate")
@@ -71,7 +71,7 @@ abstract class VariousArguments {
   @Option(names = "--localDateOpt")
   abstract Optional<LocalDate> localDateOpt();
 
-  @Param(4)
+  @Parameter(index = 4)
   abstract Optional<LocalDate> localDatePos();
 
   @Option(names = "--uri")
@@ -83,7 +83,7 @@ abstract class VariousArguments {
   @Option(names = "--uriOpt")
   abstract Optional<URI> uriOpt();
 
-  @Param(5)
+  @Parameter(index = 5)
   abstract Optional<URI> uriPos();
 
   @Option(names = "--pattern")
@@ -95,6 +95,6 @@ abstract class VariousArguments {
   @Option(names = "--patternOpt")
   abstract Optional<Pattern> patternOpt();
 
-  @Param(6)
+  @Parameter(index = 6)
   abstract Optional<Pattern> patternPos();
 }

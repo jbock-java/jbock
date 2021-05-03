@@ -7,7 +7,7 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for a name option.
+ * Marker annotation for a positional parameter.
  * The annotated method must be {@code abstract}
  * and have an empty argument list.
  * The method's enclosing class must carry the {@link Command}
@@ -15,20 +15,18 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  */
 @Target(METHOD)
 @Retention(SOURCE)
-public @interface Option {
+public @interface Parameter {
 
   /**
-   * The unique names of this option.
-   * A name can be either a gnu name, prefixed with two dashes,
-   * or a unix name. A unix name consists of single dash, followed by
-   * a single-character option name.
+   * This parameter's index.
+   * The first parameter's index is {@code 0}.
    *
-   * @return list of option names
+   * @return zero-based index
    */
-  String[] names() default {};
+  int index();
 
   /**
-   * Declare a custom converter for this named option.
+   * Declare a custom converter for this positional parameter.
    * This is either a
    * {@link java.util.function.Function Function}
    * accepting strings,
@@ -41,12 +39,12 @@ public @interface Option {
   Class<?> converter() default Void.class;
 
   /**
-   * The key that is used to find the parameter
-   * description in the i18 resource bundle for the online help.
-   * If no bundleKey is defined,
+   * The key that is used to look up the parameter
+   * description in the internationalization resource bundle for the online help.
+   * If no such key is defined,
    * or no bundle is supplied at runtime,
-   * or a bundle is supplied but does not contain the bundle key,
-   * then the {@code abstract} method's javadoc is used as description.
+   * or the bundle supplied at runtime does not contain the bundle key,
+   * then the {@code abstract} method's javadoc is used as the param's description.
    *
    * @return bundle key or empty string
    */

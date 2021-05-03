@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameters;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ abstract class CustomMapperArguments {
   @Option(names = "--enumSet", converter = EnumSetMapper.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
-  @Param(value = 0, converter = BooleanMapper.class)
+  @Parameters(converter = BooleanMapper.class)
   abstract List<Boolean> booleanList();
 
   @Option(names = "--optionalInts", converter = OptionalIntMapper.class)
@@ -76,7 +76,7 @@ abstract class CustomMapperArguments {
     @Override
     public Function<String, Integer> get() {
       return s -> {
-        Integer i = Integer.valueOf(s);
+        int i = Integer.parseInt(s);
         if (i < 0) {
           throw new IllegalArgumentException("The value cannot be negative.");
         }

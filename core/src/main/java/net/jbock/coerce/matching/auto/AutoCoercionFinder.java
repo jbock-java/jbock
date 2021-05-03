@@ -10,7 +10,7 @@ import net.jbock.coerce.matching.Match;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.either.Either.left;
 
-public class AutoMatcher extends ParameterScoped {
+public class AutoCoercionFinder extends ParameterScoped {
 
   private static final String ENUM = Enum.class.getCanonicalName();
 
@@ -30,7 +30,7 @@ public class AutoMatcher extends ParameterScoped {
   private final ImmutableList<Matcher> matchers;
 
   @Inject
-  AutoMatcher(
+  AutoCoercionFinder(
       ParameterContext context,
       AutoMapper autoMapper,
       ImmutableList<Matcher> matchers) {
@@ -39,7 +39,7 @@ public class AutoMatcher extends ParameterScoped {
     this.matchers = matchers;
   }
 
-  public <P extends Parameter> Either<String, Coercion<P>> findCoercion(P parameter) {
+  public <P extends AbstractParameter> Either<String, Coercion<P>> findCoercion(P parameter) {
     for (Matcher matcher : matchers) {
       Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
@@ -50,7 +50,7 @@ public class AutoMatcher extends ParameterScoped {
     return left(noMatchError(returnType()));
   }
 
-  private <P extends Parameter> Either<String, Coercion<P>> findMapper(Match match, P parameter) {
+  private <P extends AbstractParameter> Either<String, Coercion<P>> findMapper(Match match, P parameter) {
     TypeMirror baseReturnType = match.baseReturnType();
     return autoMapper.findAutoMapper(baseReturnType)
         .maybeRecover(() -> isEnumType(baseReturnType) ?

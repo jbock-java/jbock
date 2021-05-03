@@ -4,7 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Skew;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
 
 import javax.lang.model.type.TypeMirror;
 
@@ -42,7 +42,7 @@ public class Match {
     return new Match(wrappedType, constructorParam, extractExpr, tailExpr, skew);
   }
 
-  public <P extends Parameter> Coercion<P> toCoercion(CodeBlock mapExpr, P parameter) {
+  public <P extends AbstractParameter> Coercion<P> toCoercion(CodeBlock mapExpr, P parameter) {
     return new Coercion<>(mapExpr, tailExpr,
         extractExpr, skew, constructorParam, parameter);
   }

@@ -8,7 +8,7 @@ import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParserFlavour;
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -25,7 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OptionalMatcherTest {
 
-  private final Parameter parameter = Mockito.mock(Parameter.class);
+  private final AbstractParameter parameter = Mockito.mock(AbstractParameter.class);
 
   @Test
   void testLiftOptionalInt() {

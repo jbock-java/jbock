@@ -1,7 +1,8 @@
 package net.jbock.compiler;
 
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameter;
+import net.jbock.Parameters;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.Comparator;
@@ -10,8 +11,20 @@ import java.util.stream.Collectors;
 
 class Methods {
 
-  private static final Comparator<ExecutableElement> POSITION_COMPARATOR = Comparator
-      .comparingInt(e -> e.getAnnotation(Param.class).value());
+  private static final Comparator<ExecutableElement> POSITION_COMPARATOR =
+      (m1, m2) -> {
+        Parameter param1 = m1.getAnnotation(Parameter.class);
+        Parameter param2 = m2.getAnnotation(Parameter.class);
+        boolean p1 = param1 != null;
+        boolean p2 = param2 != null;
+        if (p1 && !p2) {
+          return -1;
+        }
+        if (!p1 && p2) {
+          return 1;
+        }
+        return Integer.compare(param1.index(), param2.index());
+      };
 
   private final List<ExecutableElement> params;
   private final List<ExecutableElement> options;
@@ -23,7 +36,8 @@ class Methods {
 
   static Methods create(List<ExecutableElement> methods) {
     List<ExecutableElement> params = methods.stream()
-        .filter(m -> m.getAnnotation(Param.class) != null)
+        .filter(m -> m.getAnnotation(Parameter.class) != null ||
+            m.getAnnotation(Parameters.class) != null)
         .sorted(POSITION_COMPARATOR)
         .collect(Collectors.toList());
     List<ExecutableElement> options = methods.stream()

@@ -10,7 +10,7 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.coerce.Coercion;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
 
 import javax.inject.Inject;
 
@@ -160,7 +160,7 @@ final class StatefulParser {
 
     CodeBlock.Builder args = CodeBlock.builder().add("\n");
     for (int j = 0; j < context.parameters().size(); j++) {
-      Coercion<? extends Parameter> param = context.parameters().get(j);
+      Coercion<? extends AbstractParameter> param = context.parameters().get(j);
       args.add(extractExpression(param));
       if (j < context.parameters().size() - 1) {
         args.add(",\n");
@@ -172,7 +172,7 @@ final class StatefulParser {
         .build();
   }
 
-  private CodeBlock extractExpression(Coercion<? extends Parameter> param) {
+  private CodeBlock extractExpression(Coercion<? extends AbstractParameter> param) {
     return getStreamExpression(param)
         .add(".stream()\n").indent()
         .add(".map($L)\n", param.mapExpr())
@@ -180,7 +180,7 @@ final class StatefulParser {
         .build();
   }
 
-  private CodeBlock.Builder getStreamExpression(Coercion<? extends Parameter> param) {
+  private CodeBlock.Builder getStreamExpression(Coercion<? extends AbstractParameter> param) {
     if (param.parameter().isPositional()) {
       return CodeBlock.builder().add(
           "$N[$L]", paramParsersField,

@@ -16,7 +16,7 @@ class InheritanceTest {
     JavaFileObject javaFile = fromSource(
         "abstract class Arguments {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract String something();",
         "",
         "  @SuperCommand",
@@ -33,7 +33,7 @@ class InheritanceTest {
     JavaFileObject javaFile = fromSource(
         "interface Arguments {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract String something();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -56,7 +56,7 @@ class InheritanceTest {
         "@SuperCommand",
         "abstract class C extends B {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract String param();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -78,13 +78,13 @@ class InheritanceTest {
         "@SuperCommand",
         "abstract class C extends B {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract String param();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("add @Option or @Param annotation");
+        .withErrorContaining("add @Option, @Parameter or @Parameters annotation");
   }
 
   @Test
@@ -101,13 +101,13 @@ class InheritanceTest {
         "@SuperCommand",
         "abstract class C extends B {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract String param();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("add @Option or @Param annotation");
+        .withErrorContaining("add @Option, @Parameter or @Parameters annotation");
   }
 
   @Test
@@ -124,13 +124,13 @@ class InheritanceTest {
         "@SuperCommand",
         "abstract class C extends B {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract String param();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("add @Option or @Param annotation");
+        .withErrorContaining("add @Option, @Parameter or @Parameters annotation");
   }
 
   @Test
@@ -142,7 +142,7 @@ class InheritanceTest {
         "@SuperCommand",
         "abstract class B extends A {",
         "",
-        "  @Param(0)",
+        "  @Parameter(index = 0)",
         "  abstract String param();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))

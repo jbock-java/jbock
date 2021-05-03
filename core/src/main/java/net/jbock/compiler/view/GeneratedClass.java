@@ -11,8 +11,8 @@ import net.jbock.coerce.Coercion;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.parameter.PositionalParameter;
 
 import javax.inject.Inject;
@@ -28,6 +28,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
@@ -57,6 +58,8 @@ public final class GeneratedClass {
 
   private static final int CONTINUATION_INDENT_USAGE = 8;
   static final String OPTIONS_BY_NAME = "OPTIONS_BY_NAME";
+  static final String SUSPICIOUS_PATTERN_1 = "SUS1";
+  static final String SUSPICIOUS_PATTERN_2 = "SUS2";
 
   private final Context context;
   private final Description description;
@@ -148,12 +151,23 @@ public final class GeneratedClass {
     spec.addField(maxLineWidth);
     spec.addField(exitHook);
     spec.addField(messages);
+
     if (!context.options().isEmpty()) {
       spec.addField(FieldSpec.builder(mapOf(STRING, generatedTypes.optionType()), OPTIONS_BY_NAME)
           .initializer("optionsByName()")
           .addModifiers(PRIVATE, STATIC, FINAL)
           .build());
     }
+
+    spec.addField(FieldSpec.builder(Pattern.class, SUSPICIOUS_PATTERN_1)
+        .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+")
+        .addModifiers(PRIVATE, STATIC, FINAL)
+        .build());
+
+    spec.addField(FieldSpec.builder(Pattern.class, SUSPICIOUS_PATTERN_2)
+        .initializer("$T.compile($S)", Pattern.class, "--[a-zA-Z0-9-]+")
+        .addModifiers(PRIVATE, STATIC, FINAL)
+        .build());
 
     spec.addType(parserState.define())
         .addType(optionEnum.define())
@@ -236,7 +250,7 @@ public final class GeneratedClass {
   }
 
   MethodSpec printOptionMethod() {
-    List<Coercion<? extends Parameter>> params = context.parameters();
+    List<Coercion<? extends AbstractParameter>> params = context.parameters();
     int totalPadding = 3;
     int width = params.stream()
         .map(Coercion::sample)

@@ -6,7 +6,7 @@ import javax.lang.model.element.ExecutableElement;
 import java.util.List;
 import java.util.OptionalInt;
 
-public class NamedOption extends Parameter {
+public class NamedOption extends AbstractParameter {
 
   private final List<String> optionName;
 
@@ -43,6 +43,11 @@ public class NamedOption extends Parameter {
     }
     String sample = String.join(", ", names);
     return isFlag ? sample : sample + ' ' + enumName.enumConstant();
+  }
+
+  @Override
+  public ParameterStyle style() {
+    return ParameterStyle.OPTION;
   }
 
   public boolean hasUnixName() {

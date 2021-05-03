@@ -4,14 +4,14 @@ import com.google.common.collect.ImmutableList;
 import dagger.BindsInstance;
 import dagger.Component;
 import dagger.Lazy;
-import net.jbock.coerce.matching.auto.AutoMatcher;
-import net.jbock.coerce.matching.mapper.MapperMatcher;
+import net.jbock.coerce.matching.auto.AutoCoercionFinder;
+import net.jbock.coerce.matching.mapper.ExplicitCoercionFinder;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.either.Either;
 import net.jbock.qualifier.MapperClass;
 
@@ -24,14 +24,14 @@ import java.util.Optional;
  */
 public class BasicInfo extends ParameterScoped {
 
-  private final Lazy<AutoMatcher> autoMatcher;
+  private final Lazy<AutoCoercionFinder> autoMatcher;
   private final Optional<TypeElement> mapperClass;
   private final ImmutableList<Matcher> matchers;
 
   @Inject
   BasicInfo(
       ParameterContext context,
-      Lazy<AutoMatcher> autoMatcher,
+      Lazy<AutoCoercionFinder> autoMatcher,
       @MapperClass Optional<TypeElement> mapperClass,
       ImmutableList<Matcher> matchers) {
     super(context);
@@ -43,7 +43,7 @@ public class BasicInfo extends ParameterScoped {
   @Component
   interface ParameterWithMapperComponent {
 
-    MapperMatcher mapperMatcher();
+    ExplicitCoercionFinder mapperMatcher();
 
     @Component.Builder
     interface Builder {
@@ -67,7 +67,7 @@ public class BasicInfo extends ParameterScoped {
     }
   }
 
-  public <P extends Parameter> Either<String, Coercion<P>> coercion(P parameter) {
+  public <P extends AbstractParameter> Either<String, Coercion<P>> coercion(P parameter) {
     return mapperClass
         .map(mapper -> {
           ParameterWithMapperComponent component = DaggerBasicInfo_ParameterWithMapperComponent.builder()

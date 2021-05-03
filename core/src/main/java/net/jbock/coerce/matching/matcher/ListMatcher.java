@@ -5,7 +5,8 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.Skew;
 import net.jbock.coerce.matching.Match;
 import net.jbock.compiler.ParameterContext;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.compiler.parameter.ParameterStyle;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -20,7 +21,11 @@ public class ListMatcher extends Matcher {
   }
 
   @Override
-  public Optional<Match> tryMatch(Parameter parameter) {
+  public Optional<Match> tryMatch(AbstractParameter parameter) {
+    if (parameter.style() == ParameterStyle.PARAMETER) {
+      // @Parameter doesn't do lists
+      return Optional.empty();
+    }
     ParameterSpec constructorParam = constructorParam(returnType());
     return tool().getSingleTypeArgument(returnType(), List.class)
         .map(typeArg -> Match.create(typeArg, constructorParam, Skew.REPEATABLE, tailExpr()));

@@ -3,7 +3,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -39,7 +39,7 @@ abstract class GradleArguments {
   @Option(names = {"--verbose", "-v"})
   abstract boolean verbose();
 
-  @Param(0)
+  @Parameters
   abstract List<String> otherTokens();
 
   @Command

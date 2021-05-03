@@ -6,8 +6,8 @@ import com.squareup.javapoet.TypeName;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
+import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.compiler.parameter.Parameter;
 import net.jbock.compiler.parameter.PositionalParameter;
 
 import javax.lang.model.element.TypeElement;
@@ -24,8 +24,8 @@ public interface ContextModule {
 
   @Provides
   @Reusable
-  static List<Parameter> parameters(List<PositionalParameter> params, List<NamedOption> options) {
-    return ImmutableList.<Parameter>builder().addAll(params).addAll(options).build();
+  static List<AbstractParameter> parameters(List<PositionalParameter> params, List<NamedOption> options) {
+    return ImmutableList.<AbstractParameter>builder().addAll(params).addAll(options).build();
   }
 
   @Provides

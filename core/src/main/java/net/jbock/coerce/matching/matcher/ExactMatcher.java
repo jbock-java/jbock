@@ -5,7 +5,8 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.Skew;
 import net.jbock.coerce.matching.Match;
 import net.jbock.compiler.ParameterContext;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.compiler.parameter.ParameterStyle;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -19,12 +20,16 @@ public class ExactMatcher extends Matcher {
   }
 
   @Override
-  public Optional<Match> tryMatch(Parameter parameter) {
+  public Optional<Match> tryMatch(AbstractParameter parameter) {
+    if (parameter.style() == ParameterStyle.PARAMETERS) {
+      // @Parameters doesn't do required
+      return Optional.empty();
+    }
     ParameterSpec constructorParam = constructorParam(boxedReturnType());
     return Optional.of(Match.create(boxedReturnType(), constructorParam, Skew.REQUIRED, tailExpr(parameter)));
   }
 
-  private CodeBlock tailExpr(Parameter parameter) {
+  private CodeBlock tailExpr(AbstractParameter parameter) {
     List<String> dashedNames = parameter.dashedNames();
     String enumConstant = parameter.enumName().enumConstant();
     String s = dashedNames.isEmpty() ?

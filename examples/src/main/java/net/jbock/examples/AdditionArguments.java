@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
-import net.jbock.Param;
+import net.jbock.Parameter;
 
 import java.util.Optional;
 
@@ -12,19 +12,19 @@ abstract class AdditionArguments {
   /**
    * First argument
    */
-  @Param(0)
+  @Parameter(index = 0)
   abstract int a();
 
   /**
    * Second argument
    */
-  @Param(1)
+  @Parameter(index = 1)
   abstract int b();
 
   /**
    * Optional third argument
    */
-  @Param(2)
+  @Parameter(index = 2)
   abstract Optional<Integer> c();
 
   final int sum() {

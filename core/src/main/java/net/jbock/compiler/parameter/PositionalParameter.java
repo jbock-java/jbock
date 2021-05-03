@@ -1,6 +1,6 @@
 package net.jbock.compiler.parameter;
 
-import net.jbock.Param;
+import net.jbock.Parameter;
 import net.jbock.compiler.EnumName;
 
 import javax.lang.model.element.ExecutableElement;
@@ -9,9 +9,11 @@ import java.util.List;
 import java.util.Locale;
 import java.util.OptionalInt;
 
-public class PositionalParameter extends Parameter {
+public class PositionalParameter extends AbstractParameter {
 
   private final int positionalIndex;
+
+  private final ParameterStyle isParameter;
 
   public PositionalParameter(
       ExecutableElement sourceMethod,
@@ -21,6 +23,9 @@ public class PositionalParameter extends Parameter {
       int positionalIndex) {
     super(sourceMethod, enumName, bundleKey, description);
     this.positionalIndex = positionalIndex;
+    this.isParameter = sourceMethod().getAnnotation(Parameter.class) != null ?
+        ParameterStyle.PARAMETER :
+        ParameterStyle.PARAMETERS;
   }
 
   @Override
@@ -43,7 +48,12 @@ public class PositionalParameter extends Parameter {
     return enumName.snake().toLowerCase(Locale.US);
   }
 
+  @Override
+  public ParameterStyle style() {
+    return isParameter;
+  }
+
   public int position() {
-    return sourceMethod().getAnnotation(Param.class).value();
+    return positionalIndex;
   }
 }

@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameter;
 
 import java.util.Optional;
 
@@ -16,10 +16,10 @@ abstract class CpArguments {
     SIMPLE
   }
 
-  @Param(0)
+  @Parameter(index = 0)
   abstract String source();
 
-  @Param(1)
+  @Parameter(index = 1)
   abstract String dest();
 
   @Option(names = {"--r", "-r"})

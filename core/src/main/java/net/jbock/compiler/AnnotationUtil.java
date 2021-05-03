@@ -3,7 +3,8 @@ package net.jbock.compiler;
 import com.google.auto.common.AnnotationMirrors;
 import com.google.auto.common.MoreTypes;
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameter;
+import net.jbock.Parameters;
 
 import javax.lang.model.element.AnnotationMirror;
 import javax.lang.model.element.AnnotationValue;
@@ -22,7 +23,10 @@ class AnnotationUtil {
 
   private static final String CONVERTER_ATTRIBUTE = "converter";
 
-  private static final Set<String> ANNOTATIONS = Stream.of(Param.class, Option.class)
+  private static final Set<String> ANNOTATIONS = Stream.of(
+      Parameter.class,
+      Parameters.class,
+      Option.class)
       .map(Class::getCanonicalName).collect(toSet());
 
   private static final AnnotationValueVisitor<TypeMirror, Void> GET_TYPE = new SimpleAnnotationValueVisitor8<TypeMirror, Void>() {

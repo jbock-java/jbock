@@ -417,7 +417,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("add @Option or @Param annotation");
+        .withErrorContaining("add @Option, @Parameter or @Parameters annotation");
   }
 
   @Test
@@ -426,7 +426,7 @@ class ProcessorTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Param(1)",
+        "  @Parameter(index = 1)",
         "  abstract boolean hello();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -442,13 +442,13 @@ class ProcessorTest {
         "abstract class Arguments {",
         "",
         "  @Option(names = \"--x\")",
-        "  @Param(1)",
+        "  @Parameter(index = 0)",
         "  abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("use @Option or @Param annotation but not both");
+        .withErrorContaining("use only one of @Option, @Parameter or @Parameters");
   }
 
   @Test
@@ -460,7 +460,7 @@ class ProcessorTest {
         "  @Option(names = \"--x\")",
         "  abstract List<String> a();",
         "",
-        "  @Param(0)",
+        "  @Parameters",
         "  abstract List<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -560,7 +560,8 @@ class ProcessorTest {
         "",
         "import net.jbock.Command;",
         "import net.jbock.SuperCommand;",
-        "import net.jbock.Param;",
+        "import net.jbock.Parameter;",
+        "import net.jbock.Parameters;",
         "import net.jbock.Option;",
         "import net.jbock.Converter;",
         "");

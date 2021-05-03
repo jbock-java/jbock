@@ -108,16 +108,15 @@ class NamedOptionFactory extends ParameterScoped {
     if (name.startsWith("---")) {
       return left("the name must start with one or two dashes, not three:" + name);
     }
-    if (name.equals("--") || name.length() < 2) {
-      return left("not a valid name: " + name);
+    if (name.equals("--")) {
+      return left("not a valid name: --");
     }
     if (name.charAt(1) != '-' && name.length() >= 3) {
       return left("single-dash names must be single-character names: " + name);
     }
     if (flavour().helpEnabled(sourceElement())) {
       if ("--help".equals(name) || "-h".equals(name)) {
-        return left("'--help' or '-h' cannot be option names, unless the help feature is disabled. " +
-            "The help feature can be disabled by setting @Command.helpDisabled = true.");
+        return left("'--help' or '-h' cannot be option names, unless the help feature is disabled.");
       }
     }
     for (int i = 0; i < name.length(); i++) {

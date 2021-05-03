@@ -9,19 +9,16 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 /**
  * <p>Marker annotation for an {@code abstract} class that is used
  * to define a command line API.
- * The generated parser will stop parsing after the last param was read,
- * and return the remaining command line arguments as an array of strings.
- * The escape sequence &quot;--&quot; is not recognized.</p>
+ * The generated parser will stop parsing after the last
+ * positional parameter was read,
+ * and return the remaining tokens as an array of strings.
+ * The double-dash is not recognized as a special token.</p>
  *
- * <p>Like with {@link Command}, each of the {@code abstract}
- * methods must have an empty argument list and must be
- * annotated with either {@link Option} or {@link Param}.
- * There are two additional rules that don't apply to {@link Command}:</p>
- * <ul>
- *   <li>There must be at least one method with a {@link Param} annotation.</li>
- *   <li>A {@link Param} cannot be repeatable. The special type {@code List<?>}
- *   is not recognized.</li>
- * </ul>
+ * <p>Each of the {@code abstract}
+ * methods must have an empty argument list, and must be
+ * annotated with either {@link Option} or {@link Parameter},
+ * but not {@link Parameters}.
+ * There must be at least one method with a {@link Parameter} annotation.
  */
 @Target(TYPE)
 @Retention(SOURCE)

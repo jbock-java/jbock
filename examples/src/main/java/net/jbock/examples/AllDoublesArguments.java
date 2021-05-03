@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Option;
-import net.jbock.Param;
+import net.jbock.Parameters;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,7 +10,7 @@ import java.util.Optional;
 @Command
 abstract class AllDoublesArguments {
 
-  @Param(0)
+  @Parameters
   abstract List<Double> positional();
 
   @Option(names = {"--i", "-i"})

@@ -3,9 +3,9 @@ package net.jbock.coerce;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.EnumName;
-import net.jbock.compiler.parameter.Parameter;
+import net.jbock.compiler.parameter.AbstractParameter;
 
-public final class Coercion<P extends Parameter> {
+public final class Coercion<P extends AbstractParameter> {
 
   private final ParameterSpec constructorParam;
   private final CodeBlock tailExpr;

@@ -10,7 +10,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Marker annotation for an {@code abstract} class that is used
  * to define a command line API.
  * Each of its {@code abstract} methods must have an empty argument list and must be
- * annotated with either {@link Option} or {@link Param}.
+ * annotated with either {@link Option} or {@link Parameter}.
  */
 @Target(TYPE)
 @Retention(SOURCE)

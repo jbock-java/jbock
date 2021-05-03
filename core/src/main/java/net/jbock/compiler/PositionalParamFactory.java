@@ -1,6 +1,7 @@
 package net.jbock.compiler;
 
 import com.google.common.collect.ImmutableList;
+import net.jbock.Parameter;
 import net.jbock.SuperCommand;
 import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;

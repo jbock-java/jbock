@@ -7,34 +7,32 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for a positional parameter.
- * The annotated method must be {@code abstract}
- * and have an empty argument list.
- * The method's enclosing class must carry the {@link Command}
- * or {@link SuperCommand} annotation.
+ * <p>Marker annotation for a repeatable positional parameter.
+ * This parameter will capture the remaining tokens,
+ * after all non-repeatable positional parameters have been captured.</p>
+ *
+ * <ul>
+ *   <li>The annotated method must be {@code abstract} and have an empty argument list.</li>
+ *   <li>It must return {@link java.util.List List&lt;E&gt;}, where {@code E} is a converted type.</li>
+ *   <li>The method's enclosing class must carry the {@link Command} or {@link SuperCommand} annotation.</li>
+ *   <li>There cannot be more than one such method per class.</li>
+ * </ul>
  */
 @Target(METHOD)
 @Retention(SOURCE)
-public @interface Param {
+public @interface Parameters {
 
   /**
-   * This parameter's position.
-   * The first parameter's position is {@code 0}.
-   *
-   * @return the param's position
-   */
-  int value();
-
-  /**
-   * Declare a custom converter for this positional parameter.
+   * Declare a custom converter that will be applied to each
+   * individual token that's captured by this parameter.
    * This is either a
    * {@link java.util.function.Function Function}
    * accepting strings,
-   * or a {@link java.util.function.Supplier Supplier} thereof.
+   * or a {@link java.util.function.Supplier Supplier} of such a function.
    * It must either be a {@code static} inner class of the class carrying the {@link Command} annotation,
    * or, if it is declared in a separate source file, it must carry the {@link Converter} annotation.
    *
-   * @return a mapper class, or {@code Void.class}
+   * @return converter class or {@code Void.class}
    */
   Class<?> converter() default Void.class;
 

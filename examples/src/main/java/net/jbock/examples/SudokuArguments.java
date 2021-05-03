@@ -2,7 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Converter;
-import net.jbock.Param;
+import net.jbock.Parameter;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -14,7 +14,7 @@ import java.util.function.Supplier;
 @Command
 abstract class SudokuArguments {
 
-  @Param(value = 0, converter = MapMap.class)
+  @Parameter(index = 0, converter = MapMap.class)
   abstract java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<Collection<Integer>>>>>>>>>>>>>> number();
 
   @Converter
