@@ -14,6 +14,7 @@ import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
@@ -33,7 +34,9 @@ public final class Context {
 
   private final List<Coercion<PositionalParameter>> params;
 
-  private final boolean anyRepeatableParam;
+  private final Optional<Coercion<PositionalParameter>> repeatableParam;
+
+  private final List<Coercion<? extends AbstractParameter>> regularParameters;
 
   private final List<Coercion<NamedOption>> options;
 
@@ -57,8 +60,11 @@ public final class Context {
     this.options = namedOptions;
     this.unixClusteringSupported = isUnixClusteringSupported(namedOptions);
     this.flavour = flavour;
-    this.parameters = ImmutableList.<Coercion<? extends AbstractParameter>>builder().addAll(params).addAll(options).build();
-    this.anyRepeatableParam = params.stream().anyMatch(Coercion::isRepeatable);
+    this.parameters = ImmutableList.<Coercion<? extends AbstractParameter>>builder().addAll(options).addAll(params).build();
+    this.repeatableParam = params.stream()
+        .filter(Coercion::isRepeatable)
+        .findFirst();
+    this.regularParameters = parameters.stream().filter(c -> !c.isRepeatable()).collect(Collectors.toList());
     this.generatedTypes = generatedTypes;
   }
 
@@ -106,7 +112,7 @@ public final class Context {
   }
 
   public boolean anyRepeatableParam() {
-    return anyRepeatableParam;
+    return repeatableParam.isPresent();
   }
 
   public boolean isUnixClusteringSupported() {
@@ -122,5 +128,16 @@ public final class Context {
 
   public String getSuccessResultMethodName() {
     return isSuperCommand() ? "getResultWithRest" : "getResult";
+  }
+
+  public Optional<Coercion<PositionalParameter>> repeatableParam() {
+    return repeatableParam;
+  }
+
+  /**
+   * Everything but the repeatable param.
+   */
+  public List<Coercion<? extends AbstractParameter>> regularParameters() {
+    return regularParameters;
   }
 }

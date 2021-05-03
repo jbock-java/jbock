@@ -24,17 +24,15 @@ class ParseMethod {
   private final Context context;
   private final GeneratedTypes generatedTypes;
 
-  private final ParameterSpec it;
-  private final ParameterSpec token;
-  private final ParameterSpec position;
+  private final ParameterSpec it = builder(STRING_ITERATOR, "it").build();
+  private final ParameterSpec token = builder(STRING, "token").build();
+  private final ParameterSpec position = builder(INT, "position").build();
+  private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest").build();
 
   @Inject
   ParseMethod(Context context, GeneratedTypes generatedTypes) {
     this.context = context;
     this.generatedTypes = generatedTypes;
-    this.it = builder(STRING_ITERATOR, "it").build();
-    this.token = builder(STRING, "token").build();
-    this.position = builder(INT, "position").build();
   }
 
   MethodSpec parseMethod() {
@@ -50,7 +48,6 @@ class ParseMethod {
 
   private CodeBlock superCommandCode(ClassName parseResultWithRestType) {
     CodeBlock.Builder code = initVariables();
-    ParameterSpec rest = builder(LIST_OF_STRING, "rest").build();
     code.addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class);
 
     // begin parsing loop
@@ -107,13 +104,19 @@ class ParseMethod {
     }
 
     if (!context.params().isEmpty()) {
-      code.addStatement("paramParsers[$N].read($N)", position, token);
-      if (context.anyRepeatableParam() && context.params().size() >= 2) {
-        code.add("if ($N < $L)\n", position, context.params().size() - 1).indent()
-            .addStatement("$N++", position)
-            .unindent();
-      } else if (!context.anyRepeatableParam()) {
-        code.addStatement("$N++", position);
+      if (context.anyRepeatableParam()) {
+        if (context.params().size() == 1) {
+          code.addStatement("$N.add($N)", rest, token);
+        } else {
+          code.add("if ($N < $L)\n", position, context.params().size() - 1).indent()
+              .addStatement("paramParsers[$N++].read($N)", position, token)
+              .unindent()
+              .add("else\n").indent()
+              .addStatement("$N.add($N)", rest, token)
+              .unindent();
+        }
+      } else {
+        code.addStatement("paramParsers[$N++].read($N)", position, token);
       }
     }
 
@@ -133,7 +136,7 @@ class ParseMethod {
 
   private CodeBlock.Builder initVariables() {
     CodeBlock.Builder code = CodeBlock.builder();
-    if (!context.params().isEmpty()) {
+    if (!context.params().isEmpty() && !(context.anyRepeatableParam() && context.params().size() == 1)) {
       code.addStatement("$T $N = $L", position.type, position, 0);
     }
     return code;

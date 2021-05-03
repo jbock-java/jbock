@@ -14,10 +14,14 @@ import net.jbock.compiler.parameter.AbstractParameter;
 
 import javax.inject.Inject;
 
+import java.util.ArrayList;
+import java.util.stream.Collectors;
+
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Constants.mapOf;
@@ -39,6 +43,10 @@ final class StatefulParser {
   private final FieldSpec paramParsersField;
 
   private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
+
+  private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
+      .initializer("new $T<>()", ArrayList.class)
+      .build();
 
   @Inject
   StatefulParser(Context context, GeneratedTypes generatedTypes, ParseMethod parseMethod) {
@@ -71,6 +79,9 @@ final class StatefulParser {
     }
     if (!context.params().isEmpty()) {
       spec.addField(paramParsersField);
+    }
+    if (context.anyRepeatableParam() || context.isSuperCommand()) {
+      spec.addField(rest);
     }
     spec.addMethod(buildMethod());
     return spec.build();
@@ -159,13 +170,23 @@ final class StatefulParser {
   private MethodSpec buildMethod() {
 
     CodeBlock.Builder args = CodeBlock.builder().add("\n");
-    for (int j = 0; j < context.parameters().size(); j++) {
-      Coercion<? extends AbstractParameter> param = context.parameters().get(j);
-      args.add(extractExpression(param));
-      if (j < context.parameters().size() - 1) {
+    for (int j = 0; j < context.regularParameters().size(); j++) {
+      if (j > 0) {
         args.add(",\n");
       }
+      Coercion<? extends AbstractParameter> param = context.regularParameters().get(j);
+      args.add(extractExpression(param));
     }
+    context.repeatableParam().ifPresent(param -> {
+      if (!context.regularParameters().isEmpty()) {
+        args.add(",\n");
+      }
+      args.add(CodeBlock.builder()
+          .add("$N.stream()\n", rest).indent()
+          .add(".map($L)\n", param.mapExpr())
+          .add(".collect($T.toList())", Collectors.class).unindent()
+          .build());
+    });
     return MethodSpec.methodBuilder("build")
         .addStatement("return new $T($L)", generatedTypes.implType(), args.build())
         .returns(generatedTypes.sourceType())
