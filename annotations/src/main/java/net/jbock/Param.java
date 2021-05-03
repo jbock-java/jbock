@@ -7,10 +7,11 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for positional parameters.
+ * Marker annotation for a positional parameter.
  * The annotated method must be {@code abstract}
  * and have an empty argument list.
- * The method's enclosing class must carry the {@link Command} annotation.
+ * The method's enclosing class must carry the {@link Command}
+ * or {@link SuperCommand} annotation.
  */
 @Target(METHOD)
 @Retention(SOURCE)
@@ -33,7 +34,7 @@ public @interface Param {
    * It must either be a {@code static} inner class of the class carrying the {@link Command} annotation,
    * or, if it is declared in a separate source file, it must carry the {@link Mapper} annotation.
    *
-   * @return an optional mapper class, or {@code Void.class} to represent &quot;none&quot;
+   * @return a mapper class, or {@code Void.class}
    */
   Class<?> mappedBy() default Void.class;
 
@@ -45,7 +46,7 @@ public @interface Param {
    * or the bundle supplied at runtime does not contain the bundle key,
    * then the {@code abstract} method's javadoc is used as the param's description.
    *
-   * @return an optional bundle key
+   * @return bundle key or empty string
    */
   String bundleKey() default "";
 }

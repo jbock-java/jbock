@@ -7,10 +7,11 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * Marker annotation for named options.
+ * Marker annotation for a name option.
  * The annotated method must be {@code abstract}
  * and have an empty argument list.
- * The method's enclosing class must carry the {@link Command} annotation.
+ * The method's enclosing class must carry the {@link Command}
+ * or {@link SuperCommand} annotation.
  */
 @Target(METHOD)
 @Retention(SOURCE)
@@ -47,7 +48,7 @@ public @interface Option {
    * or a bundle is supplied but does not contain the bundle key,
    * then the {@code abstract} method's javadoc is used as description.
    *
-   * @return an optional bundle key
+   * @return bundle key or empty string
    */
   String bundleKey() default "";
 }

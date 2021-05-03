@@ -22,9 +22,9 @@ public @interface Command {
    * If an empty string is used, the name will be based on the
    * name of the annotated class.
    *
-   * @return the intended file name of the final executable
+   * @return program name, or empty string
    */
-  String value() default "";
+  String name() default "";
 
   /**
    * When {@code false},

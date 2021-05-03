@@ -15,8 +15,8 @@ public enum ParserFlavour {
 
     @Override
     public String programName(TypeElement sourceElement) {
-      if (!sourceElement.getAnnotation(Command.class).value().isEmpty()) {
-        return sourceElement.getAnnotation(Command.class).value();
+      if (!sourceElement.getAnnotation(Command.class).name().isEmpty()) {
+        return sourceElement.getAnnotation(Command.class).name();
       }
       return EnumName.create(sourceElement.getSimpleName().toString()).snake('-');
     }
@@ -35,8 +35,8 @@ public enum ParserFlavour {
 
     @Override
     public String programName(TypeElement sourceElement) {
-      if (!sourceElement.getAnnotation(SuperCommand.class).value().isEmpty()) {
-        return sourceElement.getAnnotation(SuperCommand.class).value();
+      if (!sourceElement.getAnnotation(SuperCommand.class).name().isEmpty()) {
+        return sourceElement.getAnnotation(SuperCommand.class).name();
       }
       return EnumName.create(sourceElement.getSimpleName().toString()).snake('-');
     }
