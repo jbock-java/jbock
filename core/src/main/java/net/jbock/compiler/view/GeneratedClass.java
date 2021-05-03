@@ -1,6 +1,5 @@
 package net.jbock.compiler.view;
 
-import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -58,14 +57,13 @@ public final class GeneratedClass {
 
   private static final int CONTINUATION_INDENT_USAGE = 8;
   static final String OPTIONS_BY_NAME = "OPTIONS_BY_NAME";
-  static final String SUSPICIOUS_PATTERN = "SUSPICOUS";
+  static final String SUSPICIOUS_PATTERN = "SUSPICIOUS";
 
   private final Context context;
   private final Description description;
   private final Impl impl;
   private final GeneratedTypes generatedTypes;
   private final OptionParser optionParser;
-  private final ParamParser paramParser;
   private final OptionEnum optionEnum;
   private final StatefulParser parserState;
   private final ParseResult parseResult;
@@ -90,7 +88,6 @@ public final class GeneratedClass {
       Impl impl,
       GeneratedTypes generatedTypes,
       OptionParser optionParser,
-      ParamParser paramParser,
       OptionEnum optionEnum,
       StatefulParser parserState,
       ParseResult parseResult) {
@@ -99,7 +96,6 @@ public final class GeneratedClass {
     this.impl = impl;
     this.generatedTypes = generatedTypes;
     this.optionParser = optionParser;
-    this.paramParser = paramParser;
     this.optionEnum = optionEnum;
     this.parserState = parserState;
     this.parseResult = parseResult;
@@ -129,9 +125,6 @@ public final class GeneratedClass {
       spec.addMethod(optionsByNameMethod());
       spec.addMethod(optionParsersMethod());
     }
-    if (!context.params().isEmpty()) {
-      spec.addMethod(paramParsersMethod());
-    }
     if (context.parameters().stream().anyMatch(Coercion::isRequired)) {
       spec.addMethod(missingRequiredMethod());
     }
@@ -158,7 +151,6 @@ public final class GeneratedClass {
         .addType(optionEnum.define())
         .addType(impl.define())
         .addTypes(optionParser.define())
-        .addTypes(paramParser.define())
         .addTypes(parseResult.defineResultTypes());
 
     // move this elsewhere
@@ -614,27 +606,6 @@ public final class GeneratedClass {
       return generatedTypes.flagParserType();
     }
     return generatedTypes.regularOptionParserType();
-  }
-
-  private MethodSpec paramParsersMethod() {
-    CodeBlock code = paramParsersMethodCode(context, generatedTypes);
-    return MethodSpec.methodBuilder("paramParsers")
-        .returns(ArrayTypeName.of(generatedTypes.paramParserType()))
-        .addModifiers(PRIVATE, STATIC)
-        .addCode(code)
-        .build();
-  }
-
-  private static CodeBlock paramParsersMethodCode(Context context, GeneratedTypes generatedTypes) {
-    List<Coercion<PositionalParameter>> params = context.regularParams();
-    ParameterSpec parsers = builder(ArrayTypeName.of(generatedTypes.paramParserType()), "parsers").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T[$L]", parsers.type, parsers, generatedTypes.paramParserType(), params.size());
-    for (int i = 0; i < params.size(); i++) {
-      ClassName parserType = generatedTypes.regularParamParserType();
-      code.addStatement("$N[$L] = new $T()", parsers, i, parserType);
-    }
-    return code.addStatement("return $N", parsers).build();
   }
 
   private MethodSpec missingRequiredMethod() {

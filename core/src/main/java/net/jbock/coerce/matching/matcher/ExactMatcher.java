@@ -35,6 +35,11 @@ public class ExactMatcher extends Matcher {
     String s = dashedNames.isEmpty() ?
         enumConstant :
         enumConstant + " (" + String.join(", ", dashedNames) + ")";
-    return CodeBlock.of(".findAny()\n.orElseThrow(() -> missingRequired($S))", s);
+    CodeBlock.Builder code = CodeBlock.builder();
+    if (!parameter.isPositional()) {
+      code.add("\n.findAny()", s);
+    }
+    return code.add("\n.orElseThrow(() -> missingRequired($S))", s)
+        .build();
   }
 }

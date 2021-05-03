@@ -2,12 +2,14 @@ package net.jbock.examples;
 
 import net.jbock.Command;
 import net.jbock.Parameter;
+import net.jbock.Parameters;
 
+import java.util.List;
 import java.util.OptionalInt;
 
 @Command(helpEnabled = false)
 abstract class ExtremelySimpleArguments {
 
-  @Parameter(index = 0)
-  abstract OptionalInt hello();
+  @Parameters
+  abstract List<String> hello();
 }

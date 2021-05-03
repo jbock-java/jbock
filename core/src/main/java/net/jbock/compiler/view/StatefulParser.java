@@ -15,6 +15,7 @@ import net.jbock.compiler.parameter.AbstractParameter;
 import javax.inject.Inject;
 
 import java.util.ArrayList;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
@@ -60,8 +61,8 @@ final class StatefulParser {
         .initializer("optionParsers()")
         .build();
 
-    this.paramParsersField = FieldSpec.builder(ArrayTypeName.of(generatedTypes.paramParserType()), "paramParsers")
-        .initializer("paramParsers()")
+    this.paramParsersField = FieldSpec.builder(ArrayTypeName.of(STRING), "paramParsers")
+        .initializer("new $T[$L]", STRING, context.regularParams().size())
         .build();
   }
 
@@ -77,7 +78,7 @@ final class StatefulParser {
           .addMethod(tryReadOptionMethod());
       spec.addField(optionParsersField);
     }
-    if (!context.params().isEmpty()) {
+    if (!context.regularParams().isEmpty()) {
       spec.addField(paramParsersField);
     }
     if (context.anyRepeatableParam() || context.isSuperCommand()) {
@@ -195,8 +196,8 @@ final class StatefulParser {
 
   private CodeBlock extractExpression(Coercion<? extends AbstractParameter> param) {
     return getStreamExpression(param)
-        .add(".stream()\n").indent()
-        .add(".map($L)\n", param.mapExpr())
+        .add("\n").indent()
+        .add(".map($L)", param.mapExpr())
         .add(param.tailExpr()).unindent()
         .build();
   }
@@ -204,11 +205,11 @@ final class StatefulParser {
   private CodeBlock.Builder getStreamExpression(Coercion<? extends AbstractParameter> param) {
     if (param.parameter().isPositional()) {
       return CodeBlock.builder().add(
-          "$N[$L]", paramParsersField,
+          "$T.ofNullable($N[$L])", Optional.class, paramParsersField,
           param.parameter().positionalIndex().orElseThrow(AssertionError::new));
     }
     return CodeBlock.builder().add(
-        "$N.get($T.$N)", optionParsersField,
+        "$N.get($T.$N).stream()", optionParsersField,
         generatedTypes.optionType(), param.enumConstant());
   }
 }

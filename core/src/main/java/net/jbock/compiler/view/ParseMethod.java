@@ -64,7 +64,7 @@ class ParseMethod {
     }
     code.add(errorUnrecognizedOption());
 
-    code.addStatement("paramParsers[$N].read($N)", position, token)
+    code.addStatement("paramParsers[$N] = $N", position, token)
         .addStatement("$N++", position);
 
     // end parsing loop
@@ -109,14 +109,14 @@ class ParseMethod {
           code.addStatement("$N.add($N)", rest, token);
         } else {
           code.add("if ($N < $L)\n", position, context.params().size() - 1).indent()
-              .addStatement("paramParsers[$N++].read($N)", position, token)
+              .addStatement("paramParsers[$N++] = $N", position, token)
               .unindent()
               .add("else\n").indent()
               .addStatement("$N.add($N)", rest, token)
               .unindent();
         }
       } else {
-        code.addStatement("paramParsers[$N++].read($N)", position, token);
+        code.addStatement("paramParsers[$N++] = $N", position, token);
       }
     }
 

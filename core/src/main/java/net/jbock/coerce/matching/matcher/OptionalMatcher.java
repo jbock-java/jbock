@@ -27,19 +27,21 @@ public class OptionalMatcher extends Matcher {
       // @Parameters doesn't do optional
       return Optional.empty();
     }
-    Optional<Match> optionalPrimitive = getOptionalPrimitive(returnType());
+    Optional<Match> optionalPrimitive = getOptionalPrimitive(parameter, returnType());
     if (optionalPrimitive.isPresent()) {
       return optionalPrimitive;
     }
     return tool().getSingleTypeArgument(returnType(), Optional.class)
-        .map(typeArg -> Match.create(typeArg, constructorParam(returnType()), Skew.OPTIONAL, tailExpr()));
+        .map(typeArg -> Match.create(typeArg, constructorParam(returnType()), Skew.OPTIONAL, tailExpr(parameter)));
   }
 
-  private CodeBlock tailExpr() {
-    return CodeBlock.of(".findAny()");
+  private CodeBlock tailExpr(AbstractParameter parameter) {
+    return parameter.isPositional() ?
+        CodeBlock.builder().build() :
+        CodeBlock.of("\n.findAny()");
   }
 
-  private Optional<Match> getOptionalPrimitive(TypeMirror type) {
+  private Optional<Match> getOptionalPrimitive(AbstractParameter parameter, TypeMirror type) {
     for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
       if (tool().isSameType(type, optionalPrimitive.type())) {
         ParameterSpec constructorParam = constructorParam(asOptional(optionalPrimitive));
@@ -47,7 +49,7 @@ public class OptionalMatcher extends Matcher {
             tool().asTypeElement(optionalPrimitive.wrappedObjectType()).asType(),
             constructorParam,
             Skew.OPTIONAL,
-            tailExpr(),
+            tailExpr(parameter),
             optionalPrimitive.extractExpr(constructorParam)));
       }
     }
