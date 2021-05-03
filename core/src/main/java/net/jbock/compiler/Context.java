@@ -38,6 +38,8 @@ public final class Context {
 
   private final List<Coercion<? extends AbstractParameter>> regularParameters;
 
+  private final List<Coercion<PositionalParameter>> regularParams;
+
   private final List<Coercion<NamedOption>> options;
 
   private final ParserFlavour flavour;
@@ -60,11 +62,18 @@ public final class Context {
     this.options = namedOptions;
     this.unixClusteringSupported = isUnixClusteringSupported(namedOptions);
     this.flavour = flavour;
-    this.parameters = ImmutableList.<Coercion<? extends AbstractParameter>>builder().addAll(options).addAll(params).build();
+    this.parameters = ImmutableList.<Coercion<? extends AbstractParameter>>builder()
+        .addAll(options)
+        .addAll(params).build();
     this.repeatableParam = params.stream()
         .filter(Coercion::isRepeatable)
         .findFirst();
-    this.regularParameters = parameters.stream().filter(c -> !c.isRepeatable()).collect(Collectors.toList());
+    this.regularParameters = parameters.stream()
+        .filter(c -> !(c.parameter().isPositional() && c.isRepeatable()))
+        .collect(Collectors.toList());
+    this.regularParams = params.stream()
+        .filter(c -> !c.isRepeatable())
+        .collect(Collectors.toList());
     this.generatedTypes = generatedTypes;
   }
 
@@ -139,5 +148,9 @@ public final class Context {
    */
   public List<Coercion<? extends AbstractParameter>> regularParameters() {
     return regularParameters;
+  }
+
+  public List<Coercion<PositionalParameter>> regularParams() {
+    return regularParams;
   }
 }

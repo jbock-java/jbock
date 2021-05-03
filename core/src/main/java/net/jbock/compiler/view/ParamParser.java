@@ -5,7 +5,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.coerce.Coercion;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
 
@@ -17,7 +16,6 @@ import java.util.List;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 /**
@@ -42,8 +40,6 @@ final class ParamParser {
     if (context.params().isEmpty()) {
       return Collections.emptyList();
     }
-    FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
-        .build();
     FieldSpec value = FieldSpec.builder(STRING, "value")
         .build();
     List<TypeSpec> result = new ArrayList<>();
@@ -52,22 +48,13 @@ final class ParamParser {
         .addMethod(optionParser.streamMethodAbstract())
         .addModifiers(PRIVATE, STATIC, ABSTRACT)
         .build());
-    boolean anyRepeatable = context.params().stream().anyMatch(Coercion::isRepeatable);
-    boolean anyRegular = context.params().stream().anyMatch(param -> !param.isRepeatable());
+    boolean anyRegular = !context.regularParams().isEmpty();
     if (anyRegular) {
       result.add(TypeSpec.classBuilder(generatedTypes.regularParamParserType())
           .addField(value)
           .superclass(generatedTypes.paramParserType())
           .addMethod(readMethodRegular(value))
           .addMethod(optionParser.streamMethodRegular(value))
-          .addModifiers(PRIVATE, STATIC).build());
-    }
-    if (anyRepeatable) {
-      result.add(TypeSpec.classBuilder(generatedTypes.repeatableParamParserType())
-          .addField(values)
-          .superclass(generatedTypes.paramParserType())
-          .addMethod(readMethodRepeatable(values))
-          .addMethod(optionParser.streamMethodRepeatable(values))
           .addModifiers(PRIVATE, STATIC).build());
     }
     return result;
@@ -78,17 +65,6 @@ final class ParamParser {
     return MethodSpec.methodBuilder("read")
         .addParameter(valueParam)
         .addModifiers(ABSTRACT)
-        .build();
-  }
-
-  private MethodSpec readMethodRepeatable(FieldSpec values) {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    CodeBlock.Builder code = CodeBlock.builder()
-        .addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class)
-        .addStatement("$N.add($N)", values, token);
-    return MethodSpec.methodBuilder("read")
-        .addParameter(token)
-        .addCode(code.build())
         .build();
   }
 

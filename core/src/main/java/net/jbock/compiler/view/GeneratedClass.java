@@ -626,15 +626,12 @@ public final class GeneratedClass {
   }
 
   private static CodeBlock paramParsersMethodCode(Context context, GeneratedTypes generatedTypes) {
-    List<Coercion<PositionalParameter>> params = context.params();
+    List<Coercion<PositionalParameter>> params = context.regularParams();
     ParameterSpec parsers = builder(ArrayTypeName.of(generatedTypes.paramParserType()), "parsers").build();
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = new $T[$L]", parsers.type, parsers, generatedTypes.paramParserType(), params.size());
     for (int i = 0; i < params.size(); i++) {
-      Coercion<PositionalParameter> param = params.get(i);
-      ClassName parserType = param.isRepeatable() ?
-          generatedTypes.repeatableParamParserType() :
-          generatedTypes.regularParamParserType();
+      ClassName parserType = generatedTypes.regularParamParserType();
       code.addStatement("$N[$L] = new $T()", parsers, i, parserType);
     }
     return code.addStatement("return $N", parsers).build();
