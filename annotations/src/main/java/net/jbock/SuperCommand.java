@@ -27,7 +27,7 @@ public @interface SuperCommand {
   /**
    * The name that the program will be addressed by when the full
    * usage information is printed.
-   * If an empty string is used, the name will be based on the
+   * If an empty string is used, the program name will be based on the
    * name of the annotated class.
    *
    * @return program name, or empty string
@@ -35,12 +35,11 @@ public @interface SuperCommand {
   String name() default "";
 
   /**
-   * When {@code false},
-   * then the generated parser will print the full usage information
-   * if {@code --help} is encountered as the first token in the input array.
+   * When {@code true},
+   * the generated parser will recognize the {@code --help} or {@code -h}
+   * options.
    *
-   * @return {@code true} to disable the {@code --help} mechanism,
-   * {@code false} to enable it.
+   * @return {@code false} to disable the online help
    */
   boolean helpEnabled() default true;
 }

@@ -31,8 +31,6 @@ public @interface Parameter {
    * {@link java.util.function.Function Function}
    * accepting strings,
    * or a {@link java.util.function.Supplier Supplier} of such a function.
-   * It must either be a {@code static} inner class of the class carrying the {@link Command} annotation,
-   * or, if it is declared in a separate source file, it must carry the {@link Converter} annotation.
    *
    * @return converter class or {@code Void.class}
    */

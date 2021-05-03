@@ -33,8 +33,6 @@ public @interface Option {
    * {@link java.util.function.Function Function}
    * accepting strings,
    * or a {@link java.util.function.Supplier Supplier} of such a function.
-   * It must either be a {@code static} inner class of the class carrying the {@link Command} annotation,
-   * or, if it is declared in a separate source file, it must carry the {@link Converter} annotation.
    *
    * @return converter class or {@code Void.class}
    */
@@ -42,7 +40,7 @@ public @interface Option {
 
   /**
    * The key that is used to find the parameter
-   * description in the i18 resource bundle for the online help.
+   * description in the internationalization resource bundle for the online help.
    * If no bundleKey is defined,
    * or no bundle is supplied at runtime,
    * or a bundle is supplied but does not contain the bundle key,
