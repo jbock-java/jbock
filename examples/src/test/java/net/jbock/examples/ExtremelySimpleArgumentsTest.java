@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
-import java.util.OptionalInt;
+import java.util.Collections;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -14,6 +14,6 @@ class ExtremelySimpleArgumentsTest {
 
   @Test
   void simpleTest() {
-    assertEquals(OptionalInt.of(1), f.parse("1").hello());
+    assertEquals(Collections.singletonList("1"), f.parse("1").hello());
   }
 }
