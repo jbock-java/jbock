@@ -1,90 +1,86 @@
 [![core](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock/badge.svg?style=plastic&subject=jbock)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock)
 [![annotations](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations/badge.svg?color=red&style=plastic&subject=jbock-annotations)](https://maven-badges.herokuapp.com/maven-central/com.github.h908714124/jbock-annotations)
 
-jbock is a command line parser mainly inspired by [jcommander](https://jcommander.org/).
-While other popular tools, such as jcommander or
-[picocli](https://github.com/remkop/picocli), scan for annotations at runtime, jbock is an
+jbock is a command line parser inspired by [jcommander](https://jcommander.org/)
+and [picocli](https://github.com/remkop/picocli).
+It is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
 that generates custom parsing code at compile time.
 
 ### Overview
 
-A command line interface is defined by an `abstract` class which has a `@Command` annotation.
+A command line interface is defined as an `abstract` class 
+which has a `@Command` or `@SuperCommand` annotation.
 In this class, each `abstract` method corresponds either to a *named option* or a *positional parameter*.
 
 ````java
 @Command
-abstract class MyCommand {
+abstract class DeleteCommand {
 
   /**
    * A positional parameter.
    */
-  @Param(0)
+  @Parameter(index = 0)
   abstract Path path();
 
   /**
    * A named option.
    */
-  @Option("verbosity")
+  @Option(names = {"-v", "--verbosity"})
   abstract OptionalInt verbosity();
 }
 ````
 
-When jbock is properly configured as an
-annotation processor, the presence of the `@Command` annotation
-will trigger a round of code generation at compile time.
 The generated class will, in this case, be called
-`MyCommand_Parser`. It can be used as follows:
+`DeleteCommand_Parser`. It can be used as follows:
 
 ````java
-String[] args = { "--verbosity=2", "file.txt" }; // sample psvm input
-MyCommand c = new MyCommand_Parser().parseOrExit(args);
+String[] args = { "-v2", "file.txt" };
+DeleteCommand c = new DeleteCommand_Parser().parseOrExit(args);
 
 // Works as expected!
 assertEquals(OptionalInt.of(2), c.verbosity());
 assertEquals(Paths.get("file.txt"), c.path());
 ````
 
-In the MyCommand example, the `path` parameter is *required*,
-while the option `verbosity` is *optional*.
-The property of being either optional or required is called *skew*.
-There are four different skews:
-*required*, *optional*, *repeatable* and *flag*.
-In this case, since there isn't a custom mapper, the skew is
-determined by the abstract method's return type alone.
-See table `A` below.
+In the above example, the `path` parameter is *required*,
+while `verbosity` is *optional*.
+The `@Parameter` and `@Option` annotations do not have a flag
+to mark something as required or optional.
+Instead, the code generator looks at the annotated method's 
+return type to figure this out.
 
-### Skew rules
+#### Skew table A: Auto conversion
 
-These rules apply for options and params that
-do not define a custom mapper,
-as in the `MyCommand` example:
+These rules apply for both `path` and `verbosity` in the `DeleteCommand` example:
 
-#### Skew table A
-
-Return type of the `abstract` method      | *Skew*
+Return type of annotated method           | *Skew*
 ----------------------------------------- | --------------------------------
-`boolean`                                 | *flag* (only for `@Option`)
+`boolean`                                 | *flag* (only `@Option`)
 `Optional<A>`                             | *optional*
 `Optional{Int,Long,Double}`               | *optional*
-`List<A>`                                 | *repeatable*
+`List<A>`                                 | *repeatable* (`@Option` or `@Parameters`)
 `A` (exact match)                         | *required*
 
 where `A` must be one of the
 [auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java),
 otherwise compilation will fail.
 
-Both `@Option` and `@Param` have an optional attribute
-`mappedBy` which takes a single value of type `Class<?>`.
-Any such mapper class must implement `Function<String, E>` or `Supplier<Function<String, E>>` for some `E`.
+In the `DeleteCommand` example, the type of `path` matches `java.nio.file.Path`, which is one of the
+auto types, so the last rule applies, making this a required parameter.
+The type of `verbosity` is `OptionalInt`, so the third rule applies,
+which makes this an optional option.
 
-If a custom mapper is defined,
-then the skew is determined by comparing
-the method's return type to the type of its mapper:
+Both the `@Option` and `@Parameter` annotations also have an optional attribute
+`converter`, which takes a single value of type `Class<?>`.
+A converter class must implement `Function<String, E>` or `Supplier<Function<String, E>>` for some `E`.
 
-#### Skew table B
+#### Skew table B: Converter attribute is set
 
-Mapper type                                     | Return type of the `abstract` method | *Skew*
+If a custom converter is defined,
+then the skew is determined by looking at both the return type and the converter type.
+
+Type of the converter                           | Return type of annotated method      | *Skew*
 ----------------------------------------------- | ------------------------------------ | ------------
 Function&lt;String, `M`&gt;                     | `Optional<M>`                        | *optional*
 Function&lt;String, `{Integer,Long,Double}`&gt; | `Optional{Int,Long,Double}`          | *optional*
@@ -93,15 +89,6 @@ Function&lt;String, `M`&gt;                     | `M`                           
 Function&lt;String, `{Integer,Float,...}`&gt;   | `{int,float,...}`                    | *required*
 
 When none of these rules apply, compilation will fail.
-
-Both rule tables can be summarized in a third table:
-
-#### Skew rules overview
-
-Mapper defined? | *Skew*
---------------- | -----------
-No              | See <a href="#user-content-skew-table-a">Skew Table A</a>
-Yes             | See <a href="#user-content-skew-table-b">Skew Table B</a>
 
 ### Sample projects
 
