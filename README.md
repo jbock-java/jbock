@@ -66,7 +66,7 @@ where `A` must be one of the
 [auto types](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/JbockAutoTypes.java),
 otherwise compilation will fail.
 
-In the `DeleteCommand` example, the type of `path` matches `java.nio.file.Path`, which is one of the
+In the `DeleteCommand` example, the type of `path` is `java.nio.file.Path`, which is one of the
 auto types, so the last rule applies, making this a required parameter.
 The type of `verbosity` is `OptionalInt`, so the third rule applies,
 which makes this an optional option.
