@@ -23,16 +23,16 @@ class EvilArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  evil-arguments --fancy FANCY --fAncy F_ANCY --f_ancy F_ANCY_2 --f__ancy F_ANCY_3",
-        "        --blub BLUB --Blub BLUB_5",
+        "  evil-arguments --fancy FANCY --fAncy FANCY --f_ancy F_ANCY --f__ancy F__ANCY",
+        "        --blub BLUB --Blub BLUB",
         "",
         "OPTIONS",
-        "  --fancy FANCY      ",
-        "  --fAncy F_ANCY     ",
-        "  --f_ancy F_ANCY_2  ",
-        "  --f__ancy F_ANCY_3 ",
-        "  --blub BLUB        ",
-        "  --Blub BLUB_5      ",
+        "  --fancy FANCY     ",
+        "  --fAncy FANCY     ",
+        "  --f_ancy F_ANCY   ",
+        "  --f__ancy F__ANCY ",
+        "  --blub BLUB       ",
+        "  --Blub BLUB       ",
         "");
   }
 }

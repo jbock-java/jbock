@@ -77,7 +77,7 @@ public final class Coercion<P extends AbstractParameter> {
     return enumName().enumConstant();
   }
 
-  public String sample() {
-    return parameter.sample(isFlag(), enumName());
+  public String descriptionSummary() {
+    return parameter.descriptionSummary(isFlag());
   }
 }

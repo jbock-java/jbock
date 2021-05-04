@@ -4,20 +4,21 @@ import net.jbock.compiler.EnumName;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
+import java.util.Locale;
 import java.util.OptionalInt;
 
 public class NamedOption extends AbstractParameter {
 
-  private final List<String> optionName;
+  private final List<String> dashedNames;
 
   public NamedOption(
       EnumName enumName,
-      List<String> optionName,
+      List<String> dashedNames,
       ExecutableElement sourceMethod,
       String bundleKey,
       List<String> description) {
     super(sourceMethod, enumName, bundleKey, description);
-    this.optionName = optionName;
+    this.dashedNames = dashedNames;
   }
 
   @Override
@@ -32,13 +33,22 @@ public class NamedOption extends AbstractParameter {
 
   @Override
   public List<String> dashedNames() {
-    return optionName;
+    return dashedNames;
   }
 
   @Override
-  public String sample(boolean isFlag, EnumName enumName) {
+  public String descriptionSummary(boolean isFlag) {
     String sample = String.join(", ", dashedNames());
-    return isFlag ? sample : sample + ' ' + enumName.enumConstant();
+    return isFlag ? sample : sample + ' ' + descriptionArgName();
+  }
+
+  public String descriptionArgName() {
+    return dashedNames.stream()
+        .filter(name -> name.startsWith("--"))
+        .map(name -> name.substring(2))
+        .map(s -> s.toUpperCase(Locale.US))
+        .findFirst()
+        .orElse(enumName().enumConstant().toUpperCase(Locale.ROOT));
   }
 
   @Override
@@ -47,6 +57,6 @@ public class NamedOption extends AbstractParameter {
   }
 
   public boolean hasUnixName() {
-    return optionName.stream().anyMatch(s -> s.length() == 2);
+    return dashedNames.stream().anyMatch(s -> s.length() == 2);
   }
 }

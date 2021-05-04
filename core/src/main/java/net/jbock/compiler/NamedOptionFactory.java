@@ -42,7 +42,7 @@ class NamedOptionFactory extends ParameterScoped {
   }
 
   Either<ValidationFailure, Coercion<NamedOption>> createNamedOption() {
-    return checkFullName()
+    return checkOptionNames()
         .map(this::createNamedOption)
         .flatMap(namedOption -> {
           if (!mapperPresent && returnType().getKind() == BOOLEAN) {
@@ -53,7 +53,7 @@ class NamedOptionFactory extends ParameterScoped {
         .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
   }
 
-  private Either<String, List<String>> checkFullName() {
+  private Either<String, List<String>> checkOptionNames() {
     Option option = sourceMethod().getAnnotation(Option.class);
     if (option == null) {
       return right(Collections.emptyList());
@@ -131,8 +131,8 @@ class NamedOptionFactory extends ParameterScoped {
     return right(name);
   }
 
-  private NamedOption createNamedOption(List<String> optionName) {
-    return new NamedOption(enumName(), optionName, sourceMethod(), bundleKey(),
+  private NamedOption createNamedOption(List<String> dashedNames) {
+    return new NamedOption(enumName(), dashedNames, sourceMethod(), bundleKey(),
         Arrays.asList(description()));
   }
 

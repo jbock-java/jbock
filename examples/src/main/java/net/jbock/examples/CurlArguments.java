@@ -26,7 +26,7 @@ abstract class CurlArguments {
   /**
    * List<String> for repeatable arguments
    */
-  @Option(names = {"--H", "-H"})
+  @Option(names = {"--header", "-H"})
   abstract List<String> headers();
 
   /**

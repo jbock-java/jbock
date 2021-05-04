@@ -32,6 +32,6 @@ abstract class CpArguments {
   /**
    * Override the usual backup suffix
    */
-  @Option(names = {"--s", "-s"})
+  @Option(names = {"--suffix", "-s"})
   abstract Optional<String> suffix();
 }

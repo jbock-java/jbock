@@ -207,7 +207,7 @@ public final class GeneratedClass {
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedTypes.optionType(), p.enumConstant(),
             p.parameter().bundleKey().orElse(""),
-            p.sample()));
+            p.descriptionSummary()));
     if (!context.options().isEmpty()) {
       code.addStatement("$N.println()", err);
       code.addStatement("$N.println($S)", err, "OPTIONS");
@@ -216,7 +216,7 @@ public final class GeneratedClass {
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedTypes.optionType(), p.enumConstant(),
             p.parameter().bundleKey().orElse(""),
-            p.sample()));
+            p.descriptionSummary()));
     return methodBuilder("printOnlineHelp")
         .addModifiers(accessModifiers)
         .addCode(code.build())
@@ -227,7 +227,7 @@ public final class GeneratedClass {
     List<Coercion<? extends AbstractParameter>> params = context.parameters();
     int totalPadding = 3;
     int width = params.stream()
-        .map(Coercion::sample)
+        .map(Coercion::descriptionSummary)
         .mapToInt(String::length).max().orElse(0) + totalPadding;
     String format = "  %1$-" + (width - 2) + "s";
     ParameterSpec messageKey = builder(STRING, "messageKey").build();
@@ -477,7 +477,7 @@ public final class GeneratedClass {
       spec.addStatement("$N.add($T.format($S, $S, $S))",
           result, STRING, "%s %s",
           option.parameter().dashedNames().get(0),
-          option.enumConstant().toUpperCase(Locale.US));
+          option.parameter().descriptionArgName());
     }
 
     for (Coercion<PositionalParameter> param : context.params()) {

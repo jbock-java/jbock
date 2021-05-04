@@ -68,7 +68,7 @@ public abstract class AbstractParameter {
 
   public abstract List<String> dashedNames();
 
-  public abstract String sample(boolean isFlag, EnumName enumName);
+  public abstract String descriptionSummary(boolean isFlag);
 
   public final ExecutableElement sourceMethod() {
     return sourceMethod;

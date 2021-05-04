@@ -19,6 +19,6 @@ abstract class TarArguments {
   @Option(names = {"--z", "-z"})
   abstract boolean compress();
 
-  @Option(names = {"--f", "-f"})
+  @Option(names = {"--file", "-f"})
   abstract String file();
 }

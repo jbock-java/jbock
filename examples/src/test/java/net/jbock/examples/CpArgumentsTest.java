@@ -101,13 +101,13 @@ class CpArgumentsTest {
         "  cp-arguments [OPTION]... SOURCE DEST",
         "",
         "PARAMETERS",
-        "  source          ",
-        "  dest            ",
+        "  source              ",
+        "  dest                ",
         "",
         "OPTIONS",
-        "  -r, --r         ",
-        "  --backup BACKUP ",
-        "  -s, --s SUFFIX   Override the usual backup suffix",
+        "  -r, --r             ",
+        "  --backup BACKUP     ",
+        "  -s, --suffix SUFFIX  Override the usual backup suffix",
         "");
   }
 }

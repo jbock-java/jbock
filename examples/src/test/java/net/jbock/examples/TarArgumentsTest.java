@@ -37,11 +37,11 @@ class TarArgumentsTest {
         "  tar-arguments [OPTION]... -f FILE",
         "",
         "OPTIONS",
-        "  -x, --x      ",
-        "  -c, --c      ",
-        "  -v, --v      ",
-        "  -z, --z      ",
-        "  -f, --f FILE ",
+        "  -x, --x         ",
+        "  -c, --c         ",
+        "  -v, --v         ",
+        "  -z, --z         ",
+        "  -f, --file FILE ",
         "");
   }
 }

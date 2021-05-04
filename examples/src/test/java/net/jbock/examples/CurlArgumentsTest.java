@@ -222,13 +222,13 @@ class CurlArgumentsTest {
         "  curl [OPTION]... [URL]...",
         "",
         "PARAMETERS",
-        "  url                  ",
+        "  url                   ",
         "",
         "OPTIONS",
-        "  -X, --request METHOD  Optional<String> for regular arguments",
-        "  -H, --H HEADERS       List<String> for repeatable arguments",
-        "  -v, --verbose         boolean for flags",
-        "  -i, --include        ",
+        "  -X, --request REQUEST  Optional<String> for regular arguments",
+        "  -H, --header HEADER    List<String> for repeatable arguments",
+        "  -v, --verbose          boolean for flags",
+        "  -i, --include         ",
         "");
   }
 }
