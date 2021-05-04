@@ -71,7 +71,8 @@ class GradleArgumentsTest {
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
-        "otherTokens", asList("b-a-b-a", "->", "<=>", "", " "));
+        "mainToken", Optional.of("b-a-b-a"),
+        "otherTokens", asList("->", "<=>", "", " "));
   }
 
   @Test
@@ -147,12 +148,13 @@ class GradleArgumentsTest {
 
   @Test
   void testFlag() {
-    f.assertThat("-c", "hello").succeeds(
+    f.assertThat("-c", "hello", "hello").succeeds(
         "message", Optional.empty(),
         "file", emptyList(),
         "dir", Optional.empty(),
         "cmos", true,
         "verbose", false,
+        "mainToken", Optional.of("hello"),
         "otherTokens", singletonList("hello"));
   }
 
@@ -164,7 +166,8 @@ class GradleArgumentsTest {
         "dir", Optional.empty(),
         "cmos", false,
         "verbose", false,
-        "otherTokens", asList("hello", "goodbye"));
+        "mainToken", Optional.of("hello"),
+        "otherTokens", singletonList("goodbye"));
   }
 
   @Test
@@ -207,10 +210,11 @@ class GradleArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  gradle-arguments [OPTION]... [OTHER_TOKENS]...",
+        "  gradle-arguments [OPTION]... [MAIN_TOKEN] [OTHER_TOKENS]...",
         "",
         "PARAMETERS",
-        "  other_tokens          ",
+        "  MAIN_TOKEN    some token",
+        "  OTHER_TOKENS  some more tokens",
         "",
         "OPTIONS",
         "  -m, --message MESSAGE  the message message goes here",

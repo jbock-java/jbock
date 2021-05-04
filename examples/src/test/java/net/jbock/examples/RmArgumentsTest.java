@@ -30,7 +30,7 @@ class RmArgumentsTest {
         "  rm-arguments [OPTION]... [OTHER_TOKENS]...",
         "",
         "PARAMETERS",
-        "  other_tokens     This is a list that may be empty.",
+        "  OTHER_TOKENS  This is a list that may be empty.",
         "",
         "OPTIONS",
         "  -r, --recursive  ALLES TURISTEN UND NONTEKNISCHEN LOOKENSPEEPERS! DAS",

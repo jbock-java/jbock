@@ -45,7 +45,7 @@ public class PositionalParameter extends AbstractParameter {
 
   @Override
   public String descriptionSummary(boolean isFlag) {
-    return enumName().snake().toLowerCase(Locale.US);
+    return enumName().snake().toUpperCase(Locale.US);
   }
 
   @Override

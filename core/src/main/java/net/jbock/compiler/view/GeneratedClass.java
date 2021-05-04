@@ -10,7 +10,6 @@ import net.jbock.coerce.Coercion;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.GeneratedTypes;
-import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 
@@ -199,6 +198,11 @@ public final class GeneratedClass {
     code.addStatement("$N.println($S)", err, "USAGE");
     code.addStatement("printTokens($S, usage())", continuationIndent);
 
+    int paramsWidth = context.params().stream()
+        .map(Coercion::descriptionSummary)
+        .mapToInt(String::length).max().orElse(0) + 3;
+    String paramsFormat = "  %1$-" + (paramsWidth - 2) + "s";
+
     if (!context.params().isEmpty()) {
       code.addStatement("$N.println()", err);
       code.addStatement("$N.println($S)", err, "PARAMETERS");
@@ -207,16 +211,22 @@ public final class GeneratedClass {
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedTypes.optionType(), p.enumConstant(),
             p.parameter().bundleKey().orElse(""),
-            p.descriptionSummary()));
+            String.format(paramsFormat, p.descriptionSummary())));
     if (!context.options().isEmpty()) {
       code.addStatement("$N.println()", err);
       code.addStatement("$N.println($S)", err, "OPTIONS");
     }
+
+    int optionsWidth = context.options().stream()
+        .map(Coercion::descriptionSummary)
+        .mapToInt(String::length).max().orElse(0) + 3;
+    String optionsFormat = "  %1$-" + (optionsWidth - 2) + "s";
+
     context.options().forEach(p ->
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedTypes.optionType(), p.enumConstant(),
             p.parameter().bundleKey().orElse(""),
-            p.descriptionSummary()));
+            String.format(optionsFormat, p.descriptionSummary())));
     return methodBuilder("printOnlineHelp")
         .addModifiers(accessModifiers)
         .addCode(code.build())
@@ -224,24 +234,17 @@ public final class GeneratedClass {
   }
 
   MethodSpec printOptionMethod() {
-    List<Coercion<? extends AbstractParameter>> params = context.parameters();
-    int totalPadding = 3;
-    int width = params.stream()
-        .map(Coercion::descriptionSummary)
-        .mapToInt(String::length).max().orElse(0) + totalPadding;
-    String format = "  %1$-" + (width - 2) + "s";
     ParameterSpec messageKey = builder(STRING, "messageKey").build();
     ParameterSpec message = builder(STRING, "message").build();
     ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
     ParameterSpec names = builder(STRING, "names").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
+    ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
     ParameterSpec s = builder(STRING, "s").build();
-    ParameterSpec namesPadded = builder(STRING, "names_padded_" + width + "_characters").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $T.format($S, $N)", namesPadded.type, namesPadded, STRING, format, names);
     code.addStatement("$T $N = $N.isEmpty() ? null : $N.get($N)", message.type, message, messageKey, messages, messageKey);
     code.addStatement("$T $N = new $T<>()", tokens.type, tokens, ArrayList.class);
-    code.addStatement("$N.add($N)", tokens, namesPadded);
+    code.addStatement("$N.add($N)", tokens, names);
     code.addStatement(CodeBlock.builder().add("$N.addAll($T.ofNullable($N)\n",
         tokens, Optional.class, message).indent()
         .add(".map($T::trim)\n", STRING)
@@ -254,8 +257,9 @@ public final class GeneratedClass {
         .unindent()
         .unindent()
         .build());
-    code.addStatement("printTokens($S, $N)",
-        String.join("", Collections.nCopies(width + 1, " ")), tokens);
+    code.addStatement("$T $N = $T.join($S, $T.nCopies($N.length() + 1, $S))",
+        STRING, continuationIndent, STRING, "", Collections.class, names, " ");
+    code.addStatement("printTokens($N, $N)", continuationIndent, tokens);
     return methodBuilder("printOption")
         .addParameter(option)
         .addParameter(messageKey)

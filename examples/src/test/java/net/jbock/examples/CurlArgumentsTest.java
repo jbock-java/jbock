@@ -222,7 +222,7 @@ class CurlArgumentsTest {
         "  curl [OPTION]... [URL]...",
         "",
         "PARAMETERS",
-        "  url                   ",
+        "  URL ",
         "",
         "OPTIONS",
         "  -X, --request REQUEST  Optional<String> for regular arguments",

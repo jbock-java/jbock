@@ -49,8 +49,8 @@ class MvArgumentsTest {
         "  mv-arguments SOURCE DEST",
         "",
         "PARAMETERS",
-        "  source ",
-        "  dest   ",
+        "  SOURCE ",
+        "  DEST   ",
         "");
   }
 }

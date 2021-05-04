@@ -47,9 +47,9 @@ class AdditionArgumentsTest {
         "  addition-arguments A B [C]",
         "",
         "PARAMETERS",
-        "  a  First argument",
-        "  b  Second argument",
-        "  c  Optional third argument",
+        "  A  First argument",
+        "  B  Second argument",
+        "  C  Optional third argument",
         "");
   }
 }

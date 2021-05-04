@@ -96,11 +96,11 @@ class PositionalArgumentsTest {
         "  positional-arguments SOURCE DEST ANOTHER_INT [OPT_STRING] [OTHER_TOKENS]...",
         "",
         "PARAMETERS",
-        "  source       ",
-        "  dest          Desc of dest.",
-        "  another_int  ",
-        "  opt_string   ",
-        "  other_tokens ",
+        "  SOURCE       ",
+        "  DEST          Desc of dest.",
+        "  ANOTHER_INT  ",
+        "  OPT_STRING   ",
+        "  OTHER_TOKENS ",
         "");
   }
 }

@@ -29,7 +29,7 @@ class RestArgumentsTest {
       "  rest-arguments [OPTION]... [REST]...",
       "",
       "PARAMETERS",
-      "  rest         Hello yes",
+      "  REST  Hello yes",
       "",
       "OPTIONS",
       "  --file FILE  This is dog",

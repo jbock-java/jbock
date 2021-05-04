@@ -47,10 +47,10 @@ class RequiredArgumentsTest {
         "  required-arguments --dir DIR [OTHER_TOKENS]...",
         "",
         "PARAMETERS",
-        "  other_tokens ",
+        "  OTHER_TOKENS ",
         "",
         "OPTIONS",
-        "  --dir DIR    ",
+        "  --dir DIR ",
         "");
   }
 }
