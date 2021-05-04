@@ -12,7 +12,7 @@ class PsArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  ps-arguments [options...]",
+        "  ps-arguments [OPTION]...",
         "",
         "OPTIONS",
         "  -a, --all         ",

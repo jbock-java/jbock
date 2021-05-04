@@ -98,7 +98,7 @@ class CpArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  cp-arguments [options...] <source> <dest>",
+        "  cp-arguments [OPTION]... SOURCE DEST",
         "",
         "PARAMETERS",
         "  source          ",

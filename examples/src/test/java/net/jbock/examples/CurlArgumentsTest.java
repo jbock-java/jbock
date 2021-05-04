@@ -21,7 +21,7 @@ class CurlArgumentsTest {
         "headers", emptyList(),
         "verbose", false,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
   }
 
   @Test
@@ -31,31 +31,31 @@ class CurlArgumentsTest {
         "headers", emptyList(),
         "verbose", false,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("--request= ").succeeds(
         "method", Optional.of(" "),
         "headers", emptyList(),
         "verbose", false,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("--request", "").succeeds(
         "method", Optional.of(""),
         "headers", emptyList(),
         "verbose", false,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-XPUT").succeeds(
         "method", Optional.of("PUT"),
         "headers", emptyList(),
         "verbose", false,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-X", "PUT").succeeds(
         "method", Optional.of("PUT"),
         "headers", emptyList(),
         "verbose", false,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
   }
 
   @Test
@@ -65,25 +65,25 @@ class CurlArgumentsTest {
         "headers", singletonList("1"),
         "verbose", false,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-H1", "-H2").succeeds(
         "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", false,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-H", "1").succeeds(
         "method", Optional.empty(),
         "headers", singletonList("1"),
         "verbose", false,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-H", "1", "-H", "2").succeeds(
         "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", false,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
   }
 
   @Test
@@ -93,67 +93,67 @@ class CurlArgumentsTest {
         "headers", singletonList("1"),
         "verbose", true,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-v", "-i", "-H1").succeeds(
         "method", Optional.empty(),
         "headers", singletonList("1"),
         "verbose", true,
         "include", true,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-i", "-v", "-H1").succeeds(
         "method", Optional.empty(),
         "headers", singletonList("1"),
         "verbose", true,
         "include", true,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-v", "-i", "1").succeeds(
         "method", Optional.empty(),
         "headers", emptyList(),
         "verbose", true,
         "include", true,
-        "urls", singletonList("1"));
+        "url", singletonList("1"));
     f.assertThat("-v", "-H", "1", "-H2").succeeds(
         "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", true,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-v", "-i", "-H", "1", "-H2").succeeds(
         "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", true,
         "include", true,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-v", "-H1", "-H2").succeeds(
         "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", true,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-v", "-i", "-H1", "-H2").succeeds(
         "method", Optional.empty(),
         "headers", asList("1", "2"),
         "verbose", true,
         "include", true,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-v", "-XPOST").succeeds(
         "method", Optional.of("POST"),
         "headers", emptyList(),
         "verbose", true,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-v", "-i", "-XPOST").succeeds(
         "method", Optional.of("POST"),
         "headers", emptyList(),
         "verbose", true,
         "include", true,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-v", "-i", "-XPOST").succeeds(
         "method", Optional.of("POST"),
         "headers", emptyList(),
         "verbose", true,
         "include", true,
-        "urls", emptyList());
+        "url", emptyList());
   }
 
   @Test
@@ -163,13 +163,13 @@ class CurlArgumentsTest {
         "headers", asList("0", "1", "2"),
         "verbose", true,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
     f.assertThat("-vXPOST").succeeds(
         "method", Optional.of("POST"),
         "headers", emptyList(),
         "verbose", true,
         "include", false,
-        "urls", emptyList());
+        "url", emptyList());
   }
 
   @Test
@@ -219,10 +219,10 @@ class CurlArgumentsTest {
         "all transfer-related features. See libcurl(3) for details.",
         "",
         "USAGE",
-        "  curl [options...] <urls>...",
+        "  curl [OPTION]... [URL]...",
         "",
         "PARAMETERS",
-        "  urls                 ",
+        "  url                  ",
         "",
         "OPTIONS",
         "  -X, --request METHOD  Optional<String> for regular arguments",

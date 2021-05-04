@@ -69,7 +69,7 @@ class NoNameArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  no-name-arguments [options...] -n <number>",
+        "  no-name-arguments [OPTION]... -n NUMBER",
         "",
         "OPTIONS",
         "  --message MESSAGE         ",

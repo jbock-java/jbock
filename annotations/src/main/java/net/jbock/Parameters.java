@@ -14,7 +14,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * <ul>
  *   <li>The annotated method must be {@code abstract} and have an empty argument list.</li>
  *   <li>It must return {@link java.util.List List&lt;E&gt;}, where {@code E} is a converted type.</li>
- *   <li>The method's enclosing class must carry the {@link Command} or {@link SuperCommand} annotation.</li>
  *   <li>There cannot be more than one such method per class.</li>
  * </ul>
  */

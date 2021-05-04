@@ -93,8 +93,7 @@ class PositionalArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  positional-arguments <source> <dest> <another_int> [<opt_string>]",
-        "        <other_tokens>...",
+        "  positional-arguments SOURCE DEST ANOTHER_INT [OPT_STRING] [OTHER_TOKENS]...",
         "",
         "PARAMETERS",
         "  source       ",

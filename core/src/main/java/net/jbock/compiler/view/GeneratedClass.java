@@ -25,8 +25,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -71,7 +69,7 @@ public final class GeneratedClass {
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
 
-  private final FieldSpec maxLineWidth = FieldSpec.builder(INT, "maxLineWidth", PRIVATE)
+  private final FieldSpec terminalWidth = FieldSpec.builder(INT, "terminalWidth", PRIVATE)
       .initializer("$L", DEFAULT_WRAP_AFTER).build();
 
   private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages", PRIVATE)
@@ -110,9 +108,8 @@ public final class GeneratedClass {
         .addMethod(parseMethod(accessModifiers))
         .addMethod(parseOrExitMethod(accessModifiers))
         .addMethod(withProgramNameMethod(accessModifiers))
-        .addMethod(withMaxLineWidthMethod(accessModifiers))
+        .addMethod(withTerminalWidthMethod(accessModifiers))
         .addMethod(withMessagesMethod(accessModifiers))
-        .addMethod(withResourceBundleMethod(accessModifiers))
         .addMethod(withExitHookMethod(accessModifiers))
         .addMethod(withErrorStreamMethod(accessModifiers));
     spec.addMethod(printOnlineHelpMethod(accessModifiers))
@@ -131,7 +128,7 @@ public final class GeneratedClass {
 
     spec.addField(err);
     spec.addField(programName);
-    spec.addField(maxLineWidth);
+    spec.addField(terminalWidth);
     spec.addField(exitHook);
     spec.addField(messages);
 
@@ -236,15 +233,15 @@ public final class GeneratedClass {
     ParameterSpec messageKey = builder(STRING, "messageKey").build();
     ParameterSpec message = builder(STRING, "message").build();
     ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
-    ParameterSpec sample = builder(STRING, "sample").build();
+    ParameterSpec names = builder(STRING, "names").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec s = builder(STRING, "s").build();
-    ParameterSpec shape = builder(STRING, "shape_padded_" + width + "_characters").build();
+    ParameterSpec namesPadded = builder(STRING, "names_padded_" + width + "_characters").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $T.format($S, $N)", shape.type, shape, STRING, format, sample);
+    code.addStatement("$T $N = $T.format($S, $N)", namesPadded.type, namesPadded, STRING, format, names);
     code.addStatement("$T $N = $N.isEmpty() ? null : $N.get($N)", message.type, message, messageKey, messages, messageKey);
     code.addStatement("$T $N = new $T<>()", tokens.type, tokens, ArrayList.class);
-    code.addStatement("$N.add($N)", tokens, shape);
+    code.addStatement("$N.add($N)", tokens, namesPadded);
     code.addStatement(CodeBlock.builder().add("$N.addAll($T.ofNullable($N)\n",
         tokens, Optional.class, message).indent()
         .add(".map($T::trim)\n", STRING)
@@ -262,7 +259,7 @@ public final class GeneratedClass {
     return methodBuilder("printOption")
         .addParameter(option)
         .addParameter(messageKey)
-        .addParameter(sample)
+        .addParameter(names)
         .addModifiers(PRIVATE)
         .addCode(code.build())
         .build();
@@ -302,7 +299,7 @@ public final class GeneratedClass {
     code.addStatement("$T $N = $N.get($N)", STRING, token, tokens, i);
     code.addStatement("$T $N = $N.length() == $L", BOOLEAN, fresh, line, 0);
     code.beginControlFlow("if (!$N && $N.length() + $N.length() + 1 > $N)",
-        fresh, token, line, maxLineWidth);
+        fresh, token, line, terminalWidth);
     code.addStatement("$N.add($N.toString())", result, line);
     code.addStatement("$N.setLength(0)", line);
     code.addStatement("continue");
@@ -338,11 +335,11 @@ public final class GeneratedClass {
         .build();
   }
 
-  private MethodSpec withMaxLineWidthMethod(Modifier[] accessModifiers) {
-    ParameterSpec indentParam = builder(maxLineWidth.type, "chars").build();
-    return methodBuilder("withMaxLineWidth")
-        .addParameter(indentParam)
-        .addStatement("this.$N = $N", maxLineWidth, indentParam)
+  private MethodSpec withTerminalWidthMethod(Modifier[] accessModifiers) {
+    ParameterSpec width = builder(terminalWidth.type, "width").build();
+    return methodBuilder("withTerminalWidth")
+        .addParameter(width)
+        .addStatement("this.$1N = $2N == 0 ? this.$1N : $2N", terminalWidth, width)
         .addStatement("return this")
         .returns(context.generatedClass())
         .addModifiers(accessModifiers)
@@ -367,18 +364,6 @@ public final class GeneratedClass {
         .addStatement("this.$N = $N", messages, resourceBundleParam)
         .addStatement("return this")
         .returns(context.generatedClass())
-        .addModifiers(accessModifiers)
-        .build();
-  }
-
-  private MethodSpec withResourceBundleMethod(Modifier[] accessModifiers) {
-    ParameterSpec bundle = builder(ResourceBundle.class, "bundle").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.add("return withMessages($T.list($N.getKeys()).stream()\n", Collections.class, bundle).indent()
-        .addStatement(".collect($T.toMap($T.identity(), $N::getString)))", Collectors.class, Function.class, bundle).unindent();
-    return methodBuilder("withResourceBundle").addParameter(bundle)
-        .returns(context.generatedClass())
-        .addCode(code.build())
         .addModifiers(accessModifiers)
         .build();
   }
@@ -485,23 +470,23 @@ public final class GeneratedClass {
     spec.addStatement("$N.add($N)", result, programName);
 
     if (!optionalOptions.isEmpty()) {
-      spec.addStatement("$N.add($S)", result, "[options...]");
+      spec.addStatement("$N.add($S)", result, "[OPTION]...");
     }
 
     for (Coercion<NamedOption> option : requiredOptions) {
       spec.addStatement("$N.add($T.format($S, $S, $S))",
-          result, STRING, "%s <%s>",
+          result, STRING, "%s %s",
           option.parameter().dashedNames().get(0),
-          option.enumConstant().toLowerCase(Locale.US));
+          option.enumConstant().toUpperCase(Locale.US));
     }
 
     for (Coercion<PositionalParameter> param : context.params()) {
       if (param.isOptional()) {
-        spec.addStatement("$N.add($S)", result, "[<" + param.enumName().snake() + ">]");
+        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]");
       } else if (param.isRequired()) {
-        spec.addStatement("$N.add($S)", result, "<" + param.enumName().snake() + ">");
+        spec.addStatement("$N.add($S)", result, param.enumName().snake().toUpperCase(Locale.US));
       } else if (param.isRepeatable()) {
-        spec.addStatement("$N.add($S)", result, "<" + param.enumName().snake() + ">...");
+        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]...");
       } else {
         throw new AssertionError("all cases handled (param can't be flag)");
       }
@@ -527,7 +512,7 @@ public final class GeneratedClass {
         .beginControlFlow("if ($N instanceof $T)", result, helpRequestedType)
         .addStatement("printOnlineHelp()")
         .addStatement("$N.flush()", err)
-        .addStatement("$N.accept($N, 0)", exitHook, result)
+        .addStatement("$N.accept($N)", exitHook, result)
         .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
         .endControlFlow());
 
@@ -541,7 +526,7 @@ public final class GeneratedClass {
       code.addStatement("$N.println($S + $N + $S)", err, "Try '", programName, " --help' for more information.");
     }
     code.addStatement("$N.flush()", err)
-        .addStatement("$N.accept($N, 1)", exitHook, result)
+        .addStatement("$N.accept($N)", exitHook, result)
         .addStatement("throw new $T($S)", RuntimeException.class, "parsing error");
 
     return methodBuilder("parseOrExit").addParameter(args)
@@ -551,14 +536,17 @@ public final class GeneratedClass {
         .build();
   }
 
-
   private MethodSpec optionsByNameMethod() {
     ClassName optionType = generatedTypes.optionType();
     ParameterSpec result = builder(mapOf(STRING, optionType), "result").build();
-    ParameterSpec option = builder(optionType, "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T<>($T.values().length)",
-        result.type, result, HashMap.class, option.type);
+    long mapSize = context.options().stream()
+        .map(Coercion::parameter)
+        .map(NamedOption::dashedNames)
+        .map(List::size)
+        .mapToLong(i -> i)
+        .sum();
+    code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
     for (Coercion<NamedOption> namedOption : context.options()) {
       for (String dashedName : namedOption.parameter().dashedNames()) {
         code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedTypes.optionType(),

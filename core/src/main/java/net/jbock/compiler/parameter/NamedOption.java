@@ -37,11 +37,7 @@ public class NamedOption extends AbstractParameter {
 
   @Override
   public String sample(boolean isFlag, EnumName enumName) {
-    List<String> names = dashedNames();
-    if (names.isEmpty() || names.size() >= 3) {
-      throw new AssertionError();
-    }
-    String sample = String.join(", ", names);
+    String sample = String.join(", ", dashedNames());
     return isFlag ? sample : sample + ' ' + enumName.enumConstant();
   }
 

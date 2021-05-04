@@ -10,8 +10,6 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * Marker annotation for a positional parameter.
  * The annotated method must be {@code abstract}
  * and have an empty argument list.
- * The method's enclosing class must carry the {@link Command}
- * or {@link SuperCommand} annotation.
  */
 @Target(METHOD)
 @Retention(SOURCE)

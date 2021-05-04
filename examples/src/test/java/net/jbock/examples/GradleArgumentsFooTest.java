@@ -19,7 +19,7 @@ class GradleArgumentsFooTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  foo [options...]",
+        "  foo [OPTION]...",
         "",
         "OPTIONS",
         "  --bar BAR ",

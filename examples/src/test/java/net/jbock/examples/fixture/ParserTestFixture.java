@@ -9,8 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.ResourceBundle;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -43,11 +42,9 @@ public final class ParserTestFixture<E> {
 
     Parser<E> withMessages(Map<String, String> map);
 
-    Parser<E> withResourceBundle(ResourceBundle bundle);
+    Parser<E> withTerminalWidth(int chars);
 
-    Parser<E> maxLineWidth(int chars);
-
-    Parser<E> withExitHook(BiConsumer<?, Integer> exitHook);
+    Parser<E> withExitHook(Consumer<?> exitHook);
   }
 
   private final Parser<E> parser;
@@ -114,18 +111,13 @@ public final class ParserTestFixture<E> {
       }
 
       @Override
-      public Parser<E> withResourceBundle(ResourceBundle bundle) {
-        return callSetter("withResourceBundle", bundle, ResourceBundle.class);
+      public Parser<E> withTerminalWidth(int width) {
+        return callSetter("withTerminalWidth", width, Integer.TYPE);
       }
 
       @Override
-      public Parser<E> maxLineWidth(int chars) {
-        return callSetter("withMaxLineWidth", chars, Integer.TYPE);
-      }
-
-      @Override
-      public Parser<E> withExitHook(BiConsumer<?, Integer> exitHook) {
-        return callSetter("withExitHook", exitHook, BiConsumer.class);
+      public Parser<E> withExitHook(Consumer<?> exitHook) {
+        return callSetter("withExitHook", exitHook, Consumer.class);
       }
     });
     return new ParserTestFixture<>(parser.get(0));
@@ -138,7 +130,7 @@ public final class ParserTestFixture<E> {
   public E parse(String... args) {
     TestOutputStream stderr = new TestOutputStream();
     Optional<E> result = parser
-        .withErrorStream(stderr.out).maxLineWidth(MAX_LINE_WIDTH).parse(args);
+        .withErrorStream(stderr.out).withTerminalWidth(MAX_LINE_WIDTH).parse(args);
     if (!result.isPresent()) {
       throw new AssertionError(stderr.toString());
     }
@@ -214,7 +206,7 @@ public final class ParserTestFixture<E> {
     Parsed getParsed() {
       TestOutputStream stderr = new TestOutputStream();
       Optional<E> result = parser
-          .withErrorStream(stderr.out).maxLineWidth(MAX_LINE_WIDTH).parse(args);
+          .withErrorStream(stderr.out).withTerminalWidth(MAX_LINE_WIDTH).parse(args);
       return new Parsed(stderr.toString(), result);
     }
 
@@ -249,10 +241,10 @@ public final class ParserTestFixture<E> {
       TestOutputStream stderr = new TestOutputStream();
       try {
         parser.withErrorStream(stderr.out)
-            .withExitHook((r, code) -> {
+            .withExitHook(r -> {
               throw new Abort();
             })
-            .maxLineWidth(MAX_LINE_WIDTH)
+            .withTerminalWidth(MAX_LINE_WIDTH)
             .parseOrExit(args);
         fail("Expecting empty result");
       } catch (Abort e) {
@@ -293,19 +285,14 @@ public final class ParserTestFixture<E> {
     return getOut();
   }
 
-  public String[] getHelp(ResourceBundle bundle) {
-    parser.withResourceBundle(bundle);
-    return getOut();
-  }
-
   private String[] getOut() {
     TestOutputStream stderr = new TestOutputStream();
     try {
       parser.withErrorStream(stderr.out)
-          .withExitHook((r, code) -> {
+          .withExitHook(r -> {
             throw new Abort();
           })
-          .maxLineWidth(MAX_LINE_WIDTH)
+          .withTerminalWidth(MAX_LINE_WIDTH)
           .parseOrExit(new String[]{"--help"});
       fail("Expecting empty result");
     } catch (Abort e) {

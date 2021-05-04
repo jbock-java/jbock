@@ -4,10 +4,13 @@ import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.ResourceBundle;
 import java.util.Vector;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import static net.jbock.examples.fixture.ParserTestFixture.assertArraysEquals;
 import static org.mockito.ArgumentMatchers.eq;
@@ -23,7 +26,7 @@ class RestArgumentsTest {
 
   private final String[] expected = {
       "USAGE",
-      "  rest-arguments [options...] <rest>...",
+      "  rest-arguments [OPTION]... [REST]...",
       "",
       "PARAMETERS",
       "  rest         Hello yes",
@@ -49,7 +52,12 @@ class RestArgumentsTest {
     ResourceBundle bundle = mock(ResourceBundle.class);
     when(bundle.getKeys()).thenReturn(new Vector<>(messages.keySet()).elements());
     messages.forEach((k, v) -> when(bundle.getString(eq(k))).thenReturn(v));
-    String[] help = f.getHelp(bundle);
+    String[] help = f.getHelp(toMap(bundle));
     assertArraysEquals(expected, help);
+  }
+
+  private Map<String, String> toMap(ResourceBundle bundle) {
+    return Collections.list(bundle.getKeys()).stream()
+        .collect(Collectors.toMap(Function.identity(), bundle::getString));
   }
 }

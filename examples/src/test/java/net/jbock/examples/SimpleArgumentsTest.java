@@ -32,7 +32,7 @@ class SimpleArgumentsTest {
         "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA",
         "",
         "USAGE",
-        "  simple-arguments [options...]",
+        "  simple-arguments [OPTION]...",
         "",
         "OPTIONS",
         "  -x, --x      aa",

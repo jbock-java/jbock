@@ -39,5 +39,5 @@ abstract class CurlArguments {
   abstract boolean include();
 
   @Parameters
-  abstract List<String> urls();
+  abstract List<String> url();
 }

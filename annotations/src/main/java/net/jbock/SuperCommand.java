@@ -25,10 +25,9 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface SuperCommand {
 
   /**
-   * The name that the program will be addressed by when the full
-   * usage information is printed.
-   * If an empty string is used, the program name will be based on the
-   * name of the annotated class.
+   * The program name used in the help text.
+   * If an empty string is used, a program name will be chosen based on the
+   * class name.
    *
    * @return program name, or empty string
    */
@@ -36,8 +35,9 @@ public @interface SuperCommand {
 
   /**
    * When {@code true},
-   * the generated parser will recognize the {@code --help} or {@code -h}
-   * options.
+   * the generated parser will show the help text
+   * if {@code --help} or {@code -h}
+   * are the only options.
    *
    * @return {@code false} to disable the online help
    */

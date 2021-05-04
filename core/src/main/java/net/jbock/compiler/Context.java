@@ -2,6 +2,7 @@ package net.jbock.compiler;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -15,7 +16,7 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -106,13 +107,22 @@ public final class Context {
   }
 
   public FieldSpec exitHookField() {
-    ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(BiConsumer.class),
-        generatedTypes.parseResultType(), ClassName.get(Integer.class));
+    ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(Consumer.class),
+        generatedTypes.parseResultType());
     ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
-    ParameterSpec rc = ParameterSpec.builder(Integer.class, "rc").build();
+    CodeBlock.Builder code = CodeBlock.builder();
+    if (generatedTypes.helpRequestedType().isPresent()) {
+      generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> {
+        code.add("$N ->\n", result).indent()
+            .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, helpRequestedType)
+            .unindent();
+      });
+    } else {
+      code.add("$N -> $T.exit(1)", result, System.class);
+    }
     return FieldSpec.builder(consumer, "exitHook")
         .addModifiers(PRIVATE)
-        .initializer("($N, $N) -> $T.exit($N)", result, rc, System.class, rc)
+        .initializer(code.build())
         .build();
   }
 

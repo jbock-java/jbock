@@ -44,7 +44,7 @@ class RequiredArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  required-arguments --dir <dir> <other_tokens>...",
+        "  required-arguments --dir DIR [OTHER_TOKENS]...",
         "",
         "PARAMETERS",
         "  other_tokens ",

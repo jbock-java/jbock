@@ -23,8 +23,8 @@ class EvilArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  evil-arguments --fancy <fancy> --fAncy <f_ancy> --f_ancy <f_ancy_2>",
-        "        --f__ancy <f_ancy_3> --blub <blub> --Blub <blub_5>",
+        "  evil-arguments --fancy FANCY --fAncy F_ANCY --f_ancy F_ANCY_2 --f__ancy F_ANCY_3",
+        "        --blub BLUB --Blub BLUB_5",
         "",
         "OPTIONS",
         "  --fancy FANCY      ",

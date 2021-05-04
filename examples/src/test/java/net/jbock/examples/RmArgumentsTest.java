@@ -27,7 +27,7 @@ class RmArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  rm-arguments [options...] <other_tokens>...",
+        "  rm-arguments [OPTION]... [OTHER_TOKENS]...",
         "",
         "PARAMETERS",
         "  other_tokens     This is a list that may be empty.",

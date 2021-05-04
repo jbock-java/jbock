@@ -44,7 +44,7 @@ class AdditionArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  addition-arguments <a> <b> [<c>]",
+        "  addition-arguments A B [C]",
         "",
         "PARAMETERS",
         "  a  First argument",

@@ -295,6 +295,20 @@ class ProcessorTest {
   }
 
   @Test
+  void threeNames() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(names = {\"--x\", \"-x\", \"-m\"})",
+        "  abstract java.util.OptionalInt b();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
   void oneOptionalInt() {
     JavaFileObject javaFile = fromSource(
         "@Command",
