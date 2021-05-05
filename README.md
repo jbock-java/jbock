@@ -7,6 +7,8 @@ It is an
 [annotation processor](https://openjdk.java.net/groups/compiler/processing-code.html)
 that generates custom parsing code at compile time.
 
+Please see the [wiki](https://github.com/h908714124/jbock/wiki) for usage details.
+
 ### Overview
 
 A command line interface is defined as an `abstract` class 
