@@ -52,8 +52,6 @@ return type to figure this out.
 
 #### Skew table A: Auto conversion
 
-These rules apply for both `path` and `verbosity` in the `DeleteCommand` example:
-
 Return type of annotated method           | *Skew*
 ----------------------------------------- | --------------------------------
 `boolean`                                 | *flag* (only `@Option`)
@@ -71,13 +69,13 @@ auto types, so the last rule applies, making this a required parameter.
 The type of `verbosity` is `OptionalInt`, so the third rule applies,
 which makes this an optional option.
 
-Both the `@Option` and `@Parameter` annotations also have an optional attribute
+The `@Option` and `@Parameter` annotations also have an optional attribute
 `converter`, which takes a single value of type `Class<?>`.
 A converter class must implement `Function<String, E>` or `Supplier<Function<String, E>>` for some `E`.
 
 #### Skew table B: Converter attribute is set
 
-If a custom converter is defined,
+When the converter attribute is set,
 then the skew is determined by looking at both the return type and the converter type.
 
 Type of the converter                           | Return type of annotated method      | *Skew*
