@@ -2,6 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.RepeatedTest;
+import org.junit.jupiter.api.Test;
 
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
@@ -50,5 +51,22 @@ class GitArgumentsTest {
       }
     }
     return sb.toString();
+  }
+
+  @Test
+  void testPrint() {
+    f.assertPrintsHelp(
+        "Git (/ɡɪt/) is software for tracking changes in any set of files.",
+        "",
+        "USAGE",
+        "  git-arguments [OPTION]... COMMAND [REMAINING_ARGS]...",
+        "",
+        "PARAMETERS",
+        "  COMMAND         nope",
+        "  REMAINING_ARGS  You were a hit! Everyone loves you, now.",
+        "",
+        "OPTIONS",
+        "  --bare  bear",
+        "");
   }
 }

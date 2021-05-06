@@ -461,12 +461,43 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return false;
   }
 
-  private Description getDescription(Element method) {
-    String docComment = elements.getDocComment(method);
-    return new Description(docComment == null ? new String[0] : tokenizeJavadoc(docComment));
+  private Description getDescription(Element el) {
+    String[] description = getDescriptionFromAttribute(el);
+    if (description.length == 0) {
+      String[] javadoc = tokenizeJavadoc(elements.getDocComment(el));
+      return new Description(javadoc);
+    }
+    return new Description(description);
+  }
+
+  private String[] getDescriptionFromAttribute(Element el) {
+    Option option = el.getAnnotation(Option.class);
+    if (option != null) {
+      return option.description();
+    }
+    Parameter parameter = el.getAnnotation(Parameter.class);
+    if (parameter != null) {
+      return parameter.description();
+    }
+    Parameters parameters = el.getAnnotation(Parameters.class);
+    if (parameters != null) {
+      return parameters.description();
+    }
+    Command command = el.getAnnotation(Command.class);
+    if (command != null) {
+      return command.description();
+    }
+    SuperCommand superCommand = el.getAnnotation(SuperCommand.class);
+    if (superCommand != null) {
+      return superCommand.description();
+    }
+    return new String[0];
   }
 
   private static String[] tokenizeJavadoc(String docComment) {
+    if (docComment == null) {
+      return new String[0];
+    }
     String[] tokens = docComment.trim().split("\\R", -1);
     List<String> result = new ArrayList<>(tokens.length);
     for (String t : tokens) {

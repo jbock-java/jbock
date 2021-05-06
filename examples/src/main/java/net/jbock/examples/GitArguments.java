@@ -1,17 +1,35 @@
 package net.jbock.examples;
 
 import net.jbock.Command;
+import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 
 import java.util.List;
 
-@Command
+/**
+ * This is ignored
+ */
+@Command(description = "Git (/ɡɪt/) is software for tracking changes in any set of files.")
 abstract class GitArguments {
 
-  @Parameter(index = 0)
+  /**
+   * Is Javadoc used here?
+   */
+  @Parameter(index = 0, description = "nope")
   abstract String command();
 
-  @Parameters
+  /**
+   * Some option
+   */
+  @Option(names = "--bare", description = "bear")
+  abstract boolean bare();
+
+  /**
+   * More ignored text
+   */
+  @Parameters(description = {
+      "You were a hit!",
+      "Everyone loves you, now."})
   abstract List<String> remainingArgs();
 }
