@@ -17,21 +17,30 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface Command {
 
   /**
-   * The program name used in the help text.
-   * If an empty string is used, a program name will be chosen based on the
-   * class name.
+   * The program name used in the usage documentation.
+   * If empty, a program name will be chosen based on the
+   * class name of the annotated class.
    *
    * @return program name, or empty string
    */
   String name() default "";
 
   /**
-   * When {@code true},
-   * the generated parser will show the help text
-   * if {@code --help} or {@code -h}
-   * are the only options.
+   * If {@code true},
+   * the generated parser will print the usage documentation
+   * when {@code --help} or {@code -h}
+   * are the only input tokens, or when there is at least one
+   * required option or parameter, and the input array is empty.
    *
-   * @return {@code false} to disable the online help
+   * @return {@code false} to disable the help option
    */
   boolean helpEnabled() default true;
+
+  /**
+   * Optional text to display before the synopsis block.
+   * If empty, the javadoc of the annotated class will be used as a fallback.
+   *
+   * @return description text
+   */
+  String[] description() default {};
 }

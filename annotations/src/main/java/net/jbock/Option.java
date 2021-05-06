@@ -37,14 +37,25 @@ public @interface Option {
   Class<?> converter() default Void.class;
 
   /**
-   * The key that is used to find the parameter
-   * description in the internationalization resource bundle for the online help.
-   * If no bundleKey is defined,
-   * or no bundle is supplied at runtime,
+   * The key that is used to find the option
+   * description in the internationalization resource bundle.
+   * If no {@code bundleKey} is defined,
+   * or no message bundle is supplied at runtime,
    * or a bundle is supplied but does not contain the bundle key,
-   * then the {@code abstract} method's javadoc is used as description.
+   * then the {@code description} attribute will be used.
+   * If that is also empty, the method's javadoc will be used.
    *
    * @return bundle key or empty string
    */
   String bundleKey() default "";
+
+  /**
+   * Option description, used when generating the usage documentation.
+   * If empty, the method's javadoc will be used as a fallback.
+   * The {@code bundleKey} overrides this,
+   * if the key is present in the resource bundle at runtime.
+   *
+   * @return description text
+   */
+  String[] description() default {};
 }
