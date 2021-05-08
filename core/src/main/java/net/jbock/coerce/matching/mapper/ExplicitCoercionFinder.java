@@ -30,34 +30,34 @@ import static net.jbock.coerce.SuppliedClassValidator.getEnclosingElements;
 public class ExplicitCoercionFinder extends ParameterScoped {
 
   private final ImmutableList<Matcher> matchers;
-  private final TypeElement mapperClass;
   private final ReferenceTool referenceTool;
 
   @Inject
   ExplicitCoercionFinder(
       ParameterContext context,
-      TypeElement mapperClass,
       ImmutableList<Matcher> matchers,
       ReferenceTool referenceTool) {
     super(context);
-    this.mapperClass = mapperClass;
     this.matchers = matchers;
     this.referenceTool = referenceTool;
   }
 
-  public <P extends AbstractParameter> Either<String, Coercion<P>> findCoercion(P parameter) {
-    Optional<String> maybeFailure = commonChecks(mapperClass).map(s -> "mapper " + s);
+  public <P extends AbstractParameter> Either<String, Coercion<P>> findCoercion(
+      P parameter,
+      TypeElement converter) {
+    Optional<String> maybeFailure = commonChecks(converter).map(s -> "converter " + s);
     return Either.<String, Void>fromFailure(maybeFailure, null)
-        .filter(this::checkNotAbstract)
-        .filter(this::checkNoTypevars)
-        .filter(this::checkMapperAnnotation)
-        .flatMap(nothing -> referenceTool.getReferencedType())
-        .flatMap(functionType -> tryAllMatchers(functionType, parameter));
+        .filter(nothing -> checkNotAbstract(converter))
+        .filter(nothing -> checkNoTypevars(converter))
+        .filter(nothing -> checkMapperAnnotation(converter))
+        .flatMap(nothing -> referenceTool.getReferencedType(converter))
+        .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
   }
 
   private <P extends AbstractParameter> Either<String, Coercion<P>> tryAllMatchers(
       FunctionType functionType,
-      P parameter) {
+      P parameter,
+      TypeElement converter) {
     List<Match> matches = new ArrayList<>();
     for (Matcher matcher : matchers) {
       Optional<Match> match = matcher.tryMatch(parameter);
@@ -66,7 +66,7 @@ public class ExplicitCoercionFinder extends ParameterScoped {
       if (match.isPresent()) {
         return Either.fromSuccess("", match)
             .map(m -> {
-              CodeBlock mapExpr = getMapExpr(functionType);
+              CodeBlock mapExpr = getMapExpr(functionType, converter);
               return m.toCoercion(mapExpr, parameter);
             });
       }
@@ -77,32 +77,31 @@ public class ExplicitCoercionFinder extends ParameterScoped {
     return Either.left(ExplicitCoercionFinder.noMatchError(message.baseReturnType()));
   }
 
-  private Optional<String> checkMapperAnnotation() {
-    Converter mapperAnnotation = mapperClass.getAnnotation(Converter.class);
-    boolean nestedMapper = getEnclosingElements(mapperClass).contains(sourceElement());
-    if (mapperAnnotation == null && !nestedMapper) {
-      return Optional.of("mapper must be a static inner class of the @" + Command.class.getSimpleName() +
-          " annotated class, or carry the @" + Converter.class.getSimpleName() + " annotation");
+  private Optional<String> checkMapperAnnotation(TypeElement converter) {
+    Converter converterAnnotation = converter.getAnnotation(Converter.class);
+    boolean nestedMapper = getEnclosingElements(converter).contains(sourceElement());
+    if (converterAnnotation == null && !nestedMapper) {
+      return Optional.of("converter must be an inner class of the command class, or carry the @" + Converter.class.getSimpleName() + " annotation");
     }
     return Optional.empty();
   }
 
-  private Optional<String> checkNotAbstract() {
-    if (mapperClass.getModifiers().contains(ABSTRACT)) {
-      return Optional.of("non-abstract mapper class");
+  private Optional<String> checkNotAbstract(TypeElement converter) {
+    if (converter.getModifiers().contains(ABSTRACT)) {
+      return Optional.of("non-abstract converter class");
     }
     return Optional.empty();
   }
 
-  private Optional<String> checkNoTypevars() {
-    if (!mapperClass.getTypeParameters().isEmpty()) {
-      return Optional.of("found type parameters in mapper class declaration");
+  private Optional<String> checkNoTypevars(TypeElement converter) {
+    if (!converter.getTypeParameters().isEmpty()) {
+      return Optional.of("found type parameters in converter class declaration");
     }
     return Optional.empty();
   }
 
-  private CodeBlock getMapExpr(FunctionType functionType) {
-    return CodeBlock.of("new $T()$L", mapperClass.asType(),
+  private CodeBlock getMapExpr(FunctionType functionType, TypeElement converter) {
+    return CodeBlock.of("new $T()$L", converter.asType(),
         functionType.isSupplier() ? ".get()" : "");
   }
 
@@ -111,6 +110,6 @@ public class ExplicitCoercionFinder extends ParameterScoped {
   }
 
   private static String noMatchError(TypeMirror type) {
-    return "mapper should implement Function<String, " + Util.typeToString(type) + ">";
+    return "converter should implement Function<String, " + Util.typeToString(type) + ">";
   }
 }

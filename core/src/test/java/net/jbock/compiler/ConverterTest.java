@@ -9,10 +9,10 @@ import static com.google.testing.compile.JavaSourcesSubjectFactory.javaSources;
 import static java.util.Collections.singletonList;
 import static net.jbock.compiler.ProcessorTest.fromSource;
 
-class MapperTest {
+class ConverterTest {
 
   @Test
-  void implementsBothFunctionAndSupplier() {
+  void converterImplementsBothFunctionAndSupplier() {
     JavaFileObject javaFile = fromSource(
         "@Converter",
         "class MapMap implements Function<String, String>, Supplier<Function<String, String>> {",
@@ -30,11 +30,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper should implement Function<String, ?> or Supplier<Function<String, ?>> but not both");
+        .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>> but not both");
   }
 
   @Test
-  void doesNotImplementFunction() {
+  void converterDoesNotImplementFunction() {
     JavaFileObject javaFile = fromSource(
         "@Converter",
         "class MapMap {}",
@@ -49,11 +49,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper should implement Function<String, ?> or Supplier<Function<String, ?>>");
+        .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
 
   @Test
-  void missingMapperAnnotation() {
+  void missingConverterAnnotation() {
     JavaFileObject javaFile = fromSource(
         "class MapMap implements Function<String, String> {",
         "  public String apply(String s) { return null; }",
@@ -69,7 +69,8 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper must be a static inner class of the @Command annotated class, or carry the @Converter annotation");
+        .withErrorContaining("converter must be an inner class of the command class, " +
+            "or carry the @Converter annotation");
   }
 
   @Test
@@ -164,7 +165,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper");
+        .withErrorContaining("converter");
   }
 
   @Test
@@ -186,11 +187,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper should implement Function<String, ?> or Supplier<Function<String, ?>>");
+        .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
 
   @Test
-  void mapperInvalidPrivateConstructor() {
+  void converterInvalidPrivateConstructor() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -213,7 +214,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperInvalidNoDefaultConstructor() {
+  void converterInvalidNoDefaultConstructor() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -232,11 +233,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper missing default constructor");
+        .withErrorContaining("converter missing default constructor");
   }
 
   @Test
-  void mapperInvalidConstructorException() {
+  void converterInvalidConstructorException() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -255,11 +256,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper missing default constructor");
+        .withErrorContaining("converter missing default constructor");
   }
 
   @Test
-  void mapperInvalidNonstaticInnerClass() {
+  void converterInvalidNonstaticInnerClass() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -275,11 +276,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper must be static or top-level");
+        .withErrorContaining("converter must be static or top-level");
   }
 
   @Test
-  void mapperInvalidNotStringFunction() {
+  void converterInvalidNotStringFunction() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -295,11 +296,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper should implement Function<String, ?>");
+        .withErrorContaining("converter should implement Function<String, ?>");
   }
 
   @Test
-  void mapperInvalidReturnsString() {
+  void converterInvalidReturnsString() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -315,11 +316,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper should implement Function<String, Integer>");
+        .withErrorContaining("converter should implement Function<String, Integer>");
   }
 
   @Test
-  void mapperInvalidReturnsStringOptional() {
+  void converterInvalidReturnsStringOptional() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -335,11 +336,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper should implement Function<String, Integer>");
+        .withErrorContaining("converter should implement Function<String, Integer>");
   }
 
   @Test
-  void mapperInvalidReturnsStringList() {
+  void converterInvalidReturnsStringList() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -355,7 +356,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper should implement Function<String, Integer>");
+        .withErrorContaining("converter should implement Function<String, Integer>");
   }
 
   @Test
@@ -378,7 +379,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperValidTypevars() {
+  void converterValidTypevars() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -397,7 +398,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperValidNestedTypevars() {
+  void converterValidNestedTypevars() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -417,7 +418,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperValidExtendsFunction() {
+  void converterValidExtendsFunction() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -436,11 +437,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper should implement Function<String, ?> or Supplier<Function<String, ?>>");
+        .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
 
   @Test
-  void mapperInvalidStringFunction() {
+  void converterInvalidStringFunction() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -459,11 +460,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("mapper should implement Function<String, ?> or Supplier<Function<String, ?>>");
+        .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
 
   @Test
-  void testMapperTypeSudokuInvalid() {
+  void testConverterTypeSudokuInvalid() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -479,7 +480,7 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("found type parameters in mapper class declaration");
+        .withErrorContaining("found type parameters in converter class declaration");
   }
 
   @Test
@@ -510,7 +511,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperInvalidRawFunctionSupplier() {
+  void converterInvalidRawFunctionSupplier() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -526,11 +527,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("raw type in mapper class");
+        .withErrorContaining("raw type in converter class");
   }
 
   @Test
-  void mapperInvalidRawSupplier() {
+  void converterInvalidRawSupplier() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -546,11 +547,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("raw type in mapper class");
+        .withErrorContaining("raw type in converter class");
   }
 
   @Test
-  void mapperInvalidRawFunction() {
+  void converterInvalidRawFunction() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -566,11 +567,11 @@ class MapperTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("raw type in mapper class");
+        .withErrorContaining("raw type in converter class");
   }
 
   @Test
-  void mapperValid() {
+  void converterValid() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -589,7 +590,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperValidByte() {
+  void converterValidByte() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -608,7 +609,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperValidBytePrimitive() {
+  void converterValidBytePrimitive() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -627,7 +628,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperValidOptionalInteger() {
+  void converterValidOptionalInteger() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -665,7 +666,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperOptionalInt() {
+  void converterOptionalInt() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -684,7 +685,7 @@ class MapperTest {
   }
 
   @Test
-  void mapperOptionalInteger() {
+  void converterOptionalInteger() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -723,7 +724,7 @@ class MapperTest {
 
 
   @Test
-  void mapperValidListOfSet() {
+  void converterValidListOfSet() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",

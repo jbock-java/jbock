@@ -19,23 +19,21 @@ import static net.jbock.either.Either.right;
 
 public class ReferenceTool {
 
-  private final TypeElement mapperClass;
   private final TypeTool tool;
 
   @Inject
-  ReferenceTool(TypeTool tool, TypeElement mapperClass) {
+  ReferenceTool(TypeTool tool) {
     this.tool = tool;
-    this.mapperClass = mapperClass;
   }
 
-  public Either<String, FunctionType> getReferencedType() {
-    Optional<DeclaredType> implementsSupplier = checkImplements(Supplier.class);
-    Optional<DeclaredType> implementsFunction = checkImplements(Function.class);
+  public Either<String, FunctionType> getReferencedType(TypeElement converter) {
+    Optional<DeclaredType> implementsSupplier = checkImplements(Supplier.class, converter);
+    Optional<DeclaredType> implementsFunction = checkImplements(Function.class, converter);
     if (implementsSupplier.isPresent() && implementsFunction.isPresent()) {
-      return left(mapperNotFunction() + " but not both");
+      return left(converteNotFunction() + " but not both");
     }
     if (!implementsSupplier.isPresent() && !implementsFunction.isPresent()) {
-      return left(mapperNotFunction());
+      return left(converteNotFunction());
     }
     if (implementsSupplier.isPresent()) {
       return fromSuccess("", implementsSupplier)
@@ -47,44 +45,44 @@ public class ReferenceTool {
 
   private Either<String, FunctionType> handleSupplier(DeclaredType declaredType) {
     if (declaredType.getTypeArguments().size() != 1) {
-      return left(mapperRawType());
+      return left(converterRawType());
     }
     TypeMirror typearg = declaredType.getTypeArguments().get(0);
     if (typearg.getKind() != TypeKind.DECLARED) {
-      return left(mapperNotFunction());
+      return left(converteNotFunction());
     }
     DeclaredType suppliedFunction = AS_DECLARED.visit(typearg);
     if (!tool.isSameErasure(suppliedFunction, Function.class.getCanonicalName())) {
-      return left(mapperNotFunction());
+      return left(converteNotFunction());
     }
     return handleFunction(suppliedFunction, true);
   }
 
   private Either<String, FunctionType> handleFunction(DeclaredType suppliedFunction, boolean isSupplier) {
     if (suppliedFunction.getTypeArguments().size() != 2) {
-      return left(mapperRawType());
+      return left(converterRawType());
     }
     TypeMirror inputType = suppliedFunction.getTypeArguments().get(0);
     if (!tool.isSameType(inputType, String.class.getCanonicalName())) {
-      return left("mapper should implement Function<String, ?>");
+      return left("converter should implement Function<String, ?>");
     }
     return right(new FunctionType(suppliedFunction.getTypeArguments(), isSupplier));
   }
 
-  private Optional<DeclaredType> checkImplements(Class<?> candidate) {
-    return mapperClass.getInterfaces().stream()
+  private Optional<DeclaredType> checkImplements(Class<?> candidate, TypeElement converter) {
+    return converter.getInterfaces().stream()
         .filter(inter -> tool.isSameErasure(inter, candidate.getCanonicalName()))
         .map(AS_DECLARED::visit)
         .findFirst();
   }
 
-  private String mapperNotFunction() {
-    return "mapper should implement " + Function.class.getSimpleName() +
+  private String converteNotFunction() {
+    return "converter should implement " + Function.class.getSimpleName() +
         "<String, ?> or " + Supplier.class.getSimpleName() +
         "<" + Function.class.getSimpleName() + "<String, ?>>";
   }
 
-  private String mapperRawType() {
-    return "raw type in mapper class";
+  private String converterRawType() {
+    return "raw type in converter class";
   }
 }

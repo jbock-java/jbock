@@ -24,8 +24,8 @@ class ReferenceToolTest {
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(elements, types);
       TypeElement typeElement = elements.getTypeElement("test.Foo");
-      ReferenceTool referenceTool = new ReferenceTool(tool, typeElement);
-      Either<String, FunctionType> result = referenceTool.getReferencedType();
+      ReferenceTool referenceTool = new ReferenceTool(tool);
+      Either<String, FunctionType> result = referenceTool.getReferencedType(typeElement);
       result.accept(l -> Assertions.fail(), functionType -> Assertions.assertTrue(functionType.isSupplier()));
     });
   }
