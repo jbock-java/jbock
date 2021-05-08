@@ -1,4 +1,4 @@
-package net.jbock.coerce.reference;
+package net.jbock.convert.reference;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.List;

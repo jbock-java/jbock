@@ -2,8 +2,8 @@ package net.jbock.compiler;
 
 import com.google.common.collect.ImmutableList;
 import net.jbock.SuperCommand;
-import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.ConvertedParameter;
+import net.jbock.convert.BasicInfo;
+import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;

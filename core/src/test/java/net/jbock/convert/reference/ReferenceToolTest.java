@@ -1,4 +1,4 @@
-package net.jbock.coerce.reference;
+package net.jbock.convert.reference;
 
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;

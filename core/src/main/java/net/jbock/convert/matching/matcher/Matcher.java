@@ -1,6 +1,6 @@
-package net.jbock.coerce.matching.matcher;
+package net.jbock.convert.matching.matcher;
 
-import net.jbock.coerce.matching.Match;
+import net.jbock.convert.matching.Match;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.parameter.AbstractParameter;

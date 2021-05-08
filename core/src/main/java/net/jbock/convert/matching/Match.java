@@ -1,9 +1,9 @@
-package net.jbock.coerce.matching;
+package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.coerce.ConvertedParameter;
-import net.jbock.coerce.Skew;
+import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Skew;
 import net.jbock.compiler.parameter.AbstractParameter;
 
 import javax.lang.model.type.TypeMirror;

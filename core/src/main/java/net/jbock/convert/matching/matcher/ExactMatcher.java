@@ -1,9 +1,9 @@
-package net.jbock.coerce.matching.matcher;
+package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.coerce.Skew;
-import net.jbock.coerce.matching.Match;
+import net.jbock.convert.Skew;
+import net.jbock.convert.matching.Match;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.ParameterStyle;

@@ -1,4 +1,4 @@
-package net.jbock.coerce;
+package net.jbock.convert;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;

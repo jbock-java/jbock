@@ -1,4 +1,4 @@
-package net.jbock.coerce;
+package net.jbock.convert;
 
 import net.jbock.compiler.TypeTool;
 

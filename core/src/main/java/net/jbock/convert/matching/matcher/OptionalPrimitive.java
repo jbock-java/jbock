@@ -1,4 +1,4 @@
-package net.jbock.coerce.matching.matcher;
+package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;

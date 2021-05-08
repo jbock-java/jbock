@@ -1,13 +1,13 @@
-package net.jbock.coerce.matching.auto;
+package net.jbock.convert.matching.auto;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.coerce.AutoMapper;
-import net.jbock.coerce.ConvertedParameter;
-import net.jbock.coerce.Util;
-import net.jbock.coerce.matching.Match;
-import net.jbock.coerce.matching.matcher.Matcher;
+import net.jbock.convert.AutoMapper;
+import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Util;
+import net.jbock.convert.matching.Match;
+import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.parameter.AbstractParameter;

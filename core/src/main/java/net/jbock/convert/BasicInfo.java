@@ -1,8 +1,8 @@
-package net.jbock.coerce;
+package net.jbock.convert;
 
 import dagger.Lazy;
-import net.jbock.coerce.matching.auto.AutoCoercionFinder;
-import net.jbock.coerce.matching.mapper.ExplicitCoercionFinder;
+import net.jbock.convert.matching.auto.AutoCoercionFinder;
+import net.jbock.convert.matching.mapper.ExplicitCoercionFinder;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.parameter.AbstractParameter;

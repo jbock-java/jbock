@@ -1,14 +1,14 @@
-package net.jbock.coerce.matching.mapper;
+package net.jbock.convert.matching.mapper;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;
-import net.jbock.coerce.ConvertedParameter;
-import net.jbock.coerce.Util;
-import net.jbock.coerce.matching.Match;
-import net.jbock.coerce.matching.matcher.Matcher;
-import net.jbock.coerce.reference.FunctionType;
-import net.jbock.coerce.reference.ReferenceTool;
+import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Util;
+import net.jbock.convert.matching.Match;
+import net.jbock.convert.matching.matcher.Matcher;
+import net.jbock.convert.reference.FunctionType;
+import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.parameter.AbstractParameter;
@@ -23,8 +23,8 @@ import java.util.List;
 import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
-import static net.jbock.coerce.SuppliedClassValidator.getEnclosingElements;
+import static net.jbock.convert.SuppliedClassValidator.commonChecks;
+import static net.jbock.convert.SuppliedClassValidator.getEnclosingElements;
 
 public class ExplicitCoercionFinder extends ParameterScoped {
 

@@ -1,4 +1,4 @@
-package net.jbock.coerce.matching.matcher;
+package net.jbock.convert.matching.matcher;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.TypeName;

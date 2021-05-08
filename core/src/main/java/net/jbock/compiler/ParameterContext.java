@@ -3,7 +3,7 @@ package net.jbock.compiler;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import dagger.Reusable;
-import net.jbock.coerce.ConvertedParameter;
+import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.qualifier.BundleKey;
