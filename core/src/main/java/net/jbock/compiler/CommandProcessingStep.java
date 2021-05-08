@@ -20,6 +20,7 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.compiler.view.GeneratedClass;
 import net.jbock.either.Either;
+import net.jbock.qualifier.ConverterClass;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -95,6 +96,9 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
       @BindsInstance
       Builder optionType(ClassName optionType);
+
+      @BindsInstance
+      Builder converter(ConverterClass converter);
 
       @BindsInstance
       Builder description(Description description);
@@ -221,12 +225,13 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       List<ValidationFailure> failures = new ArrayList<>();
       List<ExecutableElement> positionalParameters = methods.params();
       for (ExecutableElement sourceMethod : positionalParameters) {
-        Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
-        ParameterModule module = new ParameterModule(sourceElement, mapperClass, getParameterBundleKey(sourceMethod));
+        Optional<TypeElement> converter = annotationUtil.getConverter(sourceMethod);
+        ParameterModule module = new ParameterModule(sourceElement, getParameterBundleKey(sourceMethod));
         ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
             .optionType(optionType)
             .sourceMethod(sourceMethod)
             .typeTool(tool)
+            .converter(new ConverterClass(converter))
             .flavour(flavour)
             .alreadyCreatedParams(ImmutableList.copyOf(positionalParams))
             .alreadyCreatedOptions(ImmutableList.of())
@@ -244,12 +249,13 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       failures.addAll(validatePositions(positionalParams));
       List<Coercion<NamedOption>> namedOptions = new ArrayList<>();
       for (ExecutableElement sourceMethod : methods.options()) {
-        Optional<TypeElement> mapperClass = annotationUtil.getMapper(sourceMethod);
-        ParameterModule module = new ParameterModule(sourceElement, mapperClass, sourceMethod.getAnnotation(Option.class).bundleKey());
+        Optional<TypeElement> converter = annotationUtil.getConverter(sourceMethod);
+        ParameterModule module = new ParameterModule(sourceElement, sourceMethod.getAnnotation(Option.class).bundleKey());
         ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
             .optionType(optionType)
             .sourceMethod(sourceMethod)
             .typeTool(tool)
+            .converter(new ConverterClass(converter))
             .flavour(flavour)
             .alreadyCreatedParams(ImmutableList.of())
             .alreadyCreatedOptions(ImmutableList.copyOf(namedOptions))

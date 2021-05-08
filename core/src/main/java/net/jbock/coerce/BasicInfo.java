@@ -13,11 +13,10 @@ import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.either.Either;
-import net.jbock.qualifier.MapperClass;
+import net.jbock.qualifier.ConverterClass;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
-import java.util.Optional;
 
 /**
  * Coercion input: Information about a single parameter (option or param).
@@ -25,14 +24,14 @@ import java.util.Optional;
 public class BasicInfo extends ParameterScoped {
 
   private final Lazy<AutoCoercionFinder> autoMatcher;
-  private final Optional<TypeElement> mapperClass;
+  private final ConverterClass mapperClass;
   private final ImmutableList<Matcher> matchers;
 
   @Inject
   BasicInfo(
       ParameterContext context,
       Lazy<AutoCoercionFinder> autoMatcher,
-      @MapperClass Optional<TypeElement> mapperClass,
+      ConverterClass mapperClass,
       ImmutableList<Matcher> matchers) {
     super(context);
     this.autoMatcher = autoMatcher;
@@ -68,7 +67,7 @@ public class BasicInfo extends ParameterScoped {
   }
 
   public <P extends AbstractParameter> Either<String, Coercion<P>> coercion(P parameter) {
-    return mapperClass
+    return mapperClass.converter()
         .map(mapper -> {
           ParameterWithMapperComponent component = DaggerBasicInfo_ParameterWithMapperComponent.builder()
               .parameterContext(parameterContext())

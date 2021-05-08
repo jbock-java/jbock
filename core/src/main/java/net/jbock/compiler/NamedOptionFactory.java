@@ -9,16 +9,13 @@ import net.jbock.coerce.Coercion;
 import net.jbock.coerce.Skew;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.either.Either;
-import net.jbock.qualifier.MapperClass;
+import net.jbock.qualifier.ConverterClass;
 
 import javax.inject.Inject;
-import javax.lang.model.element.TypeElement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.function.Function;
 
 import static java.lang.Character.isWhitespace;
@@ -29,23 +26,23 @@ import static net.jbock.either.Either.right;
 class NamedOptionFactory extends ParameterScoped {
 
   private final BasicInfo basicInfo;
-  private final boolean mapperPresent;
+  private final ConverterClass converter;
 
   @Inject
   NamedOptionFactory(
       ParameterContext parameterContext,
-      @MapperClass Optional<TypeElement> mapperClass,
+      ConverterClass converter,
       BasicInfo basicInfo) {
     super(parameterContext);
     this.basicInfo = basicInfo;
-    this.mapperPresent = mapperClass.isPresent();
+    this.converter = converter;
   }
 
   Either<ValidationFailure, Coercion<NamedOption>> createNamedOption() {
     return checkOptionNames()
         .map(this::createNamedOption)
         .flatMap(namedOption -> {
-          if (!mapperPresent && returnType().getKind() == BOOLEAN) {
+          if (!converter.isPresent() && returnType().getKind() == BOOLEAN) {
             return right(createFlag(namedOption));
           }
           return basicInfo.coercion(namedOption);
@@ -133,7 +130,7 @@ class NamedOptionFactory extends ParameterScoped {
 
   private NamedOption createNamedOption(List<String> dashedNames) {
     return new NamedOption(enumName(), dashedNames, sourceMethod(), bundleKey(),
-        Arrays.asList(description()));
+        description(), converter);
   }
 
   private Coercion<NamedOption> createFlag(NamedOption namedOption) {

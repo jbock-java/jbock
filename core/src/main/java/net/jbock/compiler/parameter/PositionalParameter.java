@@ -2,6 +2,7 @@ package net.jbock.compiler.parameter;
 
 import net.jbock.Parameter;
 import net.jbock.compiler.EnumName;
+import net.jbock.qualifier.ConverterClass;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.Collections;
@@ -20,8 +21,9 @@ public class PositionalParameter extends AbstractParameter {
       EnumName enumName,
       String bundleKey,
       List<String> description,
-      int positionalIndex) {
-    super(sourceMethod, enumName, bundleKey, description);
+      int positionalIndex,
+      ConverterClass converter) {
+    super(sourceMethod, enumName, bundleKey, description, converter);
     this.positionalIndex = positionalIndex;
     this.isParameter = sourceMethod().getAnnotation(Parameter.class) != null ?
         ParameterStyle.PARAMETER :

@@ -13,6 +13,8 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
+import java.util.Arrays;
+import java.util.List;
 
 public class ParameterScoped {
 
@@ -46,8 +48,8 @@ public class ParameterScoped {
     return parameterContext.alreadyCreatedParams;
   }
 
-  final String[] description() {
-    return parameterContext.description.getValue();
+  final List<String> description() {
+    return Arrays.asList(parameterContext.description.getValue());
   }
 
   final String bundleKey() {

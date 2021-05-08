@@ -6,24 +6,27 @@ import net.jbock.coerce.BasicInfo;
 import net.jbock.coerce.Coercion;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.either.Either;
+import net.jbock.qualifier.ConverterClass;
 
 import javax.inject.Inject;
-import java.util.Arrays;
 import java.util.Optional;
 
 class PositionalParamFactory extends ParameterScoped {
 
   private final BasicInfo basicInfo;
   private final ParserFlavour flavour;
+  private final ConverterClass converter;
 
   @Inject
   PositionalParamFactory(
       ParameterContext parameterContext,
       BasicInfo basicInfo,
-      ParserFlavour flavour) {
+      ParserFlavour flavour,
+      ConverterClass converter) {
     super(parameterContext);
     this.basicInfo = basicInfo;
     this.flavour = flavour;
+    this.converter = converter;
   }
 
   Either<ValidationFailure, Coercion<PositionalParameter>> createPositionalParam(int positionalIndex) {
@@ -31,8 +34,9 @@ class PositionalParamFactory extends ParameterScoped {
         sourceMethod(),
         enumName(),
         bundleKey(),
-        Arrays.asList(description()),
-        positionalIndex);
+        description(),
+        positionalIndex,
+        converter);
     return Either.<String, PositionalParameter>right(positionalParameter)
         .flatMap(coercion -> basicInfo.coercion(positionalParameter))
         .filter(this::checkPositionNotNegative)

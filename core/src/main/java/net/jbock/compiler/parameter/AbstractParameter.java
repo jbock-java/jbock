@@ -4,9 +4,11 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.compiler.EnumName;
+import net.jbock.qualifier.ConverterClass;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
+import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -23,21 +25,25 @@ public abstract class AbstractParameter {
 
   private final ExecutableElement sourceMethod;
 
-  private final EnumName enumName;
+  private final EnumName enumName; // unique internal name
 
   private final String bundleKey;
 
   private final List<String> description;
 
+  private final ConverterClass converter;
+
   AbstractParameter(
       ExecutableElement sourceMethod,
       EnumName enumName,
       String bundleKey,
-      List<String> description) {
+      List<String> description,
+      ConverterClass converter) {
     this.sourceMethod = sourceMethod;
     this.enumName = enumName;
     this.bundleKey = bundleKey;
     this.description = description;
+    this.converter = converter;
   }
 
   public final List<String> description() {
@@ -80,4 +86,7 @@ public abstract class AbstractParameter {
 
   public abstract ParameterStyle style();
 
+  public final Optional<TypeElement> converter() {
+    return converter.converter();
+  }
 }

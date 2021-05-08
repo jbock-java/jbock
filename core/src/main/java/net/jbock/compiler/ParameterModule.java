@@ -11,23 +11,19 @@ import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.coerce.matching.matcher.OptionalMatcher;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.qualifier.BundleKey;
-import net.jbock.qualifier.MapperClass;
 import net.jbock.qualifier.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import java.util.Optional;
 
 @Module
 public class ParameterModule {
 
   private final TypeElement sourceElement;
-  private final Optional<TypeElement> mapperClass;
   private final String bundleKey;
 
-  ParameterModule(TypeElement sourceElement, Optional<TypeElement> mapperClass, String bundleKey) {
+  ParameterModule(TypeElement sourceElement, String bundleKey) {
     this.sourceElement = sourceElement;
-    this.mapperClass = mapperClass;
     this.bundleKey = bundleKey;
   }
 
@@ -38,14 +34,8 @@ public class ParameterModule {
   }
 
   @Provides
-  @MapperClass
-  Optional<TypeElement> mapperClass() {
-    return mapperClass;
-  }
-
-  @Provides
   @BundleKey
-  public String getBundleKey() {
+  public String bundleKey() {
     return bundleKey;
   }
 
@@ -64,7 +54,7 @@ public class ParameterModule {
 
   @Reusable
   @Provides
-  ImmutableList<Matcher> getMatchers(
+  ImmutableList<Matcher> matchers(
       OptionalMatcher optionalMatcher,
       ListMatcher listMatcher,
       ExactMatcher exactMatcher) {

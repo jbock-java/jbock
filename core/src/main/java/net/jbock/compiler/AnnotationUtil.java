@@ -37,7 +37,7 @@ class AnnotationUtil {
     }
   };
 
-  Optional<TypeElement> getMapper(ExecutableElement sourceMethod) {
+  Optional<TypeElement> getConverter(ExecutableElement sourceMethod) {
     return getAnnotationMirror(sourceMethod)
         .map(AnnotationUtil::getAnnotationValue)
         .map(GET_TYPE::visit)
