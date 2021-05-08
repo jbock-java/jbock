@@ -17,31 +17,11 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 @Module
-public class ParameterModule {
-
-  private final TypeElement sourceElement;
-  private final String bundleKey;
-
-  ParameterModule(TypeElement sourceElement, String bundleKey) {
-    this.sourceElement = sourceElement;
-    this.bundleKey = bundleKey;
-  }
-
-  @Provides
-  @SourceElement
-  TypeElement sourceElement() {
-    return sourceElement;
-  }
-
-  @Provides
-  @BundleKey
-  public String bundleKey() {
-    return bundleKey;
-  }
+interface ParameterModule {
 
   @Reusable
   @Provides
-  EnumName enumName(ExecutableElement sourceMethod, ImmutableList<Coercion<NamedOption>> alreadyCreated) {
+  static EnumName enumName(ExecutableElement sourceMethod, ImmutableList<Coercion<NamedOption>> alreadyCreated) {
     String methodName = sourceMethod.getSimpleName().toString();
     EnumName result = EnumName.create(methodName);
     for (Coercion<NamedOption> param : alreadyCreated) {
@@ -54,7 +34,7 @@ public class ParameterModule {
 
   @Reusable
   @Provides
-  ImmutableList<Matcher> matchers(
+  static ImmutableList<Matcher> matchers(
       OptionalMatcher optionalMatcher,
       ListMatcher listMatcher,
       ExactMatcher exactMatcher) {

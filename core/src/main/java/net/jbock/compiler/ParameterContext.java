@@ -30,23 +30,23 @@ public class ParameterContext {
   @Inject
   public ParameterContext(
       ExecutableElement sourceMethod,
-      @SourceElement TypeElement sourceElement,
+      SourceElement sourceElement,
       TypeTool tool,
       ClassName optionType,
       ImmutableList<Coercion<PositionalParameter>> alreadyCreatedParams,
       ImmutableList<Coercion<NamedOption>> alreadyCreatedOptions,
       Description description,
-      @BundleKey String bundleKey,
+      BundleKey bundleKey,
       EnumName enumName,
       ParserFlavour flavour) {
     this.sourceMethod = sourceMethod;
-    this.sourceElement = sourceElement;
+    this.sourceElement = sourceElement.element();
     this.tool = tool;
     this.optionType = optionType;
     this.alreadyCreatedParams = alreadyCreatedParams;
     this.alreadyCreatedOptions = alreadyCreatedOptions;
     this.description = description;
-    this.bundleKey = bundleKey;
+    this.bundleKey = bundleKey.key();
     this.enumName = enumName;
     this.flavour = flavour;
   }

@@ -133,7 +133,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("define a mapper that implements Function<String, StringBuilder>");
+        .withErrorContaining("define a converter that implements Function<String, StringBuilder>");
   }
 
   @Test
@@ -178,7 +178,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("define a mapper that implements Function<String, List>");
+        .withErrorContaining("define a converter that implements Function<String, List>");
   }
 
   @Test
@@ -193,7 +193,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("define a mapper that implements Function<String, Optional>");
+        .withErrorContaining("define a converter that implements Function<String, Optional>");
   }
 
   @Test
@@ -208,7 +208,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("define a mapper that implements Function<String, Set<String>>");
+        .withErrorContaining("define a converter that implements Function<String, Set<String>>");
   }
 
   @Test
@@ -223,7 +223,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("define a mapper that implements Function<String, int[]>");
+        .withErrorContaining("define a converter that implements Function<String, int[]>");
   }
 
   @Test
@@ -238,7 +238,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("define a mapper that implements Function<String, Date>");
+        .withErrorContaining("define a converter that implements Function<String, Date>");
   }
 
   @Test
@@ -348,7 +348,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("define a mapper that implements Function<String, Boolean>");
+        .withErrorContaining("define a converter that implements Function<String, Boolean>");
   }
 
   @Test
@@ -431,7 +431,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("add @Option, @Parameter or @Parameters annotation");
+        .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
   }
 
   @Test
@@ -446,7 +446,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("define a mapper that implements Function<String, Boolean>");
+        .withErrorContaining("define a converter that implements Function<String, Boolean>");
   }
 
   @Test
@@ -462,7 +462,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("use only one of @Option, @Parameter or @Parameters");
+        .withErrorContaining("annotate with either @Option or @Parameter but not both");
   }
 
   @Test

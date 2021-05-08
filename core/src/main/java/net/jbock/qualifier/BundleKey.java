@@ -1,7 +1,14 @@
 package net.jbock.qualifier;
 
-import javax.inject.Qualifier;
+public class BundleKey {
 
-@Qualifier
-public @interface BundleKey {
+  private final String bundleKey;
+
+  public BundleKey(String bundleKey) {
+    this.bundleKey = bundleKey;
+  }
+
+  public String key() {
+    return bundleKey;
+  }
 }

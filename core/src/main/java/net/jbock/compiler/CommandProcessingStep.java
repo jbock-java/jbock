@@ -20,7 +20,9 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.compiler.view.GeneratedClass;
 import net.jbock.either.Either;
+import net.jbock.qualifier.BundleKey;
 import net.jbock.qualifier.ConverterClass;
+import net.jbock.qualifier.SourceElement;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -45,6 +47,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -53,6 +56,8 @@ import java.util.stream.Stream;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.coerce.SuppliedClassValidator.commonChecks;
+import static net.jbock.coerce.Util.assertAtLeastOneAnnotation;
+import static net.jbock.coerce.Util.assertNoDuplicateAnnotations;
 import static net.jbock.compiler.OperationMode.TEST;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static net.jbock.compiler.TypeTool.AS_TYPE_ELEMENT;
@@ -101,6 +106,12 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       Builder converter(ConverterClass converter);
 
       @BindsInstance
+      Builder sourceElement(SourceElement sourceElement);
+
+      @BindsInstance
+      Builder bundleKey(BundleKey bundleKey);
+
+      @BindsInstance
       Builder description(Description description);
 
       @BindsInstance
@@ -111,8 +122,6 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
       @BindsInstance
       Builder flavour(ParserFlavour flavour);
-
-      Builder parameterModule(ParameterModule module);
 
       ParameterComponent build();
     }
@@ -226,20 +235,19 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       List<ExecutableElement> positionalParameters = methods.params();
       for (ExecutableElement sourceMethod : positionalParameters) {
         Optional<TypeElement> converter = annotationUtil.getConverter(sourceMethod);
-        ParameterModule module = new ParameterModule(sourceElement, getParameterBundleKey(sourceMethod));
         ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
             .optionType(optionType)
             .sourceMethod(sourceMethod)
             .typeTool(tool)
+            .sourceElement(new SourceElement(sourceElement))
+            .bundleKey(new BundleKey(getParameterBundleKey(sourceMethod)))
             .converter(new ConverterClass(converter))
             .flavour(flavour)
             .alreadyCreatedParams(ImmutableList.copyOf(positionalParams))
             .alreadyCreatedOptions(ImmutableList.of())
-            .parameterModule(module)
             .description(getDescription(sourceMethod));
-        Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
         builder.build().positionalParameterFactory().createPositionalParam(
-            parameter != null ? parameter.index() : positionalParameters.size() - 1)
+            getIndex(sourceMethod).orElse(positionalParameters.size() - 1))
             .accept(failures::add, positionalParams::add);
       }
       if (flavour.isSuperCommand() && positionalParameters.isEmpty()) {
@@ -250,16 +258,16 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       List<Coercion<NamedOption>> namedOptions = new ArrayList<>();
       for (ExecutableElement sourceMethod : methods.options()) {
         Optional<TypeElement> converter = annotationUtil.getConverter(sourceMethod);
-        ParameterModule module = new ParameterModule(sourceElement, sourceMethod.getAnnotation(Option.class).bundleKey());
         ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
             .optionType(optionType)
             .sourceMethod(sourceMethod)
             .typeTool(tool)
+            .sourceElement(new SourceElement(sourceElement))
+            .bundleKey(new BundleKey(getParameterBundleKey(sourceMethod)))
             .converter(new ConverterClass(converter))
             .flavour(flavour)
             .alreadyCreatedParams(ImmutableList.of())
             .alreadyCreatedOptions(ImmutableList.copyOf(namedOptions))
-            .parameterModule(module)
             .description(getDescription(sourceMethod));
         builder.build().namedOptionFactory().createNamedOption()
             .accept(failures::add, namedOptions::add);
@@ -277,12 +285,28 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     });
   }
 
+  private OptionalInt getIndex(ExecutableElement sourceMethod) {
+    Parameter parameter = sourceMethod.getAnnotation(Parameter.class);
+    if (parameter == null) {
+      return OptionalInt.empty();
+    }
+    return OptionalInt.of(parameter.index());
+  }
+
   private String getParameterBundleKey(ExecutableElement method) {
     Parameter parameter = method.getAnnotation(Parameter.class);
     if (parameter != null) {
       return parameter.bundleKey();
     }
-    return method.getAnnotation(Parameters.class).bundleKey();
+    Option option = method.getAnnotation(Option.class);
+    if (option != null) {
+      return option.bundleKey();
+    }
+    Parameters parameters = method.getAnnotation(Parameters.class);
+    if (parameters != null) {
+      return parameters.bundleKey();
+    }
+    return null;
   }
 
   Optional<String> checkBundleKey(Coercion<? extends AbstractParameter> p, List<Coercion<? extends AbstractParameter>> alreadyCreated) {
@@ -382,16 +406,12 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return right(typeElement);
   }
 
+
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
-    boolean isCommand = sourceElement.getAnnotation(Command.class) != null;
-    boolean isSuperCommand = sourceElement.getAnnotation(SuperCommand.class) != null;
-    if (isCommand && isSuperCommand) {
-      return Optional.of("annotate with @" + Command.class.getSimpleName() + " or @" +
-          SuperCommand.class.getSimpleName() + " but not both");
-    }
     Optional<String> maybeFailure = commonChecks(sourceElement).map(s -> "command " + s);
     // the following *should* be done with Optional#or but we're currently limited to 1.8 API
     return Either.<String, Optional<String>>fromFailure(maybeFailure, Optional.empty())
+        .filter(nothing -> assertNoDuplicateAnnotations(sourceElement, Command.class, SuperCommand.class))
         .filter(nothing -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
           if (!interfaces.isEmpty()) {
@@ -412,23 +432,18 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private static Optional<String> validateParameterMethod(
       TypeElement sourceElement,
       ExecutableElement sourceMethod) {
-    boolean hasParameter = sourceMethod.getAnnotation(Parameter.class) != null;
-    boolean hasParameters = sourceMethod.getAnnotation(Parameters.class) != null;
-    boolean hasOption = sourceMethod.getAnnotation(Option.class) != null;
-    if (!hasParameter && !hasOption && !hasParameters) {
-      return Optional.of(String.format("add @%s, @%s or @%s annotation",
-          Option.class.getSimpleName(),
-          Parameter.class.getSimpleName(),
-          Parameters.class.getSimpleName()));
+    Optional<String> noAnnotationsError = assertAtLeastOneAnnotation(sourceMethod,
+        Option.class, Parameter.class, Parameters.class);
+    if (noAnnotationsError.isPresent()) {
+      return noAnnotationsError;
     }
-    if ((hasParameter && hasOption) || (hasParameter && hasParameters) || (hasOption && hasParameters)) {
-      return Optional.of(String.format("use only one of @%s, @%s or @%s",
-          Option.class.getSimpleName(),
-          Parameter.class.getSimpleName(),
-          Parameters.class.getSimpleName()));
+    Optional<String> duplicateAnnotationsError = assertNoDuplicateAnnotations(sourceMethod,
+        Option.class, Parameter.class, Parameters.class);
+    if (duplicateAnnotationsError.isPresent()) {
+      return duplicateAnnotationsError;
     }
-    boolean isSuperCommand = sourceElement.getAnnotation(SuperCommand.class) != null;
-    if (isSuperCommand && hasParameters) {
+    if (sourceElement.getAnnotation(SuperCommand.class) != null &&
+        sourceMethod.getAnnotation(Parameters.class) != null) {
       return Optional.of("@" + Parameters.class.getSimpleName()
           + " cannot be used in a @" + SuperCommand.class.getSimpleName());
     }

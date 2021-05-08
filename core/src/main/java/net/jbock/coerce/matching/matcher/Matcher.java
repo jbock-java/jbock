@@ -9,7 +9,7 @@ import java.util.Optional;
 
 public abstract class Matcher extends ParameterScoped {
 
-  public Matcher(ParameterContext parameterContext) {
+  Matcher(ParameterContext parameterContext) {
     super(parameterContext);
   }
 

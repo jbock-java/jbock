@@ -84,7 +84,7 @@ class InheritanceTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("add @Option, @Parameter or @Parameters annotation");
+        .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
   }
 
   @Test
@@ -107,7 +107,7 @@ class InheritanceTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("add @Option, @Parameter or @Parameters annotation");
+        .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
   }
 
   @Test
@@ -130,7 +130,7 @@ class InheritanceTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("add @Option, @Parameter or @Parameters annotation");
+        .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
   }
 
   @Test

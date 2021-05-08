@@ -9,6 +9,8 @@ import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParserFlavour;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.qualifier.BundleKey;
+import net.jbock.qualifier.SourceElement;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -80,8 +82,9 @@ class OptionalMatcherTest {
   private OptionalMatcher createMatcher(TypeTool tool, TypeMirror returnType) {
     ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
-    ParameterContext context = new ParameterContext(sourceMethod, null, tool, null,
-        ImmutableList.of(), ImmutableList.of(), new Description(new String[0]), "", EnumName.create("a"), ParserFlavour.COMMAND);
+    ParameterContext context = new ParameterContext(sourceMethod, new SourceElement(null), tool, null,
+        ImmutableList.of(), ImmutableList.of(), new Description(new String[0]), new BundleKey(""),
+        EnumName.create("a"), ParserFlavour.COMMAND);
     return new OptionalMatcher(context);
   }
 }

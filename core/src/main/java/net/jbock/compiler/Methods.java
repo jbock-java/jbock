@@ -23,6 +23,9 @@ class Methods {
         if (!p1 && p2) {
           return 1;
         }
+        if (!p1) {
+          return 0; // both are null, should be impossible but let's get rid of the warning
+        }
         return Integer.compare(param1.index(), param2.index());
       };
 

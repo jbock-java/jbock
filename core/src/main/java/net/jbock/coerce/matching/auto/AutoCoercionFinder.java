@@ -87,6 +87,6 @@ public class AutoCoercionFinder extends ParameterScoped {
   }
 
   private static String noMatchError(TypeMirror type) {
-    return "define a mapper that implements Function<String, " + Util.typeToString(type) + ">";
+    return "define a converter that implements Function<String, " + Util.typeToString(type) + ">";
   }
 }

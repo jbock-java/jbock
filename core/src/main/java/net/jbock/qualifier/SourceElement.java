@@ -1,7 +1,16 @@
 package net.jbock.qualifier;
 
-import javax.inject.Qualifier;
+import javax.lang.model.element.TypeElement;
 
-@Qualifier
-public @interface SourceElement {
+public class SourceElement {
+
+  private final TypeElement sourceElement;
+
+  public SourceElement(TypeElement sourceElement) {
+    this.sourceElement = sourceElement;
+  }
+
+  public TypeElement element() {
+    return sourceElement;
+  }
 }

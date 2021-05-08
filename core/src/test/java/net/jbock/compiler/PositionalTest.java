@@ -57,7 +57,7 @@ class PositionalTest {
   }
 
   @Test
-  void mixTypeAnnotations() {
+  void duplicateCommandAnnotations() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "@SuperCommand",
@@ -69,7 +69,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("annotate with @Command or @SuperCommand but not both");
+        .withErrorContaining("annotate with either @Command or @SuperCommand but not both");
   }
 
   @Test
@@ -200,7 +200,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("define a mapper that implements Function<String, StringBuilder>");
+        .withErrorContaining("define a converter that implements Function<String, StringBuilder>");
   }
 
   @Test
