@@ -4,7 +4,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.coerce.Coercion;
+import net.jbock.coerce.ConvertedParameter;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
@@ -35,7 +35,7 @@ final class Impl {
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType())
         .superclass(generatedTypes.sourceType());
-    for (Coercion<? extends AbstractParameter> c : context.parameters()) {
+    for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
       spec.addField(FieldSpec.builder(c.parameter().returnType(), c.enumName().camel()).build());
     }
     return spec.addModifiers(PRIVATE, STATIC)
@@ -46,7 +46,7 @@ final class Impl {
         .build();
   }
 
-  private static MethodSpec parameterMethodOverride(Coercion<? extends AbstractParameter> c) {
+  private static MethodSpec parameterMethodOverride(ConvertedParameter<? extends AbstractParameter> c) {
     AbstractParameter param = c.parameter();
     return MethodSpec.methodBuilder(param.methodName())
         .returns(param.returnType())
@@ -57,7 +57,7 @@ final class Impl {
 
   private static MethodSpec implConstructor(Context context) {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-    for (Coercion<? extends AbstractParameter> c : context.parameters()) {
+    for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
       TypeName returnType = c.parameter().returnType();
       spec.addStatement("this.$N = $L", FieldSpec.builder(returnType, c.enumName().camel()).build(), c.extractExpr());
       spec.addParameter(c.constructorParam());

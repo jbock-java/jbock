@@ -5,7 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.Coercion;
+import net.jbock.coerce.ConvertedParameter;
 import net.jbock.coerce.Skew;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.either.Either;
@@ -38,7 +38,7 @@ class NamedOptionFactory extends ParameterScoped {
     this.converter = converter;
   }
 
-  Either<ValidationFailure, Coercion<NamedOption>> createNamedOption() {
+  Either<ValidationFailure, ConvertedParameter<NamedOption>> createNamedOption() {
     return checkOptionNames()
         .map(this::createNamedOption)
         .flatMap(namedOption -> {
@@ -58,7 +58,7 @@ class NamedOptionFactory extends ParameterScoped {
     if (Objects.toString(option.names(), "").isEmpty()) {
       return left("empty name");
     }
-    for (Coercion<NamedOption> c : alreadyCreatedOptions()) {
+    for (ConvertedParameter<NamedOption> c : alreadyCreatedOptions()) {
       for (String name : option.names()) {
         for (String previousName : c.parameter().dashedNames()) {
           if (name.equals(previousName)) {
@@ -133,11 +133,11 @@ class NamedOptionFactory extends ParameterScoped {
         description(), converter);
   }
 
-  private Coercion<NamedOption> createFlag(NamedOption namedOption) {
+  private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
     ParameterSpec constructorParam = ParameterSpec.builder(TypeName.get(returnType()), enumName().snake()).build();
     CodeBlock mapExpr = CodeBlock.of("$T.identity()", Function.class);
     CodeBlock tailExpr = CodeBlock.of(".findAny().isPresent()");
     CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
-    return new Coercion<>(mapExpr, tailExpr, extractExpr, Skew.FLAG, constructorParam, namedOption);
+    return new ConvertedParameter<>(mapExpr, tailExpr, extractExpr, Skew.FLAG, constructorParam, namedOption);
   }
 }

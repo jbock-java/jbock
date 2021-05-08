@@ -28,7 +28,7 @@ public class BasicInfo extends ParameterScoped {
     this.mapperMatcher = mapperMatcher;
   }
 
-  public <P extends AbstractParameter> Either<String, Coercion<P>> coercion(P parameter) {
+  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> coercion(P parameter) {
     return parameter.converter()
         .map(mapper -> mapperMatcher.get().findCoercion(parameter, mapper))
         .orElseGet(() -> autoMatcher.get().findCoercion(parameter));

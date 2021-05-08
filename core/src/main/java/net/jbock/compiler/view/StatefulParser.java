@@ -7,7 +7,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.coerce.Coercion;
+import net.jbock.coerce.ConvertedParameter;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
@@ -175,7 +175,7 @@ final class StatefulParser {
       if (j > 0) {
         args.add(",\n");
       }
-      Coercion<? extends AbstractParameter> param = context.regularParameters().get(j);
+      ConvertedParameter<? extends AbstractParameter> param = context.regularParameters().get(j);
       args.add(extractExpression(param));
     }
     context.repeatableParam().ifPresent(param -> {
@@ -194,7 +194,7 @@ final class StatefulParser {
         .build();
   }
 
-  private CodeBlock extractExpression(Coercion<? extends AbstractParameter> param) {
+  private CodeBlock extractExpression(ConvertedParameter<? extends AbstractParameter> param) {
     return getStreamExpression(param)
         .add("\n").indent()
         .add(".map($L)", param.mapExpr())
@@ -202,7 +202,7 @@ final class StatefulParser {
         .build();
   }
 
-  private CodeBlock.Builder getStreamExpression(Coercion<? extends AbstractParameter> param) {
+  private CodeBlock.Builder getStreamExpression(ConvertedParameter<? extends AbstractParameter> param) {
     if (param.parameter().isPositional()) {
       return CodeBlock.builder().add(
           "$T.ofNullable($N[$L])", Optional.class, paramParsersField,

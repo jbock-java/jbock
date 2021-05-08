@@ -2,6 +2,7 @@ package net.jbock.compiler;
 
 import dagger.Module;
 import dagger.Provides;
+import dagger.Reusable;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -25,6 +26,12 @@ public interface ProcessingEnvironmentModule {
   @Provides
   static Elements elements(ProcessingEnvironment processingEnvironment) {
     return processingEnvironment.getElementUtils();
+  }
+
+  @Provides
+  @Reusable
+  static DescriptionBuilder descriptionBuilder(Elements elements) {
+    return new DescriptionBuilder(elements);
   }
 
   @Provides

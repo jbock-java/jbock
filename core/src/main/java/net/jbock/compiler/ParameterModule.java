@@ -1,30 +1,58 @@
 package net.jbock.compiler;
 
 import com.google.common.collect.ImmutableList;
+import com.squareup.javapoet.ClassName;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
-import net.jbock.coerce.Coercion;
+import net.jbock.Option;
+import net.jbock.Parameter;
+import net.jbock.Parameters;
+import net.jbock.coerce.ConvertedParameter;
 import net.jbock.coerce.matching.matcher.ExactMatcher;
 import net.jbock.coerce.matching.matcher.ListMatcher;
 import net.jbock.coerce.matching.matcher.Matcher;
 import net.jbock.coerce.matching.matcher.OptionalMatcher;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.qualifier.BundleKey;
+import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.SourceElement;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 @Module
-interface ParameterModule {
+class ParameterModule {
+
+  private final AnnotationUtil annotationUtil = new AnnotationUtil();
+
+  private final ClassName optionType;
+  private final TypeTool tool;
+  private final ParserFlavour flavour;
+  private final TypeElement sourceElement;
+  private final DescriptionBuilder descriptionBuilder;
+
+  ParameterModule(
+      ClassName optionType,
+      TypeTool tool,
+      ParserFlavour flavour,
+      TypeElement sourceElement,
+      DescriptionBuilder descriptionBuilder) {
+    this.optionType = optionType;
+    this.tool = tool;
+    this.flavour = flavour;
+    this.sourceElement = sourceElement;
+    this.descriptionBuilder = descriptionBuilder;
+  }
 
   @Reusable
   @Provides
-  static EnumName enumName(ExecutableElement sourceMethod, ImmutableList<Coercion<NamedOption>> alreadyCreated) {
+  EnumName enumName(
+      ExecutableElement sourceMethod,
+      ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated) {
     String methodName = sourceMethod.getSimpleName().toString();
     EnumName result = EnumName.create(methodName);
-    for (Coercion<NamedOption> param : alreadyCreated) {
+    for (ConvertedParameter<NamedOption> param : alreadyCreated) {
       if (param.enumName().enumConstant().equals(result.enumConstant())) {
         return result.append(Integer.toString(alreadyCreated.size()));
       }
@@ -34,10 +62,65 @@ interface ParameterModule {
 
   @Reusable
   @Provides
-  static ImmutableList<Matcher> matchers(
+  ImmutableList<Matcher> matchers(
       OptionalMatcher optionalMatcher,
       ListMatcher listMatcher,
       ExactMatcher exactMatcher) {
     return ImmutableList.of(optionalMatcher, listMatcher, exactMatcher);
+  }
+
+  @Provides
+  ClassName optionType() {
+    return optionType;
+  }
+
+  @Provides
+  TypeTool tool() {
+    return tool;
+  }
+
+  @Provides
+  ParserFlavour flavour() {
+    return flavour;
+  }
+
+  @Reusable
+  @Provides
+  SourceElement sourceElement() {
+    return new SourceElement(sourceElement);
+  }
+
+  @Reusable
+  @Provides
+  BundleKey bundleKey(ExecutableElement sourceMethod) {
+    return new BundleKey(getParameterBundleKey(sourceMethod));
+  }
+
+  @Reusable
+  @Provides
+  ConverterClass converter(ExecutableElement sourceMethod) {
+    return new ConverterClass(annotationUtil.getConverter(sourceMethod));
+  }
+
+  @Reusable
+  @Provides
+  Description description(ExecutableElement sourceMethod) {
+    return descriptionBuilder.getDescription(sourceMethod);
+  }
+
+  private String getParameterBundleKey(ExecutableElement method) {
+    Parameter parameter = method.getAnnotation(Parameter.class);
+    if (parameter != null) {
+      return parameter.bundleKey();
+    }
+    Option option = method.getAnnotation(Option.class);
+    if (option != null) {
+      return option.bundleKey();
+    }
+    Parameters parameters = method.getAnnotation(Parameters.class);
+    if (parameters != null) {
+      return parameters.bundleKey();
+    }
+    return null;
   }
 }

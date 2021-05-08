@@ -7,7 +7,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.coerce.Coercion;
+import net.jbock.coerce.ConvertedParameter;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
@@ -71,9 +71,9 @@ final class OptionParser {
             .build())
         .addModifiers(PRIVATE, STATIC, ABSTRACT)
         .build());
-    boolean anyRepeatable = context.options().stream().anyMatch(Coercion::isRepeatable);
+    boolean anyRepeatable = context.options().stream().anyMatch(ConvertedParameter::isRepeatable);
     boolean anyRegular = context.options().stream().anyMatch(option -> option.isOptional() || option.isRequired());
-    boolean anyFlags = context.options().stream().anyMatch(Coercion::isFlag);
+    boolean anyFlags = context.options().stream().anyMatch(ConvertedParameter::isFlag);
     if (anyFlags) {
       result.add(TypeSpec.classBuilder(generatedTypes.flagParserType())
           .superclass(generatedTypes.optionParserType())

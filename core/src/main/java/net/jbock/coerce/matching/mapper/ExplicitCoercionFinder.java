@@ -2,9 +2,8 @@ package net.jbock.coerce.matching.mapper;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
-import net.jbock.Command;
 import net.jbock.Converter;
-import net.jbock.coerce.Coercion;
+import net.jbock.coerce.ConvertedParameter;
 import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.Match;
 import net.jbock.coerce.matching.matcher.Matcher;
@@ -42,7 +41,7 @@ public class ExplicitCoercionFinder extends ParameterScoped {
     this.referenceTool = referenceTool;
   }
 
-  public <P extends AbstractParameter> Either<String, Coercion<P>> findCoercion(
+  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findCoercion(
       P parameter,
       TypeElement converter) {
     Optional<String> maybeFailure = commonChecks(converter).map(s -> "converter " + s);
@@ -54,7 +53,7 @@ public class ExplicitCoercionFinder extends ParameterScoped {
         .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
   }
 
-  private <P extends AbstractParameter> Either<String, Coercion<P>> tryAllMatchers(
+  private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> tryAllMatchers(
       FunctionType functionType,
       P parameter,
       TypeElement converter) {

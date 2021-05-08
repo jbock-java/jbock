@@ -3,7 +3,7 @@ package net.jbock.compiler;
 import com.google.common.collect.ImmutableList;
 import net.jbock.SuperCommand;
 import net.jbock.coerce.BasicInfo;
-import net.jbock.coerce.Coercion;
+import net.jbock.coerce.ConvertedParameter;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;
@@ -29,7 +29,7 @@ class PositionalParamFactory extends ParameterScoped {
     this.converter = converter;
   }
 
-  Either<ValidationFailure, Coercion<PositionalParameter>> createPositionalParam(int positionalIndex) {
+  Either<ValidationFailure, ConvertedParameter<PositionalParameter>> createPositionalParam(int positionalIndex) {
     PositionalParameter positionalParameter = new PositionalParameter(
         sourceMethod(),
         enumName(),
@@ -46,17 +46,17 @@ class PositionalParamFactory extends ParameterScoped {
         .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
   }
 
-  private Optional<String> checkOnlyOnePositionalList(Coercion<PositionalParameter> c) {
+  private Optional<String> checkOnlyOnePositionalList(ConvertedParameter<PositionalParameter> c) {
     if (!c.isRepeatable()) {
       return Optional.empty();
     }
     return alreadyCreatedParams().stream()
-        .filter(Coercion::isRepeatable)
+        .filter(ConvertedParameter::isRepeatable)
         .map(p -> "positional parameter " + p.enumName().enumConstant() + " is also repeatable")
         .findAny();
   }
 
-  private Optional<String> checkPositionNotNegative(Coercion<PositionalParameter> c) {
+  private Optional<String> checkPositionNotNegative(ConvertedParameter<PositionalParameter> c) {
     PositionalParameter p = c.parameter();
     if (p.position() < 0) {
       return Optional.of("negative positions are not allowed");
@@ -64,7 +64,7 @@ class PositionalParamFactory extends ParameterScoped {
     return Optional.empty();
   }
 
-  private Optional<String> checkSuperNotRepeatable(Coercion<PositionalParameter> c) {
+  private Optional<String> checkSuperNotRepeatable(ConvertedParameter<PositionalParameter> c) {
     if (flavour.isSuperCommand() && c.isRepeatable()) {
       return Optional.of("in a @" + SuperCommand.class.getSimpleName() +
           ", repeatable params are not supported");
@@ -72,12 +72,12 @@ class PositionalParamFactory extends ParameterScoped {
     return Optional.empty();
   }
 
-  private Optional<String> checkRankConsistentWithPosition(Coercion<PositionalParameter> c) {
+  private Optional<String> checkRankConsistentWithPosition(ConvertedParameter<PositionalParameter> c) {
     PositionalParameter p = c.parameter();
     int thisOrder = c.isRepeatable() ? 2 : c.isOptional() ? 1 : 0;
     int thisPosition = p.position();
-    ImmutableList<Coercion<PositionalParameter>> allPositional = alreadyCreatedParams();
-    for (Coercion<PositionalParameter> other : allPositional) {
+    ImmutableList<ConvertedParameter<PositionalParameter>> allPositional = alreadyCreatedParams();
+    for (ConvertedParameter<PositionalParameter> other : allPositional) {
       int otherOrder = other.isRepeatable() ? 2 : other.isOptional() ? 1 : 0;
       if (thisPosition == other.parameter().position()) {
         return Optional.of("duplicate position");

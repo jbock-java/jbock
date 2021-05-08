@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.coerce.AutoMapper;
-import net.jbock.coerce.Coercion;
+import net.jbock.coerce.ConvertedParameter;
 import net.jbock.coerce.Util;
 import net.jbock.coerce.matching.Match;
 import net.jbock.coerce.matching.matcher.Matcher;
@@ -39,7 +39,7 @@ public class AutoCoercionFinder extends ParameterScoped {
     this.matchers = matchers;
   }
 
-  public <P extends AbstractParameter> Either<String, Coercion<P>> findCoercion(P parameter) {
+  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findCoercion(P parameter) {
     for (Matcher matcher : matchers) {
       Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
@@ -50,7 +50,7 @@ public class AutoCoercionFinder extends ParameterScoped {
     return left(noMatchError(returnType()));
   }
 
-  private <P extends AbstractParameter> Either<String, Coercion<P>> findMapper(Match match, P parameter) {
+  private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findMapper(Match match, P parameter) {
     TypeMirror baseReturnType = match.baseReturnType();
     return autoMapper.findAutoMapper(baseReturnType)
         .maybeRecover(() -> isEnumType(baseReturnType) ?

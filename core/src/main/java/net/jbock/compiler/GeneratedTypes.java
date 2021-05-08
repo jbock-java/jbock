@@ -2,7 +2,6 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
-import net.jbock.coerce.Coercion;
 
 import javax.lang.model.element.TypeElement;
 import java.util.Optional;

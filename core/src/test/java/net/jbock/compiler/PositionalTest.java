@@ -108,16 +108,16 @@ class PositionalTest {
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Parameter(index = 0, bundleKey = \"x\")",
+        "  @Parameter(index = 0, bundleKey = \"myKey\")",
         "  abstract String a();",
         "",
-        "  @Option(names = \"--x\", bundleKey = \"x\")",
+        "  @Option(names = \"--x\", bundleKey = \"myKey\")",
         "  abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("duplicate bundle key");
+        .withErrorContaining("duplicate bundle key: myKey");
   }
 
   @Test

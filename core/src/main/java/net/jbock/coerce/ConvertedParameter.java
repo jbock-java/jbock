@@ -5,7 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.parameter.AbstractParameter;
 
-public final class Coercion<P extends AbstractParameter> {
+public final class ConvertedParameter<P extends AbstractParameter> {
 
   private final ParameterSpec constructorParam;
   private final CodeBlock tailExpr;
@@ -14,7 +14,7 @@ public final class Coercion<P extends AbstractParameter> {
   private final Skew skew;
   private final P parameter;
 
-  public Coercion(
+  public ConvertedParameter(
       CodeBlock mapExpr,
       CodeBlock tailExpr,
       CodeBlock extractExpr,

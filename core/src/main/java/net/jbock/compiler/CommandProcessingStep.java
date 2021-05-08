@@ -6,23 +6,17 @@ import com.google.common.collect.ImmutableSetMultimap;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
-import dagger.BindsInstance;
-import dagger.Component;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.SuperCommand;
-import net.jbock.coerce.Coercion;
+import net.jbock.coerce.ConvertedParameter;
 import net.jbock.coerce.Util;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
-import net.jbock.compiler.view.GeneratedClass;
 import net.jbock.either.Either;
-import net.jbock.qualifier.BundleKey;
-import net.jbock.qualifier.ConverterClass;
-import net.jbock.qualifier.SourceElement;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -35,7 +29,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -70,91 +63,23 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private final Types types;
   private final Messager messager;
   private final Filer filer;
-  private final Elements elements;
   private final OperationMode operationMode;
+  private final DescriptionBuilder descriptionBuilder;
 
   @Inject
-  CommandProcessingStep(TypeTool tool, Types types, Messager messager, Filer filer, Elements elements, OperationMode operationMode) {
+  CommandProcessingStep(
+      TypeTool tool,
+      Types types,
+      Messager messager,
+      Filer filer,
+      OperationMode operationMode,
+      DescriptionBuilder descriptionBuilder) {
     this.tool = tool;
     this.types = types;
     this.messager = messager;
     this.filer = filer;
-    this.elements = elements;
     this.operationMode = operationMode;
-  }
-
-  @Component(modules = ParameterModule.class)
-  interface ParameterComponent {
-
-    PositionalParamFactory positionalParameterFactory();
-
-    NamedOptionFactory namedOptionFactory();
-
-    @Component.Builder
-    interface Builder {
-
-      @BindsInstance
-      Builder sourceMethod(ExecutableElement sourceMethod);
-
-      @BindsInstance
-      Builder typeTool(TypeTool tool);
-
-      @BindsInstance
-      Builder optionType(ClassName optionType);
-
-      @BindsInstance
-      Builder converter(ConverterClass converter);
-
-      @BindsInstance
-      Builder sourceElement(SourceElement sourceElement);
-
-      @BindsInstance
-      Builder bundleKey(BundleKey bundleKey);
-
-      @BindsInstance
-      Builder description(Description description);
-
-      @BindsInstance
-      Builder alreadyCreatedParams(ImmutableList<Coercion<PositionalParameter>> alreadyCreated);
-
-      @BindsInstance
-      Builder alreadyCreatedOptions(ImmutableList<Coercion<NamedOption>> alreadyCreated);
-
-      @BindsInstance
-      Builder flavour(ParserFlavour flavour);
-
-      ParameterComponent build();
-    }
-  }
-
-  @Component(modules = ContextModule.class)
-  interface ContextComponent {
-
-    GeneratedClass generatedClass();
-
-    @Component.Builder
-    interface Builder {
-
-      @BindsInstance
-      Builder sourceElement(TypeElement sourceElement);
-
-      @BindsInstance
-      Builder generatedClass(ClassName generatedClass);
-
-      @BindsInstance
-      Builder params(List<Coercion<PositionalParameter>> parameters);
-
-      @BindsInstance
-      Builder options(List<Coercion<NamedOption>> options);
-
-      @BindsInstance
-      Builder flavour(ParserFlavour flavour);
-
-      @BindsInstance
-      Builder description(Description description);
-
-      ContextComponent build();
-    }
+    this.descriptionBuilder = descriptionBuilder;
   }
 
   @Override
@@ -188,13 +113,13 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
               messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
             }
           }, parameters -> {
-            ContextComponent context = DaggerCommandProcessingStep_ContextComponent.builder()
+            ContextComponent context = DaggerContextComponent.builder()
                 .flavour(flavour)
                 .sourceElement(sourceElement)
                 .generatedClass(generatedClass)
                 .options(parameters.namedOptions)
                 .params(parameters.positionalParams)
-                .description(getDescription(sourceElement))
+                .description(descriptionBuilder.getDescription(sourceElement))
                 .build();
             TypeSpec typeSpec = context.generatedClass().define();
             write(sourceElement, generatedClass, typeSpec);
@@ -228,24 +153,18 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       TypeElement sourceElement,
       ClassName optionType,
       ParserFlavour flavour) {
+    ParameterModule module = new ParameterModule(optionType, tool,
+        flavour, sourceElement, descriptionBuilder);
     return createMethods(sourceElement).flatMap(methods -> {
-      List<Coercion<PositionalParameter>> positionalParams = new ArrayList<>();
-      AnnotationUtil annotationUtil = new AnnotationUtil();
+      List<ConvertedParameter<PositionalParameter>> positionalParams = new ArrayList<>();
       List<ValidationFailure> failures = new ArrayList<>();
       List<ExecutableElement> positionalParameters = methods.params();
       for (ExecutableElement sourceMethod : positionalParameters) {
-        Optional<TypeElement> converter = annotationUtil.getConverter(sourceMethod);
-        ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
-            .optionType(optionType)
+        ParameterComponent.Builder builder = DaggerParameterComponent.builder()
+            .module(module)
             .sourceMethod(sourceMethod)
-            .typeTool(tool)
-            .sourceElement(new SourceElement(sourceElement))
-            .bundleKey(new BundleKey(getParameterBundleKey(sourceMethod)))
-            .converter(new ConverterClass(converter))
-            .flavour(flavour)
             .alreadyCreatedParams(ImmutableList.copyOf(positionalParams))
-            .alreadyCreatedOptions(ImmutableList.of())
-            .description(getDescription(sourceMethod));
+            .alreadyCreatedOptions(ImmutableList.of());
         builder.build().positionalParameterFactory().createPositionalParam(
             getIndex(sourceMethod).orElse(positionalParameters.size() - 1))
             .accept(failures::add, positionalParams::add);
@@ -255,28 +174,21 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             ", at least one @" + Parameter.class.getSimpleName() + " must be defined", sourceElement));
       }
       failures.addAll(validatePositions(positionalParams));
-      List<Coercion<NamedOption>> namedOptions = new ArrayList<>();
+      List<ConvertedParameter<NamedOption>> namedOptions = new ArrayList<>();
       for (ExecutableElement sourceMethod : methods.options()) {
-        Optional<TypeElement> converter = annotationUtil.getConverter(sourceMethod);
-        ParameterComponent.Builder builder = DaggerCommandProcessingStep_ParameterComponent.builder()
-            .optionType(optionType)
+        ParameterComponent.Builder builder = DaggerParameterComponent.builder()
+            .module(module)
             .sourceMethod(sourceMethod)
-            .typeTool(tool)
-            .sourceElement(new SourceElement(sourceElement))
-            .bundleKey(new BundleKey(getParameterBundleKey(sourceMethod)))
-            .converter(new ConverterClass(converter))
-            .flavour(flavour)
             .alreadyCreatedParams(ImmutableList.of())
-            .alreadyCreatedOptions(ImmutableList.copyOf(namedOptions))
-            .description(getDescription(sourceMethod));
+            .alreadyCreatedOptions(ImmutableList.copyOf(namedOptions));
         builder.build().namedOptionFactory().createNamedOption()
             .accept(failures::add, namedOptions::add);
       }
-      List<Coercion<? extends AbstractParameter>> abstractParameters = new ArrayList<>();
+      List<ConvertedParameter<? extends AbstractParameter>> abstractParameters = new ArrayList<>();
       abstractParameters.addAll(positionalParams);
       abstractParameters.addAll(namedOptions);
       for (int i = 0; i < abstractParameters.size(); i++) {
-        Coercion<? extends AbstractParameter> c = abstractParameters.get(i);
+        ConvertedParameter<? extends AbstractParameter> c = abstractParameters.get(i);
         checkBundleKey(c, abstractParameters.subList(0, i))
             .map(s -> new ValidationFailure(s, c.parameter().sourceMethod()))
             .ifPresent(failures::add);
@@ -293,48 +205,31 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return OptionalInt.of(parameter.index());
   }
 
-  private String getParameterBundleKey(ExecutableElement method) {
-    Parameter parameter = method.getAnnotation(Parameter.class);
-    if (parameter != null) {
-      return parameter.bundleKey();
-    }
-    Option option = method.getAnnotation(Option.class);
-    if (option != null) {
-      return option.bundleKey();
-    }
-    Parameters parameters = method.getAnnotation(Parameters.class);
-    if (parameters != null) {
-      return parameters.bundleKey();
-    }
-    return null;
-  }
-
-  Optional<String> checkBundleKey(Coercion<? extends AbstractParameter> p, List<Coercion<? extends AbstractParameter>> alreadyCreated) {
+  Optional<String> checkBundleKey(
+      ConvertedParameter<? extends AbstractParameter> p,
+      List<ConvertedParameter<? extends AbstractParameter>> alreadyCreated) {
     return p.parameter().bundleKey().flatMap(key -> {
       if (key.isEmpty()) {
         return Optional.empty();
       }
-      if (key.matches(".*\\s+.*")) {
-        return Optional.of("bundle key contains whitespace characters");
-      }
-      for (Coercion<? extends AbstractParameter> c : alreadyCreated) {
+      for (ConvertedParameter<? extends AbstractParameter> c : alreadyCreated) {
         Optional<String> failure = c.parameter().bundleKey()
             .filter(bundleKey -> bundleKey.equals(key));
         if (failure.isPresent()) {
-          return Optional.of("duplicate bundle key");
+          return Optional.of("duplicate bundle key: " + key);
         }
       }
       return Optional.empty();
     });
   }
 
-  static List<ValidationFailure> validatePositions(List<Coercion<PositionalParameter>> params) {
-    List<Coercion<PositionalParameter>> sorted = params.stream()
+  static List<ValidationFailure> validatePositions(List<ConvertedParameter<PositionalParameter>> params) {
+    List<ConvertedParameter<PositionalParameter>> sorted = params.stream()
         .sorted(Comparator.comparing(c -> c.parameter().position()))
         .collect(Collectors.toList());
     List<ValidationFailure> result = new ArrayList<>();
     for (int i = 0; i < sorted.size(); i++) {
-      Coercion<PositionalParameter> p = sorted.get(i);
+      ConvertedParameter<PositionalParameter> p = sorted.get(i);
       if (p.parameter().position() != i) {
         result.add(new ValidationFailure("Position " + p.parameter().position() + " is not available." +
             " Suggested position: " + i, p.parameter().sourceMethod()));
@@ -480,57 +375,6 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       }
     }
     return false;
-  }
-
-  private Description getDescription(Element el) {
-    String[] description = getDescriptionFromAttribute(el);
-    if (description.length == 0) {
-      String[] javadoc = tokenizeJavadoc(elements.getDocComment(el));
-      return new Description(javadoc);
-    }
-    return new Description(description);
-  }
-
-  private String[] getDescriptionFromAttribute(Element el) {
-    Option option = el.getAnnotation(Option.class);
-    if (option != null) {
-      return option.description();
-    }
-    Parameter parameter = el.getAnnotation(Parameter.class);
-    if (parameter != null) {
-      return parameter.description();
-    }
-    Parameters parameters = el.getAnnotation(Parameters.class);
-    if (parameters != null) {
-      return parameters.description();
-    }
-    Command command = el.getAnnotation(Command.class);
-    if (command != null) {
-      return command.description();
-    }
-    SuperCommand superCommand = el.getAnnotation(SuperCommand.class);
-    if (superCommand != null) {
-      return superCommand.description();
-    }
-    return new String[0];
-  }
-
-  private static String[] tokenizeJavadoc(String docComment) {
-    if (docComment == null) {
-      return new String[0];
-    }
-    String[] tokens = docComment.trim().split("\\R", -1);
-    List<String> result = new ArrayList<>(tokens.length);
-    for (String t : tokens) {
-      String token = t.trim();
-      if (token.startsWith("@")) {
-        return result.toArray(new String[0]);
-      }
-      if (!token.isEmpty()) {
-        result.add(token);
-      }
-    }
-    return result.toArray(new String[0]);
   }
 
   private void handleUnknownError(TypeElement sourceType, Throwable e) {

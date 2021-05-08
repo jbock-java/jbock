@@ -6,7 +6,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import net.jbock.coerce.Coercion;
+import net.jbock.coerce.ConvertedParameter;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
@@ -31,17 +31,17 @@ public final class Context {
   private final ClassName generatedClass;
 
   // the abstract methods in the annotated class
-  private final List<Coercion<? extends AbstractParameter>> parameters;
+  private final List<ConvertedParameter<? extends AbstractParameter>> parameters;
 
-  private final List<Coercion<PositionalParameter>> params;
+  private final List<ConvertedParameter<PositionalParameter>> params;
 
-  private final Optional<Coercion<PositionalParameter>> repeatableParam;
+  private final Optional<ConvertedParameter<PositionalParameter>> repeatableParam;
 
-  private final List<Coercion<? extends AbstractParameter>> regularParameters;
+  private final List<ConvertedParameter<? extends AbstractParameter>> regularParameters;
 
-  private final List<Coercion<PositionalParameter>> regularParams;
+  private final List<ConvertedParameter<PositionalParameter>> regularParams;
 
-  private final List<Coercion<NamedOption>> options;
+  private final List<ConvertedParameter<NamedOption>> options;
 
   private final ParserFlavour flavour;
 
@@ -53,8 +53,8 @@ public final class Context {
   Context(
       TypeElement sourceElement,
       ClassName generatedClass,
-      List<Coercion<NamedOption>> namedOptions,
-      List<Coercion<PositionalParameter>> params,
+      List<ConvertedParameter<NamedOption>> namedOptions,
+      List<ConvertedParameter<PositionalParameter>> params,
       ParserFlavour flavour,
       GeneratedTypes generatedTypes) {
     this.sourceElement = sourceElement;
@@ -63,11 +63,11 @@ public final class Context {
     this.options = namedOptions;
     this.unixClusteringSupported = isUnixClusteringSupported(namedOptions);
     this.flavour = flavour;
-    this.parameters = ImmutableList.<Coercion<? extends AbstractParameter>>builder()
+    this.parameters = ImmutableList.<ConvertedParameter<? extends AbstractParameter>>builder()
         .addAll(options)
         .addAll(params).build();
     this.repeatableParam = params.stream()
-        .filter(Coercion::isRepeatable)
+        .filter(ConvertedParameter::isRepeatable)
         .findFirst();
     this.regularParameters = parameters.stream()
         .filter(c -> !(c.parameter().isPositional() && c.isRepeatable()))
@@ -86,15 +86,15 @@ public final class Context {
     return generatedClass;
   }
 
-  public List<Coercion<? extends AbstractParameter>> parameters() {
+  public List<ConvertedParameter<? extends AbstractParameter>> parameters() {
     return parameters;
   }
 
-  public List<Coercion<PositionalParameter>> params() {
+  public List<ConvertedParameter<PositionalParameter>> params() {
     return params;
   }
 
-  public List<Coercion<NamedOption>> options() {
+  public List<ConvertedParameter<NamedOption>> options() {
     return options;
   }
 
@@ -138,29 +138,29 @@ public final class Context {
     return unixClusteringSupported;
   }
 
-  private static boolean isUnixClusteringSupported(List<Coercion<NamedOption>> options) {
-    List<Coercion<NamedOption>> unixOptions = options.stream()
+  private static boolean isUnixClusteringSupported(List<ConvertedParameter<NamedOption>> options) {
+    List<ConvertedParameter<NamedOption>> unixOptions = options.stream()
         .filter(option -> option.parameter().hasUnixName())
         .collect(Collectors.toList());
-    return unixOptions.size() >= 2 && unixOptions.stream().anyMatch(Coercion::isFlag);
+    return unixOptions.size() >= 2 && unixOptions.stream().anyMatch(ConvertedParameter::isFlag);
   }
 
   public String getSuccessResultMethodName() {
     return isSuperCommand() ? "getResultWithRest" : "getResult";
   }
 
-  public Optional<Coercion<PositionalParameter>> repeatableParam() {
+  public Optional<ConvertedParameter<PositionalParameter>> repeatableParam() {
     return repeatableParam;
   }
 
   /**
    * Everything but the repeatable param.
    */
-  public List<Coercion<? extends AbstractParameter>> regularParameters() {
+  public List<ConvertedParameter<? extends AbstractParameter>> regularParameters() {
     return regularParameters;
   }
 
-  public List<Coercion<PositionalParameter>> regularParams() {
+  public List<ConvertedParameter<PositionalParameter>> regularParams() {
     return regularParams;
   }
 }
