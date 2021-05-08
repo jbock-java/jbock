@@ -7,10 +7,10 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.convert.ConvertedParameter;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -26,7 +26,6 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.convert.Util.addBreaks;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
@@ -226,7 +225,7 @@ final class OptionParser {
   }
 
   private CodeBlock throwRepetitionErrorStatement(ParameterSpec token) {
-    return CodeBlock.of(addBreaks("throw new $T($T.format($S, $N))"),
+    return CodeBlock.of("throw new $T($T.format($S, $N))",
         RuntimeException.class, String.class,
         "Option '%s' is a repetition", token);
   }

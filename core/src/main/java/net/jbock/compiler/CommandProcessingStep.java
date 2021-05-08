@@ -48,9 +48,6 @@ import java.util.stream.Stream;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static net.jbock.convert.SuppliedClassValidator.commonChecks;
-import static net.jbock.convert.Util.assertAtLeastOneAnnotation;
-import static net.jbock.convert.Util.assertNoDuplicateAnnotations;
 import static net.jbock.compiler.OperationMode.TEST;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static net.jbock.compiler.TypeTool.AS_TYPE_ELEMENT;
@@ -65,6 +62,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private final Filer filer;
   private final OperationMode operationMode;
   private final DescriptionBuilder descriptionBuilder;
+  private final Util util;
 
   @Inject
   CommandProcessingStep(
@@ -73,13 +71,15 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       Messager messager,
       Filer filer,
       OperationMode operationMode,
-      DescriptionBuilder descriptionBuilder) {
+      DescriptionBuilder descriptionBuilder,
+      Util util) {
     this.tool = tool;
     this.types = types;
     this.messager = messager;
     this.filer = filer;
     this.operationMode = operationMode;
     this.descriptionBuilder = descriptionBuilder;
+    this.util = util;
   }
 
   @Override
@@ -303,10 +303,10 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
 
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
-    Optional<String> maybeFailure = commonChecks(sourceElement).map(s -> "command " + s);
+    Optional<String> maybeFailure = util.commonTypeChecks(sourceElement).map(s -> "command " + s);
     // the following *should* be done with Optional#or but we're currently limited to 1.8 API
     return Either.<String, Optional<String>>fromFailure(maybeFailure, Optional.empty())
-        .filter(nothing -> assertNoDuplicateAnnotations(sourceElement, Command.class, SuperCommand.class))
+        .filter(nothing -> util.assertNoDuplicateAnnotations(sourceElement, Command.class, SuperCommand.class))
         .filter(nothing -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
           if (!interfaces.isEmpty()) {
@@ -324,15 +324,15 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return ClassName.get(sourceElement).topLevelClassName().peerClass(name);
   }
 
-  private static Optional<String> validateParameterMethod(
+  private Optional<String> validateParameterMethod(
       TypeElement sourceElement,
       ExecutableElement sourceMethod) {
-    Optional<String> noAnnotationsError = assertAtLeastOneAnnotation(sourceMethod,
+    Optional<String> noAnnotationsError = util.assertAtLeastOneAnnotation(sourceMethod,
         Option.class, Parameter.class, Parameters.class);
     if (noAnnotationsError.isPresent()) {
       return noAnnotationsError;
     }
-    Optional<String> duplicateAnnotationsError = assertNoDuplicateAnnotations(sourceMethod,
+    Optional<String> duplicateAnnotationsError = util.assertNoDuplicateAnnotations(sourceMethod,
         Option.class, Parameter.class, Parameters.class);
     if (duplicateAnnotationsError.isPresent()) {
       return duplicateAnnotationsError;

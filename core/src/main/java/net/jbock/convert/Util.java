@@ -2,20 +2,78 @@ package net.jbock.convert;
 
 import net.jbock.compiler.TypeTool;
 
+import javax.inject.Inject;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public final class Util {
+public class Util {
 
-  public static String addBreaks(String code) {
-    return code.replace(" ", "$W");
+  @Inject
+  public Util() {
+  }
+
+  public Optional<String> commonTypeChecks(TypeElement classToCheck) {
+    if (classToCheck.getNestingKind().isNested() && !classToCheck.getModifiers().contains(Modifier.STATIC)) {
+      return Optional.of("must be static or top-level");
+    }
+    if (classToCheck.getKind() == ElementKind.INTERFACE) {
+      return Optional.of("cannot be an interface");
+    }
+    for (TypeElement element : getEnclosingElements(classToCheck)) {
+      if (element.getModifiers().contains(Modifier.PRIVATE)) {
+        return Optional.of("class cannot be private");
+      }
+    }
+    if (!hasDefaultConstructor(classToCheck)) {
+      return Optional.of("missing default constructor");
+    }
+    return Optional.empty();
+  }
+
+  private static boolean hasDefaultConstructor(TypeElement classToCheck) {
+    List<ExecutableElement> constructors = ElementFilter.constructorsIn(classToCheck.getEnclosedElements());
+    if (constructors.isEmpty()) {
+      return true;
+    }
+    for (ExecutableElement constructor : constructors) {
+      if (!constructor.getParameters().isEmpty()) {
+        continue;
+      }
+      if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
+        return false;
+      }
+      return constructor.getThrownTypes().isEmpty();
+    }
+    return false;
+  }
+
+  public List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
+    List<TypeElement> result = new ArrayList<>();
+    TypeElement current = sourceElement;
+    result.add(current);
+    while (current.getNestingKind() == NestingKind.MEMBER) {
+      Element enclosingElement = current.getEnclosingElement();
+      if (enclosingElement.getKind() != ElementKind.CLASS) {
+        return result;
+      }
+      current = TypeTool.AS_TYPE_ELEMENT.visit(enclosingElement);
+      result.add(current);
+    }
+    return result;
   }
 
   public static String typeToString(TypeMirror type) {
@@ -31,7 +89,7 @@ public final class Util {
         .collect(Collectors.joining(", ", "<", ">"));
   }
 
-  public static Optional<String> assertAtLeastOneAnnotation(
+  public Optional<String> assertAtLeastOneAnnotation(
       Element element,
       Class<? extends Annotation> ann1,
       Class<? extends Annotation> ann2,
@@ -39,7 +97,7 @@ public final class Util {
     return assertAtLeastOneAnnotation(element, Arrays.asList(ann1, ann2, ann3));
   }
 
-  private static Optional<String> assertAtLeastOneAnnotation(
+  private Optional<String> assertAtLeastOneAnnotation(
       Element element,
       List<Class<? extends Annotation>> annotations) {
     for (Class<? extends Annotation> annotation : annotations) {
@@ -52,14 +110,14 @@ public final class Util {
         .collect(Collectors.joining(", ")));
   }
 
-  public static Optional<String> assertNoDuplicateAnnotations(
+  public Optional<String> assertNoDuplicateAnnotations(
       Element element,
       Class<? extends Annotation> ann1,
       Class<? extends Annotation> ann2) {
     return assertNoDuplicateAnnotations(element, Arrays.asList(ann1, ann2));
   }
 
-  public static Optional<String> assertNoDuplicateAnnotations(
+  public Optional<String> assertNoDuplicateAnnotations(
       Element element,
       Class<? extends Annotation> ann1,
       Class<? extends Annotation> ann2,
@@ -67,7 +125,7 @@ public final class Util {
     return assertNoDuplicateAnnotations(element, Arrays.asList(ann1, ann2, ann3));
   }
 
-  private static Optional<String> assertNoDuplicateAnnotations(
+  private Optional<String> assertNoDuplicateAnnotations(
       Element element,
       List<Class<? extends Annotation>> annotations) {
     Class<?> found = null;

@@ -23,28 +23,29 @@ import java.util.List;
 import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static net.jbock.convert.SuppliedClassValidator.commonChecks;
-import static net.jbock.convert.SuppliedClassValidator.getEnclosingElements;
 
 public class ExplicitCoercionFinder extends ParameterScoped {
 
   private final ImmutableList<Matcher> matchers;
   private final ReferenceTool referenceTool;
+  private final Util util;
 
   @Inject
   ExplicitCoercionFinder(
       ParameterContext context,
       ImmutableList<Matcher> matchers,
-      ReferenceTool referenceTool) {
+      ReferenceTool referenceTool,
+      Util util) {
     super(context);
     this.matchers = matchers;
     this.referenceTool = referenceTool;
+    this.util = util;
   }
 
   public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findCoercion(
       P parameter,
       TypeElement converter) {
-    Optional<String> maybeFailure = commonChecks(converter).map(s -> "converter " + s);
+    Optional<String> maybeFailure = util.commonTypeChecks(converter).map(s -> "converter " + s);
     return Either.<String, Void>fromFailure(maybeFailure, null)
         .filter(nothing -> checkNotAbstract(converter))
         .filter(nothing -> checkNoTypevars(converter))
@@ -78,7 +79,7 @@ public class ExplicitCoercionFinder extends ParameterScoped {
 
   private Optional<String> checkMapperAnnotation(TypeElement converter) {
     Converter converterAnnotation = converter.getAnnotation(Converter.class);
-    boolean nestedMapper = getEnclosingElements(converter).contains(sourceElement());
+    boolean nestedMapper = util.getEnclosingElements(converter).contains(sourceElement());
     if (converterAnnotation == null && !nestedMapper) {
       return Optional.of("converter must be an inner class of the command class, or carry the @" + Converter.class.getSimpleName() + " annotation");
     }
