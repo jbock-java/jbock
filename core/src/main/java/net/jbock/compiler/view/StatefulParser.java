@@ -7,6 +7,8 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.parameter.NamedOption;
+import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
@@ -15,6 +17,7 @@ import net.jbock.compiler.parameter.AbstractParameter;
 import javax.inject.Inject;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -170,46 +173,58 @@ final class StatefulParser {
 
   private MethodSpec buildMethod() {
 
-    CodeBlock.Builder args = CodeBlock.builder().add("\n");
-    for (int j = 0; j < context.regularParameters().size(); j++) {
-      if (j > 0) {
-        args.add(",\n");
-      }
-      ConvertedParameter<? extends AbstractParameter> param = context.regularParameters().get(j);
-      args.add(extractExpression(param));
+    List<CodeBlock> code = new ArrayList<>();
+    for (ConvertedParameter<NamedOption> option : context.options()) {
+      CodeBlock.Builder streamExpression = streamExpressionOption(option);
+      code.add(extractExpression(streamExpression, option));
     }
-    context.repeatableParam().ifPresent(param -> {
-      if (!context.regularParameters().isEmpty()) {
-        args.add(",\n");
-      }
-      args.add(CodeBlock.builder()
-          .add("$N.stream()\n", rest).indent()
-          .add(".map($L)\n", param.mapExpr())
-          .add(".collect($T.toList())", Collectors.class).unindent()
-          .build());
-    });
+    for (ConvertedParameter<PositionalParameter> param : context.regularParams()) {
+      CodeBlock.Builder streamExpression = streamExpressionParameter(param);
+      code.add(extractExpression(streamExpression, param));
+    }
+    context.repeatableParam()
+        .map(param -> CodeBlock.builder()
+            .add("$N.stream()\n", rest).indent()
+            .add(".map($L)\n", param.mapExpr())
+            .add(".collect($T.toList())", Collectors.class).unindent()
+            .build())
+        .ifPresent(code::add);
     return MethodSpec.methodBuilder("build")
-        .addStatement("return new $T($L)", generatedTypes.implType(), args.build())
+        .addStatement("return new $T($L)", generatedTypes.implType(), joinCodeBlocks(code))
         .returns(generatedTypes.sourceType())
         .build();
   }
 
-  private CodeBlock extractExpression(ConvertedParameter<? extends AbstractParameter> param) {
-    return getStreamExpression(param)
+  private CodeBlock extractExpression(
+      CodeBlock.Builder streamExpression,
+      ConvertedParameter<? extends AbstractParameter> param) {
+    return streamExpression
         .add("\n").indent()
         .add(".map($L)", param.mapExpr())
         .add(param.tailExpr()).unindent()
         .build();
   }
 
-  private CodeBlock.Builder getStreamExpression(ConvertedParameter<? extends AbstractParameter> param) {
-    if (param.parameter().isPositional()) {
-      return CodeBlock.builder().add(
-          "$T.ofNullable($N[$L])", Optional.class, paramParsersField,
-          param.parameter().positionalIndex().orElseThrow(AssertionError::new));
-    }
+  private CodeBlock.Builder streamExpressionOption(ConvertedParameter<NamedOption> param) {
     return CodeBlock.builder().add(
         "$N.get($T.$N).stream()", optionParsersField,
         generatedTypes.optionType(), param.enumConstant());
+  }
+
+  private CodeBlock.Builder streamExpressionParameter(ConvertedParameter<PositionalParameter> param) {
+    return CodeBlock.builder().add(
+        "$T.ofNullable($N[$L])", Optional.class, paramParsersField,
+        param.parameter().positionalIndex().orElseThrow(AssertionError::new));
+  }
+
+  private CodeBlock joinCodeBlocks(List<CodeBlock> code) {
+    CodeBlock.Builder args = CodeBlock.builder().add("\n");
+    for (int i = 0; i < code.size(); i++) {
+      if (i != 0) {
+        args.add(",\n");
+      }
+      args.add(code.get(i));
+    }
+    return args.build();
   }
 }

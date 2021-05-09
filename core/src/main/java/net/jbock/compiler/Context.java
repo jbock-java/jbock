@@ -37,8 +37,6 @@ public final class Context {
 
   private final Optional<ConvertedParameter<PositionalParameter>> repeatableParam;
 
-  private final List<ConvertedParameter<? extends AbstractParameter>> regularParameters;
-
   private final List<ConvertedParameter<PositionalParameter>> regularParams;
 
   private final List<ConvertedParameter<NamedOption>> options;
@@ -69,9 +67,6 @@ public final class Context {
     this.repeatableParam = params.stream()
         .filter(ConvertedParameter::isRepeatable)
         .findFirst();
-    this.regularParameters = parameters.stream()
-        .filter(c -> !(c.parameter().isPositional() && c.isRepeatable()))
-        .collect(Collectors.toList());
     this.regularParams = params.stream()
         .filter(c -> !c.isRepeatable())
         .collect(Collectors.toList());
@@ -111,15 +106,12 @@ public final class Context {
         generatedTypes.parseResultType());
     ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    if (generatedTypes.helpRequestedType().isPresent()) {
-      generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> {
-        code.add("$N ->\n", result).indent()
+    code.add(generatedTypes.helpRequestedType()
+        .map(helpRequestedType -> CodeBlock.builder()
+            .add("$N ->\n", result).indent()
             .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, helpRequestedType)
-            .unindent();
-      });
-    } else {
-      code.add("$N -> $T.exit(1)", result, System.class);
-    }
+            .unindent().build())
+        .orElseGet(() -> CodeBlock.of("$N -> $T.exit(1)", result, System.class)));
     return FieldSpec.builder(consumer, "exitHook")
         .addModifiers(PRIVATE)
         .initializer(code.build())
@@ -151,13 +143,6 @@ public final class Context {
 
   public Optional<ConvertedParameter<PositionalParameter>> repeatableParam() {
     return repeatableParam;
-  }
-
-  /**
-   * Everything but the repeatable param.
-   */
-  public List<ConvertedParameter<? extends AbstractParameter>> regularParameters() {
-    return regularParameters;
   }
 
   public List<ConvertedParameter<PositionalParameter>> regularParams() {
