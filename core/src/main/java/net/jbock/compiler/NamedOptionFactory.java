@@ -135,7 +135,7 @@ class NamedOptionFactory extends ParameterScoped {
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
     ParameterSpec constructorParam = ParameterSpec.builder(TypeName.get(returnType()), enumName().snake()).build();
-    CodeBlock mapExpr = CodeBlock.of("$T.identity()", Function.class);
+    CodeBlock mapExpr = CodeBlock.builder().build();
     CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
     return new ConvertedParameter<>(mapExpr, extractExpr, Skew.FLAG, constructorParam, namedOption);
   }

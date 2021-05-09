@@ -1,17 +1,22 @@
-package net.jbock.convert.matching.mapper;
+package net.jbock.convert.matching.explicit;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;
+import net.jbock.Parameter;
+import net.jbock.Parameters;
+import net.jbock.compiler.ParameterContext;
+import net.jbock.compiler.ParameterScoped;
+import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Skew;
 import net.jbock.convert.Util;
+import net.jbock.convert.matching.ConverterFinder;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.reference.FunctionType;
 import net.jbock.convert.reference.ReferenceTool;
-import net.jbock.compiler.ParameterContext;
-import net.jbock.compiler.ParameterScoped;
-import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
@@ -23,15 +28,17 @@ import java.util.List;
 import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
-public class ExplicitCoercionFinder extends ParameterScoped {
+public class ExplicitConverterFinder extends ConverterFinder {
 
   private final ImmutableList<Matcher> matchers;
   private final ReferenceTool referenceTool;
   private final Util util;
 
   @Inject
-  ExplicitCoercionFinder(
+  ExplicitConverterFinder(
       ParameterContext context,
       ImmutableList<Matcher> matchers,
       ReferenceTool referenceTool,
@@ -42,7 +49,7 @@ public class ExplicitCoercionFinder extends ParameterScoped {
     this.util = util;
   }
 
-  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findCoercion(
+  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(
       P parameter,
       TypeElement converter) {
     Optional<String> maybeFailure = util.commonTypeChecks(converter).map(s -> "converter " + s);
@@ -64,17 +71,20 @@ public class ExplicitCoercionFinder extends ParameterScoped {
       match.ifPresent(matches::add);
       match = match.filter(m -> isValidMatch(m, functionType));
       if (match.isPresent()) {
-        return Either.fromSuccess("", match)
-            .map(m -> {
-              CodeBlock mapExpr = getMapExpr(functionType, converter);
-              return m.toCoercion(mapExpr, parameter);
-            });
+        Match m = match.get();
+        return Either.fromFailure(validateMatch(parameter, m), null)
+            .map(nothing -> CodeBlock.builder()
+                .add(".map(")
+                .add(getMapExpr(functionType, converter))
+                .add(")").build())
+            .map(mapExpr -> m.toCoercion(mapExpr, parameter));
       }
     }
-    Match message = matches.stream()
+    TypeMirror bestReturnType = matches.stream()
         .max(Comparator.comparing(Match::skew))
-        .orElseThrow(AssertionError::new); // exact matcher always matches
-    return Either.left(ExplicitCoercionFinder.noMatchError(message.baseReturnType()));
+        .map(Match::baseReturnType)
+        .orElse(returnType());
+    return left(ExplicitConverterFinder.noMatchError(bestReturnType));
   }
 
   private Optional<String> checkMapperAnnotation(TypeElement converter) {

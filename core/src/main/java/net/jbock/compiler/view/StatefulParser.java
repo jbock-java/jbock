@@ -15,12 +15,15 @@ import net.jbock.convert.ConvertedParameter;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
+import static java.util.Collections.emptyList;
+import static java.util.Collections.singletonList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
@@ -181,11 +184,13 @@ final class StatefulParser {
       code.add(extractExpressionParameter(streamExpression, param));
     }
     context.repeatableParam()
-        .map(param -> CodeBlock.builder()
-            .add("$N.stream()\n", rest).indent()
-            .add(".map($L)\n", param.mapExpr())
-            .add(".collect($T.toList())", Collectors.class).unindent()
-            .build())
+        .map(param -> {
+          List<CodeBlock> block = new ArrayList<>();
+          block.add(CodeBlock.of("$N.stream()", rest));
+          block.add(param.mapExpr());
+          block.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
+          return joinIndent(block);
+        })
         .ifPresent(code::add);
     return MethodSpec.methodBuilder("build")
         .addStatement("return new $T($L)", generatedTypes.implType(), joinCodeBlocks(code))
@@ -196,21 +201,21 @@ final class StatefulParser {
   private CodeBlock extractExpressionOption(
       CodeBlock streamExpression,
       ConvertedParameter<NamedOption> option) {
-    return CodeBlock.builder()
-        .add(streamExpression).add("\n").indent()
-        .add(".map($L)", option.mapExpr())
-        .add(tailExpressionOption(option)).unindent()
-        .build();
+    List<CodeBlock> code = new ArrayList<>();
+    code.add(streamExpression);
+    code.add(option.mapExpr());
+    code.addAll(tailExpressionOption(option));
+    return joinIndent(code);
   }
 
   private CodeBlock extractExpressionParameter(
       CodeBlock streamExpression,
       ConvertedParameter<PositionalParameter> param) {
-    return CodeBlock.builder()
-        .add(streamExpression).add("\n").indent()
-        .add(".map($L)", param.mapExpr())
-        .add(tailExpressionParameter(param)).unindent()
-        .build();
+    List<CodeBlock> code = new ArrayList<>();
+    code.add(streamExpression);
+    code.add(param.mapExpr());
+    code.addAll(tailExpressionParameter(param));
+    return joinIndent(code);
   }
 
   private CodeBlock streamExpressionOption(ConvertedParameter<NamedOption> option) {
@@ -225,38 +230,37 @@ final class StatefulParser {
         parameter.parameter().position()).build();
   }
 
-  private CodeBlock tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
+  private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
     List<String> dashedNames = parameter.parameter().dashedNames();
     String enumConstant = parameter.enumConstant();
     switch (parameter.skew()) {
       case REQUIRED:
         String name = enumConstant + " (" + String.join(", ", dashedNames) + ")";
-        return CodeBlock.builder()
-            .add("\n.findAny()")
-            .add("\n.orElseThrow(() -> missingRequired($S))", name)
-            .build();
+        return Arrays.asList(
+            CodeBlock.of(".findAny()"),
+            CodeBlock.of(".orElseThrow(() -> missingRequired($S))", name));
       case OPTIONAL:
-        return CodeBlock.of("\n.findAny()");
+        return singletonList(CodeBlock.of(".findAny()"));
       case REPEATABLE:
-        return CodeBlock.of(".collect($T.toList())", Collectors.class);
+        return singletonList(CodeBlock.of(".collect($T.toList())", Collectors.class));
       case FLAG:
-        return CodeBlock.of(".findAny().isPresent()");
+        return singletonList(CodeBlock.of(".findAny().isPresent()"));
       default:
         throw new UnsupportedOperationException("unknown skew: " + parameter.skew());
     }
   }
 
-  private CodeBlock tailExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
+  private List<CodeBlock> tailExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
     String enumConstant = parameter.enumConstant();
     switch (parameter.skew()) {
       case REQUIRED:
-        return CodeBlock.of("\n.orElseThrow(() -> missingRequired($S))", enumConstant);
+        return singletonList(CodeBlock.of(".orElseThrow(() -> missingRequired($S))", enumConstant));
       case OPTIONAL:
-        return CodeBlock.builder().build();
+        return emptyList();
       case REPEATABLE:
-        return CodeBlock.of(".collect($T.toList())", Collectors.class);
+        return singletonList(CodeBlock.of(".collect($T.toList())", Collectors.class));
       case FLAG:
-        return CodeBlock.of(".findAny().isPresent()");
+        return singletonList(CodeBlock.of(".findAny().isPresent()"));
       default:
         throw new UnsupportedOperationException("unknown skew: " + parameter.skew());
     }
@@ -271,5 +275,29 @@ final class StatefulParser {
       args.add(code.get(i));
     }
     return args.build();
+  }
+
+  private CodeBlock joinIndent(List<CodeBlock> code) {
+    code = code.stream().filter(c -> !c.isEmpty()).collect(Collectors.toList());
+    if (code.isEmpty()) {
+      return CodeBlock.builder().build();
+    }
+    if (code.size() == 1) {
+      return code.get(0);
+    }
+    CodeBlock.Builder result = CodeBlock.builder();
+    for (int i = 0; i < code.size(); i++) {
+      if (i == 0) {
+        result.add(code.get(i));
+      } else if (i == 1) {
+        result.add("\n");
+        result.indent();
+        result.add(code.get(i));
+      } else {
+        result.add("\n");
+        result.add(code.get(i));
+      }
+    }
+    return result.unindent().build();
   }
 }

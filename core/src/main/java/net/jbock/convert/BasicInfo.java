@@ -1,8 +1,8 @@
 package net.jbock.convert;
 
 import dagger.Lazy;
-import net.jbock.convert.matching.auto.AutoCoercionFinder;
-import net.jbock.convert.matching.mapper.ExplicitCoercionFinder;
+import net.jbock.convert.matching.auto.AutoConverterFinder;
+import net.jbock.convert.matching.explicit.ExplicitConverterFinder;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.parameter.AbstractParameter;
@@ -15,14 +15,14 @@ import javax.inject.Inject;
  */
 public class BasicInfo extends ParameterScoped {
 
-  private final Lazy<AutoCoercionFinder> autoMatcher;
-  private final Lazy<ExplicitCoercionFinder> mapperMatcher;
+  private final Lazy<AutoConverterFinder> autoMatcher;
+  private final Lazy<ExplicitConverterFinder> mapperMatcher;
 
   @Inject
   BasicInfo(
       ParameterContext context,
-      Lazy<AutoCoercionFinder> autoMatcher,
-      Lazy<ExplicitCoercionFinder> mapperMatcher) {
+      Lazy<AutoConverterFinder> autoMatcher,
+      Lazy<ExplicitConverterFinder> mapperMatcher) {
     super(context);
     this.autoMatcher = autoMatcher;
     this.mapperMatcher = mapperMatcher;
@@ -30,7 +30,7 @@ public class BasicInfo extends ParameterScoped {
 
   public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> coercion(P parameter) {
     return parameter.converter()
-        .map(mapper -> mapperMatcher.get().findCoercion(parameter, mapper))
-        .orElseGet(() -> autoMatcher.get().findCoercion(parameter));
+        .map(mapper -> mapperMatcher.get().findConverter(parameter, mapper))
+        .orElseGet(() -> autoMatcher.get().findConverter(parameter));
   }
 }

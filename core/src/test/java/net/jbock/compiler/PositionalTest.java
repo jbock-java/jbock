@@ -268,4 +268,49 @@ class PositionalTest {
         .processedWith(new Processor())
         .compilesWithoutError();
   }
+
+  @Test
+  void parametersInvalidNotList() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Parameters",
+        "  abstract Integer something();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("use @Parameter here");
+  }
+
+  @Test
+  void parametersInvalidNotListOptional() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Parameters",
+        "  abstract Optional<Integer> something();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("use @Parameter here");
+  }
+
+  @Test
+  void parameterInvalidList() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Parameter(index = 0)",
+        "  abstract List<Integer> something();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("use @Parameters here");
+  }
 }

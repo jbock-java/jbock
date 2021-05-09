@@ -3,7 +3,6 @@ package net.jbock.convert.matching.matcher;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.parameter.AbstractParameter;
-import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
 
@@ -22,10 +21,6 @@ public class OptionalMatcher extends Matcher {
 
   @Override
   public Optional<Match> tryMatch(AbstractParameter parameter) {
-    if (parameter.style() == ParameterStyle.PARAMETERS) {
-      // @Parameters doesn't do optional
-      return Optional.empty();
-    }
     Optional<Match> optionalPrimitive = getOptionalPrimitive(returnType());
     if (optionalPrimitive.isPresent()) {
       return optionalPrimitive;

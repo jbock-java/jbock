@@ -18,7 +18,6 @@ import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static net.jbock.compiler.Constants.STRING;
@@ -49,10 +48,9 @@ public class AutoMapper {
   }
 
   private static final List<Entry<String, CodeBlock>> MAPPERS = Arrays.asList(
-      create(String.class, CodeBlock.of("$T.identity()", Function.class)),
       create(Integer.class, VALUE_OF),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
-      create(File.class, autoMapperFile()),
+      create(File.class, autoConverterFile()),
       create(URI.class, CREATE),
       create(Pattern.class, COMPILE),
       create(LocalDate.class, PARSE),
@@ -61,21 +59,26 @@ public class AutoMapper {
       create(Byte.class, VALUE_OF),
       create(Float.class, VALUE_OF),
       create(Double.class, VALUE_OF),
-      create(Character.class, autoMapperChar()),
+      create(Character.class, autoConverterChar()),
       create(BigInteger.class, NEW),
       create(BigDecimal.class, NEW));
 
   public Either<String, CodeBlock> findAutoMapper(TypeMirror unwrappedReturnType) {
-    for (Entry<String, CodeBlock> coercion : MAPPERS) {
-      if (tool.isSameType(unwrappedReturnType, coercion.getKey())) {
-        CodeBlock mapExpr = coercion.getValue();
-        return right(mapExpr);
+    if (tool.isSameType(unwrappedReturnType, String.class.getCanonicalName())) {
+      return right(CodeBlock.builder().build());
+    }
+    for (Entry<String, CodeBlock> converter : MAPPERS) {
+      if (tool.isSameType(unwrappedReturnType, converter.getKey())) {
+        return right(CodeBlock.builder()
+            .add(".map(")
+            .add(converter.getValue())
+            .add(")").build());
       }
     }
     return left("");
   }
 
-  private static CodeBlock autoMapperFile() {
+  private static CodeBlock autoConverterFile() {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     ParameterSpec f = ParameterSpec.builder(File.class, "f").build();
     return CodeBlock.builder()
@@ -93,7 +96,7 @@ public class AutoMapper {
         .unindent().add("}").build();
   }
 
-  private static CodeBlock autoMapperChar() {
+  private static CodeBlock autoConverterChar() {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     return CodeBlock.builder()
         .add("$N -> {\n", s).indent()

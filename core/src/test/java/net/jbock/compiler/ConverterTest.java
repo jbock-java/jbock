@@ -149,6 +149,66 @@ class ConverterTest {
   }
 
   @Test
+  void parametersInvalidNotList() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Parameters(converter = MyConverter.class)",
+        "  abstract Integer something();",
+        "",
+        "  @Converter",
+        "  static class MyConverter implements Function<String, Integer> {",
+        "    public Integer apply() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("use @Parameter here");
+  }
+
+  @Test
+  void parametersInvalidNotListOptional() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Parameters(converter = MyConverter.class)",
+        "  abstract Optional<Integer> something();",
+        "",
+        "  @Converter",
+        "  static class MyConverter implements Function<String, Integer> {",
+        "    public Integer apply() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("use @Parameter here");
+  }
+
+  @Test
+  void parameterInvalidList() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Parameter(index = 0, converter = MyConverter.class)",
+        "  abstract List<Integer> something();",
+        "",
+        "  @Converter",
+        "  static class MyConverter implements Function<String, Integer> {",
+        "    public Integer apply() { return null; }",
+        "  }",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("use @Parameters here");
+  }
+
+  @Test
   void invalidBounds() {
     JavaFileObject javaFile = fromSource(
         "@Command",

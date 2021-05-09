@@ -3,9 +3,14 @@ package net.jbock.convert.matching.auto;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.Parameter;
+import net.jbock.Parameters;
+import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.AutoMapper;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Skew;
 import net.jbock.convert.Util;
+import net.jbock.convert.matching.ConverterFinder;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
@@ -21,8 +26,9 @@ import java.util.stream.Collectors;
 
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
-public class AutoCoercionFinder extends ParameterScoped {
+public class AutoConverterFinder extends ConverterFinder {
 
   private static final String ENUM = Enum.class.getCanonicalName();
 
@@ -30,7 +36,7 @@ public class AutoCoercionFinder extends ParameterScoped {
   private final ImmutableList<Matcher> matchers;
 
   @Inject
-  AutoCoercionFinder(
+  AutoConverterFinder(
       ParameterContext context,
       AutoMapper autoMapper,
       ImmutableList<Matcher> matchers) {
@@ -39,12 +45,13 @@ public class AutoCoercionFinder extends ParameterScoped {
     this.matchers = matchers;
   }
 
-  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findCoercion(P parameter) {
+  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(P parameter) {
     for (Matcher matcher : matchers) {
       Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
-        return Either.<String, Match>right(match.get())
-            .flatMap(m -> findMapper(m, parameter));
+        Match m = match.get();
+        return Either.fromFailure(validateMatch(parameter, m), null)
+            .flatMap(nothing -> findMapper(m, parameter));
       }
     }
     return left(noMatchError(returnType()));
@@ -66,6 +73,7 @@ public class AutoCoercionFinder extends ParameterScoped {
     ParameterSpec values = ParameterSpec.builder(STRING, "values").build();
     ParameterSpec message = ParameterSpec.builder(STRING, "message").build();
     return CodeBlock.builder()
+        .add(".map(")
         .add("$N -> {\n", s).indent()
         .add("try {\n").indent()
         .add("return $T.valueOf($N);\n", baseReturnType, s)
@@ -78,7 +86,7 @@ public class AutoCoercionFinder extends ParameterScoped {
         .add("$T $N = $N.getMessage() + $S + $N;\n", STRING, message, e, " ", values)
         .add("throw new $T($N);\n", IllegalArgumentException.class, message)
         .unindent().add("}\n")
-        .unindent().add("}").build();
+        .unindent().add("})\n").build();
   }
 
   private boolean isEnumType(TypeMirror type) {
