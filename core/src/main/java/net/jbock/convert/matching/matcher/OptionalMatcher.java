@@ -36,9 +36,9 @@ public class OptionalMatcher extends Matcher {
   }
 
   private CodeBlock tailExpr(AbstractParameter parameter) {
-    return parameter.isPositional() ?
-        CodeBlock.builder().build() :
-        CodeBlock.of("\n.findAny()");
+    return parameter.isOption() ?
+        CodeBlock.of("\n.findAny()") :
+        CodeBlock.builder().build();
   }
 
   private Optional<Match> getOptionalPrimitive(AbstractParameter parameter, TypeMirror type) {

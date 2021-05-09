@@ -26,20 +26,21 @@ public class ExactMatcher extends Matcher {
       return Optional.empty();
     }
     ParameterSpec constructorParam = constructorParam(boxedReturnType());
-    return Optional.of(Match.create(boxedReturnType(), constructorParam, Skew.REQUIRED, tailExpr(parameter)));
+    Match match = Match.create(boxedReturnType(), constructorParam, Skew.REQUIRED, tailExpr(parameter));
+    return Optional.of(match);
   }
 
   private CodeBlock tailExpr(AbstractParameter parameter) {
     List<String> dashedNames = parameter.dashedNames();
     String enumConstant = parameter.enumName().enumConstant();
-    String s = dashedNames.isEmpty() ?
+    CodeBlock.Builder code = CodeBlock.builder();
+    if (parameter.isOption()) {
+      code.add("\n.findAny()");
+    }
+    String name = dashedNames.isEmpty() ?
         enumConstant :
         enumConstant + " (" + String.join(", ", dashedNames) + ")";
-    CodeBlock.Builder code = CodeBlock.builder();
-    if (!parameter.isPositional()) {
-      code.add("\n.findAny()", s);
-    }
-    return code.add("\n.orElseThrow(() -> missingRequired($S))", s)
+    return code.add("\n.orElseThrow(() -> missingRequired($S))", name)
         .build();
   }
 }

@@ -58,9 +58,9 @@ public abstract class AbstractParameter {
     return TypeName.get(sourceMethod.getReturnType());
   }
 
-  public abstract boolean isPositional();
-
-  public abstract OptionalInt positionalIndex();
+  public final boolean isOption() {
+    return style() == ParameterStyle.OPTION;
+  }
 
   public final Optional<String> bundleKey() {
     return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);

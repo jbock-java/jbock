@@ -214,7 +214,7 @@ final class StatefulParser {
   private CodeBlock.Builder streamExpressionParameter(ConvertedParameter<PositionalParameter> param) {
     return CodeBlock.builder().add(
         "$T.ofNullable($N[$L])", Optional.class, paramParsersField,
-        param.parameter().positionalIndex().orElseThrow(AssertionError::new));
+        param.parameter().position());
   }
 
   private CodeBlock joinCodeBlocks(List<CodeBlock> code) {

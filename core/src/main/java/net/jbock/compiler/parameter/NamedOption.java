@@ -6,7 +6,6 @@ import net.jbock.qualifier.ConverterClass;
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
 import java.util.Locale;
-import java.util.OptionalInt;
 
 public class NamedOption extends AbstractParameter {
 
@@ -21,16 +20,6 @@ public class NamedOption extends AbstractParameter {
       ConverterClass converter) {
     super(sourceMethod, enumName, bundleKey, description, converter);
     this.dashedNames = dashedNames;
-  }
-
-  @Override
-  public boolean isPositional() {
-    return false;
-  }
-
-  @Override
-  public OptionalInt positionalIndex() {
-    return OptionalInt.empty();
   }
 
   @Override
