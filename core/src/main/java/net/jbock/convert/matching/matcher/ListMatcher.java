@@ -1,17 +1,15 @@
 package net.jbock.convert.matching.matcher;
 
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.convert.Skew;
-import net.jbock.convert.matching.Match;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.ParameterStyle;
+import net.jbock.convert.Skew;
+import net.jbock.convert.matching.Match;
 
 import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public class ListMatcher extends Matcher {
 
@@ -28,10 +26,6 @@ public class ListMatcher extends Matcher {
     }
     ParameterSpec constructorParam = constructorParam(returnType());
     return tool().getSingleTypeArgument(returnType(), List.class)
-        .map(typeArg -> Match.create(typeArg, constructorParam, Skew.REPEATABLE, tailExpr()));
-  }
-
-  private CodeBlock tailExpr() {
-    return CodeBlock.of(".collect($T.toList())", Collectors.class);
+        .map(typeArg -> Match.create(typeArg, constructorParam, Skew.REPEATABLE));
   }
 }

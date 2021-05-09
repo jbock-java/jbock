@@ -1,12 +1,11 @@
 package net.jbock.convert.matching.matcher;
 
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.convert.Skew;
-import net.jbock.convert.matching.Match;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.ParameterStyle;
+import net.jbock.convert.Skew;
+import net.jbock.convert.matching.Match;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -27,21 +26,15 @@ public class OptionalMatcher extends Matcher {
       // @Parameters doesn't do optional
       return Optional.empty();
     }
-    Optional<Match> optionalPrimitive = getOptionalPrimitive(parameter, returnType());
+    Optional<Match> optionalPrimitive = getOptionalPrimitive(returnType());
     if (optionalPrimitive.isPresent()) {
       return optionalPrimitive;
     }
     return tool().getSingleTypeArgument(returnType(), Optional.class)
-        .map(typeArg -> Match.create(typeArg, constructorParam(returnType()), Skew.OPTIONAL, tailExpr(parameter)));
+        .map(typeArg -> Match.create(typeArg, constructorParam(returnType()), Skew.OPTIONAL));
   }
 
-  private CodeBlock tailExpr(AbstractParameter parameter) {
-    return parameter.isOption() ?
-        CodeBlock.of("\n.findAny()") :
-        CodeBlock.builder().build();
-  }
-
-  private Optional<Match> getOptionalPrimitive(AbstractParameter parameter, TypeMirror type) {
+  private Optional<Match> getOptionalPrimitive(TypeMirror type) {
     for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
       if (tool().isSameType(type, optionalPrimitive.type())) {
         ParameterSpec constructorParam = constructorParam(asOptional(optionalPrimitive));
@@ -49,7 +42,6 @@ public class OptionalMatcher extends Matcher {
             tool().asTypeElement(optionalPrimitive.wrappedObjectType()).asType(),
             constructorParam,
             Skew.OPTIONAL,
-            tailExpr(parameter),
             optionalPrimitive.extractExpr(constructorParam)));
       }
     }

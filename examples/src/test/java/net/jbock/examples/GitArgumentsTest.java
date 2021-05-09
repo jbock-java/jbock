@@ -56,7 +56,7 @@ class GitArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "Git (/ɡɪt/) is software for tracking changes in any set of files.",
+        "Git is software for tracking changes in any set of files.",
         "",
         "USAGE",
         "  git-arguments [OPTION]... COMMAND [REMAINING_ARGS]...",

@@ -8,7 +8,6 @@ import net.jbock.compiler.parameter.AbstractParameter;
 public final class ConvertedParameter<P extends AbstractParameter> {
 
   private final ParameterSpec constructorParam;
-  private final CodeBlock tailExpr;
   private final CodeBlock mapExpr;
   private final CodeBlock extractExpr;
   private final Skew skew;
@@ -16,13 +15,11 @@ public final class ConvertedParameter<P extends AbstractParameter> {
 
   public ConvertedParameter(
       CodeBlock mapExpr,
-      CodeBlock tailExpr,
       CodeBlock extractExpr,
       Skew skew,
       ParameterSpec constructorParam,
       P parameter) {
     this.constructorParam = constructorParam;
-    this.tailExpr = tailExpr;
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
     this.skew = skew;
@@ -35,10 +32,6 @@ public final class ConvertedParameter<P extends AbstractParameter> {
 
   public CodeBlock extractExpr() {
     return extractExpr;
-  }
-
-  public CodeBlock tailExpr() {
-    return tailExpr;
   }
 
   public Skew skew() {

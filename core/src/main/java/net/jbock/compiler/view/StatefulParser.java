@@ -7,15 +7,13 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.Context;
+import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.compiler.Context;
-import net.jbock.compiler.GeneratedTypes;
-import net.jbock.compiler.parameter.AbstractParameter;
 
 import javax.inject.Inject;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -175,12 +173,12 @@ final class StatefulParser {
 
     List<CodeBlock> code = new ArrayList<>();
     for (ConvertedParameter<NamedOption> option : context.options()) {
-      CodeBlock.Builder streamExpression = streamExpressionOption(option);
-      code.add(extractExpression(streamExpression, option));
+      CodeBlock streamExpression = streamExpressionOption(option);
+      code.add(extractExpressionOption(streamExpression, option));
     }
     for (ConvertedParameter<PositionalParameter> param : context.regularParams()) {
-      CodeBlock.Builder streamExpression = streamExpressionParameter(param);
-      code.add(extractExpression(streamExpression, param));
+      CodeBlock streamExpression = streamExpressionParameter(param);
+      code.add(extractExpressionParameter(streamExpression, param));
     }
     context.repeatableParam()
         .map(param -> CodeBlock.builder()
@@ -195,26 +193,73 @@ final class StatefulParser {
         .build();
   }
 
-  private CodeBlock extractExpression(
-      CodeBlock.Builder streamExpression,
-      ConvertedParameter<? extends AbstractParameter> param) {
-    return streamExpression
-        .add("\n").indent()
-        .add(".map($L)", param.mapExpr())
-        .add(param.tailExpr()).unindent()
+  private CodeBlock extractExpressionOption(
+      CodeBlock streamExpression,
+      ConvertedParameter<NamedOption> option) {
+    return CodeBlock.builder()
+        .add(streamExpression).add("\n").indent()
+        .add(".map($L)", option.mapExpr())
+        .add(tailExpressionOption(option)).unindent()
         .build();
   }
 
-  private CodeBlock.Builder streamExpressionOption(ConvertedParameter<NamedOption> param) {
-    return CodeBlock.builder().add(
-        "$N.get($T.$N).stream()", optionParsersField,
-        generatedTypes.optionType(), param.enumConstant());
+  private CodeBlock extractExpressionParameter(
+      CodeBlock streamExpression,
+      ConvertedParameter<PositionalParameter> param) {
+    return CodeBlock.builder()
+        .add(streamExpression).add("\n").indent()
+        .add(".map($L)", param.mapExpr())
+        .add(tailExpressionParameter(param)).unindent()
+        .build();
   }
 
-  private CodeBlock.Builder streamExpressionParameter(ConvertedParameter<PositionalParameter> param) {
+  private CodeBlock streamExpressionOption(ConvertedParameter<NamedOption> option) {
+    return CodeBlock.builder().add(
+        "$N.get($T.$N).stream()", optionParsersField,
+        generatedTypes.optionType(), option.enumConstant()).build();
+  }
+
+  private CodeBlock streamExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
     return CodeBlock.builder().add(
         "$T.ofNullable($N[$L])", Optional.class, paramParsersField,
-        param.parameter().position());
+        parameter.parameter().position()).build();
+  }
+
+  private CodeBlock tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
+    List<String> dashedNames = parameter.parameter().dashedNames();
+    String enumConstant = parameter.enumConstant();
+    switch (parameter.skew()) {
+      case REQUIRED:
+        String name = enumConstant + " (" + String.join(", ", dashedNames) + ")";
+        return CodeBlock.builder()
+            .add("\n.findAny()")
+            .add("\n.orElseThrow(() -> missingRequired($S))", name)
+            .build();
+      case OPTIONAL:
+        return CodeBlock.of("\n.findAny()");
+      case REPEATABLE:
+        return CodeBlock.of(".collect($T.toList())", Collectors.class);
+      case FLAG:
+        return CodeBlock.of(".findAny().isPresent()");
+      default:
+        throw new UnsupportedOperationException("unknown skew: " + parameter.skew());
+    }
+  }
+
+  private CodeBlock tailExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
+    String enumConstant = parameter.enumConstant();
+    switch (parameter.skew()) {
+      case REQUIRED:
+        return CodeBlock.of("\n.orElseThrow(() -> missingRequired($S))", enumConstant);
+      case OPTIONAL:
+        return CodeBlock.builder().build();
+      case REPEATABLE:
+        return CodeBlock.of(".collect($T.toList())", Collectors.class);
+      case FLAG:
+        return CodeBlock.of(".findAny().isPresent()");
+      default:
+        throw new UnsupportedOperationException("unknown skew: " + parameter.skew());
+    }
   }
 
   private CodeBlock joinCodeBlocks(List<CodeBlock> code) {
