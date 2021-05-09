@@ -5,7 +5,6 @@ import net.jbock.Parameter;
 
 import java.util.Optional;
 
-// Allow positional arguments to start with a dash, so negative numbers can be passed.
 @Command
 abstract class AdditionArguments {
 
