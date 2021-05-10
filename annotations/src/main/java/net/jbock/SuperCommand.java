@@ -45,10 +45,23 @@ public @interface SuperCommand {
   boolean helpEnabled() default true;
 
   /**
-   * Optional text to display before the synopsis block.
+   * Optional text to display before the synopsis block, in the usage documentation.
    * If empty, the javadoc of the annotated class will be used as a fallback.
    *
    * @return description text
    */
   String[] description() default {};
+
+  /**
+   * The key that is used to find the command description
+   * in the internationalization message map.
+   * If no {@code descriptionKey} is defined,
+   * or no message map is supplied at runtime,
+   * or a message map is supplied but does not contain the description key,
+   * then the {@code description} attribute will be used.
+   * If that is also empty, the class-level javadoc will be used.
+   *
+   * @return key or empty string
+   */
+  String descriptionKey() default "";
 }
