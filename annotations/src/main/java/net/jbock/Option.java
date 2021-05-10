@@ -58,4 +58,13 @@ public @interface Option {
    * @return description text
    */
   String[] description() default {};
+
+  /**
+   * <p>Label for the option's argument, to be used in the usage documentation.
+   * If empty, a label will be chosen based on the method name.</p>
+   * <p><em>Note:</em> If this option is a mode flag, the label is ignored.</p>
+   *
+   * @return a label
+   */
+  String paramLabel() default "";
 }

@@ -56,4 +56,12 @@ public @interface Parameter {
    * @return description text
    */
   String[] description() default {};
+
+  /**
+   * Label for this parameter to be used in the usage help message.
+   * If empty, a label will be chosen based on the method name.
+   *
+   * @return a label
+   */
+  String paramLabel() default "";
 }
