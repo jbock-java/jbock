@@ -31,6 +31,8 @@ public @interface Command {
    * when {@code --help} or {@code -h}
    * are the only input tokens, or when there is at least one
    * required option or parameter, and the input array is empty.
+   * If {@code false}, the usage documentation will be printed
+   * when there is a parsing error.
    *
    * @return {@code false} to disable the help option
    */
