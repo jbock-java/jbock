@@ -33,7 +33,7 @@ class PositionalParamFactory extends ParameterScoped {
     PositionalParameter positionalParameter = new PositionalParameter(
         sourceMethod(),
         enumName(),
-        bundleKey(),
+        descriptionKey(),
         description(),
         positionalIndex,
         converter);

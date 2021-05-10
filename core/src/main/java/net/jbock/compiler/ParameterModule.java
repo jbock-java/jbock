@@ -14,7 +14,7 @@ import net.jbock.convert.matching.matcher.ListMatcher;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.matching.matcher.OptionalMatcher;
 import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.qualifier.BundleKey;
+import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.SourceElement;
 
@@ -92,8 +92,8 @@ class ParameterModule {
 
   @Reusable
   @Provides
-  BundleKey bundleKey(ExecutableElement sourceMethod) {
-    return new BundleKey(getParameterBundleKey(sourceMethod));
+  DescriptionKey descriptionKey(ExecutableElement sourceMethod) {
+    return new DescriptionKey(getParameterDescriptionKey(sourceMethod));
   }
 
   @Reusable
@@ -108,18 +108,18 @@ class ParameterModule {
     return descriptionBuilder.getDescription(sourceMethod);
   }
 
-  private String getParameterBundleKey(ExecutableElement method) {
+  private String getParameterDescriptionKey(ExecutableElement method) {
     Parameter parameter = method.getAnnotation(Parameter.class);
     if (parameter != null) {
-      return parameter.bundleKey();
+      return parameter.descriptionKey();
     }
     Option option = method.getAnnotation(Option.class);
     if (option != null) {
-      return option.bundleKey();
+      return option.descriptionKey();
     }
     Parameters parameters = method.getAnnotation(Parameters.class);
     if (parameters != null) {
-      return parameters.bundleKey();
+      return parameters.descriptionKey();
     }
     return null;
   }

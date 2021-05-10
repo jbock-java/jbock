@@ -47,7 +47,7 @@ public @interface Option {
    *
    * @return key or empty string
    */
-  String bundleKey() default "";
+  String descriptionKey() default "";
 
   /**
    * Option description, used when generating the usage documentation.

@@ -210,7 +210,7 @@ public final class GeneratedClass {
     context.params().forEach(p ->
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedTypes.optionType(), p.enumConstant(),
-            p.parameter().bundleKey().orElse(""),
+            p.parameter().descriptionKey().orElse(""),
             String.format(paramsFormat, p.descriptionSummary())));
     if (!context.options().isEmpty()) {
       code.addStatement("$N.println()", err);
@@ -225,7 +225,7 @@ public final class GeneratedClass {
     context.options().forEach(p ->
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedTypes.optionType(), p.enumConstant(),
-            p.parameter().bundleKey().orElse(""),
+            p.parameter().descriptionKey().orElse(""),
             String.format(optionsFormat, p.descriptionSummary())));
     return methodBuilder("printOnlineHelp")
         .addModifiers(accessModifiers)

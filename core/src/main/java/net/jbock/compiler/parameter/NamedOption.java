@@ -15,10 +15,10 @@ public class NamedOption extends AbstractParameter {
       EnumName enumName,
       List<String> dashedNames,
       ExecutableElement sourceMethod,
-      String bundleKey,
+      String descriptionKey,
       List<String> description,
       ConverterClass converter) {
-    super(sourceMethod, enumName, bundleKey, description, converter);
+    super(sourceMethod, enumName, descriptionKey, description, converter);
     this.dashedNames = dashedNames;
   }
 

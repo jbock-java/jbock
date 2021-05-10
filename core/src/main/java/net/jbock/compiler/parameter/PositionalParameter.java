@@ -18,11 +18,11 @@ public class PositionalParameter extends AbstractParameter {
   public PositionalParameter(
       ExecutableElement sourceMethod,
       EnumName enumName,
-      String bundleKey,
+      String descriptionKey,
       List<String> description,
       int positionalIndex,
       ConverterClass converter) {
-    super(sourceMethod, enumName, bundleKey, description, converter);
+    super(sourceMethod, enumName, descriptionKey, description, converter);
     this.positionalIndex = positionalIndex;
     this.style = sourceMethod().getAnnotation(Parameter.class) != null ?
         ParameterStyle.PARAMETER :

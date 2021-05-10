@@ -4,10 +4,10 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
+import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.BasicInfo;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Skew;
-import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;
 
@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
@@ -129,7 +128,7 @@ class NamedOptionFactory extends ParameterScoped {
   }
 
   private NamedOption createNamedOption(List<String> dashedNames) {
-    return new NamedOption(enumName(), dashedNames, sourceMethod(), bundleKey(),
+    return new NamedOption(enumName(), dashedNames, sourceMethod(), descriptionKey(),
         description(), converter);
   }
 

@@ -52,8 +52,8 @@ public class ParameterScoped {
     return Arrays.asList(parameterContext.description.getValue());
   }
 
-  final String bundleKey() {
-    return parameterContext.bundleKey;
+  final String descriptionKey() {
+    return parameterContext.descriptionKey;
   }
 
   public final EnumName enumName() {

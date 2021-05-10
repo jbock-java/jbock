@@ -11,7 +11,6 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -27,7 +26,7 @@ public abstract class AbstractParameter {
 
   private final EnumName enumName; // unique internal name
 
-  private final String bundleKey;
+  private final String descriptionKey;
 
   private final List<String> description;
 
@@ -36,12 +35,12 @@ public abstract class AbstractParameter {
   AbstractParameter(
       ExecutableElement sourceMethod,
       EnumName enumName,
-      String bundleKey,
+      String descriptionKey,
       List<String> description,
       ConverterClass converter) {
     this.sourceMethod = sourceMethod;
     this.enumName = enumName;
-    this.bundleKey = bundleKey;
+    this.descriptionKey = descriptionKey;
     this.description = description;
     this.converter = converter;
   }
@@ -62,8 +61,8 @@ public abstract class AbstractParameter {
     return style() == ParameterStyle.OPTION;
   }
 
-  public final Optional<String> bundleKey() {
-    return bundleKey.isEmpty() ? Optional.empty() : Optional.of(bundleKey);
+  public final Optional<String> descriptionKey() {
+    return descriptionKey.isEmpty() ? Optional.empty() : Optional.of(descriptionKey);
   }
 
   public final Set<Modifier> getAccessModifiers() {

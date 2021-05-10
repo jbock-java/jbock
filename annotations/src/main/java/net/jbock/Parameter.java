@@ -45,7 +45,7 @@ public @interface Parameter {
    *
    * @return description key or empty string
    */
-  String bundleKey() default "";
+  String descriptionKey() default "";
 
   /**
    * Parameter description, used when generating the usage documentation.

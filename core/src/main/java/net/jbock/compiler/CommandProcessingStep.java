@@ -189,7 +189,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       abstractParameters.addAll(namedOptions);
       for (int i = 0; i < abstractParameters.size(); i++) {
         ConvertedParameter<? extends AbstractParameter> c = abstractParameters.get(i);
-        checkBundleKey(c, abstractParameters.subList(0, i))
+        checkDescriptionKey(c, abstractParameters.subList(0, i))
             .map(s -> new ValidationFailure(s, c.parameter().sourceMethod()))
             .ifPresent(failures::add);
       }
@@ -205,16 +205,16 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return OptionalInt.of(parameter.index());
   }
 
-  Optional<String> checkBundleKey(
+  Optional<String> checkDescriptionKey(
       ConvertedParameter<? extends AbstractParameter> p,
       List<ConvertedParameter<? extends AbstractParameter>> alreadyCreated) {
-    return p.parameter().bundleKey().flatMap(key -> {
+    return p.parameter().descriptionKey().flatMap(key -> {
       if (key.isEmpty()) {
         return Optional.empty();
       }
       for (ConvertedParameter<? extends AbstractParameter> c : alreadyCreated) {
-        Optional<String> failure = c.parameter().bundleKey()
-            .filter(bundleKey -> bundleKey.equals(key));
+        Optional<String> failure = c.parameter().descriptionKey()
+            .filter(descriptionKey -> descriptionKey.equals(key));
         if (failure.isPresent()) {
           return Optional.of("duplicate bundle key: " + key);
         }

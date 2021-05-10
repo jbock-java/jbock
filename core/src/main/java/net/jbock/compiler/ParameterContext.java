@@ -6,7 +6,7 @@ import dagger.Reusable;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
-import net.jbock.qualifier.BundleKey;
+import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
@@ -23,7 +23,7 @@ public class ParameterContext {
   final ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams;
   final ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions;
   final Description description;
-  final String bundleKey;
+  final String descriptionKey;
   final EnumName enumName;
   final ParserFlavour flavour;
 
@@ -36,7 +36,7 @@ public class ParameterContext {
       ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams,
       ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions,
       Description description,
-      BundleKey bundleKey,
+      DescriptionKey descriptionKey,
       EnumName enumName,
       ParserFlavour flavour) {
     this.sourceMethod = sourceMethod;
@@ -46,7 +46,7 @@ public class ParameterContext {
     this.alreadyCreatedParams = alreadyCreatedParams;
     this.alreadyCreatedOptions = alreadyCreatedOptions;
     this.description = description;
-    this.bundleKey = bundleKey.key();
+    this.descriptionKey = descriptionKey.key();
     this.enumName = enumName;
     this.flavour = flavour;
   }

@@ -103,15 +103,15 @@ class PositionalTest {
   }
 
   @Test
-  void bundleKeyNotUnique() {
+  void descriptionKeyNotUnique() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
         "",
-        "  @Parameter(index = 0, bundleKey = \"myKey\")",
+        "  @Parameter(index = 0, descriptionKey = \"myKey\")",
         "  abstract String a();",
         "",
-        "  @Option(names = \"--x\", bundleKey = \"myKey\")",
+        "  @Option(names = \"--x\", descriptionKey = \"myKey\")",
         "  abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
