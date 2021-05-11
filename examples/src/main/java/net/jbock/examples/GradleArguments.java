@@ -22,19 +22,19 @@ abstract class GradleArguments {
   /**
    * the files
    */
-  @Option(names = {"--file", "-f"})
+  @Option(names = {"--file", "-f"}, paramLabel = "INPUT_FILE")
   abstract List<String> file();
 
   /**
    * the dir
    */
-  @Option(names = "--dir")
+  @Option(names = "--dir", paramLabel = "INPUT_DIR")
   abstract Optional<String> dir();
 
   /**
    * cmos flag
    */
-  @Option(names = {"--c", "-c"})
+  @Option(names = {"--c", "-c"}, paramLabel = "THIS_IS_IGNORED")
   abstract boolean cmos();
 
   @Option(names = {"--verbose", "-v"})
@@ -43,13 +43,13 @@ abstract class GradleArguments {
   /**
    * some token
    */
-  @Parameter(index = 0)
+  @Parameter(index = 0, paramLabel = "SOME_TOKEN")
   abstract Optional<String> mainToken();
 
   /**
    * some more tokens
    */
-  @Parameters
+  @Parameters(paramLabel = "moreTokens")
   abstract List<String> otherTokens();
 
   @Command
