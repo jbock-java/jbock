@@ -4,9 +4,6 @@ import com.google.common.collect.ImmutableList;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
-import net.jbock.Option;
-import net.jbock.Parameter;
-import net.jbock.Parameters;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.ConvertedParameter;
@@ -21,7 +18,6 @@ import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -107,8 +103,8 @@ class ParameterModule {
 
   @Reusable
   @Provides
-  DescriptionKey descriptionKey(SourceMethod sourceMethod) {
-    return new DescriptionKey(getParameterDescriptionKey(sourceMethod.method()));
+  DescriptionKey descriptionKey(SourceMethod sourceMethod, ParameterStyle parameterStyle) {
+    return new DescriptionKey(parameterStyle.getParameterDescriptionKey(sourceMethod.method()));
   }
 
   @Reusable
@@ -119,8 +115,8 @@ class ParameterModule {
 
   @Reusable
   @Provides
-  ParamLabel paramLabel(SourceMethod sourceMethod) {
-    return new ParamLabel(getParamLabel(sourceMethod.method()));
+  ParamLabel paramLabel(SourceMethod sourceMethod, ParameterStyle parameterStyle) {
+    return new ParamLabel(parameterStyle.getParamLabel(sourceMethod.method()));
   }
 
   @Reusable
@@ -132,40 +128,6 @@ class ParameterModule {
   @Reusable
   @Provides
   ParameterStyle parameterStyle(SourceMethod sourceMethod) {
-    return sourceMethod.method().getAnnotation(Parameter.class) != null ?
-        ParameterStyle.PARAMETER :
-        ParameterStyle.PARAMETERS;
-  }
-
-  private String getParameterDescriptionKey(ExecutableElement method) {
-    Parameter parameter = method.getAnnotation(Parameter.class);
-    if (parameter != null) {
-      return parameter.descriptionKey();
-    }
-    Option option = method.getAnnotation(Option.class);
-    if (option != null) {
-      return option.descriptionKey();
-    }
-    Parameters parameters = method.getAnnotation(Parameters.class);
-    if (parameters != null) {
-      return parameters.descriptionKey();
-    }
-    return null;
-  }
-
-  private String getParamLabel(ExecutableElement method) {
-    Parameter parameter = method.getAnnotation(Parameter.class);
-    if (parameter != null) {
-      return parameter.paramLabel();
-    }
-    Option option = method.getAnnotation(Option.class);
-    if (option != null) {
-      return option.paramLabel();
-    }
-    Parameters parameters = method.getAnnotation(Parameters.class);
-    if (parameters != null) {
-      return parameters.paramLabel();
-    }
-    return null;
+    return ParameterStyle.getStyle(sourceMethod.method());
   }
 }

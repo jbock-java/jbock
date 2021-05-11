@@ -4,10 +4,11 @@ import net.jbock.Command;
 import net.jbock.SuperCommand;
 
 import javax.lang.model.element.TypeElement;
+import java.lang.annotation.Annotation;
 
 public enum ParserFlavour {
 
-  COMMAND {
+  COMMAND(Command.class) {
     @Override
     public boolean helpEnabled(TypeElement sourceElement) {
       return sourceElement.getAnnotation(Command.class).helpEnabled();
@@ -15,8 +16,9 @@ public enum ParserFlavour {
 
     @Override
     public String programName(TypeElement sourceElement) {
-      if (!sourceElement.getAnnotation(Command.class).name().isEmpty()) {
-        return sourceElement.getAnnotation(Command.class).name();
+      Command command = sourceElement.getAnnotation(Command.class);
+      if (!command.name().isEmpty()) {
+        return command.name();
       }
       return EnumName.create(sourceElement.getSimpleName().toString()).snake('-');
     }
@@ -27,7 +29,7 @@ public enum ParserFlavour {
     }
   },
 
-  SUPER_COMMAND {
+  SUPER_COMMAND(SuperCommand.class) {
     @Override
     public boolean helpEnabled(TypeElement sourceElement) {
       return sourceElement.getAnnotation(SuperCommand.class).helpEnabled();
@@ -35,8 +37,9 @@ public enum ParserFlavour {
 
     @Override
     public String programName(TypeElement sourceElement) {
-      if (!sourceElement.getAnnotation(SuperCommand.class).name().isEmpty()) {
-        return sourceElement.getAnnotation(SuperCommand.class).name();
+      SuperCommand command = sourceElement.getAnnotation(SuperCommand.class);
+      if (!command.name().isEmpty()) {
+        return command.name();
       }
       return EnumName.create(sourceElement.getSimpleName().toString()).snake('-');
     }
@@ -46,6 +49,21 @@ public enum ParserFlavour {
       return true;
     }
   };
+
+  private final String className;
+
+  ParserFlavour(Class<? extends Annotation> annotationClass) {
+    this.className = annotationClass.getCanonicalName();
+  }
+
+  public static ParserFlavour forAnnotationName(String annotationName) {
+    for (ParserFlavour flavour : values()) {
+      if (flavour.className.equals(annotationName)) {
+        return flavour;
+      }
+    }
+    throw new IllegalArgumentException("Unknown flavour: " + annotationName);
+  }
 
   public abstract boolean helpEnabled(TypeElement sourceElement);
 

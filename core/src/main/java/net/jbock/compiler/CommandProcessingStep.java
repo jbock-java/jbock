@@ -93,17 +93,16 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   @Override
   public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
-    for (TypeElement typeElement : ElementFilter.typesIn(elementsByAnnotation.values())) {
-      processSourceElement(typeElement);
-    }
+    elementsByAnnotation.forEach((annotationName, element) -> {
+      ParserFlavour flavour = ParserFlavour.forAnnotationName(annotationName);
+      ElementFilter.typesIn(Collections.singletonList(element))
+          .forEach(sourceElement -> processSourceElement(sourceElement, flavour));
+    });
     return Collections.emptySet();
   }
 
-  private void processSourceElement(TypeElement sourceElement) {
+  private void processSourceElement(TypeElement sourceElement, ParserFlavour flavour) {
     ClassName generatedClass = generatedClass(sourceElement);
-    ParserFlavour flavour = sourceElement.getAnnotation(SuperCommand.class) != null ?
-        ParserFlavour.SUPER_COMMAND :
-        ParserFlavour.COMMAND;
     try {
       OptionType optionType = new OptionType(generatedClass.nestedClass("Option"));
       Either.ofLeft(validateSourceElement(sourceElement)).orElse(null)
@@ -208,7 +207,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return OptionalInt.of(parameter.index());
   }
 
-  Optional<String> checkDescriptionKey(
+  private Optional<String> checkDescriptionKey(
       ConvertedParameter<? extends AbstractParameter> p,
       List<ConvertedParameter<? extends AbstractParameter>> alreadyCreated) {
     return p.parameter().descriptionKey().flatMap(key -> {
@@ -226,7 +225,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     });
   }
 
-  static List<ValidationFailure> validatePositions(List<ConvertedParameter<PositionalParameter>> params) {
+  private static List<ValidationFailure> validatePositions(List<ConvertedParameter<PositionalParameter>> params) {
     List<ConvertedParameter<PositionalParameter>> sorted = params.stream()
         .sorted(Comparator.comparing(c -> c.parameter().position()))
         .collect(Collectors.toList());
@@ -303,7 +302,6 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     acc.addAll(methodsIn(typeElement.getEnclosedElements()));
     return right(typeElement);
   }
-
 
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
     Optional<String> maybeFailure = util.commonTypeChecks(sourceElement).map(s -> "command " + s);
