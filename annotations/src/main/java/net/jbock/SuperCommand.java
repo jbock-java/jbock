@@ -49,6 +49,8 @@ public @interface SuperCommand {
   /**
    * Optional text to display before the synopsis block, in the usage documentation.
    * If empty, the javadoc of the annotated class will be used as a fallback.
+   * If {@code descriptionKey} is not empty,
+   * the description will be read from the message map instead.
    *
    * @return description text
    */

@@ -52,8 +52,8 @@ public @interface Option {
   /**
    * Option description, used when generating the usage documentation.
    * If empty, the method's javadoc will be used as a fallback.
-   * The {@code descriptionKey} overrides this,
-   * if the key is present in the message map at runtime.
+   * If {@code descriptionKey} is not empty,
+   * the description will be read from the message map instead.
    *
    * @return description text
    */
