@@ -1,8 +1,8 @@
 package net.jbock.compiler;
 
-import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
+import net.jbock.convert.ConvertedParameter;
 
 import java.util.List;
 

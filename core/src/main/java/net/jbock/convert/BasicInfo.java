@@ -1,11 +1,11 @@
 package net.jbock.convert;
 
 import dagger.Lazy;
-import net.jbock.convert.matching.auto.AutoConverterFinder;
-import net.jbock.convert.matching.explicit.ExplicitConverterFinder;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.convert.matching.auto.AutoConverterFinder;
+import net.jbock.convert.matching.explicit.ExplicitConverterFinder;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;

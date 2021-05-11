@@ -3,14 +3,14 @@ package net.jbock.convert.matching.auto;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.convert.AutoMapper;
+import net.jbock.compiler.ParameterContext;
+import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.convert.AutoConverter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Util;
 import net.jbock.convert.matching.ConverterFinder;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.matcher.Matcher;
-import net.jbock.compiler.ParameterContext;
-import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.either.Either;
 import net.jbock.qualifier.SourceMethod;
 
@@ -27,18 +27,18 @@ public class AutoConverterFinder extends ConverterFinder {
 
   private static final String ENUM = Enum.class.getCanonicalName();
 
-  private final AutoMapper autoMapper;
+  private final AutoConverter autoConverter;
   private final ImmutableList<Matcher> matchers;
   private final SourceMethod sourceMethod;
 
   @Inject
   AutoConverterFinder(
       ParameterContext context,
-      AutoMapper autoMapper,
+      AutoConverter autoConverter,
       ImmutableList<Matcher> matchers,
       SourceMethod sourceMethod) {
     super(context);
-    this.autoMapper = autoMapper;
+    this.autoConverter = autoConverter;
     this.matchers = matchers;
     this.sourceMethod = sourceMethod;
   }
@@ -49,23 +49,23 @@ public class AutoConverterFinder extends ConverterFinder {
       if (match.isPresent()) {
         Match m = match.get();
         return Either.fromFailure(validateMatch(parameter, m), null)
-            .flatMap(nothing -> findMapper(m, parameter));
+            .flatMap(nothing -> findConverter(m, parameter));
       }
     }
     return left(noMatchError(sourceMethod.returnType()));
   }
 
-  private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findMapper(Match match, P parameter) {
+  private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(Match match, P parameter) {
     TypeMirror baseReturnType = match.baseReturnType();
-    return autoMapper.findAutoMapper(baseReturnType)
+    return autoConverter.findAutoConverter(baseReturnType)
         .maybeRecover(() -> isEnumType(baseReturnType) ?
-            Optional.of(autoMapperEnum(baseReturnType)) :
+            Optional.of(enumConverter(baseReturnType)) :
             Optional.empty())
         .mapLeft(s -> noMatchError(baseReturnType))
         .map(mapExpr -> match.toCoercion(mapExpr, parameter));
   }
 
-  private CodeBlock autoMapperEnum(TypeMirror baseReturnType) {
+  private CodeBlock enumConverter(TypeMirror baseReturnType) {
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e").build();
     ParameterSpec values = ParameterSpec.builder(STRING, "values").build();

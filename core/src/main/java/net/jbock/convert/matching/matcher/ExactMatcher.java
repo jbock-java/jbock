@@ -1,6 +1,7 @@
 package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.compiler.EnumName;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
@@ -18,8 +19,11 @@ public class ExactMatcher extends Matcher {
   private final SourceMethod sourceMethod;
 
   @Inject
-  ExactMatcher(ParameterContext parameterContext, SourceMethod sourceMethod) {
-    super(parameterContext);
+  ExactMatcher(
+      ParameterContext parameterContext,
+      SourceMethod sourceMethod,
+      EnumName enumName) {
+    super(parameterContext, enumName);
     this.sourceMethod = sourceMethod;
   }
 

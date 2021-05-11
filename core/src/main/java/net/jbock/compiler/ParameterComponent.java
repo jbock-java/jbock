@@ -3,12 +3,10 @@ package net.jbock.compiler;
 import com.google.common.collect.ImmutableList;
 import dagger.BindsInstance;
 import dagger.Component;
-import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
+import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.SourceMethod;
-
-import javax.lang.model.element.ExecutableElement;
 
 @Component(modules = ParameterModule.class)
 interface ParameterComponent {

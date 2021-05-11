@@ -1,6 +1,7 @@
 package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.compiler.EnumName;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.Skew;
@@ -18,8 +19,11 @@ public class OptionalMatcher extends Matcher {
   private final SourceMethod sourceMethod;
 
   @Inject
-  OptionalMatcher(ParameterContext parameterContext, SourceMethod sourceMethod) {
-    super(parameterContext);
+  OptionalMatcher(
+      ParameterContext parameterContext,
+      SourceMethod sourceMethod,
+      EnumName enumName) {
+    super(parameterContext, enumName);
     this.sourceMethod = sourceMethod;
   }
 

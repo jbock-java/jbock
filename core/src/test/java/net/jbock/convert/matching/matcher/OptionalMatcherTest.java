@@ -89,8 +89,10 @@ class OptionalMatcherTest {
         ImmutableList.of(),
         ImmutableList.of(),
         new Description(new String[0]),
-        EnumName.create("a"),
         ParserFlavour.COMMAND);
-    return new OptionalMatcher(context, new SourceMethod(sourceMethod));
+    return new OptionalMatcher(
+        context,
+        new SourceMethod(sourceMethod),
+        EnumName.create("a"));
   }
 }

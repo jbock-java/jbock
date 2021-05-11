@@ -2,14 +2,11 @@ package net.jbock.compiler;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.Arrays;
 import java.util.List;
@@ -44,14 +41,6 @@ public class ParameterScoped {
 
   final List<String> description() {
     return Arrays.asList(parameterContext.description.getValue());
-  }
-
-  public final EnumName enumName() {
-    return parameterContext.enumName;
-  }
-
-  public final ParameterSpec constructorParam(TypeMirror constructorParamType) {
-    return ParameterSpec.builder(TypeName.get(constructorParamType), enumName().camel()).build();
   }
 
   public final Types types() {

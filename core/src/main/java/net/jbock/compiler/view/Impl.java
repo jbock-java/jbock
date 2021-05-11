@@ -4,10 +4,10 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.convert.ConvertedParameter;
 
 import javax.inject.Inject;
 import java.util.stream.Collectors;

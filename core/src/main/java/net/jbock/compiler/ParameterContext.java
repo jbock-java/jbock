@@ -20,7 +20,6 @@ public class ParameterContext {
   final ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams;
   final ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions;
   final Description description;
-  final EnumName enumName;
   final ParserFlavour flavour;
 
   @Inject
@@ -31,7 +30,6 @@ public class ParameterContext {
       ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams,
       ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions,
       Description description,
-      EnumName enumName,
       ParserFlavour flavour) {
     this.sourceElement = sourceElement.element();
     this.tool = tool;
@@ -39,7 +37,6 @@ public class ParameterContext {
     this.alreadyCreatedParams = alreadyCreatedParams;
     this.alreadyCreatedOptions = alreadyCreatedOptions;
     this.description = description;
-    this.enumName = enumName;
     this.flavour = flavour;
   }
 }

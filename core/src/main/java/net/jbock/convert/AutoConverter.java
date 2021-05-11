@@ -24,7 +24,7 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
-public class AutoMapper {
+public class AutoConverter {
 
   private static final String NEW = "new";
   private static final String CREATE = "create";
@@ -35,19 +35,19 @@ public class AutoMapper {
   private final TypeTool tool;
 
   @Inject
-  AutoMapper(TypeTool tool) {
+  AutoConverter(TypeTool tool) {
     this.tool = tool;
   }
 
-  private static Entry<String, CodeBlock> create(Class<?> mappedType, String createFromString) {
-    return create(mappedType, CodeBlock.of("$T::" + createFromString, mappedType));
+  private static Entry<String, CodeBlock> create(Class<?> autoType, String createFromString) {
+    return create(autoType, CodeBlock.of("$T::" + createFromString, autoType));
   }
 
-  private static Entry<String, CodeBlock> create(Class<?> mappedType, CodeBlock mapExpr) {
-    return new SimpleImmutableEntry<>(mappedType.getCanonicalName(), mapExpr);
+  private static Entry<String, CodeBlock> create(Class<?> autoType, CodeBlock mapExpr) {
+    return new SimpleImmutableEntry<>(autoType.getCanonicalName(), mapExpr);
   }
 
-  private static final List<Entry<String, CodeBlock>> MAPPERS = Arrays.asList(
+  private static final List<Entry<String, CodeBlock>> CONVERTERS = Arrays.asList(
       create(Integer.class, VALUE_OF),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
       create(File.class, autoConverterFile()),
@@ -63,11 +63,11 @@ public class AutoMapper {
       create(BigInteger.class, NEW),
       create(BigDecimal.class, NEW));
 
-  public Either<String, CodeBlock> findAutoMapper(TypeMirror unwrappedReturnType) {
+  public Either<String, CodeBlock> findAutoConverter(TypeMirror unwrappedReturnType) {
     if (tool.isSameType(unwrappedReturnType, String.class.getCanonicalName())) {
       return right(CodeBlock.builder().build());
     }
-    for (Entry<String, CodeBlock> converter : MAPPERS) {
+    for (Entry<String, CodeBlock> converter : CONVERTERS) {
       if (tool.isSameType(unwrappedReturnType, converter.getKey())) {
         return right(CodeBlock.builder()
             .add(".map(")

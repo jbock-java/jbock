@@ -32,6 +32,7 @@ class NamedOptionFactory extends ParameterScoped {
   private final ParamLabel paramLabel;
   private final DescriptionKey descriptionKey;
   private final SourceMethod sourceMethod;
+  private final EnumName enumName;
 
   @Inject
   NamedOptionFactory(
@@ -40,13 +41,15 @@ class NamedOptionFactory extends ParameterScoped {
       BasicInfo basicInfo,
       ParamLabel paramLabel,
       DescriptionKey descriptionKey,
-      SourceMethod sourceMethod) {
+      SourceMethod sourceMethod,
+      EnumName enumName) {
     super(parameterContext);
     this.basicInfo = basicInfo;
     this.converter = converter;
     this.paramLabel = paramLabel;
     this.descriptionKey = descriptionKey;
     this.sourceMethod = sourceMethod;
+    this.enumName = enumName;
   }
 
   Either<ValidationFailure, ConvertedParameter<NamedOption>> createNamedOption() {
@@ -140,13 +143,13 @@ class NamedOptionFactory extends ParameterScoped {
   }
 
   private NamedOption createNamedOption(List<String> dashedNames) {
-    return new NamedOption(enumName(), dashedNames, sourceMethod, descriptionKey,
+    return new NamedOption(enumName, dashedNames, sourceMethod, descriptionKey,
         description(), converter, paramLabel);
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
     ParameterSpec constructorParam = ParameterSpec.builder(
-        TypeName.get(sourceMethod.returnType()), enumName().snake()).build();
+        TypeName.get(sourceMethod.returnType()), enumName.snake()).build();
     CodeBlock mapExpr = CodeBlock.builder().build();
     CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
     return new ConvertedParameter<>(mapExpr, extractExpr, Skew.FLAG, constructorParam, namedOption);

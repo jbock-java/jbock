@@ -22,6 +22,7 @@ class PositionalParamFactory extends ParameterScoped {
   private final ParamLabel paramLabel;
   private final DescriptionKey descriptionKey;
   private final SourceMethod sourceMethod;
+  private final EnumName enumName;
 
   @Inject
   PositionalParamFactory(
@@ -31,7 +32,8 @@ class PositionalParamFactory extends ParameterScoped {
       ConverterClass converter,
       ParamLabel paramLabel,
       DescriptionKey descriptionKey,
-      SourceMethod sourceMethod) {
+      SourceMethod sourceMethod,
+      EnumName enumName) {
     super(parameterContext);
     this.basicInfo = basicInfo;
     this.flavour = flavour;
@@ -39,12 +41,13 @@ class PositionalParamFactory extends ParameterScoped {
     this.paramLabel = paramLabel;
     this.descriptionKey = descriptionKey;
     this.sourceMethod = sourceMethod;
+    this.enumName = enumName;
   }
 
   Either<ValidationFailure, ConvertedParameter<PositionalParameter>> createPositionalParam(int positionalIndex) {
     PositionalParameter positionalParameter = new PositionalParameter(
         sourceMethod,
-        enumName(),
+        enumName,
         descriptionKey,
         description(),
         positionalIndex,

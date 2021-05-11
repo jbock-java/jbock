@@ -3,10 +3,10 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import dagger.BindsInstance;
 import dagger.Component;
-import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.compiler.view.GeneratedClass;
+import net.jbock.convert.ConvertedParameter;
 
 import javax.lang.model.element.TypeElement;
 import java.util.List;
