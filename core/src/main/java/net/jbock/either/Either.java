@@ -15,12 +15,12 @@ public abstract class Either<L, R> {
     return Right.create(value);
   }
 
-  public static <R> LeftOptional<R> ofRight(Optional<? extends R> right) {
-    return new LeftOptional<>(right);
+  public static <R> RightOptional<R> ofRight(Optional<? extends R> right) {
+    return new RightOptional<>(right);
   }
 
-  public static <L> RightOptional<L> ofLeft(Optional<? extends L> left) {
-    return new RightOptional<>(left);
+  public static <L> LeftOptional<L> ofLeft(Optional<? extends L> left) {
+    return new LeftOptional<>(left);
   }
 
   abstract <R2> Either<L, R2> flatMapInternal(
