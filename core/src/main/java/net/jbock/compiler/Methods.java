@@ -1,21 +1,18 @@
 package net.jbock.compiler;
 
-import net.jbock.Option;
 import net.jbock.Parameter;
-import net.jbock.Parameters;
 import net.jbock.qualifier.SourceMethod;
 
-import javax.lang.model.element.ExecutableElement;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
 class Methods {
 
-  private static final Comparator<ExecutableElement> POSITION_COMPARATOR =
+  private static final Comparator<SourceMethod> POSITION_COMPARATOR =
       (m1, m2) -> {
-        Parameter param1 = m1.getAnnotation(Parameter.class);
-        Parameter param2 = m2.getAnnotation(Parameter.class);
+        Parameter param1 = m1.method().getAnnotation(Parameter.class);
+        Parameter param2 = m2.method().getAnnotation(Parameter.class);
         boolean p1 = param1 != null;
         boolean p2 = param2 != null;
         if (p1 && !p2) {
@@ -38,16 +35,13 @@ class Methods {
     this.options = options;
   }
 
-  static Methods create(List<ExecutableElement> methods) {
+  static Methods create(List<SourceMethod> methods) {
     List<SourceMethod> params = methods.stream()
-        .filter(m -> m.getAnnotation(Parameter.class) != null ||
-            m.getAnnotation(Parameters.class) != null)
+        .filter(m -> m.style().isPositional())
         .sorted(POSITION_COMPARATOR)
-        .map(SourceMethod::create)
         .collect(Collectors.toList());
     List<SourceMethod> options = methods.stream()
-        .filter(m -> m.getAnnotation(Option.class) != null)
-        .map(SourceMethod::create)
+        .filter(m -> !m.style().isPositional())
         .collect(Collectors.toList());
     return new Methods(params, options);
   }

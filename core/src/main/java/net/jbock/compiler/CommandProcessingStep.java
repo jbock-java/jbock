@@ -39,10 +39,10 @@ import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.OptionalInt;
 import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -169,7 +169,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .alreadyCreatedParams(positionalsBuilder.build())
             .alreadyCreatedOptions(ImmutableList.of());
         builder.build().positionalParameterFactory().createPositionalParam(
-            getIndex(sourceMethod).orElse(positionalParameters.size() - 1))
+            sourceMethod.index().orElse(positionalParameters.size() - 1))
             .accept(failures::add, positionalsBuilder::add);
       }
       if (flavour.isSuperCommand() && positionalParameters.isEmpty()) {
@@ -203,39 +203,18 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .addAll(positionalParams)
             .addAll(namedOptions)
             .build();
-    for (int i = 0; i < abstractParameters.size(); i++) {
-      ConvertedParameter<? extends AbstractParameter> c = abstractParameters.get(i);
-      checkDescriptionKey(c, abstractParameters.subList(0, i))
-          .map(s -> new ValidationFailure(s, c.parameter().sourceMethod()))
-          .ifPresent(failures::add);
+    Set<String> keys = new HashSet<>();
+    for (ConvertedParameter<? extends AbstractParameter> c : abstractParameters) {
+      String key = c.parameter().descriptionKey().orElse("");
+      if (key.isEmpty()) {
+        continue;
+      }
+      if (!keys.add(key)) {
+        String message = "duplicate description key: " + key;
+        failures.add(new ValidationFailure(message, c.parameter().sourceMethod()));
+      }
     }
     return failures;
-  }
-
-  private OptionalInt getIndex(SourceMethod sourceMethod) {
-    Parameter parameter = sourceMethod.method().getAnnotation(Parameter.class);
-    if (parameter == null) {
-      return OptionalInt.empty();
-    }
-    return OptionalInt.of(parameter.index());
-  }
-
-  private Optional<String> checkDescriptionKey(
-      ConvertedParameter<? extends AbstractParameter> p,
-      List<ConvertedParameter<? extends AbstractParameter>> alreadyCreated) {
-    return p.parameter().descriptionKey().flatMap(key -> {
-      if (key.isEmpty()) {
-        return Optional.empty();
-      }
-      for (ConvertedParameter<? extends AbstractParameter> c : alreadyCreated) {
-        Optional<String> failure = c.parameter().descriptionKey()
-            .filter(descriptionKey -> descriptionKey.equals(key));
-        if (failure.isPresent()) {
-          return Optional.of("duplicate description key: " + key);
-        }
-      }
-      return Optional.empty();
-    });
   }
 
   private static List<ValidationFailure> validatePositions(List<ConvertedParameter<PositionalParameter>> params) {
@@ -254,8 +233,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private Either<List<ValidationFailure>, Methods> createMethods(TypeElement sourceElement) {
-    List<ValidationFailure> failures = new ArrayList<>();
     return findRelevantMethods(sourceElement.asType()).flatMap(sourceMethods -> {
+      List<ValidationFailure> failures = new ArrayList<>();
       for (ExecutableElement sourceMethod : sourceMethods) {
         validateParameterMethod(sourceElement, sourceMethod)
             .map(msg -> new ValidationFailure(msg, sourceMethod))
@@ -269,7 +248,9 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       if (!failures.isEmpty()) {
         return left(failures);
       }
-      return right(Methods.create(sourceMethods));
+      return right(Methods.create(sourceMethods.stream()
+          .map(SourceMethod::create)
+          .collect(Collectors.toList())));
     });
   }
 
