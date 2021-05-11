@@ -24,24 +24,22 @@ public class NamedOption extends AbstractParameter {
     this.dashedNames = dashedNames;
   }
 
-  @Override
   public List<String> dashedNames() {
     return dashedNames;
   }
 
-  @Override
-  public String descriptionSummary(boolean isFlag) {
+  public String dashedNamesWithLabel(boolean isFlag) {
     String sample = String.join(", ", dashedNames());
-    return isFlag ? sample : sample + ' ' + descriptionArgName();
+    return isFlag ? sample : sample + ' ' + paramLabel();
   }
 
-  public String descriptionArgName() {
-    return dashedNames.stream()
+  public String paramLabel() {
+    return label().orElseGet(() -> dashedNames.stream()
         .filter(name -> name.startsWith("--"))
         .map(name -> name.substring(2))
         .map(s -> s.toUpperCase(Locale.US))
         .findFirst()
-        .orElse(enumName().enumConstant().toUpperCase(Locale.ROOT));
+        .orElse(enumName().enumConstant().toUpperCase(Locale.ROOT)));
   }
 
   @Override

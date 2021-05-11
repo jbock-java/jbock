@@ -67,7 +67,7 @@ public abstract class AbstractParameter {
     return descriptionKey.key();
   }
 
-  public final Optional<String> paramLabel() {
+  final Optional<String> label() {
     return paramLabel.label();
   }
 
@@ -76,10 +76,6 @@ public abstract class AbstractParameter {
         .filter(ALLOWED_MODIFIERS::contains)
         .collect(Collectors.toSet());
   }
-
-  public abstract List<String> dashedNames();
-
-  public abstract String descriptionSummary(boolean isFlag);
 
   public final ExecutableElement sourceMethod() {
     return sourceMethod;

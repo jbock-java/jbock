@@ -72,8 +72,4 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   public String enumConstant() {
     return enumName.enumConstant();
   }
-
-  public String descriptionSummary() {
-    return parameter.descriptionSummary(isFlag());
-  }
 }

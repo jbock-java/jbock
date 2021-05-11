@@ -3,13 +3,10 @@ package net.jbock.compiler.parameter;
 import net.jbock.Parameter;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.EnumName;
-import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceMethod;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Locale;
 
 public class PositionalParameter extends AbstractParameter {
@@ -33,18 +30,12 @@ public class PositionalParameter extends AbstractParameter {
   }
 
   @Override
-  public List<String> dashedNames() {
-    return Collections.emptyList();
-  }
-
-  @Override
-  public String descriptionSummary(boolean isFlag) {
-    return enumName().snake().toUpperCase(Locale.US);
-  }
-
-  @Override
   public ParameterStyle style() {
     return style;
+  }
+
+  public String paramLabel() {
+    return label().orElse(enumName().snake().toUpperCase(Locale.US));
   }
 
   public int position() {

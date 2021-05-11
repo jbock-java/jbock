@@ -202,7 +202,8 @@ public final class GeneratedClass {
     code.addStatement("printTokens($S, usage())", continuationIndent);
 
     int paramsWidth = context.params().stream()
-        .map(ConvertedParameter::descriptionSummary)
+        .map(ConvertedParameter::parameter)
+        .map(PositionalParameter::paramLabel)
         .mapToInt(String::length).max().orElse(0) + 3;
     String paramsFormat = "  %1$-" + (paramsWidth - 2) + "s";
 
@@ -214,22 +215,22 @@ public final class GeneratedClass {
         code.addStatement("printOption($T.$L, $S, $S)",
             optionType.type(), p.enumConstant(),
             p.parameter().descriptionKey().orElse(""),
-            String.format(paramsFormat, p.descriptionSummary())));
+            String.format(paramsFormat, p.parameter().paramLabel())));
     if (!context.options().isEmpty()) {
       code.addStatement("$N.println()", err);
       code.addStatement("$N.println($S)", err, "OPTIONS");
     }
 
     int optionsWidth = context.options().stream()
-        .map(ConvertedParameter::descriptionSummary)
+        .map(c -> c.parameter().dashedNamesWithLabel(c.isFlag()))
         .mapToInt(String::length).max().orElse(0) + 3;
     String optionsFormat = "  %1$-" + (optionsWidth - 2) + "s";
 
-    context.options().forEach(p ->
+    context.options().forEach(c ->
         code.addStatement("printOption($T.$L, $S, $S)",
-            optionType.type(), p.enumConstant(),
-            p.parameter().descriptionKey().orElse(""),
-            String.format(optionsFormat, p.descriptionSummary())));
+            optionType.type(), c.enumConstant(),
+            c.parameter().descriptionKey().orElse(""),
+            String.format(optionsFormat, c.parameter().dashedNamesWithLabel(c.isFlag()))));
     return methodBuilder("printOnlineHelp")
         .addModifiers(accessModifiers)
         .addCode(code.build())
@@ -473,7 +474,7 @@ public final class GeneratedClass {
       spec.addStatement("$N.add($T.format($S, $S, $S))",
           result, STRING, "%s %s",
           option.parameter().dashedNames().get(0),
-          option.parameter().descriptionArgName());
+          option.parameter().paramLabel());
     }
 
     for (ConvertedParameter<PositionalParameter> param : context.params()) {
