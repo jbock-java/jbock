@@ -6,6 +6,7 @@ import dagger.Component;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
 
@@ -20,7 +21,7 @@ interface ParameterComponent {
   interface Builder {
 
     @BindsInstance
-    Builder sourceMethod(ExecutableElement sourceMethod);
+    Builder sourceMethod(SourceMethod sourceMethod);
 
     @BindsInstance
     Builder alreadyCreatedParams(ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreated);

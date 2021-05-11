@@ -11,12 +11,13 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.SuperCommand;
-import net.jbock.convert.ConvertedParameter;
-import net.jbock.convert.Util;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
+import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Util;
 import net.jbock.either.Either;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -162,7 +163,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       for (ExecutableElement sourceMethod : positionalParameters) {
         ParameterComponent.Builder builder = DaggerParameterComponent.builder()
             .module(module)
-            .sourceMethod(sourceMethod)
+            .sourceMethod(new SourceMethod(sourceMethod))
             .alreadyCreatedParams(ImmutableList.copyOf(positionalParams))
             .alreadyCreatedOptions(ImmutableList.of());
         builder.build().positionalParameterFactory().createPositionalParam(
@@ -178,7 +179,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       for (ExecutableElement sourceMethod : methods.options()) {
         ParameterComponent.Builder builder = DaggerParameterComponent.builder()
             .module(module)
-            .sourceMethod(sourceMethod)
+            .sourceMethod(new SourceMethod(sourceMethod))
             .alreadyCreatedParams(ImmutableList.of())
             .alreadyCreatedOptions(ImmutableList.copyOf(namedOptions));
         builder.build().namedOptionFactory().createNamedOption()

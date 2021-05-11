@@ -2,10 +2,14 @@ package net.jbock.compiler.parameter;
 
 import net.jbock.compiler.EnumName;
 import net.jbock.qualifier.ConverterClass;
+import net.jbock.qualifier.DescriptionKey;
+import net.jbock.qualifier.ParamLabel;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 
 public class NamedOption extends AbstractParameter {
 
@@ -14,11 +18,12 @@ public class NamedOption extends AbstractParameter {
   public NamedOption(
       EnumName enumName,
       List<String> dashedNames,
-      ExecutableElement sourceMethod,
-      String descriptionKey,
+      SourceMethod sourceMethod,
+      DescriptionKey descriptionKey,
       List<String> description,
-      ConverterClass converter) {
-    super(sourceMethod, enumName, descriptionKey, description, converter);
+      ConverterClass converter,
+      ParamLabel paramLabel) {
+    super(sourceMethod, enumName, descriptionKey, description, converter, paramLabel);
     this.dashedNames = dashedNames;
   }
 

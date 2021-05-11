@@ -3,6 +3,9 @@ package net.jbock.compiler.parameter;
 import net.jbock.Parameter;
 import net.jbock.compiler.EnumName;
 import net.jbock.qualifier.ConverterClass;
+import net.jbock.qualifier.DescriptionKey;
+import net.jbock.qualifier.ParamLabel;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.Collections;
@@ -16,13 +19,14 @@ public class PositionalParameter extends AbstractParameter {
   private final ParameterStyle style;
 
   public PositionalParameter(
-      ExecutableElement sourceMethod,
+      SourceMethod sourceMethod,
       EnumName enumName,
-      String descriptionKey,
+      DescriptionKey descriptionKey,
       List<String> description,
       int positionalIndex,
-      ConverterClass converter) {
-    super(sourceMethod, enumName, descriptionKey, description, converter);
+      ConverterClass converter,
+      ParamLabel paramLabel) {
+    super(sourceMethod, enumName, descriptionKey, description, converter, paramLabel);
     this.positionalIndex = positionalIndex;
     this.style = sourceMethod().getAnnotation(Parameter.class) != null ?
         ParameterStyle.PARAMETER :

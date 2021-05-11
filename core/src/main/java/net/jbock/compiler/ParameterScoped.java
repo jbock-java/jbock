@@ -4,9 +4,9 @@ import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.convert.ConvertedParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
+import net.jbock.convert.ConvertedParameter;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -52,16 +52,12 @@ public class ParameterScoped {
     return Arrays.asList(parameterContext.description.getValue());
   }
 
-  final String descriptionKey() {
-    return parameterContext.descriptionKey;
-  }
-
   public final EnumName enumName() {
     return parameterContext.enumName;
   }
 
   public final TypeMirror returnType() {
-    return sourceMethod().getReturnType();
+    return parameterContext.sourceMethod.getReturnType();
   }
 
   public final ParameterSpec constructorParam(TypeMirror constructorParamType) {

@@ -5,6 +5,9 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.compiler.EnumName;
 import net.jbock.qualifier.ConverterClass;
+import net.jbock.qualifier.DescriptionKey;
+import net.jbock.qualifier.ParamLabel;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
@@ -26,23 +29,27 @@ public abstract class AbstractParameter {
 
   private final EnumName enumName; // unique internal name
 
-  private final String descriptionKey;
+  private final DescriptionKey descriptionKey;
 
   private final List<String> description;
 
   private final ConverterClass converter;
 
+  private final ParamLabel paramLabel;
+
   AbstractParameter(
-      ExecutableElement sourceMethod,
+      SourceMethod sourceMethod,
       EnumName enumName,
-      String descriptionKey,
+      DescriptionKey descriptionKey,
       List<String> description,
-      ConverterClass converter) {
-    this.sourceMethod = sourceMethod;
+      ConverterClass converter,
+      ParamLabel paramLabel) {
+    this.sourceMethod = sourceMethod.method();
     this.enumName = enumName;
     this.descriptionKey = descriptionKey;
     this.description = description;
     this.converter = converter;
+    this.paramLabel = paramLabel;
   }
 
   public final List<String> description() {
@@ -62,7 +69,11 @@ public abstract class AbstractParameter {
   }
 
   public final Optional<String> descriptionKey() {
-    return descriptionKey.isEmpty() ? Optional.empty() : Optional.of(descriptionKey);
+    return descriptionKey.key();
+  }
+
+  public final Optional<String> paramLabel() {
+    return paramLabel.label();
   }
 
   public final Set<Modifier> getAccessModifiers() {

@@ -8,15 +8,17 @@ import dagger.Reusable;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
+import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.matching.matcher.ExactMatcher;
 import net.jbock.convert.matching.matcher.ListMatcher;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.matching.matcher.OptionalMatcher;
-import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.ConverterClass;
+import net.jbock.qualifier.DescriptionKey;
+import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
@@ -48,9 +50,9 @@ class ParameterModule {
   @Reusable
   @Provides
   EnumName enumName(
-      ExecutableElement sourceMethod,
+      SourceMethod sourceMethod,
       ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated) {
-    String methodName = sourceMethod.getSimpleName().toString();
+    String methodName = sourceMethod.method().getSimpleName().toString();
     EnumName result = EnumName.create(methodName);
     for (ConvertedParameter<NamedOption> param : alreadyCreated) {
       if (param.enumName().enumConstant().equals(result.enumConstant())) {
@@ -92,20 +94,26 @@ class ParameterModule {
 
   @Reusable
   @Provides
-  DescriptionKey descriptionKey(ExecutableElement sourceMethod) {
-    return new DescriptionKey(getParameterDescriptionKey(sourceMethod));
+  DescriptionKey descriptionKey(SourceMethod sourceMethod) {
+    return new DescriptionKey(getParameterDescriptionKey(sourceMethod.method()));
   }
 
   @Reusable
   @Provides
-  ConverterClass converter(ExecutableElement sourceMethod) {
-    return new ConverterClass(annotationUtil.getConverter(sourceMethod));
+  ConverterClass converter(SourceMethod sourceMethod) {
+    return new ConverterClass(annotationUtil.getConverter(sourceMethod.method()));
   }
 
   @Reusable
   @Provides
-  Description description(ExecutableElement sourceMethod) {
-    return descriptionBuilder.getDescription(sourceMethod);
+  ParamLabel paramLabel(SourceMethod sourceMethod) {
+    return new ParamLabel(getParamLabel(sourceMethod.method()));
+  }
+
+  @Reusable
+  @Provides
+  Description description(SourceMethod sourceMethod) {
+    return descriptionBuilder.getDescription(sourceMethod.method());
   }
 
   private String getParameterDescriptionKey(ExecutableElement method) {
@@ -120,6 +128,22 @@ class ParameterModule {
     Parameters parameters = method.getAnnotation(Parameters.class);
     if (parameters != null) {
       return parameters.descriptionKey();
+    }
+    return null;
+  }
+
+  private String getParamLabel(ExecutableElement method) {
+    Parameter parameter = method.getAnnotation(Parameter.class);
+    if (parameter != null) {
+      return parameter.paramLabel();
+    }
+    Option option = method.getAnnotation(Option.class);
+    if (option != null) {
+      return option.paramLabel();
+    }
+    Parameters parameters = method.getAnnotation(Parameters.class);
+    if (parameters != null) {
+      return parameters.paramLabel();
     }
     return null;
   }

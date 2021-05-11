@@ -10,6 +10,9 @@ import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Skew;
 import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;
+import net.jbock.qualifier.DescriptionKey;
+import net.jbock.qualifier.ParamLabel;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -26,15 +29,24 @@ class NamedOptionFactory extends ParameterScoped {
 
   private final BasicInfo basicInfo;
   private final ConverterClass converter;
+  private final ParamLabel paramLabel;
+  private final DescriptionKey descriptionKey;
+  private final SourceMethod sourceMethod;
 
   @Inject
   NamedOptionFactory(
       ParameterContext parameterContext,
       ConverterClass converter,
-      BasicInfo basicInfo) {
+      BasicInfo basicInfo,
+      ParamLabel paramLabel,
+      DescriptionKey descriptionKey,
+      SourceMethod sourceMethod) {
     super(parameterContext);
     this.basicInfo = basicInfo;
     this.converter = converter;
+    this.paramLabel = paramLabel;
+    this.descriptionKey = descriptionKey;
+    this.sourceMethod = sourceMethod;
   }
 
   Either<ValidationFailure, ConvertedParameter<NamedOption>> createNamedOption() {
@@ -46,11 +58,11 @@ class NamedOptionFactory extends ParameterScoped {
           }
           return basicInfo.coercion(namedOption);
         })
-        .mapLeft(s -> new ValidationFailure(s, sourceMethod()));
+        .mapLeft(sourceMethod::fail);
   }
 
   private Either<String, List<String>> checkOptionNames() {
-    Option option = sourceMethod().getAnnotation(Option.class);
+    Option option = sourceMethod.method().getAnnotation(Option.class);
     if (option == null) {
       return right(Collections.emptyList());
     }
@@ -128,8 +140,8 @@ class NamedOptionFactory extends ParameterScoped {
   }
 
   private NamedOption createNamedOption(List<String> dashedNames) {
-    return new NamedOption(enumName(), dashedNames, sourceMethod(), descriptionKey(),
-        description(), converter);
+    return new NamedOption(enumName(), dashedNames, sourceMethod, descriptionKey,
+        description(), converter, paramLabel);
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
