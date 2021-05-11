@@ -8,6 +8,7 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.compiler.parameter.NamedOption;
+import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.matching.matcher.ExactMatcher;
 import net.jbock.convert.matching.matcher.ListMatcher;
@@ -126,6 +127,14 @@ class ParameterModule {
   @Provides
   Description description(SourceMethod sourceMethod) {
     return descriptionBuilder.getDescription(sourceMethod.method());
+  }
+
+  @Reusable
+  @Provides
+  ParameterStyle parameterStyle(SourceMethod sourceMethod) {
+    return sourceMethod.method().getAnnotation(Parameter.class) != null ?
+        ParameterStyle.PARAMETER :
+        ParameterStyle.PARAMETERS;
   }
 
   private String getParameterDescriptionKey(ExecutableElement method) {

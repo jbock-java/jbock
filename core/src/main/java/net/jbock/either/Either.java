@@ -15,22 +15,12 @@ public abstract class Either<L, R> {
     return Right.create(value);
   }
 
-  public static <L, R> Either<L, R> fromSuccess(L failure, Optional<? extends R> success) {
-    return fromSuccessGet(() -> failure, success);
+  public static <R> LeftOptional<R> ofRight(Optional<? extends R> right) {
+    return new LeftOptional<>(right);
   }
 
-  public static <L, R> Either<L, R> fromSuccessGet(Supplier<? extends L> failure, Optional<? extends R> success) {
-    return success.<Either<L, R>>map(Right::create)
-        .orElseGet(() -> Left.create(failure.get()));
-  }
-
-  public static <L, R> Either<L, R> fromFailure(Optional<? extends L> failure, R success) {
-    return fromFailureGet(failure, () -> success);
-  }
-
-  public static <L, R> Either<L, R> fromFailureGet(Optional<? extends L> failure, Supplier<? extends R> success) {
-    return failure.<Either<L, R>>map(Left::create)
-        .orElseGet(() -> Right.create(success.get()));
+  public static <L> RightOptional<L> ofLeft(Optional<? extends L> left) {
+    return new RightOptional<>(left);
   }
 
   abstract <R2> Either<L, R2> flatMapInternal(

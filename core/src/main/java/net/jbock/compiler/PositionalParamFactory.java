@@ -3,10 +3,9 @@ package net.jbock.compiler;
 import com.google.common.collect.ImmutableList;
 import net.jbock.SuperCommand;
 import net.jbock.compiler.parameter.PositionalParameter;
-import net.jbock.convert.ConverterFinder;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.ConverterFinder;
 import net.jbock.either.Either;
-import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceMethod;
@@ -18,7 +17,6 @@ class PositionalParamFactory {
 
   private final ConverterFinder converterFinder;
   private final ParserFlavour flavour;
-  private final ConverterClass converter;
   private final ParamLabel paramLabel;
   private final DescriptionKey descriptionKey;
   private final SourceMethod sourceMethod;
@@ -30,7 +28,6 @@ class PositionalParamFactory {
   PositionalParamFactory(
       ConverterFinder converterFinder,
       ParserFlavour flavour,
-      ConverterClass converter,
       ParamLabel paramLabel,
       DescriptionKey descriptionKey,
       SourceMethod sourceMethod,
@@ -39,7 +36,6 @@ class PositionalParamFactory {
       ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreated) {
     this.converterFinder = converterFinder;
     this.flavour = flavour;
-    this.converter = converter;
     this.paramLabel = paramLabel;
     this.descriptionKey = descriptionKey;
     this.sourceMethod = sourceMethod;
@@ -48,13 +44,13 @@ class PositionalParamFactory {
     this.alreadyCreated = alreadyCreated;
   }
 
-  Either<ValidationFailure, ConvertedParameter<PositionalParameter>> createPositionalParam(int positionalIndex) {
+  Either<ValidationFailure, ConvertedParameter<PositionalParameter>> createPositionalParam(int position) {
     PositionalParameter positionalParameter = new PositionalParameter(
         sourceMethod,
         enumName,
         descriptionKey,
         description,
-        positionalIndex,
+        position,
         paramLabel);
     return Either.<String, PositionalParameter>right(positionalParameter)
         .flatMap(coercion -> converterFinder.findConverter(positionalParameter))

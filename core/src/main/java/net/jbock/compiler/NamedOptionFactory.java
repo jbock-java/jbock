@@ -86,7 +86,7 @@ class NamedOptionFactory {
     }
     for (ConvertedParameter<NamedOption> c : alreadyCreated) {
       for (String name : option.names()) {
-        for (String previousName : c.parameter().dashedNames()) {
+        for (String previousName : c.parameter().names()) {
           if (name.equals(previousName)) {
             return left("duplicate option name: " + name);
           }
@@ -154,8 +154,8 @@ class NamedOptionFactory {
     return right(name);
   }
 
-  private NamedOption createNamedOption(List<String> dashedNames) {
-    return new NamedOption(enumName, dashedNames, sourceMethod, descriptionKey,
+  private NamedOption createNamedOption(List<String> names) {
+    return new NamedOption(enumName, names, sourceMethod, descriptionKey,
         description, paramLabel);
   }
 

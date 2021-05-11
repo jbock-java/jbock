@@ -6,7 +6,6 @@ import net.jbock.Parameter;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.EnumName;
 import net.jbock.qualifier.DescriptionKey;
-import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
@@ -25,26 +24,19 @@ import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
 public abstract class AbstractParameter {
 
   private final ExecutableElement sourceMethod;
-
   private final EnumName enumName; // unique internal name
-
   private final DescriptionKey descriptionKey;
-
   private final Description description;
-
-  private final ParamLabel paramLabel;
 
   AbstractParameter(
       SourceMethod sourceMethod,
       EnumName enumName,
       DescriptionKey descriptionKey,
-      Description description,
-      ParamLabel paramLabel) {
+      Description description) {
     this.sourceMethod = sourceMethod.method();
     this.enumName = enumName;
     this.descriptionKey = descriptionKey;
     this.description = description;
-    this.paramLabel = paramLabel;
   }
 
   public final List<String> description() {
@@ -59,16 +51,8 @@ public abstract class AbstractParameter {
     return TypeName.get(sourceMethod.getReturnType());
   }
 
-  public final boolean isOption() {
-    return style() == ParameterStyle.OPTION;
-  }
-
   public final Optional<String> descriptionKey() {
     return descriptionKey.key();
-  }
-
-  final Optional<String> label() {
-    return paramLabel.label();
   }
 
   public final Set<Modifier> getAccessModifiers() {
@@ -81,9 +65,7 @@ public abstract class AbstractParameter {
     return sourceMethod;
   }
 
-  public final EnumName enumName() {
+  final EnumName enumName() {
     return enumName;
   }
-
-  public abstract ParameterStyle style();
 }

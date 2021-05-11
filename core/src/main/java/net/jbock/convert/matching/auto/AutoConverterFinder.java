@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.AutoConverter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Util;
@@ -40,7 +41,9 @@ public class AutoConverterFinder extends ConverterValidator {
       ImmutableList<Matcher> matchers,
       SourceMethod sourceMethod,
       Types types,
-      TypeTool tool) {
+      TypeTool tool,
+      ParameterStyle parameterStyle) {
+    super(parameterStyle);
     this.autoConverter = autoConverter;
     this.matchers = matchers;
     this.sourceMethod = sourceMethod;
@@ -53,7 +56,7 @@ public class AutoConverterFinder extends ConverterValidator {
       Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
         Match m = match.get();
-        return Either.fromFailure(validateMatch(parameter, m), null)
+        return Either.ofLeft(validateMatch(m)).orElse(null)
             .flatMap(nothing -> findConverter(m, parameter));
       }
     }

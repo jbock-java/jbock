@@ -106,7 +106,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         ParserFlavour.COMMAND;
     try {
       OptionType optionType = new OptionType(generatedClass.nestedClass("Option"));
-      Either.fromFailure(validateSourceElement(sourceElement), null)
+      Either.ofLeft(validateSourceElement(sourceElement)).orElse(null)
           .mapLeft(msg -> new ValidationFailure(msg, sourceElement))
           .mapLeft(Collections::singletonList)
           .flatMap(nothing -> getParams(sourceElement, flavour, optionType))
@@ -308,7 +308,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
     Optional<String> maybeFailure = util.commonTypeChecks(sourceElement).map(s -> "command " + s);
     // the following *should* be done with Optional#or but we're currently limited to 1.8 API
-    return Either.<String, Optional<String>>fromFailure(maybeFailure, Optional.empty())
+    return Either.ofLeft(maybeFailure).orElse(Optional.<String>empty())
         .filter(nothing -> util.assertNoDuplicateAnnotations(sourceElement, Command.class, SuperCommand.class))
         .filter(nothing -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();

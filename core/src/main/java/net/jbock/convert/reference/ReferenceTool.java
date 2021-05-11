@@ -13,8 +13,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
-import static net.jbock.either.Either.fromSuccess;
 import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.ofRight;
 import static net.jbock.either.Either.right;
 
 public class ReferenceTool {
@@ -36,10 +36,10 @@ public class ReferenceTool {
       return left(converteNotFunction());
     }
     if (implementsSupplier.isPresent()) {
-      return fromSuccess("", implementsSupplier)
+      return ofRight(implementsSupplier).orElse("")
           .flatMap(this::handleSupplier);
     }
-    return fromSuccess("", implementsFunction)
+    return ofRight(implementsFunction).orElse("")
         .flatMap(declaredType -> handleFunction(declaredType, false));
   }
 

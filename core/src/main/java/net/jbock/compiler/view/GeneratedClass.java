@@ -473,7 +473,7 @@ public final class GeneratedClass {
     for (ConvertedParameter<NamedOption> option : requiredOptions) {
       spec.addStatement("$N.add($T.format($S, $S, $S))",
           result, STRING, "%s %s",
-          option.parameter().dashedNames().get(0),
+          option.parameter().names().get(0),
           option.parameter().paramLabel());
     }
 
@@ -538,13 +538,13 @@ public final class GeneratedClass {
     CodeBlock.Builder code = CodeBlock.builder();
     long mapSize = context.options().stream()
         .map(ConvertedParameter::parameter)
-        .map(NamedOption::dashedNames)
+        .map(NamedOption::names)
         .map(List::size)
         .mapToLong(i -> i)
         .sum();
     code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
     for (ConvertedParameter<NamedOption> namedOption : context.options()) {
-      for (String dashedName : namedOption.parameter().dashedNames()) {
+      for (String dashedName : namedOption.parameter().names()) {
         code.addStatement("$N.put($S, $T.$L)", result, dashedName, optionType.type(),
             namedOption.enumConstant());
       }

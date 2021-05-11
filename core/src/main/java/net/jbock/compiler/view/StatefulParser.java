@@ -232,7 +232,7 @@ final class StatefulParser {
   }
 
   private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
-    List<String> dashedNames = parameter.parameter().dashedNames();
+    List<String> dashedNames = parameter.parameter().names();
     String enumConstant = parameter.enumConstant();
     switch (parameter.skew()) {
       case REQUIRED:

@@ -11,43 +11,40 @@ import java.util.Locale;
 
 public class NamedOption extends AbstractParameter {
 
-  private final List<String> dashedNames;
+  private final List<String> names;
+  private final ParamLabel paramLabel;
 
   public NamedOption(
       EnumName enumName,
-      List<String> dashedNames,
+      List<String> names,
       SourceMethod sourceMethod,
       DescriptionKey descriptionKey,
       Description description,
       ParamLabel paramLabel) {
-    super(sourceMethod, enumName, descriptionKey, description, paramLabel);
-    this.dashedNames = dashedNames;
+    super(sourceMethod, enumName, descriptionKey, description);
+    this.paramLabel = paramLabel;
+    this.names = names;
   }
 
-  public List<String> dashedNames() {
-    return dashedNames;
+  public List<String> names() {
+    return names;
   }
 
   public String dashedNamesWithLabel(boolean isFlag) {
-    String sample = String.join(", ", dashedNames());
+    String sample = String.join(", ", names());
     return isFlag ? sample : sample + ' ' + paramLabel();
   }
 
   public String paramLabel() {
-    return label().orElseGet(() -> dashedNames.stream()
+    return paramLabel.label().orElseGet(() -> names.stream()
         .filter(name -> name.startsWith("--"))
         .map(name -> name.substring(2))
         .map(s -> s.toUpperCase(Locale.US))
         .findFirst()
-        .orElse(enumName().enumConstant().toUpperCase(Locale.ROOT)));
-  }
-
-  @Override
-  public ParameterStyle style() {
-    return ParameterStyle.OPTION;
+        .orElse(enumName().snake().toUpperCase(Locale.US)));
   }
 
   public boolean hasUnixName() {
-    return dashedNames.stream().anyMatch(s -> s.length() == 2);
+    return names.stream().anyMatch(s -> s.length() == 2);
   }
 }

@@ -5,6 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Util;
 import net.jbock.convert.matching.ConverterValidator;
@@ -43,7 +44,9 @@ public class ExplicitConverterValidator extends ConverterValidator {
       Util util,
       SourceMethod sourceMethod,
       SourceElement sourceElement,
-      TypeTool tool) {
+      TypeTool tool,
+      ParameterStyle parameterStyle) {
+    super(parameterStyle);
     this.matchers = matchers;
     this.referenceTool = referenceTool;
     this.util = util;
@@ -56,7 +59,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
       P parameter,
       TypeElement converter) {
     Optional<String> maybeFailure = util.commonTypeChecks(converter).map(s -> "converter " + s);
-    return Either.<String, Void>fromFailure(maybeFailure, null)
+    return Either.ofLeft(maybeFailure).orElse(null)
         .filter(nothing -> checkNotAbstract(converter))
         .filter(nothing -> checkNoTypevars(converter))
         .filter(nothing -> checkMapperAnnotation(converter))
@@ -75,7 +78,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
       match = match.filter(m -> isValidMatch(m, functionType));
       if (match.isPresent()) {
         Match m = match.get();
-        return Either.fromFailure(validateMatch(parameter, m), null)
+        return Either.ofLeft(validateMatch(m)).orElse(null)
             .map(nothing -> CodeBlock.builder()
                 .add(".map(")
                 .add(getMapExpr(functionType, converter))
