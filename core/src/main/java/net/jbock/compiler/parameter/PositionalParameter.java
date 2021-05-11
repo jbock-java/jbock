@@ -24,9 +24,8 @@ public class PositionalParameter extends AbstractParameter {
       DescriptionKey descriptionKey,
       Description description,
       int positionalIndex,
-      ConverterClass converter,
       ParamLabel paramLabel) {
-    super(sourceMethod, enumName, descriptionKey, description, converter, paramLabel);
+    super(sourceMethod, enumName, descriptionKey, description, paramLabel);
     this.positionalIndex = positionalIndex;
     this.style = sourceMethod().getAnnotation(Parameter.class) != null ?
         ParameterStyle.PARAMETER :

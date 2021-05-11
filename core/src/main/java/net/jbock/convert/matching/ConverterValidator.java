@@ -8,7 +8,7 @@ import net.jbock.convert.Skew;
 
 import java.util.Optional;
 
-public abstract class ConverterFinder {
+public abstract class ConverterValidator {
 
   protected Optional<String> validateMatch(AbstractParameter parameter, Match m) {
     if (parameter.style() == ParameterStyle.PARAMETER

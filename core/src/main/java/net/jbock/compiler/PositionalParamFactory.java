@@ -3,7 +3,7 @@ package net.jbock.compiler;
 import com.google.common.collect.ImmutableList;
 import net.jbock.SuperCommand;
 import net.jbock.compiler.parameter.PositionalParameter;
-import net.jbock.convert.BasicInfo;
+import net.jbock.convert.ConverterFinder;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;
@@ -16,7 +16,7 @@ import java.util.Optional;
 
 class PositionalParamFactory {
 
-  private final BasicInfo basicInfo;
+  private final ConverterFinder converterFinder;
   private final ParserFlavour flavour;
   private final ConverterClass converter;
   private final ParamLabel paramLabel;
@@ -28,7 +28,7 @@ class PositionalParamFactory {
 
   @Inject
   PositionalParamFactory(
-      BasicInfo basicInfo,
+      ConverterFinder converterFinder,
       ParserFlavour flavour,
       ConverterClass converter,
       ParamLabel paramLabel,
@@ -37,7 +37,7 @@ class PositionalParamFactory {
       EnumName enumName,
       Description description,
       ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreated) {
-    this.basicInfo = basicInfo;
+    this.converterFinder = converterFinder;
     this.flavour = flavour;
     this.converter = converter;
     this.paramLabel = paramLabel;
@@ -55,10 +55,9 @@ class PositionalParamFactory {
         descriptionKey,
         description,
         positionalIndex,
-        converter,
         paramLabel);
     return Either.<String, PositionalParameter>right(positionalParameter)
-        .flatMap(coercion -> basicInfo.coercion(positionalParameter))
+        .flatMap(coercion -> converterFinder.findConverter(positionalParameter))
         .filter(this::checkPositionNotNegative)
         .filter(this::checkSuperNotRepeatable)
         .filter(this::checkOnlyOnePositionalList)

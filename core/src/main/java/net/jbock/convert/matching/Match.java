@@ -2,6 +2,7 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.compiler.EnumName;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Skew;
@@ -14,36 +15,25 @@ public class Match {
   private final ParameterSpec constructorParam;
   private final CodeBlock extractExpr;
   private final Skew skew;
+  private final EnumName enumName;
 
-  private Match(
+  Match(
       TypeMirror baseReturnType,
       ParameterSpec constructorParam,
       CodeBlock extractExpr,
-      Skew skew) {
+      Skew skew,
+      EnumName enumName) {
     this.baseReturnType = baseReturnType;
     this.constructorParam = constructorParam;
     this.extractExpr = extractExpr;
     this.skew = skew;
+    this.enumName = enumName;
   }
 
-  public static Match create(
-      TypeMirror wrappedType,
-      ParameterSpec constructorParam,
-      Skew skew) {
-    return create(wrappedType, constructorParam, skew, CodeBlock.of("$N", constructorParam));
-  }
-
-  public static Match create(
-      TypeMirror wrappedType,
-      ParameterSpec constructorParam,
-      Skew skew,
-      CodeBlock extractExpr) {
-    return new Match(wrappedType, constructorParam, extractExpr, skew);
-  }
-
-  public <P extends AbstractParameter> ConvertedParameter<P> toCoercion(CodeBlock mapExpr, P parameter) {
+  public <P extends AbstractParameter> ConvertedParameter<P> toCoercion(
+      CodeBlock mapExpr, P parameter) {
     return new ConvertedParameter<>(mapExpr,
-        extractExpr, skew, constructorParam, parameter);
+        extractExpr, skew, constructorParam, enumName, parameter);
   }
 
   public TypeMirror baseReturnType() {

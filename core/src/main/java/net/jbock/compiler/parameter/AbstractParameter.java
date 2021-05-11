@@ -5,14 +5,12 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.EnumName;
-import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -34,8 +32,6 @@ public abstract class AbstractParameter {
 
   private final Description description;
 
-  private final ConverterClass converter;
-
   private final ParamLabel paramLabel;
 
   AbstractParameter(
@@ -43,13 +39,11 @@ public abstract class AbstractParameter {
       EnumName enumName,
       DescriptionKey descriptionKey,
       Description description,
-      ConverterClass converter,
       ParamLabel paramLabel) {
     this.sourceMethod = sourceMethod.method();
     this.enumName = enumName;
     this.descriptionKey = descriptionKey;
     this.description = description;
-    this.converter = converter;
     this.paramLabel = paramLabel;
   }
 
@@ -96,8 +90,4 @@ public abstract class AbstractParameter {
   }
 
   public abstract ParameterStyle style();
-
-  public final Optional<TypeElement> converter() {
-    return converter.converter();
-  }
 }

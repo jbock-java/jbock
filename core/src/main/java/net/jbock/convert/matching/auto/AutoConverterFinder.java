@@ -8,7 +8,7 @@ import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.AutoConverter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Util;
-import net.jbock.convert.matching.ConverterFinder;
+import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.either.Either;
@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.either.Either.left;
 
-public class AutoConverterFinder extends ConverterFinder {
+public class AutoConverterFinder extends ConverterValidator {
 
   private static final String ENUM = Enum.class.getCanonicalName();
 

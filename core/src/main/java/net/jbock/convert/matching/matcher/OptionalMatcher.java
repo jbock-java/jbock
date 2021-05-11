@@ -6,6 +6,7 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
+import net.jbock.convert.matching.MatchFactory;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
@@ -22,6 +23,7 @@ public class OptionalMatcher extends Matcher {
   private final TypeTool tool;
   private final Types types;
   private final Elements elements;
+  private final MatchFactory matchFactory;
 
   @Inject
   OptionalMatcher(
@@ -29,12 +31,14 @@ public class OptionalMatcher extends Matcher {
       EnumName enumName,
       TypeTool tool,
       Types types,
-      Elements elements) {
+      Elements elements,
+      MatchFactory matchFactory) {
     super(enumName);
     this.sourceMethod = sourceMethod;
     this.tool = tool;
     this.types = types;
     this.elements = elements;
+    this.matchFactory = matchFactory;
   }
 
   @Override
@@ -45,14 +49,15 @@ public class OptionalMatcher extends Matcher {
       return optionalPrimitive;
     }
     return tool.getSingleTypeArgument(returnType, Optional.class)
-        .map(typeArg -> Match.create(typeArg, constructorParam(returnType), Skew.OPTIONAL));
+        .map(typeArg -> matchFactory.create(typeArg,
+            constructorParam(returnType), Skew.OPTIONAL));
   }
 
   private Optional<Match> getOptionalPrimitive(TypeMirror type) {
     for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
       if (tool.isSameType(type, optionalPrimitive.type())) {
         ParameterSpec constructorParam = constructorParam(asOptional(optionalPrimitive));
-        return Optional.of(Match.create(
+        return Optional.of(matchFactory.create(
             elements.getTypeElement(optionalPrimitive.wrappedObjectType()).asType(),
             constructorParam,
             Skew.OPTIONAL,

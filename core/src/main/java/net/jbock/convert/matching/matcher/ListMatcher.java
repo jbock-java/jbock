@@ -6,6 +6,7 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
+import net.jbock.convert.matching.MatchFactory;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
@@ -17,15 +18,18 @@ public class ListMatcher extends Matcher {
 
   private final SourceMethod sourceMethod;
   private final TypeTool tool;
+  private final MatchFactory matchFactory;
 
   @Inject
   ListMatcher(
       SourceMethod sourceMethod,
       EnumName enumName,
-      TypeTool tool) {
+      TypeTool tool,
+      MatchFactory matchFactory) {
     super(enumName);
     this.sourceMethod = sourceMethod;
     this.tool = tool;
+    this.matchFactory = matchFactory;
   }
 
   @Override
@@ -33,6 +37,6 @@ public class ListMatcher extends Matcher {
     TypeMirror returnType = sourceMethod.returnType();
     ParameterSpec constructorParam = constructorParam(returnType);
     return tool.getSingleTypeArgument(returnType, List.class)
-        .map(typeArg -> Match.create(typeArg, constructorParam, Skew.REPEATABLE));
+        .map(typeArg -> matchFactory.create(typeArg, constructorParam, Skew.REPEATABLE));
   }
 }

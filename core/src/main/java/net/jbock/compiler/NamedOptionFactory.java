@@ -6,8 +6,8 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.convert.BasicInfo;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.ConverterFinder;
 import net.jbock.convert.Skew;
 import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;
@@ -29,8 +29,8 @@ import static net.jbock.either.Either.right;
 
 class NamedOptionFactory {
 
-  private final BasicInfo basicInfo;
-  private final ConverterClass converter;
+  private final ConverterFinder converterFinder;
+  private final ConverterClass converterClass;
   private final ParamLabel paramLabel;
   private final DescriptionKey descriptionKey;
   private final SourceMethod sourceMethod;
@@ -42,8 +42,8 @@ class NamedOptionFactory {
 
   @Inject
   NamedOptionFactory(
-      ConverterClass converter,
-      BasicInfo basicInfo,
+      ConverterClass converterClass,
+      ConverterFinder converterFinder,
       ParamLabel paramLabel,
       DescriptionKey descriptionKey,
       SourceMethod sourceMethod,
@@ -52,8 +52,8 @@ class NamedOptionFactory {
       Description description,
       ParserFlavour flavour,
       ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated) {
-    this.basicInfo = basicInfo;
-    this.converter = converter;
+    this.converterFinder = converterFinder;
+    this.converterClass = converterClass;
     this.paramLabel = paramLabel;
     this.descriptionKey = descriptionKey;
     this.sourceMethod = sourceMethod;
@@ -68,10 +68,10 @@ class NamedOptionFactory {
     return checkOptionNames()
         .map(this::createNamedOption)
         .flatMap(namedOption -> {
-          if (!converter.isPresent() && sourceMethod.returnType().getKind() == BOOLEAN) {
+          if (!converterClass.isPresent() && sourceMethod.returnType().getKind() == BOOLEAN) {
             return right(createFlag(namedOption));
           }
-          return basicInfo.coercion(namedOption);
+          return converterFinder.findConverter(namedOption);
         })
         .mapLeft(sourceMethod::fail);
   }
@@ -156,7 +156,7 @@ class NamedOptionFactory {
 
   private NamedOption createNamedOption(List<String> dashedNames) {
     return new NamedOption(enumName, dashedNames, sourceMethod, descriptionKey,
-        description, converter, paramLabel);
+        description, paramLabel);
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
@@ -164,6 +164,7 @@ class NamedOptionFactory {
         TypeName.get(sourceMethod.returnType()), enumName.snake()).build();
     CodeBlock mapExpr = CodeBlock.builder().build();
     CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
-    return new ConvertedParameter<>(mapExpr, extractExpr, Skew.FLAG, constructorParam, namedOption);
+    return new ConvertedParameter<>(mapExpr, extractExpr, Skew.FLAG,
+        constructorParam, enumName, namedOption);
   }
 }

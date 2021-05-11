@@ -12,18 +12,21 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   private final CodeBlock extractExpr;
   private final Skew skew;
   private final P parameter;
+  private final EnumName enumName;
 
   public ConvertedParameter(
       CodeBlock mapExpr,
       CodeBlock extractExpr,
       Skew skew,
       ParameterSpec constructorParam,
+      EnumName enumName,
       P parameter) {
     this.constructorParam = constructorParam;
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
     this.skew = skew;
     this.parameter = parameter;
+    this.enumName = enumName;
   }
 
   public CodeBlock mapExpr() {
@@ -43,7 +46,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   }
 
   public EnumName enumName() {
-    return parameter.enumName();
+    return enumName;
   }
 
   public boolean isRequired() {
@@ -67,7 +70,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   }
 
   public String enumConstant() {
-    return enumName().enumConstant();
+    return enumName.enumConstant();
   }
 
   public String descriptionSummary() {

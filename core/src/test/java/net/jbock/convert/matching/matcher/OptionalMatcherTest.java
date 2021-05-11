@@ -5,6 +5,8 @@ import net.jbock.compiler.EnumName;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.convert.matching.MatchFactory;
+import net.jbock.convert.matching.MatchFactoryAccess;
 import net.jbock.qualifier.SourceMethod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -77,8 +79,10 @@ class OptionalMatcherTest {
   private OptionalMatcher createMatcher(TypeTool tool, TypeMirror returnType) {
     ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
+    EnumName enumName = EnumName.create("a");
+    MatchFactory matchFactory = MatchFactoryAccess.create(enumName);
     return new OptionalMatcher(
         new SourceMethod(sourceMethod),
-        EnumName.create("a"), tool, tool.types(), tool.elements());
+        enumName, tool, tool.types(), tool.elements(), matchFactory);
   }
 }

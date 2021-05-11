@@ -7,7 +7,7 @@ import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Util;
-import net.jbock.convert.matching.ConverterFinder;
+import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.reference.FunctionType;
@@ -27,7 +27,7 @@ import java.util.Optional;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.either.Either.left;
 
-public class ExplicitConverterFinder extends ConverterFinder {
+public class ExplicitConverterValidator extends ConverterValidator {
 
   private final ImmutableList<Matcher> matchers;
   private final ReferenceTool referenceTool;
@@ -37,7 +37,7 @@ public class ExplicitConverterFinder extends ConverterFinder {
   private final TypeTool tool;
 
   @Inject
-  ExplicitConverterFinder(
+  ExplicitConverterValidator(
       ImmutableList<Matcher> matchers,
       ReferenceTool referenceTool,
       Util util,
@@ -52,7 +52,7 @@ public class ExplicitConverterFinder extends ConverterFinder {
     this.tool = tool;
   }
 
-  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(
+  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> validate(
       P parameter,
       TypeElement converter) {
     Optional<String> maybeFailure = util.commonTypeChecks(converter).map(s -> "converter " + s);
@@ -87,7 +87,7 @@ public class ExplicitConverterFinder extends ConverterFinder {
         .max(Comparator.comparing(Match::skew))
         .map(Match::baseReturnType)
         .orElse(sourceMethod.returnType());
-    return left(ExplicitConverterFinder.noMatchError(bestReturnType));
+    return left(ExplicitConverterValidator.noMatchError(bestReturnType));
   }
 
   private Optional<String> checkMapperAnnotation(TypeElement converter) {
