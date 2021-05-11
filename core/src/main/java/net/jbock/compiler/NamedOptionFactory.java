@@ -1,5 +1,6 @@
 package net.jbock.compiler;
 
+import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
@@ -33,6 +34,7 @@ class NamedOptionFactory extends ParameterScoped {
   private final DescriptionKey descriptionKey;
   private final SourceMethod sourceMethod;
   private final EnumName enumName;
+  private final ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions;
 
   @Inject
   NamedOptionFactory(
@@ -42,7 +44,8 @@ class NamedOptionFactory extends ParameterScoped {
       ParamLabel paramLabel,
       DescriptionKey descriptionKey,
       SourceMethod sourceMethod,
-      EnumName enumName) {
+      EnumName enumName,
+      ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions) {
     super(parameterContext);
     this.basicInfo = basicInfo;
     this.converter = converter;
@@ -50,6 +53,7 @@ class NamedOptionFactory extends ParameterScoped {
     this.descriptionKey = descriptionKey;
     this.sourceMethod = sourceMethod;
     this.enumName = enumName;
+    this.alreadyCreatedOptions = alreadyCreatedOptions;
   }
 
   Either<ValidationFailure, ConvertedParameter<NamedOption>> createNamedOption() {
@@ -72,7 +76,7 @@ class NamedOptionFactory extends ParameterScoped {
     if (Objects.toString(option.names(), "").isEmpty()) {
       return left("empty name");
     }
-    for (ConvertedParameter<NamedOption> c : alreadyCreatedOptions()) {
+    for (ConvertedParameter<NamedOption> c : alreadyCreatedOptions) {
       for (String name : option.names()) {
         for (String previousName : c.parameter().dashedNames()) {
           if (name.equals(previousName)) {

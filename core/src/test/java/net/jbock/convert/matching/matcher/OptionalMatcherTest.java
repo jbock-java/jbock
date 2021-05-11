@@ -1,6 +1,5 @@
 package net.jbock.convert.matching.matcher;
 
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.EnumName;
@@ -86,8 +85,6 @@ class OptionalMatcherTest {
         new SourceElement(null),
         tool,
         null,
-        ImmutableList.of(),
-        ImmutableList.of(),
         new Description(new String[0]),
         ParserFlavour.COMMAND);
     return new OptionalMatcher(

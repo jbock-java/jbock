@@ -23,6 +23,7 @@ class PositionalParamFactory extends ParameterScoped {
   private final DescriptionKey descriptionKey;
   private final SourceMethod sourceMethod;
   private final EnumName enumName;
+  private final ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams;
 
   @Inject
   PositionalParamFactory(
@@ -33,7 +34,8 @@ class PositionalParamFactory extends ParameterScoped {
       ParamLabel paramLabel,
       DescriptionKey descriptionKey,
       SourceMethod sourceMethod,
-      EnumName enumName) {
+      EnumName enumName,
+      ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
     super(parameterContext);
     this.basicInfo = basicInfo;
     this.flavour = flavour;
@@ -42,6 +44,7 @@ class PositionalParamFactory extends ParameterScoped {
     this.descriptionKey = descriptionKey;
     this.sourceMethod = sourceMethod;
     this.enumName = enumName;
+    this.alreadyCreatedParams = alreadyCreatedParams;
   }
 
   Either<ValidationFailure, ConvertedParameter<PositionalParameter>> createPositionalParam(int positionalIndex) {
@@ -66,7 +69,7 @@ class PositionalParamFactory extends ParameterScoped {
     if (!c.isRepeatable()) {
       return Optional.empty();
     }
-    return alreadyCreatedParams().stream()
+    return alreadyCreatedParams.stream()
         .filter(ConvertedParameter::isRepeatable)
         .map(p -> "positional parameter " + p.enumName().enumConstant() + " is also repeatable")
         .findAny();
@@ -92,8 +95,7 @@ class PositionalParamFactory extends ParameterScoped {
     PositionalParameter p = c.parameter();
     int thisOrder = c.isRepeatable() ? 2 : c.isOptional() ? 1 : 0;
     int thisPosition = p.position();
-    ImmutableList<ConvertedParameter<PositionalParameter>> allPositional = alreadyCreatedParams();
-    for (ConvertedParameter<PositionalParameter> other : allPositional) {
+    for (ConvertedParameter<PositionalParameter> other : alreadyCreatedParams) {
       int otherOrder = other.isRepeatable() ? 2 : other.isOptional() ? 1 : 0;
       if (thisPosition == other.parameter().position()) {
         return Optional.of("duplicate position");

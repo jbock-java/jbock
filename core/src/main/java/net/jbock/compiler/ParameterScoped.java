@@ -31,14 +31,6 @@ public class ParameterScoped {
     return parameterContext.optionType;
   }
 
-  final ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions() {
-    return parameterContext.alreadyCreatedOptions;
-  }
-
-  final ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams() {
-    return parameterContext.alreadyCreatedParams;
-  }
-
   final List<String> description() {
     return Arrays.asList(parameterContext.description.getValue());
   }
