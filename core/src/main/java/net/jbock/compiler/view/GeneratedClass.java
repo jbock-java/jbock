@@ -5,14 +5,17 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.compiler.ParserFlavour;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.OptionType;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
@@ -25,6 +28,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -84,13 +88,15 @@ public final class GeneratedClass {
   GeneratedClass(
       Context context,
       Description description,
+      SourceElement sourceElement,
       Impl impl,
       GeneratedTypes generatedTypes,
       OptionParser optionParser,
       OptionEnum optionEnum,
       StatefulParser parserState,
       ParseResult parseResult,
-      OptionType optionType) {
+      OptionType optionType,
+      ParserFlavour parserFlavour) {
     this.context = context;
     this.description = description;
     this.impl = impl;
@@ -99,9 +105,9 @@ public final class GeneratedClass {
     this.optionEnum = optionEnum;
     this.parserState = parserState;
     this.parseResult = parseResult;
-    this.exitHook = context.exitHookField();
+    this.exitHook = exitHookField();
     this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
-        .initializer("$S", context.programName()).build();
+        .initializer("$S", parserFlavour.programName(sourceElement.element())).build();
     this.optionType = optionType;
   }
 
@@ -599,6 +605,23 @@ public final class GeneratedClass {
         .addStatement("return new $T($S + $N)", RuntimeException.class, "Missing required: ", name)
         .addParameter(name)
         .addModifiers(PRIVATE, STATIC)
+        .build();
+  }
+
+  private FieldSpec exitHookField() {
+    ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(Consumer.class),
+        generatedTypes.parseResultType());
+    ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
+    CodeBlock.Builder code = CodeBlock.builder();
+    code.add(generatedTypes.helpRequestedType()
+        .map(helpRequestedType -> CodeBlock.builder()
+            .add("$N ->\n", result).indent()
+            .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, helpRequestedType)
+            .unindent().build())
+        .orElseGet(() -> CodeBlock.of("$N -> $T.exit(1)", result, System.class)));
+    return FieldSpec.builder(consumer, "exitHook")
+        .addModifiers(PRIVATE)
+        .initializer(code.build())
         .build();
   }
 }

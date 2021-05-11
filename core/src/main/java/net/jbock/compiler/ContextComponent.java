@@ -8,8 +8,8 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.compiler.view.GeneratedClass;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.OptionType;
+import net.jbock.qualifier.SourceElement;
 
-import javax.lang.model.element.TypeElement;
 import java.util.List;
 
 @Component(modules = ContextModule.class)
@@ -21,7 +21,7 @@ interface ContextComponent {
   interface Builder {
 
     @BindsInstance
-    Builder sourceElement(TypeElement sourceElement);
+    Builder sourceElement(SourceElement sourceElement);
 
     @BindsInstance
     Builder generatedClass(ClassName generatedClass);

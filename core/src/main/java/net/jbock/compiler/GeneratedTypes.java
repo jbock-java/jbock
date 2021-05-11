@@ -2,8 +2,8 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import net.jbock.qualifier.SourceElement;
 
-import javax.lang.model.element.TypeElement;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -15,16 +15,16 @@ public class GeneratedTypes {
   private final ParserFlavour flavour;
 
   // the annotated class
-  private final TypeElement sourceElement;
+  private final SourceElement sourceElement;
 
-  public GeneratedTypes(ClassName generatedClass, ParserFlavour flavour, TypeElement sourceElement) {
+  public GeneratedTypes(ClassName generatedClass, ParserFlavour flavour, SourceElement sourceElement) {
     this.generatedClass = generatedClass;
     this.flavour = flavour;
     this.sourceElement = sourceElement;
   }
 
   public TypeName sourceType() {
-    return TypeName.get(sourceElement.asType());
+    return TypeName.get(sourceElement.element().asType());
   }
 
   public TypeName parseSuccessType() {
@@ -36,7 +36,7 @@ public class GeneratedTypes {
     if (!flavour.isSuperCommand()) {
       return Optional.empty();
     }
-    return Optional.of(generatedClass.nestedClass(sourceElement.getSimpleName() + "WithRest"));
+    return Optional.of(generatedClass.nestedClass(sourceElement.element().getSimpleName() + "WithRest"));
   }
 
   public ClassName optionParserType() {
@@ -64,7 +64,7 @@ public class GeneratedTypes {
   }
 
   public ClassName implType() {
-    return generatedClass.nestedClass(sourceElement.getSimpleName() + "Impl");
+    return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
   }
 
   public ClassName parseResultType() {
@@ -80,7 +80,7 @@ public class GeneratedTypes {
   }
 
   public Optional<ClassName> helpRequestedType() {
-    boolean helpParameterEnabled = flavour.helpEnabled(sourceElement);
+    boolean helpParameterEnabled = flavour.helpEnabled(sourceElement.element());
     return helpParameterEnabled ? Optional.of(generatedClass.nestedClass("HelpRequested")) : Optional.empty();
   }
 }

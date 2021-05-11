@@ -13,11 +13,13 @@ import net.jbock.Parameters;
 import net.jbock.SuperCommand;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
+import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Util;
 import net.jbock.either.Either;
 import net.jbock.qualifier.OptionType;
+import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.annotation.processing.Filer;
@@ -117,7 +119,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             ContextComponent context = DaggerContextComponent.builder()
                 .flavour(flavour)
                 .optionType(optionType)
-                .sourceElement(sourceElement)
+                .sourceElement(new SourceElement(sourceElement))
                 .generatedClass(generatedClass)
                 .options(parameters.namedOptions)
                 .params(parameters.positionalParams)
@@ -163,13 +165,14 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       List<ValidationFailure> failures = new ArrayList<>();
       List<SourceMethod> positionalParameters = methods.params();
       for (SourceMethod sourceMethod : positionalParameters) {
-        ParameterComponent.Builder builder = DaggerParameterComponent.builder()
+        DaggerParameterComponent.builder()
             .module(module)
             .sourceMethod(sourceMethod)
             .alreadyCreatedParams(positionalsBuilder.build())
-            .alreadyCreatedOptions(ImmutableList.of());
-        builder.build().positionalParameterFactory().createPositionalParam(
-            sourceMethod.index().orElse(positionalParameters.size() - 1))
+            .alreadyCreatedOptions(ImmutableList.of())
+            .build()
+            .positionalParameterFactory()
+            .createPositionalParam(sourceMethod.index().orElse(positionalParameters.size() - 1))
             .accept(failures::add, positionalsBuilder::add);
       }
       if (flavour.isSuperCommand() && positionalParameters.isEmpty()) {
@@ -180,12 +183,14 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       failures.addAll(validatePositions(positionalParams));
       ImmutableList.Builder<ConvertedParameter<NamedOption>> optionsBuilder = ImmutableList.builder();
       for (SourceMethod sourceMethod : methods.options()) {
-        ParameterComponent.Builder builder = DaggerParameterComponent.builder()
+        DaggerParameterComponent.builder()
             .module(module)
             .sourceMethod(sourceMethod)
             .alreadyCreatedParams(positionalParams)
-            .alreadyCreatedOptions(optionsBuilder.build());
-        builder.build().namedOptionFactory().createNamedOption()
+            .alreadyCreatedOptions(optionsBuilder.build())
+            .build()
+            .namedOptionFactory()
+            .createNamedOption()
             .accept(failures::add, optionsBuilder::add);
       }
       ImmutableList<ConvertedParameter<NamedOption>> namedOptions = optionsBuilder.build();
@@ -205,13 +210,14 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .build();
     Set<String> keys = new HashSet<>();
     for (ConvertedParameter<? extends AbstractParameter> c : abstractParameters) {
-      String key = c.parameter().descriptionKey().orElse("");
+      AbstractParameter p = c.parameter();
+      String key = p.descriptionKey().orElse("");
       if (key.isEmpty()) {
         continue;
       }
       if (!keys.add(key)) {
         String message = "duplicate description key: " + key;
-        failures.add(new ValidationFailure(message, c.parameter().sourceMethod()));
+        failures.add(new ValidationFailure(message, p.sourceMethod()));
       }
     }
     return failures;
@@ -223,10 +229,11 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .collect(Collectors.toList());
     List<ValidationFailure> result = new ArrayList<>();
     for (int i = 0; i < sorted.size(); i++) {
-      ConvertedParameter<PositionalParameter> p = sorted.get(i);
-      if (p.parameter().position() != i) {
-        result.add(new ValidationFailure("Position " + p.parameter().position() + " is not available." +
-            " Suggested position: " + i, p.parameter().sourceMethod()));
+      ConvertedParameter<PositionalParameter> c = sorted.get(i);
+      PositionalParameter p = c.parameter();
+      if (p.position() != i) {
+        String message = "Position " + p.position() + " is not available. Suggested position: " + i;
+        result.add(new ValidationFailure(message, p.sourceMethod()));
       }
     }
     return result;
@@ -240,28 +247,29 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .map(msg -> new ValidationFailure(msg, sourceMethod))
             .ifPresent(failures::add);
       }
-      validateDuplicateParametersAnnotation(sourceMethods)
-          .ifPresent(failures::add);
       if (sourceMethods.isEmpty()) { // javapoet #739
         failures.add(new ValidationFailure("expecting at least one abstract method", sourceElement));
       }
       if (!failures.isEmpty()) {
         return left(failures);
       }
-      return right(Methods.create(sourceMethods.stream()
+      List<SourceMethod> methods = sourceMethods.stream()
           .map(SourceMethod::create)
-          .collect(Collectors.toList())));
+          .collect(Collectors.toList());
+      return Either.ofLeft(validateDuplicateParametersAnnotation(methods))
+          .orRight(Methods.create(methods))
+          .mapLeft(Collections::singletonList);
     });
   }
 
-  private Optional<ValidationFailure> validateDuplicateParametersAnnotation(List<ExecutableElement> sourceMethods) {
-    List<ExecutableElement> parametersMethods = sourceMethods.stream()
-        .filter(m -> m.getAnnotation(Parameters.class) != null)
+  private Optional<ValidationFailure> validateDuplicateParametersAnnotation(List<SourceMethod> sourceMethods) {
+    List<SourceMethod> parametersMethods = sourceMethods.stream()
+        .filter(m -> m.style() == ParameterStyle.PARAMETERS)
         .collect(Collectors.toList());
     if (parametersMethods.size() >= 2) {
-      return Optional.of(
-          new ValidationFailure("duplicate @" + Parameters.class.getSimpleName()
-              + " annotation", sourceMethods.get(1)));
+      String message = "duplicate @" + Parameters.class.getSimpleName() + " annotation";
+      ExecutableElement method = sourceMethods.get(1).method();
+      return Optional.of(new ValidationFailure(message, method));
     }
     return Optional.empty();
   }

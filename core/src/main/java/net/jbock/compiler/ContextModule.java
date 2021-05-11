@@ -9,8 +9,8 @@ import dagger.Reusable;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
+import net.jbock.qualifier.SourceElement;
 
-import javax.lang.model.element.TypeElement;
 import java.util.List;
 
 @Module
@@ -18,8 +18,8 @@ public interface ContextModule {
 
   @Provides
   @Reusable
-  static TypeName sourceType(TypeElement sourceElement) {
-    return TypeName.get(sourceElement.asType());
+  static TypeName sourceType(SourceElement sourceElement) {
+    return TypeName.get(sourceElement.element().asType());
   }
 
   @Provides
@@ -30,7 +30,7 @@ public interface ContextModule {
 
   @Provides
   @Reusable
-  static GeneratedTypes generatedTypes(ClassName generatedClass, ParserFlavour flavour, TypeElement sourceElement) {
+  static GeneratedTypes generatedTypes(ClassName generatedClass, ParserFlavour flavour, SourceElement sourceElement) {
     return new GeneratedTypes(generatedClass, flavour, sourceElement);
   }
 }

@@ -39,14 +39,14 @@ final class Impl {
       spec.addField(FieldSpec.builder(c.parameter().returnType(), c.enumName().camel()).build());
     }
     return spec.addModifiers(PRIVATE, STATIC)
-        .addMethod(implConstructor(context))
+        .addMethod(implConstructor())
         .addMethods(context.parameters().stream()
-            .map(Impl::parameterMethodOverride)
+            .map(this::parameterMethodOverride)
             .collect(Collectors.toList()))
         .build();
   }
 
-  private static MethodSpec parameterMethodOverride(ConvertedParameter<? extends AbstractParameter> c) {
+  private MethodSpec parameterMethodOverride(ConvertedParameter<? extends AbstractParameter> c) {
     AbstractParameter param = c.parameter();
     return MethodSpec.methodBuilder(param.methodName())
         .returns(param.returnType())
@@ -55,7 +55,7 @@ final class Impl {
         .build();
   }
 
-  private static MethodSpec implConstructor(Context context) {
+  private MethodSpec implConstructor() {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
     for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
       TypeName returnType = c.parameter().returnType();
