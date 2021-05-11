@@ -1,12 +1,13 @@
 package net.jbock.compiler;
 
-import com.google.common.collect.ImmutableList;
 import dagger.BindsInstance;
 import dagger.Component;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.SourceMethod;
+
+import java.util.List;
 
 @Component(modules = ParameterModule.class)
 interface ParameterComponent {
@@ -22,10 +23,10 @@ interface ParameterComponent {
     Builder sourceMethod(SourceMethod sourceMethod);
 
     @BindsInstance
-    Builder alreadyCreatedParams(ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreated);
+    Builder alreadyCreatedParams(List<ConvertedParameter<PositionalParameter>> alreadyCreated);
 
     @BindsInstance
-    Builder alreadyCreatedOptions(ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated);
+    Builder alreadyCreatedOptions(List<ConvertedParameter<NamedOption>> alreadyCreated);
 
     Builder module(ParameterModule module);
 

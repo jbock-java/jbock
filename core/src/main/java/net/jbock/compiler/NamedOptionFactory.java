@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
@@ -38,7 +37,7 @@ class NamedOptionFactory {
   private final EnumName enumName;
   private final Description description;
   private final ParserFlavour flavour;
-  private final ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated;
+  private final List<ConvertedParameter<NamedOption>> alreadyCreated;
 
   @Inject
   NamedOptionFactory(
@@ -51,7 +50,7 @@ class NamedOptionFactory {
       EnumName enumName,
       Description description,
       ParserFlavour flavour,
-      ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated) {
+      List<ConvertedParameter<NamedOption>> alreadyCreated) {
     this.converterFinder = converterFinder;
     this.converterClass = converterClass;
     this.paramLabel = paramLabel;

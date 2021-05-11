@@ -36,10 +36,10 @@ public class ReferenceTool {
       return left(converteNotFunction());
     }
     if (implementsSupplier.isPresent()) {
-      return ofRight(implementsSupplier).orElse("")
+      return ofRight(implementsSupplier).orLeft("")
           .flatMap(this::handleSupplier);
     }
-    return ofRight(implementsFunction).orElse("")
+    return ofRight(implementsFunction).orLeft("")
         .flatMap(declaredType -> handleFunction(declaredType, false));
   }
 

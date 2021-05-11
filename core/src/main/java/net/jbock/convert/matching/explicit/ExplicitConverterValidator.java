@@ -1,6 +1,5 @@
 package net.jbock.convert.matching.explicit;
 
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;
 import net.jbock.compiler.TypeTool;
@@ -30,7 +29,7 @@ import static net.jbock.either.Either.left;
 
 public class ExplicitConverterValidator extends ConverterValidator {
 
-  private final ImmutableList<Matcher> matchers;
+  private final List<Matcher> matchers;
   private final ReferenceTool referenceTool;
   private final Util util;
   private final SourceMethod sourceMethod;
@@ -39,7 +38,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
 
   @Inject
   ExplicitConverterValidator(
-      ImmutableList<Matcher> matchers,
+      List<Matcher> matchers,
       ReferenceTool referenceTool,
       Util util,
       SourceMethod sourceMethod,
@@ -59,7 +58,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
       P parameter,
       TypeElement converter) {
     Optional<String> maybeFailure = util.commonTypeChecks(converter).map(s -> "converter " + s);
-    return Either.ofLeft(maybeFailure).orElse(null)
+    return Either.ofLeft(maybeFailure).orRight(null)
         .filter(nothing -> checkNotAbstract(converter))
         .filter(nothing -> checkNoTypevars(converter))
         .filter(nothing -> checkMapperAnnotation(converter))
@@ -78,7 +77,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
       match = match.filter(m -> isValidMatch(m, functionType));
       if (match.isPresent()) {
         Match m = match.get();
-        return Either.ofLeft(validateMatch(m)).orElse(null)
+        return Either.ofLeft(validateMatch(m)).orRight(null)
             .map(nothing -> CodeBlock.builder()
                 .add(".map(")
                 .add(getMapExpr(functionType, converter))

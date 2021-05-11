@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import com.google.common.collect.ImmutableList;
 import net.jbock.SuperCommand;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
@@ -11,6 +10,7 @@ import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
+import java.util.List;
 import java.util.Optional;
 
 class PositionalParamFactory {
@@ -22,7 +22,7 @@ class PositionalParamFactory {
   private final SourceMethod sourceMethod;
   private final EnumName enumName;
   private final Description description;
-  private final ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreated;
+  private final List<ConvertedParameter<PositionalParameter>> alreadyCreated;
 
   @Inject
   PositionalParamFactory(
@@ -33,7 +33,7 @@ class PositionalParamFactory {
       SourceMethod sourceMethod,
       EnumName enumName,
       Description description,
-      ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreated) {
+      List<ConvertedParameter<PositionalParameter>> alreadyCreated) {
     this.converterFinder = converterFinder;
     this.flavour = flavour;
     this.paramLabel = paramLabel;

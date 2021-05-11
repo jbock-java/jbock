@@ -105,7 +105,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     ClassName generatedClass = generatedClass(sourceElement);
     try {
       OptionType optionType = new OptionType(generatedClass.nestedClass("Option"));
-      Either.ofLeft(validateSourceElement(sourceElement)).orElse(null)
+      Either.ofLeft(validateSourceElement(sourceElement)).orRight(null)
           .mapLeft(msg -> new ValidationFailure(msg, sourceElement))
           .mapLeft(Collections::singletonList)
           .flatMap(nothing -> getParams(sourceElement, flavour, optionType))
@@ -319,7 +319,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
     Optional<String> maybeFailure = util.commonTypeChecks(sourceElement).map(s -> "command " + s);
     // the following *should* be done with Optional#or but we're currently limited to 1.8 API
-    return Either.ofLeft(maybeFailure).orElse(Optional.<String>empty())
+    return Either.ofLeft(maybeFailure).orRight(Optional.<String>empty())
         .filter(nothing -> util.assertNoDuplicateAnnotations(sourceElement, Command.class, SuperCommand.class))
         .filter(nothing -> {
           List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();

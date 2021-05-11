@@ -1,6 +1,5 @@
 package net.jbock.convert.matching.auto;
 
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.TypeTool;
@@ -19,6 +18,7 @@ import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -30,7 +30,7 @@ public class AutoConverterFinder extends ConverterValidator {
   private static final String ENUM = Enum.class.getCanonicalName();
 
   private final AutoConverter autoConverter;
-  private final ImmutableList<Matcher> matchers;
+  private final List<Matcher> matchers;
   private final SourceMethod sourceMethod;
   private final Types types;
   private final TypeTool tool;
@@ -38,7 +38,7 @@ public class AutoConverterFinder extends ConverterValidator {
   @Inject
   AutoConverterFinder(
       AutoConverter autoConverter,
-      ImmutableList<Matcher> matchers,
+      List<Matcher> matchers,
       SourceMethod sourceMethod,
       Types types,
       TypeTool tool,
@@ -56,7 +56,7 @@ public class AutoConverterFinder extends ConverterValidator {
       Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
         Match m = match.get();
-        return Either.ofLeft(validateMatch(m)).orElse(null)
+        return Either.ofLeft(validateMatch(m)).orRight(null)
             .flatMap(nothing -> findConverter(m, parameter));
       }
     }

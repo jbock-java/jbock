@@ -10,7 +10,7 @@ public final class RightOptional<R> {
     this.right = right;
   }
 
-  public <L> Either<L, R> orElse(L left) {
+  public <L> Either<L, R> orLeft(L left) {
     return right.<Either<L, R>>map(Right::create)
         .orElseGet(() -> Left.create(left));
   }

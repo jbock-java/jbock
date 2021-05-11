@@ -22,6 +22,7 @@ import net.jbock.qualifier.SourceMethod;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import java.util.List;
 
 @Module
 class ParameterModule {
@@ -51,13 +52,13 @@ class ParameterModule {
   @Provides
   EnumName enumName(
       SourceMethod sourceMethod,
-      ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated,
-      ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
+      List<ConvertedParameter<NamedOption>> alreadyCreatedOptions,
+      List<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
     String methodName = sourceMethod.method().getSimpleName().toString();
     EnumName originalName = EnumName.create(methodName);
     EnumName result = originalName;
     int counter = 2;
-    while (!isFresh(result, alreadyCreated, alreadyCreatedParams)) {
+    while (!isFresh(result, alreadyCreatedOptions, alreadyCreatedParams)) {
       result = originalName.append(counter++);
     }
     return result;
@@ -65,15 +66,15 @@ class ParameterModule {
 
   private boolean isFresh(
       EnumName result,
-      ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated,
-      ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
-    for (ConvertedParameter<NamedOption> param : alreadyCreated) {
-      if (param.enumName().enumConstant().equals(result.enumConstant())) {
+      List<ConvertedParameter<NamedOption>> alreadyCreatedOptions,
+      List<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
+    for (ConvertedParameter<NamedOption> c : alreadyCreatedOptions) {
+      if (c.enumName().enumConstant().equals(result.enumConstant())) {
         return false;
       }
     }
-    for (ConvertedParameter<PositionalParameter> param : alreadyCreatedParams) {
-      if (param.enumName().enumConstant().equals(result.enumConstant())) {
+    for (ConvertedParameter<PositionalParameter> c : alreadyCreatedParams) {
+      if (c.enumName().enumConstant().equals(result.enumConstant())) {
         return false;
       }
     }
@@ -82,7 +83,7 @@ class ParameterModule {
 
   @Reusable
   @Provides
-  ImmutableList<Matcher> matchers(
+  List<Matcher> matchers(
       OptionalMatcher optionalMatcher,
       ListMatcher listMatcher,
       ExactMatcher exactMatcher) {
