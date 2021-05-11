@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
 import java.util.Comparator;
@@ -29,31 +30,33 @@ class Methods {
         return Integer.compare(param1.index(), param2.index());
       };
 
-  private final List<ExecutableElement> params;
-  private final List<ExecutableElement> options;
+  private final List<SourceMethod> params;
+  private final List<SourceMethod> options;
 
-  private Methods(List<ExecutableElement> params, List<ExecutableElement> options) {
+  private Methods(List<SourceMethod> params, List<SourceMethod> options) {
     this.params = params;
     this.options = options;
   }
 
   static Methods create(List<ExecutableElement> methods) {
-    List<ExecutableElement> params = methods.stream()
+    List<SourceMethod> params = methods.stream()
         .filter(m -> m.getAnnotation(Parameter.class) != null ||
             m.getAnnotation(Parameters.class) != null)
         .sorted(POSITION_COMPARATOR)
+        .map(SourceMethod::create)
         .collect(Collectors.toList());
-    List<ExecutableElement> options = methods.stream()
+    List<SourceMethod> options = methods.stream()
         .filter(m -> m.getAnnotation(Option.class) != null)
+        .map(SourceMethod::create)
         .collect(Collectors.toList());
     return new Methods(params, options);
   }
 
-  List<ExecutableElement> params() {
+  List<SourceMethod> params() {
     return params;
   }
 
-  List<ExecutableElement> options() {
+  List<SourceMethod> options() {
     return options;
   }
 }

@@ -117,7 +117,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("duplicate bundle key: myKey");
+        .withErrorContaining("duplicate description key: myKey");
   }
 
   @Test
@@ -228,7 +228,7 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("duplicate @Parameters method");
+        .withErrorContaining("duplicate @Parameters annotation");
   }
 
   @Test

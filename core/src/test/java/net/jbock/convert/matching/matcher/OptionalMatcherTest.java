@@ -82,7 +82,7 @@ class OptionalMatcherTest {
     EnumName enumName = EnumName.create("a");
     MatchFactory matchFactory = MatchFactoryAccess.create(enumName);
     return new OptionalMatcher(
-        new SourceMethod(sourceMethod),
+        SourceMethod.create(sourceMethod),
         enumName, tool, tool.types(), tool.elements(), matchFactory);
   }
 }

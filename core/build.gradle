@@ -51,8 +51,8 @@ shadowJar {
 dependencies {
     def annotations = 'com.github.h908714124:jbock-annotations:4.2'
     implementation('com.squareup:javapoet:1.13.0')
-    implementation('com.google.auto:auto-common:0.11')
-    implementation('com.google.guava:guava:30.1-jre')
+    implementation('com.google.auto:auto-common:1.0')
+    implementation('com.google.guava:guava:30.1.1-jre')
     shadow(annotations)
     implementation('com.google.dagger:dagger:2.35.1')
     annotationProcessor('com.google.dagger:dagger-compiler:2.35.1')

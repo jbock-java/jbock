@@ -9,8 +9,12 @@ public class SourceMethod {
 
   private final ExecutableElement sourceMethod;
 
-  public SourceMethod(ExecutableElement sourceMethod) {
+  private SourceMethod(ExecutableElement sourceMethod) {
     this.sourceMethod = sourceMethod;
+  }
+
+  public static SourceMethod create(ExecutableElement sourceMethod) {
+    return new SourceMethod(sourceMethod);
   }
 
   public ExecutableElement method() {
