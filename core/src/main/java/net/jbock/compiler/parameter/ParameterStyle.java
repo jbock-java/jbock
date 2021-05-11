@@ -12,7 +12,7 @@ public enum ParameterStyle {
 
   OPTION(Option.class) {
     @Override
-    public String getParameterDescriptionKey(ExecutableElement method) {
+    public String getDescriptionKey(ExecutableElement method) {
       return get(method).map(Option::descriptionKey).orElse("");
     }
 
@@ -26,7 +26,7 @@ public enum ParameterStyle {
     }
   }, PARAMETER(Parameter.class) {
     @Override
-    public String getParameterDescriptionKey(ExecutableElement method) {
+    public String getDescriptionKey(ExecutableElement method) {
       return get(method).map(Parameter::descriptionKey).orElse("");
     }
 
@@ -40,7 +40,7 @@ public enum ParameterStyle {
     }
   }, PARAMETERS(Parameters.class) {
     @Override
-    public String getParameterDescriptionKey(ExecutableElement method) {
+    public String getDescriptionKey(ExecutableElement method) {
       return get(method).map(Parameters::descriptionKey).orElse("");
     }
 
@@ -69,7 +69,7 @@ public enum ParameterStyle {
     throw new IllegalArgumentException("no style: " + sourceMethod.getSimpleName());
   }
 
-  public abstract String getParameterDescriptionKey(ExecutableElement method);
+  public abstract String getDescriptionKey(ExecutableElement method);
 
   public abstract String getParamLabel(ExecutableElement method);
 }

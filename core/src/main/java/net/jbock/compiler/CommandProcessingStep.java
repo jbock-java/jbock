@@ -158,45 +158,58 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     ParameterModule module = new ParameterModule(optionType, tool,
         flavour, sourceElement, descriptionBuilder);
     return createMethods(sourceElement).flatMap(methods -> {
-      List<ConvertedParameter<PositionalParameter>> positionalParams = new ArrayList<>();
+      ImmutableList.Builder<ConvertedParameter<PositionalParameter>> positionalParamsBuilder =
+          ImmutableList.builder();
       List<ValidationFailure> failures = new ArrayList<>();
       List<ExecutableElement> positionalParameters = methods.params();
       for (ExecutableElement sourceMethod : positionalParameters) {
         ParameterComponent.Builder builder = DaggerParameterComponent.builder()
             .module(module)
             .sourceMethod(new SourceMethod(sourceMethod))
-            .alreadyCreatedParams(ImmutableList.copyOf(positionalParams))
+            .alreadyCreatedParams(positionalParamsBuilder.build())
             .alreadyCreatedOptions(ImmutableList.of());
         builder.build().positionalParameterFactory().createPositionalParam(
             getIndex(sourceMethod).orElse(positionalParameters.size() - 1))
-            .accept(failures::add, positionalParams::add);
+            .accept(failures::add, positionalParamsBuilder::add);
       }
       if (flavour.isSuperCommand() && positionalParameters.isEmpty()) {
         failures.add(new ValidationFailure("in a @" + SuperCommand.class.getSimpleName() +
             ", at least one @" + Parameter.class.getSimpleName() + " must be defined", sourceElement));
       }
+      ImmutableList<ConvertedParameter<PositionalParameter>> positionalParams = positionalParamsBuilder.build();
       failures.addAll(validatePositions(positionalParams));
-      List<ConvertedParameter<NamedOption>> namedOptions = new ArrayList<>();
+      ImmutableList.Builder<ConvertedParameter<NamedOption>> namedOptionsBuilder = ImmutableList.builder();
       for (ExecutableElement sourceMethod : methods.options()) {
         ParameterComponent.Builder builder = DaggerParameterComponent.builder()
             .module(module)
             .sourceMethod(new SourceMethod(sourceMethod))
-            .alreadyCreatedParams(ImmutableList.of())
-            .alreadyCreatedOptions(ImmutableList.copyOf(namedOptions));
+            .alreadyCreatedParams(positionalParams)
+            .alreadyCreatedOptions(namedOptionsBuilder.build());
         builder.build().namedOptionFactory().createNamedOption()
-            .accept(failures::add, namedOptions::add);
+            .accept(failures::add, namedOptionsBuilder::add);
       }
-      List<ConvertedParameter<? extends AbstractParameter>> abstractParameters = new ArrayList<>();
-      abstractParameters.addAll(positionalParams);
-      abstractParameters.addAll(namedOptions);
-      for (int i = 0; i < abstractParameters.size(); i++) {
-        ConvertedParameter<? extends AbstractParameter> c = abstractParameters.get(i);
-        checkDescriptionKey(c, abstractParameters.subList(0, i))
-            .map(s -> new ValidationFailure(s, c.parameter().sourceMethod()))
-            .ifPresent(failures::add);
-      }
+      ImmutableList<ConvertedParameter<NamedOption>> namedOptions = namedOptionsBuilder.build();
+      failures.addAll(checkDescriptionKeys(namedOptions, positionalParams));
       return failures.isEmpty() ? right(new Params(positionalParams, namedOptions)) : left(failures);
     });
+  }
+
+  private List<ValidationFailure> checkDescriptionKeys(
+      ImmutableList<ConvertedParameter<NamedOption>> namedOptions,
+      ImmutableList<ConvertedParameter<PositionalParameter>> positionalParams) {
+    List<ValidationFailure> failures = new ArrayList<>();
+    List<ConvertedParameter<? extends AbstractParameter>> abstractParameters =
+        ImmutableList.<ConvertedParameter<? extends AbstractParameter>>builderWithExpectedSize(namedOptions.size() + positionalParams.size())
+            .addAll(positionalParams)
+            .addAll(namedOptions)
+            .build();
+    for (int i = 0; i < abstractParameters.size(); i++) {
+      ConvertedParameter<? extends AbstractParameter> c = abstractParameters.get(i);
+      checkDescriptionKey(c, abstractParameters.subList(0, i))
+          .map(s -> new ValidationFailure(s, c.parameter().sourceMethod()))
+          .ifPresent(failures::add);
+    }
+    return failures;
   }
 
   private OptionalInt getIndex(ExecutableElement sourceMethod) {

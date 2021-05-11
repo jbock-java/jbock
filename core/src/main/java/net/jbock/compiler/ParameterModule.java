@@ -6,6 +6,7 @@ import dagger.Provides;
 import dagger.Reusable;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.ParameterStyle;
+import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.matching.matcher.ExactMatcher;
 import net.jbock.convert.matching.matcher.ListMatcher;
@@ -50,15 +51,33 @@ class ParameterModule {
   @Provides
   EnumName enumName(
       SourceMethod sourceMethod,
-      ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated) {
+      ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated,
+      ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
     String methodName = sourceMethod.method().getSimpleName().toString();
-    EnumName result = EnumName.create(methodName);
-    for (ConvertedParameter<NamedOption> param : alreadyCreated) {
-      if (param.enumName().enumConstant().equals(result.enumConstant())) {
-        return result.append(Integer.toString(alreadyCreated.size()));
-      }
+    EnumName originalName = EnumName.create(methodName);
+    EnumName result = originalName;
+    int counter = 2;
+    while (!isFresh(result, alreadyCreated, alreadyCreatedParams)) {
+      result = originalName.append(counter++);
     }
     return result;
+  }
+
+  private boolean isFresh(
+      EnumName result,
+      ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated,
+      ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
+    for (ConvertedParameter<NamedOption> param : alreadyCreated) {
+      if (param.enumName().enumConstant().equals(result.enumConstant())) {
+        return false;
+      }
+    }
+    for (ConvertedParameter<PositionalParameter> param : alreadyCreatedParams) {
+      if (param.enumName().enumConstant().equals(result.enumConstant())) {
+        return false;
+      }
+    }
+    return true;
   }
 
   @Reusable
@@ -104,7 +123,7 @@ class ParameterModule {
   @Reusable
   @Provides
   DescriptionKey descriptionKey(SourceMethod sourceMethod, ParameterStyle parameterStyle) {
-    return new DescriptionKey(parameterStyle.getParameterDescriptionKey(sourceMethod.method()));
+    return new DescriptionKey(parameterStyle.getDescriptionKey(sourceMethod.method()));
   }
 
   @Reusable

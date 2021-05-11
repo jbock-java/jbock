@@ -43,10 +43,10 @@ public class EnumName {
     return Character.toString(Character.toLowerCase(c));
   }
 
-  EnumName append(String s) {
+  EnumName append(int i) {
     List<String> newParts = new ArrayList<>(this.parts.size() + 1);
     newParts.addAll(this.parts);
-    newParts.add(s);
+    newParts.add(Integer.toString(i));
     return new EnumName(newParts);
   }
 
