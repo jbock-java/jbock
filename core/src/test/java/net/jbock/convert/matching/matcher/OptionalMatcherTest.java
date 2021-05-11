@@ -3,8 +3,6 @@ package net.jbock.convert.matching.matcher;
 import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.EvaluatingProcessor;
-import net.jbock.compiler.ParameterContext;
-import net.jbock.compiler.ParserFlavour;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.qualifier.SourceMethod;
@@ -79,12 +77,8 @@ class OptionalMatcherTest {
   private OptionalMatcher createMatcher(TypeTool tool, TypeMirror returnType) {
     ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
-    ParameterContext context = new ParameterContext(
-        tool,
-        ParserFlavour.COMMAND);
     return new OptionalMatcher(
-        context,
         new SourceMethod(sourceMethod),
-        EnumName.create("a"));
+        EnumName.create("a"), tool, tool.types(), tool.elements());
   }
 }

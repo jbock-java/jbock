@@ -27,7 +27,7 @@ import static javax.lang.model.type.TypeKind.BOOLEAN;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
-class NamedOptionFactory extends ParameterScoped {
+class NamedOptionFactory {
 
   private final BasicInfo basicInfo;
   private final ConverterClass converter;
@@ -37,11 +37,11 @@ class NamedOptionFactory extends ParameterScoped {
   private final SourceElement sourceElement;
   private final EnumName enumName;
   private final Description description;
-  private final ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions;
+  private final ParserFlavour flavour;
+  private final ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated;
 
   @Inject
   NamedOptionFactory(
-      ParameterContext parameterContext,
       ConverterClass converter,
       BasicInfo basicInfo,
       ParamLabel paramLabel,
@@ -50,8 +50,8 @@ class NamedOptionFactory extends ParameterScoped {
       SourceElement sourceElement,
       EnumName enumName,
       Description description,
-      ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions) {
-    super(parameterContext);
+      ParserFlavour flavour,
+      ImmutableList<ConvertedParameter<NamedOption>> alreadyCreated) {
     this.basicInfo = basicInfo;
     this.converter = converter;
     this.paramLabel = paramLabel;
@@ -60,7 +60,8 @@ class NamedOptionFactory extends ParameterScoped {
     this.sourceElement = sourceElement;
     this.enumName = enumName;
     this.description = description;
-    this.alreadyCreatedOptions = alreadyCreatedOptions;
+    this.flavour = flavour;
+    this.alreadyCreated = alreadyCreated;
   }
 
   Either<ValidationFailure, ConvertedParameter<NamedOption>> createNamedOption() {
@@ -83,7 +84,7 @@ class NamedOptionFactory extends ParameterScoped {
     if (Objects.toString(option.names(), "").isEmpty()) {
       return left("empty name");
     }
-    for (ConvertedParameter<NamedOption> c : alreadyCreatedOptions) {
+    for (ConvertedParameter<NamedOption> c : alreadyCreated) {
       for (String name : option.names()) {
         for (String previousName : c.parameter().dashedNames()) {
           if (name.equals(previousName)) {
@@ -136,7 +137,7 @@ class NamedOptionFactory extends ParameterScoped {
     if (name.charAt(1) != '-' && name.length() >= 3) {
       return left("single-dash names must be single-character names: " + name);
     }
-    if (flavour().helpEnabled(sourceElement.element())) {
+    if (flavour.helpEnabled(sourceElement.element())) {
       if ("--help".equals(name) || "-h".equals(name)) {
         return left("'--help' or '-h' cannot be option names, unless the help feature is disabled.");
       }

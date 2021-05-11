@@ -3,7 +3,7 @@ package net.jbock.convert.matching.auto;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.compiler.ParameterContext;
+import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.AutoConverter;
 import net.jbock.convert.ConvertedParameter;
@@ -16,6 +16,7 @@ import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -30,17 +31,21 @@ public class AutoConverterFinder extends ConverterFinder {
   private final AutoConverter autoConverter;
   private final ImmutableList<Matcher> matchers;
   private final SourceMethod sourceMethod;
+  private final Types types;
+  private final TypeTool tool;
 
   @Inject
   AutoConverterFinder(
-      ParameterContext context,
       AutoConverter autoConverter,
       ImmutableList<Matcher> matchers,
-      SourceMethod sourceMethod) {
-    super(context);
+      SourceMethod sourceMethod,
+      Types types,
+      TypeTool tool) {
     this.autoConverter = autoConverter;
     this.matchers = matchers;
     this.sourceMethod = sourceMethod;
+    this.types = types;
+    this.tool = tool;
   }
 
   public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(P parameter) {
@@ -88,8 +93,8 @@ public class AutoConverterFinder extends ConverterFinder {
   }
 
   private boolean isEnumType(TypeMirror type) {
-    return types().directSupertypes(type).stream()
-        .anyMatch(t -> tool().isSameErasure(t, ENUM));
+    return types.directSupertypes(type).stream()
+        .anyMatch(t -> tool.isSameErasure(t, ENUM));
   }
 
   private static String noMatchError(TypeMirror type) {

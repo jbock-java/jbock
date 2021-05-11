@@ -3,7 +3,7 @@ package net.jbock.convert.matching.explicit;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;
-import net.jbock.compiler.ParameterContext;
+import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Util;
@@ -34,21 +34,22 @@ public class ExplicitConverterFinder extends ConverterFinder {
   private final Util util;
   private final SourceMethod sourceMethod;
   private final SourceElement sourceElement;
+  private final TypeTool tool;
 
   @Inject
   ExplicitConverterFinder(
-      ParameterContext context,
       ImmutableList<Matcher> matchers,
       ReferenceTool referenceTool,
       Util util,
       SourceMethod sourceMethod,
-      SourceElement sourceElement) {
-    super(context);
+      SourceElement sourceElement,
+      TypeTool tool) {
     this.matchers = matchers;
     this.referenceTool = referenceTool;
     this.util = util;
     this.sourceMethod = sourceMethod;
     this.sourceElement = sourceElement;
+    this.tool = tool;
   }
 
   public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(
@@ -118,7 +119,7 @@ public class ExplicitConverterFinder extends ConverterFinder {
   }
 
   private boolean isValidMatch(Match match, FunctionType functionType) {
-    return tool().isSameType(functionType.outputType(), match.baseReturnType());
+    return tool.isSameType(functionType.outputType(), match.baseReturnType());
   }
 
   private static String noMatchError(TypeMirror type) {

@@ -2,7 +2,7 @@ package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.EnumName;
-import net.jbock.compiler.ParameterContext;
+import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
@@ -12,19 +12,29 @@ import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.Optional;
 
 public class OptionalMatcher extends Matcher {
 
   private final SourceMethod sourceMethod;
+  private final TypeTool tool;
+  private final Types types;
+  private final Elements elements;
 
   @Inject
   OptionalMatcher(
-      ParameterContext parameterContext,
       SourceMethod sourceMethod,
-      EnumName enumName) {
-    super(parameterContext, enumName);
+      EnumName enumName,
+      TypeTool tool,
+      Types types,
+      Elements elements) {
+    super(enumName);
     this.sourceMethod = sourceMethod;
+    this.tool = tool;
+    this.types = types;
+    this.elements = elements;
   }
 
   @Override
@@ -34,16 +44,16 @@ public class OptionalMatcher extends Matcher {
     if (optionalPrimitive.isPresent()) {
       return optionalPrimitive;
     }
-    return tool().getSingleTypeArgument(returnType, Optional.class)
+    return tool.getSingleTypeArgument(returnType, Optional.class)
         .map(typeArg -> Match.create(typeArg, constructorParam(returnType), Skew.OPTIONAL));
   }
 
   private Optional<Match> getOptionalPrimitive(TypeMirror type) {
     for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
-      if (tool().isSameType(type, optionalPrimitive.type())) {
+      if (tool.isSameType(type, optionalPrimitive.type())) {
         ParameterSpec constructorParam = constructorParam(asOptional(optionalPrimitive));
         return Optional.of(Match.create(
-            tool().asTypeElement(optionalPrimitive.wrappedObjectType()).asType(),
+            elements.getTypeElement(optionalPrimitive.wrappedObjectType()).asType(),
             constructorParam,
             Skew.OPTIONAL,
             optionalPrimitive.extractExpr(constructorParam)));
@@ -53,8 +63,8 @@ public class OptionalMatcher extends Matcher {
   }
 
   private DeclaredType asOptional(OptionalPrimitive optionalPrimitive) {
-    TypeElement optional = tool().asTypeElement(Optional.class.getCanonicalName());
-    TypeElement element = tool().asTypeElement(optionalPrimitive.wrappedObjectType());
-    return tool().types().getDeclaredType(optional, element.asType());
+    TypeElement optional = elements.getTypeElement(Optional.class.getCanonicalName());
+    TypeElement element = elements.getTypeElement(optionalPrimitive.wrappedObjectType());
+    return types.getDeclaredType(optional, element.asType());
   }
 }

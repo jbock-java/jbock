@@ -14,7 +14,7 @@ import net.jbock.qualifier.SourceMethod;
 import javax.inject.Inject;
 import java.util.Optional;
 
-class PositionalParamFactory extends ParameterScoped {
+class PositionalParamFactory {
 
   private final BasicInfo basicInfo;
   private final ParserFlavour flavour;
@@ -24,11 +24,10 @@ class PositionalParamFactory extends ParameterScoped {
   private final SourceMethod sourceMethod;
   private final EnumName enumName;
   private final Description description;
-  private final ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams;
+  private final ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreated;
 
   @Inject
   PositionalParamFactory(
-      ParameterContext parameterContext,
       BasicInfo basicInfo,
       ParserFlavour flavour,
       ConverterClass converter,
@@ -37,8 +36,7 @@ class PositionalParamFactory extends ParameterScoped {
       SourceMethod sourceMethod,
       EnumName enumName,
       Description description,
-      ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
-    super(parameterContext);
+      ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreated) {
     this.basicInfo = basicInfo;
     this.flavour = flavour;
     this.converter = converter;
@@ -47,7 +45,7 @@ class PositionalParamFactory extends ParameterScoped {
     this.sourceMethod = sourceMethod;
     this.enumName = enumName;
     this.description = description;
-    this.alreadyCreatedParams = alreadyCreatedParams;
+    this.alreadyCreated = alreadyCreated;
   }
 
   Either<ValidationFailure, ConvertedParameter<PositionalParameter>> createPositionalParam(int positionalIndex) {
@@ -72,7 +70,7 @@ class PositionalParamFactory extends ParameterScoped {
     if (!c.isRepeatable()) {
       return Optional.empty();
     }
-    return alreadyCreatedParams.stream()
+    return alreadyCreated.stream()
         .filter(ConvertedParameter::isRepeatable)
         .map(p -> "positional parameter " + p.enumName().enumConstant() + " is also repeatable")
         .findAny();
@@ -98,7 +96,7 @@ class PositionalParamFactory extends ParameterScoped {
     PositionalParameter p = c.parameter();
     int thisOrder = c.isRepeatable() ? 2 : c.isOptional() ? 1 : 0;
     int thisPosition = p.position();
-    for (ConvertedParameter<PositionalParameter> other : alreadyCreatedParams) {
+    for (ConvertedParameter<PositionalParameter> other : alreadyCreated) {
       int otherOrder = other.isRepeatable() ? 2 : other.isOptional() ? 1 : 0;
       if (thisPosition == other.parameter().position()) {
         return Optional.of("duplicate position");

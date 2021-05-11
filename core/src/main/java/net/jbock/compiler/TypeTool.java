@@ -83,4 +83,8 @@ public class TypeTool {
   public Types types() {
     return types;
   }
+
+  public Elements elements() {
+    return elements;
+  }
 }

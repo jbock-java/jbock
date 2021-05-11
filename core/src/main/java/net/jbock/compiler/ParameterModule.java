@@ -1,7 +1,6 @@
 package net.jbock.compiler;
 
 import com.google.common.collect.ImmutableList;
-import com.squareup.javapoet.ClassName;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
@@ -23,6 +22,8 @@ import net.jbock.qualifier.SourceMethod;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 @Module
 class ParameterModule {
@@ -80,6 +81,16 @@ class ParameterModule {
   @Provides
   TypeTool tool() {
     return tool;
+  }
+
+  @Provides
+  Types types() {
+    return tool.types();
+  }
+
+  @Provides
+  Elements elements() {
+    return tool.elements();
   }
 
   @Provides

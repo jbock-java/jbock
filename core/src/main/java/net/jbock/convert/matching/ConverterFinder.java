@@ -2,19 +2,13 @@ package net.jbock.convert.matching;
 
 import net.jbock.Parameter;
 import net.jbock.Parameters;
-import net.jbock.compiler.ParameterContext;
-import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.Skew;
 
 import java.util.Optional;
 
-public abstract class ConverterFinder extends ParameterScoped {
-
-  protected ConverterFinder(ParameterContext parameterContext) {
-    super(parameterContext);
-  }
+public abstract class ConverterFinder {
 
   protected Optional<String> validateMatch(AbstractParameter parameter, Match m) {
     if (parameter.style() == ParameterStyle.PARAMETER
