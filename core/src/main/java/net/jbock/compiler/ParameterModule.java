@@ -16,6 +16,7 @@ import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.matching.matcher.OptionalMatcher;
 import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.DescriptionKey;
+import net.jbock.qualifier.OptionType;
 import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
@@ -28,14 +29,14 @@ class ParameterModule {
 
   private final AnnotationUtil annotationUtil = new AnnotationUtil();
 
-  private final ClassName optionType;
+  private final OptionType optionType;
   private final TypeTool tool;
   private final ParserFlavour flavour;
   private final TypeElement sourceElement;
   private final DescriptionBuilder descriptionBuilder;
 
   ParameterModule(
-      ClassName optionType,
+      OptionType optionType,
       TypeTool tool,
       ParserFlavour flavour,
       TypeElement sourceElement,
@@ -72,7 +73,7 @@ class ParameterModule {
   }
 
   @Provides
-  ClassName optionType() {
+  OptionType optionType() {
     return optionType;
   }
 

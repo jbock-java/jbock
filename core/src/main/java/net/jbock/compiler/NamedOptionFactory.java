@@ -13,6 +13,7 @@ import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.ParamLabel;
+import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
@@ -33,7 +34,9 @@ class NamedOptionFactory extends ParameterScoped {
   private final ParamLabel paramLabel;
   private final DescriptionKey descriptionKey;
   private final SourceMethod sourceMethod;
+  private final SourceElement sourceElement;
   private final EnumName enumName;
+  private final Description description;
   private final ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions;
 
   @Inject
@@ -44,7 +47,9 @@ class NamedOptionFactory extends ParameterScoped {
       ParamLabel paramLabel,
       DescriptionKey descriptionKey,
       SourceMethod sourceMethod,
+      SourceElement sourceElement,
       EnumName enumName,
+      Description description,
       ImmutableList<ConvertedParameter<NamedOption>> alreadyCreatedOptions) {
     super(parameterContext);
     this.basicInfo = basicInfo;
@@ -52,7 +57,9 @@ class NamedOptionFactory extends ParameterScoped {
     this.paramLabel = paramLabel;
     this.descriptionKey = descriptionKey;
     this.sourceMethod = sourceMethod;
+    this.sourceElement = sourceElement;
     this.enumName = enumName;
+    this.description = description;
     this.alreadyCreatedOptions = alreadyCreatedOptions;
   }
 
@@ -129,7 +136,7 @@ class NamedOptionFactory extends ParameterScoped {
     if (name.charAt(1) != '-' && name.length() >= 3) {
       return left("single-dash names must be single-character names: " + name);
     }
-    if (flavour().helpEnabled(sourceElement())) {
+    if (flavour().helpEnabled(sourceElement.element())) {
       if ("--help".equals(name) || "-h".equals(name)) {
         return left("'--help' or '-h' cannot be option names, unless the help feature is disabled.");
       }
@@ -148,7 +155,7 @@ class NamedOptionFactory extends ParameterScoped {
 
   private NamedOption createNamedOption(List<String> dashedNames) {
     return new NamedOption(enumName, dashedNames, sourceMethod, descriptionKey,
-        description(), converter, paramLabel);
+        description, converter, paramLabel);
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {

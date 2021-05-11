@@ -3,6 +3,7 @@ package net.jbock.compiler.parameter;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.Parameter;
+import net.jbock.compiler.Description;
 import net.jbock.compiler.EnumName;
 import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.DescriptionKey;
@@ -31,7 +32,7 @@ public abstract class AbstractParameter {
 
   private final DescriptionKey descriptionKey;
 
-  private final List<String> description;
+  private final Description description;
 
   private final ConverterClass converter;
 
@@ -41,7 +42,7 @@ public abstract class AbstractParameter {
       SourceMethod sourceMethod,
       EnumName enumName,
       DescriptionKey descriptionKey,
-      List<String> description,
+      Description description,
       ConverterClass converter,
       ParamLabel paramLabel) {
     this.sourceMethod = sourceMethod.method();
@@ -53,7 +54,7 @@ public abstract class AbstractParameter {
   }
 
   public final List<String> description() {
-    return description;
+    return description.lines();
   }
 
   public final String methodName() {

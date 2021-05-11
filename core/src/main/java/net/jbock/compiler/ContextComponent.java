@@ -7,6 +7,7 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.compiler.view.GeneratedClass;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.OptionType;
 
 import javax.lang.model.element.TypeElement;
 import java.util.List;
@@ -30,6 +31,9 @@ interface ContextComponent {
 
     @BindsInstance
     Builder options(List<ConvertedParameter<NamedOption>> options);
+
+    @BindsInstance
+    Builder optionType(OptionType optionType);
 
     @BindsInstance
     Builder flavour(ParserFlavour flavour);

@@ -1,12 +1,5 @@
 package net.jbock.compiler;
 
-import com.google.common.collect.ImmutableList;
-import com.squareup.javapoet.ClassName;
-import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.compiler.parameter.PositionalParameter;
-import net.jbock.convert.ConvertedParameter;
-
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Types;
 import java.util.Arrays;
 import java.util.List;
@@ -19,20 +12,8 @@ public class ParameterScoped {
     this.parameterContext = parameterContext;
   }
 
-  public final TypeElement sourceElement() {
-    return parameterContext.sourceElement;
-  }
-
   public final TypeTool tool() {
     return parameterContext.tool;
-  }
-
-  public final ClassName optionType() {
-    return parameterContext.optionType;
-  }
-
-  final List<String> description() {
-    return Arrays.asList(parameterContext.description.getValue());
   }
 
   public final Types types() {

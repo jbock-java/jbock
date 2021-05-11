@@ -17,6 +17,7 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Util;
 import net.jbock.either.Either;
+import net.jbock.qualifier.OptionType;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.annotation.processing.Filer;
@@ -104,11 +105,11 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         ParserFlavour.SUPER_COMMAND :
         ParserFlavour.COMMAND;
     try {
-      ClassName optionType = generatedClass.nestedClass("Option");
+      OptionType optionType = new OptionType(generatedClass.nestedClass("Option"));
       Either.fromFailure(validateSourceElement(sourceElement), null)
           .mapLeft(msg -> new ValidationFailure(msg, sourceElement))
           .mapLeft(Collections::singletonList)
-          .flatMap(nothing -> getParams(sourceElement, optionType, flavour))
+          .flatMap(nothing -> getParams(sourceElement, flavour, optionType))
           .accept(failures -> {
             for (ValidationFailure failure : failures) {
               messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
@@ -116,6 +117,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           }, parameters -> {
             ContextComponent context = DaggerContextComponent.builder()
                 .flavour(flavour)
+                .optionType(optionType)
                 .sourceElement(sourceElement)
                 .generatedClass(generatedClass)
                 .options(parameters.namedOptions)
@@ -152,8 +154,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private Either<List<ValidationFailure>, Params> getParams(
       TypeElement sourceElement,
-      ClassName optionType,
-      ParserFlavour flavour) {
+      ParserFlavour flavour,
+      OptionType optionType) {
     ParameterModule module = new ParameterModule(optionType, tool,
         flavour, sourceElement, descriptionBuilder);
     return createMethods(sourceElement).flatMap(methods -> {

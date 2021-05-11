@@ -13,6 +13,7 @@ import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.reference.FunctionType;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.either.Either;
+import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
@@ -32,6 +33,7 @@ public class ExplicitConverterFinder extends ConverterFinder {
   private final ReferenceTool referenceTool;
   private final Util util;
   private final SourceMethod sourceMethod;
+  private final SourceElement sourceElement;
 
   @Inject
   ExplicitConverterFinder(
@@ -39,12 +41,14 @@ public class ExplicitConverterFinder extends ConverterFinder {
       ImmutableList<Matcher> matchers,
       ReferenceTool referenceTool,
       Util util,
-      SourceMethod sourceMethod) {
+      SourceMethod sourceMethod,
+      SourceElement sourceElement) {
     super(context);
     this.matchers = matchers;
     this.referenceTool = referenceTool;
     this.util = util;
     this.sourceMethod = sourceMethod;
+    this.sourceElement = sourceElement;
   }
 
   public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(
@@ -87,7 +91,7 @@ public class ExplicitConverterFinder extends ConverterFinder {
 
   private Optional<String> checkMapperAnnotation(TypeElement converter) {
     Converter converterAnnotation = converter.getAnnotation(Converter.class);
-    boolean nestedMapper = util.getEnclosingElements(converter).contains(sourceElement());
+    boolean nestedMapper = util.getEnclosingElements(converter).contains(sourceElement.element());
     if (converterAnnotation == null && !nestedMapper) {
       return Optional.of("converter must be an inner class of the command class, or carry the @" + Converter.class.getSimpleName() + " annotation");
     }

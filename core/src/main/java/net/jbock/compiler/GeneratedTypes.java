@@ -39,10 +39,6 @@ public class GeneratedTypes {
     return Optional.of(generatedClass.nestedClass(sourceElement.getSimpleName() + "WithRest"));
   }
 
-  public ClassName generatedClass() {
-    return generatedClass;
-  }
-
   public ClassName optionParserType() {
     return generatedClass.nestedClass("OptionParser");
   }
@@ -51,24 +47,12 @@ public class GeneratedTypes {
     return generatedClass.nestedClass("RepeatableOptionParser");
   }
 
-  public ClassName paramParserType() {
-    return generatedClass.nestedClass("ParamParser");
-  }
-
-  public ClassName repeatableParamParserType() {
-    return generatedClass.nestedClass("RepeatableParamParser");
-  }
-
   public ClassName flagParserType() {
     return generatedClass.nestedClass("FlagParser");
   }
 
   public ClassName regularOptionParserType() {
     return generatedClass.nestedClass("RegularOptionParser");
-  }
-
-  public ClassName regularParamParserType() {
-    return generatedClass.nestedClass("RegularParamParser");
   }
 
   public ClassName optionType() {

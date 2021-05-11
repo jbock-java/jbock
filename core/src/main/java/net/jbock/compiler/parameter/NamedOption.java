@@ -1,5 +1,6 @@
 package net.jbock.compiler.parameter;
 
+import net.jbock.compiler.Description;
 import net.jbock.compiler.EnumName;
 import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.DescriptionKey;
@@ -18,7 +19,7 @@ public class NamedOption extends AbstractParameter {
       List<String> dashedNames,
       SourceMethod sourceMethod,
       DescriptionKey descriptionKey,
-      List<String> description,
+      Description description,
       ConverterClass converter,
       ParamLabel paramLabel) {
     super(sourceMethod, enumName, descriptionKey, description, converter, paramLabel);

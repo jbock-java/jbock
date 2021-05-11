@@ -23,6 +23,7 @@ class PositionalParamFactory extends ParameterScoped {
   private final DescriptionKey descriptionKey;
   private final SourceMethod sourceMethod;
   private final EnumName enumName;
+  private final Description description;
   private final ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams;
 
   @Inject
@@ -35,6 +36,7 @@ class PositionalParamFactory extends ParameterScoped {
       DescriptionKey descriptionKey,
       SourceMethod sourceMethod,
       EnumName enumName,
+      Description description,
       ImmutableList<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
     super(parameterContext);
     this.basicInfo = basicInfo;
@@ -44,6 +46,7 @@ class PositionalParamFactory extends ParameterScoped {
     this.descriptionKey = descriptionKey;
     this.sourceMethod = sourceMethod;
     this.enumName = enumName;
+    this.description = description;
     this.alreadyCreatedParams = alreadyCreatedParams;
   }
 
@@ -52,7 +55,7 @@ class PositionalParamFactory extends ParameterScoped {
         sourceMethod,
         enumName,
         descriptionKey,
-        description(),
+        description,
         positionalIndex,
         converter,
         paramLabel);

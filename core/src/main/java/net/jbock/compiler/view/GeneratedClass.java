@@ -12,6 +12,7 @@ import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.OptionType;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
@@ -64,6 +65,7 @@ public final class GeneratedClass {
   private final OptionEnum optionEnum;
   private final StatefulParser parserState;
   private final ParseResult parseResult;
+  private final OptionType optionType;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -87,7 +89,8 @@ public final class GeneratedClass {
       OptionParser optionParser,
       OptionEnum optionEnum,
       StatefulParser parserState,
-      ParseResult parseResult) {
+      ParseResult parseResult,
+      OptionType optionType) {
     this.context = context;
     this.description = description;
     this.impl = impl;
@@ -99,6 +102,7 @@ public final class GeneratedClass {
     this.exitHook = context.exitHookField();
     this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
         .initializer("$S", context.programName()).build();
+    this.optionType = optionType;
   }
 
   public TypeSpec define() {
@@ -131,7 +135,7 @@ public final class GeneratedClass {
     spec.addField(messages);
 
     if (!context.options().isEmpty()) {
-      spec.addField(FieldSpec.builder(mapOf(STRING, generatedTypes.optionType()), OPTIONS_BY_NAME)
+      spec.addField(FieldSpec.builder(mapOf(STRING, optionType.type()), OPTIONS_BY_NAME)
           .initializer("optionsByName()")
           .addModifiers(PRIVATE, STATIC, FINAL)
           .build());
@@ -184,10 +188,10 @@ public final class GeneratedClass {
     CodeBlock.Builder code = CodeBlock.builder();
     String continuationIndent = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
 
-    if (description.getValue().length > 0) {
+    if (!description.lines().isEmpty()) {
       ParameterSpec descriptionBuilder = builder(LIST_OF_STRING, "description").build();
       code.addStatement("$T $N = new $T<>()", descriptionBuilder.type, descriptionBuilder, ArrayList.class);
-      for (String line : description.getValue()) {
+      for (String line : description.lines()) {
         code.addStatement("$T.addAll($N, $S.split($S, $L))", Collections.class, descriptionBuilder, line, "\\s+", -1);
       }
       code.addStatement("printTokens($S, $N)", "", descriptionBuilder);
@@ -208,7 +212,7 @@ public final class GeneratedClass {
     }
     context.params().forEach(p ->
         code.addStatement("printOption($T.$L, $S, $S)",
-            generatedTypes.optionType(), p.enumConstant(),
+            optionType.type(), p.enumConstant(),
             p.parameter().descriptionKey().orElse(""),
             String.format(paramsFormat, p.descriptionSummary())));
     if (!context.options().isEmpty()) {
@@ -223,7 +227,7 @@ public final class GeneratedClass {
 
     context.options().forEach(p ->
         code.addStatement("printOption($T.$L, $S, $S)",
-            generatedTypes.optionType(), p.enumConstant(),
+            optionType.type(), p.enumConstant(),
             p.parameter().descriptionKey().orElse(""),
             String.format(optionsFormat, p.descriptionSummary())));
     return methodBuilder("printOnlineHelp")
@@ -235,7 +239,7 @@ public final class GeneratedClass {
   MethodSpec printOptionMethod() {
     ParameterSpec messageKey = builder(STRING, "messageKey").build();
     ParameterSpec message = builder(STRING, "message").build();
-    ParameterSpec option = builder(generatedTypes.optionType(), "option").build();
+    ParameterSpec option = builder(optionType.type(), "option").build();
     ParameterSpec names = builder(STRING, "names").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
@@ -529,8 +533,7 @@ public final class GeneratedClass {
   }
 
   private MethodSpec optionsByNameMethod() {
-    ClassName optionType = generatedTypes.optionType();
-    ParameterSpec result = builder(mapOf(STRING, optionType), "result").build();
+    ParameterSpec result = builder(mapOf(STRING, optionType.type()), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
     long mapSize = context.options().stream()
         .map(ConvertedParameter::parameter)
@@ -541,7 +544,7 @@ public final class GeneratedClass {
     code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
     for (ConvertedParameter<NamedOption> namedOption : context.options()) {
       for (String dashedName : namedOption.parameter().dashedNames()) {
-        code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedTypes.optionType(),
+        code.addStatement("$N.put($S, $T.$L)", result, dashedName, optionType.type(),
             namedOption.enumConstant());
       }
     }
@@ -554,7 +557,7 @@ public final class GeneratedClass {
   }
 
   private MethodSpec optionParsersMethod() {
-    ParameterSpec parsers = builder(mapOf(generatedTypes.optionType(), generatedTypes.optionParserType()), "parsers").build();
+    ParameterSpec parsers = builder(mapOf(optionType.type(), generatedTypes.optionParserType()), "parsers").build();
 
     return MethodSpec.methodBuilder("optionParsers").returns(parsers.type)
         .addCode(optionParsersMethodCode(context, generatedTypes, parsers))
@@ -567,12 +570,12 @@ public final class GeneratedClass {
       return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
     }
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, generatedTypes.optionType());
+    code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, optionType.type());
     for (ConvertedParameter<NamedOption> param : options) {
       String enumConstant = param.enumConstant();
       code.addStatement("$N.put($T.$L, new $T($T.$L))",
-          parsers, generatedTypes.optionType(), enumConstant, optionParserType(generatedTypes, param),
-          generatedTypes.optionType(), enumConstant);
+          parsers, optionType.type(), enumConstant, optionParserType(generatedTypes, param),
+          optionType.type(), enumConstant);
     }
     code.addStatement("return $N", parsers);
     return code.build();

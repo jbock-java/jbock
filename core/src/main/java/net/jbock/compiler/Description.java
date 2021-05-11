@@ -1,13 +1,17 @@
 package net.jbock.compiler;
 
+import java.util.Arrays;
+import java.util.List;
+
 public class Description {
-  private final String[] value;
+
+  private final List<String> lines;
 
   public Description(String[] value) {
-    this.value = value;
+    this.lines = Arrays.asList(value);
   }
 
-  public String[] getValue() {
-    return value;
+  public List<String> lines() {
+    return lines;
   }
 }

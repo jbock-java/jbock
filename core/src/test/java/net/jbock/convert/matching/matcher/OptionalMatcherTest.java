@@ -1,14 +1,12 @@
 package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.TypeName;
-import net.jbock.compiler.Description;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.ParserFlavour;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
-import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -82,10 +80,7 @@ class OptionalMatcherTest {
     ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
     ParameterContext context = new ParameterContext(
-        new SourceElement(null),
         tool,
-        null,
-        new Description(new String[0]),
         ParserFlavour.COMMAND);
     return new OptionalMatcher(
         context,
