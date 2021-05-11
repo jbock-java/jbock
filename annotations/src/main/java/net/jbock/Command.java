@@ -41,8 +41,8 @@ public @interface Command {
   /**
    * Optional text to display before the synopsis block, in the usage documentation.
    * If empty, the javadoc of the annotated class will be used as a fallback.
-   * If {@code descriptionKey} is not empty,
-   * the description will be read from the message map instead.
+   * If {@code descriptionKey} is not empty, an attempt will be made
+   * to read the description from the message map first.
    *
    * @return description text
    */
@@ -52,8 +52,7 @@ public @interface Command {
    * The key that is used to find the command description
    * in the internationalization message map.
    * If no {@code descriptionKey} is defined,
-   * or no message map is supplied at runtime,
-   * or a message map is supplied but does not contain the description key,
+   * or the runtime message map does not contain the description key,
    * then the {@code description} attribute will be used.
    * If that is also empty, the class-level javadoc will be used.
    *

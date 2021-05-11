@@ -40,8 +40,7 @@ public @interface Option {
    * The key that is used to find the option
    * description in the internationalization message map.
    * If no {@code descriptionKey} is defined,
-   * or no message map is supplied at runtime,
-   * or a message map is supplied but does not contain the description key,
+   * or the runtime message map does not contain the description key,
    * then the {@code description} attribute will be used.
    * If that is also empty, the method's javadoc will be used.
    *
@@ -52,17 +51,17 @@ public @interface Option {
   /**
    * Option description, used when generating the usage documentation.
    * If empty, the method's javadoc will be used as a fallback.
-   * If {@code descriptionKey} is not empty,
-   * the description will be read from the message map instead.
+   * If {@code descriptionKey} is not empty, an attempt will be made
+   * to read the description from the message map first.
    *
    * @return description text
    */
   String[] description() default {};
 
   /**
-   * <p>Label for the option's argument, to be used in the usage documentation.
+   * <p>A label for the option's argument, to be used in the usage documentation.
    * If empty, a label will be chosen based on the method name.</p>
-   * <p><em>Note:</em> If this option is a mode flag, the label is ignored.</p>
+   * <p>If this option is a mode flag, the label will be ignored.</p>
    *
    * @return a label
    */
