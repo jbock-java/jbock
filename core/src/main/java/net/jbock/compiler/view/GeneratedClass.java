@@ -97,7 +97,7 @@ public final class GeneratedClass {
     this.parserState = parserState;
     this.parseResult = parseResult;
     this.exitHook = context.exitHookField();
-    this.programName = FieldSpec.builder(STRING, "programName", PRIVATE)
+    this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
         .initializer("$S", context.programName()).build();
   }
 
@@ -106,7 +106,6 @@ public final class GeneratedClass {
     TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass())
         .addMethod(parseMethod(accessModifiers))
         .addMethod(parseOrExitMethod(accessModifiers))
-        .addMethod(withProgramNameMethod(accessModifiers))
         .addMethod(withTerminalWidthMethod(accessModifiers))
         .addMethod(withMessagesMethod(accessModifiers))
         .addMethod(withExitHookMethod(accessModifiers))
@@ -325,17 +324,6 @@ public final class GeneratedClass {
         .addParameter(continuationIndent)
         .addParameter(tokens)
         .returns(LIST_OF_STRING)
-        .build();
-  }
-
-  private MethodSpec withProgramNameMethod(Modifier[] accessModifiers) {
-    ParameterSpec programNameParam = builder(STRING, "programName").build();
-    return methodBuilder("withProgramName")
-        .addParameter(programNameParam)
-        .addStatement("this.$N = $N", programName, programNameParam)
-        .addStatement("return this")
-        .returns(context.generatedClass())
-        .addModifiers(accessModifiers)
         .build();
   }
 
