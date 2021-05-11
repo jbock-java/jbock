@@ -8,9 +8,7 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.Arrays;
@@ -22,10 +20,6 @@ public class ParameterScoped {
 
   public ParameterScoped(ParameterContext parameterContext) {
     this.parameterContext = parameterContext;
-  }
-
-  public final ExecutableElement sourceMethod() {
-    return parameterContext.sourceMethod;
   }
 
   public final TypeElement sourceElement() {
@@ -56,17 +50,8 @@ public class ParameterScoped {
     return parameterContext.enumName;
   }
 
-  public final TypeMirror returnType() {
-    return parameterContext.sourceMethod.getReturnType();
-  }
-
   public final ParameterSpec constructorParam(TypeMirror constructorParamType) {
     return ParameterSpec.builder(TypeName.get(constructorParamType), enumName().camel()).build();
-  }
-
-  public final TypeMirror boxedReturnType() {
-    PrimitiveType primitive = returnType().accept(TypeTool.AS_PRIMITIVE, null);
-    return primitive == null ? returnType() : tool().types().boxedClass(primitive).asType();
   }
 
   public final Types types() {

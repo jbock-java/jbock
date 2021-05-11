@@ -5,6 +5,7 @@ import net.jbock.compiler.ParameterContext;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -14,19 +15,23 @@ import java.util.Optional;
 
 public class OptionalMatcher extends Matcher {
 
+  private final SourceMethod sourceMethod;
+
   @Inject
-  OptionalMatcher(ParameterContext parameterContext) {
+  OptionalMatcher(ParameterContext parameterContext, SourceMethod sourceMethod) {
     super(parameterContext);
+    this.sourceMethod = sourceMethod;
   }
 
   @Override
   public Optional<Match> tryMatch(AbstractParameter parameter) {
-    Optional<Match> optionalPrimitive = getOptionalPrimitive(returnType());
+    TypeMirror returnType = sourceMethod.returnType();
+    Optional<Match> optionalPrimitive = getOptionalPrimitive(returnType);
     if (optionalPrimitive.isPresent()) {
       return optionalPrimitive;
     }
-    return tool().getSingleTypeArgument(returnType(), Optional.class)
-        .map(typeArg -> Match.create(typeArg, constructorParam(returnType()), Skew.OPTIONAL));
+    return tool().getSingleTypeArgument(returnType, Optional.class)
+        .map(typeArg -> Match.create(typeArg, constructorParam(returnType), Skew.OPTIONAL));
   }
 
   private Optional<Match> getOptionalPrimitive(TypeMirror type) {

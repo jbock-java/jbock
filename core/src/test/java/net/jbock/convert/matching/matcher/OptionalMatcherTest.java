@@ -83,7 +83,6 @@ class OptionalMatcherTest {
     ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
     ParameterContext context = new ParameterContext(
-        new SourceMethod(sourceMethod),
         new SourceElement(null),
         tool,
         null,
@@ -92,6 +91,6 @@ class OptionalMatcherTest {
         new Description(new String[0]),
         EnumName.create("a"),
         ParserFlavour.COMMAND);
-    return new OptionalMatcher(context);
+    return new OptionalMatcher(context, new SourceMethod(sourceMethod));
   }
 }

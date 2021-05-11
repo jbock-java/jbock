@@ -53,7 +53,7 @@ class NamedOptionFactory extends ParameterScoped {
     return checkOptionNames()
         .map(this::createNamedOption)
         .flatMap(namedOption -> {
-          if (!converter.isPresent() && returnType().getKind() == BOOLEAN) {
+          if (!converter.isPresent() && sourceMethod.returnType().getKind() == BOOLEAN) {
             return right(createFlag(namedOption));
           }
           return basicInfo.coercion(namedOption);
@@ -145,7 +145,8 @@ class NamedOptionFactory extends ParameterScoped {
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
-    ParameterSpec constructorParam = ParameterSpec.builder(TypeName.get(returnType()), enumName().snake()).build();
+    ParameterSpec constructorParam = ParameterSpec.builder(
+        TypeName.get(sourceMethod.returnType()), enumName().snake()).build();
     CodeBlock mapExpr = CodeBlock.builder().build();
     CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
     return new ConvertedParameter<>(mapExpr, extractExpr, Skew.FLAG, constructorParam, namedOption);

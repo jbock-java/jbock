@@ -3,20 +3,16 @@ package net.jbock.convert.matching.auto;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.Parameter;
-import net.jbock.Parameters;
-import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.AutoMapper;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.convert.Skew;
 import net.jbock.convert.Util;
 import net.jbock.convert.matching.ConverterFinder;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.compiler.ParameterContext;
-import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.either.Either;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
@@ -26,7 +22,6 @@ import java.util.stream.Collectors;
 
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
 
 public class AutoConverterFinder extends ConverterFinder {
 
@@ -34,15 +29,18 @@ public class AutoConverterFinder extends ConverterFinder {
 
   private final AutoMapper autoMapper;
   private final ImmutableList<Matcher> matchers;
+  private final SourceMethod sourceMethod;
 
   @Inject
   AutoConverterFinder(
       ParameterContext context,
       AutoMapper autoMapper,
-      ImmutableList<Matcher> matchers) {
+      ImmutableList<Matcher> matchers,
+      SourceMethod sourceMethod) {
     super(context);
     this.autoMapper = autoMapper;
     this.matchers = matchers;
+    this.sourceMethod = sourceMethod;
   }
 
   public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(P parameter) {
@@ -54,7 +52,7 @@ public class AutoConverterFinder extends ConverterFinder {
             .flatMap(nothing -> findMapper(m, parameter));
       }
     }
-    return left(noMatchError(returnType()));
+    return left(noMatchError(sourceMethod.returnType()));
   }
 
   private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findMapper(Match match, P parameter) {

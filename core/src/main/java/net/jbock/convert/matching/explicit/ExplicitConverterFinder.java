@@ -3,14 +3,9 @@ package net.jbock.convert.matching.explicit;
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;
-import net.jbock.Parameter;
-import net.jbock.Parameters;
 import net.jbock.compiler.ParameterContext;
-import net.jbock.compiler.ParameterScoped;
 import net.jbock.compiler.parameter.AbstractParameter;
-import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.convert.Skew;
 import net.jbock.convert.Util;
 import net.jbock.convert.matching.ConverterFinder;
 import net.jbock.convert.matching.Match;
@@ -18,6 +13,7 @@ import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.reference.FunctionType;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.either.Either;
+import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -29,24 +25,26 @@ import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
 
 public class ExplicitConverterFinder extends ConverterFinder {
 
   private final ImmutableList<Matcher> matchers;
   private final ReferenceTool referenceTool;
   private final Util util;
+  private final SourceMethod sourceMethod;
 
   @Inject
   ExplicitConverterFinder(
       ParameterContext context,
       ImmutableList<Matcher> matchers,
       ReferenceTool referenceTool,
-      Util util) {
+      Util util,
+      SourceMethod sourceMethod) {
     super(context);
     this.matchers = matchers;
     this.referenceTool = referenceTool;
     this.util = util;
+    this.sourceMethod = sourceMethod;
   }
 
   public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(
@@ -83,7 +81,7 @@ public class ExplicitConverterFinder extends ConverterFinder {
     TypeMirror bestReturnType = matches.stream()
         .max(Comparator.comparing(Match::skew))
         .map(Match::baseReturnType)
-        .orElse(returnType());
+        .orElse(sourceMethod.returnType());
     return left(ExplicitConverterFinder.noMatchError(bestReturnType));
   }
 

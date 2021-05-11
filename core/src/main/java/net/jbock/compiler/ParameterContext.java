@@ -7,16 +7,13 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.SourceElement;
-import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 
 @Reusable
 public class ParameterContext {
 
-  final ExecutableElement sourceMethod;
   final TypeElement sourceElement;
   final TypeTool tool;
   final ClassName optionType;
@@ -28,7 +25,6 @@ public class ParameterContext {
 
   @Inject
   public ParameterContext(
-      SourceMethod sourceMethod,
       SourceElement sourceElement,
       TypeTool tool,
       ClassName optionType,
@@ -37,7 +33,6 @@ public class ParameterContext {
       Description description,
       EnumName enumName,
       ParserFlavour flavour) {
-    this.sourceMethod = sourceMethod.method();
     this.sourceElement = sourceElement.element();
     this.tool = tool;
     this.optionType = optionType;
