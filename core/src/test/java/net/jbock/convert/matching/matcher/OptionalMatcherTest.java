@@ -1,10 +1,12 @@
 package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.TypeName;
+import net.jbock.Option;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.matching.MatchFactory;
 import net.jbock.convert.matching.MatchFactoryAccess;
 import net.jbock.qualifier.SourceMethod;
@@ -78,6 +80,7 @@ class OptionalMatcherTest {
 
   private OptionalMatcher createMatcher(TypeTool tool, TypeMirror returnType) {
     ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
+    Mockito.when(sourceMethod.getAnnotation(Mockito.any())).thenReturn(Mockito.mock(Option.class));
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
     EnumName enumName = EnumName.create("a");
     MatchFactory matchFactory = MatchFactoryAccess.create(enumName);

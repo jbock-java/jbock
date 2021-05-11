@@ -148,6 +148,6 @@ class ParameterModule {
   @Reusable
   @Provides
   ParameterStyle parameterStyle(SourceMethod sourceMethod) {
-    return ParameterStyle.getStyle(sourceMethod.method());
+    return sourceMethod.style();
   }
 }
