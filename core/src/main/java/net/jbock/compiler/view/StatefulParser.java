@@ -6,11 +6,11 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.qualifier.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
@@ -40,7 +40,7 @@ import static net.jbock.compiler.view.GeneratedClass.OPTIONS_BY_NAME;
  */
 final class StatefulParser {
 
-  private final Context context;
+  private final AllParameters context;
   private final ParseMethod parseMethod;
   private final GeneratedTypes generatedTypes;
   private final GeneratedType generatedType;
@@ -59,7 +59,7 @@ final class StatefulParser {
 
   @Inject
   StatefulParser(
-      Context context,
+      AllParameters context,
       GeneratedTypes generatedTypes,
       GeneratedType generatedType,
       ParseMethod parseMethod,

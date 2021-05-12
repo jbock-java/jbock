@@ -8,14 +8,19 @@ import java.util.List;
 
 public class Params {
 
-  public final List<ConvertedParameter<PositionalParameter>> positionalParams;
-  public final List<ConvertedParameter<NamedOption>> namedOptions;
+  private final List<ConvertedParameter<PositionalParameter>> positionalParams;
+  private final List<ConvertedParameter<NamedOption>> namedOptions;
 
-  Params(
+  private Params(
       List<ConvertedParameter<PositionalParameter>> positionalParams,
       List<ConvertedParameter<NamedOption>> namedOptions) {
     this.positionalParams = positionalParams;
     this.namedOptions = namedOptions;
+  }
+
+  static Params create(List<ConvertedParameter<PositionalParameter>> positionalParams,
+                       List<ConvertedParameter<NamedOption>> namedOptions) {
+    return new Params(positionalParams, namedOptions);
   }
 
   public List<ConvertedParameter<PositionalParameter>> positionalParams() {

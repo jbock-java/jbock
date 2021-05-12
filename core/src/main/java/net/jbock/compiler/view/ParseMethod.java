@@ -5,11 +5,11 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.qualifier.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.PositionalParameters;
 
 import javax.inject.Inject;
@@ -26,7 +26,7 @@ import static net.jbock.compiler.view.GeneratedClass.SUSPICIOUS_PATTERN;
 
 class ParseMethod {
 
-  private final Context context;
+  private final AllParameters context;
   private final GeneratedTypes generatedTypes;
 
   private final ParameterSpec it = builder(STRING_ITERATOR, "it").build();
@@ -39,7 +39,7 @@ class ParseMethod {
 
   @Inject
   ParseMethod(
-      Context context,
+      AllParameters context,
       GeneratedTypes generatedTypes,
       List<ConvertedParameter<PositionalParameter>> params,
       List<ConvertedParameter<NamedOption>> options,

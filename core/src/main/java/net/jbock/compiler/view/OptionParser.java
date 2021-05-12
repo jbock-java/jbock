@@ -8,10 +8,10 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
-import net.jbock.qualifier.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.UnixClustering;
 
 import javax.inject.Inject;
@@ -37,7 +37,7 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
  */
 final class OptionParser {
 
-  private final Context context;
+  private final AllParameters context;
   private final GeneratedTypes generatedTypes;
   private final FieldSpec optionField;
   private final List<ConvertedParameter<NamedOption>> options;
@@ -45,7 +45,7 @@ final class OptionParser {
 
   @Inject
   OptionParser(
-      Context context,
+      AllParameters context,
       GeneratedTypes generatedTypes,
       List<ConvertedParameter<NamedOption>> options,
       UnixClustering unixClustering) {

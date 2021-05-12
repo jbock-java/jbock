@@ -6,7 +6,7 @@ import dagger.Reusable;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.qualifier.Context;
+import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
@@ -43,12 +43,12 @@ public class ContextModule {
 
   @Provides
   List<ConvertedParameter<NamedOption>> namedOptions(Params params) {
-    return params.namedOptions;
+    return params.namedOptions();
   }
 
   @Provides
   List<ConvertedParameter<PositionalParameter>> positionalParameters(Params params) {
-    return params.positionalParams;
+    return params.positionalParams();
   }
 
   @Reusable
@@ -72,12 +72,12 @@ public class ContextModule {
   @Reusable
   @Provides
   PositionalParameters positionals(Params params) {
-    return PositionalParameters.create(params.positionalParams);
+    return PositionalParameters.create(params.positionalParams());
   }
 
   @Reusable
   @Provides
-  Context allParameters(Params params) {
-    return Context.create(params);
+  AllParameters allParameters(Params params) {
+    return AllParameters.create(params);
   }
 }

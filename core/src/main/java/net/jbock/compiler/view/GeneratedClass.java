@@ -7,12 +7,12 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.qualifier.Context;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
 
@@ -59,7 +59,7 @@ public final class GeneratedClass {
   static final String OPTIONS_BY_NAME = "OPTIONS_BY_NAME";
   static final String SUSPICIOUS_PATTERN = "SUSPICIOUS";
 
-  private final Context context;
+  private final AllParameters context;
   private final Description description;
   private final Impl impl;
   private final GeneratedTypes generatedTypes;
@@ -87,7 +87,7 @@ public final class GeneratedClass {
 
   @Inject
   GeneratedClass(
-      Context context,
+      AllParameters context,
       Description description,
       GeneratedType generatedType,
       SourceElement sourceElement,

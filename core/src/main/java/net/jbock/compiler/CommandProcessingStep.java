@@ -196,7 +196,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       }
       ImmutableList<ConvertedParameter<NamedOption>> namedOptions = optionsBuilder.build();
       failures.addAll(checkDescriptionKeys(namedOptions, positionalParams));
-      return failures.isEmpty() ? right(new Params(positionalParams, namedOptions)) : left(failures);
+      return failures.isEmpty() ? right(Params.create(positionalParams, namedOptions)) : left(failures);
     });
   }
 

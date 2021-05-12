@@ -4,10 +4,10 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.qualifier.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
@@ -23,12 +23,12 @@ import static javax.lang.model.element.Modifier.STATIC;
  */
 final class Impl {
 
-  private final Context context;
+  private final AllParameters context;
   private final GeneratedTypes generatedTypes;
   private final SourceElement sourceElement;
 
   @Inject
-  Impl(Context context, GeneratedTypes generatedTypes, SourceElement sourceElement) {
+  Impl(AllParameters context, GeneratedTypes generatedTypes, SourceElement sourceElement) {
     this.context = context;
     this.generatedTypes = generatedTypes;
     this.sourceElement = sourceElement;

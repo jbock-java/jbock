@@ -6,10 +6,10 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.qualifier.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.AllParameters;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -26,13 +26,13 @@ import static net.jbock.compiler.Constants.STRING_ARRAY;
  */
 final class OptionEnum {
 
-  private final Context context;
+  private final AllParameters context;
   private final GeneratedTypes generatedTypes;
   private final FieldSpec descriptionField;
 
   @Inject
   OptionEnum(
-      Context context,
+      AllParameters context,
       GeneratedTypes generatedTypes) {
     this.context = context;
     this.generatedTypes = generatedTypes;

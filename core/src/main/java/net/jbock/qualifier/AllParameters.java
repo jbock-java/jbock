@@ -7,25 +7,25 @@ import net.jbock.convert.ConvertedParameter;
 
 import java.util.List;
 
-public final class Context {
+public final class AllParameters {
 
   private final List<ConvertedParameter<? extends AbstractParameter>> parameters;
   private final boolean anyRequired;
 
-  private Context(
+  private AllParameters(
       List<ConvertedParameter<? extends AbstractParameter>> parameters,
       boolean anyRequired) {
     this.parameters = parameters;
     this.anyRequired = anyRequired;
   }
 
-  public static Context create(Params params) {
+  public static AllParameters create(Params params) {
     ImmutableList<ConvertedParameter<? extends AbstractParameter>> allParameters = ImmutableList.<ConvertedParameter<? extends AbstractParameter>>builderWithExpectedSize(
-        params.namedOptions.size() + params.positionalParams.size())
-        .addAll(params.namedOptions)
-        .addAll(params.positionalParams).build();
+        params.namedOptions().size() + params.positionalParams().size())
+        .addAll(params.namedOptions())
+        .addAll(params.positionalParams()).build();
     boolean anyRequired = allParameters.stream().anyMatch(ConvertedParameter::isRequired);
-    return new Context(allParameters, anyRequired);
+    return new AllParameters(allParameters, anyRequired);
   }
 
   public List<ConvertedParameter<? extends AbstractParameter>> parameters() {
