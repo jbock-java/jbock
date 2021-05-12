@@ -52,6 +52,10 @@ public class SourceElement {
     return parserFlavour.programName(sourceElement);
   }
 
+  public String resultMethodName() {
+    return isSuperCommand() ? "getResultWithRest" : "getResult";
+  }
+
   public Modifier[] accessModifiers() {
     return accessModifiers;
   }

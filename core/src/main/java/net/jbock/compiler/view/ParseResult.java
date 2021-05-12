@@ -5,7 +5,6 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.SourceElement;
 
@@ -27,17 +26,14 @@ import static javax.lang.model.element.Modifier.STATIC;
  */
 final class ParseResult {
 
-  private final Context context;
   private final GeneratedTypes generatedTypes;
   private final FieldSpec result;
   private final SourceElement sourceElement;
 
   @Inject
   ParseResult(
-      Context context,
       GeneratedTypes generatedTypes,
       SourceElement sourceElement) {
-    this.context = context;
     this.result = FieldSpec.builder(generatedTypes.parseSuccessType(), "result", PRIVATE, FINAL).build();
     this.generatedTypes = generatedTypes;
     this.sourceElement = sourceElement;
@@ -104,7 +100,7 @@ final class ParseResult {
   }
 
   private MethodSpec getResultMethod() {
-    return methodBuilder(context.getSuccessResultMethodName())
+    return methodBuilder(sourceElement.resultMethodName())
         .addStatement("return $N", result)
         .returns(generatedTypes.parseSuccessType())
         .addModifiers(sourceElement.accessModifiers())

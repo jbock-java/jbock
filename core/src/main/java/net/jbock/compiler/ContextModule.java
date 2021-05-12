@@ -8,6 +8,7 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.qualifier.UnixClustering;
 
 import javax.lang.model.util.Elements;
 import java.util.List;
@@ -58,5 +59,11 @@ public class ContextModule {
   @Provides
   Description description(DescriptionBuilder descriptionBuilder) {
     return descriptionBuilder.getDescription(sourceElement.element());
+  }
+
+  @Reusable
+  @Provides
+  UnixClustering unixClustering(List<ConvertedParameter<NamedOption>> namedOptions) {
+    return UnixClustering.create(namedOptions);
   }
 }

@@ -511,7 +511,10 @@ public final class GeneratedClass {
     code.addStatement("$T $N = parse($N)", result.type, result, args);
 
     code.add("if ($N instanceof $T)\n", result, generatedTypes.parsingSuccessWrapperType()).indent()
-        .addStatement("return (($T) $N).$L()", generatedTypes.parsingSuccessWrapperType(), result, context.getSuccessResultMethodName())
+        .addStatement("return (($T) $N).$L()",
+            generatedTypes.parsingSuccessWrapperType(),
+            result,
+            sourceElement.resultMethodName())
         .unindent();
 
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> code
@@ -523,12 +526,12 @@ public final class GeneratedClass {
         .endControlFlow());
 
     code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", generatedTypes.parsingFailedType(), result);
-    if (context.isHelpParameterEnabled()) {
+    if (sourceElement.helpEnabled()) {
       code.addStatement("printTokens($S, usage())", String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " ")));
     } else {
       code.addStatement("printOnlineHelp()");
     }
-    if (context.isHelpParameterEnabled()) {
+    if (sourceElement.helpEnabled()) {
       code.addStatement("$N.println($S + $N + $S)", err, "Try '", programName, " --help' for more information.");
     }
     code.addStatement("$N.flush()", err)

@@ -13,6 +13,7 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.qualifier.UnixClustering;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -46,6 +47,7 @@ final class StatefulParser {
   private final FieldSpec paramParsersField;
   private final SourceElement sourceElement;
   private final List<ConvertedParameter<NamedOption>> options;
+  private final UnixClustering unixClustering;
 
   private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
 
@@ -60,13 +62,15 @@ final class StatefulParser {
       GeneratedType generatedType,
       ParseMethod parseMethod,
       SourceElement sourceElement,
-      List<ConvertedParameter<NamedOption>> options) {
+      List<ConvertedParameter<NamedOption>> options,
+      UnixClustering unixClustering) {
     this.context = context;
     this.generatedTypes = generatedTypes;
     this.generatedType = generatedType;
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
     this.options = options;
+    this.unixClustering = unixClustering;
 
     this.optionParsersField = FieldSpec.builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "optionParsers")
         .initializer("optionParsers()")
@@ -81,7 +85,7 @@ final class StatefulParser {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.statefulParserType())
         .addModifiers(PRIVATE, STATIC)
         .addMethod(parseMethod.parseMethod());
-    if (!context.isSuperCommand()) {
+    if (!sourceElement.isSuperCommand()) {
       spec.addField(endOfOptionParsing);
     }
     if (!options.isEmpty()) {
@@ -92,7 +96,7 @@ final class StatefulParser {
     if (!context.regularParams().isEmpty()) {
       spec.addField(paramParsersField);
     }
-    if (context.anyRepeatableParam() || context.isSuperCommand()) {
+    if (context.anyRepeatableParam() || sourceElement.isSuperCommand()) {
       spec.addField(rest);
     }
     spec.addMethod(buildMethod());
@@ -105,7 +109,7 @@ final class StatefulParser {
     return MethodSpec.methodBuilder("tryParseOption")
         .addParameter(token)
         .addParameter(it)
-        .addCode(context.isUnixClusteringSupported() ?
+        .addCode(unixClustering.isSupported() ?
             tryParseOptionCodeClustering(token, it) :
             tryParseOptionCodeSimple(token, it))
         .returns(BOOLEAN)
@@ -116,7 +120,7 @@ final class StatefulParser {
     ParameterSpec clusterToken = ParameterSpec.builder(STRING, "clusterToken").build();
     ParameterSpec option = ParameterSpec.builder(generatedType.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    if (!context.isSuperCommand()) {
+    if (!sourceElement.isSuperCommand()) {
       code.add("if ($N)\n", endOfOptionParsing).indent()
           .addStatement("return false")
           .unindent();
@@ -140,7 +144,7 @@ final class StatefulParser {
   private CodeBlock tryParseOptionCodeSimple(ParameterSpec token, ParameterSpec it) {
     ParameterSpec option = ParameterSpec.builder(generatedType.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    if (!context.isSuperCommand()) {
+    if (!sourceElement.isSuperCommand()) {
       code.add("if ($N)\n", endOfOptionParsing).indent()
           .addStatement("return false")
           .unindent();
