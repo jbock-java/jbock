@@ -6,12 +6,13 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Context;
+import net.jbock.qualifier.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.GeneratedType;
+import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.UnixClustering;
 
@@ -48,6 +49,7 @@ final class StatefulParser {
   private final SourceElement sourceElement;
   private final List<ConvertedParameter<NamedOption>> options;
   private final UnixClustering unixClustering;
+  private final PositionalParameters positionalParameters;
 
   private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
 
@@ -63,7 +65,8 @@ final class StatefulParser {
       ParseMethod parseMethod,
       SourceElement sourceElement,
       List<ConvertedParameter<NamedOption>> options,
-      UnixClustering unixClustering) {
+      UnixClustering unixClustering,
+      PositionalParameters positionalParameters) {
     this.context = context;
     this.generatedTypes = generatedTypes;
     this.generatedType = generatedType;
@@ -71,13 +74,14 @@ final class StatefulParser {
     this.sourceElement = sourceElement;
     this.options = options;
     this.unixClustering = unixClustering;
+    this.positionalParameters = positionalParameters;
 
     this.optionParsersField = FieldSpec.builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "optionParsers")
         .initializer("optionParsers()")
         .build();
 
     this.paramParsersField = FieldSpec.builder(ArrayTypeName.of(STRING), "paramParsers")
-        .initializer("new $T[$L]", STRING, context.regularParams().size())
+        .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
         .build();
   }
 
@@ -93,10 +97,10 @@ final class StatefulParser {
           .addMethod(tryReadOptionMethod());
       spec.addField(optionParsersField);
     }
-    if (!context.regularParams().isEmpty()) {
+    if (!positionalParameters.regular().isEmpty()) {
       spec.addField(paramParsersField);
     }
-    if (context.anyRepeatableParam() || sourceElement.isSuperCommand()) {
+    if (positionalParameters.anyRepeatable() || sourceElement.isSuperCommand()) {
       spec.addField(rest);
     }
     spec.addMethod(buildMethod());
@@ -190,11 +194,11 @@ final class StatefulParser {
       CodeBlock streamExpression = streamExpressionOption(option);
       code.add(extractExpressionOption(streamExpression, option));
     }
-    for (ConvertedParameter<PositionalParameter> param : context.regularParams()) {
+    for (ConvertedParameter<PositionalParameter> param : positionalParameters.regular()) {
       CodeBlock streamExpression = streamExpressionParameter(param);
       code.add(extractExpressionParameter(streamExpression, param));
     }
-    context.repeatableParam()
+    positionalParameters.repeatable()
         .map(param -> {
           List<CodeBlock> block = new ArrayList<>();
           block.add(CodeBlock.of("$N.stream()", rest));

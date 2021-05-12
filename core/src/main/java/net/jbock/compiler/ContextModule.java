@@ -6,7 +6,9 @@ import dagger.Reusable;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.Context;
 import net.jbock.qualifier.GeneratedType;
+import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.UnixClustering;
 
@@ -65,5 +67,17 @@ public class ContextModule {
   @Provides
   UnixClustering unixClustering(List<ConvertedParameter<NamedOption>> namedOptions) {
     return UnixClustering.create(namedOptions);
+  }
+
+  @Reusable
+  @Provides
+  PositionalParameters positionals(Params params) {
+    return PositionalParameters.create(params.positionalParams);
+  }
+
+  @Reusable
+  @Provides
+  Context allParameters(Params params) {
+    return Context.create(params);
   }
 }

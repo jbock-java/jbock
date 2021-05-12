@@ -10,7 +10,7 @@ public class UnixClustering {
 
   private final boolean supported;
 
-  public UnixClustering(boolean supported) {
+  private UnixClustering(boolean supported) {
     this.supported = supported;
   }
 
