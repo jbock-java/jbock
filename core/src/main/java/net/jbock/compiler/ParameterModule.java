@@ -54,13 +54,13 @@ class ParameterModule {
     EnumName originalName = EnumName.create(methodName);
     EnumName result = originalName;
     int counter = 2;
-    while (!isFresh(result, alreadyCreatedOptions, alreadyCreatedParams)) {
+    while (!isEnumNameUnique(result, alreadyCreatedOptions, alreadyCreatedParams)) {
       result = originalName.append(counter++);
     }
     return result;
   }
 
-  private boolean isFresh(
+  private boolean isEnumNameUnique(
       EnumName result,
       List<ConvertedParameter<NamedOption>> alreadyCreatedOptions,
       List<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {

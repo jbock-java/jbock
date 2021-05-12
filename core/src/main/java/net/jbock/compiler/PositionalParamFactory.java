@@ -31,7 +31,8 @@ class PositionalParamFactory {
       ParamLabel paramLabel,
       DescriptionKey descriptionKey,
       SourceMethod sourceMethod,
-      SourceElement sourceElement, EnumName enumName,
+      SourceElement sourceElement,
+      EnumName enumName,
       Description description,
       List<ConvertedParameter<PositionalParameter>> alreadyCreated) {
     this.converterFinder = converterFinder;
