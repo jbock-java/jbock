@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import net.jbock.Parameter;
 import net.jbock.qualifier.SourceMethod;
 
 import java.util.Comparator;
@@ -10,22 +9,7 @@ import java.util.stream.Collectors;
 class Methods {
 
   private static final Comparator<SourceMethod> POSITION_COMPARATOR =
-      (m1, m2) -> {
-        Parameter param1 = m1.method().getAnnotation(Parameter.class);
-        Parameter param2 = m2.method().getAnnotation(Parameter.class);
-        boolean p1 = param1 != null;
-        boolean p2 = param2 != null;
-        if (p1 && !p2) {
-          return -1;
-        }
-        if (!p1 && p2) {
-          return 1;
-        }
-        if (!p1) {
-          return 0; // both are null, should be impossible but let's get rid of the warning
-        }
-        return Integer.compare(param1.index(), param2.index());
-      };
+      Comparator.comparingInt(m -> m.index().orElse(Integer.MAX_VALUE));
 
   private final List<SourceMethod> params;
   private final List<SourceMethod> options;
