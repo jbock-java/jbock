@@ -25,6 +25,8 @@ class RestArgumentsTest {
   private final Map<String, String> messages = new HashMap<>();
 
   private final String[] expected = {
+      "A very good program.",
+      "",
       "USAGE",
       "  rest-arguments [OPTION]... [REST]...",
       "",
@@ -39,6 +41,7 @@ class RestArgumentsTest {
   void setup() {
     messages.put("the.file", "This\nis\ndog\n");
     messages.put("the.rest", "Hello\n   yes\n");
+    messages.put("description.main", "A very good program.");
   }
 
   @Test

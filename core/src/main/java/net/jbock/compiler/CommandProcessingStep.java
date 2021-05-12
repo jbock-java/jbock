@@ -135,7 +135,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private void write(TypeElement sourceElement, ClassName generatedType, TypeSpec definedType) {
-    JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), definedType);
+    JavaFile.Builder builder = JavaFile.builder(generatedType.packageName(), definedType)
+        .skipJavaLangImports(true);
     JavaFile javaFile = builder.build();
     try {
       JavaFileObject sourceFile = filer.createSourceFile(generatedType.toString(), sourceElement);

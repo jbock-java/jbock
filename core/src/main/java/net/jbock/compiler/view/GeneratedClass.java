@@ -209,9 +209,32 @@ public final class GeneratedClass {
     if (!description.lines().isEmpty()) {
       ParameterSpec descriptionBuilder = builder(LIST_OF_STRING, "description").build();
       code.addStatement("$T $N = new $T<>()", descriptionBuilder.type, descriptionBuilder, ArrayList.class);
-      for (String line : description.lines()) {
-        code.addStatement("$T.addAll($N, $S.split($S, $L))", Collections.class, descriptionBuilder, line, "\\s+", -1);
-      }
+      CodeBlock descriptionBlock = sourceElement.descriptionKey()
+          .map(key -> {
+            CodeBlock.Builder result = CodeBlock.builder();
+            ParameterSpec descriptionMessage = builder(STRING, "descriptionMessage").build();
+            result.addStatement("$T $N = messages.get($S)", STRING, descriptionMessage, key);
+            result.beginControlFlow("if ($N != null)", descriptionMessage)
+                .addStatement("$T.addAll($N, $N.split($S, $L))",
+                    Collections.class, descriptionBuilder, descriptionMessage, "\\s+", -1);
+            result.endControlFlow();
+            result.beginControlFlow("else");
+            for (String line : description.lines()) {
+              result.addStatement("$T.addAll($N, $S.split($S, $L))",
+                  Collections.class, descriptionBuilder, line, "\\s+", -1);
+            }
+            result.endControlFlow();
+            return result.build();
+          })
+          .orElseGet(() -> {
+            CodeBlock.Builder result = CodeBlock.builder();
+            for (String line : description.lines()) {
+              result.addStatement("$T.addAll($N, $S.split($S, $L))",
+                  Collections.class, descriptionBuilder, line, "\\s+", -1);
+            }
+            return result.build();
+          });
+      code.add(descriptionBlock);
       code.addStatement("printTokens($S, $N)", "", descriptionBuilder);
       code.addStatement("$N.println()", err);
     }
