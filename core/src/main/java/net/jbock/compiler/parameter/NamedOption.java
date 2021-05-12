@@ -30,7 +30,7 @@ public class NamedOption extends AbstractParameter {
     return names;
   }
 
-  public String dashedNamesWithLabel(boolean isFlag) {
+  public String namesWithLabel(boolean isFlag) {
     String sample = String.join(", ", names());
     return isFlag ? sample : sample + ' ' + paramLabel();
   }

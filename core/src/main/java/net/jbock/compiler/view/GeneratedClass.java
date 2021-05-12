@@ -13,6 +13,7 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
+import net.jbock.qualifier.DescriptionKeys;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
@@ -73,6 +74,7 @@ public final class GeneratedClass {
   private final SourceElement sourceElement;
   private final PositionalParameters params;
   private final NamedOptions options;
+  private final DescriptionKeys descriptionKeys;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -100,7 +102,8 @@ public final class GeneratedClass {
       StatefulParser parserState,
       ParseResult parseResult,
       PositionalParameters params,
-      NamedOptions options) {
+      NamedOptions options,
+      DescriptionKeys descriptionKeys) {
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
     this.context = context;
@@ -113,6 +116,7 @@ public final class GeneratedClass {
     this.parseResult = parseResult;
     this.params = params;
     this.options = options;
+    this.descriptionKeys = descriptionKeys;
     this.exitHook = exitHookField();
     this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
         .initializer("$S", sourceElement.programName()).build();
@@ -144,7 +148,9 @@ public final class GeneratedClass {
     spec.addField(programName);
     spec.addField(terminalWidth);
     spec.addField(exitHook);
-    spec.addField(messages);
+    if (descriptionKeys.anyDescriptionKeys()) {
+      spec.addField(messages);
+    }
 
     if (!options.isEmpty()) {
       spec.addField(FieldSpec.builder(mapOf(STRING, generatedType.optionType()), OPTIONS_BY_NAME)
@@ -220,26 +226,41 @@ public final class GeneratedClass {
       code.addStatement("$N.println()", err);
       code.addStatement("$N.println($S)", err, "PARAMETERS");
     }
-    params.forEach(p ->
+    params.forEach(p -> {
+      if (descriptionKeys.anyDescriptionKeys()) {
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedType.optionType(), p.enumConstant(),
-            p.parameter().descriptionKey().orElse(""),
-            String.format(paramsFormat, p.parameter().paramLabel())));
+            String.format(paramsFormat, p.parameter().paramLabel()),
+            p.parameter().descriptionKey().orElse(""));
+      } else {
+        code.addStatement("printOption($T.$L, $S)",
+            generatedType.optionType(), p.enumConstant(),
+            String.format(paramsFormat, p.parameter().paramLabel()));
+      }
+    });
     if (!options.isEmpty()) {
       code.addStatement("$N.println()", err);
       code.addStatement("$N.println($S)", err, "OPTIONS");
     }
 
     int optionsWidth = options.stream()
-        .map(c -> c.parameter().dashedNamesWithLabel(c.isFlag()))
+        .map(c -> c.parameter().namesWithLabel(c.isFlag()))
         .mapToInt(String::length).max().orElse(0) + 3;
     String optionsFormat = "  %1$-" + (optionsWidth - 2) + "s";
 
-    options.forEach(c ->
+    options.forEach(c -> {
+      if (descriptionKeys.anyDescriptionKeys()) {
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedType.optionType(), c.enumConstant(),
-            c.parameter().descriptionKey().orElse(""),
-            String.format(optionsFormat, c.parameter().dashedNamesWithLabel(c.isFlag()))));
+            String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
+            c.parameter().descriptionKey().orElse(""));
+      } else {
+        code.addStatement("printOption($T.$L, $S)",
+            generatedType.optionType(), c.enumConstant(),
+            String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())));
+      }
+
+    });
     return methodBuilder("printOnlineHelp")
         .addModifiers(sourceElement.accessModifiers())
         .addCode(code.build())
@@ -247,7 +268,7 @@ public final class GeneratedClass {
   }
 
   MethodSpec printOptionMethod() {
-    ParameterSpec messageKey = builder(STRING, "messageKey").build();
+    ParameterSpec descriptionKey = builder(STRING, "descriptionKey").build();
     ParameterSpec message = builder(STRING, "message").build();
     ParameterSpec option = builder(generatedType.optionType(), "option").build();
     ParameterSpec names = builder(STRING, "names").build();
@@ -255,31 +276,46 @@ public final class GeneratedClass {
     ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
     ParameterSpec s = builder(STRING, "s").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $N.isEmpty() ? null : $N.get($N)", message.type, message, messageKey, messages, messageKey);
+    if (descriptionKeys.anyDescriptionKeys()) {
+      code.addStatement("$T $N = $N.isEmpty() ? null : $N.get($N)", message.type, message, descriptionKey, messages, descriptionKey);
+    }
+
     code.addStatement("$T $N = new $T<>()", tokens.type, tokens, ArrayList.class);
     code.addStatement("$N.add($N)", tokens, names);
-    code.addStatement(CodeBlock.builder().add("$N.addAll($T.ofNullable($N)\n",
-        tokens, Optional.class, message).indent()
-        .add(".map($T::trim)\n", STRING)
-        .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
-        .add(".map($T::asList)\n", Arrays.class)
-        .add(".orElseGet(() -> $T.stream($N.description)\n", Arrays.class, option).indent()
-        .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
-        .add(".flatMap($T::stream)\n", Arrays.class)
-        .add(".collect($T.toList())))", Collectors.class)
-        .unindent()
-        .unindent()
-        .build());
+    if (descriptionKeys.anyDescriptionKeys()) {
+      code.addStatement(CodeBlock.builder().add("$N.addAll($T.ofNullable($N)\n",
+          tokens, Optional.class, message).indent()
+          .add(".map($T::trim)\n", STRING)
+          .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
+          .add(".map($T::asList)\n", Arrays.class)
+          .add(".orElseGet(() -> $T.stream($N.description)\n", Arrays.class, option).indent()
+          .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
+          .add(".flatMap($T::stream)\n", Arrays.class)
+          .add(".collect($T.toList())))", Collectors.class)
+          .unindent()
+          .unindent()
+          .build());
+    } else {
+      code.addStatement(CodeBlock.builder()
+          .add("$T.stream($N.description)\n", Arrays.class, option).indent()
+          .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
+          .add(".flatMap($T::stream)\n", Arrays.class)
+          .add(".forEach($N::add)", tokens)
+          .unindent()
+          .build());
+    }
     code.addStatement("$T $N = $T.join($S, $T.nCopies($N.length() + 1, $S))",
         STRING, continuationIndent, STRING, "", Collections.class, names, " ");
     code.addStatement("printTokens($N, $N)", continuationIndent, tokens);
-    return methodBuilder("printOption")
+    MethodSpec.Builder spec = methodBuilder("printOption")
         .addParameter(option)
-        .addParameter(messageKey)
         .addParameter(names)
         .addModifiers(PRIVATE)
-        .addCode(code.build())
-        .build();
+        .addCode(code.build());
+    if (descriptionKeys.anyDescriptionKeys()) {
+      spec.addParameter(descriptionKey);
+    }
+    return spec.build();
   }
 
   private MethodSpec printTokensMethod() {
@@ -366,10 +402,14 @@ public final class GeneratedClass {
   private MethodSpec withMessagesMethod() {
     ParameterSpec resourceBundleParam = builder(messages.type, "map").build();
     MethodSpec.Builder spec = methodBuilder("withMessages");
-    return spec.addParameter(resourceBundleParam)
-        .addStatement("this.$N = $N", messages, resourceBundleParam)
-        .addStatement("return this")
-        .returns(generatedType.type())
+    spec.addParameter(resourceBundleParam);
+    if (descriptionKeys.anyDescriptionKeys()) {
+      spec.addStatement("this.$N = $N", messages, resourceBundleParam);
+    } else {
+      spec.addComment("no keys defined");
+    }
+    spec.addStatement("return this");
+    return spec.returns(generatedType.type())
         .addModifiers(sourceElement.accessModifiers())
         .build();
   }
