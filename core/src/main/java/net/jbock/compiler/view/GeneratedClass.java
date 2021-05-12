@@ -13,7 +13,7 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
-import net.jbock.qualifier.DescriptionKeys;
+import net.jbock.qualifier.AnyDescriptionKeys;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
@@ -62,7 +62,7 @@ public final class GeneratedClass {
   static final String OPTIONS_BY_NAME = "OPTIONS_BY_NAME";
   static final String SUSPICIOUS_PATTERN = "SUSPICIOUS";
 
-  private final AllParameters context;
+  private final AllParameters allParameters;
   private final Description description;
   private final Impl impl;
   private final GeneratedTypes generatedTypes;
@@ -74,7 +74,7 @@ public final class GeneratedClass {
   private final SourceElement sourceElement;
   private final PositionalParameters params;
   private final NamedOptions options;
-  private final DescriptionKeys descriptionKeys;
+  private final AnyDescriptionKeys anyDescriptionKeys;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -91,7 +91,7 @@ public final class GeneratedClass {
 
   @Inject
   GeneratedClass(
-      AllParameters context,
+      AllParameters allParameters,
       Description description,
       GeneratedType generatedType,
       SourceElement sourceElement,
@@ -103,10 +103,10 @@ public final class GeneratedClass {
       ParseResult parseResult,
       PositionalParameters params,
       NamedOptions options,
-      DescriptionKeys descriptionKeys) {
+      AnyDescriptionKeys anyDescriptionKeys) {
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
-    this.context = context;
+    this.allParameters = allParameters;
     this.description = description;
     this.impl = impl;
     this.generatedTypes = generatedTypes;
@@ -116,7 +116,7 @@ public final class GeneratedClass {
     this.parseResult = parseResult;
     this.params = params;
     this.options = options;
-    this.descriptionKeys = descriptionKeys;
+    this.anyDescriptionKeys = anyDescriptionKeys;
     this.exitHook = exitHookField();
     this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
         .initializer("$S", sourceElement.programName()).build();
@@ -140,7 +140,7 @@ public final class GeneratedClass {
       spec.addMethod(optionsByNameMethod());
       spec.addMethod(optionParsersMethod());
     }
-    if (context.anyRequired()) {
+    if (allParameters.anyRequired()) {
       spec.addMethod(missingRequiredMethod());
     }
 
@@ -148,7 +148,7 @@ public final class GeneratedClass {
     spec.addField(programName);
     spec.addField(terminalWidth);
     spec.addField(exitHook);
-    if (descriptionKeys.anyDescriptionKeys()) {
+    if (anyDescriptionKeys.anyDescriptionKeysAtAll()) {
       spec.addField(messages);
     }
 
@@ -250,7 +250,7 @@ public final class GeneratedClass {
       code.addStatement("$N.println($S)", err, "PARAMETERS");
     }
     params.forEach(p -> {
-      if (descriptionKeys.anyDescriptionKeys()) {
+      if (allParameters.anyDescriptionKeys()) {
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedType.optionType(), p.enumConstant(),
             String.format(paramsFormat, p.parameter().paramLabel()),
@@ -272,7 +272,7 @@ public final class GeneratedClass {
     String optionsFormat = "  %1$-" + (optionsWidth - 2) + "s";
 
     options.forEach(c -> {
-      if (descriptionKeys.anyDescriptionKeys()) {
+      if (allParameters.anyDescriptionKeys()) {
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedType.optionType(), c.enumConstant(),
             String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
@@ -299,13 +299,13 @@ public final class GeneratedClass {
     ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
     ParameterSpec s = builder(STRING, "s").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    if (descriptionKeys.anyDescriptionKeys()) {
+    if (allParameters.anyDescriptionKeys()) {
       code.addStatement("$T $N = $N.isEmpty() ? null : $N.get($N)", message.type, message, descriptionKey, messages, descriptionKey);
     }
 
     code.addStatement("$T $N = new $T<>()", tokens.type, tokens, ArrayList.class);
     code.addStatement("$N.add($N)", tokens, names);
-    if (descriptionKeys.anyDescriptionKeys()) {
+    if (allParameters.anyDescriptionKeys()) {
       code.addStatement(CodeBlock.builder().add("$N.addAll($T.ofNullable($N)\n",
           tokens, Optional.class, message).indent()
           .add(".map($T::trim)\n", STRING)
@@ -335,7 +335,7 @@ public final class GeneratedClass {
         .addParameter(names)
         .addModifiers(PRIVATE)
         .addCode(code.build());
-    if (descriptionKeys.anyDescriptionKeys()) {
+    if (allParameters.anyDescriptionKeys()) {
       spec.addParameter(descriptionKey);
     }
     return spec.build();
@@ -426,7 +426,7 @@ public final class GeneratedClass {
     ParameterSpec resourceBundleParam = builder(messages.type, "map").build();
     MethodSpec.Builder spec = methodBuilder("withMessages");
     spec.addParameter(resourceBundleParam);
-    if (descriptionKeys.anyDescriptionKeys()) {
+    if (anyDescriptionKeys.anyDescriptionKeysAtAll()) {
       spec.addStatement("this.$N = $N", messages, resourceBundleParam);
     } else {
       spec.addComment("no keys defined");
@@ -455,7 +455,7 @@ public final class GeneratedClass {
     CodeBlock.Builder code = CodeBlock.builder();
 
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> {
-      if (context.anyRequired()) {
+      if (allParameters.anyRequired()) {
         code.add("if ($N.length == 0)\n",
             args).indent()
             .addStatement("return new $T()", helpRequestedType)

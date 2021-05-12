@@ -4,7 +4,6 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
 import net.jbock.qualifier.AllParameters;
-import net.jbock.qualifier.DescriptionKeys;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
@@ -13,14 +12,14 @@ import net.jbock.qualifier.SourceElement;
 import javax.lang.model.util.Elements;
 
 @Module
-public class ContextModule {
+class ContextModule {
 
   private final SourceElement sourceElement;
   private final GeneratedType generatedType;
   private final Elements elements;
   private final Params params;
 
-  public ContextModule(
+  ContextModule(
       SourceElement sourceElement,
       GeneratedType generatedType,
       Elements elements,
@@ -55,13 +54,13 @@ public class ContextModule {
 
   @Reusable
   @Provides
-  PositionalParameters positionals() {
+  PositionalParameters positionalParameters() {
     return PositionalParameters.create(params.positionalParams());
   }
 
   @Reusable
   @Provides
-  NamedOptions options() {
+  NamedOptions namedOptions() {
     return NamedOptions.create(params.namedOptions());
   }
 
@@ -69,11 +68,5 @@ public class ContextModule {
   @Provides
   AllParameters allParameters() {
     return AllParameters.create(params);
-  }
-
-  @Reusable
-  @Provides
-  public DescriptionKeys descriptionKeys(AllParameters allParameters) {
-    return DescriptionKeys.create(allParameters, sourceElement);
   }
 }
