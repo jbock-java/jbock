@@ -8,6 +8,7 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.GeneratedType;
+import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.UnixClustering;
@@ -21,14 +22,17 @@ public class ContextModule {
   private final SourceElement sourceElement;
   private final GeneratedType generatedType;
   private final Elements elements;
+  private final Params params;
 
   public ContextModule(
       SourceElement sourceElement,
       GeneratedType generatedType,
-      Elements elements) {
+      Elements elements,
+      Params params) {
     this.sourceElement = sourceElement;
     this.generatedType = generatedType;
     this.elements = elements;
+    this.params = params;
   }
 
   @Provides
@@ -42,12 +46,12 @@ public class ContextModule {
   }
 
   @Provides
-  List<ConvertedParameter<NamedOption>> namedOptions(Params params) {
+  List<ConvertedParameter<NamedOption>> namedOptions() {
     return params.namedOptions();
   }
 
   @Provides
-  List<ConvertedParameter<PositionalParameter>> positionalParameters(Params params) {
+  List<ConvertedParameter<PositionalParameter>> positionalParameters() {
     return params.positionalParams();
   }
 
@@ -71,13 +75,19 @@ public class ContextModule {
 
   @Reusable
   @Provides
-  PositionalParameters positionals(Params params) {
+  PositionalParameters positionals() {
     return PositionalParameters.create(params.positionalParams());
   }
 
   @Reusable
   @Provides
-  AllParameters allParameters(Params params) {
+  NamedOptions options() {
+    return NamedOptions.create(params.namedOptions());
+  }
+
+  @Reusable
+  @Provides
+  AllParameters allParameters() {
     return AllParameters.create(params);
   }
 }

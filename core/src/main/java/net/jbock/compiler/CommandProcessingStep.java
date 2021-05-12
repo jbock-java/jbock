@@ -122,9 +122,9 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
               messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
             }
           }, params -> {
-            ContextModule module = new ContextModule(sourceElement, generatedType, elements);
+            ContextModule module = new ContextModule(sourceElement, generatedType, elements, params);
             TypeSpec typeSpec = DaggerContextComponent.factory()
-                .create(params, module)
+                .create(module)
                 .generatedClass()
                 .define();
             write(sourceElement.element(), generatedType.type(), typeSpec);

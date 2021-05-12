@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import dagger.BindsInstance;
 import dagger.Component;
 import net.jbock.compiler.view.GeneratedClass;
 
@@ -13,7 +12,6 @@ interface ContextComponent {
   interface Builder {
 
     ContextComponent create(
-        @BindsInstance Params params,
         ContextModule module);
   }
 }

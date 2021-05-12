@@ -9,9 +9,7 @@ import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.GeneratedTypes;
-import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.convert.ConvertedParameter;
-import net.jbock.qualifier.AllParameters;
+import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.UnixClustering;
 
 import javax.inject.Inject;
@@ -37,19 +35,16 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
  */
 final class OptionParser {
 
-  private final AllParameters context;
   private final GeneratedTypes generatedTypes;
   private final FieldSpec optionField;
-  private final List<ConvertedParameter<NamedOption>> options;
+  private final NamedOptions options;
   private final UnixClustering unixClustering;
 
   @Inject
   OptionParser(
-      AllParameters context,
       GeneratedTypes generatedTypes,
-      List<ConvertedParameter<NamedOption>> options,
+      NamedOptions options,
       UnixClustering unixClustering) {
-    this.context = context;
     this.generatedTypes = generatedTypes;
     this.optionField = FieldSpec.builder(generatedTypes.optionType(), "option")
         .addModifiers(FINAL)
@@ -80,10 +75,7 @@ final class OptionParser {
             .build())
         .addModifiers(PRIVATE, STATIC, ABSTRACT)
         .build());
-    boolean anyRepeatable = options.stream().anyMatch(ConvertedParameter::isRepeatable);
-    boolean anyRegular = options.stream().anyMatch(option -> option.isOptional() || option.isRequired());
-    boolean anyFlags = options.stream().anyMatch(ConvertedParameter::isFlag);
-    if (anyFlags) {
+    if (options.anyFlags()) {
       result.add(TypeSpec.classBuilder(generatedTypes.flagParserType())
           .superclass(generatedTypes.optionParserType())
           .addField(seen)
@@ -95,7 +87,7 @@ final class OptionParser {
               .build())
           .addModifiers(PRIVATE, STATIC).build());
     }
-    if (anyRepeatable) {
+    if (options.anyRepeatable()) {
       result.add(TypeSpec.classBuilder(generatedTypes.repeatableOptionParserType())
           .superclass(generatedTypes.optionParserType())
           .addField(values)
@@ -107,7 +99,7 @@ final class OptionParser {
               .build())
           .addModifiers(PRIVATE, STATIC).build());
     }
-    if (anyRegular) {
+    if (options.anyRegular()) {
       result.add(TypeSpec.classBuilder(generatedTypes.regularOptionParserType())
           .superclass(generatedTypes.optionParserType())
           .addField(value)
