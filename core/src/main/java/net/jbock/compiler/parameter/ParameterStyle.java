@@ -6,7 +6,6 @@ import net.jbock.Parameters;
 
 import javax.lang.model.element.ExecutableElement;
 import java.lang.annotation.Annotation;
-import java.util.Optional;
 import java.util.OptionalInt;
 
 public enum ParameterStyle {
@@ -14,12 +13,12 @@ public enum ParameterStyle {
   OPTION(Option.class) {
     @Override
     public String descriptionKey(ExecutableElement method) {
-      return get(method).map(Option::descriptionKey).orElse("");
+      return get(method).descriptionKey();
     }
 
     @Override
     public String paramLabel(ExecutableElement method) {
-      return get(method).map(Option::paramLabel).orElse("");
+      return get(method).paramLabel();
     }
 
     @Override
@@ -32,18 +31,18 @@ public enum ParameterStyle {
       return OptionalInt.empty();
     }
 
-    private Optional<Option> get(ExecutableElement method) {
-      return Optional.ofNullable(method.getAnnotation(Option.class));
+    private Option get(ExecutableElement method) {
+      return method.getAnnotation(Option.class);
     }
   }, PARAMETER(Parameter.class) {
     @Override
     public String descriptionKey(ExecutableElement method) {
-      return get(method).map(Parameter::descriptionKey).orElse("");
+      return get(method).descriptionKey();
     }
 
     @Override
     public String paramLabel(ExecutableElement method) {
-      return get(method).map(Parameter::paramLabel).orElse("");
+      return get(method).paramLabel();
     }
 
     @Override
@@ -56,18 +55,18 @@ public enum ParameterStyle {
       return OptionalInt.of(method.getAnnotation(Parameter.class).index());
     }
 
-    private Optional<Parameter> get(ExecutableElement method) {
-      return Optional.ofNullable(method.getAnnotation(Parameter.class));
+    private Parameter get(ExecutableElement method) {
+      return method.getAnnotation(Parameter.class);
     }
   }, PARAMETERS(Parameters.class) {
     @Override
     public String descriptionKey(ExecutableElement method) {
-      return get(method).map(Parameters::descriptionKey).orElse("");
+      return get(method).descriptionKey();
     }
 
     @Override
     public String paramLabel(ExecutableElement method) {
-      return get(method).map(Parameters::paramLabel).orElse("");
+      return get(method).paramLabel();
     }
 
     @Override
@@ -80,8 +79,8 @@ public enum ParameterStyle {
       return OptionalInt.empty();
     }
 
-    private Optional<Parameters> get(ExecutableElement method) {
-      return Optional.ofNullable(method.getAnnotation(Parameters.class));
+    private Parameters get(ExecutableElement method) {
+      return method.getAnnotation(Parameters.class);
     }
   };
 

@@ -5,6 +5,7 @@ import net.jbock.SuperCommand;
 
 import javax.lang.model.element.TypeElement;
 import java.lang.annotation.Annotation;
+import java.util.Optional;
 
 public enum ParserFlavour {
 
@@ -15,17 +16,24 @@ public enum ParserFlavour {
     }
 
     @Override
-    public String programName(TypeElement sourceElement) {
-      Command command = sourceElement.getAnnotation(Command.class);
-      if (!command.name().isEmpty()) {
-        return command.name();
-      }
-      return EnumName.create(sourceElement.getSimpleName().toString()).snake('-');
+    public Optional<String> programName(TypeElement sourceElement) {
+      String name = get(sourceElement).name();
+      return name.isEmpty() ? Optional.empty() : Optional.of(name);
+    }
+
+    @Override
+    public Optional<String> descriptionKey(TypeElement sourceElement) {
+      String key = get(sourceElement).descriptionKey();
+      return key.isEmpty() ? Optional.empty() : Optional.of(key);
     }
 
     @Override
     public boolean isSuperCommand() {
       return false;
+    }
+
+    private Command get(TypeElement sourceElement) {
+      return sourceElement.getAnnotation(Command.class);
     }
   },
 
@@ -36,17 +44,24 @@ public enum ParserFlavour {
     }
 
     @Override
-    public String programName(TypeElement sourceElement) {
-      SuperCommand command = sourceElement.getAnnotation(SuperCommand.class);
-      if (!command.name().isEmpty()) {
-        return command.name();
-      }
-      return EnumName.create(sourceElement.getSimpleName().toString()).snake('-');
+    public Optional<String> programName(TypeElement sourceElement) {
+      String name = get(sourceElement).name();
+      return name.isEmpty() ? Optional.empty() : Optional.of(name);
+    }
+
+    @Override
+    public Optional<String> descriptionKey(TypeElement sourceElement) {
+      String key = get(sourceElement).descriptionKey();
+      return key.isEmpty() ? Optional.empty() : Optional.of(key);
     }
 
     @Override
     public boolean isSuperCommand() {
       return true;
+    }
+
+    private SuperCommand get(TypeElement sourceElement) {
+      return sourceElement.getAnnotation(SuperCommand.class);
     }
   };
 
@@ -67,7 +82,9 @@ public enum ParserFlavour {
 
   public abstract boolean helpEnabled(TypeElement sourceElement);
 
-  public abstract String programName(TypeElement sourceElement);
+  public abstract Optional<String> programName(TypeElement sourceElement);
+
+  public abstract Optional<String> descriptionKey(TypeElement sourceElement);
 
   public abstract boolean isSuperCommand();
 }

@@ -4,6 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
 import net.jbock.qualifier.AllParameters;
+import net.jbock.qualifier.DescriptionKeys;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
@@ -68,5 +69,11 @@ public class ContextModule {
   @Provides
   AllParameters allParameters() {
     return AllParameters.create(params);
+  }
+
+  @Reusable
+  @Provides
+  public DescriptionKeys descriptionKeys(AllParameters allParameters) {
+    return DescriptionKeys.create(allParameters, sourceElement);
   }
 }

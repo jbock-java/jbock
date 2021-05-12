@@ -11,12 +11,15 @@ public final class AllParameters {
 
   private final List<ConvertedParameter<? extends AbstractParameter>> parameters;
   private final boolean anyRequired;
+  private final boolean anyDescriptionKeys;
 
   private AllParameters(
       List<ConvertedParameter<? extends AbstractParameter>> parameters,
-      boolean anyRequired) {
+      boolean anyRequired,
+      boolean anyDescriptionKeys) {
     this.parameters = parameters;
     this.anyRequired = anyRequired;
+    this.anyDescriptionKeys = anyDescriptionKeys;
   }
 
   public static AllParameters create(Params params) {
@@ -25,7 +28,8 @@ public final class AllParameters {
         .addAll(params.namedOptions())
         .addAll(params.positionalParams()).build();
     boolean anyRequired = allParameters.stream().anyMatch(ConvertedParameter::isRequired);
-    return new AllParameters(allParameters, anyRequired);
+    boolean anyDescriptionKeys = allParameters.stream().anyMatch(c -> c.parameter().descriptionKey().isPresent());
+    return new AllParameters(allParameters, anyRequired, anyDescriptionKeys);
   }
 
   public List<ConvertedParameter<? extends AbstractParameter>> parameters() {
@@ -34,5 +38,9 @@ public final class AllParameters {
 
   public boolean anyRequired() {
     return anyRequired;
+  }
+
+  public boolean anyDescriptionKeys() {
+    return anyDescriptionKeys;
   }
 }
