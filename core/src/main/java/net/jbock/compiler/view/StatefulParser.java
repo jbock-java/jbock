@@ -10,11 +10,10 @@ import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.GeneratedType;
+import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
-import net.jbock.qualifier.UnixClustering;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -40,15 +39,13 @@ import static net.jbock.compiler.view.GeneratedClass.OPTIONS_BY_NAME;
  */
 final class StatefulParser {
 
-  private final AllParameters context;
   private final ParseMethod parseMethod;
   private final GeneratedTypes generatedTypes;
   private final GeneratedType generatedType;
   private final FieldSpec optionParsersField;
   private final FieldSpec paramParsersField;
   private final SourceElement sourceElement;
-  private final List<ConvertedParameter<NamedOption>> options;
-  private final UnixClustering unixClustering;
+  private final NamedOptions options;
   private final PositionalParameters positionalParameters;
 
   private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
@@ -59,21 +56,17 @@ final class StatefulParser {
 
   @Inject
   StatefulParser(
-      AllParameters context,
       GeneratedTypes generatedTypes,
       GeneratedType generatedType,
       ParseMethod parseMethod,
       SourceElement sourceElement,
-      List<ConvertedParameter<NamedOption>> options,
-      UnixClustering unixClustering,
+      NamedOptions options,
       PositionalParameters positionalParameters) {
-    this.context = context;
     this.generatedTypes = generatedTypes;
     this.generatedType = generatedType;
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
     this.options = options;
-    this.unixClustering = unixClustering;
     this.positionalParameters = positionalParameters;
 
     this.optionParsersField = FieldSpec.builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "optionParsers")
@@ -113,7 +106,7 @@ final class StatefulParser {
     return MethodSpec.methodBuilder("tryParseOption")
         .addParameter(token)
         .addParameter(it)
-        .addCode(unixClustering.isSupported() ?
+        .addCode(options.unixClusteringSupported() ?
             tryParseOptionCodeClustering(token, it) :
             tryParseOptionCodeSimple(token, it))
         .returns(BOOLEAN)
@@ -190,7 +183,7 @@ final class StatefulParser {
   private MethodSpec buildMethod() {
 
     List<CodeBlock> code = new ArrayList<>();
-    for (ConvertedParameter<NamedOption> option : options) {
+    for (ConvertedParameter<NamedOption> option : options.options()) {
       CodeBlock streamExpression = streamExpressionOption(option);
       code.add(extractExpressionOption(streamExpression, option));
     }

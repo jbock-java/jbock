@@ -10,7 +10,6 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.NamedOptions;
-import net.jbock.qualifier.UnixClustering;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -38,19 +37,16 @@ final class OptionParser {
   private final GeneratedTypes generatedTypes;
   private final FieldSpec optionField;
   private final NamedOptions options;
-  private final UnixClustering unixClustering;
 
   @Inject
   OptionParser(
       GeneratedTypes generatedTypes,
-      NamedOptions options,
-      UnixClustering unixClustering) {
+      NamedOptions options) {
     this.generatedTypes = generatedTypes;
     this.optionField = FieldSpec.builder(generatedTypes.optionType(), "option")
         .addModifiers(FINAL)
         .build();
     this.options = options;
-    this.unixClustering = unixClustering;
   }
 
   List<TypeSpec> define() {
@@ -130,7 +126,7 @@ final class OptionParser {
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class);
     code.addStatement("values.add(readOptionArgument($N, $N))", token, it);
-    if (unixClustering.isSupported()) {
+    if (options.unixClusteringSupported()) {
       code.addStatement("return false");
     }
     return MethodSpec.methodBuilder("read")
@@ -148,7 +144,7 @@ final class OptionParser {
         .addStatement(throwRepetitionErrorStatement(token))
         .unindent();
     code.addStatement("$N = readOptionArgument($N, $N)", value, token, it);
-    if (unixClustering.isSupported()) {
+    if (options.unixClusteringSupported()) {
       code.addStatement("return false");
     }
     return MethodSpec.methodBuilder("read")
@@ -162,7 +158,7 @@ final class OptionParser {
     ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     return MethodSpec.methodBuilder("read")
-        .addCode(unixClustering.isSupported() ?
+        .addCode(options.unixClusteringSupported() ?
             readMethodFlagCodeClustering(seen, token) :
             readMethodFlagCodeSimple(seen, token))
         .returns(readMethodReturnType())
@@ -233,6 +229,6 @@ final class OptionParser {
   }
 
   private TypeName readMethodReturnType() {
-    return unixClustering.isSupported() ? BOOLEAN : VOID;
+    return options.unixClusteringSupported() ? BOOLEAN : VOID;
   }
 }

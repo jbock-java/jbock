@@ -6,15 +6,11 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.GeneratedTypes;
-import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.compiler.parameter.PositionalParameter;
-import net.jbock.convert.ConvertedParameter;
-import net.jbock.qualifier.AllParameters;
+import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.List;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
@@ -26,29 +22,23 @@ import static net.jbock.compiler.view.GeneratedClass.SUSPICIOUS_PATTERN;
 
 class ParseMethod {
 
-  private final AllParameters context;
   private final GeneratedTypes generatedTypes;
 
   private final ParameterSpec it = builder(STRING_ITERATOR, "it").build();
   private final ParameterSpec token = builder(STRING, "token").build();
   private final ParameterSpec position = builder(INT, "position").build();
   private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest").build();
-  private final List<ConvertedParameter<PositionalParameter>> params;
-  private final List<ConvertedParameter<NamedOption>> options;
-  private final PositionalParameters positionalParameters;
+  private final NamedOptions options;
+  private final PositionalParameters params;
 
   @Inject
   ParseMethod(
-      AllParameters context,
       GeneratedTypes generatedTypes,
-      List<ConvertedParameter<PositionalParameter>> params,
-      List<ConvertedParameter<NamedOption>> options,
-      PositionalParameters positionalParameters) {
-    this.context = context;
+      NamedOptions options,
+      PositionalParameters params) {
     this.generatedTypes = generatedTypes;
-    this.params = params;
     this.options = options;
-    this.positionalParameters = positionalParameters;
+    this.params = params;
   }
 
   MethodSpec parseMethod() {
@@ -113,14 +103,14 @@ class ParseMethod {
 
     if (params.isEmpty()) {
       code.addStatement(throwInvalidOptionStatement("Excess param"));
-    } else if (!positionalParameters.anyRepeatable()) {
+    } else if (!params.anyRepeatable()) {
       code.add("if ($N == $L)\n", position, params.size()).indent()
           .addStatement(throwInvalidOptionStatement("Excess param"))
           .unindent();
     }
 
     if (!params.isEmpty()) {
-      if (positionalParameters.anyRepeatable()) {
+      if (params.anyRepeatable()) {
         if (params.size() == 1) {
           code.addStatement("$N.add($N)", rest, token);
         } else {
@@ -152,7 +142,7 @@ class ParseMethod {
 
   private CodeBlock.Builder initVariables() {
     CodeBlock.Builder code = CodeBlock.builder();
-    if (!params.isEmpty() && !(positionalParameters.anyRepeatable() && params.size() == 1)) {
+    if (!params.isEmpty() && !(params.anyRepeatable() && params.size() == 1)) {
       code.addStatement("$T $N = $L", position.type, position, 0);
     }
     return code;

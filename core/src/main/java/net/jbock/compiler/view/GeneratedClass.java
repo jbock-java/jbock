@@ -14,6 +14,8 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.GeneratedType;
+import net.jbock.qualifier.NamedOptions;
+import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
@@ -69,8 +71,8 @@ public final class GeneratedClass {
   private final StatefulParser parserState;
   private final ParseResult parseResult;
   private final SourceElement sourceElement;
-  private final List<ConvertedParameter<PositionalParameter>> params;
-  private final List<ConvertedParameter<NamedOption>> options;
+  private final PositionalParameters params;
+  private final NamedOptions options;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -97,8 +99,8 @@ public final class GeneratedClass {
       OptionEnum optionEnum,
       StatefulParser parserState,
       ParseResult parseResult,
-      List<ConvertedParameter<PositionalParameter>> params,
-      List<ConvertedParameter<NamedOption>> options) {
+      PositionalParameters params,
+      NamedOptions options) {
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
     this.context = context;
@@ -211,10 +213,7 @@ public final class GeneratedClass {
     code.addStatement("$N.println($S)", err, "USAGE");
     code.addStatement("printTokens($S, usage())", continuationIndent);
 
-    int paramsWidth = params.stream()
-        .map(ConvertedParameter::parameter)
-        .map(PositionalParameter::paramLabel)
-        .mapToInt(String::length).max().orElse(0) + 3;
+    int paramsWidth = params.paramsWidth();
     String paramsFormat = "  %1$-" + (paramsWidth - 2) + "s";
 
     if (!params.isEmpty()) {
@@ -486,7 +485,7 @@ public final class GeneratedClass {
           option.parameter().paramLabel());
     }
 
-    for (ConvertedParameter<PositionalParameter> param : params) {
+    for (ConvertedParameter<PositionalParameter> param : params.all()) {
       if (param.isOptional()) {
         spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]");
       } else if (param.isRequired()) {
@@ -555,7 +554,7 @@ public final class GeneratedClass {
         .mapToLong(i -> i)
         .sum();
     code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
-    for (ConvertedParameter<NamedOption> namedOption : options) {
+    for (ConvertedParameter<NamedOption> namedOption : options.options()) {
       for (String dashedName : namedOption.parameter().names()) {
         code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedType.optionType(),
             namedOption.enumConstant());
@@ -584,7 +583,7 @@ public final class GeneratedClass {
     }
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, generatedType.optionType());
-    for (ConvertedParameter<NamedOption> param : options) {
+    for (ConvertedParameter<NamedOption> param : options.options()) {
       String enumConstant = param.enumConstant();
       code.addStatement("$N.put($T.$L, new $T($T.$L))",
           parsers, generatedType.optionType(), enumConstant, optionParserType(param),
