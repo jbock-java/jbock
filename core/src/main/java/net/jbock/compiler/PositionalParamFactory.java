@@ -7,6 +7,7 @@ import net.jbock.convert.ConverterFinder;
 import net.jbock.either.Either;
 import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.ParamLabel;
+import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
@@ -16,10 +17,10 @@ import java.util.Optional;
 class PositionalParamFactory {
 
   private final ConverterFinder converterFinder;
-  private final ParserFlavour flavour;
   private final ParamLabel paramLabel;
   private final DescriptionKey descriptionKey;
   private final SourceMethod sourceMethod;
+  private final SourceElement sourceElement;
   private final EnumName enumName;
   private final Description description;
   private final List<ConvertedParameter<PositionalParameter>> alreadyCreated;
@@ -27,18 +28,17 @@ class PositionalParamFactory {
   @Inject
   PositionalParamFactory(
       ConverterFinder converterFinder,
-      ParserFlavour flavour,
       ParamLabel paramLabel,
       DescriptionKey descriptionKey,
       SourceMethod sourceMethod,
-      EnumName enumName,
+      SourceElement sourceElement, EnumName enumName,
       Description description,
       List<ConvertedParameter<PositionalParameter>> alreadyCreated) {
     this.converterFinder = converterFinder;
-    this.flavour = flavour;
     this.paramLabel = paramLabel;
     this.descriptionKey = descriptionKey;
     this.sourceMethod = sourceMethod;
+    this.sourceElement = sourceElement;
     this.enumName = enumName;
     this.description = description;
     this.alreadyCreated = alreadyCreated;
@@ -80,7 +80,7 @@ class PositionalParamFactory {
   }
 
   private Optional<String> checkSuperNotRepeatable(ConvertedParameter<PositionalParameter> c) {
-    if (flavour.isSuperCommand() && c.isRepeatable()) {
+    if (sourceElement.isSuperCommand() && c.isRepeatable()) {
       return Optional.of("in a @" + SuperCommand.class.getSimpleName() +
           ", repeatable params are not supported");
     }

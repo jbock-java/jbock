@@ -7,6 +7,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -27,23 +28,26 @@ import static javax.lang.model.element.Modifier.STATIC;
 final class ParseResult {
 
   private final Context context;
-
   private final GeneratedTypes generatedTypes;
-
   private final FieldSpec result;
+  private final SourceElement sourceElement;
 
   @Inject
-  ParseResult(Context context, GeneratedTypes generatedTypes) {
+  ParseResult(
+      Context context,
+      GeneratedTypes generatedTypes,
+      SourceElement sourceElement) {
     this.context = context;
     this.result = FieldSpec.builder(generatedTypes.parseSuccessType(), "result", PRIVATE, FINAL).build();
     this.generatedTypes = generatedTypes;
+    this.sourceElement = sourceElement;
   }
 
   List<TypeSpec> defineResultTypes() {
     TypeSpec.Builder spec = classBuilder(generatedTypes.parseResultType())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addModifiers(ABSTRACT, STATIC)
-        .addModifiers(context.getAccessModifiers());
+        .addModifiers(sourceElement.accessModifiers());
     List<TypeSpec> result = new ArrayList<>();
     result.add(spec.build());
     result.add(defineErrorResult());
@@ -58,7 +62,7 @@ final class ParseResult {
     return classBuilder(helpRequestedType)
         .superclass(generatedTypes.parseResultType())
         .addModifiers(STATIC, FINAL)
-        .addModifiers(context.getAccessModifiers())
+        .addModifiers(sourceElement.accessModifiers())
         .build();
   }
 
@@ -74,10 +78,10 @@ final class ParseResult {
             .addStatement("this.$N = $N", fieldError, paramError)
             .build())
         .addModifiers(STATIC, FINAL)
-        .addModifiers(context.getAccessModifiers())
+        .addModifiers(sourceElement.accessModifiers())
         .addMethod(methodBuilder("getError")
             .addStatement("return $N", fieldError)
-            .addModifiers(context.getAccessModifiers())
+            .addModifiers(sourceElement.accessModifiers())
             .returns(fieldError.type)
             .build())
         .build();
@@ -94,7 +98,7 @@ final class ParseResult {
             .addStatement("this.$N = $N", result, paramResult)
             .build())
         .addModifiers(STATIC, FINAL)
-        .addModifiers(context.getAccessModifiers())
+        .addModifiers(sourceElement.accessModifiers())
         .addMethod(getResultMethod())
         .build();
   }
@@ -103,7 +107,7 @@ final class ParseResult {
     return methodBuilder(context.getSuccessResultMethodName())
         .addStatement("return $N", result)
         .returns(generatedTypes.parseSuccessType())
-        .addModifiers(context.getAccessModifiers())
+        .addModifiers(sourceElement.accessModifiers())
         .build();
   }
 }

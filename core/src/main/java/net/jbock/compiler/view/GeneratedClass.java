@@ -10,11 +10,10 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.GeneratedTypes;
-import net.jbock.compiler.ParserFlavour;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.qualifier.OptionType;
+import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
@@ -65,11 +64,12 @@ public final class GeneratedClass {
   private final Description description;
   private final Impl impl;
   private final GeneratedTypes generatedTypes;
+  private final GeneratedType generatedType;
   private final OptionParser optionParser;
   private final OptionEnum optionEnum;
   private final StatefulParser parserState;
   private final ParseResult parseResult;
-  private final OptionType optionType;
+  private final SourceElement sourceElement;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -88,15 +88,16 @@ public final class GeneratedClass {
   GeneratedClass(
       Context context,
       Description description,
+      GeneratedType generatedType,
       SourceElement sourceElement,
       Impl impl,
       GeneratedTypes generatedTypes,
       OptionParser optionParser,
       OptionEnum optionEnum,
       StatefulParser parserState,
-      ParseResult parseResult,
-      OptionType optionType,
-      ParserFlavour parserFlavour) {
+      ParseResult parseResult) {
+    this.generatedType = generatedType;
+    this.sourceElement = sourceElement;
     this.context = context;
     this.description = description;
     this.impl = impl;
@@ -107,20 +108,18 @@ public final class GeneratedClass {
     this.parseResult = parseResult;
     this.exitHook = exitHookField();
     this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
-        .initializer("$S", parserFlavour.programName(sourceElement.element())).build();
-    this.optionType = optionType;
+        .initializer("$S", sourceElement.programName()).build();
   }
 
   public TypeSpec define() {
-    Modifier[] accessModifiers = context.getAccessModifiers();
-    TypeSpec.Builder spec = TypeSpec.classBuilder(context.generatedClass())
-        .addMethod(parseMethod(accessModifiers))
-        .addMethod(parseOrExitMethod(accessModifiers))
-        .addMethod(withTerminalWidthMethod(accessModifiers))
-        .addMethod(withMessagesMethod(accessModifiers))
-        .addMethod(withExitHookMethod(accessModifiers))
-        .addMethod(withErrorStreamMethod(accessModifiers));
-    spec.addMethod(printOnlineHelpMethod(accessModifiers))
+    TypeSpec.Builder spec = TypeSpec.classBuilder(generatedType.type())
+        .addMethod(parseMethod(sourceElement.accessModifiers()))
+        .addMethod(parseOrExitMethod(sourceElement.accessModifiers()))
+        .addMethod(withTerminalWidthMethod(sourceElement.accessModifiers()))
+        .addMethod(withMessagesMethod(sourceElement.accessModifiers()))
+        .addMethod(withExitHookMethod(sourceElement.accessModifiers()))
+        .addMethod(withErrorStreamMethod(sourceElement.accessModifiers()))
+        .addMethod(printOnlineHelpMethod(sourceElement.accessModifiers()))
         .addMethod(printOptionMethod())
         .addMethod(printTokensMethod())
         .addMethod(makeLinesMethod())
@@ -130,7 +129,7 @@ public final class GeneratedClass {
       spec.addMethod(optionsByNameMethod());
       spec.addMethod(optionParsersMethod());
     }
-    if (context.parameters().stream().anyMatch(ConvertedParameter::isRequired)) {
+    if (context.anyRequired()) {
       spec.addMethod(missingRequiredMethod());
     }
 
@@ -141,7 +140,7 @@ public final class GeneratedClass {
     spec.addField(messages);
 
     if (!context.options().isEmpty()) {
-      spec.addField(FieldSpec.builder(mapOf(STRING, optionType.type()), OPTIONS_BY_NAME)
+      spec.addField(FieldSpec.builder(mapOf(STRING, generatedType.optionType()), OPTIONS_BY_NAME)
           .initializer("optionsByName()")
           .addModifiers(PRIVATE, STATIC, FINAL)
           .build());
@@ -160,10 +159,10 @@ public final class GeneratedClass {
 
     // move this elsewhere
     generatedTypes.parseResultWithRestType().ifPresent(resultWithRestType -> {
-      FieldSpec result = FieldSpec.builder(generatedTypes.sourceType(), "result", PRIVATE, FINAL).build();
+      FieldSpec result = FieldSpec.builder(sourceElement.typeName(), "result", PRIVATE, FINAL).build();
       FieldSpec rest = FieldSpec.builder(STRING_ARRAY, "rest", PRIVATE, FINAL).build();
       spec.addType(TypeSpec.classBuilder(resultWithRestType)
-          .addModifiers(accessModifiers)
+          .addModifiers(sourceElement.accessModifiers())
           .addModifiers(STATIC, FINAL)
           .addField(result)
           .addField(rest)
@@ -176,17 +175,17 @@ public final class GeneratedClass {
               .build())
           .addMethod(methodBuilder("getRest")
               .returns(rest.type)
-              .addModifiers(accessModifiers)
+              .addModifiers(sourceElement.accessModifiers())
               .addStatement("return $N", rest).build())
           .addMethod(methodBuilder("getResult")
               .returns(result.type)
-              .addModifiers(accessModifiers)
+              .addModifiers(sourceElement.accessModifiers())
               .addStatement("return $N", result).build())
           .build());
     });
 
     return spec.addModifiers(FINAL)
-        .addModifiers(accessModifiers)
+        .addModifiers(sourceElement.accessModifiers())
         .addJavadoc(javadoc()).build();
   }
 
@@ -219,7 +218,7 @@ public final class GeneratedClass {
     }
     context.params().forEach(p ->
         code.addStatement("printOption($T.$L, $S, $S)",
-            optionType.type(), p.enumConstant(),
+            generatedType.optionType(), p.enumConstant(),
             p.parameter().descriptionKey().orElse(""),
             String.format(paramsFormat, p.parameter().paramLabel())));
     if (!context.options().isEmpty()) {
@@ -234,7 +233,7 @@ public final class GeneratedClass {
 
     context.options().forEach(c ->
         code.addStatement("printOption($T.$L, $S, $S)",
-            optionType.type(), c.enumConstant(),
+            generatedType.optionType(), c.enumConstant(),
             c.parameter().descriptionKey().orElse(""),
             String.format(optionsFormat, c.parameter().dashedNamesWithLabel(c.isFlag()))));
     return methodBuilder("printOnlineHelp")
@@ -246,7 +245,7 @@ public final class GeneratedClass {
   MethodSpec printOptionMethod() {
     ParameterSpec messageKey = builder(STRING, "messageKey").build();
     ParameterSpec message = builder(STRING, "message").build();
-    ParameterSpec option = builder(optionType.type(), "option").build();
+    ParameterSpec option = builder(generatedType.optionType(), "option").build();
     ParameterSpec names = builder(STRING, "names").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
@@ -344,7 +343,7 @@ public final class GeneratedClass {
         .addParameter(width)
         .addStatement("this.$1N = $2N == 0 ? this.$1N : $2N", terminalWidth, width)
         .addStatement("return this")
-        .returns(context.generatedClass())
+        .returns(generatedType.type())
         .addModifiers(accessModifiers)
         .build();
   }
@@ -355,7 +354,7 @@ public final class GeneratedClass {
         .addParameter(param)
         .addStatement("this.$N = $N", exitHook, param)
         .addStatement("return this")
-        .returns(context.generatedClass())
+        .returns(generatedType.type())
         .addModifiers(accessModifiers)
         .build();
   }
@@ -366,7 +365,7 @@ public final class GeneratedClass {
     return spec.addParameter(resourceBundleParam)
         .addStatement("this.$N = $N", messages, resourceBundleParam)
         .addStatement("return this")
-        .returns(context.generatedClass())
+        .returns(generatedType.type())
         .addModifiers(accessModifiers)
         .build();
   }
@@ -377,7 +376,7 @@ public final class GeneratedClass {
         .addParameter(param)
         .addStatement("this.$N = $N", err, param)
         .addStatement("return this")
-        .returns(context.generatedClass())
+        .returns(generatedType.type())
         .addModifiers(accessModifiers)
         .build();
   }
@@ -388,9 +387,8 @@ public final class GeneratedClass {
     ParameterSpec e = builder(RuntimeException.class, "e").build();
     CodeBlock.Builder code = CodeBlock.builder();
 
-
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> {
-      if (context.parameters().stream().anyMatch(ConvertedParameter::isRequired)) {
+      if (context.anyRequired()) {
         code.add("if ($N.length == 0)\n",
             args).indent()
             .addStatement("return new $T()", helpRequestedType)
@@ -540,7 +538,7 @@ public final class GeneratedClass {
   }
 
   private MethodSpec optionsByNameMethod() {
-    ParameterSpec result = builder(mapOf(STRING, optionType.type()), "result").build();
+    ParameterSpec result = builder(mapOf(STRING, generatedType.optionType()), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
     long mapSize = context.options().stream()
         .map(ConvertedParameter::parameter)
@@ -551,7 +549,7 @@ public final class GeneratedClass {
     code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
     for (ConvertedParameter<NamedOption> namedOption : context.options()) {
       for (String dashedName : namedOption.parameter().names()) {
-        code.addStatement("$N.put($S, $T.$L)", result, dashedName, optionType.type(),
+        code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedType.optionType(),
             namedOption.enumConstant());
       }
     }
@@ -564,7 +562,7 @@ public final class GeneratedClass {
   }
 
   private MethodSpec optionParsersMethod() {
-    ParameterSpec parsers = builder(mapOf(optionType.type(), generatedTypes.optionParserType()), "parsers").build();
+    ParameterSpec parsers = builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "parsers").build();
 
     return MethodSpec.methodBuilder("optionParsers").returns(parsers.type)
         .addCode(optionParsersMethodCode(context, generatedTypes, parsers))
@@ -577,12 +575,12 @@ public final class GeneratedClass {
       return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
     }
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, optionType.type());
+    code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, generatedType.optionType());
     for (ConvertedParameter<NamedOption> param : options) {
       String enumConstant = param.enumConstant();
       code.addStatement("$N.put($T.$L, new $T($T.$L))",
-          parsers, optionType.type(), enumConstant, optionParserType(generatedTypes, param),
-          optionType.type(), enumConstant);
+          parsers, generatedType.optionType(), enumConstant, optionParserType(generatedTypes, param),
+          generatedType.optionType(), enumConstant);
     }
     code.addStatement("return $N", parsers);
     return code.build();

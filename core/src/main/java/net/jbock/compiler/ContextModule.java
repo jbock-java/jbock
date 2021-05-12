@@ -1,36 +1,48 @@
 package net.jbock.compiler;
 
-import com.google.common.collect.ImmutableList;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.TypeName;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
-import net.jbock.compiler.parameter.AbstractParameter;
-import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.compiler.parameter.PositionalParameter;
+import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
 
-import java.util.List;
+import javax.lang.model.util.Elements;
 
 @Module
-public interface ContextModule {
+public class ContextModule {
 
-  @Provides
-  @Reusable
-  static TypeName sourceType(SourceElement sourceElement) {
-    return TypeName.get(sourceElement.element().asType());
+  private final SourceElement sourceElement;
+  private final GeneratedType generatedType;
+  private final Elements elements;
+
+  public ContextModule(
+      SourceElement sourceElement,
+      GeneratedType generatedType,
+      Elements elements) {
+    this.sourceElement = sourceElement;
+    this.generatedType = generatedType;
+    this.elements = elements;
   }
 
   @Provides
-  @Reusable
-  static List<AbstractParameter> parameters(List<PositionalParameter> params, List<NamedOption> options) {
-    return ImmutableList.<AbstractParameter>builder().addAll(params).addAll(options).build();
+  SourceElement sourceElement() {
+    return sourceElement;
   }
 
   @Provides
+  GeneratedType generatedType() {
+    return generatedType;
+  }
+
   @Reusable
-  static GeneratedTypes generatedTypes(ClassName generatedClass, ParserFlavour flavour, SourceElement sourceElement) {
-    return new GeneratedTypes(generatedClass, flavour, sourceElement);
+  @Provides
+  DescriptionBuilder descriptionBuilder() {
+    return new DescriptionBuilder(elements);
+  }
+
+  @Reusable
+  @Provides
+  Description description(DescriptionBuilder descriptionBuilder) {
+    return descriptionBuilder.getDescription(sourceElement.element());
   }
 }

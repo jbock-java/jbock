@@ -5,10 +5,10 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.EnumName;
+import net.jbock.compiler.ValidationFailure;
 import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.SourceMethod;
 
-import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import java.util.List;
 import java.util.Optional;
@@ -23,7 +23,7 @@ import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
  */
 public abstract class AbstractParameter {
 
-  private final ExecutableElement sourceMethod;
+  private final SourceMethod sourceMethod;
   private final EnumName enumName; // unique internal name
   private final DescriptionKey descriptionKey;
   private final Description description;
@@ -33,7 +33,7 @@ public abstract class AbstractParameter {
       EnumName enumName,
       DescriptionKey descriptionKey,
       Description description) {
-    this.sourceMethod = sourceMethod.method();
+    this.sourceMethod = sourceMethod;
     this.enumName = enumName;
     this.descriptionKey = descriptionKey;
     this.description = description;
@@ -44,11 +44,11 @@ public abstract class AbstractParameter {
   }
 
   public final String methodName() {
-    return sourceMethod.getSimpleName().toString();
+    return sourceMethod.method().getSimpleName().toString();
   }
 
   public final TypeName returnType() {
-    return TypeName.get(sourceMethod.getReturnType());
+    return TypeName.get(sourceMethod.method().getReturnType());
   }
 
   public final Optional<String> descriptionKey() {
@@ -56,13 +56,13 @@ public abstract class AbstractParameter {
   }
 
   public final Set<Modifier> getAccessModifiers() {
-    return sourceMethod.getModifiers().stream()
+    return sourceMethod.method().getModifiers().stream()
         .filter(ALLOWED_MODIFIERS::contains)
         .collect(Collectors.toSet());
   }
 
-  public final ExecutableElement sourceMethod() {
-    return sourceMethod;
+  public final ValidationFailure fail(String message) {
+    return sourceMethod.fail(message);
   }
 
   final EnumName enumName() {

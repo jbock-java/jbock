@@ -11,7 +11,8 @@ import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.qualifier.OptionType;
+import net.jbock.qualifier.GeneratedType;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -40,9 +41,10 @@ final class StatefulParser {
   private final Context context;
   private final ParseMethod parseMethod;
   private final GeneratedTypes generatedTypes;
+  private final GeneratedType generatedType;
   private final FieldSpec optionParsersField;
   private final FieldSpec paramParsersField;
-  private final OptionType optionType;
+  private final SourceElement sourceElement;
 
   private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
 
@@ -54,21 +56,23 @@ final class StatefulParser {
   StatefulParser(
       Context context,
       GeneratedTypes generatedTypes,
+      GeneratedType generatedType,
       ParseMethod parseMethod,
-      OptionType optionType) {
+      SourceElement sourceElement) {
     this.context = context;
     this.generatedTypes = generatedTypes;
+    this.generatedType = generatedType;
     this.parseMethod = parseMethod;
+    this.sourceElement = sourceElement;
 
     // stateful parsers
-    this.optionParsersField = FieldSpec.builder(mapOf(optionType.type(), generatedTypes.optionParserType()), "optionParsers")
+    this.optionParsersField = FieldSpec.builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "optionParsers")
         .initializer("optionParsers()")
         .build();
 
     this.paramParsersField = FieldSpec.builder(ArrayTypeName.of(STRING), "paramParsers")
         .initializer("new $T[$L]", STRING, context.regularParams().size())
         .build();
-    this.optionType = optionType;
   }
 
   TypeSpec define() {
@@ -108,14 +112,14 @@ final class StatefulParser {
 
   private CodeBlock tryParseOptionCodeClustering(ParameterSpec token, ParameterSpec it) {
     ParameterSpec clusterToken = ParameterSpec.builder(STRING, "clusterToken").build();
-    ParameterSpec option = ParameterSpec.builder(optionType.type(), "option").build();
+    ParameterSpec option = ParameterSpec.builder(generatedType.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
     if (!context.isSuperCommand()) {
       code.add("if ($N)\n", endOfOptionParsing).indent()
           .addStatement("return false")
           .unindent();
     }
-    code.addStatement("$T $N = tryReadOption($N)", optionType.type(), option, token);
+    code.addStatement("$T $N = tryReadOption($N)", generatedType.optionType(), option, token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")
         .unindent();
@@ -132,14 +136,14 @@ final class StatefulParser {
   }
 
   private CodeBlock tryParseOptionCodeSimple(ParameterSpec token, ParameterSpec it) {
-    ParameterSpec option = ParameterSpec.builder(optionType.type(), "option").build();
+    ParameterSpec option = ParameterSpec.builder(generatedType.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
     if (!context.isSuperCommand()) {
       code.add("if ($N)\n", endOfOptionParsing).indent()
           .addStatement("return false")
           .unindent();
     }
-    code.addStatement("$T $N = tryReadOption($N)", optionType.type(), option, token);
+    code.addStatement("$T $N = tryReadOption($N)", generatedType.optionType(), option, token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")
         .unindent();
@@ -151,7 +155,7 @@ final class StatefulParser {
   private MethodSpec tryReadOptionMethod() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, optionType.type()),
+    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, generatedType.optionType()),
         OPTIONS_BY_NAME).build();
 
     CodeBlock.Builder code = CodeBlock.builder();
@@ -170,7 +174,7 @@ final class StatefulParser {
     return MethodSpec.methodBuilder("tryReadOption")
         .addParameter(token)
         .addCode(code.build())
-        .returns(optionType.type()).build();
+        .returns(generatedType.optionType()).build();
   }
 
   private MethodSpec buildMethod() {
@@ -195,7 +199,7 @@ final class StatefulParser {
         .ifPresent(code::add);
     return MethodSpec.methodBuilder("build")
         .addStatement("return new $T($L)", generatedTypes.implType(), joinCodeBlocks(code))
-        .returns(generatedTypes.sourceType())
+        .returns(sourceElement.typeName())
         .build();
   }
 
@@ -222,7 +226,7 @@ final class StatefulParser {
   private CodeBlock streamExpressionOption(ConvertedParameter<NamedOption> option) {
     return CodeBlock.builder().add(
         "$N.get($T.$N).stream()", optionParsersField,
-        optionType.type(), option.enumConstant()).build();
+        generatedType.optionType(), option.enumConstant()).build();
   }
 
   private CodeBlock streamExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {

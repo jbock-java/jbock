@@ -36,7 +36,6 @@ class NamedOptionFactory {
   private final SourceElement sourceElement;
   private final EnumName enumName;
   private final Description description;
-  private final ParserFlavour flavour;
   private final List<ConvertedParameter<NamedOption>> alreadyCreated;
 
   @Inject
@@ -49,7 +48,6 @@ class NamedOptionFactory {
       SourceElement sourceElement,
       EnumName enumName,
       Description description,
-      ParserFlavour flavour,
       List<ConvertedParameter<NamedOption>> alreadyCreated) {
     this.converterFinder = converterFinder;
     this.converterClass = converterClass;
@@ -59,7 +57,6 @@ class NamedOptionFactory {
     this.sourceElement = sourceElement;
     this.enumName = enumName;
     this.description = description;
-    this.flavour = flavour;
     this.alreadyCreated = alreadyCreated;
   }
 
@@ -136,7 +133,7 @@ class NamedOptionFactory {
     if (name.charAt(1) != '-' && name.length() >= 3) {
       return left("single-dash names must be single-character names: " + name);
     }
-    if (flavour.helpEnabled(sourceElement.element())) {
+    if (sourceElement.helpEnabled()) {
       if ("--help".equals(name) || "-h".equals(name)) {
         return left("'--help' or '-h' cannot be option names, unless the help feature is disabled.");
       }

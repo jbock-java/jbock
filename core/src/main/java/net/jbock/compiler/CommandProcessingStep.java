@@ -18,7 +18,7 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Util;
 import net.jbock.either.Either;
-import net.jbock.qualifier.OptionType;
+import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
@@ -33,6 +33,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
@@ -67,11 +68,13 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private final OperationMode operationMode;
   private final DescriptionBuilder descriptionBuilder;
   private final Util util;
+  private final Elements elements;
 
   @Inject
   CommandProcessingStep(
       TypeTool tool,
       Types types,
+      Elements elements,
       Messager messager,
       Filer filer,
       OperationMode operationMode,
@@ -84,6 +87,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     this.operationMode = operationMode;
     this.descriptionBuilder = descriptionBuilder;
     this.util = util;
+    this.elements = elements;
   }
 
   @Override
@@ -96,40 +100,39 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   @Override
   public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
     elementsByAnnotation.forEach((annotationName, element) -> {
-      ParserFlavour flavour = ParserFlavour.forAnnotationName(annotationName);
+      ParserFlavour parserFlavour = ParserFlavour.forAnnotationName(annotationName);
       ElementFilter.typesIn(Collections.singletonList(element))
-          .forEach(sourceElement -> processSourceElement(sourceElement, flavour));
+          .forEach(el -> {
+            SourceElement sourceElement = SourceElement.create(el, parserFlavour);
+            processSourceElement(sourceElement);
+          });
     });
     return Collections.emptySet();
   }
 
-  private void processSourceElement(TypeElement sourceElement, ParserFlavour flavour) {
-    ClassName generatedClass = generatedClass(sourceElement);
+  private void processSourceElement(SourceElement sourceElement) {
+    GeneratedType generatedType = GeneratedType.create(sourceElement.element());
     try {
-      OptionType optionType = new OptionType(generatedClass.nestedClass("Option"));
-      Either.ofLeft(validateSourceElement(sourceElement)).orRight(null)
-          .mapLeft(msg -> new ValidationFailure(msg, sourceElement))
+      Either.ofLeft(validateSourceElement(sourceElement.element())).orRight(null)
+          .mapLeft(sourceElement::fail)
           .mapLeft(Collections::singletonList)
-          .flatMap(nothing -> getParams(sourceElement, flavour, optionType))
+          .flatMap(nothing -> getParams(sourceElement, generatedType))
           .accept(failures -> {
             for (ValidationFailure failure : failures) {
               messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
             }
           }, parameters -> {
-            ContextComponent context = DaggerContextComponent.builder()
-                .flavour(flavour)
-                .optionType(optionType)
-                .sourceElement(new SourceElement(sourceElement))
-                .generatedClass(generatedClass)
+            TypeSpec typeSpec = DaggerContextComponent.builder()
+                .module(new ContextModule(sourceElement, generatedType, elements))
                 .options(parameters.namedOptions)
                 .params(parameters.positionalParams)
-                .description(descriptionBuilder.getDescription(sourceElement))
-                .build();
-            TypeSpec typeSpec = context.generatedClass().define();
-            write(sourceElement, generatedClass, typeSpec);
+                .build()
+                .generatedClass()
+                .define();
+            write(sourceElement.element(), generatedType.type(), typeSpec);
           });
     } catch (Throwable error) {
-      handleUnknownError(sourceElement, error);
+      handleUnknownError(sourceElement.element(), error);
     }
   }
 
@@ -154,12 +157,11 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private Either<List<ValidationFailure>, Params> getParams(
-      TypeElement sourceElement,
-      ParserFlavour flavour,
-      OptionType optionType) {
-    ParameterModule module = new ParameterModule(optionType, tool,
-        flavour, sourceElement, descriptionBuilder);
-    return createMethods(sourceElement).flatMap(methods -> {
+      SourceElement sourceElement,
+      GeneratedType generatedType) {
+    ParameterModule module = new ParameterModule(generatedType, tool,
+        sourceElement, descriptionBuilder);
+    return createMethods(sourceElement.element()).flatMap(methods -> {
       ImmutableList.Builder<ConvertedParameter<PositionalParameter>> positionalsBuilder =
           ImmutableList.builder();
       List<ValidationFailure> failures = new ArrayList<>();
@@ -175,9 +177,10 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .createPositionalParam(sourceMethod.index().orElse(positionalParameters.size() - 1))
             .accept(failures::add, positionalsBuilder::add);
       }
-      if (flavour.isSuperCommand() && positionalParameters.isEmpty()) {
-        failures.add(new ValidationFailure("in a @" + SuperCommand.class.getSimpleName() +
-            ", at least one @" + Parameter.class.getSimpleName() + " must be defined", sourceElement));
+      if (sourceElement.isSuperCommand() && positionalParameters.isEmpty()) {
+        String message = "in a @" + SuperCommand.class.getSimpleName() +
+            ", at least one @" + Parameter.class.getSimpleName() + " must be defined";
+        failures.add(sourceElement.fail(message));
       }
       ImmutableList<ConvertedParameter<PositionalParameter>> positionalParams = positionalsBuilder.build();
       failures.addAll(validatePositions(positionalParams));
@@ -217,7 +220,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       }
       if (!keys.add(key)) {
         String message = "duplicate description key: " + key;
-        failures.add(new ValidationFailure(message, p.sourceMethod()));
+        failures.add(p.fail(message));
       }
     }
     return failures;
@@ -233,7 +236,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       PositionalParameter p = c.parameter();
       if (p.position() != i) {
         String message = "Position " + p.position() + " is not available. Suggested position: " + i;
-        result.add(new ValidationFailure(message, p.sourceMethod()));
+        result.add(p.fail(message));
       }
     }
     return result;
@@ -327,11 +330,6 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .flip()
         .map(Optional::of)
         .orElseGet(Function.identity());
-  }
-
-  private static ClassName generatedClass(TypeElement sourceElement) {
-    String name = String.join("_", ClassName.get(sourceElement).simpleNames()) + "_Parser";
-    return ClassName.get(sourceElement).topLevelClassName().peerClass(name);
   }
 
   private Optional<String> validateParameterMethod(

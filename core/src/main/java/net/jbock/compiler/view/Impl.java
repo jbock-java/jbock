@@ -8,6 +8,7 @@ import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.stream.Collectors;
@@ -23,18 +24,19 @@ import static javax.lang.model.element.Modifier.STATIC;
 final class Impl {
 
   private final Context context;
-
   private final GeneratedTypes generatedTypes;
+  private final SourceElement sourceElement;
 
   @Inject
-  Impl(Context context, GeneratedTypes generatedTypes) {
+  Impl(Context context, GeneratedTypes generatedTypes, SourceElement sourceElement) {
     this.context = context;
     this.generatedTypes = generatedTypes;
+    this.sourceElement = sourceElement;
   }
 
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType())
-        .superclass(generatedTypes.sourceType());
+        .superclass(sourceElement.typeName());
     for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
       spec.addField(FieldSpec.builder(c.parameter().returnType(), c.enumName().camel()).build());
     }

@@ -1,59 +1,42 @@
 package net.jbock.compiler;
 
 import com.google.common.collect.ImmutableList;
-import com.squareup.javapoet.ClassName;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
-import javax.lang.model.element.Modifier;
-import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
-
 public final class Context {
 
-  // the annotated class
-  private final TypeElement sourceElement;
-
-  // the class that will be generated
-  private final ClassName generatedClass;
-
-  // the abstract methods in the annotated class
+  private final SourceElement sourceElement;
+  private final GeneratedType generatedType;
   private final List<ConvertedParameter<? extends AbstractParameter>> parameters;
-
   private final List<ConvertedParameter<PositionalParameter>> params;
-
   private final Optional<ConvertedParameter<PositionalParameter>> repeatableParam;
-
   private final List<ConvertedParameter<PositionalParameter>> regularParams;
-
   private final List<ConvertedParameter<NamedOption>> options;
-
-  private final ParserFlavour flavour;
-
   private final boolean unixClusteringSupported;
+  private final boolean anyRequired;
 
   @Inject
   Context(
       SourceElement sourceElement,
-      ClassName generatedClass,
+      GeneratedType generatedType,
       List<ConvertedParameter<NamedOption>> namedOptions,
-      List<ConvertedParameter<PositionalParameter>> params,
-      ParserFlavour flavour) {
-    this.sourceElement = sourceElement.element();
-    this.generatedClass = generatedClass;
+      List<ConvertedParameter<PositionalParameter>> params) {
+    this.sourceElement = sourceElement;
+    this.generatedType = generatedType;
     this.params = params;
     this.options = namedOptions;
     this.unixClusteringSupported = isUnixClusteringSupported(namedOptions);
-    this.flavour = flavour;
-    this.parameters = ImmutableList.<ConvertedParameter<? extends AbstractParameter>>builder()
+    this.parameters = ImmutableList.<ConvertedParameter<? extends AbstractParameter>>builderWithExpectedSize(options.size() + params.size())
         .addAll(options)
         .addAll(params).build();
     this.repeatableParam = params.stream()
@@ -62,14 +45,11 @@ public final class Context {
     this.regularParams = params.stream()
         .filter(c -> !c.isRepeatable())
         .collect(Collectors.toList());
+    this.anyRequired = parameters.stream().anyMatch(ConvertedParameter::isRequired);
   }
 
-  public Modifier[] getAccessModifiers() {
-    return sourceElement.getModifiers().stream().filter(ALLOWED_MODIFIERS::contains).toArray(Modifier[]::new);
-  }
-
-  public ClassName generatedClass() {
-    return generatedClass;
+  public GeneratedType generatedType() {
+    return generatedType;
   }
 
   public List<ConvertedParameter<? extends AbstractParameter>> parameters() {
@@ -85,15 +65,19 @@ public final class Context {
   }
 
   public boolean isHelpParameterEnabled() {
-    return flavour.helpEnabled(sourceElement);
+    return sourceElement.helpEnabled();
   }
 
   public boolean isSuperCommand() {
-    return flavour.isSuperCommand();
+    return sourceElement.isSuperCommand();
   }
 
   public boolean anyRepeatableParam() {
     return repeatableParam.isPresent();
+  }
+
+  public boolean anyRequired() {
+    return anyRequired;
   }
 
   public boolean isUnixClusteringSupported() {

@@ -2,85 +2,81 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import dagger.Reusable;
+import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
 
+import javax.inject.Inject;
 import java.util.Optional;
 import java.util.function.Function;
 
+@Reusable
 public class GeneratedTypes {
 
-  private final ClassName generatedClass;
-
-  // whether "--help" is a special token
-  private final ParserFlavour flavour;
-
-  // the annotated class
+  private final GeneratedType generatedType;
   private final SourceElement sourceElement;
 
-  public GeneratedTypes(ClassName generatedClass, ParserFlavour flavour, SourceElement sourceElement) {
-    this.generatedClass = generatedClass;
-    this.flavour = flavour;
+  @Inject
+  GeneratedTypes(GeneratedType generatedType, SourceElement sourceElement) {
+    this.generatedType = generatedType;
     this.sourceElement = sourceElement;
-  }
-
-  public TypeName sourceType() {
-    return TypeName.get(sourceElement.element().asType());
   }
 
   public TypeName parseSuccessType() {
     Optional<TypeName> className = parseResultWithRestType().map(Function.identity());
-    return className.orElse(sourceType());
+    return className.orElse(sourceElement.typeName());
   }
 
   public Optional<ClassName> parseResultWithRestType() {
-    if (!flavour.isSuperCommand()) {
+    if (!sourceElement.isSuperCommand()) {
       return Optional.empty();
     }
-    return Optional.of(generatedClass.nestedClass(sourceElement.element().getSimpleName() + "WithRest"));
+    return Optional.of(generatedType.type().nestedClass(sourceElement.element().getSimpleName() + "WithRest"));
   }
 
   public ClassName optionParserType() {
-    return generatedClass.nestedClass("OptionParser");
+    return generatedType.type().nestedClass("OptionParser");
   }
 
   public ClassName repeatableOptionParserType() {
-    return generatedClass.nestedClass("RepeatableOptionParser");
+    return generatedType.type().nestedClass("RepeatableOptionParser");
   }
 
   public ClassName flagParserType() {
-    return generatedClass.nestedClass("FlagParser");
+    return generatedType.type().nestedClass("FlagParser");
   }
 
   public ClassName regularOptionParserType() {
-    return generatedClass.nestedClass("RegularOptionParser");
+    return generatedType.type().nestedClass("RegularOptionParser");
   }
 
   public ClassName optionType() {
-    return generatedClass.nestedClass("Option");
+    return generatedType.type().nestedClass("Option");
   }
 
   public ClassName statefulParserType() {
-    return generatedClass.nestedClass("StatefulParser");
+    return generatedType.type().nestedClass("StatefulParser");
   }
 
   public ClassName implType() {
-    return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
+    return generatedType.type().nestedClass(sourceElement.element().getSimpleName() + "Impl");
   }
 
   public ClassName parseResultType() {
-    return generatedClass.nestedClass("ParseResult");
+    return generatedType.type().nestedClass("ParseResult");
   }
 
   public ClassName parsingSuccessWrapperType() {
-    return generatedClass.nestedClass("ParsingSuccess");
+    return generatedType.type().nestedClass("ParsingSuccess");
   }
 
   public ClassName parsingFailedType() {
-    return generatedClass.nestedClass("ParsingFailed");
+    return generatedType.type().nestedClass("ParsingFailed");
   }
 
   public Optional<ClassName> helpRequestedType() {
-    boolean helpParameterEnabled = flavour.helpEnabled(sourceElement.element());
-    return helpParameterEnabled ? Optional.of(generatedClass.nestedClass("HelpRequested")) : Optional.empty();
+    return sourceElement.helpEnabled() ?
+        Optional.of(generatedType.type().nestedClass("HelpRequested")) :
+        Optional.empty();
   }
 }

@@ -14,12 +14,11 @@ import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.matching.matcher.OptionalMatcher;
 import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.DescriptionKey;
-import net.jbock.qualifier.OptionType;
+import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.List;
@@ -29,21 +28,18 @@ class ParameterModule {
 
   private final AnnotationUtil annotationUtil = new AnnotationUtil();
 
-  private final OptionType optionType;
+  private final GeneratedType generatedType;
   private final TypeTool tool;
-  private final ParserFlavour flavour;
-  private final TypeElement sourceElement;
+  private final SourceElement sourceElement;
   private final DescriptionBuilder descriptionBuilder;
 
   ParameterModule(
-      OptionType optionType,
+      GeneratedType generatedType,
       TypeTool tool,
-      ParserFlavour flavour,
-      TypeElement sourceElement,
+      SourceElement sourceElement,
       DescriptionBuilder descriptionBuilder) {
-    this.optionType = optionType;
+    this.generatedType = generatedType;
     this.tool = tool;
-    this.flavour = flavour;
     this.sourceElement = sourceElement;
     this.descriptionBuilder = descriptionBuilder;
   }
@@ -91,8 +87,8 @@ class ParameterModule {
   }
 
   @Provides
-  OptionType optionType() {
-    return optionType;
+  GeneratedType generatedType() {
+    return generatedType;
   }
 
   @Provides
@@ -111,14 +107,8 @@ class ParameterModule {
   }
 
   @Provides
-  ParserFlavour flavour() {
-    return flavour;
-  }
-
-  @Reusable
-  @Provides
   SourceElement sourceElement() {
-    return new SourceElement(sourceElement);
+    return sourceElement;
   }
 
   @Reusable
