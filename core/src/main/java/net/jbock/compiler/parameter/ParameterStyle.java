@@ -13,12 +13,12 @@ public enum ParameterStyle {
 
   OPTION(Option.class) {
     @Override
-    public String getDescriptionKey(ExecutableElement method) {
+    public String descriptionKey(ExecutableElement method) {
       return get(method).map(Option::descriptionKey).orElse("");
     }
 
     @Override
-    public String getParamLabel(ExecutableElement method) {
+    public String paramLabel(ExecutableElement method) {
       return get(method).map(Option::paramLabel).orElse("");
     }
 
@@ -37,12 +37,12 @@ public enum ParameterStyle {
     }
   }, PARAMETER(Parameter.class) {
     @Override
-    public String getDescriptionKey(ExecutableElement method) {
+    public String descriptionKey(ExecutableElement method) {
       return get(method).map(Parameter::descriptionKey).orElse("");
     }
 
     @Override
-    public String getParamLabel(ExecutableElement method) {
+    public String paramLabel(ExecutableElement method) {
       return get(method).map(Parameter::paramLabel).orElse("");
     }
 
@@ -61,12 +61,12 @@ public enum ParameterStyle {
     }
   }, PARAMETERS(Parameters.class) {
     @Override
-    public String getDescriptionKey(ExecutableElement method) {
+    public String descriptionKey(ExecutableElement method) {
       return get(method).map(Parameters::descriptionKey).orElse("");
     }
 
     @Override
-    public String getParamLabel(ExecutableElement method) {
+    public String paramLabel(ExecutableElement method) {
       return get(method).map(Parameters::paramLabel).orElse("");
     }
 
@@ -100,9 +100,9 @@ public enum ParameterStyle {
     throw new IllegalArgumentException("no style: " + sourceMethod.getSimpleName());
   }
 
-  public abstract String getDescriptionKey(ExecutableElement method);
+  public abstract String descriptionKey(ExecutableElement method);
 
-  public abstract String getParamLabel(ExecutableElement method);
+  public abstract String paramLabel(ExecutableElement method);
 
   public abstract boolean isPositional();
 

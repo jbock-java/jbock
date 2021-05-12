@@ -10,7 +10,6 @@ import java.util.OptionalInt;
 public class SourceMethod {
 
   private final ExecutableElement sourceMethod;
-
   private final ParameterStyle parameterStyle;
 
   private SourceMethod(ExecutableElement sourceMethod, ParameterStyle parameterStyle) {
@@ -37,6 +36,10 @@ public class SourceMethod {
 
   public OptionalInt index() {
     return parameterStyle.index(sourceMethod);
+  }
+
+  public String descriptionKey() {
+    return parameterStyle.descriptionKey(sourceMethod);
   }
 
   public ValidationFailure fail(String message) {

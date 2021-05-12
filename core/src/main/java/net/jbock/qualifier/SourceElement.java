@@ -15,7 +15,7 @@ public class SourceElement {
   private final ParserFlavour parserFlavour;
   private final Modifier[] accessModifiers;
 
-  public SourceElement(TypeElement sourceElement, ParserFlavour parserFlavour, Modifier[] accessModifiers) {
+  private SourceElement(TypeElement sourceElement, ParserFlavour parserFlavour, Modifier[] accessModifiers) {
     this.sourceElement = sourceElement;
     this.parserFlavour = parserFlavour;
     this.accessModifiers = accessModifiers;

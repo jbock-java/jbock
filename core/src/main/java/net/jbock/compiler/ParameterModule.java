@@ -113,8 +113,8 @@ class ParameterModule {
 
   @Reusable
   @Provides
-  DescriptionKey descriptionKey(SourceMethod sourceMethod, ParameterStyle parameterStyle) {
-    return new DescriptionKey(parameterStyle.getDescriptionKey(sourceMethod.method()));
+  DescriptionKey descriptionKey(SourceMethod sourceMethod) {
+    return new DescriptionKey(sourceMethod.descriptionKey());
   }
 
   @Reusable
@@ -126,7 +126,7 @@ class ParameterModule {
   @Reusable
   @Provides
   ParamLabel paramLabel(SourceMethod sourceMethod, ParameterStyle parameterStyle) {
-    return new ParamLabel(parameterStyle.getParamLabel(sourceMethod.method()));
+    return new ParamLabel(parameterStyle.paramLabel(sourceMethod.method()));
   }
 
   @Reusable
