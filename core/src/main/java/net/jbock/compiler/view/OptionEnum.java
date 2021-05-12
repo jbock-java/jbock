@@ -27,13 +27,13 @@ import static net.jbock.compiler.Constants.STRING_ARRAY;
 final class OptionEnum {
 
   private final Context context;
-
   private final GeneratedTypes generatedTypes;
-
   private final FieldSpec descriptionField;
 
   @Inject
-  OptionEnum(Context context, GeneratedTypes generatedTypes) {
+  OptionEnum(
+      Context context,
+      GeneratedTypes generatedTypes) {
     this.context = context;
     this.generatedTypes = generatedTypes;
     this.descriptionField = FieldSpec.builder(STRING_ARRAY, "description").build();
@@ -44,8 +44,8 @@ final class OptionEnum {
     TypeSpec.Builder spec = TypeSpec.enumBuilder(generatedTypes.optionType());
     for (ConvertedParameter<? extends AbstractParameter> param : parameters) {
       String enumConstant = param.enumConstant();
-      List<String> description = param.parameter().description();
-      TypeSpec optionSpec = anonymousClassBuilder(descExpression(description)).build();
+      CodeBlock description = descriptionBlock(param.parameter().description());
+      TypeSpec optionSpec = anonymousClassBuilder(description).build();
       spec.addEnumConstant(enumConstant, optionSpec);
     }
     return spec.addModifiers(PRIVATE)
@@ -54,11 +54,11 @@ final class OptionEnum {
         .build();
   }
 
-  private CodeBlock descExpression(List<String> desc) {
+  private CodeBlock descriptionBlock(List<String> lines) {
     CodeBlock.Builder code = CodeBlock.builder();
-    for (int i = 0; i < desc.size(); i++) {
-      code.add("$S", desc.get(i));
-      if (i != desc.size() - 1) {
+    for (int i = 0; i < lines.size(); i++) {
+      code.add("$S", lines.get(i));
+      if (i != lines.size() - 1) {
         code.add(",\n");
       }
     }

@@ -7,9 +7,13 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.compiler.parameter.NamedOption;
+import net.jbock.compiler.parameter.PositionalParameter;
+import net.jbock.convert.ConvertedParameter;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.List;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
@@ -28,11 +32,19 @@ class ParseMethod {
   private final ParameterSpec token = builder(STRING, "token").build();
   private final ParameterSpec position = builder(INT, "position").build();
   private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest").build();
+  private final List<ConvertedParameter<PositionalParameter>> params;
+  private final List<ConvertedParameter<NamedOption>> options;
 
   @Inject
-  ParseMethod(Context context, GeneratedTypes generatedTypes) {
+  ParseMethod(
+      Context context,
+      GeneratedTypes generatedTypes,
+      List<ConvertedParameter<PositionalParameter>> params,
+      List<ConvertedParameter<NamedOption>> options) {
     this.context = context;
     this.generatedTypes = generatedTypes;
+    this.params = params;
+    this.options = options;
   }
 
   MethodSpec parseMethod() {
@@ -54,12 +66,12 @@ class ParseMethod {
     code.beginControlFlow("while ($N.hasNext())", it)
         .addStatement("$T $N = $N.next()", STRING, token, it);
 
-    code.beginControlFlow("if ($N == $L)", position, context.params().size())
+    code.beginControlFlow("if ($N == $L)", position, params.size())
         .addStatement("$N.add($N)", rest, token)
         .addStatement("continue")
         .endControlFlow();
 
-    if (!context.options().isEmpty()) {
+    if (!options.isEmpty()) {
       code.add(optionBlock());
     }
     code.add(errorUnrecognizedOption());
@@ -88,27 +100,27 @@ class ParseMethod {
         .addStatement("continue")
         .endControlFlow();
 
-    if (!context.options().isEmpty()) {
+    if (!options.isEmpty()) {
       code.add(optionBlock());
     }
     code.beginControlFlow("if (!$N)", endOfOptionParsing)
         .add(errorUnrecognizedOption())
         .endControlFlow();
 
-    if (context.params().isEmpty()) {
+    if (params.isEmpty()) {
       code.addStatement(throwInvalidOptionStatement("Excess param"));
     } else if (!context.anyRepeatableParam()) {
-      code.add("if ($N == $L)\n", position, context.params().size()).indent()
+      code.add("if ($N == $L)\n", position, params.size()).indent()
           .addStatement(throwInvalidOptionStatement("Excess param"))
           .unindent();
     }
 
-    if (!context.params().isEmpty()) {
+    if (!params.isEmpty()) {
       if (context.anyRepeatableParam()) {
-        if (context.params().size() == 1) {
+        if (params.size() == 1) {
           code.addStatement("$N.add($N)", rest, token);
         } else {
-          code.add("if ($N < $L)\n", position, context.params().size() - 1).indent()
+          code.add("if ($N < $L)\n", position, params.size() - 1).indent()
               .addStatement("paramParsers[$N++] = $N", position, token)
               .unindent()
               .add("else\n").indent()
@@ -136,7 +148,7 @@ class ParseMethod {
 
   private CodeBlock.Builder initVariables() {
     CodeBlock.Builder code = CodeBlock.builder();
-    if (!context.params().isEmpty() && !(context.anyRepeatableParam() && context.params().size() == 1)) {
+    if (!params.isEmpty() && !(context.anyRepeatableParam() && params.size() == 1)) {
       code.addStatement("$T $N = $L", position.type, position, 0);
     }
     return code;

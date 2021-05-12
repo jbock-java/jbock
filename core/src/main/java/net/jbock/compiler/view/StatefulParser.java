@@ -45,6 +45,7 @@ final class StatefulParser {
   private final FieldSpec optionParsersField;
   private final FieldSpec paramParsersField;
   private final SourceElement sourceElement;
+  private final List<ConvertedParameter<NamedOption>> options;
 
   private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
 
@@ -58,12 +59,14 @@ final class StatefulParser {
       GeneratedTypes generatedTypes,
       GeneratedType generatedType,
       ParseMethod parseMethod,
-      SourceElement sourceElement) {
+      SourceElement sourceElement,
+      List<ConvertedParameter<NamedOption>> options) {
     this.context = context;
     this.generatedTypes = generatedTypes;
     this.generatedType = generatedType;
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
+    this.options = options;
 
     // stateful parsers
     this.optionParsersField = FieldSpec.builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "optionParsers")
@@ -82,7 +85,7 @@ final class StatefulParser {
     if (!context.isSuperCommand()) {
       spec.addField(endOfOptionParsing);
     }
-    if (!context.options().isEmpty()) {
+    if (!options.isEmpty()) {
       spec.addMethod(tryParseOptionMethod())
           .addMethod(tryReadOptionMethod());
       spec.addField(optionParsersField);
@@ -180,7 +183,7 @@ final class StatefulParser {
   private MethodSpec buildMethod() {
 
     List<CodeBlock> code = new ArrayList<>();
-    for (ConvertedParameter<NamedOption> option : context.options()) {
+    for (ConvertedParameter<NamedOption> option : options) {
       CodeBlock streamExpression = streamExpressionOption(option);
       code.add(extractExpressionOption(streamExpression, option));
     }

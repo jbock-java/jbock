@@ -17,7 +17,6 @@ import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
-import javax.lang.model.element.Modifier;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -70,6 +69,8 @@ public final class GeneratedClass {
   private final StatefulParser parserState;
   private final ParseResult parseResult;
   private final SourceElement sourceElement;
+  private final List<ConvertedParameter<PositionalParameter>> params;
+  private final List<ConvertedParameter<NamedOption>> options;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -95,7 +96,9 @@ public final class GeneratedClass {
       OptionParser optionParser,
       OptionEnum optionEnum,
       StatefulParser parserState,
-      ParseResult parseResult) {
+      ParseResult parseResult,
+      List<ConvertedParameter<PositionalParameter>> params,
+      List<ConvertedParameter<NamedOption>> options) {
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
     this.context = context;
@@ -106,6 +109,8 @@ public final class GeneratedClass {
     this.optionEnum = optionEnum;
     this.parserState = parserState;
     this.parseResult = parseResult;
+    this.params = params;
+    this.options = options;
     this.exitHook = exitHookField();
     this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
         .initializer("$S", sourceElement.programName()).build();
@@ -113,18 +118,18 @@ public final class GeneratedClass {
 
   public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedType.type())
-        .addMethod(parseMethod(sourceElement.accessModifiers()))
-        .addMethod(parseOrExitMethod(sourceElement.accessModifiers()))
-        .addMethod(withTerminalWidthMethod(sourceElement.accessModifiers()))
-        .addMethod(withMessagesMethod(sourceElement.accessModifiers()))
-        .addMethod(withExitHookMethod(sourceElement.accessModifiers()))
-        .addMethod(withErrorStreamMethod(sourceElement.accessModifiers()))
-        .addMethod(printOnlineHelpMethod(sourceElement.accessModifiers()))
+        .addMethod(parseMethod())
+        .addMethod(parseOrExitMethod())
+        .addMethod(withTerminalWidthMethod())
+        .addMethod(withMessagesMethod())
+        .addMethod(withExitHookMethod())
+        .addMethod(withErrorStreamMethod())
+        .addMethod(printOnlineHelpMethod())
         .addMethod(printOptionMethod())
         .addMethod(printTokensMethod())
         .addMethod(makeLinesMethod())
         .addMethod(usageMethod());
-    if (!context.options().isEmpty()) {
+    if (!options.isEmpty()) {
       spec.addMethod(readOptionArgumentMethod());
       spec.addMethod(optionsByNameMethod());
       spec.addMethod(optionParsersMethod());
@@ -139,7 +144,7 @@ public final class GeneratedClass {
     spec.addField(exitHook);
     spec.addField(messages);
 
-    if (!context.options().isEmpty()) {
+    if (!options.isEmpty()) {
       spec.addField(FieldSpec.builder(mapOf(STRING, generatedType.optionType()), OPTIONS_BY_NAME)
           .initializer("optionsByName()")
           .addModifiers(PRIVATE, STATIC, FINAL)
@@ -189,7 +194,7 @@ public final class GeneratedClass {
         .addJavadoc(javadoc()).build();
   }
 
-  private MethodSpec printOnlineHelpMethod(Modifier[] accessModifiers) {
+  private MethodSpec printOnlineHelpMethod() {
     CodeBlock.Builder code = CodeBlock.builder();
     String continuationIndent = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
 
@@ -206,38 +211,38 @@ public final class GeneratedClass {
     code.addStatement("$N.println($S)", err, "USAGE");
     code.addStatement("printTokens($S, usage())", continuationIndent);
 
-    int paramsWidth = context.params().stream()
+    int paramsWidth = params.stream()
         .map(ConvertedParameter::parameter)
         .map(PositionalParameter::paramLabel)
         .mapToInt(String::length).max().orElse(0) + 3;
     String paramsFormat = "  %1$-" + (paramsWidth - 2) + "s";
 
-    if (!context.params().isEmpty()) {
+    if (!params.isEmpty()) {
       code.addStatement("$N.println()", err);
       code.addStatement("$N.println($S)", err, "PARAMETERS");
     }
-    context.params().forEach(p ->
+    params.forEach(p ->
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedType.optionType(), p.enumConstant(),
             p.parameter().descriptionKey().orElse(""),
             String.format(paramsFormat, p.parameter().paramLabel())));
-    if (!context.options().isEmpty()) {
+    if (!options.isEmpty()) {
       code.addStatement("$N.println()", err);
       code.addStatement("$N.println($S)", err, "OPTIONS");
     }
 
-    int optionsWidth = context.options().stream()
+    int optionsWidth = options.stream()
         .map(c -> c.parameter().dashedNamesWithLabel(c.isFlag()))
         .mapToInt(String::length).max().orElse(0) + 3;
     String optionsFormat = "  %1$-" + (optionsWidth - 2) + "s";
 
-    context.options().forEach(c ->
+    options.forEach(c ->
         code.addStatement("printOption($T.$L, $S, $S)",
             generatedType.optionType(), c.enumConstant(),
             c.parameter().descriptionKey().orElse(""),
             String.format(optionsFormat, c.parameter().dashedNamesWithLabel(c.isFlag()))));
     return methodBuilder("printOnlineHelp")
-        .addModifiers(accessModifiers)
+        .addModifiers(sourceElement.accessModifiers())
         .addCode(code.build())
         .build();
   }
@@ -337,51 +342,51 @@ public final class GeneratedClass {
         .build();
   }
 
-  private MethodSpec withTerminalWidthMethod(Modifier[] accessModifiers) {
+  private MethodSpec withTerminalWidthMethod() {
     ParameterSpec width = builder(terminalWidth.type, "width").build();
     return methodBuilder("withTerminalWidth")
         .addParameter(width)
         .addStatement("this.$1N = $2N == 0 ? this.$1N : $2N", terminalWidth, width)
         .addStatement("return this")
         .returns(generatedType.type())
-        .addModifiers(accessModifiers)
+        .addModifiers(sourceElement.accessModifiers())
         .build();
   }
 
-  private MethodSpec withExitHookMethod(Modifier[] accessModifiers) {
+  private MethodSpec withExitHookMethod() {
     ParameterSpec param = builder(exitHook.type, exitHook.name).build();
     return methodBuilder("withExitHook")
         .addParameter(param)
         .addStatement("this.$N = $N", exitHook, param)
         .addStatement("return this")
         .returns(generatedType.type())
-        .addModifiers(accessModifiers)
+        .addModifiers(sourceElement.accessModifiers())
         .build();
   }
 
-  private MethodSpec withMessagesMethod(Modifier[] accessModifiers) {
+  private MethodSpec withMessagesMethod() {
     ParameterSpec resourceBundleParam = builder(messages.type, "map").build();
     MethodSpec.Builder spec = methodBuilder("withMessages");
     return spec.addParameter(resourceBundleParam)
         .addStatement("this.$N = $N", messages, resourceBundleParam)
         .addStatement("return this")
         .returns(generatedType.type())
-        .addModifiers(accessModifiers)
+        .addModifiers(sourceElement.accessModifiers())
         .build();
   }
 
-  private MethodSpec withErrorStreamMethod(Modifier[] accessModifiers) {
+  private MethodSpec withErrorStreamMethod() {
     ParameterSpec param = builder(err.type, err.name).build();
     return methodBuilder("withErrorStream")
         .addParameter(param)
         .addStatement("this.$N = $N", err, param)
         .addStatement("return this")
         .returns(generatedType.type())
-        .addModifiers(accessModifiers)
+        .addModifiers(sourceElement.accessModifiers())
         .build();
   }
 
-  private MethodSpec parseMethod(Modifier[] accessModifiers) {
+  private MethodSpec parseMethod() {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
     ParameterSpec e = builder(RuntimeException.class, "e").build();
@@ -418,7 +423,7 @@ public final class GeneratedClass {
     return MethodSpec.methodBuilder("parse").addParameter(args)
         .returns(generatedTypes.parseResultType())
         .addCode(code.build())
-        .addModifiers(accessModifiers)
+        .addModifiers(sourceElement.accessModifiers())
         .addJavadoc("This parse method has no side effects.\n" +
             "Consider {@link #parseOrExit()} instead which does standard error-handling\n" +
             "like printing error messages, and potentially shutting down the JVM.\n")
@@ -463,8 +468,8 @@ public final class GeneratedClass {
 
     ParameterSpec result = builder(LIST_OF_STRING, "result").build();
 
-    List<ConvertedParameter<NamedOption>> requiredOptions = context.options().stream().filter(ConvertedParameter::isRequired).collect(Collectors.toList());
-    List<ConvertedParameter<NamedOption>> optionalOptions = context.options().stream().filter(p -> !p.isRequired()).collect(Collectors.toList());
+    List<ConvertedParameter<NamedOption>> requiredOptions = options.stream().filter(ConvertedParameter::isRequired).collect(Collectors.toList());
+    List<ConvertedParameter<NamedOption>> optionalOptions = options.stream().filter(p -> !p.isRequired()).collect(Collectors.toList());
 
     spec.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
     spec.addStatement("$N.add($S)", result, " ");
@@ -481,7 +486,7 @@ public final class GeneratedClass {
           option.parameter().paramLabel());
     }
 
-    for (ConvertedParameter<PositionalParameter> param : context.params()) {
+    for (ConvertedParameter<PositionalParameter> param : params) {
       if (param.isOptional()) {
         spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]");
       } else if (param.isRequired()) {
@@ -497,7 +502,7 @@ public final class GeneratedClass {
     return spec.returns(LIST_OF_STRING).addModifiers(PRIVATE).build();
   }
 
-  private MethodSpec parseOrExitMethod(Modifier[] accessModifiers) {
+  private MethodSpec parseOrExitMethod() {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
     ParameterSpec result = builder(generatedTypes.parseResultType(), "result").build();
@@ -531,7 +536,7 @@ public final class GeneratedClass {
         .addStatement("throw new $T($S)", RuntimeException.class, "parsing error");
 
     return methodBuilder("parseOrExit").addParameter(args)
-        .addModifiers(accessModifiers)
+        .addModifiers(sourceElement.accessModifiers())
         .returns(generatedTypes.parseSuccessType())
         .addCode(code.build())
         .build();
@@ -540,14 +545,14 @@ public final class GeneratedClass {
   private MethodSpec optionsByNameMethod() {
     ParameterSpec result = builder(mapOf(STRING, generatedType.optionType()), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    long mapSize = context.options().stream()
+    long mapSize = options.stream()
         .map(ConvertedParameter::parameter)
         .map(NamedOption::names)
         .map(List::size)
         .mapToLong(i -> i)
         .sum();
     code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
-    for (ConvertedParameter<NamedOption> namedOption : context.options()) {
+    for (ConvertedParameter<NamedOption> namedOption : options) {
       for (String dashedName : namedOption.parameter().names()) {
         code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedType.optionType(),
             namedOption.enumConstant());
@@ -562,15 +567,15 @@ public final class GeneratedClass {
   }
 
   private MethodSpec optionParsersMethod() {
-    ParameterSpec parsers = builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "parsers").build();
+    ParameterSpec parsers = builder(mapOf(generatedType.optionType(),
+        generatedTypes.optionParserType()), "parsers").build();
 
     return MethodSpec.methodBuilder("optionParsers").returns(parsers.type)
-        .addCode(optionParsersMethodCode(context, generatedTypes, parsers))
+        .addCode(optionParsersMethodCode(parsers))
         .addModifiers(PRIVATE, STATIC).build();
   }
 
-  private CodeBlock optionParsersMethodCode(Context context, GeneratedTypes generatedTypes, ParameterSpec parsers) {
-    List<ConvertedParameter<NamedOption>> options = context.options();
+  private CodeBlock optionParsersMethodCode(ParameterSpec parsers) {
     if (options.isEmpty()) {
       return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
     }
@@ -579,14 +584,14 @@ public final class GeneratedClass {
     for (ConvertedParameter<NamedOption> param : options) {
       String enumConstant = param.enumConstant();
       code.addStatement("$N.put($T.$L, new $T($T.$L))",
-          parsers, generatedType.optionType(), enumConstant, optionParserType(generatedTypes, param),
+          parsers, generatedType.optionType(), enumConstant, optionParserType(param),
           generatedType.optionType(), enumConstant);
     }
     code.addStatement("return $N", parsers);
     return code.build();
   }
 
-  private static ClassName optionParserType(GeneratedTypes generatedTypes, ConvertedParameter<NamedOption> param) {
+  private ClassName optionParserType(ConvertedParameter<NamedOption> param) {
     if (param.isRepeatable()) {
       return generatedTypes.repeatableOptionParserType();
     }

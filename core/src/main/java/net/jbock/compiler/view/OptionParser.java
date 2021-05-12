@@ -10,6 +10,7 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.Context;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.ConvertedParameter;
 
 import javax.inject.Inject;
@@ -38,18 +39,23 @@ final class OptionParser {
   private final Context context;
   private final GeneratedTypes generatedTypes;
   private final FieldSpec optionField;
+  private final List<ConvertedParameter<NamedOption>> options;
 
   @Inject
-  OptionParser(Context context, GeneratedTypes generatedTypes) {
+  OptionParser(
+      Context context,
+      GeneratedTypes generatedTypes,
+      List<ConvertedParameter<NamedOption>> options) {
     this.context = context;
     this.generatedTypes = generatedTypes;
     this.optionField = FieldSpec.builder(generatedTypes.optionType(), "option")
         .addModifiers(FINAL)
         .build();
+    this.options = options;
   }
 
   List<TypeSpec> define() {
-    if (context.options().isEmpty()) {
+    if (options.isEmpty()) {
       return Collections.emptyList();
     }
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
@@ -70,9 +76,9 @@ final class OptionParser {
             .build())
         .addModifiers(PRIVATE, STATIC, ABSTRACT)
         .build());
-    boolean anyRepeatable = context.options().stream().anyMatch(ConvertedParameter::isRepeatable);
-    boolean anyRegular = context.options().stream().anyMatch(option -> option.isOptional() || option.isRequired());
-    boolean anyFlags = context.options().stream().anyMatch(ConvertedParameter::isFlag);
+    boolean anyRepeatable = options.stream().anyMatch(ConvertedParameter::isRepeatable);
+    boolean anyRegular = options.stream().anyMatch(option -> option.isOptional() || option.isRequired());
+    boolean anyFlags = options.stream().anyMatch(ConvertedParameter::isFlag);
     if (anyFlags) {
       result.add(TypeSpec.classBuilder(generatedTypes.flagParserType())
           .superclass(generatedTypes.optionParserType())

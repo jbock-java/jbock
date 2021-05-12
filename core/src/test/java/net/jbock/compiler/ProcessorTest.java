@@ -354,10 +354,10 @@ class ProcessorTest {
   @Test
   void simpleInt() {
     JavaFileObject javaFile = fromSource(
-        "@Command",
+        "@Command(description = \"x\", descriptionKey = \"x\")",
         "abstract class Arguments {",
         "",
-        "  @Option(names = \"--x\")",
+        "  @Option(names = \"--x\", description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
         "  abstract int aRequiredInt();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))

@@ -18,7 +18,6 @@ public final class Context {
   private final SourceElement sourceElement;
   private final GeneratedType generatedType;
   private final List<ConvertedParameter<? extends AbstractParameter>> parameters;
-  private final List<ConvertedParameter<PositionalParameter>> params;
   private final Optional<ConvertedParameter<PositionalParameter>> repeatableParam;
   private final List<ConvertedParameter<PositionalParameter>> regularParams;
   private final List<ConvertedParameter<NamedOption>> options;
@@ -33,7 +32,6 @@ public final class Context {
       List<ConvertedParameter<PositionalParameter>> params) {
     this.sourceElement = sourceElement;
     this.generatedType = generatedType;
-    this.params = params;
     this.options = namedOptions;
     this.unixClusteringSupported = isUnixClusteringSupported(namedOptions);
     this.parameters = ImmutableList.<ConvertedParameter<? extends AbstractParameter>>builderWithExpectedSize(options.size() + params.size())
@@ -54,14 +52,6 @@ public final class Context {
 
   public List<ConvertedParameter<? extends AbstractParameter>> parameters() {
     return parameters;
-  }
-
-  public List<ConvertedParameter<PositionalParameter>> params() {
-    return params;
-  }
-
-  public List<ConvertedParameter<NamedOption>> options() {
-    return options;
   }
 
   public boolean isHelpParameterEnabled() {

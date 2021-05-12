@@ -28,10 +28,10 @@ class PositionalTest {
   @Test
   void superSimpleOptional() {
     JavaFileObject javaFile = fromSource(
-        "@SuperCommand",
+        "@SuperCommand(description = \"x\", descriptionKey = \"x\")",
         "abstract class Arguments {",
         "",
-        "  @Parameter(index = 0)",
+        "  @Parameter(index = 0, description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
