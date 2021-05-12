@@ -68,7 +68,6 @@ final class StatefulParser {
     this.sourceElement = sourceElement;
     this.options = options;
 
-    // stateful parsers
     this.optionParsersField = FieldSpec.builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "optionParsers")
         .initializer("optionParsers()")
         .build();
