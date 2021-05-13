@@ -20,15 +20,18 @@ class ParseOrExitMethod {
   private final SourceElement sourceElement;
   private final GeneratedTypes generatedTypes;
   private final CommonFields commonFields;
+  private final PrintTokensMethod printTokensMethod;
 
   @Inject
   ParseOrExitMethod(
       SourceElement sourceElement,
       GeneratedTypes generatedTypes,
-      CommonFields commonFields) {
+      CommonFields commonFields,
+      PrintTokensMethod printTokensMethod) {
     this.sourceElement = sourceElement;
     this.generatedTypes = generatedTypes;
     this.commonFields = commonFields;
+    this.printTokensMethod = printTokensMethod;
   }
 
   MethodSpec define() {
@@ -58,7 +61,7 @@ class ParseOrExitMethod {
         "Error: ", generatedTypes.parsingFailedType(), result);
     if (sourceElement.helpEnabled()) {
       String blanks = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
-      code.addStatement("printTokens($S, usage())", blanks);
+      code.addStatement("$N($S, usage())", printTokensMethod.get(), blanks);
     } else {
       code.addStatement("printOnlineHelp()");
     }

@@ -25,12 +25,17 @@ class PrintOptionMethod {
 
   private final AllParameters allParameters;
   private final GeneratedType generatedType;
+  private final PrintTokensMethod printTokensMethod;
   private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages", PRIVATE).build();
 
   @Inject
-  PrintOptionMethod(AllParameters allParameters, GeneratedType generatedType) {
+  PrintOptionMethod(
+      AllParameters allParameters,
+      GeneratedType generatedType,
+      PrintTokensMethod printTokensMethod) {
     this.allParameters = allParameters;
     this.generatedType = generatedType;
+    this.printTokensMethod = printTokensMethod;
   }
 
   MethodSpec define() {
@@ -72,7 +77,7 @@ class PrintOptionMethod {
     }
     code.addStatement("$T $N = $T.join($S, $T.nCopies($N.length() + 1, $S))",
         STRING, continuationIndent, STRING, "", Collections.class, names, " ");
-    code.addStatement("printTokens($N, $N)", continuationIndent, tokens);
+    code.addStatement("$N($N, $N)", printTokensMethod.get(), continuationIndent, tokens);
     MethodSpec.Builder spec = methodBuilder("printOption")
         .addParameter(option)
         .addParameter(names)

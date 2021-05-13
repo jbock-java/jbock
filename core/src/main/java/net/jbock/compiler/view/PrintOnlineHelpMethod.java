@@ -34,6 +34,7 @@ class PrintOnlineHelpMethod {
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
   private final GeneratedType generatedType;
+  private final PrintTokensMethod printTokensMethod;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE).build();
 
@@ -44,13 +45,15 @@ class PrintOnlineHelpMethod {
       AllParameters allParameters,
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
-      GeneratedType generatedType) {
+      GeneratedType generatedType,
+      PrintTokensMethod printTokensMethod) {
     this.description = description;
     this.sourceElement = sourceElement;
     this.allParameters = allParameters;
     this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
     this.generatedType = generatedType;
+    this.printTokensMethod = printTokensMethod;
   }
 
 
@@ -87,12 +90,12 @@ class PrintOnlineHelpMethod {
             return result.build();
           });
       code.add(descriptionBlock);
-      code.addStatement("printTokens($S, $N)", "", descriptionBuilder);
+      code.addStatement("$N($S, $N)", printTokensMethod.get(), "", descriptionBuilder);
       code.addStatement("$N.println()", err);
     }
 
     code.addStatement("$N.println($S)", err, "USAGE");
-    code.addStatement("printTokens($S, usage())", continuationIndent);
+    code.addStatement("$N($S, usage())", printTokensMethod.get(), continuationIndent);
 
     String paramsFormat = "  %1$-" + positionalParameters.maxWidth() + "s ";
 

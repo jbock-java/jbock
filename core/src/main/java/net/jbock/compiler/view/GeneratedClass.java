@@ -19,7 +19,6 @@ import static com.squareup.javapoet.ParameterSpec.builder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 /**
@@ -54,6 +53,7 @@ public final class GeneratedClass {
   private final UsageMethod usageMethod;
   private final Withers withers;
   private final OptionsByNameMethod optionsByNameMethod;
+  private final PrintTokensMethod printTokensMethod;
 
   @Inject
   GeneratedClass(
@@ -78,7 +78,8 @@ public final class GeneratedClass {
       ParseResultWithRest parseResultWithRest,
       ReadOptionArgumentMethod readOptionArgumentMethod,
       UsageMethod usageMethod, Withers withers,
-      OptionsByNameMethod optionsByNameMethod) {
+      OptionsByNameMethod optionsByNameMethod,
+      PrintTokensMethod printTokensMethod) {
     this.parseMethod = parseMethod;
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
@@ -102,6 +103,7 @@ public final class GeneratedClass {
     this.usageMethod = usageMethod;
     this.withers = withers;
     this.optionsByNameMethod = optionsByNameMethod;
+    this.printTokensMethod = printTokensMethod;
   }
 
   public TypeSpec define() {
@@ -114,7 +116,7 @@ public final class GeneratedClass {
         .addMethod(withers.withErrorStreamMethod())
         .addMethod(printOnlineHelpMethod.define())
         .addMethod(printOptionMethod.define())
-        .addMethod(printTokensMethod())
+        .addMethod(printTokensMethod.get())
         .addMethod(makeLinesMethod.define())
         .addMethod(usageMethod.define());
     if (!namedOptions.isEmpty()) {
@@ -154,25 +156,6 @@ public final class GeneratedClass {
         .addModifiers(sourceElement.accessModifiers())
         .addJavadoc(javadoc()).build();
   }
-
-  private MethodSpec printTokensMethod() {
-    ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
-    ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
-    ParameterSpec lines = builder(LIST_OF_STRING, "lines").build();
-    ParameterSpec line = builder(STRING, "line").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = makeLines($N, $N)", lines.type, lines, continuationIndent, tokens);
-    code.add("for ($T $N : $N)\n", STRING, line, lines).indent()
-        .addStatement("$N.println($N)", commonFields.err(), line)
-        .unindent();
-    return methodBuilder("printTokens")
-        .addModifiers(PRIVATE)
-        .addCode(code.build())
-        .addParameter(continuationIndent)
-        .addParameter(tokens)
-        .build();
-  }
-
 
   private CodeBlock javadoc() {
     String version = getClass().getPackage().getImplementationVersion();
