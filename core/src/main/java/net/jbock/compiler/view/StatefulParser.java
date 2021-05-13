@@ -10,6 +10,7 @@ import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
@@ -32,7 +33,6 @@ import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Constants.mapOf;
-import static net.jbock.compiler.view.GeneratedClass.OPTIONS_BY_NAME;
 
 /**
  * Defines the inner class StatefulParser
@@ -47,6 +47,7 @@ final class StatefulParser {
   private final SourceElement sourceElement;
   private final NamedOptions options;
   private final PositionalParameters positionalParameters;
+  private final CommonFields commonFields;
 
   private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
 
@@ -61,13 +62,15 @@ final class StatefulParser {
       StatefulParseMethod parseMethod,
       SourceElement sourceElement,
       NamedOptions options,
-      PositionalParameters positionalParameters) {
+      PositionalParameters positionalParameters,
+      CommonFields commonFields) {
     this.generatedTypes = generatedTypes;
     this.generatedType = generatedType;
     this.statefulParseMethod = parseMethod;
     this.sourceElement = sourceElement;
     this.options = options;
     this.positionalParameters = positionalParameters;
+    this.commonFields = commonFields;
 
     this.optionParsersField = FieldSpec.builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "optionParsers")
         .initializer("optionParsers()")
@@ -158,21 +161,19 @@ final class StatefulParser {
   private MethodSpec tryReadOptionMethod() {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, generatedType.optionType()),
-        OPTIONS_BY_NAME).build();
 
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N.length() <= 1 || $N.charAt(0) != '-')\n", token, token).indent()
         .addStatement("return null").unindent();
 
     code.add("if ($N.charAt(1) != '-')\n", token).indent()
-        .addStatement("return $N.get($N.substring(0, 2))", optionsByName, token).unindent();
+        .addStatement("return $N.get($N.substring(0, 2))", commonFields.optionsByName(), token).unindent();
 
     code.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
     code.add("if ($N < 0)\n", index).indent()
-        .addStatement("return $N.get($N)", optionsByName, token)
+        .addStatement("return $N.get($N)", commonFields.optionsByName(), token)
         .unindent();
-    code.addStatement("return $N.get($N.substring(0, $N))", optionsByName, token, index);
+    code.addStatement("return $N.get($N.substring(0, $N))", commonFields.optionsByName(), token, index);
 
     return MethodSpec.methodBuilder("tryReadOption")
         .addParameter(token)

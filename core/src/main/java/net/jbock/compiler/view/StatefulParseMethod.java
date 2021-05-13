@@ -6,6 +6,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 
@@ -18,7 +19,6 @@ import static com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.view.GeneratedClass.SUSPICIOUS_PATTERN;
 
 class StatefulParseMethod {
 
@@ -30,15 +30,18 @@ class StatefulParseMethod {
   private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest").build();
   private final NamedOptions options;
   private final PositionalParameters positionalParameters;
+  private final CommonFields commonFields;
 
   @Inject
   StatefulParseMethod(
       GeneratedTypes generatedTypes,
       NamedOptions options,
-      PositionalParameters positionalParameters) {
+      PositionalParameters positionalParameters,
+      CommonFields commonFields) {
     this.generatedTypes = generatedTypes;
     this.options = options;
     this.positionalParameters = positionalParameters;
+    this.commonFields = commonFields;
   }
 
   MethodSpec parseMethod() {
@@ -150,7 +153,7 @@ class StatefulParseMethod {
 
   CodeBlock errorUnrecognizedOption() {
     return CodeBlock.builder().add("if ($N.matcher($N).matches())\n",
-        SUSPICIOUS_PATTERN, token).indent()
+        commonFields.suspiciousPattern(), token).indent()
         .addStatement(throwInvalidOptionStatement("Invalid option"))
         .unindent().build();
   }

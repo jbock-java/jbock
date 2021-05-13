@@ -1,53 +1,35 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.GeneratedTypes;
-import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.AnyDescriptionKeys;
-import net.jbock.qualifier.ExitHookField;
+import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
-import java.io.PrintStream;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.regex.Pattern;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
-import static net.jbock.compiler.Constants.mapOf;
 
 /**
  * Generates the *_Parser class.
  */
 public final class GeneratedClass {
 
-  private static final int DEFAULT_WRAP_AFTER = 80;
-
   private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
 
   static final int CONTINUATION_INDENT_USAGE = 8;
-  static final String OPTIONS_BY_NAME = "OPTIONS_BY_NAME";
-  static final FieldSpec SUSPICIOUS_PATTERN = FieldSpec.builder(Pattern.class, "SUSPICIOUS")
-      .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
-      .addModifiers(PRIVATE, STATIC, FINAL)
-      .build();
 
   private final AllParameters allParameters;
   private final ParseMethod parseMethod;
@@ -62,7 +44,7 @@ public final class GeneratedClass {
   private final NamedOptions namedOptions;
   private final AnyDescriptionKeys anyDescriptionKeys;
   private final PrintOnlineHelpMethod printOnlineHelpMethod;
-  private final ExitHookField exitHookField;
+  private final CommonFields commonFields;
   private final ParseOrExitMethod parseOrExitMethod;
   private final OptionParsersMethod optionParsersMethod;
   private final PrintOptionMethod printOptionMethod;
@@ -70,17 +52,8 @@ public final class GeneratedClass {
   private final ParseResultWithRest parseResultWithRest;
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
   private final UsageMethod usageMethod;
-
-  private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
-      .initializer("$T.err", System.class).build();
-
-  private final FieldSpec terminalWidth = FieldSpec.builder(INT, "terminalWidth", PRIVATE)
-      .initializer("$L", DEFAULT_WRAP_AFTER).build();
-
-  private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages", PRIVATE)
-      .initializer("$T.emptyMap()", Collections.class).build();
-
-  private final FieldSpec programName;
+  private final Withers withers;
+  private final OptionsByNameMethod optionsByNameMethod;
 
   @Inject
   GeneratedClass(
@@ -97,14 +70,15 @@ public final class GeneratedClass {
       NamedOptions namedOptions,
       AnyDescriptionKeys anyDescriptionKeys,
       PrintOnlineHelpMethod printOnlineHelpMethod,
-      ExitHookField exitHookField,
+      CommonFields commonFields,
       ParseOrExitMethod parseOrExitMethod,
       OptionParsersMethod optionParsersMethod,
       PrintOptionMethod printOptionMethod,
       MakeLinesMethod makeLinesMethod,
       ParseResultWithRest parseResultWithRest,
       ReadOptionArgumentMethod readOptionArgumentMethod,
-      UsageMethod usageMethod) {
+      UsageMethod usageMethod, Withers withers,
+      OptionsByNameMethod optionsByNameMethod) {
     this.parseMethod = parseMethod;
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
@@ -118,9 +92,7 @@ public final class GeneratedClass {
     this.namedOptions = namedOptions;
     this.anyDescriptionKeys = anyDescriptionKeys;
     this.printOnlineHelpMethod = printOnlineHelpMethod;
-    this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
-        .initializer("$S", sourceElement.programName()).build();
-    this.exitHookField = exitHookField;
+    this.commonFields = commonFields;
     this.parseOrExitMethod = parseOrExitMethod;
     this.optionParsersMethod = optionParsersMethod;
     this.printOptionMethod = printOptionMethod;
@@ -128,16 +100,18 @@ public final class GeneratedClass {
     this.parseResultWithRest = parseResultWithRest;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.usageMethod = usageMethod;
+    this.withers = withers;
+    this.optionsByNameMethod = optionsByNameMethod;
   }
 
   public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedType.type())
         .addMethod(parseMethod.define())
         .addMethod(parseOrExitMethod.define())
-        .addMethod(withTerminalWidthMethod())
-        .addMethod(withMessagesMethod())
-        .addMethod(withExitHookMethod())
-        .addMethod(withErrorStreamMethod())
+        .addMethod(withers.withTerminalWidthMethod())
+        .addMethod(withers.withMessagesMethod())
+        .addMethod(withers.withExitHookMethod())
+        .addMethod(withers.withErrorStreamMethod())
         .addMethod(printOnlineHelpMethod.define())
         .addMethod(printOptionMethod.define())
         .addMethod(printTokensMethod())
@@ -145,29 +119,26 @@ public final class GeneratedClass {
         .addMethod(usageMethod.define());
     if (!namedOptions.isEmpty()) {
       spec.addMethod(readOptionArgumentMethod.define());
-      spec.addMethod(optionsByNameMethod());
+      spec.addMethod(optionsByNameMethod.define());
       spec.addMethod(optionParsersMethod.define());
     }
     if (allParameters.anyRequired()) {
       spec.addMethod(missingRequiredMethod());
     }
 
-    spec.addField(err);
-    spec.addField(programName);
-    spec.addField(terminalWidth);
-    spec.addField(exitHookField.get());
+    spec.addField(commonFields.err());
+    spec.addField(commonFields.programName());
+    spec.addField(commonFields.terminalWidth());
+    spec.addField(commonFields.exitHook());
     if (anyDescriptionKeys.anyDescriptionKeysAtAll()) {
-      spec.addField(messages);
+      spec.addField(commonFields.messages());
     }
 
     if (!namedOptions.isEmpty()) {
-      spec.addField(FieldSpec.builder(mapOf(STRING, generatedType.optionType()), OPTIONS_BY_NAME)
-          .initializer("optionsByName()")
-          .addModifiers(PRIVATE, STATIC, FINAL)
-          .build());
+      spec.addField(commonFields.optionsByName());
     }
 
-    spec.addField(SUSPICIOUS_PATTERN);
+    spec.addField(commonFields.suspiciousPattern());
 
     spec.addType(parserState.define())
         .addType(optionEnum.define())
@@ -192,7 +163,7 @@ public final class GeneratedClass {
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = makeLines($N, $N)", lines.type, lines, continuationIndent, tokens);
     code.add("for ($T $N : $N)\n", STRING, line, lines).indent()
-        .addStatement("$N.println($N)", err, line)
+        .addStatement("$N.println($N)", commonFields.err(), line)
         .unindent();
     return methodBuilder("printTokens")
         .addModifiers(PRIVATE)
@@ -203,85 +174,11 @@ public final class GeneratedClass {
   }
 
 
-  private MethodSpec withTerminalWidthMethod() {
-    ParameterSpec width = builder(terminalWidth.type, "width").build();
-    return methodBuilder("withTerminalWidth")
-        .addParameter(width)
-        .addStatement("this.$1N = $2N == 0 ? this.$1N : $2N", terminalWidth, width)
-        .addStatement("return this")
-        .returns(generatedType.type())
-        .addModifiers(sourceElement.accessModifiers())
-        .build();
-  }
-
-  private MethodSpec withExitHookMethod() {
-    FieldSpec exitHook = exitHookField.get();
-    ParameterSpec param = builder(exitHook.type, exitHook.name).build();
-    return methodBuilder("withExitHook")
-        .addParameter(param)
-        .addStatement("this.$N = $N", exitHook, param)
-        .addStatement("return this")
-        .returns(generatedType.type())
-        .addModifiers(sourceElement.accessModifiers())
-        .build();
-  }
-
-  private MethodSpec withMessagesMethod() {
-    ParameterSpec resourceBundleParam = builder(messages.type, "map").build();
-    MethodSpec.Builder spec = methodBuilder("withMessages");
-    spec.addParameter(resourceBundleParam);
-    if (anyDescriptionKeys.anyDescriptionKeysAtAll()) {
-      spec.addStatement("this.$N = $N", messages, resourceBundleParam);
-    } else {
-      spec.addComment("no keys defined");
-    }
-    spec.addStatement("return this");
-    return spec.returns(generatedType.type())
-        .addModifiers(sourceElement.accessModifiers())
-        .build();
-  }
-
-  private MethodSpec withErrorStreamMethod() {
-    ParameterSpec param = builder(err.type, err.name).build();
-    return methodBuilder("withErrorStream")
-        .addParameter(param)
-        .addStatement("this.$N = $N", err, param)
-        .addStatement("return this")
-        .returns(generatedType.type())
-        .addModifiers(sourceElement.accessModifiers())
-        .build();
-  }
-
-
   private CodeBlock javadoc() {
     String version = getClass().getPackage().getImplementationVersion();
     return CodeBlock.builder()
         .add("<h3>Generated by <a href=$S>jbock $L</a></h3>\n", PROJECT_URL, version)
         .add("<p>Use the default constructor to obtain an instance of this parser.</p>\n")
-        .build();
-  }
-
-  private MethodSpec optionsByNameMethod() {
-    ParameterSpec result = builder(mapOf(STRING, generatedType.optionType()), "result").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    long mapSize = namedOptions.stream()
-        .map(ConvertedParameter::parameter)
-        .map(NamedOption::names)
-        .map(List::size)
-        .mapToLong(i -> i)
-        .sum();
-    code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
-    for (ConvertedParameter<NamedOption> namedOption : namedOptions.options()) {
-      for (String dashedName : namedOption.parameter().names()) {
-        code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedType.optionType(),
-            namedOption.enumConstant());
-      }
-    }
-    code.addStatement("return $N", result);
-
-    return MethodSpec.methodBuilder("optionsByName").returns(result.type)
-        .addCode(code.build())
-        .addModifiers(PRIVATE, STATIC)
         .build();
   }
 

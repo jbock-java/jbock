@@ -1,11 +1,11 @@
 package net.jbock.compiler.view;
 
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 
@@ -14,7 +14,6 @@ import java.util.ArrayList;
 import java.util.Locale;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
@@ -23,13 +22,16 @@ class UsageMethod {
 
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
-
-  private final FieldSpec programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL).build();
+  private final CommonFields commonFields;
 
   @Inject
-  UsageMethod(PositionalParameters positionalParameters, NamedOptions namedOptions) {
+  UsageMethod(
+      PositionalParameters positionalParameters,
+      NamedOptions namedOptions,
+      CommonFields commonFields) {
     this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
+    this.commonFields = commonFields;
   }
 
   MethodSpec define() {
@@ -39,7 +41,7 @@ class UsageMethod {
 
     spec.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
     spec.addStatement("$N.add($S)", result, " ");
-    spec.addStatement("$N.add($N)", result, programName);
+    spec.addStatement("$N.add($N)", result, commonFields.programName());
 
     if (!namedOptions.optional().isEmpty()) {
       spec.addStatement("$N.add($S)", result, "[OPTION]...");
