@@ -10,18 +10,15 @@ import java.util.stream.Collectors;
 
 public class PositionalParameters {
 
-  private final List<ConvertedParameter<PositionalParameter>> all;
   private final List<ConvertedParameter<PositionalParameter>> regular;
   private final Optional<ConvertedParameter<PositionalParameter>> repeatable;
 
   private final int paramsWidth;
 
   private PositionalParameters(
-      List<ConvertedParameter<PositionalParameter>> all,
       List<ConvertedParameter<PositionalParameter>> regular,
       Optional<ConvertedParameter<PositionalParameter>> repeatable,
       int paramsWidth) {
-    this.all = all;
     this.regular = regular;
     this.repeatable = repeatable;
     this.paramsWidth = paramsWidth;
@@ -34,7 +31,7 @@ public class PositionalParameters {
     Optional<ConvertedParameter<PositionalParameter>> repeatable = all.stream()
         .filter(ConvertedParameter::isRepeatable)
         .findFirst();
-    return new PositionalParameters(all, regular, repeatable, all.stream()
+    return new PositionalParameters(regular, repeatable, all.stream()
         .map(ConvertedParameter::parameter)
         .map(PositionalParameter::paramLabel)
         .mapToInt(String::length).max().orElse(0) + 3);
@@ -44,12 +41,8 @@ public class PositionalParameters {
     return regular;
   }
 
-  public List<ConvertedParameter<PositionalParameter>> all() {
-    return all;
-  }
-
   public int size() {
-    return all.size();
+    return regular().size() + (anyRepeatable() ? 1 : 0);
   }
 
   public Optional<ConvertedParameter<PositionalParameter>> repeatable() {
@@ -60,12 +53,12 @@ public class PositionalParameters {
     return repeatable.isPresent();
   }
 
-  public boolean isEmpty() {
-    return all.isEmpty();
+  public boolean none() {
+    return regular.isEmpty() && !anyRepeatable();
   }
 
-  public void forEach(Consumer<ConvertedParameter<PositionalParameter>> consumer) {
-    all.forEach(consumer);
+  public void forEachRegular(Consumer<ConvertedParameter<PositionalParameter>> consumer) {
+    regular.forEach(consumer);
   }
 
   public int paramsWidth() {

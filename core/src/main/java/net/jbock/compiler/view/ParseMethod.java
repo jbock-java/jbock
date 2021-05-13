@@ -29,16 +29,16 @@ class ParseMethod {
   private final ParameterSpec position = builder(INT, "position").build();
   private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest").build();
   private final NamedOptions options;
-  private final PositionalParameters params;
+  private final PositionalParameters positionalParameters;
 
   @Inject
   ParseMethod(
       GeneratedTypes generatedTypes,
       NamedOptions options,
-      PositionalParameters params) {
+      PositionalParameters positionalParameters) {
     this.generatedTypes = generatedTypes;
     this.options = options;
-    this.params = params;
+    this.positionalParameters = positionalParameters;
   }
 
   MethodSpec parseMethod() {
@@ -60,7 +60,7 @@ class ParseMethod {
     code.beginControlFlow("while ($N.hasNext())", it)
         .addStatement("$T $N = $N.next()", STRING, token, it);
 
-    code.beginControlFlow("if ($N == $L)", position, params.size())
+    code.beginControlFlow("if ($N == $L)", position, positionalParameters.size())
         .addStatement("$N.add($N)", rest, token)
         .addStatement("continue")
         .endControlFlow();
@@ -101,20 +101,20 @@ class ParseMethod {
         .add(errorUnrecognizedOption())
         .endControlFlow();
 
-    if (params.isEmpty()) {
+    if (positionalParameters.none()) {
       code.addStatement(throwInvalidOptionStatement("Excess param"));
-    } else if (!params.anyRepeatable()) {
-      code.add("if ($N == $L)\n", position, params.size()).indent()
+    } else if (!positionalParameters.anyRepeatable()) {
+      code.add("if ($N == $L)\n", position, positionalParameters.size()).indent()
           .addStatement(throwInvalidOptionStatement("Excess param"))
           .unindent();
     }
 
-    if (!params.isEmpty()) {
-      if (params.anyRepeatable()) {
-        if (params.size() == 1) {
+    if (!positionalParameters.none()) {
+      if (positionalParameters.anyRepeatable()) {
+        if (positionalParameters.size() == 1) {
           code.addStatement("$N.add($N)", rest, token);
         } else {
-          code.add("if ($N < $L)\n", position, params.size() - 1).indent()
+          code.add("if ($N < $L)\n", position, positionalParameters.size() - 1).indent()
               .addStatement("paramParsers[$N++] = $N", position, token)
               .unindent()
               .add("else\n").indent()
@@ -142,7 +142,7 @@ class ParseMethod {
 
   private CodeBlock.Builder initVariables() {
     CodeBlock.Builder code = CodeBlock.builder();
-    if (!params.isEmpty() && !(params.anyRepeatable() && params.size() == 1)) {
+    if (!positionalParameters.none() && !(positionalParameters.anyRepeatable() && positionalParameters.size() == 1)) {
       code.addStatement("$T $N = $L", position.type, position, 0);
     }
     return code;

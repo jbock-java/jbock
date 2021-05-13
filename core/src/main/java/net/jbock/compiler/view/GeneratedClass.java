@@ -72,8 +72,8 @@ public final class GeneratedClass {
   private final StatefulParser parserState;
   private final ParseResult parseResult;
   private final SourceElement sourceElement;
-  private final PositionalParameters params;
-  private final NamedOptions options;
+  private final PositionalParameters positionalParameters;
+  private final NamedOptions namedOptions;
   private final AnyDescriptionKeys anyDescriptionKeys;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
@@ -101,8 +101,8 @@ public final class GeneratedClass {
       OptionEnum optionEnum,
       StatefulParser parserState,
       ParseResult parseResult,
-      PositionalParameters params,
-      NamedOptions options,
+      PositionalParameters positionalParameters,
+      NamedOptions namedOptions,
       AnyDescriptionKeys anyDescriptionKeys) {
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
@@ -114,8 +114,8 @@ public final class GeneratedClass {
     this.optionEnum = optionEnum;
     this.parserState = parserState;
     this.parseResult = parseResult;
-    this.params = params;
-    this.options = options;
+    this.positionalParameters = positionalParameters;
+    this.namedOptions = namedOptions;
     this.anyDescriptionKeys = anyDescriptionKeys;
     this.exitHook = exitHookField();
     this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
@@ -135,7 +135,7 @@ public final class GeneratedClass {
         .addMethod(printTokensMethod())
         .addMethod(makeLinesMethod())
         .addMethod(usageMethod());
-    if (!options.isEmpty()) {
+    if (!namedOptions.isEmpty()) {
       spec.addMethod(readOptionArgumentMethod());
       spec.addMethod(optionsByNameMethod());
       spec.addMethod(optionParsersMethod());
@@ -152,7 +152,7 @@ public final class GeneratedClass {
       spec.addField(messages);
     }
 
-    if (!options.isEmpty()) {
+    if (!namedOptions.isEmpty()) {
       spec.addField(FieldSpec.builder(mapOf(STRING, generatedType.optionType()), OPTIONS_BY_NAME)
           .initializer("optionsByName()")
           .addModifiers(PRIVATE, STATIC, FINAL)
@@ -242,52 +242,53 @@ public final class GeneratedClass {
     code.addStatement("$N.println($S)", err, "USAGE");
     code.addStatement("printTokens($S, usage())", continuationIndent);
 
-    int paramsWidth = params.paramsWidth();
+    int paramsWidth = positionalParameters.paramsWidth();
     String paramsFormat = "  %1$-" + (paramsWidth - 2) + "s";
 
-    if (!params.isEmpty()) {
+    if (!positionalParameters.none()) {
       code.addStatement("$N.println()", err);
       code.addStatement("$N.println($S)", err, "PARAMETERS");
     }
-    params.forEach(p -> {
-      if (allParameters.anyDescriptionKeys()) {
-        code.addStatement("printOption($T.$L, $S, $S)",
-            generatedType.optionType(), p.enumConstant(),
-            String.format(paramsFormat, p.parameter().paramLabel()),
-            p.parameter().descriptionKey().orElse(""));
-      } else {
-        code.addStatement("printOption($T.$L, $S)",
-            generatedType.optionType(), p.enumConstant(),
-            String.format(paramsFormat, p.parameter().paramLabel()));
-      }
-    });
-    if (!options.isEmpty()) {
+    positionalParameters.forEachRegular(p -> code.add(printPositionalCode(paramsFormat, p)));
+    positionalParameters.repeatable().ifPresent(p -> code.add(printPositionalCode(paramsFormat, p)));
+    if (!namedOptions.isEmpty()) {
       code.addStatement("$N.println()", err);
       code.addStatement("$N.println($S)", err, "OPTIONS");
     }
 
-    int optionsWidth = options.stream()
-        .map(c -> c.parameter().namesWithLabel(c.isFlag()))
-        .mapToInt(String::length).max().orElse(0) + 3;
-    String optionsFormat = "  %1$-" + (optionsWidth - 2) + "s";
+    String optionsFormat = "  %1$-" + (namedOptions.optionsWidth() - 2) + "s";
 
-    options.forEach(c -> {
-      if (allParameters.anyDescriptionKeys()) {
-        code.addStatement("printOption($T.$L, $S, $S)",
-            generatedType.optionType(), c.enumConstant(),
-            String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
-            c.parameter().descriptionKey().orElse(""));
-      } else {
-        code.addStatement("printOption($T.$L, $S)",
-            generatedType.optionType(), c.enumConstant(),
-            String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())));
-      }
-
-    });
+    namedOptions.forEach(c -> code.add(printNamedOptionCode(optionsFormat, c)));
     return methodBuilder("printOnlineHelp")
         .addModifiers(sourceElement.accessModifiers())
         .addCode(code.build())
         .build();
+  }
+
+  private CodeBlock printNamedOptionCode(String optionsFormat, ConvertedParameter<NamedOption> c) {
+    if (allParameters.anyDescriptionKeys()) {
+      return CodeBlock.builder().addStatement("printOption($T.$L, $S, $S)",
+          generatedType.optionType(), c.enumConstant(),
+          String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
+          c.parameter().descriptionKey().orElse("")).build();
+    } else {
+      return CodeBlock.builder().addStatement("printOption($T.$L, $S)",
+          generatedType.optionType(), c.enumConstant(),
+          String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag()))).build();
+    }
+  }
+
+  private CodeBlock printPositionalCode(String paramsFormat, ConvertedParameter<PositionalParameter> p) {
+    if (allParameters.anyDescriptionKeys()) {
+      return CodeBlock.builder().addStatement("printOption($T.$L, $S, $S)",
+          generatedType.optionType(), p.enumConstant(),
+          String.format(paramsFormat, p.parameter().paramLabel()),
+          p.parameter().descriptionKey().orElse("")).build();
+    } else {
+      return CodeBlock.builder().addStatement("printOption($T.$L, $S)",
+          generatedType.optionType(), p.enumConstant(),
+          String.format(paramsFormat, p.parameter().paramLabel())).build();
+    }
   }
 
   MethodSpec printOptionMethod() {
@@ -530,35 +531,33 @@ public final class GeneratedClass {
 
     ParameterSpec result = builder(LIST_OF_STRING, "result").build();
 
-    List<ConvertedParameter<NamedOption>> requiredOptions = options.stream().filter(ConvertedParameter::isRequired).collect(Collectors.toList());
-    List<ConvertedParameter<NamedOption>> optionalOptions = options.stream().filter(p -> !p.isRequired()).collect(Collectors.toList());
-
     spec.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
     spec.addStatement("$N.add($S)", result, " ");
     spec.addStatement("$N.add($N)", result, programName);
 
-    if (!optionalOptions.isEmpty()) {
+    if (!namedOptions.optional().isEmpty()) {
       spec.addStatement("$N.add($S)", result, "[OPTION]...");
     }
 
-    for (ConvertedParameter<NamedOption> option : requiredOptions) {
+    for (ConvertedParameter<NamedOption> option : namedOptions.required()) {
       spec.addStatement("$N.add($T.format($S, $S, $S))",
           result, STRING, "%s %s",
           option.parameter().names().get(0),
           option.parameter().paramLabel());
     }
 
-    for (ConvertedParameter<PositionalParameter> param : params.all()) {
+    for (ConvertedParameter<PositionalParameter> param : positionalParameters.regular()) {
       if (param.isOptional()) {
         spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]");
       } else if (param.isRequired()) {
         spec.addStatement("$N.add($S)", result, param.enumName().snake().toUpperCase(Locale.US));
-      } else if (param.isRepeatable()) {
-        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]...");
       } else {
         throw new AssertionError("all cases handled (param can't be flag)");
       }
     }
+
+    positionalParameters.repeatable().ifPresent(param ->
+        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]..."));
 
     spec.addStatement("return $N", result);
     return spec.returns(LIST_OF_STRING).addModifiers(PRIVATE).build();
@@ -610,14 +609,14 @@ public final class GeneratedClass {
   private MethodSpec optionsByNameMethod() {
     ParameterSpec result = builder(mapOf(STRING, generatedType.optionType()), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    long mapSize = options.stream()
+    long mapSize = namedOptions.stream()
         .map(ConvertedParameter::parameter)
         .map(NamedOption::names)
         .map(List::size)
         .mapToLong(i -> i)
         .sum();
     code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
-    for (ConvertedParameter<NamedOption> namedOption : options.options()) {
+    for (ConvertedParameter<NamedOption> namedOption : namedOptions.options()) {
       for (String dashedName : namedOption.parameter().names()) {
         code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedType.optionType(),
             namedOption.enumConstant());
@@ -641,12 +640,12 @@ public final class GeneratedClass {
   }
 
   private CodeBlock optionParsersMethodCode(ParameterSpec parsers) {
-    if (options.isEmpty()) {
+    if (namedOptions.isEmpty()) {
       return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
     }
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, generatedType.optionType());
-    for (ConvertedParameter<NamedOption> param : options.options()) {
+    for (ConvertedParameter<NamedOption> param : namedOptions.options()) {
       String enumConstant = param.enumConstant();
       code.addStatement("$N.put($T.$L, new $T($T.$L))",
           parsers, generatedType.optionType(), enumConstant, optionParserType(param),
