@@ -196,12 +196,16 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .accept(failures::add, optionsBuilder::add);
       }
       ImmutableList<ConvertedParameter<NamedOption>> namedOptions = optionsBuilder.build();
-      failures.addAll(checkDescriptionKeys(namedOptions, positionalParams));
-      return failures.isEmpty() ? right(Params.create(positionalParams, namedOptions)) : left(failures);
+      failures.addAll(checkDuplicateDescriptionKeys(sourceElement, namedOptions, positionalParams));
+      if (!failures.isEmpty()) {
+        return left(failures);
+      }
+      return right(Params.create(positionalParams, namedOptions));
     });
   }
 
-  private List<ValidationFailure> checkDescriptionKeys(
+  private List<ValidationFailure> checkDuplicateDescriptionKeys(
+      SourceElement sourceElement,
       ImmutableList<ConvertedParameter<NamedOption>> namedOptions,
       ImmutableList<ConvertedParameter<PositionalParameter>> positionalParams) {
     List<ValidationFailure> failures = new ArrayList<>();
@@ -211,6 +215,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .addAll(namedOptions)
             .build();
     Set<String> keys = new HashSet<>();
+    sourceElement.descriptionKey().ifPresent(keys::add);
     for (ConvertedParameter<? extends AbstractParameter> c : abstractParameters) {
       AbstractParameter p = c.parameter();
       String key = p.descriptionKey().orElse("");

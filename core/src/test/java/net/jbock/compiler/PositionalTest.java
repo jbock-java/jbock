@@ -28,7 +28,7 @@ class PositionalTest {
   @Test
   void superSimpleOptional() {
     JavaFileObject javaFile = fromSource(
-        "@SuperCommand(description = \"x\", descriptionKey = \"x\")",
+        "@SuperCommand(description = \"y\", descriptionKey = \"y\")",
         "abstract class Arguments {",
         "",
         "  @Parameter(index = 0, description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
@@ -103,7 +103,7 @@ class PositionalTest {
   }
 
   @Test
-  void descriptionKeyNotUnique() {
+  void duplicateDescriptionKeyParam() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -121,35 +121,37 @@ class PositionalTest {
   }
 
   @Test
-  void mayNotDeclareAsOptionalInt() {
+  void duplicateDescriptionKeyCommand() {
     JavaFileObject javaFile = fromSource(
-        "@Command",
+        "@Command(descriptionKey = \"myKey\")",
         "abstract class Arguments {",
-        "  @Parameter(index = 0) abstract Optional<Integer> a();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void positionalOptionalsGaps() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "  @Parameter(index = 0) abstract Optional<Integer> b();",
-        "  @Parameter(index = 10) abstract Optional<String> c();",
-        "  @Parameter(index = 100) abstract Optional<Integer> d();",
+        "",
+        "  @Parameter(index = 0, descriptionKey = \"myKey\")",
+        "  abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("Position 10 is not available. Suggested position: 1");
+        .withErrorContaining("duplicate description key: myKey");
+  }
+
+  @Test
+  void indexGap() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "  @Parameter(index = 0) abstract Optional<Integer> b();",
+        "  @Parameter(index = 2) abstract Optional<String> c();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("Position 2 is not available. Suggested position: 1");
   }
 
 
   @Test
-  void positionalOptionalsOne() {
+  void indexMissingZero() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
