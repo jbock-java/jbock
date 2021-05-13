@@ -4,6 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
 import net.jbock.qualifier.AllParameters;
+import net.jbock.qualifier.ExitHookField;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
@@ -68,5 +69,11 @@ class ContextModule {
   @Provides
   AllParameters allParameters() {
     return AllParameters.create(params);
+  }
+
+  @Reusable
+  @Provides
+  ExitHookField exitHookField(GeneratedTypes generatedTypes) {
+    return ExitHookField.create(generatedTypes);
   }
 }

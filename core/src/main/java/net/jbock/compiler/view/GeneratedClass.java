@@ -5,7 +5,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
@@ -13,6 +12,7 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.AnyDescriptionKeys;
+import net.jbock.qualifier.ExitHookField;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
@@ -28,7 +28,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -62,6 +61,7 @@ public final class GeneratedClass {
   static final String SUSPICIOUS_PATTERN = "SUSPICIOUS";
 
   private final AllParameters allParameters;
+  private final ParseMethod parseMethod;
   private final Impl impl;
   private final GeneratedTypes generatedTypes;
   private final GeneratedType generatedType;
@@ -74,6 +74,8 @@ public final class GeneratedClass {
   private final NamedOptions namedOptions;
   private final AnyDescriptionKeys anyDescriptionKeys;
   private final PrintOnlineHelpMethod printOnlineHelpMethod;
+  private final ExitHookField exitHookField;
+  private final ParseOrExitMethod parseOrExitMethod;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -85,11 +87,11 @@ public final class GeneratedClass {
       .initializer("$T.emptyMap()", Collections.class).build();
 
   private final FieldSpec programName;
-  private final FieldSpec exitHook;
 
   @Inject
   GeneratedClass(
       AllParameters allParameters,
+      ParseMethod parseMethod,
       GeneratedType generatedType,
       SourceElement sourceElement,
       Impl impl,
@@ -101,7 +103,9 @@ public final class GeneratedClass {
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
       AnyDescriptionKeys anyDescriptionKeys,
-      PrintOnlineHelpMethod printOnlineHelpMethod) {
+      PrintOnlineHelpMethod printOnlineHelpMethod,
+      ExitHookField exitHookField, ParseOrExitMethod parseOrExitMethod) {
+    this.parseMethod = parseMethod;
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
     this.allParameters = allParameters;
@@ -115,15 +119,16 @@ public final class GeneratedClass {
     this.namedOptions = namedOptions;
     this.anyDescriptionKeys = anyDescriptionKeys;
     this.printOnlineHelpMethod = printOnlineHelpMethod;
-    this.exitHook = exitHookField();
     this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
         .initializer("$S", sourceElement.programName()).build();
+    this.exitHookField = exitHookField;
+    this.parseOrExitMethod = parseOrExitMethod;
   }
 
   public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedType.type())
-        .addMethod(parseMethod())
-        .addMethod(parseOrExitMethod())
+        .addMethod(parseMethod.define())
+        .addMethod(parseOrExitMethod.define())
         .addMethod(withTerminalWidthMethod())
         .addMethod(withMessagesMethod())
         .addMethod(withExitHookMethod())
@@ -145,7 +150,7 @@ public final class GeneratedClass {
     spec.addField(err);
     spec.addField(programName);
     spec.addField(terminalWidth);
-    spec.addField(exitHook);
+    spec.addField(exitHookField.get());
     if (anyDescriptionKeys.anyDescriptionKeysAtAll()) {
       spec.addField(messages);
     }
@@ -322,6 +327,7 @@ public final class GeneratedClass {
   }
 
   private MethodSpec withExitHookMethod() {
+    FieldSpec exitHook = exitHookField.get();
     ParameterSpec param = builder(exitHook.type, exitHook.name).build();
     return methodBuilder("withExitHook")
         .addParameter(param)
@@ -358,49 +364,6 @@ public final class GeneratedClass {
         .build();
   }
 
-  private MethodSpec parseMethod() {
-
-    ParameterSpec args = builder(STRING_ARRAY, "args").build();
-    ParameterSpec e = builder(RuntimeException.class, "e").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-
-    generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> {
-      if (allParameters.anyRequired()) {
-        code.add("if ($N.length == 0)\n",
-            args).indent()
-            .addStatement("return new $T()", helpRequestedType)
-            .unindent();
-      }
-      code.add("if ($1N.length == 1 && ($2S.equals($1N[0]) || $3S.equals($1N[0])))\n",
-          args, "--help", "-h").indent()
-          .addStatement("return new $T()", helpRequestedType)
-          .unindent();
-    });
-
-    ParameterSpec state = builder(generatedTypes.statefulParserType(), "state").build();
-    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-    ParameterSpec result = builder(generatedTypes.parseSuccessType(), "result").build();
-    code.addStatement("$T $N = new $T()", state.type, state, state.type);
-    code.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
-    code.beginControlFlow("try")
-        .addStatement("$T $N = $N.parse($N)", result.type, result, state, it)
-        .addStatement("return new $T($N)", generatedTypes.parsingSuccessWrapperType(), result)
-        .endControlFlow();
-
-    code.beginControlFlow("catch ($T $N)", RuntimeException.class, e)
-        .addStatement("return new $T($N)",
-            generatedTypes.parsingFailedType(), e)
-        .endControlFlow();
-
-    return MethodSpec.methodBuilder("parse").addParameter(args)
-        .returns(generatedTypes.parseResultType())
-        .addCode(code.build())
-        .addModifiers(sourceElement.accessModifiers())
-        .addJavadoc("This parse method has no side effects.\n" +
-            "Consider {@link #parseOrExit()} instead which does standard error-handling\n" +
-            "like printing error messages, and potentially shutting down the JVM.\n")
-        .build();
-  }
 
   private CodeBlock javadoc() {
     String version = getClass().getPackage().getImplementationVersion();
@@ -472,48 +435,6 @@ public final class GeneratedClass {
     return spec.returns(LIST_OF_STRING).addModifiers(PRIVATE).build();
   }
 
-  private MethodSpec parseOrExitMethod() {
-
-    ParameterSpec args = builder(STRING_ARRAY, "args").build();
-    ParameterSpec result = builder(generatedTypes.parseResultType(), "result").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-
-    code.addStatement("$T $N = parse($N)", result.type, result, args);
-
-    code.add("if ($N instanceof $T)\n", result, generatedTypes.parsingSuccessWrapperType()).indent()
-        .addStatement("return (($T) $N).$L()",
-            generatedTypes.parsingSuccessWrapperType(),
-            result,
-            sourceElement.resultMethodName())
-        .unindent();
-
-    generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> code
-        .beginControlFlow("if ($N instanceof $T)", result, helpRequestedType)
-        .addStatement("printOnlineHelp()")
-        .addStatement("$N.flush()", err)
-        .addStatement("$N.accept($N)", exitHook, result)
-        .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
-        .endControlFlow());
-
-    code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", err, "Error: ", generatedTypes.parsingFailedType(), result);
-    if (sourceElement.helpEnabled()) {
-      code.addStatement("printTokens($S, usage())", String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " ")));
-    } else {
-      code.addStatement("printOnlineHelp()");
-    }
-    if (sourceElement.helpEnabled()) {
-      code.addStatement("$N.println($S + $N + $S)", err, "Try '", programName, " --help' for more information.");
-    }
-    code.addStatement("$N.flush()", err)
-        .addStatement("$N.accept($N)", exitHook, result)
-        .addStatement("throw new $T($S)", RuntimeException.class, "parsing error");
-
-    return methodBuilder("parseOrExit").addParameter(args)
-        .addModifiers(sourceElement.accessModifiers())
-        .returns(generatedTypes.parseSuccessType())
-        .addCode(code.build())
-        .build();
-  }
 
   private MethodSpec optionsByNameMethod() {
     ParameterSpec result = builder(mapOf(STRING, generatedType.optionType()), "result").build();
@@ -581,23 +502,6 @@ public final class GeneratedClass {
         .addStatement("return new $T($S + $N)", RuntimeException.class, "Missing required: ", name)
         .addParameter(name)
         .addModifiers(PRIVATE, STATIC)
-        .build();
-  }
-
-  private FieldSpec exitHookField() {
-    ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(Consumer.class),
-        generatedTypes.parseResultType());
-    ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.add(generatedTypes.helpRequestedType()
-        .map(helpRequestedType -> CodeBlock.builder()
-            .add("$N ->\n", result).indent()
-            .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, helpRequestedType)
-            .unindent().build())
-        .orElseGet(() -> CodeBlock.of("$N -> $T.exit(1)", result, System.class)));
-    return FieldSpec.builder(consumer, "exitHook")
-        .addModifiers(PRIVATE)
-        .initializer(code.build())
         .build();
   }
 }
