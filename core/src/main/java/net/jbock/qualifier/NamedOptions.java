@@ -18,7 +18,7 @@ public class NamedOptions {
   private final boolean anyRegular;
   private final boolean anyFlags;
   private final boolean unixClusteringSupported;
-  private final int optionsWidth;
+  private final int maxWidth;
 
 
   private NamedOptions(
@@ -28,7 +28,7 @@ public class NamedOptions {
       boolean anyRepeatable,
       boolean anyRegular,
       boolean anyFlags,
-      boolean unixClusteringSupported, int optionsWidth) {
+      boolean unixClusteringSupported, int maxWidth) {
     this.options = options;
     this.requiredOptions = requiredOptions;
     this.optionalOptions = optionalOptions;
@@ -36,7 +36,7 @@ public class NamedOptions {
     this.anyRegular = anyRegular;
     this.anyFlags = anyFlags;
     this.unixClusteringSupported = unixClusteringSupported;
-    this.optionsWidth = optionsWidth;
+    this.maxWidth = maxWidth;
   }
 
   public static NamedOptions create(List<ConvertedParameter<NamedOption>> options) {
@@ -49,11 +49,11 @@ public class NamedOptions {
     boolean unixClusteringSupported = unixOptions.size() >= 2 && unixOptions.stream().anyMatch(ConvertedParameter::isFlag);
     Map<Boolean, List<ConvertedParameter<NamedOption>>> required = options.stream()
         .collect(Collectors.partitioningBy(ConvertedParameter::isRequired));
-    int optionsWidth = options.stream()
+    int maxWidth = options.stream()
         .map(c -> c.parameter().namesWithLabel(c.isFlag()))
-        .mapToInt(String::length).max().orElse(0) + 3;
+        .mapToInt(String::length).max().orElse(0);
     return new NamedOptions(options, required.get(true), required.get(false),
-        anyRepeatable, anyRegular, anyFlags, unixClusteringSupported, optionsWidth);
+        anyRepeatable, anyRegular, anyFlags, unixClusteringSupported, maxWidth);
   }
 
   public boolean anyRepeatable() {
@@ -96,7 +96,7 @@ public class NamedOptions {
     return optionalOptions;
   }
 
-  public int optionsWidth() {
-    return optionsWidth;
+  public int maxWidth() {
+    return maxWidth;
   }
 }

@@ -12,16 +12,15 @@ public class PositionalParameters {
 
   private final List<ConvertedParameter<PositionalParameter>> regular;
   private final Optional<ConvertedParameter<PositionalParameter>> repeatable;
-
-  private final int paramsWidth;
+  private final int maxWidth;
 
   private PositionalParameters(
       List<ConvertedParameter<PositionalParameter>> regular,
       Optional<ConvertedParameter<PositionalParameter>> repeatable,
-      int paramsWidth) {
+      int maxWidth) {
     this.regular = regular;
     this.repeatable = repeatable;
-    this.paramsWidth = paramsWidth;
+    this.maxWidth = maxWidth;
   }
 
   public static PositionalParameters create(List<ConvertedParameter<PositionalParameter>> all) {
@@ -31,10 +30,11 @@ public class PositionalParameters {
     Optional<ConvertedParameter<PositionalParameter>> repeatable = all.stream()
         .filter(ConvertedParameter::isRepeatable)
         .findFirst();
-    return new PositionalParameters(regular, repeatable, all.stream()
+    int maxWidth = all.stream()
         .map(ConvertedParameter::parameter)
         .map(PositionalParameter::paramLabel)
-        .mapToInt(String::length).max().orElse(0) + 3);
+        .mapToInt(String::length).max().orElse(0);
+    return new PositionalParameters(regular, repeatable, maxWidth);
   }
 
   public List<ConvertedParameter<PositionalParameter>> regular() {
@@ -61,7 +61,7 @@ public class PositionalParameters {
     regular.forEach(consumer);
   }
 
-  public int paramsWidth() {
-    return paramsWidth;
+  public int maxWidth() {
+    return maxWidth;
   }
 }

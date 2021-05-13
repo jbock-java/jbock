@@ -7,7 +7,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Description;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
@@ -58,12 +57,11 @@ public final class GeneratedClass {
 
   private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
 
-  private static final int CONTINUATION_INDENT_USAGE = 8;
+  static final int CONTINUATION_INDENT_USAGE = 8;
   static final String OPTIONS_BY_NAME = "OPTIONS_BY_NAME";
   static final String SUSPICIOUS_PATTERN = "SUSPICIOUS";
 
   private final AllParameters allParameters;
-  private final Description description;
   private final Impl impl;
   private final GeneratedTypes generatedTypes;
   private final GeneratedType generatedType;
@@ -75,6 +73,7 @@ public final class GeneratedClass {
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
   private final AnyDescriptionKeys anyDescriptionKeys;
+  private final PrintOnlineHelpMethod printOnlineHelpMethod;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -86,13 +85,11 @@ public final class GeneratedClass {
       .initializer("$T.emptyMap()", Collections.class).build();
 
   private final FieldSpec programName;
-
   private final FieldSpec exitHook;
 
   @Inject
   GeneratedClass(
       AllParameters allParameters,
-      Description description,
       GeneratedType generatedType,
       SourceElement sourceElement,
       Impl impl,
@@ -103,11 +100,11 @@ public final class GeneratedClass {
       ParseResult parseResult,
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
-      AnyDescriptionKeys anyDescriptionKeys) {
+      AnyDescriptionKeys anyDescriptionKeys,
+      PrintOnlineHelpMethod printOnlineHelpMethod) {
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
     this.allParameters = allParameters;
-    this.description = description;
     this.impl = impl;
     this.generatedTypes = generatedTypes;
     this.optionParser = optionParser;
@@ -117,6 +114,7 @@ public final class GeneratedClass {
     this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
     this.anyDescriptionKeys = anyDescriptionKeys;
+    this.printOnlineHelpMethod = printOnlineHelpMethod;
     this.exitHook = exitHookField();
     this.programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
         .initializer("$S", sourceElement.programName()).build();
@@ -130,7 +128,7 @@ public final class GeneratedClass {
         .addMethod(withMessagesMethod())
         .addMethod(withExitHookMethod())
         .addMethod(withErrorStreamMethod())
-        .addMethod(printOnlineHelpMethod())
+        .addMethod(printOnlineHelpMethod.printOnlineHelpMethod())
         .addMethod(printOptionMethod())
         .addMethod(printTokensMethod())
         .addMethod(makeLinesMethod())
@@ -200,95 +198,6 @@ public final class GeneratedClass {
     return spec.addModifiers(FINAL)
         .addModifiers(sourceElement.accessModifiers())
         .addJavadoc(javadoc()).build();
-  }
-
-  private MethodSpec printOnlineHelpMethod() {
-    CodeBlock.Builder code = CodeBlock.builder();
-    String continuationIndent = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
-
-    if (!description.lines().isEmpty()) {
-      ParameterSpec descriptionBuilder = builder(LIST_OF_STRING, "description").build();
-      code.addStatement("$T $N = new $T<>()", descriptionBuilder.type, descriptionBuilder, ArrayList.class);
-      CodeBlock descriptionBlock = sourceElement.descriptionKey()
-          .map(key -> {
-            CodeBlock.Builder result = CodeBlock.builder();
-            ParameterSpec descriptionMessage = builder(STRING, "descriptionMessage").build();
-            result.addStatement("$T $N = messages.get($S)", STRING, descriptionMessage, key);
-            result.beginControlFlow("if ($N != null)", descriptionMessage)
-                .addStatement("$T.addAll($N, $N.split($S, $L))",
-                    Collections.class, descriptionBuilder, descriptionMessage, "\\s+", -1);
-            result.endControlFlow();
-            result.beginControlFlow("else");
-            for (String line : description.lines()) {
-              result.addStatement("$T.addAll($N, $S.split($S, $L))",
-                  Collections.class, descriptionBuilder, line, "\\s+", -1);
-            }
-            result.endControlFlow();
-            return result.build();
-          })
-          .orElseGet(() -> {
-            CodeBlock.Builder result = CodeBlock.builder();
-            for (String line : description.lines()) {
-              result.addStatement("$T.addAll($N, $S.split($S, $L))",
-                  Collections.class, descriptionBuilder, line, "\\s+", -1);
-            }
-            return result.build();
-          });
-      code.add(descriptionBlock);
-      code.addStatement("printTokens($S, $N)", "", descriptionBuilder);
-      code.addStatement("$N.println()", err);
-    }
-
-    code.addStatement("$N.println($S)", err, "USAGE");
-    code.addStatement("printTokens($S, usage())", continuationIndent);
-
-    int paramsWidth = positionalParameters.paramsWidth();
-    String paramsFormat = "  %1$-" + (paramsWidth - 2) + "s";
-
-    if (!positionalParameters.none()) {
-      code.addStatement("$N.println()", err);
-      code.addStatement("$N.println($S)", err, "PARAMETERS");
-    }
-    positionalParameters.forEachRegular(p -> code.add(printPositionalCode(paramsFormat, p)));
-    positionalParameters.repeatable().ifPresent(p -> code.add(printPositionalCode(paramsFormat, p)));
-    if (!namedOptions.isEmpty()) {
-      code.addStatement("$N.println()", err);
-      code.addStatement("$N.println($S)", err, "OPTIONS");
-    }
-
-    String optionsFormat = "  %1$-" + (namedOptions.optionsWidth() - 2) + "s";
-
-    namedOptions.forEach(c -> code.add(printNamedOptionCode(optionsFormat, c)));
-    return methodBuilder("printOnlineHelp")
-        .addModifiers(sourceElement.accessModifiers())
-        .addCode(code.build())
-        .build();
-  }
-
-  private CodeBlock printNamedOptionCode(String optionsFormat, ConvertedParameter<NamedOption> c) {
-    if (allParameters.anyDescriptionKeys()) {
-      return CodeBlock.builder().addStatement("printOption($T.$L, $S, $S)",
-          generatedType.optionType(), c.enumConstant(),
-          String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
-          c.parameter().descriptionKey().orElse("")).build();
-    } else {
-      return CodeBlock.builder().addStatement("printOption($T.$L, $S)",
-          generatedType.optionType(), c.enumConstant(),
-          String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag()))).build();
-    }
-  }
-
-  private CodeBlock printPositionalCode(String paramsFormat, ConvertedParameter<PositionalParameter> p) {
-    if (allParameters.anyDescriptionKeys()) {
-      return CodeBlock.builder().addStatement("printOption($T.$L, $S, $S)",
-          generatedType.optionType(), p.enumConstant(),
-          String.format(paramsFormat, p.parameter().paramLabel()),
-          p.parameter().descriptionKey().orElse("")).build();
-    } else {
-      return CodeBlock.builder().addStatement("printOption($T.$L, $S)",
-          generatedType.optionType(), p.enumConstant(),
-          String.format(paramsFormat, p.parameter().paramLabel())).build();
-    }
   }
 
   MethodSpec printOptionMethod() {
