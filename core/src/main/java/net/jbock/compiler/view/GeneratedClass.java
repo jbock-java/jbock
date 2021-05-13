@@ -1,6 +1,5 @@
 package net.jbock.compiler.view;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
@@ -21,15 +20,11 @@ import net.jbock.qualifier.SourceElement;
 import javax.inject.Inject;
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
-import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
@@ -76,6 +71,8 @@ public final class GeneratedClass {
   private final PrintOnlineHelpMethod printOnlineHelpMethod;
   private final ExitHookField exitHookField;
   private final ParseOrExitMethod parseOrExitMethod;
+  private final OptionParsersMethod optionParsersMethod;
+  private final PrintOptionMethod printOptionMethod;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -104,7 +101,10 @@ public final class GeneratedClass {
       NamedOptions namedOptions,
       AnyDescriptionKeys anyDescriptionKeys,
       PrintOnlineHelpMethod printOnlineHelpMethod,
-      ExitHookField exitHookField, ParseOrExitMethod parseOrExitMethod) {
+      ExitHookField exitHookField,
+      ParseOrExitMethod parseOrExitMethod,
+      OptionParsersMethod optionParsersMethod,
+      PrintOptionMethod printOptionMethod) {
     this.parseMethod = parseMethod;
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
@@ -123,6 +123,8 @@ public final class GeneratedClass {
         .initializer("$S", sourceElement.programName()).build();
     this.exitHookField = exitHookField;
     this.parseOrExitMethod = parseOrExitMethod;
+    this.optionParsersMethod = optionParsersMethod;
+    this.printOptionMethod = printOptionMethod;
   }
 
   public TypeSpec define() {
@@ -134,14 +136,14 @@ public final class GeneratedClass {
         .addMethod(withExitHookMethod())
         .addMethod(withErrorStreamMethod())
         .addMethod(printOnlineHelpMethod.define())
-        .addMethod(printOptionMethod())
+        .addMethod(printOptionMethod.define())
         .addMethod(printTokensMethod())
         .addMethod(makeLinesMethod())
         .addMethod(usageMethod());
     if (!namedOptions.isEmpty()) {
       spec.addMethod(readOptionArgumentMethod());
       spec.addMethod(optionsByNameMethod());
-      spec.addMethod(optionParsersMethod());
+      spec.addMethod(optionParsersMethod.optionParsersMethod());
     }
     if (allParameters.anyRequired()) {
       spec.addMethod(missingRequiredMethod());
@@ -203,57 +205,6 @@ public final class GeneratedClass {
     return spec.addModifiers(FINAL)
         .addModifiers(sourceElement.accessModifiers())
         .addJavadoc(javadoc()).build();
-  }
-
-  MethodSpec printOptionMethod() {
-    ParameterSpec descriptionKey = builder(STRING, "descriptionKey").build();
-    ParameterSpec message = builder(STRING, "message").build();
-    ParameterSpec option = builder(generatedType.optionType(), "option").build();
-    ParameterSpec names = builder(STRING, "names").build();
-    ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
-    ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
-    ParameterSpec s = builder(STRING, "s").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    if (allParameters.anyDescriptionKeys()) {
-      code.addStatement("$T $N = $N.isEmpty() ? null : $N.get($N)", message.type, message, descriptionKey, messages, descriptionKey);
-    }
-
-    code.addStatement("$T $N = new $T<>()", tokens.type, tokens, ArrayList.class);
-    code.addStatement("$N.add($N)", tokens, names);
-    if (allParameters.anyDescriptionKeys()) {
-      code.addStatement(CodeBlock.builder().add("$N.addAll($T.ofNullable($N)\n",
-          tokens, Optional.class, message).indent()
-          .add(".map($T::trim)\n", STRING)
-          .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
-          .add(".map($T::asList)\n", Arrays.class)
-          .add(".orElseGet(() -> $T.stream($N.description)\n", Arrays.class, option).indent()
-          .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
-          .add(".flatMap($T::stream)\n", Arrays.class)
-          .add(".collect($T.toList())))", Collectors.class)
-          .unindent()
-          .unindent()
-          .build());
-    } else {
-      code.addStatement(CodeBlock.builder()
-          .add("$T.stream($N.description)\n", Arrays.class, option).indent()
-          .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
-          .add(".flatMap($T::stream)\n", Arrays.class)
-          .add(".forEach($N::add)", tokens)
-          .unindent()
-          .build());
-    }
-    code.addStatement("$T $N = $T.join($S, $T.nCopies($N.length() + 1, $S))",
-        STRING, continuationIndent, STRING, "", Collections.class, names, " ");
-    code.addStatement("printTokens($N, $N)", continuationIndent, tokens);
-    MethodSpec.Builder spec = methodBuilder("printOption")
-        .addParameter(option)
-        .addParameter(names)
-        .addModifiers(PRIVATE)
-        .addCode(code.build());
-    if (allParameters.anyDescriptionKeys()) {
-      spec.addParameter(descriptionKey);
-    }
-    return spec.build();
   }
 
   private MethodSpec printTokensMethod() {
@@ -435,7 +386,6 @@ public final class GeneratedClass {
     return spec.returns(LIST_OF_STRING).addModifiers(PRIVATE).build();
   }
 
-
   private MethodSpec optionsByNameMethod() {
     ParameterSpec result = builder(mapOf(STRING, generatedType.optionType()), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
@@ -458,41 +408,6 @@ public final class GeneratedClass {
         .addCode(code.build())
         .addModifiers(PRIVATE, STATIC)
         .build();
-  }
-
-  private MethodSpec optionParsersMethod() {
-    ParameterSpec parsers = builder(mapOf(generatedType.optionType(),
-        generatedTypes.optionParserType()), "parsers").build();
-
-    return MethodSpec.methodBuilder("optionParsers").returns(parsers.type)
-        .addCode(optionParsersMethodCode(parsers))
-        .addModifiers(PRIVATE, STATIC).build();
-  }
-
-  private CodeBlock optionParsersMethodCode(ParameterSpec parsers) {
-    if (namedOptions.isEmpty()) {
-      return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
-    }
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, generatedType.optionType());
-    for (ConvertedParameter<NamedOption> param : namedOptions.options()) {
-      String enumConstant = param.enumConstant();
-      code.addStatement("$N.put($T.$L, new $T($T.$L))",
-          parsers, generatedType.optionType(), enumConstant, optionParserType(param),
-          generatedType.optionType(), enumConstant);
-    }
-    code.addStatement("return $N", parsers);
-    return code.build();
-  }
-
-  private ClassName optionParserType(ConvertedParameter<NamedOption> param) {
-    if (param.isRepeatable()) {
-      return generatedTypes.repeatableOptionParserType();
-    }
-    if (param.isFlag()) {
-      return generatedTypes.flagParserType();
-    }
-    return generatedTypes.regularOptionParserType();
   }
 
   private MethodSpec missingRequiredMethod() {
