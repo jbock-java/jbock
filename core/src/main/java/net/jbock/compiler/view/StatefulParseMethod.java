@@ -149,7 +149,7 @@ class StatefulParseMethod {
   }
 
   CodeBlock errorUnrecognizedOption() {
-    return CodeBlock.builder().add("if ($L.matcher($N).matches())\n",
+    return CodeBlock.builder().add("if ($N.matcher($N).matches())\n",
         SUSPICIOUS_PATTERN, token).indent()
         .addStatement(throwInvalidOptionStatement("Invalid option"))
         .unindent().build();

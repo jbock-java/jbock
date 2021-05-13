@@ -7,38 +7,29 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
-import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.AnyDescriptionKeys;
 import net.jbock.qualifier.ExitHookField;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
-import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.io.PrintStream;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Locale;
 import java.util.regex.Pattern;
 
-import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
-import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ARRAY;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
 import static net.jbock.compiler.Constants.mapOf;
 
@@ -53,7 +44,10 @@ public final class GeneratedClass {
 
   static final int CONTINUATION_INDENT_USAGE = 8;
   static final String OPTIONS_BY_NAME = "OPTIONS_BY_NAME";
-  static final String SUSPICIOUS_PATTERN = "SUSPICIOUS";
+  static final FieldSpec SUSPICIOUS_PATTERN = FieldSpec.builder(Pattern.class, "SUSPICIOUS")
+      .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
+      .addModifiers(PRIVATE, STATIC, FINAL)
+      .build();
 
   private final AllParameters allParameters;
   private final ParseMethod parseMethod;
@@ -65,7 +59,6 @@ public final class GeneratedClass {
   private final StatefulParser parserState;
   private final ParseResult parseResult;
   private final SourceElement sourceElement;
-  private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
   private final AnyDescriptionKeys anyDescriptionKeys;
   private final PrintOnlineHelpMethod printOnlineHelpMethod;
@@ -73,6 +66,10 @@ public final class GeneratedClass {
   private final ParseOrExitMethod parseOrExitMethod;
   private final OptionParsersMethod optionParsersMethod;
   private final PrintOptionMethod printOptionMethod;
+  private final MakeLinesMethod makeLinesMethod;
+  private final ParseResultWithRest parseResultWithRest;
+  private final ReadOptionArgumentMethod readOptionArgumentMethod;
+  private final UsageMethod usageMethod;
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -97,14 +94,17 @@ public final class GeneratedClass {
       OptionEnum optionEnum,
       StatefulParser parserState,
       ParseResult parseResult,
-      PositionalParameters positionalParameters,
       NamedOptions namedOptions,
       AnyDescriptionKeys anyDescriptionKeys,
       PrintOnlineHelpMethod printOnlineHelpMethod,
       ExitHookField exitHookField,
       ParseOrExitMethod parseOrExitMethod,
       OptionParsersMethod optionParsersMethod,
-      PrintOptionMethod printOptionMethod) {
+      PrintOptionMethod printOptionMethod,
+      MakeLinesMethod makeLinesMethod,
+      ParseResultWithRest parseResultWithRest,
+      ReadOptionArgumentMethod readOptionArgumentMethod,
+      UsageMethod usageMethod) {
     this.parseMethod = parseMethod;
     this.generatedType = generatedType;
     this.sourceElement = sourceElement;
@@ -115,7 +115,6 @@ public final class GeneratedClass {
     this.optionEnum = optionEnum;
     this.parserState = parserState;
     this.parseResult = parseResult;
-    this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
     this.anyDescriptionKeys = anyDescriptionKeys;
     this.printOnlineHelpMethod = printOnlineHelpMethod;
@@ -125,6 +124,10 @@ public final class GeneratedClass {
     this.parseOrExitMethod = parseOrExitMethod;
     this.optionParsersMethod = optionParsersMethod;
     this.printOptionMethod = printOptionMethod;
+    this.makeLinesMethod = makeLinesMethod;
+    this.parseResultWithRest = parseResultWithRest;
+    this.readOptionArgumentMethod = readOptionArgumentMethod;
+    this.usageMethod = usageMethod;
   }
 
   public TypeSpec define() {
@@ -138,12 +141,12 @@ public final class GeneratedClass {
         .addMethod(printOnlineHelpMethod.define())
         .addMethod(printOptionMethod.define())
         .addMethod(printTokensMethod())
-        .addMethod(makeLinesMethod())
-        .addMethod(usageMethod());
+        .addMethod(makeLinesMethod.define())
+        .addMethod(usageMethod.define());
     if (!namedOptions.isEmpty()) {
-      spec.addMethod(readOptionArgumentMethod());
+      spec.addMethod(readOptionArgumentMethod.define());
       spec.addMethod(optionsByNameMethod());
-      spec.addMethod(optionParsersMethod.optionParsersMethod());
+      spec.addMethod(optionParsersMethod.define());
     }
     if (allParameters.anyRequired()) {
       spec.addMethod(missingRequiredMethod());
@@ -164,10 +167,7 @@ public final class GeneratedClass {
           .build());
     }
 
-    spec.addField(FieldSpec.builder(Pattern.class, SUSPICIOUS_PATTERN)
-        .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
-        .addModifiers(PRIVATE, STATIC, FINAL)
-        .build());
+    spec.addField(SUSPICIOUS_PATTERN);
 
     spec.addType(parserState.define())
         .addType(optionEnum.define())
@@ -175,32 +175,9 @@ public final class GeneratedClass {
         .addTypes(optionParser.define())
         .addTypes(parseResult.defineResultTypes());
 
-    // move this elsewhere
-    generatedTypes.parseResultWithRestType().ifPresent(resultWithRestType -> {
-      FieldSpec result = FieldSpec.builder(sourceElement.typeName(), "result", PRIVATE, FINAL).build();
-      FieldSpec rest = FieldSpec.builder(STRING_ARRAY, "rest", PRIVATE, FINAL).build();
-      spec.addType(TypeSpec.classBuilder(resultWithRestType)
-          .addModifiers(sourceElement.accessModifiers())
-          .addModifiers(STATIC, FINAL)
-          .addField(result)
-          .addField(rest)
-          .addMethod(constructorBuilder()
-              .addParameter(ParameterSpec.builder(result.type, result.name).build())
-              .addParameter(ParameterSpec.builder(rest.type, rest.name).build())
-              .addStatement("this.$N = $N", result, result)
-              .addStatement("this.$N = $N", rest, rest)
-              .addModifiers(PRIVATE)
-              .build())
-          .addMethod(methodBuilder("getRest")
-              .returns(rest.type)
-              .addModifiers(sourceElement.accessModifiers())
-              .addStatement("return $N", rest).build())
-          .addMethod(methodBuilder("getResult")
-              .returns(result.type)
-              .addModifiers(sourceElement.accessModifiers())
-              .addStatement("return $N", result).build())
-          .build());
-    });
+    generatedTypes.parseResultWithRestType()
+        .map(parseResultWithRest::define)
+        .ifPresent(spec::addType);
 
     return spec.addModifiers(FINAL)
         .addModifiers(sourceElement.accessModifiers())
@@ -225,46 +202,6 @@ public final class GeneratedClass {
         .build();
   }
 
-  private MethodSpec makeLinesMethod() {
-    ParameterSpec result = builder(LIST_OF_STRING, "result").build();
-    ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
-    ParameterSpec i = builder(INT, "i").build();
-    ParameterSpec fresh = builder(BOOLEAN, "fresh").build();
-    ParameterSpec line = builder(StringBuilder.class, "line").build();
-    ParameterSpec token = builder(STRING, "token").build();
-    ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
-    code.addStatement("$T $N = new $T()", line.type, line, StringBuilder.class);
-    code.addStatement("$T $N = $L", INT, i, 0);
-    code.beginControlFlow("while ($N < $N.size())", i, tokens);
-    code.addStatement("$T $N = $N.get($N)", STRING, token, tokens, i);
-    code.addStatement("$T $N = $N.length() == $L", BOOLEAN, fresh, line, 0);
-    code.beginControlFlow("if (!$N && $N.length() + $N.length() + 1 > $N)",
-        fresh, token, line, terminalWidth);
-    code.addStatement("$N.add($N.toString())", result, line);
-    code.addStatement("$N.setLength(0)", line);
-    code.addStatement("continue");
-    code.endControlFlow();
-    code.beginControlFlow("if ($N > 0)", i)
-        .addStatement("$N.append($N ? $N : $S)", line, fresh, continuationIndent, " ")
-        .endControlFlow();
-    code.addStatement("$N.append($N)", line, token);
-    code.addStatement("$N++", i);
-    code.endControlFlow();
-
-    code.beginControlFlow("if ($N.length() > 0)", line)
-        .addStatement("$N.add($N.toString())", result, line)
-        .endControlFlow();
-    code.addStatement("return $N", result);
-    return methodBuilder("makeLines")
-        .addModifiers(PRIVATE)
-        .addCode(code.build())
-        .addParameter(continuationIndent)
-        .addParameter(tokens)
-        .returns(LIST_OF_STRING)
-        .build();
-  }
 
   private MethodSpec withTerminalWidthMethod() {
     ParameterSpec width = builder(terminalWidth.type, "width").build();
@@ -322,68 +259,6 @@ public final class GeneratedClass {
         .add("<h3>Generated by <a href=$S>jbock $L</a></h3>\n", PROJECT_URL, version)
         .add("<p>Use the default constructor to obtain an instance of this parser.</p>\n")
         .build();
-  }
-
-  private static MethodSpec readOptionArgumentMethod() {
-    ParameterSpec token = builder(STRING, "token").build();
-    ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-
-    code.add("if ($N.charAt(1) == '-' && $N.indexOf('=') >= 0)\n", token, token).indent()
-        .addStatement("return $N.substring($N.indexOf('=') + 1)", token, token).unindent();
-
-    code.add("if ($N.charAt(1) != '-' && $N.length() >= 3)\n", token, token).indent()
-        .addStatement("return $N.substring(2)", token).unindent();
-
-    code.add("if (!$N.hasNext())\n", it).indent()
-        .addStatement("throw new $T($S + $N)", RuntimeException.class,
-            "Missing value after token: ", token)
-        .unindent();
-
-    code.addStatement("return $N.next()", it);
-    return methodBuilder("readOptionArgument")
-        .addCode(code.build())
-        .addParameters(asList(token, it))
-        .returns(STRING)
-        .addModifiers(PRIVATE, STATIC)
-        .build();
-  }
-
-  private MethodSpec usageMethod() {
-    MethodSpec.Builder spec = MethodSpec.methodBuilder("usage");
-
-    ParameterSpec result = builder(LIST_OF_STRING, "result").build();
-
-    spec.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
-    spec.addStatement("$N.add($S)", result, " ");
-    spec.addStatement("$N.add($N)", result, programName);
-
-    if (!namedOptions.optional().isEmpty()) {
-      spec.addStatement("$N.add($S)", result, "[OPTION]...");
-    }
-
-    for (ConvertedParameter<NamedOption> option : namedOptions.required()) {
-      spec.addStatement("$N.add($T.format($S, $S, $S))",
-          result, STRING, "%s %s",
-          option.parameter().names().get(0),
-          option.parameter().paramLabel());
-    }
-
-    for (ConvertedParameter<PositionalParameter> param : positionalParameters.regular()) {
-      if (param.isOptional()) {
-        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]");
-      } else if (param.isRequired()) {
-        spec.addStatement("$N.add($S)", result, param.enumName().snake().toUpperCase(Locale.US));
-      } else {
-        throw new AssertionError("all cases handled (param can't be flag)");
-      }
-    }
-
-    positionalParameters.repeatable().ifPresent(param ->
-        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]..."));
-
-    spec.addStatement("return $N", result);
-    return spec.returns(LIST_OF_STRING).addModifiers(PRIVATE).build();
   }
 
   private MethodSpec optionsByNameMethod() {

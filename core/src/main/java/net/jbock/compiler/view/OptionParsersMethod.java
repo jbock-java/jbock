@@ -35,7 +35,7 @@ class OptionParsersMethod {
     this.namedOptions = namedOptions;
   }
 
-  MethodSpec optionParsersMethod() {
+  MethodSpec define() {
     ParameterSpec parsers = builder(mapOf(generatedType.optionType(),
         generatedTypes.optionParserType()), "parsers").build();
 
