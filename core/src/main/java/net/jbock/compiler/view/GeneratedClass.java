@@ -128,7 +128,7 @@ public final class GeneratedClass {
         .addMethod(withMessagesMethod())
         .addMethod(withExitHookMethod())
         .addMethod(withErrorStreamMethod())
-        .addMethod(printOnlineHelpMethod.printOnlineHelpMethod())
+        .addMethod(printOnlineHelpMethod.define())
         .addMethod(printOptionMethod())
         .addMethod(printTokensMethod())
         .addMethod(makeLinesMethod())

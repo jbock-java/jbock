@@ -39,7 +39,7 @@ import static net.jbock.compiler.view.GeneratedClass.OPTIONS_BY_NAME;
  */
 final class StatefulParser {
 
-  private final ParseMethod parseMethod;
+  private final StatefulParseMethod statefulParseMethod;
   private final GeneratedTypes generatedTypes;
   private final GeneratedType generatedType;
   private final FieldSpec optionParsersField;
@@ -58,13 +58,13 @@ final class StatefulParser {
   StatefulParser(
       GeneratedTypes generatedTypes,
       GeneratedType generatedType,
-      ParseMethod parseMethod,
+      StatefulParseMethod parseMethod,
       SourceElement sourceElement,
       NamedOptions options,
       PositionalParameters positionalParameters) {
     this.generatedTypes = generatedTypes;
     this.generatedType = generatedType;
-    this.parseMethod = parseMethod;
+    this.statefulParseMethod = parseMethod;
     this.sourceElement = sourceElement;
     this.options = options;
     this.positionalParameters = positionalParameters;
@@ -81,7 +81,7 @@ final class StatefulParser {
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.statefulParserType())
         .addModifiers(PRIVATE, STATIC)
-        .addMethod(parseMethod.parseMethod());
+        .addMethod(statefulParseMethod.parseMethod());
     if (!sourceElement.isSuperCommand()) {
       spec.addField(endOfOptionParsing);
     }

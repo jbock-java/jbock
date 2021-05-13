@@ -54,7 +54,7 @@ class PrintOnlineHelpMethod {
   }
 
 
-  MethodSpec printOnlineHelpMethod() {
+  MethodSpec define() {
     CodeBlock.Builder code = CodeBlock.builder();
     String continuationIndent = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
 

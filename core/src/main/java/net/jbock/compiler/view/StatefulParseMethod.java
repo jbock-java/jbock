@@ -20,7 +20,7 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.view.GeneratedClass.SUSPICIOUS_PATTERN;
 
-class ParseMethod {
+class StatefulParseMethod {
 
   private final GeneratedTypes generatedTypes;
 
@@ -32,7 +32,7 @@ class ParseMethod {
   private final PositionalParameters positionalParameters;
 
   @Inject
-  ParseMethod(
+  StatefulParseMethod(
       GeneratedTypes generatedTypes,
       NamedOptions options,
       PositionalParameters positionalParameters) {
