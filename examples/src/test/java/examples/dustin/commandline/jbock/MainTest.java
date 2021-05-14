@@ -1,6 +1,8 @@
-package net.jbock.examples;
+package examples.dustin.commandline.jbock;
 
 import org.junit.jupiter.api.Test;
+
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -11,7 +13,7 @@ class MainTest {
   void testMain() {
     String[] argv = new String[]{"-v", "-f", "file.txt"};
     Main.Arguments args = new Main_Arguments_Parser().parseOrExit(argv);
-    assertEquals("file.txt", args.file());
+    assertEquals(Optional.of("file.txt"), args.file());
     assertTrue(args.verbose());
   }
 }
