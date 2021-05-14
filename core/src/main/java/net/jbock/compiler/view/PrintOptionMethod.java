@@ -1,10 +1,10 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.qualifier.AllParameters;
+import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.GeneratedType;
 
 import javax.inject.Inject;
@@ -19,23 +19,24 @@ import static com.squareup.javapoet.ParameterSpec.builder;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
 
 class PrintOptionMethod {
 
   private final AllParameters allParameters;
   private final GeneratedType generatedType;
   private final PrintTokensMethod printTokensMethod;
-  private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages", PRIVATE).build();
+  private final CommonFields commonFields;
 
   @Inject
   PrintOptionMethod(
       AllParameters allParameters,
       GeneratedType generatedType,
-      PrintTokensMethod printTokensMethod) {
+      PrintTokensMethod printTokensMethod,
+      CommonFields commonFields) {
     this.allParameters = allParameters;
     this.generatedType = generatedType;
     this.printTokensMethod = printTokensMethod;
+    this.commonFields = commonFields;
   }
 
   MethodSpec define() {
@@ -48,7 +49,8 @@ class PrintOptionMethod {
     ParameterSpec s = builder(STRING, "s").build();
     CodeBlock.Builder code = CodeBlock.builder();
     if (allParameters.anyDescriptionKeys()) {
-      code.addStatement("$T $N = $N.isEmpty() ? null : $N.get($N)", message.type, message, descriptionKey, messages, descriptionKey);
+      code.addStatement("$T $N = $N.isEmpty() ? null : $N.get($N)",
+          message.type, message, descriptionKey, commonFields.messages(), descriptionKey);
     }
 
     code.addStatement("$T $N = new $T<>()", tokens.type, tokens, ArrayList.class);

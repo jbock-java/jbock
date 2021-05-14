@@ -29,7 +29,6 @@ import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 import static net.jbock.compiler.Constants.mapOf;
@@ -43,18 +42,11 @@ final class StatefulParser {
   private final GeneratedTypes generatedTypes;
   private final GeneratedType generatedType;
   private final FieldSpec optionParsersField;
-  private final FieldSpec paramParsersField;
   private final SourceElement sourceElement;
   private final NamedOptions options;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
   private final MissingRequiredMethod missingRequiredMethod;
-
-  private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
-
-  private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
-      .initializer("new $T<>()", ArrayList.class)
-      .build();
 
   @Inject
   StatefulParser(
@@ -78,10 +70,6 @@ final class StatefulParser {
     this.optionParsersField = FieldSpec.builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "optionParsers")
         .initializer("optionParsers()")
         .build();
-
-    this.paramParsersField = FieldSpec.builder(ArrayTypeName.of(STRING), "paramParsers")
-        .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
-        .build();
   }
 
   TypeSpec define() {
@@ -89,7 +77,7 @@ final class StatefulParser {
         .addModifiers(PRIVATE, STATIC)
         .addMethod(statefulParseMethod.parseMethod());
     if (!sourceElement.isSuperCommand()) {
-      spec.addField(endOfOptionParsing);
+      spec.addField(commonFields.endOfOptionParsing());
     }
     if (!options.isEmpty()) {
       spec.addMethod(tryParseOptionMethod())
@@ -97,10 +85,10 @@ final class StatefulParser {
       spec.addField(optionParsersField);
     }
     if (!positionalParameters.regular().isEmpty()) {
-      spec.addField(paramParsersField);
+      spec.addField(commonFields.paramParsers());
     }
     if (positionalParameters.anyRepeatable() || sourceElement.isSuperCommand()) {
-      spec.addField(rest);
+      spec.addField(commonFields.rest());
     }
     spec.addMethod(buildMethod());
     return spec.build();
@@ -124,7 +112,7 @@ final class StatefulParser {
     ParameterSpec option = ParameterSpec.builder(generatedType.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
     if (!sourceElement.isSuperCommand()) {
-      code.add("if ($N)\n", endOfOptionParsing).indent()
+      code.add("if ($N)\n", commonFields.endOfOptionParsing()).indent()
           .addStatement("return false")
           .unindent();
     }
@@ -148,7 +136,7 @@ final class StatefulParser {
     ParameterSpec option = ParameterSpec.builder(generatedType.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
     if (!sourceElement.isSuperCommand()) {
-      code.add("if ($N)\n", endOfOptionParsing).indent()
+      code.add("if ($N)\n", commonFields.endOfOptionParsing()).indent()
           .addStatement("return false")
           .unindent();
     }
@@ -198,7 +186,7 @@ final class StatefulParser {
     positionalParameters.repeatable()
         .map(param -> {
           List<CodeBlock> block = new ArrayList<>();
-          block.add(CodeBlock.of("$N.stream()", rest));
+          block.add(CodeBlock.of("$N.stream()", commonFields.rest()));
           block.add(param.mapExpr());
           block.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
           return joinIndent(block);
@@ -238,7 +226,7 @@ final class StatefulParser {
 
   private CodeBlock streamExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
     return CodeBlock.builder().add(
-        "$T.ofNullable($N[$L])", Optional.class, paramParsersField,
+        "$T.ofNullable($N[$L])", Optional.class, commonFields.paramParsers(),
         parameter.parameter().position()).build();
   }
 

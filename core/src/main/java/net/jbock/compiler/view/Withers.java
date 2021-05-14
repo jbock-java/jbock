@@ -1,6 +1,5 @@
 package net.jbock.compiler.view;
 
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.qualifier.AnyDescriptionKeys;
@@ -45,11 +44,11 @@ class Withers {
   }
 
   MethodSpec withExitHookMethod() {
-    FieldSpec exitHook = commonFields.exitHook();
-    ParameterSpec param = builder(exitHook.type, exitHook.name).build();
+    ParameterSpec param = builder(commonFields.exitHook().type,
+        commonFields.exitHook().name).build();
     return methodBuilder("withExitHook")
         .addParameter(param)
-        .addStatement("this.$N = $N", exitHook, param)
+        .addStatement("this.$N = $N", commonFields.exitHook(), param)
         .addStatement("return this")
         .returns(generatedType.type())
         .addModifiers(sourceElement.accessModifiers())

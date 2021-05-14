@@ -2,7 +2,6 @@ package net.jbock.compiler.view;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.GeneratedTypes;
@@ -14,9 +13,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
@@ -27,7 +24,6 @@ class StatefulParseMethod {
   private final ParameterSpec it = builder(STRING_ITERATOR, "it").build();
   private final ParameterSpec token = builder(STRING, "token").build();
   private final ParameterSpec position = builder(INT, "position").build();
-  private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest").build();
   private final NamedOptions options;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
@@ -57,14 +53,15 @@ class StatefulParseMethod {
 
   private CodeBlock superCommandCode(ClassName parseResultWithRestType) {
     CodeBlock.Builder code = initVariables();
-    code.addStatement("$T $N = new $T<>()", rest.type, rest, ArrayList.class);
+    code.addStatement("$T $N = new $T<>()",
+        commonFields.rest().type, commonFields.rest(), ArrayList.class);
 
     // begin parsing loop
     code.beginControlFlow("while ($N.hasNext())", it)
         .addStatement("$T $N = $N.next()", STRING, token, it);
 
     code.beginControlFlow("if ($N == $L)", position, positionalParameters.size())
-        .addStatement("$N.add($N)", rest, token)
+        .addStatement("$N.add($N)", commonFields.rest(), token)
         .addStatement("continue")
         .endControlFlow();
 
@@ -73,34 +70,34 @@ class StatefulParseMethod {
     }
     code.add(errorUnrecognizedOption());
 
-    code.addStatement("paramParsers[$N] = $N", position, token)
-        .addStatement("$N++", position);
+    code.addStatement("$N[$N++] = $N", commonFields.paramParsers(),
+        position, token);
 
     // end parsing loop
     code.endControlFlow();
 
     code.addStatement("return new $T(build(), $N.toArray(new $T[0]))",
-        parseResultWithRestType, rest, String.class);
+        parseResultWithRestType, commonFields.rest(), String.class);
     return code.build();
   }
 
   private CodeBlock regularCode() {
     CodeBlock.Builder code = initVariables();
-    FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
 
     // begin parsing loop
     code.beginControlFlow("while ($N.hasNext())", it)
         .addStatement("$T $N = $N.next()", STRING, token, it);
 
-    code.beginControlFlow("if (!$N && $S.equals($N))", endOfOptionParsing, "--", token)
-        .addStatement("$N = $L", endOfOptionParsing, true)
+    code.beginControlFlow("if (!$N && $S.equals($N))",
+        commonFields.endOfOptionParsing(), "--", token)
+        .addStatement("$N = $L", commonFields.endOfOptionParsing(), true)
         .addStatement("continue")
         .endControlFlow();
 
     if (!options.isEmpty()) {
       code.add(optionBlock());
     }
-    code.beginControlFlow("if (!$N)", endOfOptionParsing)
+    code.beginControlFlow("if (!$N)", commonFields.endOfOptionParsing())
         .add(errorUnrecognizedOption())
         .endControlFlow();
 
@@ -115,17 +112,19 @@ class StatefulParseMethod {
     if (!positionalParameters.none()) {
       if (positionalParameters.anyRepeatable()) {
         if (positionalParameters.size() == 1) {
-          code.addStatement("$N.add($N)", rest, token);
+          code.addStatement("$N.add($N)", commonFields.rest(), token);
         } else {
           code.add("if ($N < $L)\n", position, positionalParameters.size() - 1).indent()
-              .addStatement("paramParsers[$N++] = $N", position, token)
+              .addStatement("$N[$N++] = $N", commonFields.paramParsers(),
+                  position, token)
               .unindent()
               .add("else\n").indent()
-              .addStatement("$N.add($N)", rest, token)
+              .addStatement("$N.add($N)", commonFields.rest(), token)
               .unindent();
         }
       } else {
-        code.addStatement("paramParsers[$N++] = $N", position, token);
+        code.addStatement("$N[$N++] = $N", commonFields.paramParsers(),
+            position, token);
       }
     }
 

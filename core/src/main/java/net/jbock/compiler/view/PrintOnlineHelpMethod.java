@@ -1,7 +1,6 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.Description;
@@ -9,19 +8,18 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
+import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.view.GeneratedClass.CONTINUATION_INDENT_USAGE;
@@ -35,8 +33,7 @@ class PrintOnlineHelpMethod {
   private final NamedOptions namedOptions;
   private final GeneratedType generatedType;
   private final PrintTokensMethod printTokensMethod;
-
-  private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE).build();
+  private final CommonFields commonFields;
 
   @Inject
   PrintOnlineHelpMethod(
@@ -46,7 +43,8 @@ class PrintOnlineHelpMethod {
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
       GeneratedType generatedType,
-      PrintTokensMethod printTokensMethod) {
+      PrintTokensMethod printTokensMethod,
+      CommonFields commonFields) {
     this.description = description;
     this.sourceElement = sourceElement;
     this.allParameters = allParameters;
@@ -54,6 +52,7 @@ class PrintOnlineHelpMethod {
     this.namedOptions = namedOptions;
     this.generatedType = generatedType;
     this.printTokensMethod = printTokensMethod;
+    this.commonFields = commonFields;
   }
 
 
@@ -91,23 +90,23 @@ class PrintOnlineHelpMethod {
           });
       code.add(descriptionBlock);
       code.addStatement("$N($S, $N)", printTokensMethod.get(), "", descriptionBuilder);
-      code.addStatement("$N.println()", err);
+      code.addStatement("$N.println()", commonFields.err());
     }
 
-    code.addStatement("$N.println($S)", err, "USAGE");
+    code.addStatement("$N.println($S)", commonFields.err(), "USAGE");
     code.addStatement("$N($S, usage())", printTokensMethod.get(), continuationIndent);
 
     String paramsFormat = "  %1$-" + positionalParameters.maxWidth() + "s ";
 
     if (!positionalParameters.none()) {
-      code.addStatement("$N.println()", err);
-      code.addStatement("$N.println($S)", err, "PARAMETERS");
+      code.addStatement("$N.println()", commonFields.err());
+      code.addStatement("$N.println($S)", commonFields.err(), "PARAMETERS");
     }
     positionalParameters.forEachRegular(p -> code.add(printPositionalCode(paramsFormat, p)));
     positionalParameters.repeatable().ifPresent(p -> code.add(printPositionalCode(paramsFormat, p)));
     if (!namedOptions.isEmpty()) {
-      code.addStatement("$N.println()", err);
-      code.addStatement("$N.println($S)", err, "OPTIONS");
+      code.addStatement("$N.println()", commonFields.err());
+      code.addStatement("$N.println($S)", commonFields.err(), "OPTIONS");
     }
 
     String optionsFormat = "  %1$-" + namedOptions.maxWidth() + "s ";

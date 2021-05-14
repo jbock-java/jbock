@@ -68,9 +68,6 @@ class ParseMethod {
         .returns(generatedTypes.parseResultType())
         .addCode(code.build())
         .addModifiers(sourceElement.accessModifiers())
-        .addJavadoc("This parse method has no side effects.\n" +
-            "Consider {@link #parseOrExit()} instead which does standard error-handling\n" +
-            "like printing error messages, and potentially shutting down the JVM.\n")
         .build();
   }
 }

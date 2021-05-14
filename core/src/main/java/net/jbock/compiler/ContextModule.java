@@ -73,7 +73,15 @@ class ContextModule {
 
   @Reusable
   @Provides
-  CommonFields exitHookField(GeneratedTypes generatedTypes, GeneratedType generatedType, SourceElement sourceElement) {
-    return CommonFields.create(generatedTypes, generatedType, sourceElement);
+  CommonFields commonFields(
+      GeneratedTypes generatedTypes,
+      GeneratedType generatedType,
+      SourceElement sourceElement,
+      PositionalParameters positionalParameters) {
+    return CommonFields.create(
+        generatedTypes,
+        generatedType,
+        sourceElement,
+        positionalParameters);
   }
 }

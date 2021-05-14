@@ -1,5 +1,6 @@
 package net.jbock.qualifier;
 
+import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
@@ -8,14 +9,17 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.compiler.GeneratedTypes;
 
 import java.io.PrintStream;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
+import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
 import static net.jbock.compiler.Constants.mapOf;
@@ -27,6 +31,14 @@ public class CommonFields {
   private final FieldSpec exitHookField;
   private final FieldSpec programName;
   private final FieldSpec optionsByName;
+  private final FieldSpec paramParsers;
+
+  private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing")
+      .build();
+
+  private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
+      .initializer("new $T<>()", ArrayList.class)
+      .build();
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
@@ -42,16 +54,22 @@ public class CommonFields {
       .addModifiers(PRIVATE, STATIC, FINAL)
       .build();
 
-  private CommonFields(FieldSpec exitHookField, FieldSpec programName, FieldSpec optionsByName) {
+  private CommonFields(
+      FieldSpec exitHookField,
+      FieldSpec programName,
+      FieldSpec optionsByName,
+      FieldSpec paramParsers) {
     this.exitHookField = exitHookField;
     this.programName = programName;
     this.optionsByName = optionsByName;
+    this.paramParsers = paramParsers;
   }
 
   public static CommonFields create(
       GeneratedTypes generatedTypes,
       GeneratedType generatedType,
-      SourceElement sourceElement) {
+      SourceElement sourceElement,
+      PositionalParameters positionalParameters) {
     ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(Consumer.class),
         generatedTypes.parseResultType());
     ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
@@ -72,7 +90,10 @@ public class CommonFields {
         .initializer("optionsByName()")
         .addModifiers(PRIVATE, STATIC, FINAL)
         .build();
-    return new CommonFields(exitHookField, programName, optionsByName);
+    FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "paramParsers")
+        .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
+        .build();
+    return new CommonFields(exitHookField, programName, optionsByName, paramParsers);
   }
 
   public FieldSpec exitHook() {
@@ -101,5 +122,17 @@ public class CommonFields {
 
   public FieldSpec optionsByName() {
     return optionsByName;
+  }
+
+  public FieldSpec rest() {
+    return rest;
+  }
+
+  public FieldSpec endOfOptionParsing() {
+    return endOfOptionParsing;
+  }
+
+  public FieldSpec paramParsers() {
+    return paramParsers;
   }
 }

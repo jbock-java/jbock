@@ -1,9 +1,9 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.qualifier.CommonFields;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -18,10 +18,11 @@ import static net.jbock.compiler.Constants.STRING;
 
 class MakeLinesMethod {
 
-  private final FieldSpec terminalWidth = FieldSpec.builder(INT, "terminalWidth", PRIVATE).build();
+  private final CommonFields commonFields;
 
   @Inject
-  MakeLinesMethod() {
+  MakeLinesMethod(CommonFields commonFields) {
+    this.commonFields = commonFields;
   }
 
   MethodSpec define() {
@@ -40,7 +41,7 @@ class MakeLinesMethod {
     code.addStatement("$T $N = $N.get($N)", STRING, token, tokens, i);
     code.addStatement("$T $N = $N.length() == $L", BOOLEAN, fresh, line, 0);
     code.beginControlFlow("if (!$N && $N.length() + $N.length() + 1 > $N)",
-        fresh, token, line, terminalWidth);
+        fresh, token, line, commonFields.terminalWidth());
     code.addStatement("$N.add($N.toString())", result, line);
     code.addStatement("$N.setLength(0)", line);
     code.addStatement("continue");
