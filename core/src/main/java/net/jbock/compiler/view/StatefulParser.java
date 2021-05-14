@@ -48,6 +48,7 @@ final class StatefulParser {
   private final NamedOptions options;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
+  private final MissingRequiredMethod missingRequiredMethod;
 
   private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing").build();
 
@@ -63,7 +64,8 @@ final class StatefulParser {
       SourceElement sourceElement,
       NamedOptions options,
       PositionalParameters positionalParameters,
-      CommonFields commonFields) {
+      CommonFields commonFields,
+      MissingRequiredMethod missingRequiredMethod) {
     this.generatedTypes = generatedTypes;
     this.generatedType = generatedType;
     this.statefulParseMethod = parseMethod;
@@ -71,6 +73,7 @@ final class StatefulParser {
     this.options = options;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
+    this.missingRequiredMethod = missingRequiredMethod;
 
     this.optionParsersField = FieldSpec.builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "optionParsers")
         .initializer("optionParsers()")
@@ -247,7 +250,8 @@ final class StatefulParser {
         String name = enumConstant + " (" + String.join(", ", dashedNames) + ")";
         return Arrays.asList(
             CodeBlock.of(".findAny()"),
-            CodeBlock.of(".orElseThrow(() -> missingRequired($S))", name));
+            CodeBlock.of(".orElseThrow(() -> $N($S))",
+                missingRequiredMethod.method(), name));
       case OPTIONAL:
         return singletonList(CodeBlock.of(".findAny()"));
       case REPEATABLE:
@@ -263,7 +267,8 @@ final class StatefulParser {
     String enumConstant = parameter.enumConstant();
     switch (parameter.skew()) {
       case REQUIRED:
-        return singletonList(CodeBlock.of(".orElseThrow(() -> missingRequired($S))", enumConstant));
+        return singletonList(CodeBlock.of(".orElseThrow(() -> $N($S))",
+            missingRequiredMethod.method(), enumConstant));
       case OPTIONAL:
         return emptyList();
       case REPEATABLE:
