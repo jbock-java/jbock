@@ -24,7 +24,8 @@ abstract class DeleteCommand {
    * Path, not Optional<Path>.
    * This parameter is required.
    */
-  @Parameter(index = 0, description = "A positional parameter.")
+  @Parameter(index = 0,
+             description = "A positional parameter.")
   abstract Path path();
 
   /**
@@ -32,7 +33,8 @@ abstract class DeleteCommand {
    * OptionalInt, not int or Integer.
    * This option is optional.
    */
-  @Option(names = {"-v", "--verbosity"}, description = "A named option.")
+  @Option(names = {"-v", "--verbosity"},
+          description = "A named option.")
   abstract OptionalInt verbosity();
 }
 ````
