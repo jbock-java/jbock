@@ -20,15 +20,19 @@ In this class, each `abstract` method corresponds either to a *named option* or 
 abstract class DeleteCommand {
 
   /**
-   * A positional parameter.
+   * The type is important!
+   * Path, not Optional<Path>.
+   * This parameter is required.
    */
-  @Parameter(index = 0)
+  @Parameter(index = 0, description = "A positional parameter.")
   abstract Path path();
 
   /**
-   * A named option.
+   * The type is important!
+   * OptionalInt, not int or Integer.
+   * This option is optional.
    */
-  @Option(names = {"-v", "--verbosity"})
+  @Option(names = {"-v", "--verbosity"}, description = "A named option.")
   abstract OptionalInt verbosity();
 }
 ````
