@@ -53,7 +53,7 @@ In the above example, the `path` parameter is *required*,
 while `verbosity` is *optional*.
 The `@Parameter` and `@Option` annotations do not have a flag
 to mark something as required or optional.
-Instead, the code generator looks at the annotated method's 
+Instead, the code generator looks at the method
 return type to figure this out.
 
 #### Skew table A: Auto conversion
