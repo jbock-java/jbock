@@ -9,6 +9,34 @@ that generates custom parsing code at compile time.
 
 Please see the [wiki](https://github.com/h908714124/jbock/wiki) for usage details.
 
+### Basic example
+
+A command line interface is defined as an `abstract` class 
+which has a `@Command` or `@SuperCommand` annotation.
+In this class, each `abstract` method corresponds either to a *named option* or a *positional parameter*.
+
+````java
+@Command
+abstract class DeleteCommand {
+
+  /**
+   * The type is important!
+   * Path, not Optional<Path>.
+   * This parameter is required.
+   */
+  @Parameter(index = 0, description = "A positional parameter.")
+  abstract Path path();
+
+  /**
+   * The type is important!
+   * OptionalInt, not int or Integer.
+   * This option is optional.
+   */
+  @Option(names = {"-v", "--verbosity"}, description = "A named option.")
+  abstract OptionalInt verbosity();
+}
+````
+
 ### Sample projects
 
 * [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
