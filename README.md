@@ -37,7 +37,7 @@ abstract class DeleteCommand {
 }
 ````
 
-The generated class will, in this case, be called
+The generated class will be called
 `DeleteCommand_Parser`. It can be used as follows:
 
 ````java
