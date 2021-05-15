@@ -60,7 +60,7 @@ return type to figure this out.
 
 Return type of annotated method           | *Skew*
 ----------------------------------------- | --------------------------------
-`boolean`                                 | *flag* (only `@Option`)
+`boolean`                                 | *mode flag* (only `@Option`)
 `Optional<A>`                             | *optional*
 `Optional{Int,Long,Double}`               | *optional*
 `List<A>`                                 | *repeatable* (`@Option` or `@Parameters`)
