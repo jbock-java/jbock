@@ -1,9 +1,9 @@
 package net.jbock.qualifier;
 
-import com.google.common.collect.ImmutableList;
 import net.jbock.compiler.Params;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Util;
 
 import java.util.List;
 
@@ -22,11 +22,9 @@ public final class AllParameters {
     this.anyDescriptionKeys = anyDescriptionKeys;
   }
 
-  public static AllParameters create(Params params) {
-    ImmutableList<ConvertedParameter<? extends AbstractParameter>> allParameters = ImmutableList.<ConvertedParameter<? extends AbstractParameter>>builderWithExpectedSize(
-        params.namedOptions().size() + params.positionalParams().size())
-        .addAll(params.namedOptions())
-        .addAll(params.positionalParams()).build();
+  public static AllParameters create(Params params, Util util) {
+    List<ConvertedParameter<? extends AbstractParameter>> allParameters =
+        util.concat(params.namedOptions(), params.positionalParams());
     boolean anyRequired = allParameters.stream().anyMatch(ConvertedParameter::isRequired);
     boolean anyDescriptionKeys = allParameters.stream().anyMatch(c -> c.parameter().descriptionKey().isPresent());
     return new AllParameters(allParameters, anyRequired, anyDescriptionKeys);

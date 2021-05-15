@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
+import net.jbock.convert.Util;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.GeneratedType;
@@ -67,8 +68,8 @@ class ContextModule {
 
   @Reusable
   @Provides
-  AllParameters allParameters() {
-    return AllParameters.create(params);
+  AllParameters allParameters(Util util) {
+    return AllParameters.create(params, util);
   }
 
   @Reusable

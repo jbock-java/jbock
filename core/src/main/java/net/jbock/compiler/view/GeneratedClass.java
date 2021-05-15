@@ -149,6 +149,7 @@ public final class GeneratedClass {
         .ifPresent(spec::addType);
 
     return spec.addModifiers(FINAL)
+        .addOriginatingElement(sourceElement.element())
         .addModifiers(sourceElement.accessModifiers())
         .addJavadoc(classJavadoc.create()).build();
   }

@@ -36,9 +36,7 @@ import javax.lang.model.util.ElementFilter;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import javax.tools.Diagnostic;
-import javax.tools.JavaFileObject;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -139,16 +137,10 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .skipJavaLangImports(true);
     JavaFile javaFile = builder.build();
     try {
-      JavaFileObject sourceFile = filer.createSourceFile(generatedType.toString(), sourceElement);
-      try (Writer writer = sourceFile.openWriter()) {
-        String sourceCode = javaFile.toString();
-        if (operationMode == TEST) {
-          System.out.println("Printing generated code in OperationMode TEST");
-          System.err.println(sourceCode);
-        }
-        writer.write(sourceCode);
-      } catch (IOException e) {
-        handleUnknownError(sourceElement, e);
+      javaFile.writeTo(filer);
+      if (operationMode == TEST) {
+        System.out.println("Printing generated code in OperationMode TEST");
+        javaFile.writeTo(System.err);
       }
     } catch (IOException e) {
       handleUnknownError(sourceElement, e);
@@ -210,10 +202,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       ImmutableList<ConvertedParameter<PositionalParameter>> positionalParams) {
     List<ValidationFailure> failures = new ArrayList<>();
     List<ConvertedParameter<? extends AbstractParameter>> abstractParameters =
-        ImmutableList.<ConvertedParameter<? extends AbstractParameter>>builderWithExpectedSize(namedOptions.size() + positionalParams.size())
-            .addAll(positionalParams)
-            .addAll(namedOptions)
-            .build();
+        util.concat(namedOptions, positionalParams);
     Set<String> keys = new HashSet<>();
     sourceElement.descriptionKey().ifPresent(keys::add);
     for (ConvertedParameter<? extends AbstractParameter> c : abstractParameters) {

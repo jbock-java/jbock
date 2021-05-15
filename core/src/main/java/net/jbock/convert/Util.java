@@ -26,6 +26,13 @@ public class Util {
   public Util() {
   }
 
+  public <E> List<E> concat(List<? extends E> list1, List<? extends E> list2) {
+    List<E> result = new ArrayList<>(list1.size() + list2.size());
+    result.addAll(list1);
+    result.addAll(list2);
+    return result;
+  }
+
   public Optional<String> commonTypeChecks(TypeElement classToCheck) {
     if (classToCheck.getNestingKind().isNested() && !classToCheck.getModifiers().contains(Modifier.STATIC)) {
       return Optional.of("must be static or top-level");
