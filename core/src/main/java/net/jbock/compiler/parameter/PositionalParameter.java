@@ -10,6 +10,8 @@ import java.util.Locale;
 
 public class PositionalParameter extends AbstractParameter {
 
+  // for @Parameter this is the index
+  // for @Parameters, greatest index plus one
   private final int position;
   private final ParamLabel paramLabel;
 

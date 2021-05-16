@@ -5,13 +5,15 @@ import java.util.Optional;
 
 public class ParamLabel {
 
-  private final String label;
+  private final Optional<String> label;
 
   public ParamLabel(String label) {
-    this.label = Objects.toString(label, "");
+    this.label = Objects.toString(label, "").isEmpty() ?
+        Optional.empty() :
+        Optional.of(label);
   }
 
   public Optional<String> label() {
-    return label.isEmpty() ? Optional.empty() : Optional.of(label);
+    return label;
   }
 }

@@ -1,5 +1,7 @@
 package net.jbock.compiler;
 
+import com.google.auto.common.BasicAnnotationProcessor;
+import com.google.common.collect.ImmutableList;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
@@ -10,6 +12,7 @@ import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
+import java.util.List;
 
 @Module
 public interface ProcessingEnvironmentModule {
@@ -48,6 +51,18 @@ public interface ProcessingEnvironmentModule {
   @Provides
   static TypeTool tool(ProcessingEnvironment processingEnv) {
     return new TypeTool(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
+  }
+
+  @Reusable
+  @Provides
+  static List<? extends BasicAnnotationProcessor.Step> steps(
+      CommandProcessingStep commandProcessingStep,
+      MapperProcessingStep mapperProcessingStep,
+      ParameterMethodProcessingStep parameterMethodProcessingStep) {
+    return ImmutableList.of(
+        commandProcessingStep,
+        mapperProcessingStep,
+        parameterMethodProcessingStep);
   }
 
   @Reusable

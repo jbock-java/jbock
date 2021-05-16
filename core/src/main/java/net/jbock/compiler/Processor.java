@@ -1,12 +1,12 @@
 package net.jbock.compiler;
 
 import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.common.collect.ImmutableList;
 import dagger.BindsInstance;
 import dagger.Component;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
+import java.util.List;
 
 public final class Processor extends BasicAnnotationProcessor {
 
@@ -28,24 +28,17 @@ public final class Processor extends BasicAnnotationProcessor {
 
   @Override
   protected Iterable<? extends Step> steps() {
-    ProcessorComponent component = DaggerProcessor_ProcessorComponent.builder()
+    return DaggerProcessor_ProcessorComponent.builder()
         .processingEnv(processingEnv)
         .operationMode(operationMode)
-        .build();
-    return ImmutableList.of(
-        component.commandProcessingStep(),
-        component.mapperProcessingStep(),
-        component.parameterMethodProcessingStep());
+        .build()
+        .steps();
   }
 
   @Component(modules = ProcessingEnvironmentModule.class)
   interface ProcessorComponent {
 
-    CommandProcessingStep commandProcessingStep();
-
-    MapperProcessingStep mapperProcessingStep();
-
-    ParameterMethodProcessingStep parameterMethodProcessingStep();
+    List<? extends Step> steps();
 
     @Component.Builder
     interface Builder {
