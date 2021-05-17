@@ -25,6 +25,7 @@ import java.util.stream.Collectors;
 
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 @Reusable
 public class AutoConverterFinder extends ConverterValidator {
@@ -66,12 +67,12 @@ public class AutoConverterFinder extends ConverterValidator {
   }
 
   private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(Match match, P parameter) {
-    TypeMirror baseReturnType = match.baseType();
-    return autoConverter.findAutoConverter(baseReturnType)
-        .maybeRecover(() -> isEnumType(baseReturnType) ?
-            Optional.of(enumConverter(baseReturnType)) :
-            Optional.empty())
-        .mapLeft(s -> noMatchError(baseReturnType))
+    TypeMirror baseType = match.baseType();
+    return autoConverter.findAutoConverter(baseType)
+        .flatMapLeft(__ -> isEnumType(baseType) ?
+            right(enumConverter(baseType)) :
+            left(null))
+        .mapLeft(__ -> noMatchError(baseType))
         .map(mapExpr -> match.toCoercion(mapExpr, parameter));
   }
 

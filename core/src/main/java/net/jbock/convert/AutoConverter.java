@@ -65,7 +65,7 @@ public class AutoConverter {
       create(BigInteger.class, NEW),
       create(BigDecimal.class, NEW));
 
-  public Either<String, CodeBlock> findAutoConverter(TypeMirror unwrappedReturnType) {
+  public Either<Void, CodeBlock> findAutoConverter(TypeMirror unwrappedReturnType) {
     if (tool.isSameType(unwrappedReturnType, String.class.getCanonicalName())) {
       return right(CodeBlock.builder().build());
     }
@@ -77,7 +77,7 @@ public class AutoConverter {
             .add(")").build());
       }
     }
-    return left("");
+    return left(null);
   }
 
   private static CodeBlock autoConverterFile() {

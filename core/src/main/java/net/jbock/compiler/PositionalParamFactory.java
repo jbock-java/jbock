@@ -13,6 +13,9 @@ import net.jbock.qualifier.SourceMethod;
 import javax.inject.Inject;
 import java.util.List;
 
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
+
 public class PositionalParamFactory {
 
   private final ConverterFinder converterFinder;
@@ -63,7 +66,7 @@ public class PositionalParamFactory {
 
   private Either<String, ConvertedParameter<PositionalParameter>> checkOnlyOnePositionalList(ConvertedParameter<PositionalParameter> c) {
     if (!c.isRepeatable()) {
-      return Either.right(c);
+      return right(c);
     }
     return Either.ofLeft(alreadyCreated.stream()
         .filter(ConvertedParameter::isRepeatable)
@@ -75,17 +78,17 @@ public class PositionalParamFactory {
   private Either<String, ConvertedParameter<PositionalParameter>> checkPositionNotNegative(ConvertedParameter<PositionalParameter> c) {
     PositionalParameter p = c.parameter();
     if (p.position() < 0) {
-      return Either.left("negative positions are not allowed");
+      return left("negative positions are not allowed");
     }
-    return Either.right(c);
+    return right(c);
   }
 
   private Either<String, ConvertedParameter<PositionalParameter>> checkSuperNotRepeatable(ConvertedParameter<PositionalParameter> c) {
     if (sourceElement.isSuperCommand() && c.isRepeatable()) {
-      return Either.left("in a @" + SuperCommand.class.getSimpleName() +
+      return left("in a @" + SuperCommand.class.getSimpleName() +
           ", repeatable params are not supported");
     }
-    return Either.right(c);
+    return right(c);
   }
 
   private Either<String, ConvertedParameter<PositionalParameter>> checkRankConsistentWithPosition(ConvertedParameter<PositionalParameter> c) {
@@ -95,17 +98,17 @@ public class PositionalParamFactory {
     for (ConvertedParameter<PositionalParameter> other : alreadyCreated) {
       int otherOrder = other.isRepeatable() ? 2 : other.isOptional() ? 1 : 0;
       if (thisPosition == other.parameter().position()) {
-        return Either.left("duplicate position");
+        return left("duplicate position");
       }
       if (thisOrder > otherOrder && thisPosition < other.parameter().position()) {
-        return Either.left("position must be greater than position of " +
+        return left("position must be greater than position of " +
             other.skew() + " parameter " + other.enumName());
       }
       if (thisOrder < otherOrder && thisPosition > other.parameter().position()) {
-        return Either.left("position must be less than position of " +
+        return left("position must be less than position of " +
             other.skew() + " parameter " + other.enumName());
       }
     }
-    return Either.right(c);
+    return right(c);
   }
 }

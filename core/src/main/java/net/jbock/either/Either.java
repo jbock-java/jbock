@@ -3,7 +3,6 @@ package net.jbock.either;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 public abstract class Either<L, R> {
 
@@ -35,23 +34,20 @@ public abstract class Either<L, R> {
     return flatMapInternal(right -> choice.apply(right.value()));
   }
 
-  public final Either<L, R> filter(
-      Function<? super R, ? extends Optional<? extends L>> fail) {
-    return flatMapInternal(r -> fail.apply(r.value()).<Either<L, R>>map(Either::left).orElse(r));
+  public final <L2> Either<L2, R> flatMapLeft(
+      Function<? super L, ? extends Either<? extends L2, ? extends R>> choice) {
+    @SuppressWarnings("unchecked")
+    Either<L2, R> result = (Either<L2, R>) flip().flatMapInternal(l -> {
+      Either<? extends L2, ? extends R> apply = choice.apply(l.value());
+      return apply.flip();
+    }).flip();
+    return result;
   }
 
   public final <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper) {
     @SuppressWarnings("unchecked")
     Either<L2, R> result = (Either<L2, R>) flip().map(leftMapper).flip();
     return result;
-  }
-
-  public final Either<L, R> maybeRecover(Function<? super L, ? extends Optional<? extends R>> choice) {
-    return flip().filter(choice).flip();
-  }
-
-  public final Either<L, R> maybeRecover(Supplier<? extends Optional<? extends R>> choice) {
-    return maybeRecover(value -> choice.get());
   }
 
   public final boolean isRight() {
@@ -61,14 +57,6 @@ public abstract class Either<L, R> {
   public abstract <T> T fold(
       Function<? super L, ? extends T> leftMapper,
       Function<? super R, ? extends T> rightMapper);
-
-  public final R orElseGet(Function<? super L, ? extends R> recover) {
-    return fold(recover, Function.identity());
-  }
-
-  public final R orElse(R defaultValue) {
-    return orElseGet(l -> defaultValue);
-  }
 
   abstract Either<R, L> flip();
 

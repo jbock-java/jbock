@@ -271,11 +271,11 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantMethods(TypeMirror sourceElement) {
     List<ExecutableElement> acc = new ArrayList<>();
-    Either<List<ValidationFailure>, TypeElement> element;
     while (true) {
-      element = findRelevantMethods(sourceElement, acc);
+      Either<List<ValidationFailure>, TypeElement> element = findRelevantMethods(sourceElement, acc);
       if (!element.isRight()) {
-        List<ValidationFailure> failures = element.fold(Function.identity(),
+        List<ValidationFailure> failures = element.fold(
+            Function.identity(),
             __ -> Collections.emptyList());
         if (!failures.isEmpty()) {
           return left(failures);
@@ -283,7 +283,10 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           break;
         }
       }
-      sourceElement = element.orElse(null).getSuperclass();
+      sourceElement = element.fold(
+          __ -> null,
+          Function.identity())
+          .getSuperclass();
     }
     Map<Boolean, List<ExecutableElement>> map = acc.stream()
         .collect(Collectors.partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
