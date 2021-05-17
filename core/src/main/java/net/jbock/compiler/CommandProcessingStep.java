@@ -272,11 +272,18 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantMethods(TypeMirror sourceElement) {
     List<ExecutableElement> acc = new ArrayList<>();
     Either<List<ValidationFailure>, TypeElement> element;
-    while ((element = findRelevantMethods(sourceElement, acc)).isRight()) {
+    while (true) {
+      element = findRelevantMethods(sourceElement, acc);
+      if (!element.isRight()) {
+        List<ValidationFailure> failures = element.fold(Function.identity(),
+            __ -> Collections.emptyList());
+        if (!failures.isEmpty()) {
+          return left(failures);
+        } else {
+          break;
+        }
+      }
       sourceElement = element.orElse(null).getSuperclass();
-    }
-    if (!element.flip().orElse(Collections.emptyList()).isEmpty()) {
-      return left(element.flip().orElse(Collections.emptyList()));
     }
     Map<Boolean, List<ExecutableElement>> map = acc.stream()
         .collect(Collectors.partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
@@ -308,7 +315,8 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
-    Optional<String> maybeFailure = util.commonTypeChecks(sourceElement).map(s -> "command " + s);
+    Optional<String> maybeFailure = util.commonTypeChecks(sourceElement)
+        .map(s -> "command " + s);
     // the following *should* be done with Optional#or but we're currently limited to 1.8 API
     return Either.ofLeft(maybeFailure).orRight(Optional.<String>empty())
         .filter(nothing -> util.assertNoDuplicateAnnotations(sourceElement, Command.class, SuperCommand.class))
