@@ -11,19 +11,19 @@ import javax.lang.model.type.TypeMirror;
 
 public class Match {
 
-  private final TypeMirror baseReturnType;
+  private final TypeMirror baseType;
   private final ParameterSpec constructorParam;
   private final CodeBlock extractExpr;
   private final Skew skew;
   private final EnumName enumName;
 
   Match(
-      TypeMirror baseReturnType,
+      TypeMirror baseType,
       ParameterSpec constructorParam,
       CodeBlock extractExpr,
       Skew skew,
       EnumName enumName) {
-    this.baseReturnType = baseReturnType;
+    this.baseType = baseType;
     this.constructorParam = constructorParam;
     this.extractExpr = extractExpr;
     this.skew = skew;
@@ -36,8 +36,8 @@ public class Match {
         extractExpr, skew, constructorParam, enumName, parameter);
   }
 
-  public TypeMirror baseReturnType() {
-    return baseReturnType;
+  public TypeMirror baseType() {
+    return baseType;
   }
 
   public ParameterSpec constructorParam() {

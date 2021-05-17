@@ -88,11 +88,11 @@ public class ExplicitConverterValidator extends ConverterValidator {
             .map(mapExpr -> m.toCoercion(mapExpr, parameter));
       }
     }
-    TypeMirror bestReturnType = matches.stream()
+    TypeMirror typeForErrorMessage = matches.stream()
         .max(Comparator.comparing(Match::skew))
-        .map(Match::baseReturnType)
+        .map(Match::baseType)
         .orElse(sourceMethod.returnType());
-    return left(ExplicitConverterValidator.noMatchError(bestReturnType));
+    return left(ExplicitConverterValidator.noMatchError(typeForErrorMessage));
   }
 
   private Either<String, Void> checkMapperAnnotation(TypeElement converter) {
@@ -124,7 +124,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
   }
 
   private boolean isValidMatch(Match match, FunctionType functionType) {
-    return tool.isSameType(functionType.outputType(), match.baseReturnType());
+    return tool.isSameType(functionType.outputType(), match.baseType());
   }
 
   private static String noMatchError(TypeMirror type) {

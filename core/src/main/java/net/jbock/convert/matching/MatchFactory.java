@@ -20,17 +20,17 @@ public class MatchFactory {
   }
 
   public Match create(
-      TypeMirror wrappedType,
+      TypeMirror baseType,
       ParameterSpec constructorParam,
       Skew skew) {
-    return create(wrappedType, constructorParam, skew, CodeBlock.of("$N", constructorParam));
+    return create(baseType, constructorParam, skew, CodeBlock.of("$N", constructorParam));
   }
 
   public Match create(
-      TypeMirror wrappedType,
+      TypeMirror baseType,
       ParameterSpec constructorParam,
       Skew skew,
       CodeBlock extractExpr) {
-    return new Match(wrappedType, constructorParam, extractExpr, skew, enumName);
+    return new Match(baseType, constructorParam, extractExpr, skew, enumName);
   }
 }

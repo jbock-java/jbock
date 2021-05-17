@@ -66,7 +66,7 @@ public class AutoConverterFinder extends ConverterValidator {
   }
 
   private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(Match match, P parameter) {
-    TypeMirror baseReturnType = match.baseReturnType();
+    TypeMirror baseReturnType = match.baseType();
     return autoConverter.findAutoConverter(baseReturnType)
         .maybeRecover(() -> isEnumType(baseReturnType) ?
             Optional.of(enumConverter(baseReturnType)) :
