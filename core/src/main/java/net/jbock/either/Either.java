@@ -35,12 +35,9 @@ public abstract class Either<L, R> {
     return flatMapInternal(right -> choice.apply(right.value()));
   }
 
-  public final Either<L, R> filter(Function<? super R, ? extends Optional<? extends L>> fail) {
+  public final Either<L, R> filter(
+      Function<? super R, ? extends Optional<? extends L>> fail) {
     return flatMapInternal(r -> fail.apply(r.value()).<Either<L, R>>map(Either::left).orElse(r));
-  }
-
-  public final Either<L, R> filter(Supplier<? extends Optional<? extends L>> fail) {
-    return filter(r -> fail.get());
   }
 
   public final <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper) {
@@ -73,7 +70,7 @@ public abstract class Either<L, R> {
     return orElseGet(l -> defaultValue);
   }
 
-  public abstract Either<R, L> flip();
+  abstract Either<R, L> flip();
 
   public final void accept(Consumer<? super L> leftAction, Consumer<? super R> rightAction) {
     fold(l -> {

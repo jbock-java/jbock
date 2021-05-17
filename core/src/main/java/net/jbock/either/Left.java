@@ -15,7 +15,7 @@ final class Left<L, R> extends Either<L, R> {
   }
 
   @Override
-  public Either<R, L> flip() {
+  Either<R, L> flip() {
     return right(value);
   }
 

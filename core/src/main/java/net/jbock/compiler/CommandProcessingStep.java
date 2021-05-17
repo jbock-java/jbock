@@ -315,21 +315,16 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private Optional<String> validateSourceElement(TypeElement sourceElement) {
-    Optional<String> maybeFailure = util.commonTypeChecks(sourceElement)
-        .map(s -> "command " + s);
-    // the following *should* be done with Optional#or but we're currently limited to 1.8 API
-    return Either.ofLeft(maybeFailure).orRight(Optional.<String>empty())
-        .filter(nothing -> util.assertNoDuplicateAnnotations(sourceElement, Command.class, SuperCommand.class))
-        .filter(nothing -> {
-          List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
-          if (!interfaces.isEmpty()) {
-            return Optional.of("command cannot implement " + interfaces.get(0));
-          }
-          return Optional.empty();
-        })
-        .flip()
-        .map(Optional::of)
-        .orElseGet(Function.identity());
+    List<String> errors = new ArrayList<>();
+    util.commonTypeChecks(sourceElement)
+        .map(s -> "command " + s)
+        .ifPresent(errors::add);
+    util.assertNoDuplicateAnnotations(sourceElement, Command.class, SuperCommand.class).ifPresent(errors::add);
+    List<? extends TypeMirror> interfaces = sourceElement.getInterfaces();
+    if (!interfaces.isEmpty()) {
+      errors.add("command cannot implement " + interfaces.get(0));
+    }
+    return errors.stream().findFirst();
   }
 
   private Optional<String> validateParameterMethod(
