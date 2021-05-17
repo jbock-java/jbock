@@ -19,15 +19,17 @@ final class Left<L, R> extends Either<L, R> {
     return right(value);
   }
 
+  @SuppressWarnings("unchecked")
   @Override
-  <R2> Either<L, R2> flatMapInternal(Function<Right<L, R>, ? extends Either<? extends L, ? extends R2>> choice) {
-    @SuppressWarnings("unchecked")
-    Left<L, R2> result = (Left<L, R2>) this;
-    return result;
+  <R2> Either<L, R2> flatMapInternal(
+      Function<Right<L, R>, ? extends Either<? extends L, ? extends R2>> choice) {
+    return (Left<L, R2>) this;
   }
 
   @Override
-  public <T> T fold(Function<? super L, ? extends T> leftMapper, Function<? super R, ? extends T> rightMapper) {
+  public <U> U fold(
+      Function<? super L, ? extends U> leftMapper,
+      Function<? super R, ? extends U> rightMapper) {
     return leftMapper.apply(value);
   }
 }

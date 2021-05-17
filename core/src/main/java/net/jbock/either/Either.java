@@ -36,27 +36,23 @@ public abstract class Either<L, R> {
 
   public final <L2> Either<L2, R> flatMapLeft(
       Function<? super L, ? extends Either<? extends L2, ? extends R>> choice) {
-    @SuppressWarnings("unchecked")
-    Either<L2, R> result = (Either<L2, R>) flip().flatMapInternal(l -> {
+    return narrow(flip().flatMapInternal(l -> {
       Either<? extends L2, ? extends R> apply = choice.apply(l.value());
       return apply.flip();
-    }).flip();
-    return result;
+    }).flip());
   }
 
   public final <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper) {
-    @SuppressWarnings("unchecked")
-    Either<L2, R> result = (Either<L2, R>) flip().map(leftMapper).flip();
-    return result;
+    return narrow(flip().map(leftMapper).flip());
   }
 
   public final boolean isRight() {
     return fold(l -> false, r -> true);
   }
 
-  public abstract <T> T fold(
-      Function<? super L, ? extends T> leftMapper,
-      Function<? super R, ? extends T> rightMapper);
+  public abstract <U> U fold(
+      Function<? super L, ? extends U> leftMapper,
+      Function<? super R, ? extends U> rightMapper);
 
   abstract Either<R, L> flip();
 
@@ -68,5 +64,10 @@ public abstract class Either<L, R> {
       rightAction.accept(r);
       return null;
     });
+  }
+
+  @SuppressWarnings("unchecked")
+  private static <L, R> Either<L, R> narrow(Either<? extends L, ? extends R> either) {
+    return (Either<L, R>) either;
   }
 }
