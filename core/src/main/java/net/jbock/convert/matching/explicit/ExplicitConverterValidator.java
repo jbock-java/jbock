@@ -27,6 +27,7 @@ import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 @Reusable
 public class ExplicitConverterValidator extends ConverterValidator {
@@ -61,9 +62,9 @@ public class ExplicitConverterValidator extends ConverterValidator {
       TypeElement converter) {
     Optional<String> maybeFailure = util.commonTypeChecks(converter).map(s -> "converter " + s);
     return Either.ofLeft(maybeFailure).orRight(null)
-        .filter(nothing -> checkNotAbstract(converter))
-        .filter(nothing -> checkNoTypevars(converter))
-        .filter(nothing -> checkMapperAnnotation(converter))
+        .flatMap(nothing -> checkNotAbstract(converter))
+        .flatMap(nothing -> checkNoTypevars(converter))
+        .flatMap(nothing -> checkMapperAnnotation(converter))
         .flatMap(nothing -> referenceTool.getReferencedType(converter))
         .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
   }
@@ -94,27 +95,27 @@ public class ExplicitConverterValidator extends ConverterValidator {
     return left(ExplicitConverterValidator.noMatchError(bestReturnType));
   }
 
-  private Optional<String> checkMapperAnnotation(TypeElement converter) {
+  private Either<String, Void> checkMapperAnnotation(TypeElement converter) {
     Converter converterAnnotation = converter.getAnnotation(Converter.class);
     boolean nestedMapper = util.getEnclosingElements(converter).contains(sourceElement.element());
     if (converterAnnotation == null && !nestedMapper) {
-      return Optional.of("converter must be an inner class of the command class, or carry the @" + Converter.class.getSimpleName() + " annotation");
+      return left("converter must be an inner class of the command class, or carry the @" + Converter.class.getSimpleName() + " annotation");
     }
-    return Optional.empty();
+    return right(null);
   }
 
-  private Optional<String> checkNotAbstract(TypeElement converter) {
+  private Either<String, Void> checkNotAbstract(TypeElement converter) {
     if (converter.getModifiers().contains(ABSTRACT)) {
-      return Optional.of("non-abstract converter class");
+      return left("non-abstract converter class");
     }
-    return Optional.empty();
+    return right(null);
   }
 
-  private Optional<String> checkNoTypevars(TypeElement converter) {
+  private Either<String, Void> checkNoTypevars(TypeElement converter) {
     if (!converter.getTypeParameters().isEmpty()) {
-      return Optional.of("found type parameters in converter class declaration");
+      return left("found type parameters in converter class declaration");
     }
-    return Optional.empty();
+    return right(null);
   }
 
   private CodeBlock getMapExpr(FunctionType functionType, TypeElement converter) {

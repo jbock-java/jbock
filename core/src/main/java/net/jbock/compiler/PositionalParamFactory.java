@@ -12,7 +12,6 @@ import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.List;
-import java.util.Optional;
 
 public class PositionalParamFactory {
 
@@ -55,57 +54,58 @@ public class PositionalParamFactory {
         paramLabel);
     return Either.<String, PositionalParameter>right(positionalParameter)
         .flatMap(coercion -> converterFinder.findConverter(positionalParameter))
-        .filter(this::checkPositionNotNegative)
-        .filter(this::checkSuperNotRepeatable)
-        .filter(this::checkOnlyOnePositionalList)
-        .filter(this::checkRankConsistentWithPosition)
+        .flatMap(this::checkPositionNotNegative)
+        .flatMap(this::checkSuperNotRepeatable)
+        .flatMap(this::checkOnlyOnePositionalList)
+        .flatMap(this::checkRankConsistentWithPosition)
         .mapLeft(sourceMethod::fail);
   }
 
-  private Optional<String> checkOnlyOnePositionalList(ConvertedParameter<PositionalParameter> c) {
+  private Either<String, ConvertedParameter<PositionalParameter>> checkOnlyOnePositionalList(ConvertedParameter<PositionalParameter> c) {
     if (!c.isRepeatable()) {
-      return Optional.empty();
+      return Either.right(c);
     }
-    return alreadyCreated.stream()
+    return Either.ofLeft(alreadyCreated.stream()
         .filter(ConvertedParameter::isRepeatable)
         .map(p -> "positional parameter " + p.enumName().enumConstant() + " is also repeatable")
-        .findAny();
+        .findAny())
+        .orRight(c);
   }
 
-  private Optional<String> checkPositionNotNegative(ConvertedParameter<PositionalParameter> c) {
+  private Either<String, ConvertedParameter<PositionalParameter>> checkPositionNotNegative(ConvertedParameter<PositionalParameter> c) {
     PositionalParameter p = c.parameter();
     if (p.position() < 0) {
-      return Optional.of("negative positions are not allowed");
+      return Either.left("negative positions are not allowed");
     }
-    return Optional.empty();
+    return Either.right(c);
   }
 
-  private Optional<String> checkSuperNotRepeatable(ConvertedParameter<PositionalParameter> c) {
+  private Either<String, ConvertedParameter<PositionalParameter>> checkSuperNotRepeatable(ConvertedParameter<PositionalParameter> c) {
     if (sourceElement.isSuperCommand() && c.isRepeatable()) {
-      return Optional.of("in a @" + SuperCommand.class.getSimpleName() +
+      return Either.left("in a @" + SuperCommand.class.getSimpleName() +
           ", repeatable params are not supported");
     }
-    return Optional.empty();
+    return Either.right(c);
   }
 
-  private Optional<String> checkRankConsistentWithPosition(ConvertedParameter<PositionalParameter> c) {
+  private Either<String, ConvertedParameter<PositionalParameter>> checkRankConsistentWithPosition(ConvertedParameter<PositionalParameter> c) {
     PositionalParameter p = c.parameter();
     int thisOrder = c.isRepeatable() ? 2 : c.isOptional() ? 1 : 0;
     int thisPosition = p.position();
     for (ConvertedParameter<PositionalParameter> other : alreadyCreated) {
       int otherOrder = other.isRepeatable() ? 2 : other.isOptional() ? 1 : 0;
       if (thisPosition == other.parameter().position()) {
-        return Optional.of("duplicate position");
+        return Either.left("duplicate position");
       }
       if (thisOrder > otherOrder && thisPosition < other.parameter().position()) {
-        return Optional.of("position must be greater than position of " +
+        return Either.left("position must be greater than position of " +
             other.skew() + " parameter " + other.enumName());
       }
       if (thisOrder < otherOrder && thisPosition > other.parameter().position()) {
-        return Optional.of("position must be less than position of " +
+        return Either.left("position must be less than position of " +
             other.skew() + " parameter " + other.enumName());
       }
     }
-    return Optional.empty();
+    return Either.right(c);
   }
 }
