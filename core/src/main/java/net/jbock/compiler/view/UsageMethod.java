@@ -2,6 +2,7 @@ package net.jbock.compiler.view;
 
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import dagger.Reusable;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
@@ -18,7 +19,8 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
-class UsageMethod {
+@Reusable
+public class UsageMethod {
 
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;

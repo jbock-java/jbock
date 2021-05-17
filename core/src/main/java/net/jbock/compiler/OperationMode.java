@@ -1,5 +1,5 @@
 package net.jbock.compiler;
 
-enum OperationMode {
+public enum OperationMode {
   PRODUCTION, TEST
 }

@@ -3,6 +3,7 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import dagger.Reusable;
 import net.jbock.qualifier.CommonFields;
 
 import javax.inject.Inject;
@@ -13,7 +14,8 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
-class PrintTokensMethod {
+@Reusable
+public class PrintTokensMethod {
 
   private final MethodSpec method;
 

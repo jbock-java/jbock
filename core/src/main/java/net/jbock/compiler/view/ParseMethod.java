@@ -3,6 +3,7 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.SourceElement;
@@ -14,7 +15,8 @@ import static com.squareup.javapoet.ParameterSpec.builder;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
-class ParseMethod {
+@Reusable
+public class ParseMethod {
 
   private final GeneratedTypes generatedTypes;
   private final AllParameters allParameters;

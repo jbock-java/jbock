@@ -1,11 +1,11 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.TypeSpec;
+import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.AnyDescriptionKeys;
 import net.jbock.qualifier.CommonFields;
-import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.SourceElement;
 
@@ -16,6 +16,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 /**
  * Generates the *_Parser class.
  */
+@Reusable
 public final class GeneratedClass {
 
   static final int CONTINUATION_INDENT_USAGE = 8;
@@ -24,10 +25,9 @@ public final class GeneratedClass {
   private final ParseMethod parseMethod;
   private final Impl impl;
   private final GeneratedTypes generatedTypes;
-  private final GeneratedType generatedType;
   private final OptionParser optionParser;
   private final OptionEnum optionEnum;
-  private final StatefulParser parserState;
+  private final StatefulParser statefulParser;
   private final ParseResult parseResult;
   private final SourceElement sourceElement;
   private final NamedOptions namedOptions;
@@ -51,13 +51,12 @@ public final class GeneratedClass {
   GeneratedClass(
       AllParameters allParameters,
       ParseMethod parseMethod,
-      GeneratedType generatedType,
       SourceElement sourceElement,
       Impl impl,
       GeneratedTypes generatedTypes,
       OptionParser optionParser,
       OptionEnum optionEnum,
-      StatefulParser parserState,
+      StatefulParser statefulParser,
       ParseResult parseResult,
       NamedOptions namedOptions,
       AnyDescriptionKeys anyDescriptionKeys,
@@ -75,14 +74,13 @@ public final class GeneratedClass {
       ClassJavadoc classJavadoc,
       MissingRequiredMethod missingRequiredMethod) {
     this.parseMethod = parseMethod;
-    this.generatedType = generatedType;
     this.sourceElement = sourceElement;
     this.allParameters = allParameters;
     this.impl = impl;
     this.generatedTypes = generatedTypes;
     this.optionParser = optionParser;
     this.optionEnum = optionEnum;
-    this.parserState = parserState;
+    this.statefulParser = statefulParser;
     this.parseResult = parseResult;
     this.namedOptions = namedOptions;
     this.anyDescriptionKeys = anyDescriptionKeys;
@@ -138,7 +136,7 @@ public final class GeneratedClass {
 
     spec.addField(commonFields.suspiciousPattern());
 
-    spec.addType(parserState.define())
+    spec.addType(statefulParser.define())
         .addType(optionEnum.define())
         .addType(impl.define())
         .addTypes(optionParser.define())

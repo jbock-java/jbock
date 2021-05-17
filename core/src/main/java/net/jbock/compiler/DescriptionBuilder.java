@@ -1,5 +1,6 @@
 package net.jbock.compiler;
 
+import dagger.Reusable;
 import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
@@ -12,7 +13,8 @@ import javax.lang.model.util.Elements;
 import java.util.ArrayList;
 import java.util.List;
 
-class DescriptionBuilder {
+@Reusable
+public class DescriptionBuilder {
 
   private final Elements elements;
 

@@ -3,6 +3,7 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import dagger.Reusable;
 import net.jbock.compiler.Description;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
@@ -23,7 +24,8 @@ import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.view.GeneratedClass.CONTINUATION_INDENT_USAGE;
 
-class PrintOnlineHelpMethod {
+@Reusable
+public class PrintOnlineHelpMethod {
 
   private final Description description;
   private final SourceElement sourceElement;

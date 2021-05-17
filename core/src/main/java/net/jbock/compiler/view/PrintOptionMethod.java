@@ -3,6 +3,7 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import dagger.Reusable;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.SourceElement;
@@ -20,7 +21,8 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
-class PrintOptionMethod {
+@Reusable
+public class PrintOptionMethod {
 
   private final AllParameters allParameters;
   private final SourceElement sourceElement;

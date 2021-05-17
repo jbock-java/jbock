@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.NamedOptions;
@@ -17,7 +18,8 @@ import static com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
-class StatefulParseMethod {
+@Reusable
+public class StatefulParseMethod {
 
   private final GeneratedTypes generatedTypes;
 

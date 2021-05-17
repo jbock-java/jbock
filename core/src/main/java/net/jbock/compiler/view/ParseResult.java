@@ -5,6 +5,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.SourceElement;
 
@@ -24,7 +25,8 @@ import static javax.lang.model.element.Modifier.STATIC;
 /**
  * Defines the inner class ParseResult.
  */
-final class ParseResult {
+@Reusable
+public class ParseResult {
 
   private final GeneratedTypes generatedTypes;
   private final FieldSpec result;

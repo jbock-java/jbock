@@ -59,7 +59,8 @@ public class CommonFields {
       FieldSpec exitHookField,
       FieldSpec programName,
       FieldSpec optionsByName,
-      FieldSpec paramParsers, FieldSpec optionParsers) {
+      FieldSpec paramParsers,
+      FieldSpec optionParsers) {
     this.exitHookField = exitHookField;
     this.programName = programName;
     this.optionsByName = optionsByName;
@@ -69,7 +70,6 @@ public class CommonFields {
 
   public static CommonFields create(
       GeneratedTypes generatedTypes,
-      GeneratedType generatedType,
       SourceElement sourceElement,
       PositionalParameters positionalParameters) {
     ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(Consumer.class),
@@ -88,7 +88,7 @@ public class CommonFields {
         .build();
     FieldSpec programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
         .initializer("$S", sourceElement.programName()).build();
-    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, generatedType.optionType()), "OPTIONS_BY_NAME")
+    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.optionType()), "OPTIONS_BY_NAME")
         .initializer("optionsByName()")
         .addModifiers(PRIVATE, STATIC, FINAL)
         .build();

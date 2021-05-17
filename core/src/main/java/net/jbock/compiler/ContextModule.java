@@ -76,12 +76,10 @@ class ContextModule {
   @Provides
   CommonFields commonFields(
       GeneratedTypes generatedTypes,
-      GeneratedType generatedType,
       SourceElement sourceElement,
       PositionalParameters positionalParameters) {
     return CommonFields.create(
         generatedTypes,
-        generatedType,
         sourceElement,
         positionalParameters);
   }

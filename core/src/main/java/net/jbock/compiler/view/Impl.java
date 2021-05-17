@@ -4,6 +4,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
@@ -21,7 +22,8 @@ import static javax.lang.model.element.Modifier.STATIC;
  *
  * @see GeneratedClass
  */
-final class Impl {
+@Reusable
+public class Impl {
 
   private final AllParameters context;
   private final GeneratedTypes generatedTypes;

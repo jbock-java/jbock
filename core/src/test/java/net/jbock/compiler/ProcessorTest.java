@@ -366,6 +366,21 @@ class ProcessorTest {
   }
 
   @Test
+  void noNames() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(names = {})",
+        "  abstract int aRequiredInt();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .failsToCompile()
+        .withErrorContaining("define at least one option name");
+  }
+
+  @Test
   void implementsNotAllowed() {
     JavaFileObject javaFile = fromSource(
         "interface Arguments {",

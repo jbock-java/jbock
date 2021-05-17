@@ -4,6 +4,7 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import dagger.Reusable;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.NamedOptions;
@@ -19,7 +20,8 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.mapOf;
 
-class OptionsByNameMethod {
+@Reusable
+public class OptionsByNameMethod {
 
   private final SourceElement sourceElement;
   private final NamedOptions namedOptions;

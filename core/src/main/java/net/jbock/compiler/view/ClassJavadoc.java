@@ -1,10 +1,12 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.CodeBlock;
+import dagger.Reusable;
 
 import javax.inject.Inject;
 
-class ClassJavadoc {
+@Reusable
+public class ClassJavadoc {
 
   private static final String PROJECT_URL = "https://github.com/h908714124/jbock";
 

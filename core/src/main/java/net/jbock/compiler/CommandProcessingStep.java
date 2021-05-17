@@ -57,7 +57,7 @@ import static net.jbock.compiler.TypeTool.AS_TYPE_ELEMENT;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
-class CommandProcessingStep implements BasicAnnotationProcessor.Step {
+public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private final TypeTool tool;
   private final Types types;
@@ -152,7 +152,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       GeneratedType generatedType) {
     ParameterModule module = new ParameterModule(generatedType, tool,
         sourceElement, descriptionBuilder);
-    return createMethods(sourceElement.element()).flatMap(methods -> {
+    return createMethods(sourceElement).flatMap(methods -> {
       ImmutableList.Builder<ConvertedParameter<PositionalParameter>> positionalsBuilder =
           ImmutableList.builder();
       List<ValidationFailure> failures = new ArrayList<>();
@@ -235,8 +235,8 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return result;
   }
 
-  private Either<List<ValidationFailure>, Methods> createMethods(TypeElement sourceElement) {
-    return findRelevantMethods(sourceElement.asType()).flatMap(sourceMethods -> {
+  private Either<List<ValidationFailure>, Methods> createMethods(SourceElement sourceElement) {
+    return findRelevantMethods(sourceElement.element().asType()).flatMap(sourceMethods -> {
       List<ValidationFailure> failures = new ArrayList<>();
       for (ExecutableElement sourceMethod : sourceMethods) {
         validateParameterMethod(sourceElement, sourceMethod)
@@ -244,7 +244,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             .ifPresent(failures::add);
       }
       if (sourceMethods.isEmpty()) { // javapoet #739
-        failures.add(new ValidationFailure("expecting at least one abstract method", sourceElement));
+        failures.add(sourceElement.fail("expecting at least one abstract method"));
       }
       if (!failures.isEmpty()) {
         return left(failures);
@@ -264,8 +264,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .collect(Collectors.toList());
     if (parametersMethods.size() >= 2) {
       String message = "duplicate @" + Parameters.class.getSimpleName() + " annotation";
-      ExecutableElement method = sourceMethods.get(1).method();
-      return Optional.of(new ValidationFailure(message, method));
+      return Optional.of(sourceMethods.get(1).fail(message));
     }
     return Optional.empty();
   }
@@ -326,7 +325,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private Optional<String> validateParameterMethod(
-      TypeElement sourceElement,
+      SourceElement sourceElement,
       ExecutableElement sourceMethod) {
     Optional<String> noAnnotationsError = util.assertAtLeastOneAnnotation(sourceMethod,
         Option.class, Parameter.class, Parameters.class);
@@ -338,7 +337,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     if (duplicateAnnotationsError.isPresent()) {
       return duplicateAnnotationsError;
     }
-    if (sourceElement.getAnnotation(SuperCommand.class) != null &&
+    if (sourceElement.element().getAnnotation(SuperCommand.class) != null &&
         sourceMethod.getAnnotation(Parameters.class) != null) {
       return Optional.of("@" + Parameters.class.getSimpleName()
           + " cannot be used in a @" + SuperCommand.class.getSimpleName());

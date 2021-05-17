@@ -19,7 +19,7 @@ import java.util.stream.Stream;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-class ParameterMethodProcessingStep implements BasicAnnotationProcessor.Step {
+public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.Step {
 
   private final Messager messager;
 

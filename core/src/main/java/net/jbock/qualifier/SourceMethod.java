@@ -5,6 +5,7 @@ import net.jbock.compiler.parameter.ParameterStyle;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
+import java.util.List;
 import java.util.OptionalInt;
 
 public class SourceMethod {
@@ -44,5 +45,9 @@ public class SourceMethod {
 
   public ValidationFailure fail(String message) {
     return new ValidationFailure(message, sourceMethod);
+  }
+
+  public List<String> names() {
+    return parameterStyle.names(sourceMethod);
   }
 }

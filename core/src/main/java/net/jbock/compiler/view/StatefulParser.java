@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
@@ -32,7 +33,8 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
 /**
  * Defines the inner class StatefulParser
  */
-final class StatefulParser {
+@Reusable
+public class StatefulParser {
 
   private final StatefulParseMethod statefulParseMethod;
   private final GeneratedTypes generatedTypes;

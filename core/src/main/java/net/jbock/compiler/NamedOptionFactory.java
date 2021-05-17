@@ -3,7 +3,6 @@ package net.jbock.compiler;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.Option;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ConverterFinder;
@@ -26,7 +25,7 @@ import static javax.lang.model.type.TypeKind.BOOLEAN;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
-class NamedOptionFactory {
+public class NamedOptionFactory {
 
   private final ConverterFinder converterFinder;
   private final ConverterClass converterClass;
@@ -73,15 +72,11 @@ class NamedOptionFactory {
   }
 
   private Either<String, List<String>> checkOptionNames() {
-    Option option = sourceMethod.method().getAnnotation(Option.class);
-    if (option == null) {
-      return right(Collections.emptyList());
-    }
-    if (Objects.toString(option.names(), "").isEmpty()) {
-      return left("empty name");
+    if (sourceMethod.names().isEmpty()) {
+      return left("define at least one option name");
     }
     for (ConvertedParameter<NamedOption> c : alreadyCreated) {
-      for (String name : option.names()) {
+      for (String name : sourceMethod.names()) {
         for (String previousName : c.parameter().names()) {
           if (name.equals(previousName)) {
             return left("duplicate option name: " + name);
@@ -90,7 +85,7 @@ class NamedOptionFactory {
       }
     }
     List<String> result = new ArrayList<>();
-    for (String name : option.names()) {
+    for (String name : sourceMethod.names()) {
       Either<String, String> check = checkName(name);
       if (!check.isRight()) {
         return check.map(__ -> Collections.emptyList());
@@ -111,9 +106,6 @@ class NamedOptionFactory {
       }
       return n1.compareTo(n2);
     });
-    if (result.isEmpty()) {
-      return left("define at least one option name");
-    }
     return right(result);
   }
 

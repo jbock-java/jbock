@@ -4,6 +4,7 @@ import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import dagger.Reusable;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
@@ -15,7 +16,8 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 
-class ParseResultWithRest {
+@Reusable
+public class ParseResultWithRest {
 
   private final SourceElement sourceElement;
 

@@ -2,6 +2,7 @@ package net.jbock.compiler.view;
 
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import dagger.Reusable;
 
 import javax.inject.Inject;
 
@@ -11,7 +12,8 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 
-class MissingRequiredMethod {
+@Reusable
+public class MissingRequiredMethod {
 
   private final MethodSpec method = missingRequiredMethod();
 

@@ -7,6 +7,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import dagger.Reusable;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.NamedOptions;
@@ -32,7 +33,8 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
 /**
  * Generates the inner class OptionParser and its subtypes.
  */
-final class OptionParser {
+@Reusable
+public final class OptionParser {
 
   private final GeneratedTypes generatedTypes;
   private final FieldSpec optionField;

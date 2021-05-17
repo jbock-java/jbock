@@ -14,7 +14,7 @@ import javax.inject.Inject;
 import java.util.List;
 import java.util.Optional;
 
-class PositionalParamFactory {
+public class PositionalParamFactory {
 
   private final ConverterFinder converterFinder;
   private final ParamLabel paramLabel;

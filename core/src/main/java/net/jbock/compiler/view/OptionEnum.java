@@ -6,6 +6,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
+import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
@@ -24,7 +25,8 @@ import static net.jbock.compiler.Constants.STRING_ARRAY;
  *
  * @see GeneratedClass
  */
-final class OptionEnum {
+@Reusable
+public class OptionEnum {
 
   private final AllParameters context;
   private final GeneratedTypes generatedTypes;
