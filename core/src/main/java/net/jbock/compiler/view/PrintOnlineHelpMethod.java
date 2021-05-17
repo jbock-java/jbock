@@ -25,7 +25,7 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.view.GeneratedClass.CONTINUATION_INDENT_USAGE;
 
 @Reusable
-public class PrintOnlineHelpMethod {
+public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
 
   private final Description description;
   private final SourceElement sourceElement;
@@ -53,7 +53,7 @@ public class PrintOnlineHelpMethod {
     this.commonFields = commonFields;
   }
 
-
+  @Override
   MethodSpec define() {
     CodeBlock.Builder code = CodeBlock.builder();
     String continuationIndent = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
@@ -141,6 +141,4 @@ public class PrintOnlineHelpMethod {
           String.format(paramsFormat, p.parameter().paramLabel())).build();
     }
   }
-
-
 }

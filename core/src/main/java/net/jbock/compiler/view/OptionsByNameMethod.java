@@ -21,7 +21,7 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.mapOf;
 
 @Reusable
-public class OptionsByNameMethod {
+public class OptionsByNameMethod extends Cached<MethodSpec> {
 
   private final SourceElement sourceElement;
   private final NamedOptions namedOptions;
@@ -32,6 +32,7 @@ public class OptionsByNameMethod {
     this.namedOptions = namedOptions;
   }
 
+  @Override
   MethodSpec define() {
     ParameterSpec result = builder(mapOf(STRING, sourceElement.optionType()), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();

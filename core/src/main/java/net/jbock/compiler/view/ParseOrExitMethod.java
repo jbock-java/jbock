@@ -17,25 +17,29 @@ import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.view.GeneratedClass.CONTINUATION_INDENT_USAGE;
 
 @Reusable
-public class ParseOrExitMethod {
+public class ParseOrExitMethod extends Cached<MethodSpec> {
 
   private final SourceElement sourceElement;
   private final GeneratedTypes generatedTypes;
   private final CommonFields commonFields;
   private final PrintTokensMethod printTokensMethod;
+  private final PrintOnlineHelpMethod printOnlineHelpMethod;
 
   @Inject
   ParseOrExitMethod(
       SourceElement sourceElement,
       GeneratedTypes generatedTypes,
       CommonFields commonFields,
-      PrintTokensMethod printTokensMethod) {
+      PrintTokensMethod printTokensMethod,
+      PrintOnlineHelpMethod printOnlineHelpMethod) {
     this.sourceElement = sourceElement;
     this.generatedTypes = generatedTypes;
     this.commonFields = commonFields;
     this.printTokensMethod = printTokensMethod;
+    this.printOnlineHelpMethod = printOnlineHelpMethod;
   }
 
+  @Override
   MethodSpec define() {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
@@ -53,7 +57,7 @@ public class ParseOrExitMethod {
 
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> code
         .beginControlFlow("if ($N instanceof $T)", result, helpRequestedType)
-        .addStatement("printOnlineHelp()")
+        .addStatement("$N()", printOnlineHelpMethod.get())
         .addStatement("$N.flush()", commonFields.err())
         .addStatement("$N.accept($N)", commonFields.exitHook(), result)
         .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
@@ -65,7 +69,7 @@ public class ParseOrExitMethod {
       String blanks = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
       code.addStatement("$N($S, usage())", printTokensMethod.get(), blanks);
     } else {
-      code.addStatement("printOnlineHelp()");
+      code.addStatement("$N()", printOnlineHelpMethod.get());
     }
     if (sourceElement.helpEnabled()) {
       code.addStatement("$N.println($S + $N + $S)", commonFields.err(),

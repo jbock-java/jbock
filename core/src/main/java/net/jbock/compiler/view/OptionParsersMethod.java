@@ -21,7 +21,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.mapOf;
 
 @Reusable
-public class OptionParsersMethod {
+public class OptionParsersMethod extends Cached<MethodSpec> {
 
   private final GeneratedTypes generatedTypes;
   private final SourceElement sourceElement;
@@ -37,6 +37,7 @@ public class OptionParsersMethod {
     this.namedOptions = namedOptions;
   }
 
+  @Override
   MethodSpec define() {
     ParameterSpec parsers = builder(mapOf(sourceElement.optionType(),
         generatedTypes.optionParserType()), "parsers").build();

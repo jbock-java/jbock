@@ -15,12 +15,17 @@ import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 @Reusable
-public class PrintTokensMethod {
+public class PrintTokensMethod extends Cached<MethodSpec> {
 
-  private final MethodSpec method;
+  private final CommonFields commonFields;
 
   @Inject
   PrintTokensMethod(CommonFields commonFields) {
+    this.commonFields = commonFields;
+  }
+
+  @Override
+  MethodSpec define() {
     ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec lines = builder(LIST_OF_STRING, "lines").build();
@@ -30,15 +35,11 @@ public class PrintTokensMethod {
     code.add("for ($T $N : $N)\n", STRING, line, lines).indent()
         .addStatement("$N.println($N)", commonFields.err(), line)
         .unindent();
-    this.method = methodBuilder("printTokens")
+    return methodBuilder("printTokens")
         .addModifiers(PRIVATE)
         .addCode(code.build())
         .addParameter(continuationIndent)
         .addParameter(tokens)
         .build();
-  }
-
-  MethodSpec get() {
-    return method;
   }
 }

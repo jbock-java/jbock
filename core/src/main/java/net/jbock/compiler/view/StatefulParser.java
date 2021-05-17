@@ -34,7 +34,7 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
  * Defines the inner class StatefulParser
  */
 @Reusable
-public class StatefulParser {
+public class StatefulParser extends Cached<TypeSpec> {
 
   private final StatefulParseMethod statefulParseMethod;
   private final GeneratedTypes generatedTypes;
@@ -62,6 +62,7 @@ public class StatefulParser {
     this.missingRequiredMethod = missingRequiredMethod;
   }
 
+  @Override
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.statefulParserType())
         .addModifiers(PRIVATE, STATIC)
@@ -229,7 +230,7 @@ public class StatefulParser {
         return Arrays.asList(
             CodeBlock.of(".findAny()"),
             CodeBlock.of(".orElseThrow(() -> $N($S))",
-                missingRequiredMethod.method(), name));
+                missingRequiredMethod.get(), name));
       case OPTIONAL:
         return singletonList(CodeBlock.of(".findAny()"));
       case REPEATABLE:
@@ -246,7 +247,7 @@ public class StatefulParser {
     switch (parameter.skew()) {
       case REQUIRED:
         return singletonList(CodeBlock.of(".orElseThrow(() -> $N($S))",
-            missingRequiredMethod.method(), enumConstant));
+            missingRequiredMethod.get(), enumConstant));
       case OPTIONAL:
         return emptyList();
       case REPEATABLE:

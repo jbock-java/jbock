@@ -20,7 +20,7 @@ import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 @Reusable
-public class UsageMethod {
+public class UsageMethod extends Cached<MethodSpec> {
 
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
@@ -36,6 +36,7 @@ public class UsageMethod {
     this.commonFields = commonFields;
   }
 
+  @Override
   MethodSpec define() {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("usage");
 

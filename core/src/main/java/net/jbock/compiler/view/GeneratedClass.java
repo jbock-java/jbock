@@ -102,24 +102,24 @@ public final class GeneratedClass {
 
   public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass())
-        .addMethod(parseMethod.define())
-        .addMethod(parseOrExitMethod.define())
+        .addMethod(parseMethod.get())
+        .addMethod(parseOrExitMethod.get())
         .addMethod(withers.withTerminalWidthMethod())
         .addMethod(withers.withMessagesMethod())
         .addMethod(withers.withExitHookMethod())
         .addMethod(withers.withErrorStreamMethod())
-        .addMethod(printOnlineHelpMethod.define())
-        .addMethod(printOptionMethod.define())
+        .addMethod(printOnlineHelpMethod.get())
+        .addMethod(printOptionMethod.get())
         .addMethod(printTokensMethod.get())
-        .addMethod(makeLinesMethod.define())
-        .addMethod(usageMethod.define());
+        .addMethod(makeLinesMethod.get())
+        .addMethod(usageMethod.get());
     if (!namedOptions.isEmpty()) {
-      spec.addMethod(readOptionArgumentMethod.define());
-      spec.addMethod(optionsByNameMethod.define());
-      spec.addMethod(optionParsersMethod.define());
+      spec.addMethod(readOptionArgumentMethod.get());
+      spec.addMethod(optionsByNameMethod.get());
+      spec.addMethod(optionParsersMethod.get());
     }
     if (allParameters.anyRequired()) {
-      spec.addMethod(missingRequiredMethod.method());
+      spec.addMethod(missingRequiredMethod.get());
     }
 
     spec.addField(commonFields.err());
@@ -136,7 +136,7 @@ public final class GeneratedClass {
 
     spec.addField(commonFields.suspiciousPattern());
 
-    spec.addType(statefulParser.define())
+    spec.addType(statefulParser.get())
         .addType(optionEnum.define())
         .addType(impl.define())
         .addTypes(optionParser.define())

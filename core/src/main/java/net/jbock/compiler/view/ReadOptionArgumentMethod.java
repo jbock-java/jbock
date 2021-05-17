@@ -16,12 +16,13 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
 @Reusable
-public class ReadOptionArgumentMethod {
+public class ReadOptionArgumentMethod extends Cached<MethodSpec> {
 
   @Inject
   ReadOptionArgumentMethod() {
   }
 
+  @Override
   MethodSpec define() {
     ParameterSpec token = builder(STRING, "token").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();

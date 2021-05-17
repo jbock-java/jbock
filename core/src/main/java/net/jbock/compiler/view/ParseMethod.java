@@ -16,7 +16,7 @@ import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
 @Reusable
-public class ParseMethod {
+public class ParseMethod extends Cached<MethodSpec> {
 
   private final GeneratedTypes generatedTypes;
   private final AllParameters allParameters;
@@ -32,6 +32,7 @@ public class ParseMethod {
     this.sourceElement = sourceElement;
   }
 
+  @Override
   MethodSpec define() {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();

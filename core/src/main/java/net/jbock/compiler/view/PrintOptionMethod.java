@@ -22,7 +22,7 @@ import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 @Reusable
-public class PrintOptionMethod {
+public class PrintOptionMethod extends Cached<MethodSpec> {
 
   private final AllParameters allParameters;
   private final SourceElement sourceElement;
@@ -41,6 +41,7 @@ public class PrintOptionMethod {
     this.commonFields = commonFields;
   }
 
+  @Override
   MethodSpec define() {
     ParameterSpec descriptionKey = builder(STRING, "descriptionKey").build();
     ParameterSpec message = builder(STRING, "message").build();

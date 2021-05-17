@@ -29,7 +29,6 @@ public class Withers {
     this.anyDescriptionKeys = anyDescriptionKeys;
   }
 
-
   MethodSpec withTerminalWidthMethod() {
     ParameterSpec width = builder(commonFields.terminalWidth().type, "width").build();
     return methodBuilder("withTerminalWidth")
