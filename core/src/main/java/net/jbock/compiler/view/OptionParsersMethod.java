@@ -7,8 +7,8 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.Collections;
@@ -22,21 +22,21 @@ import static net.jbock.compiler.Constants.mapOf;
 class OptionParsersMethod {
 
   private final GeneratedTypes generatedTypes;
-  private final GeneratedType generatedType;
+  private final SourceElement sourceElement;
   private final NamedOptions namedOptions;
 
   @Inject
   OptionParsersMethod(
       GeneratedTypes generatedTypes,
-      GeneratedType generatedType,
+      SourceElement sourceElement,
       NamedOptions namedOptions) {
     this.generatedTypes = generatedTypes;
-    this.generatedType = generatedType;
+    this.sourceElement = sourceElement;
     this.namedOptions = namedOptions;
   }
 
   MethodSpec define() {
-    ParameterSpec parsers = builder(mapOf(generatedType.optionType(),
+    ParameterSpec parsers = builder(mapOf(sourceElement.optionType(),
         generatedTypes.optionParserType()), "parsers").build();
 
     return MethodSpec.methodBuilder("optionParsers").returns(parsers.type)
@@ -49,12 +49,12 @@ class OptionParsersMethod {
       return CodeBlock.builder().addStatement("return $T.emptyMap()", Collections.class).build();
     }
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, generatedType.optionType());
+    code.addStatement("$T $N = new $T<>($T.class)", parsers.type, parsers, EnumMap.class, sourceElement.optionType());
     for (ConvertedParameter<NamedOption> param : namedOptions.options()) {
       String enumConstant = param.enumConstant();
       code.addStatement("$N.put($T.$L, new $T($T.$L))",
-          parsers, generatedType.optionType(), enumConstant, optionParserType(param),
-          generatedType.optionType(), enumConstant);
+          parsers, sourceElement.optionType(), enumConstant, optionParserType(param),
+          sourceElement.optionType(), enumConstant);
     }
     code.addStatement("return $N", parsers);
     return code.build();

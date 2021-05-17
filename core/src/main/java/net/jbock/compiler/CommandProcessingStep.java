@@ -125,7 +125,7 @@ class CommandProcessingStep implements BasicAnnotationProcessor.Step {
                 .create(module)
                 .generatedClass()
                 .define();
-            write(sourceElement.element(), generatedType.type(), typeSpec);
+            write(sourceElement.element(), sourceElement.generatedClass(), typeSpec);
           });
     } catch (Throwable error) {
       handleUnknownError(sourceElement.element(), error);

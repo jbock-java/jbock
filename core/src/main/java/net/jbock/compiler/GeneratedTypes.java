@@ -3,7 +3,6 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import dagger.Reusable;
-import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
@@ -13,13 +12,13 @@ import java.util.function.Function;
 @Reusable
 public class GeneratedTypes {
 
-  private final GeneratedType generatedType;
   private final SourceElement sourceElement;
+  private final ClassName generatedClass;
 
   @Inject
-  GeneratedTypes(GeneratedType generatedType, SourceElement sourceElement) {
-    this.generatedType = generatedType;
+  GeneratedTypes(SourceElement sourceElement) {
     this.sourceElement = sourceElement;
+    this.generatedClass = sourceElement.generatedClass();
   }
 
   public TypeName parseSuccessType() {
@@ -31,52 +30,52 @@ public class GeneratedTypes {
     if (!sourceElement.isSuperCommand()) {
       return Optional.empty();
     }
-    return Optional.of(generatedType.type().nestedClass(sourceElement.element().getSimpleName() + "WithRest"));
+    return Optional.of(generatedClass.nestedClass(sourceElement.element().getSimpleName() + "WithRest"));
   }
 
   public ClassName optionParserType() {
-    return generatedType.type().nestedClass("OptionParser");
+    return generatedClass.nestedClass("OptionParser");
   }
 
   public ClassName repeatableOptionParserType() {
-    return generatedType.type().nestedClass("RepeatableOptionParser");
+    return generatedClass.nestedClass("RepeatableOptionParser");
   }
 
   public ClassName flagParserType() {
-    return generatedType.type().nestedClass("FlagParser");
+    return generatedClass.nestedClass("FlagParser");
   }
 
   public ClassName regularOptionParserType() {
-    return generatedType.type().nestedClass("RegularOptionParser");
+    return generatedClass.nestedClass("RegularOptionParser");
   }
 
   public ClassName optionType() {
-    return generatedType.type().nestedClass("Option");
+    return generatedClass.nestedClass("Option");
   }
 
   public ClassName statefulParserType() {
-    return generatedType.type().nestedClass("StatefulParser");
+    return generatedClass.nestedClass("StatefulParser");
   }
 
   public ClassName implType() {
-    return generatedType.type().nestedClass(sourceElement.element().getSimpleName() + "Impl");
+    return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
   }
 
   public ClassName parseResultType() {
-    return generatedType.type().nestedClass("ParseResult");
+    return generatedClass.nestedClass("ParseResult");
   }
 
   public ClassName parsingSuccessWrapperType() {
-    return generatedType.type().nestedClass("ParsingSuccess");
+    return generatedClass.nestedClass("ParsingSuccess");
   }
 
   public ClassName parsingFailedType() {
-    return generatedType.type().nestedClass("ParsingFailed");
+    return generatedClass.nestedClass("ParsingFailed");
   }
 
   public Optional<ClassName> helpRequestedType() {
     return sourceElement.helpEnabled() ?
-        Optional.of(generatedType.type().nestedClass("HelpRequested")) :
+        Optional.of(generatedClass.nestedClass("HelpRequested")) :
         Optional.empty();
   }
 }

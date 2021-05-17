@@ -6,8 +6,8 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.HashMap;
@@ -21,17 +21,17 @@ import static net.jbock.compiler.Constants.mapOf;
 
 class OptionsByNameMethod {
 
-  private final GeneratedType generatedType;
+  private final SourceElement sourceElement;
   private final NamedOptions namedOptions;
 
   @Inject
-  OptionsByNameMethod(GeneratedType generatedType, NamedOptions namedOptions) {
-    this.generatedType = generatedType;
+  OptionsByNameMethod(SourceElement sourceElement, NamedOptions namedOptions) {
+    this.sourceElement = sourceElement;
     this.namedOptions = namedOptions;
   }
 
   MethodSpec define() {
-    ParameterSpec result = builder(mapOf(STRING, generatedType.optionType()), "result").build();
+    ParameterSpec result = builder(mapOf(STRING, sourceElement.optionType()), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
     long mapSize = namedOptions.stream()
         .map(ConvertedParameter::parameter)
@@ -42,7 +42,7 @@ class OptionsByNameMethod {
     code.addStatement("$T $N = new $T<>($L)", result.type, result, HashMap.class, mapSize);
     for (ConvertedParameter<NamedOption> namedOption : namedOptions.options()) {
       for (String dashedName : namedOption.parameter().names()) {
-        code.addStatement("$N.put($S, $T.$L)", result, dashedName, generatedType.optionType(),
+        code.addStatement("$N.put($S, $T.$L)", result, dashedName, sourceElement.optionType(),
             namedOption.enumConstant());
       }
     }

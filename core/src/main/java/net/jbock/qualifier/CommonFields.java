@@ -32,6 +32,7 @@ public class CommonFields {
   private final FieldSpec programName;
   private final FieldSpec optionsByName;
   private final FieldSpec paramParsers;
+  private final FieldSpec optionParsers;
 
   private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing")
       .build();
@@ -58,11 +59,12 @@ public class CommonFields {
       FieldSpec exitHookField,
       FieldSpec programName,
       FieldSpec optionsByName,
-      FieldSpec paramParsers) {
+      FieldSpec paramParsers, FieldSpec optionParsers) {
     this.exitHookField = exitHookField;
     this.programName = programName;
     this.optionsByName = optionsByName;
     this.paramParsers = paramParsers;
+    this.optionParsers = optionParsers;
   }
 
   public static CommonFields create(
@@ -93,7 +95,10 @@ public class CommonFields {
     FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "paramParsers")
         .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
         .build();
-    return new CommonFields(exitHookField, programName, optionsByName, paramParsers);
+    FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionType(), generatedTypes.optionParserType()), "optionParsers")
+        .initializer("optionParsers()")
+        .build();
+    return new CommonFields(exitHookField, programName, optionsByName, paramParsers, optionParsers);
   }
 
   public FieldSpec exitHook() {
@@ -134,5 +139,9 @@ public class CommonFields {
 
   public FieldSpec paramParsers() {
     return paramParsers;
+  }
+
+  public FieldSpec optionParsers() {
+    return optionParsers;
   }
 }

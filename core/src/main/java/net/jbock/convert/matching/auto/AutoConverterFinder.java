@@ -2,6 +2,7 @@ package net.jbock.convert.matching.auto;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import dagger.Reusable;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.ParameterStyle;
@@ -25,6 +26,7 @@ import java.util.stream.Collectors;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.either.Either.left;
 
+@Reusable
 public class AutoConverterFinder extends ConverterValidator {
 
   private static final String ENUM = Enum.class.getCanonicalName();

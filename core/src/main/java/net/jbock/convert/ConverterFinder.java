@@ -1,6 +1,7 @@
 package net.jbock.convert;
 
 import dagger.Lazy;
+import dagger.Reusable;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.matching.auto.AutoConverterFinder;
 import net.jbock.convert.matching.explicit.ExplicitConverterValidator;
@@ -9,6 +10,7 @@ import net.jbock.qualifier.ConverterClass;
 
 import javax.inject.Inject;
 
+@Reusable
 public class ConverterFinder {
 
   private final Lazy<AutoConverterFinder> autoConverterFinder;

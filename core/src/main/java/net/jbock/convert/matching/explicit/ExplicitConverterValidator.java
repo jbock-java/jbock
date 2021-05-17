@@ -1,6 +1,7 @@
 package net.jbock.convert.matching.explicit;
 
 import com.squareup.javapoet.CodeBlock;
+import dagger.Reusable;
 import net.jbock.Converter;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
@@ -27,6 +28,7 @@ import java.util.Optional;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.either.Either.left;
 
+@Reusable
 public class ExplicitConverterValidator extends ConverterValidator {
 
   private final List<Matcher> matchers;

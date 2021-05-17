@@ -9,7 +9,6 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.CommonFields;
-import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
@@ -31,7 +30,6 @@ class PrintOnlineHelpMethod {
   private final AllParameters allParameters;
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
-  private final GeneratedType generatedType;
   private final PrintTokensMethod printTokensMethod;
   private final CommonFields commonFields;
 
@@ -42,7 +40,6 @@ class PrintOnlineHelpMethod {
       AllParameters allParameters,
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
-      GeneratedType generatedType,
       PrintTokensMethod printTokensMethod,
       CommonFields commonFields) {
     this.description = description;
@@ -50,7 +47,6 @@ class PrintOnlineHelpMethod {
     this.allParameters = allParameters;
     this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
-    this.generatedType = generatedType;
     this.printTokensMethod = printTokensMethod;
     this.commonFields = commonFields;
   }
@@ -121,12 +117,12 @@ class PrintOnlineHelpMethod {
   private CodeBlock printNamedOptionCode(String optionsFormat, ConvertedParameter<NamedOption> c) {
     if (allParameters.anyDescriptionKeys()) {
       return CodeBlock.builder().addStatement("printOption($T.$L, $S, $S)",
-          generatedType.optionType(), c.enumConstant(),
+          sourceElement.optionType(), c.enumConstant(),
           String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
           c.parameter().descriptionKey().orElse("")).build();
     } else {
       return CodeBlock.builder().addStatement("printOption($T.$L, $S)",
-          generatedType.optionType(), c.enumConstant(),
+          sourceElement.optionType(), c.enumConstant(),
           String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag()))).build();
     }
   }
@@ -134,12 +130,12 @@ class PrintOnlineHelpMethod {
   private CodeBlock printPositionalCode(String paramsFormat, ConvertedParameter<PositionalParameter> p) {
     if (allParameters.anyDescriptionKeys()) {
       return CodeBlock.builder().addStatement("printOption($T.$L, $S, $S)",
-          generatedType.optionType(), p.enumConstant(),
+          sourceElement.optionType(), p.enumConstant(),
           String.format(paramsFormat, p.parameter().paramLabel()),
           p.parameter().descriptionKey().orElse("")).build();
     } else {
       return CodeBlock.builder().addStatement("printOption($T.$L, $S)",
-          generatedType.optionType(), p.enumConstant(),
+          sourceElement.optionType(), p.enumConstant(),
           String.format(paramsFormat, p.parameter().paramLabel())).build();
     }
   }

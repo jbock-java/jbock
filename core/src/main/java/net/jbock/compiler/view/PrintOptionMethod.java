@@ -5,7 +5,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.CommonFields;
-import net.jbock.qualifier.GeneratedType;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -23,18 +23,18 @@ import static net.jbock.compiler.Constants.STRING;
 class PrintOptionMethod {
 
   private final AllParameters allParameters;
-  private final GeneratedType generatedType;
+  private final SourceElement sourceElement;
   private final PrintTokensMethod printTokensMethod;
   private final CommonFields commonFields;
 
   @Inject
   PrintOptionMethod(
       AllParameters allParameters,
-      GeneratedType generatedType,
+      SourceElement sourceElement,
       PrintTokensMethod printTokensMethod,
       CommonFields commonFields) {
     this.allParameters = allParameters;
-    this.generatedType = generatedType;
+    this.sourceElement = sourceElement;
     this.printTokensMethod = printTokensMethod;
     this.commonFields = commonFields;
   }
@@ -42,7 +42,7 @@ class PrintOptionMethod {
   MethodSpec define() {
     ParameterSpec descriptionKey = builder(STRING, "descriptionKey").build();
     ParameterSpec message = builder(STRING, "message").build();
-    ParameterSpec option = builder(generatedType.optionType(), "option").build();
+    ParameterSpec option = builder(sourceElement.optionType(), "option").build();
     ParameterSpec names = builder(STRING, "names").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();

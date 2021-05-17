@@ -1,5 +1,6 @@
 package net.jbock.qualifier;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.ParserFlavour;
@@ -17,12 +18,22 @@ public class SourceElement {
   private final ParserFlavour parserFlavour;
   private final Modifier[] accessModifiers;
   private final String programName;
+  private final ClassName generatedClass;
+  private final ClassName optionType;
 
-  private SourceElement(TypeElement sourceElement, ParserFlavour parserFlavour, Modifier[] accessModifiers, String programName) {
+  private SourceElement(
+      TypeElement sourceElement,
+      ParserFlavour parserFlavour,
+      Modifier[] accessModifiers,
+      String programName,
+      ClassName generatedClass,
+      ClassName optionType) {
     this.sourceElement = sourceElement;
     this.parserFlavour = parserFlavour;
     this.accessModifiers = accessModifiers;
     this.programName = programName;
+    this.generatedClass = generatedClass;
+    this.optionType = optionType;
   }
 
   public static SourceElement create(TypeElement sourceElement, ParserFlavour parserFlavour) {
@@ -31,8 +42,15 @@ public class SourceElement {
         .toArray(Modifier[]::new);
     String programName = parserFlavour.programName(sourceElement)
         .orElseGet(() -> EnumName.create(sourceElement.getSimpleName().toString()).snake('-'));
-    return new SourceElement(sourceElement, parserFlavour, accessModifiers, programName);
+    String generatedClassName = String.join("_", ClassName.get(sourceElement).simpleNames()) + "_Parser";
+    ClassName generatedClass = ClassName.get(sourceElement)
+        .topLevelClassName()
+        .peerClass(generatedClassName);
+    ClassName optionType = generatedClass.nestedClass("Option");
+    return new SourceElement(sourceElement, parserFlavour, accessModifiers,
+        programName, generatedClass, optionType);
   }
+
 
   public TypeElement element() {
     return sourceElement;
@@ -68,5 +86,13 @@ public class SourceElement {
 
   public Optional<String> descriptionKey() {
     return parserFlavour.descriptionKey(sourceElement);
+  }
+
+  public ClassName generatedClass() {
+    return generatedClass;
+  }
+
+  public ClassName optionType() {
+    return optionType;
   }
 }

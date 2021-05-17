@@ -4,7 +4,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.qualifier.AnyDescriptionKeys;
 import net.jbock.qualifier.CommonFields;
-import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
@@ -15,18 +14,15 @@ import static com.squareup.javapoet.ParameterSpec.builder;
 class Withers {
 
   private final CommonFields commonFields;
-  private final GeneratedType generatedType;
   private final SourceElement sourceElement;
   private final AnyDescriptionKeys anyDescriptionKeys;
 
   @Inject
   Withers(
       CommonFields commonFields,
-      GeneratedType generatedType,
       SourceElement sourceElement,
       AnyDescriptionKeys anyDescriptionKeys) {
     this.commonFields = commonFields;
-    this.generatedType = generatedType;
     this.sourceElement = sourceElement;
     this.anyDescriptionKeys = anyDescriptionKeys;
   }
@@ -38,7 +34,7 @@ class Withers {
         .addParameter(width)
         .addStatement("this.$1N = $2N == 0 ? this.$1N : $2N", commonFields.terminalWidth(), width)
         .addStatement("return this")
-        .returns(generatedType.type())
+        .returns(sourceElement.generatedClass())
         .addModifiers(sourceElement.accessModifiers())
         .build();
   }
@@ -50,7 +46,7 @@ class Withers {
         .addParameter(param)
         .addStatement("this.$N = $N", commonFields.exitHook(), param)
         .addStatement("return this")
-        .returns(generatedType.type())
+        .returns(sourceElement.generatedClass())
         .addModifiers(sourceElement.accessModifiers())
         .build();
   }
@@ -65,7 +61,7 @@ class Withers {
       spec.addComment("no keys defined");
     }
     spec.addStatement("return this");
-    return spec.returns(generatedType.type())
+    return spec.returns(sourceElement.generatedClass())
         .addModifiers(sourceElement.accessModifiers())
         .build();
   }
@@ -76,7 +72,7 @@ class Withers {
         .addParameter(param)
         .addStatement("this.$N = $N", commonFields.err(), param)
         .addStatement("return this")
-        .returns(generatedType.type())
+        .returns(sourceElement.generatedClass())
         .addModifiers(sourceElement.accessModifiers())
         .build();
   }

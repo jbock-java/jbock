@@ -1,5 +1,6 @@
 package net.jbock.convert.reference;
 
+import dagger.Reusable;
 import net.jbock.compiler.TypeTool;
 import net.jbock.either.Either;
 
@@ -17,6 +18,7 @@ import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.ofRight;
 import static net.jbock.either.Either.right;
 
+@Reusable
 public class ReferenceTool {
 
   private final TypeTool tool;

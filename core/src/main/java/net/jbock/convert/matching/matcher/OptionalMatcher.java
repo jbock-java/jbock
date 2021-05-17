@@ -1,6 +1,7 @@
 package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.ParameterSpec;
+import dagger.Reusable;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
@@ -17,6 +18,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.Optional;
 
+@Reusable
 public class OptionalMatcher extends Matcher {
 
   private final SourceMethod sourceMethod;

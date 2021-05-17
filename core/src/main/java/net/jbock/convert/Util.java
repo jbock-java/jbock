@@ -1,5 +1,6 @@
 package net.jbock.convert;
 
+import dagger.Reusable;
 import net.jbock.compiler.TypeTool;
 
 import javax.inject.Inject;
@@ -20,6 +21,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+@Reusable
 public class Util {
 
   @Inject

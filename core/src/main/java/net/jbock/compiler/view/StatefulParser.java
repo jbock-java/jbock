@@ -1,7 +1,6 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -10,7 +9,6 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.CommonFields;
-import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
@@ -30,7 +28,6 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
-import static net.jbock.compiler.Constants.mapOf;
 
 /**
  * Defines the inner class StatefulParser
@@ -39,8 +36,6 @@ final class StatefulParser {
 
   private final StatefulParseMethod statefulParseMethod;
   private final GeneratedTypes generatedTypes;
-  private final GeneratedType generatedType;
-  private final FieldSpec optionParsersField;
   private final SourceElement sourceElement;
   private final NamedOptions options;
   private final PositionalParameters positionalParameters;
@@ -50,7 +45,6 @@ final class StatefulParser {
   @Inject
   StatefulParser(
       GeneratedTypes generatedTypes,
-      GeneratedType generatedType,
       StatefulParseMethod parseMethod,
       SourceElement sourceElement,
       NamedOptions options,
@@ -58,17 +52,12 @@ final class StatefulParser {
       CommonFields commonFields,
       MissingRequiredMethod missingRequiredMethod) {
     this.generatedTypes = generatedTypes;
-    this.generatedType = generatedType;
     this.statefulParseMethod = parseMethod;
     this.sourceElement = sourceElement;
     this.options = options;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
     this.missingRequiredMethod = missingRequiredMethod;
-
-    this.optionParsersField = FieldSpec.builder(mapOf(generatedType.optionType(), generatedTypes.optionParserType()), "optionParsers")
-        .initializer("optionParsers()")
-        .build();
   }
 
   TypeSpec define() {
@@ -81,7 +70,7 @@ final class StatefulParser {
     if (!options.isEmpty()) {
       spec.addMethod(tryParseOptionMethod())
           .addMethod(tryReadOptionMethod());
-      spec.addField(optionParsersField);
+      spec.addField(commonFields.optionParsers());
     }
     if (!positionalParameters.regular().isEmpty()) {
       spec.addField(commonFields.paramParsers());
@@ -108,19 +97,19 @@ final class StatefulParser {
 
   private CodeBlock tryParseOptionCodeClustering(ParameterSpec token, ParameterSpec it) {
     ParameterSpec clusterToken = ParameterSpec.builder(STRING, "clusterToken").build();
-    ParameterSpec option = ParameterSpec.builder(generatedType.optionType(), "option").build();
+    ParameterSpec option = ParameterSpec.builder(sourceElement.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
     if (!sourceElement.isSuperCommand()) {
       code.add("if ($N)\n", commonFields.endOfOptionParsing()).indent()
           .addStatement("return false")
           .unindent();
     }
-    code.addStatement("$T $N = tryReadOption($N)", generatedType.optionType(), option, token);
+    code.addStatement("$T $N = tryReadOption($N)", sourceElement.optionType(), option, token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")
         .unindent();
     code.addStatement("$T $N = $N", clusterToken.type, clusterToken, token);
-    code.beginControlFlow("while ($N.get($N).read($N, $N))", optionParsersField, option, clusterToken, it);
+    code.beginControlFlow("while ($N.get($N).read($N, $N))", commonFields.optionParsers(), option, clusterToken, it);
     code.addStatement("$1N = '-' + $1N.substring(2, $1N.length())", clusterToken);
     code.addStatement("$N = tryReadOption($N)", option, clusterToken);
     code.add("if ($N == null)\n", option).indent()
@@ -132,18 +121,18 @@ final class StatefulParser {
   }
 
   private CodeBlock tryParseOptionCodeSimple(ParameterSpec token, ParameterSpec it) {
-    ParameterSpec option = ParameterSpec.builder(generatedType.optionType(), "option").build();
+    ParameterSpec option = ParameterSpec.builder(sourceElement.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
     if (!sourceElement.isSuperCommand()) {
       code.add("if ($N)\n", commonFields.endOfOptionParsing()).indent()
           .addStatement("return false")
           .unindent();
     }
-    code.addStatement("$T $N = tryReadOption($N)", generatedType.optionType(), option, token);
+    code.addStatement("$T $N = tryReadOption($N)", sourceElement.optionType(), option, token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")
         .unindent();
-    code.addStatement("$N.get($N).read($N, $N)", optionParsersField, option, token, it)
+    code.addStatement("$N.get($N).read($N, $N)", commonFields.optionParsers(), option, token, it)
         .addStatement("return true");
     return code.build();
   }
@@ -168,7 +157,7 @@ final class StatefulParser {
     return MethodSpec.methodBuilder("tryReadOption")
         .addParameter(token)
         .addCode(code.build())
-        .returns(generatedType.optionType()).build();
+        .returns(sourceElement.optionType()).build();
   }
 
   private MethodSpec buildMethod() {
@@ -219,8 +208,8 @@ final class StatefulParser {
 
   private CodeBlock streamExpressionOption(ConvertedParameter<NamedOption> option) {
     return CodeBlock.builder().add(
-        "$N.get($T.$N).stream()", optionParsersField,
-        generatedType.optionType(), option.enumConstant()).build();
+        "$N.get($T.$N).stream()", commonFields.optionParsers(),
+        sourceElement.optionType(), option.enumConstant()).build();
   }
 
   private CodeBlock streamExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {

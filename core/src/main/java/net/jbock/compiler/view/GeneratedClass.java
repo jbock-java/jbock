@@ -103,7 +103,7 @@ public final class GeneratedClass {
   }
 
   public TypeSpec define() {
-    TypeSpec.Builder spec = TypeSpec.classBuilder(generatedType.type())
+    TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass())
         .addMethod(parseMethod.define())
         .addMethod(parseOrExitMethod.define())
         .addMethod(withers.withTerminalWidthMethod())
