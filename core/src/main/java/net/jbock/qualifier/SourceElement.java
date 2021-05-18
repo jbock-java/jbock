@@ -36,18 +36,18 @@ public class SourceElement {
     this.optionType = optionType;
   }
 
-  public static SourceElement create(TypeElement sourceElement, ParserFlavour parserFlavour) {
-    Modifier[] accessModifiers = sourceElement.getModifiers().stream()
+  public static SourceElement create(TypeElement typeElement, ParserFlavour parserFlavour) {
+    Modifier[] accessModifiers = typeElement.getModifiers().stream()
         .filter(ALLOWED_MODIFIERS::contains)
         .toArray(Modifier[]::new);
-    String programName = parserFlavour.programName(sourceElement)
-        .orElseGet(() -> EnumName.create(sourceElement.getSimpleName().toString()).snake('-'));
-    String generatedClassName = String.join("_", ClassName.get(sourceElement).simpleNames()) + "_Parser";
-    ClassName generatedClass = ClassName.get(sourceElement)
+    String programName = parserFlavour.programName(typeElement)
+        .orElseGet(() -> EnumName.create(typeElement.getSimpleName().toString()).snake('-'));
+    String generatedClassName = String.join("_", ClassName.get(typeElement).simpleNames()) + "_Parser";
+    ClassName generatedClass = ClassName.get(typeElement)
         .topLevelClassName()
         .peerClass(generatedClassName);
     ClassName optionType = generatedClass.nestedClass("Option");
-    return new SourceElement(sourceElement, parserFlavour, accessModifiers,
+    return new SourceElement(typeElement, parserFlavour, accessModifiers,
         programName, generatedClass, optionType);
   }
 

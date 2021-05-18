@@ -6,7 +6,6 @@ import dagger.Reusable;
 import net.jbock.convert.Util;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.CommonFields;
-import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
@@ -14,20 +13,17 @@ import net.jbock.qualifier.SourceElement;
 import javax.lang.model.util.Elements;
 
 @Module
-class ContextModule {
+public class ContextModule {
 
   private final SourceElement sourceElement;
-  private final GeneratedType generatedType;
   private final Elements elements;
   private final Params params;
 
-  ContextModule(
+  public ContextModule(
       SourceElement sourceElement,
-      GeneratedType generatedType,
       Elements elements,
       Params params) {
     this.sourceElement = sourceElement;
-    this.generatedType = generatedType;
     this.elements = elements;
     this.params = params;
   }
@@ -35,11 +31,6 @@ class ContextModule {
   @Provides
   SourceElement sourceElement() {
     return sourceElement;
-  }
-
-  @Provides
-  GeneratedType generatedType() {
-    return generatedType;
   }
 
   @Reusable

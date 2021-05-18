@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableList;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
-import net.jbock.convert.Util;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -37,12 +36,6 @@ public interface ProcessingEnvironmentModule {
 
   @Reusable
   @Provides
-  static DescriptionBuilder descriptionBuilder(Elements elements) {
-    return new DescriptionBuilder(elements);
-  }
-
-  @Reusable
-  @Provides
   static Types types(ProcessingEnvironment processingEnvironment) {
     return processingEnvironment.getTypeUtils();
   }
@@ -63,11 +56,5 @@ public interface ProcessingEnvironmentModule {
         commandProcessingStep,
         mapperProcessingStep,
         parameterMethodProcessingStep);
-  }
-
-  @Reusable
-  @Provides
-  static Util util() {
-    return new Util();
   }
 }

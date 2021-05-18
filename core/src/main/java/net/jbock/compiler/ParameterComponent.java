@@ -10,7 +10,7 @@ import net.jbock.qualifier.SourceMethod;
 import java.util.List;
 
 @Component(modules = ParameterModule.class)
-interface ParameterComponent {
+public interface ParameterComponent {
 
   PositionalParamFactory positionalParameterFactory();
 

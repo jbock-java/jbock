@@ -4,7 +4,7 @@ import dagger.Component;
 import net.jbock.compiler.view.GeneratedClass;
 
 @Component(modules = ContextModule.class)
-interface ContextComponent {
+public interface ContextComponent {
 
   GeneratedClass generatedClass();
 

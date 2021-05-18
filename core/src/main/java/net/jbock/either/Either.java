@@ -22,16 +22,13 @@ public abstract class Either<L, R> {
     return new LeftOptional<>(left);
   }
 
-  abstract <R2> Either<L, R2> flatMapInternal(
-      Function<Right<L, R>, ? extends Either<? extends L, ? extends R2>> choice);
-
   public final <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper) {
-    return flatMapInternal(r -> right(rightMapper.apply(r.value())));
+    return flatMap(r -> right(rightMapper.apply(r)));
   }
 
   public final <R2> Either<L, R2> flatMap(
       Function<? super R, ? extends Either<? extends L, ? extends R2>> choice) {
-    return flatMapInternal(right -> choice.apply(right.value()));
+    return fold(Either::left, r -> narrow(choice.apply(r)));
   }
 
   public final <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper) {
@@ -40,10 +37,7 @@ public abstract class Either<L, R> {
 
   public final <L2> Either<L2, R> flatMapLeft(
       Function<? super L, ? extends Either<? extends L2, ? extends R>> choice) {
-    return narrow(flip().flatMapInternal(l -> {
-      Either<? extends L2, ? extends R> apply = choice.apply(l.value());
-      return apply.flip();
-    }).flip());
+    return narrow(flip().flatMap(l -> choice.apply(l).flip()).flip());
   }
 
   public final boolean isRight() {

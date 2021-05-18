@@ -14,20 +14,9 @@ final class Right<L, R> extends Either<L, R> {
     return new Right<>(value);
   }
 
-  R value() {
-    return value;
-  }
-
   @Override
   Either<R, L> flip() {
     return left(value);
-  }
-
-  @SuppressWarnings("unchecked")
-  @Override
-  <R2> Either<L, R2> flatMapInternal(
-      Function<Right<L, R>, ? extends Either<? extends L, ? extends R2>> choice) {
-    return (Either<L, R2>) choice.apply(this);
   }
 
   @Override

@@ -47,7 +47,7 @@ public class PositionalParamFactory {
     this.alreadyCreated = alreadyCreated;
   }
 
-  Either<ValidationFailure, ConvertedParameter<PositionalParameter>> createPositionalParam(int position) {
+  public Either<ValidationFailure, ConvertedParameter<PositionalParameter>> createPositionalParam(int position) {
     PositionalParameter positionalParameter = new PositionalParameter(
         sourceMethod,
         enumName,

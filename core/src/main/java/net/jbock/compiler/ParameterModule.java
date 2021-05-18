@@ -14,7 +14,6 @@ import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.matching.matcher.OptionalMatcher;
 import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.DescriptionKey;
-import net.jbock.qualifier.GeneratedType;
 import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
@@ -24,21 +23,18 @@ import javax.lang.model.util.Types;
 import java.util.List;
 
 @Module
-class ParameterModule {
+public class ParameterModule {
 
   private final AnnotationUtil annotationUtil = new AnnotationUtil();
 
-  private final GeneratedType generatedType;
   private final TypeTool tool;
   private final SourceElement sourceElement;
   private final DescriptionBuilder descriptionBuilder;
 
-  ParameterModule(
-      GeneratedType generatedType,
+  public ParameterModule(
       TypeTool tool,
       SourceElement sourceElement,
       DescriptionBuilder descriptionBuilder) {
-    this.generatedType = generatedType;
     this.tool = tool;
     this.sourceElement = sourceElement;
     this.descriptionBuilder = descriptionBuilder;
@@ -84,11 +80,6 @@ class ParameterModule {
       ListMatcher listMatcher,
       ExactMatcher exactMatcher) {
     return ImmutableList.of(optionalMatcher, listMatcher, exactMatcher);
-  }
-
-  @Provides
-  GeneratedType generatedType() {
-    return generatedType;
   }
 
   @Provides

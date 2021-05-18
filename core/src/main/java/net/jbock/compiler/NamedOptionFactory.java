@@ -59,7 +59,7 @@ public class NamedOptionFactory {
     this.alreadyCreated = alreadyCreated;
   }
 
-  Either<ValidationFailure, ConvertedParameter<NamedOption>> createNamedOption() {
+  public Either<ValidationFailure, ConvertedParameter<NamedOption>> createNamedOption() {
     return checkOptionNames()
         .map(this::createNamedOption)
         .flatMap(namedOption -> {

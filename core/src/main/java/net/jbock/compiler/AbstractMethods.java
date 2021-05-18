@@ -9,7 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-class AbstractMethods {
+public class AbstractMethods {
 
   final List<ExecutableElement> abstractMethods;
   final Map<Name, List<ExecutableElement>> nonabstractMethods;
@@ -24,7 +24,7 @@ class AbstractMethods {
     this.types = types;
   }
 
-  static AbstractMethods create(
+  public static AbstractMethods create(
       List<ExecutableElement> abstractMethods,
       List<ExecutableElement> nonabstractMethods,
       Types types) {
@@ -32,7 +32,7 @@ class AbstractMethods {
         .collect(Collectors.groupingBy(ExecutableElement::getSimpleName)), types);
   }
 
-  List<ExecutableElement> unimplementedAbstract() {
+  public List<ExecutableElement> unimplementedAbstract() {
     return abstractMethods.stream()
         .filter(abstractMethod -> nonabstractMethods.getOrDefault(abstractMethod.getSimpleName(), Collections.emptyList())
             .stream()

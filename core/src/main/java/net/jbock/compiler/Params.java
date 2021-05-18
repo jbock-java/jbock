@@ -18,7 +18,7 @@ public class Params {
     this.namedOptions = namedOptions;
   }
 
-  static Params create(List<ConvertedParameter<PositionalParameter>> positionalParams,
+  public static Params create(List<ConvertedParameter<PositionalParameter>> positionalParams,
                        List<ConvertedParameter<NamedOption>> namedOptions) {
     return new Params(positionalParams, namedOptions);
   }

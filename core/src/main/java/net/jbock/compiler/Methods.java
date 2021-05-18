@@ -6,7 +6,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
-class Methods {
+public class Methods {
 
   private static final Comparator<SourceMethod> POSITION_COMPARATOR =
       Comparator.comparingInt(m -> m.index().orElse(Integer.MAX_VALUE));
@@ -19,7 +19,7 @@ class Methods {
     this.options = options;
   }
 
-  static Methods create(List<SourceMethod> methods) {
+  public static Methods create(List<SourceMethod> methods) {
     List<SourceMethod> params = methods.stream()
         .filter(m -> m.style().isPositional())
         .sorted(POSITION_COMPARATOR)
@@ -30,11 +30,11 @@ class Methods {
     return new Methods(params, options);
   }
 
-  List<SourceMethod> params() {
+  public List<SourceMethod> params() {
     return params;
   }
 
-  List<SourceMethod> options() {
+  public List<SourceMethod> options() {
     return options;
   }
 }
