@@ -96,28 +96,37 @@ public class CommandProcessor {
   private Either<List<ValidationFailure>, Params> getParams() {
     ParameterModule module = new ParameterModule(tool, sourceElement, descriptionBuilder);
     return createMethods(sourceElement).flatMap(methods -> getPositionalParams(module, methods.params())
-        .flatMap(
-            positionalParams -> {
-              List<ValidationFailure> failures = new ArrayList<>();
-              ImmutableList.Builder<ConvertedParameter<NamedOption>> optionsBuilder = ImmutableList.builder();
-              for (SourceMethod sourceMethod : methods.options()) {
-                DaggerParameterComponent.builder()
-                    .module(module)
-                    .sourceMethod(sourceMethod)
-                    .alreadyCreatedParams(positionalParams)
-                    .alreadyCreatedOptions(optionsBuilder.build())
-                    .build()
-                    .namedOptionFactory()
-                    .createNamedOption()
-                    .accept(failures::add, optionsBuilder::add);
-              }
-              ImmutableList<ConvertedParameter<NamedOption>> namedOptions = optionsBuilder.build();
-              failures.addAll(checkDuplicateDescriptionKeys(namedOptions, positionalParams));
+        .flatMap(positionalParams -> getNamedOptions(module, methods.options(), positionalParams)
+            .flatMap(namedOptions -> {
+              List<ValidationFailure> failures = checkDuplicateDescriptionKeys(namedOptions, positionalParams);
               if (!failures.isEmpty()) {
                 return left(failures);
               }
               return right(Params.create(positionalParams, namedOptions));
-            }));
+            })));
+  }
+
+  private Either<List<ValidationFailure>, List<ConvertedParameter<NamedOption>>> getNamedOptions(
+      ParameterModule module,
+      List<SourceMethod> options,
+      List<ConvertedParameter<PositionalParameter>> positionalParams) {
+    List<ValidationFailure> failures = new ArrayList<>();
+    ImmutableList.Builder<ConvertedParameter<NamedOption>> optionsBuilder = ImmutableList.builder();
+    for (SourceMethod sourceMethod : options) {
+      DaggerParameterComponent.builder()
+          .module(module)
+          .sourceMethod(sourceMethod)
+          .alreadyCreatedParams(positionalParams)
+          .alreadyCreatedOptions(optionsBuilder.build())
+          .build()
+          .namedOptionFactory()
+          .createNamedOption()
+          .accept(failures::add, optionsBuilder::add);
+    }
+    if (failures.isEmpty()) {
+      return right(optionsBuilder.build());
+    }
+    return left(failures);
   }
 
   private Either<List<ValidationFailure>, List<ConvertedParameter<PositionalParameter>>> getPositionalParams(
