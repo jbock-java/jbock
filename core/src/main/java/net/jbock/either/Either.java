@@ -34,16 +34,16 @@ public abstract class Either<L, R> {
     return flatMapInternal(right -> choice.apply(right.value()));
   }
 
+  public final <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper) {
+    return narrow(flip().map(leftMapper).flip());
+  }
+
   public final <L2> Either<L2, R> flatMapLeft(
       Function<? super L, ? extends Either<? extends L2, ? extends R>> choice) {
     return narrow(flip().flatMapInternal(l -> {
       Either<? extends L2, ? extends R> apply = choice.apply(l.value());
       return apply.flip();
     }).flip());
-  }
-
-  public final <L2> Either<L2, R> mapLeft(Function<? super L, ? extends L2> leftMapper) {
-    return narrow(flip().map(leftMapper).flip());
   }
 
   public final boolean isRight() {
