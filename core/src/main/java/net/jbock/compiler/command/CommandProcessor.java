@@ -78,7 +78,7 @@ public class CommandProcessor {
     return createMethods()
         .flatMap(this::getPositionalParams)
         .flatMap(this::getNamedOptions)
-        .map(params -> new ContextModule(sourceElement, elements, params))
+        .map(this::contextModule)
         .map(module -> DaggerContextComponent.factory()
             .create(module)
             .generatedClass()
@@ -206,5 +206,9 @@ public class CommandProcessor {
 
   private ParameterModule parameterModule() {
     return new ParameterModule(tool, sourceElement, descriptionBuilder);
+  }
+
+  private ContextModule contextModule(Params params) {
+    return new ContextModule(sourceElement, elements, params);
   }
 }
