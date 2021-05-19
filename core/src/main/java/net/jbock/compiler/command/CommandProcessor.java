@@ -15,9 +15,9 @@ import net.jbock.compiler.DescriptionBuilder;
 import net.jbock.compiler.Methods;
 import net.jbock.compiler.ParameterModule;
 import net.jbock.compiler.Params;
+import net.jbock.compiler.ParamsFactory;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.ValidationFailure;
-import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.compiler.parameter.PositionalParameter;
@@ -39,11 +39,9 @@ import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -62,6 +60,7 @@ public class CommandProcessor {
   private final Types types;
   private final TypeTool tool;
   private final DescriptionBuilder descriptionBuilder;
+  private final ParamsFactory paramsFactory;
 
   @Inject
   CommandProcessor(
@@ -70,13 +69,14 @@ public class CommandProcessor {
       Util util,
       Types types,
       TypeTool tool,
-      DescriptionBuilder descriptionBuilder) {
+      DescriptionBuilder descriptionBuilder, ParamsFactory paramsFactory) {
     this.sourceElement = sourceElement;
     this.elements = elements;
     this.util = util;
     this.types = types;
     this.tool = tool;
     this.descriptionBuilder = descriptionBuilder;
+    this.paramsFactory = paramsFactory;
   }
 
   public Either<List<ValidationFailure>, TypeSpec> generate() {
@@ -94,29 +94,20 @@ public class CommandProcessor {
   }
 
   private Either<List<ValidationFailure>, Params> getParams() {
-    ParameterModule module = new ParameterModule(tool, sourceElement, descriptionBuilder);
-    return createMethods(sourceElement).flatMap(methods -> getPositionalParams(module, methods.params())
-        .flatMap(positionalParams -> getNamedOptions(module, methods.options(), positionalParams)
-            .flatMap(namedOptions -> {
-              List<ValidationFailure> failures = checkDuplicateDescriptionKeys(namedOptions, positionalParams);
-              if (!failures.isEmpty()) {
-                return left(failures);
-              }
-              return right(Params.create(positionalParams, namedOptions));
-            })));
+    return createMethods(sourceElement)
+        .flatMap(this::getPositionalParams)
+        .flatMap(this::getNamedOptions);
   }
 
-  private Either<List<ValidationFailure>, List<ConvertedParameter<NamedOption>>> getNamedOptions(
-      ParameterModule module,
-      List<SourceMethod> options,
-      List<ConvertedParameter<PositionalParameter>> positionalParams) {
+  private Either<List<ValidationFailure>, Params> getNamedOptions(IntermediateResult intermediateResult) {
+    ParameterModule module = new ParameterModule(tool, sourceElement, descriptionBuilder);
     List<ValidationFailure> failures = new ArrayList<>();
     ImmutableList.Builder<ConvertedParameter<NamedOption>> optionsBuilder = ImmutableList.builder();
-    for (SourceMethod sourceMethod : options) {
+    for (SourceMethod sourceMethod : intermediateResult.options()) {
       DaggerParameterComponent.builder()
           .module(module)
           .sourceMethod(sourceMethod)
-          .alreadyCreatedParams(positionalParams)
+          .alreadyCreatedParams(intermediateResult.positionalParameters())
           .alreadyCreatedOptions(optionsBuilder.build())
           .build()
           .namedOptionFactory()
@@ -124,17 +115,17 @@ public class CommandProcessor {
           .accept(failures::add, optionsBuilder::add);
     }
     if (failures.isEmpty()) {
-      return right(optionsBuilder.build());
+      return paramsFactory.create(intermediateResult.positionalParameters(), optionsBuilder.build());
     }
     return left(failures);
   }
 
-  private Either<List<ValidationFailure>, List<ConvertedParameter<PositionalParameter>>> getPositionalParams(
-      ParameterModule module, List<SourceMethod> positionalParameters) {
+  private Either<List<ValidationFailure>, IntermediateResult> getPositionalParams(Methods methods) {
+    ParameterModule module = new ParameterModule(tool, sourceElement, descriptionBuilder);
     ImmutableList.Builder<ConvertedParameter<PositionalParameter>> positionalParams =
         ImmutableList.builder();
     List<ValidationFailure> failures = new ArrayList<>();
-    for (SourceMethod sourceMethod : positionalParameters) {
+    for (SourceMethod sourceMethod : methods.params()) {
       DaggerParameterComponent.builder()
           .module(module)
           .sourceMethod(sourceMethod)
@@ -142,42 +133,20 @@ public class CommandProcessor {
           .alreadyCreatedOptions(ImmutableList.of())
           .build()
           .positionalParameterFactory()
-          .createPositionalParam(sourceMethod.index().orElse(positionalParameters.size() - 1))
+          .createPositionalParam(sourceMethod.index().orElse(methods.params().size() - 1))
           .accept(failures::add, positionalParams::add);
     }
-    if (sourceElement.isSuperCommand() && positionalParameters.isEmpty()) {
+    if (sourceElement.isSuperCommand() && methods.params().isEmpty()) {
       String message = "in a @" + SuperCommand.class.getSimpleName() +
           ", at least one @" + Parameter.class.getSimpleName() + " must be defined";
       failures.add(sourceElement.fail(message));
     }
-    List<ConvertedParameter<PositionalParameter>> r = positionalParams.build();
-    failures.addAll(validatePositions(r));
+    List<ConvertedParameter<PositionalParameter>> result = positionalParams.build();
+    failures.addAll(validatePositions(result));
     if (failures.isEmpty()) {
-      return right(r);
+      return right(IntermediateResult.create(methods.options(), result));
     }
     return left(failures);
-  }
-
-  private List<ValidationFailure> checkDuplicateDescriptionKeys(
-      List<ConvertedParameter<NamedOption>> namedOptions,
-      List<ConvertedParameter<PositionalParameter>> positionalParams) {
-    List<ValidationFailure> failures = new ArrayList<>();
-    List<ConvertedParameter<? extends AbstractParameter>> abstractParameters =
-        util.concat(namedOptions, positionalParams);
-    Set<String> keys = new HashSet<>();
-    sourceElement.descriptionKey().ifPresent(keys::add);
-    for (ConvertedParameter<? extends AbstractParameter> c : abstractParameters) {
-      AbstractParameter p = c.parameter();
-      String key = p.descriptionKey().orElse("");
-      if (key.isEmpty()) {
-        continue;
-      }
-      if (!keys.add(key)) {
-        String message = "duplicate description key: " + key;
-        failures.add(p.fail(message));
-      }
-    }
-    return failures;
   }
 
   private static List<ValidationFailure> validatePositions(List<ConvertedParameter<PositionalParameter>> params) {

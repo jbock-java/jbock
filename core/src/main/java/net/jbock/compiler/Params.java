@@ -11,16 +11,11 @@ public class Params {
   private final List<ConvertedParameter<PositionalParameter>> positionalParams;
   private final List<ConvertedParameter<NamedOption>> namedOptions;
 
-  private Params(
+  Params(
       List<ConvertedParameter<PositionalParameter>> positionalParams,
       List<ConvertedParameter<NamedOption>> namedOptions) {
     this.positionalParams = positionalParams;
     this.namedOptions = namedOptions;
-  }
-
-  public static Params create(List<ConvertedParameter<PositionalParameter>> positionalParams,
-                       List<ConvertedParameter<NamedOption>> namedOptions) {
-    return new Params(positionalParams, namedOptions);
   }
 
   public List<ConvertedParameter<PositionalParameter>> positionalParams() {
