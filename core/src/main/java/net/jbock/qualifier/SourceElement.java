@@ -51,7 +51,6 @@ public class SourceElement {
         programName, generatedClass, optionType);
   }
 
-
   public TypeElement element() {
     return sourceElement;
   }

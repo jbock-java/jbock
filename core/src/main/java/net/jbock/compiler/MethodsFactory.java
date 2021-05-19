@@ -1,15 +1,19 @@
 package net.jbock.compiler;
 
 import net.jbock.Parameter;
+import net.jbock.Parameters;
 import net.jbock.SuperCommand;
+import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
+import javax.lang.model.element.ExecutableElement;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static net.jbock.either.Either.left;
@@ -27,7 +31,16 @@ public class MethodsFactory {
     this.sourceElement = sourceElement;
   }
 
-  public Either<List<ValidationFailure>, Methods> create(List<SourceMethod> methods) {
+  public Either<List<ValidationFailure>, Methods> create(List<ExecutableElement> sourceMethods) {
+    List<SourceMethod> methods = sourceMethods.stream()
+        .map(SourceMethod::create)
+        .collect(Collectors.toList());
+    return Either.ofLeft(validateDuplicateParametersAnnotation(methods)).orRight(null)
+        .mapLeft(Collections::singletonList)
+        .flatMap(nothing -> createInternal(methods));
+  }
+
+  private Either<List<ValidationFailure>, Methods> createInternal(List<SourceMethod> methods) {
     List<SourceMethod> params = methods.stream()
         .filter(m -> m.style().isPositional())
         .sorted(POSITION_COMPARATOR)
@@ -41,5 +54,16 @@ public class MethodsFactory {
       return left(Collections.singletonList(sourceElement.fail(message)));
     }
     return right(new Methods(params, options));
+  }
+
+  private Optional<ValidationFailure> validateDuplicateParametersAnnotation(List<SourceMethod> sourceMethods) {
+    List<SourceMethod> parametersMethods = sourceMethods.stream()
+        .filter(m -> m.style() == ParameterStyle.PARAMETERS)
+        .collect(Collectors.toList());
+    if (parametersMethods.size() >= 2) {
+      String message = "duplicate @" + Parameters.class.getSimpleName() + " annotation";
+      return Optional.of(sourceMethods.get(1).fail(message));
+    }
+    return Optional.empty();
   }
 }

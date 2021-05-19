@@ -8,18 +8,26 @@ import net.jbock.compiler.command.CommandComponent;
 import net.jbock.compiler.command.DaggerCommandComponent;
 import net.jbock.compiler.command.SourceFileGenerator;
 import net.jbock.convert.Util;
+import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
+import javax.lang.model.element.TypeElement;
+import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
@@ -54,11 +62,9 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
     elementsByAnnotation.forEach((annotationName, element) -> {
       ParserFlavour parserFlavour = ParserFlavour.forAnnotationName(annotationName);
-      ElementFilter.typesIn(Collections.singletonList(element))
-          .forEach(typeElement -> {
-            SourceElement sourceElement = SourceElement.create(typeElement, parserFlavour);
-            processSourceElement(sourceElement);
-          });
+      ElementFilter.typesIn(Collections.singletonList(element)).stream()
+          .map(typeElement -> validateSourceElement(typeElement, parserFlavour))
+          .forEach(either -> either.accept(this::printFailures, this::processSourceElement));
     });
     return Collections.emptySet();
   }
@@ -75,6 +81,27 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     SourceFileGenerator sourceFileGenerator = component.sourceFileGenerator();
     component.processor().generate()
         .accept(this::printFailures, sourceFileGenerator::write);
+  }
+
+  private Either<List<ValidationFailure>, SourceElement> validateSourceElement(
+      TypeElement element,
+      ParserFlavour parserFlavour) {
+    List<String> failures = new ArrayList<>();
+    util.commonTypeChecks(element)
+        .map(s -> "command " + s)
+        .ifPresent(failures::add);
+    util.assertNoDuplicateAnnotations(element, Command.class, SuperCommand.class)
+        .ifPresent(failures::add);
+    List<? extends TypeMirror> interfaces = element.getInterfaces();
+    if (!interfaces.isEmpty()) {
+      failures.add("command cannot implement " + interfaces.get(0));
+    }
+    if (!failures.isEmpty()) {
+      return left(failures.stream()
+          .map(message -> new ValidationFailure(message, element))
+          .collect(Collectors.toList()));
+    }
+    return right(SourceElement.create(element, parserFlavour));
   }
 
   private void printFailures(java.util.List<ValidationFailure> failures) {
