@@ -75,7 +75,7 @@ public class CommandProcessor {
   }
 
   public Either<List<ValidationFailure>, TypeSpec> generate() {
-    return createMethods(sourceElement)
+    return createMethods()
         .flatMap(this::getPositionalParams)
         .flatMap(this::getNamedOptions)
         .map(params -> new ContextModule(sourceElement, elements, params))
@@ -125,24 +125,33 @@ public class CommandProcessor {
     return IntermediateResult.create(methods.options(), positionalParams);
   }
 
-  private Either<List<ValidationFailure>, Methods> createMethods(SourceElement sourceElement) {
+  private Either<List<ValidationFailure>, Methods> createMethods() {
     return findRelevantMethods(sourceElement.element().asType())
-        .flatMap(sourceMethods -> {
-          List<ValidationFailure> failures = new ArrayList<>();
-          for (ExecutableElement sourceMethod : sourceMethods) {
-            parameterMethodValidator.validateParameterMethod(sourceMethod)
-                .map(msg -> new ValidationFailure(msg, sourceMethod))
-                .ifPresent(failures::add);
-          }
-          if (sourceMethods.isEmpty()) { // javapoet #739
-            failures.add(sourceElement.fail("expecting at least one abstract method"));
-          }
-          if (!failures.isEmpty()) {
-            return left(failures);
-          }
-          return right(sourceMethods);
-        })
+        .flatMap(this::validateAtLeastOneAbstractMethod)
+        .flatMap(this::validateParameterMethods)
         .flatMap(methodsFactory::create);
+  }
+
+  private Either<List<ValidationFailure>, List<ExecutableElement>> validateParameterMethods(
+      List<ExecutableElement> sourceMethods) {
+    List<ValidationFailure> failures = new ArrayList<>();
+    for (ExecutableElement sourceMethod : sourceMethods) {
+      parameterMethodValidator.validateParameterMethod(sourceMethod)
+          .map(msg -> new ValidationFailure(msg, sourceMethod))
+          .ifPresent(failures::add);
+    }
+    if (!failures.isEmpty()) {
+      return left(failures);
+    }
+    return right(sourceMethods);
+  }
+
+  private Either<List<ValidationFailure>, List<ExecutableElement>> validateAtLeastOneAbstractMethod(
+      List<ExecutableElement> sourceMethods) {
+    if (sourceMethods.isEmpty()) { // javapoet #739
+      return left(Collections.singletonList(sourceElement.fail("expecting at least one abstract method")));
+    }
+    return right(sourceMethods);
   }
 
   private Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantMethods(TypeMirror sourceElement) {
