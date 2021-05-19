@@ -13,6 +13,7 @@ import net.jbock.compiler.DaggerContextComponent;
 import net.jbock.compiler.DaggerParameterComponent;
 import net.jbock.compiler.DescriptionBuilder;
 import net.jbock.compiler.Methods;
+import net.jbock.compiler.MethodsFactory;
 import net.jbock.compiler.ParameterModule;
 import net.jbock.compiler.Params;
 import net.jbock.compiler.ParamsFactory;
@@ -38,7 +39,6 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -61,6 +61,7 @@ public class CommandProcessor {
   private final TypeTool tool;
   private final DescriptionBuilder descriptionBuilder;
   private final ParamsFactory paramsFactory;
+  private final MethodsFactory methodsFactory;
 
   @Inject
   CommandProcessor(
@@ -69,7 +70,9 @@ public class CommandProcessor {
       Util util,
       Types types,
       TypeTool tool,
-      DescriptionBuilder descriptionBuilder, ParamsFactory paramsFactory) {
+      DescriptionBuilder descriptionBuilder,
+      ParamsFactory paramsFactory,
+      MethodsFactory methodsFactory) {
     this.sourceElement = sourceElement;
     this.elements = elements;
     this.util = util;
@@ -77,6 +80,7 @@ public class CommandProcessor {
     this.tool = tool;
     this.descriptionBuilder = descriptionBuilder;
     this.paramsFactory = paramsFactory;
+    this.methodsFactory = methodsFactory;
   }
 
   public Either<List<ValidationFailure>, TypeSpec> generate() {
@@ -100,69 +104,43 @@ public class CommandProcessor {
   }
 
   private Either<List<ValidationFailure>, Params> getNamedOptions(IntermediateResult intermediateResult) {
-    ParameterModule module = new ParameterModule(tool, sourceElement, descriptionBuilder);
     List<ValidationFailure> failures = new ArrayList<>();
-    ImmutableList.Builder<ConvertedParameter<NamedOption>> optionsBuilder = ImmutableList.builder();
+    List<ConvertedParameter<NamedOption>> optionsBuilder = new ArrayList<>(intermediateResult.options().size());
     for (SourceMethod sourceMethod : intermediateResult.options()) {
       DaggerParameterComponent.builder()
-          .module(module)
+          .module(parameterModule())
           .sourceMethod(sourceMethod)
           .alreadyCreatedParams(intermediateResult.positionalParameters())
-          .alreadyCreatedOptions(optionsBuilder.build())
+          .alreadyCreatedOptions(optionsBuilder)
           .build()
           .namedOptionFactory()
           .createNamedOption()
           .accept(failures::add, optionsBuilder::add);
     }
     if (failures.isEmpty()) {
-      return paramsFactory.create(intermediateResult.positionalParameters(), optionsBuilder.build());
+      return paramsFactory.create(intermediateResult.positionalParameters(), optionsBuilder);
     }
     return left(failures);
   }
 
   private Either<List<ValidationFailure>, IntermediateResult> getPositionalParams(Methods methods) {
-    ParameterModule module = new ParameterModule(tool, sourceElement, descriptionBuilder);
-    ImmutableList.Builder<ConvertedParameter<PositionalParameter>> positionalParams =
-        ImmutableList.builder();
+    List<ConvertedParameter<PositionalParameter>> positionalParams = new ArrayList<>(methods.params().size());
     List<ValidationFailure> failures = new ArrayList<>();
     for (SourceMethod sourceMethod : methods.params()) {
       DaggerParameterComponent.builder()
-          .module(module)
+          .module(parameterModule())
           .sourceMethod(sourceMethod)
-          .alreadyCreatedParams(positionalParams.build())
+          .alreadyCreatedParams(positionalParams)
           .alreadyCreatedOptions(ImmutableList.of())
           .build()
           .positionalParameterFactory()
           .createPositionalParam(sourceMethod.index().orElse(methods.params().size() - 1))
           .accept(failures::add, positionalParams::add);
     }
-    if (sourceElement.isSuperCommand() && methods.params().isEmpty()) {
-      String message = "in a @" + SuperCommand.class.getSimpleName() +
-          ", at least one @" + Parameter.class.getSimpleName() + " must be defined";
-      failures.add(sourceElement.fail(message));
-    }
-    List<ConvertedParameter<PositionalParameter>> result = positionalParams.build();
-    failures.addAll(validatePositions(result));
     if (failures.isEmpty()) {
-      return right(IntermediateResult.create(methods.options(), result));
+      return IntermediateResult.create(methods.options(), positionalParams);
     }
     return left(failures);
-  }
-
-  private static List<ValidationFailure> validatePositions(List<ConvertedParameter<PositionalParameter>> params) {
-    List<ConvertedParameter<PositionalParameter>> sorted = params.stream()
-        .sorted(Comparator.comparing(c -> c.parameter().position()))
-        .collect(Collectors.toList());
-    List<ValidationFailure> result = new ArrayList<>();
-    for (int i = 0; i < sorted.size(); i++) {
-      ConvertedParameter<PositionalParameter> c = sorted.get(i);
-      PositionalParameter p = c.parameter();
-      if (p.position() != i) {
-        String message = "Position " + p.position() + " is not available. Suggested position: " + i;
-        result.add(p.fail(message));
-      }
-    }
-    return result;
   }
 
   private Either<List<ValidationFailure>, Methods> createMethods(SourceElement sourceElement) {
@@ -182,9 +160,9 @@ public class CommandProcessor {
       List<SourceMethod> methods = sourceMethods.stream()
           .map(SourceMethod::create)
           .collect(Collectors.toList());
-      return Either.ofLeft(validateDuplicateParametersAnnotation(methods))
-          .orRight(Methods.create(methods))
-          .mapLeft(Collections::singletonList);
+      return Either.ofLeft(validateDuplicateParametersAnnotation(methods)).orRight(null)
+          .mapLeft(Collections::singletonList)
+          .flatMap(nothing -> methodsFactory.create(methods));
     });
   }
 
@@ -311,5 +289,9 @@ public class CommandProcessor {
       }
     }
     return false;
+  }
+
+  private ParameterModule parameterModule() {
+    return new ParameterModule(tool, sourceElement, descriptionBuilder);
   }
 }
