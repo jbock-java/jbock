@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.SuperCommand;
+import net.jbock.compiler.command.ParameterMethodValidator;
 import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
@@ -10,10 +11,10 @@ import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static net.jbock.either.Either.left;
@@ -25,22 +26,27 @@ public class MethodsFactory {
       Comparator.comparingInt(m -> m.index().orElse(Integer.MAX_VALUE));
 
   private final SourceElement sourceElement;
+  private final ParameterMethodValidator parameterMethodValidator;
 
   @Inject
-  MethodsFactory(SourceElement sourceElement) {
+  MethodsFactory(SourceElement sourceElement, ParameterMethodValidator parameterMethodValidator) {
     this.sourceElement = sourceElement;
+    this.parameterMethodValidator = parameterMethodValidator;
   }
 
   public Either<List<ValidationFailure>, Methods> create(List<ExecutableElement> sourceMethods) {
-    List<SourceMethod> methods = sourceMethods.stream()
-        .map(SourceMethod::create)
-        .collect(Collectors.toList());
-    return Either.ofLeft(validateDuplicateParametersAnnotation(methods)).orRight(null)
-        .mapLeft(Collections::singletonList)
-        .flatMap(nothing -> createInternal(methods));
+    return Either.<List<ValidationFailure>, List<ExecutableElement>>right(sourceMethods)
+        .flatMap(this::validateAtLeastOneAbstractMethod)
+        .flatMap(this::validateParameterMethods)
+        .map(methods -> methods.stream()
+            .map(SourceMethod::create)
+            .collect(Collectors.toList()))
+        .flatMap(this::validateDuplicateParametersAnnotation)
+        .flatMap(this::validateParameterSuperCommand);
   }
 
-  private Either<List<ValidationFailure>, Methods> createInternal(List<SourceMethod> methods) {
+  private Either<List<ValidationFailure>, Methods> validateParameterSuperCommand(
+      List<SourceMethod> methods) {
     List<SourceMethod> params = methods.stream()
         .filter(m -> m.style().isPositional())
         .sorted(POSITION_COMPARATOR)
@@ -56,14 +62,37 @@ public class MethodsFactory {
     return right(new Methods(params, options));
   }
 
-  private Optional<ValidationFailure> validateDuplicateParametersAnnotation(List<SourceMethod> sourceMethods) {
+  private Either<List<ValidationFailure>, List<SourceMethod>> validateDuplicateParametersAnnotation(
+      List<SourceMethod> sourceMethods) {
     List<SourceMethod> parametersMethods = sourceMethods.stream()
         .filter(m -> m.style() == ParameterStyle.PARAMETERS)
         .collect(Collectors.toList());
     if (parametersMethods.size() >= 2) {
       String message = "duplicate @" + Parameters.class.getSimpleName() + " annotation";
-      return Optional.of(sourceMethods.get(1).fail(message));
+      return left(Collections.singletonList(sourceMethods.get(1).fail(message)));
     }
-    return Optional.empty();
+    return right(sourceMethods);
+  }
+
+  private Either<List<ValidationFailure>, List<ExecutableElement>> validateParameterMethods(
+      List<ExecutableElement> sourceMethods) {
+    List<ValidationFailure> failures = new ArrayList<>();
+    for (ExecutableElement sourceMethod : sourceMethods) {
+      parameterMethodValidator.validateParameterMethod(sourceMethod)
+          .map(msg -> new ValidationFailure(msg, sourceMethod))
+          .ifPresent(failures::add);
+    }
+    if (!failures.isEmpty()) {
+      return left(failures);
+    }
+    return right(sourceMethods);
+  }
+
+  private Either<List<ValidationFailure>, List<ExecutableElement>> validateAtLeastOneAbstractMethod(
+      List<ExecutableElement> sourceMethods) {
+    if (sourceMethods.isEmpty()) { // javapoet #739
+      return left(Collections.singletonList(sourceElement.fail("expecting at least one abstract method")));
+    }
+    return right(sourceMethods);
   }
 }

@@ -29,7 +29,7 @@ public class ParameterMethodValidator {
     this.util = util;
   }
 
-  Optional<String> validateParameterMethod(ExecutableElement sourceMethod) {
+  public Optional<String> validateParameterMethod(ExecutableElement sourceMethod) {
     Optional<String> noAnnotationsError = util.assertAtLeastOneAnnotation(sourceMethod,
         Option.class, Parameter.class, Parameters.class);
     if (noAnnotationsError.isPresent()) {
