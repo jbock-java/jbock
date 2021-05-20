@@ -27,21 +27,21 @@ public class MethodsFactory {
 
   private final SourceElement sourceElement;
   private final ParameterMethodValidator parameterMethodValidator;
-  private final AbstractMethodsFinder abstractMethodsFactory;
+  private final AbstractMethodsFinder abstractMethodsFinder;
 
   @Inject
   MethodsFactory(
       SourceElement sourceElement,
       ParameterMethodValidator parameterMethodValidator,
-      AbstractMethodsFinder abstractMethodsFactory) {
+      AbstractMethodsFinder abstractMethodsFinder) {
     this.sourceElement = sourceElement;
     this.parameterMethodValidator = parameterMethodValidator;
-    this.abstractMethodsFactory = abstractMethodsFactory;
+    this.abstractMethodsFinder = abstractMethodsFinder;
   }
 
   public Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
-    return abstractMethodsFactory.findRelevantMethods()
-        .flatMap(this::validateAtLeastOneAbstractMethod)
+    return abstractMethodsFinder.findAbstractMethods()
+        .flatMap(this::checkAtLeastOneAbstractMethod)
         .flatMap(this::validateParameterMethods)
         .map(methods -> methods.stream()
             .map(SourceMethod::create)
@@ -93,10 +93,12 @@ public class MethodsFactory {
     return right(sourceMethods);
   }
 
-  private Either<List<ValidationFailure>, List<ExecutableElement>> validateAtLeastOneAbstractMethod(
+  private Either<List<ValidationFailure>, List<ExecutableElement>> checkAtLeastOneAbstractMethod(
       List<ExecutableElement> sourceMethods) {
     if (sourceMethods.isEmpty()) { // javapoet #739
-      return left(Collections.singletonList(sourceElement.fail("expecting at least one abstract method")));
+      String message = "expecting at least one abstract method";
+      ValidationFailure failure = sourceElement.fail(message);
+      return left(Collections.singletonList(failure));
     }
     return right(sourceMethods);
   }
