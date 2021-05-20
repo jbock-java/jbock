@@ -8,6 +8,7 @@ import dagger.Reusable;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
+import javax.lang.model.element.Modifier;
 
 import static com.squareup.javapoet.MethodSpec.constructorBuilder;
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
@@ -30,7 +31,7 @@ public class ParseResultWithRest {
     FieldSpec result = FieldSpec.builder(sourceElement.typeName(), "result", PRIVATE, FINAL).build();
     FieldSpec rest = FieldSpec.builder(STRING_ARRAY, "rest", PRIVATE, FINAL).build();
     return TypeSpec.classBuilder(resultWithRestType)
-        .addModifiers(sourceElement.accessModifiers())
+        .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
         .addModifiers(STATIC, FINAL)
         .addField(result)
         .addField(rest)

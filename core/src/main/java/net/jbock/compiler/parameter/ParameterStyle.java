@@ -3,7 +3,7 @@ package net.jbock.compiler.parameter;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
-import net.jbock.compiler.DescriptionBuilder;
+import net.jbock.compiler.Descriptions;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Elements;
@@ -19,12 +19,12 @@ public enum ParameterStyle {
   OPTION(Option.class) {
     @Override
     public Optional<String> descriptionKey(ExecutableElement method) {
-      return DescriptionBuilder.optionalString(get(method).descriptionKey());
+      return Descriptions.optionalString(get(method).descriptionKey());
     }
 
     @Override
     public Optional<String> paramLabel(ExecutableElement method) {
-      return DescriptionBuilder.optionalString(get(method).paramLabel());
+      return Descriptions.optionalString(get(method).paramLabel());
     }
 
     @Override
@@ -45,7 +45,7 @@ public enum ParameterStyle {
     @Override
     public List<String> description(ExecutableElement method, Elements elements) {
       String[] description = get(method).description();
-      return getDescription(method, elements, description);
+      return Descriptions.getDescription(method, elements, description);
     }
 
     private Option get(ExecutableElement method) {
@@ -54,12 +54,12 @@ public enum ParameterStyle {
   }, PARAMETER(Parameter.class) {
     @Override
     public Optional<String> descriptionKey(ExecutableElement method) {
-      return DescriptionBuilder.optionalString(get(method).descriptionKey());
+      return Descriptions.optionalString(get(method).descriptionKey());
     }
 
     @Override
     public Optional<String> paramLabel(ExecutableElement method) {
-      return DescriptionBuilder.optionalString(get(method).paramLabel());
+      return Descriptions.optionalString(get(method).paramLabel());
     }
 
     @Override
@@ -80,7 +80,7 @@ public enum ParameterStyle {
     @Override
     public List<String> description(ExecutableElement method, Elements elements) {
       String[] description = get(method).description();
-      return getDescription(method, elements, description);
+      return Descriptions.getDescription(method, elements, description);
     }
 
     private Parameter get(ExecutableElement method) {
@@ -89,12 +89,12 @@ public enum ParameterStyle {
   }, PARAMETERS(Parameters.class) {
     @Override
     public Optional<String> descriptionKey(ExecutableElement method) {
-      return DescriptionBuilder.optionalString(get(method).descriptionKey());
+      return Descriptions.optionalString(get(method).descriptionKey());
     }
 
     @Override
     public Optional<String> paramLabel(ExecutableElement method) {
-      return DescriptionBuilder.optionalString(get(method).paramLabel());
+      return Descriptions.optionalString(get(method).paramLabel());
     }
 
     @Override
@@ -115,23 +115,13 @@ public enum ParameterStyle {
     @Override
     public List<String> description(ExecutableElement method, Elements elements) {
       String[] description = get(method).description();
-      return getDescription(method, elements, description);
+      return Descriptions.getDescription(method, elements, description);
     }
 
     private Parameters get(ExecutableElement method) {
       return method.getAnnotation(Parameters.class);
     }
   };
-
-  private static List<String> getDescription(
-      ExecutableElement method,
-      Elements elements,
-      String[] description) {
-    if (description.length == 0) {
-      return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(method));
-    }
-    return Arrays.asList(description);
-  }
 
   private final Class<? extends Annotation> annotationClass;
 

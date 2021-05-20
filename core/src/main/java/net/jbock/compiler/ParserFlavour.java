@@ -6,7 +6,6 @@ import net.jbock.SuperCommand;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -20,20 +19,18 @@ public enum ParserFlavour {
 
     @Override
     public Optional<String> programName(TypeElement sourceElement) {
-      String name = get(sourceElement).name();
-      return name.isEmpty() ? Optional.empty() : Optional.of(name);
+      return Descriptions.optionalString(get(sourceElement).name());
     }
 
     @Override
     public Optional<String> descriptionKey(TypeElement sourceElement) {
-      String key = get(sourceElement).descriptionKey();
-      return key.isEmpty() ? Optional.empty() : Optional.of(key);
+      return Descriptions.optionalString(get(sourceElement).descriptionKey());
     }
 
     @Override
     public List<String> description(TypeElement sourceElement, Elements elements) {
       String[] description = get(sourceElement).description();
-      return getDescription(sourceElement, elements, description);
+      return Descriptions.getDescription(sourceElement, elements, description);
     }
 
     @Override
@@ -54,20 +51,18 @@ public enum ParserFlavour {
 
     @Override
     public Optional<String> programName(TypeElement sourceElement) {
-      String name = get(sourceElement).name();
-      return name.isEmpty() ? Optional.empty() : Optional.of(name);
+      return Descriptions.optionalString(get(sourceElement).name());
     }
 
     @Override
     public Optional<String> descriptionKey(TypeElement sourceElement) {
-      String key = get(sourceElement).descriptionKey();
-      return key.isEmpty() ? Optional.empty() : Optional.of(key);
+      return Descriptions.optionalString(get(sourceElement).descriptionKey());
     }
 
     @Override
     public List<String> description(TypeElement sourceElement, Elements elements) {
       String[] description = get(sourceElement).description();
-      return getDescription(sourceElement, elements, description);
+      return Descriptions.getDescription(sourceElement, elements, description);
     }
 
     @Override
@@ -79,16 +74,6 @@ public enum ParserFlavour {
       return sourceElement.getAnnotation(SuperCommand.class);
     }
   };
-
-  private static List<String> getDescription(
-      TypeElement sourceElement,
-      Elements elements,
-      String[] description) {
-    if (description.length == 0) {
-      return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(sourceElement));
-    }
-    return Arrays.asList(description);
-  }
 
   private final String className;
 

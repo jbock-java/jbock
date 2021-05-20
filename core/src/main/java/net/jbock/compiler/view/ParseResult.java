@@ -10,6 +10,7 @@ import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
+import javax.lang.model.element.Modifier;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -45,7 +46,7 @@ public class ParseResult {
     TypeSpec.Builder spec = classBuilder(generatedTypes.parseResultType())
         .addMethod(constructorBuilder().addModifiers(PRIVATE).build())
         .addModifiers(ABSTRACT, STATIC)
-        .addModifiers(sourceElement.accessModifiers());
+        .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]));
     List<TypeSpec> result = new ArrayList<>();
     result.add(spec.build());
     result.add(defineErrorResult());
@@ -60,7 +61,7 @@ public class ParseResult {
     return classBuilder(helpRequestedType)
         .superclass(generatedTypes.parseResultType())
         .addModifiers(STATIC, FINAL)
-        .addModifiers(sourceElement.accessModifiers())
+        .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
         .build();
   }
 
@@ -76,7 +77,7 @@ public class ParseResult {
             .addStatement("this.$N = $N", fieldError, paramError)
             .build())
         .addModifiers(STATIC, FINAL)
-        .addModifiers(sourceElement.accessModifiers())
+        .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
         .addMethod(methodBuilder("getError")
             .addStatement("return $N", fieldError)
             .addModifiers(sourceElement.accessModifiers())
@@ -96,7 +97,7 @@ public class ParseResult {
             .addStatement("this.$N = $N", result, paramResult)
             .build())
         .addModifiers(STATIC, FINAL)
-        .addModifiers(sourceElement.accessModifiers())
+        .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
         .addMethod(getResultMethod())
         .build();
   }

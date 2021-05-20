@@ -1,14 +1,17 @@
 package net.jbock.compiler;
 
+import javax.lang.model.element.Element;
+import javax.lang.model.util.Elements;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-public class DescriptionBuilder {
+public class Descriptions {
 
-  private DescriptionBuilder() {
+  private Descriptions() {
   }
 
   public static Optional<String> optionalString(String s) {
@@ -18,7 +21,17 @@ public class DescriptionBuilder {
     return Optional.of(s);
   }
 
-  public static List<String> tokenizeJavadoc(String docComment) {
+  public static List<String> getDescription(
+      Element element,
+      Elements elements,
+      String[] description) {
+    if (description.length == 0) {
+      return tokenizeJavadoc(elements.getDocComment(element));
+    }
+    return Arrays.asList(description);
+  }
+
+  private static List<String> tokenizeJavadoc(String docComment) {
     if (Objects.toString(docComment, "").trim().isEmpty()) {
       return Collections.emptyList();
     }

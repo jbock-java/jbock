@@ -12,9 +12,6 @@ import javax.lang.model.util.Elements;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
-
-import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
 
 /**
  * This class represents an {@code abstract} Method in the command class,
@@ -49,9 +46,7 @@ public abstract class AbstractParameter {
   }
 
   public final Set<Modifier> getAccessModifiers() {
-    return sourceMethod.method().getModifiers().stream()
-        .filter(ALLOWED_MODIFIERS::contains)
-        .collect(Collectors.toSet());
+    return sourceMethod.accessModifiers();
   }
 
   public final ValidationFailure fail(String message) {

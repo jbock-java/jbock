@@ -10,6 +10,7 @@ import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
+import javax.lang.model.element.Modifier;
 
 import static javax.lang.model.element.Modifier.FINAL;
 
@@ -148,7 +149,7 @@ public final class GeneratedClass {
 
     return spec.addModifiers(FINAL)
         .addOriginatingElement(sourceElement.element())
-        .addModifiers(sourceElement.accessModifiers())
+        .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
         .addJavadoc(classJavadoc.create()).build();
   }
 }

@@ -11,14 +11,16 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
+import static net.jbock.compiler.Constants.ACCESS_MODIFIERS;
 
 public class SourceElement {
 
   private final TypeElement sourceElement;
   private final ParserFlavour parserFlavour;
-  private final Modifier[] accessModifiers;
+  private final Set<Modifier> accessModifiers;
   private final String programName;
   private final ClassName generatedClass;
   private final ClassName optionType;
@@ -26,7 +28,7 @@ public class SourceElement {
   private SourceElement(
       TypeElement sourceElement,
       ParserFlavour parserFlavour,
-      Modifier[] accessModifiers,
+      Set<Modifier> accessModifiers,
       String programName,
       ClassName generatedClass,
       ClassName optionType) {
@@ -39,9 +41,9 @@ public class SourceElement {
   }
 
   public static SourceElement create(TypeElement typeElement, ParserFlavour parserFlavour) {
-    Modifier[] accessModifiers = typeElement.getModifiers().stream()
-        .filter(ALLOWED_MODIFIERS::contains)
-        .toArray(Modifier[]::new);
+    Set<Modifier> accessModifiers = typeElement.getModifiers().stream()
+        .filter(ACCESS_MODIFIERS::contains)
+        .collect(Collectors.toSet());
     String programName = parserFlavour.programName(typeElement)
         .orElseGet(() -> EnumName.create(typeElement.getSimpleName().toString()).snake('-'));
     String generatedClassName = String.join("_", ClassName.get(typeElement).simpleNames()) + "_Parser";
@@ -81,7 +83,7 @@ public class SourceElement {
     return isSuperCommand() ? "getResultWithRest" : "getResult";
   }
 
-  public Modifier[] accessModifiers() {
+  public Set<Modifier> accessModifiers() {
     return accessModifiers;
   }
 
