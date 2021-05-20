@@ -8,16 +8,16 @@ group = 'com.github.h908714124'
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of(16))
+        languageVersion.set(JavaLanguageVersion.of(11))
     }
 }
 
 compileJava {
     options.encoding = 'UTF-8'
-    sourceCompatibility = '8'
-    targetCompatibility = '8'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
     options.compilerArgs << '--release'
-    options.compilerArgs << '8'
+    options.compilerArgs << '11'
 }
 
 repositories {
@@ -39,7 +39,6 @@ dependencies {
 jar {
     manifest {
         attributes(
-                'Automatic-Module-Name': 'net.jbock',
                 'Implementation-Version': project.properties['version']
         )
     }

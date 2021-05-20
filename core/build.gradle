@@ -15,10 +15,10 @@ java {
 
 compileJava {
     options.encoding = 'UTF-8'
-    sourceCompatibility = '8'
-    targetCompatibility = '8'
+    sourceCompatibility = '11'
+    targetCompatibility = '11'
     options.compilerArgs << '--release'
-    options.compilerArgs << '8'
+    options.compilerArgs << '11'
 }
 
 repositories {
@@ -49,7 +49,7 @@ shadowJar {
 }
 
 dependencies {
-    def annotations = 'com.github.h908714124:jbock-annotations:4.2'
+    def annotations = project(':annotations')
     implementation('com.squareup:javapoet:1.13.0')
     implementation('com.google.auto:auto-common:1.0')
     implementation('com.google.guava:guava:30.1.1-jre')
