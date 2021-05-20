@@ -22,23 +22,28 @@ import static net.jbock.compiler.TypeTool.AS_TYPE_ELEMENT;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
-public class MethodFinder {
+public class AllMethodsFinder {
 
   private final SourceElement sourceElement;
 
   @Inject
-  MethodFinder(SourceElement sourceElement) {
+  AllMethodsFinder(SourceElement sourceElement) {
     this.sourceElement = sourceElement;
   }
 
-  public Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantMethods() {
-    return findRelevantMethods(sourceElement.element().asType());
+  /**
+   * find methods in source element, including inherited
+   */
+  public Either<List<ValidationFailure>, List<ExecutableElement>> findMethodsInSourceElement() {
+    TypeMirror mirror = sourceElement.element().asType();
+    return findMethodsIn(mirror);
   }
 
-  private Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantMethods(TypeMirror sourceElement) {
+  private Either<List<ValidationFailure>, List<ExecutableElement>> findMethodsIn(
+      TypeMirror mirror) {
     List<ExecutableElement> acc = new ArrayList<>();
     while (true) {
-      Either<List<ValidationFailure>, TypeElement> element = findRelevantMethods(sourceElement, acc);
+      Either<List<ValidationFailure>, TypeElement> element = findMethodsIn(mirror, acc);
       if (!element.isRight()) {
         List<ValidationFailure> failures = element.fold(
             Function.identity(),
@@ -52,16 +57,16 @@ public class MethodFinder {
       TypeElement folded = element.fold(
           __ -> null, // doesn't happen
           Function.identity());
-      sourceElement = folded.getSuperclass();
+      mirror = folded.getSuperclass();
     }
   }
 
-  private Either<List<ValidationFailure>, TypeElement> findRelevantMethods(
-      TypeMirror sourceElement, List<ExecutableElement> acc) {
-    if (sourceElement.getKind() != TypeKind.DECLARED) {
+  private Either<List<ValidationFailure>, TypeElement> findMethodsIn(
+      TypeMirror mirror, List<ExecutableElement> acc) {
+    if (mirror.getKind() != TypeKind.DECLARED) {
       return left(Collections.emptyList());
     }
-    DeclaredType declared = AS_DECLARED.visit(sourceElement);
+    DeclaredType declared = AS_DECLARED.visit(mirror);
     if (declared == null) {
       return left(Collections.emptyList());
     }

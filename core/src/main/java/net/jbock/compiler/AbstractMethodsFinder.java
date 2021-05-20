@@ -1,6 +1,6 @@
 package net.jbock.compiler;
 
-import net.jbock.compiler.command.MethodFinder;
+import net.jbock.compiler.command.AllMethodsFinder;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
@@ -14,21 +14,21 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.partitioningBy;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
-public class AbstractMethodsFactory {
+public class AbstractMethodsFinder {
 
   private final Types types;
-  private final MethodFinder methodFinder;
+  private final AllMethodsFinder allMethodsFinder;
 
   @Inject
-  AbstractMethodsFactory(
+  AbstractMethodsFinder(
       Types types,
-      MethodFinder methodFinder) {
+      AllMethodsFinder allMethodsFinder) {
     this.types = types;
-    this.methodFinder = methodFinder;
+    this.allMethodsFinder = allMethodsFinder;
   }
 
   public Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantMethods() {
-    return methodFinder.findRelevantMethods()
+    return allMethodsFinder.findMethodsInSourceElement()
         .map(acc -> acc.stream()
             .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT))))
         .map(partitions -> {

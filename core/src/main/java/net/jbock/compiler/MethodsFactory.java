@@ -27,13 +27,13 @@ public class MethodsFactory {
 
   private final SourceElement sourceElement;
   private final ParameterMethodValidator parameterMethodValidator;
-  private final AbstractMethodsFactory abstractMethodsFactory;
+  private final AbstractMethodsFinder abstractMethodsFactory;
 
   @Inject
   MethodsFactory(
       SourceElement sourceElement,
       ParameterMethodValidator parameterMethodValidator,
-      AbstractMethodsFactory abstractMethodsFactory) {
+      AbstractMethodsFinder abstractMethodsFactory) {
     this.sourceElement = sourceElement;
     this.parameterMethodValidator = parameterMethodValidator;
     this.abstractMethodsFactory = abstractMethodsFactory;
