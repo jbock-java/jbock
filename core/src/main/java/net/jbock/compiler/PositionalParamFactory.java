@@ -5,7 +5,6 @@ import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ConverterFinder;
 import net.jbock.either.Either;
-import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
@@ -18,7 +17,6 @@ import static net.jbock.either.Either.right;
 public class PositionalParamFactory {
 
   private final ConverterFinder converterFinder;
-  private final ParamLabel paramLabel;
   private final SourceMethod sourceMethod;
   private final SourceElement sourceElement;
   private final EnumName enumName;
@@ -27,13 +25,11 @@ public class PositionalParamFactory {
   @Inject
   PositionalParamFactory(
       ConverterFinder converterFinder,
-      ParamLabel paramLabel,
       SourceMethod sourceMethod,
       SourceElement sourceElement,
       EnumName enumName,
       List<ConvertedParameter<PositionalParameter>> alreadyCreated) {
     this.converterFinder = converterFinder;
-    this.paramLabel = paramLabel;
     this.sourceMethod = sourceMethod;
     this.sourceElement = sourceElement;
     this.enumName = enumName;
@@ -44,8 +40,7 @@ public class PositionalParamFactory {
     PositionalParameter positionalParameter = new PositionalParameter(
         sourceMethod,
         enumName,
-        position,
-        paramLabel);
+        position);
     return Either.<String, PositionalParameter>right(positionalParameter)
         .flatMap(coercion -> converterFinder.findConverter(positionalParameter))
         .flatMap(this::checkPositionNotNegative)

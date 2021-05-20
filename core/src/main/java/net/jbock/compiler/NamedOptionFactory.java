@@ -9,7 +9,6 @@ import net.jbock.convert.ConverterFinder;
 import net.jbock.convert.Skew;
 import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;
-import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
@@ -28,7 +27,6 @@ public class NamedOptionFactory {
 
   private final ConverterFinder converterFinder;
   private final ConverterClass converterClass;
-  private final ParamLabel paramLabel;
   private final SourceMethod sourceMethod;
   private final SourceElement sourceElement;
   private final EnumName enumName;
@@ -38,14 +36,12 @@ public class NamedOptionFactory {
   NamedOptionFactory(
       ConverterClass converterClass,
       ConverterFinder converterFinder,
-      ParamLabel paramLabel,
       SourceMethod sourceMethod,
       SourceElement sourceElement,
       EnumName enumName,
       List<ConvertedParameter<NamedOption>> alreadyCreated) {
     this.converterFinder = converterFinder;
     this.converterClass = converterClass;
-    this.paramLabel = paramLabel;
     this.sourceMethod = sourceMethod;
     this.sourceElement = sourceElement;
     this.enumName = enumName;
@@ -136,7 +132,7 @@ public class NamedOptionFactory {
   }
 
   private NamedOption createNamedOption(List<String> names) {
-    return new NamedOption(enumName, names, sourceMethod, paramLabel);
+    return new NamedOption(enumName, names, sourceMethod);
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {

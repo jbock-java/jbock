@@ -6,7 +6,6 @@ import net.jbock.compiler.parameter.ParameterStyle;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -55,6 +54,10 @@ public class SourceMethod {
   }
 
   public List<String> description(Elements elements) {
-    return Arrays.asList(parameterStyle.description(sourceMethod, elements));
+    return parameterStyle.description(sourceMethod, elements);
+  }
+
+  public Optional<String> paramLabel() {
+    return parameterStyle.paramLabel(sourceMethod);
   }
 }

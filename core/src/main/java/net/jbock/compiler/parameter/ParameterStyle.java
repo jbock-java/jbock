@@ -23,8 +23,8 @@ public enum ParameterStyle {
     }
 
     @Override
-    public String paramLabel(ExecutableElement method) {
-      return get(method).paramLabel();
+    public Optional<String> paramLabel(ExecutableElement method) {
+      return DescriptionBuilder.optionalString(get(method).paramLabel());
     }
 
     @Override
@@ -43,12 +43,9 @@ public enum ParameterStyle {
     }
 
     @Override
-    public String[] description(ExecutableElement method, Elements elements) {
+    public List<String> description(ExecutableElement method, Elements elements) {
       String[] description = get(method).description();
-      if (description.length == 0) {
-        return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(method));
-      }
-      return description;
+      return getDescription(method, elements, description);
     }
 
     private Option get(ExecutableElement method) {
@@ -61,8 +58,8 @@ public enum ParameterStyle {
     }
 
     @Override
-    public String paramLabel(ExecutableElement method) {
-      return get(method).paramLabel();
+    public Optional<String> paramLabel(ExecutableElement method) {
+      return DescriptionBuilder.optionalString(get(method).paramLabel());
     }
 
     @Override
@@ -81,12 +78,9 @@ public enum ParameterStyle {
     }
 
     @Override
-    public String[] description(ExecutableElement method, Elements elements) {
+    public List<String> description(ExecutableElement method, Elements elements) {
       String[] description = get(method).description();
-      if (description.length == 0) {
-        return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(method));
-      }
-      return description;
+      return getDescription(method, elements, description);
     }
 
     private Parameter get(ExecutableElement method) {
@@ -99,8 +93,8 @@ public enum ParameterStyle {
     }
 
     @Override
-    public String paramLabel(ExecutableElement method) {
-      return get(method).paramLabel();
+    public Optional<String> paramLabel(ExecutableElement method) {
+      return DescriptionBuilder.optionalString(get(method).paramLabel());
     }
 
     @Override
@@ -119,18 +113,25 @@ public enum ParameterStyle {
     }
 
     @Override
-    public String[] description(ExecutableElement method, Elements elements) {
+    public List<String> description(ExecutableElement method, Elements elements) {
       String[] description = get(method).description();
-      if (description.length == 0) {
-        return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(method));
-      }
-      return description;
+      return getDescription(method, elements, description);
     }
 
     private Parameters get(ExecutableElement method) {
       return method.getAnnotation(Parameters.class);
     }
   };
+
+  private static List<String> getDescription(
+      ExecutableElement method,
+      Elements elements,
+      String[] description) {
+    if (description.length == 0) {
+      return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(method));
+    }
+    return Arrays.asList(description);
+  }
 
   private final Class<? extends Annotation> annotationClass;
 
@@ -149,7 +150,7 @@ public enum ParameterStyle {
 
   public abstract Optional<String> descriptionKey(ExecutableElement method);
 
-  public abstract String paramLabel(ExecutableElement method);
+  public abstract Optional<String> paramLabel(ExecutableElement method);
 
   public abstract boolean isPositional();
 
@@ -157,5 +158,5 @@ public enum ParameterStyle {
 
   public abstract List<String> names(ExecutableElement method);
 
-  public abstract String[] description(ExecutableElement method, Elements elements);
+  public abstract List<String> description(ExecutableElement method, Elements elements);
 }

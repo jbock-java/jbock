@@ -1,7 +1,9 @@
 package net.jbock.compiler;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 public class DescriptionBuilder {
@@ -16,21 +18,21 @@ public class DescriptionBuilder {
     return Optional.of(s);
   }
 
-  public static String[] tokenizeJavadoc(String docComment) {
-    if (docComment == null) {
-      return new String[0];
+  public static List<String> tokenizeJavadoc(String docComment) {
+    if (Objects.toString(docComment, "").trim().isEmpty()) {
+      return Collections.emptyList();
     }
     String[] tokens = docComment.trim().split("\\R", -1);
     List<String> result = new ArrayList<>(tokens.length);
     for (String t : tokens) {
       String token = t.trim();
       if (token.startsWith("@")) {
-        return result.toArray(new String[0]);
+        break;
       }
       if (!token.isEmpty()) {
         result.add(token);
       }
     }
-    return result.toArray(new String[0]);
+    return result;
   }
 }

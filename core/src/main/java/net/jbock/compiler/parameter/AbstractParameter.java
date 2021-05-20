@@ -61,4 +61,8 @@ public abstract class AbstractParameter {
   final EnumName enumName() {
     return enumName;
   }
+
+  final SourceMethod sourceMethod() {
+    return sourceMethod;
+  }
 }

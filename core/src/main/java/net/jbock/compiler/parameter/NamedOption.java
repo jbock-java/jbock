@@ -1,7 +1,6 @@
 package net.jbock.compiler.parameter;
 
 import net.jbock.compiler.EnumName;
-import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceMethod;
 
 import java.util.List;
@@ -10,15 +9,12 @@ import java.util.Locale;
 public class NamedOption extends AbstractParameter {
 
   private final List<String> names;
-  private final ParamLabel paramLabel;
 
   public NamedOption(
       EnumName enumName,
       List<String> names,
-      SourceMethod sourceMethod,
-      ParamLabel paramLabel) {
+      SourceMethod sourceMethod) {
     super(sourceMethod, enumName);
-    this.paramLabel = paramLabel;
     this.names = names;
   }
 
@@ -32,7 +28,7 @@ public class NamedOption extends AbstractParameter {
   }
 
   public String paramLabel() {
-    return paramLabel.label().orElseGet(() -> names.stream()
+    return sourceMethod().paramLabel().orElseGet(() -> names.stream()
         .filter(name -> name.startsWith("--"))
         .map(name -> name.substring(2))
         .map(s -> s.toUpperCase(Locale.US))

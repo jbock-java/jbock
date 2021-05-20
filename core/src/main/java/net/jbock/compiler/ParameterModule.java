@@ -13,7 +13,6 @@ import net.jbock.convert.matching.matcher.ListMatcher;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.matching.matcher.OptionalMatcher;
 import net.jbock.qualifier.ConverterClass;
-import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
@@ -102,12 +101,6 @@ public class ParameterModule {
   @Provides
   ConverterClass converter(SourceMethod sourceMethod) {
     return new ConverterClass(annotationUtil.getConverter(sourceMethod.method()));
-  }
-
-  @Reusable
-  @Provides
-  ParamLabel paramLabel(SourceMethod sourceMethod, ParameterStyle parameterStyle) {
-    return new ParamLabel(parameterStyle.paramLabel(sourceMethod.method()));
   }
 
   @Reusable

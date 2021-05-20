@@ -6,6 +6,8 @@ import net.jbock.SuperCommand;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public enum ParserFlavour {
@@ -29,12 +31,9 @@ public enum ParserFlavour {
     }
 
     @Override
-    public String[] description(TypeElement sourceElement, Elements elements) {
+    public List<String> description(TypeElement sourceElement, Elements elements) {
       String[] description = get(sourceElement).description();
-      if (description.length == 0) {
-        return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(sourceElement));
-      }
-      return description;
+      return getDescription(sourceElement, elements, description);
     }
 
     @Override
@@ -66,12 +65,9 @@ public enum ParserFlavour {
     }
 
     @Override
-    public String[] description(TypeElement sourceElement, Elements elements) {
+    public List<String> description(TypeElement sourceElement, Elements elements) {
       String[] description = get(sourceElement).description();
-      if (description.length == 0) {
-        return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(sourceElement));
-      }
-      return description;
+      return getDescription(sourceElement, elements, description);
     }
 
     @Override
@@ -83,6 +79,16 @@ public enum ParserFlavour {
       return sourceElement.getAnnotation(SuperCommand.class);
     }
   };
+
+  private static List<String> getDescription(
+      TypeElement sourceElement,
+      Elements elements,
+      String[] description) {
+    if (description.length == 0) {
+      return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(sourceElement));
+    }
+    return Arrays.asList(description);
+  }
 
   private final String className;
 
@@ -105,7 +111,7 @@ public enum ParserFlavour {
 
   public abstract Optional<String> descriptionKey(TypeElement sourceElement);
 
-  public abstract String[] description(TypeElement sourceElement, Elements elements);
+  public abstract List<String> description(TypeElement sourceElement, Elements elements);
 
   public abstract boolean isSuperCommand();
 }
