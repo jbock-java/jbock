@@ -8,6 +8,9 @@ import net.jbock.compiler.ValidationFailure;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 import static net.jbock.compiler.Constants.ALLOWED_MODIFIERS;
@@ -93,5 +96,9 @@ public class SourceElement {
 
   public ClassName optionType() {
     return optionType;
+  }
+
+  public List<String> description(Elements elements) {
+    return Arrays.asList(parserFlavour.description(sourceElement, elements));
   }
 }

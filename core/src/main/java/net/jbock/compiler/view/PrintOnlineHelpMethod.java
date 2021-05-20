@@ -4,7 +4,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import dagger.Reusable;
-import net.jbock.compiler.Description;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
@@ -15,8 +14,10 @@ import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
+import javax.lang.model.util.Elements;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
@@ -27,30 +28,30 @@ import static net.jbock.compiler.view.GeneratedClass.CONTINUATION_INDENT_USAGE;
 @Reusable
 public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
 
-  private final Description description;
   private final SourceElement sourceElement;
   private final AllParameters allParameters;
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
   private final PrintTokensMethod printTokensMethod;
   private final CommonFields commonFields;
+  private final Elements elements;
 
   @Inject
   PrintOnlineHelpMethod(
-      Description description,
       SourceElement sourceElement,
       AllParameters allParameters,
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
       PrintTokensMethod printTokensMethod,
-      CommonFields commonFields) {
-    this.description = description;
+      CommonFields commonFields,
+      Elements elements) {
     this.sourceElement = sourceElement;
     this.allParameters = allParameters;
     this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
     this.printTokensMethod = printTokensMethod;
     this.commonFields = commonFields;
+    this.elements = elements;
   }
 
   @Override
@@ -58,7 +59,8 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
     CodeBlock.Builder code = CodeBlock.builder();
     String continuationIndent = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
 
-    if (!description.lines().isEmpty()) {
+    List<String> description = sourceElement.description(elements);
+    if (!description.isEmpty()) {
       ParameterSpec descriptionBuilder = builder(LIST_OF_STRING, "description").build();
       code.addStatement("$T $N = new $T<>()", descriptionBuilder.type, descriptionBuilder, ArrayList.class);
       CodeBlock descriptionBlock = sourceElement.descriptionKey()
@@ -71,7 +73,7 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
                     Collections.class, descriptionBuilder, descriptionMessage, "\\s+", -1);
             result.endControlFlow();
             result.beginControlFlow("else");
-            for (String line : description.lines()) {
+            for (String line : description) {
               result.addStatement("$T.addAll($N, $S.split($S, $L))",
                   Collections.class, descriptionBuilder, line, "\\s+", -1);
             }
@@ -80,7 +82,7 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
           })
           .orElseGet(() -> {
             CodeBlock.Builder result = CodeBlock.builder();
-            for (String line : description.lines()) {
+            for (String line : description) {
               result.addStatement("$T.addAll($N, $S.split($S, $L))",
                   Collections.class, descriptionBuilder, line, "\\s+", -1);
             }

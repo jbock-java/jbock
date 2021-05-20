@@ -33,16 +33,9 @@ public class ContextModule {
     return sourceElement;
   }
 
-  @Reusable
   @Provides
-  DescriptionBuilder descriptionBuilder() {
-    return new DescriptionBuilder(elements);
-  }
-
-  @Reusable
-  @Provides
-  Description description(DescriptionBuilder descriptionBuilder) {
-    return descriptionBuilder.getDescription(sourceElement.element());
+  Elements elements() {
+    return elements;
   }
 
   @Reusable

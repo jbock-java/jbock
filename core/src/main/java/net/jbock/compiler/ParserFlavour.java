@@ -4,6 +4,7 @@ import net.jbock.Command;
 import net.jbock.SuperCommand;
 
 import javax.lang.model.element.TypeElement;
+import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
 import java.util.Optional;
 
@@ -12,7 +13,7 @@ public enum ParserFlavour {
   COMMAND(Command.class) {
     @Override
     public boolean helpEnabled(TypeElement sourceElement) {
-      return sourceElement.getAnnotation(Command.class).helpEnabled();
+      return get(sourceElement).helpEnabled();
     }
 
     @Override
@@ -25,6 +26,15 @@ public enum ParserFlavour {
     public Optional<String> descriptionKey(TypeElement sourceElement) {
       String key = get(sourceElement).descriptionKey();
       return key.isEmpty() ? Optional.empty() : Optional.of(key);
+    }
+
+    @Override
+    public String[] description(TypeElement sourceElement, Elements elements) {
+      String[] description = get(sourceElement).description();
+      if (description.length == 0) {
+        return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(sourceElement));
+      }
+      return description;
     }
 
     @Override
@@ -40,7 +50,7 @@ public enum ParserFlavour {
   SUPER_COMMAND(SuperCommand.class) {
     @Override
     public boolean helpEnabled(TypeElement sourceElement) {
-      return sourceElement.getAnnotation(SuperCommand.class).helpEnabled();
+      return get(sourceElement).helpEnabled();
     }
 
     @Override
@@ -53,6 +63,15 @@ public enum ParserFlavour {
     public Optional<String> descriptionKey(TypeElement sourceElement) {
       String key = get(sourceElement).descriptionKey();
       return key.isEmpty() ? Optional.empty() : Optional.of(key);
+    }
+
+    @Override
+    public String[] description(TypeElement sourceElement, Elements elements) {
+      String[] description = get(sourceElement).description();
+      if (description.length == 0) {
+        return DescriptionBuilder.tokenizeJavadoc(elements.getDocComment(sourceElement));
+      }
+      return description;
     }
 
     @Override
@@ -85,6 +104,8 @@ public enum ParserFlavour {
   public abstract Optional<String> programName(TypeElement sourceElement);
 
   public abstract Optional<String> descriptionKey(TypeElement sourceElement);
+
+  public abstract String[] description(TypeElement sourceElement, Elements elements);
 
   public abstract boolean isSuperCommand();
 }

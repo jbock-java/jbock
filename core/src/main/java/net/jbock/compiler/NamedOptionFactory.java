@@ -9,7 +9,6 @@ import net.jbock.convert.ConverterFinder;
 import net.jbock.convert.Skew;
 import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;
-import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
@@ -30,11 +29,9 @@ public class NamedOptionFactory {
   private final ConverterFinder converterFinder;
   private final ConverterClass converterClass;
   private final ParamLabel paramLabel;
-  private final DescriptionKey descriptionKey;
   private final SourceMethod sourceMethod;
   private final SourceElement sourceElement;
   private final EnumName enumName;
-  private final Description description;
   private final List<ConvertedParameter<NamedOption>> alreadyCreated;
 
   @Inject
@@ -42,20 +39,16 @@ public class NamedOptionFactory {
       ConverterClass converterClass,
       ConverterFinder converterFinder,
       ParamLabel paramLabel,
-      DescriptionKey descriptionKey,
       SourceMethod sourceMethod,
       SourceElement sourceElement,
       EnumName enumName,
-      Description description,
       List<ConvertedParameter<NamedOption>> alreadyCreated) {
     this.converterFinder = converterFinder;
     this.converterClass = converterClass;
     this.paramLabel = paramLabel;
-    this.descriptionKey = descriptionKey;
     this.sourceMethod = sourceMethod;
     this.sourceElement = sourceElement;
     this.enumName = enumName;
-    this.description = description;
     this.alreadyCreated = alreadyCreated;
   }
 
@@ -143,8 +136,7 @@ public class NamedOptionFactory {
   }
 
   private NamedOption createNamedOption(List<String> names) {
-    return new NamedOption(enumName, names, sourceMethod, descriptionKey,
-        description, paramLabel);
+    return new NamedOption(enumName, names, sourceMethod, paramLabel);
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {

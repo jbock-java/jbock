@@ -13,6 +13,7 @@ import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
 
 import javax.inject.Inject;
+import javax.lang.model.util.Elements;
 import java.util.List;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
@@ -31,13 +32,16 @@ public class OptionEnum {
   private final AllParameters context;
   private final GeneratedTypes generatedTypes;
   private final FieldSpec descriptionField;
+  private final Elements elements;
 
   @Inject
   OptionEnum(
       AllParameters context,
-      GeneratedTypes generatedTypes) {
+      GeneratedTypes generatedTypes,
+      Elements elements) {
     this.context = context;
     this.generatedTypes = generatedTypes;
+    this.elements = elements;
     this.descriptionField = FieldSpec.builder(STRING_ARRAY, "description").build();
   }
 
@@ -46,7 +50,7 @@ public class OptionEnum {
     TypeSpec.Builder spec = TypeSpec.enumBuilder(generatedTypes.optionType());
     for (ConvertedParameter<? extends AbstractParameter> param : parameters) {
       String enumConstant = param.enumConstant();
-      CodeBlock description = descriptionBlock(param.parameter().description());
+      CodeBlock description = descriptionBlock(param.parameter().description(elements));
       TypeSpec optionSpec = anonymousClassBuilder(description).build();
       spec.addEnumConstant(enumConstant, optionSpec);
     }

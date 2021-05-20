@@ -1,8 +1,6 @@
 package net.jbock.compiler.parameter;
 
-import net.jbock.compiler.Description;
 import net.jbock.compiler.EnumName;
-import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceMethod;
 
@@ -18,11 +16,9 @@ public class PositionalParameter extends AbstractParameter {
   public PositionalParameter(
       SourceMethod sourceMethod,
       EnumName enumName,
-      DescriptionKey descriptionKey,
-      Description description,
       int position,
       ParamLabel paramLabel) {
-    super(sourceMethod, enumName, descriptionKey, description);
+    super(sourceMethod, enumName);
     this.position = position;
     this.paramLabel = paramLabel;
   }

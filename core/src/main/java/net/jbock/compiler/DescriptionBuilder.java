@@ -1,62 +1,22 @@
 package net.jbock.compiler;
 
-import dagger.Reusable;
-import net.jbock.Command;
-import net.jbock.Option;
-import net.jbock.Parameter;
-import net.jbock.Parameters;
-import net.jbock.SuperCommand;
-
-import javax.inject.Inject;
-import javax.lang.model.element.Element;
-import javax.lang.model.util.Elements;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-@Reusable
 public class DescriptionBuilder {
 
-  private final Elements elements;
-
-  @Inject
-  DescriptionBuilder(Elements elements) {
-    this.elements = elements;
+  private DescriptionBuilder() {
   }
 
-  Description getDescription(Element el) {
-    String[] description = getDescriptionFromAttribute(el);
-    if (description.length == 0) {
-      String[] javadoc = tokenizeJavadoc(elements.getDocComment(el));
-      return new Description(javadoc);
+  public static Optional<String> optionalString(String s) {
+    if (s.isEmpty()) {
+      return Optional.empty();
     }
-    return new Description(description);
+    return Optional.of(s);
   }
 
-  private String[] getDescriptionFromAttribute(Element el) {
-    Option option = el.getAnnotation(Option.class);
-    if (option != null) {
-      return option.description();
-    }
-    Parameter parameter = el.getAnnotation(Parameter.class);
-    if (parameter != null) {
-      return parameter.description();
-    }
-    Parameters parameters = el.getAnnotation(Parameters.class);
-    if (parameters != null) {
-      return parameters.description();
-    }
-    Command command = el.getAnnotation(Command.class);
-    if (command != null) {
-      return command.description();
-    }
-    SuperCommand superCommand = el.getAnnotation(SuperCommand.class);
-    if (superCommand != null) {
-      return superCommand.description();
-    }
-    return new String[0];
-  }
-
-  private static String[] tokenizeJavadoc(String docComment) {
+  public static String[] tokenizeJavadoc(String docComment) {
     if (docComment == null) {
       return new String[0];
     }

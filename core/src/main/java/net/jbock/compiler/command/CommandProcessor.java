@@ -5,7 +5,6 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.ContextModule;
 import net.jbock.compiler.DaggerContextComponent;
 import net.jbock.compiler.DaggerParameterComponent;
-import net.jbock.compiler.DescriptionBuilder;
 import net.jbock.compiler.Methods;
 import net.jbock.compiler.MethodsFactory;
 import net.jbock.compiler.ParameterModule;
@@ -32,7 +31,6 @@ public class CommandProcessor {
   private final SourceElement sourceElement;
   private final Elements elements;
   private final TypeTool tool;
-  private final DescriptionBuilder descriptionBuilder;
   private final ParamsFactory paramsFactory;
   private final MethodsFactory methodsFactory;
   private final MethodFinder methodFinder;
@@ -42,14 +40,12 @@ public class CommandProcessor {
       SourceElement sourceElement,
       Elements elements,
       TypeTool tool,
-      DescriptionBuilder descriptionBuilder,
       ParamsFactory paramsFactory,
       MethodsFactory methodsFactory,
       MethodFinder methodFinder) {
     this.sourceElement = sourceElement;
     this.elements = elements;
     this.tool = tool;
-    this.descriptionBuilder = descriptionBuilder;
     this.paramsFactory = paramsFactory;
     this.methodsFactory = methodsFactory;
     this.methodFinder = methodFinder;
@@ -109,7 +105,7 @@ public class CommandProcessor {
   }
 
   private ParameterModule parameterModule() {
-    return new ParameterModule(tool, sourceElement, descriptionBuilder);
+    return new ParameterModule(tool, sourceElement);
   }
 
   private ContextModule contextModule(Params params) {

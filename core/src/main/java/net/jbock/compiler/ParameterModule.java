@@ -13,7 +13,6 @@ import net.jbock.convert.matching.matcher.ListMatcher;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.matching.matcher.OptionalMatcher;
 import net.jbock.qualifier.ConverterClass;
-import net.jbock.qualifier.DescriptionKey;
 import net.jbock.qualifier.ParamLabel;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
@@ -29,15 +28,12 @@ public class ParameterModule {
 
   private final TypeTool tool;
   private final SourceElement sourceElement;
-  private final DescriptionBuilder descriptionBuilder;
 
   public ParameterModule(
       TypeTool tool,
-      SourceElement sourceElement,
-      DescriptionBuilder descriptionBuilder) {
+      SourceElement sourceElement) {
     this.tool = tool;
     this.sourceElement = sourceElement;
-    this.descriptionBuilder = descriptionBuilder;
   }
 
   @Reusable
@@ -104,12 +100,6 @@ public class ParameterModule {
 
   @Reusable
   @Provides
-  DescriptionKey descriptionKey(SourceMethod sourceMethod) {
-    return new DescriptionKey(sourceMethod.descriptionKey());
-  }
-
-  @Reusable
-  @Provides
   ConverterClass converter(SourceMethod sourceMethod) {
     return new ConverterClass(annotationUtil.getConverter(sourceMethod.method()));
   }
@@ -118,12 +108,6 @@ public class ParameterModule {
   @Provides
   ParamLabel paramLabel(SourceMethod sourceMethod, ParameterStyle parameterStyle) {
     return new ParamLabel(parameterStyle.paramLabel(sourceMethod.method()));
-  }
-
-  @Reusable
-  @Provides
-  Description description(SourceMethod sourceMethod) {
-    return descriptionBuilder.getDescription(sourceMethod.method());
   }
 
   @Reusable
