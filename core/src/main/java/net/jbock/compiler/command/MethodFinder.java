@@ -1,6 +1,5 @@
 package net.jbock.compiler.command;
 
-import net.jbock.compiler.AbstractMethods;
 import net.jbock.compiler.ValidationFailure;
 import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
@@ -11,13 +10,10 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
-import java.util.stream.Collectors;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
@@ -28,16 +24,14 @@ import static net.jbock.either.Either.right;
 
 public class MethodFinder {
 
-  private final Types types;
   private final SourceElement sourceElement;
 
   @Inject
-  MethodFinder(Types types, SourceElement sourceElement) {
-    this.types = types;
+  MethodFinder(SourceElement sourceElement) {
     this.sourceElement = sourceElement;
   }
 
-  Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantMethods() {
+  public Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantMethods() {
     return findRelevantMethods(sourceElement.element().asType());
   }
 
@@ -52,18 +46,14 @@ public class MethodFinder {
         if (!failures.isEmpty()) {
           return left(failures);
         } else {
-          break;
+          return right(acc);
         }
       }
-      sourceElement = element.fold(
-          __ -> null,
-          Function.identity())
-          .getSuperclass();
+      TypeElement folded = element.fold(
+          __ -> null, // doesn't happen
+          Function.identity());
+      sourceElement = folded.getSuperclass();
     }
-    Map<Boolean, List<ExecutableElement>> map = acc.stream()
-        .collect(Collectors.partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
-    return right(AbstractMethods.create(map.get(true), map.get(false), types)
-        .unimplementedAbstract());
   }
 
   private Either<List<ValidationFailure>, TypeElement> findRelevantMethods(

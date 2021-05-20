@@ -2,10 +2,10 @@ package net.jbock.compiler.command;
 
 import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.compiler.AbstractMethods;
 import net.jbock.compiler.ContextModule;
 import net.jbock.compiler.DaggerContextComponent;
 import net.jbock.compiler.DaggerParameterComponent;
-import net.jbock.compiler.Methods;
 import net.jbock.compiler.MethodsFactory;
 import net.jbock.compiler.ParameterModule;
 import net.jbock.compiler.Params;
@@ -33,7 +33,6 @@ public class CommandProcessor {
   private final TypeTool tool;
   private final ParamsFactory paramsFactory;
   private final MethodsFactory methodsFactory;
-  private final MethodFinder methodFinder;
 
   @Inject
   CommandProcessor(
@@ -41,19 +40,16 @@ public class CommandProcessor {
       Elements elements,
       TypeTool tool,
       ParamsFactory paramsFactory,
-      MethodsFactory methodsFactory,
-      MethodFinder methodFinder) {
+      MethodsFactory methodsFactory) {
     this.sourceElement = sourceElement;
     this.elements = elements;
     this.tool = tool;
     this.paramsFactory = paramsFactory;
     this.methodsFactory = methodsFactory;
-    this.methodFinder = methodFinder;
   }
 
   public Either<List<ValidationFailure>, TypeSpec> generate() {
-    return methodFinder.findRelevantMethods()
-        .flatMap(methodsFactory::create)
+    return methodsFactory.findAbstractMethods()
         .flatMap(this::createPositionalParams)
         .flatMap(this::createNamedOptions)
         .map(this::contextModule)
@@ -84,10 +80,10 @@ public class CommandProcessor {
     return paramsFactory.create(intermediateResult.positionalParameters(), namedOptions);
   }
 
-  private Either<List<ValidationFailure>, IntermediateResult> createPositionalParams(Methods methods) {
-    List<ConvertedParameter<PositionalParameter>> positionalParams = new ArrayList<>(methods.params().size());
+  private Either<List<ValidationFailure>, IntermediateResult> createPositionalParams(AbstractMethods methods) {
+    List<ConvertedParameter<PositionalParameter>> positionalParams = new ArrayList<>(methods.positionalParameters().size());
     List<ValidationFailure> failures = new ArrayList<>();
-    for (SourceMethod sourceMethod : methods.params()) {
+    for (SourceMethod sourceMethod : methods.positionalParameters()) {
       DaggerParameterComponent.builder()
           .module(parameterModule())
           .sourceMethod(sourceMethod)
@@ -95,13 +91,13 @@ public class CommandProcessor {
           .alreadyCreatedOptions(ImmutableList.of())
           .build()
           .positionalParameterFactory()
-          .createPositionalParam(sourceMethod.index().orElse(methods.params().size() - 1))
+          .createPositionalParam(sourceMethod.index().orElse(methods.positionalParameters().size() - 1))
           .accept(failures::add, positionalParams::add);
     }
     if (!failures.isEmpty()) {
       return left(failures);
     }
-    return IntermediateResult.create(methods.options(), positionalParams);
+    return IntermediateResult.create(methods.namedOptions(), positionalParams);
   }
 
   private ParameterModule parameterModule() {

@@ -27,15 +27,20 @@ public class MethodsFactory {
 
   private final SourceElement sourceElement;
   private final ParameterMethodValidator parameterMethodValidator;
+  private final AbstractMethodsFactory abstractMethodsFactory;
 
   @Inject
-  MethodsFactory(SourceElement sourceElement, ParameterMethodValidator parameterMethodValidator) {
+  MethodsFactory(
+      SourceElement sourceElement,
+      ParameterMethodValidator parameterMethodValidator,
+      AbstractMethodsFactory abstractMethodsFactory) {
     this.sourceElement = sourceElement;
     this.parameterMethodValidator = parameterMethodValidator;
+    this.abstractMethodsFactory = abstractMethodsFactory;
   }
 
-  public Either<List<ValidationFailure>, Methods> create(List<ExecutableElement> sourceMethods) {
-    return Either.<List<ValidationFailure>, List<ExecutableElement>>right(sourceMethods)
+  public Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
+    return abstractMethodsFactory.findRelevantMethods()
         .flatMap(this::validateAtLeastOneAbstractMethod)
         .flatMap(this::validateParameterMethods)
         .map(methods -> methods.stream()
@@ -45,7 +50,7 @@ public class MethodsFactory {
         .flatMap(this::validateParameterSuperCommand);
   }
 
-  private Either<List<ValidationFailure>, Methods> validateParameterSuperCommand(
+  private Either<List<ValidationFailure>, AbstractMethods> validateParameterSuperCommand(
       List<SourceMethod> methods) {
     List<SourceMethod> params = methods.stream()
         .filter(m -> m.style().isPositional())
@@ -59,7 +64,7 @@ public class MethodsFactory {
           ", at least one @" + Parameter.class.getSimpleName() + " must be defined";
       return left(Collections.singletonList(sourceElement.fail(message)));
     }
-    return right(new Methods(params, options));
+    return right(new AbstractMethods(params, options));
   }
 
   private Either<List<ValidationFailure>, List<SourceMethod>> validateDuplicateParametersAnnotation(

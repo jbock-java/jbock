@@ -16,24 +16,24 @@ import static net.jbock.either.Either.right;
 
 class IntermediateResult {
 
-  private final List<SourceMethod> options;
+  private final List<SourceMethod> namedOptions;
   private final List<ConvertedParameter<PositionalParameter>> positionalParameters;
 
   private IntermediateResult(
-      List<SourceMethod> options,
+      List<SourceMethod> namedOptions,
       List<ConvertedParameter<PositionalParameter>> positionalParameters) {
-    this.options = options;
+    this.namedOptions = namedOptions;
     this.positionalParameters = positionalParameters;
   }
 
   static Either<List<ValidationFailure>, IntermediateResult> create(
-      List<SourceMethod> options,
+      List<SourceMethod> namedOptions,
       List<ConvertedParameter<PositionalParameter>> positionalParameters) {
     List<ValidationFailure> failures = validatePositions(positionalParameters);
     if (!failures.isEmpty()) {
       return left(failures);
     }
-    return right(new IntermediateResult(options, positionalParameters));
+    return right(new IntermediateResult(namedOptions, positionalParameters));
   }
 
   private static List<ValidationFailure> validatePositions(
@@ -54,7 +54,7 @@ class IntermediateResult {
   }
 
   List<SourceMethod> options() {
-    return options;
+    return namedOptions;
   }
 
   List<ConvertedParameter<PositionalParameter>> positionalParameters() {
