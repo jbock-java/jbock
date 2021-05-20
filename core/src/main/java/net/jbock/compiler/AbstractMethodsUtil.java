@@ -10,15 +10,12 @@ import java.util.stream.Collectors;
 
 class AbstractMethodsUtil {
 
-  private final List<ExecutableElement> abstractMethods;
   private final Map<Name, List<ExecutableElement>> nonAbstractMethods;
   private final Types types;
 
   AbstractMethodsUtil(
-      List<ExecutableElement> abstractMethods,
       Map<Name, List<ExecutableElement>> nonAbstractMethods,
       Types types) {
-    this.abstractMethods = abstractMethods;
     this.nonAbstractMethods = nonAbstractMethods;
     this.types = types;
   }
@@ -27,7 +24,7 @@ class AbstractMethodsUtil {
    * find abstract methods that are not implemented
    * further below in the hierarchy
    */
-  List<ExecutableElement> findRelevantAbstractMethods() {
+  List<ExecutableElement> findRelevantAbstractMethods(List<ExecutableElement> abstractMethods) {
     return abstractMethods.stream()
         .filter(this::isUnimplemented)
         .collect(Collectors.toList());

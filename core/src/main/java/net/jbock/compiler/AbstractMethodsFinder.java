@@ -36,8 +36,8 @@ public class AbstractMethodsFinder {
           Map<Name, List<ExecutableElement>> nonAbstractMethods = partitions.get(false)
               .stream()
               .collect(groupingBy(ExecutableElement::getSimpleName));
-          return new AbstractMethodsUtil(abstractMethods, nonAbstractMethods, types)
-              .findRelevantAbstractMethods();
+          return new AbstractMethodsUtil(nonAbstractMethods, types)
+              .findRelevantAbstractMethods(abstractMethods);
         });
   }
 }

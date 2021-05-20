@@ -39,6 +39,9 @@ public class MethodsFactory {
     this.abstractMethodsFinder = abstractMethodsFinder;
   }
 
+  /**
+   * find unimplemented abstract methods in {@code sourceElement} and its ancestors
+   */
   public Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
     return abstractMethodsFinder.findAbstractMethods()
         .flatMap(this::checkAtLeastOneAbstractMethod)
