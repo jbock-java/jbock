@@ -51,7 +51,7 @@ public class OptionsByNameMethod extends Cached<MethodSpec> {
     }
     code.addStatement("return $N", result);
 
-    return MethodSpec.methodBuilder("optionsByName").returns(result.type)
+    return MethodSpec.methodBuilder("getOptionsByName").returns(result.type)
         .addCode(code.build())
         .addModifiers(PRIVATE, STATIC)
         .build();

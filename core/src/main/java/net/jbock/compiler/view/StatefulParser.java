@@ -40,7 +40,7 @@ public class StatefulParser extends Cached<TypeSpec> {
   private final StatefulParseMethod statefulParseMethod;
   private final GeneratedTypes generatedTypes;
   private final SourceElement sourceElement;
-  private final NamedOptions options;
+  private final NamedOptions namedOptions;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
   private final MissingRequiredMethod missingRequiredMethod;
@@ -48,16 +48,16 @@ public class StatefulParser extends Cached<TypeSpec> {
   @Inject
   StatefulParser(
       GeneratedTypes generatedTypes,
-      StatefulParseMethod parseMethod,
+      StatefulParseMethod statefulParseMethod,
       SourceElement sourceElement,
-      NamedOptions options,
+      NamedOptions namedOptions,
       PositionalParameters positionalParameters,
       CommonFields commonFields,
       MissingRequiredMethod missingRequiredMethod) {
     this.generatedTypes = generatedTypes;
-    this.statefulParseMethod = parseMethod;
+    this.statefulParseMethod = statefulParseMethod;
     this.sourceElement = sourceElement;
-    this.options = options;
+    this.namedOptions = namedOptions;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
     this.missingRequiredMethod = missingRequiredMethod;
@@ -69,9 +69,10 @@ public class StatefulParser extends Cached<TypeSpec> {
         .addModifiers(PRIVATE, STATIC)
         .addMethod(statefulParseMethod.parseMethod());
     spec.addField(commonFields.suspiciousPattern());
-    if (!options.isEmpty()) {
+    if (!namedOptions.isEmpty()) {
       spec.addMethod(tryParseOptionMethod())
           .addMethod(tryReadOptionMethod());
+      spec.addField(commonFields.optionsByName());
       spec.addField(commonFields.optionParsers());
     }
     if (!positionalParameters.regular().isEmpty()) {
@@ -90,7 +91,7 @@ public class StatefulParser extends Cached<TypeSpec> {
     return MethodSpec.methodBuilder("tryParseOption")
         .addParameter(token)
         .addParameter(it)
-        .addCode(options.unixClusteringSupported() ?
+        .addCode(namedOptions.unixClusteringSupported() ?
             tryParseOptionCodeClustering(token, it) :
             tryParseOptionCodeSimple(token, it))
         .returns(BOOLEAN)
@@ -155,7 +156,7 @@ public class StatefulParser extends Cached<TypeSpec> {
   private MethodSpec buildMethod() {
 
     List<CodeBlock> code = new ArrayList<>();
-    for (ConvertedParameter<NamedOption> option : options.options()) {
+    for (ConvertedParameter<NamedOption> option : namedOptions.options()) {
       CodeBlock streamExpression = streamExpressionOption(option);
       code.add(extractExpressionOption(streamExpression, option));
     }

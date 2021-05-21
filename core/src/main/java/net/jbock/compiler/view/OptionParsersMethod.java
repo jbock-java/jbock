@@ -42,7 +42,7 @@ public class OptionParsersMethod extends Cached<MethodSpec> {
     ParameterSpec parsers = builder(mapOf(sourceElement.optionType(),
         generatedTypes.optionParserType()), "parsers").build();
 
-    return MethodSpec.methodBuilder("optionParsers").returns(parsers.type)
+    return MethodSpec.methodBuilder("getOptionParsers").returns(parsers.type)
         .addCode(optionParsersMethodCode(parsers))
         .addModifiers(PRIVATE, STATIC).build();
   }

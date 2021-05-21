@@ -132,10 +132,6 @@ public final class GeneratedClass {
       spec.addField(commonFields.messages());
     }
 
-    if (!namedOptions.isEmpty()) {
-      spec.addField(commonFields.optionsByName());
-    }
-
     spec.addType(statefulParser.get())
         .addType(optionEnum.define())
         .addType(impl.define())

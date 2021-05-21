@@ -15,9 +15,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static com.squareup.javapoet.TypeName.INT;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
@@ -78,15 +76,14 @@ public class CommonFields {
         .addModifiers(PRIVATE)
         .initializer(code.build())
         .build();
-    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.optionType()), "OPTIONS_BY_NAME")
-        .initializer("optionsByName()")
-        .addModifiers(PRIVATE, STATIC, FINAL)
+    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.optionType()), "optionsByName")
+        .initializer("getOptionsByName()")
         .build();
     FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "paramParsers")
         .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
         .build();
     FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionType(), generatedTypes.optionParserType()), "optionParsers")
-        .initializer("optionParsers()")
+        .initializer("getOptionParsers()")
         .build();
     return new CommonFields(exitHookField, optionsByName, paramParsers, optionParsers);
   }
