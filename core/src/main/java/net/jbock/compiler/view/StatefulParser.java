@@ -103,11 +103,6 @@ public class StatefulParser extends Cached<TypeSpec> {
     ParameterSpec clusterToken = ParameterSpec.builder(STRING, "clusterToken").build();
     ParameterSpec option = ParameterSpec.builder(sourceElement.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    if (!sourceElement.isSuperCommand()) {
-      code.add("if ($N)\n", commonFields.endOfOptionParsing()).indent()
-          .addStatement("return false")
-          .unindent();
-    }
     code.addStatement("$T $N = tryReadOption($N)", sourceElement.optionType(), option, token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")

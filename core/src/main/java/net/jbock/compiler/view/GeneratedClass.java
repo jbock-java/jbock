@@ -115,7 +115,9 @@ public final class GeneratedClass {
         .addMethod(makeLinesMethod.get())
         .addMethod(usageMethod.get());
     if (!namedOptions.isEmpty()) {
-      spec.addMethod(readOptionArgumentMethod.get());
+      if (namedOptions.anyRepeatable() || namedOptions.anyRegular()) {
+        spec.addMethod(readOptionArgumentMethod.get());
+      }
       spec.addMethod(optionsByNameMethod.get());
       spec.addMethod(optionParsersMethod.get());
     }

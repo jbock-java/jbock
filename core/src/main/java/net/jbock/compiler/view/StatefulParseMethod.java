@@ -9,6 +9,7 @@ import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -29,17 +30,20 @@ public class StatefulParseMethod {
   private final NamedOptions options;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
+  private final SourceElement sourceElement;
 
   @Inject
   StatefulParseMethod(
       GeneratedTypes generatedTypes,
       NamedOptions options,
       PositionalParameters positionalParameters,
-      CommonFields commonFields) {
+      CommonFields commonFields,
+      SourceElement sourceElement) {
     this.generatedTypes = generatedTypes;
     this.options = options;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
+    this.sourceElement = sourceElement;
   }
 
   MethodSpec parseMethod() {
@@ -137,11 +141,19 @@ public class StatefulParseMethod {
   }
 
   private CodeBlock optionBlock() {
-    return CodeBlock.builder()
-        .beginControlFlow("if (tryParseOption($N, $N))", token, it)
-        .addStatement("continue")
-        .endControlFlow()
-        .build();
+    if (sourceElement.isSuperCommand()) {
+      return CodeBlock.builder()
+          .beginControlFlow("if (tryParseOption($N, $N))", token, it)
+          .addStatement("continue")
+          .endControlFlow()
+          .build();
+    } else {
+      return CodeBlock.builder()
+          .beginControlFlow("if (!$N && tryParseOption($N, $N))", commonFields.endOfOptionParsing(), token, it)
+          .addStatement("continue")
+          .endControlFlow()
+          .build();
+    }
   }
 
   private CodeBlock.Builder initVariables() {
