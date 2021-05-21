@@ -7,14 +7,15 @@ import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
- * <p>Marker annotation for a repeatable positional parameter.
+ * <p>Marker annotation for a <em>repeatable</em> positional parameter.
  * This parameter will capture the remaining tokens,
- * after all non-repeatable positional parameters have been captured.</p>
+ * after all positional parameters have been captured.</p>
  *
  * <ul>
  *   <li>The annotated method must be {@code abstract} and have an empty argument list.</li>
  *   <li>It must return {@link java.util.List List&lt;E&gt;}, where {@code E} is a converted type.</li>
- *   <li>There cannot be more than one such method per class.</li>
+ *   <li>There cannot be more than one repeatable positional parameter per command.</li>
+ *   <li>Cannot be used in a {@link SuperCommand @SuperCommand}.</li>
  * </ul>
  */
 @Target(METHOD)
@@ -39,7 +40,7 @@ public @interface Parameters {
    * If no {@code descriptionKey} is defined,
    * or the runtime message map does not contain the description key,
    * then the {@code description} attribute will be used.
-   * If that is also empty, the method's javadoc will be used.
+   * If that is also empty, the method's javadoc will be used as a fallback.
    *
    * @return key or empty string
    */
@@ -47,9 +48,7 @@ public @interface Parameters {
 
   /**
    * Parameter description, used when generating the usage documentation.
-   * If empty, the method's javadoc will be used as a fallback.
-   * If {@code descriptionKey} is not empty, an attempt will be made
-   * to read the description from the message map first.
+   * Can be overridden via {@code descriptionKey}.
    *
    * @return description text
    */

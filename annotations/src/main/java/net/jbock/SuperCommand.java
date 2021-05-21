@@ -14,11 +14,12 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * and return the remaining tokens as an array of strings.
  * The double-dash is not recognized as a special token.</p>
  *
- * <p>Each of the {@code abstract}
- * methods must have an empty argument list, and must be
- * annotated with either {@link Option} or {@link Parameter},
- * but not {@link Parameters}.
- * There must be at least one method with a {@link Parameter} annotation.
+ * <ul>
+ *   <li>Each of the {@code abstract} methods must be either an {@link Option @Option}
+ *   or a {@link Parameter @Parameter}</li>
+ *   <li>There must be at least one {@link Parameter @Parameter}.</li>
+ *   <li>{@link Parameters @Parameters} cannot be used in a {@link SuperCommand @SuperCommand}.</li>
+ * </ul>
  */
 @Target(TYPE)
 @Retention(SOURCE)
@@ -62,7 +63,8 @@ public @interface SuperCommand {
    * If no {@code descriptionKey} is defined,
    * or the runtime message map does not contain the description key,
    * then the {@code description} attribute will be used.
-   * If that is also empty, the class-level javadoc will be used.
+   * If that is also empty, the javadoc of the SuperCommand class will be used
+   * as a fallback.
    *
    * @return key or empty string
    */

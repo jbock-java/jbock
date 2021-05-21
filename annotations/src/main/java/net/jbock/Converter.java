@@ -8,8 +8,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 
 /**
  * <p>Marker annotation for a converter class.
- * If the converter class is defined as a static inner class inside
- * the class where it is referenced,
+ * If the converter is a static inner class of its command,
  * then this annotation may be omitted.</p>
  *
  * <p>The converter must implement either {@code Function<String, M>} or

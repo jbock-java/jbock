@@ -9,8 +9,9 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 /**
  * Marker annotation for an {@code abstract} class that is used
  * to define a command line API.
- * Each of its {@code abstract} methods must have an empty argument list and must be
- * annotated with either {@link Option}, {@link Parameter} or {@link Parameters}.
+ * Each of its {@code abstract} methods must be
+ * either an {@link Option @Option} or a {@link Parameter @Parameter},
+ * or carry the {@link Parameters @Parameters} annotation.
  */
 @Target(TYPE)
 @Retention(SOURCE)
@@ -54,7 +55,8 @@ public @interface Command {
    * If no {@code descriptionKey} is defined,
    * or the runtime message map does not contain the description key,
    * then the {@code description} attribute will be used.
-   * If that is also empty, the class-level javadoc will be used.
+   * If that is also empty, the javadoc of the Command class will be used
+   * as a fallback.
    *
    * @return key or empty string
    */

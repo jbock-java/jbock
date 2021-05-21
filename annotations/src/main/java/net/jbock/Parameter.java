@@ -16,7 +16,8 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 public @interface Parameter {
 
   /**
-   * This parameter's index.
+   * The parameter's index among all positional parameters.
+   * {@link Option Named options} have no index and do not count.
    * The first parameter's index is {@code 0}.
    *
    * @return zero-based index
@@ -40,7 +41,7 @@ public @interface Parameter {
    * If no {@code descriptionKey} is defined,
    * or the runtime message map does not contain the description key,
    * then the {@code description} attribute will be used.
-   * If that is also empty, the method's javadoc will be used.
+   * If that is also empty, the method's javadoc will be used as a fallback.
    *
    * @return description key or empty string
    */
@@ -48,9 +49,7 @@ public @interface Parameter {
 
   /**
    * Parameter description, used when generating the usage documentation.
-   * If empty, the method's javadoc will be used as a fallback.
-   * If {@code descriptionKey} is not empty, an attempt will be made
-   * to read the description from the message map first.
+   * Can be overridden via {@code descriptionKey}.
    *
    * @return description text
    */
