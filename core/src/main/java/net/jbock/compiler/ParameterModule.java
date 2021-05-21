@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import com.google.common.collect.ImmutableList;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
@@ -74,7 +73,7 @@ public class ParameterModule {
       OptionalMatcher optionalMatcher,
       ListMatcher listMatcher,
       ExactMatcher exactMatcher) {
-    return ImmutableList.of(optionalMatcher, listMatcher, exactMatcher);
+    return List.of(optionalMatcher, listMatcher, exactMatcher);
   }
 
   @Provides

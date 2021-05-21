@@ -14,7 +14,6 @@ import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -77,7 +76,7 @@ public class NamedOptionFactory {
     for (String name : sourceMethod.names()) {
       Either<String, String> check = checkName(name);
       if (!check.isRight()) {
-        return check.map(__ -> Collections.emptyList());
+        return check.map(__ -> List.of());
       }
       if (result.contains(name)) {
         return left("duplicate option name: " + name);

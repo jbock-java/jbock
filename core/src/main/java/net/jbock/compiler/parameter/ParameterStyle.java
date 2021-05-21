@@ -9,7 +9,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -74,7 +73,7 @@ public enum ParameterStyle {
 
     @Override
     public List<String> names(ExecutableElement method) {
-      return Collections.emptyList();
+      return List.of();
     }
 
     @Override
@@ -109,7 +108,7 @@ public enum ParameterStyle {
 
     @Override
     public List<String> names(ExecutableElement method) {
-      return Collections.emptyList();
+      return List.of();
     }
 
     @Override

@@ -4,7 +4,6 @@ import javax.lang.model.element.Element;
 import javax.lang.model.util.Elements;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -33,7 +32,7 @@ public class Descriptions {
 
   private static List<String> tokenizeJavadoc(String docComment) {
     if (Objects.toString(docComment, "").trim().isEmpty()) {
-      return Collections.emptyList();
+      return List.of();
     }
     String[] tokens = docComment.trim().split("\\R", -1);
     List<String> result = new ArrayList<>(tokens.length);

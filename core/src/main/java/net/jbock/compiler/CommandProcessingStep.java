@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Command;
+import net.jbock.Converter;
 import net.jbock.SuperCommand;
 import net.jbock.compiler.command.CommandComponent;
 import net.jbock.compiler.command.DaggerCommandComponent;
@@ -19,14 +20,13 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
 public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
@@ -66,7 +66,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
           .map(typeElement -> validateSourceElement(typeElement, parserFlavour))
           .forEach(either -> either.accept(this::printFailures, this::processSourceElement));
     });
-    return Collections.emptySet();
+    return Set.of();
   }
 
   private void processSourceElement(SourceElement sourceElement) {
@@ -86,22 +86,22 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private Either<List<ValidationFailure>, SourceElement> validateSourceElement(
       TypeElement element,
       ParserFlavour parserFlavour) {
-    List<String> failures = new ArrayList<>();
-    util.commonTypeChecks(element)
-        .map(s -> "command " + s)
-        .ifPresent(failures::add);
-    util.assertNoDuplicateAnnotations(element, Command.class, SuperCommand.class)
-        .ifPresent(failures::add);
+    return util.commonTypeChecks(element).map(s -> "command " + s)
+        .or(() -> util.assertNoDuplicateAnnotations(element,
+            Command.class, SuperCommand.class, Converter.class))
+        .or(() -> checkNoInterfaces(element))
+        .map(s -> new ValidationFailure(s, element))
+        .map(List::of)
+        .map(Either::<List<ValidationFailure>, SourceElement>left)
+        .orElseGet(() -> right(SourceElement.create(element, parserFlavour)));
+  }
+
+  private Optional<String> checkNoInterfaces(TypeElement element) {
     List<? extends TypeMirror> interfaces = element.getInterfaces();
     if (!interfaces.isEmpty()) {
-      failures.add("command cannot implement " + interfaces.get(0));
+      return Optional.of("command cannot implement " + interfaces.get(0));
     }
-    if (!failures.isEmpty()) {
-      return left(failures.stream()
-          .map(message -> new ValidationFailure(message, element))
-          .collect(Collectors.toList()));
-    }
-    return right(SourceElement.create(element, parserFlavour));
+    return Optional.empty();
   }
 
   private void printFailures(java.util.List<ValidationFailure> failures) {

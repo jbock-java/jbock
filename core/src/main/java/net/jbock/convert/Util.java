@@ -122,13 +122,6 @@ public class Util {
   public Optional<String> assertNoDuplicateAnnotations(
       Element element,
       Class<? extends Annotation> ann1,
-      Class<? extends Annotation> ann2) {
-    return assertNoDuplicateAnnotations(element, Arrays.asList(ann1, ann2));
-  }
-
-  public Optional<String> assertNoDuplicateAnnotations(
-      Element element,
-      Class<? extends Annotation> ann1,
       Class<? extends Annotation> ann2,
       Class<? extends Annotation> ann3) {
     return assertNoDuplicateAnnotations(element, Arrays.asList(ann1, ann2, ann3));

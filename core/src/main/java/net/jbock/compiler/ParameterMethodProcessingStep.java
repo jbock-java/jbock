@@ -11,7 +11,6 @@ import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.ElementFilter;
-import java.util.Collections;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -40,7 +39,7 @@ public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.S
     for (ExecutableElement method : ElementFilter.methodsIn(elementsByAnnotation.values())) {
       checkEnclosingElement(method);
     }
-    return Collections.emptySet();
+    return Set.of();
   }
 
   private void checkEnclosingElement(ExecutableElement method) {

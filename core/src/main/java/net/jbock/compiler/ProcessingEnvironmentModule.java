@@ -1,7 +1,6 @@
 package net.jbock.compiler;
 
 import com.google.auto.common.BasicAnnotationProcessor;
-import com.google.common.collect.ImmutableList;
 import dagger.Module;
 import dagger.Provides;
 import dagger.Reusable;
@@ -50,11 +49,11 @@ public interface ProcessingEnvironmentModule {
   @Provides
   static List<? extends BasicAnnotationProcessor.Step> steps(
       CommandProcessingStep commandProcessingStep,
-      MapperProcessingStep mapperProcessingStep,
+      ConverterProcessingStep converterProcessingStep,
       ParameterMethodProcessingStep parameterMethodProcessingStep) {
-    return ImmutableList.of(
+    return List.of(
         commandProcessingStep,
-        mapperProcessingStep,
+        converterProcessingStep,
         parameterMethodProcessingStep);
   }
 }

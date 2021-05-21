@@ -47,7 +47,7 @@ public class AllMethodsFinder {
       if (!element.isRight()) {
         List<ValidationFailure> failures = element.fold(
             Function.identity(),
-            __ -> Collections.emptyList());
+            __ -> List.of());
         if (!failures.isEmpty()) {
           return left(failures);
         } else {
@@ -64,18 +64,18 @@ public class AllMethodsFinder {
   private Either<List<ValidationFailure>, TypeElement> findMethodsIn(
       TypeMirror mirror, List<ExecutableElement> acc) {
     if (mirror.getKind() != TypeKind.DECLARED) {
-      return left(Collections.emptyList());
+      return left(List.of());
     }
     DeclaredType declared = AS_DECLARED.visit(mirror);
     if (declared == null) {
-      return left(Collections.emptyList());
+      return left(List.of());
     }
     TypeElement typeElement = AS_TYPE_ELEMENT.visit(declared.asElement());
     if (typeElement == null) {
-      return left(Collections.emptyList());
+      return left(List.of());
     }
     if (!typeElement.getModifiers().contains(ABSTRACT)) {
-      return left(Collections.emptyList());
+      return left(List.of());
     }
     List<? extends TypeMirror> interfaces = typeElement.getInterfaces();
     if (!interfaces.isEmpty()) {

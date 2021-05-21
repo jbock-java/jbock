@@ -1,6 +1,5 @@
 package net.jbock.compiler.command;
 
-import com.google.common.collect.ImmutableList;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.compiler.AbstractMethods;
 import net.jbock.compiler.ContextModule;
@@ -88,7 +87,7 @@ public class CommandProcessor {
           .module(parameterModule())
           .sourceMethod(sourceMethod)
           .alreadyCreatedParams(positionalParams)
-          .alreadyCreatedOptions(ImmutableList.of())
+          .alreadyCreatedOptions(List.of())
           .build()
           .positionalParameterFactory()
           .createPositionalParam(sourceMethod.index().orElse(methods.positionalParameters().size() - 1))
