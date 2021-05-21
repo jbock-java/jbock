@@ -6,9 +6,9 @@ import dagger.Reusable;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -24,16 +24,16 @@ public class UsageMethod extends Cached<MethodSpec> {
 
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
-  private final CommonFields commonFields;
+  private final SourceElement sourceElement;
 
   @Inject
   UsageMethod(
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
-      CommonFields commonFields) {
+      SourceElement sourceElement) {
     this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
-    this.commonFields = commonFields;
+    this.sourceElement = sourceElement;
   }
 
   @Override
@@ -44,7 +44,7 @@ public class UsageMethod extends Cached<MethodSpec> {
 
     spec.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
     spec.addStatement("$N.add($S)", result, " ");
-    spec.addStatement("$N.add($N)", result, commonFields.programName());
+    spec.addStatement("$N.add($S)", result, sourceElement.programName());
 
     if (!namedOptions.optional().isEmpty()) {
       spec.addStatement("$N.add($S)", result, "[OPTION]...");

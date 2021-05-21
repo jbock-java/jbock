@@ -124,7 +124,6 @@ public final class GeneratedClass {
     }
 
     spec.addField(commonFields.err());
-    spec.addField(commonFields.programName());
     spec.addField(commonFields.terminalWidth());
     spec.addField(commonFields.exitHook());
     if (anyDescriptionKeys.anyDescriptionKeysAtAll()) {
@@ -134,8 +133,6 @@ public final class GeneratedClass {
     if (!namedOptions.isEmpty()) {
       spec.addField(commonFields.optionsByName());
     }
-
-    spec.addField(commonFields.suspiciousPattern());
 
     spec.addType(statefulParser.get())
         .addType(optionEnum.define())

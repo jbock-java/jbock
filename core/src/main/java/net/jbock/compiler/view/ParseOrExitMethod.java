@@ -72,8 +72,8 @@ public class ParseOrExitMethod extends Cached<MethodSpec> {
       code.addStatement("$N()", printOnlineHelpMethod.get());
     }
     if (sourceElement.helpEnabled()) {
-      code.addStatement("$N.println($S + $N + $S)", commonFields.err(),
-          "Try '", commonFields.programName(), " --help' for more information.");
+      code.addStatement("$N.println($S)", commonFields.err(),
+          "Try '" + sourceElement.programName() + " --help' for more information.");
     }
     code.addStatement("$N.flush()", commonFields.err())
         .addStatement("$N.accept($N)", commonFields.exitHook(), result)

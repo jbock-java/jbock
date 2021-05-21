@@ -70,6 +70,7 @@ public class StatefulParser extends Cached<TypeSpec> {
     if (!sourceElement.isSuperCommand()) {
       spec.addField(commonFields.endOfOptionParsing());
     }
+    spec.addField(commonFields.suspiciousPattern());
     if (!options.isEmpty()) {
       spec.addMethod(tryParseOptionMethod())
           .addMethod(tryReadOptionMethod());

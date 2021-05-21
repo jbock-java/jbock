@@ -29,7 +29,6 @@ public class CommonFields {
   private static final int DEFAULT_WRAP_AFTER = 80;
 
   private final FieldSpec exitHookField;
-  private final FieldSpec programName;
   private final FieldSpec optionsByName;
   private final FieldSpec paramParsers;
   private final FieldSpec optionParsers;
@@ -50,19 +49,16 @@ public class CommonFields {
   private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages", PRIVATE)
       .initializer("$T.emptyMap()", Collections.class).build();
 
-  private final FieldSpec suspiciousPattern = FieldSpec.builder(Pattern.class, "SUSPICIOUS")
+  private final FieldSpec suspiciousPattern = FieldSpec.builder(Pattern.class, "suspicious")
       .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
-      .addModifiers(PRIVATE, STATIC, FINAL)
       .build();
 
   private CommonFields(
       FieldSpec exitHookField,
-      FieldSpec programName,
       FieldSpec optionsByName,
       FieldSpec paramParsers,
       FieldSpec optionParsers) {
     this.exitHookField = exitHookField;
-    this.programName = programName;
     this.optionsByName = optionsByName;
     this.paramParsers = paramParsers;
     this.optionParsers = optionParsers;
@@ -86,8 +82,6 @@ public class CommonFields {
         .addModifiers(PRIVATE)
         .initializer(code.build())
         .build();
-    FieldSpec programName = FieldSpec.builder(STRING, "programName", PRIVATE, FINAL)
-        .initializer("$S", sourceElement.programName()).build();
     FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.optionType()), "OPTIONS_BY_NAME")
         .initializer("optionsByName()")
         .addModifiers(PRIVATE, STATIC, FINAL)
@@ -98,15 +92,11 @@ public class CommonFields {
     FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionType(), generatedTypes.optionParserType()), "optionParsers")
         .initializer("optionParsers()")
         .build();
-    return new CommonFields(exitHookField, programName, optionsByName, paramParsers, optionParsers);
+    return new CommonFields(exitHookField, optionsByName, paramParsers, optionParsers);
   }
 
   public FieldSpec exitHook() {
     return exitHookField;
-  }
-
-  public FieldSpec programName() {
-    return programName;
   }
 
   public FieldSpec err() {
