@@ -1,5 +1,6 @@
 package net.jbock.compiler.view;
 
+import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -17,6 +18,8 @@ import net.jbock.qualifier.SourceElement;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.EnumMap;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -71,7 +74,8 @@ public class StatefulParser extends Cached<TypeSpec> {
     spec.addField(commonFields.suspiciousPattern());
     if (!namedOptions.isEmpty()) {
       spec.addMethod(tryParseOptionMethod())
-          .addMethod(tryReadOptionMethod());
+          .addMethod(tryReadOptionMethod())
+          .addMethod(privateConstructor());
       spec.addField(commonFields.optionsByName());
       spec.addField(commonFields.optionParsers());
     }
@@ -83,6 +87,34 @@ public class StatefulParser extends Cached<TypeSpec> {
     }
     spec.addMethod(buildMethod());
     return spec.build();
+  }
+
+  private MethodSpec privateConstructor() {
+    CodeBlock.Builder code = CodeBlock.builder();
+    for (ConvertedParameter<NamedOption> namedOption : namedOptions.options()) {
+      for (String dashedName : namedOption.parameter().names()) {
+        code.addStatement("$N.put($S, $T.$L)", commonFields.optionsByName(), dashedName, sourceElement.optionType(),
+            namedOption.enumConstant());
+      }
+      String enumConstant = namedOption.enumConstant();
+      code.addStatement("$N.put($T.$L, new $T($T.$L))",
+          commonFields.optionParsers(), sourceElement.optionType(), enumConstant, optionParserType(namedOption),
+          sourceElement.optionType(), enumConstant);
+    }
+    return MethodSpec.constructorBuilder()
+        .addCode(code.build())
+        .build();
+  }
+
+
+  private ClassName optionParserType(ConvertedParameter<NamedOption> param) {
+    if (param.isRepeatable()) {
+      return generatedTypes.repeatableOptionParserType();
+    }
+    if (param.isFlag()) {
+      return generatedTypes.flagParserType();
+    }
+    return generatedTypes.regularOptionParserType();
   }
 
   private MethodSpec tryParseOptionMethod() {

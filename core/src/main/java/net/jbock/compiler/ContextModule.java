@@ -61,10 +61,12 @@ public class ContextModule {
   CommonFields commonFields(
       GeneratedTypes generatedTypes,
       SourceElement sourceElement,
-      PositionalParameters positionalParameters) {
+      PositionalParameters positionalParameters,
+      NamedOptions namedOptions) {
     return CommonFields.create(
         generatedTypes,
         sourceElement,
-        positionalParameters);
+        positionalParameters,
+        namedOptions);
   }
 }

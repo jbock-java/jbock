@@ -7,10 +7,15 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.compiler.parameter.NamedOption;
+import net.jbock.convert.ConvertedParameter;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashMap;
+import java.util.List;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
@@ -61,7 +66,8 @@ public class CommonFields {
   public static CommonFields create(
       GeneratedTypes generatedTypes,
       SourceElement sourceElement,
-      PositionalParameters positionalParameters) {
+      PositionalParameters positionalParameters,
+      NamedOptions namedOptions) {
     ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(Consumer.class),
         generatedTypes.parseResultType());
     ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
@@ -76,14 +82,20 @@ public class CommonFields {
         .addModifiers(PRIVATE)
         .initializer(code.build())
         .build();
+    long mapSize = namedOptions.stream()
+        .map(ConvertedParameter::parameter)
+        .map(NamedOption::names)
+        .map(List::size)
+        .mapToLong(i -> i)
+        .sum();
     FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.optionType()), "optionsByName")
-        .initializer("getOptionsByName()")
+        .initializer("new $T<>($L)", HashMap.class, mapSize)
         .build();
     FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "paramParsers")
         .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
         .build();
     FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionType(), generatedTypes.optionParserType()), "optionParsers")
-        .initializer("getOptionParsers()")
+        .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.optionType())
         .build();
     return new CommonFields(exitHookField, optionsByName, paramParsers, optionParsers);
   }

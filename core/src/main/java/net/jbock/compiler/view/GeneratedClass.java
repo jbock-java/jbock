@@ -36,14 +36,12 @@ public final class GeneratedClass {
   private final PrintOnlineHelpMethod printOnlineHelpMethod;
   private final CommonFields commonFields;
   private final ParseOrExitMethod parseOrExitMethod;
-  private final OptionParsersMethod optionParsersMethod;
   private final PrintOptionMethod printOptionMethod;
   private final MakeLinesMethod makeLinesMethod;
   private final ParseResultWithRest parseResultWithRest;
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
   private final UsageMethod usageMethod;
   private final Withers withers;
-  private final OptionsByNameMethod optionsByNameMethod;
   private final PrintTokensMethod printTokensMethod;
   private final ClassJavadoc classJavadoc;
   private final MissingRequiredMethod missingRequiredMethod;
@@ -64,13 +62,11 @@ public final class GeneratedClass {
       PrintOnlineHelpMethod printOnlineHelpMethod,
       CommonFields commonFields,
       ParseOrExitMethod parseOrExitMethod,
-      OptionParsersMethod optionParsersMethod,
       PrintOptionMethod printOptionMethod,
       MakeLinesMethod makeLinesMethod,
       ParseResultWithRest parseResultWithRest,
       ReadOptionArgumentMethod readOptionArgumentMethod,
       UsageMethod usageMethod, Withers withers,
-      OptionsByNameMethod optionsByNameMethod,
       PrintTokensMethod printTokensMethod,
       ClassJavadoc classJavadoc,
       MissingRequiredMethod missingRequiredMethod) {
@@ -88,14 +84,12 @@ public final class GeneratedClass {
     this.printOnlineHelpMethod = printOnlineHelpMethod;
     this.commonFields = commonFields;
     this.parseOrExitMethod = parseOrExitMethod;
-    this.optionParsersMethod = optionParsersMethod;
     this.printOptionMethod = printOptionMethod;
     this.makeLinesMethod = makeLinesMethod;
     this.parseResultWithRest = parseResultWithRest;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.usageMethod = usageMethod;
     this.withers = withers;
-    this.optionsByNameMethod = optionsByNameMethod;
     this.printTokensMethod = printTokensMethod;
     this.classJavadoc = classJavadoc;
     this.missingRequiredMethod = missingRequiredMethod;
@@ -118,8 +112,6 @@ public final class GeneratedClass {
       if (namedOptions.anyRepeatable() || namedOptions.anyRegular()) {
         spec.addMethod(readOptionArgumentMethod.get());
       }
-      spec.addMethod(optionsByNameMethod.get());
-      spec.addMethod(optionParsersMethod.get());
     }
     if (allParameters.anyRequired()) {
       spec.addMethod(missingRequiredMethod.get());
