@@ -14,7 +14,6 @@ import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -32,9 +31,6 @@ public class CommonFields {
   private final FieldSpec optionsByName;
   private final FieldSpec paramParsers;
   private final FieldSpec optionParsers;
-
-  private final FieldSpec endOfOptionParsing = FieldSpec.builder(BOOLEAN, "endOfOptionParsing")
-      .build();
 
   private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
       .initializer("new $T<>()", ArrayList.class)
@@ -121,10 +117,6 @@ public class CommonFields {
 
   public FieldSpec rest() {
     return rest;
-  }
-
-  public FieldSpec endOfOptionParsing() {
-    return endOfOptionParsing;
   }
 
   public FieldSpec paramParsers() {

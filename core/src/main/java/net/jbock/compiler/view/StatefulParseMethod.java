@@ -12,9 +12,9 @@ import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
-import java.util.ArrayList;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
@@ -27,6 +27,7 @@ public class StatefulParseMethod {
   private final ParameterSpec it = builder(STRING_ITERATOR, "it").build();
   private final ParameterSpec token = builder(STRING, "token").build();
   private final ParameterSpec position = builder(INT, "position").build();
+  private final ParameterSpec endOfOptionParsing = builder(BOOLEAN, "endOfOptionParsing").build();
   private final NamedOptions options;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
@@ -53,14 +54,12 @@ public class StatefulParseMethod {
         .addCode(generatedTypes.parseResultWithRestType()
             .map(this::superCommandCode)
             .orElseGet(this::regularCode))
-        .returns(generatedTypes.parseSuccessType())
+        .returns(generatedTypes.statefulParserType())
         .build();
   }
 
   private CodeBlock superCommandCode(ClassName parseResultWithRestType) {
     CodeBlock.Builder code = initVariables();
-    code.addStatement("$T $N = new $T<>()",
-        commonFields.rest().type, commonFields.rest(), ArrayList.class);
 
     // begin parsing loop
     code.beginControlFlow("while ($N.hasNext())", it)
@@ -82,8 +81,7 @@ public class StatefulParseMethod {
     // end parsing loop
     code.endControlFlow();
 
-    code.addStatement("return new $T(build(), $N.toArray(new $T[0]))",
-        parseResultWithRestType, commonFields.rest(), String.class);
+    code.addStatement("return this");
     return code.build();
   }
 
@@ -95,15 +93,15 @@ public class StatefulParseMethod {
         .addStatement("$T $N = $N.next()", STRING, token, it);
 
     code.beginControlFlow("if (!$N && $S.equals($N))",
-        commonFields.endOfOptionParsing(), "--", token)
-        .addStatement("$N = $L", commonFields.endOfOptionParsing(), true)
+        endOfOptionParsing, "--", token)
+        .addStatement("$N = $L", endOfOptionParsing, true)
         .addStatement("continue")
         .endControlFlow();
 
     if (!options.isEmpty()) {
       code.add(optionBlock());
     }
-    code.beginControlFlow("if (!$N)", commonFields.endOfOptionParsing())
+    code.beginControlFlow("if (!$N)", endOfOptionParsing)
         .add(errorUnrecognizedOption())
         .endControlFlow();
 
@@ -137,7 +135,7 @@ public class StatefulParseMethod {
     // end parsing loop
     code.endControlFlow();
 
-    return code.addStatement("return build()").build();
+    return code.addStatement("return this").build();
   }
 
   private CodeBlock optionBlock() {
@@ -149,7 +147,7 @@ public class StatefulParseMethod {
           .build();
     } else {
       return CodeBlock.builder()
-          .beginControlFlow("if (!$N && tryParseOption($N, $N))", commonFields.endOfOptionParsing(), token, it)
+          .beginControlFlow("if (!$N && tryParseOption($N, $N))", endOfOptionParsing, token, it)
           .addStatement("continue")
           .endControlFlow()
           .build();
@@ -160,6 +158,9 @@ public class StatefulParseMethod {
     CodeBlock.Builder code = CodeBlock.builder();
     if (!positionalParameters.none() && !(positionalParameters.anyRepeatable() && positionalParameters.size() == 1)) {
       code.addStatement("$T $N = $L", position.type, position, 0);
+    }
+    if (!sourceElement.isSuperCommand()) {
+      code.addStatement("$T $N = $L", BOOLEAN, endOfOptionParsing, false);
     }
     return code;
   }

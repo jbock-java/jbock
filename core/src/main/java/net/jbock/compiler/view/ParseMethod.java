@@ -58,7 +58,7 @@ public class ParseMethod extends Cached<MethodSpec> {
     code.addStatement("$T $N = new $T()", state.type, state, state.type);
     code.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
     code.beginControlFlow("try")
-        .addStatement("$T $N = $N.parse($N)", result.type, result, state, it)
+        .addStatement("$T $N = $N.parse($N).build()", result.type, result, state, it)
         .addStatement("return new $T($N)", generatedTypes.parsingSuccessWrapperType(), result)
         .endControlFlow();
 

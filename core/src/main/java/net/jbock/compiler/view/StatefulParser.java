@@ -28,6 +28,7 @@ import static java.util.Collections.singletonList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
 /**
@@ -67,9 +68,6 @@ public class StatefulParser extends Cached<TypeSpec> {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.statefulParserType())
         .addModifiers(PRIVATE, STATIC)
         .addMethod(statefulParseMethod.parseMethod());
-    if (!sourceElement.isSuperCommand()) {
-      spec.addField(commonFields.endOfOptionParsing());
-    }
     spec.addField(commonFields.suspiciousPattern());
     if (!options.isEmpty()) {
       spec.addMethod(tryParseOptionMethod())
@@ -122,11 +120,6 @@ public class StatefulParser extends Cached<TypeSpec> {
   private CodeBlock tryParseOptionCodeSimple(ParameterSpec token, ParameterSpec it) {
     ParameterSpec option = ParameterSpec.builder(sourceElement.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    if (!sourceElement.isSuperCommand()) {
-      code.add("if ($N)\n", commonFields.endOfOptionParsing()).indent()
-          .addStatement("return false")
-          .unindent();
-    }
     code.addStatement("$T $N = tryReadOption($N)", sourceElement.optionType(), option, token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")
@@ -179,9 +172,19 @@ public class StatefulParser extends Cached<TypeSpec> {
           return joinIndent(block);
         })
         .ifPresent(code::add);
-    return MethodSpec.methodBuilder("build")
-        .addStatement("return new $T($L)", generatedTypes.implType(), joinCodeBlocks(code))
-        .returns(sourceElement.typeName())
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
+    generatedTypes.parseResultWithRestType().ifPresentOrElse(parseResultWithRestType -> {
+          ParameterSpec result = ParameterSpec.builder(sourceElement.typeName(), "result").build();
+          ParameterSpec restArgs = ParameterSpec.builder(sourceElement.typeName(), "restArgs").build();
+          spec.addStatement("$T $N = new $T($L)", result.type, result, generatedTypes.implType(),
+              joinCodeBlocks(code));
+          spec.addStatement("$T $N = $N.toArray(new $T[0])", STRING_ARRAY, restArgs,
+              commonFields.rest(), STRING);
+          spec.addStatement("return new $T($N, $N)", parseResultWithRestType,
+              result, restArgs);
+        },
+        () -> spec.addStatement("return new $T($L)", generatedTypes.implType(), joinCodeBlocks(code)));
+    return spec.returns(generatedTypes.parseSuccessType())
         .build();
   }
 
