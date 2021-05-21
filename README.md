@@ -35,6 +35,9 @@ abstract class DeleteCommand {
 }
 ````
 
+See [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommand_Parser.java)
+for the code this generates.
+
 ### Sample projects
 
 * [jbock-maven-example](https://github.com/h908714124/jbock-maven-example)
