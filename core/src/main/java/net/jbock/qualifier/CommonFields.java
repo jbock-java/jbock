@@ -31,8 +31,8 @@ public class CommonFields {
   private static final int DEFAULT_WRAP_AFTER = 80;
 
   private final FieldSpec exitHookField;
-  private final FieldSpec optionsByName;
-  private final FieldSpec paramParsers;
+  private final FieldSpec optionNames;
+  private final FieldSpec params;
   private final FieldSpec optionParsers;
 
   private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
@@ -54,12 +54,12 @@ public class CommonFields {
 
   private CommonFields(
       FieldSpec exitHookField,
-      FieldSpec optionsByName,
-      FieldSpec paramParsers,
+      FieldSpec optionNames,
+      FieldSpec params,
       FieldSpec optionParsers) {
     this.exitHookField = exitHookField;
-    this.optionsByName = optionsByName;
-    this.paramParsers = paramParsers;
+    this.optionNames = optionNames;
+    this.params = params;
     this.optionParsers = optionParsers;
   }
 
@@ -88,10 +88,10 @@ public class CommonFields {
         .map(List::size)
         .mapToLong(i -> i)
         .sum();
-    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.optionType()), "optionsByName")
+    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.optionType()), "optionNames")
         .initializer("new $T<>($L)", HashMap.class, mapSize)
         .build();
-    FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "paramParsers")
+    FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "params")
         .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
         .build();
     FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionType(), generatedTypes.optionParserType()), "optionParsers")
@@ -120,16 +120,16 @@ public class CommonFields {
     return suspiciousPattern;
   }
 
-  public FieldSpec optionsByName() {
-    return optionsByName;
+  public FieldSpec optionNames() {
+    return optionNames;
   }
 
   public FieldSpec rest() {
     return rest;
   }
 
-  public FieldSpec paramParsers() {
-    return paramParsers;
+  public FieldSpec params() {
+    return params;
   }
 
   public FieldSpec optionParsers() {

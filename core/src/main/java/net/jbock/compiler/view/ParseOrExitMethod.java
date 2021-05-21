@@ -17,7 +17,7 @@ import static net.jbock.compiler.Constants.STRING_ARRAY;
 import static net.jbock.compiler.view.GeneratedClass.CONTINUATION_INDENT_USAGE;
 
 @Reusable
-public class ParseOrExitMethod extends Cached<MethodSpec> {
+public class ParseOrExitMethod {
 
   private final SourceElement sourceElement;
   private final GeneratedTypes generatedTypes;
@@ -39,8 +39,7 @@ public class ParseOrExitMethod extends Cached<MethodSpec> {
     this.printOnlineHelpMethod = printOnlineHelpMethod;
   }
 
-  @Override
-  MethodSpec define() {
+  MethodSpec get() {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
     ParameterSpec result = builder(generatedTypes.parseResultType(), "result").build();

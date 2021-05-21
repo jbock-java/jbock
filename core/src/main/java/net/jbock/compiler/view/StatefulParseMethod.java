@@ -75,7 +75,7 @@ public class StatefulParseMethod {
     }
     code.add(errorUnrecognizedOption());
 
-    code.addStatement("$N[$N++] = $N", commonFields.paramParsers(),
+    code.addStatement("$N[$N++] = $N", commonFields.params(),
         position, token);
 
     // end parsing loop
@@ -119,7 +119,7 @@ public class StatefulParseMethod {
           code.addStatement("$N.add($N)", commonFields.rest(), token);
         } else {
           code.add("if ($N < $L)\n", position, positionalParameters.size() - 1).indent()
-              .addStatement("$N[$N++] = $N", commonFields.paramParsers(),
+              .addStatement("$N[$N++] = $N", commonFields.params(),
                   position, token)
               .unindent()
               .add("else\n").indent()
@@ -127,7 +127,7 @@ public class StatefulParseMethod {
               .unindent();
         }
       } else {
-        code.addStatement("$N[$N++] = $N", commonFields.paramParsers(),
+        code.addStatement("$N[$N++] = $N", commonFields.params(),
             position, token);
       }
     }

@@ -180,12 +180,12 @@ class CurlArgumentsTest {
 
   @Test
   void errorMissingRepeatable() {
-    f.assertThat("-H").failsWithMessage("Missing value after token: -H");
+    f.assertThat("-H").failsWithMessage("Missing argument after token: -H");
   }
 
   @Test
   void errorMissingNonRepeatable() {
-    f.assertThat("--request").failsWithMessage("Missing value after token: --request");
+    f.assertThat("--request").failsWithMessage("Missing argument after token: --request");
   }
 
   @Test

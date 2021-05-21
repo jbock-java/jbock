@@ -18,14 +18,11 @@ import net.jbock.qualifier.SourceElement;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.EnumMap;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static com.squareup.javapoet.TypeName.BOOLEAN;
-import static com.squareup.javapoet.TypeName.INT;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -47,6 +44,7 @@ public class StatefulParser extends Cached<TypeSpec> {
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
   private final MissingRequiredMethod missingRequiredMethod;
+  private final ReadOptionNameMethod readOptionNameMethod;
 
   @Inject
   StatefulParser(
@@ -56,7 +54,8 @@ public class StatefulParser extends Cached<TypeSpec> {
       NamedOptions namedOptions,
       PositionalParameters positionalParameters,
       CommonFields commonFields,
-      MissingRequiredMethod missingRequiredMethod) {
+      MissingRequiredMethod missingRequiredMethod,
+      ReadOptionNameMethod readOptionNameMethod) {
     this.generatedTypes = generatedTypes;
     this.statefulParseMethod = statefulParseMethod;
     this.sourceElement = sourceElement;
@@ -64,6 +63,7 @@ public class StatefulParser extends Cached<TypeSpec> {
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
     this.missingRequiredMethod = missingRequiredMethod;
+    this.readOptionNameMethod = readOptionNameMethod;
   }
 
   @Override
@@ -74,13 +74,12 @@ public class StatefulParser extends Cached<TypeSpec> {
     spec.addField(commonFields.suspiciousPattern());
     if (!namedOptions.isEmpty()) {
       spec.addMethod(tryParseOptionMethod())
-          .addMethod(tryReadOptionMethod())
           .addMethod(privateConstructor());
-      spec.addField(commonFields.optionsByName());
+      spec.addField(commonFields.optionNames());
       spec.addField(commonFields.optionParsers());
     }
     if (!positionalParameters.regular().isEmpty()) {
-      spec.addField(commonFields.paramParsers());
+      spec.addField(commonFields.params());
     }
     if (positionalParameters.anyRepeatable() || sourceElement.isSuperCommand()) {
       spec.addField(commonFields.rest());
@@ -93,7 +92,7 @@ public class StatefulParser extends Cached<TypeSpec> {
     CodeBlock.Builder code = CodeBlock.builder();
     for (ConvertedParameter<NamedOption> namedOption : namedOptions.options()) {
       for (String dashedName : namedOption.parameter().names()) {
-        code.addStatement("$N.put($S, $T.$L)", commonFields.optionsByName(), dashedName, sourceElement.optionType(),
+        code.addStatement("$N.put($S, $T.$L)", commonFields.optionNames(), dashedName, sourceElement.optionType(),
             namedOption.enumConstant());
       }
       String enumConstant = namedOption.enumConstant();
@@ -134,14 +133,16 @@ public class StatefulParser extends Cached<TypeSpec> {
     ParameterSpec clusterToken = ParameterSpec.builder(STRING, "clusterToken").build();
     ParameterSpec option = ParameterSpec.builder(sourceElement.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = tryReadOption($N)", sourceElement.optionType(), option, token);
+    code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionType(),
+        option, commonFields.optionNames(), readOptionNameMethod.get(), token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")
         .unindent();
     code.addStatement("$T $N = $N", clusterToken.type, clusterToken, token);
     code.beginControlFlow("while ($N.get($N).read($N, $N))", commonFields.optionParsers(), option, clusterToken, it);
     code.addStatement("$1N = '-' + $1N.substring(2, $1N.length())", clusterToken);
-    code.addStatement("$N = tryReadOption($N)", option, clusterToken);
+    code.addStatement("$N = $N.get($N($N))", option, commonFields.optionNames(), readOptionNameMethod.get(),
+        clusterToken);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("throw new $T($S + $N)", RuntimeException.class, "Invalid token: ", token)
         .unindent();
@@ -153,36 +154,14 @@ public class StatefulParser extends Cached<TypeSpec> {
   private CodeBlock tryParseOptionCodeSimple(ParameterSpec token, ParameterSpec it) {
     ParameterSpec option = ParameterSpec.builder(sourceElement.optionType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = tryReadOption($N)", sourceElement.optionType(), option, token);
+    code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionType(), option,
+        commonFields.optionNames(), readOptionNameMethod.get(), token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")
         .unindent();
     code.addStatement("$N.get($N).read($N, $N)", commonFields.optionParsers(), option, token, it)
         .addStatement("return true");
     return code.build();
-  }
-
-  private MethodSpec tryReadOptionMethod() {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec index = ParameterSpec.builder(INT, "index").build();
-
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.add("if ($N.length() <= 1 || $N.charAt(0) != '-')\n", token, token).indent()
-        .addStatement("return null").unindent();
-
-    code.add("if ($N.charAt(1) != '-')\n", token).indent()
-        .addStatement("return $N.get($N.substring(0, 2))", commonFields.optionsByName(), token).unindent();
-
-    code.addStatement("$T $N = $N.indexOf('=')", INT, index, token);
-    code.add("if ($N < 0)\n", index).indent()
-        .addStatement("return $N.get($N)", commonFields.optionsByName(), token)
-        .unindent();
-    code.addStatement("return $N.get($N.substring(0, $N))", commonFields.optionsByName(), token, index);
-
-    return MethodSpec.methodBuilder("tryReadOption")
-        .addParameter(token)
-        .addCode(code.build())
-        .returns(sourceElement.optionType()).build();
   }
 
   private MethodSpec buildMethod() {
@@ -249,7 +228,7 @@ public class StatefulParser extends Cached<TypeSpec> {
 
   private CodeBlock streamExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
     return CodeBlock.builder().add(
-        "$T.ofNullable($N[$L])", Optional.class, commonFields.paramParsers(),
+        "$T.ofNullable($N[$L])", Optional.class, commonFields.params(),
         parameter.parameter().position()).build();
   }
 

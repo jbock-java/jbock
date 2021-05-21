@@ -38,16 +38,19 @@ public final class OptionParser {
   private final GeneratedTypes generatedTypes;
   private final FieldSpec optionField;
   private final NamedOptions options;
+  private final ReadOptionArgumentMethod readOptionArgumentMethod;
 
   @Inject
   OptionParser(
       GeneratedTypes generatedTypes,
-      NamedOptions options) {
+      NamedOptions options,
+      ReadOptionArgumentMethod readOptionArgumentMethod) {
     this.generatedTypes = generatedTypes;
     this.optionField = FieldSpec.builder(generatedTypes.optionType(), "option")
         .addModifiers(FINAL)
         .build();
     this.options = options;
+    this.readOptionArgumentMethod = readOptionArgumentMethod;
   }
 
   List<TypeSpec> define() {
@@ -126,7 +129,7 @@ public final class OptionParser {
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class);
-    code.addStatement("values.add(readOptionArgument($N, $N))", token, it);
+    code.addStatement("values.add($N($N, $N))", readOptionArgumentMethod.get(), token, it);
     if (options.unixClusteringSupported()) {
       code.addStatement("return false");
     }
@@ -144,7 +147,7 @@ public final class OptionParser {
     code.add("if ($N != null)\n", value).indent()
         .addStatement(throwRepetitionErrorStatement(token))
         .unindent();
-    code.addStatement("$N = readOptionArgument($N, $N)", value, token, it);
+    code.addStatement("$N = $N($N, $N)", value, readOptionArgumentMethod.get(), token, it);
     if (options.unixClusteringSupported()) {
       code.addStatement("return false");
     }

@@ -23,7 +23,7 @@ class GradleArgumentsTest {
   @Test
   void errorMissingValue() {
     // there's nothing after -m
-    f.assertThat("-m").failsWithMessage("Missing value after token: -m");
+    f.assertThat("-m").failsWithMessage("Missing argument after token: -m");
   }
 
   @Test
@@ -48,7 +48,7 @@ class GradleArgumentsTest {
     f.assertThat("-cX=1").failsWithMessage("Invalid token: -cX=1");
     f.assertThat("-cvv").failsWithMessage("Option '-v' is a repetition");
     f.assertThat("-cvx").failsWithMessage("Invalid token: -cvx");
-    f.assertThat("-cvm").failsWithMessage("Missing value after token: -m");
+    f.assertThat("-cvm").failsWithMessage("Missing argument after token: -m");
     f.assertThat("--column-count").failsWithMessage("Invalid option: --column-count");
   }
 

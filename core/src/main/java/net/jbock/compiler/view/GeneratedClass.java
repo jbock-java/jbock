@@ -45,6 +45,7 @@ public final class GeneratedClass {
   private final PrintTokensMethod printTokensMethod;
   private final ClassJavadoc classJavadoc;
   private final MissingRequiredMethod missingRequiredMethod;
+  private final ReadOptionNameMethod readOptionNameMethod;
 
   @Inject
   GeneratedClass(
@@ -69,7 +70,8 @@ public final class GeneratedClass {
       UsageMethod usageMethod, Withers withers,
       PrintTokensMethod printTokensMethod,
       ClassJavadoc classJavadoc,
-      MissingRequiredMethod missingRequiredMethod) {
+      MissingRequiredMethod missingRequiredMethod,
+      ReadOptionNameMethod readOptionNameMethod) {
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
     this.allParameters = allParameters;
@@ -93,6 +95,7 @@ public final class GeneratedClass {
     this.printTokensMethod = printTokensMethod;
     this.classJavadoc = classJavadoc;
     this.missingRequiredMethod = missingRequiredMethod;
+    this.readOptionNameMethod = readOptionNameMethod;
   }
 
   public TypeSpec define() {
@@ -109,6 +112,7 @@ public final class GeneratedClass {
         .addMethod(makeLinesMethod.get())
         .addMethod(usageMethod.get());
     if (!namedOptions.isEmpty()) {
+      spec.addMethod(readOptionNameMethod.get());
       if (namedOptions.anyRepeatable() || namedOptions.anyRegular()) {
         spec.addMethod(readOptionArgumentMethod.get());
       }

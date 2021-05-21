@@ -36,7 +36,7 @@ public class ReadOptionArgumentMethod extends Cached<MethodSpec> {
 
     code.add("if (!$N.hasNext())\n", it).indent()
         .addStatement("throw new $T($S + $N)", RuntimeException.class,
-            "Missing value after token: ", token)
+            "Missing argument after token: ", token)
         .unindent();
 
     code.addStatement("return $N.next()", it);
