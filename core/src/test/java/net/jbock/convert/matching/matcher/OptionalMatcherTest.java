@@ -6,7 +6,6 @@ import net.jbock.compiler.EnumName;
 import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
-import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.matching.MatchFactory;
 import net.jbock.convert.matching.MatchFactoryAccess;
 import net.jbock.qualifier.SourceMethod;

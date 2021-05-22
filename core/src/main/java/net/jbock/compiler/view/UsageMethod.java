@@ -59,16 +59,16 @@ public class UsageMethod extends Cached<MethodSpec> {
 
     for (ConvertedParameter<PositionalParameter> param : positionalParameters.regular()) {
       if (param.isOptional()) {
-        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]");
+        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake('_').toUpperCase(Locale.US) + "]");
       } else if (param.isRequired()) {
-        spec.addStatement("$N.add($S)", result, param.enumName().snake().toUpperCase(Locale.US));
+        spec.addStatement("$N.add($S)", result, param.enumName().snake('_').toUpperCase(Locale.US));
       } else {
         throw new AssertionError("all cases handled (param can't be flag)");
       }
     }
 
     positionalParameters.repeatable().ifPresent(param ->
-        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake().toUpperCase(Locale.US) + "]..."));
+        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake('_').toUpperCase(Locale.US) + "]..."));
 
     spec.addStatement("return $N", result);
     return spec.returns(LIST_OF_STRING).addModifiers(PRIVATE).build();

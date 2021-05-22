@@ -14,6 +14,7 @@ import net.jbock.compiler.ValidationFailure;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Util;
 import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
@@ -32,6 +33,7 @@ public class CommandProcessor {
   private final TypeTool tool;
   private final ParamsFactory paramsFactory;
   private final MethodsFactory methodsFactory;
+  private final Util util;
 
   @Inject
   CommandProcessor(
@@ -39,12 +41,14 @@ public class CommandProcessor {
       Elements elements,
       TypeTool tool,
       ParamsFactory paramsFactory,
-      MethodsFactory methodsFactory) {
+      MethodsFactory methodsFactory,
+      Util util) {
     this.sourceElement = sourceElement;
     this.elements = elements;
     this.tool = tool;
     this.paramsFactory = paramsFactory;
     this.methodsFactory = methodsFactory;
+    this.util = util;
   }
 
   public Either<List<ValidationFailure>, TypeSpec> generate() {
@@ -100,7 +104,7 @@ public class CommandProcessor {
   }
 
   private ParameterModule parameterModule() {
-    return new ParameterModule(tool, sourceElement);
+    return new ParameterModule(tool, sourceElement, util);
   }
 
   private ContextModule contextModule(Params params) {

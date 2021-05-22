@@ -22,6 +22,6 @@ public abstract class Matcher {
   protected ParameterSpec constructorParam(TypeMirror constructorParamType) {
     return ParameterSpec.builder(
         TypeName.get(constructorParamType),
-        enumName.camel()).build();
+        enumName.enumConstant()).build();
   }
 }

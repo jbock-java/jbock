@@ -20,7 +20,7 @@ public class PositionalParameter extends AbstractParameter {
   }
 
   public String paramLabel() {
-    return sourceMethod().paramLabel().orElse(enumName().snake().toUpperCase(Locale.US));
+    return sourceMethod().paramLabel().orElse(enumName().snake('_').toUpperCase(Locale.US));
   }
 
   public int position() {

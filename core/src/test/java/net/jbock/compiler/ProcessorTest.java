@@ -337,6 +337,51 @@ class ProcessorTest {
   }
 
   @Test
+  void reallyWeirdMethodName() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(names = \"--x\")",
+        "  abstract boolean __();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void reallyStrangeMethodName() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(names = \"--x\")",
+        "  abstract boolean __9();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void fancyOptionNames() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(names = \"--Fancy\")",
+        "  abstract boolean Fancy();",
+
+        "  @Option(names = \"--fancy\")",
+        "  abstract boolean fancy();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(new Processor(true))
+        .compilesWithoutError();
+  }
+
+  @Test
   void badFlag() {
     JavaFileObject javaFile = fromSource(
         "@Command",
@@ -355,7 +400,7 @@ class ProcessorTest {
   void simpleInt() {
     JavaFileObject javaFile = fromSource(
         "@Command(description = \"y\", descriptionKey = \"y\")",
-        "abstract class Arguments {",
+        "abstract class MyArguments {",
         "",
         "  @Option(names = \"--x\", description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
         "  abstract int aRequiredInt();",

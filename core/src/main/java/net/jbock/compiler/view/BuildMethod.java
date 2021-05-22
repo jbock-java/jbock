@@ -16,6 +16,7 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -123,7 +124,7 @@ public class BuildMethod {
 
   private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
     List<String> dashedNames = parameter.parameter().names();
-    String enumConstant = parameter.enumConstant();
+    String enumConstant = parameter.enumName().snake('_').toUpperCase(Locale.US);
     switch (parameter.skew()) {
       case REQUIRED:
         String name = enumConstant + " (" + String.join(", ", dashedNames) + ")";
@@ -143,7 +144,7 @@ public class BuildMethod {
   }
 
   private List<CodeBlock> tailExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
-    String enumConstant = parameter.enumConstant();
+    String enumConstant = parameter.enumName().snake('_').toUpperCase(Locale.US);
     switch (parameter.skew()) {
       case REQUIRED:
         return singletonList(CodeBlock.of(".orElseThrow(() -> $N($S))",

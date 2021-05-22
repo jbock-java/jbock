@@ -3,11 +3,16 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Option;
 
+import java.util.Optional;
+
 @Command
 abstract class EvilArguments {
 
+  @Option(names = "--Fancy")
+  abstract Optional<String> Fancy();
+
   @Option(names = "--fancy")
-  abstract protected String fancy();
+  abstract String fancy();
 
   @Option(names = "--fAncy")
   abstract String fAncy();
@@ -23,4 +28,7 @@ abstract class EvilArguments {
 
   @Option(names = "--Blub")
   abstract String Blub();
+
+  @Option(names = "--evil")
+  abstract Optional<String> __();
 }

@@ -7,6 +7,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import dagger.Reusable;
+import net.jbock.compiler.EnumName;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
@@ -49,7 +50,8 @@ public class OptionEnum {
     List<ConvertedParameter<? extends AbstractParameter>> parameters = context.parameters();
     TypeSpec.Builder spec = TypeSpec.enumBuilder(generatedTypes.optionType());
     for (ConvertedParameter<? extends AbstractParameter> param : parameters) {
-      String enumConstant = param.enumConstant();
+      EnumName enumName = param.enumName();
+      String enumConstant = enumName.enumConstant();
       CodeBlock description = descriptionBlock(param.parameter().description(elements));
       TypeSpec optionSpec = anonymousClassBuilder(description).build();
       spec.addEnumConstant(enumConstant, optionSpec);

@@ -33,7 +33,7 @@ public class NamedOption extends AbstractParameter {
         .map(name -> name.substring(2))
         .map(s -> s.toUpperCase(Locale.US))
         .findFirst()
-        .orElse(enumName().snake().toUpperCase(Locale.US)));
+        .orElse(enumName().snake('_').toUpperCase(Locale.US)));
   }
 
   public boolean hasUnixName() {
