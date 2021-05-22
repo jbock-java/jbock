@@ -24,6 +24,7 @@ public class ParseOrExitMethod {
   private final CommonFields commonFields;
   private final PrintTokensMethod printTokensMethod;
   private final PrintOnlineHelpMethod printOnlineHelpMethod;
+  private final ParseMethod parseMethod;
 
   @Inject
   ParseOrExitMethod(
@@ -31,12 +32,14 @@ public class ParseOrExitMethod {
       GeneratedTypes generatedTypes,
       CommonFields commonFields,
       PrintTokensMethod printTokensMethod,
-      PrintOnlineHelpMethod printOnlineHelpMethod) {
+      PrintOnlineHelpMethod printOnlineHelpMethod,
+      ParseMethod parseMethod) {
     this.sourceElement = sourceElement;
     this.generatedTypes = generatedTypes;
     this.commonFields = commonFields;
     this.printTokensMethod = printTokensMethod;
     this.printOnlineHelpMethod = printOnlineHelpMethod;
+    this.parseMethod = parseMethod;
   }
 
   MethodSpec get() {
@@ -45,7 +48,7 @@ public class ParseOrExitMethod {
     ParameterSpec result = builder(generatedTypes.parseResultType(), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
 
-    code.addStatement("$T $N = parse($N)", result.type, result, args);
+    code.addStatement("$T $N = $N($N)", result.type, result, parseMethod.get(), args);
 
     code.add("if ($N instanceof $T)\n", result, generatedTypes.parsingSuccessWrapperType()).indent()
         .addStatement("return (($T) $N).$L()",

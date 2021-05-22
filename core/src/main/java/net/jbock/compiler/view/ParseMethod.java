@@ -52,7 +52,7 @@ public class ParseMethod extends Cached<MethodSpec> {
           .unindent();
     });
 
-    ParameterSpec state = builder(generatedTypes.statefulParserType(), "state").build();
+    ParameterSpec state = builder(generatedTypes.statefulParserType(), "statefulParser").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec result = builder(generatedTypes.parseSuccessType(), "result").build();
     code.addStatement("$T $N = new $T()", state.type, state, state.type);
