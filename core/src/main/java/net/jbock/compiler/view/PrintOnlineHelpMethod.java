@@ -35,6 +35,7 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
   private final PrintTokensMethod printTokensMethod;
   private final CommonFields commonFields;
   private final Elements elements;
+  private final PrintOptionMethod printOptionMethod;
 
   @Inject
   PrintOnlineHelpMethod(
@@ -44,7 +45,8 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
       NamedOptions namedOptions,
       PrintTokensMethod printTokensMethod,
       CommonFields commonFields,
-      Elements elements) {
+      Elements elements,
+      PrintOptionMethod printOptionMethod) {
     this.sourceElement = sourceElement;
     this.allParameters = allParameters;
     this.positionalParameters = positionalParameters;
@@ -52,6 +54,7 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
     this.printTokensMethod = printTokensMethod;
     this.commonFields = commonFields;
     this.elements = elements;
+    this.printOptionMethod = printOptionMethod;
   }
 
   @Override
@@ -119,27 +122,33 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
   }
 
   private CodeBlock printNamedOptionCode(String optionsFormat, ConvertedParameter<NamedOption> c) {
+    String enumConstant = c.enumConstant();
     if (allParameters.anyDescriptionKeys()) {
-      return CodeBlock.builder().addStatement("printOption($T.$L, $S, $S)",
-          sourceElement.optionType(), c.enumConstant(),
+      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S)",
+          printOptionMethod.get(),
+          sourceElement.optionType(), enumConstant,
           String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
           c.parameter().descriptionKey().orElse("")).build();
     } else {
-      return CodeBlock.builder().addStatement("printOption($T.$L, $S)",
-          sourceElement.optionType(), c.enumConstant(),
+      return CodeBlock.builder().addStatement("$N($T.$L, $S)",
+          printOptionMethod.get(),
+          sourceElement.optionType(), enumConstant,
           String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag()))).build();
     }
   }
 
   private CodeBlock printPositionalCode(String paramsFormat, ConvertedParameter<PositionalParameter> p) {
+    String enumConstant = p.enumConstant();
     if (allParameters.anyDescriptionKeys()) {
-      return CodeBlock.builder().addStatement("printOption($T.$L, $S, $S)",
-          sourceElement.optionType(), p.enumConstant(),
+      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S)",
+          printOptionMethod.get(),
+          sourceElement.optionType(), enumConstant,
           String.format(paramsFormat, p.parameter().paramLabel()),
           p.parameter().descriptionKey().orElse("")).build();
     } else {
-      return CodeBlock.builder().addStatement("printOption($T.$L, $S)",
-          sourceElement.optionType(), p.enumConstant(),
+      return CodeBlock.builder().addStatement("$N($T.$L, $S)",
+          printOptionMethod.get(),
+          sourceElement.optionType(), enumConstant,
           String.format(paramsFormat, p.parameter().paramLabel())).build();
     }
   }

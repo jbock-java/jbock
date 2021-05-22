@@ -377,7 +377,7 @@ class ProcessorTest {
         "  abstract boolean fancy();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor(true))
+        .processedWith(new Processor())
         .compilesWithoutError();
   }
 

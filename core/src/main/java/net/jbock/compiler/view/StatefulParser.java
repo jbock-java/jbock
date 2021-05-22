@@ -82,14 +82,15 @@ public class StatefulParser extends Cached<TypeSpec> {
   private MethodSpec privateConstructor() {
     CodeBlock.Builder code = CodeBlock.builder();
     for (ConvertedParameter<NamedOption> namedOption : namedOptions.options()) {
-      for (String dashedName : namedOption.parameter().names()) {
-        code.addStatement("$N.put($S, $T.$L)", commonFields.optionNames(), dashedName, sourceElement.optionType(),
-            namedOption.enumConstant());
-      }
       String enumConstant = namedOption.enumConstant();
-      code.addStatement("$N.put($T.$L, new $T($T.$L))",
-          commonFields.optionParsers(), sourceElement.optionType(), enumConstant, optionParserType(namedOption),
-          sourceElement.optionType(), enumConstant);
+      for (String dashedName : namedOption.parameter().names()) {
+        code.addStatement("$N.put($S, $T.$L)",
+            commonFields.optionNames(), dashedName, sourceElement.optionType(),
+            enumConstant);
+      }
+      code.addStatement("$1N.put($2T.$3L, new $4T($2T.$3L))",
+          commonFields.optionParsers(), sourceElement.optionType(),
+          enumConstant, optionParserType(namedOption));
     }
     return MethodSpec.constructorBuilder()
         .addCode(code.build())

@@ -40,7 +40,7 @@ public class Impl {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType())
         .superclass(sourceElement.typeName());
     for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
-      spec.addField(FieldSpec.builder(c.parameter().returnType(), c.enumConstant()).build());
+      spec.addField(implField(c));
     }
     return spec.addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor())
@@ -55,18 +55,23 @@ public class Impl {
     return MethodSpec.methodBuilder(param.methodName())
         .returns(param.returnType())
         .addModifiers(param.getAccessModifiers())
-        .addStatement("return $N", FieldSpec.builder(param.returnType(), c.enumConstant()).build())
+        .addStatement("return $N", implField(c))
         .build();
   }
 
   private MethodSpec implConstructor() {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
     for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
-      TypeName returnType = c.parameter().returnType();
-      String name = c.enumConstant();
-      spec.addStatement("this.$N = $L", FieldSpec.builder(returnType, name).build(), c.extractExpr());
+      FieldSpec field = implField(c);
+      spec.addStatement("this.$N = $L", field, c.extractExpr());
       spec.addParameter(c.constructorParam());
     }
     return spec.build();
+  }
+
+  private FieldSpec implField(ConvertedParameter<? extends AbstractParameter> c) {
+    TypeName fieldType = c.parameter().returnType();
+    String fieldName = c.enumConstant();
+    return FieldSpec.builder(fieldType, fieldName).build();
   }
 }

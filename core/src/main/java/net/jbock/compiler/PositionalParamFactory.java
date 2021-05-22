@@ -56,7 +56,7 @@ public class PositionalParamFactory {
     }
     return Either.ofLeft(alreadyCreated.stream()
         .filter(ConvertedParameter::isRepeatable)
-        .map(p -> "positional parameter " + p.enumName().enumConstant() + " is also repeatable")
+        .map(p -> "positional parameter " + p.parameter().paramLabel() + " is also repeatable")
         .findAny())
         .orRight(c);
   }
@@ -88,11 +88,11 @@ public class PositionalParamFactory {
       }
       if (thisOrder > otherOrder && thisPosition < other.parameter().position()) {
         return left("position must be greater than position of " +
-            other.skew() + " parameter " + other.enumName());
+            other.skew() + " parameter " + other.parameter().paramLabel());
       }
       if (thisOrder < otherOrder && thisPosition > other.parameter().position()) {
         return left("position must be less than position of " +
-            other.skew() + " parameter " + other.enumName());
+            other.skew() + " parameter " + other.parameter().paramLabel());
       }
     }
     return right(c);
