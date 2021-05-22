@@ -4,6 +4,7 @@ import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
+import java.util.OptionalInt;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
@@ -35,11 +36,12 @@ class AllIntegersArgumentsTest {
 
   @Test
   void positional() {
-    f.assertThat("--obj=1", "--prim=1", "5", "3").succeeds(
+    f.assertThat("--obj=1", "--prim=1", "5", "3", "--opti=5").succeeds(
         "positional", asList(5, 3),
         "listOfIntegers", emptyList(),
         "optionalInteger", Optional.empty(),
         "integer", 1,
+        "optionalInt", OptionalInt.of(5),
         "primitiveInt", 1);
   }
 }
