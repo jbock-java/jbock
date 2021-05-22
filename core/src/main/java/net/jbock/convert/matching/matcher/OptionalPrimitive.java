@@ -22,8 +22,8 @@ enum OptionalPrimitive {
   }
 
   CodeBlock extractExpr(ParameterSpec constructorParam) {
-    return CodeBlock.of("$N.isPresent() ? $T.of($N.get()) : $T.empty()",
-        constructorParam, type, constructorParam, type);
+    return CodeBlock.of("$1N.map($2T::of).orElse($2T.empty())",
+        constructorParam, type);
   }
 
   public String type() {

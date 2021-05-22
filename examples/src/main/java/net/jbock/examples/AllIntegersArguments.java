@@ -6,6 +6,7 @@ import net.jbock.Parameters;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.OptionalInt;
 
 @Command
 abstract class AllIntegersArguments {
@@ -24,4 +25,7 @@ abstract class AllIntegersArguments {
 
   @Option(names = "--prim")
   abstract int primitiveInt();
+
+  @Option(names = "--opti")
+  abstract OptionalInt optionalInt();
 }
