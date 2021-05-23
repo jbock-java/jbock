@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import dagger.Reusable;
+import net.jbock.compiler.color.Styler;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
@@ -36,6 +37,8 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
   private final CommonFields commonFields;
   private final Elements elements;
   private final PrintOptionMethod printOptionMethod;
+  private final UsageMethod usageMethod;
+  private final Styler styler;
 
   @Inject
   PrintOnlineHelpMethod(
@@ -46,7 +49,9 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
       PrintTokensMethod printTokensMethod,
       CommonFields commonFields,
       Elements elements,
-      PrintOptionMethod printOptionMethod) {
+      PrintOptionMethod printOptionMethod,
+      UsageMethod usageMethod,
+      Styler styler) {
     this.sourceElement = sourceElement;
     this.allParameters = allParameters;
     this.positionalParameters = positionalParameters;
@@ -55,6 +60,8 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
     this.commonFields = commonFields;
     this.elements = elements;
     this.printOptionMethod = printOptionMethod;
+    this.usageMethod = usageMethod;
+    this.styler = styler;
   }
 
   @Override
@@ -96,20 +103,20 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
       code.addStatement("$N.println()", commonFields.err());
     }
 
-    code.addStatement("$N.println($S)", commonFields.err(), "USAGE");
-    code.addStatement("$N($S, usage())", printTokensMethod.get(), continuationIndent);
+    code.addStatement("$N.println($S)", commonFields.err(), styler.bold("USAGE"));
+    code.addStatement("$N($S, $N())", printTokensMethod.get(), continuationIndent, usageMethod.get());
 
     String paramsFormat = "  %1$-" + positionalParameters.maxWidth() + "s ";
 
     if (!positionalParameters.none()) {
       code.addStatement("$N.println()", commonFields.err());
-      code.addStatement("$N.println($S)", commonFields.err(), "PARAMETERS");
+      code.addStatement("$N.println($S)", commonFields.err(), styler.bold("PARAMETERS"));
     }
     positionalParameters.forEachRegular(p -> code.add(printPositionalCode(paramsFormat, p)));
     positionalParameters.repeatable().ifPresent(p -> code.add(printPositionalCode(paramsFormat, p)));
     if (!namedOptions.isEmpty()) {
       code.addStatement("$N.println()", commonFields.err());
-      code.addStatement("$N.println($S)", commonFields.err(), "OPTIONS");
+      code.addStatement("$N.println($S)", commonFields.err(), styler.bold("OPTIONS"));
     }
 
     String optionsFormat = "  %1$-" + namedOptions.maxWidth() + "s ";
@@ -137,19 +144,19 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
     }
   }
 
-  private CodeBlock printPositionalCode(String paramsFormat, ConvertedParameter<PositionalParameter> p) {
-    String enumConstant = p.enumConstant();
+  private CodeBlock printPositionalCode(String paramsFormat, ConvertedParameter<PositionalParameter> c) {
+    String enumConstant = c.enumConstant();
     if (allParameters.anyDescriptionKeys()) {
       return CodeBlock.builder().addStatement("$N($T.$L, $S, $S)",
           printOptionMethod.get(),
           sourceElement.optionType(), enumConstant,
-          String.format(paramsFormat, p.parameter().paramLabel()),
-          p.parameter().descriptionKey().orElse("")).build();
+          String.format(paramsFormat, c.paramLabel()),
+          c.parameter().descriptionKey().orElse("")).build();
     } else {
       return CodeBlock.builder().addStatement("$N($T.$L, $S)",
           printOptionMethod.get(),
           sourceElement.optionType(), enumConstant,
-          String.format(paramsFormat, p.parameter().paramLabel())).build();
+          String.format(paramsFormat, c.paramLabel())).build();
     }
   }
 }

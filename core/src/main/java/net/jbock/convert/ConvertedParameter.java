@@ -69,6 +69,10 @@ public final class ConvertedParameter<P extends AbstractParameter> {
     return parameter;
   }
 
+  public String paramLabel() {
+    return parameter.paramLabel();
+  }
+
   public String enumConstant() {
     return enumName.enumConstant();
   }

@@ -3,16 +3,17 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import dagger.Reusable;
+import net.jbock.compiler.color.Styler;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Skew;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Locale;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static javax.lang.model.element.Modifier.PRIVATE;
@@ -25,15 +26,18 @@ public class UsageMethod extends Cached<MethodSpec> {
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
   private final SourceElement sourceElement;
+  private final Styler styler;
 
   @Inject
   UsageMethod(
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
-      SourceElement sourceElement) {
+      SourceElement sourceElement,
+      Styler styler) {
     this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
     this.sourceElement = sourceElement;
+    this.styler = styler;
   }
 
   @Override
@@ -53,22 +57,27 @@ public class UsageMethod extends Cached<MethodSpec> {
     for (ConvertedParameter<NamedOption> option : namedOptions.required()) {
       spec.addStatement("$N.add($T.format($S, $S, $S))",
           result, STRING, "%s %s",
-          option.parameter().names().get(0),
-          option.parameter().paramLabel());
+          styler.yellow(option.parameter().names().get(0)),
+          option.paramLabel());
     }
 
     for (ConvertedParameter<PositionalParameter> param : positionalParameters.regular()) {
-      if (param.isOptional()) {
-        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake('_').toUpperCase(Locale.US) + "]");
-      } else if (param.isRequired()) {
-        spec.addStatement("$N.add($S)", result, param.enumName().snake('_').toUpperCase(Locale.US));
-      } else {
-        throw new AssertionError("all cases handled (param can't be flag)");
+      Skew skew = param.skew();
+      String paramLabel = param.paramLabel();
+      switch (skew) {
+        case OPTIONAL:
+          spec.addStatement("$N.add($S)", result, "[" + paramLabel + "]");
+          break;
+        case REQUIRED:
+          spec.addStatement("$N.add($S)", result, styler.yellow(paramLabel));
+          break;
+        default:
+          throw new AssertionError("unexpected skew: " + skew);
       }
     }
 
     positionalParameters.repeatable().ifPresent(param ->
-        spec.addStatement("$N.add($S)", result, "[" + param.enumName().snake('_').toUpperCase(Locale.US) + "]..."));
+        spec.addStatement("$N.add($S)", result, "[" + param.paramLabel() + "]..."));
 
     spec.addStatement("return $N", result);
     return spec.returns(LIST_OF_STRING).addModifiers(PRIVATE).build();

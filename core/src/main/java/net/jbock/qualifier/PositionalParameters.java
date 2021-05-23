@@ -31,8 +31,7 @@ public class PositionalParameters {
         .filter(ConvertedParameter::isRepeatable)
         .findFirst();
     int maxWidth = all.stream()
-        .map(ConvertedParameter::parameter)
-        .map(PositionalParameter::paramLabel)
+        .map(ConvertedParameter::paramLabel)
         .mapToInt(String::length).max().orElse(0);
     return new PositionalParameters(regular, repeatable, maxWidth);
   }

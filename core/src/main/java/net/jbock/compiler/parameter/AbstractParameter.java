@@ -57,6 +57,8 @@ public abstract class AbstractParameter {
     return enumName;
   }
 
+  public abstract String paramLabel();
+
   final SourceMethod sourceMethod() {
     return sourceMethod;
   }

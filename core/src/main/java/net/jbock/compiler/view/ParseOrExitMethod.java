@@ -5,6 +5,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.compiler.color.Styler;
 import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.SourceElement;
 
@@ -24,7 +25,9 @@ public class ParseOrExitMethod {
   private final CommonFields commonFields;
   private final PrintTokensMethod printTokensMethod;
   private final PrintOnlineHelpMethod printOnlineHelpMethod;
+  private final UsageMethod usageMethod;
   private final ParseMethod parseMethod;
+  private final Styler styler;
 
   @Inject
   ParseOrExitMethod(
@@ -33,13 +36,17 @@ public class ParseOrExitMethod {
       CommonFields commonFields,
       PrintTokensMethod printTokensMethod,
       PrintOnlineHelpMethod printOnlineHelpMethod,
-      ParseMethod parseMethod) {
+      UsageMethod usageMethod,
+      ParseMethod parseMethod,
+      Styler styler) {
     this.sourceElement = sourceElement;
     this.generatedTypes = generatedTypes;
     this.commonFields = commonFields;
     this.printTokensMethod = printTokensMethod;
     this.printOnlineHelpMethod = printOnlineHelpMethod;
+    this.usageMethod = usageMethod;
     this.parseMethod = parseMethod;
+    this.styler = styler;
   }
 
   MethodSpec get() {
@@ -65,17 +72,18 @@ public class ParseOrExitMethod {
         .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
         .endControlFlow());
 
-    code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", commonFields.err(),
-        "Error: ", generatedTypes.parsingFailedType(), result);
+    code.addStatement("$N.println($S + (($T) $N).getError().getMessage() + $S)", commonFields.err(),
+        styler.startRed() + "Error: ", generatedTypes.parsingFailedType(), result, styler.endRed());
     if (sourceElement.helpEnabled()) {
       String blanks = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
-      code.addStatement("$N($S, usage())", printTokensMethod.get(), blanks);
+      code.addStatement("$N($S, $N())", printTokensMethod.get(), blanks, usageMethod.get());
     } else {
       code.addStatement("$N()", printOnlineHelpMethod.get());
     }
     if (sourceElement.helpEnabled()) {
       code.addStatement("$N.println($S)", commonFields.err(),
-          "Try '" + sourceElement.programName() + " --help' for more information.");
+          "Try " + styler.yellow(sourceElement.programName() + " --help") +
+              " for more information.");
     }
     code.addStatement("$N.flush()", commonFields.err())
         .addStatement("$N.accept($N)", commonFields.exitHook(), result)

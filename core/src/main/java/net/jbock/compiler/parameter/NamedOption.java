@@ -27,7 +27,8 @@ public class NamedOption extends AbstractParameter {
     return isFlag ? sample : sample + ' ' + paramLabel();
   }
 
-  public String paramLabel() {
+  @Override
+  public final String paramLabel() {
     return sourceMethod().paramLabel().orElseGet(() -> names.stream()
         .filter(name -> name.startsWith("--"))
         .map(name -> name.substring(2))

@@ -19,7 +19,8 @@ public class PositionalParameter extends AbstractParameter {
     this.position = position;
   }
 
-  public String paramLabel() {
+  @Override
+  public final String paramLabel() {
     return sourceMethod().paramLabel().orElse(enumName().snake('_').toUpperCase(Locale.US));
   }
 

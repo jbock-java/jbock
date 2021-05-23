@@ -16,8 +16,12 @@ public class EnumName {
   private final String enumConstant; // unique
 
   private EnumName(List<String> parts) {
+    this(parts, makeCamel(parts));
+  }
+
+  private EnumName(List<String> parts, String enumConstant) {
     this.parts = parts;
-    this.enumConstant = makeCamel(parts);
+    this.enumConstant = enumConstant;
   }
 
   private static final Set<CharType> BREAK_TYPES = EnumSet.of(
@@ -44,10 +48,13 @@ public class EnumName {
   }
 
   EnumName makeLonger() {
-    List<String> newParts = new ArrayList<>(this.parts.size() + 1);
-    newParts.addAll(this.parts);
-    newParts.add("1");
-    return new EnumName(newParts);
+    String newConstant;
+    if (charType(enumConstant.charAt(enumConstant.length() - 1)) == CharType.DIGIT) {
+      newConstant = this.enumConstant + "1";
+    } else {
+      newConstant = this.enumConstant + "_1";
+    }
+    return new EnumName(parts, newConstant);
   }
 
   /**
