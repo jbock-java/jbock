@@ -16,7 +16,7 @@ class CpArgumentsTest {
 
   @Test
   void errorMissingSource() {
-    f.assertThat("-r").failsWithMessage("Missing required parameter: \u001B[33mSOURCE\u001B[39m");
+    f.assertThat("-r").failsWithMessage("Missing required parameter: \u001B[33mSOURCE\u001B[m");
   }
 
   @Test
@@ -30,9 +30,9 @@ class CpArgumentsTest {
 
   @Test
   void errorMissingDest() {
-    f.assertThat("a").failsWithMessage("Missing required parameter: \u001B[33mDEST\u001B[39m");
-    f.assertThat("a", "-r").failsWithMessage("Missing required parameter: \u001B[33mDEST\u001B[39m");
-    f.assertThat("-r", "a").failsWithMessage("Missing required parameter: \u001B[33mDEST\u001B[39m");
+    f.assertThat("a").failsWithMessage("Missing required parameter: \u001B[33mDEST\u001B[m");
+    f.assertThat("a", "-r").failsWithMessage("Missing required parameter: \u001B[33mDEST\u001B[m");
+    f.assertThat("-r", "a").failsWithMessage("Missing required parameter: \u001B[33mDEST\u001B[m");
   }
 
   @Test
@@ -97,14 +97,14 @@ class CpArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "\u001B[1mUSAGE\u001B[21m",
-        "  cp-arguments [OPTION]... \u001B[33mSOURCE\u001B[39m \u001B[33mDEST\u001B[39m",
+        "\u001B[1mUSAGE\u001B[m",
+        "  cp-arguments [OPTION]... \u001B[33mSOURCE\u001B[m \u001B[33mDEST\u001B[m",
         "",
-        "\u001B[1mPARAMETERS\u001B[21m",
+        "\u001B[1mPARAMETERS\u001B[m",
         "  SOURCE ",
         "  DEST   ",
         "",
-        "\u001B[1mOPTIONS\u001B[21m",
+        "\u001B[1mOPTIONS\u001B[m",
         "  -r, --r             ",
         "  --backup BACKUP     ",
         "  -s, --suffix SUFFIX  Override the usual backup suffix",

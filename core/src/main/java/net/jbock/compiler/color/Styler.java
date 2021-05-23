@@ -19,7 +19,7 @@ public class Styler {
     if (!sourceElement.isAnsi()) {
       return text;
     }
-    return style.on() + text + style.off();
+    return style.code() + text + Style.OFF;
   }
 
   public String red(String text) {

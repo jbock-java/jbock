@@ -2,26 +2,22 @@ package net.jbock.compiler.color;
 
 enum Style {
 
-  BOLD(1, 21),
-  FG_RED(31, 39),
-  FG_YELLOW(33, 39);
+  BOLD(1),
+  FG_RED(31),
+  FG_YELLOW(33);
 
   private static final char ESC = 0x1B;
   private static final String CSI = ESC + "[";
 
-  private final String on;
-  private final String off;
+  static final String OFF = CSI + "m";
 
-  Style(int startCode, int endCode) {
-    on = CSI + startCode + "m";
-    off = CSI + endCode + "m";;
+  private final String code;
+
+  Style(int code) {
+    this.code = CSI + code + "m";
   }
 
-  String on() {
-    return on;
-  }
-
-  String off() {
-    return off;
+  String code() {
+    return code;
   }
 }
