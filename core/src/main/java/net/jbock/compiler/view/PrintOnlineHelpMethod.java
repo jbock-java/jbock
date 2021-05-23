@@ -29,6 +29,10 @@ import static net.jbock.compiler.view.GeneratedClass.CONTINUATION_INDENT_USAGE;
 @Reusable
 public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
 
+  private static final String USAGE = "USAGE";
+  private static final String PARAMETERS = "PARAMETERS";
+  private static final String OPTIONS = "OPTIONS";
+
   private final SourceElement sourceElement;
   private final AllParameters allParameters;
   private final PositionalParameters positionalParameters;
@@ -103,7 +107,7 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
       code.addStatement("$N.println()", commonFields.err());
     }
 
-    code.addStatement("$N.println($S)", commonFields.err(), styler.bold("USAGE"));
+    code.addStatement("$N.println($S)", commonFields.err(), styler.bold(USAGE).orElse(USAGE));
     code.addStatement("$N($S, $N($S))", printTokensMethod.get(), continuationIndent,
         usageMethod.get(), " ");
 
@@ -111,13 +115,13 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
 
     if (!positionalParameters.none()) {
       code.addStatement("$N.println()", commonFields.err());
-      code.addStatement("$N.println($S)", commonFields.err(), styler.bold("PARAMETERS"));
+      code.addStatement("$N.println($S)", commonFields.err(), styler.bold(PARAMETERS).orElse(PARAMETERS));
     }
     positionalParameters.forEachRegular(p -> code.add(printPositionalCode(paramsFormat, p)));
     positionalParameters.repeatable().ifPresent(p -> code.add(printPositionalCode(paramsFormat, p)));
     if (!namedOptions.isEmpty()) {
       code.addStatement("$N.println()", commonFields.err());
-      code.addStatement("$N.println($S)", commonFields.err(), styler.bold("OPTIONS"));
+      code.addStatement("$N.println($S)", commonFields.err(), styler.bold(OPTIONS).orElse(OPTIONS));
     }
 
     String optionsFormat = "  %1$-" + namedOptions.maxWidth() + "s ";

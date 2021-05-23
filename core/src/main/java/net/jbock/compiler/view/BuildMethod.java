@@ -127,7 +127,7 @@ public class BuildMethod {
 
   private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
     List<String> optionNames = parameter.parameter().names().stream()
-        .map(styler::yellow)
+        .map(text -> styler.yellow(text).orElse(text))
         .collect(Collectors.toList());
     String paramLabel = parameter.paramLabel();
     switch (parameter.skew()) {
@@ -153,7 +153,7 @@ public class BuildMethod {
     switch (parameter.skew()) {
       case REQUIRED:
         return singletonList(CodeBlock.of(".orElseThrow(() -> $N($S))",
-            missingRequiredMethod.get(), "parameter: " + styler.yellow(paramLabel)));
+            missingRequiredMethod.get(), "parameter: " + styler.yellow(paramLabel).orElse(paramLabel)));
       case OPTIONAL:
         return emptyList();
       case REPEATABLE:

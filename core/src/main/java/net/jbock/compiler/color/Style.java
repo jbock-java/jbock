@@ -7,17 +7,18 @@ enum Style {
   FG_YELLOW(33);
 
   private static final char ESC = 0x1B;
-  private static final String CSI = ESC + "[";
+
+  static final String CSI = ESC + "[";
 
   static final String OFF = CSI + "m";
 
-  private final String code;
+  private final int code;
 
   Style(int code) {
-    this.code = CSI + code + "m";
+    this.code = code;
   }
 
-  String code() {
+  int code() {
     return code;
   }
 }

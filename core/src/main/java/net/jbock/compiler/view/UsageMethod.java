@@ -56,9 +56,10 @@ public class UsageMethod extends Cached<MethodSpec> {
     }
 
     for (ConvertedParameter<NamedOption> option : namedOptions.required()) {
+      String firstName = option.parameter().names().get(0);
       spec.addStatement("$N.add($T.format($S, $S, $S))",
           result, STRING, "%s %s",
-          styler.yellow(option.parameter().names().get(0)),
+          styler.yellow(firstName).orElse(firstName),
           option.paramLabel());
     }
 
@@ -70,7 +71,7 @@ public class UsageMethod extends Cached<MethodSpec> {
           spec.addStatement("$N.add($S)", result, "[" + paramLabel + "]");
           break;
         case REQUIRED:
-          spec.addStatement("$N.add($S)", result, styler.yellow(paramLabel));
+          spec.addStatement("$N.add($S)", result, styler.yellow(paramLabel).orElse(paramLabel));
           break;
         default:
           throw new AssertionError("unexpected skew: " + skew);

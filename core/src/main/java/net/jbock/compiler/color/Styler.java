@@ -4,6 +4,7 @@ import dagger.Reusable;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
+import java.util.Optional;
 
 @Reusable
 public class Styler {
@@ -15,29 +16,33 @@ public class Styler {
     this.sourceElement = sourceElement;
   }
 
-  private String paint(Style style, String text) {
+  private Optional<String> paint(String text, Style... styles) {
     if (!sourceElement.isAnsi()) {
-      return text;
+      return Optional.empty();
     }
-    return style.code() + text + Style.OFF;
-  }
-
-  public String red(String text) {
-    return paint(Style.FG_RED, text);
-  }
-
-  public String bold(String text) {
-    return paint(Style.BOLD, text);
-  }
-
-  public String yellow(String text) {
-    return paint(Style.FG_YELLOW, text);
-  }
-
-  public String yellowOrQuote(String text) {
-    if (sourceElement.isAnsi()) {
-      return yellow(text);
+    StringBuilder sb = new StringBuilder();
+    sb.append(Style.CSI);
+    for (int i = 0; i < styles.length; i++) {
+      if (i > 0) {
+        sb.append(';');
+      }
+      sb.append(styles[i].code());
     }
-    return '"' + text + '"';
+    sb.append('m');
+    sb.append(text);
+    sb.append(Style.OFF);
+    return Optional.of(sb.toString());
+  }
+
+  public Optional<String> boldRed(String text) {
+    return paint(text, Style.FG_RED, Style.BOLD);
+  }
+
+  public Optional<String> bold(String text) {
+    return paint(text, Style.BOLD);
+  }
+
+  public Optional<String> yellow(String text) {
+    return paint(text, Style.FG_YELLOW);
   }
 }
