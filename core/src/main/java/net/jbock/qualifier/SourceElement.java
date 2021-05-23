@@ -75,6 +75,10 @@ public class SourceElement {
     return parserFlavour.helpEnabled(sourceElement);
   }
 
+  public boolean isAnsi() {
+    return parserFlavour.isAnsi(sourceElement);
+  }
+
   public String programName() {
     return programName;
   }

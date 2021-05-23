@@ -6,22 +6,22 @@ enum Style {
   FG_RED(31, 39),
   FG_YELLOW(33, 39);
 
-  // control sequence introducer
-  private static final String CSI = "\u001B[";
+  private static final char ESC = 0x1B;
+  private static final String CSI = ESC + "[";
 
-  private final int startCode;
-  private final int endCode;
+  private final String on;
+  private final String off;
 
   Style(int startCode, int endCode) {
-    this.startCode = startCode;
-    this.endCode = endCode;
+    on = CSI + startCode + "m";
+    off = CSI + endCode + "m";;
   }
 
   String on() {
-    return CSI + startCode + "m";
+    return on;
   }
 
   String off() {
-    return CSI + endCode + "m";
+    return off;
   }
 }

@@ -9,7 +9,7 @@ import net.jbock.Parameters;
 import java.util.List;
 import java.util.Optional;
 
-@Command
+@Command(ansi = false)
 abstract class GradleArguments {
 
   /**
@@ -52,7 +52,7 @@ abstract class GradleArguments {
   @Parameters(paramLabel = "moreTokens")
   abstract List<String> otherTokens();
 
-  @Command
+  @Command(ansi = false)
   static abstract class Foo {
 
     @Option(names = "--bar")

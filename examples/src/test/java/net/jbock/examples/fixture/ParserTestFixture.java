@@ -226,8 +226,17 @@ public final class ParserTestFixture<E> {
       }
       String[] tokens = stderr.split("\\R", -1);
       for (String token : tokens) {
-        if (token.startsWith("Error: ")) {
-          if (!expectedMessage.equals(token.substring("Error: ".length()))) {
+        String prefix = "Error: ";
+        if (token.startsWith(prefix)) {
+          if (!expectedMessage.equals(token.substring(prefix.length()))) {
+            Arrays.stream(tokens).forEach(System.err::println);
+            fail();
+          }
+          return;
+        }
+        String prefixAnsi = "\u001B[31mError\u001B[39m: ";
+        if (token.startsWith(prefixAnsi)) {
+          if (!expectedMessage.equals(token.substring(prefixAnsi.length()))) {
             Arrays.stream(tokens).forEach(System.err::println);
             fail();
           }

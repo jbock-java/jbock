@@ -5,7 +5,7 @@ import net.jbock.Option;
 
 import java.util.Optional;
 
-@Command
+@Command(ansi = false)
 abstract class EvilArguments {
 
   @Option(names = "--Fancy")

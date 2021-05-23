@@ -4,7 +4,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Option;
 
-@Command
+@Command(ansi = false)
 abstract class TarArguments {
 
   @Option(names = {"--x", "-x"})

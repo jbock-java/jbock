@@ -10,7 +10,7 @@ class MvArgumentsTest {
 
   @Test
   void notEnoughArguments() {
-    f.assertThat("a").failsWithMessage("Missing required: DEST");
+    f.assertThat("a").failsWithMessage("Missing required parameter: DEST");
   }
 
   @Test

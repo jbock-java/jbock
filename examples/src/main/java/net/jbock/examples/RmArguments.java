@@ -6,7 +6,7 @@ import net.jbock.Parameters;
 
 import java.util.List;
 
-@Command
+@Command(ansi = false)
 abstract class RmArguments {
 
   /**

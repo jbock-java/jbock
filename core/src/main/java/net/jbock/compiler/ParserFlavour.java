@@ -38,6 +38,11 @@ public enum ParserFlavour {
       return false;
     }
 
+    @Override
+    public boolean isAnsi(TypeElement sourceElement) {
+      return get(sourceElement).ansi();
+    }
+
     private Command get(TypeElement sourceElement) {
       return sourceElement.getAnnotation(Command.class);
     }
@@ -70,6 +75,11 @@ public enum ParserFlavour {
       return true;
     }
 
+    @Override
+    public boolean isAnsi(TypeElement sourceElement) {
+      return get(sourceElement).ansi();
+    }
+
     private SuperCommand get(TypeElement sourceElement) {
       return sourceElement.getAnnotation(SuperCommand.class);
     }
@@ -99,4 +109,6 @@ public enum ParserFlavour {
   public abstract List<String> description(TypeElement sourceElement, Elements elements);
 
   public abstract boolean isSuperCommand();
+
+  public abstract boolean isAnsi(TypeElement sourceElement);
 }

@@ -72,8 +72,8 @@ public class ParseOrExitMethod {
         .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
         .endControlFlow());
 
-    code.addStatement("$N.println($S + (($T) $N).getError().getMessage() + $S)", commonFields.err(),
-        styler.startRed() + "Error: ", generatedTypes.parsingFailedType(), result, styler.endRed());
+    code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", commonFields.err(),
+        styler.red("Error") + ": ", generatedTypes.parsingFailedType(), result);
     if (sourceElement.helpEnabled()) {
       String blanks = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
       code.addStatement("$N($S, $N())", printTokensMethod.get(), blanks, usageMethod.get());

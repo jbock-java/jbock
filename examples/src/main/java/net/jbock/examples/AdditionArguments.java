@@ -5,7 +5,7 @@ import net.jbock.Parameter;
 
 import java.util.Optional;
 
-@Command
+@Command(ansi = false)
 abstract class AdditionArguments {
 
   /**

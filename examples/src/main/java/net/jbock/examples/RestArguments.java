@@ -6,7 +6,7 @@ import net.jbock.Parameters;
 
 import java.util.List;
 
-@Command(description = "ouch", descriptionKey = "description.main")
+@Command(description = "ouch", descriptionKey = "description.main", ansi = false)
 abstract class RestArguments {
 
   /**

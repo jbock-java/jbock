@@ -24,7 +24,7 @@ public class MissingRequiredMethod extends Cached<MethodSpec> {
     ParameterSpec name = builder(STRING, "name").build();
     return methodBuilder("missingRequired")
         .returns(RuntimeException.class)
-        .addStatement("return new $T($S + $N)", RuntimeException.class, "Missing required: ", name)
+        .addStatement("return new $T($S + $N)", RuntimeException.class, "Missing required ", name)
         .addParameter(name)
         .addModifiers(PRIVATE, STATIC)
         .build();

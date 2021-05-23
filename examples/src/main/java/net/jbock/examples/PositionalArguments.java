@@ -7,7 +7,7 @@ import net.jbock.Parameters;
 import java.util.List;
 import java.util.Optional;
 
-@Command
+@Command(ansi = false)
 abstract class PositionalArguments {
 
   @Parameter(index = 0)

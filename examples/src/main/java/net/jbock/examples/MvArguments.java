@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Parameter;
 
-@Command
+@Command(ansi = false)
 abstract class MvArguments {
 
   @Parameter(index = 0)

@@ -4,6 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.GeneratedTypes;
+import net.jbock.compiler.color.Styler;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
@@ -16,7 +17,6 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -33,6 +33,7 @@ public class BuildMethod {
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
   private final MissingRequiredMethod missingRequiredMethod;
+  private final Styler styler;
 
   @Inject
   BuildMethod(
@@ -41,13 +42,15 @@ public class BuildMethod {
       NamedOptions namedOptions,
       PositionalParameters positionalParameters,
       CommonFields commonFields,
-      MissingRequiredMethod missingRequiredMethod) {
+      MissingRequiredMethod missingRequiredMethod,
+      Styler styler) {
     this.generatedTypes = generatedTypes;
     this.sourceElement = sourceElement;
     this.namedOptions = namedOptions;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
     this.missingRequiredMethod = missingRequiredMethod;
+    this.styler = styler;
   }
 
   MethodSpec get() {
@@ -123,11 +126,13 @@ public class BuildMethod {
   }
 
   private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
-    List<String> dashedNames = parameter.parameter().names();
-    String enumConstant = parameter.enumName().snake('_').toUpperCase(Locale.US);
+    List<String> optionNames = parameter.parameter().names().stream()
+        .map(styler::yellow)
+        .collect(Collectors.toList());
+    String paramLabel = parameter.paramLabel();
     switch (parameter.skew()) {
       case REQUIRED:
-        String name = enumConstant + " (" + String.join(", ", dashedNames) + ")";
+        String name = "option: " + paramLabel + " (" + String.join(", ", optionNames) + ")";
         return Arrays.asList(
             CodeBlock.of(".findAny()"),
             CodeBlock.of(".orElseThrow(() -> $N($S))",
@@ -144,11 +149,11 @@ public class BuildMethod {
   }
 
   private List<CodeBlock> tailExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
-    String enumConstant = parameter.enumName().snake('_').toUpperCase(Locale.US);
+    String paramLabel = parameter.paramLabel();
     switch (parameter.skew()) {
       case REQUIRED:
         return singletonList(CodeBlock.of(".orElseThrow(() -> $N($S))",
-            missingRequiredMethod.get(), enumConstant));
+            missingRequiredMethod.get(), "parameter: " + styler.yellow(paramLabel)));
       case OPTIONAL:
         return emptyList();
       case REPEATABLE:

@@ -210,7 +210,7 @@ class GradleArgumentsTest {
   void testPrint() {
     f.assertPrintsHelp(
         "USAGE",
-        "  gradle-arguments [OPTION]... [MAIN_TOKEN] [OTHER_TOKENS]...",
+        "  gradle-arguments [OPTION]... [SOME_TOKEN] [moreTokens]...",
         "",
         "PARAMETERS",
         "  SOME_TOKEN  some token",
