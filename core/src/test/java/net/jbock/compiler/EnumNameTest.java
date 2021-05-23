@@ -18,7 +18,7 @@ class EnumNameTest {
     assertEquals("this_is_snake", EnumName.create("thisIsSnake").snake('_'));
     assertEquals("fancy", EnumName.create("fancy").snake('_'));
     assertEquals("f_ancy", EnumName.create("fAncy").snake('_'));
-    assertEquals("f_ancy", EnumName.create("f_ancy").snake('_')); // collision, see previous line
+    assertEquals("f_ancy", EnumName.create("f_ancy").snake('_'));
     assertEquals("f__ancy", EnumName.create("f__ancy").snake('_'));
     assertEquals("__", EnumName.create("__").snake('_'));
   }
@@ -35,7 +35,8 @@ class EnumNameTest {
     assertEquals("thisIsSnake", EnumName.create("thisIsSnake").enumConstant());
     assertEquals("fancy", EnumName.create("fancy").enumConstant());
     assertEquals("fAncy", EnumName.create("fAncy").enumConstant());
-    assertEquals("f_ancy", EnumName.create("f_ancy").enumConstant()); // no collision
+    assertEquals("f_ancy", EnumName.create("f_ancy").enumConstant());
+    assertEquals("f_ancy", EnumName.create("f_Ancy").enumConstant());
     assertEquals("f__ancy", EnumName.create("f__ancy").enumConstant());
     assertEquals("__", EnumName.create("__").enumConstant());
   }

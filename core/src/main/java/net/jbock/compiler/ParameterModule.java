@@ -48,13 +48,13 @@ public class ParameterModule {
       List<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
     String methodName = sourceMethod.method().getSimpleName().toString();
     EnumName originalName = EnumName.create(methodName);
-    Set<List<String>> alreadyCreated = util.concat(alreadyCreatedOptions, alreadyCreatedParams)
+    Set<String> alreadyCreated = util.concat(alreadyCreatedOptions, alreadyCreatedParams)
         .stream()
         .map(ConvertedParameter::enumName)
-        .map(EnumName::parts)
+        .map(EnumName::enumConstant)
         .collect(Collectors.toSet());
     EnumName result = originalName;
-    while (alreadyCreated.contains(result.parts())) {
+    while (alreadyCreated.contains(result.enumConstant())) {
       result = originalName.makeLonger();
     }
     return result;
