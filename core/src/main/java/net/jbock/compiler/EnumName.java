@@ -60,17 +60,7 @@ public class EnumName {
   }
 
   private static String makeCamel(List<String> myParts) {
-    StringBuilder sb = new StringBuilder();
-    for (int i = 0; i < myParts.size(); i++) {
-      String part = myParts.get(i);
-      if (i == 0 || myParts.get(i - 1).endsWith("_")) {
-        sb.append(part.charAt(0));
-      } else {
-        sb.append(Character.toUpperCase(part.charAt(0)));
-      }
-      sb.append(part.substring(1));
-    }
-    return sb.toString();
+    return String.join("_", myParts).toUpperCase(Locale.US);
   }
 
   private static CharType charType(char c) {
@@ -88,9 +78,5 @@ public class EnumName {
 
   public String enumConstant() {
     return enumConstant;
-  }
-
-  List<String> parts() {
-    return parts;
   }
 }

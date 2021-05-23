@@ -25,19 +25,19 @@ class EnumNameTest {
 
   @Test
   void testCamel() {
-    assertEquals("myArguments", EnumName.create("MyArguments").enumConstant());
-    assertEquals("getMoney", EnumName.create("getMoney").enumConstant());
-    assertEquals("github", EnumName.create("GIThub").enumConstant());
-    assertEquals("money_maker", EnumName.create("money_maker").enumConstant());
-    assertEquals("roboCop9", EnumName.create("roboCop9").enumConstant());
-    assertEquals("isWindowscompatible", EnumName.create("isWINDOWScompatible").enumConstant());
-    assertEquals("aRequiredInt", EnumName.create("aRequiredInt").enumConstant());
-    assertEquals("thisIsSnake", EnumName.create("thisIsSnake").enumConstant());
-    assertEquals("fancy", EnumName.create("fancy").enumConstant());
-    assertEquals("fAncy", EnumName.create("fAncy").enumConstant());
-    assertEquals("f_ancy", EnumName.create("f_ancy").enumConstant());
-    assertEquals("f_ancy", EnumName.create("f_Ancy").enumConstant());
-    assertEquals("f__ancy", EnumName.create("f__ancy").enumConstant());
+    assertEquals("MY_ARGUMENTS", EnumName.create("MyArguments").enumConstant());
+    assertEquals("GET_MONEY", EnumName.create("getMoney").enumConstant());
+    assertEquals("GITHUB", EnumName.create("GIThub").enumConstant());
+    assertEquals("MONEY_MAKER", EnumName.create("money_maker").enumConstant());
+    assertEquals("ROBO_COP_9", EnumName.create("roboCop9").enumConstant());
+    assertEquals("IS_WINDOWSCOMPATIBLE", EnumName.create("isWINDOWScompatible").enumConstant());
+    assertEquals("A_REQUIRED_INT", EnumName.create("aRequiredInt").enumConstant());
+    assertEquals("THIS_IS_SNAKE", EnumName.create("thisIsSnake").enumConstant());
+    assertEquals("FANCY", EnumName.create("fancy").enumConstant());
+    assertEquals("F_ANCY", EnumName.create("fAncy").enumConstant());
+    assertEquals("F_ANCY", EnumName.create("f_ancy").enumConstant());
+    assertEquals("F__ANCY", EnumName.create("f_Ancy").enumConstant());
+    assertEquals("F__ANCY", EnumName.create("f__ancy").enumConstant());
     assertEquals("__", EnumName.create("__").enumConstant());
   }
 }
