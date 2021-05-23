@@ -33,4 +33,11 @@ public class Styler {
   public String yellow(String text) {
     return paint(Style.FG_YELLOW, text);
   }
+
+  public String yellowOrQuote(String text) {
+    if (sourceElement.isAnsi()) {
+      return yellow(text);
+    }
+    return '"' + text + '"';
+  }
 }

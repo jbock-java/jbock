@@ -73,16 +73,17 @@ public class ParseOrExitMethod {
         .endControlFlow());
 
     code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", commonFields.err(),
-        styler.red("Error") + ": ", generatedTypes.parsingFailedType(), result);
+        styler.red("ERROR:") + " ", generatedTypes.parsingFailedType(), result);
     if (sourceElement.helpEnabled()) {
       String blanks = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
-      code.addStatement("$N($S, $N())", printTokensMethod.get(), blanks, usageMethod.get());
+      code.addStatement("$N($S, $N($S))", printTokensMethod.get(), blanks, usageMethod.get(),
+          styler.bold("USAGE:"));
     } else {
       code.addStatement("$N()", printOnlineHelpMethod.get());
     }
     if (sourceElement.helpEnabled()) {
       code.addStatement("$N.println($S)", commonFields.err(),
-          "Try " + styler.yellow(sourceElement.programName() + " --help") +
+          "Type " + styler.yellowOrQuote(sourceElement.programName() + " --help") +
               " for more information.");
     }
     code.addStatement("$N.flush()", commonFields.err())

@@ -104,7 +104,8 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
     }
 
     code.addStatement("$N.println($S)", commonFields.err(), styler.bold("USAGE"));
-    code.addStatement("$N($S, $N())", printTokensMethod.get(), continuationIndent, usageMethod.get());
+    code.addStatement("$N($S, $N($S))", printTokensMethod.get(), continuationIndent,
+        usageMethod.get(), " ");
 
     String paramsFormat = "  %1$-" + positionalParameters.maxWidth() + "s ";
 

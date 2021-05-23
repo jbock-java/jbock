@@ -45,9 +45,10 @@ public class UsageMethod extends Cached<MethodSpec> {
     MethodSpec.Builder spec = MethodSpec.methodBuilder("usage");
 
     ParameterSpec result = builder(LIST_OF_STRING, "result").build();
+    ParameterSpec prefix = builder(STRING, "prefix").build();
 
     spec.addStatement("$T $N = new $T<>()", result.type, result, ArrayList.class);
-    spec.addStatement("$N.add($S)", result, " ");
+    spec.addStatement("$N.add($N)", result, prefix);
     spec.addStatement("$N.add($S)", result, sourceElement.programName());
 
     if (!namedOptions.optional().isEmpty()) {
@@ -80,6 +81,9 @@ public class UsageMethod extends Cached<MethodSpec> {
         spec.addStatement("$N.add($S)", result, "[" + param.paramLabel() + "]..."));
 
     spec.addStatement("return $N", result);
-    return spec.returns(LIST_OF_STRING).addModifiers(PRIVATE).build();
+    return spec.returns(LIST_OF_STRING)
+        .addModifiers(PRIVATE)
+        .addParameter(prefix)
+        .build();
   }
 }
