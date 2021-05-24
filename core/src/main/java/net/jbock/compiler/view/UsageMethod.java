@@ -3,7 +3,6 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import dagger.Reusable;
-import net.jbock.compiler.color.Styler;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
@@ -26,18 +25,15 @@ public class UsageMethod extends Cached<MethodSpec> {
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
   private final SourceElement sourceElement;
-  private final Styler styler;
 
   @Inject
   UsageMethod(
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
-      SourceElement sourceElement,
-      Styler styler) {
+      SourceElement sourceElement) {
     this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
     this.sourceElement = sourceElement;
-    this.styler = styler;
   }
 
   @Override
@@ -59,7 +55,7 @@ public class UsageMethod extends Cached<MethodSpec> {
       String firstName = option.parameter().names().get(0);
       spec.addStatement("$N.add($T.format($S, $S, $S))",
           result, STRING, "%s %s",
-          styler.yellow(firstName).orElse(firstName),
+          firstName,
           option.paramLabel());
     }
 
@@ -71,7 +67,7 @@ public class UsageMethod extends Cached<MethodSpec> {
           spec.addStatement("$N.add($S)", result, "[" + paramLabel + "]");
           break;
         case REQUIRED:
-          spec.addStatement("$N.add($S)", result, styler.yellow(paramLabel).orElse(paramLabel));
+          spec.addStatement("$N.add($S)", result, paramLabel);
           break;
         default:
           throw new AssertionError("unexpected skew: " + skew);

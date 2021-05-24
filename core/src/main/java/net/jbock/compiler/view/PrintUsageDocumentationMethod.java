@@ -45,8 +45,8 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
   private final Styler styler;
   private final String paramsFormat;
   private final String optionsFormat;
-  private final String paramsIndent;
-  private final String optionsIndent;
+  private final ParameterSpec optionsIndent = ParameterSpec.builder(STRING, "indent_o").build();
+  private final ParameterSpec paramsIndent = ParameterSpec.builder(STRING, "indent_p").build();
 
   @Inject
   PrintUsageDocumentationMethod(
@@ -72,8 +72,6 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
     this.styler = styler;
     this.optionsFormat = "  %1$-" + namedOptions.maxWidth() + "s ";
     this.paramsFormat = "  %1$-" + positionalParameters.maxWidth() + "s ";
-    this.optionsIndent = String.join("", Collections.nCopies(namedOptions.maxWidth() + 4, " "));
-    this.paramsIndent = String.join("", Collections.nCopies(positionalParameters.maxWidth() + 4, " "));
   }
 
   @Override
@@ -85,32 +83,26 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
     if (!description.isEmpty()) {
       ParameterSpec descriptionBuilder = builder(LIST_OF_STRING, "description").build();
       code.addStatement("$T $N = new $T<>()", descriptionBuilder.type, descriptionBuilder, ArrayList.class);
-      CodeBlock descriptionBlock = sourceElement.descriptionKey()
-          .map(key -> {
-            CodeBlock.Builder result = CodeBlock.builder();
+      sourceElement.descriptionKey()
+          .ifPresentOrElse(key -> {
             ParameterSpec descriptionMessage = builder(STRING, "descriptionMessage").build();
-            result.addStatement("$T $N = messages.get($S)", STRING, descriptionMessage, key);
-            result.beginControlFlow("if ($N != null)", descriptionMessage)
+            code.addStatement("$T $N = messages.get($S)", STRING, descriptionMessage, key);
+            code.beginControlFlow("if ($N != null)", descriptionMessage)
                 .addStatement("$T.addAll($N, $N.split($S, $L))",
                     Collections.class, descriptionBuilder, descriptionMessage, "\\s+", -1);
-            result.endControlFlow();
-            result.beginControlFlow("else");
+            code.endControlFlow();
+            code.beginControlFlow("else");
             for (String line : description) {
-              result.addStatement("$T.addAll($N, $S.split($S, $L))",
+              code.addStatement("$T.addAll($N, $S.split($S, $L))",
                   Collections.class, descriptionBuilder, line, "\\s+", -1);
             }
-            result.endControlFlow();
-            return result.build();
-          })
-          .orElseGet(() -> {
-            CodeBlock.Builder result = CodeBlock.builder();
+            code.endControlFlow();
+          }, () -> {
             for (String line : description) {
-              result.addStatement("$T.addAll($N, $S.split($S, $L))",
+              code.addStatement("$T.addAll($N, $S.split($S, $L))",
                   Collections.class, descriptionBuilder, line, "\\s+", -1);
             }
-            return result.build();
           });
-      code.add(descriptionBlock);
       code.addStatement("$N($S, $N).forEach($N::println)", makeLinesMethod.get(), "",
           descriptionBuilder, commonFields.err());
       code.addStatement("$N.println()", commonFields.err());
@@ -120,15 +112,17 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
     code.addStatement("$N($S, $N($S)).forEach($N::println)", makeLinesMethod.get(), continuationIndent,
         usageMethod.get(), " ", commonFields.err());
 
-    if (!positionalParameters.none()) {
+    if (!positionalParameters.isEmpty()) {
       code.addStatement("$N.println()", commonFields.err());
       code.addStatement("$N.println($S)", commonFields.err(), styler.bold(PARAMETERS).orElse(PARAMETERS));
+      code.addStatement("$T $N = $S", STRING, paramsIndent, String.join("", Collections.nCopies(positionalParameters.maxWidth() + 4, " ")));
     }
     positionalParameters.forEachRegular(p -> code.add(printPositionalCode(p)));
     positionalParameters.repeatable().ifPresent(p -> code.add(printPositionalCode(p)));
     if (!namedOptions.isEmpty()) {
       code.addStatement("$N.println()", commonFields.err());
       code.addStatement("$N.println($S)", commonFields.err(), styler.bold(OPTIONS).orElse(OPTIONS));
+      code.addStatement("$T $N = $S", STRING, optionsIndent, String.join("", Collections.nCopies(namedOptions.maxWidth() + 4, " ")));
     }
 
     namedOptions.forEach(c -> code.add(printNamedOptionCode(c)));
@@ -141,35 +135,36 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
   private CodeBlock printNamedOptionCode(ConvertedParameter<NamedOption> c) {
     String enumConstant = c.enumConstant();
     if (allParameters.anyDescriptionKeys()) {
-      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S, $S)",
+      return CodeBlock.builder().addStatement("$N($T.$L, $S, $N, $S)",
           printOptionDocumentationMethod.get(),
           sourceElement.optionType(), enumConstant,
           String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
           optionsIndent,
           c.parameter().descriptionKey().orElse("")).build();
     } else {
-      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S)",
+      return CodeBlock.builder().addStatement("$N($T.$L, $S, $N)",
           printOptionDocumentationMethod.get(),
           sourceElement.optionType(), enumConstant,
-          String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())), optionsIndent)
-          .build();
+          String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
+          optionsIndent).build();
     }
   }
 
   private CodeBlock printPositionalCode(ConvertedParameter<PositionalParameter> c) {
     String enumConstant = c.enumConstant();
     if (allParameters.anyDescriptionKeys()) {
-      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S, $S)",
+      return CodeBlock.builder().addStatement("$N($T.$L, $S, $N, $S)",
           printOptionDocumentationMethod.get(),
           sourceElement.optionType(), enumConstant,
           String.format(paramsFormat, c.paramLabel()),
           paramsIndent,
           c.parameter().descriptionKey().orElse("")).build();
     } else {
-      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S)",
+      return CodeBlock.builder().addStatement("$N($T.$L, $S, $N)",
           printOptionDocumentationMethod.get(),
           sourceElement.optionType(), enumConstant,
-          String.format(paramsFormat, c.paramLabel()), paramsIndent).build();
+          String.format(paramsFormat, c.paramLabel()),
+          paramsIndent).build();
     }
   }
 }

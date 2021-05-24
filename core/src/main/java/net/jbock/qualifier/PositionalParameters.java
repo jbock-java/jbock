@@ -52,7 +52,7 @@ public class PositionalParameters {
     return repeatable.isPresent();
   }
 
-  public boolean none() {
+  public boolean isEmpty() {
     return regular.isEmpty() && !anyRepeatable();
   }
 

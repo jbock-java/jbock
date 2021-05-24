@@ -105,7 +105,7 @@ public class StatefulParseMethod {
         .add(errorUnrecognizedOption())
         .endControlFlow();
 
-    if (positionalParameters.none()) {
+    if (positionalParameters.isEmpty()) {
       code.addStatement(throwInvalidOptionStatement("Excess param"));
     } else if (!positionalParameters.anyRepeatable()) {
       code.add("if ($N == $L)\n", position, positionalParameters.size()).indent()
@@ -113,7 +113,7 @@ public class StatefulParseMethod {
           .unindent();
     }
 
-    if (!positionalParameters.none()) {
+    if (!positionalParameters.isEmpty()) {
       if (positionalParameters.anyRepeatable()) {
         if (positionalParameters.size() == 1) {
           code.addStatement("$N.add($N)", commonFields.rest(), token);
@@ -156,7 +156,7 @@ public class StatefulParseMethod {
 
   private CodeBlock.Builder initVariables() {
     CodeBlock.Builder code = CodeBlock.builder();
-    if (!positionalParameters.none() && !(positionalParameters.anyRepeatable() && positionalParameters.size() == 1)) {
+    if (!positionalParameters.isEmpty() && !(positionalParameters.anyRepeatable() && positionalParameters.size() == 1)) {
       code.addStatement("$T $N = $L", position.type, position, 0);
     }
     if (!sourceElement.isSuperCommand()) {

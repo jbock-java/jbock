@@ -10,19 +10,16 @@ import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
-import java.util.Collections;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
-import static net.jbock.compiler.view.GeneratedClass.CONTINUATION_INDENT_USAGE;
 
 @Reusable
 public class ParseOrExitMethod {
 
   private final SourceElement sourceElement;
   private final GeneratedTypes generatedTypes;
-  private final MakeLinesMethod makeLinesMethod;
   private final CommonFields commonFields;
   private final PrintUsageDocumentationMethod printUsageDocumentationMethod;
   private final UsageMethod usageMethod;
@@ -33,7 +30,6 @@ public class ParseOrExitMethod {
   ParseOrExitMethod(
       SourceElement sourceElement,
       GeneratedTypes generatedTypes,
-      MakeLinesMethod makeLinesMethod,
       CommonFields commonFields,
       PrintUsageDocumentationMethod printUsageDocumentationMethod,
       UsageMethod usageMethod,
@@ -41,7 +37,6 @@ public class ParseOrExitMethod {
       Styler styler) {
     this.sourceElement = sourceElement;
     this.generatedTypes = generatedTypes;
-    this.makeLinesMethod = makeLinesMethod;
     this.commonFields = commonFields;
     this.printUsageDocumentationMethod = printUsageDocumentationMethod;
     this.usageMethod = usageMethod;
@@ -75,9 +70,7 @@ public class ParseOrExitMethod {
     code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", commonFields.err(),
         styler.boldRed("ERROR").orElse("ERROR:") + " ", generatedTypes.parsingFailedType(), result);
     if (sourceElement.helpEnabled()) {
-      String blanks = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
-      code.addStatement("$N($S, $N($S)).forEach($N::println)", makeLinesMethod.get(), blanks, usageMethod.get(),
-          "Usage:", commonFields.err());
+      code.addStatement("$N.println($N($S))", commonFields.err(), usageMethod.get(), "Usage:");
     } else {
       code.addStatement("$N()", printUsageDocumentationMethod.get());
     }
