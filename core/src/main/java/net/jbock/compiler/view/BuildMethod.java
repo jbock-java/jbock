@@ -53,12 +53,30 @@ public class BuildMethod {
   MethodSpec get() {
     CodeBlock constructorArguments = getConstructorArguments();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
+    for (ConvertedParameter<NamedOption> option : namedOptions.options()) {
+      CodeBlock streamExpression = streamExpressionOption(option);
+      spec.addStatement("$T $N = $L", option.implConstructorParam().type, option.implConstructorParam(),
+          extractExpressionOption(streamExpression, option));
+    }
+    for (ConvertedParameter<PositionalParameter> param : positionalParameters.regular()) {
+      CodeBlock streamExpression = streamExpressionParameter(param);
+      spec.addStatement("$T $N = $L", param.implConstructorParam().type, param.implConstructorParam(),
+          extractExpressionParameter(streamExpression, param));
+    }
+    positionalParameters.repeatable().ifPresent(param -> {
+      List<CodeBlock> block = new ArrayList<>();
+      block.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
+      block.add(param.mapExpr());
+      block.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
+      spec.addStatement("$T $N = $L", param.implConstructorParam().type, param.implConstructorParam(),
+          joinByNewline(block));
+    });
     generatedTypes.parseResultWithRestType().ifPresentOrElse(parseResultWithRestType -> {
           ParameterSpec result = ParameterSpec.builder(sourceElement.typeName(), "result").build();
           ParameterSpec restArgs = ParameterSpec.builder(sourceElement.typeName(), "restArgs").build();
           spec.addStatement("$T $N = new $T($L)", result.type, result, generatedTypes.implType(),
               constructorArguments);
-          spec.addStatement("$T $N = $N.toArray(new $T[0])", STRING_ARRAY, restArgs,
+          spec.addStatement("$T $N = this.$N.toArray(new $T[0])", STRING_ARRAY, restArgs,
               commonFields.rest(), STRING);
           spec.addStatement("return new $T($N, $N)", parseResultWithRestType,
               result, restArgs);
@@ -71,23 +89,15 @@ public class BuildMethod {
   private CodeBlock getConstructorArguments() {
     List<CodeBlock> code = new ArrayList<>();
     for (ConvertedParameter<NamedOption> option : namedOptions.options()) {
-      CodeBlock streamExpression = streamExpressionOption(option);
-      code.add(extractExpressionOption(streamExpression, option));
+      code.add(CodeBlock.of("$N", option.implConstructorParam()));
     }
     for (ConvertedParameter<PositionalParameter> param : positionalParameters.regular()) {
-      CodeBlock streamExpression = streamExpressionParameter(param);
-      code.add(extractExpressionParameter(streamExpression, param));
+      code.add(CodeBlock.of("$N", param.implConstructorParam()));
     }
     positionalParameters.repeatable()
-        .map(param -> {
-          List<CodeBlock> block = new ArrayList<>();
-          block.add(CodeBlock.of("$N.stream()", commonFields.rest()));
-          block.add(param.mapExpr());
-          block.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
-          return joinIndent(block);
-        })
+        .map(param -> CodeBlock.of("$N", param.implConstructorParam()))
         .ifPresent(code::add);
-    return joinCodeBlocks(code);
+    return joinByComma(code);
   }
 
   private CodeBlock extractExpressionOption(
@@ -97,7 +107,7 @@ public class BuildMethod {
     code.add(streamExpression);
     code.add(option.mapExpr());
     code.addAll(tailExpressionOption(option));
-    return joinIndent(code);
+    return joinByNewline(code);
   }
 
   private CodeBlock extractExpressionParameter(
@@ -107,18 +117,18 @@ public class BuildMethod {
     code.add(streamExpression);
     code.add(param.mapExpr());
     code.addAll(tailExpressionParameter(param));
-    return joinIndent(code);
+    return joinByNewline(code);
   }
 
   private CodeBlock streamExpressionOption(ConvertedParameter<NamedOption> option) {
     return CodeBlock.builder().add(
-        "$N.get($T.$N).stream()", commonFields.optionParsers(),
+        "this.$N.get($T.$N).stream()", commonFields.optionParsers(),
         sourceElement.optionType(), option.enumConstant()).build();
   }
 
   private CodeBlock streamExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
     return CodeBlock.builder().add(
-        "$T.ofNullable($N[$L])", Optional.class, commonFields.params(),
+        "$T.ofNullable(this.$N[$L])", Optional.class, commonFields.params(),
         parameter.parameter().position()).build();
   }
 
@@ -162,18 +172,18 @@ public class BuildMethod {
     }
   }
 
-  private CodeBlock joinCodeBlocks(List<CodeBlock> code) {
-    CodeBlock.Builder args = CodeBlock.builder().add("\n");
+  private CodeBlock joinByComma(List<CodeBlock> code) {
+    CodeBlock.Builder args = CodeBlock.builder();
     for (int i = 0; i < code.size(); i++) {
       if (i != 0) {
-        args.add(",\n");
+        args.add(",$W");
       }
       args.add(code.get(i));
     }
     return args.build();
   }
 
-  private CodeBlock joinIndent(List<CodeBlock> code) {
+  private CodeBlock joinByNewline(List<CodeBlock> code) {
     code = code.stream().filter(c -> !c.isEmpty()).collect(Collectors.toList());
     if (code.isEmpty()) {
       return CodeBlock.builder().build();

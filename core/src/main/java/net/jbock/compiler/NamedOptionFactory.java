@@ -15,6 +15,7 @@ import net.jbock.qualifier.SourceMethod;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 
 import static java.lang.Character.isWhitespace;
@@ -135,9 +136,9 @@ public class NamedOptionFactory {
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
-    String name = enumName.enumConstant();
+    String constructorParamName = enumName.enumConstant().toLowerCase(Locale.US);
     ParameterSpec constructorParam = ParameterSpec.builder(
-        TypeName.get(sourceMethod.returnType()), name).build();
+        TypeName.get(sourceMethod.returnType()), constructorParamName).build();
     CodeBlock mapExpr = CodeBlock.builder().build();
     CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
     return ConvertedParameter.create(mapExpr, extractExpr, Skew.FLAG,

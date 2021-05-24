@@ -7,6 +7,7 @@ import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.matching.Match;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.Locale;
 import java.util.Optional;
 
 public abstract class Matcher {
@@ -22,6 +23,6 @@ public abstract class Matcher {
   protected ParameterSpec constructorParam(TypeMirror constructorParamType) {
     return ParameterSpec.builder(
         TypeName.get(constructorParamType),
-        enumName.enumConstant()).build();
+        '_' + enumName.enumConstant().toLowerCase(Locale.US)).build();
   }
 }

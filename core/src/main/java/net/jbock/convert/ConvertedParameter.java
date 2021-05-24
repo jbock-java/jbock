@@ -7,6 +7,8 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.parameter.AbstractParameter;
 
+import java.util.Locale;
+
 public final class ConvertedParameter<P extends AbstractParameter> {
 
   private final ParameterSpec implConstructorParam;
@@ -42,7 +44,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
       EnumName enumName,
       P parameter) {
     TypeName fieldType = parameter.returnType();
-    String fieldName = enumName.enumConstant();
+    String fieldName = implConstructorParam.name;
     FieldSpec implField = FieldSpec.builder(fieldType, fieldName).build();
     return new ConvertedParameter<>(mapExpr, extractExpr, skew, implConstructorParam,
         enumName, implField, parameter);
