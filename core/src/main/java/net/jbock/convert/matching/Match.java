@@ -8,32 +8,33 @@ import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Skew;
 
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 
 public class Match {
 
   private final TypeMirror baseType;
   private final ParameterSpec constructorParam;
-  private final CodeBlock extractExpr;
+  private final Optional<CodeBlock> extractExpr;
   private final Skew skew;
   private final EnumName enumName;
 
   Match(
       TypeMirror baseType,
       ParameterSpec constructorParam,
-      CodeBlock extractExpr,
       Skew skew,
-      EnumName enumName) {
+      EnumName enumName,
+      Optional<CodeBlock> extractExpr) {
     this.baseType = baseType;
     this.constructorParam = constructorParam;
-    this.extractExpr = extractExpr;
     this.skew = skew;
+    this.extractExpr = extractExpr;
     this.enumName = enumName;
   }
 
   public <P extends AbstractParameter> ConvertedParameter<P> toConvertedParameter(
       CodeBlock mapExpr, P parameter) {
     return ConvertedParameter.create(mapExpr,
-        extractExpr, skew, constructorParam, enumName, parameter);
+        extractExpr, skew, enumName, parameter);
   }
 
   public TypeMirror baseType() {

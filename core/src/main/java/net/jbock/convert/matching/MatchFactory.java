@@ -8,6 +8,7 @@ import net.jbock.convert.Skew;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
+import java.util.Optional;
 
 @Reusable
 public class MatchFactory {
@@ -23,7 +24,7 @@ public class MatchFactory {
       TypeMirror baseType,
       ParameterSpec constructorParam,
       Skew skew) {
-    return create(baseType, constructorParam, skew, CodeBlock.of("$N", constructorParam));
+    return new Match(baseType, constructorParam, skew, enumName, Optional.empty());
   }
 
   public Match create(
@@ -31,6 +32,6 @@ public class MatchFactory {
       ParameterSpec constructorParam,
       Skew skew,
       CodeBlock extractExpr) {
-    return new Match(baseType, constructorParam, extractExpr, skew, enumName);
+    return new Match(baseType, constructorParam, skew, enumName, Optional.of(extractExpr));
   }
 }

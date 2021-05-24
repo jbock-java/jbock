@@ -1,7 +1,6 @@
 package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterSpec;
 
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
@@ -21,9 +20,8 @@ enum OptionalPrimitive {
     this.wrappedObjectType = wrappedObjectType.getCanonicalName();
   }
 
-  CodeBlock extractExpr(ParameterSpec constructorParam) {
-    return CodeBlock.of("$1N.map($2T::of).orElse($2T.empty())",
-        constructorParam, type);
+  CodeBlock extractExpr() {
+    return CodeBlock.of(".map($1T::of).orElse($1T.empty())", type);
   }
 
   public String type() {

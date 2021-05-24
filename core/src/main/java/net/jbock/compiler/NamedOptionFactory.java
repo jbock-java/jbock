@@ -1,8 +1,6 @@
 package net.jbock.compiler;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ConverterFinder;
@@ -15,8 +13,8 @@ import net.jbock.qualifier.SourceMethod;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
@@ -136,12 +134,8 @@ public class NamedOptionFactory {
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
-    String name = '_' + enumName.enumConstant().toLowerCase(Locale.US);
-    TypeName type = TypeName.get(sourceMethod.returnType());
-    ParameterSpec constructorParam = ParameterSpec.builder(type, name).build();
     CodeBlock mapExpr = CodeBlock.builder().build();
-    CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
-    return ConvertedParameter.create(mapExpr, extractExpr, Skew.FLAG,
-        constructorParam, enumName, namedOption);
+    return ConvertedParameter.create(mapExpr, Optional.empty(), Skew.FLAG,
+        enumName, namedOption);
   }
 }

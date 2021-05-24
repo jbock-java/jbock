@@ -63,7 +63,7 @@ public class OptionalMatcher extends Matcher {
             elements.getTypeElement(optionalPrimitive.wrappedObjectType()).asType(),
             constructorParam,
             Skew.OPTIONAL,
-            optionalPrimitive.extractExpr(constructorParam)));
+            optionalPrimitive.extractExpr()));
       }
     }
     return Optional.empty();

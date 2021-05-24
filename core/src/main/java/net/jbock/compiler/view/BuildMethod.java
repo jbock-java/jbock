@@ -107,6 +107,7 @@ public class BuildMethod {
     code.add(streamExpression);
     code.add(option.mapExpr());
     code.addAll(tailExpressionOption(option));
+    option.extractExpr().ifPresent(code::add);
     return joinByNewline(code);
   }
 
@@ -117,6 +118,7 @@ public class BuildMethod {
     code.add(streamExpression);
     code.add(param.mapExpr());
     code.addAll(tailExpressionParameter(param));
+    param.extractExpr().ifPresent(code::add);
     return joinByNewline(code);
   }
 

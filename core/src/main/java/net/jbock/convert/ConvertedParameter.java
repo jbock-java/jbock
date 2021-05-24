@@ -8,20 +8,21 @@ import net.jbock.compiler.EnumName;
 import net.jbock.compiler.parameter.AbstractParameter;
 
 import java.util.Locale;
+import java.util.Optional;
 
 public final class ConvertedParameter<P extends AbstractParameter> {
 
   private final ParameterSpec implConstructorParam;
   private final CodeBlock mapExpr;
-  private final CodeBlock extractExpr;
+  private final Optional<CodeBlock> extractExpr;
   private final Skew skew;
   private final P parameter;
   private final EnumName enumName;
   private final FieldSpec implField;
 
-  public ConvertedParameter(
+  private ConvertedParameter(
       CodeBlock mapExpr,
-      CodeBlock extractExpr,
+      Optional<CodeBlock> extractExpr,
       Skew skew,
       ParameterSpec implConstructorParam,
       EnumName enumName,
@@ -38,14 +39,14 @@ public final class ConvertedParameter<P extends AbstractParameter> {
 
   public static <P extends AbstractParameter> ConvertedParameter<P> create(
       CodeBlock mapExpr,
-      CodeBlock extractExpr,
+      Optional<CodeBlock> extractExpr,
       Skew skew,
-      ParameterSpec implConstructorParam,
       EnumName enumName,
       P parameter) {
     TypeName fieldType = parameter.returnType();
-    String fieldName = implConstructorParam.name;
+    String fieldName = '_' + enumName.enumConstant().toLowerCase(Locale.US);
     FieldSpec implField = FieldSpec.builder(fieldType, fieldName).build();
+    ParameterSpec implConstructorParam = ParameterSpec.builder(fieldType, fieldName).build();
     return new ConvertedParameter<>(mapExpr, extractExpr, skew, implConstructorParam,
         enumName, implField, parameter);
   }
@@ -57,7 +58,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   /**
    * Converts from param type to field type.
    */
-  public CodeBlock extractExpr() {
+  public Optional<CodeBlock> extractExpr() {
     return extractExpr;
   }
 

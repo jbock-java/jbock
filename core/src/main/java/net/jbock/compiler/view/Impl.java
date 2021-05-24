@@ -62,7 +62,7 @@ public class Impl {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
     for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
       FieldSpec field = c.implField();
-      spec.addStatement("this.$N = $L", field, c.extractExpr());
+      spec.addStatement("this.$N = $N", field, c.implConstructorParam());
       spec.addParameter(c.implConstructorParam());
     }
     return spec.build();
