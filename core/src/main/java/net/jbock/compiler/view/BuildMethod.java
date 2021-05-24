@@ -32,7 +32,6 @@ public class BuildMethod {
   private final NamedOptions namedOptions;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
-  private final MissingRequiredMethod missingRequiredMethod;
   private final Styler styler;
 
   @Inject
@@ -42,14 +41,12 @@ public class BuildMethod {
       NamedOptions namedOptions,
       PositionalParameters positionalParameters,
       CommonFields commonFields,
-      MissingRequiredMethod missingRequiredMethod,
       Styler styler) {
     this.generatedTypes = generatedTypes;
     this.sourceElement = sourceElement;
     this.namedOptions = namedOptions;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
-    this.missingRequiredMethod = missingRequiredMethod;
     this.styler = styler;
   }
 
@@ -126,17 +123,17 @@ public class BuildMethod {
   }
 
   private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
-    List<String> optionNames = parameter.parameter().names().stream()
+    String optionNames = parameter.parameter().names().stream()
         .map(text -> styler.yellow(text).orElse(text))
-        .collect(Collectors.toList());
+        .collect(Collectors.joining(", "));
     String paramLabel = parameter.paramLabel();
     switch (parameter.skew()) {
       case REQUIRED:
-        String name = "option: " + paramLabel + " (" + String.join(", ", optionNames) + ")";
+        String message = "Missing required option: " + paramLabel + " (" + optionNames + ")";
         return Arrays.asList(
             CodeBlock.of(".findAny()"),
-            CodeBlock.of(".orElseThrow(() -> $N($S))",
-                missingRequiredMethod.get(), name));
+            CodeBlock.of(".orElseThrow(() -> new $T($S))",
+                RuntimeException.class, message));
       case OPTIONAL:
         return singletonList(CodeBlock.of(".findAny()"));
       case REPEATABLE:
@@ -149,11 +146,11 @@ public class BuildMethod {
   }
 
   private List<CodeBlock> tailExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
-    String paramLabel = parameter.paramLabel();
     switch (parameter.skew()) {
       case REQUIRED:
-        return singletonList(CodeBlock.of(".orElseThrow(() -> $N($S))",
-            missingRequiredMethod.get(), "parameter: " + styler.yellow(paramLabel).orElse(paramLabel)));
+        String paramLabel = styler.yellow(parameter.paramLabel()).orElse(parameter.paramLabel());
+        return singletonList(CodeBlock.of(".orElseThrow(() -> new $T($S))",
+            RuntimeException.class, "Missing required parameter: " + paramLabel));
       case OPTIONAL:
         return emptyList();
       case REPEATABLE:

@@ -22,9 +22,9 @@ public class ParseOrExitMethod {
 
   private final SourceElement sourceElement;
   private final GeneratedTypes generatedTypes;
+  private final MakeLinesMethod makeLinesMethod;
   private final CommonFields commonFields;
-  private final PrintTokensMethod printTokensMethod;
-  private final PrintOnlineHelpMethod printOnlineHelpMethod;
+  private final PrintUsageDocumentationMethod printUsageDocumentationMethod;
   private final UsageMethod usageMethod;
   private final ParseMethod parseMethod;
   private final Styler styler;
@@ -33,17 +33,17 @@ public class ParseOrExitMethod {
   ParseOrExitMethod(
       SourceElement sourceElement,
       GeneratedTypes generatedTypes,
+      MakeLinesMethod makeLinesMethod,
       CommonFields commonFields,
-      PrintTokensMethod printTokensMethod,
-      PrintOnlineHelpMethod printOnlineHelpMethod,
+      PrintUsageDocumentationMethod printUsageDocumentationMethod,
       UsageMethod usageMethod,
       ParseMethod parseMethod,
       Styler styler) {
     this.sourceElement = sourceElement;
     this.generatedTypes = generatedTypes;
+    this.makeLinesMethod = makeLinesMethod;
     this.commonFields = commonFields;
-    this.printTokensMethod = printTokensMethod;
-    this.printOnlineHelpMethod = printOnlineHelpMethod;
+    this.printUsageDocumentationMethod = printUsageDocumentationMethod;
     this.usageMethod = usageMethod;
     this.parseMethod = parseMethod;
     this.styler = styler;
@@ -66,7 +66,7 @@ public class ParseOrExitMethod {
 
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> code
         .beginControlFlow("if ($N instanceof $T)", result, helpRequestedType)
-        .addStatement("$N()", printOnlineHelpMethod.get())
+        .addStatement("$N()", printUsageDocumentationMethod.get())
         .addStatement("$N.flush()", commonFields.err())
         .addStatement("$N.accept($N)", commonFields.exitHook(), result)
         .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
@@ -76,10 +76,10 @@ public class ParseOrExitMethod {
         styler.boldRed("ERROR").orElse("ERROR:") + " ", generatedTypes.parsingFailedType(), result);
     if (sourceElement.helpEnabled()) {
       String blanks = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
-      code.addStatement("$N($S, $N($S))", printTokensMethod.get(), blanks, usageMethod.get(),
-          "Usage:");
+      code.addStatement("$N($S, $N($S)).forEach($N::println)", makeLinesMethod.get(), blanks, usageMethod.get(),
+          "Usage:", commonFields.err());
     } else {
-      code.addStatement("$N()", printOnlineHelpMethod.get());
+      code.addStatement("$N()", printUsageDocumentationMethod.get());
     }
     if (sourceElement.helpEnabled()) {
       String helpSuggestion = sourceElement.programName() + " --help";

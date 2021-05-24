@@ -26,19 +26,19 @@ public class PrintOptionMethod {
 
   private final AllParameters allParameters;
   private final SourceElement sourceElement;
-  private final PrintTokensMethod printTokensMethod;
   private final CommonFields commonFields;
+  private final MakeLinesMethod makeLinesMethod;
 
   @Inject
   PrintOptionMethod(
       AllParameters allParameters,
       SourceElement sourceElement,
-      PrintTokensMethod printTokensMethod,
-      CommonFields commonFields) {
+      CommonFields commonFields,
+      MakeLinesMethod makeLinesMethod) {
     this.allParameters = allParameters;
     this.sourceElement = sourceElement;
-    this.printTokensMethod = printTokensMethod;
     this.commonFields = commonFields;
+    this.makeLinesMethod = makeLinesMethod;
   }
 
   MethodSpec get() {
@@ -81,7 +81,8 @@ public class PrintOptionMethod {
     }
     code.addStatement("$T $N = $T.join($S, $T.nCopies($N.length() + 1, $S))",
         STRING, continuationIndent, STRING, "", Collections.class, names, " ");
-    code.addStatement("$N($N, $N)", printTokensMethod.get(), continuationIndent, tokens);
+    code.addStatement("$N($N, $N).forEach($N::println)", makeLinesMethod.get(),
+        continuationIndent, tokens, commonFields.err());
     MethodSpec.Builder spec = methodBuilder("printOption")
         .addParameter(option)
         .addParameter(names)

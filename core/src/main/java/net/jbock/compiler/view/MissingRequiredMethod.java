@@ -13,14 +13,13 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 
 @Reusable
-public class MissingRequiredMethod extends Cached<MethodSpec> {
+public class MissingRequiredMethod {
 
   @Inject
   MissingRequiredMethod() {
   }
 
-  @Override
-  MethodSpec define() {
+  MethodSpec get() {
     ParameterSpec name = builder(STRING, "name").build();
     return methodBuilder("missingRequired")
         .returns(RuntimeException.class)

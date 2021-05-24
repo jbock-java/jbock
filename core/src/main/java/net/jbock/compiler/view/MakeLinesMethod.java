@@ -18,7 +18,7 @@ import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 @Reusable
-public class MakeLinesMethod {
+public class MakeLinesMethod extends Cached<MethodSpec> {
 
   private final CommonFields commonFields;
 
@@ -27,7 +27,8 @@ public class MakeLinesMethod {
     this.commonFields = commonFields;
   }
 
-  MethodSpec get() {
+  @Override
+  MethodSpec define() {
     ParameterSpec result = builder(LIST_OF_STRING, "result").build();
     ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
     ParameterSpec i = builder(INT, "i").build();

@@ -3,7 +3,6 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.TypeSpec;
 import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
-import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.AnyDescriptionKeys;
 import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.NamedOptions;
@@ -22,7 +21,6 @@ public final class GeneratedClass {
 
   static final int CONTINUATION_INDENT_USAGE = 8;
 
-  private final AllParameters allParameters;
   private final ParseMethod parseMethod;
   private final Impl impl;
   private final GeneratedTypes generatedTypes;
@@ -33,7 +31,7 @@ public final class GeneratedClass {
   private final SourceElement sourceElement;
   private final NamedOptions namedOptions;
   private final AnyDescriptionKeys anyDescriptionKeys;
-  private final PrintOnlineHelpMethod printOnlineHelpMethod;
+  private final PrintUsageDocumentationMethod printUsageDocumentationMethod;
   private final CommonFields commonFields;
   private final ParseOrExitMethod parseOrExitMethod;
   private final PrintOptionMethod printOptionMethod;
@@ -42,14 +40,11 @@ public final class GeneratedClass {
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
   private final UsageMethod usageMethod;
   private final Withers withers;
-  private final PrintTokensMethod printTokensMethod;
   private final ClassJavadoc classJavadoc;
-  private final MissingRequiredMethod missingRequiredMethod;
   private final ReadOptionNameMethod readOptionNameMethod;
 
   @Inject
   GeneratedClass(
-      AllParameters allParameters,
       ParseMethod parseMethod,
       SourceElement sourceElement,
       Impl impl,
@@ -60,7 +55,7 @@ public final class GeneratedClass {
       ParseResult parseResult,
       NamedOptions namedOptions,
       AnyDescriptionKeys anyDescriptionKeys,
-      PrintOnlineHelpMethod printOnlineHelpMethod,
+      PrintUsageDocumentationMethod printUsageDocumentationMethod,
       CommonFields commonFields,
       ParseOrExitMethod parseOrExitMethod,
       PrintOptionMethod printOptionMethod,
@@ -68,13 +63,10 @@ public final class GeneratedClass {
       ParseResultWithRest parseResultWithRest,
       ReadOptionArgumentMethod readOptionArgumentMethod,
       UsageMethod usageMethod, Withers withers,
-      PrintTokensMethod printTokensMethod,
       ClassJavadoc classJavadoc,
-      MissingRequiredMethod missingRequiredMethod,
       ReadOptionNameMethod readOptionNameMethod) {
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
-    this.allParameters = allParameters;
     this.impl = impl;
     this.generatedTypes = generatedTypes;
     this.optionParser = optionParser;
@@ -83,7 +75,7 @@ public final class GeneratedClass {
     this.parseResult = parseResult;
     this.namedOptions = namedOptions;
     this.anyDescriptionKeys = anyDescriptionKeys;
-    this.printOnlineHelpMethod = printOnlineHelpMethod;
+    this.printUsageDocumentationMethod = printUsageDocumentationMethod;
     this.commonFields = commonFields;
     this.parseOrExitMethod = parseOrExitMethod;
     this.printOptionMethod = printOptionMethod;
@@ -92,9 +84,7 @@ public final class GeneratedClass {
     this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.usageMethod = usageMethod;
     this.withers = withers;
-    this.printTokensMethod = printTokensMethod;
     this.classJavadoc = classJavadoc;
-    this.missingRequiredMethod = missingRequiredMethod;
     this.readOptionNameMethod = readOptionNameMethod;
   }
 
@@ -106,9 +96,8 @@ public final class GeneratedClass {
         .addMethod(withers.withMessagesMethod())
         .addMethod(withers.withExitHookMethod())
         .addMethod(withers.withErrorStreamMethod())
-        .addMethod(printOnlineHelpMethod.get())
+        .addMethod(printUsageDocumentationMethod.get())
         .addMethod(printOptionMethod.get())
-        .addMethod(printTokensMethod.get())
         .addMethod(makeLinesMethod.get())
         .addMethod(usageMethod.get());
     if (!namedOptions.isEmpty()) {
@@ -116,9 +105,6 @@ public final class GeneratedClass {
       if (namedOptions.anyRepeatable() || namedOptions.anyRegular()) {
         spec.addMethod(readOptionArgumentMethod.get());
       }
-    }
-    if (allParameters.anyRequired()) {
-      spec.addMethod(missingRequiredMethod.get());
     }
 
     spec.addField(commonFields.err());

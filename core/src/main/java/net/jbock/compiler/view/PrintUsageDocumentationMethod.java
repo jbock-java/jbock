@@ -27,7 +27,7 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.view.GeneratedClass.CONTINUATION_INDENT_USAGE;
 
 @Reusable
-public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
+public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
 
   private static final String USAGE = "USAGE";
   private static final String PARAMETERS = "PARAMETERS";
@@ -37,7 +37,7 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
   private final AllParameters allParameters;
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
-  private final PrintTokensMethod printTokensMethod;
+  private final MakeLinesMethod makeLinesMethod;
   private final CommonFields commonFields;
   private final Elements elements;
   private final PrintOptionMethod printOptionMethod;
@@ -45,12 +45,12 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
   private final Styler styler;
 
   @Inject
-  PrintOnlineHelpMethod(
+  PrintUsageDocumentationMethod(
       SourceElement sourceElement,
       AllParameters allParameters,
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
-      PrintTokensMethod printTokensMethod,
+      MakeLinesMethod makeLinesMethod,
       CommonFields commonFields,
       Elements elements,
       PrintOptionMethod printOptionMethod,
@@ -60,7 +60,7 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
     this.allParameters = allParameters;
     this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
-    this.printTokensMethod = printTokensMethod;
+    this.makeLinesMethod = makeLinesMethod;
     this.commonFields = commonFields;
     this.elements = elements;
     this.printOptionMethod = printOptionMethod;
@@ -103,13 +103,14 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
             return result.build();
           });
       code.add(descriptionBlock);
-      code.addStatement("$N($S, $N)", printTokensMethod.get(), "", descriptionBuilder);
+      code.addStatement("$N($S, $N).forEach($N::println)", makeLinesMethod.get(), "",
+          descriptionBuilder, commonFields.err());
       code.addStatement("$N.println()", commonFields.err());
     }
 
     code.addStatement("$N.println($S)", commonFields.err(), styler.bold(USAGE).orElse(USAGE));
-    code.addStatement("$N($S, $N($S))", printTokensMethod.get(), continuationIndent,
-        usageMethod.get(), " ");
+    code.addStatement("$N($S, $N($S)).forEach($N::println)", makeLinesMethod.get(), continuationIndent,
+        usageMethod.get(), " ", commonFields.err());
 
     String paramsFormat = "  %1$-" + positionalParameters.maxWidth() + "s ";
 
@@ -127,7 +128,7 @@ public class PrintOnlineHelpMethod extends Cached<MethodSpec> {
     String optionsFormat = "  %1$-" + namedOptions.maxWidth() + "s ";
 
     namedOptions.forEach(c -> code.add(printNamedOptionCode(optionsFormat, c)));
-    return methodBuilder("printOnlineHelp")
+    return methodBuilder("printUsageDocumentation")
         .addModifiers(sourceElement.accessModifiers())
         .addCode(code.build())
         .build();
