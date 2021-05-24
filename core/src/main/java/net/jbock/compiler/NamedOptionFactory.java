@@ -115,8 +115,8 @@ public class NamedOptionFactory {
       return left("single-dash names must be single-character names: " + name);
     }
     if (sourceElement.helpEnabled()) {
-      if ("--help".equals(name) || "-h".equals(name)) {
-        return left("'--help' or '-h' cannot be option names, unless the help feature is disabled.");
+      if ("--help".equals(name)) {
+        return left("'--help' cannot be an option name, unless the help feature is disabled.");
       }
     }
     for (int i = 0; i < name.length(); i++) {

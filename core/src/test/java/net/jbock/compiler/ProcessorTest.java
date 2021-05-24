@@ -92,20 +92,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("'--help' or '-h' cannot be option names");
-  }
-
-  @Test
-  void helpNameUnix() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "  @Option(names = {\"-h\"}) abstract String a();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("'--help' or '-h' cannot be option names");
+        .withErrorContaining("'--help' cannot be an option name");
   }
 
   @Test
