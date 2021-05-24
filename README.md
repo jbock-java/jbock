@@ -36,7 +36,19 @@ abstract class DeleteCommand {
 ````
 
 See [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommand_Parser.java)
-for the code this generates. And here's a screenshot of the generated code in action:
+for the code this generates.
+
+The generated code is typically used directly in the `main` method:
+
+````java
+public static void main(String[] input) {
+    DeleteCommand command = new DeleteCommand_Parser().parseOrExit(input);
+    // ...
+}
+
+````
+
+This is what your users might see:
 
 <img src="images/screenshot.png" alt="screenshot">
 
