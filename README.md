@@ -38,9 +38,9 @@ abstract class DeleteCommand {
 See [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommand_Parser.java)
 for the code this generates.
 
-The generated parser will give the user meaningful feedback if the input is invalid:
+The generated parser will give meaningful feedback if the input is invalid:
 
-[[images/screenshot.png]]
+<p align="center"><img src="images/screenshot.png" alt="screenshot" height="127px"></p>
 
 ### Sample projects
 
