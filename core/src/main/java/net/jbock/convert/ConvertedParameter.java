@@ -1,48 +1,66 @@
 package net.jbock.convert;
 
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
+import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.parameter.AbstractParameter;
 
 public final class ConvertedParameter<P extends AbstractParameter> {
 
-  private final ParameterSpec constructorParam;
+  private final ParameterSpec implConstructorParam;
   private final CodeBlock mapExpr;
   private final CodeBlock extractExpr;
   private final Skew skew;
   private final P parameter;
   private final EnumName enumName;
+  private final FieldSpec implField;
 
   public ConvertedParameter(
       CodeBlock mapExpr,
       CodeBlock extractExpr,
       Skew skew,
-      ParameterSpec constructorParam,
+      ParameterSpec implConstructorParam,
       EnumName enumName,
+      FieldSpec implField,
       P parameter) {
-    this.constructorParam = constructorParam;
+    this.implConstructorParam = implConstructorParam;
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
     this.skew = skew;
-    this.parameter = parameter;
     this.enumName = enumName;
+    this.implField = implField;
+    this.parameter = parameter;
+  }
+
+  public static <P extends AbstractParameter> ConvertedParameter<P> create(
+      CodeBlock mapExpr,
+      CodeBlock extractExpr,
+      Skew skew,
+      ParameterSpec implConstructorParam,
+      EnumName enumName,
+      P parameter) {
+    TypeName fieldType = parameter.returnType();
+    String fieldName = enumName.enumConstant();
+    FieldSpec implField = FieldSpec.builder(fieldType, fieldName).build();
+    return new ConvertedParameter<>(mapExpr, extractExpr, skew, implConstructorParam,
+        enumName, implField, parameter);
   }
 
   public CodeBlock mapExpr() {
     return mapExpr;
   }
 
+  /**
+   * Converts from param type to field type.
+   */
   public CodeBlock extractExpr() {
     return extractExpr;
   }
 
   public Skew skew() {
     return skew;
-  }
-
-  public ParameterSpec constructorParam() {
-    return constructorParam;
   }
 
   public EnumName enumName() {
@@ -75,5 +93,13 @@ public final class ConvertedParameter<P extends AbstractParameter> {
 
   public String enumConstant() {
     return enumName.enumConstant();
+  }
+
+  public FieldSpec implField() {
+    return implField;
+  }
+
+  public ParameterSpec implConstructorParam() {
+    return implConstructorParam;
   }
 }

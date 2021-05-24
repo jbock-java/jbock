@@ -73,7 +73,7 @@ public class AutoConverterFinder extends ConverterValidator {
             right(enumConverter(baseType)) :
             left(null))
         .mapLeft(__ -> noMatchError(baseType))
-        .map(mapExpr -> match.toCoercion(mapExpr, parameter));
+        .map(mapExpr -> match.toConvertedParameter(mapExpr, parameter));
   }
 
   private CodeBlock enumConverter(TypeMirror baseReturnType) {

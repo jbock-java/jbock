@@ -9,6 +9,10 @@ import java.util.Optional;
 @Reusable
 public class Styler {
 
+  private static final char ESC = 0x1B;
+  private static final String CSI = ESC + "[";
+  private static final String RESET = CSI + "m";
+
   private final SourceElement sourceElement;
 
   @Inject
@@ -21,7 +25,7 @@ public class Styler {
       return Optional.empty();
     }
     StringBuilder sb = new StringBuilder();
-    sb.append(Style.CSI);
+    sb.append(CSI);
     for (int i = 0; i < styles.length; i++) {
       if (i > 0) {
         sb.append(';');
@@ -30,7 +34,7 @@ public class Styler {
     }
     sb.append('m');
     sb.append(text);
-    sb.append(Style.OFF);
+    sb.append(RESET);
     return Optional.of(sb.toString());
   }
 

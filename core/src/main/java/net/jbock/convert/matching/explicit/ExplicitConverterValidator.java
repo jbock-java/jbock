@@ -85,7 +85,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
                 .add(".map(")
                 .add(getMapExpr(functionType, converter))
                 .add(")").build())
-            .map(mapExpr -> m.toCoercion(mapExpr, parameter));
+            .map(mapExpr -> m.toConvertedParameter(mapExpr, parameter));
       }
     }
     TypeMirror typeForErrorMessage = matches.stream()

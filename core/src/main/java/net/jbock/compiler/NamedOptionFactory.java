@@ -140,7 +140,7 @@ public class NamedOptionFactory {
         TypeName.get(sourceMethod.returnType()), name).build();
     CodeBlock mapExpr = CodeBlock.builder().build();
     CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
-    return new ConvertedParameter<>(mapExpr, extractExpr, Skew.FLAG,
+    return ConvertedParameter.create(mapExpr, extractExpr, Skew.FLAG,
         constructorParam, enumName, namedOption);
   }
 }

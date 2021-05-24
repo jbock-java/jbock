@@ -30,9 +30,9 @@ public class Match {
     this.enumName = enumName;
   }
 
-  public <P extends AbstractParameter> ConvertedParameter<P> toCoercion(
+  public <P extends AbstractParameter> ConvertedParameter<P> toConvertedParameter(
       CodeBlock mapExpr, P parameter) {
-    return new ConvertedParameter<>(mapExpr,
+    return ConvertedParameter.create(mapExpr,
         extractExpr, skew, constructorParam, enumName, parameter);
   }
 

@@ -2,7 +2,6 @@ package net.jbock.compiler.view;
 
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
@@ -40,7 +39,7 @@ public class Impl {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType())
         .superclass(sourceElement.typeName());
     for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
-      spec.addField(implField(c));
+      spec.addField(c.implField());
     }
     return spec.addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor())
@@ -55,23 +54,17 @@ public class Impl {
     return MethodSpec.methodBuilder(param.methodName())
         .returns(param.returnType())
         .addModifiers(param.getAccessModifiers())
-        .addStatement("return $N", implField(c))
+        .addStatement("return $N", c.implField())
         .build();
   }
 
   private MethodSpec implConstructor() {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
     for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
-      FieldSpec field = implField(c);
+      FieldSpec field = c.implField();
       spec.addStatement("this.$N = $L", field, c.extractExpr());
-      spec.addParameter(c.constructorParam());
+      spec.addParameter(c.implConstructorParam());
     }
     return spec.build();
-  }
-
-  private FieldSpec implField(ConvertedParameter<? extends AbstractParameter> c) {
-    TypeName fieldType = c.parameter().returnType();
-    String fieldName = c.enumConstant();
-    return FieldSpec.builder(fieldType, fieldName).build();
   }
 }
