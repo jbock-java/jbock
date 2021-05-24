@@ -48,7 +48,7 @@ public static void main(String[] args) {
 
 ````
 
-Finally, this is what your users might see:
+This is what your users might see:
 
 <img src="images/screenshot.png" alt="screenshot">
 
