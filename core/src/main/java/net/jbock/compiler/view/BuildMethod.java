@@ -15,13 +15,11 @@ import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
-import static java.util.Collections.singletonList;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 
@@ -66,7 +64,7 @@ public class BuildMethod {
     positionalParameters.repeatable().ifPresent(param -> {
       List<CodeBlock> block = new ArrayList<>();
       block.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
-      block.add(param.mapExpr());
+      param.mapExpr().ifPresent(block::add);
       block.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
       spec.addStatement("$T $N = $L", param.implConstructorParam().type, param.implConstructorParam(),
           joinByNewline(block));
@@ -105,7 +103,7 @@ public class BuildMethod {
       ConvertedParameter<NamedOption> option) {
     List<CodeBlock> code = new ArrayList<>();
     code.add(streamExpression);
-    code.add(option.mapExpr());
+    option.mapExpr().ifPresent(code::add);
     code.addAll(tailExpressionOption(option));
     option.extractExpr().ifPresent(code::add);
     return joinByNewline(code);
@@ -116,7 +114,7 @@ public class BuildMethod {
       ConvertedParameter<PositionalParameter> param) {
     List<CodeBlock> code = new ArrayList<>();
     code.add(streamExpression);
-    code.add(param.mapExpr());
+    param.mapExpr().ifPresent(code::add);
     code.addAll(tailExpressionParameter(param));
     param.extractExpr().ifPresent(code::add);
     return joinByNewline(code);
@@ -135,23 +133,21 @@ public class BuildMethod {
   }
 
   private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
-    String optionNames = parameter.parameter().names().stream()
-        .map(text -> styler.bold(text).orElse(text))
-        .collect(Collectors.joining(", "));
+    String optionNames = String.join(", ", parameter.parameter().names());
     String paramLabel = parameter.paramLabel();
     switch (parameter.skew()) {
       case REQUIRED:
         String message = "Missing required option: " + paramLabel + " (" + optionNames + ")";
-        return Arrays.asList(
+        return List.of(
             CodeBlock.of(".findAny()"),
             CodeBlock.of(".orElseThrow(() -> new $T($S))",
                 RuntimeException.class, message));
       case OPTIONAL:
-        return singletonList(CodeBlock.of(".findAny()"));
+        return List.of(CodeBlock.of(".findAny()"));
       case REPEATABLE:
-        return singletonList(CodeBlock.of(".collect($T.toList())", Collectors.class));
+        return List.of(CodeBlock.of(".collect($T.toList())", Collectors.class));
       case FLAG:
-        return singletonList(CodeBlock.of(".findAny().isPresent()"));
+        return List.of(CodeBlock.of(".findAny().isPresent()"));
       default:
         throw new UnsupportedOperationException("unknown skew: " + parameter.skew());
     }
@@ -161,14 +157,14 @@ public class BuildMethod {
     switch (parameter.skew()) {
       case REQUIRED:
         String paramLabel = styler.bold(parameter.paramLabel()).orElse(parameter.paramLabel());
-        return singletonList(CodeBlock.of(".orElseThrow(() -> new $T($S))",
+        return List.of(CodeBlock.of(".orElseThrow(() -> new $T($S))",
             RuntimeException.class, "Missing required parameter: " + paramLabel));
       case OPTIONAL:
         return emptyList();
       case REPEATABLE:
-        return singletonList(CodeBlock.of(".collect($T.toList())", Collectors.class));
+        return List.of(CodeBlock.of(".collect($T.toList())", Collectors.class));
       case FLAG:
-        return singletonList(CodeBlock.of(".findAny().isPresent()"));
+        return List.of(CodeBlock.of(".findAny().isPresent()"));
       default:
         throw new UnsupportedOperationException("unknown skew: " + parameter.skew());
     }
@@ -186,7 +182,6 @@ public class BuildMethod {
   }
 
   private CodeBlock joinByNewline(List<CodeBlock> code) {
-    code = code.stream().filter(c -> !c.isEmpty()).collect(Collectors.toList());
     if (code.isEmpty()) {
       return CodeBlock.builder().build();
     }

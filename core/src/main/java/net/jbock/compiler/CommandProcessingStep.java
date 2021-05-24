@@ -20,7 +20,6 @@ import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import javax.tools.Diagnostic;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -62,7 +61,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
     elementsByAnnotation.forEach((annotationName, element) -> {
       ParserFlavour parserFlavour = ParserFlavour.forAnnotationName(annotationName);
-      ElementFilter.typesIn(Collections.singletonList(element)).stream()
+      ElementFilter.typesIn(List.of(element)).stream()
           .map(typeElement -> validateSourceElement(typeElement, parserFlavour))
           .forEach(either -> either.accept(this::printFailures, this::processSourceElement));
     });

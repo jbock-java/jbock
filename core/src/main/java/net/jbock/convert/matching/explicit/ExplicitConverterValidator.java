@@ -27,7 +27,6 @@ import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
 
 @Reusable
 public class ExplicitConverterValidator extends ConverterValidator {
@@ -60,12 +59,12 @@ public class ExplicitConverterValidator extends ConverterValidator {
   public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> validate(
       P parameter,
       TypeElement converter) {
-    Optional<String> maybeFailure = util.commonTypeChecks(converter).map(s -> "converter " + s);
-    return Either.ofLeft(maybeFailure).orRight(null)
-        .flatMap(nothing -> checkNotAbstract(converter))
-        .flatMap(nothing -> checkNoTypevars(converter))
-        .flatMap(nothing -> checkMapperAnnotation(converter))
-        .flatMap(nothing -> referenceTool.getReferencedType(converter))
+    Optional<String> maybeFailure = util.commonTypeChecks(converter).map(s -> "converter " + s)
+        .or(() -> checkNotAbstract(converter))
+        .or(() -> checkNoTypevars(converter))
+        .or(() -> checkMapperAnnotation(converter));
+    return Either.maybeLeft(maybeFailure)
+        .flatMap(() -> referenceTool.getReferencedType(converter))
         .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
   }
 
@@ -80,12 +79,12 @@ public class ExplicitConverterValidator extends ConverterValidator {
       match = match.filter(m -> isValidMatch(m, functionType));
       if (match.isPresent()) {
         Match m = match.get();
-        return Either.ofLeft(validateMatch(m)).orRight(null)
-            .map(nothing -> CodeBlock.builder()
+        return Either.maybeLeft(validateMatch(m))
+            .orRight(() -> CodeBlock.builder()
                 .add(".map(")
                 .add(getMapExpr(functionType, converter))
                 .add(")").build())
-            .map(mapExpr -> m.toConvertedParameter(mapExpr, parameter));
+            .map(mapExpr -> m.toConvertedParameter(Optional.of(mapExpr), parameter));
       }
     }
     TypeMirror typeForErrorMessage = matches.stream()
@@ -95,27 +94,27 @@ public class ExplicitConverterValidator extends ConverterValidator {
     return left(ExplicitConverterValidator.noMatchError(typeForErrorMessage));
   }
 
-  private Either<String, Void> checkMapperAnnotation(TypeElement converter) {
+  private Optional<String> checkMapperAnnotation(TypeElement converter) {
     Converter converterAnnotation = converter.getAnnotation(Converter.class);
     boolean nestedMapper = util.getEnclosingElements(converter).contains(sourceElement.element());
     if (converterAnnotation == null && !nestedMapper) {
-      return left("converter must be an inner class of the command class, or carry the @" + Converter.class.getSimpleName() + " annotation");
+      return Optional.of("converter must be an inner class of the command class, or carry the @" + Converter.class.getSimpleName() + " annotation");
     }
-    return right(null);
+    return Optional.empty();
   }
 
-  private Either<String, Void> checkNotAbstract(TypeElement converter) {
+  private Optional<String> checkNotAbstract(TypeElement converter) {
     if (converter.getModifiers().contains(ABSTRACT)) {
-      return left("non-abstract converter class");
+      return Optional.of("non-abstract converter class");
     }
-    return right(null);
+    return Optional.empty();
   }
 
-  private Either<String, Void> checkNoTypevars(TypeElement converter) {
+  private Optional<String> checkNoTypevars(TypeElement converter) {
     if (!converter.getTypeParameters().isEmpty()) {
-      return left("found type parameters in converter class declaration");
+      return Optional.of("found type parameters in converter class declaration");
     }
-    return right(null);
+    return Optional.empty();
   }
 
   private CodeBlock getMapExpr(FunctionType functionType, TypeElement converter) {

@@ -16,7 +16,6 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -103,7 +102,7 @@ public class Util {
       Class<? extends Annotation> ann1,
       Class<? extends Annotation> ann2,
       Class<? extends Annotation> ann3) {
-    return assertAtLeastOneAnnotation(element, Arrays.asList(ann1, ann2, ann3));
+    return assertAtLeastOneAnnotation(element, List.of(ann1, ann2, ann3));
   }
 
   private Optional<String> assertAtLeastOneAnnotation(
@@ -124,7 +123,7 @@ public class Util {
       Class<? extends Annotation> ann1,
       Class<? extends Annotation> ann2,
       Class<? extends Annotation> ann3) {
-    return assertNoDuplicateAnnotations(element, Arrays.asList(ann1, ann2, ann3));
+    return assertNoDuplicateAnnotations(element, List.of(ann1, ann2, ann3));
   }
 
   private Optional<String> assertNoDuplicateAnnotations(

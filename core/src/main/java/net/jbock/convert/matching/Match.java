@@ -32,7 +32,7 @@ public class Match {
   }
 
   public <P extends AbstractParameter> ConvertedParameter<P> toConvertedParameter(
-      CodeBlock mapExpr, P parameter) {
+      Optional<CodeBlock> mapExpr, P parameter) {
     return ConvertedParameter.create(mapExpr,
         extractExpr, skew, enumName, parameter);
   }

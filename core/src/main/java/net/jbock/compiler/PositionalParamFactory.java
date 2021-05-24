@@ -50,18 +50,20 @@ public class PositionalParamFactory {
         .mapLeft(sourceMethod::fail);
   }
 
-  private Either<String, ConvertedParameter<PositionalParameter>> checkOnlyOnePositionalList(ConvertedParameter<PositionalParameter> c) {
+  private Either<String, ConvertedParameter<PositionalParameter>> checkOnlyOnePositionalList(
+      ConvertedParameter<PositionalParameter> c) {
     if (!c.isRepeatable()) {
       return right(c);
     }
-    return Either.ofLeft(alreadyCreated.stream()
+    return Either.maybeLeft(alreadyCreated.stream()
         .filter(ConvertedParameter::isRepeatable)
         .map(p -> "positional parameter " + p.paramLabel() + " is also repeatable")
         .findAny())
-        .orRight(c);
+        .orRight(() -> c);
   }
 
-  private Either<String, ConvertedParameter<PositionalParameter>> checkPositionNotNegative(ConvertedParameter<PositionalParameter> c) {
+  private Either<String, ConvertedParameter<PositionalParameter>> checkPositionNotNegative(
+      ConvertedParameter<PositionalParameter> c) {
     PositionalParameter p = c.parameter();
     if (p.position() < 0) {
       return left("negative positions are not allowed");

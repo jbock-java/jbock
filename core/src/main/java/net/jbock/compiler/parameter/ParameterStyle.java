@@ -8,7 +8,6 @@ import net.jbock.compiler.Descriptions;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
@@ -38,7 +37,7 @@ public enum ParameterStyle {
 
     @Override
     public List<String> names(ExecutableElement method) {
-      return Arrays.asList(get(method).names());
+      return List.of(get(method).names());
     }
 
     @Override

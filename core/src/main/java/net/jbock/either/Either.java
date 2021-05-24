@@ -14,11 +14,11 @@ public abstract class Either<L, R> {
     return Right.create(value);
   }
 
-  public static <R> RightOptional<R> ofRight(Optional<? extends R> right) {
+  public static <R> RightOptional<R> maybeRight(Optional<? extends R> right) {
     return new RightOptional<>(right);
   }
 
-  public static <L> LeftOptional<L> ofLeft(Optional<? extends L> left) {
+  public static <L> LeftOptional<L> maybeLeft(Optional<? extends L> left) {
     return new LeftOptional<>(left);
   }
 

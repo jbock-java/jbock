@@ -1,6 +1,7 @@
 package net.jbock.either;
 
 import java.util.Optional;
+import java.util.function.Supplier;
 
 public final class RightOptional<R> {
 
@@ -10,8 +11,8 @@ public final class RightOptional<R> {
     this.right = right;
   }
 
-  public <L> Either<L, R> orLeft(L left) {
+  public <L> Either<L, R> orLeft(Supplier<? extends L> left) {
     return right.<Either<L, R>>map(Right::create)
-        .orElseGet(() -> Left.create(left));
+        .orElseGet(() -> Left.create(left.get()));
   }
 }

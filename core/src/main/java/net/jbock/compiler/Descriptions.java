@@ -3,7 +3,6 @@ package net.jbock.compiler;
 import javax.lang.model.element.Element;
 import javax.lang.model.util.Elements;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -27,7 +26,7 @@ public class Descriptions {
     if (description.length == 0) {
       return tokenizeJavadoc(elements.getDocComment(element));
     }
-    return Arrays.asList(description);
+    return List.of(description);
   }
 
   private static List<String> tokenizeJavadoc(String docComment) {

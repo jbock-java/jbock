@@ -12,7 +12,6 @@ import net.jbock.qualifier.SourceMethod;
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,9 +45,7 @@ public class MethodsFactory {
     return abstractMethodsFinder.findAbstractMethods()
         .flatMap(this::checkAtLeastOneAbstractMethod)
         .flatMap(this::validateParameterMethods)
-        .map(methods -> methods.stream()
-            .map(SourceMethod::create)
-            .collect(Collectors.toList()))
+        .map(this::toSourceMethods)
         .flatMap(this::validateDuplicateParametersAnnotation)
         .flatMap(this::validateParameterSuperCommand);
   }
@@ -65,7 +62,7 @@ public class MethodsFactory {
     if (sourceElement.isSuperCommand() && params.isEmpty()) {
       String message = "in a @" + SuperCommand.class.getSimpleName() +
           ", at least one @" + Parameter.class.getSimpleName() + " must be defined";
-      return left(Collections.singletonList(sourceElement.fail(message)));
+      return left(List.of(sourceElement.fail(message)));
     }
     return right(new AbstractMethods(params, options));
   }
@@ -77,7 +74,7 @@ public class MethodsFactory {
         .collect(Collectors.toList());
     if (parametersMethods.size() >= 2) {
       String message = "duplicate @" + Parameters.class.getSimpleName() + " annotation";
-      return left(Collections.singletonList(sourceMethods.get(1).fail(message)));
+      return left(List.of(sourceMethods.get(1).fail(message)));
     }
     return right(sourceMethods);
   }
@@ -101,8 +98,14 @@ public class MethodsFactory {
     if (sourceMethods.isEmpty()) { // javapoet #739
       String message = "expecting at least one abstract method";
       ValidationFailure failure = sourceElement.fail(message);
-      return left(Collections.singletonList(failure));
+      return left(List.of(failure));
     }
     return right(sourceMethods);
+  }
+
+  private List<SourceMethod> toSourceMethods(List<ExecutableElement> methods) {
+    return methods.stream()
+        .map(SourceMethod::create)
+        .collect(Collectors.toList());
   }
 }

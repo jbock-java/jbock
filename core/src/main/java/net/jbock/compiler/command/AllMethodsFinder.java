@@ -11,7 +11,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.function.Function;
 
@@ -79,7 +78,7 @@ public class AllMethodsFinder {
     }
     List<? extends TypeMirror> interfaces = typeElement.getInterfaces();
     if (!interfaces.isEmpty()) {
-      return left(Collections.singletonList(
+      return left(List.of(
           new ValidationFailure("this abstract class may not implement any interfaces", typeElement)));
     }
     acc.addAll(methodsIn(typeElement.getEnclosedElements()));

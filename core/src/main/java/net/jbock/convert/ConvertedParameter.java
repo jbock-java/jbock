@@ -13,7 +13,7 @@ import java.util.Optional;
 public final class ConvertedParameter<P extends AbstractParameter> {
 
   private final ParameterSpec implConstructorParam;
-  private final CodeBlock mapExpr;
+  private final Optional<CodeBlock> mapExpr;
   private final Optional<CodeBlock> extractExpr;
   private final Skew skew;
   private final P parameter;
@@ -21,7 +21,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   private final FieldSpec implField;
 
   private ConvertedParameter(
-      CodeBlock mapExpr,
+      Optional<CodeBlock> mapExpr,
       Optional<CodeBlock> extractExpr,
       Skew skew,
       ParameterSpec implConstructorParam,
@@ -38,7 +38,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   }
 
   public static <P extends AbstractParameter> ConvertedParameter<P> create(
-      CodeBlock mapExpr,
+      Optional<CodeBlock> mapExpr,
       Optional<CodeBlock> extractExpr,
       Skew skew,
       EnumName enumName,
@@ -51,7 +51,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
         enumName, implField, parameter);
   }
 
-  public CodeBlock mapExpr() {
+  public Optional<CodeBlock> mapExpr() {
     return mapExpr;
   }
 

@@ -16,9 +16,9 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.util.AbstractMap.SimpleImmutableEntry;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map.Entry;
+import java.util.Optional;
 import java.util.regex.Pattern;
 
 import static net.jbock.compiler.Constants.STRING;
@@ -49,7 +49,7 @@ public class AutoConverter {
     return new SimpleImmutableEntry<>(autoType.getCanonicalName(), mapExpr);
   }
 
-  private static final List<Entry<String, CodeBlock>> CONVERTERS = Arrays.asList(
+  private static final List<Entry<String, CodeBlock>> CONVERTERS = List.of(
       create(Integer.class, VALUE_OF),
       create(Path.class, CodeBlock.of("$T::get", Paths.class)),
       create(File.class, autoConverterFile()),
@@ -65,19 +65,19 @@ public class AutoConverter {
       create(BigInteger.class, NEW),
       create(BigDecimal.class, NEW));
 
-  public Either<Void, CodeBlock> findAutoConverter(TypeMirror unwrappedReturnType) {
-    if (tool.isSameType(unwrappedReturnType, String.class.getCanonicalName())) {
-      return right(CodeBlock.builder().build());
+  public Either<TypeMirror, Optional<CodeBlock>> findAutoConverter(TypeMirror baseType) {
+    if (tool.isSameType(baseType, String.class.getCanonicalName())) {
+      return right(Optional.empty());
     }
     for (Entry<String, CodeBlock> converter : CONVERTERS) {
-      if (tool.isSameType(unwrappedReturnType, converter.getKey())) {
-        return right(CodeBlock.builder()
+      if (tool.isSameType(baseType, converter.getKey())) {
+        return right(Optional.of(CodeBlock.builder()
             .add(".map(")
             .add(converter.getValue())
-            .add(")").build());
+            .add(")").build()));
       }
     }
-    return left(null);
+    return left(baseType);
   }
 
   private static CodeBlock autoConverterFile() {

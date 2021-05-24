@@ -1,6 +1,5 @@
 package net.jbock.compiler;
 
-import com.squareup.javapoet.CodeBlock;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ConverterFinder;
@@ -134,8 +133,7 @@ public class NamedOptionFactory {
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
-    CodeBlock mapExpr = CodeBlock.builder().build();
-    return ConvertedParameter.create(mapExpr, Optional.empty(), Skew.FLAG,
+    return ConvertedParameter.create(Optional.empty(), Optional.empty(), Skew.FLAG,
         enumName, namedOption);
   }
 }

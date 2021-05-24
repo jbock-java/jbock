@@ -25,7 +25,6 @@ import java.util.stream.Collectors;
 
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
 
 @Reusable
 public class AutoConverterFinder extends ConverterValidator {
@@ -59,43 +58,43 @@ public class AutoConverterFinder extends ConverterValidator {
       Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
         Match m = match.get();
-        return Either.ofLeft(validateMatch(m)).orRight(null)
-            .flatMap(nothing -> findConverter(m, parameter));
+        return Either.maybeLeft(validateMatch(m))
+            .flatMap(() -> findConverter(m, parameter));
       }
     }
     return left(noMatchError(sourceMethod.returnType()));
   }
 
   private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(Match match, P parameter) {
-    TypeMirror baseType = match.baseType();
-    return autoConverter.findAutoConverter(baseType)
-        .flatMapLeft(__ -> isEnumType(baseType) ?
-            right(enumConverter(baseType)) :
-            left(null))
-        .mapLeft(__ -> noMatchError(baseType))
+    return autoConverter.findAutoConverter(match.baseType())
+        .flatMapLeft(this::enumConverter)
+        .mapLeft(AutoConverterFinder::noMatchError)
         .map(mapExpr -> match.toConvertedParameter(mapExpr, parameter));
   }
 
-  private CodeBlock enumConverter(TypeMirror baseReturnType) {
+  private Either<TypeMirror, Optional<CodeBlock>> enumConverter(TypeMirror baseType) {
+    if (!isEnumType(baseType)) {
+      return left(baseType);
+    }
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e").build();
     ParameterSpec values = ParameterSpec.builder(STRING, "values").build();
     ParameterSpec message = ParameterSpec.builder(STRING, "message").build();
-    return CodeBlock.builder()
+    return Either.right(Optional.of(CodeBlock.builder()
         .add(".map(")
         .add("$N -> {\n", s).indent()
         .add("try {\n").indent()
-        .add("return $T.valueOf($N);\n", baseReturnType, s)
+        .add("return $T.valueOf($N);\n", baseType, s)
         .unindent()
         .add("} catch ($T $N) {\n", IllegalArgumentException.class, e).indent()
-        .add("$T $N = $T.stream($T.values())\n", STRING, values, Arrays.class, baseReturnType).indent()
-        .add(".map($T::name)\n", baseReturnType)
+        .add("$T $N = $T.stream($T.values())\n", STRING, values, Arrays.class, baseType).indent()
+        .add(".map($T::name)\n", baseType)
         .add(".collect($T.joining($S, $S, $S));\n", Collectors.class, ", ", "[", "]")
         .unindent()
         .add("$T $N = $N.getMessage() + $S + $N;\n", STRING, message, e, " ", values)
         .add("throw new $T($N);\n", IllegalArgumentException.class, message)
         .unindent().add("}\n")
-        .unindent().add("})\n").build();
+        .unindent().add("})\n").build()));
   }
 
   private boolean isEnumType(TypeMirror type) {
