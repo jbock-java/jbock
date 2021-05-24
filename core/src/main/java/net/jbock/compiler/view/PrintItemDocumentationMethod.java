@@ -11,7 +11,6 @@ import net.jbock.qualifier.SourceElement;
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,7 +21,7 @@ import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 @Reusable
-public class PrintOptionDocumentationMethod {
+public class PrintItemDocumentationMethod extends Cached<MethodSpec> {
 
   private final AllParameters allParameters;
   private final SourceElement sourceElement;
@@ -30,7 +29,7 @@ public class PrintOptionDocumentationMethod {
   private final MakeLinesMethod makeLinesMethod;
 
   @Inject
-  PrintOptionDocumentationMethod(
+  PrintItemDocumentationMethod(
       AllParameters allParameters,
       SourceElement sourceElement,
       CommonFields commonFields,
@@ -41,10 +40,11 @@ public class PrintOptionDocumentationMethod {
     this.makeLinesMethod = makeLinesMethod;
   }
 
-  MethodSpec get() {
+  @Override
+  MethodSpec define() {
     ParameterSpec descriptionKey = builder(STRING, "descriptionKey").build();
     ParameterSpec message = builder(STRING, "message").build();
-    ParameterSpec option = builder(sourceElement.optionType(), "option").build();
+    ParameterSpec item = builder(sourceElement.itemType(), "item").build();
     ParameterSpec names = builder(STRING, "names").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
     ParameterSpec indent = builder(STRING, "indent").build();
@@ -63,7 +63,7 @@ public class PrintOptionDocumentationMethod {
           .add(".map($T::trim)\n", STRING)
           .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
           .add(".map($T::asList)\n", Arrays.class)
-          .add(".orElseGet(() -> $T.stream($N.description)\n", Arrays.class, option).indent()
+          .add(".orElseGet(() -> $T.stream($N.description)\n", Arrays.class, item).indent()
           .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
           .add(".flatMap($T::stream)\n", Arrays.class)
           .add(".collect($T.toList())))", Collectors.class)
@@ -72,7 +72,7 @@ public class PrintOptionDocumentationMethod {
           .build());
     } else {
       code.addStatement(CodeBlock.builder()
-          .add("$T.stream($N.description)\n", Arrays.class, option).indent()
+          .add("$T.stream($N.description)\n", Arrays.class, item).indent()
           .add(".map($N -> $N.split($S, $L))\n", s, s, "\\s+", -1)
           .add(".flatMap($T::stream)\n", Arrays.class)
           .add(".forEach($N::add)", tokens)
@@ -81,8 +81,8 @@ public class PrintOptionDocumentationMethod {
     }
     code.addStatement("$N($N, $N).forEach($N::println)", makeLinesMethod.get(),
         indent, tokens, commonFields.err());
-    MethodSpec.Builder spec = methodBuilder("printOptionDocumentation")
-        .addParameter(option)
+    MethodSpec.Builder spec = methodBuilder("printItemDocumentation")
+        .addParameter(item)
         .addParameter(names)
         .addParameter(indent)
         .addModifiers(PRIVATE)

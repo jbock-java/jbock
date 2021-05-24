@@ -123,7 +123,7 @@ public class BuildMethod {
   private CodeBlock streamExpressionOption(ConvertedParameter<NamedOption> option) {
     return CodeBlock.builder().add(
         "this.$N.get($T.$N).stream()", commonFields.optionParsers(),
-        sourceElement.optionType(), option.enumConstant()).build();
+        sourceElement.itemType(), option.enumConstant()).build();
   }
 
   private CodeBlock streamExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {

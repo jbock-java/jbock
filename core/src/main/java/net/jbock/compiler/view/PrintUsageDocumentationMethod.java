@@ -40,7 +40,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
   private final MakeLinesMethod makeLinesMethod;
   private final CommonFields commonFields;
   private final Elements elements;
-  private final PrintOptionDocumentationMethod printOptionDocumentationMethod;
+  private final PrintItemDocumentationMethod printItemDocumentationMethod;
   private final UsageMethod usageMethod;
   private final Styler styler;
   private final String paramsFormat;
@@ -57,7 +57,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
       MakeLinesMethod makeLinesMethod,
       CommonFields commonFields,
       Elements elements,
-      PrintOptionDocumentationMethod printOptionDocumentationMethod,
+      PrintItemDocumentationMethod printItemDocumentationMethod,
       UsageMethod usageMethod,
       Styler styler) {
     this.sourceElement = sourceElement;
@@ -67,7 +67,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
     this.makeLinesMethod = makeLinesMethod;
     this.commonFields = commonFields;
     this.elements = elements;
-    this.printOptionDocumentationMethod = printOptionDocumentationMethod;
+    this.printItemDocumentationMethod = printItemDocumentationMethod;
     this.usageMethod = usageMethod;
     this.styler = styler;
     this.optionsFormat = "  %1$-" + namedOptions.maxWidth() + "s ";
@@ -136,15 +136,15 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
     String enumConstant = c.enumConstant();
     if (allParameters.anyDescriptionKeys()) {
       return CodeBlock.builder().addStatement("$N($T.$L, $S, $N, $S)",
-          printOptionDocumentationMethod.get(),
-          sourceElement.optionType(), enumConstant,
+          printItemDocumentationMethod.get(),
+          sourceElement.itemType(), enumConstant,
           String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
           optionsIndent,
           c.parameter().descriptionKey().orElse("")).build();
     } else {
       return CodeBlock.builder().addStatement("$N($T.$L, $S, $N)",
-          printOptionDocumentationMethod.get(),
-          sourceElement.optionType(), enumConstant,
+          printItemDocumentationMethod.get(),
+          sourceElement.itemType(), enumConstant,
           String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
           optionsIndent).build();
     }
@@ -154,15 +154,15 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
     String enumConstant = c.enumConstant();
     if (allParameters.anyDescriptionKeys()) {
       return CodeBlock.builder().addStatement("$N($T.$L, $S, $N, $S)",
-          printOptionDocumentationMethod.get(),
-          sourceElement.optionType(), enumConstant,
+          printItemDocumentationMethod.get(),
+          sourceElement.itemType(), enumConstant,
           String.format(paramsFormat, c.paramLabel()),
           paramsIndent,
           c.parameter().descriptionKey().orElse("")).build();
     } else {
       return CodeBlock.builder().addStatement("$N($T.$L, $S, $N)",
-          printOptionDocumentationMethod.get(),
-          sourceElement.optionType(), enumConstant,
+          printItemDocumentationMethod.get(),
+          sourceElement.itemType(), enumConstant,
           String.format(paramsFormat, c.paramLabel()),
           paramsIndent).build();
     }

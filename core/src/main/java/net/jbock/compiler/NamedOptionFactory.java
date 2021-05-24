@@ -136,9 +136,9 @@ public class NamedOptionFactory {
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
-    String constructorParamName = enumName.enumConstant().toLowerCase(Locale.US);
-    ParameterSpec constructorParam = ParameterSpec.builder(
-        TypeName.get(sourceMethod.returnType()), constructorParamName).build();
+    String name = '_' + enumName.enumConstant().toLowerCase(Locale.US);
+    TypeName type = TypeName.get(sourceMethod.returnType());
+    ParameterSpec constructorParam = ParameterSpec.builder(type, name).build();
     CodeBlock mapExpr = CodeBlock.builder().build();
     CodeBlock extractExpr = CodeBlock.of("$N", constructorParam);
     return ConvertedParameter.create(mapExpr, extractExpr, Skew.FLAG,

@@ -21,8 +21,8 @@ public abstract class Matcher {
   public abstract Optional<Match> tryMatch(AbstractParameter parameter);
 
   protected ParameterSpec constructorParam(TypeMirror constructorParamType) {
-    return ParameterSpec.builder(
-        TypeName.get(constructorParamType),
-        '_' + enumName.enumConstant().toLowerCase(Locale.US)).build();
+    String name = '_' + enumName.enumConstant().toLowerCase(Locale.US);
+    TypeName type = TypeName.get(constructorParamType);
+    return ParameterSpec.builder(type, name).build();
   }
 }

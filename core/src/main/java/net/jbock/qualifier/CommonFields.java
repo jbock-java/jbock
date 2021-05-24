@@ -88,14 +88,14 @@ public class CommonFields {
         .map(List::size)
         .mapToLong(i -> i)
         .sum();
-    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.optionType()), "optionNames")
+    FieldSpec optionsByName = FieldSpec.builder(mapOf(STRING, sourceElement.itemType()), "optionNames")
         .initializer("new $T<>($L)", HashMap.class, mapSize)
         .build();
     FieldSpec paramParsers = FieldSpec.builder(ArrayTypeName.of(STRING), "params")
         .initializer("new $T[$L]", STRING, positionalParameters.regular().size())
         .build();
-    FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.optionType(), generatedTypes.optionParserType()), "optionParsers")
-        .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.optionType())
+    FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.itemType(), generatedTypes.optionParserType()), "optionParsers")
+        .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.itemType())
         .build();
     return new CommonFields(exitHookField, optionsByName, paramParsers, optionParsers);
   }

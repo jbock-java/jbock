@@ -11,6 +11,7 @@ import dagger.Reusable;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.NamedOptions;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -44,9 +45,10 @@ public final class OptionParser {
   OptionParser(
       GeneratedTypes generatedTypes,
       NamedOptions options,
+      SourceElement sourceElement,
       ReadOptionArgumentMethod readOptionArgumentMethod) {
     this.generatedTypes = generatedTypes;
-    this.optionField = FieldSpec.builder(generatedTypes.optionType(), "option")
+    this.optionField = FieldSpec.builder(sourceElement.itemType(), "option")
         .addModifiers(FINAL)
         .build();
     this.options = options;

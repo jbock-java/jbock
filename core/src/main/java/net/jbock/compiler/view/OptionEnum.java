@@ -8,10 +8,10 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import dagger.Reusable;
 import net.jbock.compiler.EnumName;
-import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
+import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
 import javax.lang.model.util.Elements;
@@ -31,24 +31,24 @@ import static net.jbock.compiler.Constants.STRING_ARRAY;
 public class OptionEnum {
 
   private final AllParameters context;
-  private final GeneratedTypes generatedTypes;
   private final FieldSpec descriptionField;
   private final Elements elements;
+  private final SourceElement sourceElement;
 
   @Inject
   OptionEnum(
       AllParameters context,
-      GeneratedTypes generatedTypes,
-      Elements elements) {
+      Elements elements,
+      SourceElement sourceElement) {
     this.context = context;
-    this.generatedTypes = generatedTypes;
     this.elements = elements;
+    this.sourceElement = sourceElement;
     this.descriptionField = FieldSpec.builder(STRING_ARRAY, "description").build();
   }
 
   TypeSpec define() {
     List<ConvertedParameter<? extends AbstractParameter>> parameters = context.parameters();
-    TypeSpec.Builder spec = TypeSpec.enumBuilder(generatedTypes.optionType());
+    TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement.itemType());
     for (ConvertedParameter<? extends AbstractParameter> param : parameters) {
       EnumName enumName = param.enumName();
       String enumConstant = enumName.enumConstant();

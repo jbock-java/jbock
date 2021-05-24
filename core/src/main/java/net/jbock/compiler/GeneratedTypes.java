@@ -49,10 +49,6 @@ public class GeneratedTypes {
     return generatedClass.nestedClass("RegularOptionParser");
   }
 
-  public ClassName optionType() {
-    return generatedClass.nestedClass("Option");
-  }
-
   public ClassName statefulParserType() {
     return generatedClass.nestedClass("StatefulParser");
   }

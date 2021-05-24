@@ -23,7 +23,7 @@ public class SourceElement {
   private final Set<Modifier> accessModifiers;
   private final String programName;
   private final ClassName generatedClass;
-  private final ClassName optionType;
+  private final ClassName itemType;
 
   private SourceElement(
       TypeElement sourceElement,
@@ -31,13 +31,13 @@ public class SourceElement {
       Set<Modifier> accessModifiers,
       String programName,
       ClassName generatedClass,
-      ClassName optionType) {
+      ClassName itemType) {
     this.sourceElement = sourceElement;
     this.parserFlavour = parserFlavour;
     this.accessModifiers = accessModifiers;
     this.programName = programName;
     this.generatedClass = generatedClass;
-    this.optionType = optionType;
+    this.itemType = itemType;
   }
 
   public static SourceElement create(TypeElement typeElement, ParserFlavour parserFlavour) {
@@ -50,9 +50,9 @@ public class SourceElement {
     ClassName generatedClass = ClassName.get(typeElement)
         .topLevelClassName()
         .peerClass(generatedClassName);
-    ClassName optionType = generatedClass.nestedClass("Option");
+    ClassName itemType = generatedClass.nestedClass("Item");
     return new SourceElement(typeElement, parserFlavour, accessModifiers,
-        programName, generatedClass, optionType);
+        programName, generatedClass, itemType);
   }
 
   public TypeElement element() {
@@ -99,8 +99,8 @@ public class SourceElement {
     return generatedClass;
   }
 
-  public ClassName optionType() {
-    return optionType;
+  public ClassName itemType() {
+    return itemType;
   }
 
   public List<String> description(Elements elements) {
