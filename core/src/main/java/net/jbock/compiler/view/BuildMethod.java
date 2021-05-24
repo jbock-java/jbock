@@ -134,7 +134,7 @@ public class BuildMethod {
 
   private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
     String optionNames = parameter.parameter().names().stream()
-        .map(text -> styler.yellow(text).orElse(text))
+        .map(text -> styler.bold(text).orElse(text))
         .collect(Collectors.joining(", "));
     String paramLabel = parameter.paramLabel();
     switch (parameter.skew()) {
@@ -158,7 +158,7 @@ public class BuildMethod {
   private List<CodeBlock> tailExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
     switch (parameter.skew()) {
       case REQUIRED:
-        String paramLabel = styler.yellow(parameter.paramLabel()).orElse(parameter.paramLabel());
+        String paramLabel = styler.bold(parameter.paramLabel()).orElse(parameter.paramLabel());
         return singletonList(CodeBlock.of(".orElseThrow(() -> new $T($S))",
             RuntimeException.class, "Missing required parameter: " + paramLabel));
       case OPTIONAL:

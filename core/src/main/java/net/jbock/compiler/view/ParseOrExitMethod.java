@@ -13,6 +13,7 @@ import javax.inject.Inject;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
+import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 
 @Reusable
@@ -70,14 +71,15 @@ public class ParseOrExitMethod {
     code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", commonFields.err(),
         styler.boldRed("ERROR").orElse("ERROR:") + " ", generatedTypes.parsingFailedType(), result);
     if (sourceElement.helpEnabled()) {
-      code.addStatement("$N.println($N($S))", commonFields.err(), usageMethod.get(), "Usage:");
+      code.addStatement("$N.println($T.join($S, $N($S)))",
+          commonFields.err(), STRING, " ", usageMethod.get(), "Usage:");
     } else {
       code.addStatement("$N()", printUsageDocumentationMethod.get());
     }
     if (sourceElement.helpEnabled()) {
       String helpSuggestion = sourceElement.programName() + " --help";
       code.addStatement("$N.println($S)", commonFields.err(),
-          "Type " + styler.yellow(helpSuggestion).orElseGet(() -> '"' + helpSuggestion + '"') +
+          "Type " + styler.bold(helpSuggestion).orElseGet(() -> '"' + helpSuggestion + '"') +
               " for more information.");
     }
     code.addStatement("$N.flush()", commonFields.err())

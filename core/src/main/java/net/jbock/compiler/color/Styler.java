@@ -45,8 +45,4 @@ public class Styler {
   public Optional<String> bold(String text) {
     return paint(text, Style.BOLD);
   }
-
-  public Optional<String> yellow(String text) {
-    return paint(text, Style.FG_YELLOW);
-  }
 }

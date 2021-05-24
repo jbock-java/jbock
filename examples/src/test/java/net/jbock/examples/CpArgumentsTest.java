@@ -16,7 +16,7 @@ class CpArgumentsTest {
 
   @Test
   void errorMissingSource() {
-    f.assertThat("-r").failsWithMessage("Missing required parameter: \u001B[33mSOURCE\u001B[m");
+    f.assertThat("-r").failsWithMessage("Missing required parameter: \u001B[1mSOURCE\u001B[m");
   }
 
   @Test
@@ -30,9 +30,9 @@ class CpArgumentsTest {
 
   @Test
   void errorMissingDest() {
-    f.assertThat("a").failsWithMessage("Missing required parameter: \u001B[33mDEST\u001B[m");
-    f.assertThat("a", "-r").failsWithMessage("Missing required parameter: \u001B[33mDEST\u001B[m");
-    f.assertThat("-r", "a").failsWithMessage("Missing required parameter: \u001B[33mDEST\u001B[m");
+    f.assertThat("a").failsWithMessage("Missing required parameter: \u001B[1mDEST\u001B[m");
+    f.assertThat("a", "-r").failsWithMessage("Missing required parameter: \u001B[1mDEST\u001B[m");
+    f.assertThat("-r", "a").failsWithMessage("Missing required parameter: \u001B[1mDEST\u001B[m");
   }
 
   @Test

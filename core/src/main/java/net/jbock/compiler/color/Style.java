@@ -3,8 +3,7 @@ package net.jbock.compiler.color;
 enum Style {
 
   BOLD(1),
-  FG_RED(31),
-  FG_YELLOW(33);
+  FG_RED(31);
 
   private final int code;
 

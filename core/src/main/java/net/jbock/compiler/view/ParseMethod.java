@@ -46,8 +46,8 @@ public class ParseMethod extends Cached<MethodSpec> {
             .addStatement("return new $T()", helpRequestedType)
             .unindent();
       }
-      code.add("if ($1N.length == 1 && ($2S.equals($1N[0]) || $3S.equals($1N[0])))\n",
-          args, "--help", "-h").indent()
+      code.add("if ($1N.length == 1 && $2S.equals($1N[0]))\n",
+          args, "--help").indent()
           .addStatement("return new $T()", helpRequestedType)
           .unindent();
     });
