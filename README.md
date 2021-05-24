@@ -41,8 +41,8 @@ See here for the code this generates:
 The generated code is typically used directly in the `main` method:
 
 ````java
-public static void main(String[] input) {
-    DeleteCommand command = new DeleteCommand_Parser().parseOrExit(input);
+public static void main(String[] args) {
+    DeleteCommand command = new DeleteCommand_Parser().parseOrExit(args);
     // ...
 }
 
