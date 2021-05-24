@@ -40,7 +40,7 @@ for the code this generates.
 
 The generated parser will give meaningful feedback if the input is invalid:
 
-<p align="center"><img src="images/screenshot.png" alt="screenshot" height="127px"></p>
+<img src="images/screenshot.png" alt="screenshot" height="127px">
 
 ### Sample projects
 
