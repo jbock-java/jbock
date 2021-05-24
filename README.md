@@ -16,7 +16,7 @@ which has either a `@Command` or `@SuperCommand` annotation.
 In this class, each `abstract` method defines a *named option* or a *positional parameter*.
 
 ````java
-@Command(name = "rm", description = "Delete your data.")
+@Command(name = "rm", description = "Delete your own files.")
 abstract class DeleteCommand {
 
   /* Path, not Optional<Path>:
