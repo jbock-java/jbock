@@ -51,23 +51,17 @@ public class BuildMethod {
   MethodSpec get() {
     CodeBlock constructorArguments = getConstructorArguments();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
-    for (ConvertedParameter<NamedOption> option : namedOptions.options()) {
-      CodeBlock streamExpression = streamExpressionOption(option);
-      spec.addStatement("$T $N = $L", option.implConstructorParam().type, option.implConstructorParam(),
-          extractExpressionOption(streamExpression, option));
+    for (ConvertedParameter<NamedOption> c : namedOptions.options()) {
+      ParameterSpec p = c.asParam();
+      spec.addStatement("$T $N = $L", p.type, p, convertExpressionOption(c));
     }
-    for (ConvertedParameter<PositionalParameter> param : positionalParameters.regular()) {
-      CodeBlock streamExpression = streamExpressionParameter(param);
-      spec.addStatement("$T $N = $L", param.implConstructorParam().type, param.implConstructorParam(),
-          extractExpressionParameter(streamExpression, param));
+    for (ConvertedParameter<PositionalParameter> c : positionalParameters.regular()) {
+      ParameterSpec p = c.asParam();
+      spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(c));
     }
-    positionalParameters.repeatable().ifPresent(param -> {
-      List<CodeBlock> block = new ArrayList<>();
-      block.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
-      param.mapExpr().ifPresent(block::add);
-      block.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
-      spec.addStatement("$T $N = $L", param.implConstructorParam().type, param.implConstructorParam(),
-          joinByNewline(block));
+    positionalParameters.repeatable().ifPresent(c -> {
+      ParameterSpec p = c.asParam();
+      spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(c));
     });
     generatedTypes.parseResultWithRestType().ifPresentOrElse(parseResultWithRestType -> {
           ParameterSpec result = ParameterSpec.builder(sourceElement.typeName(), "result").build();
@@ -86,38 +80,43 @@ public class BuildMethod {
 
   private CodeBlock getConstructorArguments() {
     List<CodeBlock> code = new ArrayList<>();
-    for (ConvertedParameter<NamedOption> option : namedOptions.options()) {
-      code.add(CodeBlock.of("$N", option.implConstructorParam()));
+    for (ConvertedParameter<NamedOption> c : namedOptions.options()) {
+      code.add(CodeBlock.of("$N", c.asParam()));
     }
-    for (ConvertedParameter<PositionalParameter> param : positionalParameters.regular()) {
-      code.add(CodeBlock.of("$N", param.implConstructorParam()));
+    for (ConvertedParameter<PositionalParameter> c : positionalParameters.regular()) {
+      code.add(CodeBlock.of("$N", c.asParam()));
     }
     positionalParameters.repeatable()
-        .map(param -> CodeBlock.of("$N", param.implConstructorParam()))
+        .map(c -> CodeBlock.of("$N", c.asParam()))
         .ifPresent(code::add);
     return joinByComma(code);
   }
 
-  private CodeBlock extractExpressionOption(
-      CodeBlock streamExpression,
-      ConvertedParameter<NamedOption> option) {
+  private CodeBlock convertExpressionOption(ConvertedParameter<NamedOption> c) {
     List<CodeBlock> code = new ArrayList<>();
-    code.add(streamExpression);
-    option.mapExpr().ifPresent(code::add);
-    code.addAll(tailExpressionOption(option));
-    option.extractExpr().ifPresent(code::add);
+    code.add(streamExpressionOption(c));
+    c.mapExpr().ifPresent(code::add);
+    code.addAll(tailExpressionOption(c));
+    c.extractExpr().ifPresent(code::add);
     return joinByNewline(code);
   }
 
-  private CodeBlock extractExpressionParameter(
-      CodeBlock streamExpression,
-      ConvertedParameter<PositionalParameter> param) {
+  private CodeBlock convertExpressionRegularParameter(ConvertedParameter<PositionalParameter> c) {
     List<CodeBlock> code = new ArrayList<>();
-    code.add(streamExpression);
-    param.mapExpr().ifPresent(code::add);
-    code.addAll(tailExpressionParameter(param));
-    param.extractExpr().ifPresent(code::add);
+    code.add(streamExpressionParameter(c));
+    c.mapExpr().ifPresent(code::add);
+    code.addAll(tailExpressionParameter(c));
+    c.extractExpr().ifPresent(code::add);
     return joinByNewline(code);
+  }
+
+
+  private CodeBlock convertExpressionRepeatableParameter(ConvertedParameter<PositionalParameter> c) {
+    List<CodeBlock> block = new ArrayList<>();
+    block.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
+    c.mapExpr().ifPresent(block::add);
+    block.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
+    return joinByNewline(block);
   }
 
   private CodeBlock streamExpressionOption(ConvertedParameter<NamedOption> option) {
@@ -149,7 +148,7 @@ public class BuildMethod {
       case FLAG:
         return List.of(CodeBlock.of(".findAny().isPresent()"));
       default:
-        throw new UnsupportedOperationException("unknown skew: " + parameter.skew());
+        throw new UnsupportedOperationException("unexpected skew: " + parameter.skew());
     }
   }
 
@@ -161,12 +160,8 @@ public class BuildMethod {
             RuntimeException.class, "Missing required parameter: " + paramLabel));
       case OPTIONAL:
         return emptyList();
-      case REPEATABLE:
-        return List.of(CodeBlock.of(".collect($T.toList())", Collectors.class));
-      case FLAG:
-        return List.of(CodeBlock.of(".findAny().isPresent()"));
       default:
-        throw new UnsupportedOperationException("unknown skew: " + parameter.skew());
+        throw new UnsupportedOperationException("unexpected skew: " + parameter.skew());
     }
   }
 
@@ -182,25 +177,21 @@ public class BuildMethod {
   }
 
   private CodeBlock joinByNewline(List<CodeBlock> code) {
-    if (code.isEmpty()) {
-      return CodeBlock.builder().build();
-    }
-    if (code.size() == 1) {
-      return code.get(0);
-    }
+    boolean indent = false;
     CodeBlock.Builder result = CodeBlock.builder();
     for (int i = 0; i < code.size(); i++) {
       if (i == 0) {
         result.add(code.get(i));
       } else if (i == 1) {
-        result.add("\n");
-        result.indent();
-        result.add(code.get(i));
+        result.add("\n").indent().add(code.get(i));
+        indent = true;
       } else {
-        result.add("\n");
-        result.add(code.get(i));
+        result.add("\n").add(code.get(i));
       }
     }
-    return result.unindent().build();
+    if (indent) {
+      result.unindent();
+    }
+    return result.build();
   }
 }

@@ -39,7 +39,7 @@ public class Impl {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType())
         .superclass(sourceElement.typeName());
     for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
-      spec.addField(c.implField());
+      spec.addField(c.asField());
     }
     return spec.addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor())
@@ -54,16 +54,16 @@ public class Impl {
     return MethodSpec.methodBuilder(param.methodName())
         .returns(param.returnType())
         .addModifiers(param.getAccessModifiers())
-        .addStatement("return $N", c.implField())
+        .addStatement("return $N", c.asField())
         .build();
   }
 
   private MethodSpec implConstructor() {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
     for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
-      FieldSpec field = c.implField();
-      spec.addStatement("this.$N = $N", field, c.implConstructorParam());
-      spec.addParameter(c.implConstructorParam());
+      FieldSpec field = c.asField();
+      spec.addStatement("this.$N = $N", field, c.asParam());
+      spec.addParameter(c.asParam());
     }
     return spec.build();
   }

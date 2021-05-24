@@ -98,11 +98,11 @@ public final class ConvertedParameter<P extends AbstractParameter> {
     return enumName.enumConstant();
   }
 
-  public FieldSpec implField() {
+  public FieldSpec asField() {
     return implField;
   }
 
-  public ParameterSpec implConstructorParam() {
+  public ParameterSpec asParam() {
     return implConstructorParam;
   }
 }
