@@ -94,7 +94,8 @@ public class BuildMethod {
 
   private CodeBlock convertExpressionOption(ConvertedParameter<NamedOption> c) {
     List<CodeBlock> code = new ArrayList<>();
-    code.add(streamExpressionOption(c));
+    code.add(CodeBlock.of("this.$N.get($T.$N).stream()", commonFields.optionParsers(),
+        sourceElement.itemType(), c.enumConstant()));
     c.mapExpr().ifPresent(code::add);
     code.addAll(tailExpressionOption(c));
     c.extractExpr().ifPresent(code::add);
@@ -103,13 +104,13 @@ public class BuildMethod {
 
   private CodeBlock convertExpressionRegularParameter(ConvertedParameter<PositionalParameter> c) {
     List<CodeBlock> code = new ArrayList<>();
-    code.add(streamExpressionParameter(c));
+    code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", Optional.class, commonFields.params(),
+        c.parameter().position()));
     c.mapExpr().ifPresent(code::add);
     code.addAll(tailExpressionParameter(c));
     c.extractExpr().ifPresent(code::add);
     return joinByNewline(code);
   }
-
 
   private CodeBlock convertExpressionRepeatableParameter(ConvertedParameter<PositionalParameter> c) {
     List<CodeBlock> block = new ArrayList<>();
@@ -117,18 +118,6 @@ public class BuildMethod {
     c.mapExpr().ifPresent(block::add);
     block.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
     return joinByNewline(block);
-  }
-
-  private CodeBlock streamExpressionOption(ConvertedParameter<NamedOption> option) {
-    return CodeBlock.builder().add(
-        "this.$N.get($T.$N).stream()", commonFields.optionParsers(),
-        sourceElement.itemType(), option.enumConstant()).build();
-  }
-
-  private CodeBlock streamExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
-    return CodeBlock.builder().add(
-        "$T.ofNullable(this.$N[$L])", Optional.class, commonFields.params(),
-        parameter.parameter().position()).build();
   }
 
   private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
