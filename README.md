@@ -16,7 +16,7 @@ which has either a `@Command` or `@SuperCommand` annotation.
 In this class, each `abstract` method defines a *named option* or a *positional parameter*.
 
 ````java
-@Command
+@Command(name = "rm")
 abstract class DeleteCommand {
 
   /* Path, not Optional<Path>:
@@ -37,6 +37,10 @@ abstract class DeleteCommand {
 
 See [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommand_Parser.java)
 for the code this generates.
+
+The generated parser will give the user meaningful feedback if the input is invalid:
+
+[[images/screenshot.png]]
 
 ### Sample projects
 
