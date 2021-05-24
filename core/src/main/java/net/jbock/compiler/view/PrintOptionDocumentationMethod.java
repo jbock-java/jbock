@@ -22,7 +22,7 @@ import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
 @Reusable
-public class PrintOptionMethod {
+public class PrintOptionDocumentationMethod {
 
   private final AllParameters allParameters;
   private final SourceElement sourceElement;
@@ -30,7 +30,7 @@ public class PrintOptionMethod {
   private final MakeLinesMethod makeLinesMethod;
 
   @Inject
-  PrintOptionMethod(
+  PrintOptionDocumentationMethod(
       AllParameters allParameters,
       SourceElement sourceElement,
       CommonFields commonFields,
@@ -47,7 +47,7 @@ public class PrintOptionMethod {
     ParameterSpec option = builder(sourceElement.optionType(), "option").build();
     ParameterSpec names = builder(STRING, "names").build();
     ParameterSpec tokens = builder(LIST_OF_STRING, "tokens").build();
-    ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
+    ParameterSpec indent = builder(STRING, "indent").build();
     ParameterSpec s = builder(STRING, "s").build();
     CodeBlock.Builder code = CodeBlock.builder();
     if (allParameters.anyDescriptionKeys()) {
@@ -79,13 +79,12 @@ public class PrintOptionMethod {
           .unindent()
           .build());
     }
-    code.addStatement("$T $N = $T.join($S, $T.nCopies($N.length() + 1, $S))",
-        STRING, continuationIndent, STRING, "", Collections.class, names, " ");
     code.addStatement("$N($N, $N).forEach($N::println)", makeLinesMethod.get(),
-        continuationIndent, tokens, commonFields.err());
-    MethodSpec.Builder spec = methodBuilder("printOption")
+        indent, tokens, commonFields.err());
+    MethodSpec.Builder spec = methodBuilder("printOptionDocumentation")
         .addParameter(option)
         .addParameter(names)
+        .addParameter(indent)
         .addModifiers(PRIVATE)
         .addCode(code.build());
     if (allParameters.anyDescriptionKeys()) {

@@ -40,9 +40,13 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
   private final MakeLinesMethod makeLinesMethod;
   private final CommonFields commonFields;
   private final Elements elements;
-  private final PrintOptionMethod printOptionMethod;
+  private final PrintOptionDocumentationMethod printOptionDocumentationMethod;
   private final UsageMethod usageMethod;
   private final Styler styler;
+  private final String paramsFormat;
+  private final String optionsFormat;
+  private final String paramsIndent;
+  private final String optionsIndent;
 
   @Inject
   PrintUsageDocumentationMethod(
@@ -53,7 +57,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
       MakeLinesMethod makeLinesMethod,
       CommonFields commonFields,
       Elements elements,
-      PrintOptionMethod printOptionMethod,
+      PrintOptionDocumentationMethod printOptionDocumentationMethod,
       UsageMethod usageMethod,
       Styler styler) {
     this.sourceElement = sourceElement;
@@ -63,9 +67,13 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
     this.makeLinesMethod = makeLinesMethod;
     this.commonFields = commonFields;
     this.elements = elements;
-    this.printOptionMethod = printOptionMethod;
+    this.printOptionDocumentationMethod = printOptionDocumentationMethod;
     this.usageMethod = usageMethod;
     this.styler = styler;
+    this.optionsFormat = "  %1$-" + namedOptions.maxWidth() + "s ";
+    this.paramsFormat = "  %1$-" + positionalParameters.maxWidth() + "s ";
+    this.optionsIndent = String.join("", Collections.nCopies(namedOptions.maxWidth() + 4, " "));
+    this.paramsIndent = String.join("", Collections.nCopies(positionalParameters.maxWidth() + 4, " "));
   }
 
   @Override
@@ -112,57 +120,56 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
     code.addStatement("$N($S, $N($S)).forEach($N::println)", makeLinesMethod.get(), continuationIndent,
         usageMethod.get(), " ", commonFields.err());
 
-    String paramsFormat = "  %1$-" + positionalParameters.maxWidth() + "s ";
-
     if (!positionalParameters.none()) {
       code.addStatement("$N.println()", commonFields.err());
       code.addStatement("$N.println($S)", commonFields.err(), styler.bold(PARAMETERS).orElse(PARAMETERS));
     }
-    positionalParameters.forEachRegular(p -> code.add(printPositionalCode(paramsFormat, p)));
-    positionalParameters.repeatable().ifPresent(p -> code.add(printPositionalCode(paramsFormat, p)));
+    positionalParameters.forEachRegular(p -> code.add(printPositionalCode(p)));
+    positionalParameters.repeatable().ifPresent(p -> code.add(printPositionalCode(p)));
     if (!namedOptions.isEmpty()) {
       code.addStatement("$N.println()", commonFields.err());
       code.addStatement("$N.println($S)", commonFields.err(), styler.bold(OPTIONS).orElse(OPTIONS));
     }
 
-    String optionsFormat = "  %1$-" + namedOptions.maxWidth() + "s ";
-
-    namedOptions.forEach(c -> code.add(printNamedOptionCode(optionsFormat, c)));
+    namedOptions.forEach(c -> code.add(printNamedOptionCode(c)));
     return methodBuilder("printUsageDocumentation")
         .addModifiers(sourceElement.accessModifiers())
         .addCode(code.build())
         .build();
   }
 
-  private CodeBlock printNamedOptionCode(String optionsFormat, ConvertedParameter<NamedOption> c) {
+  private CodeBlock printNamedOptionCode(ConvertedParameter<NamedOption> c) {
     String enumConstant = c.enumConstant();
     if (allParameters.anyDescriptionKeys()) {
-      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S)",
-          printOptionMethod.get(),
+      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S, $S)",
+          printOptionDocumentationMethod.get(),
           sourceElement.optionType(), enumConstant,
           String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
+          optionsIndent,
           c.parameter().descriptionKey().orElse("")).build();
     } else {
-      return CodeBlock.builder().addStatement("$N($T.$L, $S)",
-          printOptionMethod.get(),
+      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S)",
+          printOptionDocumentationMethod.get(),
           sourceElement.optionType(), enumConstant,
-          String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag()))).build();
+          String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())), optionsIndent)
+          .build();
     }
   }
 
-  private CodeBlock printPositionalCode(String paramsFormat, ConvertedParameter<PositionalParameter> c) {
+  private CodeBlock printPositionalCode(ConvertedParameter<PositionalParameter> c) {
     String enumConstant = c.enumConstant();
     if (allParameters.anyDescriptionKeys()) {
-      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S)",
-          printOptionMethod.get(),
+      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S, $S)",
+          printOptionDocumentationMethod.get(),
           sourceElement.optionType(), enumConstant,
           String.format(paramsFormat, c.paramLabel()),
+          paramsIndent,
           c.parameter().descriptionKey().orElse("")).build();
     } else {
-      return CodeBlock.builder().addStatement("$N($T.$L, $S)",
-          printOptionMethod.get(),
+      return CodeBlock.builder().addStatement("$N($T.$L, $S, $S)",
+          printOptionDocumentationMethod.get(),
           sourceElement.optionType(), enumConstant,
-          String.format(paramsFormat, c.paramLabel())).build();
+          String.format(paramsFormat, c.paramLabel()), paramsIndent).build();
     }
   }
 }

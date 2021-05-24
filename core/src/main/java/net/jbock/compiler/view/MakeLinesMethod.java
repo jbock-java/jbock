@@ -30,7 +30,7 @@ public class MakeLinesMethod extends Cached<MethodSpec> {
   @Override
   MethodSpec define() {
     ParameterSpec result = builder(LIST_OF_STRING, "result").build();
-    ParameterSpec continuationIndent = builder(STRING, "continuationIndent").build();
+    ParameterSpec indent = builder(STRING, "indent").build();
     ParameterSpec i = builder(INT, "i").build();
     ParameterSpec fresh = builder(BOOLEAN, "fresh").build();
     ParameterSpec line = builder(StringBuilder.class, "line").build();
@@ -50,7 +50,7 @@ public class MakeLinesMethod extends Cached<MethodSpec> {
     code.addStatement("continue");
     code.endControlFlow();
     code.beginControlFlow("if ($N > 0)", i)
-        .addStatement("$N.append($N ? $N : $S)", line, fresh, continuationIndent, " ")
+        .addStatement("$N.append($N ? $N : $S)", line, fresh, indent, " ")
         .endControlFlow();
     code.addStatement("$N.append($N)", line, token);
     code.addStatement("$N++", i);
@@ -63,7 +63,7 @@ public class MakeLinesMethod extends Cached<MethodSpec> {
     return methodBuilder("makeLines")
         .addModifiers(PRIVATE)
         .addCode(code.build())
-        .addParameter(continuationIndent)
+        .addParameter(indent)
         .addParameter(tokens)
         .returns(LIST_OF_STRING)
         .build();

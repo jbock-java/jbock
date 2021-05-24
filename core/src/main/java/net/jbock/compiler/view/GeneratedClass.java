@@ -34,7 +34,7 @@ public final class GeneratedClass {
   private final PrintUsageDocumentationMethod printUsageDocumentationMethod;
   private final CommonFields commonFields;
   private final ParseOrExitMethod parseOrExitMethod;
-  private final PrintOptionMethod printOptionMethod;
+  private final PrintOptionDocumentationMethod printOptionDocumentationMethod;
   private final MakeLinesMethod makeLinesMethod;
   private final ParseResultWithRest parseResultWithRest;
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
@@ -58,7 +58,7 @@ public final class GeneratedClass {
       PrintUsageDocumentationMethod printUsageDocumentationMethod,
       CommonFields commonFields,
       ParseOrExitMethod parseOrExitMethod,
-      PrintOptionMethod printOptionMethod,
+      PrintOptionDocumentationMethod printOptionDocumentationMethod,
       MakeLinesMethod makeLinesMethod,
       ParseResultWithRest parseResultWithRest,
       ReadOptionArgumentMethod readOptionArgumentMethod,
@@ -78,7 +78,7 @@ public final class GeneratedClass {
     this.printUsageDocumentationMethod = printUsageDocumentationMethod;
     this.commonFields = commonFields;
     this.parseOrExitMethod = parseOrExitMethod;
-    this.printOptionMethod = printOptionMethod;
+    this.printOptionDocumentationMethod = printOptionDocumentationMethod;
     this.makeLinesMethod = makeLinesMethod;
     this.parseResultWithRest = parseResultWithRest;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
@@ -97,7 +97,7 @@ public final class GeneratedClass {
         .addMethod(withers.withExitHookMethod())
         .addMethod(withers.withErrorStreamMethod())
         .addMethod(printUsageDocumentationMethod.get())
-        .addMethod(printOptionMethod.get())
+        .addMethod(printOptionDocumentationMethod.get())
         .addMethod(makeLinesMethod.get())
         .addMethod(usageMethod.get());
     if (!namedOptions.isEmpty()) {
