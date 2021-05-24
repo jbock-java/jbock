@@ -36,7 +36,7 @@ abstract class DeleteCommand {
 ````
 
 See [here](https://github.com/h908714124/jbock-docgen/blob/master/src/main/java/com/example/hello/DeleteCommand_Parser.java)
-for the code this generates. And here's a screenshot of jbock in action:
+for the code this generates. And here's a screenshot of the generated code in action:
 
 <img src="images/screenshot.png" alt="screenshot">
 
