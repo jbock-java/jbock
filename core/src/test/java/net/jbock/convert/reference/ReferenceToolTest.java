@@ -1,7 +1,7 @@
 package net.jbock.convert.reference;
 
 import net.jbock.compiler.EvaluatingProcessor;
-import net.jbock.compiler.TypeTool;
+import net.jbock.common.TypeTool;
 import net.jbock.either.Either;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

@@ -1,12 +1,21 @@
 package net.jbock.validate;
 
+import net.jbock.common.Annotations;
+import net.jbock.common.ValidationFailure;
+import net.jbock.either.Either;
+
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import javax.lang.model.element.VariableElement;
 import javax.lang.model.util.Types;
+import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 class AbstractMethodsUtil {
 
@@ -21,13 +30,28 @@ class AbstractMethodsUtil {
   }
 
   /**
-   * find abstract methods that are not implemented
-   * further below in the hierarchy
+   * Find abstract methods that are not implemented
+   * further below in the hierarchy.
+   * An overridden method may not be annotated.
    */
-  List<ExecutableElement> findRelevantAbstractMethods(List<ExecutableElement> abstractMethods) {
-    return abstractMethods.stream()
-        .filter(this::isUnimplemented)
+  Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantAbstractMethods(List<ExecutableElement> abstractMethods) {
+    Map<Boolean, List<ExecutableElement>> partition = abstractMethods.stream()
+        .collect(Collectors.partitioningBy(this::isUnimplemented));
+    List<ExecutableElement> result = partition.get(true);
+    List<ExecutableElement> overridden = partition.get(false);
+    List<ValidationFailure> failures = overridden.stream().flatMap(m -> {
+      for (Class<? extends Annotation> ann : Annotations.methodLevelAnnotations()) {
+        if (m.getAnnotation(ann) != null) {
+          return Stream.of(m);
+        }
+      }
+      return Stream.empty();
+    }).map(m -> new ValidationFailure("annotated method is overridden", m))
         .collect(Collectors.toList());
+    if (!failures.isEmpty()) {
+      return left(failures);
+    }
+    return right(result);
   }
 
   private boolean isUnimplemented(ExecutableElement abstractMethod) {

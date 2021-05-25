@@ -1,6 +1,6 @@
 package net.jbock.convert.reference;
 
-import net.jbock.compiler.TypeTool;
+import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
 
@@ -13,7 +13,7 @@ import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import static net.jbock.compiler.TypeTool.AS_DECLARED;
+import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.either.Either.halfRight;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;

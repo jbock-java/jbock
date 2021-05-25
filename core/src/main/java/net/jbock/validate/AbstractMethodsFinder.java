@@ -1,5 +1,8 @@
 package net.jbock.validate;
 
+import net.jbock.common.ValidationFailure;
+import net.jbock.either.Either;
+
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
@@ -25,7 +28,7 @@ public class AbstractMethodsFinder {
     this.allMethodsFinder = allMethodsFinder;
   }
 
-  public List<ExecutableElement> findAbstractMethods() {
+  public Either<List<ValidationFailure>, List<ExecutableElement>> findAbstractMethods() {
     List<ExecutableElement> methods = allMethodsFinder.findMethodsInSourceElement();
     Map<Boolean, List<ExecutableElement>> partitions = methods.stream()
         .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));

@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.common;
 
 import com.squareup.javapoet.ArrayTypeName;
 import com.squareup.javapoet.ClassName;

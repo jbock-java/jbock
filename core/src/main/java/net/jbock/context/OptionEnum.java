@@ -6,7 +6,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.EnumName;
+import net.jbock.common.EnumName;
 import net.jbock.compiler.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.AbstractParameter;
@@ -18,7 +18,7 @@ import java.util.List;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeSpec.anonymousClassBuilder;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static net.jbock.compiler.Constants.STRING_ARRAY;
+import static net.jbock.common.Constants.STRING_ARRAY;
 
 /**
  * Defines the *_Parser.Option enum.

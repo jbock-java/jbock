@@ -2,6 +2,7 @@ package net.jbock.compiler;
 
 import net.jbock.Command;
 import net.jbock.SuperCommand;
+import net.jbock.common.Descriptions;
 
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
@@ -91,7 +92,7 @@ public enum ParserFlavour {
     this.className = annotationClass.getCanonicalName();
   }
 
-  public static ParserFlavour forAnnotationName(String annotationName) {
+  static ParserFlavour forAnnotationName(String annotationName) {
     for (ParserFlavour flavour : values()) {
       if (flavour.className.equals(annotationName)) {
         return flavour;

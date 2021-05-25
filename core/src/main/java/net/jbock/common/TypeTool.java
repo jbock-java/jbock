@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.common;
 
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeElement;

@@ -1,7 +1,7 @@
 package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.compiler.EnumName;
+import net.jbock.common.EnumName;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
@@ -15,7 +15,7 @@ import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.Optional;
 
-import static net.jbock.compiler.TypeTool.AS_PRIMITIVE;
+import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 
 @ParameterScope
 public class ExactMatcher extends Matcher {

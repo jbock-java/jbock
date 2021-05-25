@@ -3,7 +3,7 @@ package net.jbock.parameter;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
-import net.jbock.compiler.Descriptions;
+import net.jbock.common.Descriptions;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Elements;

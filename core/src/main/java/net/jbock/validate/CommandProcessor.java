@@ -1,15 +1,15 @@
 package net.jbock.validate;
 
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.common.TypeTool;
+import net.jbock.common.Util;
+import net.jbock.common.ValidationFailure;
 import net.jbock.compiler.SourceElement;
-import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.ValidationFailure;
 import net.jbock.context.ContextModule;
 import net.jbock.context.DaggerContextComponent;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.DaggerParameterComponent;
 import net.jbock.convert.ParameterModule;
-import net.jbock.convert.Util;
 import net.jbock.either.Either;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;

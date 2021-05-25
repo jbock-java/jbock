@@ -2,8 +2,8 @@ package net.jbock.context;
 
 import dagger.Module;
 import dagger.Provides;
+import net.jbock.common.Util;
 import net.jbock.compiler.SourceElement;
-import net.jbock.convert.Util;
 import net.jbock.validate.Params;
 
 import javax.lang.model.util.Elements;

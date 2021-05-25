@@ -10,8 +10,8 @@ import javax.inject.Inject;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ARRAY;
+import static net.jbock.common.Constants.STRING;
+import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
 public class ParseOrExitMethod {

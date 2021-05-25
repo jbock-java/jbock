@@ -17,8 +17,8 @@ import java.util.List;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.common.Constants.LIST_OF_STRING;
+import static net.jbock.common.Constants.STRING;
 import static net.jbock.context.GeneratedClass.CONTINUATION_INDENT_USAGE;
 
 @ContextScope

@@ -2,7 +2,8 @@ package net.jbock.compiler;
 
 import dagger.Module;
 import dagger.Provides;
-import net.jbock.convert.Util;
+import net.jbock.common.TypeTool;
+import net.jbock.common.Util;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;

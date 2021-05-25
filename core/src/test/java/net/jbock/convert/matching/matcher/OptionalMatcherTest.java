@@ -2,9 +2,9 @@ package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
-import net.jbock.compiler.EnumName;
+import net.jbock.common.EnumName;
 import net.jbock.compiler.EvaluatingProcessor;
-import net.jbock.compiler.TypeTool;
+import net.jbock.common.TypeTool;
 import net.jbock.convert.matching.MatchFactory;
 import net.jbock.convert.matching.MatchFactoryAccess;
 import net.jbock.parameter.AbstractParameter;

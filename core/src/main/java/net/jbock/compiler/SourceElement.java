@@ -2,6 +2,8 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
+import net.jbock.common.EnumName;
+import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
@@ -12,7 +14,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static net.jbock.compiler.Constants.ACCESS_MODIFIERS;
+import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 
 public class SourceElement {
 
@@ -38,7 +40,7 @@ public class SourceElement {
     this.itemType = itemType;
   }
 
-  public static SourceElement create(TypeElement typeElement, ParserFlavour parserFlavour) {
+  static SourceElement create(TypeElement typeElement, ParserFlavour parserFlavour) {
     Set<Modifier> accessModifiers = typeElement.getModifiers().stream()
         .filter(ACCESS_MODIFIERS::contains)
         .collect(Collectors.toSet());

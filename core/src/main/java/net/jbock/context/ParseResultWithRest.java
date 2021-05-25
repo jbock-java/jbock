@@ -14,7 +14,7 @@ import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.STRING_ARRAY;
+import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
 public class ParseResultWithRest {

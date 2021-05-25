@@ -9,8 +9,8 @@ import javax.inject.Inject;
 import java.util.Arrays;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
-import static net.jbock.compiler.Constants.STRING_ARRAY;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.common.Constants.STRING_ARRAY;
+import static net.jbock.common.Constants.STRING_ITERATOR;
 
 @ContextScope
 public class ParseMethod extends Cached<MethodSpec> {

@@ -12,8 +12,8 @@ import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.common.Constants.LIST_OF_STRING;
+import static net.jbock.common.Constants.STRING;
 
 @ContextScope
 public class MakeLinesMethod extends Cached<MethodSpec> {

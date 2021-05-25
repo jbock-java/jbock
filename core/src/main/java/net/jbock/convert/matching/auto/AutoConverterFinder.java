@@ -2,11 +2,11 @@ package net.jbock.convert.matching.auto;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.compiler.TypeTool;
+import net.jbock.common.TypeTool;
+import net.jbock.common.Util;
 import net.jbock.convert.AutoConverter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ParameterScope;
-import net.jbock.convert.Util;
 import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.matcher.Matcher;
@@ -23,7 +23,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.common.Constants.STRING;
 import static net.jbock.either.Either.left;
 
 @ParameterScope

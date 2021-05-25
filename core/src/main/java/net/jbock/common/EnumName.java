@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.common;
 
 import java.util.ArrayList;
 import java.util.EnumSet;

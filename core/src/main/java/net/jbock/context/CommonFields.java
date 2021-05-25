@@ -21,10 +21,10 @@ import java.util.regex.Pattern;
 
 import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_TO_STRING_MAP;
-import static net.jbock.compiler.Constants.mapOf;
+import static net.jbock.common.Constants.LIST_OF_STRING;
+import static net.jbock.common.Constants.STRING;
+import static net.jbock.common.Constants.STRING_TO_STRING_MAP;
+import static net.jbock.common.Constants.mapOf;
 
 public class CommonFields {
 

@@ -11,8 +11,8 @@ import static com.squareup.javapoet.ParameterSpec.builder;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.common.Constants.STRING;
+import static net.jbock.common.Constants.STRING_ITERATOR;
 
 @ContextScope
 public class ReadOptionArgumentMethod extends Cached<MethodSpec> {

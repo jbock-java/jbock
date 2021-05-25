@@ -1,7 +1,7 @@
 package net.jbock.context;
 
+import net.jbock.common.Util;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.convert.Util;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.validate.Params;
 

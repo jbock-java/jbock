@@ -14,8 +14,8 @@ import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
-import static net.jbock.compiler.TypeTool.AS_DECLARED;
-import static net.jbock.compiler.TypeTool.AS_TYPE_ELEMENT;
+import static net.jbock.common.TypeTool.AS_DECLARED;
+import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 public class AllMethodsFinder {
 

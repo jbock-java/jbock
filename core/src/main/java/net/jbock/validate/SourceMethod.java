@@ -1,6 +1,6 @@
 package net.jbock.validate;
 
-import net.jbock.compiler.ValidationFailure;
+import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.ParameterStyle;
 
 import javax.lang.model.element.ExecutableElement;
@@ -13,7 +13,7 @@ import java.util.OptionalInt;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import static net.jbock.compiler.Constants.ACCESS_MODIFIERS;
+import static net.jbock.common.Constants.ACCESS_MODIFIERS;
 
 public class SourceMethod {
 

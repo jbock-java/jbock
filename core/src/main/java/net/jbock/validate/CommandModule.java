@@ -2,7 +2,7 @@ package net.jbock.validate;
 
 import dagger.Module;
 import dagger.Provides;
-import net.jbock.compiler.TypeTool;
+import net.jbock.common.TypeTool;
 
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;

@@ -2,7 +2,7 @@ package net.jbock.convert;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.compiler.TypeTool;
+import net.jbock.common.TypeTool;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
@@ -20,7 +20,7 @@ import java.util.Map.Entry;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
-import static net.jbock.compiler.Constants.STRING;
+import static net.jbock.common.Constants.STRING;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 

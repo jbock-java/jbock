@@ -2,9 +2,10 @@ package net.jbock.convert;
 
 import dagger.Module;
 import dagger.Provides;
-import net.jbock.compiler.EnumName;
+import net.jbock.common.EnumName;
+import net.jbock.common.TypeTool;
+import net.jbock.common.Util;
 import net.jbock.compiler.SourceElement;
-import net.jbock.compiler.TypeTool;
 import net.jbock.convert.matching.matcher.ExactMatcher;
 import net.jbock.convert.matching.matcher.ListMatcher;
 import net.jbock.convert.matching.matcher.Matcher;

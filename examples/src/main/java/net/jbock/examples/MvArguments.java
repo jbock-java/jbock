@@ -4,8 +4,13 @@ import net.jbock.Command;
 import net.jbock.Parameter;
 
 @Command(ansi = false)
-interface MvArguments extends MvArguments_Parent {
+abstract class MvArguments implements MvArguments_Parent {
 
   @Parameter(index = 1)
-  String dest();
+  abstract String dest();
+
+  @Override
+  public boolean isSafe() {
+    return true;
+  }
 }

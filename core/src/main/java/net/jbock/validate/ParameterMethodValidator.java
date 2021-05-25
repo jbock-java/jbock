@@ -1,11 +1,10 @@
 package net.jbock.validate;
 
-import net.jbock.Option;
-import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.SuperCommand;
+import net.jbock.common.Annotations;
+import net.jbock.common.Util;
 import net.jbock.compiler.SourceElement;
-import net.jbock.convert.Util;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
@@ -16,7 +15,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
-import static net.jbock.compiler.TypeTool.AS_DECLARED;
+import static net.jbock.common.TypeTool.AS_DECLARED;
 
 @ValidateScope
 public class ParameterMethodValidator {
@@ -32,12 +31,12 @@ public class ParameterMethodValidator {
 
   public Optional<String> validateParameterMethod(ExecutableElement sourceMethod) {
     Optional<String> noAnnotationsError = util.assertAtLeastOneAnnotation(sourceMethod,
-        Option.class, Parameter.class, Parameters.class);
+        Annotations.methodLevelAnnotations());
     if (noAnnotationsError.isPresent()) {
       return noAnnotationsError;
     }
     Optional<String> duplicateAnnotationsError = util.assertNoDuplicateAnnotations(sourceMethod,
-        Option.class, Parameter.class, Parameters.class);
+        Annotations.methodLevelAnnotations());
     if (duplicateAnnotationsError.isPresent()) {
       return duplicateAnnotationsError;
     }
@@ -45,17 +44,6 @@ public class ParameterMethodValidator {
         sourceMethod.getAnnotation(Parameters.class) != null) {
       return Optional.of("@" + Parameters.class.getSimpleName()
           + " cannot be used in a @" + SuperCommand.class.getSimpleName());
-    }
-    if (!sourceMethod.getParameters().isEmpty()) {
-      return Optional.of("empty argument list expected");
-    }
-    if (!sourceMethod.getTypeParameters().isEmpty()) {
-      return Optional.of("type parameter" +
-          (sourceMethod.getTypeParameters().size() >= 2 ? "s" : "") +
-          " not expected here");
-    }
-    if (!sourceMethod.getThrownTypes().isEmpty()) {
-      return Optional.of("method may not declare any exceptions");
     }
     if (isUnreachable(sourceMethod.getReturnType())) {
       return Optional.of("unreachable type: " + Util.typeToString(sourceMethod.getReturnType()));

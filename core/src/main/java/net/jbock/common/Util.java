@@ -1,6 +1,4 @@
-package net.jbock.convert;
-
-import net.jbock.compiler.TypeTool;
+package net.jbock.common;
 
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
@@ -89,14 +87,6 @@ public class Util {
 
   public Optional<String> assertAtLeastOneAnnotation(
       Element element,
-      Class<? extends Annotation> ann1,
-      Class<? extends Annotation> ann2,
-      Class<? extends Annotation> ann3) {
-    return assertAtLeastOneAnnotation(element, List.of(ann1, ann2, ann3));
-  }
-
-  private Optional<String> assertAtLeastOneAnnotation(
-      Element element,
       List<Class<? extends Annotation>> annotations) {
     for (Class<? extends Annotation> annotation : annotations) {
       if (element.getAnnotation(annotation) != null) {
@@ -116,7 +106,7 @@ public class Util {
     return assertNoDuplicateAnnotations(element, List.of(ann1, ann2, ann3));
   }
 
-  private Optional<String> assertNoDuplicateAnnotations(
+  public Optional<String> assertNoDuplicateAnnotations(
       Element element,
       List<Class<? extends Annotation>> annotations) {
     Class<?> found = null;

@@ -3,8 +3,8 @@ package net.jbock.validate;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.SuperCommand;
+import net.jbock.common.ValidationFailure;
 import net.jbock.compiler.SourceElement;
-import net.jbock.compiler.ValidationFailure;
 import net.jbock.either.Either;
 import net.jbock.parameter.ParameterStyle;
 
@@ -42,10 +42,10 @@ public class MethodsFactory {
    * find unimplemented abstract methods in {@code sourceElement} and its ancestors
    */
   public Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
-    List<ExecutableElement> methods = abstractMethodsFinder.findAbstractMethods();
-    return validateParameterMethods(methods)
+    return abstractMethodsFinder.findAbstractMethods()
+        .flatMap(this::validateParameterMethods)
         .flatMap(this::checkAtLeastOneAbstractMethod)
-        .map(this::toSourceMethods)
+        .map(this::createSourceMethods)
         .flatMap(this::validateDuplicateParametersAnnotation)
         .flatMap(this::validateParameterSuperCommand);
   }
@@ -103,7 +103,7 @@ public class MethodsFactory {
     return right(sourceMethods);
   }
 
-  private List<SourceMethod> toSourceMethods(List<ExecutableElement> methods) {
+  private List<SourceMethod> createSourceMethods(List<ExecutableElement> methods) {
     return methods.stream()
         .map(SourceMethod::create)
         .collect(Collectors.toList());

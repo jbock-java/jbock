@@ -16,8 +16,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static java.util.Collections.emptyList;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ARRAY;
+import static net.jbock.common.Constants.STRING;
+import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
 public class BuildMethod {

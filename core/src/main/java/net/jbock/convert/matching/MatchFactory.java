@@ -2,7 +2,7 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.compiler.EnumName;
+import net.jbock.common.EnumName;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.Skew;
 

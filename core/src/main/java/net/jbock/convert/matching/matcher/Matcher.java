@@ -2,7 +2,7 @@ package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
-import net.jbock.compiler.EnumName;
+import net.jbock.common.EnumName;
 import net.jbock.convert.matching.Match;
 import net.jbock.parameter.AbstractParameter;
 

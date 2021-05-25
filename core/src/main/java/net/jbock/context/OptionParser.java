@@ -7,7 +7,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.Constants;
+import net.jbock.common.Constants;
 import net.jbock.compiler.SourceElement;
 
 import javax.inject.Inject;
@@ -23,9 +23,9 @@ import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.compiler.Constants.LIST_OF_STRING;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.common.Constants.LIST_OF_STRING;
+import static net.jbock.common.Constants.STRING;
+import static net.jbock.common.Constants.STRING_ITERATOR;
 
 /**
  * Generates the inner class OptionParser and its subtypes.

@@ -6,7 +6,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
 
 import static net.jbock.compiler.EvaluatingProcessor.assertSameType;
-import static net.jbock.compiler.TypeTool.AS_DECLARED;
+import static net.jbock.common.TypeTool.AS_DECLARED;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TypeToolTest {

@@ -3,8 +3,8 @@ package net.jbock.parameter;
 import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.Parameter;
-import net.jbock.compiler.EnumName;
-import net.jbock.compiler.ValidationFailure;
+import net.jbock.common.EnumName;
+import net.jbock.common.ValidationFailure;
 import net.jbock.validate.SourceMethod;
 
 import javax.lang.model.element.Modifier;

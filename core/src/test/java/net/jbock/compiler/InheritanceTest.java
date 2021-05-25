@@ -63,6 +63,29 @@ class InheritanceTest {
         .compilesWithoutError();
   }
 
+
+  @Test
+  void annotatedMethodOverridden() {
+    JavaFileObject javaFile = fromSource(
+        "abstract class A {",
+        "",
+        "  @Option(names = \"--ouch\")",
+        "  abstract String wasp();",
+        "}",
+        "@Command",
+        "abstract class B extends A {",
+        "",
+        "  String wasp() { return null; }",
+        "",
+        "  @Parameter(index = 0)",
+        "  abstract String param();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(Processor.testInstance())
+        .failsToCompile()
+        .withErrorContaining("annotated method is overridden");
+  }
+
   @Test
   void inheritedMethodIsNotAnnotated() {
     JavaFileObject javaFile = fromSource(

@@ -1,6 +1,6 @@
 package net.jbock.convert.matching;
 
-import net.jbock.compiler.EnumName;
+import net.jbock.common.EnumName;
 
 public class MatchFactoryAccess {
 

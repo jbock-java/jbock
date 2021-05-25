@@ -2,18 +2,16 @@ package net.jbock.compiler;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
-import net.jbock.Option;
-import net.jbock.Parameter;
-import net.jbock.Parameters;
+import net.jbock.common.Annotations;
 
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.ElementFilter;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.tools.Diagnostic.Kind.ERROR;
@@ -30,7 +28,7 @@ public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.S
 
   @Override
   public Set<String> annotations() {
-    return Stream.of(Option.class, Parameter.class, Parameters.class)
+    return Annotations.methodLevelAnnotations().stream()
         .map(Class::getCanonicalName)
         .collect(Collectors.toSet());
   }
@@ -38,14 +36,27 @@ public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.S
   @Override
   public Set<? extends Element> process(ImmutableSetMultimap<String, Element> elementsByAnnotation) {
     for (ExecutableElement method : ElementFilter.methodsIn(elementsByAnnotation.values())) {
-      checkEnclosingElement(method);
+      validateAnnotatedMethod(method).ifPresent(message ->
+          messager.printMessage(ERROR, message, method));
     }
     return Set.of();
   }
 
-  private void checkEnclosingElement(ExecutableElement method) {
+  private Optional<String> validateAnnotatedMethod(ExecutableElement method) {
     if (!method.getModifiers().contains(ABSTRACT)) {
-      messager.printMessage(ERROR, "abstract method expected", method);
+      return Optional.of("abstract method expected");
     }
+    if (!method.getParameters().isEmpty()) {
+      return Optional.of("empty argument list expected");
+    }
+    if (!method.getTypeParameters().isEmpty()) {
+      return Optional.of("type parameter" +
+          (method.getTypeParameters().size() >= 2 ? "s" : "") +
+          " not expected here");
+    }
+    if (!method.getThrownTypes().isEmpty()) {
+      return Optional.of("method may not declare any exceptions");
+    }
+    return Optional.empty();
   }
 }

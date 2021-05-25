@@ -2,10 +2,10 @@ package net.jbock.validate;
 
 import dagger.BindsInstance;
 import dagger.Component;
-import net.jbock.compiler.OperationMode;
+import net.jbock.common.OperationMode;
+import net.jbock.common.TypeTool;
+import net.jbock.common.Util;
 import net.jbock.compiler.SourceElement;
-import net.jbock.compiler.TypeTool;
-import net.jbock.convert.Util;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;

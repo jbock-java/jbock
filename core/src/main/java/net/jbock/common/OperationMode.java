@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.common;
 
 public enum OperationMode {
 

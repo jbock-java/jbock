@@ -2,11 +2,11 @@ package net.jbock.convert.matching.explicit;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;
+import net.jbock.common.TypeTool;
+import net.jbock.common.Util;
 import net.jbock.compiler.SourceElement;
-import net.jbock.compiler.TypeTool;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ParameterScope;
-import net.jbock.convert.Util;
 import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.matcher.Matcher;

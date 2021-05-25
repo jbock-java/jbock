@@ -11,8 +11,8 @@ import javax.inject.Inject;
 import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.INT;
-import static net.jbock.compiler.Constants.STRING;
-import static net.jbock.compiler.Constants.STRING_ITERATOR;
+import static net.jbock.common.Constants.STRING;
+import static net.jbock.common.Constants.STRING_ITERATOR;
 
 @ContextScope
 public class StatefulParseMethod {

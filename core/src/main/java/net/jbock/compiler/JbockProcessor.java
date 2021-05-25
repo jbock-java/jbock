@@ -3,12 +3,13 @@ package net.jbock.compiler;
 import com.google.auto.common.BasicAnnotationProcessor;
 import dagger.BindsInstance;
 import dagger.Component;
+import net.jbock.common.OperationMode;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
 import java.util.List;
 
-import static net.jbock.compiler.OperationMode.PRODUCTION;
+import static net.jbock.common.OperationMode.PRODUCTION;
 
 public final class JbockProcessor extends BasicAnnotationProcessor {
 
