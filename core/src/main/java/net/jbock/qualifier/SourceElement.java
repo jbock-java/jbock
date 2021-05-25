@@ -6,6 +6,7 @@ import net.jbock.compiler.EnumName;
 import net.jbock.compiler.ParserFlavour;
 import net.jbock.compiler.ValidationFailure;
 
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.Elements;
@@ -101,6 +102,10 @@ public class SourceElement {
 
   public ClassName itemType() {
     return itemType;
+  }
+
+  public boolean isInterface() {
+    return sourceElement.getKind() == ElementKind.INTERFACE;
   }
 
   public List<String> description(Elements elements) {

@@ -38,9 +38,6 @@ public class Util {
     if (classToCheck.getNestingKind().isNested() && !classToCheck.getModifiers().contains(Modifier.STATIC)) {
       return Optional.of("must be static or top-level");
     }
-    if (classToCheck.getKind() == ElementKind.INTERFACE) {
-      return Optional.of("cannot be an interface");
-    }
     for (TypeElement element : getEnclosingElements(classToCheck)) {
       if (element.getModifiers().contains(Modifier.PRIVATE)) {
         return Optional.of("class cannot be private");

@@ -42,9 +42,9 @@ public class MethodsFactory {
    * find unimplemented abstract methods in {@code sourceElement} and its ancestors
    */
   public Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
-    return abstractMethodsFinder.findAbstractMethods()
+    List<ExecutableElement> methods = abstractMethodsFinder.findAbstractMethods();
+    return validateParameterMethods(methods)
         .flatMap(this::checkAtLeastOneAbstractMethod)
-        .flatMap(this::validateParameterMethods)
         .map(this::toSourceMethods)
         .flatMap(this::validateDuplicateParametersAnnotation)
         .flatMap(this::validateParameterSuperCommand);

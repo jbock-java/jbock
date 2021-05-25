@@ -1,7 +1,6 @@
 package net.jbock.compiler;
 
 import net.jbock.compiler.command.AllMethodsFinder;
-import net.jbock.either.Either;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
@@ -27,17 +26,15 @@ public class AbstractMethodsFinder {
     this.allMethodsFinder = allMethodsFinder;
   }
 
-  public Either<List<ValidationFailure>, List<ExecutableElement>> findAbstractMethods() {
-    return allMethodsFinder.findMethodsInSourceElement()
-        .map(acc -> acc.stream()
-            .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT))))
-        .map(partitions -> {
-          List<ExecutableElement> abstractMethods = partitions.get(true);
-          Map<Name, List<ExecutableElement>> nonAbstractMethods = partitions.get(false)
-              .stream()
-              .collect(groupingBy(ExecutableElement::getSimpleName));
-          return new AbstractMethodsUtil(nonAbstractMethods, types)
-              .findRelevantAbstractMethods(abstractMethods);
-        });
+  public List<ExecutableElement> findAbstractMethods() {
+    List<ExecutableElement> methods = allMethodsFinder.findMethodsInSourceElement();
+    Map<Boolean, List<ExecutableElement>> partitions = methods.stream()
+        .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));
+    List<ExecutableElement> abstractMethods = partitions.get(true);
+    Map<Name, List<ExecutableElement>> nonAbstractMethods = partitions.get(false)
+        .stream()
+        .collect(groupingBy(ExecutableElement::getSimpleName));
+    return new AbstractMethodsUtil(nonAbstractMethods, types)
+        .findRelevantAbstractMethods(abstractMethods);
   }
 }

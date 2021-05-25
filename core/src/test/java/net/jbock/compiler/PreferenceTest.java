@@ -37,7 +37,7 @@ public class PreferenceTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -65,7 +65,7 @@ public class PreferenceTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -94,7 +94,7 @@ public class PreferenceTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -123,7 +123,7 @@ public class PreferenceTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 }

@@ -24,7 +24,7 @@ class InheritanceTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -37,9 +37,8 @@ class InheritanceTest {
         "  abstract String something();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("use an abstract class, not an interface");
+        .processedWith(Processor.testInstance())
+        .compilesWithoutError();
   }
 
   @Test
@@ -60,7 +59,7 @@ class InheritanceTest {
         "  abstract String param();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -82,7 +81,7 @@ class InheritanceTest {
         "  abstract String param();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
   }
@@ -105,7 +104,7 @@ class InheritanceTest {
         "  abstract String param();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
   }
@@ -128,7 +127,7 @@ class InheritanceTest {
         "  abstract String param();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
   }
@@ -146,8 +145,7 @@ class InheritanceTest {
         "  abstract String param();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("this abstract class may not implement any interfaces");
+        .processedWith(Processor.testInstance())
+        .compilesWithoutError();
   }
 }

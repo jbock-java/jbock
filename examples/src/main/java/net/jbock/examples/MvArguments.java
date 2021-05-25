@@ -4,11 +4,8 @@ import net.jbock.Command;
 import net.jbock.Parameter;
 
 @Command(ansi = false)
-abstract class MvArguments {
-
-  @Parameter(index = 0)
-  abstract String source();
+interface MvArguments extends MvArguments_Parent {
 
   @Parameter(index = 1)
-  abstract String dest();
+  String dest();
 }

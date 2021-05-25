@@ -13,8 +13,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 
-import static net.jbock.compiler.OperationMode.TEST;
-
 public class SourceFileGenerator {
 
   private final Filer filer;
@@ -23,7 +21,11 @@ public class SourceFileGenerator {
   private final OperationMode operationMode;
 
   @Inject
-  SourceFileGenerator(Filer filer, SourceElement sourceElement, Messager messager, OperationMode operationMode) {
+  SourceFileGenerator(
+      Filer filer,
+      SourceElement sourceElement,
+      Messager messager,
+      OperationMode operationMode) {
     this.filer = filer;
     this.sourceElement = sourceElement;
     this.messager = messager;
@@ -37,7 +39,7 @@ public class SourceFileGenerator {
         .build();
     try {
       javaFile.writeTo(filer);
-      if (operationMode == TEST) {
+      if (operationMode.isTest()) {
         System.out.println("Printing generated code in OperationMode TEST");
         System.out.flush();
         javaFile.writeTo(System.err);

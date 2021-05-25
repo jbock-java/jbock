@@ -18,7 +18,6 @@ import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
 import java.util.List;
 import java.util.Optional;
@@ -90,19 +89,10 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .map(m -> (parserFlavour.isSuperCommand() ? "Super" : "") + "Command " + m)
         .or(() -> util.assertNoDuplicateAnnotations(element,
             Command.class, SuperCommand.class, Converter.class))
-        .or(() -> checkNoInterfaces(element))
         .map(s -> new ValidationFailure(s, element))
         .map(List::of);
     return Either.halfLeft(failureList)
         .map(() -> SourceElement.create(element, parserFlavour));
-  }
-
-  private Optional<String> checkNoInterfaces(TypeElement element) {
-    List<? extends TypeMirror> interfaces = element.getInterfaces();
-    if (!interfaces.isEmpty()) {
-      return Optional.of("command cannot implement " + interfaces.get(0));
-    }
-    return Optional.empty();
   }
 
   private void printFailures(List<ValidationFailure> failures) {

@@ -21,7 +21,7 @@ class PositionalTest {
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -35,7 +35,7 @@ class PositionalTest {
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -52,7 +52,7 @@ class PositionalTest {
         "  abstract Optional<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -67,7 +67,7 @@ class PositionalTest {
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("annotate with either @Command or @SuperCommand but not both");
   }
@@ -83,7 +83,7 @@ class PositionalTest {
         "  abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("annotate with either @Command or @Converter but not both");
   }
@@ -98,7 +98,7 @@ class PositionalTest {
         "  abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("@Parameters cannot be used in a @SuperCommand");
   }
@@ -113,7 +113,7 @@ class PositionalTest {
         "  abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("in a @SuperCommand, at least one @Parameter must be defined");
   }
@@ -131,7 +131,7 @@ class PositionalTest {
         "  abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("duplicate description key: myKey");
   }
@@ -146,7 +146,7 @@ class PositionalTest {
         "  abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("duplicate description key: myKey");
   }
@@ -160,7 +160,7 @@ class PositionalTest {
         "  @Parameter(index = 2) abstract Optional<String> c();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("Position 2 is not available. Suggested position: 1");
   }
@@ -174,7 +174,7 @@ class PositionalTest {
         "  @Parameter(index = 1) abstract Optional<Integer> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("Position 1 is not available. Suggested position: 0");
   }
@@ -188,7 +188,7 @@ class PositionalTest {
         "  @Parameter(index = -1) abstract Optional<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("negative positions are not allowed");
   }
@@ -202,7 +202,7 @@ class PositionalTest {
         "  @Parameter(index = 1) abstract int b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("duplicate position");
   }
@@ -216,7 +216,7 @@ class PositionalTest {
         "  @Parameter(index = 1) abstract StringBuilder a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define a converter that implements Function<String, StringBuilder>");
   }
@@ -231,7 +231,7 @@ class PositionalTest {
         "  @Parameters abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -244,7 +244,7 @@ class PositionalTest {
         "  @Parameters abstract List<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("duplicate @Parameters annotation");
   }
@@ -257,7 +257,7 @@ class PositionalTest {
         "  @Parameters abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -270,7 +270,7 @@ class PositionalTest {
         "  @Parameter(index = 1) abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("position must be less than position of optional parameter A");
   }
@@ -283,7 +283,7 @@ class PositionalTest {
         "  @Parameter(index = 0) abstract Optional<Integer> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -297,7 +297,7 @@ class PositionalTest {
         "  abstract Integer something();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("use @Parameter here");
   }
@@ -312,7 +312,7 @@ class PositionalTest {
         "  abstract Optional<Integer> something();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("use @Parameter here");
   }
@@ -327,7 +327,7 @@ class PositionalTest {
         "  abstract List<Integer> something();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("use @Parameters here");
   }

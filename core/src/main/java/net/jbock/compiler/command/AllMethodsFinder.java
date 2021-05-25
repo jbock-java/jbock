@@ -1,7 +1,5 @@
 package net.jbock.compiler.command;
 
-import net.jbock.compiler.ValidationFailure;
-import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
 
 import javax.inject.Inject;
@@ -12,14 +10,12 @@ import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Function;
+import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 import static net.jbock.compiler.TypeTool.AS_TYPE_ELEMENT;
-import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.right;
 
 public class AllMethodsFinder {
 
@@ -31,57 +27,46 @@ public class AllMethodsFinder {
   }
 
   /**
-   * find methods in source element, including inherited
+   * find all methods in source element, including inherited
    */
-  public Either<List<ValidationFailure>, List<ExecutableElement>> findMethodsInSourceElement() {
+  public List<ExecutableElement> findMethodsInSourceElement() {
     TypeMirror mirror = sourceElement.element().asType();
     return findMethodsIn(mirror);
   }
 
-  private Either<List<ValidationFailure>, List<ExecutableElement>> findMethodsIn(
-      TypeMirror mirror) {
+  private List<ExecutableElement> findMethodsIn(TypeMirror mirror) {
     List<ExecutableElement> acc = new ArrayList<>();
     while (true) {
-      Either<List<ValidationFailure>, TypeElement> element = findMethodsIn(mirror, acc);
-      if (!element.isRight()) {
-        List<ValidationFailure> failures = element.fold(
-            Function.identity(),
-            __ -> List.of());
-        if (!failures.isEmpty()) {
-          return left(failures);
-        } else {
-          return right(acc);
-        }
+      Optional<TypeElement> element = findMethodsIn(mirror, acc);
+      if (element.isEmpty()) {
+        return acc;
       }
-      TypeElement folded = element.fold(
-          __ -> null, // doesn't happen
-          Function.identity());
-      mirror = folded.getSuperclass();
+      mirror = element.get().getSuperclass();
     }
   }
 
-  private Either<List<ValidationFailure>, TypeElement> findMethodsIn(
+  private Optional<TypeElement> findMethodsIn(
       TypeMirror mirror, List<ExecutableElement> acc) {
     if (mirror.getKind() != TypeKind.DECLARED) {
-      return left(List.of());
+      return Optional.empty();
     }
     DeclaredType declared = AS_DECLARED.visit(mirror);
     if (declared == null) {
-      return left(List.of());
+      return Optional.empty();
     }
     TypeElement typeElement = AS_TYPE_ELEMENT.visit(declared.asElement());
     if (typeElement == null) {
-      return left(List.of());
-    }
-    if (!typeElement.getModifiers().contains(ABSTRACT)) {
-      return left(List.of());
+      return Optional.empty();
     }
     List<? extends TypeMirror> interfaces = typeElement.getInterfaces();
-    if (!interfaces.isEmpty()) {
-      return left(List.of(
-          new ValidationFailure("this abstract class may not implement any interfaces", typeElement)));
+    for (TypeMirror anInterface : interfaces) {
+      findMethodsIn(anInterface, acc);// recursion
+    }
+    if (!typeElement.getModifiers().contains(ABSTRACT)) {
+      // no relevant methods
+      return Optional.empty();
     }
     acc.addAll(methodsIn(typeElement.getEnclosedElements()));
-    return right(typeElement);
+    return Optional.of(typeElement);
   }
 }

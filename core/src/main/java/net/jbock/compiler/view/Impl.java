@@ -36,8 +36,12 @@ public class Impl {
   }
 
   TypeSpec define() {
-    TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType())
-        .superclass(sourceElement.typeName());
+    TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.implType());
+    if (sourceElement.isInterface()) {
+      spec.addSuperinterface(sourceElement.typeName());
+    } else {
+      spec.superclass(sourceElement.typeName());
+    }
     for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
       spec.addField(c.asField());
     }

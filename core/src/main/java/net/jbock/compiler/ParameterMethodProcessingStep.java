@@ -45,10 +45,6 @@ public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.S
   }
 
   private void checkEnclosingElement(ExecutableElement method) {
-    Element enclosing = method.getEnclosingElement();
-    if (enclosing.getKind().isInterface()) {
-      messager.printMessage(ERROR, "use an abstract class, not an interface", enclosing);
-    }
     if (!method.getModifiers().contains(ABSTRACT)) {
       messager.printMessage(ERROR, "abstract method expected", method);
     }

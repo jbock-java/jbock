@@ -9,27 +9,24 @@ import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
 import java.util.List;
 
-public final class Processor extends BasicAnnotationProcessor {
+import static net.jbock.compiler.OperationMode.PRODUCTION;
+
+public final class JbockProcessor extends BasicAnnotationProcessor {
 
   private final OperationMode operationMode;
 
-  public Processor() {
-    this(OperationMode.PRODUCTION);
+  public JbockProcessor() {
+    this.operationMode = PRODUCTION;
   }
 
   // visible for testing
-  @SuppressWarnings("unused")
-  Processor(boolean test) {
-    this(test ? OperationMode.TEST : OperationMode.PRODUCTION);
-  }
-
-  private Processor(OperationMode operationMode) {
-    this.operationMode = operationMode;
+  JbockProcessor(boolean test) {
+    this.operationMode = OperationMode.valueOf(test);
   }
 
   @Override
   protected Iterable<? extends Step> steps() {
-    ProcessorComponent component = DaggerProcessor_ProcessorComponent.builder()
+    ProcessorComponent component = DaggerJbockProcessor_ProcessorComponent.builder()
         .processingEnv(processingEnv)
         .operationMode(operationMode)
         .build();

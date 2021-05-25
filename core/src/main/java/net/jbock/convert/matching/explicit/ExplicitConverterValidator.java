@@ -18,6 +18,7 @@ import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
+import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import java.util.ArrayList;
@@ -60,6 +61,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
       P parameter,
       TypeElement converter) {
     Optional<String> maybeFailure = util.commonTypeChecks(converter).map(s -> "converter " + s)
+        .or(() -> checkNotAnInterface(converter))
         .or(() -> checkNotAbstract(converter))
         .or(() -> checkNoTypevars(converter))
         .or(() -> checkMapperAnnotation(converter));
@@ -93,6 +95,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
         .orElse(sourceMethod.returnType());
     return left(ExplicitConverterValidator.noMatchError(typeForErrorMessage));
   }
+
 
   private Optional<String> checkMapperAnnotation(TypeElement converter) {
     Converter converterAnnotation = converter.getAnnotation(Converter.class);
@@ -128,5 +131,12 @@ public class ExplicitConverterValidator extends ConverterValidator {
 
   private static String noMatchError(TypeMirror type) {
     return "converter should implement Function<String, " + Util.typeToString(type) + ">";
+  }
+  
+  private Optional<? extends String> checkNotAnInterface(TypeElement converter) {
+    if (converter.getKind() == ElementKind.INTERFACE) {
+      return Optional.of("cannot be an interface");
+    }
+    return Optional.empty();
   }
 }

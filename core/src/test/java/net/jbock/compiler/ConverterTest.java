@@ -28,7 +28,7 @@ class ConverterTest {
         "",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>> but not both");
   }
@@ -47,7 +47,7 @@ class ConverterTest {
         "",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
@@ -67,7 +67,7 @@ class ConverterTest {
         "",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter must be an inner class of the command class, " +
             "or carry the @Converter annotation");
@@ -88,7 +88,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -106,7 +106,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -125,7 +125,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -144,7 +144,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -163,7 +163,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("use @Parameter here");
   }
@@ -183,7 +183,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("use @Parameter here");
   }
@@ -203,7 +203,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("use @Parameters here");
   }
@@ -223,7 +223,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter");
   }
@@ -245,7 +245,7 @@ class ConverterTest {
         "  interface Katz<OR> extends Supplier<Function<OR, OR>> { }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
@@ -268,7 +268,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("constructor");
   }
@@ -291,7 +291,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter missing default constructor");
   }
@@ -314,7 +314,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter missing default constructor");
   }
@@ -334,7 +334,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter must be static or top-level");
   }
@@ -354,7 +354,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter should implement Function<String, ?>");
   }
@@ -374,7 +374,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter should implement Function<String, Integer>");
   }
@@ -394,7 +394,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter should implement Function<String, Integer>");
   }
@@ -414,7 +414,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter should implement Function<String, Integer>");
   }
@@ -434,7 +434,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -453,7 +453,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -473,7 +473,7 @@ class ConverterTest {
         "}");
 
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -495,7 +495,7 @@ class ConverterTest {
         "",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
@@ -518,7 +518,7 @@ class ConverterTest {
         "",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
   }
@@ -538,7 +538,7 @@ class ConverterTest {
         "  interface Foo<X> extends Function<String, List<List<X>>> { }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("found type parameters in converter class declaration");
   }
@@ -566,7 +566,7 @@ class ConverterTest {
         "  interface Foo8<H> extends Function<String, H> { }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -585,7 +585,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("raw type in converter class");
   }
@@ -605,7 +605,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("raw type in converter class");
   }
@@ -625,7 +625,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("raw type in converter class");
   }
@@ -645,7 +645,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -664,7 +664,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -683,7 +683,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -702,7 +702,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -721,7 +721,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -740,7 +740,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -759,7 +759,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -778,10 +778,9 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
-
 
   @Test
   void converterValidListOfSet() {
@@ -798,7 +797,7 @@ class ConverterTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 }

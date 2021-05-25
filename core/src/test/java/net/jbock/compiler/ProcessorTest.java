@@ -23,7 +23,7 @@ class ProcessorTest {
         "  @Option(names = \"a\") abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("name must start with a dash character: a");
   }
@@ -36,7 +36,7 @@ class ProcessorTest {
         "  @Option(names = \"--\") abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("not a valid name: --");
   }
@@ -50,7 +50,7 @@ class ProcessorTest {
         "  @Option(names = \"--x\") abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("duplicate option name");
   }
@@ -64,7 +64,7 @@ class ProcessorTest {
         "  @Option(names = {\"--y\", \"-x\"}) abstract String b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("duplicate option name: -x");
   }
@@ -77,7 +77,7 @@ class ProcessorTest {
         "  @Option(names = {\"--x\", \"--x\"}) abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("duplicate option name: --x");
   }
@@ -90,7 +90,7 @@ class ProcessorTest {
         "  @Option(names = {\"--help\"}) abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("'--help' cannot be an option name");
   }
@@ -103,7 +103,7 @@ class ProcessorTest {
         "  @Option(names = {\"-xx\"}) abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("single-dash names must be single-character names: -xx");
   }
@@ -118,7 +118,7 @@ class ProcessorTest {
         "  abstract StringBuilder a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define a converter that implements Function<String, StringBuilder>");
   }
@@ -133,7 +133,7 @@ class ProcessorTest {
         "  abstract String a() throws IllegalArgumentException;",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("may not declare any exceptions");
   }
@@ -148,7 +148,7 @@ class ProcessorTest {
         "  String a() { return null; }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("abstract method expected");
   }
@@ -163,7 +163,7 @@ class ProcessorTest {
         "  abstract List a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define a converter that implements Function<String, List>");
   }
@@ -178,7 +178,7 @@ class ProcessorTest {
         "  abstract Optional a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define a converter that implements Function<String, Optional>");
   }
@@ -193,7 +193,7 @@ class ProcessorTest {
         "  abstract java.util.Set<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define a converter that implements Function<String, Set<String>>");
   }
@@ -208,7 +208,7 @@ class ProcessorTest {
         "  abstract int[] a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define a converter that implements Function<String, int[]>");
   }
@@ -223,7 +223,7 @@ class ProcessorTest {
         "  abstract java.util.Date a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define a converter that implements Function<String, Date>");
   }
@@ -233,12 +233,12 @@ class ProcessorTest {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "interface Arguments {",
+        "  @Option(names = \"--a\")",
         "  abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("Command cannot be an interface");
+        .processedWith(Processor.testInstance())
+        .compilesWithoutError();
   }
 
   @Test
@@ -250,7 +250,7 @@ class ProcessorTest {
         "  abstract String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("name contains whitespace characters");
   }
@@ -262,7 +262,7 @@ class ProcessorTest {
         "abstract class Arguments {",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("expecting at least one abstract method");
   }
@@ -277,7 +277,7 @@ class ProcessorTest {
         "  abstract java.util.OptionalInt b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -291,7 +291,7 @@ class ProcessorTest {
         "  abstract java.util.OptionalInt b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -305,7 +305,7 @@ class ProcessorTest {
         "  abstract java.util.OptionalInt b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -319,7 +319,7 @@ class ProcessorTest {
         "  abstract boolean x();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -333,7 +333,7 @@ class ProcessorTest {
         "  abstract boolean __();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -347,7 +347,7 @@ class ProcessorTest {
         "  abstract boolean __9();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -364,7 +364,7 @@ class ProcessorTest {
         "  abstract boolean fancy();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -378,7 +378,7 @@ class ProcessorTest {
         "  abstract java.lang.Boolean x();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define a converter that implements Function<String, Boolean>");
   }
@@ -393,7 +393,7 @@ class ProcessorTest {
         "  abstract int aRequiredInt();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -407,25 +407,9 @@ class ProcessorTest {
         "  abstract int aRequiredInt();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define at least one option name");
-  }
-
-  @Test
-  void implementsNotAllowed() {
-    JavaFileObject javaFile = fromSource(
-        "interface Arguments {",
-        "",
-        "  @Command",
-        "  abstract class Foo implements Arguments {",
-        "    abstract String a();",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
-        .failsToCompile()
-        .withErrorContaining("implement");
   }
 
   @Test
@@ -436,7 +420,7 @@ class ProcessorTest {
         "  @Option(names = \"--x\") abstract String a(int b, int c);",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("empty argument list expected");
   }
@@ -449,7 +433,7 @@ class ProcessorTest {
         "  @Option(names = \"--x\") abstract <E> String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("type parameter not expected here");
   }
@@ -462,7 +446,7 @@ class ProcessorTest {
         "  @Option(names = \"--x\") abstract <E, F> String a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("type parameters not expected here");
   }
@@ -476,7 +460,7 @@ class ProcessorTest {
         "  abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("add one of these annotations: @Option, @Parameter, @Parameters");
   }
@@ -491,7 +475,7 @@ class ProcessorTest {
         "  abstract boolean hello();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define a converter that implements Function<String, Boolean>");
   }
@@ -507,7 +491,7 @@ class ProcessorTest {
         "  abstract List<String> a();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("annotate with either @Option or @Parameter but not both");
   }
@@ -525,7 +509,7 @@ class ProcessorTest {
         "  abstract List<String> b();",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -543,7 +527,7 @@ class ProcessorTest {
         "   }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .compilesWithoutError();
   }
 
@@ -561,7 +545,7 @@ class ProcessorTest {
         "   }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("unreachable type: Foo");
   }
@@ -580,7 +564,7 @@ class ProcessorTest {
         "   }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("unreachable type: List<Foo>");
   }
@@ -598,7 +582,7 @@ class ProcessorTest {
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(new Processor())
+        .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("Command class cannot be private");
   }
