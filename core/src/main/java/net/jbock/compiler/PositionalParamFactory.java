@@ -10,6 +10,7 @@ import net.jbock.qualifier.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Optional;
 
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
@@ -55,11 +56,11 @@ public class PositionalParamFactory {
     if (!c.isRepeatable()) {
       return right(c);
     }
-    return Either.maybeLeft(alreadyCreated.stream()
+    Optional<String> failure = alreadyCreated.stream()
         .filter(ConvertedParameter::isRepeatable)
         .map(p -> "positional parameter " + p.paramLabel() + " is also repeatable")
-        .findAny())
-        .orRight(() -> c);
+        .findAny();
+    return Either.halfLeft(failure).orElseRight(() -> c);
   }
 
   private Either<String, ConvertedParameter<PositionalParameter>> checkPositionNotNegative(

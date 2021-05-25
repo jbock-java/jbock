@@ -58,7 +58,7 @@ public class AutoConverterFinder extends ConverterValidator {
       Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
         Match m = match.get();
-        return Either.maybeLeft(validateMatch(m))
+        return Either.halfLeft(validateMatch(m))
             .flatMap(() -> findConverter(m, parameter));
       }
     }

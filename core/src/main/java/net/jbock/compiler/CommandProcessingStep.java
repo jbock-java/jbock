@@ -11,6 +11,7 @@ import net.jbock.compiler.command.SourceFileGenerator;
 import net.jbock.convert.Util;
 import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.EnvironmentScope;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -19,15 +20,15 @@ import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
-import javax.tools.Diagnostic;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static net.jbock.either.Either.right;
+import static javax.tools.Diagnostic.Kind.ERROR;
 
+@EnvironmentScope
 public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private final TypeTool tool;
@@ -85,14 +86,15 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private Either<List<ValidationFailure>, SourceElement> validateSourceElement(
       TypeElement element,
       ParserFlavour parserFlavour) {
-    return util.commonTypeChecks(element).map(s -> "command " + s)
+    Optional<List<ValidationFailure>> failureList = util.commonTypeChecks(element)
+        .map(m -> (parserFlavour.isSuperCommand() ? "Super" : "") + "Command " + m)
         .or(() -> util.assertNoDuplicateAnnotations(element,
             Command.class, SuperCommand.class, Converter.class))
         .or(() -> checkNoInterfaces(element))
         .map(s -> new ValidationFailure(s, element))
-        .map(List::of)
-        .map(Either::<List<ValidationFailure>, SourceElement>left)
-        .orElseGet(() -> right(SourceElement.create(element, parserFlavour)));
+        .map(List::of);
+    return Either.halfLeft(failureList)
+        .map(() -> SourceElement.create(element, parserFlavour));
   }
 
   private Optional<String> checkNoInterfaces(TypeElement element) {
@@ -103,9 +105,9 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     return Optional.empty();
   }
 
-  private void printFailures(java.util.List<ValidationFailure> failures) {
+  private void printFailures(List<ValidationFailure> failures) {
     for (ValidationFailure failure : failures) {
-      messager.printMessage(Diagnostic.Kind.ERROR, failure.message(), failure.about());
+      messager.printMessage(ERROR, failure.message(), failure.about());
     }
   }
 }

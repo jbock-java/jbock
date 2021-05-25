@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.google.auto.common.BasicAnnotationProcessor;
 import dagger.BindsInstance;
 import dagger.Component;
+import net.jbock.scope.EnvironmentScope;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
@@ -28,17 +29,24 @@ public final class Processor extends BasicAnnotationProcessor {
 
   @Override
   protected Iterable<? extends Step> steps() {
-    return DaggerProcessor_ProcessorComponent.builder()
+    ProcessorComponent component = DaggerProcessor_ProcessorComponent.builder()
         .processingEnv(processingEnv)
         .operationMode(operationMode)
-        .build()
-        .steps();
+        .build();
+    return List.of(component.commandProcessingStep(),
+        component.converterProcessingStep(),
+        component.parameterMethodProcessingStep());
   }
 
   @Component(modules = ProcessingEnvironmentModule.class)
+  @EnvironmentScope
   interface ProcessorComponent {
 
-    List<? extends Step> steps();
+    ParameterMethodProcessingStep parameterMethodProcessingStep();
+
+    ConverterProcessingStep converterProcessingStep();
+
+    CommandProcessingStep commandProcessingStep();
 
     @Component.Builder
     interface Builder {

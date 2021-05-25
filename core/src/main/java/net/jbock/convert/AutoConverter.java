@@ -2,9 +2,9 @@ package net.jbock.convert;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import dagger.Reusable;
 import net.jbock.compiler.TypeTool;
 import net.jbock.either.Either;
+import net.jbock.scope.ParameterScope;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
@@ -25,7 +25,7 @@ import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
-@Reusable
+@ParameterScope
 public class AutoConverter {
 
   private static final String NEW = "new";

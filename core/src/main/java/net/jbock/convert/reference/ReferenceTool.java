@@ -14,8 +14,8 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
+import static net.jbock.either.Either.halfRight;
 import static net.jbock.either.Either.left;
-import static net.jbock.either.Either.maybeRight;
 import static net.jbock.either.Either.right;
 
 @Reusable
@@ -38,10 +38,10 @@ public class ReferenceTool {
       return left(converteNotFunction());
     }
     if (implementsSupplier.isPresent()) {
-      return maybeRight(implementsSupplier).orLeft(() -> "")
+      return halfRight(implementsSupplier).orElseLeft(() -> "")
           .flatMap(this::handleSupplier);
     }
-    return maybeRight(implementsFunction).orLeft(() -> "")
+    return halfRight(implementsFunction).orElseLeft(() -> "")
         .flatMap(declaredType -> handleFunction(declaredType, false));
   }
 

@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
+import net.jbock.scope.EnvironmentScope;
 
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
@@ -18,6 +19,7 @@ import java.util.stream.Stream;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static javax.tools.Diagnostic.Kind.ERROR;
 
+@EnvironmentScope
 public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.Step {
 
   private final Messager messager;

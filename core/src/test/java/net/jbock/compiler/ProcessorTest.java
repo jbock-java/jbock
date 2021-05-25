@@ -238,7 +238,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("command cannot be an interface");
+        .withErrorContaining("Command cannot be an interface");
   }
 
   @Test
@@ -600,7 +600,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(new Processor())
         .failsToCompile()
-        .withErrorContaining("command class cannot be private");
+        .withErrorContaining("Command class cannot be private");
   }
 
   static JavaFileObject fromSource(String... lines) {

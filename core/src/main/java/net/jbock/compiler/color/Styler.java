@@ -1,12 +1,12 @@
 package net.jbock.compiler.color;
 
-import dagger.Reusable;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.AssembleScope;
 
 import javax.inject.Inject;
 import java.util.Optional;
 
-@Reusable
+@AssembleScope
 public class Styler {
 
   private static final char ESC = 0x1B;

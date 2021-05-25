@@ -14,12 +14,12 @@ public abstract class Either<L, R> {
     return Right.create(value);
   }
 
-  public static <R> MaybeRight<R> maybeRight(Optional<? extends R> right) {
-    return new MaybeRight<>(right);
+  public static <R> HalfRight<R> halfRight(Optional<? extends R> right) {
+    return new HalfRight<>(right);
   }
 
-  public static <L> MaybeLeft<L> maybeLeft(Optional<? extends L> left) {
-    return new MaybeLeft<>(left);
+  public static <L> HalfLeft<L> halfLeft(Optional<? extends L> left) {
+    return new HalfLeft<>(left);
   }
 
   public final <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper) {

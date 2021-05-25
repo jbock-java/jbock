@@ -6,10 +6,12 @@ import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.SourceMethod;
+import net.jbock.scope.ParameterScope;
 
 import java.util.List;
 
 @Component(modules = ParameterModule.class)
+@ParameterScope
 public interface ParameterComponent {
 
   PositionalParamFactory positionalParameterFactory();

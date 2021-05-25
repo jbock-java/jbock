@@ -3,5 +3,5 @@ build
 *.iml
 *~
 /dependency-reduced-pom.xml
-/.gradle
+.gradle
 /gradlew.bat

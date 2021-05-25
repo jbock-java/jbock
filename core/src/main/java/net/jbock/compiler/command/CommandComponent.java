@@ -6,11 +6,13 @@ import net.jbock.compiler.OperationMode;
 import net.jbock.compiler.TypeTool;
 import net.jbock.convert.Util;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ValidationScope;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 
 @Component(modules = CommandModule.class)
+@ValidationScope
 public interface CommandComponent {
 
   CommandProcessor processor();

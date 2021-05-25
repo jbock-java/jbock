@@ -63,7 +63,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
         .or(() -> checkNotAbstract(converter))
         .or(() -> checkNoTypevars(converter))
         .or(() -> checkMapperAnnotation(converter));
-    return Either.maybeLeft(maybeFailure)
+    return Either.halfLeft(maybeFailure)
         .flatMap(() -> referenceTool.getReferencedType(converter))
         .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
   }
@@ -79,8 +79,8 @@ public class ExplicitConverterValidator extends ConverterValidator {
       match = match.filter(m -> isValidMatch(m, functionType));
       if (match.isPresent()) {
         Match m = match.get();
-        return Either.maybeLeft(validateMatch(m))
-            .orRight(() -> CodeBlock.builder()
+        return Either.halfLeft(validateMatch(m))
+            .orElseRight(() -> CodeBlock.builder()
                 .add(".map(")
                 .add(getMapExpr(functionType, converter))
                 .add(")").build())

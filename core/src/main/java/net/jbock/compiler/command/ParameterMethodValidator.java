@@ -6,6 +6,7 @@ import net.jbock.Parameters;
 import net.jbock.SuperCommand;
 import net.jbock.convert.Util;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ValidationScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
@@ -18,6 +19,7 @@ import java.util.Optional;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.TypeTool.AS_DECLARED;
 
+@ValidationScope
 public class ParameterMethodValidator {
 
   private final SourceElement sourceElement;
