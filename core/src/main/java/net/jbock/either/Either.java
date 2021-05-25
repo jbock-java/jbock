@@ -14,12 +14,12 @@ public abstract class Either<L, R> {
     return Right.create(value);
   }
 
-  public static <R> RightOptional<R> maybeRight(Optional<? extends R> right) {
-    return new RightOptional<>(right);
+  public static <R> MaybeRight<R> maybeRight(Optional<? extends R> right) {
+    return new MaybeRight<>(right);
   }
 
-  public static <L> LeftOptional<L> maybeLeft(Optional<? extends L> left) {
-    return new LeftOptional<>(left);
+  public static <L> MaybeLeft<L> maybeLeft(Optional<? extends L> left) {
+    return new MaybeLeft<>(left);
   }
 
   public final <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper) {
@@ -61,7 +61,7 @@ public abstract class Either<L, R> {
   }
 
   @SuppressWarnings("unchecked")
-  private static <L, R> Either<L, R> narrow(Either<? extends L, ? extends R> either) {
+  static <L, R> Either<L, R> narrow(Either<? extends L, ? extends R> either) {
     return (Either<L, R>) either;
   }
 }

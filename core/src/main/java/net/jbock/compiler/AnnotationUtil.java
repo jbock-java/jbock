@@ -29,10 +29,10 @@ class AnnotationUtil {
       Option.class)
       .map(Class::getCanonicalName).collect(toSet());
 
-  private static final AnnotationValueVisitor<TypeMirror, Void> GET_TYPE = new SimpleAnnotationValueVisitor8<TypeMirror, Void>() {
+  private static final AnnotationValueVisitor<TypeMirror, Void> GET_TYPE = new SimpleAnnotationValueVisitor8<>() {
 
     @Override
-    public TypeMirror visitType(TypeMirror mirror, Void unused) {
+    public TypeMirror visitType(TypeMirror mirror, Void nothing) {
       return mirror;
     }
   };

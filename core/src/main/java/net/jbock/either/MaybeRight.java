@@ -3,11 +3,11 @@ package net.jbock.either;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-public final class RightOptional<R> {
+public final class MaybeRight<R> {
 
   private final Optional<? extends R> right;
 
-  RightOptional(Optional<? extends R> right) {
+  MaybeRight(Optional<? extends R> right) {
     this.right = right;
   }
 

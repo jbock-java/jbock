@@ -15,25 +15,25 @@ import java.util.Optional;
 public class TypeTool {
 
   public static final TypeVisitor<DeclaredType, Void> AS_DECLARED =
-      new SimpleTypeVisitor8<DeclaredType, Void>() {
+      new SimpleTypeVisitor8<>() {
         @Override
-        public DeclaredType visitDeclared(DeclaredType declaredType, Void _null) {
+        public DeclaredType visitDeclared(DeclaredType declaredType, Void nothing) {
           return declaredType;
         }
       };
 
   public static final TypeVisitor<PrimitiveType, Void> AS_PRIMITIVE =
-      new SimpleTypeVisitor8<PrimitiveType, Void>() {
+      new SimpleTypeVisitor8<>() {
         @Override
-        public PrimitiveType visitPrimitive(PrimitiveType primitiveType, Void _null) {
+        public PrimitiveType visitPrimitive(PrimitiveType primitiveType, Void nothing) {
           return primitiveType;
         }
       };
 
   public static final ElementVisitor<TypeElement, Void> AS_TYPE_ELEMENT =
-      new SimpleElementVisitor8<TypeElement, Void>() {
+      new SimpleElementVisitor8<>() {
         @Override
-        public TypeElement visitType(TypeElement typeElement, Void _null) {
+        public TypeElement visitType(TypeElement typeElement, Void nothing) {
           return typeElement;
         }
       };
