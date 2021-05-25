@@ -20,7 +20,7 @@ public final class HalfLeft<L> {
 
   public <R> Either<L, R> flatMap(
       Supplier<? extends Either<? extends L, ? extends R>> choice) {
-    return left.<Either<L, R>>map(Left::create)
+    return left.<Either<L, R>>map(Either::left)
         .orElseGet(() -> narrow(choice.get()));
   }
 }

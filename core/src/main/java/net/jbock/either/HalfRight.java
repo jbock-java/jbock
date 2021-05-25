@@ -4,6 +4,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.narrow;
 
 public final class HalfRight<R> {
 
@@ -14,7 +15,12 @@ public final class HalfRight<R> {
   }
 
   public <L> Either<L, R> orElseLeft(Supplier<? extends L> left) {
-    return right.<Either<L, R>>map(Right::create)
-        .orElseGet(() -> left(left.get()));
+    return flatMap(() -> left(left.get()));
+  }
+
+  public <L> Either<L, R> flatMap(
+      Supplier<? extends Either<? extends L, ? extends R>> choice) {
+    return right.<Either<L, R>>map(Either::right)
+        .orElseGet(() -> narrow(choice.get()));
   }
 }
