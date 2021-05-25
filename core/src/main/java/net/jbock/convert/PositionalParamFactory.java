@@ -61,7 +61,7 @@ public class PositionalParamFactory {
         .filter(ConvertedParameter::isRepeatable)
         .map(p -> "positional parameter " + p.paramLabel() + " is also repeatable")
         .findAny();
-    return Either.halfLeft(failure).orElseRight(() -> c);
+    return Either.unbalancedLeft(failure).orElseRight(() -> c);
   }
 
   private Either<String, ConvertedParameter<PositionalParameter>> checkPositionNotNegative(

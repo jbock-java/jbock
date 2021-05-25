@@ -92,7 +92,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
             Command.class, SuperCommand.class, Converter.class))
         .map(s -> new ValidationFailure(s, element))
         .map(List::of);
-    return Either.halfLeft(failureList)
+    return Either.unbalancedLeft(failureList)
         .orElseRight(() -> SourceElement.create(element, parserFlavour));
   }
 

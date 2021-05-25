@@ -14,12 +14,12 @@ public abstract class Either<L, R> {
     return Right.create(value);
   }
 
-  public static <R> HalfRight<R> halfRight(Optional<? extends R> right) {
-    return new HalfRight<>(right);
+  public static <L> UnbalancedLeft<L> unbalancedLeft(Optional<? extends L> left) {
+    return new UnbalancedLeft<>(left);
   }
 
-  public static <L> HalfLeft<L> halfLeft(Optional<? extends L> left) {
-    return new HalfLeft<>(left);
+  public static <R> UnbalancedRight<R> unbalancedRight(Optional<? extends R> right) {
+    return new UnbalancedRight<>(right);
   }
 
   public final <R2> Either<L, R2> map(Function<? super R, ? extends R2> rightMapper) {

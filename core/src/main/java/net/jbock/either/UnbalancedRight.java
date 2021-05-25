@@ -6,11 +6,11 @@ import java.util.function.Supplier;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.narrow;
 
-public final class HalfRight<R> {
+public final class UnbalancedRight<R> {
 
   private final Optional<? extends R> right;
 
-  HalfRight(Optional<? extends R> right) {
+  UnbalancedRight(Optional<? extends R> right) {
     this.right = right;
   }
 

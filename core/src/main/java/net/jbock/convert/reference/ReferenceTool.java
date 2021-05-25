@@ -14,7 +14,7 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.jbock.common.TypeTool.AS_DECLARED;
-import static net.jbock.either.Either.halfRight;
+import static net.jbock.either.Either.unbalancedRight;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
@@ -38,10 +38,10 @@ public class ReferenceTool {
       return left(converteNotFunction());
     }
     if (implementsSupplier.isPresent()) {
-      return halfRight(implementsSupplier).orElseLeft(() -> "")
+      return unbalancedRight(implementsSupplier).orElseLeft(() -> "")
           .flatMap(this::handleSupplier);
     }
-    return halfRight(implementsFunction).orElseLeft(() -> "")
+    return unbalancedRight(implementsFunction).orElseLeft(() -> "")
         .flatMap(declaredType -> handleFunction(declaredType, false));
   }
 
