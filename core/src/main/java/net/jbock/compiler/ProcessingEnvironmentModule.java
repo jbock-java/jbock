@@ -2,7 +2,8 @@ package net.jbock.compiler;
 
 import dagger.Module;
 import dagger.Provides;
-import dagger.Reusable;
+import net.jbock.convert.Util;
+import net.jbock.scope.ProcessorScope;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -13,33 +14,39 @@ import javax.lang.model.util.Types;
 @Module
 public interface ProcessingEnvironmentModule {
 
-  @Reusable
+  @ProcessorScope
   @Provides
   static Messager messager(ProcessingEnvironment processingEnvironment) {
     return processingEnvironment.getMessager();
   }
 
-  @Reusable
+  @ProcessorScope
   @Provides
   static Filer filer(ProcessingEnvironment processingEnvironment) {
     return processingEnvironment.getFiler();
   }
 
-  @Reusable
+  @ProcessorScope
   @Provides
   static Elements elements(ProcessingEnvironment processingEnvironment) {
     return processingEnvironment.getElementUtils();
   }
 
-  @Reusable
+  @ProcessorScope
   @Provides
   static Types types(ProcessingEnvironment processingEnvironment) {
     return processingEnvironment.getTypeUtils();
   }
 
-  @Reusable
+  @ProcessorScope
   @Provides
   static TypeTool tool(ProcessingEnvironment processingEnv) {
     return new TypeTool(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
+  }
+
+  @ProcessorScope
+  @Provides
+  static Util util() {
+    return new Util();
   }
 }

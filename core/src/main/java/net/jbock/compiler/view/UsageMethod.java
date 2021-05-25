@@ -2,7 +2,6 @@ package net.jbock.compiler.view;
 
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import dagger.Reusable;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.PositionalParameter;
 import net.jbock.convert.ConvertedParameter;
@@ -10,6 +9,7 @@ import net.jbock.convert.Skew;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -19,7 +19,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.compiler.Constants.LIST_OF_STRING;
 import static net.jbock.compiler.Constants.STRING;
 
-@Reusable
+@ContextScope
 public class UsageMethod extends Cached<MethodSpec> {
 
   private final PositionalParameters positionalParameters;

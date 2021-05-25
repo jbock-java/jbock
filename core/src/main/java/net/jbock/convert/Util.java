@@ -1,9 +1,7 @@
 package net.jbock.convert;
 
-import dagger.Reusable;
 import net.jbock.compiler.TypeTool;
 
-import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -20,12 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-@Reusable
 public class Util {
-
-  @Inject
-  public Util() {
-  }
 
   public <E> List<E> concat(List<? extends E> list1, List<? extends E> list2) {
     List<E> result = new ArrayList<>(list1.size() + list2.size());

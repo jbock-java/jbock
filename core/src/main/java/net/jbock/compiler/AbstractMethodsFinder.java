@@ -1,6 +1,7 @@
 package net.jbock.compiler;
 
 import net.jbock.compiler.command.AllMethodsFinder;
+import net.jbock.scope.ValidateScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
@@ -13,6 +14,7 @@ import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.partitioningBy;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 
+@ValidateScope
 public class AbstractMethodsFinder {
 
   private final Types types;

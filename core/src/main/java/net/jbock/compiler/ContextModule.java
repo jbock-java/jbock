@@ -2,13 +2,13 @@ package net.jbock.compiler;
 
 import dagger.Module;
 import dagger.Provides;
-import dagger.Reusable;
 import net.jbock.convert.Util;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.lang.model.util.Elements;
 
@@ -28,35 +28,43 @@ public class ContextModule {
     this.params = params;
   }
 
+  @ContextScope
   @Provides
   SourceElement sourceElement() {
     return sourceElement;
   }
 
+  @ContextScope
   @Provides
   Elements elements() {
     return elements;
   }
 
-  @Reusable
+  @ContextScope
   @Provides
   PositionalParameters positionalParameters() {
     return PositionalParameters.create(params.positionalParams());
   }
 
-  @Reusable
+  @ContextScope
   @Provides
   NamedOptions namedOptions() {
     return NamedOptions.create(params.namedOptions());
   }
 
-  @Reusable
+  @ContextScope
+  @Provides
+  Util util() {
+    return new Util();
+  }
+
+  @ContextScope
   @Provides
   AllParameters allParameters(Util util) {
     return AllParameters.create(params, util);
   }
 
-  @Reusable
+  @ContextScope
   @Provides
   CommonFields commonFields(
       GeneratedTypes generatedTypes,

@@ -2,10 +2,10 @@ package net.jbock.compiler;
 
 import dagger.Component;
 import net.jbock.compiler.view.GeneratedClass;
-import net.jbock.scope.AssembleScope;
+import net.jbock.scope.ContextScope;
 
 @Component(modules = ContextModule.class)
-@AssembleScope
+@ContextScope
 public interface ContextComponent {
 
   GeneratedClass generatedClass();

@@ -3,12 +3,12 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
-import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 import java.util.stream.Collectors;
@@ -21,7 +21,7 @@ import static javax.lang.model.element.Modifier.STATIC;
  *
  * @see GeneratedClass
  */
-@Reusable
+@ContextScope
 public class Impl {
 
   private final AllParameters context;

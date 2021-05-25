@@ -1,8 +1,5 @@
 package net.jbock.compiler;
 
-import dagger.Reusable;
-
-import javax.inject.Inject;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -15,7 +12,6 @@ import javax.lang.model.util.SimpleTypeVisitor8;
 import javax.lang.model.util.Types;
 import java.util.Optional;
 
-@Reusable
 public class TypeTool {
 
   public static final TypeVisitor<DeclaredType, Void> AS_DECLARED =
@@ -47,7 +43,6 @@ public class TypeTool {
   private final Elements elements;
 
   // visible for testing
-  @Inject
   public TypeTool(Elements elements, Types types) {
     this.types = types;
     this.elements = elements;

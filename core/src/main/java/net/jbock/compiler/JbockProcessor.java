@@ -3,7 +3,7 @@ package net.jbock.compiler;
 import com.google.auto.common.BasicAnnotationProcessor;
 import dagger.BindsInstance;
 import dagger.Component;
-import net.jbock.scope.EnvironmentScope;
+import net.jbock.scope.ProcessorScope;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;
@@ -36,7 +36,7 @@ public final class JbockProcessor extends BasicAnnotationProcessor {
   }
 
   @Component(modules = ProcessingEnvironmentModule.class)
-  @EnvironmentScope
+  @ProcessorScope
   interface ProcessorComponent {
 
     ParameterMethodProcessingStep parameterMethodProcessingStep();

@@ -1,16 +1,16 @@
 package net.jbock.convert;
 
 import dagger.Lazy;
-import dagger.Reusable;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.matching.auto.AutoConverterFinder;
 import net.jbock.convert.matching.explicit.ExplicitConverterValidator;
 import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;
+import net.jbock.scope.ParameterScope;
 
 import javax.inject.Inject;
 
-@Reusable
+@ParameterScope
 public class ConverterFinder {
 
   private final Lazy<AutoConverterFinder> autoConverterFinder;

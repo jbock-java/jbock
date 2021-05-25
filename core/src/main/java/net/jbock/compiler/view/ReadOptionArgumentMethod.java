@@ -3,7 +3,7 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import dagger.Reusable;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 
@@ -15,7 +15,7 @@ import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ITERATOR;
 
-@Reusable
+@ContextScope
 public class ReadOptionArgumentMethod extends Cached<MethodSpec> {
 
   @Inject

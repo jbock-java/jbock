@@ -1,10 +1,10 @@
 package net.jbock.qualifier;
 
-import dagger.Reusable;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 
-@Reusable
+@ContextScope
 public class AnyDescriptionKeys {
 
   private final AllParameters allParameters;

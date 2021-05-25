@@ -1,7 +1,6 @@
 package net.jbock.convert.matching.explicit;
 
 import com.squareup.javapoet.CodeBlock;
-import dagger.Reusable;
 import net.jbock.Converter;
 import net.jbock.compiler.TypeTool;
 import net.jbock.compiler.parameter.AbstractParameter;
@@ -16,6 +15,7 @@ import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
+import net.jbock.scope.ParameterScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
@@ -29,7 +29,7 @@ import java.util.Optional;
 import static javax.lang.model.element.Modifier.ABSTRACT;
 import static net.jbock.either.Either.left;
 
-@Reusable
+@ParameterScope
 public class ExplicitConverterValidator extends ConverterValidator {
 
   private final List<Matcher> matchers;
@@ -132,7 +132,7 @@ public class ExplicitConverterValidator extends ConverterValidator {
   private static String noMatchError(TypeMirror type) {
     return "converter should implement Function<String, " + Util.typeToString(type) + ">";
   }
-  
+
   private Optional<? extends String> checkNotAnInterface(TypeElement converter) {
     if (converter.getKind() == ElementKind.INTERFACE) {
       return Optional.of("cannot be an interface");

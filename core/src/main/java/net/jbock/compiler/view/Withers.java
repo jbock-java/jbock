@@ -2,17 +2,17 @@ package net.jbock.compiler.view;
 
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import dagger.Reusable;
 import net.jbock.qualifier.AnyDescriptionKeys;
 import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
 
-@Reusable
+@ContextScope
 public class Withers {
 
   private final CommonFields commonFields;

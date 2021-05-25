@@ -7,6 +7,7 @@ import net.jbock.convert.ConverterFinder;
 import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
+import net.jbock.scope.ParameterScope;
 
 import javax.inject.Inject;
 import java.util.List;
@@ -15,6 +16,7 @@ import java.util.Optional;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
+@ParameterScope
 public class PositionalParamFactory {
 
   private final ConverterFinder converterFinder;

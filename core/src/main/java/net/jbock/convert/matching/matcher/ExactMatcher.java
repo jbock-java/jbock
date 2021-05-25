@@ -1,13 +1,13 @@
 package net.jbock.convert.matching.matcher;
 
 import com.squareup.javapoet.ParameterSpec;
-import dagger.Reusable;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.MatchFactory;
 import net.jbock.qualifier.SourceMethod;
+import net.jbock.scope.ParameterScope;
 
 import javax.inject.Inject;
 import javax.lang.model.type.PrimitiveType;
@@ -17,7 +17,7 @@ import java.util.Optional;
 
 import static net.jbock.compiler.TypeTool.AS_PRIMITIVE;
 
-@Reusable
+@ParameterScope
 public class ExactMatcher extends Matcher {
 
   private final SourceMethod sourceMethod;

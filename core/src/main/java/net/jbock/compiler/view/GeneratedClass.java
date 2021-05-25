@@ -1,12 +1,12 @@
 package net.jbock.compiler.view;
 
 import com.squareup.javapoet.TypeSpec;
-import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.AnyDescriptionKeys;
 import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Modifier;
@@ -16,7 +16,7 @@ import static javax.lang.model.element.Modifier.FINAL;
 /**
  * Generates the *_Parser class.
  */
-@Reusable
+@ContextScope
 public final class GeneratedClass {
 
   static final int CONTINUATION_INDENT_USAGE = 8;

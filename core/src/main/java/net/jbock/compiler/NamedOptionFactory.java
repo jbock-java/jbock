@@ -8,6 +8,7 @@ import net.jbock.either.Either;
 import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
+import net.jbock.scope.ParameterScope;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -20,6 +21,7 @@ import static javax.lang.model.type.TypeKind.BOOLEAN;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
+@ParameterScope
 public class NamedOptionFactory {
 
   private final ConverterFinder converterFinder;

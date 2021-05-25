@@ -1,12 +1,12 @@
 package net.jbock.compiler.color;
 
 import net.jbock.qualifier.SourceElement;
-import net.jbock.scope.AssembleScope;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 import java.util.Optional;
 
-@AssembleScope
+@ContextScope
 public class Styler {
 
   private static final char ESC = 0x1B;

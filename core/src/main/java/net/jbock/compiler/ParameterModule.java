@@ -2,7 +2,6 @@ package net.jbock.compiler;
 
 import dagger.Module;
 import dagger.Provides;
-import dagger.Reusable;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.compiler.parameter.PositionalParameter;
@@ -15,6 +14,7 @@ import net.jbock.convert.matching.matcher.OptionalMatcher;
 import net.jbock.qualifier.ConverterClass;
 import net.jbock.qualifier.SourceElement;
 import net.jbock.qualifier.SourceMethod;
+import net.jbock.scope.ParameterScope;
 
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -40,7 +40,7 @@ public class ParameterModule {
     this.util = util;
   }
 
-  @Reusable
+  @ParameterScope
   @Provides
   EnumName enumName(
       SourceMethod sourceMethod,
@@ -60,7 +60,7 @@ public class ParameterModule {
     return result;
   }
 
-  @Reusable
+  @ParameterScope
   @Provides
   List<Matcher> matchers(
       OptionalMatcher optionalMatcher,
@@ -69,33 +69,43 @@ public class ParameterModule {
     return List.of(optionalMatcher, listMatcher, exactMatcher);
   }
 
+  @ParameterScope
   @Provides
   TypeTool tool() {
     return tool;
   }
 
+  @ParameterScope
   @Provides
   Types types() {
     return tool.types();
   }
 
+  @ParameterScope
   @Provides
   Elements elements() {
     return tool.elements();
   }
 
+  @ParameterScope
   @Provides
   SourceElement sourceElement() {
     return sourceElement;
   }
 
-  @Reusable
+  @ParameterScope
   @Provides
   ConverterClass converter(SourceMethod sourceMethod) {
     return new ConverterClass(annotationUtil.getConverter(sourceMethod.method()));
   }
 
-  @Reusable
+  @ParameterScope
+  @Provides
+  Util util() {
+    return new Util();
+  }
+
+  @ParameterScope
   @Provides
   ParameterStyle parameterStyle(SourceMethod sourceMethod) {
     return sourceMethod.style();

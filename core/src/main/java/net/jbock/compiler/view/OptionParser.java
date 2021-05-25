@@ -7,11 +7,11 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
-import dagger.Reusable;
 import net.jbock.compiler.Constants;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -33,7 +33,7 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
 /**
  * Generates the inner class OptionParser and its subtypes.
  */
-@Reusable
+@ContextScope
 public final class OptionParser {
 
   private final GeneratedTypes generatedTypes;

@@ -6,12 +6,12 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import dagger.Reusable;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.qualifier.AllParameters;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 import javax.lang.model.util.Elements;
@@ -27,7 +27,7 @@ import static net.jbock.compiler.Constants.STRING_ARRAY;
  *
  * @see GeneratedClass
  */
-@Reusable
+@ContextScope
 public class OptionEnum {
 
   private final AllParameters context;

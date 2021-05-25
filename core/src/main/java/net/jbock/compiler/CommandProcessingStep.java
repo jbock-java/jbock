@@ -11,7 +11,7 @@ import net.jbock.compiler.command.SourceFileGenerator;
 import net.jbock.convert.Util;
 import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
-import net.jbock.scope.EnvironmentScope;
+import net.jbock.scope.ProcessorScope;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
@@ -27,7 +27,7 @@ import java.util.stream.Stream;
 
 import static javax.tools.Diagnostic.Kind.ERROR;
 
-@EnvironmentScope
+@ProcessorScope
 public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   private final TypeTool tool;

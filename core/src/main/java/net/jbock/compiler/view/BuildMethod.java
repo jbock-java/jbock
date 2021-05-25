@@ -12,6 +12,7 @@ import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -23,6 +24,7 @@ import static java.util.Collections.emptyList;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 
+@ContextScope
 public class BuildMethod {
 
   private final GeneratedTypes generatedTypes;

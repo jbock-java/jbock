@@ -1,8 +1,8 @@
 package net.jbock.convert.reference;
 
-import dagger.Reusable;
 import net.jbock.compiler.TypeTool;
 import net.jbock.either.Either;
+import net.jbock.scope.ParameterScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -18,7 +18,7 @@ import static net.jbock.either.Either.halfRight;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
-@Reusable
+@ParameterScope
 public class ReferenceTool {
 
   private final TypeTool tool;

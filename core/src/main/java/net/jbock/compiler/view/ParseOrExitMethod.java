@@ -3,11 +3,11 @@ package net.jbock.compiler.view;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.color.Styler;
 import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 
@@ -16,7 +16,7 @@ import static com.squareup.javapoet.ParameterSpec.builder;
 import static net.jbock.compiler.Constants.STRING;
 import static net.jbock.compiler.Constants.STRING_ARRAY;
 
-@Reusable
+@ContextScope
 public class ParseOrExitMethod {
 
   private final SourceElement sourceElement;

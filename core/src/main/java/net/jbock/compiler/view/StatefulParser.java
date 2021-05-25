@@ -5,7 +5,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import dagger.Reusable;
 import net.jbock.compiler.GeneratedTypes;
 import net.jbock.compiler.parameter.NamedOption;
 import net.jbock.convert.ConvertedParameter;
@@ -13,6 +12,7 @@ import net.jbock.qualifier.CommonFields;
 import net.jbock.qualifier.NamedOptions;
 import net.jbock.qualifier.PositionalParameters;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 
@@ -25,7 +25,7 @@ import static net.jbock.compiler.Constants.STRING_ITERATOR;
 /**
  * Defines the inner class StatefulParser
  */
-@Reusable
+@ContextScope
 public class StatefulParser extends Cached<TypeSpec> {
 
   private final StatefulParseMethod statefulParseMethod;

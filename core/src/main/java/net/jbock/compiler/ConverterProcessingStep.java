@@ -3,7 +3,7 @@ package net.jbock.compiler;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Converter;
-import net.jbock.scope.EnvironmentScope;
+import net.jbock.scope.ProcessorScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Element;
@@ -12,7 +12,7 @@ import java.util.Set;
 /**
  * Ensure that changes in the converter class trigger the processing.
  */
-@EnvironmentScope
+@ProcessorScope
 public class ConverterProcessingStep implements BasicAnnotationProcessor.Step {
 
   @Inject

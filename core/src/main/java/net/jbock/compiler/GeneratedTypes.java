@@ -2,14 +2,14 @@ package net.jbock.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
-import dagger.Reusable;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ContextScope;
 
 import javax.inject.Inject;
 import java.util.Optional;
 import java.util.function.Function;
 
-@Reusable
+@ContextScope
 public class GeneratedTypes {
 
   private final SourceElement sourceElement;

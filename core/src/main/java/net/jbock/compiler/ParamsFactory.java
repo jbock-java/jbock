@@ -7,6 +7,7 @@ import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Util;
 import net.jbock.either.Either;
 import net.jbock.qualifier.SourceElement;
+import net.jbock.scope.ValidateScope;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -17,6 +18,7 @@ import java.util.Set;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
+@ValidateScope
 public class ParamsFactory {
 
   private final SourceElement sourceElement;

@@ -2,15 +2,15 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import dagger.Reusable;
 import net.jbock.compiler.EnumName;
 import net.jbock.convert.Skew;
+import net.jbock.scope.ParameterScope;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
-@Reusable
+@ParameterScope
 public class MatchFactory {
 
   private final EnumName enumName;
