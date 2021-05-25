@@ -5,7 +5,7 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.EnumName;
-import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.parameter.AbstractParameter;
 
 import java.util.Locale;
 import java.util.Optional;

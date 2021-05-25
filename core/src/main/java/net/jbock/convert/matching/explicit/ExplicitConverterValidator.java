@@ -2,10 +2,10 @@ package net.jbock.convert.matching.explicit;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;
+import net.jbock.compiler.SourceElement;
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.parameter.AbstractParameter;
-import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.ParameterScope;
 import net.jbock.convert.Util;
 import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.convert.matching.Match;
@@ -13,9 +13,9 @@ import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.reference.FunctionType;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.either.Either;
-import net.jbock.qualifier.SourceElement;
-import net.jbock.qualifier.SourceMethod;
-import net.jbock.scope.ParameterScope;
+import net.jbock.parameter.AbstractParameter;
+import net.jbock.parameter.ParameterStyle;
+import net.jbock.validate.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;

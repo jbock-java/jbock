@@ -5,7 +5,6 @@ import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
-import net.jbock.scope.ProcessorScope;
 
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;

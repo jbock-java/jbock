@@ -5,13 +5,11 @@ import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.SuperCommand;
-import net.jbock.compiler.command.CommandComponent;
-import net.jbock.compiler.command.DaggerCommandComponent;
-import net.jbock.compiler.command.SourceFileGenerator;
 import net.jbock.convert.Util;
 import net.jbock.either.Either;
-import net.jbock.qualifier.SourceElement;
-import net.jbock.scope.ProcessorScope;
+import net.jbock.validate.CommandComponent;
+import net.jbock.validate.DaggerCommandComponent;
+import net.jbock.validate.SourceFileGenerator;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;

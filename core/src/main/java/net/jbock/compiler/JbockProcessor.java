@@ -3,7 +3,6 @@ package net.jbock.compiler;
 import com.google.auto.common.BasicAnnotationProcessor;
 import dagger.BindsInstance;
 import dagger.Component;
-import net.jbock.scope.ProcessorScope;
 
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.lang.model.SourceVersion;

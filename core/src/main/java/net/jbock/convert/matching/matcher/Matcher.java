@@ -3,8 +3,8 @@ package net.jbock.convert.matching.matcher;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.compiler.EnumName;
-import net.jbock.compiler.parameter.AbstractParameter;
 import net.jbock.convert.matching.Match;
+import net.jbock.parameter.AbstractParameter;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Locale;

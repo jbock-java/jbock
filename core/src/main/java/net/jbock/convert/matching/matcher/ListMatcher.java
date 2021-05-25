@@ -3,12 +3,12 @@ package net.jbock.convert.matching.matcher;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.compiler.EnumName;
 import net.jbock.compiler.TypeTool;
-import net.jbock.compiler.parameter.AbstractParameter;
+import net.jbock.convert.ParameterScope;
 import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.MatchFactory;
-import net.jbock.qualifier.SourceMethod;
-import net.jbock.scope.ParameterScope;
+import net.jbock.parameter.AbstractParameter;
+import net.jbock.validate.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;

@@ -1,8 +1,8 @@
 package net.jbock.convert.reference;
 
 import net.jbock.compiler.TypeTool;
+import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
-import net.jbock.scope.ParameterScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;

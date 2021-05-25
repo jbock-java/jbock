@@ -2,8 +2,8 @@ package net.jbock.convert.matching;
 
 import net.jbock.Parameter;
 import net.jbock.Parameters;
-import net.jbock.compiler.parameter.ParameterStyle;
 import net.jbock.convert.Skew;
+import net.jbock.parameter.ParameterStyle;
 
 import java.util.Optional;
 

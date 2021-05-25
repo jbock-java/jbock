@@ -3,7 +3,6 @@ package net.jbock.compiler;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Converter;
-import net.jbock.scope.ProcessorScope;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Element;

@@ -47,7 +47,7 @@ public class EnumName {
     return new EnumName(result);
   }
 
-  EnumName makeLonger() {
+  public EnumName makeLonger() {
     String newConstant;
     if (charType(enumConstant.charAt(enumConstant.length() - 1)) == CharType.DIGIT) {
       newConstant = this.enumConstant + "1";
