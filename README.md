@@ -48,7 +48,8 @@ public static void main(String[] args) {
 
 ````
 
-This is what your users might see:
+This will be enough to warn your users of missing parameters,
+in a nicely colored error message:
 
 <img src="images/screenshot.png" alt="screenshot">
 
