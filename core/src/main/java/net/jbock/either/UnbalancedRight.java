@@ -15,10 +15,10 @@ public final class UnbalancedRight<R> {
   }
 
   public <L> Either<L, R> orElseLeft(Supplier<? extends L> left) {
-    return flatMap(() -> left(left.get()));
+    return flatMapLeft(() -> left(left.get()));
   }
 
-  public <L> Either<L, R> flatMap(
+  public <L> Either<L, R> flatMapLeft(
       Supplier<? extends Either<? extends L, ? extends R>> choice) {
     return right.<Either<L, R>>map(Either::right)
         .orElseGet(() -> narrow(choice.get()));
