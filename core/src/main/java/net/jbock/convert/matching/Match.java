@@ -1,8 +1,6 @@
 package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
-import com.squareup.javapoet.ParameterSpec;
-import net.jbock.common.EnumName;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Skew;
 import net.jbock.parameter.AbstractParameter;
@@ -12,37 +10,42 @@ import java.util.Optional;
 
 public class Match {
 
+  /* baseType ({A, List<A>, Optional<A>}) == A
+   * baseType (OptionalInt) == int
+   */
   private final TypeMirror baseType;
-  private final ParameterSpec constructorParam;
   private final Optional<CodeBlock> extractExpr;
   private final Skew skew;
-  private final EnumName enumName;
 
-  Match(
+  private Match(
       TypeMirror baseType,
-      ParameterSpec constructorParam,
       Skew skew,
-      EnumName enumName,
       Optional<CodeBlock> extractExpr) {
     this.baseType = baseType;
-    this.constructorParam = constructorParam;
     this.skew = skew;
     this.extractExpr = extractExpr;
-    this.enumName = enumName;
+  }
+
+  public static Match create(
+      TypeMirror baseType,
+      Skew skew,
+      CodeBlock extractExpr) {
+    return new Match(baseType, skew, Optional.of(extractExpr));
+  }
+
+  public static Match create(
+      TypeMirror baseType,
+      Skew skew) {
+    return new Match(baseType, skew, Optional.empty());
   }
 
   public <P extends AbstractParameter> ConvertedParameter<P> toConvertedParameter(
       Optional<CodeBlock> mapExpr, P parameter) {
-    return ConvertedParameter.create(mapExpr,
-        extractExpr, skew, enumName, parameter);
+    return ConvertedParameter.create(mapExpr, extractExpr, skew, parameter);
   }
 
   public TypeMirror baseType() {
     return baseType;
-  }
-
-  public ParameterSpec constructorParam() {
-    return constructorParam;
   }
 
   public Skew skew() {

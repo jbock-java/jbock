@@ -1,11 +1,8 @@
 package net.jbock.convert.matching.matcher;
 
-import com.squareup.javapoet.ParameterSpec;
-import net.jbock.common.EnumName;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
-import net.jbock.convert.matching.MatchFactory;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.validate.SourceMethod;
 
@@ -22,24 +19,18 @@ public class ExactMatcher extends Matcher {
 
   private final SourceMethod sourceMethod;
   private final Types types;
-  private final MatchFactory matchFactory;
 
   @Inject
   ExactMatcher(
       SourceMethod sourceMethod,
-      EnumName enumName,
-      Types types,
-      MatchFactory matchFactory) {
-    super(enumName);
+      Types types) {
     this.sourceMethod = sourceMethod;
     this.types = types;
-    this.matchFactory = matchFactory;
   }
 
   @Override
   public Optional<Match> tryMatch(AbstractParameter parameter) {
-    ParameterSpec constructorParam = constructorParam(boxedReturnType());
-    Match match = matchFactory.create(boxedReturnType(), constructorParam, Skew.REQUIRED);
+    Match match = Match.create(boxedReturnType(), Skew.REQUIRED);
     return Optional.of(match);
   }
 

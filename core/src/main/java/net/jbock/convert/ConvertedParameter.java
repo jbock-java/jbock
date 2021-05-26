@@ -12,28 +12,25 @@ import java.util.Optional;
 
 public final class ConvertedParameter<P extends AbstractParameter> {
 
-  private final ParameterSpec implConstructorParam;
   private final Optional<CodeBlock> mapExpr;
   private final Optional<CodeBlock> extractExpr;
   private final Skew skew;
   private final P parameter;
-  private final EnumName enumName;
-  private final FieldSpec implField;
+  private final ParameterSpec asParameterSpec;
+  private final FieldSpec asFieldSpec;
 
   private ConvertedParameter(
       Optional<CodeBlock> mapExpr,
       Optional<CodeBlock> extractExpr,
       Skew skew,
-      ParameterSpec implConstructorParam,
-      EnumName enumName,
-      FieldSpec implField,
+      ParameterSpec asParameterSpec,
+      FieldSpec asFieldSpec,
       P parameter) {
-    this.implConstructorParam = implConstructorParam;
+    this.asParameterSpec = asParameterSpec;
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
     this.skew = skew;
-    this.enumName = enumName;
-    this.implField = implField;
+    this.asFieldSpec = asFieldSpec;
     this.parameter = parameter;
   }
 
@@ -41,23 +38,19 @@ public final class ConvertedParameter<P extends AbstractParameter> {
       Optional<CodeBlock> mapExpr,
       Optional<CodeBlock> extractExpr,
       Skew skew,
-      EnumName enumName,
       P parameter) {
     TypeName fieldType = parameter.returnType();
-    String fieldName = '_' + enumName.enumConstant().toLowerCase(Locale.US);
-    FieldSpec implField = FieldSpec.builder(fieldType, fieldName).build();
-    ParameterSpec implConstructorParam = ParameterSpec.builder(fieldType, fieldName).build();
-    return new ConvertedParameter<>(mapExpr, extractExpr, skew, implConstructorParam,
-        enumName, implField, parameter);
+    String fieldName = '_' + parameter.enumName().enumConstant().toLowerCase(Locale.US);
+    FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
+    ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
+    return new ConvertedParameter<>(mapExpr, extractExpr, skew, asParameterSpec,
+        asFieldSpec, parameter);
   }
 
   public Optional<CodeBlock> mapExpr() {
     return mapExpr;
   }
 
-  /**
-   * Converts from param type to field type.
-   */
   public Optional<CodeBlock> extractExpr() {
     return extractExpr;
   }
@@ -67,7 +60,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   }
 
   public EnumName enumName() {
-    return enumName;
+    return parameter.enumName();
   }
 
   public boolean isRequired() {
@@ -95,14 +88,14 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   }
 
   public String enumConstant() {
-    return enumName.enumConstant();
+    return enumName().enumConstant();
   }
 
   public FieldSpec asField() {
-    return implField;
+    return asFieldSpec;
   }
 
   public ParameterSpec asParam() {
-    return implConstructorParam;
+    return asParameterSpec;
   }
 }

@@ -14,9 +14,9 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.jbock.common.TypeTool.AS_DECLARED;
-import static net.jbock.either.Either.unbalancedRight;
 import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
+import static net.jbock.either.Either.unbalancedRight;
 
 @ParameterScope
 public class ReferenceTool {

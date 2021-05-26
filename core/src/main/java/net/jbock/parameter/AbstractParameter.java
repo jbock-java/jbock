@@ -53,13 +53,13 @@ public abstract class AbstractParameter {
     return sourceMethod.fail(message);
   }
 
-  final EnumName enumName() {
+  public final EnumName enumName() {
     return enumName;
   }
 
   public abstract String paramLabel();
 
-  final SourceMethod sourceMethod() {
+  public final SourceMethod sourceMethod() {
     return sourceMethod;
   }
 }

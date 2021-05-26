@@ -1,12 +1,8 @@
 package net.jbock.convert.matching.matcher;
 
-import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
-import net.jbock.common.EnumName;
-import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.common.TypeTool;
-import net.jbock.convert.matching.MatchFactory;
-import net.jbock.convert.matching.MatchFactoryAccess;
+import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.validate.SourceMethod;
 import org.junit.jupiter.api.Assertions;
@@ -34,8 +30,8 @@ class OptionalMatcherTest {
       TypeTool tool = new TypeTool(elements, types);
       OptionalMatcher optionalish = createMatcher(tool, optionalInt);
       optionalish.tryMatch(parameter).map(unwrapSuccess -> {
-        TypeName liftedType = unwrapSuccess.constructorParam().type;
-        assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
+        TypeMirror baseType = unwrapSuccess.baseType();
+        assertEquals("java.lang.Integer", baseType.toString());
         return unwrapSuccess;
       }).orElseGet(Assertions::fail);
     });
@@ -50,8 +46,8 @@ class OptionalMatcherTest {
       DeclaredType optionalInteger = types.getDeclaredType(optional, integer);
       OptionalMatcher optionalish = createMatcher(tool, optionalInteger);
       optionalish.tryMatch(parameter).map(unwrapSuccess -> {
-        TypeName liftedType = unwrapSuccess.constructorParam().type;
-        assertEquals("java.util.Optional<java.lang.Integer>", liftedType.toString());
+        TypeMirror baseType = unwrapSuccess.baseType();
+        assertEquals("java.lang.Integer", baseType.toString());
         return unwrapSuccess;
       }).orElseGet(Assertions::fail);
     });
@@ -81,10 +77,7 @@ class OptionalMatcherTest {
     ExecutableElement sourceMethod = Mockito.mock(ExecutableElement.class);
     Mockito.when(sourceMethod.getAnnotation(Mockito.any())).thenReturn(Mockito.mock(Option.class));
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
-    EnumName enumName = EnumName.create("a");
-    MatchFactory matchFactory = MatchFactoryAccess.create(enumName);
-    return new OptionalMatcher(
-        SourceMethod.create(sourceMethod),
-        enumName, tool, tool.types(), tool.elements(), matchFactory);
+    return new OptionalMatcher(SourceMethod.create(sourceMethod),
+        tool, tool.elements());
   }
 }

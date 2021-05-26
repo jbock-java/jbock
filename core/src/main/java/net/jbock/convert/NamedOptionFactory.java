@@ -133,6 +133,6 @@ public class NamedOptionFactory {
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
     return ConvertedParameter.create(Optional.empty(), Optional.empty(), Skew.FLAG,
-        enumName, namedOption);
+        namedOption);
   }
 }
