@@ -21,7 +21,7 @@ public abstract class ConverterValidator {
       return Optional.of("use @" + Parameters.class.getSimpleName() + " here");
     }
     if (parameterStyle == ParameterStyle.PARAMETERS
-        && (m.skew() == Skew.REQUIRED || m.skew() == Skew.OPTIONAL)) {
+        && m.skew() != Skew.REPEATABLE) {
       return Optional.of("use @" + Parameter.class.getSimpleName() + " here");
     }
     return Optional.empty();

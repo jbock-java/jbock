@@ -10,7 +10,7 @@ import java.util.Optional;
 
 public class Match {
 
-  /* baseType ({A, List<A>, Optional<A>}) == A
+  /* baseType ({List<A>, Optional<A>}) == A
    * baseType (OptionalInt) == int
    */
   private final TypeMirror baseType;

@@ -68,13 +68,12 @@ public class AutoConverterFinder extends ConverterValidator {
   private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(Match match, P parameter) {
     return autoConverter.findAutoConverter(match.baseType())
         .flatMapLeft(this::enumConverter)
-        .mapLeft(AutoConverterFinder::noMatchError)
         .map(mapExpr -> match.toConvertedParameter(mapExpr, parameter));
   }
 
-  private Either<TypeMirror, Optional<CodeBlock>> enumConverter(TypeMirror baseType) {
+  private Either<String, Optional<CodeBlock>> enumConverter(TypeMirror baseType) {
     if (!isEnumType(baseType)) {
-      return left(baseType);
+      return left(noMatchError(baseType));
     }
     ParameterSpec s = ParameterSpec.builder(STRING, "s").build();
     ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e").build();

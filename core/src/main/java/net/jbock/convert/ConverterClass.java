@@ -7,7 +7,7 @@ public class ConverterClass {
 
   private final Optional<TypeElement> converter;
 
-  public ConverterClass(Optional<TypeElement> converter) {
+  ConverterClass(Optional<TypeElement> converter) {
     this.converter = converter;
   }
 

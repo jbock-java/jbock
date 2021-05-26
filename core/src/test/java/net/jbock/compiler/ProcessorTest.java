@@ -38,7 +38,22 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("not a valid name: --");
+        .withErrorContaining("invalid name: --");
+  }
+
+  @Test
+  void badName() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(names = \"-\")",
+        "  abstract boolean __();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(Processor.testInstance())
+        .failsToCompile()
+        .withErrorContaining("invalid name: -");
   }
 
   @Test
@@ -92,7 +107,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("'--help' cannot be an option name");
+        .withErrorContaining("'--help' is reserved, set 'helpEnabled=false' to allow it");
   }
 
   @Test

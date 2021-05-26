@@ -71,9 +71,9 @@ public class NamedOptionFactory {
     }
     List<String> result = new ArrayList<>();
     for (String name : sourceMethod.names()) {
-      Either<String, String> check = checkName(name);
-      if (!check.isRight()) {
-        return check.map(__ -> List.of());
+      Optional<String> check = checkName(name);
+      if (check.isPresent()) {
+        return Either.unbalancedLeft(check).orElseRight(List::of);
       }
       if (result.contains(name)) {
         return left("duplicate option name: " + name);
@@ -94,37 +94,35 @@ public class NamedOptionFactory {
     return right(result);
   }
 
-  private Either<String, String> checkName(String name) {
+  private Optional<String> checkName(String name) {
     if (Objects.toString(name, "").isEmpty()) {
-      return left("empty name");
+      return Optional.of("empty name");
     }
     if (name.charAt(0) != '-') {
-      return left("the name must start with a dash character: " + name);
+      return Optional.of("the name must start with a dash character: " + name);
     }
     if (name.startsWith("---")) {
-      return left("the name must start with one or two dashes, not three:" + name);
+      return Optional.of("the name must start with one or two dashes, not three:" + name);
     }
-    if (name.equals("--")) {
-      return left("not a valid name: --");
+    if (name.equals("-") || name.equals("--")) {
+      return Optional.of("invalid name: " + name);
     }
     if (name.charAt(1) != '-' && name.length() >= 3) {
-      return left("single-dash names must be single-character names: " + name);
+      return Optional.of("single-dash names must be single-character names: " + name);
     }
-    if (sourceElement.helpEnabled()) {
-      if ("--help".equals(name)) {
-        return left("'--help' cannot be an option name, unless the help feature is disabled.");
-      }
+    if (sourceElement.helpEnabled() && "--help".equals(name)) {
+      return Optional.of("'--help' is reserved, set 'helpEnabled=false' to allow it");
     }
     for (int i = 0; i < name.length(); i++) {
       char c = name.charAt(i);
       if (isWhitespace(c)) {
-        return left("the name contains whitespace characters: " + name);
+        return Optional.of("the name contains whitespace characters: " + name);
       }
       if (c == '=') {
-        return left("the name contains '=': " + name);
+        return Optional.of("the name contains '=': " + name);
       }
     }
-    return right(name);
+    return Optional.empty();
   }
 
   private NamedOption createNamedOption(List<String> names) {
