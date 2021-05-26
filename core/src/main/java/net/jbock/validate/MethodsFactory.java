@@ -10,9 +10,12 @@ import net.jbock.parameter.ParameterStyle;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
+import javax.lang.model.element.Name;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static net.jbock.either.Either.left;
@@ -45,12 +48,24 @@ public class MethodsFactory {
     return abstractMethodsFinder.findAbstractMethods()
         .flatMap(this::validateParameterMethods)
         .flatMap(this::checkAtLeastOneAbstractMethod)
+        .flatMap(this::inheritanceCollision)
         .map(this::createSourceMethods)
         .flatMap(this::validateDuplicateParametersAnnotation)
-        .flatMap(this::validateParameterSuperCommand);
+        .flatMap(this::atLeastOneParameterSuperCommand);
   }
 
-  private Either<List<ValidationFailure>, AbstractMethods> validateParameterSuperCommand(
+  private Either<List<ValidationFailure>, List<ExecutableElement>> inheritanceCollision(
+      List<ExecutableElement> methods) {
+    Map<Name, List<ExecutableElement>> map = methods.stream().collect(Collectors.groupingBy(ExecutableElement::getSimpleName));
+    for (ExecutableElement method : methods) {
+      if (map.get(method.getSimpleName()).size() >= 2) {
+        return left(List.of(new ValidationFailure("inheritance collision", method)));
+      }
+    }
+    return right(methods);
+  }
+
+  private Either<List<ValidationFailure>, AbstractMethods> atLeastOneParameterSuperCommand(
       List<SourceMethod> methods) {
     List<SourceMethod> params = methods.stream()
         .filter(m -> m.style().isPositional())

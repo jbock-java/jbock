@@ -156,6 +156,27 @@ class InheritanceTest {
   }
 
   @Test
+  void inheritanceCollision() {
+    JavaFileObject javaFile = fromSource(
+        "interface A {",
+        "",
+        "  @Parameter(index = 0)",
+        "  String param();",
+        "}",
+        "",
+        "@Command",
+        "abstract class B implements A {",
+        "",
+        "  @Option(names = \"-a\")",
+        "  abstract String param();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(Processor.testInstance())
+        .failsToCompile()
+        .withErrorContaining("inheritance collision");
+  }
+
+  @Test
   void inheritedInterface() {
     JavaFileObject javaFile = fromSource(
         "interface I {}",

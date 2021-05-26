@@ -36,8 +36,8 @@ class AbstractMethodsUtil {
    */
   Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantAbstractMethods(List<ExecutableElement> abstractMethods) {
     Map<Boolean, List<ExecutableElement>> partition = abstractMethods.stream()
-        .collect(Collectors.partitioningBy(this::isUnimplemented));
-    List<ExecutableElement> result = partition.get(true);
+        .collect(Collectors.partitioningBy(this::isNotOverridden));
+    List<ExecutableElement> notOverridden = partition.get(true);
     List<ExecutableElement> overridden = partition.get(false);
     List<ValidationFailure> failures = overridden.stream().flatMap(m -> {
       for (Class<? extends Annotation> ann : Annotations.methodLevelAnnotations()) {
@@ -51,10 +51,10 @@ class AbstractMethodsUtil {
     if (!failures.isEmpty()) {
       return left(failures);
     }
-    return right(result);
+    return right(notOverridden);
   }
 
-  private boolean isUnimplemented(ExecutableElement abstractMethod) {
+  private boolean isNotOverridden(ExecutableElement abstractMethod) {
     Name name = abstractMethod.getSimpleName();
     List<ExecutableElement> methodsByTheSameName = nonAbstractMethods.get(name);
     if (methodsByTheSameName == null) {
