@@ -1,4 +1,4 @@
-module net.jbock {
+module net.jbock.annotations {
 
   exports net.jbock;
 }
