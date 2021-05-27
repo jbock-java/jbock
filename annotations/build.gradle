@@ -4,7 +4,7 @@ plugins {
     id('signing')
 }
 
-group = 'com.github.h908714124'
+group = 'com.github.jbock-java'
 
 java {
     toolchain {
@@ -79,7 +79,7 @@ publishing {
                 name = 'jbock-annotations'
                 packaging = 'jar'
                 description = 'Annotations for the jbock annotation processor'
-                url = 'https://github.com/h908714124/jbock'
+                url = 'https://github.com/jbock-java/jbock'
 
                 licenses {
                     license {
@@ -95,9 +95,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:https://github.com/h908714124/jbock.git'
-                    developerConnection = 'scm:git:https://github.com/h908714124/jbock.git'
-                    url = 'https://github.com/h908714124/jbock'
+                    connection = 'scm:git:https://github.com/jbock-java/jbock.git'
+                    developerConnection = 'scm:git:https://github.com/jbock-java/jbock.git'
+                    url = 'https://github.com/jbock-java/jbock'
                 }
             }
         }

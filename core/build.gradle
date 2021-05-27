@@ -5,7 +5,7 @@ plugins {
     id('signing')
 }
 
-group = 'com.github.h908714124'
+group = 'com.github.jbock-java'
 
 java {
     toolchain {
@@ -37,8 +37,9 @@ tasks.withType(GenerateModuleMetadata) {
 shadowJar {
     minimize()
     dependencies {
-        exclude(dependency('com.github.h908714124:jbock-annotations:.*'))
-        exclude(dependency('javax.annotation:jsr250-api:.*'))
+        exclude('com.github.jbock-java:jbock-annotations:.*')
+        exclude('com.github.h908714124:jbock-annotations:.*')
+        exclude('javax.annotation:jsr250-api:.*')
     }
     archiveClassifier.set('')
     relocate('dagger', 'net.jbock.dagger')
@@ -49,7 +50,7 @@ shadowJar {
 }
 
 dependencies {
-    def annotations = 'com.github.h908714124:jbock-annotations:4.4'
+    def annotations = project(':annotations')
     implementation('com.squareup:javapoet:1.13.0')
     implementation('com.google.auto:auto-common:1.0')
     implementation('com.google.guava:guava:30.1.1-jre')
@@ -107,7 +108,7 @@ publishing {
                 name = 'jbock'
                 packaging = 'jar'
                 description = 'The jbock command line parser'
-                url = 'https://github.com/h908714124/jbock'
+                url = 'https://github.com/jbock-java/jbock'
 
                 licenses {
                     license {
@@ -123,9 +124,9 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:git:https://github.com/h908714124/jbock.git'
-                    developerConnection = 'scm:git:https://github.com/h908714124/jbock.git'
-                    url = 'https://github.com/h908714124/jbock'
+                    connection = 'scm:git:https://github.com/jbock-java/jbock.git'
+                    developerConnection = 'scm:git:https://github.com/jbock-java/jbock.git'
+                    url = 'https://github.com/jbock-java/jbock'
                 }
             }
         }
