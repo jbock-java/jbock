@@ -9,6 +9,7 @@ import net.jbock.validate.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -20,6 +21,19 @@ import static net.jbock.either.Either.right;
 
 @ParameterScope
 public class NamedOptionFactory {
+
+  // visible for testing
+  static final Comparator<String> UNIX_NAMES_FIRST_COMPARATOR = (n1, n2) -> {
+    boolean unix1 = n1.length() == 2;
+    boolean unix2 = n2.length() == 2;
+    if (unix1 && !unix2) {
+      return -1;
+    }
+    if (!unix1 && unix2) {
+      return 1;
+    }
+    return n1.compareTo(n2);
+  };
 
   private final ConverterFinder converterFinder;
   private final ConverterClass converterClass;
@@ -80,34 +94,21 @@ public class NamedOptionFactory {
       }
       result.add(name);
     }
-    result.sort((n1, n2) -> {
-      boolean unix1 = n1.length() == 2;
-      boolean unix2 = n2.length() == 2;
-      if (unix1 && !unix2) {
-        return -1;
-      }
-      if (!unix1 && unix2) {
-        return 1;
-      }
-      return n1.compareTo(n2);
-    });
+    result.sort(UNIX_NAMES_FIRST_COMPARATOR);
     return right(result);
   }
 
   private Optional<String> checkName(String name) {
-    if (Objects.toString(name, "").isEmpty()) {
-      return Optional.of("empty name");
+    if (Objects.toString(name, "").length() <= 1 || "--".equals(name)) {
+      return Optional.of("invalid name: " + name);
     }
-    if (name.charAt(0) != '-') {
+    if (!name.startsWith("-")) {
       return Optional.of("the name must start with a dash character: " + name);
     }
     if (name.startsWith("---")) {
       return Optional.of("the name must start with one or two dashes, not three:" + name);
     }
-    if (name.equals("-") || name.equals("--")) {
-      return Optional.of("invalid name: " + name);
-    }
-    if (name.charAt(1) != '-' && name.length() >= 3) {
+    if (!name.startsWith("--") && name.length() > 2) {
       return Optional.of("single-dash names must be single-character names: " + name);
     }
     if (sourceElement.helpEnabled() && "--help".equals(name)) {

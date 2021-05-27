@@ -25,7 +25,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("name must start with a dash character: a");
+        .withErrorContaining("invalid name: a");
   }
 
   @Test
