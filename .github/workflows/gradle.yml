@@ -14,4 +14,4 @@ jobs:
       with:
         java-version: 16
     - name: Build with Gradle
-      run: ./gradlew clean core:test :examples:test
+      run: ./gradlew compiler:test examples:test
