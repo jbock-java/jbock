@@ -99,7 +99,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) { publication ->
             project.shadow.component(publication)
-            artifactId = 'jbock'
+            artifactId = 'jbock-compiler'
 
             artifact sourcesJar
             artifact javadocJar
@@ -107,7 +107,7 @@ publishing {
             pom {
                 name = 'jbock-compiler'
                 packaging = 'jar'
-                description = 'The jbock command line parser'
+                description = 'jbock annotation processor'
                 url = 'https://github.com/jbock-java/jbock'
 
                 licenses {

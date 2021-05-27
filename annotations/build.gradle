@@ -78,7 +78,7 @@ publishing {
             pom {
                 name = 'jbock-annotations'
                 packaging = 'jar'
-                description = 'Annotations for the jbock annotation processor'
+                description = 'jbock annotations'
                 url = 'https://github.com/jbock-java/jbock'
 
                 licenses {
