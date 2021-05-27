@@ -123,8 +123,8 @@ publishing {
                     }
                 }
                 scm {
-                    connection = 'scm:svn:https://github.com/h908714124/jbock.git'
-                    developerConnection = 'scm:svn:https://github.com/h908714124/jbock.git'
+                    connection = 'scm:git:https://github.com/h908714124/jbock.git'
+                    developerConnection = 'scm:git:https://github.com/h908714124/jbock.git'
                     url = 'https://github.com/h908714124/jbock'
                 }
             }
