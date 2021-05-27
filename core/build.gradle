@@ -5,7 +5,7 @@ plugins {
     id('signing')
 }
 
-group = 'com.github.jbock-java'
+group = 'io.github.jbock-java'
 
 java {
     toolchain {
@@ -105,7 +105,7 @@ publishing {
             artifact javadocJar
 
             pom {
-                name = 'jbock'
+                name = 'jbock-compiler'
                 packaging = 'jar'
                 description = 'The jbock command line parser'
                 url = 'https://github.com/jbock-java/jbock'
