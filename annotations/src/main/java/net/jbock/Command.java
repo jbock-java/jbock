@@ -66,6 +66,7 @@ public @interface Command {
    * Enables or disable ANSI colors in the usage documentation.
    * By default, colors and bold text are used to highlight
    * certain keywords.
+   *
    * @return {@code false} to disable ANSI colors
    */
   boolean ansi() default true;
