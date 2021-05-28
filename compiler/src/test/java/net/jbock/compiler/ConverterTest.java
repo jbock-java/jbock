@@ -316,7 +316,7 @@ class ConverterTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("converter missing default constructor");
+        .withErrorContaining("default constructor not found");
   }
 
   @Test
