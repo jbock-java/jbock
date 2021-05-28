@@ -7,11 +7,11 @@ import net.jbock.parameter.ParameterStyle;
 
 import java.util.Optional;
 
-public abstract class ConverterValidator {
+public abstract class MatchValidator {
 
   private final ParameterStyle parameterStyle;
 
-  protected ConverterValidator(ParameterStyle parameterStyle) {
+  protected MatchValidator(ParameterStyle parameterStyle) {
     this.parameterStyle = parameterStyle;
   }
 

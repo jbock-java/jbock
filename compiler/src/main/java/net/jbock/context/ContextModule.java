@@ -2,11 +2,13 @@ package net.jbock.context;
 
 import dagger.Module;
 import dagger.Provides;
+import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.compiler.SourceElement;
 import net.jbock.validate.Params;
 
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 
 @Module
 public class ContextModule {
@@ -14,14 +16,17 @@ public class ContextModule {
   private final SourceElement sourceElement;
   private final Elements elements;
   private final Params params;
+  private final Types types;
 
   public ContextModule(
       SourceElement sourceElement,
       Elements elements,
-      Params params) {
+      Params params,
+      Types types) {
     this.sourceElement = sourceElement;
     this.elements = elements;
     this.params = params;
+    this.types = types;
   }
 
   @ContextScope
@@ -51,7 +56,7 @@ public class ContextModule {
   @ContextScope
   @Provides
   Util util() {
-    return new Util();
+    return new Util(types, new TypeTool(elements, types));
   }
 
   @ContextScope

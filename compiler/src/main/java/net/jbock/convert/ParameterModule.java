@@ -100,8 +100,8 @@ public class ParameterModule {
 
   @ParameterScope
   @Provides
-  Util util() {
-    return new Util();
+  Util util(Types types, TypeTool tool) {
+    return new Util(types, tool);
   }
 
   @ParameterScope

@@ -7,7 +7,7 @@ import net.jbock.common.Util;
 import net.jbock.convert.AutoConverter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ParameterScope;
-import net.jbock.convert.matching.ConverterValidator;
+import net.jbock.convert.matching.MatchValidator;
 import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.either.Either;
@@ -27,7 +27,7 @@ import static net.jbock.common.Constants.STRING;
 import static net.jbock.either.Either.left;
 
 @ParameterScope
-public class AutoConverterFinder extends ConverterValidator {
+public class AutoConverterFinder extends MatchValidator {
 
   private static final String ENUM = Enum.class.getCanonicalName();
 
@@ -36,6 +36,7 @@ public class AutoConverterFinder extends ConverterValidator {
   private final SourceMethod sourceMethod;
   private final Types types;
   private final TypeTool tool;
+  private final Util util;
 
   @Inject
   AutoConverterFinder(
@@ -44,13 +45,15 @@ public class AutoConverterFinder extends ConverterValidator {
       SourceMethod sourceMethod,
       Types types,
       TypeTool tool,
-      ParameterStyle parameterStyle) {
+      ParameterStyle parameterStyle,
+      Util util) {
     super(parameterStyle);
     this.autoConverter = autoConverter;
     this.matchers = matchers;
     this.sourceMethod = sourceMethod;
     this.types = types;
     this.tool = tool;
+    this.util = util;
   }
 
   public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(P parameter) {
@@ -101,7 +104,7 @@ public class AutoConverterFinder extends ConverterValidator {
         .anyMatch(t -> tool.isSameErasure(t, ENUM));
   }
 
-  private static String noMatchError(TypeMirror type) {
-    return "define a converter that implements Function<String, " + Util.typeToString(type) + ">";
+  private String noMatchError(TypeMirror type) {
+    return "define a converter that implements Function<String, " + util.typeToString(type) + ">";
   }
 }

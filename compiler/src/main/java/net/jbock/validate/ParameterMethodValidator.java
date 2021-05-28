@@ -46,7 +46,7 @@ public class ParameterMethodValidator {
           + " cannot be used in a @" + SuperCommand.class.getSimpleName());
     }
     if (isUnreachable(sourceMethod.getReturnType())) {
-      return Optional.of("unreachable type: " + Util.typeToString(sourceMethod.getReturnType()));
+      return Optional.of("unreachable type: " + util.typeToString(sourceMethod.getReturnType()));
     }
     return Optional.empty();
   }

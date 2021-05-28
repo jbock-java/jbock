@@ -2,7 +2,7 @@ package net.jbock.convert;
 
 import dagger.Lazy;
 import net.jbock.convert.matching.auto.AutoConverterFinder;
-import net.jbock.convert.matching.explicit.ExplicitConverterValidator;
+import net.jbock.convert.matching.explicit.ConverterValidator;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractParameter;
 
@@ -12,13 +12,13 @@ import javax.inject.Inject;
 public class ConverterFinder {
 
   private final Lazy<AutoConverterFinder> autoConverterFinder;
-  private final Lazy<ExplicitConverterValidator> converterValidator;
+  private final Lazy<ConverterValidator> converterValidator;
   private final ConverterClass converterClass;
 
   @Inject
   ConverterFinder(
       Lazy<AutoConverterFinder> autoConverterFinder,
-      Lazy<ExplicitConverterValidator> converterValidator,
+      Lazy<ConverterValidator> converterValidator,
       ConverterClass converterClass) {
     this.autoConverterFinder = autoConverterFinder;
     this.converterValidator = converterValidator;

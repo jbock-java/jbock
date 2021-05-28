@@ -46,7 +46,7 @@ public interface ProcessingEnvironmentModule {
 
   @ProcessorScope
   @Provides
-  static Util util() {
-    return new Util();
+  static Util util(Types types, TypeTool tool) {
+    return new Util(types, tool);
   }
 }

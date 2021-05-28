@@ -10,6 +10,7 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Types;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +18,14 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Util {
+
+  private final Types types;
+  private final TypeTool tool;
+
+  public Util(Types types, TypeTool tool) {
+    this.types = types;
+    this.tool = tool;
+  }
 
   public <E> List<E> concat(List<? extends E> list1, List<? extends E> list2) {
     List<E> result = new ArrayList<>(list1.size() + list2.size());
@@ -27,7 +36,7 @@ public class Util {
 
   public Optional<String> commonTypeChecks(TypeElement classToCheck) {
     if (classToCheck.getNestingKind().isNested() && !classToCheck.getModifiers().contains(Modifier.STATIC)) {
-      return Optional.of("must be static or top-level");
+      return Optional.of("nested class must be static");
     }
     for (TypeElement element : getEnclosingElements(classToCheck)) {
       if (element.getModifiers().contains(Modifier.PRIVATE)) {
@@ -35,26 +44,44 @@ public class Util {
       }
     }
     if (!hasDefaultConstructor(classToCheck)) {
-      return Optional.of("missing default constructor");
+      return Optional.of("default constructor not found");
     }
     return Optional.empty();
   }
 
-  private static boolean hasDefaultConstructor(TypeElement classToCheck) {
+  private boolean hasDefaultConstructor(TypeElement classToCheck) {
     List<ExecutableElement> constructors = ElementFilter.constructorsIn(classToCheck.getEnclosedElements());
     if (constructors.isEmpty()) {
       return true;
     }
     for (ExecutableElement constructor : constructors) {
-      if (!constructor.getParameters().isEmpty()) {
-        continue;
+      if (!constructor.getModifiers().contains(Modifier.PRIVATE) &&
+          constructor.getParameters().isEmpty() &&
+          !throwsAnyCheckedExceptions(constructor)) {
+        return true;
       }
-      if (constructor.getModifiers().contains(Modifier.PRIVATE)) {
-        return false;
-      }
-      return constructor.getThrownTypes().isEmpty();
     }
     return false;
+  }
+
+  public boolean throwsAnyCheckedExceptions(ExecutableElement element) {
+    for (TypeMirror thrownType : element.getThrownTypes()) {
+      if (!extendsRuntimeException(thrownType)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  private boolean extendsRuntimeException(TypeMirror mirror) {
+    if (mirror.getKind() != TypeKind.DECLARED) {
+      return false;
+    }
+    if (tool.isSameType(mirror, RuntimeException.class.getCanonicalName())) {
+      return true;
+    }
+    TypeElement el = TypeTool.AS_TYPE_ELEMENT.visit(types.asElement(mirror));
+    return extendsRuntimeException(el.getSuperclass());
   }
 
   public List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
@@ -72,7 +99,7 @@ public class Util {
     return result;
   }
 
-  public static String typeToString(TypeMirror type) {
+  public String typeToString(TypeMirror type) {
     if (type.getKind() != TypeKind.DECLARED) {
       return type.toString();
     }
@@ -81,7 +108,7 @@ public class Util {
     if (declared.getTypeArguments().isEmpty()) {
       return base;
     }
-    return base + declared.getTypeArguments().stream().map(Util::typeToString)
+    return base + declared.getTypeArguments().stream().map(this::typeToString)
         .collect(Collectors.joining(", ", "<", ">"));
   }
 

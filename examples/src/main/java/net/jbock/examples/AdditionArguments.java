@@ -3,16 +3,23 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Parameter;
 
+import java.io.IOException;
 import java.util.Optional;
 
 @Command(ansi = false)
 abstract class AdditionArguments {
 
+  AdditionArguments() throws IndexOutOfBoundsException {
+  }
+
+  AdditionArguments(String s) throws IOException {
+  }
+
   /**
    * First argument
    */
   @Parameter(index = 0)
-  abstract int a();
+  abstract int a() throws IllegalStateException;
 
   /**
    * Second argument

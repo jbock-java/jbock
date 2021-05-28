@@ -16,6 +16,7 @@ import net.jbock.parameter.PositionalParameter;
 
 import javax.inject.Inject;
 import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,6 +28,7 @@ public class CommandProcessor {
   private final SourceElement sourceElement;
   private final Elements elements;
   private final TypeTool tool;
+  private final Types types;
   private final ParamsFactory paramsFactory;
   private final MethodsFactory methodsFactory;
   private final Util util;
@@ -36,12 +38,14 @@ public class CommandProcessor {
       SourceElement sourceElement,
       Elements elements,
       TypeTool tool,
+      Types types,
       ParamsFactory paramsFactory,
       MethodsFactory methodsFactory,
       Util util) {
     this.sourceElement = sourceElement;
     this.elements = elements;
     this.tool = tool;
+    this.types = types;
     this.paramsFactory = paramsFactory;
     this.methodsFactory = methodsFactory;
     this.util = util;
@@ -104,6 +108,6 @@ public class CommandProcessor {
   }
 
   private ContextModule contextModule(Params params) {
-    return new ContextModule(sourceElement, elements, params);
+    return new ContextModule(sourceElement, elements, params, types);
   }
 }

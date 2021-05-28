@@ -87,7 +87,6 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       TypeElement element,
       ParserFlavour parserFlavour) {
     Optional<List<ValidationFailure>> failureList = util.commonTypeChecks(element)
-        .map(m -> (parserFlavour.isSuperCommand() ? "Super" : "") + "Command " + m)
         .or(() -> util.assertNoDuplicateAnnotations(element,
             Command.class, SuperCommand.class, Converter.class))
         .map(s -> new ValidationFailure(s, element))

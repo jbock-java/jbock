@@ -7,15 +7,15 @@ import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.Elements;
-import javax.lang.model.util.SimpleElementVisitor8;
-import javax.lang.model.util.SimpleTypeVisitor8;
+import javax.lang.model.util.SimpleElementVisitor9;
+import javax.lang.model.util.SimpleTypeVisitor9;
 import javax.lang.model.util.Types;
 import java.util.Optional;
 
 public class TypeTool {
 
   public static final TypeVisitor<DeclaredType, Void> AS_DECLARED =
-      new SimpleTypeVisitor8<>() {
+      new SimpleTypeVisitor9<>() {
         @Override
         public DeclaredType visitDeclared(DeclaredType declaredType, Void nothing) {
           return declaredType;
@@ -23,7 +23,7 @@ public class TypeTool {
       };
 
   public static final TypeVisitor<PrimitiveType, Void> AS_PRIMITIVE =
-      new SimpleTypeVisitor8<>() {
+      new SimpleTypeVisitor9<>() {
         @Override
         public PrimitiveType visitPrimitive(PrimitiveType primitiveType, Void nothing) {
           return primitiveType;
@@ -31,7 +31,7 @@ public class TypeTool {
       };
 
   public static final ElementVisitor<TypeElement, Void> AS_TYPE_ELEMENT =
-      new SimpleElementVisitor8<>() {
+      new SimpleElementVisitor9<>() {
         @Override
         public TypeElement visitType(TypeElement typeElement, Void nothing) {
           return typeElement;

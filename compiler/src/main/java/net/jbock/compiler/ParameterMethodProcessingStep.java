@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.common.Annotations;
+import net.jbock.common.Util;
 
 import javax.annotation.processing.Messager;
 import javax.inject.Inject;
@@ -20,10 +21,12 @@ import static javax.tools.Diagnostic.Kind.ERROR;
 public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.Step {
 
   private final Messager messager;
+  private final Util util;
 
   @Inject
-  ParameterMethodProcessingStep(Messager messager) {
+  ParameterMethodProcessingStep(Messager messager, Util util) {
     this.messager = messager;
+    this.util = util;
   }
 
   @Override
@@ -54,8 +57,8 @@ public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.S
           (method.getTypeParameters().size() >= 2 ? "s" : "") +
           " not expected here");
     }
-    if (!method.getThrownTypes().isEmpty()) {
-      return Optional.of("method may not declare any exceptions");
+    if (util.throwsAnyCheckedExceptions(method)) {
+      return Optional.of("checked exceptions are not allowed here");
     }
     return Optional.empty();
   }

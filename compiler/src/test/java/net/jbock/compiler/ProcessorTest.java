@@ -139,7 +139,7 @@ class ProcessorTest {
   }
 
   @Test
-  void declaredException() {
+  void runtimeException() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -149,8 +149,7 @@ class ProcessorTest {
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
-        .failsToCompile()
-        .withErrorContaining("may not declare any exceptions");
+        .compilesWithoutError();
   }
 
   @Test
@@ -211,6 +210,66 @@ class ProcessorTest {
         .processedWith(Processor.testInstance())
         .failsToCompile()
         .withErrorContaining("define a converter that implements Function<String, Set<String>>");
+  }
+
+  @Test
+  void checkedException() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(names = \"--x\")",
+        "  abstract String a() throws java.io.IOException;",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(Processor.testInstance())
+        .failsToCompile()
+        .withErrorContaining("checked exceptions are not allowed here");
+  }
+
+  @Test
+  void uncheckedException() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  @Option(names = \"--x\")",
+        "  abstract String a() throws IllegalArgumentException;",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(Processor.testInstance())
+        .compilesWithoutError();
+  }
+
+  @Test
+  void constructorCheckedException() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  Arguments() throws java.io.IOException {}",
+        "  @Option(names = \"--x\")",
+        "  abstract String a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(Processor.testInstance())
+        .failsToCompile()
+        .withErrorContaining("default constructor not found");
+  }
+
+  @Test
+  void constructorUncheckedException() {
+    JavaFileObject javaFile = fromSource(
+        "@Command",
+        "abstract class Arguments {",
+        "",
+        "  Arguments() throws IllegalArgumentException {}",
+        "  @Option(names = \"--x\")",
+        "  abstract String a();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(Processor.testInstance())
+        .compilesWithoutError();
   }
 
   @Test
@@ -599,7 +658,7 @@ class ProcessorTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("Command class cannot be private");
+        .withErrorContaining("class cannot be private");
   }
 
   static JavaFileObject fromSource(String... lines) {

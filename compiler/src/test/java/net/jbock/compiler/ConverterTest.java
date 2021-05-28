@@ -293,7 +293,7 @@ class ConverterTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("converter missing default constructor");
+        .withErrorContaining("default constructor not found");
   }
 
   @Test
@@ -308,7 +308,7 @@ class ConverterTest {
         "  @Converter",
         "  static class MapMap implements Supplier<Function<String, Integer>> {",
         "",
-        "    MapMap() throws IllegalStateException {}",
+        "    MapMap() throws java.io.IOException {}",
         "",
         "    public Function<String, Integer> get() { return null; }",
         "  }",
@@ -336,7 +336,7 @@ class ConverterTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("converter must be static or top-level");
+        .withErrorContaining("nested class must be static");
   }
 
   @Test
@@ -540,7 +540,7 @@ class ConverterTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("found type parameters in converter class declaration");
+        .withErrorContaining("type parameters are not allowed in converter class declaration");
   }
 
   @Test
