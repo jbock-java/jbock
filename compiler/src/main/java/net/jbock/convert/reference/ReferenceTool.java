@@ -65,7 +65,7 @@ public class ReferenceTool {
       return left(converterRawType());
     }
     TypeMirror inputType = suppliedFunction.getTypeArguments().get(0);
-    if (!tool.isSameType(inputType, String.class.getCanonicalName())) {
+    if (!tool.isSameType(inputType, String.class)) {
       return left("converter should implement Function<String, ?>");
     }
     return right(new FunctionType(suppliedFunction.getTypeArguments(), isSupplier));

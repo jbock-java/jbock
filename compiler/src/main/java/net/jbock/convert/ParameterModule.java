@@ -15,6 +15,7 @@ import net.jbock.parameter.ParameterStyle;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.validate.SourceMethod;
 
+import javax.annotation.processing.Messager;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.List;
@@ -29,14 +30,23 @@ public class ParameterModule {
   private final TypeTool tool;
   private final SourceElement sourceElement;
   private final Util util;
+  private final Types types;
+  private final Elements elements;
+  private final Messager messager;
 
   public ParameterModule(
       TypeTool tool,
+      Types types,
       SourceElement sourceElement,
-      Util util) {
+      Util util,
+      Elements elements,
+      Messager messager) {
     this.tool = tool;
     this.sourceElement = sourceElement;
     this.util = util;
+    this.elements = elements;
+    this.messager = messager;
+    this.types = types;
   }
 
   @ParameterScope
@@ -77,13 +87,13 @@ public class ParameterModule {
   @ParameterScope
   @Provides
   Types types() {
-    return tool.types();
+    return types;
   }
 
   @ParameterScope
   @Provides
   Elements elements() {
-    return tool.elements();
+    return elements;
   }
 
   @ParameterScope
@@ -100,8 +110,14 @@ public class ParameterModule {
 
   @ParameterScope
   @Provides
-  Util util(Types types, TypeTool tool) {
+  Util util(TypeTool tool) {
     return new Util(types, tool);
+  }
+
+  @ParameterScope
+  @Provides
+  Messager messager() {
+    return messager;
   }
 
   @ParameterScope

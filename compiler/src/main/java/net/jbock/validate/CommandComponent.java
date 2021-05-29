@@ -39,6 +39,8 @@ public interface CommandComponent {
     @BindsInstance
     Builder operationMode(OperationMode operationMode);
 
+    Builder module(CommandModule module);
+
     CommandComponent create();
   }
 }

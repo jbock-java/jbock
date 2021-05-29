@@ -1,8 +1,8 @@
 package net.jbock.convert;
 
 import dagger.Lazy;
-import net.jbock.convert.matching.auto.AutoConverterFinder;
-import net.jbock.convert.matching.explicit.ConverterValidator;
+import net.jbock.convert.matching.AutoConverterFinder;
+import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractParameter;
 

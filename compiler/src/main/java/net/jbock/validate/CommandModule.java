@@ -8,15 +8,23 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 @Module
-public interface CommandModule {
+public class CommandModule {
 
-  @Provides
-  static Types types(TypeTool tool) {
-    return tool.types();
+  private final Types types;
+  private final Elements elements;
+
+  public CommandModule(Types types, Elements elements) {
+    this.types = types;
+    this.elements = elements;
   }
 
   @Provides
-  static Elements elements(TypeTool tool) {
-    return tool.elements();
+  Types types(TypeTool tool) {
+    return types;
+  }
+
+  @Provides
+  Elements elements() {
+    return elements;
   }
 }

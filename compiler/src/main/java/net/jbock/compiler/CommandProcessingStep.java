@@ -3,14 +3,15 @@ package net.jbock.compiler;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Command;
-import net.jbock.Converter;
 import net.jbock.SuperCommand;
+import net.jbock.common.Annotations;
 import net.jbock.common.OperationMode;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
 import net.jbock.validate.CommandComponent;
+import net.jbock.validate.CommandModule;
 import net.jbock.validate.DaggerCommandComponent;
 import net.jbock.validate.SourceFileGenerator;
 
@@ -20,6 +21,8 @@ import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
+import javax.lang.model.util.Elements;
+import javax.lang.model.util.Types;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -36,6 +39,8 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private final Util util;
   private final Filer filer;
   private final OperationMode operationMode;
+  private final Types types;
+  private final Elements elements;
 
   @Inject
   CommandProcessingStep(
@@ -43,12 +48,16 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       Messager messager,
       Util util,
       Filer filer,
-      OperationMode operationMode) {
+      OperationMode operationMode,
+      Types types,
+      Elements elements) {
     this.tool = tool;
     this.messager = messager;
     this.util = util;
     this.filer = filer;
     this.operationMode = operationMode;
+    this.types = types;
+    this.elements = elements;
   }
 
   @Override
@@ -77,6 +86,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .filer(filer)
         .messager(messager)
         .operationMode(operationMode)
+        .module(new CommandModule(types, elements))
         .create();
     SourceFileGenerator sourceFileGenerator = component.sourceFileGenerator();
     component.processor().generate()
@@ -88,7 +98,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       ParserFlavour parserFlavour) {
     Optional<List<ValidationFailure>> failureList = util.commonTypeChecks(element)
         .or(() -> util.assertNoDuplicateAnnotations(element,
-            Command.class, SuperCommand.class, Converter.class))
+            Annotations.typeLevelAnnotations()))
         .map(s -> new ValidationFailure(s, element))
         .map(List::of);
     return Either.unbalancedLeft(failureList)

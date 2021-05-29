@@ -1,8 +1,9 @@
-package net.jbock.convert;
+package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.common.TypeTool;
+import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
 
 import javax.inject.Inject;
@@ -25,7 +26,7 @@ import static net.jbock.either.Either.left;
 import static net.jbock.either.Either.right;
 
 @ParameterScope
-public class AutoConverter {
+public class AutoConverters {
 
   private static final String NEW = "new";
   private static final String CREATE = "create";
@@ -36,7 +37,7 @@ public class AutoConverter {
   private final TypeTool tool;
 
   @Inject
-  AutoConverter(TypeTool tool) {
+  AutoConverters(TypeTool tool) {
     this.tool = tool;
   }
 
@@ -48,27 +49,31 @@ public class AutoConverter {
     return new SimpleImmutableEntry<>(autoType.getCanonicalName(), mapExpr);
   }
 
-  private static final List<Entry<String, CodeBlock>> CONVERTERS = List.of(
-      create(Integer.class, VALUE_OF),
-      create(Path.class, CodeBlock.of("$T::get", Paths.class)),
-      create(File.class, autoConverterFile()),
-      create(URI.class, CREATE),
-      create(Pattern.class, COMPILE),
-      create(LocalDate.class, PARSE),
-      create(Long.class, VALUE_OF),
-      create(Short.class, VALUE_OF),
-      create(Byte.class, VALUE_OF),
-      create(Float.class, VALUE_OF),
-      create(Double.class, VALUE_OF),
-      create(Character.class, autoConverterChar()),
-      create(BigInteger.class, NEW),
-      create(BigDecimal.class, NEW));
+  private final List<Entry<String, CodeBlock>> converters = autoConverters();
 
-  public Either<TypeMirror, Optional<CodeBlock>> findAutoConverter(TypeMirror baseType) {
-    if (tool.isSameType(baseType, String.class.getCanonicalName())) {
+  private List<Entry<String, CodeBlock>> autoConverters() {
+    return List.of(
+        create(Integer.class, VALUE_OF),
+        create(Path.class, CodeBlock.of("$T::get", Paths.class)),
+        create(File.class, autoConverterFile()),
+        create(URI.class, CREATE),
+        create(Pattern.class, COMPILE),
+        create(LocalDate.class, PARSE),
+        create(Long.class, VALUE_OF),
+        create(Short.class, VALUE_OF),
+        create(Byte.class, VALUE_OF),
+        create(Float.class, VALUE_OF),
+        create(Double.class, VALUE_OF),
+        create(Character.class, autoConverterChar()),
+        create(BigInteger.class, NEW),
+        create(BigDecimal.class, NEW));
+  }
+
+  Either<TypeMirror, Optional<CodeBlock>> findAutoConverter(TypeMirror baseType) {
+    if (tool.isSameType(baseType, String.class)) {
       return right(Optional.empty());
     }
-    for (Entry<String, CodeBlock> converter : CONVERTERS) {
+    for (Entry<String, CodeBlock> converter : converters) {
       if (tool.isSameType(baseType, converter.getKey())) {
         return right(Optional.of(CodeBlock.builder()
             .add(".map(")

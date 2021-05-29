@@ -1,14 +1,11 @@
-package net.jbock.convert.matching.auto;
+package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
-import net.jbock.convert.AutoConverter;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ParameterScope;
-import net.jbock.convert.matching.MatchValidator;
-import net.jbock.convert.matching.Match;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractParameter;
@@ -31,7 +28,7 @@ public class AutoConverterFinder extends MatchValidator {
 
   private static final String ENUM = Enum.class.getCanonicalName();
 
-  private final AutoConverter autoConverter;
+  private final AutoConverters autoConverter;
   private final List<Matcher> matchers;
   private final SourceMethod sourceMethod;
   private final Types types;
@@ -40,7 +37,7 @@ public class AutoConverterFinder extends MatchValidator {
 
   @Inject
   AutoConverterFinder(
-      AutoConverter autoConverter,
+      AutoConverters autoConverter,
       List<Matcher> matchers,
       SourceMethod sourceMethod,
       Types types,

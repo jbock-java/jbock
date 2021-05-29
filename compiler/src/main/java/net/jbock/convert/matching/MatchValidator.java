@@ -7,15 +7,15 @@ import net.jbock.parameter.ParameterStyle;
 
 import java.util.Optional;
 
-public abstract class MatchValidator {
+abstract class MatchValidator {
 
   private final ParameterStyle parameterStyle;
 
-  protected MatchValidator(ParameterStyle parameterStyle) {
+  MatchValidator(ParameterStyle parameterStyle) {
     this.parameterStyle = parameterStyle;
   }
 
-  protected Optional<String> validateMatch(Match m) {
+  Optional<String> validateMatch(Match m) {
     if (parameterStyle == ParameterStyle.PARAMETER
         && m.skew() == Skew.REPEATABLE) {
       return Optional.of("use @" + Parameters.class.getSimpleName() + " here");

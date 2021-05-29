@@ -14,6 +14,7 @@ import net.jbock.either.Either;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 
+import javax.annotation.processing.Messager;
 import javax.inject.Inject;
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
@@ -32,6 +33,7 @@ public class CommandProcessor {
   private final ParamsFactory paramsFactory;
   private final MethodsFactory methodsFactory;
   private final Util util;
+  private final Messager messager;
 
   @Inject
   CommandProcessor(
@@ -41,7 +43,8 @@ public class CommandProcessor {
       Types types,
       ParamsFactory paramsFactory,
       MethodsFactory methodsFactory,
-      Util util) {
+      Util util,
+      Messager messager) {
     this.sourceElement = sourceElement;
     this.elements = elements;
     this.tool = tool;
@@ -49,6 +52,7 @@ public class CommandProcessor {
     this.paramsFactory = paramsFactory;
     this.methodsFactory = methodsFactory;
     this.util = util;
+    this.messager = messager;
   }
 
   public Either<List<ValidationFailure>, TypeSpec> generate() {
@@ -104,7 +108,7 @@ public class CommandProcessor {
   }
 
   private ParameterModule parameterModule() {
-    return new ParameterModule(tool, sourceElement, util);
+    return new ParameterModule(tool, types, sourceElement, util, elements, messager);
   }
 
   private ContextModule contextModule(Params params) {

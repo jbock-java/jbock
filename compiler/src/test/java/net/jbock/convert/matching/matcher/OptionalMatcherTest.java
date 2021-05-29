@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
+import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -78,6 +79,6 @@ class OptionalMatcherTest {
     Mockito.when(sourceMethod.getAnnotation(Mockito.any())).thenReturn(Mockito.mock(Option.class));
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
     return new OptionalMatcher(SourceMethod.create(sourceMethod),
-        tool, tool.elements());
+        tool, tool.elements(), Mockito.mock(Messager.class));
   }
 }

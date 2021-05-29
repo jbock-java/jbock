@@ -11,7 +11,8 @@ import java.util.Optional;
 public class Match {
 
   /* baseType ({List<A>, Optional<A>}) == A
-   * baseType (OptionalInt) == int
+   * baseType (OptionalInt) == Integer
+   * baseType (int) == Integer
    */
   private final TypeMirror baseType;
   private final Optional<CodeBlock> extractExpr;

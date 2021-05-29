@@ -7,9 +7,12 @@ import net.jbock.convert.matching.Match;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.validate.SourceMethod;
 
+import javax.annotation.processing.Messager;
 import javax.inject.Inject;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Elements;
+import javax.tools.Diagnostic;
 import java.util.Optional;
 
 @ParameterScope
@@ -18,15 +21,18 @@ public class OptionalMatcher extends Matcher {
   private final SourceMethod sourceMethod;
   private final TypeTool tool;
   private final Elements elements;
+  private final Messager messager;
 
   @Inject
   OptionalMatcher(
       SourceMethod sourceMethod,
       TypeTool tool,
-      Elements elements) {
+      Elements elements,
+      Messager messager) {
     this.sourceMethod = sourceMethod;
     this.tool = tool;
     this.elements = elements;
+    this.messager = messager;
   }
 
   @Override
@@ -40,7 +46,15 @@ public class OptionalMatcher extends Matcher {
   private Optional<Match> getOptionalPrimitive(TypeMirror type) {
     for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
       if (tool.isSameType(type, optionalPrimitive.type())) {
-        TypeMirror baseType = elements.getTypeElement(optionalPrimitive.wrappedObjectType()).asType();
+        String wrapped = optionalPrimitive.wrappedObjectType();
+        TypeElement el = elements.getTypeElement(wrapped);
+        if (el == null) {
+          // should not happen
+          messager.printMessage(Diagnostic.Kind.WARNING,
+              "TypeElement not found: " + wrapped);
+          return Optional.empty();
+        }
+        TypeMirror baseType = el.asType();
         return Optional.of(Match.create(baseType,
             Skew.OPTIONAL, optionalPrimitive.extractExpr()));
       }

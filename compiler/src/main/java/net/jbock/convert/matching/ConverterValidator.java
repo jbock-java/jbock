@@ -1,4 +1,4 @@
-package net.jbock.convert.matching.explicit;
+package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;

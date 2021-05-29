@@ -77,10 +77,13 @@ public class Util {
     if (mirror.getKind() != TypeKind.DECLARED) {
       return false;
     }
-    if (tool.isSameType(mirror, RuntimeException.class.getCanonicalName())) {
+    if (tool.isSameType(mirror, RuntimeException.class)) {
       return true;
     }
     TypeElement el = TypeTool.AS_TYPE_ELEMENT.visit(types.asElement(mirror));
+    if (el == null) {
+      return false;
+    }
     return extendsRuntimeException(el.getSuperclass());
   }
 
@@ -94,6 +97,9 @@ public class Util {
         return result;
       }
       current = TypeTool.AS_TYPE_ELEMENT.visit(enclosingElement);
+      if (current == null) {
+        return result;
+      }
       result.add(current);
     }
     return result;
@@ -104,7 +110,11 @@ public class Util {
       return type.toString();
     }
     DeclaredType declared = TypeTool.AS_DECLARED.visit(type);
-    String base = TypeTool.AS_TYPE_ELEMENT.visit(declared.asElement()).getSimpleName().toString();
+    TypeElement el = TypeTool.AS_TYPE_ELEMENT.visit(declared.asElement());
+    if (el == null) {
+      return type.toString();
+    }
+    String base = el.getSimpleName().toString();
     if (declared.getTypeArguments().isEmpty()) {
       return base;
     }
@@ -123,14 +133,6 @@ public class Util {
     return Optional.of("add one of these annotations: " + annotations.stream()
         .map(ann -> "@" + ann.getSimpleName())
         .collect(Collectors.joining(", ")));
-  }
-
-  public Optional<String> assertNoDuplicateAnnotations(
-      Element element,
-      Class<? extends Annotation> ann1,
-      Class<? extends Annotation> ann2,
-      Class<? extends Annotation> ann3) {
-    return assertNoDuplicateAnnotations(element, List.of(ann1, ann2, ann3));
   }
 
   public Optional<String> assertNoDuplicateAnnotations(

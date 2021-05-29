@@ -4,6 +4,7 @@ import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.Elements;
@@ -48,8 +49,16 @@ public class TypeTool {
     this.elements = elements;
   }
 
+  public boolean isSameType(TypeMirror mirror, Class<?> cl) {
+    return isSameType(mirror, cl.getCanonicalName());
+  }
+
   public boolean isSameType(TypeMirror mirror, String canonicalName) {
-    return types.isSameType(mirror, asTypeElement(canonicalName).asType());
+    TypeElement el = elements.getTypeElement(canonicalName);
+    if (el == null) {
+      return false;
+    }
+    return types.isSameType(mirror, el.asType());
   }
 
   public boolean isSameType(TypeMirror mirror, TypeMirror otherType) {
@@ -57,15 +66,19 @@ public class TypeTool {
   }
 
   /**
-   * The canonical name must be a class with exactly one type parameter.
+   * The class must be a class with exactly one type parameter.
    */
-  public Optional<TypeMirror> getSingleTypeArgument(TypeMirror mirror, Class<?> someClass) {
-    String canonicalName = someClass.getCanonicalName();
-    if (!isSameErasure(mirror, canonicalName)) {
+  public Optional<TypeMirror> getSingleTypeArgument(
+      TypeMirror mirror, Class<?> someClass) {
+    if (mirror.getKind() != TypeKind.DECLARED) {
       return Optional.empty();
     }
+    String canonicalName = someClass.getCanonicalName();
     DeclaredType declaredType = AS_DECLARED.visit(mirror);
     if (declaredType.getTypeArguments().isEmpty()) {
+      return Optional.empty();
+    }
+    if (!isSameErasure(mirror, canonicalName)) {
       return Optional.empty();
     }
     return Optional.of(declaredType.getTypeArguments().get(0));
@@ -73,11 +86,10 @@ public class TypeTool {
 
   public boolean isSameErasure(TypeMirror x, String y) {
     TypeElement el = elements.getTypeElement(y);
+    if (el == null) {
+      return false;
+    }
     return types.isSameType(types.erasure(x), types.erasure(el.asType()));
-  }
-
-  public TypeElement asTypeElement(String canonicalName) {
-    return elements.getTypeElement(canonicalName);
   }
 
   public Types types() {
