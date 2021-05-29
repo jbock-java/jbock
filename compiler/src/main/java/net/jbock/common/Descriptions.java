@@ -21,10 +21,12 @@ public class Descriptions {
 
   public static List<String> getDescription(
       Element element,
-      Elements elements,
+      SafeElements elements,
       String[] description) {
     if (description.length == 0) {
-      return tokenizeJavadoc(elements.getDocComment(element));
+      return elements.getDocComment(element)
+          .map(Descriptions::tokenizeJavadoc)
+          .orElse(List.of());
     }
     return List.of(description);
   }

@@ -6,13 +6,14 @@ import net.jbock.Command;
 import net.jbock.SuperCommand;
 import net.jbock.common.Annotations;
 import net.jbock.common.OperationMode;
+import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
-import net.jbock.validate.CommandComponent;
-import net.jbock.validate.CommandModule;
-import net.jbock.validate.DaggerCommandComponent;
+import net.jbock.validate.ValidateComponent;
+import net.jbock.validate.ValidateModule;
+import net.jbock.validate.DaggerValidateComponent;
 import net.jbock.validate.SourceFileGenerator;
 
 import javax.annotation.processing.Filer;
@@ -21,7 +22,6 @@ import javax.inject.Inject;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.util.ElementFilter;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.List;
 import java.util.Optional;
@@ -40,7 +40,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private final Filer filer;
   private final OperationMode operationMode;
   private final Types types;
-  private final Elements elements;
+  private final SafeElements elements;
 
   @Inject
   CommandProcessingStep(
@@ -50,7 +50,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       Filer filer,
       OperationMode operationMode,
       Types types,
-      Elements elements) {
+      SafeElements elements) {
     this.tool = tool;
     this.messager = messager;
     this.util = util;
@@ -79,14 +79,14 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   }
 
   private void processSourceElement(SourceElement sourceElement) {
-    CommandComponent component = DaggerCommandComponent.builder()
+    ValidateComponent component = DaggerValidateComponent.builder()
         .sourceElement(sourceElement)
         .tool(tool)
         .util(util)
         .filer(filer)
         .messager(messager)
         .operationMode(operationMode)
-        .module(new CommandModule(types, elements))
+        .module(new ValidateModule(types, elements))
         .create();
     SourceFileGenerator sourceFileGenerator = component.sourceFileGenerator();
     component.processor().generate()

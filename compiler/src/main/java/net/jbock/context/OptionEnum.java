@@ -7,6 +7,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.EnumName;
+import net.jbock.common.SafeElements;
 import net.jbock.compiler.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.AbstractParameter;
@@ -30,13 +31,13 @@ public class OptionEnum {
 
   private final AllParameters context;
   private final FieldSpec descriptionField;
-  private final Elements elements;
+  private final SafeElements elements;
   private final SourceElement sourceElement;
 
   @Inject
   OptionEnum(
       AllParameters context,
-      Elements elements,
+      SafeElements elements,
       SourceElement sourceElement) {
     this.context = context;
     this.elements = elements;

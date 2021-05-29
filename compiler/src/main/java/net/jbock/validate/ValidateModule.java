@@ -2,18 +2,19 @@ package net.jbock.validate;
 
 import dagger.Module;
 import dagger.Provides;
+import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 
 import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 @Module
-public class CommandModule {
+public class ValidateModule {
 
   private final Types types;
-  private final Elements elements;
+  private final SafeElements elements;
 
-  public CommandModule(Types types, Elements elements) {
+  public ValidateModule(Types types, SafeElements elements) {
     this.types = types;
     this.elements = elements;
   }
@@ -24,7 +25,7 @@ public class CommandModule {
   }
 
   @Provides
-  Elements elements() {
+  SafeElements elements() {
     return elements;
   }
 }

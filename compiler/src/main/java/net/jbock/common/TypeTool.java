@@ -8,7 +8,6 @@ import javax.lang.model.type.PrimitiveType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.SimpleElementVisitor9;
 import javax.lang.model.util.SimpleTypeVisitor9;
 import javax.lang.model.util.Types;
@@ -57,10 +56,10 @@ public class TypeTool {
 
   private final Types types;
 
-  private final Elements elements;
+  private final SafeElements elements;
 
   // visible for testing
-  public TypeTool(Elements elements, Types types) {
+  public TypeTool(SafeElements elements, Types types) {
     this.types = types;
     this.elements = elements;
   }
@@ -70,11 +69,10 @@ public class TypeTool {
   }
 
   public boolean isSameType(TypeMirror mirror, String canonicalName) {
-    TypeElement el = elements.getTypeElement(canonicalName);
-    if (el == null) {
-      return false;
-    }
-    return types.isSameType(mirror, el.asType());
+    return elements.getTypeElement(canonicalName)
+        .map(TypeElement::asType)
+        .map(type -> types.isSameType(mirror, type))
+        .orElse(false);
   }
 
   public boolean isSameType(TypeMirror mirror, TypeMirror otherType) {
@@ -102,10 +100,9 @@ public class TypeTool {
   }
 
   public boolean isSameErasure(TypeMirror x, String y) {
-    TypeElement el = elements.getTypeElement(y);
-    if (el == null) {
-      return false;
-    }
-    return types.isSameType(types.erasure(x), types.erasure(el.asType()));
+    return elements.getTypeElement(y)
+        .map(TypeElement::asType)
+        .map(type -> types.isSameType(types.erasure(x), types.erasure(type)))
+        .orElse(false);
   }
 }

@@ -1,5 +1,6 @@
 package net.jbock.convert.matching.matcher;
 
+import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.Skew;
@@ -20,19 +21,16 @@ public class OptionalMatcher extends Matcher {
 
   private final SourceMethod sourceMethod;
   private final TypeTool tool;
-  private final Elements elements;
-  private final Messager messager;
+  private final SafeElements elements;
 
   @Inject
   OptionalMatcher(
       SourceMethod sourceMethod,
       TypeTool tool,
-      Elements elements,
-      Messager messager) {
+      SafeElements elements) {
     this.sourceMethod = sourceMethod;
     this.tool = tool;
     this.elements = elements;
-    this.messager = messager;
   }
 
   @Override
@@ -47,16 +45,12 @@ public class OptionalMatcher extends Matcher {
     for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
       if (tool.isSameType(type, optionalPrimitive.type())) {
         String wrapped = optionalPrimitive.wrappedObjectType();
-        TypeElement el = elements.getTypeElement(wrapped);
-        if (el == null) {
-          // should not happen
-          messager.printMessage(Diagnostic.Kind.WARNING,
-              "TypeElement not found: " + wrapped);
-          return Optional.empty();
-        }
-        TypeMirror baseType = el.asType();
-        return Optional.of(Match.create(baseType,
-            Skew.OPTIONAL, optionalPrimitive.extractExpr()));
+        elements.getTypeElement(wrapped)
+            .flatMap(el -> {
+              TypeMirror baseType = el.asType();
+              return Optional.of(Match.create(baseType,
+                  Skew.OPTIONAL, optionalPrimitive.extractExpr()));
+            });
       }
     }
     return Optional.empty();

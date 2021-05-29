@@ -4,6 +4,7 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.common.EnumName;
+import net.jbock.common.SafeElements;
 import net.jbock.common.ValidationFailure;
 import net.jbock.validate.SourceMethod;
 
@@ -29,7 +30,7 @@ public abstract class AbstractParameter {
     this.enumName = enumName;
   }
 
-  public final List<String> description(Elements elements) {
+  public final List<String> description(SafeElements elements) {
     return sourceMethod.description(elements);
   }
 

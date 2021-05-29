@@ -2,6 +2,7 @@ package net.jbock.compiler;
 
 import dagger.Module;
 import dagger.Provides;
+import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 
@@ -12,7 +13,7 @@ import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 @Module
-public interface ProcessingEnvironmentModule {
+public interface ProcessorModule {
 
   @ProcessorScope
   @Provides
@@ -28,8 +29,8 @@ public interface ProcessingEnvironmentModule {
 
   @ProcessorScope
   @Provides
-  static Elements elements(ProcessingEnvironment processingEnvironment) {
-    return processingEnvironment.getElementUtils();
+  static SafeElements elements(ProcessingEnvironment processingEnvironment) {
+    return new SafeElements(processingEnvironment.getElementUtils());
   }
 
   @ProcessorScope
@@ -40,8 +41,8 @@ public interface ProcessingEnvironmentModule {
 
   @ProcessorScope
   @Provides
-  static TypeTool tool(ProcessingEnvironment processingEnv) {
-    return new TypeTool(processingEnv.getElementUtils(), processingEnv.getTypeUtils());
+  static TypeTool tool(SafeElements elements,ProcessingEnvironment processingEnv) {
+    return new TypeTool(elements, processingEnv.getTypeUtils());
   }
 
   @ProcessorScope

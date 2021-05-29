@@ -3,9 +3,9 @@ package net.jbock.compiler;
 import net.jbock.Command;
 import net.jbock.SuperCommand;
 import net.jbock.common.Descriptions;
+import net.jbock.common.SafeElements;
 
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +29,7 @@ public enum ParserFlavour {
     }
 
     @Override
-    public List<String> description(TypeElement sourceElement, Elements elements) {
+    public List<String> description(TypeElement sourceElement, SafeElements elements) {
       String[] description = get(sourceElement).description();
       return Descriptions.getDescription(sourceElement, elements, description);
     }
@@ -66,7 +66,7 @@ public enum ParserFlavour {
     }
 
     @Override
-    public List<String> description(TypeElement sourceElement, Elements elements) {
+    public List<String> description(TypeElement sourceElement, SafeElements elements) {
       String[] description = get(sourceElement).description();
       return Descriptions.getDescription(sourceElement, elements, description);
     }
@@ -107,7 +107,7 @@ public enum ParserFlavour {
 
   public abstract Optional<String> descriptionKey(TypeElement sourceElement);
 
-  public abstract List<String> description(TypeElement sourceElement, Elements elements);
+  public abstract List<String> description(TypeElement sourceElement, SafeElements elements);
 
   public abstract boolean isSuperCommand();
 

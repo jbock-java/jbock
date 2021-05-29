@@ -2,6 +2,7 @@ package net.jbock.context;
 
 import dagger.Module;
 import dagger.Provides;
+import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.compiler.SourceElement;
@@ -14,13 +15,13 @@ import javax.lang.model.util.Types;
 public class ContextModule {
 
   private final SourceElement sourceElement;
-  private final Elements elements;
+  private final SafeElements elements;
   private final Params params;
   private final Types types;
 
   public ContextModule(
       SourceElement sourceElement,
-      Elements elements,
+      SafeElements elements,
       Params params,
       Types types) {
     this.sourceElement = sourceElement;
@@ -37,7 +38,7 @@ public class ContextModule {
 
   @ContextScope
   @Provides
-  Elements elements() {
+  SafeElements elements() {
     return elements;
   }
 

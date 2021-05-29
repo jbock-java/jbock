@@ -3,6 +3,7 @@ package net.jbock.compiler;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.common.EnumName;
+import net.jbock.common.SafeElements;
 import net.jbock.common.ValidationFailure;
 
 import javax.lang.model.element.ElementKind;
@@ -107,7 +108,7 @@ public class SourceElement {
     return sourceElement.getKind() == ElementKind.INTERFACE;
   }
 
-  public List<String> description(Elements elements) {
+  public List<String> description(SafeElements elements) {
     return parserFlavour.description(sourceElement, elements);
   }
 }

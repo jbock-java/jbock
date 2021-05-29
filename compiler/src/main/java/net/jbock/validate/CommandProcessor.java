@@ -1,6 +1,7 @@
 package net.jbock.validate;
 
 import com.squareup.javapoet.TypeSpec;
+import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
@@ -8,15 +9,13 @@ import net.jbock.compiler.SourceElement;
 import net.jbock.context.ContextModule;
 import net.jbock.context.DaggerContextComponent;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.convert.DaggerParameterComponent;
-import net.jbock.convert.ParameterModule;
+import net.jbock.convert.DaggerConvertComponent;
+import net.jbock.convert.ConvertModule;
 import net.jbock.either.Either;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 
-import javax.annotation.processing.Messager;
 import javax.inject.Inject;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,24 +26,22 @@ import static net.jbock.either.Either.left;
 public class CommandProcessor {
 
   private final SourceElement sourceElement;
-  private final Elements elements;
+  private final SafeElements elements;
   private final TypeTool tool;
   private final Types types;
   private final ParamsFactory paramsFactory;
   private final MethodsFactory methodsFactory;
   private final Util util;
-  private final Messager messager;
 
   @Inject
   CommandProcessor(
       SourceElement sourceElement,
-      Elements elements,
+      SafeElements elements,
       TypeTool tool,
       Types types,
       ParamsFactory paramsFactory,
       MethodsFactory methodsFactory,
-      Util util,
-      Messager messager) {
+      Util util) {
     this.sourceElement = sourceElement;
     this.elements = elements;
     this.tool = tool;
@@ -52,7 +49,6 @@ public class CommandProcessor {
     this.paramsFactory = paramsFactory;
     this.methodsFactory = methodsFactory;
     this.util = util;
-    this.messager = messager;
   }
 
   public Either<List<ValidationFailure>, TypeSpec> generate() {
@@ -71,7 +67,7 @@ public class CommandProcessor {
     List<ValidationFailure> failures = new ArrayList<>();
     List<ConvertedParameter<NamedOption>> namedOptions = new ArrayList<>(intermediateResult.options().size());
     for (SourceMethod sourceMethod : intermediateResult.options()) {
-      DaggerParameterComponent.builder()
+      DaggerConvertComponent.builder()
           .module(parameterModule())
           .sourceMethod(sourceMethod)
           .alreadyCreatedParams(intermediateResult.positionalParameters())
@@ -91,7 +87,7 @@ public class CommandProcessor {
     List<ConvertedParameter<PositionalParameter>> positionalParams = new ArrayList<>(methods.positionalParameters().size());
     List<ValidationFailure> failures = new ArrayList<>();
     for (SourceMethod sourceMethod : methods.positionalParameters()) {
-      DaggerParameterComponent.builder()
+      DaggerConvertComponent.builder()
           .module(parameterModule())
           .sourceMethod(sourceMethod)
           .alreadyCreatedParams(positionalParams)
@@ -107,8 +103,8 @@ public class CommandProcessor {
     return IntermediateResult.create(methods.namedOptions(), positionalParams);
   }
 
-  private ParameterModule parameterModule() {
-    return new ParameterModule(tool, types, sourceElement, util, elements, messager);
+  private ConvertModule parameterModule() {
+    return new ConvertModule(tool, types, sourceElement, util, elements);
   }
 
   private ContextModule contextModule(Params params) {

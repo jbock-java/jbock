@@ -8,9 +8,9 @@ import net.jbock.validate.SourceMethod;
 
 import java.util.List;
 
-@Component(modules = ParameterModule.class)
+@Component(modules = ConvertModule.class)
 @ParameterScope
-public interface ParameterComponent {
+public interface ConvertComponent {
 
   PositionalParamFactory positionalParameterFactory();
 
@@ -28,8 +28,8 @@ public interface ParameterComponent {
     @BindsInstance
     Builder alreadyCreatedOptions(List<ConvertedParameter<NamedOption>> alreadyCreated);
 
-    Builder module(ParameterModule module);
+    Builder module(ConvertModule module);
 
-    ParameterComponent build();
+    ConvertComponent build();
   }
 }

@@ -4,6 +4,7 @@ import net.jbock.Option;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.common.Descriptions;
+import net.jbock.common.SafeElements;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.util.Elements;
@@ -41,7 +42,7 @@ public enum ParameterStyle {
     }
 
     @Override
-    public List<String> description(ExecutableElement method, Elements elements) {
+    public List<String> description(ExecutableElement method, SafeElements elements) {
       String[] description = get(method).description();
       return Descriptions.getDescription(method, elements, description);
     }
@@ -76,7 +77,7 @@ public enum ParameterStyle {
     }
 
     @Override
-    public List<String> description(ExecutableElement method, Elements elements) {
+    public List<String> description(ExecutableElement method, SafeElements elements) {
       String[] description = get(method).description();
       return Descriptions.getDescription(method, elements, description);
     }
@@ -111,7 +112,7 @@ public enum ParameterStyle {
     }
 
     @Override
-    public List<String> description(ExecutableElement method, Elements elements) {
+    public List<String> description(ExecutableElement method, SafeElements elements) {
       String[] description = get(method).description();
       return Descriptions.getDescription(method, elements, description);
     }
@@ -146,5 +147,5 @@ public enum ParameterStyle {
 
   public abstract List<String> names(ExecutableElement method);
 
-  public abstract List<String> description(ExecutableElement method, Elements elements);
+  public abstract List<String> description(ExecutableElement method, SafeElements elements);
 }

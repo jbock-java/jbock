@@ -3,6 +3,7 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.common.SafeElements;
 import net.jbock.compiler.SourceElement;
 import net.jbock.context.color.Styler;
 import net.jbock.convert.ConvertedParameter;
@@ -34,7 +35,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
   private final NamedOptions namedOptions;
   private final MakeLinesMethod makeLinesMethod;
   private final CommonFields commonFields;
-  private final Elements elements;
+  private final SafeElements elements;
   private final PrintItemDocumentationMethod printItemDocumentationMethod;
   private final UsageMethod usageMethod;
   private final Styler styler;
@@ -51,7 +52,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
       NamedOptions namedOptions,
       MakeLinesMethod makeLinesMethod,
       CommonFields commonFields,
-      Elements elements,
+      SafeElements elements,
       PrintItemDocumentationMethod printItemDocumentationMethod,
       UsageMethod usageMethod,
       Styler styler) {

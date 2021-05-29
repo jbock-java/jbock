@@ -1,5 +1,6 @@
 package net.jbock.validate;
 
+import net.jbock.common.SafeElements;
 import net.jbock.common.ValidationFailure;
 import net.jbock.parameter.ParameterStyle;
 
@@ -66,7 +67,7 @@ public class SourceMethod {
     return parameterStyle.names(sourceMethod);
   }
 
-  public List<String> description(Elements elements) {
+  public List<String> description(SafeElements elements) {
     return parameterStyle.description(sourceMethod, elements);
   }
 

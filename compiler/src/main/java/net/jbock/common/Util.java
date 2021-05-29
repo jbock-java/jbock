@@ -136,15 +136,12 @@ public class Util {
   public Optional<String> assertNoDuplicateAnnotations(
       Element element,
       List<Class<? extends Annotation>> annotations) {
-    Class<?> found = null;
-    for (Class<? extends Annotation> annotation : annotations) {
-      if (element.getAnnotation(annotation) != null) {
-        if (found != null) {
-          return Optional.of("annotate with either @" + found.getSimpleName() +
-              " or @" + annotation.getSimpleName() + " but not both");
-        }
-        found = annotation;
-      }
+    List<Class<? extends Annotation>> present = annotations.stream()
+        .filter(ann -> element.getAnnotation(ann) != null)
+        .collect(Collectors.toList());
+    if (present.size() >= 2) {
+      return Optional.of("annotate with either @" + present.get(0).getSimpleName() +
+          " or @" + present.get(1).getSimpleName() + " but not both");
     }
     return Optional.empty();
   }

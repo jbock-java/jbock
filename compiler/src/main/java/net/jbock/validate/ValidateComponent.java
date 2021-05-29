@@ -10,9 +10,9 @@ import net.jbock.compiler.SourceElement;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 
-@Component(modules = CommandModule.class)
+@Component(modules = ValidateModule.class)
 @ValidateScope
-public interface CommandComponent {
+public interface ValidateComponent {
 
   CommandProcessor processor();
 
@@ -39,8 +39,8 @@ public interface CommandComponent {
     @BindsInstance
     Builder operationMode(OperationMode operationMode);
 
-    Builder module(CommandModule module);
+    Builder module(ValidateModule module);
 
-    CommandComponent create();
+    ValidateComponent create();
   }
 }

@@ -3,6 +3,7 @@ package net.jbock.convert;
 import dagger.Module;
 import dagger.Provides;
 import net.jbock.common.EnumName;
+import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.compiler.SourceElement;
@@ -23,7 +24,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 @Module
-public class ParameterModule {
+public class ConvertModule {
 
   private final AnnotationUtil annotationUtil = new AnnotationUtil();
 
@@ -31,21 +32,18 @@ public class ParameterModule {
   private final SourceElement sourceElement;
   private final Util util;
   private final Types types;
-  private final Elements elements;
-  private final Messager messager;
+  private final SafeElements elements;
 
-  public ParameterModule(
+  public ConvertModule(
       TypeTool tool,
       Types types,
       SourceElement sourceElement,
       Util util,
-      Elements elements,
-      Messager messager) {
+      SafeElements elements) {
     this.tool = tool;
     this.sourceElement = sourceElement;
     this.util = util;
     this.elements = elements;
-    this.messager = messager;
     this.types = types;
   }
 
@@ -92,7 +90,7 @@ public class ParameterModule {
 
   @ParameterScope
   @Provides
-  Elements elements() {
+  SafeElements elements() {
     return elements;
   }
 
@@ -112,12 +110,6 @@ public class ParameterModule {
   @Provides
   Util util(TypeTool tool) {
     return new Util(types, tool);
-  }
-
-  @ParameterScope
-  @Provides
-  Messager messager() {
-    return messager;
   }
 
   @ParameterScope
