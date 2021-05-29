@@ -6,7 +6,7 @@ import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 import net.jbock.convert.matching.matcher.ExactMatcher;
 import net.jbock.convert.matching.matcher.ListMatcher;
 import net.jbock.convert.matching.matcher.Matcher;
@@ -16,8 +16,6 @@ import net.jbock.parameter.ParameterStyle;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.validate.SourceMethod;
 
-import javax.annotation.processing.Messager;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 import java.util.List;
 import java.util.Set;

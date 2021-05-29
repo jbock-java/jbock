@@ -2,7 +2,7 @@ package net.jbock.convert;
 
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 import net.jbock.either.Either;
 import net.jbock.parameter.NamedOption;
 import net.jbock.validate.SourceMethod;

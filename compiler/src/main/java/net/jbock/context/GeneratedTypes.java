@@ -2,7 +2,7 @@ package net.jbock.context;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import java.util.Optional;

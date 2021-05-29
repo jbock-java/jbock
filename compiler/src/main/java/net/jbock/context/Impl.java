@@ -3,7 +3,7 @@ package net.jbock.context;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.AbstractParameter;
 

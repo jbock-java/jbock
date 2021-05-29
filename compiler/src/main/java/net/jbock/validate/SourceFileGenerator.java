@@ -3,7 +3,7 @@ package net.jbock.validate;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.OperationMode;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;

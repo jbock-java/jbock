@@ -3,7 +3,7 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 import net.jbock.context.color.Styler;
 
 import javax.inject.Inject;

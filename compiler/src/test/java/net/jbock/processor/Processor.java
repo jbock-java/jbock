@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.processor;
 
 class Processor {
 

@@ -4,14 +4,13 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.common.SafeElements;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 import net.jbock.context.color.Styler;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 
 import javax.inject.Inject;
-import javax.lang.model.util.Elements;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

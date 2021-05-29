@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.processor;
 
 import net.jbock.Command;
 import net.jbock.SuperCommand;

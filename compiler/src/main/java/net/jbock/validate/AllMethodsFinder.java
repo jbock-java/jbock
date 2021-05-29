@@ -1,6 +1,6 @@
 package net.jbock.validate;
 
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;

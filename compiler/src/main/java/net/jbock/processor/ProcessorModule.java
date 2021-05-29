@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.processor;
 
 import dagger.Module;
 import dagger.Provides;
@@ -9,7 +9,6 @@ import net.jbock.common.Util;
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;
 import javax.annotation.processing.ProcessingEnvironment;
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 @Module

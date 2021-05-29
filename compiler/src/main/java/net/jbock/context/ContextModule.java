@@ -5,10 +5,9 @@ import dagger.Provides;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 import net.jbock.validate.Params;
 
-import javax.lang.model.util.Elements;
 import javax.lang.model.util.Types;
 
 @Module

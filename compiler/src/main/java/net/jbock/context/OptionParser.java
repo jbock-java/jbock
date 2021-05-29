@@ -8,7 +8,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.Constants;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;

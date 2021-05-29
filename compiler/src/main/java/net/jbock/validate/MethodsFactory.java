@@ -4,7 +4,7 @@ import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.SuperCommand;
 import net.jbock.common.ValidationFailure;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 import net.jbock.either.Either;
 import net.jbock.parameter.ParameterStyle;
 

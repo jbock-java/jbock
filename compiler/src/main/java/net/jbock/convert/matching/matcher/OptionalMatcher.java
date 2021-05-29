@@ -8,12 +8,8 @@ import net.jbock.convert.matching.Match;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.validate.SourceMethod;
 
-import javax.annotation.processing.Messager;
 import javax.inject.Inject;
-import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
-import javax.tools.Diagnostic;
 import java.util.Optional;
 
 @ParameterScope
@@ -36,16 +32,17 @@ public class OptionalMatcher extends Matcher {
   @Override
   public Optional<Match> tryMatch(AbstractParameter parameter) {
     TypeMirror returnType = sourceMethod.returnType();
-    return getOptionalPrimitive(returnType).or(() ->
-        tool.getSingleTypeArgument(returnType, Optional.class)
-            .map(typeArg -> Match.create(typeArg, Skew.OPTIONAL)));
+    return getOptionalPrimitive(returnType)
+        .or(() ->
+            tool.getSingleTypeArgument(returnType, Optional.class)
+                .map(typeArg -> Match.create(typeArg, Skew.OPTIONAL)));
   }
 
   private Optional<Match> getOptionalPrimitive(TypeMirror type) {
     for (OptionalPrimitive optionalPrimitive : OptionalPrimitive.values()) {
       if (tool.isSameType(type, optionalPrimitive.type())) {
         String wrapped = optionalPrimitive.wrappedObjectType();
-        elements.getTypeElement(wrapped)
+        return elements.getTypeElement(wrapped)
             .flatMap(el -> {
               TypeMirror baseType = el.asType();
               return Optional.of(Match.create(baseType,

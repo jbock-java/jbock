@@ -2,7 +2,7 @@ package net.jbock.context;
 
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.Skew;
 import net.jbock.parameter.NamedOption;

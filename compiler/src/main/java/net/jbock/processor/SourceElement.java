@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.processor;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.TypeName;
@@ -9,7 +9,6 @@ import net.jbock.common.ValidationFailure;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.util.Elements;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;

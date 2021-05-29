@@ -4,7 +4,7 @@ import net.jbock.Parameters;
 import net.jbock.SuperCommand;
 import net.jbock.common.Annotations;
 import net.jbock.common.Util;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import javax.lang.model.element.Element;

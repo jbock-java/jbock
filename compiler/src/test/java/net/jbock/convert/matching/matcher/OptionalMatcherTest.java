@@ -1,15 +1,15 @@
 package net.jbock.convert.matching.matcher;
 
 import net.jbock.Option;
+import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
-import net.jbock.compiler.EvaluatingProcessor;
 import net.jbock.parameter.AbstractParameter;
+import net.jbock.processor.EvaluatingProcessor;
 import net.jbock.validate.SourceMethod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 
-import javax.annotation.processing.Messager;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -29,7 +29,7 @@ class OptionalMatcherTest {
   void testLiftOptionalInt() {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeMirror optionalInt = elements.getTypeElement(OptionalInt.class.getCanonicalName()).asType();
-      TypeTool tool = new TypeTool(elements, types);
+      TypeTool tool = new TypeTool(new SafeElements(elements), types);
       OptionalMatcher optionalish = createMatcher(elements, tool, optionalInt);
       optionalish.tryMatch(parameter).map(unwrapSuccess -> {
         TypeMirror baseType = unwrapSuccess.baseType();
@@ -44,7 +44,7 @@ class OptionalMatcherTest {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeElement optional = elements.getTypeElement(Optional.class.getCanonicalName());
       TypeMirror integer = elements.getTypeElement(Integer.class.getCanonicalName()).asType();
-      TypeTool tool = new TypeTool(elements, types);
+      TypeTool tool = new TypeTool(new SafeElements(elements), types);
       DeclaredType optionalInteger = types.getDeclaredType(optional, integer);
       OptionalMatcher optionalish = createMatcher(elements, tool, optionalInteger);
       optionalish.tryMatch(parameter).map(unwrapSuccess -> {
@@ -59,7 +59,7 @@ class OptionalMatcherTest {
   void testLiftPrimitiveInt() {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeMirror primitiveInt = types.getPrimitiveType(TypeKind.INT);
-      TypeTool tool = new TypeTool(elements, types);
+      TypeTool tool = new TypeTool(new SafeElements(elements), types);
       OptionalMatcher optionalish = createMatcher(elements, tool, primitiveInt);
       Assertions.assertFalse(optionalish.tryMatch(parameter).isPresent());
     });
@@ -69,7 +69,7 @@ class OptionalMatcherTest {
   void testLiftString() {
     EvaluatingProcessor.source().run((elements, types) -> {
       TypeMirror string = elements.getTypeElement(String.class.getCanonicalName()).asType();
-      TypeTool tool = new TypeTool(elements, types);
+      TypeTool tool = new TypeTool(new SafeElements(elements), types);
       OptionalMatcher optionalish = createMatcher(elements, tool, string);
       Assertions.assertFalse(optionalish.tryMatch(parameter).isPresent());
     });
@@ -80,6 +80,6 @@ class OptionalMatcherTest {
     Mockito.when(sourceMethod.getAnnotation(Mockito.any())).thenReturn(Mockito.mock(Option.class));
     Mockito.when(sourceMethod.getReturnType()).thenReturn(returnType);
     return new OptionalMatcher(SourceMethod.create(sourceMethod),
-        tool, elements, Mockito.mock(Messager.class));
+        tool, new SafeElements(elements));
   }
 }

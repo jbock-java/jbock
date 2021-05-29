@@ -1,6 +1,7 @@
 package net.jbock.convert.reference;
 
-import net.jbock.compiler.EvaluatingProcessor;
+import net.jbock.common.SafeElements;
+import net.jbock.processor.EvaluatingProcessor;
 import net.jbock.common.TypeTool;
 import net.jbock.either.Either;
 import org.junit.jupiter.api.Assertions;
@@ -22,7 +23,7 @@ class ReferenceToolTest {
         "", "",
         "abstract class Foo implements Supplier<Function<String, Set<String>>> { }"
     ).run("Mapper", (elements, types) -> {
-      TypeTool tool = new TypeTool(elements, types);
+      TypeTool tool = new TypeTool(new SafeElements(elements), types);
       TypeElement typeElement = elements.getTypeElement("test.Foo");
       ReferenceTool referenceTool = new ReferenceTool(tool);
       Either<String, FunctionType> result = referenceTool.getReferencedType(typeElement);

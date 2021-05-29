@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.processor;
 
 import javax.inject.Scope;
 import java.lang.annotation.Retention;

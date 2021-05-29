@@ -8,12 +8,11 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.AbstractParameter;
 
 import javax.inject.Inject;
-import javax.lang.model.util.Elements;
 import java.util.List;
 
 import static com.squareup.javapoet.ParameterSpec.builder;

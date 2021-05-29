@@ -5,7 +5,7 @@ import dagger.Component;
 import net.jbock.common.OperationMode;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;

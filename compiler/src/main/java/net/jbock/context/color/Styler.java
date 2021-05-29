@@ -1,6 +1,6 @@
 package net.jbock.context.color;
 
-import net.jbock.compiler.SourceElement;
+import net.jbock.processor.SourceElement;
 import net.jbock.context.ContextScope;
 
 import javax.inject.Inject;

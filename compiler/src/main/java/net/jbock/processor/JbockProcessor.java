@@ -1,4 +1,4 @@
-package net.jbock.compiler;
+package net.jbock.processor;
 
 import com.google.auto.common.BasicAnnotationProcessor;
 import net.jbock.common.OperationMode;
