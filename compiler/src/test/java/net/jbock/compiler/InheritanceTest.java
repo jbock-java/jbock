@@ -156,6 +156,27 @@ class InheritanceTest {
   }
 
   @Test
+  void parentParent() {
+    JavaFileObject javaFile = fromSource(
+        "interface ParentParent {",
+        "",
+        "  @Parameter(index = 0)",
+        "  String source();",
+        "}",
+        "interface Parent extends ParentParent {",
+        "}",
+        "@Command",
+        "abstract class C implements Parent, ParentParent {",
+        "",
+        "  @Parameter(index = 1)",
+        "  abstract String dest();",
+        "}");
+    assertAbout(javaSources()).that(singletonList(javaFile))
+        .processedWith(Processor.testInstance())
+        .compilesWithoutError();
+  }
+
+  @Test
   void inheritanceCollision() {
     JavaFileObject javaFile = fromSource(
         "interface A {",

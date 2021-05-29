@@ -4,7 +4,7 @@ import net.jbock.Command;
 import net.jbock.Parameter;
 
 @Command(ansi = false)
-abstract class MvArguments implements MvArguments_Parent {
+abstract class MvArguments implements MvArguments_Parent, MvArguments_ParentParent {
 
   @Parameter(index = 1)
   abstract String dest();

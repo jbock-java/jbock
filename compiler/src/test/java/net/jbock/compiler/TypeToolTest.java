@@ -24,10 +24,10 @@ class TypeToolTest {
           types.erasure(elements.getTypeElement("java.util.List").asType()),
           types.erasure(key),
           types);
-      assertEquals(1, AS_DECLARED.visit(key).getTypeArguments().size());
+      assertEquals(1, AS_DECLARED.visit(key).get().getTypeArguments().size());
       assertSameType(
           types.getDeclaredType(elements.getTypeElement("java.lang.String")),
-          AS_DECLARED.visit(key).getTypeArguments().get(0),
+          AS_DECLARED.visit(key).get().getTypeArguments().get(0),
           types);
       assertSameType(
           types.getDeclaredType(elements.getTypeElement("java.lang.String")),

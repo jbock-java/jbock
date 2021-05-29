@@ -7,15 +7,16 @@ import net.jbock.common.Util;
 import net.jbock.compiler.SourceElement;
 
 import javax.inject.Inject;
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
-import java.util.List;
 import java.util.Optional;
 
 import static javax.lang.model.element.Modifier.PRIVATE;
+import static javax.lang.model.element.Modifier.STATIC;
+import static javax.lang.model.element.NestingKind.MEMBER;
 import static net.jbock.common.TypeTool.AS_DECLARED;
+import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
 @ValidateScope
 public class ParameterMethodValidator {
@@ -52,20 +53,19 @@ public class ParameterMethodValidator {
   }
 
   private boolean isUnreachable(TypeMirror mirror) {
-    TypeKind kind = mirror.getKind();
-    if (kind != TypeKind.DECLARED) {
-      return false;
-    }
-    DeclaredType declared = AS_DECLARED.visit(mirror);
-    if (declared.asElement().getModifiers().contains(PRIVATE)) {
-      return true;
-    }
-    List<? extends TypeMirror> typeArguments = declared.getTypeArguments();
-    for (TypeMirror typeArgument : typeArguments) {
-      if (isUnreachable(typeArgument)) {
-        return true;
-      }
-    }
-    return false;
+    return AS_DECLARED.visit(mirror)
+        .map(declared -> {
+          Element el = declared.asElement();
+          if (el.getModifiers().contains(PRIVATE)) {
+            return true;
+          }
+          boolean badNesting = AS_TYPE_ELEMENT.visit(el)
+              .map(t -> t.getNestingKind() == MEMBER
+                  && !t.getModifiers().contains(STATIC))
+              .orElse(false);
+          return badNesting || declared.getTypeArguments().stream()
+              .anyMatch(this::isUnreachable);
+        })
+        .orElse(false);
   }
 }

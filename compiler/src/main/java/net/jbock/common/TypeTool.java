@@ -1,5 +1,6 @@
 package net.jbock.common;
 
+import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
@@ -15,27 +16,42 @@ import java.util.Optional;
 
 public class TypeTool {
 
-  public static final TypeVisitor<DeclaredType, Void> AS_DECLARED =
+  public static final TypeVisitor<Optional<DeclaredType>, Void> AS_DECLARED =
       new SimpleTypeVisitor9<>() {
         @Override
-        public DeclaredType visitDeclared(DeclaredType declaredType, Void nothing) {
-          return declaredType;
+        public Optional<DeclaredType> visitDeclared(DeclaredType declaredType, Void nothing) {
+          return Optional.of(declaredType);
+        }
+
+        @Override
+        protected Optional<DeclaredType> defaultAction(TypeMirror e, Void unused) {
+          return Optional.empty();
         }
       };
 
-  public static final TypeVisitor<PrimitiveType, Void> AS_PRIMITIVE =
+  public static final TypeVisitor<Optional<PrimitiveType>, Void> AS_PRIMITIVE =
       new SimpleTypeVisitor9<>() {
         @Override
-        public PrimitiveType visitPrimitive(PrimitiveType primitiveType, Void nothing) {
-          return primitiveType;
+        public Optional<PrimitiveType> visitPrimitive(PrimitiveType primitiveType, Void nothing) {
+          return Optional.of(primitiveType);
+        }
+
+        @Override
+        protected Optional<PrimitiveType> defaultAction(TypeMirror e, Void unused) {
+          return Optional.empty();
         }
       };
 
-  public static final ElementVisitor<TypeElement, Void> AS_TYPE_ELEMENT =
+  public static final ElementVisitor<Optional<TypeElement>, Void> AS_TYPE_ELEMENT =
       new SimpleElementVisitor9<>() {
         @Override
-        public TypeElement visitType(TypeElement typeElement, Void nothing) {
-          return typeElement;
+        public Optional<TypeElement> visitType(TypeElement typeElement, Void nothing) {
+          return Optional.of(typeElement);
+        }
+
+        @Override
+        protected Optional<TypeElement> defaultAction(Element e, Void unused) {
+          return Optional.empty();
         }
       };
 
@@ -74,14 +90,15 @@ public class TypeTool {
       return Optional.empty();
     }
     String canonicalName = someClass.getCanonicalName();
-    DeclaredType declaredType = AS_DECLARED.visit(mirror);
-    if (declaredType.getTypeArguments().isEmpty()) {
-      return Optional.empty();
-    }
-    if (!isSameErasure(mirror, canonicalName)) {
-      return Optional.empty();
-    }
-    return Optional.of(declaredType.getTypeArguments().get(0));
+    return AS_DECLARED.visit(mirror).flatMap(declaredType -> {
+      if (declaredType.getTypeArguments().isEmpty()) {
+        return Optional.empty();
+      }
+      if (!isSameErasure(mirror, canonicalName)) {
+        return Optional.empty();
+      }
+      return Optional.of(declaredType.getTypeArguments().get(0));
+    });
   }
 
   public boolean isSameErasure(TypeMirror x, String y) {
@@ -90,13 +107,5 @@ public class TypeTool {
       return false;
     }
     return types.isSameType(types.erasure(x), types.erasure(el.asType()));
-  }
-
-  public Types types() {
-    return types;
-  }
-
-  public Elements elements() {
-    return elements;
   }
 }

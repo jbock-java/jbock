@@ -12,7 +12,6 @@ import javax.inject.Inject;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Name;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -44,7 +43,7 @@ public class MethodsFactory {
   /**
    * find unimplemented abstract methods in {@code sourceElement} and its ancestors
    */
-  public Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
+  Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
     return abstractMethodsFinder.findAbstractMethods()
         .flatMap(this::validateParameterMethods)
         .flatMap(this::checkAtLeastOneAbstractMethod)

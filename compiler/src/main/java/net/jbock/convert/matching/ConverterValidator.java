@@ -7,8 +7,6 @@ import net.jbock.common.Util;
 import net.jbock.compiler.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ParameterScope;
-import net.jbock.convert.matching.Match;
-import net.jbock.convert.matching.MatchValidator;
 import net.jbock.convert.matching.matcher.Matcher;
 import net.jbock.convert.reference.FunctionType;
 import net.jbock.convert.reference.ReferenceTool;

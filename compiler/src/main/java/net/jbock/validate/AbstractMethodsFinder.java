@@ -28,7 +28,7 @@ public class AbstractMethodsFinder {
     this.allMethodsFinder = allMethodsFinder;
   }
 
-  public Either<List<ValidationFailure>, List<ExecutableElement>> findAbstractMethods() {
+  Either<List<ValidationFailure>, List<ExecutableElement>> findAbstractMethods() {
     List<ExecutableElement> methods = allMethodsFinder.findMethodsInSourceElement();
     Map<Boolean, List<ExecutableElement>> partitions = methods.stream()
         .collect(partitioningBy(m -> m.getModifiers().contains(ABSTRACT)));

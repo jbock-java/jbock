@@ -7,7 +7,7 @@ import net.jbock.parameter.AbstractParameter;
 import net.jbock.validate.SourceMethod;
 
 import javax.inject.Inject;
-import javax.lang.model.type.PrimitiveType;
+import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
 import java.util.Optional;
@@ -36,8 +36,8 @@ public class ExactMatcher extends Matcher {
 
   private TypeMirror boxedReturnType() {
     TypeMirror sourceType = sourceMethod.returnType();
-    PrimitiveType primitive = AS_PRIMITIVE.visit(sourceType);
-    return primitive == null ? sourceType :
-        types.boxedClass(primitive).asType();
+    return AS_PRIMITIVE.visit(sourceType).map(types::boxedClass)
+        .map(TypeElement::asType)
+        .orElse(sourceType);
   }
 }

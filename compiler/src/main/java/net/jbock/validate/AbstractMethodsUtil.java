@@ -34,7 +34,8 @@ class AbstractMethodsUtil {
    * further below in the hierarchy.
    * An overridden method may not be annotated.
    */
-  Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantAbstractMethods(List<ExecutableElement> abstractMethods) {
+  Either<List<ValidationFailure>, List<ExecutableElement>> findRelevantAbstractMethods(
+      List<ExecutableElement> abstractMethods) {
     Map<Boolean, List<ExecutableElement>> partition = abstractMethods.stream()
         .collect(Collectors.partitioningBy(this::isNotOverridden));
     List<ExecutableElement> notOverridden = partition.get(true);

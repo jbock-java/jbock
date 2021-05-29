@@ -16,6 +16,7 @@ public class Annotations {
     return List.of(Option.class, Parameter.class, Parameters.class);
 
   }
+
   public static List<Class<? extends Annotation>> typeLevelAnnotations() {
     return List.of(Command.class, SuperCommand.class, Converter.class);
   }

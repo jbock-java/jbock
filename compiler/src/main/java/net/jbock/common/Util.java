@@ -6,7 +6,6 @@ import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
 import javax.lang.model.element.TypeElement;
-import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.ElementFilter;
@@ -80,11 +79,11 @@ public class Util {
     if (tool.isSameType(mirror, RuntimeException.class)) {
       return true;
     }
-    TypeElement el = TypeTool.AS_TYPE_ELEMENT.visit(types.asElement(mirror));
-    if (el == null) {
+    Optional<TypeElement> el = TypeTool.AS_TYPE_ELEMENT.visit(types.asElement(mirror));
+    if (el.isEmpty()) {
       return false;
     }
-    return extendsRuntimeException(el.getSuperclass());
+    return extendsRuntimeException(el.get().getSuperclass());
   }
 
   public List<TypeElement> getEnclosingElements(TypeElement sourceElement) {
@@ -96,10 +95,11 @@ public class Util {
       if (enclosingElement.getKind() != ElementKind.CLASS) {
         return result;
       }
-      current = TypeTool.AS_TYPE_ELEMENT.visit(enclosingElement);
-      if (current == null) {
+      Optional<TypeElement> opt = TypeTool.AS_TYPE_ELEMENT.visit(enclosingElement);
+      if (opt.isEmpty()) {
         return result;
       }
+      current = opt.get();
       result.add(current);
     }
     return result;
@@ -109,17 +109,15 @@ public class Util {
     if (type.getKind() != TypeKind.DECLARED) {
       return type.toString();
     }
-    DeclaredType declared = TypeTool.AS_DECLARED.visit(type);
-    TypeElement el = TypeTool.AS_TYPE_ELEMENT.visit(declared.asElement());
-    if (el == null) {
-      return type.toString();
-    }
-    String base = el.getSimpleName().toString();
-    if (declared.getTypeArguments().isEmpty()) {
-      return base;
-    }
-    return base + declared.getTypeArguments().stream().map(this::typeToString)
-        .collect(Collectors.joining(", ", "<", ">"));
+    return TypeTool.AS_DECLARED.visit(type).flatMap(declared ->
+        TypeTool.AS_TYPE_ELEMENT.visit(declared.asElement()).map(el -> {
+          String base = el.getSimpleName().toString();
+          if (declared.getTypeArguments().isEmpty()) {
+            return base;
+          }
+          return base + declared.getTypeArguments().stream().map(this::typeToString)
+              .collect(Collectors.joining(", ", "<", ">"));
+        })).orElseGet(type::toString);
   }
 
   public Optional<String> assertAtLeastOneAnnotation(

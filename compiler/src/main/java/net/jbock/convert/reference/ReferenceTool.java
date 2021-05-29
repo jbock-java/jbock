@@ -32,10 +32,10 @@ public class ReferenceTool {
     Optional<DeclaredType> implementsSupplier = checkImplements(Supplier.class, converter);
     Optional<DeclaredType> implementsFunction = checkImplements(Function.class, converter);
     if (implementsSupplier.isPresent() && implementsFunction.isPresent()) {
-      return left(converteNotFunction() + " but not both");
+      return left(errorConverterType() + " but not both");
     }
     if (implementsSupplier.isEmpty() && implementsFunction.isEmpty()) {
-      return left(converteNotFunction());
+      return left(errorConverterType());
     }
     if (implementsSupplier.isPresent()) {
       return unbalancedRight(implementsSupplier).orElseLeft(() -> "")
@@ -51,13 +51,13 @@ public class ReferenceTool {
     }
     TypeMirror typearg = declaredType.getTypeArguments().get(0);
     if (typearg.getKind() != TypeKind.DECLARED) {
-      return left(converteNotFunction());
+      return left(errorConverterType());
     }
-    DeclaredType suppliedFunction = AS_DECLARED.visit(typearg);
-    if (!tool.isSameErasure(suppliedFunction, Function.class.getCanonicalName())) {
-      return left(converteNotFunction());
-    }
-    return handleFunction(suppliedFunction, true);
+    return unbalancedRight(AS_DECLARED.visit(typearg)
+        .filter(suppliedFunction -> tool.isSameErasure(suppliedFunction,
+            Function.class.getCanonicalName())))
+        .orElseLeft(this::errorConverterType)
+        .flatMap(suppliedFunction -> handleFunction(suppliedFunction, true));
   }
 
   private Either<String, FunctionType> handleFunction(DeclaredType suppliedFunction, boolean isSupplier) {
@@ -75,10 +75,11 @@ public class ReferenceTool {
     return converter.getInterfaces().stream()
         .filter(inter -> tool.isSameErasure(inter, candidate.getCanonicalName()))
         .map(AS_DECLARED::visit)
+        .flatMap(Optional::stream)
         .findFirst();
   }
 
-  private String converteNotFunction() {
+  private String errorConverterType() {
     return "converter should implement " + Function.class.getSimpleName() +
         "<String, ?> or " + Supplier.class.getSimpleName() +
         "<" + Function.class.getSimpleName() + "<String, ?>>";

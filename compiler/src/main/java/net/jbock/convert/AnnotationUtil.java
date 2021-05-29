@@ -29,18 +29,23 @@ class AnnotationUtil {
       Option.class)
       .map(Class::getCanonicalName).collect(toSet());
 
-  private static final AnnotationValueVisitor<TypeMirror, Void> GET_TYPE = new SimpleAnnotationValueVisitor9<>() {
+  private static final AnnotationValueVisitor<Optional<TypeMirror>, Void> GET_TYPE = new SimpleAnnotationValueVisitor9<>() {
 
     @Override
-    public TypeMirror visitType(TypeMirror mirror, Void nothing) {
-      return mirror;
+    public Optional<TypeMirror> visitType(TypeMirror mirror, Void nothing) {
+      return Optional.of(mirror);
+    }
+
+    @Override
+    protected Optional<TypeMirror> defaultAction(Object o, Void unused) {
+      return Optional.empty();
     }
   };
 
   Optional<TypeElement> getConverter(ExecutableElement sourceMethod) {
     return getAnnotationMirror(sourceMethod)
         .map(AnnotationUtil::getAnnotationValue)
-        .map(GET_TYPE::visit)
+        .flatMap(GET_TYPE::visit)
         .map(MoreTypes::asTypeElement)
         .filter(AnnotationUtil::isNotVoid);
   }
