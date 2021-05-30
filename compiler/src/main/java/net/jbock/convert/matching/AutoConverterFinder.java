@@ -6,15 +6,16 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ParameterScope;
-import net.jbock.convert.matching.matcher.Matcher;
+import net.jbock.convert.matcher.Matcher;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.parameter.ParameterStyle;
 import net.jbock.validate.SourceMethod;
 
 import javax.inject.Inject;
+import javax.lang.model.element.ElementKind;
+import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Types;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,13 +27,9 @@ import static net.jbock.either.Either.left;
 @ParameterScope
 public class AutoConverterFinder extends MatchValidator {
 
-  private static final String ENUM = Enum.class.getCanonicalName();
-
   private final AutoConverters autoConverter;
   private final List<Matcher> matchers;
   private final SourceMethod sourceMethod;
-  private final Types types;
-  private final TypeTool tool;
   private final Util util;
 
   @Inject
@@ -40,16 +37,12 @@ public class AutoConverterFinder extends MatchValidator {
       AutoConverters autoConverter,
       List<Matcher> matchers,
       SourceMethod sourceMethod,
-      Types types,
-      TypeTool tool,
       ParameterStyle parameterStyle,
       Util util) {
     super(parameterStyle);
     this.autoConverter = autoConverter;
     this.matchers = matchers;
     this.sourceMethod = sourceMethod;
-    this.types = types;
-    this.tool = tool;
     this.util = util;
   }
 
@@ -97,8 +90,11 @@ public class AutoConverterFinder extends MatchValidator {
   }
 
   private boolean isEnumType(TypeMirror type) {
-    return types.directSupertypes(type).stream()
-        .anyMatch(t -> tool.isSameErasure(t, ENUM));
+    return TypeTool.AS_DECLARED.visit(type)
+        .map(DeclaredType::asElement)
+        .flatMap(TypeTool.AS_TYPE_ELEMENT::visit)
+        .map(element -> element.getKind() == ElementKind.ENUM)
+        .orElse(false);
   }
 
   private String noMatchError(TypeMirror type) {

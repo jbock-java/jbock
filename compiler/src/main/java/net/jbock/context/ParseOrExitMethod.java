@@ -4,7 +4,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.processor.SourceElement;
-import net.jbock.context.color.Styler;
 
 import javax.inject.Inject;
 
@@ -22,7 +21,7 @@ public class ParseOrExitMethod {
   private final PrintUsageDocumentationMethod printUsageDocumentationMethod;
   private final UsageMethod usageMethod;
   private final ParseMethod parseMethod;
-  private final Styler styler;
+  private final AnsiStyle styler;
 
   @Inject
   ParseOrExitMethod(
@@ -32,7 +31,7 @@ public class ParseOrExitMethod {
       PrintUsageDocumentationMethod printUsageDocumentationMethod,
       UsageMethod usageMethod,
       ParseMethod parseMethod,
-      Styler styler) {
+      AnsiStyle styler) {
     this.sourceElement = sourceElement;
     this.generatedTypes = generatedTypes;
     this.commonFields = commonFields;

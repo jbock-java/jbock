@@ -1,4 +1,4 @@
-package net.jbock.convert.matching.matcher;
+package net.jbock.convert.matcher;
 
 import net.jbock.Option;
 import net.jbock.common.SafeElements;

@@ -4,7 +4,6 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.processor.SourceElement;
-import net.jbock.context.color.Styler;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
@@ -27,7 +26,7 @@ public class BuildMethod {
   private final NamedOptions namedOptions;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
-  private final Styler styler;
+  private final AnsiStyle styler;
 
   @Inject
   BuildMethod(
@@ -36,7 +35,7 @@ public class BuildMethod {
       NamedOptions namedOptions,
       PositionalParameters positionalParameters,
       CommonFields commonFields,
-      Styler styler) {
+      AnsiStyle styler) {
     this.generatedTypes = generatedTypes;
     this.sourceElement = sourceElement;
     this.namedOptions = namedOptions;

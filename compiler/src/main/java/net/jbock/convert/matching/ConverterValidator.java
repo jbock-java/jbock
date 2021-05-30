@@ -7,7 +7,7 @@ import net.jbock.common.Util;
 import net.jbock.processor.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ParameterScope;
-import net.jbock.convert.matching.matcher.Matcher;
+import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.reference.FunctionType;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.either.Either;
@@ -19,6 +19,7 @@ import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
+import javax.lang.model.util.Types;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -36,6 +37,7 @@ public class ConverterValidator extends MatchValidator {
   private final SourceMethod sourceMethod;
   private final SourceElement sourceElement;
   private final TypeTool tool;
+  private final Types types;
 
   @Inject
   ConverterValidator(
@@ -45,7 +47,8 @@ public class ConverterValidator extends MatchValidator {
       SourceMethod sourceMethod,
       SourceElement sourceElement,
       TypeTool tool,
-      ParameterStyle parameterStyle) {
+      ParameterStyle parameterStyle,
+      Types types) {
     super(parameterStyle);
     this.matchers = matchers;
     this.referenceTool = referenceTool;
@@ -53,6 +56,7 @@ public class ConverterValidator extends MatchValidator {
     this.sourceMethod = sourceMethod;
     this.sourceElement = sourceElement;
     this.tool = tool;
+    this.types = types;
   }
 
   public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> validate(
@@ -127,7 +131,7 @@ public class ConverterValidator extends MatchValidator {
   }
 
   private boolean isValidMatch(Match match, FunctionType functionType) {
-    return tool.isSameType(functionType.outputType(), match.baseType());
+    return types.isSameType(functionType.outputType(), match.baseType());
   }
 
   private String noMatchError(TypeMirror type) {

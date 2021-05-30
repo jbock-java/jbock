@@ -1,4 +1,4 @@
-package net.jbock.convert.matching.matcher;
+package net.jbock.convert.matcher;
 
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.Skew;
@@ -15,7 +15,7 @@ import java.util.Optional;
 import static net.jbock.common.TypeTool.AS_PRIMITIVE;
 
 @ParameterScope
-public class ExactMatcher extends Matcher {
+public class ExactMatcher implements Matcher {
 
   private final SourceMethod sourceMethod;
   private final Types types;

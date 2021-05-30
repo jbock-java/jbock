@@ -1,4 +1,4 @@
-package net.jbock.convert.matching.matcher;
+package net.jbock.convert.matcher;
 
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
@@ -13,7 +13,7 @@ import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 
 @ParameterScope
-public class OptionalMatcher extends Matcher {
+public class OptionalMatcher implements Matcher {
 
   private final SourceMethod sourceMethod;
   private final TypeTool tool;

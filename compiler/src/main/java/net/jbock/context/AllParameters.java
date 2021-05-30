@@ -22,7 +22,7 @@ public final class AllParameters {
     this.anyDescriptionKeys = anyDescriptionKeys;
   }
 
-  public static AllParameters create(Params params, Util util) {
+  static AllParameters create(Params params, Util util) {
     List<ConvertedParameter<? extends AbstractParameter>> allParameters =
         util.concat(params.namedOptions(), params.positionalParams());
     boolean anyRequired = allParameters.stream().anyMatch(ConvertedParameter::isRequired);

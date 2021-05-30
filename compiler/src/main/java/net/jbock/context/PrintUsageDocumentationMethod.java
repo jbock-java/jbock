@@ -5,7 +5,6 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.common.SafeElements;
 import net.jbock.processor.SourceElement;
-import net.jbock.context.color.Styler;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
@@ -37,7 +36,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
   private final SafeElements elements;
   private final PrintItemDocumentationMethod printItemDocumentationMethod;
   private final UsageMethod usageMethod;
-  private final Styler styler;
+  private final AnsiStyle styler;
   private final String paramsFormat;
   private final String optionsFormat;
   private final ParameterSpec optionsIndent = ParameterSpec.builder(STRING, "indent_o").build();
@@ -54,7 +53,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
       SafeElements elements,
       PrintItemDocumentationMethod printItemDocumentationMethod,
       UsageMethod usageMethod,
-      Styler styler) {
+      AnsiStyle styler) {
     this.sourceElement = sourceElement;
     this.allParameters = allParameters;
     this.positionalParameters = positionalParameters;

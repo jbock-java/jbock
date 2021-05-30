@@ -1,4 +1,4 @@
-package net.jbock.context.color;
+package net.jbock.context;
 
 import net.jbock.processor.SourceElement;
 import net.jbock.context.ContextScope;
@@ -7,7 +7,7 @@ import javax.inject.Inject;
 import java.util.Optional;
 
 @ContextScope
-public class Styler {
+public class AnsiStyle {
 
   private static final char ESC = 0x1B;
   private static final String CSI = ESC + "[";
@@ -16,7 +16,7 @@ public class Styler {
   private final SourceElement sourceElement;
 
   @Inject
-  Styler(SourceElement sourceElement) {
+  AnsiStyle(SourceElement sourceElement) {
     this.sourceElement = sourceElement;
   }
 
@@ -30,7 +30,7 @@ public class Styler {
       if (i > 0) {
         sb.append(';');
       }
-      sb.append(styles[i].code());
+      sb.append(styles[i].code);
     }
     sb.append('m');
     sb.append(text);
@@ -44,5 +44,17 @@ public class Styler {
 
   public Optional<String> bold(String text) {
     return paint(text, Style.BOLD);
+  }
+
+  private enum Style {
+
+    BOLD(1),
+    FG_RED(31);
+
+    final int code;
+
+    Style(int code) {
+      this.code = code;
+    }
   }
 }

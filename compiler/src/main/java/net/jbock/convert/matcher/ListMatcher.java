@@ -1,4 +1,4 @@
-package net.jbock.convert.matching.matcher;
+package net.jbock.convert.matcher;
 
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Optional;
 
 @ParameterScope
-public class ListMatcher extends Matcher {
+public class ListMatcher implements Matcher {
 
   private final SourceMethod sourceMethod;
   private final TypeTool tool;

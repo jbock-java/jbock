@@ -5,7 +5,6 @@ import javax.lang.model.element.ElementVisitor;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.PrimitiveType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.type.TypeVisitor;
 import javax.lang.model.util.SimpleElementVisitor9;
@@ -64,10 +63,16 @@ public class TypeTool {
     this.elements = elements;
   }
 
+  /**
+   * Works for classes with no type parameters.
+   */
   public boolean isSameType(TypeMirror mirror, Class<?> cl) {
     return isSameType(mirror, cl.getCanonicalName());
   }
 
+  /**
+   * Works for classes with no type parameters.
+   */
   public boolean isSameType(TypeMirror mirror, String canonicalName) {
     return elements.getTypeElement(canonicalName)
         .map(TypeElement::asType)
@@ -75,28 +80,16 @@ public class TypeTool {
         .orElse(false);
   }
 
-  public boolean isSameType(TypeMirror mirror, TypeMirror otherType) {
-    return types.isSameType(mirror, otherType);
-  }
-
   /**
    * The class must be a class with exactly one type parameter.
    */
   public Optional<TypeMirror> getSingleTypeArgument(
       TypeMirror mirror, Class<?> someClass) {
-    if (mirror.getKind() != TypeKind.DECLARED) {
-      return Optional.empty();
-    }
     String canonicalName = someClass.getCanonicalName();
-    return AS_DECLARED.visit(mirror).flatMap(declaredType -> {
-      if (declaredType.getTypeArguments().isEmpty()) {
-        return Optional.empty();
-      }
-      if (!isSameErasure(mirror, canonicalName)) {
-        return Optional.empty();
-      }
-      return Optional.of(declaredType.getTypeArguments().get(0));
-    });
+    return AS_DECLARED.visit(mirror)
+        .filter(declaredType -> declaredType.getTypeArguments().size() == 1)
+        .filter(declaredType -> isSameErasure(declaredType, canonicalName))
+        .map(declaredType -> declaredType.getTypeArguments().get(0));
   }
 
   public boolean isSameErasure(TypeMirror x, String y) {
