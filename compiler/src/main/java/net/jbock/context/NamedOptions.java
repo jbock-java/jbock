@@ -45,7 +45,7 @@ public class NamedOptions {
     boolean anyFlags = options.stream().anyMatch(ConvertedParameter::isFlag);
     List<ConvertedParameter<NamedOption>> unixOptions = options.stream()
         .filter(option -> option.parameter().hasUnixName())
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
     boolean unixClusteringSupported = unixOptions.size() >= 2 && unixOptions.stream().anyMatch(ConvertedParameter::isFlag);
     Map<Boolean, List<ConvertedParameter<NamedOption>>> required = options.stream()
         .collect(Collectors.partitioningBy(ConvertedParameter::isRequired));

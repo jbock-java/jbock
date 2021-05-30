@@ -133,7 +133,7 @@ public class BuildMethod {
       case FLAG:
         return List.of(CodeBlock.of(".findAny().isPresent()"));
       default:
-        throw new UnsupportedOperationException("unexpected skew: " + parameter.skew());
+        throw new IllegalArgumentException("unexpected skew: " + parameter.skew());
     }
   }
 
@@ -146,7 +146,7 @@ public class BuildMethod {
       case OPTIONAL:
         return emptyList();
       default:
-        throw new UnsupportedOperationException("unexpected skew: " + parameter.skew());
+        throw new IllegalArgumentException("unexpected skew: " + parameter.skew());
     }
   }
 

@@ -138,7 +138,7 @@ public class Util {
       List<Class<? extends Annotation>> annotations) {
     List<Class<? extends Annotation>> present = annotations.stream()
         .filter(ann -> element.getAnnotation(ann) != null)
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
     if (present.size() >= 2) {
       return Optional.of("annotate with either @" + present.get(0).getSimpleName() +
           " or @" + present.get(1).getSimpleName() + " but not both");

@@ -39,7 +39,7 @@ public class IntermediateResult {
       List<ConvertedParameter<PositionalParameter>> params) {
     List<ConvertedParameter<PositionalParameter>> sorted = params.stream()
         .sorted(Comparator.comparing(c -> c.parameter().position()))
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
     List<ValidationFailure> failures = new ArrayList<>();
     for (int i = 0; i < sorted.size(); i++) {
       ConvertedParameter<PositionalParameter> c = sorted.get(i);

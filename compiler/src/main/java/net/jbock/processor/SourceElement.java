@@ -20,7 +20,7 @@ public class SourceElement {
 
   private final TypeElement sourceElement;
   private final ParserFlavour parserFlavour;
-  private final Set<Modifier> accessModifiers;
+  private final List<Modifier> accessModifiers;
   private final String programName;
   private final ClassName generatedClass;
   private final ClassName itemType;
@@ -28,7 +28,7 @@ public class SourceElement {
   private SourceElement(
       TypeElement sourceElement,
       ParserFlavour parserFlavour,
-      Set<Modifier> accessModifiers,
+      List<Modifier> accessModifiers,
       String programName,
       ClassName generatedClass,
       ClassName itemType) {
@@ -41,9 +41,9 @@ public class SourceElement {
   }
 
   static SourceElement create(TypeElement typeElement, ParserFlavour parserFlavour) {
-    Set<Modifier> accessModifiers = typeElement.getModifiers().stream()
+    List<Modifier> accessModifiers = typeElement.getModifiers().stream()
         .filter(ACCESS_MODIFIERS::contains)
-        .collect(Collectors.toSet());
+        .collect(Collectors.toUnmodifiableList());
     String programName = parserFlavour.programName(typeElement)
         .orElseGet(() -> EnumName.create(typeElement.getSimpleName().toString()).snake('-'));
     String generatedClassName = String.join("_", ClassName.get(typeElement).simpleNames()) + "_Parser";
@@ -87,7 +87,7 @@ public class SourceElement {
     return isSuperCommand() ? "getResultWithRest" : "getResult";
   }
 
-  public Set<Modifier> accessModifiers() {
+  public List<Modifier> accessModifiers() {
     return accessModifiers;
   }
 

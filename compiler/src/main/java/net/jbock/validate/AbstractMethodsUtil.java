@@ -48,7 +48,7 @@ class AbstractMethodsUtil {
       }
       return Stream.empty();
     }).map(m -> new ValidationFailure("annotated method is overridden", m))
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
     if (!failures.isEmpty()) {
       return left(failures);
     }

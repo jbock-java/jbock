@@ -7,11 +7,9 @@ import net.jbock.parameter.ParameterStyle;
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.type.TypeMirror;
-import javax.lang.model.util.Elements;
 import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.jbock.common.Constants.ACCESS_MODIFIERS;
@@ -20,21 +18,21 @@ public class SourceMethod {
 
   private final ExecutableElement sourceMethod;
   private final ParameterStyle parameterStyle;
-  private final Set<Modifier> accessModifiers;
+  private final List<Modifier> accessModifiers;
 
   private SourceMethod(
       ExecutableElement sourceMethod,
       ParameterStyle parameterStyle,
-      Set<Modifier> accessModifiers) {
+      List<Modifier> accessModifiers) {
     this.sourceMethod = sourceMethod;
     this.parameterStyle = parameterStyle;
     this.accessModifiers = accessModifiers;
   }
 
   public static SourceMethod create(ExecutableElement sourceMethod) {
-    Set<Modifier> accessModifiers = sourceMethod.getModifiers().stream()
+    List<Modifier> accessModifiers = sourceMethod.getModifiers().stream()
         .filter(ACCESS_MODIFIERS::contains)
-        .collect(Collectors.toSet());
+        .collect(Collectors.toUnmodifiableList());
     ParameterStyle parameterStyle = ParameterStyle.getStyle(sourceMethod);
     return new SourceMethod(sourceMethod, parameterStyle, accessModifiers);
   }
@@ -75,7 +73,7 @@ public class SourceMethod {
     return parameterStyle.paramLabel(sourceMethod);
   }
 
-  public Set<Modifier> accessModifiers() {
+  public List<Modifier> accessModifiers() {
     return accessModifiers;
   }
 }

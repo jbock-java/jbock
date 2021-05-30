@@ -26,7 +26,7 @@ public class PositionalParameters {
   public static PositionalParameters create(List<ConvertedParameter<PositionalParameter>> all) {
     List<ConvertedParameter<PositionalParameter>> regular = all.stream()
         .filter(c -> !c.isRepeatable())
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
     Optional<ConvertedParameter<PositionalParameter>> repeatable = all.stream()
         .filter(ConvertedParameter::isRepeatable)
         .findFirst();

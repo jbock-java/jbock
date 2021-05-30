@@ -9,10 +9,8 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.validate.SourceMethod;
 
 import javax.lang.model.element.Modifier;
-import javax.lang.model.util.Elements;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 
 /**
  * This class represents an {@code abstract} Method in the command class,
@@ -46,7 +44,7 @@ public abstract class AbstractParameter {
     return sourceMethod.descriptionKey();
   }
 
-  public final Set<Modifier> getAccessModifiers() {
+  public final List<Modifier> getAccessModifiers() {
     return sourceMethod.accessModifiers();
   }
 

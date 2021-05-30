@@ -46,7 +46,7 @@ public class Impl {
         .addMethod(implConstructor())
         .addMethods(context.parameters().stream()
             .map(this::parameterMethodOverride)
-            .collect(Collectors.toList()))
+            .collect(Collectors.toUnmodifiableList()))
         .build();
   }
 

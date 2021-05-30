@@ -13,7 +13,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static javax.lang.model.element.ElementKind.INTERFACE;
 import static javax.lang.model.element.Modifier.ABSTRACT;
@@ -40,8 +39,8 @@ public class AllMethodsFinder {
 
   private List<ExecutableElement> findMethodsIn(TypeMirror mirror) {
     Map<Name, List<ExecutableElement>> methodsInInterfaces = findMethodsInInterfaces(mirror);
-    List<ExecutableElement> acc = new ArrayList<>(methodsInInterfaces.size() + 20);
-    acc.addAll(methodsInInterfaces.values().stream().flatMap(List::stream).collect(Collectors.toList()));
+    List<ExecutableElement> acc = new ArrayList<>();
+    methodsInInterfaces.values().forEach(acc::addAll);
     while (true) {
       Optional<TypeElement> element = asAbstractTypeElement(mirror);
       if (element.isEmpty()) {

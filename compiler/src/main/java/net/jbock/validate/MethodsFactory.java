@@ -69,10 +69,10 @@ public class MethodsFactory {
     List<SourceMethod> params = methods.stream()
         .filter(m -> m.style().isPositional())
         .sorted(POSITION_COMPARATOR)
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
     List<SourceMethod> options = methods.stream()
         .filter(m -> !m.style().isPositional())
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
     if (sourceElement.isSuperCommand() && params.isEmpty()) {
       String message = "in a @" + SuperCommand.class.getSimpleName() +
           ", at least one @" + Parameter.class.getSimpleName() + " must be defined";
@@ -85,7 +85,7 @@ public class MethodsFactory {
       List<SourceMethod> sourceMethods) {
     List<SourceMethod> parametersMethods = sourceMethods.stream()
         .filter(m -> m.style() == ParameterStyle.PARAMETERS)
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
     if (parametersMethods.size() >= 2) {
       String message = "duplicate @" + Parameters.class.getSimpleName() + " annotation";
       return left(List.of(sourceMethods.get(1).fail(message)));
@@ -120,6 +120,6 @@ public class MethodsFactory {
   private List<SourceMethod> createSourceMethods(List<ExecutableElement> methods) {
     return methods.stream()
         .map(SourceMethod::create)
-        .collect(Collectors.toList());
+        .collect(Collectors.toUnmodifiableList());
   }
 }
