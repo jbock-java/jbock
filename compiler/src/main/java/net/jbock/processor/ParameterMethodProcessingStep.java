@@ -25,6 +25,7 @@ public class ParameterMethodProcessingStep implements BasicAnnotationProcessor.S
   private static final Set<TypeKind> FORBIDDEN_KINDS = EnumSet.of(
       TypeKind.VOID,
       TypeKind.TYPEVAR,
+      TypeKind.WILDCARD,
       TypeKind.OTHER,
       TypeKind.ERROR,
       TypeKind.UNION,
