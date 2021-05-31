@@ -11,8 +11,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  * If the converter is a static inner class of its command,
  * then this annotation may be omitted.</p>
  *
- * <p>The converter must implement either {@code Function<String, M>} or
- * {@code Supplier<Function<String, M>>},
+ * <p>The converter must extend {@link StringConverter StringConverter<M>},
  * where one of the following holds:</p>
  *
  * <ul>
