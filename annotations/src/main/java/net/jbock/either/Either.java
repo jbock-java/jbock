@@ -44,6 +44,8 @@ public abstract class Either<L, R> {
     return fold(l -> false, r -> true);
   }
 
+  public abstract  <X extends Throwable> R orElseThrow(Function<? super L, ? extends X> f) throws X;
+
   public abstract <U> U fold(
       Function<? super L, ? extends U> leftMapper,
       Function<? super R, ? extends U> rightMapper);

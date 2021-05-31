@@ -16,21 +16,30 @@ public abstract class StringConverter<T> implements Function<String, Either<Stri
   /**
    * Converts a single command line token. This method will be invoked
    * if the corresponding token was present in the input array.
-   * Converter error is signaled by throwing any exception.
+   * Conversion failure is signaled by throwing any exception.
    * It is an error to return {@code null} from this method.
    *
-   * @param value a string, never {@code null}
+   * @param token a non-null string
    * @return a non-null instance of {@code T}
    * @throws Exception if a parsing error occurs
    */
-  public abstract T convert(String value) throws Exception;
+  public abstract T convert(String token) throws Exception;
+
+  public static <T> StringConverter<T> create(Function<String, T> function) {
+    return new StringConverter<>() {
+      @Override
+      public T convert(String token) {
+        return function.apply(token);
+      }
+    };
+  }
 
   @Override
   public final Either<String, T> apply(String s) {
     try {
       T result = convert(s);
       if (result == null) {
-        return left("got null value from mapper");
+        return left("converter returned null");
       }
       return right(result);
     } catch (Exception e) {
