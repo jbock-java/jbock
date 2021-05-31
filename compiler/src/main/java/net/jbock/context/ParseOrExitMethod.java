@@ -65,7 +65,7 @@ public class ParseOrExitMethod {
         .endControlFlow());
 
     code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", commonFields.err(),
-        styler.boldRed("ERROR").orElse("ERROR:") + " ", generatedTypes.parsingFailedType(), result);
+        styler.red("ERROR:") + " ", generatedTypes.parsingFailedType(), result);
     if (sourceElement.helpEnabled()) {
       code.addStatement("$N.println($T.join($S, $N($S)))",
           commonFields.err(), STRING, " ", usageMethod.get(), "Usage:");

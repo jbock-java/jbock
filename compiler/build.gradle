@@ -38,7 +38,6 @@ shadowJar {
     minimize()
     dependencies {
         exclude('com.github.jbock-java:jbock-annotations:.*')
-        exclude('com.github.h908714124:jbock-annotations:.*')
         exclude('javax.annotation:jsr250-api:.*')
     }
     archiveClassifier.set('')

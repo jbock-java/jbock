@@ -1,7 +1,6 @@
 package net.jbock.context;
 
 import net.jbock.processor.SourceElement;
-import net.jbock.context.ContextScope;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -20,26 +19,15 @@ public class AnsiStyle {
     this.sourceElement = sourceElement;
   }
 
-  private Optional<String> paint(String text, Style... styles) {
+  private Optional<String> paint(String text, Style style) {
     if (!sourceElement.isAnsi()) {
       return Optional.empty();
     }
-    StringBuilder sb = new StringBuilder();
-    sb.append(CSI);
-    for (int i = 0; i < styles.length; i++) {
-      if (i > 0) {
-        sb.append(';');
-      }
-      sb.append(styles[i].code);
-    }
-    sb.append('m');
-    sb.append(text);
-    sb.append(RESET);
-    return Optional.of(sb.toString());
+    return Optional.of(CSI + style.code + 'm' + text + RESET);
   }
 
-  public Optional<String> boldRed(String text) {
-    return paint(text, Style.FG_RED, Style.BOLD);
+  public String red(String text) {
+    return paint(text, Style.FG_RED).orElse(text);
   }
 
   public Optional<String> bold(String text) {
