@@ -63,11 +63,28 @@ public @interface Command {
   String descriptionKey() default "";
 
   /**
-   * Enables or disable ANSI colors in the usage documentation.
+   * Enables or disables ANSI colors in the usage documentation.
    * By default, colors and bold text are used to highlight
    * certain keywords.
    *
    * @return {@code false} to disable ANSI colors
    */
   boolean ansi() default true;
+
+  /**
+   * <p>Enables or disables the so-called {@code @file} (read: &quot;at-file&quot;) syntax.
+   * If the first token in the input array starts with an {@code @} (read: &quot;at&quot;) character,
+   * <em>and</em> this is also the only token in the input array,
+   * then this token is interpreted as the name of an options-file,
+   * containing one command line token per line.
+   * The {@code @file} does not support comments or quoting.
+   * Hence, the {@code @file} cannot contain tokens with embedded newline characters.</p>
+   * <p>Note: Even if this is set to the default value {@code true},
+   * and the user wants to specify exactly one positional parameter
+   * that starts with an at-sign and nothing else,
+   * they can still choose not to use the {@code @file}, by escaping with {@code "--"}.</p>
+   *
+   * @return {@code false} to disable the at-file syntax.
+   */
+  boolean expandAtSign() default true;
 }
