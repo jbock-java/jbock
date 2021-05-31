@@ -80,15 +80,17 @@ public @interface SuperCommand {
   boolean ansi() default true;
 
   /**
-   * <p>Enables or disables the so-called {@code @file} (read: &quot;at-file&quot;) syntax.
-   * If the first token in the input array starts with an {@code @} (read: &quot;at&quot;) character,
+   * <p>Enables or disables the so-called {@code @file} (read: &quot;at-file&quot;) expansion.
+   * If the first token in the input array starts with an {@code @} character,
    * <em>and</em> this is also the only token in the input array,
    * then this token is interpreted as the name of an options-file,
-   * containing one command line token per line.
-   * The {@code @file} does not support comments or quoting.
-   * Hence, the {@code @file} cannot contain tokens with embedded newline characters.</p>
+   * containing lines of {@code UTF-8} encoded tokens.
+   * Trailing empty lines, or lines starting with a hashtag character, are ignored.
+   * Tokens are left-trimmed, but not right-trimmed.
+   * Spaces, newlines and hashtags can be quoted with a backslash.
+   * A literal backslash character must be escaped as a double backslash.</p>
    *
-   * @return {@code false} to disable the at-file syntax.
+   * @return {@code true} to enable the {@code @file} expansion
    */
-  boolean expandAtSign() default true;
+  boolean expandAtSign() default false;
 }

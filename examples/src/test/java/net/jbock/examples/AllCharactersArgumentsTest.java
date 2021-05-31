@@ -34,6 +34,6 @@ class AllCharactersArgumentsTest {
         "--charOpt", "X",
         "--charList", "b",
         "--charList", "c").failsWithMessage(
-        "Not a single character: <abc>");
+        "Not a single character: <abc>"); // TODO mention option name in error message
   }
 }

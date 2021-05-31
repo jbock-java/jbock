@@ -234,7 +234,7 @@ public final class ParserTestFixture<E> {
           }
           return;
         }
-        String prefixAnsi = "\u001B[31;1mERROR\u001B[m ";
+        String prefixAnsi = "\u001B[31mERROR:\u001B[m ";
         if (token.startsWith(prefixAnsi)) {
           if (!expectedMessage.equals(token.substring(prefixAnsi.length()))) {
             Arrays.stream(tokens).forEach(System.err::println);
