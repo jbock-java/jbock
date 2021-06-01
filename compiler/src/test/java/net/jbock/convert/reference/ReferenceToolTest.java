@@ -17,16 +17,17 @@ class ReferenceToolTest {
     EvaluatingProcessor.source(
         "package test;",
         "",
+        "import net.jbock.StringConverter;",
         "import java.util.function.Supplier;",
         "import java.util.function.Function;",
         "import java.util.Set;",
         "", "",
-        "abstract class Foo implements Supplier<Function<String, Set<String>>> { }"
+        "abstract class Foo implements Supplier<StringConverter<Set<String>>> { }"
     ).run("Mapper", (elements, types) -> {
       TypeTool tool = new TypeTool(new SafeElements(elements), types);
       TypeElement typeElement = elements.getTypeElement("test.Foo");
       ReferenceTool referenceTool = new ReferenceTool(tool);
-      Either<String, FunctionType> result = referenceTool.getReferencedType(typeElement);
+      Either<String, StringConverterType> result = referenceTool.getReferencedType(typeElement);
       result.accept(l -> Assertions.fail(), functionType -> Assertions.assertTrue(functionType.isSupplier()));
     });
   }

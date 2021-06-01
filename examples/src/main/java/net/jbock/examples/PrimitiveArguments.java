@@ -3,8 +3,8 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
+import net.jbock.StringConverter;
 
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Command
@@ -33,91 +33,91 @@ abstract class PrimitiveArguments {
 
   // there's no simple boolean -- that would be a flag!
 
-  @Option(names = {"--b", "-b"}, converter = ByteMapper.class)
+  @Option(names = {"--b", "-b"}, converter = ByteConverter.class)
   abstract byte mappedByte();
 
-  @Option(names = {"--s", "-s"}, converter = ShortMapper.class)
+  @Option(names = {"--s", "-s"}, converter = ShortConverter.class)
   abstract short mappedShort();
 
-  @Option(names = {"--i", "-i"}, converter = IntMapper.class)
+  @Option(names = {"--i", "-i"}, converter = IntConverter.class)
   abstract int mappedInt();
 
-  @Option(names = {"--l", "-l"}, converter = LongMapper.class)
+  @Option(names = {"--l", "-l"}, converter = LongConverter.class)
   abstract long mappedLong();
 
-  @Option(names = {"--f", "-f"}, converter = FloatMapper.class)
+  @Option(names = {"--f", "-f"}, converter = FloatConverter.class)
   abstract float mappedFloat();
 
-  @Option(names = {"--d", "-d"}, converter = DoubleMapper.class)
+  @Option(names = {"--d", "-d"}, converter = DoubleConverter.class)
   abstract double mappedDouble();
 
-  @Option(names = {"--c", "-c"}, converter = CharMapper.class)
+  @Option(names = {"--c", "-c"}, converter = CharConverter.class)
   abstract char mappedChar();
 
-  @Option(names = {"--x", "-x"}, converter = BooleanMapper.class)
+  @Option(names = {"--x", "-x"}, converter = BooleanConverter.class)
   abstract boolean mappedBoolean();
 
   @Converter
-  static class IntMapper implements Supplier<Function<String, Integer>> {
+  static class IntConverter implements Supplier<StringConverter<Integer>> {
     @Override
-    public Function<String, Integer> get() {
-      return Integer::valueOf;
+    public StringConverter<Integer> get() {
+      return StringConverter.create(Integer::valueOf);
     }
   }
 
   @Converter
-  static class LongMapper implements Supplier<Function<String, Long>> {
+  static class LongConverter implements Supplier<StringConverter<Long>> {
     @Override
-    public Function<String, Long> get() {
-      return Long::valueOf;
+    public StringConverter<Long> get() {
+      return StringConverter.create(Long::valueOf);
     }
   }
 
   @Converter
-  static class DoubleMapper implements Supplier<Function<String, Double>> {
+  static class DoubleConverter implements Supplier<StringConverter<Double>> {
     @Override
-    public Function<String, Double> get() {
-      return Double::valueOf;
+    public StringConverter<Double> get() {
+      return StringConverter.create(Double::valueOf);
     }
   }
 
   @Converter
-  static class ByteMapper implements Supplier<Function<String, Byte>> {
+  static class ByteConverter implements Supplier<StringConverter<Byte>> {
     @Override
-    public Function<String, Byte> get() {
-      return Byte::valueOf;
+    public StringConverter<Byte> get() {
+      return StringConverter.create(Byte::valueOf);
     }
   }
 
   @Converter
-  static class ShortMapper implements Supplier<Function<String, Short>> {
+  static class ShortConverter implements Supplier<StringConverter<Short>> {
     @Override
-    public Function<String, Short> get() {
-      return Short::valueOf;
+    public StringConverter<Short> get() {
+      return StringConverter.create(Short::valueOf);
     }
   }
 
   @Converter
-  static class FloatMapper implements Supplier<Function<String, Float>> {
+  static class FloatConverter implements Supplier<StringConverter<Float>> {
     @Override
-    public Function<String, Float> get() {
-      return Float::valueOf;
+    public StringConverter<Float> get() {
+      return StringConverter.create(Float::valueOf);
     }
   }
 
   @Converter
-  static class CharMapper implements Supplier<Function<String, Character>> {
+  static class CharConverter implements Supplier<StringConverter<Character>> {
     @Override
-    public Function<String, Character> get() {
-      return s -> s.charAt(0);
+    public StringConverter<Character> get() {
+      return StringConverter.create(s -> s.charAt(0));
     }
   }
 
   @Converter
-  static class BooleanMapper implements Supplier<Function<String, Boolean>> {
+  static class BooleanConverter implements Supplier<StringConverter<Boolean>> {
     @Override
-    public Function<String, Boolean> get() {
-      return Boolean::valueOf;
+    public StringConverter<Boolean> get() {
+      return StringConverter.create(Boolean::valueOf);
     }
   }
 }

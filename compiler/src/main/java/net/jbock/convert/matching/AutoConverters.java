@@ -2,6 +2,7 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.StringConverter;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
@@ -18,7 +19,7 @@ import java.time.LocalDate;
 import java.util.AbstractMap.SimpleImmutableEntry;
 import java.util.List;
 import java.util.Map.Entry;
-import java.util.Optional;
+import java.util.function.Function;
 import java.util.regex.Pattern;
 
 import static net.jbock.common.Constants.STRING;
@@ -53,6 +54,7 @@ public class AutoConverters {
 
   private List<Entry<String, CodeBlock>> autoConverters() {
     return List.of(
+        create(String.class, CodeBlock.of("$T.identity()", Function.class)),
         create(Integer.class, VALUE_OF),
         create(Path.class, CodeBlock.of("$T::get", Paths.class)),
         create(File.class, autoConverterFile()),
@@ -69,16 +71,13 @@ public class AutoConverters {
         create(BigDecimal.class, NEW));
   }
 
-  Either<TypeMirror, Optional<CodeBlock>> findAutoConverter(TypeMirror baseType) {
-    if (tool.isSameType(baseType, String.class)) {
-      return right(Optional.empty());
-    }
+  Either<TypeMirror, CodeBlock> findAutoConverter(TypeMirror baseType) {
     for (Entry<String, CodeBlock> converter : converters) {
       if (tool.isSameType(baseType, converter.getKey())) {
-        return right(Optional.of(CodeBlock.builder()
-            .add(".map(")
+        return right(CodeBlock.builder()
+            .add(".map($T.create(", StringConverter.class)
             .add(converter.getValue())
-            .add(")").build()));
+            .add("))").build());
       }
     }
     return left(baseType);

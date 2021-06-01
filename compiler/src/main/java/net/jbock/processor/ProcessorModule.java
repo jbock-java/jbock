@@ -40,7 +40,7 @@ public interface ProcessorModule {
 
   @ProcessorScope
   @Provides
-  static TypeTool tool(SafeElements elements,ProcessingEnvironment processingEnv) {
+  static TypeTool tool(SafeElements elements, ProcessingEnvironment processingEnv) {
     return new TypeTool(elements, processingEnv.getTypeUtils());
   }
 

@@ -1,11 +1,13 @@
 package net.jbock.convert;
 
+import com.squareup.javapoet.CodeBlock;
+import net.jbock.StringConverter;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
-import net.jbock.processor.SourceElement;
 import net.jbock.either.Either;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.SourceMethod;
+import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -13,6 +15,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Function;
 
 import static java.lang.Character.isWhitespace;
 import static javax.lang.model.type.TypeKind.BOOLEAN;
@@ -131,7 +134,9 @@ public class NamedOptionFactory {
   }
 
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
-    return ConvertedParameter.create(Optional.empty(), Optional.empty(), Skew.FLAG,
+    CodeBlock mapExpr = CodeBlock.of(".map($T.create($T.identity()))", StringConverter.class, Function.class);
+    return ConvertedParameter.create(mapExpr,
+        Optional.empty(), Skew.FLAG,
         namedOption);
   }
 }

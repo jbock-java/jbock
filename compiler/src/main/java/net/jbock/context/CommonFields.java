@@ -6,9 +6,9 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import net.jbock.processor.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
+import net.jbock.processor.SourceElement;
 
 import java.io.PrintStream;
 import java.util.ArrayList;

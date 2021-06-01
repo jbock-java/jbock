@@ -2,12 +2,12 @@ package net.jbock.validate;
 
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.processor.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
+import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;

@@ -8,9 +8,9 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
-import net.jbock.processor.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.AbstractParameter;
+import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import java.util.List;

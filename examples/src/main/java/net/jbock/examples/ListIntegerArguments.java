@@ -3,6 +3,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
+import net.jbock.StringConverter;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -15,14 +16,14 @@ abstract class ListIntegerArguments {
   private static final Function<String, Integer> PARSE_INT = Integer::parseInt;
 
   @Option(names = {"--a", "-a"}, converter = Mapper.class)
-  abstract java.util.ArrayList<Integer> a();
+  abstract ArrayList<Integer> a();
 
   @Converter
-  static class Mapper implements Supplier<Function<String, java.util.ArrayList<Integer>>> {
+  static class Mapper implements Supplier<StringConverter<ArrayList<Integer>>> {
 
     @Override
-    public Function<String, java.util.ArrayList<Integer>> get() {
-      return PARSE_INT.andThen(Collections::singletonList).andThen(ArrayList::new);
+    public StringConverter<ArrayList<Integer>> get() {
+      return StringConverter.create(PARSE_INT.andThen(Collections::singletonList).andThen(ArrayList::new));
     }
   }
 }

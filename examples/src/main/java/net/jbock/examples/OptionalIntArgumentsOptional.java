@@ -3,23 +3,23 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
+import net.jbock.StringConverter;
 
 import java.util.OptionalInt;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Command
 abstract class OptionalIntArgumentsOptional {
 
-  @Option(names = {"--a", "-a"}, converter = MyMapper.class)
+  @Option(names = {"--a", "-a"}, converter = MyConverter.class)
   abstract OptionalInt a();
 
   @Converter
-  static class MyMapper implements Supplier<Function<String, Integer>> {
+  static class MyConverter implements Supplier<StringConverter<Integer>> {
 
     @Override
-    public Function<String, Integer> get() {
-      return Integer::parseInt;
+    public StringConverter<Integer> get() {
+      return StringConverter.create(Integer::parseInt);
     }
   }
 }

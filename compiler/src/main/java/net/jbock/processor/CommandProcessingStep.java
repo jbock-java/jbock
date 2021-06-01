@@ -11,10 +11,10 @@ import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
-import net.jbock.validate.ValidateComponent;
-import net.jbock.validate.ValidateModule;
 import net.jbock.validate.DaggerValidateComponent;
 import net.jbock.validate.SourceFileGenerator;
+import net.jbock.validate.ValidateComponent;
+import net.jbock.validate.ValidateModule;
 
 import javax.annotation.processing.Filer;
 import javax.annotation.processing.Messager;

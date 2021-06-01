@@ -3,9 +3,9 @@ package net.jbock.context;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.processor.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.AbstractParameter;
+import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import java.util.stream.Collectors;

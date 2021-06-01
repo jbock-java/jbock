@@ -3,6 +3,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
+import net.jbock.StringConverter;
 
 import java.util.List;
 import java.util.function.Function;
@@ -13,19 +14,19 @@ abstract class ComplicatedMapperArguments {
 
   @Option(
       names = "--number",
-      converter = Mapper.class)
+      converter = MyConverter.class)
   abstract Integer number();
 
   @Option(
       names = "--numbers",
-      converter = LazyNumberMapper.class)
+      converter = LazyNumberConverter.class)
   abstract List<LazyNumber> numbers();
 
   @Converter
-  static class LazyNumberMapper implements Supplier<Function<String, LazyNumber>> {
+  static class LazyNumberConverter implements Supplier<StringConverter<LazyNumber>> {
     @Override
-    public Function<String, LazyNumber> get() {
-      return s -> () -> Integer.valueOf(s);
+    public StringConverter<LazyNumber> get() {
+      return StringConverter.create(s -> () -> Integer.valueOf(s));
     }
   }
 
@@ -33,10 +34,10 @@ abstract class ComplicatedMapperArguments {
   }
 
   @Converter
-  static class Mapper implements Supplier<Function<String, Integer>> {
+  static class MyConverter implements Supplier<StringConverter<Integer>> {
     @Override
-    public Function<String, Integer> get() {
-      return new Zapper();
+    public StringConverter<Integer> get() {
+      return StringConverter.create(new Zapper());
     }
   }
 

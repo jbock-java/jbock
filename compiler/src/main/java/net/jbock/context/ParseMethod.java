@@ -18,15 +18,18 @@ public class ParseMethod extends Cached<MethodSpec> {
   private final GeneratedTypes generatedTypes;
   private final AllParameters allParameters;
   private final SourceElement sourceElement;
+  private final BuildMethod buildMethod;
 
   @Inject
   ParseMethod(
       GeneratedTypes generatedTypes,
       AllParameters allParameters,
-      SourceElement sourceElement) {
+      SourceElement sourceElement,
+      BuildMethod buildMethod) {
     this.generatedTypes = generatedTypes;
     this.allParameters = allParameters;
     this.sourceElement = sourceElement;
+    this.buildMethod = buildMethod;
   }
 
   @Override
@@ -55,7 +58,7 @@ public class ParseMethod extends Cached<MethodSpec> {
     code.addStatement("$T $N = new $T()", state.type, state, state.type);
     code.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
     code.beginControlFlow("try")
-        .addStatement("$T $N = $N.parse($N).build()", result.type, result, state, it)
+        .addStatement("$T $N = $N.parse($N).$N()", result.type, result, state, it, buildMethod.get())
         .addStatement("return new $T($N)", generatedTypes.parsingSuccessWrapperType(), result)
         .endControlFlow();
 

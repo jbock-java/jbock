@@ -1,5 +1,6 @@
 package net.jbock.convert.reference;
 
+import net.jbock.StringConverter;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
@@ -10,7 +11,6 @@ import javax.lang.model.type.DeclaredType;
 import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static net.jbock.common.TypeTool.AS_DECLARED;
@@ -28,24 +28,18 @@ public class ReferenceTool {
     this.tool = tool;
   }
 
-  public Either<String, FunctionType> getReferencedType(TypeElement converter) {
-    Optional<DeclaredType> implementsSupplier = checkImplements(Supplier.class, converter);
-    Optional<DeclaredType> implementsFunction = checkImplements(Function.class, converter);
-    if (implementsSupplier.isPresent() && implementsFunction.isPresent()) {
+  public Either<String, StringConverterType> getReferencedType(TypeElement converter) {
+    Optional<DeclaredType> supplier = checkSupplier(converter);
+    Optional<DeclaredType> stringConverter = checkStringConverter(converter);
+    if (supplier.isPresent() && stringConverter.isPresent()) {
       return left(errorConverterType() + " but not both");
     }
-    if (implementsSupplier.isEmpty() && implementsFunction.isEmpty()) {
-      return left(errorConverterType());
-    }
-    if (implementsSupplier.isPresent()) {
-      return unbalancedRight(implementsSupplier).orElseLeft(() -> "")
-          .flatMap(this::handleSupplier);
-    }
-    return unbalancedRight(implementsFunction).orElseLeft(() -> "")
-        .flatMap(declaredType -> handleFunction(declaredType, false));
+    return supplier.map(this::handleSupplier)
+        .or(() -> stringConverter.map(c -> handleStringConverter(c, false)))
+        .orElseGet(() -> left(errorConverterType()));
   }
 
-  private Either<String, FunctionType> handleSupplier(DeclaredType declaredType) {
+  private Either<String, StringConverterType> handleSupplier(DeclaredType declaredType) {
     if (declaredType.getTypeArguments().size() != 1) {
       return left(converterRawType());
     }
@@ -55,34 +49,38 @@ public class ReferenceTool {
     }
     return unbalancedRight(AS_DECLARED.visit(typearg)
         .filter(suppliedFunction -> tool.isSameErasure(suppliedFunction,
-            Function.class.getCanonicalName())))
+            StringConverter.class.getCanonicalName())))
         .orElseLeft(this::errorConverterType)
-        .flatMap(suppliedFunction -> handleFunction(suppliedFunction, true));
+        .flatMap(suppliedType -> handleStringConverter(suppliedType, true));
   }
 
-  private Either<String, FunctionType> handleFunction(DeclaredType suppliedFunction, boolean isSupplier) {
-    if (suppliedFunction.getTypeArguments().size() != 2) {
+  private Either<String, StringConverterType> handleStringConverter(
+      DeclaredType stringConverter, boolean isSupplier) {
+    if (stringConverter.getTypeArguments().size() != 1) {
       return left(converterRawType());
     }
-    TypeMirror inputType = suppliedFunction.getTypeArguments().get(0);
-    if (!tool.isSameType(inputType, String.class)) {
-      return left("converter should implement Function<String, ?>");
-    }
-    return right(new FunctionType(suppliedFunction.getTypeArguments(), isSupplier));
+    TypeMirror typeArgument = stringConverter.getTypeArguments().get(0);
+    return right(new StringConverterType(typeArgument, isSupplier));
   }
 
-  private Optional<DeclaredType> checkImplements(Class<?> candidate, TypeElement converter) {
+  private Optional<DeclaredType> checkSupplier(TypeElement converter) {
     return converter.getInterfaces().stream()
-        .filter(inter -> tool.isSameErasure(inter, candidate.getCanonicalName()))
+        .filter(inter -> tool.isSameErasure(inter, Supplier.class))
         .map(AS_DECLARED::visit)
         .flatMap(Optional::stream)
         .findFirst();
   }
 
+  private Optional<DeclaredType> checkStringConverter(TypeElement converter) {
+    return Optional.of(converter.getSuperclass())
+        .filter(inter -> tool.isSameErasure(inter, StringConverter.class))
+        .flatMap(AS_DECLARED::visit);
+  }
+
   private String errorConverterType() {
-    return "converter should implement " + Function.class.getSimpleName() +
-        "<String, ?> or " + Supplier.class.getSimpleName() +
-        "<" + Function.class.getSimpleName() + "<String, ?>>";
+    return "converter must extend " + StringConverter.class.getSimpleName() +
+        "<X> or implement " + Supplier.class.getSimpleName() +
+        "<" + StringConverter.class.getSimpleName() + "<X>>";
   }
 
   private String converterRawType() {

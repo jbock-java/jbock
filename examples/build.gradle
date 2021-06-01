@@ -19,7 +19,7 @@ compileJava {
 }
 
 dependencies {
-    compileOnly project(':annotations')
+    implementation project(':annotations')
     annotationProcessor project(':compiler')
     annotationProcessor project(':annotations')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'

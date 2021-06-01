@@ -2,21 +2,19 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;
-import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
-import net.jbock.processor.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matcher.Matcher;
-import net.jbock.convert.reference.FunctionType;
 import net.jbock.convert.reference.ReferenceTool;
+import net.jbock.convert.reference.StringConverterType;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractParameter;
-import net.jbock.validate.ParameterStyle;
 import net.jbock.parameter.SourceMethod;
+import net.jbock.processor.SourceElement;
+import net.jbock.validate.ParameterStyle;
 
 import javax.inject.Inject;
-import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.TypeMirror;
 import javax.lang.model.util.Types;
@@ -36,7 +34,6 @@ public class ConverterValidator extends MatchValidator {
   private final Util util;
   private final SourceMethod sourceMethod;
   private final SourceElement sourceElement;
-  private final TypeTool tool;
   private final Types types;
 
   @Inject
@@ -46,7 +43,6 @@ public class ConverterValidator extends MatchValidator {
       Util util,
       SourceMethod sourceMethod,
       SourceElement sourceElement,
-      TypeTool tool,
       ParameterStyle parameterStyle,
       Types types) {
     super(parameterStyle);
@@ -55,7 +51,6 @@ public class ConverterValidator extends MatchValidator {
     this.util = util;
     this.sourceMethod = sourceMethod;
     this.sourceElement = sourceElement;
-    this.tool = tool;
     this.types = types;
   }
 
@@ -63,7 +58,6 @@ public class ConverterValidator extends MatchValidator {
       P parameter,
       TypeElement converter) {
     Optional<String> maybeFailure = util.commonTypeChecks(converter)
-        .or(() -> checkNotAnInterface(converter))
         .or(() -> checkNotAbstract(converter))
         .or(() -> checkNoTypevars(converter))
         .or(() -> checkConverterAnnotationPresent(converter));
@@ -73,7 +67,7 @@ public class ConverterValidator extends MatchValidator {
   }
 
   private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> tryAllMatchers(
-      FunctionType functionType,
+      StringConverterType functionType,
       P parameter,
       TypeElement converter) {
     List<Match> matches = new ArrayList<>();
@@ -88,7 +82,7 @@ public class ConverterValidator extends MatchValidator {
                 .add(".map(")
                 .add(getMapExpr(functionType, converter))
                 .add(")").build())
-            .map(mapExpr -> m.toConvertedParameter(Optional.of(mapExpr), parameter));
+            .map(mapExpr -> m.toConvertedParameter(mapExpr, parameter));
       }
     }
     TypeMirror typeForErrorMessage = matches.stream()
@@ -123,25 +117,18 @@ public class ConverterValidator extends MatchValidator {
     return Optional.empty();
   }
 
-  private CodeBlock getMapExpr(FunctionType functionType, TypeElement converter) {
+  private CodeBlock getMapExpr(StringConverterType functionType, TypeElement converter) {
     if (functionType.isSupplier()) {
       return CodeBlock.of("new $T().get()", converter.asType());
     }
     return CodeBlock.of("new $T()", converter.asType());
   }
 
-  private boolean isValidMatch(Match match, FunctionType functionType) {
+  private boolean isValidMatch(Match match, StringConverterType functionType) {
     return types.isSameType(functionType.outputType(), match.baseType());
   }
 
   private String noMatchError(TypeMirror type) {
-    return "converter should implement Function<String, " + util.typeToString(type) + ">";
-  }
-
-  private Optional<? extends String> checkNotAnInterface(TypeElement converter) {
-    if (converter.getKind() == ElementKind.INTERFACE) {
-      return Optional.of("converter cannot be an interface");
-    }
-    return Optional.empty();
+    return "converter should extend StringConverter<" + util.typeToString(type) + ">";
   }
 }

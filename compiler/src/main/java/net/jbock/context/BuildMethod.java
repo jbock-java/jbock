@@ -3,10 +3,10 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.processor.SourceElement;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
+import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -14,12 +14,11 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import static java.util.Collections.emptyList;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
 @ContextScope
-public class BuildMethod {
+public class BuildMethod extends Cached<MethodSpec> {
 
   private final GeneratedTypes generatedTypes;
   private final SourceElement sourceElement;
@@ -27,6 +26,7 @@ public class BuildMethod {
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
   private final AnsiStyle styler;
+  private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
 
   @Inject
   BuildMethod(
@@ -44,7 +44,8 @@ public class BuildMethod {
     this.styler = styler;
   }
 
-  MethodSpec get() {
+  @Override
+  MethodSpec define() {
     CodeBlock constructorArguments = getConstructorArguments();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
     for (ConvertedParameter<NamedOption> c : namedOptions.options()) {
@@ -92,7 +93,9 @@ public class BuildMethod {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("this.$N.get($T.$N).stream()", commonFields.optionParsers(),
         sourceElement.itemType(), c.enumConstant()));
-    c.mapExpr().ifPresent(code::add);
+    if (!c.isFlag()) {
+      code.add(c.mapExpr());
+    }
     code.addAll(tailExpressionOption(c));
     c.extractExpr().ifPresent(code::add);
     return joinByNewline(code);
@@ -102,18 +105,19 @@ public class BuildMethod {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", Optional.class, commonFields.params(),
         c.parameter().position()));
-    c.mapExpr().ifPresent(code::add);
+    code.add(c.mapExpr());
     code.addAll(tailExpressionParameter(c));
     c.extractExpr().ifPresent(code::add);
     return joinByNewline(code);
   }
 
   private CodeBlock convertExpressionRepeatableParameter(ConvertedParameter<PositionalParameter> c) {
-    List<CodeBlock> block = new ArrayList<>();
-    block.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
-    c.mapExpr().ifPresent(block::add);
-    block.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
-    return joinByNewline(block);
+    List<CodeBlock> code = new ArrayList<>();
+    code.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
+    code.add(c.mapExpr());
+    code.add(CodeBlock.of(".map(e -> e.orElseThrow($1N -> new $2T($1N)))", left, RuntimeException.class));
+    code.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
+    return joinByNewline(code);
   }
 
   private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
@@ -124,12 +128,16 @@ public class BuildMethod {
         String message = "Missing required option: " + paramLabel + " (" + optionNames + ")";
         return List.of(
             CodeBlock.of(".findAny()"),
-            CodeBlock.of(".orElseThrow(() -> new $T($S))",
-                RuntimeException.class, message));
+            CodeBlock.of(".orElseThrow(() -> new $T($S))", RuntimeException.class, message),
+            CodeBlock.of(".orElseThrow($1N -> new $2T($1N))", left, RuntimeException.class));
       case OPTIONAL:
-        return List.of(CodeBlock.of(".findAny()"));
+        return List.of(
+            CodeBlock.of(".map(e -> e.orElseThrow($1N -> new $2T($1N)))", left, RuntimeException.class),
+            CodeBlock.of(".findAny()"));
       case REPEATABLE:
-        return List.of(CodeBlock.of(".collect($T.toList())", Collectors.class));
+        return List.of(
+            CodeBlock.of(".map(e -> e.orElseThrow($1N -> new $2T($1N)))", left, RuntimeException.class),
+            CodeBlock.of(".collect($T.toList())", Collectors.class));
       case FLAG:
         return List.of(CodeBlock.of(".findAny().isPresent()"));
       default:
@@ -142,9 +150,10 @@ public class BuildMethod {
       case REQUIRED:
         String paramLabel = styler.bold(parameter.paramLabel()).orElse(parameter.paramLabel());
         return List.of(CodeBlock.of(".orElseThrow(() -> new $T($S))",
-            RuntimeException.class, "Missing required parameter: " + paramLabel));
+            RuntimeException.class, "Missing required parameter: " + paramLabel),
+            CodeBlock.of(".orElseThrow($1N -> new $2T($1N))", left, RuntimeException.class));
       case OPTIONAL:
-        return emptyList();
+        return List.of(CodeBlock.of(".map(e -> e.orElseThrow($1N -> new $2T($1N)))", left, RuntimeException.class));
       default:
         throw new IllegalArgumentException("unexpected skew: " + parameter.skew());
     }

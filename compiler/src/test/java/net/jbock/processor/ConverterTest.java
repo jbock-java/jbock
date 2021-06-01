@@ -15,9 +15,9 @@ class ConverterTest {
   void converterImplementsBothFunctionAndSupplier() {
     JavaFileObject javaFile = fromSource(
         "@Converter",
-        "class MapMap implements Function<String, String>, Supplier<Function<String, String>> {",
-        "  public String apply(String s) { return null; }",
-        "  public Function<String, String> get() { return null; }",
+        "class MapMap extends StringConverter<String> implements Supplier<StringConverter<String>> {",
+        "  public String convert(String token) { return null; }",
+        "  public StringConverter<String> get() { return null; }",
         "}",
         "",
         "@Command",
@@ -30,7 +30,7 @@ class ConverterTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>> but not both");
+        .withErrorContaining("converter must extend StringConverter<X> or implement Supplier<StringConverter<X>> but not both");
   }
 
   @Test
@@ -49,7 +49,7 @@ class ConverterTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
+        .withErrorContaining("converter must extend StringConverter<X> or implement Supplier<StringConverter<X>>");
   }
 
   @Test
@@ -83,8 +83,8 @@ class ConverterTest {
         "  abstract Optional<int[]> foo();",
         "",
         "  @Converter",
-        "  static class ArrayMapper implements Supplier<Function<String, int[]>> {",
-        "    public Function<String, int[]> get() { return null; }",
+        "  static class ArrayMapper implements Supplier<StringConverter<int[]>> {",
+        "    public StringConverter<int[]> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -101,27 +101,8 @@ class ConverterTest {
         "  @Option(names = \"--x\", converter = ArrayMapper.class)",
         "  abstract Optional<int[]> foo();",
         "",
-        "  static class ArrayMapper implements Function<String, int[]> {",
-        "    public int[] apply(String s) { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(Processor.testInstance())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void invalidFlagMapper() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(names = \"--x\", converter = FlagMapper.class)",
-        "  abstract Boolean flag();",
-        "",
-        "  @Converter",
-        "  static class FlagMapper implements Supplier<Function<String, Boolean>> {",
-        "    public Function<String, Boolean> get() { return null; }",
+        "  static class ArrayMapper extends StringConverter<int[]> {",
+        "    public int[] convert(String s) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -139,8 +120,8 @@ class ConverterTest {
         "  abstract List<Boolean> booleanList();",
         "",
         "  @Converter",
-        "  static class BooleanMapper implements Supplier<Function<String, Boolean>> {",
-        "    public Function<String, Boolean> get() { return null; }",
+        "  static class BooleanMapper implements Supplier<StringConverter<Boolean>> {",
+        "    public StringConverter<Boolean> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -158,8 +139,8 @@ class ConverterTest {
         "  abstract Integer something();",
         "",
         "  @Converter",
-        "  static class MyConverter implements Function<String, Integer> {",
-        "    public Integer apply() { return null; }",
+        "  static class MyConverter extends StringConverter<Integer> {",
+        "    public Integer convert(String token) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -178,8 +159,8 @@ class ConverterTest {
         "  abstract Optional<Integer> something();",
         "",
         "  @Converter",
-        "  static class MyConverter implements Function<String, Integer> {",
-        "    public Integer apply() { return null; }",
+        "  static class MyConverter extends StringConverter<Integer> {",
+        "    public Integer convert(String token) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -198,8 +179,8 @@ class ConverterTest {
         "  abstract List<Integer> something();",
         "",
         "  @Converter",
-        "  static class MyConverter implements Function<String, Integer> {",
-        "    public Integer apply() { return null; }",
+        "  static class MyConverter extends StringConverter<Integer> {",
+        "    public Integer convert(String token) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -229,7 +210,7 @@ class ConverterTest {
   }
 
   @Test
-  void validBounds() {
+  void indirectSupplier() {
     JavaFileObject javaFile = fromSource(
         "@Command",
         "abstract class Arguments {",
@@ -239,15 +220,15 @@ class ConverterTest {
         "",
         "  @Converter",
         "  static class BoundMapper implements Katz<String> {",
-        "    public Function<String, String> get() { return null; }",
+        "    public StringConverter<String> get() { return null; }",
         "  }",
         "",
-        "  interface Katz<OR> extends Supplier<Function<OR, OR>> { }",
+        "  interface Katz<T> extends Supplier<StringConverter<T>> { }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
+        .withErrorContaining("converter must extend StringConverter<X> or implement Supplier<StringConverter<X>>");
   }
 
   @Test
@@ -340,26 +321,6 @@ class ConverterTest {
   }
 
   @Test
-  void converterInvalidNotStringFunction() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(names = \"--x\", converter = MapMap.class)",
-        "  abstract Integer number();",
-        "",
-        "  @Converter",
-        "  static class MapMap implements Supplier<Function<Integer, Integer>> {",
-        "    public Function<Integer, Integer> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(Processor.testInstance())
-        .failsToCompile()
-        .withErrorContaining("converter should implement Function<String, ?>");
-  }
-
-  @Test
   void converterInvalidReturnsString() {
     JavaFileObject javaFile = fromSource(
         "@Command",
@@ -369,14 +330,14 @@ class ConverterTest {
         "  abstract Integer number();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, String>> {",
-        "    public Function<String, String> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<String>> {",
+        "    public StringConverter<String> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("converter should implement Function<String, Integer>");
+        .withErrorContaining("converter should extend StringConverter<Integer>");
   }
 
   @Test
@@ -389,14 +350,14 @@ class ConverterTest {
         "  abstract java.util.OptionalInt number();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, String>> {",
-        "    public Function<String, String> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<String>> {",
+        "    public StringConverter<String> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("converter should implement Function<String, Integer>");
+        .withErrorContaining("converter should extend StringConverter<Integer>");
   }
 
   @Test
@@ -409,33 +370,14 @@ class ConverterTest {
         "  abstract List<Integer> number();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, String>> {",
-        "    public Function<String, String> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<String>> {",
+        "    public StringConverter<String> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("converter should implement Function<String, Integer>");
-  }
-
-  @Test
-  void rawType() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(names = \"--x\", converter = MapMap.class)",
-        "  abstract java.util.Set<java.util.Set> things();",
-        "",
-        "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, java.util.Set<java.util.Set>>> {",
-        "    public Function<String, java.util.Set<java.util.Set>> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(Processor.testInstance())
-        .compilesWithoutError();
+        .withErrorContaining("converter should extend StringConverter<Integer>");
   }
 
   @Test
@@ -448,8 +390,8 @@ class ConverterTest {
         "  abstract Supplier<String> string();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, Supplier<String>>> {",
-        "    public Function<String, Supplier<String>> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<Supplier<String>>> {",
+        "    public StringConverter<Supplier<String>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -467,104 +409,11 @@ class ConverterTest {
         "  abstract Supplier<Optional<String>> string();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, Supplier<Optional<String>>>> {",
-        "    public Function<String, Supplier<Optional<String>>> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<Supplier<Optional<String>>>> {",
+        "    public StringConverter<Supplier<Optional<String>>> get() { return null; }",
         "  }",
         "}");
 
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(Processor.testInstance())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void converterValidExtendsFunction() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(names = \"--x\", converter = MapMap.class)",
-        "  abstract Integer number();",
-        "",
-        "  @Converter",
-        "  static class MapMap implements Supplier<StringFunction<String, Integer>> {",
-        "    public StringFunction<String, Integer> get() { return null; }",
-        "  }",
-        "",
-        "  interface StringFunction<V, X> extends Function<V, X> {}",
-        "",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(Processor.testInstance())
-        .failsToCompile()
-        .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
-  }
-
-  @Test
-  void converterInvalidStringFunction() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(names = \"--x\", converter = MapMap.class)",
-        "  abstract Integer number();",
-        "",
-        "  @Converter",
-        "  static class MapMap implements Supplier<StringFunction<Integer>> {",
-        "    public StringFunction<Integer> get() { return null; }",
-        "  }",
-        "",
-        "  interface StringFunction<R> extends Function<Long, R> {}",
-        "",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(Processor.testInstance())
-        .failsToCompile()
-        .withErrorContaining("converter should implement Function<String, ?> or Supplier<Function<String, ?>>");
-  }
-
-  @Test
-  void testConverterTypeSudokuInvalid() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(names = \"--x\", converter = MapMap.class)",
-        "  abstract List<List<Integer>> number();",
-        "",
-        "  @Converter",
-        "  static class MapMap<E extends List<List<Integer>>> implements FooSupplier<E> { public Foo<E> get() { return null; } }",
-        "  interface FooSupplier<K> extends Supplier<Foo<K>> { }",
-        "  interface Foo<X> extends Function<String, List<List<X>>> { }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(Processor.testInstance())
-        .failsToCompile()
-        .withErrorContaining("type parameters are not allowed in converter class declaration");
-  }
-
-  @Test
-  void testSudokuHard() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(names = \"--x\", converter = MapMap.class)",
-        "  abstract java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<java.util.Collection<Integer>>>>>>>>>>>>>> numbers();",
-        "",
-        "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, java.util.ArrayList<List<List<List<List<List<List<Set<Set<Set<Set<Set<Set<java.util.Collection<Integer>>>>>>>>>>>>>>>> {",
-        "    public Foo1<Set<Set<Set<Set<Set<Set<java.util.Collection<Integer>>>>>>>> get() { return null; }",
-        "  }",
-        "  interface Foo1<A> extends Foo2<List<A>> { }",
-        "  interface Foo2<B> extends Foo3<List<B>> { }",
-        "  interface Foo3<C> extends Foo4<List<C>> { }",
-        "  interface Foo4<D> extends Foo5<List<D>> { }",
-        "  interface Foo5<E> extends Foo6<List<E>> { }",
-        "  interface Foo6<F> extends Foo7<List<F>> { }",
-        "  interface Foo7<G> extends Foo8<java.util.ArrayList<G>> { }",
-        "  interface Foo8<H> extends Function<String, H> { }",
-        "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .compilesWithoutError();
@@ -580,8 +429,8 @@ class ConverterTest {
         "  abstract Integer number();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function> {",
-        "    public Function get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter> {",
+        "    public StringConverter get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -620,8 +469,8 @@ class ConverterTest {
         "  abstract Integer number();",
         "",
         "  @Converter",
-        "  static class MapMap implements Function {",
-        "    public Object apply(Object o) { return null; }",
+        "  static class MapMap extends StringConverter {",
+        "    public Object convert(String token) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -640,27 +489,8 @@ class ConverterTest {
         "  abstract List<java.util.OptionalInt> numbers();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, java.util.OptionalInt>> {",
-        "    public Function<String, java.util.OptionalInt> get() { return null; }",
-        "  }",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(Processor.testInstance())
-        .compilesWithoutError();
-  }
-
-  @Test
-  void converterValidByte() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "abstract class Arguments {",
-        "",
-        "  @Option(names = \"--x\", converter = MapMap.class)",
-        "  abstract Byte number();",
-        "",
-        "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, Byte>> {",
-        "    public Function<String, Byte> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<java.util.OptionalInt>> {",
+        "    public StringConverter<java.util.OptionalInt> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -678,8 +508,8 @@ class ConverterTest {
         "  abstract byte number();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, Byte>> {",
-        "    public Function<String, Byte> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<Byte>> {",
+        "    public StringConverter<Byte> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -697,8 +527,8 @@ class ConverterTest {
         "  abstract Optional<Integer> number();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, Integer>> {",
-        "    public Function<String, Integer> get() { return null; }",
+        "  static class MapMap extends StringConverter<Integer> {",
+        "    public Integer convert(String token) { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -716,8 +546,8 @@ class ConverterTest {
         "  abstract java.util.OptionalInt b();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, Integer>> {",
-        "    public Function<String, Integer> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<Integer>> {",
+        "    public StringConverter<Integer> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -735,8 +565,8 @@ class ConverterTest {
         "  abstract java.util.OptionalInt b();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, java.util.OptionalInt>> {",
-        "    public Function<String, java.util.OptionalInt> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<java.util.OptionalInt>> {",
+        "    public StringConverter<java.util.OptionalInt> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -754,8 +584,8 @@ class ConverterTest {
         "  abstract Optional<Integer> b();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, Optional<Integer>>> {",
-        "    public Function<String, Optional<Integer>> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<Optional<Integer>>> {",
+        "    public StringConverter<Optional<Integer>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -773,8 +603,8 @@ class ConverterTest {
         "  abstract java.util.OptionalInt b();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, Integer>> {",
-        "    public Function<String, Integer> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<Integer>> {",
+        "    public StringConverter<Integer> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))
@@ -792,8 +622,8 @@ class ConverterTest {
         "  abstract List<Set<Integer>> sets();",
         "",
         "  @Converter",
-        "  static class MapMap implements Supplier<Function<String, Set<Integer>>> {",
-        "    public Function<String, Set<Integer>> get() { return null; }",
+        "  static class MapMap implements Supplier<StringConverter<Set<Integer>>> {",
+        "    public StringConverter<Set<Integer>> get() { return null; }",
         "  }",
         "}");
     assertAbout(javaSources()).that(singletonList(javaFile))

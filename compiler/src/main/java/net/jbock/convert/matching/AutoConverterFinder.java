@@ -2,6 +2,7 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.StringConverter;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.convert.ConvertedParameter;
@@ -9,8 +10,8 @@ import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractParameter;
-import net.jbock.validate.ParameterStyle;
 import net.jbock.parameter.SourceMethod;
+import net.jbock.validate.ParameterStyle;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;
@@ -64,7 +65,7 @@ public class AutoConverterFinder extends MatchValidator {
         .map(mapExpr -> match.toConvertedParameter(mapExpr, parameter));
   }
 
-  private Either<String, Optional<CodeBlock>> enumConverter(TypeMirror baseType) {
+  private Either<String, CodeBlock> enumConverter(TypeMirror baseType) {
     if (!isEnumType(baseType)) {
       return left(noMatchError(baseType));
     }
@@ -72,8 +73,8 @@ public class AutoConverterFinder extends MatchValidator {
     ParameterSpec e = ParameterSpec.builder(IllegalArgumentException.class, "e").build();
     ParameterSpec values = ParameterSpec.builder(STRING, "values").build();
     ParameterSpec message = ParameterSpec.builder(STRING, "message").build();
-    return Either.right(Optional.of(CodeBlock.builder()
-        .add(".map(")
+    return Either.right(CodeBlock.builder()
+        .add(".map($T.create(", StringConverter.class)
         .add("$N -> {\n", s).indent()
         .add("try {\n").indent()
         .add("return $T.valueOf($N);\n", baseType, s)
@@ -86,7 +87,7 @@ public class AutoConverterFinder extends MatchValidator {
         .add("$T $N = $N.getMessage() + $S + $N;\n", STRING, message, e, " ", values)
         .add("throw new $T($N);\n", IllegalArgumentException.class, message)
         .unindent().add("}\n")
-        .unindent().add("})\n").build()));
+        .unindent().add("}))\n").build());
   }
 
   private boolean isEnumType(TypeMirror type) {

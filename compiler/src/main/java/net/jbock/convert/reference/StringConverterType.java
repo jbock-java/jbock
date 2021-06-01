@@ -1,15 +1,14 @@
 package net.jbock.convert.reference;
 
 import javax.lang.model.type.TypeMirror;
-import java.util.List;
 
-public class FunctionType {
+public class StringConverterType {
 
-  private final List<? extends TypeMirror> typeArguments;
+  private final TypeMirror typeArgument;
   private final boolean supplier; // wrapped in Supplier?
 
-  FunctionType(List<? extends TypeMirror> typeArguments, boolean supplier) {
-    this.typeArguments = typeArguments;
+  StringConverterType(TypeMirror typeArgument, boolean supplier) {
+    this.typeArgument = typeArgument;
     this.supplier = supplier;
   }
 
@@ -18,6 +17,6 @@ public class FunctionType {
   }
 
   public TypeMirror outputType() {
-    return typeArguments.get(1);
+    return typeArgument;
   }
 }

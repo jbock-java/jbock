@@ -677,6 +677,7 @@ class ProcessorTest {
         "import java.util.function.Supplier;",
         "import java.util.stream.Collector;",
         "",
+        "import net.jbock.StringConverter;",
         "import net.jbock.Command;",
         "import net.jbock.SuperCommand;",
         "import net.jbock.Parameter;",

@@ -3,55 +3,55 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
+import net.jbock.StringConverter;
 
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
 import java.util.OptionalLong;
-import java.util.function.Function;
 import java.util.function.Supplier;
 
 @Command
 abstract class PrimitiveOptionalsArguments {
 
-  @Option(names = {"--I", "-I"}, converter = IntegerMapper.class)
+  @Option(names = {"--I", "-I"}, converter = IntegerConverter.class)
   abstract OptionalInt simpleInt();
 
-  @Option(names = {"--L", "-L"}, converter = LongMapper.class)
+  @Option(names = {"--L", "-L"}, converter = LongConverter.class)
   abstract OptionalLong simpleLong();
 
-  @Option(names = {"--D", "-D"}, converter = DoubleMapper.class)
+  @Option(names = {"--D", "-D"}, converter = DoubleConverter.class)
   abstract OptionalDouble simpleDouble();
 
-  @Option(names = {"--i", "-i"}, converter = IntegerMapper.class)
+  @Option(names = {"--i", "-i"}, converter = IntegerConverter.class)
   abstract OptionalInt mappedInt();
 
-  @Option(names = {"--l", "-l"}, converter = LongMapper.class)
+  @Option(names = {"--l", "-l"}, converter = LongConverter.class)
   abstract OptionalLong mappedLong();
 
-  @Option(names = {"--d", "-d"}, converter = DoubleMapper.class)
+  @Option(names = {"--d", "-d"}, converter = DoubleConverter.class)
   abstract OptionalDouble mappedDouble();
 
   @Converter
-  static class IntegerMapper implements Supplier<Function<String, Integer>> {
+  static class IntegerConverter implements Supplier<StringConverter<Integer>> {
     @Override
-    public Function<String, Integer> get() {
-      return Integer::valueOf;
+    public StringConverter<Integer> get() {
+      return StringConverter.create(Integer::valueOf);
     }
   }
 
   @Converter
-  static class LongMapper implements Supplier<Function<String, Long>> {
+  static class LongConverter implements Supplier<StringConverter<Long>> {
     @Override
-    public Function<String, Long> get() {
-      return Long::valueOf;
+    public StringConverter<Long> get() {
+      return StringConverter.create(Long::valueOf);
     }
   }
 
   @Converter
-  static class DoubleMapper implements Supplier<Function<String, Double>> {
+  static class DoubleConverter implements Supplier<StringConverter<Double>> {
     @Override
-    public Function<String, Double> get() {
-      return Double::valueOf;
+    public StringConverter<Double> get() {
+      return StringConverter.create(Double::valueOf);
     }
   }
 }

@@ -4,6 +4,7 @@ import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
 import net.jbock.Parameters;
+import net.jbock.StringConverter;
 
 import java.math.BigInteger;
 import java.util.ArrayList;
@@ -14,7 +15,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.OptionalInt;
 import java.util.Set;
-import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -25,120 +25,120 @@ abstract class CustomMapperArguments {
    * The mapper must be a Function from String to whatever-this-returns.
    * It must also have a package-visible no-arg constructor.
    */
-  @Option(names = "--date", converter = DateMapper.class)
+  @Option(names = "--date", converter = DateConverter.class)
   abstract Date date();
 
-  @Option(names = "--optDate", converter = DateMapper.class)
+  @Option(names = "--optDate", converter = DateConverter.class)
   abstract Optional<Date> optDate();
 
-  @Option(names = "--dateList", converter = DateMapper.class)
+  @Option(names = "--dateList", converter = DateConverter.class)
   abstract List<Date> dateList();
 
   @Option(names = "--verbosity", converter = CustomBigIntegerMapperSupplier.class)
   abstract Optional<BigInteger> verbosity();
 
-  @Option(names = "--aRequiredInt", converter = PositiveNumberMapper.class)
+  @Option(names = "--aRequiredInt", converter = PositiveNumberConverter.class)
   abstract int aRequiredInt();
 
-  @Option(names = "--stringArray", converter = ArrayMapper.class)
+  @Option(names = "--stringArray", converter = ArrayConverter.class)
   abstract Optional<String[]> stringArray();
 
-  @Option(names = "--integerList", converter = IntegerListMapper.class)
+  @Option(names = "--integerList", converter = IntegerListConverter.class)
   abstract Optional<ArrayList<Integer>> integerList();
 
-  @Option(names = "--enumSet", converter = EnumSetMapper.class)
+  @Option(names = "--enumSet", converter = EnumSetConverter.class)
   abstract Optional<Set<MyEnum>> enumSet();
 
-  @Parameters(converter = BooleanMapper.class)
+  @Parameters(converter = BooleanConverter.class)
   abstract List<Boolean> booleanList();
 
   @Option(names = "--optionalInts", converter = OptionalIntMapper.class)
   abstract List<OptionalInt> optionalInts();
 
-  @Option(names = "--listWrapper", converter = ListWrapperMapper.class)
-  abstract Optional<java.util.ArrayList<String>> listWrapper();
+  @Option(names = "--listWrapper", converter = ListWrapperConverter.class)
+  abstract Optional<ArrayList<String>> listWrapper();
 
-  @Option(names = "--notFlag", converter = BooleanMapper.class)
+  @Option(names = "--notFlag", converter = BooleanConverter.class)
   abstract Boolean notFlag();
 
   @Converter
-  static class DateMapper implements Supplier<Function<String, Date>> {
+  static class DateConverter implements Supplier<StringConverter<Date>> {
 
     @Override
-    public Function<String, Date> get() {
-      return s -> new Date(Long.parseLong(s));
+    public StringConverter<Date> get() {
+      return StringConverter.create(s -> new Date(Long.parseLong(s)));
     }
   }
 
   @Converter
-  static class PositiveNumberMapper implements Supplier<Function<String, Integer>> {
+  static class PositiveNumberConverter implements Supplier<StringConverter<Integer>> {
 
     @Override
-    public Function<String, Integer> get() {
-      return s -> {
+    public StringConverter<Integer> get() {
+      return StringConverter.create(s -> {
         int i = Integer.parseInt(s);
         if (i < 0) {
           throw new IllegalArgumentException("The value cannot be negative.");
         }
         return i;
-      };
+      });
     }
   }
 
-  static class ArrayMapper implements Supplier<Function<String, String[]>> {
+  static class ArrayConverter implements Supplier<StringConverter<String[]>> {
 
     @Override
-    public Function<String, String[]> get() {
-      return s -> new String[]{s};
+    public StringConverter<String[]> get() {
+      return StringConverter.create(s -> new String[]{s});
     }
   }
 
-  static class IntegerListMapper implements Supplier<Function<String, java.util.ArrayList<Integer>>> {
+  static class IntegerListConverter implements Supplier<StringConverter<ArrayList<Integer>>> {
 
     @Override
-    public Function<String, java.util.ArrayList<Integer>> get() {
-      return s -> new ArrayList<>(Arrays.stream(s.split(",", -1))
+    public StringConverter<ArrayList<Integer>> get() {
+      return StringConverter.create(s -> new ArrayList<>(Arrays.stream(s.split(",", -1))
           .map(Integer::valueOf)
-          .collect(Collectors.toList()));
+          .collect(Collectors.toList())));
     }
   }
 
-  static class EnumSetMapper implements Supplier<Function<String, Set<MyEnum>>> {
+  static class EnumSetConverter implements Supplier<StringConverter<Set<MyEnum>>> {
 
     @Override
-    public Function<String, Set<MyEnum>> get() {
-      return s -> Arrays.stream(s.split(",", -1))
+    public StringConverter<Set<MyEnum>> get() {
+      return StringConverter.create(s -> Arrays.stream(s.split(",", -1))
           .map(MyEnum::valueOf)
-          .collect(Collectors.toSet());
+          .collect(Collectors.toSet()));
     }
   }
 
-  static class BooleanMapper implements Supplier<Function<String, Boolean>> {
+  static class BooleanConverter implements Supplier<StringConverter<Boolean>> {
 
     @Override
-    public Function<String, Boolean> get() {
-      return Boolean::valueOf;
+    public StringConverter<Boolean> get() {
+      return StringConverter.create(Boolean::valueOf);
     }
   }
 
-  static class ListWrapperMapper implements Supplier<Function<String, java.util.ArrayList<String>>> {
+  static class ListWrapperConverter implements Supplier<StringConverter<ArrayList<String>>> {
 
     @Override
-    public Function<String, java.util.ArrayList<String>> get() {
-      return s -> new ArrayList<>(Collections.singletonList(s));
+    public StringConverter<ArrayList<String>> get() {
+      return StringConverter.create(s -> new ArrayList<>(Collections.singletonList(s)));
     }
   }
 
-  static class OptionalIntMapper implements Supplier<Function<String, OptionalInt>> {
+  static class OptionalIntMapper implements Supplier<StringConverter<OptionalInt>> {
 
     @Override
-    public Function<String, OptionalInt> get() {
-      return s -> {
+    public StringConverter<OptionalInt> get() {
+      return StringConverter.create(s -> {
         if (s.isEmpty()) {
           return OptionalInt.empty();
         }
         return OptionalInt.of(Integer.parseInt(s));
-      };
+      });
     }
   }
 

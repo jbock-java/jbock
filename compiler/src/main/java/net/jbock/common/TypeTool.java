@@ -92,6 +92,10 @@ public class TypeTool {
         .map(declaredType -> declaredType.getTypeArguments().get(0));
   }
 
+  public boolean isSameErasure(TypeMirror x, Class<?> y) {
+    return isSameErasure(x, y.getCanonicalName());
+  }
+
   public boolean isSameErasure(TypeMirror x, String y) {
     return elements.getTypeElement(y)
         .map(TypeElement::asType)
