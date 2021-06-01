@@ -35,7 +35,7 @@ public final class GeneratedClass {
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
   private final UsageMethod usageMethod;
   private final Withers withers;
-  private final ClassJavadoc classJavadoc;
+  private final GeneratedAnnotation generatedAnnotation;
   private final ReadOptionNameMethod readOptionNameMethod;
 
   @Inject
@@ -58,7 +58,7 @@ public final class GeneratedClass {
       ParseResultWithRest parseResultWithRest,
       ReadOptionArgumentMethod readOptionArgumentMethod,
       UsageMethod usageMethod, Withers withers,
-      ClassJavadoc classJavadoc,
+      GeneratedAnnotation generatedAnnotation,
       ReadOptionNameMethod readOptionNameMethod) {
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
@@ -79,7 +79,7 @@ public final class GeneratedClass {
     this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.usageMethod = usageMethod;
     this.withers = withers;
-    this.classJavadoc = classJavadoc;
+    this.generatedAnnotation = generatedAnnotation;
     this.readOptionNameMethod = readOptionNameMethod;
   }
 
@@ -122,6 +122,6 @@ public final class GeneratedClass {
     return spec.addModifiers(FINAL)
         .addOriginatingElement(sourceElement.element())
         .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
-        .addJavadoc(classJavadoc.create()).build();
+        .addAnnotation(generatedAnnotation.create()).build();
   }
 }
