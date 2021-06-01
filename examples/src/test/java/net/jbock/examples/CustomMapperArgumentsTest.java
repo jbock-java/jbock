@@ -57,6 +57,6 @@ class CustomMapperArgumentsTest {
 
   @Test
   void invalidOptions() {
-    f.assertThat("--date", "FooBar").failsWithMessage("For input string: \"FooBar\"");
+    f.assertThat("--date", "FooBar").failsWithMessage("while converting option DATE (--date): For input string: \"FooBar\"");
   }
 }
