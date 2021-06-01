@@ -69,16 +69,16 @@ artifacts {
 publishing {
     publications {
         mavenJava(MavenPublication) {
-            artifactId = 'jbock-annotations'
+            artifactId = 'jbock'
             from components.java
 
             artifact sourcesJar
             artifact javadocJar
 
             pom {
-                name = 'jbock-annotations'
+                name = 'jbock'
                 packaging = 'jar'
-                description = 'jbock annotations'
+                description = 'jbock annotations and public interface'
                 url = 'https://github.com/jbock-java/jbock'
 
                 licenses {
