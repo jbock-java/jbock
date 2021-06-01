@@ -4,7 +4,7 @@ import dagger.BindsInstance;
 import dagger.Component;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
-import net.jbock.validate.SourceMethod;
+import net.jbock.parameter.SourceMethod;
 
 import java.util.List;
 

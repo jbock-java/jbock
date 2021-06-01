@@ -12,8 +12,8 @@ import net.jbock.convert.reference.FunctionType;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractParameter;
-import net.jbock.parameter.ParameterStyle;
-import net.jbock.validate.SourceMethod;
+import net.jbock.validate.ParameterStyle;
+import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;

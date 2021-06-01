@@ -11,7 +11,6 @@ import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
 import java.util.List;
 import java.util.Optional;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 import static net.jbock.common.Constants.ACCESS_MODIFIERS;
@@ -77,6 +76,10 @@ public class SourceElement {
 
   public boolean isAnsi() {
     return parserFlavour.isAnsi(sourceElement);
+  }
+
+  public boolean expandAtSign() {
+    return parserFlavour.expandAtSign(sourceElement);
   }
 
   public String programName() {

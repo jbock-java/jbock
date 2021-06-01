@@ -5,7 +5,7 @@ import net.jbock.convert.ParameterScope;
 import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
 import net.jbock.parameter.AbstractParameter;
-import net.jbock.validate.SourceMethod;
+import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;

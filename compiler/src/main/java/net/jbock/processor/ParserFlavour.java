@@ -10,37 +10,42 @@ import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;
 
-public enum ParserFlavour {
+enum ParserFlavour {
 
   COMMAND(Command.class) {
     @Override
-    public boolean helpEnabled(TypeElement sourceElement) {
+    boolean helpEnabled(TypeElement sourceElement) {
       return get(sourceElement).helpEnabled();
     }
 
     @Override
-    public Optional<String> programName(TypeElement sourceElement) {
+    Optional<String> programName(TypeElement sourceElement) {
       return Descriptions.optionalString(get(sourceElement).name());
     }
 
     @Override
-    public Optional<String> descriptionKey(TypeElement sourceElement) {
+    Optional<String> descriptionKey(TypeElement sourceElement) {
       return Descriptions.optionalString(get(sourceElement).descriptionKey());
     }
 
     @Override
-    public List<String> description(TypeElement sourceElement, SafeElements elements) {
+    List<String> description(TypeElement sourceElement, SafeElements elements) {
       String[] description = get(sourceElement).description();
       return Descriptions.getDescription(sourceElement, elements, description);
     }
 
     @Override
-    public boolean isSuperCommand() {
+    boolean expandAtSign(TypeElement sourceElement) {
+      return get(sourceElement).expandAtSign();
+    }
+
+    @Override
+    boolean isSuperCommand() {
       return false;
     }
 
     @Override
-    public boolean isAnsi(TypeElement sourceElement) {
+    boolean isAnsi(TypeElement sourceElement) {
       return get(sourceElement).ansi();
     }
 
@@ -51,33 +56,38 @@ public enum ParserFlavour {
 
   SUPER_COMMAND(SuperCommand.class) {
     @Override
-    public boolean helpEnabled(TypeElement sourceElement) {
+    boolean helpEnabled(TypeElement sourceElement) {
       return get(sourceElement).helpEnabled();
     }
 
     @Override
-    public Optional<String> programName(TypeElement sourceElement) {
+    Optional<String> programName(TypeElement sourceElement) {
       return Descriptions.optionalString(get(sourceElement).name());
     }
 
     @Override
-    public Optional<String> descriptionKey(TypeElement sourceElement) {
+    Optional<String> descriptionKey(TypeElement sourceElement) {
       return Descriptions.optionalString(get(sourceElement).descriptionKey());
     }
 
     @Override
-    public List<String> description(TypeElement sourceElement, SafeElements elements) {
+    List<String> description(TypeElement sourceElement, SafeElements elements) {
       String[] description = get(sourceElement).description();
       return Descriptions.getDescription(sourceElement, elements, description);
     }
 
     @Override
-    public boolean isSuperCommand() {
+    boolean expandAtSign(TypeElement sourceElement) {
+      return get(sourceElement).expandAtSign();
+    }
+
+    @Override
+    boolean isSuperCommand() {
       return true;
     }
 
     @Override
-    public boolean isAnsi(TypeElement sourceElement) {
+    boolean isAnsi(TypeElement sourceElement) {
       return get(sourceElement).ansi();
     }
 
@@ -101,15 +111,17 @@ public enum ParserFlavour {
     throw new IllegalArgumentException("Unknown flavour: " + annotationName);
   }
 
-  public abstract boolean helpEnabled(TypeElement sourceElement);
+  abstract boolean isSuperCommand();
 
-  public abstract Optional<String> programName(TypeElement sourceElement);
+  abstract boolean helpEnabled(TypeElement sourceElement);
 
-  public abstract Optional<String> descriptionKey(TypeElement sourceElement);
+  abstract Optional<String> programName(TypeElement sourceElement);
 
-  public abstract List<String> description(TypeElement sourceElement, SafeElements elements);
+  abstract Optional<String> descriptionKey(TypeElement sourceElement);
 
-  public abstract boolean isSuperCommand();
+  abstract List<String> description(TypeElement sourceElement, SafeElements elements);
 
-  public abstract boolean isAnsi(TypeElement sourceElement);
+  abstract boolean expandAtSign(TypeElement sourceElement);
+
+  abstract boolean isAnsi(TypeElement sourceElement);
 }

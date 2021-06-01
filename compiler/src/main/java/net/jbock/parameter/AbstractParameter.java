@@ -6,7 +6,6 @@ import net.jbock.Parameter;
 import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
 import net.jbock.common.ValidationFailure;
-import net.jbock.validate.SourceMethod;
 
 import javax.lang.model.element.Modifier;
 import java.util.List;

@@ -5,7 +5,7 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.processor.SourceElement;
 import net.jbock.either.Either;
 import net.jbock.parameter.NamedOption;
-import net.jbock.validate.SourceMethod;
+import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
 import java.util.ArrayList;

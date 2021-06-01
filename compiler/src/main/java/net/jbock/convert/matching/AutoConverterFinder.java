@@ -9,8 +9,8 @@ import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractParameter;
-import net.jbock.parameter.ParameterStyle;
-import net.jbock.validate.SourceMethod;
+import net.jbock.validate.ParameterStyle;
+import net.jbock.parameter.SourceMethod;
 
 import javax.inject.Inject;
 import javax.lang.model.element.ElementKind;

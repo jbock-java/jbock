@@ -1,7 +1,6 @@
 package net.jbock.parameter;
 
 import net.jbock.common.EnumName;
-import net.jbock.validate.SourceMethod;
 
 import java.util.List;
 import java.util.Locale;

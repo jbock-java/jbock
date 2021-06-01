@@ -1,4 +1,4 @@
-package net.jbock.parameter;
+package net.jbock.validate;
 
 import net.jbock.Option;
 import net.jbock.Parameter;
@@ -7,7 +7,6 @@ import net.jbock.common.Descriptions;
 import net.jbock.common.SafeElements;
 
 import javax.lang.model.element.ExecutableElement;
-import javax.lang.model.util.Elements;
 import java.lang.annotation.Annotation;
 import java.util.List;
 import java.util.Optional;

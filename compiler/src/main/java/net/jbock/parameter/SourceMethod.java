@@ -1,8 +1,8 @@
-package net.jbock.validate;
+package net.jbock.parameter;
 
 import net.jbock.common.SafeElements;
 import net.jbock.common.ValidationFailure;
-import net.jbock.parameter.ParameterStyle;
+import net.jbock.validate.ParameterStyle;
 
 import javax.lang.model.element.ExecutableElement;
 import javax.lang.model.element.Modifier;

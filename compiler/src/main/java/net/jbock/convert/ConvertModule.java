@@ -12,9 +12,9 @@ import net.jbock.convert.matcher.ListMatcher;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.matcher.OptionalMatcher;
 import net.jbock.parameter.NamedOption;
-import net.jbock.parameter.ParameterStyle;
+import net.jbock.validate.ParameterStyle;
 import net.jbock.parameter.PositionalParameter;
-import net.jbock.validate.SourceMethod;
+import net.jbock.parameter.SourceMethod;
 
 import javax.lang.model.util.Types;
 import java.util.List;

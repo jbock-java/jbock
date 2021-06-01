@@ -5,7 +5,7 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.processor.EvaluatingProcessor;
-import net.jbock.validate.SourceMethod;
+import net.jbock.parameter.SourceMethod;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
@@ -31,10 +31,10 @@ class OptionalMatcherTest {
       TypeMirror optionalInt = elements.getTypeElement(OptionalInt.class.getCanonicalName()).asType();
       TypeTool tool = new TypeTool(new SafeElements(elements), types);
       OptionalMatcher optionalish = createMatcher(elements, tool, optionalInt);
-      optionalish.tryMatch(parameter).map(unwrapSuccess -> {
-        TypeMirror baseType = unwrapSuccess.baseType();
+      optionalish.tryMatch(parameter).map(match -> {
+        TypeMirror baseType = match.baseType();
         assertEquals("java.lang.Integer", baseType.toString());
-        return unwrapSuccess;
+        return match;
       }).orElseGet(Assertions::fail);
     });
   }
@@ -47,10 +47,10 @@ class OptionalMatcherTest {
       TypeTool tool = new TypeTool(new SafeElements(elements), types);
       DeclaredType optionalInteger = types.getDeclaredType(optional, integer);
       OptionalMatcher optionalish = createMatcher(elements, tool, optionalInteger);
-      optionalish.tryMatch(parameter).map(unwrapSuccess -> {
-        TypeMirror baseType = unwrapSuccess.baseType();
+      optionalish.tryMatch(parameter).map(match -> {
+        TypeMirror baseType = match.baseType();
         assertEquals("java.lang.Integer", baseType.toString());
-        return unwrapSuccess;
+        return match;
       }).orElseGet(Assertions::fail);
     });
   }

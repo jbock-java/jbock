@@ -3,7 +3,7 @@ package net.jbock.convert.matching;
 import net.jbock.Parameter;
 import net.jbock.Parameters;
 import net.jbock.convert.Skew;
-import net.jbock.parameter.ParameterStyle;
+import net.jbock.validate.ParameterStyle;
 
 import java.util.Optional;
 
