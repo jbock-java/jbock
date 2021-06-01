@@ -55,6 +55,8 @@ public class Withers {
     spec.addParameter(resourceBundleParam);
     if (anyDescriptionKeys.anyDescriptionKeysAtAll()) {
       spec.addStatement("this.$N = $N", commonFields.messages(), resourceBundleParam);
+    } else {
+      spec.addComment("need at least one descriptionKey");
     }
     spec.addStatement("return this");
     return spec.returns(sourceElement.generatedClass())
