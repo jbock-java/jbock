@@ -1,8 +1,11 @@
 package net.jbock.examples;
 
 import net.jbock.examples.ClusteredShortOptions_Parser.ParseResult;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class ClusteredShortOptionsTest {
 
@@ -16,16 +19,16 @@ class ClusteredShortOptionsTest {
   }
 
   private void assertAllSet(ClusteredShortOptions options) {
-    Assertions.assertTrue(options.aaa());
-    Assertions.assertTrue(options.bbb());
-    Assertions.assertTrue(options.ccc());
-    Assertions.assertEquals("InputFile.txt", options.file());
+    assertTrue(options.aaa());
+    assertTrue(options.bbb());
+    assertTrue(options.ccc());
+    assertEquals("InputFile.txt", options.file());
   }
 
   private ClusteredShortOptions parse(String... args) {
     ParseResult result = new ClusteredShortOptions_Parser().parse(args);
     if (!(result instanceof ClusteredShortOptions_Parser.ParsingSuccess)) {
-      Assertions.fail("success expected but was " + result);
+      fail("success expected but was " + result);
     }
     return ((ClusteredShortOptions_Parser.ParsingSuccess) result).getResult();
   }

@@ -115,47 +115,47 @@ public class BuildMethod extends Cached<MethodSpec> {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
     code.add(c.mapExpr());
-    code.add(CodeBlock.of(".map(e -> e.orElseThrow($1N -> new $2T($1N)))", left, RuntimeException.class));
+    code.add(CodeBlock.of(".map(e -> e$L)", checkConverterError(c.parameter())));
     code.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
     return joinByNewline(code);
   }
 
-  private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> parameter) {
-    String optionNames = String.join(", ", parameter.parameter().names());
-    String paramLabel = parameter.paramLabel();
-    switch (parameter.skew()) {
+  private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> c) {
+    String optionNames = String.join(", ", c.parameter().names());
+    String paramLabel = c.paramLabel();
+    switch (c.skew()) {
       case REQUIRED:
         String message = "Missing required option: " + paramLabel + " (" + optionNames + ")";
         return List.of(
             CodeBlock.of(".findAny()"),
             CodeBlock.of(".orElseThrow(() -> new $T($S))", RuntimeException.class, message),
-            CodeBlock.of(".orElseThrow($1N -> new $2T($1N))", left, RuntimeException.class));
+            checkConverterError(c.parameter()));
       case OPTIONAL:
         return List.of(
-            CodeBlock.of(".map(e -> e.orElseThrow($1N -> new $2T($1N)))", left, RuntimeException.class),
+            CodeBlock.of(".map(e -> e$L)", checkConverterError(c.parameter())),
             CodeBlock.of(".findAny()"));
       case REPEATABLE:
         return List.of(
-            CodeBlock.of(".map(e -> e.orElseThrow($1N -> new $2T($1N)))", left, RuntimeException.class),
+            CodeBlock.of(".map(e -> e$L)", checkConverterError(c.parameter())),
             CodeBlock.of(".collect($T.toList())", Collectors.class));
       case FLAG:
         return List.of(CodeBlock.of(".findAny().isPresent()"));
       default:
-        throw new IllegalArgumentException("unexpected skew: " + parameter.skew());
+        throw new IllegalArgumentException("unexpected skew: " + c.skew());
     }
   }
 
-  private List<CodeBlock> tailExpressionParameter(ConvertedParameter<PositionalParameter> parameter) {
-    switch (parameter.skew()) {
+  private List<CodeBlock> tailExpressionParameter(ConvertedParameter<PositionalParameter> c) {
+    switch (c.skew()) {
       case REQUIRED:
-        String paramLabel = styler.bold(parameter.paramLabel()).orElse(parameter.paramLabel());
+        String paramLabel = styler.bold(c.paramLabel()).orElse(c.paramLabel());
         return List.of(CodeBlock.of(".orElseThrow(() -> new $T($S))",
             RuntimeException.class, "Missing required parameter: " + paramLabel),
-            CodeBlock.of(".orElseThrow($1N -> new $2T($1N))", left, RuntimeException.class));
+            checkConverterError(c.parameter()));
       case OPTIONAL:
-        return List.of(CodeBlock.of(".map(e -> e.orElseThrow($1N -> new $2T($1N)))", left, RuntimeException.class));
+        return List.of(CodeBlock.of(".map(e -> e$L)", checkConverterError(c.parameter())));
       default:
-        throw new IllegalArgumentException("unexpected skew: " + parameter.skew());
+        throw new IllegalArgumentException("unexpected skew: " + c.skew());
     }
   }
 
@@ -187,5 +187,16 @@ public class BuildMethod extends Cached<MethodSpec> {
       result.unindent();
     }
     return result.build();
+  }
+
+  private CodeBlock checkConverterError(NamedOption option) {
+    String message = "while converting option "
+        + option.paramLabel() + " (" + String.join(", ", option.names()) + "): ";
+    return CodeBlock.of(".orElseThrow($1N -> new $2T($3S + $1N))", left, RuntimeException.class, message);
+  }
+
+  private CodeBlock checkConverterError(PositionalParameter parameter) {
+    String message = "while converting parameter " + parameter.paramLabel() + ": ";
+    return CodeBlock.of(".orElseThrow($1N -> new $2T($3S + $1N))", left, RuntimeException.class, message);
   }
 }

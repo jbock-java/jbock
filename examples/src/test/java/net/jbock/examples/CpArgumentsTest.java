@@ -2,12 +2,12 @@ package net.jbock.examples;
 
 import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CpArgumentsTest {
 
@@ -22,10 +22,10 @@ class CpArgumentsTest {
   @Test
   void enumValuesInMessage() {
     CpArguments_Parser.ParseResult result = new CpArguments_Parser().parse(new String[]{"a", "b", "--backup", "CLOUD"});
-    Assertions.assertTrue(result instanceof CpArguments_Parser.ParsingFailed);
+    assertTrue(result instanceof CpArguments_Parser.ParsingFailed);
     CpArguments_Parser.ParsingFailed failure = (CpArguments_Parser.ParsingFailed) result;
     String message = failure.getError().getMessage();
-    Assertions.assertEquals("No enum constant net.jbock.examples.CpArguments.Control.CLOUD [NONE, NUMBERED, EXISTING, SIMPLE]", message);
+    assertEquals("while converting option BACKUP (--backup): No enum constant net.jbock.examples.CpArguments.Control.CLOUD [NONE, NUMBERED, EXISTING, SIMPLE]", message);
   }
 
   @Test

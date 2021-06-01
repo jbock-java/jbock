@@ -29,7 +29,7 @@ class AdditionArgumentsTest {
   @Test
   void wrongNumber() {
     f.assertThat("--", "-a", "2").failsWithMessage(
-        "For input string: \"-a\"");
+        "while converting parameter A: For input string: \"-a\"");
   }
 
   @Test
