@@ -77,14 +77,22 @@ public @interface Command {
    * <em>and</em> this is also the only token in the input array,
    * then this token is interpreted as the name of an options-file,
    * containing lines of {@code UTF-8} encoded tokens.
-   * Trailing empty lines, or lines starting with a hashtag character, are ignored.
-   * Tokens are left-trimmed, but not right-trimmed.
-   * Spaces, newlines and hashtags can be quoted with a backslash.
-   * A literal backslash character must be escaped as a double backslash.</p>
+   * Trailing empty lines are ignored.
+   * <p>The following escape sequences are recognized:</p>
+   * <table>
+   *   <thead><tr><td><b>Code</b></td><td><b>Meaning</b></td></tr></thead>
+   *   <tr><td>{@code \\}</td><td>backslash</td></tr>
+   *   <tr><td>{@code \n}</td><td>newline</td></tr>
+   *   <tr><td>{@code \r}</td><td>carriage return</td></tr>
+   *   <tr><td>{@code \t}</td><td>horizontal tab</td></tr>
+   * </table>
+   * <p>An unpaired backslash at the end of a line prevents
+   * the newline from being read.</p>
    * <p>Note: Even if set to {@code true},
    * and the user wants to pass exactly one positional parameter
-   * that starts with an {@code @},
-   * they can still prevent {@code @file} expansion, by escaping with {@code "--"}.</p>
+   * that starts with an {@code @} character,
+   * they can still prevent the {@code @file} expansion,
+   * by passing {@code --} as the first token.</p>
    *
    * @return {@code true} to enable the {@code @file} expansion
    */
