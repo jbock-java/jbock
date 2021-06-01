@@ -1,9 +1,9 @@
 package net.jbock.convert.reference;
 
 import net.jbock.common.SafeElements;
-import net.jbock.processor.EvaluatingProcessor;
 import net.jbock.common.TypeTool;
 import net.jbock.either.Either;
+import net.jbock.processor.EvaluatingProcessor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 

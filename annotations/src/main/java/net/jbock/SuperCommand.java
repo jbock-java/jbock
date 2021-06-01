@@ -97,7 +97,7 @@ public @interface SuperCommand {
    * <p>An unpaired backslash at the end of a line prevents
    * the newline from being read.</p>
    *
-   * @return {@code true} to enable the {@code @file} expansion
+   * @return {@code false} to disable the {@code @file} expansion
    */
-  boolean expandAtSign() default false;
+  boolean expandAtSign() default true;
 }

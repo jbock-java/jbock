@@ -22,6 +22,7 @@ public class SourceElement {
   private final List<Modifier> accessModifiers;
   private final String programName;
   private final ClassName generatedClass;
+  private final ClassName atFileReaderClass;
   private final ClassName itemType;
 
   private SourceElement(
@@ -30,12 +31,14 @@ public class SourceElement {
       List<Modifier> accessModifiers,
       String programName,
       ClassName generatedClass,
+      ClassName atFileReaderClass,
       ClassName itemType) {
     this.sourceElement = sourceElement;
     this.parserFlavour = parserFlavour;
     this.accessModifiers = accessModifiers;
     this.programName = programName;
     this.generatedClass = generatedClass;
+    this.atFileReaderClass = atFileReaderClass;
     this.itemType = itemType;
   }
 
@@ -49,9 +52,12 @@ public class SourceElement {
     ClassName generatedClass = ClassName.get(typeElement)
         .topLevelClassName()
         .peerClass(generatedClassName);
+    ClassName atFileParserClass = ClassName.get(typeElement)
+        .topLevelClassName()
+        .peerClass("__" + generatedClassName + "_AtFileReader");
     ClassName itemType = generatedClass.nestedClass("Item");
     return new SourceElement(typeElement, parserFlavour, accessModifiers,
-        programName, generatedClass, itemType);
+        programName, generatedClass, atFileParserClass, itemType);
   }
 
   public TypeElement element() {
@@ -100,6 +106,10 @@ public class SourceElement {
 
   public ClassName generatedClass() {
     return generatedClass;
+  }
+
+  public ClassName atFileReaderType() {
+    return atFileReaderClass;
   }
 
   public ClassName itemType() {

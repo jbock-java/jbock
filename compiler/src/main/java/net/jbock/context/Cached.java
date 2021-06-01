@@ -1,12 +1,12 @@
 package net.jbock.context;
 
-abstract class Cached<E> {
+public abstract class Cached<E> {
 
   private E instance;
 
   abstract E define();
 
-  final E get() {
+  public final E get() {
     if (instance == null) {
       instance = define();
     }

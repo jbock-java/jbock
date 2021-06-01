@@ -122,6 +122,6 @@ public final class GeneratedClass {
     return spec.addModifiers(FINAL)
         .addOriginatingElement(sourceElement.element())
         .addModifiers(sourceElement.accessModifiers().toArray(new Modifier[0]))
-        .addAnnotation(generatedAnnotation.create()).build();
+        .addAnnotation(generatedAnnotation.get()).build();
   }
 }

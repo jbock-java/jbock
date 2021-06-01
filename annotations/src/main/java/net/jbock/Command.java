@@ -94,7 +94,7 @@ public @interface Command {
    * they can still prevent the {@code @file} expansion,
    * by passing {@code --} as the first token.</p>
    *
-   * @return {@code true} to enable the {@code @file} expansion
+   * @return {@code false} to disable the {@code @file} expansion
    */
-  boolean expandAtSign() default false;
+  boolean expandAtSign() default true;
 }

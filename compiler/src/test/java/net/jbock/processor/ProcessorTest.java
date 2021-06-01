@@ -461,7 +461,7 @@ class ProcessorTest {
   void simpleInt() {
     JavaFileObject javaFile = fromSource(
         "@Command(description = \"y\", descriptionKey = \"y\")",
-        "abstract class MyArguments {",
+        "abstract class Arguments {",
         "",
         "  @Option(names = \"--x\", description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
         "  abstract int aRequiredInt();",

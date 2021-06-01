@@ -64,7 +64,7 @@ public class ParseResult {
   }
 
   private TypeSpec defineErrorResult() {
-    ParameterSpec paramError = builder(RuntimeException.class, "error").build();
+    ParameterSpec paramError = builder(Exception.class, "error").build();
     FieldSpec fieldError = FieldSpec.builder(paramError.type, paramError.name, PRIVATE, FINAL).build();
     return classBuilder(generatedTypes.parsingFailedType())
         .superclass(generatedTypes.parseResultType())

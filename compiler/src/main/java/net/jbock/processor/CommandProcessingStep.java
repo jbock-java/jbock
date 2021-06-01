@@ -90,7 +90,8 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .create();
     SourceFileGenerator sourceFileGenerator = component.sourceFileGenerator();
     component.processor().generate()
-        .accept(this::printFailures, sourceFileGenerator::write);
+        .accept(this::printFailures, types ->
+            types.forEach(sourceFileGenerator::write));
   }
 
   private Either<List<ValidationFailure>, SourceElement> validateSourceElement(
