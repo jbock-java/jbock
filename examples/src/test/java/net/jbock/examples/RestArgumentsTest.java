@@ -20,7 +20,7 @@ import static org.mockito.Mockito.when;
 class RestArgumentsTest {
 
   private final ParserTestFixture<RestArguments> f =
-      ParserTestFixture.create(new RestArguments_Parser());
+      ParserTestFixture.create(new RestArgumentsParser());
 
   private final Map<String, String> messages = new HashMap<>();
 

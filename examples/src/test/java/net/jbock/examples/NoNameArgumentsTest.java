@@ -11,7 +11,7 @@ import static java.util.Collections.emptyList;
 class NoNameArgumentsTest {
 
   private final ParserTestFixture<NoNameArguments> f =
-      ParserTestFixture.create(new NoNameArguments_Parser());
+      ParserTestFixture.create(new NoNameArgumentsParser());
 
   @Test
   void testDifferentOrder() {

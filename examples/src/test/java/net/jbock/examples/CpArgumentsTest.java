@@ -1,7 +1,10 @@
 package net.jbock.examples;
 
+import net.jbock.either.Either;
 import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
+import net.jbock.util.NotSuccess;
+import net.jbock.util.SyntaxError;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -12,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CpArgumentsTest {
 
   private final ParserTestFixture<CpArguments> f =
-      ParserTestFixture.create(new CpArguments_Parser());
+      ParserTestFixture.create(new CpArgumentsParser());
 
   @Test
   void errorMissingSource() {
@@ -21,11 +24,13 @@ class CpArgumentsTest {
 
   @Test
   void enumValuesInMessage() {
-    CpArguments_Parser.ParseResult result = new CpArguments_Parser().parse(new String[]{"a", "b", "--backup", "CLOUD"});
-    assertTrue(result instanceof CpArguments_Parser.ParsingFailed);
-    CpArguments_Parser.ParsingFailed failure = (CpArguments_Parser.ParsingFailed) result;
-    String message = failure.getError().getMessage();
-    assertEquals("while converting option BACKUP (--backup): No enum constant net.jbock.examples.CpArguments.Control.CLOUD [NONE, NUMBERED, EXISTING, SIMPLE]", message);
+    Either<NotSuccess, CpArguments> result = new CpArgumentsParser().parse(new String[]{"a", "b", "--backup", "CLOUD"});
+    assertTrue(result.getLeft().isPresent());
+    assertTrue(result.getLeft().get() instanceof SyntaxError);
+    SyntaxError failure = (SyntaxError) result.getLeft().get();
+    String message = failure.message();
+    assertEquals("while converting option BACKUP (--backup): No enum constant " +
+        "net.jbock.examples.CpArguments.Control.CLOUD [NONE, NUMBERED, EXISTING, SIMPLE]", message);
   }
 
   @Test

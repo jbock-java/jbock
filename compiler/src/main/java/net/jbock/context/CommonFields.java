@@ -9,6 +9,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.NotSuccess;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class CommonFields {
 
   private static final int DEFAULT_WRAP_AFTER = 80;
 
-  private final FieldSpec exitHookField;
+  private final FieldSpec exitHook;
   private final FieldSpec optionNames;
   private final FieldSpec params;
   private final FieldSpec optionParsers;
@@ -53,11 +54,11 @@ public class CommonFields {
       .build();
 
   private CommonFields(
-      FieldSpec exitHookField,
+      FieldSpec exitHook,
       FieldSpec optionNames,
       FieldSpec params,
       FieldSpec optionParsers) {
-    this.exitHookField = exitHookField;
+    this.exitHook = exitHook;
     this.optionNames = optionNames;
     this.params = params;
     this.optionParsers = optionParsers;
@@ -68,8 +69,9 @@ public class CommonFields {
       SourceElement sourceElement,
       PositionalParameters positionalParameters,
       NamedOptions namedOptions) {
-    ParameterizedTypeName consumer = ParameterizedTypeName.get(ClassName.get(Consumer.class),
-        generatedTypes.parseResultType());
+    ParameterizedTypeName consumer = ParameterizedTypeName.get(
+        ClassName.get(Consumer.class),
+        ClassName.get(NotSuccess.class));
     ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
     code.add(generatedTypes.helpRequestedType()
@@ -78,7 +80,7 @@ public class CommonFields {
             .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, helpRequestedType)
             .unindent().build())
         .orElseGet(() -> CodeBlock.of("$N -> $T.exit(1)", result, System.class)));
-    FieldSpec exitHookField = FieldSpec.builder(consumer, "exitHook")
+    FieldSpec exitHook = FieldSpec.builder(consumer, "exitHook")
         .addModifiers(PRIVATE)
         .initializer(code.build())
         .build();
@@ -97,11 +99,11 @@ public class CommonFields {
     FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.itemType(), generatedTypes.optionParserType()), "optionParsers")
         .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.itemType())
         .build();
-    return new CommonFields(exitHookField, optionsByName, paramParsers, optionParsers);
+    return new CommonFields(exitHook, optionsByName, paramParsers, optionParsers);
   }
 
   public FieldSpec exitHook() {
-    return exitHookField;
+    return exitHook;
   }
 
   public FieldSpec err() {

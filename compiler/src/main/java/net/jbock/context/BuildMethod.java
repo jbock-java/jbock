@@ -60,7 +60,7 @@ public class BuildMethod extends Cached<MethodSpec> {
       ParameterSpec p = c.asParam();
       spec.addStatement("$T $N = $L", p.type, p, convertExpressionRepeatableParameter(c));
     });
-    generatedTypes.parseResultWithRestType().ifPresentOrElse(parseResultWithRestType -> {
+    generatedTypes.superResultType().ifPresentOrElse(parseResultWithRestType -> {
           ParameterSpec result = ParameterSpec.builder(sourceElement.typeName(), "result").build();
           ParameterSpec restArgs = ParameterSpec.builder(sourceElement.typeName(), "restArgs").build();
           spec.addStatement("$T $N = new $T($L)", result.type, result, generatedTypes.implType(),

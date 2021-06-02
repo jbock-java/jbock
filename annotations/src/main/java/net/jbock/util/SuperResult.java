@@ -1,4 +1,4 @@
-package net.jbock.result;
+package net.jbock.util;
 
 /**
  * This class represents parsing success for a

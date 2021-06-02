@@ -8,7 +8,7 @@ import java.util.Optional;
 class SimpleArgumentsTest {
 
   private final ParserTestFixture<SimpleArguments> f =
-      ParserTestFixture.create(new SimpleArguments_Parser());
+      ParserTestFixture.create(new SimpleArgumentsParser());
 
   @Test
   void invalidOptions() {

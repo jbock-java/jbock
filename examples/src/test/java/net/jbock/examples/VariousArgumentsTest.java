@@ -1,5 +1,6 @@
 package net.jbock.examples;
 
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.math.BigDecimal;
@@ -8,13 +9,13 @@ import java.nio.file.Paths;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.fail;
 
 class VariousArgumentsTest {
 
   @Test
   void bigDecimal() {
-    VariousArguments_Parser.ParseResult parsed = new VariousArguments_Parser().parse(new String[]{
+    VariousArguments args = new VariousArgumentsParser().parse(new String[]{
         "--bigDecimal", "3.14159265358979323846264338327950288419716939937510",
         "--bigInteger", "60221407600000000000000",
         "--path", "/home",
@@ -28,9 +29,7 @@ class VariousArgumentsTest {
         "2001-02-01",
         "http://localhost:8080",
         "^[abc]*$"
-    });
-    assertTrue(parsed instanceof VariousArguments_Parser.ParsingSuccess);
-    VariousArguments args = ((VariousArguments_Parser.ParsingSuccess) parsed).getResult();
+    }).orElseThrow(notSuccess -> Assertions.<RuntimeException>fail("expecting success but was " + notSuccess));
     assertEquals(new BigDecimal("3.14159265358979323846264338327950288419716939937510"), args.bigDecimal());
     assertEquals(Optional.of(Paths.get("/home")), args.pathPos());
     assertEquals(URI.create("http://localhost:8080"), args.uri());

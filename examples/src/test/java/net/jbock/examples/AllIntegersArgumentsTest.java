@@ -12,7 +12,7 @@ import static java.util.Collections.emptyList;
 class AllIntegersArgumentsTest {
 
   private final ParserTestFixture<AllIntegersArguments> f =
-      ParserTestFixture.create(new AllIntegersArguments_Parser());
+      ParserTestFixture.create(new AllIntegersArgumentsParser());
 
   @Test
   void listOfInteger() {

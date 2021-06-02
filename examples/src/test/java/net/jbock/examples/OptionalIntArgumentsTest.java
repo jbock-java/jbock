@@ -1,5 +1,8 @@
 package net.jbock.examples;
 
+import net.jbock.either.Either;
+import net.jbock.util.HelpRequested;
+import net.jbock.util.NotSuccess;
 import org.junit.jupiter.api.Test;
 
 import java.util.OptionalInt;
@@ -11,13 +14,14 @@ class OptionalIntArgumentsTest {
 
   @Test
   void testPresent() {
-    OptionalIntArguments args = new OptionalIntArguments_Parser().parseOrExit(new String[]{"-a", "1"});
+    OptionalIntArguments args = new OptionalIntArgumentsParser().parseOrExit(new String[]{"-a", "1"});
     assertEquals(OptionalInt.of(1), args.a());
   }
 
   @Test
   void testAbsent() {
-    OptionalIntArguments_Parser.ParseResult result = new OptionalIntArguments_Parser().parse(new String[]{});
-    assertTrue(result instanceof OptionalIntArguments_Parser.HelpRequested);
+    Either<NotSuccess, OptionalIntArguments> result = new OptionalIntArgumentsParser().parse(new String[]{});
+    assertTrue(result.getLeft().isPresent());
+    assertTrue(result.getLeft().get() instanceof HelpRequested);
   }
 }

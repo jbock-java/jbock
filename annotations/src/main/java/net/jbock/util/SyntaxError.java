@@ -1,4 +1,4 @@
-package net.jbock.result;
+package net.jbock.util;
 
 /**
  * Indicates a parsing syntax error, for example:
@@ -10,7 +10,7 @@ package net.jbock.result;
  *   <li>excess parameter</li>
  * </ul>
  */
-public final class SyntaxError implements NotSuccess {
+public final class SyntaxError implements Failure {
 
   private final String message;
 
@@ -18,7 +18,7 @@ public final class SyntaxError implements NotSuccess {
     this.message = message;
   }
 
-  public String getMessage() {
+  public String message() {
     return message;
   }
 }

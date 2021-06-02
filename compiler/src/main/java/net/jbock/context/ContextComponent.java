@@ -8,8 +8,6 @@ public interface ContextComponent {
 
   GeneratedClass generatedClass();
 
-  AtFileReader atFileReader();
-
   @Component.Factory
   interface Builder {
 

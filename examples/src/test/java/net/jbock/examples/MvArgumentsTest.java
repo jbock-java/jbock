@@ -6,7 +6,7 @@ import org.junit.jupiter.api.Test;
 class MvArgumentsTest {
 
   private final ParserTestFixture<MvArguments> f =
-      ParserTestFixture.create(new MvArguments_Parser());
+      ParserTestFixture.create(new MvArgumentsParser());
 
   @Test
   void notEnoughArguments() {

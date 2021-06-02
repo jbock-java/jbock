@@ -8,7 +8,7 @@ import java.util.Optional;
 class GradleArgumentsFooTest {
 
   private final ParserTestFixture<GradleArguments.Foo> f =
-      ParserTestFixture.create(new GradleArguments_Foo_Parser());
+      ParserTestFixture.create(new GradleArguments_FooParser());
 
   @Test
   void testParserForNestedClass() {

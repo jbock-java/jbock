@@ -44,28 +44,19 @@ public class ParseOrExitMethod {
   MethodSpec get() {
 
     ParameterSpec args = builder(STRING_ARRAY, "args").build();
-    ParameterSpec result = builder(generatedTypes.parseResultType(), "result").build();
+    ParameterSpec notSuccess = builder(generatedTypes.parseResultType(), "notSuccess").build();
+
     CodeBlock.Builder code = CodeBlock.builder();
-
-    code.addStatement("$T $N = $N($N)", result.type, result, parseMethod.get(), args);
-
-    code.add("if ($N instanceof $T)\n", result, generatedTypes.parsingSuccessWrapperType()).indent()
-        .addStatement("return (($T) $N).$L()",
-            generatedTypes.parsingSuccessWrapperType(),
-            result,
-            sourceElement.resultMethodName())
-        .unindent();
-
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> code
-        .beginControlFlow("if ($N instanceof $T)", result, helpRequestedType)
+        .beginControlFlow("if ($N instanceof $T)", notSuccess, helpRequestedType)
         .addStatement("$N()", printUsageDocumentationMethod.get())
         .addStatement("$N.flush()", commonFields.err())
-        .addStatement("$N.accept($N)", commonFields.exitHook(), result)
+        .addStatement("$N.accept($N)", commonFields.exitHook(), notSuccess)
         .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
         .endControlFlow());
 
-    code.addStatement("$N.println($S + (($T) $N).getError().getMessage())", commonFields.err(),
-        styler.red("ERROR:") + " ", generatedTypes.parsingFailedType(), result);
+    code.addStatement("$N.println($S + (($T) $N).message())", commonFields.err(),
+        styler.red("ERROR:") + " ", generatedTypes.parsingFailedType(), notSuccess);
     if (sourceElement.helpEnabled()) {
       code.addStatement("$N.println($T.join($S, $N($S)))",
           commonFields.err(), STRING, " ", usageMethod.get(), "Usage:");
@@ -78,14 +69,18 @@ public class ParseOrExitMethod {
           "Type " + styler.bold(helpSuggestion).orElseGet(() -> '"' + helpSuggestion + '"') +
               " for more information.");
     }
-    code.addStatement("$N.flush()", commonFields.err())
-        .addStatement("$N.accept($N)", commonFields.exitHook(), result)
-        .addStatement("throw new $T($S)", RuntimeException.class, "parsing error");
+    code.addStatement("$N.flush()", commonFields.err());
+    code.addStatement("$N.accept($N)", commonFields.exitHook(), notSuccess);
+    code.addStatement("throw new $T($S)", RuntimeException.class, "parsing error");
 
     return methodBuilder("parseOrExit").addParameter(args)
         .addModifiers(sourceElement.accessModifiers())
         .returns(generatedTypes.parseSuccessType())
-        .addCode(code.build())
+        .addCode(CodeBlock.builder()
+            .add("return $N($N)", parseMethod.get(), args)
+            .add(".orElseThrow($N -> {\n", notSuccess).indent()
+            .add(code.build()).unindent()
+            .add("});").build())
         .build();
   }
 }

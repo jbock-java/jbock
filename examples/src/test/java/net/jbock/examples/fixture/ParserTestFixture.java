@@ -1,5 +1,8 @@
 package net.jbock.examples.fixture;
 
+import net.jbock.either.Either;
+import net.jbock.util.NotSuccess;
+
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
@@ -44,7 +47,7 @@ public final class ParserTestFixture<E> {
 
     Parser<E> withTerminalWidth(int chars);
 
-    Parser<E> withExitHook(Consumer<?> exitHook);
+    Parser<E> withExitHook(Consumer<NotSuccess> exitHook);
   }
 
   private final Parser<E> parser;
@@ -78,10 +81,9 @@ public final class ParserTestFixture<E> {
         try {
           Method parseMethod = builder.getClass().getDeclaredMethod("parse", args.getClass());
           parseMethod.setAccessible(true);
-          Object parseResult = parseMethod.invoke(builder, new Object[]{args});
-          Method resultMethod = parseResult.getClass().getDeclaredMethod("getResult");
-          resultMethod.setAccessible(true);
-          return Optional.of((E) resultMethod.invoke(parseResult));
+          Either<NotSuccess, E> parseResult = (Either<NotSuccess, E>)
+              parseMethod.invoke(builder, new Object[]{args});
+          return parseResult.getRight();
         } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
           return Optional.empty();
         }
@@ -116,7 +118,7 @@ public final class ParserTestFixture<E> {
       }
 
       @Override
-      public Parser<E> withExitHook(Consumer<?> exitHook) {
+      public Parser<E> withExitHook(Consumer<NotSuccess> exitHook) {
         return callSetter("withExitHook", exitHook, Consumer.class);
       }
     });

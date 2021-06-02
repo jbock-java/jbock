@@ -18,11 +18,9 @@ public final class GeneratedClass {
 
   private final ParseMethod parseMethod;
   private final Impl impl;
-  private final GeneratedTypes generatedTypes;
   private final OptionParser optionParser;
   private final OptionEnum optionEnum;
   private final StatefulParser statefulParser;
-  private final ParseResult parseResult;
   private final SourceElement sourceElement;
   private final NamedOptions namedOptions;
   private final AnyDescriptionKeys anyDescriptionKeys;
@@ -31,7 +29,6 @@ public final class GeneratedClass {
   private final ParseOrExitMethod parseOrExitMethod;
   private final PrintItemDocumentationMethod printItemDocumentationMethod;
   private final MakeLinesMethod makeLinesMethod;
-  private final ParseResultWithRest parseResultWithRest;
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
   private final UsageMethod usageMethod;
   private final Withers withers;
@@ -43,11 +40,9 @@ public final class GeneratedClass {
       ParseMethod parseMethod,
       SourceElement sourceElement,
       Impl impl,
-      GeneratedTypes generatedTypes,
       OptionParser optionParser,
       OptionEnum optionEnum,
       StatefulParser statefulParser,
-      ParseResult parseResult,
       NamedOptions namedOptions,
       AnyDescriptionKeys anyDescriptionKeys,
       PrintUsageDocumentationMethod printUsageDocumentationMethod,
@@ -55,19 +50,17 @@ public final class GeneratedClass {
       ParseOrExitMethod parseOrExitMethod,
       PrintItemDocumentationMethod printItemDocumentationMethod,
       MakeLinesMethod makeLinesMethod,
-      ParseResultWithRest parseResultWithRest,
       ReadOptionArgumentMethod readOptionArgumentMethod,
-      UsageMethod usageMethod, Withers withers,
+      UsageMethod usageMethod,
+      Withers withers,
       GeneratedAnnotation generatedAnnotation,
       ReadOptionNameMethod readOptionNameMethod) {
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
     this.impl = impl;
-    this.generatedTypes = generatedTypes;
     this.optionParser = optionParser;
     this.optionEnum = optionEnum;
     this.statefulParser = statefulParser;
-    this.parseResult = parseResult;
     this.namedOptions = namedOptions;
     this.anyDescriptionKeys = anyDescriptionKeys;
     this.printUsageDocumentationMethod = printUsageDocumentationMethod;
@@ -75,7 +68,6 @@ public final class GeneratedClass {
     this.parseOrExitMethod = parseOrExitMethod;
     this.printItemDocumentationMethod = printItemDocumentationMethod;
     this.makeLinesMethod = makeLinesMethod;
-    this.parseResultWithRest = parseResultWithRest;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.usageMethod = usageMethod;
     this.withers = withers;
@@ -89,8 +81,8 @@ public final class GeneratedClass {
         .addMethod(parseOrExitMethod.get())
         .addMethod(withers.withTerminalWidthMethod())
         .addMethod(withers.withMessagesMethod())
-        .addMethod(withers.withExitHookMethod())
         .addMethod(withers.withErrorStreamMethod())
+        .addMethod(withers.withExitHookMethod())
         .addMethod(printUsageDocumentationMethod.get())
         .addMethod(printItemDocumentationMethod.get())
         .addMethod(makeLinesMethod.get())
@@ -104,20 +96,15 @@ public final class GeneratedClass {
 
     spec.addField(commonFields.err());
     spec.addField(commonFields.terminalWidth());
-    spec.addField(commonFields.exitHook());
     if (anyDescriptionKeys.anyDescriptionKeysAtAll()) {
       spec.addField(commonFields.messages());
     }
+    spec.addField(commonFields.exitHook());
 
     spec.addType(statefulParser.get())
         .addType(optionEnum.define())
         .addType(impl.define())
-        .addTypes(optionParser.define())
-        .addTypes(parseResult.defineResultTypes());
-
-    generatedTypes.parseResultWithRestType()
-        .map(parseResultWithRest::define)
-        .ifPresent(spec::addType);
+        .addTypes(optionParser.define());
 
     return spec.addModifiers(FINAL)
         .addOriginatingElement(sourceElement.element())

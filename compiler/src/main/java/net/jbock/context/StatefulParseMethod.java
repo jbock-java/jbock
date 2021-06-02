@@ -1,6 +1,5 @@
 package net.jbock.context;
 
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
@@ -44,16 +43,18 @@ public class StatefulParseMethod {
 
   MethodSpec parseMethod() {
 
-    return MethodSpec.methodBuilder("parse")
-        .addParameter(it)
-        .addCode(generatedTypes.parseResultWithRestType()
-            .map(this::superCommandCode)
-            .orElseGet(this::regularCode))
+    MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
+    if (sourceElement.isSuperCommand()) {
+      spec.addCode(superCommandCode());
+    } else {
+      spec.addCode(regularCode());
+    }
+    return spec.addParameter(it)
         .returns(generatedTypes.statefulParserType())
         .build();
   }
 
-  private CodeBlock superCommandCode(ClassName parseResultWithRestType) {
+  private CodeBlock superCommandCode() {
     CodeBlock.Builder code = initVariables();
 
     // begin parsing loop

@@ -8,7 +8,7 @@ import java.util.Optional;
 class AdditionArgumentsTest {
 
   private final ParserTestFixture<AdditionArguments> f =
-      ParserTestFixture.create(new AdditionArguments_Parser());
+      ParserTestFixture.create(new AdditionArgumentsParser());
 
   @Test
   void optionalAbsent() {

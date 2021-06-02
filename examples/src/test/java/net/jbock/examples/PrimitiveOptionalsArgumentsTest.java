@@ -12,7 +12,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class PrimitiveOptionalsArgumentsTest {
 
   private final ParserTestFixture<PrimitiveOptionalsArguments> f =
-      ParserTestFixture.create(new PrimitiveOptionalsArguments_Parser());
+      ParserTestFixture.create(new PrimitiveOptionalsArgumentsParser());
 
   @Test
   void simpleTest() {

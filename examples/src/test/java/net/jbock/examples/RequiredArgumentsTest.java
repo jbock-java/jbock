@@ -1,16 +1,18 @@
 package net.jbock.examples;
 
-import net.jbock.examples.RequiredArguments_Parser.ParseResult;
+import net.jbock.either.Either;
 import net.jbock.examples.fixture.ParserTestFixture;
+import net.jbock.util.HelpRequested;
+import net.jbock.util.NotSuccess;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Collections.emptyList;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RequiredArgumentsTest {
 
   private final ParserTestFixture<RequiredArguments> f =
-      ParserTestFixture.create(new RequiredArguments_Parser());
+      ParserTestFixture.create(new RequiredArgumentsParser());
 
   @Test
   void success() {
@@ -19,8 +21,9 @@ class RequiredArgumentsTest {
 
   @Test
   void errorDirMissing() {
-    ParseResult result = new RequiredArguments_Parser().parse(new String[0]);
-    assertTrue(result instanceof RequiredArguments_Parser.HelpRequested);
+    Either<NotSuccess, RequiredArguments> result = new RequiredArgumentsParser().parse(new String[0]);
+    Assertions.assertTrue(result.getLeft().isPresent());
+    Assertions.assertTrue(result.getLeft().get() instanceof HelpRequested);
   }
 
   @Test

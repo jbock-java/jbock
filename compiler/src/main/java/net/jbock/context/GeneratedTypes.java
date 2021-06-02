@@ -1,12 +1,17 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.ClassName;
+import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
+import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.HelpRequested;
+import net.jbock.util.NotSuccess;
+import net.jbock.util.SuperResult;
+import net.jbock.util.SyntaxError;
 
 import javax.inject.Inject;
 import java.util.Optional;
-import java.util.function.Function;
 
 @ContextScope
 public class GeneratedTypes {
@@ -21,15 +26,17 @@ public class GeneratedTypes {
   }
 
   public TypeName parseSuccessType() {
-    Optional<TypeName> className = parseResultWithRestType().map(Function.identity());
-    return className.orElse(sourceElement.typeName());
+    return superResultType().orElse(sourceElement.typeName());
   }
 
-  public Optional<ClassName> parseResultWithRestType() {
+  public Optional<TypeName> superResultType() {
     if (!sourceElement.isSuperCommand()) {
       return Optional.empty();
     }
-    return Optional.of(generatedClass.nestedClass(sourceElement.element().getSimpleName() + "WithRest"));
+    ParameterizedTypeName type = ParameterizedTypeName.get(
+        ClassName.get(SuperResult.class),
+        sourceElement.typeName());
+    return Optional.of(type);
   }
 
   public ClassName optionParserType() {
@@ -56,21 +63,20 @@ public class GeneratedTypes {
     return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
   }
 
-  public ClassName parseResultType() {
-    return generatedClass.nestedClass("ParseResult");
-  }
-
-  public ClassName parsingSuccessWrapperType() {
-    return generatedClass.nestedClass("ParsingSuccess");
+  public TypeName parseResultType() {
+    return ParameterizedTypeName.get(
+        ClassName.get(Either.class),
+        ClassName.get(NotSuccess.class),
+        parseSuccessType());
   }
 
   public ClassName parsingFailedType() {
-    return generatedClass.nestedClass("ParsingFailed");
+    return ClassName.get(SyntaxError.class);
   }
 
   public Optional<ClassName> helpRequestedType() {
     return sourceElement.helpEnabled() ?
-        Optional.of(generatedClass.nestedClass("HelpRequested")) :
+        Optional.of(ClassName.get(HelpRequested.class)) :
         Optional.empty();
   }
 }

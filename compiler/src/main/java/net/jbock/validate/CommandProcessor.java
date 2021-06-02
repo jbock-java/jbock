@@ -63,9 +63,6 @@ public class CommandProcessor {
               .create(module);
           List<TypeSpec> typeSpecs = new ArrayList<>();
           typeSpecs.add(component.generatedClass().define());
-          if (sourceElement.expandAtSign()) {
-            typeSpecs.add(component.atFileReader().get());
-          }
           return typeSpecs;
         });
   }

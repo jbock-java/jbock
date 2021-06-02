@@ -3,12 +3,17 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.AtFileReader;
+import net.jbock.util.HelpRequested;
+import net.jbock.util.SyntaxError;
 
 import javax.inject.Inject;
 import java.util.Arrays;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
+import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static net.jbock.common.Constants.STRING_ARRAY;
 import static net.jbock.common.Constants.STRING_ITERATOR;
 
@@ -19,20 +24,17 @@ public class ParseMethod extends Cached<MethodSpec> {
   private final AllParameters allParameters;
   private final SourceElement sourceElement;
   private final BuildMethod buildMethod;
-  private final ReadAtFileMethod readAtFileMethod;
 
   @Inject
   ParseMethod(
       GeneratedTypes generatedTypes,
       AllParameters allParameters,
       SourceElement sourceElement,
-      BuildMethod buildMethod,
-      ReadAtFileMethod readAtFileMethod) {
+      BuildMethod buildMethod) {
     this.generatedTypes = generatedTypes;
     this.allParameters = allParameters;
     this.sourceElement = sourceElement;
     this.buildMethod = buildMethod;
-    this.readAtFileMethod = readAtFileMethod;
   }
 
   @Override
@@ -42,46 +44,42 @@ public class ParseMethod extends Cached<MethodSpec> {
     ParameterSpec e = builder(Exception.class, "e").build();
     CodeBlock.Builder code = CodeBlock.builder();
 
-    generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> {
+    if (sourceElement.helpEnabled()) {
       if (allParameters.anyRequired()) {
         code.add("if ($N.length == 0)\n", args).indent()
-            .addStatement("return new $T()", helpRequestedType)
+            .addStatement("return $T.left(new $T())", Either.class, HelpRequested.class)
             .unindent();
       }
       code.add("if ($1N.length == 1 && $2S.equals($1N[0]))\n", args, "--help").indent()
-          .addStatement("return new $T()", helpRequestedType)
+          .addStatement("return $T.left(new $T())", Either.class, HelpRequested.class)
           .unindent();
-    });
+    }
     ParameterSpec state = builder(generatedTypes.statefulParserType(), "statefulParser").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
-    ParameterSpec result = builder(generatedTypes.parseSuccessType(), "result").build();
+    ParameterSpec atFile = builder(BOOLEAN, "atFile").build();
     code.addStatement("$T $N = new $T()", state.type, state, state.type);
     code.beginControlFlow("try");
     if (sourceElement.expandAtSign()) {
-      code.addStatement("$T $N", it.type, it);
-      code.beginControlFlow("$L", CodeBlock.builder()
-          .add("if ($1N.length == 1 && $1N[0].length() >= 2\n", args)
+      code.addStatement(CodeBlock.builder()
+          .add("$T $N = $N.length == 1\n", BOOLEAN, atFile, args)
           .indent().indent().indent().indent()
-          .add("&& $N[0].startsWith($S))", args, "@")
+          .add("&& $N[0].length() >= 2\n", args)
+          .add("&& $N[0].startsWith($S)", args, "@")
           .unindent().unindent().unindent().unindent().build());
-      code.addStatement("$L", CodeBlock.builder()
-          .add("$N = new $T()\n", it, sourceElement.atFileReaderType())
+      code.addStatement(CodeBlock.builder()
+          .add("$T $N = $N ?\n", STRING_ITERATOR, it, atFile)
           .indent()
-          .add(".$N($N[0].substring(1)).iterator()", readAtFileMethod.get(), args)
+          .add("new $T().readAtFile($N[0].substring(1)).iterator() :\n", AtFileReader.class, args)
+          .add("$T.asList($N).iterator()", Arrays.class, args)
           .unindent().build());
-      code.endControlFlow();
-      code.beginControlFlow("else");
-      code.addStatement("$N = $T.asList($N).iterator()", it, Arrays.class, args);
-      code.endControlFlow();
     } else {
       code.addStatement("$T $N = $T.asList($N).iterator()", it.type, it, Arrays.class, args);
     }
-    code.addStatement("$T $N = $N.parse($N).$N()", result.type, result, state, it, buildMethod.get());
-    code.addStatement("return new $T($N)", generatedTypes.parsingSuccessWrapperType(), result);
+    code.addStatement("return $T.right($N.parse($N).$N())", Either.class, state, it, buildMethod.get());
     code.endControlFlow();
 
     code.beginControlFlow("catch ($T $N)", Exception.class, e)
-        .addStatement("return new $T($N)", generatedTypes.parsingFailedType(), e)
+        .addStatement("return $T.left(new $T($N.getMessage()))", Either.class, SyntaxError.class, e)
         .endControlFlow();
 
     return MethodSpec.methodBuilder("parse").addParameter(args)

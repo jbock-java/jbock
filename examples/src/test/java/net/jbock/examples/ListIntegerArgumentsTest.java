@@ -1,5 +1,8 @@
 package net.jbock.examples;
 
+import net.jbock.either.Either;
+import net.jbock.util.HelpRequested;
+import net.jbock.util.NotSuccess;
 import org.junit.jupiter.api.Test;
 
 import java.util.Collections;
@@ -11,13 +14,14 @@ class ListIntegerArgumentsTest {
 
   @Test
   void testPresent() {
-    ListIntegerArguments args = new ListIntegerArguments_Parser().parseOrExit(new String[]{"-a", "1"});
+    ListIntegerArguments args = new ListIntegerArgumentsParser().parseOrExit(new String[]{"-a", "1"});
     assertEquals(Collections.singletonList(1), args.a());
   }
 
   @Test
   void testAbsent() {
-    ListIntegerArguments_Parser.ParseResult result = new ListIntegerArguments_Parser().parse(new String[]{});
-    assertTrue(result instanceof ListIntegerArguments_Parser.HelpRequested);
+    Either<NotSuccess, ListIntegerArguments> result = new ListIntegerArgumentsParser().parse(new String[]{});
+    assertTrue(result.getLeft().isPresent());
+    assertTrue(result.getLeft().get() instanceof HelpRequested);
   }
 }

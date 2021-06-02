@@ -1,4 +1,4 @@
-package net.jbock.examples;
+package net.jbock.util;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -6,10 +6,9 @@ import org.junit.jupiter.api.Test;
 import java.lang.reflect.Method;
 import java.util.List;
 
-public class AtFileTest {
+class AtFileReaderTest {
 
-  private final __AdditionArguments_Parser_AtFileReader reader =
-      new __AdditionArguments_Parser_AtFileReader();
+  private final AtFileReader reader = new AtFileReader();
 
   @Test
   void testAtFileSyntax() {

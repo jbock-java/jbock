@@ -11,7 +11,7 @@ import static java.util.Collections.emptyList;
 class AllFloatsArgumentsTest {
 
   private final ParserTestFixture<AllFloatsArguments> f =
-      ParserTestFixture.create(new AllFloatsArguments_Parser());
+      ParserTestFixture.create(new AllFloatsArgumentsParser());
 
   @Test
   void listOfInteger() {
@@ -42,5 +42,4 @@ class AllFloatsArgumentsTest {
         "floatObject", 1.5f,
         "primitiveFloat", 1.5f);
   }
-
 }

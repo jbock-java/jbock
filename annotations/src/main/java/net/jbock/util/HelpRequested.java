@@ -1,4 +1,4 @@
-package net.jbock.result;
+package net.jbock.util;
 
 /**
  * This parsing result indicates that the user has passed the

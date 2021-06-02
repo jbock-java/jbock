@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 class CustomMapperArgumentsTest {
 
   private final ParserTestFixture<CustomMapperArguments> f =
-      ParserTestFixture.create(new CustomMapperArguments_Parser());
+      ParserTestFixture.create(new CustomMapperArgumentsParser());
 
   @Test
   void success() {

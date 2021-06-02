@@ -1,15 +1,21 @@
 package net.jbock.examples;
 
-import org.junit.jupiter.api.Assertions;
+import net.jbock.either.Either;
+import net.jbock.util.NotSuccess;
+import net.jbock.util.SuperResult;
+import net.jbock.util.SyntaxError;
 import org.junit.jupiter.api.Test;
+
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HelplessSuperArgumentsTest {
 
-  private final HelplessSuperArguments_Parser parser = new HelplessSuperArguments_Parser();
+  private final HelplessSuperArgumentsParser parser = new HelplessSuperArgumentsParser();
 
   @Test
   void testHelpDisabled() {
-    HelplessSuperArguments_Parser.ParseResult result = parser.parse(new String[]{"--help"});
-    Assertions.assertTrue(result instanceof HelplessSuperArguments_Parser.ParsingFailed);
+    Either<NotSuccess, SuperResult<HelplessSuperArguments>> result = parser.parse(new String[]{"--help"});
+    assertTrue(result.getLeft().isPresent());
+    assertTrue(result.getLeft().get() instanceof SyntaxError);
   }
 }

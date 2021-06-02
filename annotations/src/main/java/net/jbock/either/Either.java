@@ -62,6 +62,10 @@ public abstract class Either<L, R> {
     });
   }
 
+  public abstract Optional<L> getLeft();
+
+  public abstract Optional<R> getRight();
+
   @SuppressWarnings("unchecked")
   static <L, R> Either<L, R> narrow(Either<? extends L, ? extends R> either) {
     return (Either<L, R>) either;
