@@ -4,6 +4,7 @@ import com.squareup.javapoet.TypeSpec;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
+import javax.lang.model.element.Modifier;
 
 public class AtFileReader extends Cached<TypeSpec> {
 
@@ -30,10 +31,12 @@ public class AtFileReader extends Cached<TypeSpec> {
   @Override
   TypeSpec define() {
     return TypeSpec.classBuilder(sourceElement.atFileReaderType())
+        .addModifiers(Modifier.FINAL)
         .addMethod(readAtFileMethod.get())
         .addMethod(readAtLinesMethod.get())
         .addMethod(readTokenFromAtFileMethod.get())
         .addAnnotation(generatedAnnotation.get())
+        .addOriginatingElement(sourceElement.element())
         .build();
   }
 }

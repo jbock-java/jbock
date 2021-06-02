@@ -1,5 +1,6 @@
 package net.jbock.validate;
 
+import com.google.common.base.Preconditions;
 import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.OperationMode;
@@ -33,6 +34,7 @@ public class SourceFileGenerator {
   }
 
   public void write(TypeSpec typeSpec) {
+    Preconditions.checkArgument(typeSpec.originatingElements.size() == 1);
     String packageName = sourceElement.generatedClass().packageName();
     JavaFile javaFile = JavaFile.builder(packageName, typeSpec)
         .skipJavaLangImports(true)
