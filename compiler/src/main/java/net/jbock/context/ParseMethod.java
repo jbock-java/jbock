@@ -19,7 +19,6 @@ public class ParseMethod extends Cached<MethodSpec> {
   private final AllParameters allParameters;
   private final SourceElement sourceElement;
   private final BuildMethod buildMethod;
-  private final AtFileReader atFileReader;
   private final ReadAtFileMethod readAtFileMethod;
 
   @Inject
@@ -28,13 +27,11 @@ public class ParseMethod extends Cached<MethodSpec> {
       AllParameters allParameters,
       SourceElement sourceElement,
       BuildMethod buildMethod,
-      AtFileReader atFileReader,
       ReadAtFileMethod readAtFileMethod) {
     this.generatedTypes = generatedTypes;
     this.allParameters = allParameters;
     this.sourceElement = sourceElement;
     this.buildMethod = buildMethod;
-    this.atFileReader = atFileReader;
     this.readAtFileMethod = readAtFileMethod;
   }
 
@@ -47,26 +44,31 @@ public class ParseMethod extends Cached<MethodSpec> {
 
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> {
       if (allParameters.anyRequired()) {
-        code.add("if ($N.length == 0)\n",
-            args).indent()
+        code.add("if ($N.length == 0)\n", args).indent()
             .addStatement("return new $T()", helpRequestedType)
             .unindent();
       }
-      code.add("if ($1N.length == 1 && $2S.equals($1N[0]))\n",
-          args, "--help").indent()
+      code.add("if ($1N.length == 1 && $2S.equals($1N[0]))\n", args, "--help").indent()
           .addStatement("return new $T()", helpRequestedType)
           .unindent();
     });
-    code.beginControlFlow("try");
     ParameterSpec state = builder(generatedTypes.statefulParserType(), "statefulParser").build();
     ParameterSpec it = builder(STRING_ITERATOR, "it").build();
     ParameterSpec result = builder(generatedTypes.parseSuccessType(), "result").build();
     code.addStatement("$T $N = new $T()", state.type, state, state.type);
+    code.beginControlFlow("try");
     if (sourceElement.expandAtSign()) {
       code.addStatement("$T $N", it.type, it);
-      code.beginControlFlow("if ($1N.length == 1 && $1N[0].length() >= 2 && $1N[0].startsWith($2S))", args, "@");
-      code.addStatement("$N = new $T().$N($N[0].substring(1)).iterator()", it, sourceElement.atFileReaderType(),
-          readAtFileMethod.get(), args);
+      code.beginControlFlow("$L", CodeBlock.builder()
+          .add("if ($1N.length == 1 && $1N[0].length() >= 2\n", args)
+          .indent().indent().indent().indent()
+          .add("&& $N[0].startsWith($S))", args, "@")
+          .unindent().unindent().unindent().unindent().build());
+      code.addStatement("$L", CodeBlock.builder()
+          .add("$N = new $T()\n", it, sourceElement.atFileReaderType())
+          .indent()
+          .add(".$N($N[0].substring(1)).iterator()", readAtFileMethod.get(), args)
+          .unindent().build());
       code.endControlFlow();
       code.beginControlFlow("else");
       code.addStatement("$N = $T.asList($N).iterator()", it, Arrays.class, args);
@@ -79,8 +81,7 @@ public class ParseMethod extends Cached<MethodSpec> {
     code.endControlFlow();
 
     code.beginControlFlow("catch ($T $N)", Exception.class, e)
-        .addStatement("return new $T($N)",
-            generatedTypes.parsingFailedType(), e)
+        .addStatement("return new $T($N)", generatedTypes.parsingFailedType(), e)
         .endControlFlow();
 
     return MethodSpec.methodBuilder("parse").addParameter(args)
