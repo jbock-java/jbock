@@ -1,3 +1,3 @@
-include 'annotations'
+include 'core'
 include 'compiler'
 include 'examples'

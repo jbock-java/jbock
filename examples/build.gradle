@@ -19,9 +19,9 @@ compileJava {
 }
 
 dependencies {
-    implementation project(':annotations')
+    implementation project(':core')
     annotationProcessor project(':compiler')
-    annotationProcessor project(':annotations')
+    annotationProcessor project(':core')
     testImplementation 'org.junit.jupiter:junit-jupiter:5.7.1'
     testImplementation 'org.mockito:mockito-core:3.9.0' //  for mocking resourcebundle
 }
