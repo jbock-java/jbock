@@ -1,10 +1,10 @@
 package net.jbock.convert.matcher;
 
 import net.jbock.convert.ParameterScope;
-import net.jbock.convert.Skew;
 import net.jbock.convert.matching.Match;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.parameter.SourceMethod;
+import net.jbock.usage.Skew;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;

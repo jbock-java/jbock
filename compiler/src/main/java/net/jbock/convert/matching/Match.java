@@ -2,8 +2,8 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.convert.ConvertedParameter;
-import net.jbock.convert.Skew;
 import net.jbock.parameter.AbstractParameter;
+import net.jbock.usage.Skew;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;

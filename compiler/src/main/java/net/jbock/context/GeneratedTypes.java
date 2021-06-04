@@ -5,9 +5,9 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.ParsingError;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.NotSuccess;
+import net.jbock.util.ParsingError;
 import net.jbock.util.SuperResult;
 
 import javax.inject.Inject;

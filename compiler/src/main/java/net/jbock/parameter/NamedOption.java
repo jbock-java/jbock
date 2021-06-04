@@ -28,12 +28,12 @@ public class NamedOption extends AbstractParameter {
 
   @Override
   public final String paramLabel() {
-    return sourceMethod().paramLabel().orElseGet(() -> names.stream()
+    return sourceMethod().paramLabel().or(() -> names.stream()
         .filter(name -> name.startsWith("--"))
         .map(name -> name.substring(2))
         .map(s -> s.toUpperCase(Locale.US))
-        .findFirst()
-        .orElse(enumName().snake('_').toUpperCase(Locale.US)));
+        .findFirst())
+        .orElse(enumName().snake('_').toUpperCase(Locale.US));
   }
 
   public boolean hasUnixName() {

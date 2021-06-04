@@ -2,10 +2,10 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.util.StringConverter;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
+import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;

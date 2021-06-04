@@ -2,7 +2,6 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.util.StringConverter;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.convert.ConvertedParameter;
@@ -11,6 +10,7 @@ import net.jbock.convert.matcher.Matcher;
 import net.jbock.either.Either;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.parameter.SourceMethod;
+import net.jbock.util.StringConverter;
 import net.jbock.validate.ParameterStyle;
 
 import javax.inject.Inject;

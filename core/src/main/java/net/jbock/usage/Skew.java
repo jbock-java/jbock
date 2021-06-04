@@ -1,4 +1,4 @@
-package net.jbock.convert;
+package net.jbock.usage;
 
 import java.util.Locale;
 
