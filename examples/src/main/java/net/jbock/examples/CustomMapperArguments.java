@@ -4,7 +4,7 @@ import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
 import net.jbock.Parameters;
-import net.jbock.StringConverter;
+import net.jbock.util.StringConverter;
 
 import java.math.BigInteger;
 import java.util.ArrayList;

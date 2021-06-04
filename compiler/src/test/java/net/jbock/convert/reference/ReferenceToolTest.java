@@ -17,7 +17,7 @@ class ReferenceToolTest {
     EvaluatingProcessor.source(
         "package test;",
         "",
-        "import net.jbock.StringConverter;",
+        "import net.jbock.util.StringConverter;",
         "import java.util.function.Supplier;",
         "import java.util.function.Function;",
         "import java.util.Set;",

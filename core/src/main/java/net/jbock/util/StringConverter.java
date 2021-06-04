@@ -1,4 +1,4 @@
-package net.jbock;
+package net.jbock.util;
 
 import net.jbock.either.Either;
 
@@ -9,9 +9,12 @@ import static net.jbock.either.Either.right;
 
 /**
  * Converts strings to any arbitrary type.
- * The implementing class must be public, and have a public default constructor.
+ * The implementing class must be public
+ * and have a public default constructor.
+ *
+ * @param <T> converter output type
  */
-public abstract class StringConverter<T> implements Function<String, Either<String, T>> {
+public abstract class StringConverter<T> implements Function<String, Either<ConverterFailure, T>> {
 
   /**
    * Converts a single command line token. This method will be invoked
@@ -25,6 +28,13 @@ public abstract class StringConverter<T> implements Function<String, Either<Stri
    */
   public abstract T convert(String token) throws Exception;
 
+  /**
+   * Factory method to create a {@link StringConverter} from a function.
+   *
+   * @param function a function that should not return null
+   * @param <T> function output type
+   * @return converter instance
+   */
   public static <T> StringConverter<T> create(Function<String, T> function) {
     return new StringConverter<>() {
       @Override
@@ -35,15 +45,15 @@ public abstract class StringConverter<T> implements Function<String, Either<Stri
   }
 
   @Override
-  public final Either<String, T> apply(String s) {
+  public final Either<ConverterFailure, T> apply(String s) {
     try {
       T result = convert(s);
       if (result == null) {
-        return left("converter returned null");
+        return left(new ConverterReturnedNull());
       }
       return right(result);
     } catch (Exception e) {
-      return left(e.getMessage());
+      return left(new ConverterThrewException(e));
     }
   }
 }

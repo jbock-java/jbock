@@ -3,8 +3,8 @@ package net.jbock.examples;
 import net.jbock.either.Either;
 import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
+import net.jbock.util.ConverterError;
 import net.jbock.util.NotSuccess;
-import net.jbock.util.SyntaxError;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
@@ -26,9 +26,9 @@ class CpArgumentsTest {
   void enumValuesInMessage() {
     Either<NotSuccess, CpArguments> result = new CpArgumentsParser().parse(new String[]{"a", "b", "--backup", "CLOUD"});
     assertTrue(result.getLeft().isPresent());
-    assertTrue(result.getLeft().get() instanceof SyntaxError);
-    SyntaxError failure = (SyntaxError) result.getLeft().get();
-    String message = failure.message();
+    assertTrue(result.getLeft().get() instanceof ConverterError);
+    ConverterError error = (ConverterError) result.getLeft().get();
+    String message = error.message();
     assertEquals("while converting option BACKUP (--backup): No enum constant " +
         "net.jbock.examples.CpArguments.Control.CLOUD [NONE, NUMBERED, EXISTING, SIMPLE]", message);
   }

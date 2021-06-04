@@ -1,6 +1,6 @@
 package net.jbock.convert.reference;
 
-import net.jbock.StringConverter;
+import net.jbock.util.StringConverter;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;

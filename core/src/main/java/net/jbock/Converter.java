@@ -1,5 +1,7 @@
 package net.jbock;
 
+import net.jbock.util.StringConverter;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 

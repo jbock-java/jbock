@@ -6,12 +6,17 @@ package net.jbock.util;
  *
  * <ul>
  *   <li>{@link SyntaxError}</li>
- *   <li>{@link ConversionError}</li>
+ *   <li>{@link ConverterError}</li>
  * </ul>
  *
  * This interface will be a sealed interface in later versions.
  */
-public interface Failure extends NotSuccess {
+public interface ParsingError extends NotSuccess {
 
+  /**
+   * Returns an error message to describe the failure.
+   *
+   * @return error message
+   */
   String message();
 }

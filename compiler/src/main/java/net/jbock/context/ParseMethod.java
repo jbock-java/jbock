@@ -24,17 +24,20 @@ public class ParseMethod extends Cached<MethodSpec> {
   private final AllParameters allParameters;
   private final SourceElement sourceElement;
   private final BuildMethod buildMethod;
+  private final CommonFields commonFields;
 
   @Inject
   ParseMethod(
       GeneratedTypes generatedTypes,
       AllParameters allParameters,
       SourceElement sourceElement,
-      BuildMethod buildMethod) {
+      BuildMethod buildMethod,
+      CommonFields commonFields) {
     this.generatedTypes = generatedTypes;
     this.allParameters = allParameters;
     this.sourceElement = sourceElement;
     this.buildMethod = buildMethod;
+    this.commonFields = commonFields;
   }
 
   @Override
@@ -77,6 +80,10 @@ public class ParseMethod extends Cached<MethodSpec> {
     }
     code.addStatement("return $T.right($N.parse($N).$N())", Either.class, state, it, buildMethod.get());
     code.endControlFlow();
+
+    code.beginControlFlow("catch ($T $N)", generatedTypes.convExType(), e)
+        .addStatement("return $T.left($N.$N)", Either.class, e, commonFields.convExError())
+        .endControlFlow();
 
     code.beginControlFlow("catch ($T $N)", Exception.class, e)
         .addStatement("return $T.left(new $T($N.getMessage()))", Either.class, SyntaxError.class, e)

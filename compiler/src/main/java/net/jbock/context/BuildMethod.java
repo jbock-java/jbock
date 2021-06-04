@@ -7,6 +7,7 @@ import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.ItemType;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -190,13 +191,20 @@ public class BuildMethod extends Cached<MethodSpec> {
   }
 
   private CodeBlock checkConverterError(NamedOption option) {
-    String message = "while converting option "
-        + option.paramLabel() + " (" + String.join(", ", option.names()) + "): ";
-    return CodeBlock.of(".orElseThrow($1N -> new $2T($3S + $1N))", left, RuntimeException.class, message);
+    String itemName = option.paramLabel() + " (" + String.join(", ", option.names()) + ")";
+    return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5S))",
+        left, generatedTypes.convExType(),
+        ItemType.class,
+        ItemType.OPTION,
+        itemName);
   }
 
   private CodeBlock checkConverterError(PositionalParameter parameter) {
-    String message = "while converting parameter " + parameter.paramLabel() + ": ";
-    return CodeBlock.of(".orElseThrow($1N -> new $2T($3S + $1N))", left, RuntimeException.class, message);
+    String itemName = parameter.paramLabel();
+    return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5S))",
+        left, generatedTypes.convExType(),
+        ItemType.class,
+        ItemType.PARAMETER,
+        itemName);
   }
 }

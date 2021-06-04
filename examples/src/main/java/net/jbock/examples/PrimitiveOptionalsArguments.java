@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Converter;
 import net.jbock.Option;
-import net.jbock.StringConverter;
+import net.jbock.util.StringConverter;
 
 import java.util.OptionalDouble;
 import java.util.OptionalInt;

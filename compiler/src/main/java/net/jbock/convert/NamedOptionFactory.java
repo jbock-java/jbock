@@ -1,7 +1,7 @@
 package net.jbock.convert;
 
 import com.squareup.javapoet.CodeBlock;
-import net.jbock.StringConverter;
+import net.jbock.util.StringConverter;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;

@@ -1,5 +1,8 @@
 package net.jbock.util;
 
+import net.jbock.Command;
+import net.jbock.SuperCommand;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -16,6 +19,9 @@ public final class AtFileReader {
 
   /**
    * Read file contents into a string array.
+   * Public method that may be invoked from the generated code,
+   * unless {@link Command#expandAtSign()} or
+   * {@link SuperCommand#expandAtSign()} is {@code false}.
    *
    * @param fileName a file name
    * @return the options in the file
@@ -28,42 +34,64 @@ public final class AtFileReader {
   }
 
   private List<String> readAtLines(List<String> lines) {
-    lines = new ArrayList<>(lines);
-    Collections.reverse(lines);
-    List<String> copy = new ArrayList<>(lines.size());
-    lines.stream().dropWhile(String::isEmpty).forEach(copy::add);
-    Collections.reverse(copy);
-    Iterator<String> it = copy.iterator();
-    List<String> tokens = new ArrayList<>(copy.size());
+    Iterator<String> it = removeTrailingEmptyLines(lines);
+    List<String> tokens = new ArrayList<>(lines.size());
     while (it.hasNext()) {
       tokens.add(readTokenFromAtFile(it));
     }
     return tokens;
   }
 
+  private Iterator<String> removeTrailingEmptyLines(List<String> lines) {
+    ArrayList<String> arrayLines = new ArrayList<>(lines);
+    Collections.reverse(arrayLines);
+    ArrayList<String> copy = new ArrayList<>(arrayLines.size());
+    arrayLines.stream().dropWhile(String::isEmpty).forEach(copy::add);
+    Collections.reverse(copy);
+    return copy.iterator();
+  }
+
   private String readTokenFromAtFile(Iterator<String> it) {
-    String line = it.next();
     StringBuilder sb = new StringBuilder();
-    while (true) {
-      boolean esc = false;
-      for (int i = 0; i < line.length(); i++) {
-        char c = line.charAt(i);
-        if (c == '\\') {
-          if (esc) sb.append('\\');
-          esc = !esc;
-          continue;
-        }
-        if (esc) {
-          if (c == 'n') sb.append('\n');
-          else if (c == 'r') sb.append('\r');
-          else if (c == 't') sb.append('\t');
-          else sb.append(c);
-          esc = false;
-        } else sb.append(c);
-      }
-      if (!esc || !it.hasNext()) break;
-      line = it.next();
-    }
+    boolean esc;
+    do {
+      esc = readLine(it.next(), sb);
+    } while (esc && it.hasNext());
     return sb.toString();
+  }
+
+  private boolean readLine(String line, StringBuilder sb) {
+    boolean esc = false;
+    int length = line.length();
+    for (int i = 0; i < length; i++) {
+      char c = line.charAt(i);
+      if (c == '\\') {
+        if (esc) {
+          sb.append('\\');
+          esc = false;
+        } else {
+          esc = true;
+        }
+      } else if (esc) {
+        sb.append(escapeValue(c));
+        esc = false;
+      } else {
+        sb.append(c);
+      }
+    }
+    return esc;
+  }
+
+  private char escapeValue(char c) {
+    switch (c) {
+      case 'n':
+        return '\n';
+      case 'r':
+        return '\r';
+      case 't':
+        return '\t';
+      default:
+        return c;
+    }
   }
 }

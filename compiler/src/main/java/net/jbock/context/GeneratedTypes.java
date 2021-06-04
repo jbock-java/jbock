@@ -5,10 +5,10 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.ParsingError;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.NotSuccess;
 import net.jbock.util.SuperResult;
-import net.jbock.util.SyntaxError;
 
 import javax.inject.Inject;
 import java.util.Optional;
@@ -63,6 +63,10 @@ public class GeneratedTypes {
     return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
   }
 
+  public ClassName convExType() {
+    return generatedClass.nestedClass("ConvEx");
+  }
+
   public TypeName parseResultType() {
     return ParameterizedTypeName.get(
         ClassName.get(Either.class),
@@ -71,7 +75,7 @@ public class GeneratedTypes {
   }
 
   public ClassName parsingFailedType() {
-    return ClassName.get(SyntaxError.class);
+    return ClassName.get(ParsingError.class);
   }
 
   public Optional<ClassName> helpRequestedType() {

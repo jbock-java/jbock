@@ -2,7 +2,7 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.StringConverter;
+import net.jbock.util.StringConverter;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.convert.ConvertedParameter;

@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.Converter;
-import net.jbock.StringConverter;
+import net.jbock.util.StringConverter;
 
 import java.math.BigInteger;
 import java.util.function.Supplier;

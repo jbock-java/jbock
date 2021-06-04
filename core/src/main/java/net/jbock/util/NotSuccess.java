@@ -1,16 +1,20 @@
 package net.jbock.util;
 
 /**
- * An implementation of this interface represents any parsing
+ * <p>An implementation of this interface represents any parsing
  * result that's different from parsing success.
- * There are a fixed number of implementations:
+ * This will be returned from the generated code,
+ * if the parsing is not successful, or if the user has
+ * passed the {@code --help} option on the command line.</p>
+ *
+ * <p>There are a fixed number of implementations:</p>
  *
  * <ul>
- *   <li>{@link Failure}</li>
+ *   <li>{@link ParsingError}</li>
  *   <li>{@link HelpRequested}</li>
  * </ul>
  *
- * This interface will be a sealed interface in later versions.
+ * <p>This interface will be a sealed interface in later versions.</p>
  */
 public interface NotSuccess {
 }

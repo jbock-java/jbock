@@ -10,7 +10,7 @@ package net.jbock.util;
  *   <li>excess parameter</li>
  * </ul>
  */
-public final class SyntaxError implements Failure {
+public final class SyntaxError implements ParsingError {
 
   private final String message;
 

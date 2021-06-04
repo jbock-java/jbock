@@ -9,6 +9,7 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.ConverterError;
 import net.jbock.util.NotSuccess;
 
 import java.io.PrintStream;
@@ -21,6 +22,7 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static com.squareup.javapoet.TypeName.INT;
+import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
@@ -51,6 +53,10 @@ public class CommonFields {
 
   private final FieldSpec suspiciousPattern = FieldSpec.builder(Pattern.class, "suspicious")
       .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
+      .build();
+
+  private final FieldSpec convExError = FieldSpec.builder(ConverterError.class, "error")
+      .addModifiers(FINAL)
       .build();
 
   private CommonFields(
@@ -132,6 +138,10 @@ public class CommonFields {
 
   public FieldSpec params() {
     return params;
+  }
+
+  public FieldSpec convExError() {
+    return convExError;
   }
 
   public FieldSpec optionParsers() {
