@@ -12,7 +12,6 @@ import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
 import net.jbock.validate.DaggerValidateComponent;
-import net.jbock.validate.SourceFileGenerator;
 import net.jbock.validate.ValidateComponent;
 import net.jbock.validate.ValidateModule;
 
@@ -41,6 +40,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
   private final OperationMode operationMode;
   private final Types types;
   private final SafeElements elements;
+  private final SourceFileGenerator sourceFileGenerator;
 
   @Inject
   CommandProcessingStep(
@@ -50,7 +50,8 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
       Filer filer,
       OperationMode operationMode,
       Types types,
-      SafeElements elements) {
+      SafeElements elements,
+      SourceFileGenerator sourceFileGenerator) {
     this.tool = tool;
     this.messager = messager;
     this.util = util;
@@ -58,6 +59,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
     this.operationMode = operationMode;
     this.types = types;
     this.elements = elements;
+    this.sourceFileGenerator = sourceFileGenerator;
   }
 
   @Override
@@ -88,10 +90,9 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
         .operationMode(operationMode)
         .module(new ValidateModule(types, elements))
         .create();
-    SourceFileGenerator sourceFileGenerator = component.sourceFileGenerator();
     component.processor().generate()
-        .accept(this::printFailures, types ->
-            types.forEach(sourceFileGenerator::write));
+        .accept(this::printFailures, type ->
+            sourceFileGenerator.write(sourceElement, type));
   }
 
   private Either<List<ValidationFailure>, SourceElement> validateSourceElement(

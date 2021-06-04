@@ -56,7 +56,7 @@ public class StatefulParser extends Cached<TypeSpec> {
   TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(generatedTypes.statefulParserType())
         .addModifiers(PRIVATE, STATIC)
-        .addMethod(statefulParseMethod.parseMethod());
+        .addMethod(statefulParseMethod.define());
     spec.addField(commonFields.suspiciousPattern());
     if (!namedOptions.isEmpty()) {
       spec.addMethod(tryParseOptionMethod())

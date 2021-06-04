@@ -16,8 +16,6 @@ public interface ValidateComponent {
 
   CommandProcessor processor();
 
-  SourceFileGenerator sourceFileGenerator();
-
   @Component.Builder
   interface Builder {
 

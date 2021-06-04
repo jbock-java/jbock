@@ -41,7 +41,7 @@ public class StatefulParseMethod {
     this.sourceElement = sourceElement;
   }
 
-  MethodSpec parseMethod() {
+  MethodSpec define() {
 
     MethodSpec.Builder spec = MethodSpec.methodBuilder("parse");
     if (sourceElement.isSuperCommand()) {

@@ -37,7 +37,7 @@ class AnnotationUtil {
     }
 
     @Override
-    protected Optional<TypeMirror> defaultAction(Object o, Void unused) {
+    protected Optional<TypeMirror> defaultAction(Object o, Void nothing) {
       return Optional.empty();
     }
   };

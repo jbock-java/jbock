@@ -1,14 +1,13 @@
 package net.jbock.convert.reference;
 
-import net.jbock.util.StringConverter;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.either.Either;
+import net.jbock.util.StringConverter;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
 import javax.lang.model.type.DeclaredType;
-import javax.lang.model.type.TypeKind;
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -43,11 +42,8 @@ public class ReferenceTool {
     if (declaredType.getTypeArguments().size() != 1) {
       return left(converterRawType());
     }
-    TypeMirror typearg = declaredType.getTypeArguments().get(0);
-    if (typearg.getKind() != TypeKind.DECLARED) {
-      return left(errorConverterType());
-    }
-    return unbalancedRight(AS_DECLARED.visit(typearg)
+    TypeMirror typeArgument = declaredType.getTypeArguments().get(0);
+    return unbalancedRight(AS_DECLARED.visit(typeArgument)
         .filter(suppliedFunction -> tool.isSameErasure(suppliedFunction,
             StringConverter.class.getCanonicalName())))
         .orElseLeft(this::errorConverterType)

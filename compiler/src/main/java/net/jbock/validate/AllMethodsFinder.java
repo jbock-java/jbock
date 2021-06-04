@@ -20,6 +20,7 @@ import static javax.lang.model.util.ElementFilter.methodsIn;
 import static net.jbock.common.TypeTool.AS_DECLARED;
 import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 
+@ValidateScope
 public class AllMethodsFinder {
 
   private final SourceElement sourceElement;

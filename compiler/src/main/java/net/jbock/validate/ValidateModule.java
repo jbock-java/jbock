@@ -19,7 +19,7 @@ public class ValidateModule {
   }
 
   @Provides
-  Types types(TypeTool tool) {
+  Types types() {
     return types;
   }
 

@@ -22,7 +22,7 @@ public class TypeTool {
         }
 
         @Override
-        protected Optional<DeclaredType> defaultAction(TypeMirror e, Void unused) {
+        protected Optional<DeclaredType> defaultAction(TypeMirror e, Void nothing) {
           return Optional.empty();
         }
       };
@@ -35,7 +35,7 @@ public class TypeTool {
         }
 
         @Override
-        protected Optional<PrimitiveType> defaultAction(TypeMirror e, Void unused) {
+        protected Optional<PrimitiveType> defaultAction(TypeMirror e, Void nothing) {
           return Optional.empty();
         }
       };
@@ -48,7 +48,7 @@ public class TypeTool {
         }
 
         @Override
-        protected Optional<TypeElement> defaultAction(Element e, Void unused) {
+        protected Optional<TypeElement> defaultAction(Element e, Void nothing) {
           return Optional.empty();
         }
       };

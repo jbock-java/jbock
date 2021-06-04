@@ -5,7 +5,6 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.context.ContextComponent;
 import net.jbock.context.ContextModule;
 import net.jbock.context.DaggerContextComponent;
 import net.jbock.convert.ConvertModule;
@@ -53,18 +52,13 @@ public class CommandProcessor {
     this.util = util;
   }
 
-  public Either<List<ValidationFailure>, List<TypeSpec>> generate() {
+  public Either<List<ValidationFailure>, TypeSpec> generate() {
     return methodsFactory.findAbstractMethods()
         .flatMap(this::createPositionalParams)
         .flatMap(this::createNamedOptions)
         .map(this::contextModule)
-        .map(module -> {
-          ContextComponent component = DaggerContextComponent.factory()
-              .create(module);
-          List<TypeSpec> typeSpecs = new ArrayList<>();
-          typeSpecs.add(component.generatedClass().define());
-          return typeSpecs;
-        });
+        .map(module -> DaggerContextComponent.factory().create(module))
+        .map(component -> component.generatedClass().define());
   }
 
   private Either<List<ValidationFailure>, Params> createNamedOptions(
