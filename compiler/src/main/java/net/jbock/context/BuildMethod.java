@@ -139,7 +139,7 @@ public class BuildMethod extends Cached<MethodSpec> {
         return List.of(
             CodeBlock.of(".map(e -> e$L)", checkConverterError(c.parameter())),
             CodeBlock.of(".collect($T.toList())", Collectors.class));
-      case FLAG:
+      case MODAL_FLAG:
         return List.of(CodeBlock.of(".findAny().isPresent()"));
       default:
         throw new IllegalArgumentException("unexpected skew: " + c.skew());

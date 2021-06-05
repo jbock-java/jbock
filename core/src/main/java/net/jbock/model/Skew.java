@@ -4,7 +4,7 @@ import java.util.Locale;
 
 public enum Skew {
 
-  REQUIRED, OPTIONAL, REPEATABLE, FLAG;
+  REQUIRED, OPTIONAL, REPEATABLE, MODAL_FLAG;
 
   @Override
   public String toString() {

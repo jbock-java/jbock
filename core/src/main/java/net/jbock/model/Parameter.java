@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A positional parameter.
+ * A positional parameter, possibly repeatable.
  */
 public final class Parameter extends Item {
 

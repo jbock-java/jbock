@@ -77,7 +77,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   }
 
   public boolean isFlag() {
-    return skew == Skew.FLAG;
+    return skew == Skew.MODAL_FLAG;
   }
 
   public P parameter() {

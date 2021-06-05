@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A named option.
+ * A named option or a modal flag.
  */
 public final class Option extends Item {
 
@@ -65,7 +65,7 @@ public final class Option extends Item {
   @Override
   public String name() {
     String sample = String.join(", ", names);
-    if (skew() == Skew.FLAG) {
+    if (skew() == Skew.MODAL_FLAG) {
       return sample;
     }
     return sample + ' ' + paramLabel();

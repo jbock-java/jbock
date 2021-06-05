@@ -16,73 +16,7 @@ public final class CommandModel {
   private final List<Option> options;
   private final List<Parameter> parameters;
 
-  public static Builder builder() {
-    return new Builder();
-  }
-
-  public static final class Builder {
-
-    private String programName;
-    private boolean ansi;
-    private boolean helpEnabled;
-    private boolean superCommand;
-    private boolean atFileExpansion;
-    private final List<Option> options = new ArrayList<>();
-    private final List<Parameter> parameters = new ArrayList<>();
-
-    public Builder withProgramName(String programName) {
-      this.programName = programName;
-      return this;
-    }
-
-    public Builder withAnsi(boolean ansi) {
-      this.ansi = ansi;
-      return this;
-    }
-
-    public Builder withHelpEnabled(boolean helpEnabled) {
-      this.helpEnabled = helpEnabled;
-      return this;
-    }
-
-    public Builder withSuperCommand(boolean superCommand) {
-      this.superCommand = superCommand;
-      return this;
-    }
-
-    public Builder withAtFileExpansion(boolean atFileExpansion) {
-      this.atFileExpansion = atFileExpansion;
-      return this;
-    }
-
-    public Builder addOption(Option option) {
-      this.options.add(option);
-      return this;
-    }
-
-    public Builder addParameter(Parameter parameter) {
-      this.parameters.add(parameter);
-      return this;
-    }
-
-    public CommandModel build() {
-      return new CommandModel(programName, ansi, helpEnabled, superCommand, atFileExpansion,
-          options, parameters);
-    }
-  }
-
-  /**
-   * Creates the model.
-   * Public constructor that may be invoked from the generated code.
-   *  @param programName program name, not blank
-   * @param ansi whether to use ansi codes
-   * @param helpEnabled whether the {@code --help} option is understood
-   * @param superCommand whether this is a supercommand
-   * @param atFileExpansion whether {@code @file}-expansion is enabled
-   * @param options all options
-   * @param parameters all parameters
-   */
-  CommandModel(
+  private CommandModel(
       String programName,
       boolean ansi,
       boolean helpEnabled,
@@ -99,30 +33,182 @@ public final class CommandModel {
     this.parameters = parameters;
   }
 
+  /**
+   * Creates a builder instance.
+   * Public method that may be invoked from the generated code.
+   *
+   * @return empty builder
+   */
+  public static Builder builder() {
+    return new Builder();
+  }
+
+  /**
+   * Builder for {@link CommandModel}.
+   */
+  public static final class Builder {
+
+    private String programName;
+    private boolean ansi;
+    private boolean helpEnabled;
+    private boolean superCommand;
+    private boolean atFileExpansion;
+    private final List<Option> options = new ArrayList<>();
+    private final List<Parameter> parameters = new ArrayList<>();
+
+    /**
+     * Set program name.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param programName program name, not blank
+     */
+    public Builder withProgramName(String programName) {
+      this.programName = programName;
+      return this;
+    }
+
+    /**
+     * Set ansi flag.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param ansi whether to use ansi codes
+     */
+    public Builder withAnsi(boolean ansi) {
+      this.ansi = ansi;
+      return this;
+    }
+
+    /**
+     * Set help enabled property.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param helpEnabled whether the {@code --help} option is understood
+     */
+    public Builder withHelpEnabled(boolean helpEnabled) {
+      this.helpEnabled = helpEnabled;
+      return this;
+    }
+
+    /**
+     * Set the supercommand property.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param superCommand whether this is a supercommand
+     */
+    public Builder withSuperCommand(boolean superCommand) {
+      this.superCommand = superCommand;
+      return this;
+    }
+
+    /**
+     * Set at file expansion property.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param atFileExpansion whether {@code @file}-expansion is enabled
+     */
+    public Builder withAtFileExpansion(boolean atFileExpansion) {
+      this.atFileExpansion = atFileExpansion;
+      return this;
+    }
+
+    /**
+     * Add an option.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param option a named option
+     */
+    public Builder addOption(Option option) {
+      this.options.add(option);
+      return this;
+    }
+
+    /**
+     * Add a parameter.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param parameter a positional parameter
+     */
+    public Builder addParameter(Parameter parameter) {
+      this.parameters.add(parameter);
+      return this;
+    }
+
+    /**
+     * Create the command model.
+     * Public method that may be invoked from the generated code.
+     *
+     * @return command model
+     */
+    public CommandModel build() {
+      return new CommandModel(programName, ansi, helpEnabled, superCommand, atFileExpansion,
+          options, parameters);
+    }
+  }
+
+
+  /**
+   * Get the program name.
+   *
+   * @return the program name
+   */
   public String programName() {
     return programName;
   }
 
+  /**
+   * Check if ansi codes are enabled.
+   *
+   * @return {@code true} if the parser can use ansi colors
+   *         when printing the usage documentation
+   */
   public boolean ansi() {
     return ansi;
   }
 
+  /**
+   * Get the list of all named options, including modal flags.
+   *
+   * @return named options
+   */
   public List<Option> options() {
     return options;
   }
 
+  /**
+   * Get the list of all positional parameters.
+   *
+   * @return positional parameters
+   */
   public List<Parameter> parameters() {
     return parameters;
   }
 
+  /**
+   * Check if the command supports the help option.
+   *
+   * @return {@code true} if the generated parser supports
+   *         the {@code --help} option
+   */
   public boolean helpEnabled() {
     return helpEnabled;
   }
 
+  /**
+   * Check for the supercommand annotation.
+   *
+   * @return {@code true} if the command is a {@link net.jbock.SuperCommand},
+   *         {@code false} if it is a {@link net.jbock.Command}
+   *
+   */
   public boolean superCommand() {
     return superCommand;
   }
 
+  /**
+   * Check for {@code @file} expansion.
+   *
+   * @return {@code true} if {@code @file} expansion is enabled
+   */
   public boolean atFileExpansion() {
     return atFileExpansion;
   }

@@ -137,7 +137,7 @@ public class NamedOptionFactory {
   private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
     CodeBlock mapExpr = CodeBlock.of(".map($T.create($T.identity()))", StringConverter.class, Function.class);
     return ConvertedParameter.create(mapExpr,
-        Optional.empty(), Skew.FLAG,
+        Optional.empty(), Skew.MODAL_FLAG,
         namedOption);
   }
 }
