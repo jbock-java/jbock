@@ -1,5 +1,7 @@
 package net.jbock.common;
 
+import com.squareup.javapoet.CodeBlock;
+
 import javax.lang.model.element.Element;
 import javax.lang.model.element.ElementKind;
 import javax.lang.model.element.ExecutableElement;
@@ -144,5 +146,35 @@ public class Util {
           " or @" + present.get(1).getSimpleName() + " but not both");
     }
     return Optional.empty();
+  }
+
+  public CodeBlock joinByComma(List<CodeBlock> code) {
+    CodeBlock.Builder args = CodeBlock.builder();
+    for (int i = 0; i < code.size(); i++) {
+      if (i != 0) {
+        args.add(",$W");
+      }
+      args.add(code.get(i));
+    }
+    return args.build();
+  }
+
+  public CodeBlock joinByNewline(List<CodeBlock> code) {
+    boolean indent = false;
+    CodeBlock.Builder result = CodeBlock.builder();
+    for (int i = 0; i < code.size(); i++) {
+      if (i == 0) {
+        result.add(code.get(i));
+      } else if (i == 1) {
+        result.add("\n").indent().add(code.get(i));
+        indent = true;
+      } else {
+        result.add("\n").add(code.get(i));
+      }
+    }
+    if (indent) {
+      result.unindent();
+    }
+    return result.build();
   }
 }

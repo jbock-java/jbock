@@ -10,6 +10,8 @@ import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ConverterError;
+import net.jbock.util.ConverterFailure;
+import net.jbock.util.ItemType;
 import net.jbock.util.NotSuccess;
 
 import java.io.PrintStream;
@@ -55,8 +57,11 @@ public class CommonFields {
       .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
       .build();
 
-  private final FieldSpec convExError = FieldSpec.builder(ConverterError.class, "error")
-      .addModifiers(FINAL)
+  private final FieldSpec convExFailure = FieldSpec.builder(ConverterFailure.class, "failure")
+      .build();
+  private final FieldSpec convExItemType = FieldSpec.builder(ItemType.class, "itemType")
+      .build();
+  private final FieldSpec convExItemName = FieldSpec.builder(STRING, "itemName")
       .build();
 
   private CommonFields(
@@ -140,8 +145,16 @@ public class CommonFields {
     return params;
   }
 
-  public FieldSpec convExError() {
-    return convExError;
+  public FieldSpec convExFailure() {
+    return convExFailure;
+  }
+
+  public FieldSpec convExItemType() {
+    return convExItemType;
+  }
+
+  public FieldSpec convExItemName() {
+    return convExItemName;
   }
 
   public FieldSpec optionParsers() {

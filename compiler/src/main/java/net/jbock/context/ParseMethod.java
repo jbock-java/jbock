@@ -6,6 +6,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.AtFileReader;
+import net.jbock.util.ConverterError;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.SyntaxError;
 
@@ -25,6 +26,7 @@ public class ParseMethod extends Cached<MethodSpec> {
   private final SourceElement sourceElement;
   private final BuildMethod buildMethod;
   private final CommonFields commonFields;
+  private final CreateModelMethod createModelMethod;
 
   @Inject
   ParseMethod(
@@ -32,12 +34,14 @@ public class ParseMethod extends Cached<MethodSpec> {
       AllParameters allParameters,
       SourceElement sourceElement,
       BuildMethod buildMethod,
-      CommonFields commonFields) {
+      CommonFields commonFields,
+      CreateModelMethod createModelMethod) {
     this.generatedTypes = generatedTypes;
     this.allParameters = allParameters;
     this.sourceElement = sourceElement;
     this.buildMethod = buildMethod;
     this.commonFields = commonFields;
+    this.createModelMethod = createModelMethod;
   }
 
   @Override
@@ -50,11 +54,13 @@ public class ParseMethod extends Cached<MethodSpec> {
     if (sourceElement.helpEnabled()) {
       if (allParameters.anyRequired()) {
         code.add("if ($N.length == 0)\n", args).indent()
-            .addStatement("return $T.left(new $T())", Either.class, HelpRequested.class)
+            .addStatement("return $T.left(new $T($N()))", Either.class, HelpRequested.class,
+                createModelMethod.get())
             .unindent();
       }
       code.add("if ($1N.length == 1 && $2S.equals($1N[0]))\n", args, "--help").indent()
-          .addStatement("return $T.left(new $T())", Either.class, HelpRequested.class)
+          .addStatement("return $T.left(new $T($N()))", Either.class, HelpRequested.class,
+              createModelMethod.get())
           .unindent();
     }
     ParameterSpec state = builder(generatedTypes.statefulParserType(), "statefulParser").build();
@@ -82,11 +88,15 @@ public class ParseMethod extends Cached<MethodSpec> {
     code.endControlFlow();
 
     code.beginControlFlow("catch ($T $N)", generatedTypes.convExType(), e)
-        .addStatement("return $T.left($N.$N)", Either.class, e, commonFields.convExError())
+        .addStatement("return $1T.left(new $2T($3N(), $4N.$5N, $4N.$6N, $4N.$7N))",
+            Either.class,
+            ConverterError.class, createModelMethod.get(), e,
+            commonFields.convExFailure(), commonFields.convExItemType(), commonFields.convExItemName())
         .endControlFlow();
 
     code.beginControlFlow("catch ($T $N)", Exception.class, e)
-        .addStatement("return $T.left(new $T($N.getMessage()))", Either.class, SyntaxError.class, e)
+        .addStatement("return $T.left(new $T($N(), $N.getMessage()))", Either.class,
+            SyntaxError.class, createModelMethod.get(), e)
         .endControlFlow();
 
     return MethodSpec.methodBuilder("parse").addParameter(args)

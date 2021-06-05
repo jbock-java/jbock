@@ -1,12 +1,14 @@
 package net.jbock.util;
 
+import net.jbock.model.CommandModel;
+
 import java.util.Locale;
 
 /**
  * A wrapper to decorate {@link ConverterFailure} with some
  * additional information.
  */
-public final class ConverterError implements ParsingError {
+public final class ConverterError extends ParsingError {
 
   private final ConverterFailure failure;
   private final ItemType itemType;
@@ -15,14 +17,17 @@ public final class ConverterError implements ParsingError {
   /**
    * Public constructor that may be invoked from the generated code.
    *
+   * @param commandModel the command model
    * @param failure the converter failure
    * @param itemType type of the {@link ItemType item} that the converter was bound to
    * @param itemName item name
    */
   public ConverterError(
+      CommandModel commandModel,
       ConverterFailure failure,
       ItemType itemType,
       String itemName) {
+    super(commandModel);
     this.failure = failure;
     this.itemType = itemType;
     this.itemName = itemName;

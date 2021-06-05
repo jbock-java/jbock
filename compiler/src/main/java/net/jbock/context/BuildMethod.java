@@ -3,6 +3,7 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
+import net.jbock.common.Util;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
@@ -27,6 +28,7 @@ public class BuildMethod extends Cached<MethodSpec> {
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
   private final AnsiStyle styler;
+  private final Util util;
   private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
 
   @Inject
@@ -36,13 +38,15 @@ public class BuildMethod extends Cached<MethodSpec> {
       NamedOptions namedOptions,
       PositionalParameters positionalParameters,
       CommonFields commonFields,
-      AnsiStyle styler) {
+      AnsiStyle styler,
+      Util util) {
     this.generatedTypes = generatedTypes;
     this.sourceElement = sourceElement;
     this.namedOptions = namedOptions;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
     this.styler = styler;
+    this.util = util;
   }
 
   @Override
@@ -87,7 +91,7 @@ public class BuildMethod extends Cached<MethodSpec> {
     positionalParameters.repeatable()
         .map(c -> CodeBlock.of("$N", c.asParam()))
         .ifPresent(code::add);
-    return joinByComma(code);
+    return util.joinByComma(code);
   }
 
   private CodeBlock convertExpressionOption(ConvertedParameter<NamedOption> c) {
@@ -99,7 +103,7 @@ public class BuildMethod extends Cached<MethodSpec> {
     }
     code.addAll(tailExpressionOption(c));
     c.extractExpr().ifPresent(code::add);
-    return joinByNewline(code);
+    return util.joinByNewline(code);
   }
 
   private CodeBlock convertExpressionRegularParameter(ConvertedParameter<PositionalParameter> c) {
@@ -109,7 +113,7 @@ public class BuildMethod extends Cached<MethodSpec> {
     code.add(c.mapExpr());
     code.addAll(tailExpressionParameter(c));
     c.extractExpr().ifPresent(code::add);
-    return joinByNewline(code);
+    return util.joinByNewline(code);
   }
 
   private CodeBlock convertExpressionRepeatableParameter(ConvertedParameter<PositionalParameter> c) {
@@ -118,7 +122,7 @@ public class BuildMethod extends Cached<MethodSpec> {
     code.add(c.mapExpr());
     code.add(CodeBlock.of(".map(e -> e$L)", checkConverterError(c.parameter())));
     code.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
-    return joinByNewline(code);
+    return util.joinByNewline(code);
   }
 
   private List<CodeBlock> tailExpressionOption(ConvertedParameter<NamedOption> c) {
@@ -158,36 +162,6 @@ public class BuildMethod extends Cached<MethodSpec> {
       default:
         throw new IllegalArgumentException("unexpected skew: " + c.skew());
     }
-  }
-
-  private CodeBlock joinByComma(List<CodeBlock> code) {
-    CodeBlock.Builder args = CodeBlock.builder();
-    for (int i = 0; i < code.size(); i++) {
-      if (i != 0) {
-        args.add(",$W");
-      }
-      args.add(code.get(i));
-    }
-    return args.build();
-  }
-
-  private CodeBlock joinByNewline(List<CodeBlock> code) {
-    boolean indent = false;
-    CodeBlock.Builder result = CodeBlock.builder();
-    for (int i = 0; i < code.size(); i++) {
-      if (i == 0) {
-        result.add(code.get(i));
-      } else if (i == 1) {
-        result.add("\n").indent().add(code.get(i));
-        indent = true;
-      } else {
-        result.add("\n").add(code.get(i));
-      }
-    }
-    if (indent) {
-      result.unindent();
-    }
-    return result.build();
   }
 
   private CodeBlock checkConverterError(NamedOption option) {

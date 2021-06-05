@@ -35,6 +35,7 @@ public final class GeneratedClass {
   private final GeneratedAnnotation generatedAnnotation;
   private final ReadOptionNameMethod readOptionNameMethod;
   private final ConvEx convEx;
+  private final CreateModelMethod createModelMethod;
 
   @Inject
   GeneratedClass(
@@ -56,7 +57,8 @@ public final class GeneratedClass {
       Withers withers,
       GeneratedAnnotation generatedAnnotation,
       ReadOptionNameMethod readOptionNameMethod,
-      ConvEx convEx) {
+      ConvEx convEx,
+      CreateModelMethod createModelMethod) {
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
     this.impl = impl;
@@ -76,6 +78,7 @@ public final class GeneratedClass {
     this.generatedAnnotation = generatedAnnotation;
     this.readOptionNameMethod = readOptionNameMethod;
     this.convEx = convEx;
+    this.createModelMethod = createModelMethod;
   }
 
   public TypeSpec define() {
@@ -89,6 +92,7 @@ public final class GeneratedClass {
         .addMethod(printUsageDocumentationMethod.get())
         .addMethod(printItemDocumentationMethod.get())
         .addMethod(makeLinesMethod.get())
+        .addMethod(createModelMethod.get())
         .addMethod(usageMethod.get());
     if (!namedOptions.isEmpty()) {
       spec.addMethod(readOptionNameMethod.get());
