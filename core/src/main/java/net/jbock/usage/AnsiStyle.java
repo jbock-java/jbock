@@ -1,5 +1,7 @@
 package net.jbock.usage;
 
+import net.jbock.model.UsageContext;
+
 import java.util.Optional;
 
 public class AnsiStyle {
@@ -12,6 +14,10 @@ public class AnsiStyle {
 
   AnsiStyle(boolean ansi) {
     this.ansi = ansi;
+  }
+
+  static AnsiStyle create(UsageContext context) {
+    return new AnsiStyle(context.ansi());
   }
 
   private Optional<String> paint(String text, Style style) {

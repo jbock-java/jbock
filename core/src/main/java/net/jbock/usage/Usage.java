@@ -1,5 +1,7 @@
 package net.jbock.usage;
 
+import net.jbock.model.UsageContext;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -21,6 +23,10 @@ public class Usage {
     this.options = options;
     this.parameters = parameters;
     this.programName = programName;
+  }
+
+  public static Usage create(UsageContext context) {
+    return new Usage(context.options(), context.parameters(), context.programName());
   }
 
   public List<String> usage(String prefix) {

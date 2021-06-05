@@ -1,5 +1,7 @@
 package net.jbock.usage;
 
+import net.jbock.model.UsageContext;
+
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,7 +13,7 @@ import java.util.stream.Collectors;
 
 public class UsageDocumentation {
 
-  static final int CONTINUATION_INDENT_USAGE = 8;
+  private static final int CONTINUATION_INDENT_USAGE = 8;
 
   private final PrintStream err;
   private final int terminalWidth;
@@ -22,6 +24,81 @@ public class UsageDocumentation {
   private final AnsiStyle ansiStyle;
   private final int maxWidthOptions;
   private final int maxWidthParameters;
+
+  /**
+   * Create a builder instance.
+   * Public method that may be invoked from the generated code.
+   */
+  public static Builder builder(UsageContext context) {
+    return new Builder(context);
+  }
+
+  public static class Builder {
+
+    private final UsageContext context;
+    private PrintStream err;
+    private int terminalWidth;
+    private Map<String, String> messages;
+
+    Builder(UsageContext context) {
+      this.context = context;
+    }
+
+    /**
+     * Set terminal width. Default is {@code 80} characters.
+     *
+     * @return the builder instance
+     */
+    public Builder withTerminalWidth(int width) {
+      this.terminalWidth = width == 0 ? this.terminalWidth : width;
+      return this;
+    }
+
+    /**
+     * Set the message map that contains description keys.
+     * The default value is an empty map.
+     *
+     * @return the builder instance
+     */
+    public Builder withMessages(Map<String, String> map) {
+      this.messages = map;
+      return this;
+    }
+
+    /**
+     * Set the output stream for printing.
+     * The default value is {@code System.err}.
+     *
+     * @return the builder instance
+     */
+    public Builder withErrorStream(PrintStream err) {
+      this.err = err;
+      return this;
+    }
+
+    /**
+     * Create an instance.
+     * Public method that may be invoked from the generated code.
+     */
+    public UsageDocumentation build() {
+      return new UsageDocumentation(
+          err, terminalWidth, messages,
+          context.options(),
+          context.parameters(),
+          Usage.create(context),
+          AnsiStyle.create(context),
+          maxWidth(context.options()),
+          maxWidth(context.parameters()));
+    }
+
+    private int maxWidth(List<? extends Item> items) {
+      return items.stream()
+          .map(Item::name)
+          .mapToInt(String::length)
+          .max()
+          .orElse(0);
+    }
+  }
 
   UsageDocumentation(
       PrintStream err,
@@ -44,6 +121,10 @@ public class UsageDocumentation {
     this.maxWidthParameters = maxWidthParameters;
   }
 
+  /**
+   * Print usage documentation.
+   * Public method that may be invoked from the generated code.
+   */
   public void printUsageDocumentation() {
     String optionsFormat = "  %1$-" + maxWidthOptions + "s ";
     String paramsFormat = "  %1$-" + maxWidthParameters + "s ";
@@ -79,7 +160,6 @@ public class UsageDocumentation {
             .collect(Collectors.toList())));
     makeLines(indent, tokens).forEach(err::println);
   }
-
 
   private List<String> makeLines(String indent, List<String> tokens) {
     List<String> result = new ArrayList<>();
