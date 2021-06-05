@@ -5,27 +5,33 @@ import dagger.Provides;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
+import net.jbock.convert.Mapped;
+import net.jbock.parameter.NamedOption;
+import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
-import net.jbock.validate.Params;
 
 import javax.lang.model.util.Types;
+import java.util.List;
 
 @Module
 public class ContextModule {
 
   private final SourceElement sourceElement;
   private final SafeElements elements;
-  private final Params params;
+  private final List<Mapped<PositionalParameter>> positionalParams;
+  private final List<Mapped<NamedOption>> namedOptions;
   private final Types types;
 
   public ContextModule(
       SourceElement sourceElement,
       SafeElements elements,
-      Params params,
+      List<Mapped<PositionalParameter>> positionalParams,
+      List<Mapped<NamedOption>> namedOptions,
       Types types) {
     this.sourceElement = sourceElement;
     this.elements = elements;
-    this.params = params;
+    this.positionalParams = positionalParams;
+    this.namedOptions = namedOptions;
     this.types = types;
   }
 
@@ -44,13 +50,13 @@ public class ContextModule {
   @ContextScope
   @Provides
   PositionalParameters positionalParameters() {
-    return PositionalParameters.create(params.positionalParams());
+    return PositionalParameters.create(positionalParams);
   }
 
   @ContextScope
   @Provides
   NamedOptions namedOptions() {
-    return NamedOptions.create(params.namedOptions());
+    return NamedOptions.create(namedOptions);
   }
 
   @ContextScope
@@ -61,8 +67,8 @@ public class ContextModule {
 
   @ContextScope
   @Provides
-  AllParameters allParameters(Util util) {
-    return AllParameters.create(params, util);
+  AllItems allParameters(Util util) {
+    return AllItems.create(positionalParams, namedOptions, util);
   }
 
   @ContextScope

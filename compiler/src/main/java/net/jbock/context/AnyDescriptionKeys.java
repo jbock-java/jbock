@@ -7,17 +7,17 @@ import javax.inject.Inject;
 @ContextScope
 public class AnyDescriptionKeys {
 
-  private final AllParameters allParameters;
+  private final AllItems allItems;
   private final SourceElement sourceElement;
 
   @Inject
-  AnyDescriptionKeys(AllParameters allParameters, SourceElement sourceElement) {
-    this.allParameters = allParameters;
+  AnyDescriptionKeys(AllItems allItems, SourceElement sourceElement) {
+    this.allItems = allItems;
     this.sourceElement = sourceElement;
   }
 
   public boolean anyDescriptionKeysAtAll() {
-    return allParameters.anyDescriptionKeys()
+    return allItems.anyDescriptionKeys()
         || sourceElement.descriptionKey().isPresent();
   }
 }

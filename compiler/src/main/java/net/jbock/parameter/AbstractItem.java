@@ -15,12 +15,12 @@ import java.util.Optional;
  * This class represents an {@code abstract} Method in the command class,
  * which can be either an {@link Option} or a {@link Parameter}.
  */
-public abstract class AbstractParameter {
+public abstract class AbstractItem {
 
   private final SourceMethod sourceMethod;
-  private final EnumName enumName; // unique internal name
+  private final EnumName enumName;
 
-  AbstractParameter(
+  AbstractItem(
       SourceMethod sourceMethod,
       EnumName enumName) {
     this.sourceMethod = sourceMethod;

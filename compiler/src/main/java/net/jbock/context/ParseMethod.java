@@ -22,7 +22,7 @@ import static net.jbock.common.Constants.STRING_ITERATOR;
 public class ParseMethod extends Cached<MethodSpec> {
 
   private final GeneratedTypes generatedTypes;
-  private final AllParameters allParameters;
+  private final AllItems allItems;
   private final SourceElement sourceElement;
   private final BuildMethod buildMethod;
   private final CommonFields commonFields;
@@ -31,13 +31,13 @@ public class ParseMethod extends Cached<MethodSpec> {
   @Inject
   ParseMethod(
       GeneratedTypes generatedTypes,
-      AllParameters allParameters,
+      AllItems allItems,
       SourceElement sourceElement,
       BuildMethod buildMethod,
       CommonFields commonFields,
       CreateModelMethod createModelMethod) {
     this.generatedTypes = generatedTypes;
-    this.allParameters = allParameters;
+    this.allItems = allItems;
     this.sourceElement = sourceElement;
     this.buildMethod = buildMethod;
     this.commonFields = commonFields;
@@ -52,7 +52,7 @@ public class ParseMethod extends Cached<MethodSpec> {
     CodeBlock.Builder code = CodeBlock.builder();
 
     if (sourceElement.helpEnabled()) {
-      if (allParameters.anyRequired()) {
+      if (allItems.anyRequired()) {
         code.add("if ($N.length == 0)\n", args).indent()
             .addStatement("return $T.left(new $T($N()))", Either.class, HelpRequested.class,
                 createModelMethod.get())

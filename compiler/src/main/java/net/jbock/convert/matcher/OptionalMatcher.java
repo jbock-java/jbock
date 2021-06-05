@@ -4,7 +4,7 @@ import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.model.Skew;
 
@@ -30,7 +30,7 @@ public class OptionalMatcher implements Matcher {
   }
 
   @Override
-  public Optional<Match> tryMatch(AbstractParameter parameter) {
+  public Optional<Match> tryMatch(AbstractItem parameter) {
     TypeMirror returnType = sourceMethod.returnType();
     return getOptionalPrimitive(returnType)
         .or(() ->

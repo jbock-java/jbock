@@ -6,10 +6,9 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.ConverterError;
 import net.jbock.util.ConverterFailure;
 import net.jbock.util.ItemType;
 import net.jbock.util.NotSuccess;
@@ -24,7 +23,6 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
 import static com.squareup.javapoet.TypeName.INT;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
@@ -96,7 +94,7 @@ public class CommonFields {
         .initializer(code.build())
         .build();
     long mapSize = namedOptions.stream()
-        .map(ConvertedParameter::parameter)
+        .map(Mapped::item)
         .map(NamedOption::names)
         .map(List::size)
         .mapToLong(i -> i)

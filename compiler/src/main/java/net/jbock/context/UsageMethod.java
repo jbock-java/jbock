@@ -2,7 +2,7 @@ package net.jbock.context;
 
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.model.Skew;
@@ -48,15 +48,15 @@ public class UsageMethod extends Cached<MethodSpec> {
       spec.addStatement("$N.add($S)", result, "[OPTION]...");
     }
 
-    for (ConvertedParameter<NamedOption> option : namedOptions.required()) {
-      String firstName = option.parameter().names().get(0);
+    for (Mapped<NamedOption> option : namedOptions.required()) {
+      String firstName = option.item().names().get(0);
       spec.addStatement("$N.add($T.format($S, $S, $S))",
           result, STRING, "%s %s",
           firstName,
           option.paramLabel());
     }
 
-    for (ConvertedParameter<PositionalParameter> param : positionalParameters.regular()) {
+    for (Mapped<PositionalParameter> param : positionalParameters.regular()) {
       Skew skew = param.skew();
       String paramLabel = param.paramLabel();
       switch (skew) {

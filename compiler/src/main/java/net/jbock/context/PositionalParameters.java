@@ -1,6 +1,6 @@
 package net.jbock.context;
 
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.parameter.PositionalParameter;
 
 import java.util.ArrayList;
@@ -11,41 +11,41 @@ import java.util.stream.Collectors;
 
 public class PositionalParameters {
 
-  private final List<ConvertedParameter<PositionalParameter>> regular;
-  private final Optional<ConvertedParameter<PositionalParameter>> repeatable;
+  private final List<Mapped<PositionalParameter>> regular;
+  private final Optional<Mapped<PositionalParameter>> repeatable;
   private final int maxWidth;
 
   private PositionalParameters(
-      List<ConvertedParameter<PositionalParameter>> regular,
-      Optional<ConvertedParameter<PositionalParameter>> repeatable,
+      List<Mapped<PositionalParameter>> regular,
+      Optional<Mapped<PositionalParameter>> repeatable,
       int maxWidth) {
     this.regular = regular;
     this.repeatable = repeatable;
     this.maxWidth = maxWidth;
   }
 
-  public static PositionalParameters create(List<ConvertedParameter<PositionalParameter>> all) {
-    List<ConvertedParameter<PositionalParameter>> regular = all.stream()
+  public static PositionalParameters create(List<Mapped<PositionalParameter>> all) {
+    List<Mapped<PositionalParameter>> regular = all.stream()
         .filter(c -> !c.isRepeatable())
         .collect(Collectors.toUnmodifiableList());
-    Optional<ConvertedParameter<PositionalParameter>> repeatable = all.stream()
-        .filter(ConvertedParameter::isRepeatable)
+    Optional<Mapped<PositionalParameter>> repeatable = all.stream()
+        .filter(Mapped::isRepeatable)
         .findFirst();
     int maxWidth = all.stream()
-        .map(ConvertedParameter::paramLabel)
+        .map(Mapped::paramLabel)
         .mapToInt(String::length).max().orElse(0);
     return new PositionalParameters(regular, repeatable, maxWidth);
   }
 
-  public List<ConvertedParameter<PositionalParameter>> regular() {
+  public List<Mapped<PositionalParameter>> regular() {
     return regular;
   }
 
-  public List<ConvertedParameter<PositionalParameter>> parameters() {
+  public List<Mapped<PositionalParameter>> parameters() {
     if (repeatable.isEmpty()) {
       return regular;
     }
-    List<ConvertedParameter<PositionalParameter>> result = new ArrayList<>(regular.size() + 1);
+    List<Mapped<PositionalParameter>> result = new ArrayList<>(regular.size() + 1);
     result.addAll(regular);
     repeatable.ifPresent(result::add);
     return result;
@@ -55,7 +55,7 @@ public class PositionalParameters {
     return regular().size() + (anyRepeatable() ? 1 : 0);
   }
 
-  public Optional<ConvertedParameter<PositionalParameter>> repeatable() {
+  public Optional<Mapped<PositionalParameter>> repeatable() {
     return repeatable;
   }
 
@@ -67,7 +67,7 @@ public class PositionalParameters {
     return regular.isEmpty() && !anyRepeatable();
   }
 
-  public void forEachRegular(Consumer<ConvertedParameter<PositionalParameter>> consumer) {
+  public void forEachRegular(Consumer<Mapped<PositionalParameter>> consumer) {
     regular.forEach(consumer);
   }
 

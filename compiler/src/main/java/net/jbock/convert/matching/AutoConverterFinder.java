@@ -4,11 +4,11 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.common.TypeTool;
 import net.jbock.common.Util;
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.either.Either;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.util.StringConverter;
 import net.jbock.validate.ParameterStyle;
@@ -47,7 +47,7 @@ public class AutoConverterFinder extends MatchValidator {
     this.util = util;
   }
 
-  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(P parameter) {
+  public <P extends AbstractItem> Either<String, Mapped<P>> findConverter(P parameter) {
     for (Matcher matcher : matchers) {
       Optional<Match> match = matcher.tryMatch(parameter);
       if (match.isPresent()) {
@@ -59,7 +59,7 @@ public class AutoConverterFinder extends MatchValidator {
     return left(noMatchError(sourceMethod.returnType()));
   }
 
-  private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(Match match, P parameter) {
+  private <P extends AbstractItem> Either<String, Mapped<P>> findConverter(Match match, P parameter) {
     return autoConverter.findAutoConverter(match.baseType())
         .flatMapLeft(this::enumConverter)
         .map(mapExpr -> match.toConvertedParameter(mapExpr, parameter));

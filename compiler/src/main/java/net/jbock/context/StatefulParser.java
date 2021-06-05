@@ -5,7 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
 
@@ -76,9 +76,9 @@ public class StatefulParser extends Cached<TypeSpec> {
 
   private MethodSpec privateConstructor() {
     CodeBlock.Builder code = CodeBlock.builder();
-    for (ConvertedParameter<NamedOption> namedOption : namedOptions.options()) {
+    for (Mapped<NamedOption> namedOption : namedOptions.options()) {
       String enumConstant = namedOption.enumConstant();
-      for (String dashedName : namedOption.parameter().names()) {
+      for (String dashedName : namedOption.item().names()) {
         code.addStatement("$N.put($S, $T.$L)",
             commonFields.optionNames(), dashedName, sourceElement.itemType(),
             enumConstant);
@@ -92,7 +92,7 @@ public class StatefulParser extends Cached<TypeSpec> {
         .build();
   }
 
-  private ClassName optionParserType(ConvertedParameter<NamedOption> param) {
+  private ClassName optionParserType(Mapped<NamedOption> param) {
     if (param.isRepeatable()) {
       return generatedTypes.repeatableOptionParserType();
     }

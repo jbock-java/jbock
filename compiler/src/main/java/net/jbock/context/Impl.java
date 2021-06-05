@@ -3,8 +3,8 @@ package net.jbock.context;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.convert.ConvertedParameter;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.convert.Mapped;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -21,12 +21,12 @@ import static javax.lang.model.element.Modifier.STATIC;
 @ContextScope
 public class Impl {
 
-  private final AllParameters context;
+  private final AllItems context;
   private final GeneratedTypes generatedTypes;
   private final SourceElement sourceElement;
 
   @Inject
-  Impl(AllParameters context, GeneratedTypes generatedTypes, SourceElement sourceElement) {
+  Impl(AllItems context, GeneratedTypes generatedTypes, SourceElement sourceElement) {
     this.context = context;
     this.generatedTypes = generatedTypes;
     this.sourceElement = sourceElement;
@@ -39,7 +39,7 @@ public class Impl {
     } else {
       spec.superclass(sourceElement.typeName());
     }
-    for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
+    for (Mapped<? extends AbstractItem> c : context.parameters()) {
       spec.addField(c.asField());
     }
     return spec.addModifiers(PRIVATE, STATIC)
@@ -50,8 +50,8 @@ public class Impl {
         .build();
   }
 
-  private MethodSpec parameterMethodOverride(ConvertedParameter<? extends AbstractParameter> c) {
-    AbstractParameter param = c.parameter();
+  private MethodSpec parameterMethodOverride(Mapped<? extends AbstractItem> c) {
+    AbstractItem param = c.item();
     return MethodSpec.methodBuilder(param.methodName())
         .returns(param.returnType())
         .addModifiers(param.getAccessModifiers())
@@ -61,7 +61,7 @@ public class Impl {
 
   private MethodSpec implConstructor() {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-    for (ConvertedParameter<? extends AbstractParameter> c : context.parameters()) {
+    for (Mapped<? extends AbstractItem> c : context.parameters()) {
       FieldSpec field = c.asField();
       spec.addStatement("this.$N = $N", field, c.asParam());
       spec.addParameter(c.asParam());

@@ -20,18 +20,18 @@ import static net.jbock.common.Constants.STRING;
 @ContextScope
 public class PrintItemDocumentationMethod extends Cached<MethodSpec> {
 
-  private final AllParameters allParameters;
+  private final AllItems allItems;
   private final SourceElement sourceElement;
   private final CommonFields commonFields;
   private final MakeLinesMethod makeLinesMethod;
 
   @Inject
   PrintItemDocumentationMethod(
-      AllParameters allParameters,
+      AllItems allItems,
       SourceElement sourceElement,
       CommonFields commonFields,
       MakeLinesMethod makeLinesMethod) {
-    this.allParameters = allParameters;
+    this.allItems = allItems;
     this.sourceElement = sourceElement;
     this.commonFields = commonFields;
     this.makeLinesMethod = makeLinesMethod;
@@ -47,14 +47,14 @@ public class PrintItemDocumentationMethod extends Cached<MethodSpec> {
     ParameterSpec indent = builder(STRING, "indent").build();
     ParameterSpec s = builder(STRING, "s").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    if (allParameters.anyDescriptionKeys()) {
+    if (allItems.anyDescriptionKeys()) {
       code.addStatement("$T $N = $N.isEmpty() ? null : $N.get($N)",
           message.type, message, descriptionKey, commonFields.messages(), descriptionKey);
     }
 
     code.addStatement("$T $N = new $T<>()", tokens.type, tokens, ArrayList.class);
     code.addStatement("$N.add($N)", tokens, names);
-    if (allParameters.anyDescriptionKeys()) {
+    if (allItems.anyDescriptionKeys()) {
       code.addStatement(CodeBlock.builder().add("$N.addAll($T.ofNullable($N)\n",
           tokens, Optional.class, message).indent()
           .add(".map($T::trim)\n", STRING)
@@ -84,7 +84,7 @@ public class PrintItemDocumentationMethod extends Cached<MethodSpec> {
         .addParameter(indent)
         .addModifiers(PRIVATE)
         .addCode(code.build());
-    if (allParameters.anyDescriptionKeys()) {
+    if (allItems.anyDescriptionKeys()) {
       spec.addParameter(descriptionKey);
     }
     return spec.build();

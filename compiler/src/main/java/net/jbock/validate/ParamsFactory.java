@@ -2,9 +2,9 @@ package net.jbock.validate;
 
 import net.jbock.common.Util;
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.either.Either;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
@@ -30,26 +30,26 @@ public class ParamsFactory {
     this.util = util;
   }
 
-  public Either<List<ValidationFailure>, Params> create(
-      List<ConvertedParameter<PositionalParameter>> positionalParams,
-      List<ConvertedParameter<NamedOption>> namedOptions) {
+  public Either<List<ValidationFailure>, Items> create(
+      List<Mapped<PositionalParameter>> positionalParams,
+      List<Mapped<NamedOption>> namedOptions) {
     List<ValidationFailure> failures = checkDuplicateDescriptionKeys(namedOptions, positionalParams);
     if (!failures.isEmpty()) {
       return left(failures);
     }
-    return right(new Params(positionalParams, namedOptions));
+    return right(new Items(positionalParams, namedOptions));
   }
 
   private List<ValidationFailure> checkDuplicateDescriptionKeys(
-      List<ConvertedParameter<NamedOption>> namedOptions,
-      List<ConvertedParameter<PositionalParameter>> positionalParams) {
+      List<Mapped<NamedOption>> namedOptions,
+      List<Mapped<PositionalParameter>> positionalParams) {
     List<ValidationFailure> failures = new ArrayList<>();
-    List<ConvertedParameter<? extends AbstractParameter>> abstractParameters =
+    List<Mapped<? extends AbstractItem>> abstractParameters =
         util.concat(namedOptions, positionalParams);
     Set<String> keys = new HashSet<>();
     sourceElement.descriptionKey().ifPresent(keys::add);
-    for (ConvertedParameter<? extends AbstractParameter> c : abstractParameters) {
-      AbstractParameter p = c.parameter();
+    for (Mapped<? extends AbstractItem> c : abstractParameters) {
+      AbstractItem p = c.item();
       String key = p.descriptionKey().orElse("");
       if (key.isEmpty()) {
         continue;

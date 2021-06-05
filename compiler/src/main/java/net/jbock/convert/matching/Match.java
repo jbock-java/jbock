@@ -1,8 +1,8 @@
 package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
-import net.jbock.convert.ConvertedParameter;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.convert.Mapped;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.model.Skew;
 
 import javax.lang.model.type.TypeMirror;
@@ -40,9 +40,9 @@ public class Match {
     return new Match(baseType, skew, Optional.empty());
   }
 
-  public <P extends AbstractParameter> ConvertedParameter<P> toConvertedParameter(
+  public <P extends AbstractItem> Mapped<P> toConvertedParameter(
       CodeBlock mapExpr, P parameter) {
-    return ConvertedParameter.create(mapExpr, extractExpr, skew, parameter);
+    return Mapped.create(mapExpr, extractExpr, skew, parameter);
   }
 
   public TypeMirror baseType() {

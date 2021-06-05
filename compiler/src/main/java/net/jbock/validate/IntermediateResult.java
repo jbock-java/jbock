@@ -1,7 +1,7 @@
 package net.jbock.validate;
 
 import net.jbock.common.ValidationFailure;
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.either.Either;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.parameter.SourceMethod;
@@ -17,18 +17,18 @@ import static net.jbock.either.Either.right;
 public class IntermediateResult {
 
   private final List<SourceMethod> namedOptions;
-  private final List<ConvertedParameter<PositionalParameter>> positionalParameters;
+  private final List<Mapped<PositionalParameter>> positionalParameters;
 
   private IntermediateResult(
       List<SourceMethod> namedOptions,
-      List<ConvertedParameter<PositionalParameter>> positionalParameters) {
+      List<Mapped<PositionalParameter>> positionalParameters) {
     this.namedOptions = namedOptions;
     this.positionalParameters = positionalParameters;
   }
 
   public static Either<List<ValidationFailure>, IntermediateResult> create(
       List<SourceMethod> namedOptions,
-      List<ConvertedParameter<PositionalParameter>> positionalParameters) {
+      List<Mapped<PositionalParameter>> positionalParameters) {
     List<ValidationFailure> failures = validatePositions(positionalParameters);
     if (!failures.isEmpty()) {
       return left(failures);
@@ -37,14 +37,14 @@ public class IntermediateResult {
   }
 
   private static List<ValidationFailure> validatePositions(
-      List<ConvertedParameter<PositionalParameter>> params) {
-    List<ConvertedParameter<PositionalParameter>> sorted = params.stream()
-        .sorted(Comparator.comparing(c -> c.parameter().position()))
+      List<Mapped<PositionalParameter>> params) {
+    List<Mapped<PositionalParameter>> sorted = params.stream()
+        .sorted(Comparator.comparing(c -> c.item().position()))
         .collect(Collectors.toUnmodifiableList());
     List<ValidationFailure> failures = new ArrayList<>();
     for (int i = 0; i < sorted.size(); i++) {
-      ConvertedParameter<PositionalParameter> c = sorted.get(i);
-      PositionalParameter p = c.parameter();
+      Mapped<PositionalParameter> c = sorted.get(i);
+      PositionalParameter p = c.item();
       if (p.position() != i) {
         String message = "Position " + p.position() + " is not available. Suggested position: " + i;
         failures.add(p.fail(message));
@@ -57,7 +57,7 @@ public class IntermediateResult {
     return namedOptions;
   }
 
-  public List<ConvertedParameter<PositionalParameter>> positionalParameters() {
+  public List<Mapped<PositionalParameter>> positionalParameters() {
     return positionalParameters;
   }
 }

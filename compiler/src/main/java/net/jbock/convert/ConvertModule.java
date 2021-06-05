@@ -49,13 +49,13 @@ public class ConvertModule {
   @Provides
   EnumName enumName(
       SourceMethod sourceMethod,
-      List<ConvertedParameter<NamedOption>> alreadyCreatedOptions,
-      List<ConvertedParameter<PositionalParameter>> alreadyCreatedParams) {
+      List<Mapped<NamedOption>> alreadyCreatedOptions,
+      List<Mapped<PositionalParameter>> alreadyCreatedParams) {
     String methodName = sourceMethod.method().getSimpleName().toString();
     EnumName originalName = EnumName.create(methodName);
     Set<String> alreadyCreated = util.concat(alreadyCreatedOptions, alreadyCreatedParams)
         .stream()
-        .map(ConvertedParameter::enumName)
+        .map(Mapped::enumName)
         .map(EnumName::enumConstant)
         .collect(Collectors.toSet());
     EnumName result = originalName;

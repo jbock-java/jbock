@@ -2,7 +2,7 @@ package net.jbock.convert.matcher;
 
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.model.Skew;
 
@@ -29,7 +29,7 @@ public class ExactMatcher implements Matcher {
   }
 
   @Override
-  public Optional<Match> tryMatch(AbstractParameter parameter) {
+  public Optional<Match> tryMatch(AbstractItem parameter) {
     Match match = Match.create(boxedReturnType(), Skew.REQUIRED);
     return Optional.of(match);
   }

@@ -44,7 +44,7 @@ public class NamedOptionFactory {
   private final SourceMethod sourceMethod;
   private final SourceElement sourceElement;
   private final EnumName enumName;
-  private final List<ConvertedParameter<NamedOption>> alreadyCreated;
+  private final List<Mapped<NamedOption>> alreadyCreated;
 
   @Inject
   NamedOptionFactory(
@@ -53,7 +53,7 @@ public class NamedOptionFactory {
       SourceMethod sourceMethod,
       SourceElement sourceElement,
       EnumName enumName,
-      List<ConvertedParameter<NamedOption>> alreadyCreated) {
+      List<Mapped<NamedOption>> alreadyCreated) {
     this.converterFinder = converterFinder;
     this.converterClass = converterClass;
     this.sourceMethod = sourceMethod;
@@ -62,7 +62,7 @@ public class NamedOptionFactory {
     this.alreadyCreated = alreadyCreated;
   }
 
-  public Either<ValidationFailure, ConvertedParameter<NamedOption>> createNamedOption() {
+  public Either<ValidationFailure, Mapped<NamedOption>> createNamedOption() {
     return checkOptionNames()
         .map(this::createNamedOption)
         .flatMap(namedOption -> {
@@ -78,9 +78,9 @@ public class NamedOptionFactory {
     if (sourceMethod.names().isEmpty()) {
       return left("define at least one option name");
     }
-    for (ConvertedParameter<NamedOption> c : alreadyCreated) {
+    for (Mapped<NamedOption> c : alreadyCreated) {
       for (String name : sourceMethod.names()) {
-        for (String previousName : c.parameter().names()) {
+        for (String previousName : c.item().names()) {
           if (name.equals(previousName)) {
             return left("duplicate option name: " + name);
           }
@@ -134,9 +134,9 @@ public class NamedOptionFactory {
     return new NamedOption(enumName, names, sourceMethod);
   }
 
-  private ConvertedParameter<NamedOption> createFlag(NamedOption namedOption) {
+  private Mapped<NamedOption> createFlag(NamedOption namedOption) {
     CodeBlock mapExpr = CodeBlock.of(".map($T.create($T.identity()))", StringConverter.class, Function.class);
-    return ConvertedParameter.create(mapExpr,
+    return Mapped.create(mapExpr,
         Optional.empty(), Skew.MODAL_FLAG,
         namedOption);
   }

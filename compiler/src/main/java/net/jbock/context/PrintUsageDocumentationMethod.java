@@ -4,7 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.common.SafeElements;
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
@@ -28,7 +28,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
   private static final String OPTIONS = "OPTIONS";
 
   private final SourceElement sourceElement;
-  private final AllParameters allParameters;
+  private final AllItems allItems;
   private final PositionalParameters positionalParameters;
   private final NamedOptions namedOptions;
   private final MakeLinesMethod makeLinesMethod;
@@ -45,7 +45,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
   @Inject
   PrintUsageDocumentationMethod(
       SourceElement sourceElement,
-      AllParameters allParameters,
+      AllItems allItems,
       PositionalParameters positionalParameters,
       NamedOptions namedOptions,
       MakeLinesMethod makeLinesMethod,
@@ -55,7 +55,7 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
       UsageMethod usageMethod,
       AnsiStyle styler) {
     this.sourceElement = sourceElement;
-    this.allParameters = allParameters;
+    this.allItems = allItems;
     this.positionalParameters = positionalParameters;
     this.namedOptions = namedOptions;
     this.makeLinesMethod = makeLinesMethod;
@@ -126,33 +126,33 @@ public class PrintUsageDocumentationMethod extends Cached<MethodSpec> {
         .build();
   }
 
-  private CodeBlock printNamedOptionCode(ConvertedParameter<NamedOption> c) {
+  private CodeBlock printNamedOptionCode(Mapped<NamedOption> c) {
     String enumConstant = c.enumConstant();
-    if (allParameters.anyDescriptionKeys()) {
+    if (allItems.anyDescriptionKeys()) {
       return CodeBlock.builder().addStatement("$N($T.$L, $S, $N, $S)",
           printItemDocumentationMethod.get(),
           sourceElement.itemType(), enumConstant,
-          String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
+          String.format(optionsFormat, c.item().namesWithLabel(c.isFlag())),
           optionsIndent,
-          c.parameter().descriptionKey().orElse("")).build();
+          c.item().descriptionKey().orElse("")).build();
     } else {
       return CodeBlock.builder().addStatement("$N($T.$L, $S, $N)",
           printItemDocumentationMethod.get(),
           sourceElement.itemType(), enumConstant,
-          String.format(optionsFormat, c.parameter().namesWithLabel(c.isFlag())),
+          String.format(optionsFormat, c.item().namesWithLabel(c.isFlag())),
           optionsIndent).build();
     }
   }
 
-  private CodeBlock printPositionalCode(ConvertedParameter<PositionalParameter> c) {
+  private CodeBlock printPositionalCode(Mapped<PositionalParameter> c) {
     String enumConstant = c.enumConstant();
-    if (allParameters.anyDescriptionKeys()) {
+    if (allItems.anyDescriptionKeys()) {
       return CodeBlock.builder().addStatement("$N($T.$L, $S, $N, $S)",
           printItemDocumentationMethod.get(),
           sourceElement.itemType(), enumConstant,
           String.format(paramsFormat, c.paramLabel()),
           paramsIndent,
-          c.parameter().descriptionKey().orElse("")).build();
+          c.item().descriptionKey().orElse("")).build();
     } else {
       return CodeBlock.builder().addStatement("$N($T.$L, $S, $N)",
           printItemDocumentationMethod.get(),

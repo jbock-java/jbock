@@ -22,7 +22,7 @@ public class PositionalParamFactory {
   private final SourceMethod sourceMethod;
   private final SourceElement sourceElement;
   private final EnumName enumName;
-  private final List<ConvertedParameter<PositionalParameter>> alreadyCreated;
+  private final List<Mapped<PositionalParameter>> alreadyCreated;
 
   @Inject
   PositionalParamFactory(
@@ -30,7 +30,7 @@ public class PositionalParamFactory {
       SourceMethod sourceMethod,
       SourceElement sourceElement,
       EnumName enumName,
-      List<ConvertedParameter<PositionalParameter>> alreadyCreated) {
+      List<Mapped<PositionalParameter>> alreadyCreated) {
     this.converterFinder = converterFinder;
     this.sourceMethod = sourceMethod;
     this.sourceElement = sourceElement;
@@ -38,7 +38,7 @@ public class PositionalParamFactory {
     this.alreadyCreated = alreadyCreated;
   }
 
-  public Either<ValidationFailure, ConvertedParameter<PositionalParameter>> createPositionalParam(int position) {
+  public Either<ValidationFailure, Mapped<PositionalParameter>> createPositionalParam(int position) {
     PositionalParameter positionalParameter = new PositionalParameter(
         sourceMethod,
         enumName,
@@ -52,28 +52,28 @@ public class PositionalParamFactory {
         .mapLeft(sourceMethod::fail);
   }
 
-  private Either<String, ConvertedParameter<PositionalParameter>> checkOnlyOnePositionalList(
-      ConvertedParameter<PositionalParameter> c) {
+  private Either<String, Mapped<PositionalParameter>> checkOnlyOnePositionalList(
+      Mapped<PositionalParameter> c) {
     if (!c.isRepeatable()) {
       return right(c);
     }
     Optional<String> failure = alreadyCreated.stream()
-        .filter(ConvertedParameter::isRepeatable)
+        .filter(Mapped::isRepeatable)
         .map(p -> "positional parameter " + p.paramLabel() + " is also repeatable")
         .findAny();
     return Either.unbalancedLeft(failure).orElseRight(() -> c);
   }
 
-  private Either<String, ConvertedParameter<PositionalParameter>> checkPositionNotNegative(
-      ConvertedParameter<PositionalParameter> c) {
-    PositionalParameter p = c.parameter();
+  private Either<String, Mapped<PositionalParameter>> checkPositionNotNegative(
+      Mapped<PositionalParameter> c) {
+    PositionalParameter p = c.item();
     if (p.position() < 0) {
       return left("negative positions are not allowed");
     }
     return right(c);
   }
 
-  private Either<String, ConvertedParameter<PositionalParameter>> checkSuperNotRepeatable(ConvertedParameter<PositionalParameter> c) {
+  private Either<String, Mapped<PositionalParameter>> checkSuperNotRepeatable(Mapped<PositionalParameter> c) {
     if (sourceElement.isSuperCommand() && c.isRepeatable()) {
       return left("in a @" + SuperCommand.class.getSimpleName() +
           ", repeatable params are not supported");
@@ -81,20 +81,20 @@ public class PositionalParamFactory {
     return right(c);
   }
 
-  private Either<String, ConvertedParameter<PositionalParameter>> checkRankConsistentWithPosition(ConvertedParameter<PositionalParameter> c) {
-    PositionalParameter p = c.parameter();
+  private Either<String, Mapped<PositionalParameter>> checkRankConsistentWithPosition(Mapped<PositionalParameter> c) {
+    PositionalParameter p = c.item();
     int thisOrder = c.isRepeatable() ? 2 : c.isOptional() ? 1 : 0;
     int thisPosition = p.position();
-    for (ConvertedParameter<PositionalParameter> other : alreadyCreated) {
+    for (Mapped<PositionalParameter> other : alreadyCreated) {
       int otherOrder = other.isRepeatable() ? 2 : other.isOptional() ? 1 : 0;
-      if (thisPosition == other.parameter().position()) {
+      if (thisPosition == other.item().position()) {
         return left("duplicate position");
       }
-      if (thisOrder > otherOrder && thisPosition < other.parameter().position()) {
+      if (thisOrder > otherOrder && thisPosition < other.item().position()) {
         return left("position must be greater than position of " +
             other.skew() + " parameter " + other.paramLabel());
       }
-      if (thisOrder < otherOrder && thisPosition > other.parameter().position()) {
+      if (thisOrder < otherOrder && thisPosition > other.item().position()) {
         return left("position must be less than position of " +
             other.skew() + " parameter " + other.paramLabel());
       }

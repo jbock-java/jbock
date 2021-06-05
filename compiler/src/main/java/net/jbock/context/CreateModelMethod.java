@@ -4,7 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import net.jbock.common.SafeElements;
 import net.jbock.common.Util;
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Option;
 import net.jbock.model.Parameter;
@@ -56,10 +56,10 @@ public class CreateModelMethod extends Cached<MethodSpec> {
     code.add(CodeBlock.of(".withHelpEnabled($L)", sourceElement.helpEnabled()));
     code.add(CodeBlock.of(".withSuperCommand($L)", sourceElement.isSuperCommand()));
     code.add(CodeBlock.of(".withAtFileExpansion($L)", sourceElement.expandAtSign()));
-    for (ConvertedParameter<NamedOption> c : namedOptions.options()) {
+    for (Mapped<NamedOption> c : namedOptions.options()) {
       code.add(CodeBlock.of(".addOption($L)", optionBlock(c)));
     }
-    for (ConvertedParameter<PositionalParameter> c : positionalParameters.parameters()) {
+    for (Mapped<PositionalParameter> c : positionalParameters.parameters()) {
       code.add(CodeBlock.of(".addParameter($L)", parameterBlock(c)));
     }
     code.add(CodeBlock.of(".build()"));
@@ -70,31 +70,31 @@ public class CreateModelMethod extends Cached<MethodSpec> {
         .build();
   }
 
-  private CodeBlock optionBlock(ConvertedParameter<NamedOption> c) {
+  private CodeBlock optionBlock(Mapped<NamedOption> c) {
     List<CodeBlock> names = new ArrayList<>();
-    for (String name : c.parameter().names()) {
+    for (String name : c.item().names()) {
       names.add(CodeBlock.of("$S", name));
     }
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("$T.builder()", Option.class));
     code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
-    code.add(CodeBlock.of(".withDescriptionKey($S)", c.parameter().descriptionKey().orElse("")));
+    code.add(CodeBlock.of(".withDescriptionKey($S)", c.item().descriptionKey().orElse("")));
     code.add(CodeBlock.of(".withNames($T.of($L))", List.class, util.joinByComma(names)));
     code.add(CodeBlock.of(".withSkew($T.$L)", Skew.class, c.skew().name()));
-    for (String line : c.parameter().description(elements)) {
+    for (String line : c.item().description(elements)) {
       code.add(CodeBlock.of(".addDescriptionLine($S)", line));
     }
     code.add(CodeBlock.of(".build()"));
     return util.joinByNewline(code);
   }
 
-  private CodeBlock parameterBlock(ConvertedParameter<PositionalParameter> c) {
+  private CodeBlock parameterBlock(Mapped<PositionalParameter> c) {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("$T.builder()", Parameter.class));
     code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
-    code.add(CodeBlock.of(".withDescriptionKey($S)", c.parameter().descriptionKey().orElse("")));
+    code.add(CodeBlock.of(".withDescriptionKey($S)", c.item().descriptionKey().orElse("")));
     code.add(CodeBlock.of(".withSkew($T.$L)", Skew.class, c.skew().name()));
-    for (String line : c.parameter().description(elements)) {
+    for (String line : c.item().description(elements)) {
       code.add(CodeBlock.of(".addDescriptionLine($S)", line));
     }
     code.add(CodeBlock.of(".build()"));

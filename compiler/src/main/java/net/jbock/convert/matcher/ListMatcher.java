@@ -3,7 +3,7 @@ package net.jbock.convert.matcher;
 import net.jbock.common.TypeTool;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.model.Skew;
 
@@ -27,7 +27,7 @@ public class ListMatcher implements Matcher {
   }
 
   @Override
-  public Optional<Match> tryMatch(AbstractParameter parameter) {
+  public Optional<Match> tryMatch(AbstractItem parameter) {
     TypeMirror returnType = sourceMethod.returnType();
     return tool.getSingleTypeArgument(returnType, List.class)
         .map(typeArg -> Match.create(typeArg, Skew.REPEATABLE));

@@ -1,6 +1,6 @@
 package net.jbock.context;
 
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 
 import java.util.List;
@@ -11,20 +11,19 @@ import java.util.stream.Stream;
 
 public class NamedOptions {
 
-  private final List<ConvertedParameter<NamedOption>> options;
-  private final List<ConvertedParameter<NamedOption>> requiredOptions;
-  private final List<ConvertedParameter<NamedOption>> optionalOptions;
+  private final List<Mapped<NamedOption>> options;
+  private final List<Mapped<NamedOption>> requiredOptions;
+  private final List<Mapped<NamedOption>> optionalOptions;
   private final boolean anyRepeatable;
   private final boolean anyRegular;
   private final boolean anyFlags;
   private final boolean unixClusteringSupported;
   private final int maxWidth;
 
-
   private NamedOptions(
-      List<ConvertedParameter<NamedOption>> options,
-      List<ConvertedParameter<NamedOption>> requiredOptions,
-      List<ConvertedParameter<NamedOption>> optionalOptions,
+      List<Mapped<NamedOption>> options,
+      List<Mapped<NamedOption>> requiredOptions,
+      List<Mapped<NamedOption>> optionalOptions,
       boolean anyRepeatable,
       boolean anyRegular,
       boolean anyFlags,
@@ -39,18 +38,18 @@ public class NamedOptions {
     this.maxWidth = maxWidth;
   }
 
-  public static NamedOptions create(List<ConvertedParameter<NamedOption>> options) {
-    boolean anyRepeatable = options.stream().anyMatch(ConvertedParameter::isRepeatable);
+  public static NamedOptions create(List<Mapped<NamedOption>> options) {
+    boolean anyRepeatable = options.stream().anyMatch(Mapped::isRepeatable);
     boolean anyRegular = options.stream().anyMatch(option -> option.isOptional() || option.isRequired());
-    boolean anyFlags = options.stream().anyMatch(ConvertedParameter::isFlag);
-    List<ConvertedParameter<NamedOption>> unixOptions = options.stream()
-        .filter(option -> option.parameter().hasUnixName())
+    boolean anyFlags = options.stream().anyMatch(Mapped::isFlag);
+    List<Mapped<NamedOption>> unixOptions = options.stream()
+        .filter(option -> option.item().hasUnixName())
         .collect(Collectors.toUnmodifiableList());
-    boolean unixClusteringSupported = unixOptions.size() >= 2 && unixOptions.stream().anyMatch(ConvertedParameter::isFlag);
-    Map<Boolean, List<ConvertedParameter<NamedOption>>> required = options.stream()
-        .collect(Collectors.partitioningBy(ConvertedParameter::isRequired));
+    boolean unixClusteringSupported = unixOptions.size() >= 2 && unixOptions.stream().anyMatch(Mapped::isFlag);
+    Map<Boolean, List<Mapped<NamedOption>>> required = options.stream()
+        .collect(Collectors.partitioningBy(Mapped::isRequired));
     int maxWidth = options.stream()
-        .map(c -> c.parameter().namesWithLabel(c.isFlag()))
+        .map(c -> c.item().namesWithLabel(c.isFlag()))
         .mapToInt(String::length).max().orElse(0);
     return new NamedOptions(options, required.get(true), required.get(false),
         anyRepeatable, anyRegular, anyFlags, unixClusteringSupported, maxWidth);
@@ -68,7 +67,7 @@ public class NamedOptions {
     return anyFlags;
   }
 
-  public List<ConvertedParameter<NamedOption>> options() {
+  public List<Mapped<NamedOption>> options() {
     return options;
   }
 
@@ -76,11 +75,11 @@ public class NamedOptions {
     return options.isEmpty();
   }
 
-  public Stream<ConvertedParameter<NamedOption>> stream() {
+  public Stream<Mapped<NamedOption>> stream() {
     return options.stream();
   }
 
-  public void forEach(Consumer<ConvertedParameter<NamedOption>> consumer) {
+  public void forEach(Consumer<Mapped<NamedOption>> consumer) {
     options.forEach(consumer);
   }
 
@@ -88,11 +87,11 @@ public class NamedOptions {
     return unixClusteringSupported;
   }
 
-  public List<ConvertedParameter<NamedOption>> required() {
+  public List<Mapped<NamedOption>> required() {
     return requiredOptions;
   }
 
-  public List<ConvertedParameter<NamedOption>> optional() {
+  public List<Mapped<NamedOption>> optional() {
     return optionalOptions;
   }
 

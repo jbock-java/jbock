@@ -4,7 +4,7 @@ import net.jbock.common.EnumName;
 
 import java.util.Locale;
 
-public class PositionalParameter extends AbstractParameter {
+public final class PositionalParameter extends AbstractItem {
 
   // for @Parameter this is the index
   // for @Parameters, greatest index plus one
@@ -20,7 +20,8 @@ public class PositionalParameter extends AbstractParameter {
 
   @Override
   public final String paramLabel() {
-    return sourceMethod().paramLabel().orElse(enumName().snake('_').toUpperCase(Locale.US));
+    return sourceMethod().paramLabel()
+        .orElse(enumName().snake('_').toUpperCase(Locale.US));
   }
 
   public int position() {

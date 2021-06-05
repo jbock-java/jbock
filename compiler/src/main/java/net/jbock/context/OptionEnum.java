@@ -8,8 +8,8 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.EnumName;
 import net.jbock.common.SafeElements;
-import net.jbock.convert.ConvertedParameter;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.convert.Mapped;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -28,14 +28,14 @@ import static net.jbock.common.Constants.STRING_ARRAY;
 @ContextScope
 public class OptionEnum {
 
-  private final AllParameters context;
+  private final AllItems context;
   private final FieldSpec descriptionField;
   private final SafeElements elements;
   private final SourceElement sourceElement;
 
   @Inject
   OptionEnum(
-      AllParameters context,
+      AllItems context,
       SafeElements elements,
       SourceElement sourceElement) {
     this.context = context;
@@ -45,12 +45,12 @@ public class OptionEnum {
   }
 
   TypeSpec define() {
-    List<ConvertedParameter<? extends AbstractParameter>> parameters = context.parameters();
+    List<Mapped<? extends AbstractItem>> parameters = context.parameters();
     TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement.itemType());
-    for (ConvertedParameter<? extends AbstractParameter> param : parameters) {
+    for (Mapped<? extends AbstractItem> param : parameters) {
       EnumName enumName = param.enumName();
       String enumConstant = enumName.enumConstant();
-      CodeBlock description = descriptionBlock(param.parameter().description(elements));
+      CodeBlock description = descriptionBlock(param.item().description(elements));
       TypeSpec optionSpec = anonymousClassBuilder(description).build();
       spec.addEnumConstant(enumConstant, optionSpec);
     }

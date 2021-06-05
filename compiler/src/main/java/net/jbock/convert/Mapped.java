@@ -5,37 +5,37 @@ import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.common.EnumName;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.model.Skew;
 
 import java.util.Locale;
 import java.util.Optional;
 
-public final class ConvertedParameter<P extends AbstractParameter> {
+public final class Mapped<P extends AbstractItem> {
 
   private final CodeBlock mapExpr;
   private final Optional<CodeBlock> extractExpr;
   private final Skew skew;
-  private final P parameter;
+  private final P item;
   private final ParameterSpec asParameterSpec;
   private final FieldSpec asFieldSpec;
 
-  private ConvertedParameter(
+  private Mapped(
       CodeBlock mapExpr,
       Optional<CodeBlock> extractExpr,
       Skew skew,
       ParameterSpec asParameterSpec,
       FieldSpec asFieldSpec,
-      P parameter) {
+      P item) {
     this.asParameterSpec = asParameterSpec;
     this.mapExpr = mapExpr;
     this.extractExpr = extractExpr;
     this.skew = skew;
     this.asFieldSpec = asFieldSpec;
-    this.parameter = parameter;
+    this.item = item;
   }
 
-  public static <P extends AbstractParameter> ConvertedParameter<P> create(
+  public static <P extends AbstractItem> Mapped<P> create(
       CodeBlock mapExpr,
       Optional<CodeBlock> extractExpr,
       Skew skew,
@@ -44,7 +44,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
     String fieldName = '_' + parameter.enumName().enumConstant().toLowerCase(Locale.US);
     FieldSpec asFieldSpec = FieldSpec.builder(fieldType, fieldName).build();
     ParameterSpec asParameterSpec = ParameterSpec.builder(fieldType, fieldName).build();
-    return new ConvertedParameter<>(mapExpr, extractExpr, skew, asParameterSpec,
+    return new Mapped<>(mapExpr, extractExpr, skew, asParameterSpec,
         asFieldSpec, parameter);
   }
 
@@ -61,7 +61,7 @@ public final class ConvertedParameter<P extends AbstractParameter> {
   }
 
   public EnumName enumName() {
-    return parameter.enumName();
+    return item.enumName();
   }
 
   public boolean isRequired() {
@@ -80,12 +80,12 @@ public final class ConvertedParameter<P extends AbstractParameter> {
     return skew == Skew.MODAL_FLAG;
   }
 
-  public P parameter() {
-    return parameter;
+  public P item() {
+    return item;
   }
 
   public String paramLabel() {
-    return parameter.paramLabel();
+    return item.paramLabel();
   }
 
   public String enumConstant() {

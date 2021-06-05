@@ -23,10 +23,10 @@ public interface ConvertComponent {
     Builder sourceMethod(SourceMethod sourceMethod);
 
     @BindsInstance
-    Builder alreadyCreatedParams(List<ConvertedParameter<PositionalParameter>> alreadyCreated);
+    Builder alreadyCreatedParams(List<Mapped<PositionalParameter>> alreadyCreated);
 
     @BindsInstance
-    Builder alreadyCreatedOptions(List<ConvertedParameter<NamedOption>> alreadyCreated);
+    Builder alreadyCreatedOptions(List<Mapped<NamedOption>> alreadyCreated);
 
     Builder module(ConvertModule module);
 

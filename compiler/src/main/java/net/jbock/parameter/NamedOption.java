@@ -5,7 +5,7 @@ import net.jbock.common.EnumName;
 import java.util.List;
 import java.util.Locale;
 
-public class NamedOption extends AbstractParameter {
+public final class NamedOption extends AbstractItem {
 
   private final List<String> names;
 

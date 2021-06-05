@@ -3,7 +3,7 @@ package net.jbock.convert.matcher;
 import net.jbock.Option;
 import net.jbock.common.SafeElements;
 import net.jbock.common.TypeTool;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.EvaluatingProcessor;
 import org.junit.jupiter.api.Assertions;
@@ -23,7 +23,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class OptionalMatcherTest {
 
-  private final AbstractParameter parameter = Mockito.mock(AbstractParameter.class);
+  private final AbstractItem parameter = Mockito.mock(AbstractItem.class);
 
   @Test
   void testLiftOptionalInt() {

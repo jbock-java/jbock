@@ -3,13 +3,13 @@ package net.jbock.convert.matching;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.Converter;
 import net.jbock.common.Util;
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matcher.Matcher;
 import net.jbock.convert.reference.ReferenceTool;
 import net.jbock.convert.reference.StringConverterType;
 import net.jbock.either.Either;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
 import net.jbock.processor.SourceElement;
 import net.jbock.validate.ParameterStyle;
@@ -54,7 +54,7 @@ public class ConverterValidator extends MatchValidator {
     this.types = types;
   }
 
-  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> validate(
+  public <P extends AbstractItem> Either<String, Mapped<P>> validate(
       P parameter,
       TypeElement converter) {
     Optional<String> maybeFailure = util.commonTypeChecks(converter)
@@ -66,7 +66,7 @@ public class ConverterValidator extends MatchValidator {
         .flatMap(functionType -> tryAllMatchers(functionType, parameter, converter));
   }
 
-  private <P extends AbstractParameter> Either<String, ConvertedParameter<P>> tryAllMatchers(
+  private <P extends AbstractItem> Either<String, Mapped<P>> tryAllMatchers(
       StringConverterType functionType,
       P parameter,
       TypeElement converter) {

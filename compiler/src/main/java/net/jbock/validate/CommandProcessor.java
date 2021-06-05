@@ -8,7 +8,7 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.context.ContextModule;
 import net.jbock.context.DaggerContextComponent;
 import net.jbock.convert.ConvertModule;
-import net.jbock.convert.ConvertedParameter;
+import net.jbock.convert.Mapped;
 import net.jbock.convert.DaggerConvertComponent;
 import net.jbock.either.Either;
 import net.jbock.parameter.NamedOption;
@@ -61,10 +61,10 @@ public class CommandProcessor {
         .map(component -> component.generatedClass().define());
   }
 
-  private Either<List<ValidationFailure>, Params> createNamedOptions(
+  private Either<List<ValidationFailure>, Items> createNamedOptions(
       IntermediateResult intermediateResult) {
     List<ValidationFailure> failures = new ArrayList<>();
-    List<ConvertedParameter<NamedOption>> namedOptions = new ArrayList<>(intermediateResult.options().size());
+    List<Mapped<NamedOption>> namedOptions = new ArrayList<>(intermediateResult.options().size());
     for (SourceMethod sourceMethod : intermediateResult.options()) {
       DaggerConvertComponent.builder()
           .module(parameterModule())
@@ -83,7 +83,7 @@ public class CommandProcessor {
   }
 
   private Either<List<ValidationFailure>, IntermediateResult> createPositionalParams(AbstractMethods methods) {
-    List<ConvertedParameter<PositionalParameter>> positionalParams = new ArrayList<>(methods.positionalParameters().size());
+    List<Mapped<PositionalParameter>> positionalParams = new ArrayList<>(methods.positionalParameters().size());
     List<ValidationFailure> failures = new ArrayList<>();
     for (SourceMethod sourceMethod : methods.positionalParameters()) {
       DaggerConvertComponent.builder()
@@ -106,7 +106,8 @@ public class CommandProcessor {
     return new ConvertModule(tool, types, sourceElement, util, elements);
   }
 
-  private ContextModule contextModule(Params params) {
-    return new ContextModule(sourceElement, elements, params, types);
+  private ContextModule contextModule(Items items) {
+    return new ContextModule(sourceElement, elements, items.positionalParams(),
+        items.namedOptions(), types);
   }
 }

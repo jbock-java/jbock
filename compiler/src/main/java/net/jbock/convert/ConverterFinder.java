@@ -4,7 +4,7 @@ import dagger.Lazy;
 import net.jbock.convert.matching.AutoConverterFinder;
 import net.jbock.convert.matching.ConverterValidator;
 import net.jbock.either.Either;
-import net.jbock.parameter.AbstractParameter;
+import net.jbock.parameter.AbstractItem;
 
 import javax.inject.Inject;
 
@@ -25,7 +25,7 @@ public class ConverterFinder {
     this.converterClass = converterClass;
   }
 
-  public <P extends AbstractParameter> Either<String, ConvertedParameter<P>> findConverter(P parameter) {
+  public <P extends AbstractItem> Either<String, Mapped<P>> findConverter(P parameter) {
     return converterClass.converter()
         .map(converter -> converterValidator.get().validate(parameter, converter))
         .orElseGet(() -> autoConverterFinder.get().findConverter(parameter));
