@@ -101,7 +101,7 @@ public class ParseMethod extends Cached<MethodSpec> {
             SyntaxError.class, createModelMethod.get(), e)
         .endControlFlow();
 
-    code.beginControlFlow("catch ($T $N)", IOException.class, e)
+    code.beginControlFlow("catch ($T | $T $N)", SecurityException.class, IOException.class, e)
         .addStatement("return $T.left(new $T($N(), $N[0], $N))", Either.class,
             AtFileError.class, createModelMethod.get(), args, e)
         .endControlFlow();
