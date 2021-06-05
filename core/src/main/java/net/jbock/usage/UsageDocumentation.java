@@ -21,6 +21,8 @@ public class UsageDocumentation {
   private final PrintStream err;
   private final int terminalWidth;
   private final Map<String, String> messages;
+  private final String descriptionKey;
+  private final List<String> descriptionLines;
   private final List<Option> options;
   private final List<Parameter> parameters;
   private final Synopsis synopsis;
@@ -38,13 +40,14 @@ public class UsageDocumentation {
 
   public static class Builder {
 
-    private final CommandModel context;
-    private PrintStream err;
-    private int terminalWidth;
-    private Map<String, String> messages;
+    private final CommandModel model;
 
-    Builder(CommandModel context) {
-      this.context = context;
+    private PrintStream err = System.err;
+    private int terminalWidth = 80;
+    private Map<String, String> messages = Collections.emptyMap();
+
+    Builder(CommandModel model) {
+      this.model = model;
     }
 
     /**
@@ -86,12 +89,14 @@ public class UsageDocumentation {
     public UsageDocumentation build() {
       return new UsageDocumentation(
           err, terminalWidth, messages,
-          context.options(),
-          context.parameters(),
-          Synopsis.create(context),
-          AnsiStyle.create(context),
-          maxWidth(context.options()),
-          maxWidth(context.parameters()));
+          model.descriptionKey(),
+          model.descriptionLines(),
+          model.options(),
+          model.parameters(),
+          Synopsis.create(model),
+          AnsiStyle.create(model),
+          maxWidth(model.options()),
+          maxWidth(model.parameters()));
     }
 
     private int maxWidth(List<? extends Item> items) {
@@ -107,12 +112,16 @@ public class UsageDocumentation {
       PrintStream err,
       int terminalWidth,
       Map<String, String> messages,
+      String descriptionKey,
+      List<String> descriptionLines,
       List<Option> options,
       List<Parameter> parameters,
       Synopsis synopsis,
       AnsiStyle ansiStyle,
       int maxWidthOptions,
       int maxWidthParameters) {
+    this.descriptionKey = descriptionKey;
+    this.descriptionLines = descriptionLines;
     this.err = err;
     this.terminalWidth = terminalWidth;
     this.messages = messages;
@@ -129,6 +138,21 @@ public class UsageDocumentation {
    * Public method that may be invoked from the generated code.
    */
   public void printUsageDocumentation() {
+    List<String> description = new ArrayList<>();
+    String desc = messages.get(descriptionKey);
+    if (desc != null) {
+      Collections.addAll(description, desc.split("\\s+", -1));
+    } else {
+      for (String line : descriptionLines) {
+        Collections.addAll(description, line.split("\\s+", -1));
+      }
+    }
+    makeLines("", description).forEach(err::println);
+
+    if (!description.isEmpty()) {
+      err.println();
+    }
+
     String optionsFormat = "  %1$-" + maxWidthOptions + "s ";
     String paramsFormat = "  %1$-" + maxWidthParameters + "s ";
     String indent_p = String.join("", Collections.nCopies(maxWidthParameters + 4, " "));
@@ -136,7 +160,7 @@ public class UsageDocumentation {
 
     err.println(ansiStyle.bold("USAGE"));
     String indent_u = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
-    makeLines(indent_u, synopsis.usage(" ")).forEach(err::println);
+    makeLines(indent_u, synopsis.createSynopsis(" ")).forEach(err::println);
     err.println();
     err.println(ansiStyle.bold("PARAMETERS"));
     for (Parameter parameter : parameters) {
@@ -147,6 +171,7 @@ public class UsageDocumentation {
     for (Option option : options) {
       printItemDocumentation(option, String.format(optionsFormat, option.name()), indent_o);
     }
+    err.flush();
   }
 
   private void printItemDocumentation(Item item, String itemName, String indent) {

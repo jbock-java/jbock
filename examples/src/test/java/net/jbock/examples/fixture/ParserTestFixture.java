@@ -1,7 +1,10 @@
 package net.jbock.examples.fixture;
 
 import net.jbock.either.Either;
+import net.jbock.usage.UsageDocumentation;
 import net.jbock.util.NotSuccess;
+import net.jbock.util.ParsingError;
+import org.junit.jupiter.api.Assertions;
 
 import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
@@ -144,6 +147,10 @@ public final class ParserTestFixture<E> {
     assertArraysEquals(expected, actual);
   }
 
+  public static void assertEquals(String[] actual, String... expected) {
+    assertArraysEquals(expected, actual);
+  }
+
   public static void assertArraysEquals(String[] expected, String[] actual) {
     if (expected.length != actual.length) {
       failDifferentLength(expected, actual);
@@ -282,7 +289,7 @@ public final class ParserTestFixture<E> {
           Method method = parsed.get().getClass().getDeclaredMethod(key);
           method.setAccessible(true);
           Object result = method.invoke(parsed.get());
-          assertEquals(expectedValue, result,
+          Assertions.assertEquals(expectedValue, result,
               String.format("At `%s`: expecting %s but found %s", key, expectedValue, result));
         }
       } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
@@ -314,5 +321,19 @@ public final class ParserTestFixture<E> {
 
   private static class Abort extends RuntimeException {
 
+  }
+
+  public ParsingError castToError(NotSuccess notSuccess) {
+    return (ParsingError) notSuccess;
+  }
+
+  public String[] getUsageDocumentation(NotSuccess notSuccess) {
+    TestOutputStream testOutputStream = new TestOutputStream();
+    UsageDocumentation.builder(notSuccess.commandModel())
+        .withErrorStream(testOutputStream.out)
+        .withTerminalWidth(MAX_LINE_WIDTH)
+        .build()
+        .printUsageDocumentation();
+    return testOutputStream.split();
   }
 }

@@ -14,12 +14,16 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CpArgumentsTest {
 
+  private final CpArgumentsParser parser = new CpArgumentsParser();
+
   private final ParserTestFixture<CpArguments> f =
-      ParserTestFixture.create(new CpArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void errorMissingSource() {
-    f.assertThat("-r").failsWithMessage("Missing required parameter: \u001B[1mSOURCE\u001B[m");
+    Either<NotSuccess, CpArguments> result = parser.parse("-r");
+    assertTrue(result.getLeft().map(f::castToError).orElseThrow().message()
+        .contains("Missing required parameter: \u001B[1mSOURCE\u001B[m"));
   }
 
   @Test
@@ -35,9 +39,15 @@ class CpArgumentsTest {
 
   @Test
   void errorMissingDest() {
-    f.assertThat("a").failsWithMessage("Missing required parameter: \u001B[1mDEST\u001B[m");
-    f.assertThat("a", "-r").failsWithMessage("Missing required parameter: \u001B[1mDEST\u001B[m");
-    f.assertThat("-r", "a").failsWithMessage("Missing required parameter: \u001B[1mDEST\u001B[m");
+    assertTrue(parser.parse("a").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Missing required parameter: \u001B[1mDEST\u001B[m"));
+    assertTrue(parser.parse("a", "-r").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Missing required parameter: \u001B[1mDEST\u001B[m"));
+    assertTrue(parser.parse("-r", "a").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Missing required parameter: \u001B[1mDEST\u001B[m"));
   }
 
   @Test
@@ -58,17 +68,23 @@ class CpArgumentsTest {
 
   @Test
   void dashNotIgnored() {
-    f.assertThat("-a", "b").failsWithMessage("Invalid option: -a");
+    assertTrue(parser.parse("-a", "b").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid option: -a"));
   }
 
   @Test
   void tooMany() {
-    f.assertThat("a", "b", "c").failsWithMessage("Excess param: c");
+    assertTrue(parser.parse("a", "b", "c").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Excess param: c"));
   }
 
   @Test
   void tooManyAndFlag() {
-    f.assertThat("-r", "a", "b", "c").failsWithMessage("Excess param: c");
+    assertTrue(parser.parse("-r", "a", "b", "c").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Excess param: c"));
   }
 
   @Test

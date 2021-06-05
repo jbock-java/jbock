@@ -99,7 +99,9 @@ public class ParseMethod extends Cached<MethodSpec> {
             SyntaxError.class, createModelMethod.get(), e)
         .endControlFlow();
 
-    return MethodSpec.methodBuilder("parse").addParameter(args)
+    return MethodSpec.methodBuilder("parse")
+        .addParameter(args)
+        .varargs(true)
         .returns(generatedTypes.parseResultType())
         .addCode(code.build())
         .addModifiers(sourceElement.accessModifiers())

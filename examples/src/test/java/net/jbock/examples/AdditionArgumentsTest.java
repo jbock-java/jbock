@@ -5,10 +5,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class AdditionArgumentsTest {
 
+  private final AdditionArgumentsParser parser = new AdditionArgumentsParser();
+
   private final ParserTestFixture<AdditionArguments> f =
-      ParserTestFixture.create(new AdditionArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void optionalAbsent() {
@@ -28,8 +32,9 @@ class AdditionArgumentsTest {
 
   @Test
   void wrongNumber() {
-    f.assertThat("--", "-a", "2").failsWithMessage(
-        "while converting parameter A: For input string: \"-a\"");
+    assertTrue(parser.parse("--", "-a", "2").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("while converting parameter A: For input string: \"-a\""));
   }
 
   @Test

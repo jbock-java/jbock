@@ -13,12 +13,17 @@ public class TestOutputStream {
 
   @Override
   public String toString() {
-    return new String(baos.toByteArray());
+    return baos.toString();
   }
 
   public void assertEquals(String... expected) {
     String stdout = baos.toString();
-    String[] actual = stdout.split("\\r?\\n", -1);
+    String[] actual = stdout.split("\\R", -1);
     assertArraysEquals(expected, actual);
+  }
+
+  public String[] split() {
+    String stdout = baos.toString();
+    return stdout.split("\\R", -1);
   }
 }

@@ -4,11 +4,14 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.processor.SourceElement;
+import net.jbock.usage.Synopsis;
+import net.jbock.usage.UsageDocumentation;
 
 import javax.inject.Inject;
 
 import static com.squareup.javapoet.MethodSpec.methodBuilder;
 import static com.squareup.javapoet.ParameterSpec.builder;
+import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
 
@@ -49,19 +52,22 @@ public class ParseOrExitMethod {
     CodeBlock.Builder code = CodeBlock.builder();
     generatedTypes.helpRequestedType().ifPresent(helpRequestedType -> code
         .beginControlFlow("if ($N instanceof $T)", notSuccess, helpRequestedType)
-        .addStatement("$N()", printUsageDocumentationMethod.get())
-        .addStatement("$N.flush()", commonFields.err())
-        .addStatement("$N.accept($N)", commonFields.exitHook(), notSuccess)
-        .addStatement("throw new $T($S)", RuntimeException.class, "help requested")
+        .add("$T.builder($N.commandModel())\n", UsageDocumentation.class, notSuccess).indent()
+        .add(".build().printUsageDocumentation();\n").unindent()
+        .addStatement("$T.exit(0)", System.class)
         .endControlFlow());
 
     code.addStatement("$N.println($S + (($T) $N).message())", commonFields.err(),
         styler.red("ERROR:") + " ", generatedTypes.parsingFailedType(), notSuccess);
     if (sourceElement.helpEnabled()) {
-      code.addStatement("$N.println($T.join($S, $N($S)))",
-          commonFields.err(), STRING, " ", usageMethod.get(), "Usage:");
+      ParameterSpec synopsis = builder(LIST_OF_STRING, "synopsis").build();
+      code.add("$T $N = $T.create($N.commandModel())\n", LIST_OF_STRING, synopsis, Synopsis.class, notSuccess).indent()
+          .add(".createSynopsis($S);\n", "Usage:").unindent();
+      code.addStatement("$N.println($T.join($S, $N))",
+          commonFields.err(), STRING, " ", synopsis);
     } else {
-      code.addStatement("$N()", printUsageDocumentationMethod.get());
+      code.add("$T.builder($N.commandModel())\n", UsageDocumentation.class, notSuccess).indent()
+          .add(".build().printUsageDocumentation();\n").unindent();
     }
     if (sourceElement.helpEnabled()) {
       String helpSuggestion = sourceElement.programName() + " --help";
@@ -70,8 +76,8 @@ public class ParseOrExitMethod {
               " for more information.");
     }
     code.addStatement("$N.flush()", commonFields.err());
-    code.addStatement("$N.accept($N)", commonFields.exitHook(), notSuccess);
-    code.addStatement("throw new $T($S)", RuntimeException.class, "parsing error");
+    code.addStatement("$T.exit(1)", System.class);
+    code.addStatement("return new $T()", RuntimeException.class);
 
     return methodBuilder("parseOrExit").addParameter(args)
         .addModifiers(sourceElement.accessModifiers())

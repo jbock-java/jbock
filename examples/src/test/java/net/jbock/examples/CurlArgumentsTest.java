@@ -8,11 +8,15 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CurlArgumentsTest {
 
+  private final CurlArgumentsParser parser = new CurlArgumentsParser();
+
   private final ParserTestFixture<CurlArguments> f =
-      ParserTestFixture.create(new CurlArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void testEmpty() {
@@ -174,52 +178,64 @@ class CurlArgumentsTest {
 
   @Test
   void errorGroupingDuplicateFlag() {
-    f.assertThat("-v", "-vH'Content-Type: application/xml'").failsWithMessage(
-        "Option '-vH'Content-Type: application/xml'' is a repetition");
+    assertTrue(parser.parse("-v", "-vH'Content-Type: application/xml'")
+        .getLeft().map(f::castToError).orElseThrow().message()
+        .contains("Option '-vH'Content-Type: application/xml'' is a repetition"));
   }
 
   @Test
   void errorMissingRepeatable() {
-    f.assertThat("-H").failsWithMessage("Missing argument after token: -H");
+    assertTrue(parser.parse("-H")
+        .getLeft().map(f::castToError).orElseThrow().message()
+        .contains("Missing argument after token: -H"));
   }
 
   @Test
   void errorMissingNonRepeatable() {
-    f.assertThat("--request").failsWithMessage("Missing argument after token: --request");
+    assertTrue(parser.parse("--request")
+        .getLeft().map(f::castToError).orElseThrow().message()
+        .contains("Missing argument after token: --request"));
   }
 
   @Test
   void errorDuplicateNonRepeatableLong() {
-    f.assertThat("--request", "GET", "--request", "POST").failsWithMessage(
-        "Option '--request' is a repetition");
+    assertTrue(parser.parse("--request", "GET", "--request", "POST")
+        .getLeft().map(f::castToError).orElseThrow().message()
+        .contains("Option '--request' is a repetition"));
   }
 
   @Test
   void errorDuplicateNonRepeatableShort() {
-    f.assertThat("-X1", "-X2").failsWithMessage("Option '-X2' is a repetition");
+    assertTrue(parser.parse("-X1", "-X2")
+        .getLeft().map(f::castToError).orElseThrow().message()
+        .contains("Option '-X2' is a repetition"));
   }
 
   @Test
   void errorDuplicateNonRepeatableLongDetachedShortAttached() {
-    f.assertThat("--request", "1", "-X2").failsWithMessage(
-        "Option '-X2' is a repetition");
+    assertTrue(parser.parse("--request", "1", "-X2")
+        .getLeft().map(f::castToError).orElseThrow().message()
+        .contains("Option '-X2' is a repetition"));
   }
 
   @Test
   void errorDuplicateNonRepeatableLongAttachedShortDetached() {
-    f.assertThat("--request=1", "-X", "2").failsWithMessage(
-        "Option '-X' is a repetition");
+    assertTrue(parser.parse("--request=1", "-X", "2")
+        .getLeft().map(f::castToError).orElseThrow().message()
+        .contains("Option '-X' is a repetition"));
   }
 
   @Test
   void testPrint() {
-    f.assertPrintsHelp(
+    String[] actual = parser.parse("--help")
+        .getLeft().map(f::getUsageDocumentation).orElseThrow();
+    assertEquals(actual,
         "curl is a tool to transfer data from or to a server using one of the supported",
         "protocols. curl offers a busload of useful tricks. curl is powered by libcurl for",
         "all transfer-related features. See libcurl(3) for details.",
         "",
         "\u001B[1mUSAGE\u001B[m",
-        "  curl [OPTION]... [URL]...",
+        "  curl [OPTIONS] URL...",
         "",
         "\u001B[1mPARAMETERS\u001B[m",
         "  URL ",

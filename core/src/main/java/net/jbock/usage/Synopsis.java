@@ -39,12 +39,12 @@ public class Synopsis {
   /**
    * Public method that may be invoked from the generated code.
    */
-  public List<String> usage(String prefix) {
+  public List<String> createSynopsis(String prefix) {
     List<String> result = new ArrayList<>();
     result.add(prefix);
     result.add(programName);
     if (optionalOptions().findAny().isPresent()) {
-      result.add("[OPTION]...");
+      result.add("[OPTIONS]");
     }
     for (Option option : requiredOptions()) {
       String firstName = option.names().get(0);
@@ -64,7 +64,7 @@ public class Synopsis {
           throw new IllegalArgumentException("unexpected skew: " + skew);
       }
     }
-    repeatableParameter().ifPresent(param -> result.add("[" + param.paramLabel() + "]"));
+    repeatableParameter().ifPresent(param -> result.add(param.paramLabel() + "..."));
     return result;
   }
 

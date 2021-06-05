@@ -8,6 +8,8 @@ import java.util.List;
  */
 public final class CommandModel {
 
+  private final String descriptionKey;
+  private final List<String> descriptionLines;
   private final String programName;
   private final boolean ansi;
   private final boolean helpEnabled;
@@ -17,6 +19,8 @@ public final class CommandModel {
   private final List<Parameter> parameters;
 
   private CommandModel(
+      String descriptionKey,
+      List<String> descriptionLines,
       String programName,
       boolean ansi,
       boolean helpEnabled,
@@ -24,6 +28,8 @@ public final class CommandModel {
       boolean atFileExpansion,
       List<Option> options,
       List<Parameter> parameters) {
+    this.descriptionKey = descriptionKey;
+    this.descriptionLines = descriptionLines;
     this.programName = programName;
     this.ansi = ansi;
     this.helpEnabled = helpEnabled;
@@ -48,6 +54,8 @@ public final class CommandModel {
    */
   public static final class Builder {
 
+    private String descriptionKey;
+    private final List<String> descriptionLines = new ArrayList<>();
     private String programName;
     private boolean ansi;
     private boolean helpEnabled;
@@ -56,6 +64,27 @@ public final class CommandModel {
     private final List<Option> options = new ArrayList<>();
     private final List<Parameter> parameters = new ArrayList<>();
 
+    /**
+     * Set description key.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param descriptionKey a key, possibly blank
+     */
+    public Builder withDescriptionKey(String descriptionKey) {
+      this.descriptionKey = descriptionKey;
+      return this;
+    }
+
+    /**
+     * Add description line.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param descriptionLine a line
+     */
+    public Builder addDescriptionLine(String descriptionLine) {
+      this.descriptionLines.add(descriptionLine);
+      return this;
+    }
     /**
      * Set program name.
      * Public method that may be invoked from the generated code.
@@ -140,11 +169,18 @@ public final class CommandModel {
      * @return command model
      */
     public CommandModel build() {
-      return new CommandModel(programName, ansi, helpEnabled, superCommand, atFileExpansion,
+      return new CommandModel(descriptionKey, descriptionLines, programName, ansi, helpEnabled, superCommand, atFileExpansion,
           options, parameters);
     }
   }
 
+  public String descriptionKey() {
+    return descriptionKey;
+  }
+
+  public List<String> descriptionLines() {
+    return descriptionLines;
+  }
 
   /**
    * Get the program name.

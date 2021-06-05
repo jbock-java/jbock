@@ -3,6 +3,7 @@ package net.jbock.context;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.PositionalParameter;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -38,6 +39,16 @@ public class PositionalParameters {
 
   public List<ConvertedParameter<PositionalParameter>> regular() {
     return regular;
+  }
+
+  public List<ConvertedParameter<PositionalParameter>> parameters() {
+    if (repeatable.isEmpty()) {
+      return regular;
+    }
+    List<ConvertedParameter<PositionalParameter>> result = new ArrayList<>(regular.size() + 1);
+    result.addAll(regular);
+    repeatable.ifPresent(result::add);
+    return result;
   }
 
   public int size() {
