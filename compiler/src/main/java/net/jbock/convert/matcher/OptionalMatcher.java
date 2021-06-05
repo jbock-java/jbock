@@ -6,7 +6,7 @@ import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.parameter.AbstractParameter;
 import net.jbock.parameter.SourceMethod;
-import net.jbock.usage.Skew;
+import net.jbock.model.Skew;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;

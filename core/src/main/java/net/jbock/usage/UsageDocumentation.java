@@ -1,6 +1,9 @@
 package net.jbock.usage;
 
-import net.jbock.model.UsageContext;
+import net.jbock.model.Item;
+import net.jbock.model.Option;
+import net.jbock.model.Parameter;
+import net.jbock.model.CommandModel;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -20,7 +23,7 @@ public class UsageDocumentation {
   private final Map<String, String> messages;
   private final List<Option> options;
   private final List<Parameter> parameters;
-  private final Usage usage;
+  private final Synopsis synopsis;
   private final AnsiStyle ansiStyle;
   private final int maxWidthOptions;
   private final int maxWidthParameters;
@@ -29,18 +32,18 @@ public class UsageDocumentation {
    * Create a builder instance.
    * Public method that may be invoked from the generated code.
    */
-  public static Builder builder(UsageContext context) {
+  public static Builder builder(CommandModel context) {
     return new Builder(context);
   }
 
   public static class Builder {
 
-    private final UsageContext context;
+    private final CommandModel context;
     private PrintStream err;
     private int terminalWidth;
     private Map<String, String> messages;
 
-    Builder(UsageContext context) {
+    Builder(CommandModel context) {
       this.context = context;
     }
 
@@ -85,7 +88,7 @@ public class UsageDocumentation {
           err, terminalWidth, messages,
           context.options(),
           context.parameters(),
-          Usage.create(context),
+          Synopsis.create(context),
           AnsiStyle.create(context),
           maxWidth(context.options()),
           maxWidth(context.parameters()));
@@ -106,7 +109,7 @@ public class UsageDocumentation {
       Map<String, String> messages,
       List<Option> options,
       List<Parameter> parameters,
-      Usage usage,
+      Synopsis synopsis,
       AnsiStyle ansiStyle,
       int maxWidthOptions,
       int maxWidthParameters) {
@@ -115,7 +118,7 @@ public class UsageDocumentation {
     this.messages = messages;
     this.options = options;
     this.parameters = parameters;
-    this.usage = usage;
+    this.synopsis = synopsis;
     this.ansiStyle = ansiStyle;
     this.maxWidthOptions = maxWidthOptions;
     this.maxWidthParameters = maxWidthParameters;
@@ -133,7 +136,7 @@ public class UsageDocumentation {
 
     err.println(ansiStyle.bold("USAGE"));
     String indent_u = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
-    makeLines(indent_u, usage.usage(" ")).forEach(err::println);
+    makeLines(indent_u, synopsis.usage(" ")).forEach(err::println);
     err.println();
     err.println(ansiStyle.bold("PARAMETERS"));
     for (Parameter parameter : parameters) {

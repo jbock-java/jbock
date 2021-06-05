@@ -6,7 +6,7 @@ import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeName;
 import net.jbock.common.EnumName;
 import net.jbock.parameter.AbstractParameter;
-import net.jbock.usage.Skew;
+import net.jbock.model.Skew;
 
 import java.util.Locale;
 import java.util.Optional;

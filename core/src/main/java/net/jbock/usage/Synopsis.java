@@ -1,6 +1,10 @@
 package net.jbock.usage;
 
-import net.jbock.model.UsageContext;
+import net.jbock.model.Item;
+import net.jbock.model.Option;
+import net.jbock.model.Parameter;
+import net.jbock.model.Skew;
+import net.jbock.model.CommandModel;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -9,26 +13,32 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static net.jbock.usage.Skew.OPTIONAL;
-import static net.jbock.usage.Skew.REPEATABLE;
-import static net.jbock.usage.Skew.REQUIRED;
+import static net.jbock.model.Skew.OPTIONAL;
+import static net.jbock.model.Skew.REPEATABLE;
+import static net.jbock.model.Skew.REQUIRED;
 
-public class Usage {
+/**
+ * Creates a single-line usage summary
+ */
+public class Synopsis {
 
   private final List<Option> options;
   private final List<Parameter> parameters;
   private final String programName;
 
-  Usage(List<Option> options, List<Parameter> parameters, String programName) {
+  Synopsis(List<Option> options, List<Parameter> parameters, String programName) {
     this.options = options;
     this.parameters = parameters;
     this.programName = programName;
   }
 
-  public static Usage create(UsageContext context) {
-    return new Usage(context.options(), context.parameters(), context.programName());
+  public static Synopsis create(CommandModel context) {
+    return new Synopsis(context.options(), context.parameters(), context.programName());
   }
 
+  /**
+   * Public method that may be invoked from the generated code.
+   */
   public List<String> usage(String prefix) {
     List<String> result = new ArrayList<>();
     result.add(prefix);

@@ -5,7 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.convert.ConvertedParameter;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
-import net.jbock.usage.Skew;
+import net.jbock.model.Skew;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;

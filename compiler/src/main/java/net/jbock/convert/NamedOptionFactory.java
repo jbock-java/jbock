@@ -6,7 +6,7 @@ import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.SourceMethod;
-import net.jbock.usage.Skew;
+import net.jbock.model.Skew;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.StringConverter;
 

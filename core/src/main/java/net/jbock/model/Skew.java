@@ -1,4 +1,4 @@
-package net.jbock.usage;
+package net.jbock.model;
 
 import java.util.Locale;
 
@@ -6,6 +6,7 @@ public enum Skew {
 
   REQUIRED, OPTIONAL, REPEATABLE, FLAG;
 
+  @Override
   public String toString() {
     return name().toLowerCase(Locale.US);
   }

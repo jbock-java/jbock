@@ -1,6 +1,6 @@
 package net.jbock.usage;
 
-import net.jbock.model.UsageContext;
+import net.jbock.model.CommandModel;
 
 import java.util.Optional;
 
@@ -16,7 +16,7 @@ public class AnsiStyle {
     this.ansi = ansi;
   }
 
-  static AnsiStyle create(UsageContext context) {
+  static AnsiStyle create(CommandModel context) {
     return new AnsiStyle(context.ansi());
   }
 
