@@ -39,7 +39,7 @@ class HelplessArgumentsTest {
 
   @Test
   void errorNoArguments() {
-    f.assertThat().failsWithMessage("Missing required parameter: REQUIRED");
+    f.assertThat().failsWithMessage("Missing required parameter: \u001B[1mREQUIRED\u001B[m");
   }
 
   @Test

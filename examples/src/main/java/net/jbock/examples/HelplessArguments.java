@@ -4,7 +4,7 @@ import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
 
-@Command(helpEnabled = false, ansi = false)
+@Command(helpEnabled = false)
 abstract class HelplessArguments {
 
   @Parameter(index = 0)

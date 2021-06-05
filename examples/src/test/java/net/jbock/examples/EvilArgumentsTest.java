@@ -25,11 +25,11 @@ class EvilArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "USAGE",
+        "\u001B[1mUSAGE\u001B[m",
         "  evil-arguments [OPTION]... --fancy FANCY --fAncy FANCY --f_ancy F_ANCY",
         "        --f__ancy F__ANCY --blub BLUB --Blub BLUB",
         "",
-        "OPTIONS",
+        "\u001B[1mOPTIONS\u001B[m",
         "  --Fancy FANCY     ",
         "  --fancy FANCY     ",
         "  --fAncy FANCY     ",
