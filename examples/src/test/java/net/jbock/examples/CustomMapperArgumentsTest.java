@@ -19,8 +19,10 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CustomMapperArgumentsTest {
 
+  private final CustomMapperArgumentsParser parser = new CustomMapperArgumentsParser();
+
   private final ParserTestFixture<CustomMapperArguments> f =
-      ParserTestFixture.create(new CustomMapperArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void success() {
@@ -57,6 +59,8 @@ class CustomMapperArgumentsTest {
 
   @Test
   void invalidOptions() {
-    f.assertThat("--date", "FooBar").failsWithMessage("while converting option DATE (--date): For input string: \"FooBar\"");
+    assertTrue(parser.parse("--date", "FooBar").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("while converting option DATE (--date): For input string: \"FooBar\""));
   }
 }

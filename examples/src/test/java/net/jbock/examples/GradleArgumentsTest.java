@@ -8,48 +8,77 @@ import java.util.Optional;
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class GradleArgumentsTest {
 
+  private final GradleArgumentsParser parser = new GradleArgumentsParser();
+
   private final ParserTestFixture<GradleArguments> f =
-      ParserTestFixture.create(new GradleArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void errorShortLongConflict() {
-    f.assertThat("-m", "hello", "--message=goodbye").failsWithMessage(
-        "Option '--message=goodbye' is a repetition");
+    assertTrue(parser.parse("-m", "hello", "--message=goodbye").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Option '--message=goodbye' is a repetition"));
   }
 
   @Test
   void errorMissingValue() {
     // there's nothing after -m
-    f.assertThat("-m").failsWithMessage("Missing argument after token: -m");
+    assertTrue(parser.parse("-m").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Missing argument after token: -m"));
   }
 
   @Test
   void errorLongShortConflict() {
-    f.assertThat("--message=hello", "-m", "goodbye").failsWithMessage(
-        "Option '-m' is a repetition");
+    assertTrue(parser.parse("--message=hello", "-m", "goodbye").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Option '-m' is a repetition"));
   }
 
   @Test
   void errorLongLongConflict() {
-    f.assertThat("--message=hello", "--message=goodbye").failsWithMessage(
-        "Option '--message=goodbye' is a repetition");
+    assertTrue(parser.parse("--message=hello", "--message=goodbye").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Option '--message=goodbye' is a repetition"));
   }
 
   @Test
   void errorInvalidOption() {
-    f.assertThat("-c1").failsWithMessage("Invalid token: -c1");
-    f.assertThat("-c-v").failsWithMessage("Invalid token: -c-v");
-    f.assertThat("-c-").failsWithMessage("Invalid token: -c-");
-    f.assertThat("-c=v").failsWithMessage("Invalid token: -c=v");
-    f.assertThat("-c=").failsWithMessage("Invalid token: -c=");
-    f.assertThat("-cX=1").failsWithMessage("Invalid token: -cX=1");
-    f.assertThat("-cvv").failsWithMessage("Option '-v' is a repetition");
-    f.assertThat("-cvx").failsWithMessage("Invalid token: -cvx");
-    f.assertThat("-cvm").failsWithMessage("Missing argument after token: -m");
-    f.assertThat("--column-count").failsWithMessage("Invalid option: --column-count");
+    assertTrue(parser.parse("-c1").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid token: -c1"));
+    assertTrue(parser.parse("-c-v").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid token: -c-v"));
+    assertTrue(parser.parse("-c-").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid token: -c-"));
+    assertTrue(parser.parse("-c=v").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid token: -c=v"));
+    assertTrue(parser.parse("-c=").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid token: -c="));
+    assertTrue(parser.parse("-cX=1").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid token: -cX=1"));
+    assertTrue(parser.parse("-cvv").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Option '-v' is a repetition"));
+    assertTrue(parser.parse("-cvx").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid token: -cvx"));
+    assertTrue(parser.parse("-cvm").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Missing argument after token: -m"));
+    assertTrue(parser.parse("--column-count").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid option: --column-count"));
   }
 
   @Test
@@ -143,7 +172,9 @@ class GradleArgumentsTest {
   @Test
   void testLongSuppressed() {
     // Long option --cmos is suppressed
-    f.assertThat("--cmos").failsWithMessage("Invalid option: --cmos");
+    assertTrue(parser.parse("--cmos").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid option: --cmos"));
   }
 
   @Test
@@ -208,9 +239,11 @@ class GradleArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrintsHelp(
+    String[] actual = parser.parse("--help")
+        .getLeft().map(f::getUsageDocumentation).orElseThrow();
+    assertEquals(actual,
         "\u001B[1mUSAGE\u001B[m",
-        "  gradle-arguments [OPTION]... [SOME_TOKEN] [moreTokens]...",
+        "  gradle-arguments [OPTIONS] [SOME_TOKEN] moreTokens...",
         "",
         "\u001B[1mPARAMETERS\u001B[m",
         "  SOME_TOKEN  some token",

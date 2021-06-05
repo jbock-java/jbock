@@ -130,7 +130,7 @@ public class StatefulParser extends Cached<TypeSpec> {
     code.addStatement("$N = $N.get($N($N))", option, commonFields.optionNames(), readOptionNameMethod.get(),
         clusterToken);
     code.add("if ($N == null)\n", option).indent()
-        .addStatement("throw new $T($S + $N)", RuntimeException.class, "Invalid token: ", token)
+        .addStatement("throw new $T($S + $N)", generatedTypes.syntExType(), "Invalid token: ", token)
         .unindent();
     code.endControlFlow();
     code.addStatement("return true");

@@ -17,8 +17,11 @@ import static net.jbock.common.Constants.STRING_ITERATOR;
 @ContextScope
 public class ReadOptionArgumentMethod extends Cached<MethodSpec> {
 
+  private final GeneratedTypes generatedTypes;
+
   @Inject
-  ReadOptionArgumentMethod() {
+  ReadOptionArgumentMethod(GeneratedTypes generatedTypes) {
+    this.generatedTypes = generatedTypes;
   }
 
   @Override
@@ -34,7 +37,7 @@ public class ReadOptionArgumentMethod extends Cached<MethodSpec> {
         .addStatement("return $N.substring(2)", token).unindent();
 
     code.add("if (!$N.hasNext())\n", it).indent()
-        .addStatement("throw new $T($S + $N)", RuntimeException.class,
+        .addStatement("throw new $T($S + $N)", generatedTypes.syntExType(),
             "Missing argument after token: ", token)
         .unindent();
 

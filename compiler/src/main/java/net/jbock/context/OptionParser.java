@@ -171,7 +171,7 @@ public final class OptionParser {
   private CodeBlock readMethodFlagCodeClustering(FieldSpec seen, ParameterSpec token) {
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N.contains($S))\n", token, "=").indent()
-        .addStatement("throw new $T($S + $N)", RuntimeException.class, "Invalid token: ", token)
+        .addStatement("throw new $T($S + $N)", generatedTypes.syntExType(), "Invalid token: ", token)
         .unindent();
     code.add("if ($N)\n", seen).indent()
         .addStatement(throwRepetitionErrorStatement(token))
@@ -184,7 +184,7 @@ public final class OptionParser {
   private CodeBlock readMethodFlagCodeSimple(FieldSpec seen, ParameterSpec token) {
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))\n", token, token, token, "=").indent()
-        .addStatement("throw new $T($S + $N)", RuntimeException.class, "Invalid token: ", token)
+        .addStatement("throw new $T($S + $N)", generatedTypes.syntExType(), "Invalid token: ", token)
         .unindent();
     code.add("if ($N)\n", seen).indent()
         .addStatement(throwRepetitionErrorStatement(token))
@@ -227,7 +227,7 @@ public final class OptionParser {
 
   private CodeBlock throwRepetitionErrorStatement(ParameterSpec token) {
     return CodeBlock.of("throw new $T($T.format($S, $N))",
-        RuntimeException.class, String.class,
+        generatedTypes.syntExType(), String.class,
         "Option '%s' is a repetition", token);
   }
 

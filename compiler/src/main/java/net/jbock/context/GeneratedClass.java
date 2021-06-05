@@ -35,6 +35,7 @@ public final class GeneratedClass {
   private final GeneratedAnnotation generatedAnnotation;
   private final ReadOptionNameMethod readOptionNameMethod;
   private final ConvEx convEx;
+  private final SyntEx syntEx;
   private final CreateModelMethod createModelMethod;
 
   @Inject
@@ -58,6 +59,7 @@ public final class GeneratedClass {
       GeneratedAnnotation generatedAnnotation,
       ReadOptionNameMethod readOptionNameMethod,
       ConvEx convEx,
+      SyntEx syntEx,
       CreateModelMethod createModelMethod) {
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
@@ -78,6 +80,7 @@ public final class GeneratedClass {
     this.generatedAnnotation = generatedAnnotation;
     this.readOptionNameMethod = readOptionNameMethod;
     this.convEx = convEx;
+    this.syntEx = syntEx;
     this.createModelMethod = createModelMethod;
   }
 
@@ -112,6 +115,7 @@ public final class GeneratedClass {
         .addType(optionEnum.define())
         .addType(impl.define())
         .addType(convEx.define())
+        .addType(syntEx.define())
         .addTypes(optionParser.define());
 
     return spec.addModifiers(FINAL)

@@ -8,6 +8,7 @@ import net.jbock.model.CommandModel;
  *
  * <ul>
  *   <li>{@link SyntaxError}</li>
+ *   <li>{@link AtFileError}</li>
  *   <li>{@link ConverterError}</li>
  * </ul>
  *

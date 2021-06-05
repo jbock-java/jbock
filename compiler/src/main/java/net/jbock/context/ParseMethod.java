@@ -5,12 +5,14 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.AtFileError;
 import net.jbock.util.AtFileReader;
 import net.jbock.util.ConverterError;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.SyntaxError;
 
 import javax.inject.Inject;
+import java.io.IOException;
 import java.util.Arrays;
 
 import static com.squareup.javapoet.ParameterSpec.builder;
@@ -94,9 +96,14 @@ public class ParseMethod extends Cached<MethodSpec> {
             commonFields.convExFailure(), commonFields.convExItemType(), commonFields.convExItemName())
         .endControlFlow();
 
-    code.beginControlFlow("catch ($T $N)", Exception.class, e)
+    code.beginControlFlow("catch ($T $N)", generatedTypes.syntExType(), e)
         .addStatement("return $T.left(new $T($N(), $N.getMessage()))", Either.class,
             SyntaxError.class, createModelMethod.get(), e)
+        .endControlFlow();
+
+    code.beginControlFlow("catch ($T $N)", IOException.class, e)
+        .addStatement("return $T.left(new $T($N(), $N[0], $N))", Either.class,
+            AtFileError.class, createModelMethod.get(), args, e)
         .endControlFlow();
 
     return MethodSpec.methodBuilder("parse")

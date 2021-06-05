@@ -133,7 +133,7 @@ public class BuildMethod extends Cached<MethodSpec> {
         String message = "Missing required option: " + paramLabel + " (" + optionNames + ")";
         return List.of(
             CodeBlock.of(".findAny()"),
-            CodeBlock.of(".orElseThrow(() -> new $T($S))", RuntimeException.class, message),
+            CodeBlock.of(".orElseThrow(() -> new $T($S))", generatedTypes.syntExType(), message),
             checkConverterError(c.item()));
       case OPTIONAL:
         return List.of(
@@ -155,7 +155,7 @@ public class BuildMethod extends Cached<MethodSpec> {
       case REQUIRED:
         String paramLabel = styler.bold(c.paramLabel()).orElse(c.paramLabel());
         return List.of(CodeBlock.of(".orElseThrow(() -> new $T($S))",
-            RuntimeException.class, "Missing required parameter: " + paramLabel),
+            generatedTypes.syntExType(), "Missing required parameter: " + paramLabel),
             checkConverterError(c.item()));
       case OPTIONAL:
         return List.of(CodeBlock.of(".map(e -> e$L)", checkConverterError(c.item())));

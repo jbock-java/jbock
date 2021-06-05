@@ -169,6 +169,6 @@ public class StatefulParseMethod {
   }
 
   private CodeBlock throwInvalidOptionStatement(String message) {
-    return CodeBlock.of("throw new $T($S + $N)", RuntimeException.class, message + ": ", token);
+    return CodeBlock.of("throw new $T($S + $N)", generatedTypes.syntExType(), message + ": ", token);
   }
 }

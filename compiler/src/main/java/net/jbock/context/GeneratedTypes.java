@@ -67,6 +67,10 @@ public class GeneratedTypes {
     return generatedClass.nestedClass("ConvEx");
   }
 
+  public ClassName syntExType() {
+    return generatedClass.nestedClass("SyntEx");
+  }
+
   public TypeName parseResultType() {
     return ParameterizedTypeName.get(
         ClassName.get(Either.class),
