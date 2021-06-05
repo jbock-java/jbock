@@ -10,7 +10,7 @@ import java.util.List;
 /**
  * This is ignored
  */
-@Command(description = "Git is software for tracking changes in any set of files.", ansi = false)
+@Command(description = "Git is software for tracking changes in any set of files.")
 abstract class GitArguments {
 
   /**

@@ -5,7 +5,7 @@ import net.jbock.Option;
 
 import java.util.Optional;
 
-@Command(ansi = false)
+@Command
 abstract class PsArguments {
 
   @Option(names = {"--all", "-a"})

@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.Command;
 import net.jbock.Parameter;
 
-@Command(ansi = false)
+@Command
 abstract class MvArguments implements MvArguments_Parent, MvArguments_ParentParent {
 
   @Parameter(index = 1)

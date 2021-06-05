@@ -10,7 +10,7 @@ class MvArgumentsTest {
 
   @Test
   void notEnoughArguments() {
-    f.assertThat("a").failsWithMessage("Missing required parameter: DEST");
+    f.assertThat("a").failsWithMessage("Missing required parameter: \u001B[1mDEST\u001B[m");
   }
 
   @Test
@@ -45,10 +45,10 @@ class MvArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "USAGE",
+        "\u001B[1mUSAGE\u001B[m",
         "  mv-arguments SOURCE DEST",
         "",
-        "PARAMETERS",
+        "\u001B[1mPARAMETERS\u001B[m",
         "  SOURCE ",
         "  DEST   ",
         "");

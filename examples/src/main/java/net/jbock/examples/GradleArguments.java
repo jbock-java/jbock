@@ -9,7 +9,7 @@ import net.jbock.Parameters;
 import java.util.List;
 import java.util.Optional;
 
-@Command(ansi = false)
+@Command
 abstract class GradleArguments {
 
   /**

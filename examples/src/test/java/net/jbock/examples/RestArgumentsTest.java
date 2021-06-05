@@ -27,13 +27,13 @@ class RestArgumentsTest {
   private final String[] expected = {
       "A very good program.",
       "",
-      "USAGE",
+      "\u001B[1mUSAGE\u001B[m",
       "  rest-arguments [OPTION]... [REST]...",
       "",
-      "PARAMETERS",
+      "\u001B[1mPARAMETERS\u001B[m",
       "  REST  Hello yes",
       "",
-      "OPTIONS",
+      "\u001B[1mOPTIONS\u001B[m",
       "  --file FILE  This is dog",
       ""};
 

@@ -209,14 +209,14 @@ class GradleArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "USAGE",
+        "\u001B[1mUSAGE\u001B[m",
         "  gradle-arguments [OPTION]... [SOME_TOKEN] [moreTokens]...",
         "",
-        "PARAMETERS",
+        "\u001B[1mPARAMETERS\u001B[m",
         "  SOME_TOKEN  some token",
         "  moreTokens  some more tokens",
         "",
-        "OPTIONS",
+        "\u001B[1mOPTIONS\u001B[m",
         "  -m, --message MESSAGE  the message message goes here",
         "  -f, --file INPUT_FILE  the files",
         "  --dir INPUT_DIR        the dir",

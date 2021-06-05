@@ -7,7 +7,7 @@ import net.jbock.Parameters;
 
 import java.util.List;
 
-@Command(ansi = false)
+@Command
 abstract class RequiredArguments {
 
   @Option(names = "--dir")

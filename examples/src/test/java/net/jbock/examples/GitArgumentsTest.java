@@ -58,14 +58,14 @@ class GitArgumentsTest {
     f.assertPrintsHelp(
         "Git is software for tracking changes in any set of files.",
         "",
-        "USAGE",
+        "\u001B[1mUSAGE\u001B[m",
         "  git-arguments [OPTION]... COMMAND [REMAINING_ARGS]...",
         "",
-        "PARAMETERS",
+        "\u001B[1mPARAMETERS\u001B[m",
         "  COMMAND         nope",
         "  REMAINING_ARGS  You were a hit! Everyone loves you, now.",
         "",
-        "OPTIONS",
+        "\u001B[1mOPTIONS\u001B[m",
         "  --bare  bear",
         "");
   }

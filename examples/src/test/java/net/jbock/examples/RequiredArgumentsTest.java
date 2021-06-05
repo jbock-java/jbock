@@ -46,13 +46,13 @@ class RequiredArgumentsTest {
   @Test
   void testPrint() {
     f.assertPrintsHelp(
-        "USAGE",
+        "\u001B[1mUSAGE\u001B[m",
         "  required-arguments --dir DIR [OTHER_TOKENS]...",
         "",
-        "PARAMETERS",
+        "\u001B[1mPARAMETERS\u001B[m",
         "  OTHER_TOKENS ",
         "",
-        "OPTIONS",
+        "\u001B[1mOPTIONS\u001B[m",
         "  --dir DIR ",
         "");
   }
