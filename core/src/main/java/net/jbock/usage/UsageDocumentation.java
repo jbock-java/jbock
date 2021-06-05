@@ -161,13 +161,17 @@ public class UsageDocumentation {
     err.println(ansiStyle.bold("USAGE"));
     String indent_u = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
     makeLines(indent_u, synopsis.createSynopsis(" ")).forEach(err::println);
-    err.println();
-    err.println(ansiStyle.bold("PARAMETERS"));
+    if (!parameters.isEmpty()) {
+      err.println();
+      err.println(ansiStyle.bold("PARAMETERS"));
+    }
     for (Parameter parameter : parameters) {
       printItemDocumentation(parameter, String.format(paramsFormat, parameter.name()), indent_p);
     }
-    err.println();
-    err.println(ansiStyle.bold("OPTIONS"));
+    if (!options.isEmpty()) {
+      err.println();
+      err.println(ansiStyle.bold("OPTIONS"));
+    }
     for (Option option : options) {
       printItemDocumentation(option, String.format(optionsFormat, option.name()), indent_o);
     }

@@ -10,12 +10,14 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class HelplessArgumentsTest {
 
+  private final HelplessArgumentsParser parser = new HelplessArgumentsParser();
+
   private final ParserTestFixture<HelplessArguments> f =
-      ParserTestFixture.create(new HelplessArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void success0() {
-    HelplessArguments args = new HelplessArgumentsParser().parse(new String[]{"x"})
+    HelplessArguments args = parser.parse(new String[]{"x"})
         .orElseThrow(notSuccess -> Assertions.<RuntimeException>fail("expecting success but was " + notSuccess));
     assertEquals("x", args.required());
     assertFalse(args.help());
@@ -23,7 +25,7 @@ class HelplessArgumentsTest {
 
   @Test
   void success1() {
-    HelplessArguments args = new HelplessArgumentsParser().parse(new String[]{"x", "--help"})
+    HelplessArguments args = parser.parse(new String[]{"x", "--help"})
         .orElseThrow(notSuccess -> Assertions.<RuntimeException>fail("expecting success but was " + notSuccess));
     assertTrue(args.help());
     assertEquals("x", args.required());
@@ -31,7 +33,7 @@ class HelplessArgumentsTest {
 
   @Test
   void success2() {
-    HelplessArguments args = new HelplessArgumentsParser().parse(new String[]{"--help", "x"})
+    HelplessArguments args = parser.parse(new String[]{"--help", "x"})
         .orElseThrow(notSuccess -> Assertions.<RuntimeException>fail("expecting success but was " + notSuccess));
     assertTrue(args.help());
     assertEquals("x", args.required());
@@ -39,11 +41,16 @@ class HelplessArgumentsTest {
 
   @Test
   void errorNoArguments() {
-    f.assertThat().failsWithMessage("Missing required parameter: \u001B[1mREQUIRED\u001B[m");
+    String[] emptyInput = new String[0];
+    assertTrue(parser.parse(emptyInput).getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Missing required parameter: \u001B[1mREQUIRED\u001B[m"));
   }
 
   @Test
   void errorInvalidOption() {
-    f.assertThat("-p").failsWithMessage("Invalid option: -p");
+    assertTrue(parser.parse("-p").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid option: -p"));
   }
 }

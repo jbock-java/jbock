@@ -3,10 +3,15 @@ package net.jbock.examples;
 import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
+import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+
 class TarArgumentsTest {
 
+  private final TarArgumentsParser parser = new TarArgumentsParser();
+
   private final ParserTestFixture<TarArguments> f =
-      ParserTestFixture.create(new TarArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void testExtract() {
@@ -26,15 +31,21 @@ class TarArgumentsTest {
 
   @Test
   void flagWithArgument() {
-    f.assertThat("-xf").failsWithMessage("Missing argument after token: -f");
-    f.assertThat("--x=f").failsWithMessage("Invalid token: --x=f");
+    assertTrue(parser.parse("-xf").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Missing argument after token: -f"));
+    assertTrue(parser.parse("--x=f").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid token: --x=f"));
   }
 
   @Test
   void testPrint() {
-    f.assertPrintsHelp(
+    String[] actual = parser.parse("--help")
+        .getLeft().map(f::getUsageDocumentation).orElseThrow();
+    assertEquals(actual,
         "\u001B[1mUSAGE\u001B[m",
-        "  tar-arguments [OPTION]... -f FILE",
+        "  tar-arguments [OPTIONS] -f FILE",
         "",
         "\u001B[1mOPTIONS\u001B[m",
         "  -x, --x         ",

@@ -7,11 +7,15 @@ import java.util.Optional;
 
 import static java.util.Arrays.asList;
 import static java.util.Collections.emptyList;
+import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class NoNameArgumentsTest {
 
+  private final NoNameArgumentsParser parser = new NoNameArgumentsParser();
+
   private final ParserTestFixture<NoNameArguments> f =
-      ParserTestFixture.create(new NoNameArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void testDifferentOrder() {
@@ -57,19 +61,25 @@ class NoNameArgumentsTest {
 
   @Test
   void errorMissingInt() {
-    f.assertThat("--cmos").failsWithMessage("Missing required option: NUMBER (-n, --number)");
+    assertTrue(parser.parse("--cmos").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Missing required option: NUMBER (-n, --number)"));
   }
 
   @Test
   void errorUnknownToken() {
-    f.assertThat("blabla").failsWithMessage("Excess param: blabla");
+    assertTrue(parser.parse("blabla").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Excess param: blabla"));
   }
 
   @Test
   void testPrint() {
-    f.assertPrintsHelp(
+    String[] actual = parser.parse("--help")
+        .getLeft().map(f::getUsageDocumentation).orElseThrow();
+    assertEquals(actual,
         "USAGE",
-        "  no-name-arguments [OPTION]... -n NUMBER",
+        "  no-name-arguments [OPTIONS] -n NUMBER",
         "",
         "OPTIONS",
         "  --message MESSAGE         ",

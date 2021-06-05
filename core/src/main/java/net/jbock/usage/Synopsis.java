@@ -69,7 +69,7 @@ public class Synopsis {
   }
 
   private Stream<Option> optionalOptions() {
-    return filterBySkew(options, OPTIONAL);
+    return filterBySkew(options, sk -> sk != REQUIRED);
   }
 
   private List<Option> requiredOptions() {

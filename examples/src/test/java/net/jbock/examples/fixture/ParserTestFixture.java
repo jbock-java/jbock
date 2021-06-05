@@ -228,50 +228,6 @@ public final class ParserTestFixture<E> {
       this.parser = parser;
     }
 
-    public void failsWithMessage(String expectedMessage) {
-      String stderr = getErr();
-      if (stderr.isEmpty()) {
-        fail("no output on stderr");
-      }
-      String[] tokens = stderr.split("\\R", -1);
-      for (String token : tokens) {
-        String prefix = "ERROR: ";
-        if (token.startsWith(prefix)) {
-          if (!expectedMessage.equals(token.substring(prefix.length()))) {
-            Arrays.stream(tokens).forEach(System.err::println);
-            fail();
-          }
-          return;
-        }
-        String prefixAnsi = "\u001B[31mERROR:\u001B[m ";
-        if (token.startsWith(prefixAnsi)) {
-          if (!expectedMessage.equals(token.substring(prefixAnsi.length()))) {
-            Arrays.stream(tokens).forEach(System.err::println);
-            fail();
-          }
-          return;
-        }
-      }
-      fail("Error line not found");
-    }
-
-    private String getErr() {
-      TestOutputStream stderr = new TestOutputStream();
-      try {
-        parser.withErrorStream(stderr.out)
-            .withExitHook(r -> {
-              throw new Abort();
-            })
-            .withTerminalWidth(MAX_LINE_WIDTH)
-            .parseOrExit(args);
-        fail("Expecting empty result");
-      } catch (Abort e) {
-        // noop
-      }
-      return stderr.toString();
-    }
-
-
     public void satisfies(Predicate<E> predicate) {
       Parsed parsed = getParsed();
       assertTrue(parsed.isPresent(), "Parsing was not successful");

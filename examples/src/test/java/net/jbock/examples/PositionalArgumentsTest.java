@@ -7,16 +7,24 @@ import java.util.Optional;
 
 import static java.util.Collections.emptyList;
 import static java.util.Collections.singletonList;
+import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class PositionalArgumentsTest {
 
+  private final PositionalArgumentsParser parser = new PositionalArgumentsParser();
+
   private final ParserTestFixture<PositionalArguments> f =
-      ParserTestFixture.create(new PositionalArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void errorMissingParameters() {
-    f.assertThat("a").failsWithMessage("Missing required parameter: DEST");
-    f.assertThat("a", "b").failsWithMessage("Missing required parameter: ANOTHER_INT");
+    assertTrue(parser.parse("a").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Missing required parameter: DEST"));
+    assertTrue(parser.parse("a", "b").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Missing required parameter: ANOTHER_INT"));
   }
 
   @Test
@@ -91,9 +99,11 @@ class PositionalArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrintsHelp(
+    String[] actual = parser.parse("--help")
+        .getLeft().map(f::getUsageDocumentation).orElseThrow();
+    assertEquals(actual,
         "USAGE",
-        "  positional-arguments SOURCE DEST ANOTHER_INT [OPT_STRING] [OTHER_TOKENS]...",
+        "  positional-arguments SOURCE DEST ANOTHER_INT [OPT_STRING] OTHER_TOKENS...",
         "",
         "PARAMETERS",
         "  SOURCE       ",

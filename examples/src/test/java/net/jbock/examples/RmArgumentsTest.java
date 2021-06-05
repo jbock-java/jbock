@@ -4,11 +4,15 @@ import net.jbock.examples.fixture.ParserTestFixture;
 import org.junit.jupiter.api.Test;
 
 import static java.util.Arrays.asList;
+import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RmArgumentsTest {
 
+  private final RmArgumentsParser parser = new RmArgumentsParser();
+
   private final ParserTestFixture<RmArguments> f =
-      ParserTestFixture.create(new RmArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void testRest() {
@@ -20,14 +24,18 @@ class RmArgumentsTest {
 
   @Test
   void testInvalidToken() {
-    f.assertThat("--foo-bar").failsWithMessage("Invalid option: --foo-bar");
+    assertTrue(parser.parse("--foo-bar").getLeft().map(f::castToError)
+        .orElseThrow().message()
+        .contains("Invalid option: --foo-bar"));
   }
 
   @Test
   void testPrint() {
-    f.assertPrintsHelp(
+    String[] actual = parser.parse("--help")
+        .getLeft().map(f::getUsageDocumentation).orElseThrow();
+    assertEquals(actual,
         "\u001B[1mUSAGE\u001B[m",
-        "  rm-arguments [OPTION]... [OTHER_TOKENS]...",
+        "  rm-arguments [OPTIONS] OTHER_TOKENS...",
         "",
         "\u001B[1mPARAMETERS\u001B[m",
         "  OTHER_TOKENS  This is a list that may be empty.",
