@@ -1,8 +1,10 @@
 package net.jbock.either;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.stream.Collector;
 
 public abstract class Either<L, R> {
 
@@ -60,6 +62,10 @@ public abstract class Either<L, R> {
       rightAction.accept(r);
       return null;
     });
+  }
+
+  public static <L, R> Collector<Either<L, R>, ?, Either<L, List<R>>> toValidList() {
+    return new ValidatingCollector<>();
   }
 
   public abstract Optional<L> getLeft();
