@@ -21,8 +21,6 @@ public class ParseOrExitMethod {
   private final SourceElement sourceElement;
   private final GeneratedTypes generatedTypes;
   private final CommonFields commonFields;
-  private final PrintUsageDocumentationMethod printUsageDocumentationMethod;
-  private final UsageMethod usageMethod;
   private final ParseMethod parseMethod;
   private final AnsiStyle styler;
 
@@ -31,15 +29,11 @@ public class ParseOrExitMethod {
       SourceElement sourceElement,
       GeneratedTypes generatedTypes,
       CommonFields commonFields,
-      PrintUsageDocumentationMethod printUsageDocumentationMethod,
-      UsageMethod usageMethod,
       ParseMethod parseMethod,
       AnsiStyle styler) {
     this.sourceElement = sourceElement;
     this.generatedTypes = generatedTypes;
     this.commonFields = commonFields;
-    this.printUsageDocumentationMethod = printUsageDocumentationMethod;
-    this.usageMethod = usageMethod;
     this.parseMethod = parseMethod;
     this.styler = styler;
   }

@@ -5,7 +5,6 @@ import net.jbock.parameter.NamedOption;
 
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -18,7 +17,6 @@ public class NamedOptions {
   private final boolean anyRegular;
   private final boolean anyFlags;
   private final boolean unixClusteringSupported;
-  private final int maxWidth;
 
   private NamedOptions(
       List<Mapped<NamedOption>> options,
@@ -27,7 +25,7 @@ public class NamedOptions {
       boolean anyRepeatable,
       boolean anyRegular,
       boolean anyFlags,
-      boolean unixClusteringSupported, int maxWidth) {
+      boolean unixClusteringSupported) {
     this.options = options;
     this.requiredOptions = requiredOptions;
     this.optionalOptions = optionalOptions;
@@ -35,7 +33,6 @@ public class NamedOptions {
     this.anyRegular = anyRegular;
     this.anyFlags = anyFlags;
     this.unixClusteringSupported = unixClusteringSupported;
-    this.maxWidth = maxWidth;
   }
 
   public static NamedOptions create(List<Mapped<NamedOption>> options) {
@@ -48,11 +45,8 @@ public class NamedOptions {
     boolean unixClusteringSupported = unixOptions.size() >= 2 && unixOptions.stream().anyMatch(Mapped::isFlag);
     Map<Boolean, List<Mapped<NamedOption>>> required = options.stream()
         .collect(Collectors.partitioningBy(Mapped::isRequired));
-    int maxWidth = options.stream()
-        .map(c -> c.item().namesWithLabel(c.isFlag()))
-        .mapToInt(String::length).max().orElse(0);
     return new NamedOptions(options, required.get(true), required.get(false),
-        anyRepeatable, anyRegular, anyFlags, unixClusteringSupported, maxWidth);
+        anyRepeatable, anyRegular, anyFlags, unixClusteringSupported);
   }
 
   public boolean anyRepeatable() {
@@ -79,10 +73,6 @@ public class NamedOptions {
     return options.stream();
   }
 
-  public void forEach(Consumer<Mapped<NamedOption>> consumer) {
-    options.forEach(consumer);
-  }
-
   public boolean unixClusteringSupported() {
     return unixClusteringSupported;
   }
@@ -93,9 +83,5 @@ public class NamedOptions {
 
   public List<Mapped<NamedOption>> optional() {
     return optionalOptions;
-  }
-
-  public int maxWidth() {
-    return maxWidth;
   }
 }

@@ -43,6 +43,7 @@ public class ReadOptionArgumentMethod extends Cached<MethodSpec> {
 
     code.addStatement("return $N.next()", it);
     return methodBuilder("readOptionArgument")
+        .addException(generatedTypes.syntExType())
         .addCode(code.build())
         .addParameters(asList(token, it))
         .returns(STRING)

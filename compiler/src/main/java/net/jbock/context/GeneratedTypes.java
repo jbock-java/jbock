@@ -25,11 +25,11 @@ public class GeneratedTypes {
     this.generatedClass = sourceElement.generatedClass();
   }
 
-  public TypeName parseSuccessType() {
+  TypeName parseSuccessType() {
     return superResultType().orElse(sourceElement.typeName());
   }
 
-  public Optional<TypeName> superResultType() {
+  Optional<TypeName> superResultType() {
     if (!sourceElement.isSuperCommand()) {
       return Optional.empty();
     }
@@ -39,50 +39,50 @@ public class GeneratedTypes {
     return Optional.of(type);
   }
 
-  public ClassName optionParserType() {
+  ClassName optionParserType() {
     return generatedClass.nestedClass("OptionParser");
   }
 
-  public ClassName repeatableOptionParserType() {
+  ClassName repeatableOptionParserType() {
     return generatedClass.nestedClass("RepeatableOptionParser");
   }
 
-  public ClassName flagParserType() {
+  ClassName flagParserType() {
     return generatedClass.nestedClass("FlagParser");
   }
 
-  public ClassName regularOptionParserType() {
+  ClassName regularOptionParserType() {
     return generatedClass.nestedClass("RegularOptionParser");
   }
 
-  public ClassName statefulParserType() {
+  ClassName statefulParserType() {
     return generatedClass.nestedClass("StatefulParser");
   }
 
-  public ClassName implType() {
+  ClassName implType() {
     return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
   }
 
-  public ClassName convExType() {
+  ClassName convExType() {
     return generatedClass.nestedClass("ConvEx");
   }
 
-  public ClassName syntExType() {
+  ClassName syntExType() {
     return generatedClass.nestedClass("SyntEx");
   }
 
-  public TypeName parseResultType() {
+  TypeName parseResultType() {
     return ParameterizedTypeName.get(
         ClassName.get(Either.class),
         ClassName.get(NotSuccess.class),
         parseSuccessType());
   }
 
-  public ClassName parsingFailedType() {
+  ClassName parsingFailedType() {
     return ClassName.get(ParsingError.class);
   }
 
-  public Optional<ClassName> helpRequestedType() {
+  Optional<ClassName> helpRequestedType() {
     return sourceElement.helpEnabled() ?
         Optional.of(ClassName.get(HelpRequested.class)) :
         Optional.empty();

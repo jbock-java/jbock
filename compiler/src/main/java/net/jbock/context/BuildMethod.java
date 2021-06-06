@@ -77,6 +77,7 @@ public class BuildMethod extends Cached<MethodSpec> {
         },
         () -> spec.addStatement("return new $T($L)", generatedTypes.implType(), constructorArguments));
     return spec.returns(generatedTypes.parseSuccessType())
+        .addException(generatedTypes.syntExType())
         .build();
   }
 

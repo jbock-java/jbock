@@ -117,6 +117,7 @@ public final class OptionParser {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     return MethodSpec.methodBuilder("read")
+        .addException(generatedTypes.syntExType())
         .addParameters(asList(token, it))
         .addModifiers(ABSTRACT)
         .returns(readMethodReturnType())
@@ -133,6 +134,7 @@ public final class OptionParser {
       code.addStatement("return false");
     }
     return MethodSpec.methodBuilder("read")
+        .addException(generatedTypes.syntExType())
         .addParameters(asList(token, it))
         .addCode(code.build())
         .returns(readMethodReturnType())
@@ -151,6 +153,7 @@ public final class OptionParser {
       code.addStatement("return false");
     }
     return MethodSpec.methodBuilder("read")
+        .addException(generatedTypes.syntExType())
         .addCode(code.build())
         .returns(readMethodReturnType())
         .addParameters(asList(token, it)).build();
@@ -161,6 +164,7 @@ public final class OptionParser {
     ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     return MethodSpec.methodBuilder("read")
+        .addException(generatedTypes.syntExType())
         .addCode(options.unixClusteringSupported() ?
             readMethodFlagCodeClustering(seen, token) :
             readMethodFlagCodeSimple(seen, token))

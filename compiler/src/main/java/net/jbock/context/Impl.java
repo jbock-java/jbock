@@ -14,7 +14,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 
 /**
- * Defines the *_Impl inner class.
+ * Defines the *Impl inner class.
  *
  * @see GeneratedClass
  */

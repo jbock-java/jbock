@@ -1,10 +1,10 @@
 package net.jbock.context;
 
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.util.ConverterFailure;
-import net.jbock.util.ItemType;
 
 import javax.inject.Inject;
 
@@ -27,7 +27,9 @@ public class SyntEx {
 
   public TypeSpec define() {
     return TypeSpec.classBuilder(generatedTypes.syntExType())
-        .superclass(RuntimeException.class)
+        .superclass(Exception.class)
+        .addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+            .addMember("value", CodeBlock.of("$S", "serial")).build())
         .addMethod(MethodSpec.constructorBuilder()
             .addParameter(message)
             .addStatement("super($N)", message)

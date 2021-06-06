@@ -106,6 +106,7 @@ public class StatefulParser extends Cached<TypeSpec> {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     return MethodSpec.methodBuilder("tryParseOption")
+        .addException(generatedTypes.syntExType())
         .addParameter(token)
         .addParameter(it)
         .addCode(namedOptions.unixClusteringSupported() ?

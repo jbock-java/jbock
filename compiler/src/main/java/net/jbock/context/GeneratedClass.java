@@ -14,8 +14,6 @@ import static javax.lang.model.element.Modifier.FINAL;
 @ContextScope
 public final class GeneratedClass {
 
-  static final int CONTINUATION_INDENT_USAGE = 8;
-
   private final ParseMethod parseMethod;
   private final Impl impl;
   private final OptionParser optionParser;
@@ -69,8 +67,7 @@ public final class GeneratedClass {
   public TypeSpec define() {
     TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass())
         .addMethod(parseMethod.get())
-        .addMethod(parseOrExitMethod.get())
-        .addMethod(createModelMethod.get());
+        .addMethod(parseOrExitMethod.get());
     if (!namedOptions.isEmpty()) {
       spec.addMethod(readOptionNameMethod.get());
       if (namedOptions.anyRepeatable() || namedOptions.anyRegular()) {
@@ -86,6 +83,8 @@ public final class GeneratedClass {
         .addType(convEx.define())
         .addType(syntEx.define())
         .addTypes(optionParser.define());
+
+    spec.addMethod(createModelMethod.get());
 
     return spec.addModifiers(FINAL)
         .addOriginatingElement(sourceElement.element())

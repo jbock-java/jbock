@@ -50,6 +50,7 @@ public class StatefulParseMethod {
       spec.addCode(regularCode());
     }
     return spec.addParameter(it)
+        .addException(generatedTypes.syntExType())
         .returns(generatedTypes.statefulParserType())
         .build();
   }

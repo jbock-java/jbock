@@ -1,37 +1,28 @@
 package net.jbock.context;
 
 import com.squareup.javapoet.ArrayTypeName;
-import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.ParameterSpec;
-import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ConverterFailure;
 import net.jbock.util.ItemType;
-import net.jbock.util.NotSuccess;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.regex.Pattern;
 
-import static com.squareup.javapoet.TypeName.INT;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
-import static net.jbock.common.Constants.STRING_TO_STRING_MAP;
 import static net.jbock.common.Constants.mapOf;
 
 public class CommonFields {
-
-  private static final int DEFAULT_WRAP_AFTER = 80;
 
   private final FieldSpec optionNames;
   private final FieldSpec params;
@@ -69,9 +60,6 @@ public class CommonFields {
       SourceElement sourceElement,
       PositionalParameters positionalParameters,
       NamedOptions namedOptions) {
-    ParameterizedTypeName consumer = ParameterizedTypeName.get(
-        ClassName.get(Consumer.class),
-        ClassName.get(NotSuccess.class));
     ParameterSpec result = ParameterSpec.builder(generatedTypes.parseResultType(), "result").build();
     CodeBlock.Builder code = CodeBlock.builder();
     code.add(generatedTypes.helpRequestedType()
@@ -80,10 +68,6 @@ public class CommonFields {
             .add("$T.exit($N instanceof $T ? 0 : 1)", System.class, result, helpRequestedType)
             .unindent().build())
         .orElseGet(() -> CodeBlock.of("$N -> $T.exit(1)", result, System.class)));
-    FieldSpec exitHook = FieldSpec.builder(consumer, "exitHook")
-        .addModifiers(PRIVATE)
-        .initializer(code.build())
-        .build();
     long mapSize = namedOptions.stream()
         .map(Mapped::item)
         .map(NamedOption::names)
