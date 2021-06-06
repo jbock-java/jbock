@@ -45,7 +45,7 @@ public class OptionEnum {
   }
 
   TypeSpec define() {
-    List<Mapped<? extends AbstractItem>> parameters = context.parameters();
+    List<Mapped<? extends AbstractItem>> parameters = context.items();
     TypeSpec.Builder spec = TypeSpec.enumBuilder(sourceElement.itemType());
     for (Mapped<? extends AbstractItem> param : parameters) {
       EnumName enumName = param.enumName();

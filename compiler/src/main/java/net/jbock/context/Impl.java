@@ -39,12 +39,12 @@ public class Impl {
     } else {
       spec.superclass(sourceElement.typeName());
     }
-    for (Mapped<? extends AbstractItem> c : context.parameters()) {
+    for (Mapped<? extends AbstractItem> c : context.items()) {
       spec.addField(c.asField());
     }
     return spec.addModifiers(PRIVATE, STATIC)
         .addMethod(implConstructor())
-        .addMethods(context.parameters().stream()
+        .addMethods(context.items().stream()
             .map(this::parameterMethodOverride)
             .collect(Collectors.toUnmodifiableList()))
         .build();
@@ -61,7 +61,7 @@ public class Impl {
 
   private MethodSpec implConstructor() {
     MethodSpec.Builder spec = MethodSpec.constructorBuilder();
-    for (Mapped<? extends AbstractItem> c : context.parameters()) {
+    for (Mapped<? extends AbstractItem> c : context.items()) {
       FieldSpec field = c.asField();
       spec.addStatement("this.$N = $N", field, c.asParam());
       spec.addParameter(c.asParam());

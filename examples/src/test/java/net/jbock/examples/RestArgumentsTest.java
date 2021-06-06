@@ -19,8 +19,10 @@ import static org.mockito.Mockito.when;
 
 class RestArgumentsTest {
 
+  private final RestArgumentsParser parser = new RestArgumentsParser();
+
   private final ParserTestFixture<RestArguments> f =
-      ParserTestFixture.create(new RestArgumentsParser());
+      ParserTestFixture.create(parser);
 
   private final Map<String, String> messages = new HashMap<>();
 
@@ -28,7 +30,7 @@ class RestArgumentsTest {
       "A very good program.",
       "",
       "\u001B[1mUSAGE\u001B[m",
-      "  rest-arguments [OPTION]... [REST]...",
+      "  rest-arguments [OPTIONS] REST...",
       "",
       "\u001B[1mPARAMETERS\u001B[m",
       "  REST  Hello yes",
@@ -46,8 +48,10 @@ class RestArgumentsTest {
 
   @Test
   void testBundleKey() {
-    String[] help = f.getHelp(messages);
-    assertArraysEquals(expected, help);
+    String[] actual = parser.parse("--help").getLeft()
+        .map(notSuccess -> f.getUsageDocumentation(notSuccess, messages))
+        .orElseThrow();
+    assertArraysEquals(actual, expected);
   }
 
   @Test
@@ -55,8 +59,10 @@ class RestArgumentsTest {
     ResourceBundle bundle = mock(ResourceBundle.class);
     when(bundle.getKeys()).thenReturn(new Vector<>(messages.keySet()).elements());
     messages.forEach((k, v) -> when(bundle.getString(eq(k))).thenReturn(v));
-    String[] help = f.getHelp(toMap(bundle));
-    assertArraysEquals(expected, help);
+    String[] actual = parser.parse("--help").getLeft()
+        .map(notSuccess -> f.getUsageDocumentation(notSuccess, toMap(bundle)))
+        .orElseThrow();
+    assertArraysEquals(actual, expected);
   }
 
   private Map<String, String> toMap(ResourceBundle bundle) {

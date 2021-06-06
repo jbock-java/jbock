@@ -67,7 +67,7 @@ public class ContextModule {
 
   @ContextScope
   @Provides
-  AllItems allParameters(Util util) {
+  AllItems allItems(Util util) {
     return AllItems.create(positionalParams, namedOptions, util);
   }
 

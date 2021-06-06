@@ -7,12 +7,15 @@ import org.junit.jupiter.api.Test;
 import java.util.Arrays;
 import java.util.concurrent.ThreadLocalRandom;
 
+import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 
 class GitArgumentsTest {
 
+  private final GitArgumentsParser parser = new GitArgumentsParser();
+
   private final ParserTestFixture<GitArguments> f =
-      ParserTestFixture.create(new GitArgumentsParser());
+      ParserTestFixture.create(parser);
 
   @RepeatedTest(10)
   void testEscape() {
@@ -55,11 +58,13 @@ class GitArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrintsHelp(
+    String[] actual = parser.parse("--help")
+        .getLeft().map(f::getUsageDocumentation).orElseThrow();
+    assertEquals(actual,
         "Git is software for tracking changes in any set of files.",
         "",
         "\u001B[1mUSAGE\u001B[m",
-        "  git-arguments [OPTION]... COMMAND [REMAINING_ARGS]...",
+        "  git-arguments [OPTIONS] COMMAND REMAINING_ARGS...",
         "",
         "\u001B[1mPARAMETERS\u001B[m",
         "  COMMAND         nope",

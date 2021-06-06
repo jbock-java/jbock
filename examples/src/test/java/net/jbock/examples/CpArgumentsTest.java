@@ -117,9 +117,11 @@ class CpArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrintsHelp(
+    String[] actual = parser.parse("--help")
+        .getLeft().map(f::getUsageDocumentation).orElseThrow();
+    ParserTestFixture.assertEquals(actual,
         "\u001B[1mUSAGE\u001B[m",
-        "  cp-arguments [OPTION]... SOURCE DEST",
+        "  cp-arguments [OPTIONS] SOURCE DEST",
         "",
         "\u001B[1mPARAMETERS\u001B[m",
         "  SOURCE ",

@@ -23,15 +23,9 @@ public final class GeneratedClass {
   private final StatefulParser statefulParser;
   private final SourceElement sourceElement;
   private final NamedOptions namedOptions;
-  private final AnyDescriptionKeys anyDescriptionKeys;
-  private final PrintUsageDocumentationMethod printUsageDocumentationMethod;
   private final CommonFields commonFields;
   private final ParseOrExitMethod parseOrExitMethod;
-  private final PrintItemDocumentationMethod printItemDocumentationMethod;
-  private final MakeLinesMethod makeLinesMethod;
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
-  private final UsageMethod usageMethod;
-  private final Withers withers;
   private final GeneratedAnnotation generatedAnnotation;
   private final ReadOptionNameMethod readOptionNameMethod;
   private final ConvEx convEx;
@@ -47,15 +41,9 @@ public final class GeneratedClass {
       OptionEnum optionEnum,
       StatefulParser statefulParser,
       NamedOptions namedOptions,
-      AnyDescriptionKeys anyDescriptionKeys,
-      PrintUsageDocumentationMethod printUsageDocumentationMethod,
       CommonFields commonFields,
       ParseOrExitMethod parseOrExitMethod,
-      PrintItemDocumentationMethod printItemDocumentationMethod,
-      MakeLinesMethod makeLinesMethod,
       ReadOptionArgumentMethod readOptionArgumentMethod,
-      UsageMethod usageMethod,
-      Withers withers,
       GeneratedAnnotation generatedAnnotation,
       ReadOptionNameMethod readOptionNameMethod,
       ConvEx convEx,
@@ -68,15 +56,9 @@ public final class GeneratedClass {
     this.optionEnum = optionEnum;
     this.statefulParser = statefulParser;
     this.namedOptions = namedOptions;
-    this.anyDescriptionKeys = anyDescriptionKeys;
-    this.printUsageDocumentationMethod = printUsageDocumentationMethod;
     this.commonFields = commonFields;
     this.parseOrExitMethod = parseOrExitMethod;
-    this.printItemDocumentationMethod = printItemDocumentationMethod;
-    this.makeLinesMethod = makeLinesMethod;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
-    this.usageMethod = usageMethod;
-    this.withers = withers;
     this.generatedAnnotation = generatedAnnotation;
     this.readOptionNameMethod = readOptionNameMethod;
     this.convEx = convEx;
@@ -88,15 +70,7 @@ public final class GeneratedClass {
     TypeSpec.Builder spec = TypeSpec.classBuilder(sourceElement.generatedClass())
         .addMethod(parseMethod.get())
         .addMethod(parseOrExitMethod.get())
-        .addMethod(withers.withTerminalWidthMethod())
-        .addMethod(withers.withMessagesMethod())
-        .addMethod(withers.withErrorStreamMethod())
-        .addMethod(withers.withExitHookMethod())
-        .addMethod(printUsageDocumentationMethod.get())
-        .addMethod(printItemDocumentationMethod.get())
-        .addMethod(makeLinesMethod.get())
-        .addMethod(createModelMethod.get())
-        .addMethod(usageMethod.get());
+        .addMethod(createModelMethod.get());
     if (!namedOptions.isEmpty()) {
       spec.addMethod(readOptionNameMethod.get());
       if (namedOptions.anyRepeatable() || namedOptions.anyRegular()) {
@@ -105,11 +79,6 @@ public final class GeneratedClass {
     }
 
     spec.addField(commonFields.err());
-    spec.addField(commonFields.terminalWidth());
-    if (anyDescriptionKeys.anyDescriptionKeysAtAll()) {
-      spec.addField(commonFields.messages());
-    }
-    spec.addField(commonFields.exitHook());
 
     spec.addType(statefulParser.get())
         .addType(optionEnum.define())

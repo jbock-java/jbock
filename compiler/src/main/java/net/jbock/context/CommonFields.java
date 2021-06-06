@@ -33,7 +33,6 @@ public class CommonFields {
 
   private static final int DEFAULT_WRAP_AFTER = 80;
 
-  private final FieldSpec exitHook;
   private final FieldSpec optionNames;
   private final FieldSpec params;
   private final FieldSpec optionParsers;
@@ -44,12 +43,6 @@ public class CommonFields {
 
   private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
       .initializer("$T.err", System.class).build();
-
-  private final FieldSpec terminalWidth = FieldSpec.builder(INT, "terminalWidth", PRIVATE)
-      .initializer("$L", DEFAULT_WRAP_AFTER).build();
-
-  private final FieldSpec messages = FieldSpec.builder(STRING_TO_STRING_MAP, "messages", PRIVATE)
-      .initializer("$T.emptyMap()", Collections.class).build();
 
   private final FieldSpec suspiciousPattern = FieldSpec.builder(Pattern.class, "suspicious")
       .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
@@ -63,11 +56,9 @@ public class CommonFields {
       .build();
 
   private CommonFields(
-      FieldSpec exitHook,
       FieldSpec optionNames,
       FieldSpec params,
       FieldSpec optionParsers) {
-    this.exitHook = exitHook;
     this.optionNames = optionNames;
     this.params = params;
     this.optionParsers = optionParsers;
@@ -108,23 +99,11 @@ public class CommonFields {
     FieldSpec optionParsers = FieldSpec.builder(mapOf(sourceElement.itemType(), generatedTypes.optionParserType()), "optionParsers")
         .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.itemType())
         .build();
-    return new CommonFields(exitHook, optionsByName, paramParsers, optionParsers);
-  }
-
-  public FieldSpec exitHook() {
-    return exitHook;
+    return new CommonFields(optionsByName, paramParsers, optionParsers);
   }
 
   public FieldSpec err() {
     return err;
-  }
-
-  public FieldSpec terminalWidth() {
-    return terminalWidth;
-  }
-
-  public FieldSpec messages() {
-    return messages;
   }
 
   public FieldSpec suspiciousPattern() {

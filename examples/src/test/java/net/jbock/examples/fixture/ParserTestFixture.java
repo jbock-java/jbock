@@ -6,19 +6,15 @@ import net.jbock.util.NotSuccess;
 import net.jbock.util.ParsingError;
 import org.junit.jupiter.api.Assertions;
 
-import java.io.PrintStream;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -41,16 +37,6 @@ public final class ParserTestFixture<E> {
 
   public interface Parser<E> {
     Optional<E> parse(String[] args);
-
-    Object parseOrExit(String[] args);
-
-    Parser<E> withErrorStream(PrintStream out);
-
-    Parser<E> withMessages(Map<String, String> map);
-
-    Parser<E> withTerminalWidth(int chars);
-
-    Parser<E> withExitHook(Consumer<NotSuccess> exitHook);
   }
 
   private final Parser<E> parser;
@@ -62,21 +48,6 @@ public final class ParserTestFixture<E> {
   public static <E> ParserTestFixture<E> create(Object builder) {
     List<Parser<E>> parser = new ArrayList<>(1);
     parser.add(new Parser<E>() {
-
-      private Parser<E> callSetter(String methodName, Object parameter) {
-        return callSetter(methodName, parameter, parameter.getClass());
-      }
-
-      private Parser<E> callSetter(String methodName, Object parameter, Class<?> parameterType) {
-        try {
-          Method outMethod = builder.getClass().getDeclaredMethod(methodName, parameterType);
-          outMethod.setAccessible(true);
-          outMethod.invoke(builder, parameter);
-          return parser.get(0);
-        } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-          throw new RuntimeException(e);
-        }
-      }
 
       @Override
       @SuppressWarnings("unchecked")
@@ -91,39 +62,6 @@ public final class ParserTestFixture<E> {
           return Optional.empty();
         }
       }
-
-      @Override
-      public Object parseOrExit(String[] args) {
-        try {
-          Method outMethod = builder.getClass().getDeclaredMethod("parseOrExit", args.getClass());
-          outMethod.setAccessible(true);
-          return outMethod.invoke(builder, new Object[]{args});
-        } catch (IllegalAccessException | NoSuchMethodException e) {
-          return Optional.empty();
-        } catch (InvocationTargetException e) {
-          throw (RuntimeException) e.getCause();
-        }
-      }
-
-      @Override
-      public Parser<E> withErrorStream(PrintStream err) {
-        return callSetter("withErrorStream", err);
-      }
-
-      @Override
-      public Parser<E> withMessages(Map<String, String> map) {
-        return callSetter("withMessages", map, Map.class);
-      }
-
-      @Override
-      public Parser<E> withTerminalWidth(int width) {
-        return callSetter("withTerminalWidth", width, Integer.TYPE);
-      }
-
-      @Override
-      public Parser<E> withExitHook(Consumer<NotSuccess> exitHook) {
-        return callSetter("withExitHook", exitHook, Consumer.class);
-      }
     });
     return new ParserTestFixture<>(parser.get(0));
   }
@@ -133,18 +71,8 @@ public final class ParserTestFixture<E> {
   }
 
   public E parse(String... args) {
-    TestOutputStream stderr = new TestOutputStream();
-    Optional<E> result = parser
-        .withErrorStream(stderr.out).withTerminalWidth(MAX_LINE_WIDTH).parse(args);
-    if (!result.isPresent()) {
-      throw new AssertionError(stderr.toString());
-    }
+    Optional<E> result = parser.parse(args);
     return result.get();
-  }
-
-  public void assertPrintsHelp(String... expected) {
-    String[] actual = getOut();
-    assertArraysEquals(expected, actual);
   }
 
   public static void assertEquals(String[] actual, String... expected) {
@@ -214,8 +142,7 @@ public final class ParserTestFixture<E> {
 
     Parsed getParsed() {
       TestOutputStream stderr = new TestOutputStream();
-      Optional<E> result = parser
-          .withErrorStream(stderr.out).withTerminalWidth(MAX_LINE_WIDTH).parse(args);
+      Optional<E> result = parser.parse(args);
       return new Parsed(stderr.toString(), result);
     }
 
@@ -254,40 +181,22 @@ public final class ParserTestFixture<E> {
     }
   }
 
-  public String[] getHelp(Map<String, String> bundle) {
-    parser.withMessages(bundle);
-    return getOut();
-  }
-
-  private String[] getOut() {
-    TestOutputStream stderr = new TestOutputStream();
-    try {
-      parser.withErrorStream(stderr.out)
-          .withExitHook(r -> {
-            throw new Abort();
-          })
-          .withTerminalWidth(MAX_LINE_WIDTH)
-          .parseOrExit(new String[]{"--help"});
-      fail("Expecting empty result");
-    } catch (Abort e) {
-      // noop
-    }
-    return stderr.toString().split("\\R", -1);
-  }
-
-  private static class Abort extends RuntimeException {
-
-  }
-
   public ParsingError castToError(NotSuccess notSuccess) {
     return (ParsingError) notSuccess;
   }
 
   public String[] getUsageDocumentation(NotSuccess notSuccess) {
+    return getUsageDocumentation(notSuccess, Map.of());
+  }
+
+  public String[] getUsageDocumentation(
+      NotSuccess notSuccess,
+      Map<String, String> messages) {
     TestOutputStream testOutputStream = new TestOutputStream();
     UsageDocumentation.builder(notSuccess.commandModel())
         .withErrorStream(testOutputStream.out)
         .withTerminalWidth(MAX_LINE_WIDTH)
+        .withMessages(messages)
         .build()
         .printUsageDocumentation();
     return testOutputStream.split();

@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class AdditionArgumentsTest {
@@ -47,7 +48,9 @@ class AdditionArgumentsTest {
 
   @Test
   void testPrint() {
-    f.assertPrintsHelp(
+    String[] actual = parser.parse("--help")
+        .getLeft().map(f::getUsageDocumentation).orElseThrow();
+    assertEquals(actual,
         "USAGE",
         "  addition-arguments A B [C]",
         "",

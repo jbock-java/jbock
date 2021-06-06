@@ -5,10 +5,14 @@ import org.junit.jupiter.api.Test;
 
 import java.util.Optional;
 
+import static net.jbock.examples.fixture.ParserTestFixture.assertEquals;
+
 class GradleArgumentsFooTest {
 
+  private final GradleArguments_FooParser parser = new GradleArguments_FooParser();
+
   private final ParserTestFixture<GradleArguments.Foo> f =
-      ParserTestFixture.create(new GradleArguments_FooParser());
+      ParserTestFixture.create(parser);
 
   @Test
   void testParserForNestedClass() {
@@ -17,9 +21,11 @@ class GradleArgumentsFooTest {
 
   @Test
   void testPrint() {
-    f.assertPrintsHelp(
+    String[] actual = parser.parse("--help")
+        .getLeft().map(f::getUsageDocumentation).orElseThrow();
+    assertEquals(actual,
         "USAGE",
-        "  foo [OPTION]...",
+        "  foo [OPTIONS]",
         "",
         "OPTIONS",
         "  --bar BAR ",
