@@ -98,7 +98,7 @@ public class BuildMethod extends Cached<MethodSpec> {
   private CodeBlock convertExpressionOption(Mapped<NamedOption> c) {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("this.$N.get($T.$N).stream()", commonFields.optionParsers(),
-        sourceElement.itemType(), c.enumConstant()));
+        sourceElement.optionEnumType(), c.enumConstant()));
     if (!c.isFlag()) {
       code.add(c.mapExpr());
     }

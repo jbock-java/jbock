@@ -22,7 +22,7 @@ public class SourceElement {
   private final List<Modifier> accessModifiers;
   private final String programName;
   private final ClassName generatedClass;
-  private final ClassName itemType;
+  private final ClassName optionEnumType;
 
   private SourceElement(
       TypeElement sourceElement,
@@ -30,13 +30,13 @@ public class SourceElement {
       List<Modifier> accessModifiers,
       String programName,
       ClassName generatedClass,
-      ClassName itemType) {
+      ClassName optionEnumType) {
     this.sourceElement = sourceElement;
     this.parserFlavour = parserFlavour;
     this.accessModifiers = accessModifiers;
     this.programName = programName;
     this.generatedClass = generatedClass;
-    this.itemType = itemType;
+    this.optionEnumType = optionEnumType;
   }
 
   static SourceElement create(TypeElement typeElement, ParserFlavour parserFlavour) {
@@ -49,9 +49,9 @@ public class SourceElement {
     ClassName generatedClass = ClassName.get(typeElement)
         .topLevelClassName()
         .peerClass(generatedClassName);
-    ClassName itemType = generatedClass.nestedClass("Item");
+    ClassName optionEnumType = generatedClass.nestedClass("Option");
     return new SourceElement(typeElement, parserFlavour, accessModifiers,
-        programName, generatedClass, itemType);
+        programName, generatedClass, optionEnumType);
   }
 
   public TypeElement element() {
@@ -98,8 +98,8 @@ public class SourceElement {
     return generatedClass;
   }
 
-  public ClassName itemType() {
-    return itemType;
+  public ClassName optionEnumType() {
+    return optionEnumType;
   }
 
   public boolean isInterface() {

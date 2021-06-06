@@ -35,27 +35,24 @@ public final class OptionParser {
 
   private final GeneratedTypes generatedTypes;
   private final FieldSpec optionField;
-  private final NamedOptions options;
+  private final NamedOptions namedOptions;
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
 
   @Inject
   OptionParser(
       GeneratedTypes generatedTypes,
-      NamedOptions options,
+      NamedOptions namedOptions,
       SourceElement sourceElement,
       ReadOptionArgumentMethod readOptionArgumentMethod) {
     this.generatedTypes = generatedTypes;
-    this.optionField = FieldSpec.builder(sourceElement.itemType(), "option")
+    this.optionField = FieldSpec.builder(sourceElement.optionEnumType(), "option")
         .addModifiers(FINAL)
         .build();
-    this.options = options;
+    this.namedOptions = namedOptions;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
   }
 
   List<TypeSpec> define() {
-    if (options.isEmpty()) {
-      return List.of();
-    }
     FieldSpec values = FieldSpec.builder(LIST_OF_STRING, "values")
         .build();
     FieldSpec value = FieldSpec.builder(STRING, "value")
@@ -74,7 +71,7 @@ public final class OptionParser {
             .build())
         .addModifiers(PRIVATE, STATIC, ABSTRACT)
         .build());
-    if (options.anyFlags()) {
+    if (namedOptions.anyFlags()) {
       result.add(TypeSpec.classBuilder(generatedTypes.flagParserType())
           .superclass(generatedTypes.optionParserType())
           .addField(seen)
@@ -86,7 +83,7 @@ public final class OptionParser {
               .build())
           .addModifiers(PRIVATE, STATIC).build());
     }
-    if (options.anyRepeatable()) {
+    if (namedOptions.anyRepeatable()) {
       result.add(TypeSpec.classBuilder(generatedTypes.repeatableOptionParserType())
           .superclass(generatedTypes.optionParserType())
           .addField(values)
@@ -98,7 +95,7 @@ public final class OptionParser {
               .build())
           .addModifiers(PRIVATE, STATIC).build());
     }
-    if (options.anyRegular()) {
+    if (namedOptions.anyRegular()) {
       result.add(TypeSpec.classBuilder(generatedTypes.regularOptionParserType())
           .superclass(generatedTypes.optionParserType())
           .addField(value)
@@ -130,7 +127,7 @@ public final class OptionParser {
     CodeBlock.Builder code = CodeBlock.builder();
     code.addStatement("if ($N == null) $N = new $T<>()", values, values, ArrayList.class);
     code.addStatement("values.add($N($N, $N))", readOptionArgumentMethod.get(), token, it);
-    if (options.unixClusteringSupported()) {
+    if (namedOptions.unixClusteringSupported()) {
       code.addStatement("return false");
     }
     return MethodSpec.methodBuilder("read")
@@ -149,7 +146,7 @@ public final class OptionParser {
         .addStatement(throwRepetitionErrorStatement(token))
         .unindent();
     code.addStatement("$N = $N($N, $N)", value, readOptionArgumentMethod.get(), token, it);
-    if (options.unixClusteringSupported()) {
+    if (namedOptions.unixClusteringSupported()) {
       code.addStatement("return false");
     }
     return MethodSpec.methodBuilder("read")
@@ -165,7 +162,7 @@ public final class OptionParser {
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     return MethodSpec.methodBuilder("read")
         .addException(generatedTypes.syntExType())
-        .addCode(options.unixClusteringSupported() ?
+        .addCode(namedOptions.unixClusteringSupported() ?
             readMethodFlagCodeClustering(seen, token) :
             readMethodFlagCodeSimple(seen, token))
         .returns(readMethodReturnType())
@@ -236,6 +233,6 @@ public final class OptionParser {
   }
 
   private TypeName readMethodReturnType() {
-    return options.unixClusteringSupported() ? BOOLEAN : VOID;
+    return namedOptions.unixClusteringSupported() ? BOOLEAN : VOID;
   }
 }

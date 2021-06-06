@@ -46,7 +46,6 @@ public class MethodsFactory {
   Either<List<ValidationFailure>, AbstractMethods> findAbstractMethods() {
     return abstractMethodsFinder.findAbstractMethods()
         .flatMap(this::validateParameterMethods)
-        .flatMap(this::checkAtLeastOneAbstractMethod)
         .flatMap(this::inheritanceCollision)
         .map(this::createSourceMethods)
         .flatMap(this::validateDuplicateParametersAnnotation)
@@ -103,16 +102,6 @@ public class MethodsFactory {
     }
     if (!failures.isEmpty()) {
       return left(failures);
-    }
-    return right(sourceMethods);
-  }
-
-  private Either<List<ValidationFailure>, List<ExecutableElement>> checkAtLeastOneAbstractMethod(
-      List<ExecutableElement> sourceMethods) {
-    if (sourceMethods.isEmpty()) { // javapoet #739
-      String message = "expecting at least one abstract method";
-      ValidationFailure failure = sourceElement.fail(message);
-      return left(List.of(failure));
     }
     return right(sourceMethods);
   }

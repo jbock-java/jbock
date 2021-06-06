@@ -80,11 +80,11 @@ public class StatefulParser extends Cached<TypeSpec> {
       String enumConstant = namedOption.enumConstant();
       for (String dashedName : namedOption.item().names()) {
         code.addStatement("$N.put($S, $T.$L)",
-            commonFields.optionNames(), dashedName, sourceElement.itemType(),
+            commonFields.optionNames(), dashedName, sourceElement.optionEnumType(),
             enumConstant);
       }
       code.addStatement("$1N.put($2T.$3L, new $4T($2T.$3L))",
-          commonFields.optionParsers(), sourceElement.itemType(),
+          commonFields.optionParsers(), sourceElement.optionEnumType(),
           enumConstant, optionParserType(namedOption));
     }
     return MethodSpec.constructorBuilder()
@@ -118,9 +118,9 @@ public class StatefulParser extends Cached<TypeSpec> {
 
   private CodeBlock tryParseOptionCodeClustering(ParameterSpec token, ParameterSpec it) {
     ParameterSpec clusterToken = ParameterSpec.builder(STRING, "clusterToken").build();
-    ParameterSpec option = ParameterSpec.builder(sourceElement.itemType(), "option").build();
+    ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $N.get($N($N))", sourceElement.itemType(),
+    code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionEnumType(),
         option, commonFields.optionNames(), readOptionNameMethod.get(), token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")
@@ -139,9 +139,9 @@ public class StatefulParser extends Cached<TypeSpec> {
   }
 
   private CodeBlock tryParseOptionCodeSimple(ParameterSpec token, ParameterSpec it) {
-    ParameterSpec option = ParameterSpec.builder(sourceElement.itemType(), "option").build();
+    ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "option").build();
     CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $N.get($N($N))", sourceElement.itemType(), option,
+    code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionEnumType(), option,
         commonFields.optionNames(), readOptionNameMethod.get(), token);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("return false")

@@ -77,12 +77,14 @@ public final class GeneratedClass {
 
     spec.addField(commonFields.err());
 
-    spec.addType(statefulParser.get())
-        .addType(optionEnum.define())
-        .addType(impl.define())
-        .addType(convEx.define())
-        .addType(syntEx.define())
-        .addTypes(optionParser.define());
+    spec.addType(statefulParser.get());
+    if (!namedOptions.isEmpty()) {
+      spec.addType(optionEnum.define());
+      spec.addTypes(optionParser.define());
+    }
+    spec.addType(impl.define());
+    spec.addType(convEx.define());
+    spec.addType(syntEx.define());
 
     spec.addMethod(createModelMethod.get());
 
