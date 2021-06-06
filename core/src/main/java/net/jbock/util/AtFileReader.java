@@ -2,8 +2,8 @@ package net.jbock.util;
 
 import net.jbock.Command;
 import net.jbock.SuperCommand;
+import net.jbock.either.Either;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -11,6 +11,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+
+import static net.jbock.either.Either.left;
+import static net.jbock.either.Either.right;
 
 /**
  * Read command line options from a configuration file.
@@ -24,13 +27,16 @@ public final class AtFileReader {
    * {@link SuperCommand#expandAtSign()} is {@code false}.
    *
    * @param fileName a file name
-   * @return the options in the file
-   * @throws IOException if an error occurs
+   * @return the options in the file, or an error report
    */
-  public List<String> readAtFile(String fileName) throws IOException {
-    Path path = Paths.get(fileName);
-    List<String> lines = Files.readAllLines(path);
-    return readAtLines(lines);
+  public Either<FileReadingError, List<String>> readAtFile(String fileName) {
+    try {
+      Path path = Paths.get(fileName);
+      List<String> lines = Files.readAllLines(path);
+      return right(readAtLines(lines));
+    } catch (Exception e) {
+      return left(new FileReadingError(e, fileName));
+    }
   }
 
   private List<String> readAtLines(List<String> lines) {

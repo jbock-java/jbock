@@ -87,7 +87,7 @@ public class AutoConverterFinder extends MatchValidator {
         .add("$T $N = $N.getMessage() + $S + $N;\n", STRING, message, e, " ", values)
         .add("throw new $T($N);\n", IllegalArgumentException.class, message)
         .unindent().add("}\n")
-        .unindent().add("}))\n").build());
+        .unindent().add("}))").build());
   }
 
   private boolean isEnumType(TypeMirror type) {

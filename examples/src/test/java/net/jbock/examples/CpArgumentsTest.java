@@ -28,7 +28,7 @@ class CpArgumentsTest {
 
   @Test
   void enumValuesInMessage() {
-    Either<NotSuccess, CpArguments> result = new CpArgumentsParser().parse(new String[]{"a", "b", "--backup", "CLOUD"});
+    Either<NotSuccess, CpArguments> result = new CpArgumentsParser().parse("a", "b", "--backup", "CLOUD");
     assertTrue(result.getLeft().isPresent());
     assertTrue(result.getLeft().get() instanceof ConverterError);
     ConverterError error = (ConverterError) result.getLeft().get();
