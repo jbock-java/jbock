@@ -5,6 +5,7 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.common.Util;
 import net.jbock.convert.Mapped;
+import net.jbock.either.Either;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
@@ -14,7 +15,6 @@ import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.STRING_ARRAY;
@@ -78,6 +78,7 @@ public class BuildMethod extends Cached<MethodSpec> {
         () -> spec.addStatement("return new $T($L)", generatedTypes.implType(), constructorArguments));
     return spec.returns(generatedTypes.parseSuccessType())
         .addException(generatedTypes.syntExType())
+        .addException(generatedTypes.convExType())
         .build();
   }
 
@@ -121,8 +122,8 @@ public class BuildMethod extends Cached<MethodSpec> {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
     code.add(c.mapExpr());
-    code.add(CodeBlock.of(".map(e -> e$L)", checkConverterError(c.item())));
-    code.add(CodeBlock.of(".collect($T.toList())", Collectors.class));
+    code.add(CodeBlock.of(".collect($T.toValidList())", Either.class));
+    code.add(orElseThrowConverterError(c.item()));
     return util.joinByNewline(code);
   }
 
@@ -135,15 +136,16 @@ public class BuildMethod extends Cached<MethodSpec> {
         return List.of(
             CodeBlock.of(".findAny()"),
             CodeBlock.of(".orElseThrow(() -> new $T($S))", generatedTypes.syntExType(), message),
-            checkConverterError(c.item()));
+            orElseThrowConverterError(c.item()));
       case OPTIONAL:
         return List.of(
-            CodeBlock.of(".map(e -> e$L)", checkConverterError(c.item())),
-            CodeBlock.of(".findAny()"));
+            CodeBlock.of(".collect($T.toValidList())", Either.class),
+            orElseThrowConverterError(c.item()),
+            CodeBlock.of(".stream().findAny()"));
       case REPEATABLE:
         return List.of(
-            CodeBlock.of(".map(e -> e$L)", checkConverterError(c.item())),
-            CodeBlock.of(".collect($T.toList())", Collectors.class));
+            CodeBlock.of(".collect($T.toValidList())", Either.class),
+            orElseThrowConverterError(c.item()));
       case MODAL_FLAG:
         return List.of(CodeBlock.of(".findAny().isPresent()"));
       default:
@@ -157,29 +159,33 @@ public class BuildMethod extends Cached<MethodSpec> {
         String paramLabel = styler.bold(c.paramLabel()).orElse(c.paramLabel());
         return List.of(CodeBlock.of(".orElseThrow(() -> new $T($S))",
             generatedTypes.syntExType(), "Missing required parameter: " + paramLabel),
-            checkConverterError(c.item()));
+            orElseThrowConverterError(c.item()));
       case OPTIONAL:
-        return List.of(CodeBlock.of(".map(e -> e$L)", checkConverterError(c.item())));
+        return List.of(
+            CodeBlock.of(".stream()"),
+            CodeBlock.of(".collect($T.toValidList())", Either.class),
+            orElseThrowConverterError(c.item()),
+            CodeBlock.of(".stream().findAny()"));
       default:
         throw new IllegalArgumentException("unexpected skew: " + c.skew());
     }
   }
 
-  private CodeBlock checkConverterError(NamedOption option) {
+  private CodeBlock orElseThrowConverterError(NamedOption option) {
     String itemName = option.paramLabel() + " (" + String.join(", ", option.names()) + ")";
-    return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5S))",
-        left, generatedTypes.convExType(),
-        ItemType.class,
-        ItemType.OPTION,
-        itemName);
+    return orElseThrowConverterError(itemName, ItemType.OPTION);
   }
 
-  private CodeBlock checkConverterError(PositionalParameter parameter) {
+  private CodeBlock orElseThrowConverterError(PositionalParameter parameter) {
     String itemName = parameter.paramLabel();
+    return orElseThrowConverterError(itemName, ItemType.PARAMETER);
+  }
+
+  private CodeBlock orElseThrowConverterError(String itemName, ItemType itemType) {
     return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5S))",
         left, generatedTypes.convExType(),
         ItemType.class,
-        ItemType.PARAMETER,
+        itemType,
         itemName);
   }
 }

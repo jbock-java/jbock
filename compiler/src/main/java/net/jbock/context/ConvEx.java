@@ -1,5 +1,7 @@
 package net.jbock.context;
 
+import com.squareup.javapoet.AnnotationSpec;
+import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
@@ -33,7 +35,9 @@ public class ConvEx {
 
   public TypeSpec define() {
     return TypeSpec.classBuilder(generatedTypes.convExType())
-        .superclass(RuntimeException.class)
+        .superclass(Exception.class)
+        .addAnnotation(AnnotationSpec.builder(SuppressWarnings.class)
+            .addMember("value", CodeBlock.of("$S", "serial")).build())
         .addField(commonFields.convExFailure())
         .addField(commonFields.convExItemType())
         .addField(commonFields.convExItemName())
