@@ -13,6 +13,7 @@ import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.STRING;
 
+@ContextScope
 public class SyntEx {
 
   private final GeneratedTypes generatedTypes;

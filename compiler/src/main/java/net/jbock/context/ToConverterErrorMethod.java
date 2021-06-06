@@ -8,6 +8,7 @@ import net.jbock.util.NotSuccess;
 
 import javax.inject.Inject;
 
+@ContextScope
 public class ToConverterErrorMethod extends Cached<MethodSpec> {
 
   private final CommonFields commonFields;

@@ -23,8 +23,6 @@ public final class Constants {
 
   public static final TypeName LIST_OF_STRING = listOf(STRING);
 
-  public static final TypeName STRING_TO_STRING_MAP = mapOf(STRING, STRING);
-
   public static final TypeName STRING_ARRAY = ArrayTypeName.of(STRING);
 
   public static final TypeName STRING_ITERATOR = ParameterizedTypeName.get(ClassName.get(Iterator.class), STRING);
