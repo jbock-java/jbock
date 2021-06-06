@@ -23,11 +23,10 @@ public class ToConverterErrorMethod extends Cached<MethodSpec> {
     ParameterSpec model = ParameterSpec.builder(CommandModel.class, "model").build();
     return MethodSpec.methodBuilder("toConverterError")
         .addParameter(model)
-        .addStatement("new $T($N, $N, $N, $N)",
+        .addStatement("return new $T($N, $N, $N, $N)",
             ConverterError.class, model, commonFields.convExFailure(),
             commonFields.convExItemType(), commonFields.convExItemName())
         .returns(NotSuccess.class)
         .build();
   }
-
 }

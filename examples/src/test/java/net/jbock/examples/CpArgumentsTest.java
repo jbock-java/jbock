@@ -23,7 +23,7 @@ class CpArgumentsTest {
   void errorMissingSource() {
     Either<NotSuccess, CpArguments> result = parser.parse("-r");
     assertTrue(result.getLeft().map(f::castToError).orElseThrow().message()
-        .contains("Missing required parameter: \u001B[1mSOURCE\u001B[m"));
+        .contains("Missing required parameter: SOURCE"));
   }
 
   @Test
@@ -41,13 +41,13 @@ class CpArgumentsTest {
   void errorMissingDest() {
     assertTrue(parser.parse("a").getLeft().map(f::castToError)
         .orElseThrow().message()
-        .contains("Missing required parameter: \u001B[1mDEST\u001B[m"));
+        .contains("Missing required parameter: DEST"));
     assertTrue(parser.parse("a", "-r").getLeft().map(f::castToError)
         .orElseThrow().message()
-        .contains("Missing required parameter: \u001B[1mDEST\u001B[m"));
+        .contains("Missing required parameter: DEST"));
     assertTrue(parser.parse("-r", "a").getLeft().map(f::castToError)
         .orElseThrow().message()
-        .contains("Missing required parameter: \u001B[1mDEST\u001B[m"));
+        .contains("Missing required parameter: DEST"));
   }
 
   @Test

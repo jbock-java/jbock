@@ -27,13 +27,18 @@ public class AnsiStyle {
     return Optional.of(CSI + style.code + 'm' + text + RESET);
   }
 
-  String bold(String text) {
-    return paint(text, Style.BOLD).orElse(text);
+  Optional<String> bold(String text) {
+    return paint(text, Style.BOLD);
+  }
+
+  String red(String text) {
+    return paint(text, Style.FG_RED).orElse(text);
   }
 
   private enum Style {
 
-    BOLD(1);
+    BOLD(1),
+    FG_RED(31);
 
     final int code;
 

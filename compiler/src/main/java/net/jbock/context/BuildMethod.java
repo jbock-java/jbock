@@ -27,7 +27,6 @@ public class BuildMethod extends Cached<MethodSpec> {
   private final NamedOptions namedOptions;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
-  private final AnsiStyle styler;
   private final Util util;
   private final ParameterSpec left = ParameterSpec.builder(STRING, "left").build();
 
@@ -38,14 +37,12 @@ public class BuildMethod extends Cached<MethodSpec> {
       NamedOptions namedOptions,
       PositionalParameters positionalParameters,
       CommonFields commonFields,
-      AnsiStyle styler,
       Util util) {
     this.generatedTypes = generatedTypes;
     this.sourceElement = sourceElement;
     this.namedOptions = namedOptions;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
-    this.styler = styler;
     this.util = util;
   }
 
@@ -156,7 +153,7 @@ public class BuildMethod extends Cached<MethodSpec> {
   private List<CodeBlock> tailExpressionParameter(Mapped<PositionalParameter> c) {
     switch (c.skew()) {
       case REQUIRED:
-        String paramLabel = styler.bold(c.paramLabel()).orElse(c.paramLabel());
+        String paramLabel = c.paramLabel();
         return List.of(CodeBlock.of(".orElseThrow(() -> new $T($S))",
             generatedTypes.syntExType(), "Missing required parameter: " + paramLabel),
             orElseThrowConverterError(c.item()));

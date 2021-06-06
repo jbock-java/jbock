@@ -17,7 +17,7 @@ class MvArgumentsTest {
   void notEnoughArguments() {
     assertTrue(parser.parse("a").getLeft().map(f::castToError)
         .orElseThrow().message()
-        .contains("Missing required parameter: \u001B[1mDEST\u001B[m"));
+        .contains("Missing required parameter: DEST"));
   }
 
   @Test

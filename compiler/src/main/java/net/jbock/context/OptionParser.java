@@ -8,19 +8,16 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.Constants;
-import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
-import static com.squareup.javapoet.ParameterSpec.builder;
 import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static com.squareup.javapoet.TypeName.VOID;
 import static java.util.Arrays.asList;
 import static javax.lang.model.element.Modifier.ABSTRACT;
-import static javax.lang.model.element.Modifier.FINAL;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
 import static net.jbock.common.Constants.LIST_OF_STRING;
@@ -34,7 +31,6 @@ import static net.jbock.common.Constants.STRING_ITERATOR;
 public final class OptionParser {
 
   private final GeneratedTypes generatedTypes;
-  private final FieldSpec optionField;
   private final NamedOptions namedOptions;
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
 
@@ -42,12 +38,8 @@ public final class OptionParser {
   OptionParser(
       GeneratedTypes generatedTypes,
       NamedOptions namedOptions,
-      SourceElement sourceElement,
       ReadOptionArgumentMethod readOptionArgumentMethod) {
     this.generatedTypes = generatedTypes;
-    this.optionField = FieldSpec.builder(sourceElement.optionEnumType(), "option")
-        .addModifiers(FINAL)
-        .build();
     this.namedOptions = namedOptions;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
   }
@@ -60,15 +52,9 @@ public final class OptionParser {
     FieldSpec seen = FieldSpec.builder(BOOLEAN, "seen")
         .build();
     List<TypeSpec> result = new ArrayList<>();
-    ParameterSpec optionParam = builder(optionField.type, optionField.name).build();
     result.add(TypeSpec.classBuilder(generatedTypes.optionParserType())
-        .addField(optionField)
         .addMethod(readMethodAbstract())
         .addMethod(streamMethodAbstract())
-        .addMethod(MethodSpec.constructorBuilder()
-            .addParameter(optionParam)
-            .addStatement("this.$N = $N", optionField, optionParam)
-            .build())
         .addModifiers(PRIVATE, STATIC, ABSTRACT)
         .build());
     if (namedOptions.anyFlags()) {
@@ -77,10 +63,6 @@ public final class OptionParser {
           .addField(seen)
           .addMethod(readMethodFlag(seen))
           .addMethod(streamMethodFlag(seen))
-          .addMethod(MethodSpec.constructorBuilder()
-              .addParameter(optionParam)
-              .addStatement("super($N)", optionParam)
-              .build())
           .addModifiers(PRIVATE, STATIC).build());
     }
     if (namedOptions.anyRepeatable()) {
@@ -89,10 +71,6 @@ public final class OptionParser {
           .addField(values)
           .addMethod(readMethodRepeatable(values))
           .addMethod(streamMethodRepeatable(values))
-          .addMethod(MethodSpec.constructorBuilder()
-              .addParameter(optionParam)
-              .addStatement("super($N)", optionParam)
-              .build())
           .addModifiers(PRIVATE, STATIC).build());
     }
     if (namedOptions.anyRegular()) {
@@ -101,10 +79,6 @@ public final class OptionParser {
           .addField(value)
           .addMethod(readMethodRegular(value))
           .addMethod(streamMethodRegular(value))
-          .addMethod(MethodSpec.constructorBuilder()
-              .addParameter(optionParam)
-              .addStatement("super($N)", optionParam)
-              .build())
           .addModifiers(PRIVATE, STATIC).build());
     }
     return result;

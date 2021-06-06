@@ -30,6 +30,31 @@ public class UsageDocumentation {
   private final int maxWidthOptions;
   private final int maxWidthParameters;
 
+  private UsageDocumentation(
+      PrintStream err,
+      int terminalWidth,
+      Map<String, String> messages,
+      String descriptionKey,
+      List<String> descriptionLines,
+      List<Option> options,
+      List<Parameter> parameters,
+      Synopsis synopsis,
+      AnsiStyle ansiStyle,
+      int maxWidthOptions,
+      int maxWidthParameters) {
+    this.descriptionKey = descriptionKey;
+    this.descriptionLines = descriptionLines;
+    this.err = err;
+    this.terminalWidth = terminalWidth;
+    this.messages = messages;
+    this.options = options;
+    this.parameters = parameters;
+    this.synopsis = synopsis;
+    this.ansiStyle = ansiStyle;
+    this.maxWidthOptions = maxWidthOptions;
+    this.maxWidthParameters = maxWidthParameters;
+  }
+
   /**
    * Create a builder instance.
    * Public method that may be invoked from the generated code.
@@ -46,7 +71,7 @@ public class UsageDocumentation {
     private int terminalWidth = 80;
     private Map<String, String> messages = Collections.emptyMap();
 
-    Builder(CommandModel model) {
+    private Builder(CommandModel model) {
       this.model = model;
     }
 
@@ -108,31 +133,6 @@ public class UsageDocumentation {
     }
   }
 
-  UsageDocumentation(
-      PrintStream err,
-      int terminalWidth,
-      Map<String, String> messages,
-      String descriptionKey,
-      List<String> descriptionLines,
-      List<Option> options,
-      List<Parameter> parameters,
-      Synopsis synopsis,
-      AnsiStyle ansiStyle,
-      int maxWidthOptions,
-      int maxWidthParameters) {
-    this.descriptionKey = descriptionKey;
-    this.descriptionLines = descriptionLines;
-    this.err = err;
-    this.terminalWidth = terminalWidth;
-    this.messages = messages;
-    this.options = options;
-    this.parameters = parameters;
-    this.synopsis = synopsis;
-    this.ansiStyle = ansiStyle;
-    this.maxWidthOptions = maxWidthOptions;
-    this.maxWidthParameters = maxWidthParameters;
-  }
-
   /**
    * Print usage documentation.
    * Public method that may be invoked from the generated code.
@@ -158,19 +158,19 @@ public class UsageDocumentation {
     String indent_p = String.join("", Collections.nCopies(maxWidthParameters + 4, " "));
     String indent_o = String.join("", Collections.nCopies(maxWidthOptions + 4, " "));
 
-    err.println(ansiStyle.bold("USAGE"));
+    err.println(ansiStyle.bold("USAGE").orElse("USAGE"));
     String indent_u = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
     makeLines(indent_u, synopsis.createSynopsis(" ")).forEach(err::println);
     if (!parameters.isEmpty()) {
       err.println();
-      err.println(ansiStyle.bold("PARAMETERS"));
+      err.println(ansiStyle.bold("PARAMETERS").orElse("PARAMETERS"));
     }
     for (Parameter parameter : parameters) {
       printItemDocumentation(parameter, String.format(paramsFormat, parameter.name()), indent_p);
     }
     if (!options.isEmpty()) {
       err.println();
-      err.println(ansiStyle.bold("OPTIONS"));
+      err.println(ansiStyle.bold("OPTIONS").orElse("OPTIONS"));
     }
     for (Option option : options) {
       printItemDocumentation(option, String.format(optionsFormat, option.name()), indent_o);

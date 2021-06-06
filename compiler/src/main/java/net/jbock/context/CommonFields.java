@@ -10,14 +10,12 @@ import net.jbock.processor.SourceElement;
 import net.jbock.util.ConverterFailure;
 import net.jbock.util.ItemType;
 
-import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.EnumMap;
 import java.util.HashMap;
 import java.util.List;
 import java.util.regex.Pattern;
 
-import static javax.lang.model.element.Modifier.PRIVATE;
 import static net.jbock.common.Constants.LIST_OF_STRING;
 import static net.jbock.common.Constants.STRING;
 import static net.jbock.common.Constants.mapOf;
@@ -31,9 +29,6 @@ public class CommonFields {
   private final FieldSpec rest = FieldSpec.builder(LIST_OF_STRING, "rest")
       .initializer("new $T<>()", ArrayList.class)
       .build();
-
-  private final FieldSpec err = FieldSpec.builder(PrintStream.class, "err", PRIVATE)
-      .initializer("$T.err", System.class).build();
 
   private final FieldSpec suspiciousPattern = FieldSpec.builder(Pattern.class, "suspicious")
       .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
@@ -84,10 +79,6 @@ public class CommonFields {
         .initializer("new $T<>($T.class)", EnumMap.class, sourceElement.optionEnumType())
         .build();
     return new CommonFields(optionsByName, paramParsers, optionParsers);
-  }
-
-  public FieldSpec err() {
-    return err;
   }
 
   public FieldSpec suspiciousPattern() {

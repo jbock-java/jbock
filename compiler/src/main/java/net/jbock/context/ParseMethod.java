@@ -8,7 +8,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.AtFileReader;
-import net.jbock.util.ConverterError;
 import net.jbock.util.FileReadingError;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.SyntaxError;
@@ -30,8 +29,8 @@ public class ParseMethod extends Cached<MethodSpec> {
   private final AllItems allItems;
   private final SourceElement sourceElement;
   private final BuildMethod buildMethod;
-  private final CommonFields commonFields;
   private final CreateModelMethod createModelMethod;
+  private final ToConverterErrorMethod toConverterErrorMethod;
 
   @Inject
   ParseMethod(
@@ -39,14 +38,14 @@ public class ParseMethod extends Cached<MethodSpec> {
       AllItems allItems,
       SourceElement sourceElement,
       BuildMethod buildMethod,
-      CommonFields commonFields,
-      CreateModelMethod createModelMethod) {
+      CreateModelMethod createModelMethod,
+      ToConverterErrorMethod toConverterErrorMethod) {
     this.generatedTypes = generatedTypes;
     this.allItems = allItems;
     this.sourceElement = sourceElement;
     this.buildMethod = buildMethod;
-    this.commonFields = commonFields;
     this.createModelMethod = createModelMethod;
+    this.toConverterErrorMethod = toConverterErrorMethod;
   }
 
   @Override
@@ -90,14 +89,13 @@ public class ParseMethod extends Cached<MethodSpec> {
           .add("new $T().readAtFile($N[0].substring(1)) :\n", AtFileReader.class, args)
           .add("$T.right($T.asList($N))", Either.class, Arrays.class, args)
           .unindent().build());
-      CodeBlock resultExpression = CodeBlock.builder()
+      code.addStatement("return $L", CodeBlock.builder()
           .add("$1N.mapLeft($2N -> $2N.addModel($3N()))\n", either, err, createModelMethod.get()).indent()
           .add(".map($T::iterator)\n", List.class)
-          .add(".flatMap($N -> {\n", it).indent()
-          .add(coreBlock(it))
-          .add("})").unindent().unindent()
-          .build();
-      code.addStatement("return $L", resultExpression);
+          .add(".flatMap($N -> {\n", it)
+          .indent().add(coreBlock(it)).unindent()
+          .add("})").unindent()
+          .build());
     } else {
       code.addStatement("$T $N = $T.asList($N)", it.type, it,
           Either.class, Arrays.class, args);
@@ -120,10 +118,8 @@ public class ParseMethod extends Cached<MethodSpec> {
         .add("try {\n").indent()
         .add("return $T.right($N.parse($N).$N());\n", Either.class, state, it, buildMethod.get())
         .unindent().add("} catch ($T $N) {\n", generatedTypes.convExType(), e).indent()
-        .add("return $1T.left(new $2T($3N(), $4N.$5N, $4N.$6N, $4N.$7N));\n",
-            Either.class,
-            ConverterError.class, createModelMethod.get(), e,
-            commonFields.convExFailure(), commonFields.convExItemType(), commonFields.convExItemName())
+        .add("return $T.left($N.$N($N()));\n",
+            Either.class, e, toConverterErrorMethod.get(), createModelMethod.get())
         .unindent().add("} catch ($T $N) {\n", generatedTypes.syntExType(), e).indent()
         .add("return $T.left(new $T($N(), $N.getMessage()));\n", Either.class,
             SyntaxError.class, createModelMethod.get(), e)

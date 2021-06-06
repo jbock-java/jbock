@@ -49,7 +49,7 @@ public class SourceElement {
     ClassName generatedClass = ClassName.get(typeElement)
         .topLevelClassName()
         .peerClass(generatedClassName);
-    ClassName optionEnumType = generatedClass.nestedClass("Option");
+    ClassName optionEnumType = generatedClass.nestedClass("Opt");
     return new SourceElement(typeElement, parserFlavour, accessModifiers,
         programName, generatedClass, optionEnumType);
   }

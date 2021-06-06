@@ -20,6 +20,7 @@ public class ConvEx {
 
   private final CommonFields commonFields;
   private final GeneratedTypes generatedTypes;
+  private final ToConverterErrorMethod toConverterErrorMethod;
 
   private final ParameterSpec paramFailure = ParameterSpec.builder(ConverterFailure.class, "failure")
       .build();
@@ -29,9 +30,13 @@ public class ConvEx {
       .build();
 
   @Inject
-  ConvEx(GeneratedTypes generatedTypes, CommonFields commonFields) {
+  ConvEx(
+      GeneratedTypes generatedTypes,
+      CommonFields commonFields,
+      ToConverterErrorMethod toConverterErrorMethod) {
     this.generatedTypes = generatedTypes;
     this.commonFields = commonFields;
+    this.toConverterErrorMethod = toConverterErrorMethod;
   }
 
   public TypeSpec define() {
@@ -50,6 +55,7 @@ public class ConvEx {
             .addStatement("this.$N = $N", commonFields.convExItemType(), paramItemType)
             .addStatement("this.$N = $N", commonFields.convExItemName(), paramItemName)
             .build())
+        .addMethod(toConverterErrorMethod.get())
         .addModifiers(PRIVATE, STATIC, FINAL)
         .build();
   }

@@ -83,7 +83,7 @@ public class StatefulParser extends Cached<TypeSpec> {
             commonFields.optionNames(), dashedName, sourceElement.optionEnumType(),
             enumConstant);
       }
-      code.addStatement("$1N.put($2T.$3L, new $4T($2T.$3L))",
+      code.addStatement("$N.put($T.$L, new $T())",
           commonFields.optionParsers(), sourceElement.optionEnumType(),
           enumConstant, optionParserType(namedOption));
     }

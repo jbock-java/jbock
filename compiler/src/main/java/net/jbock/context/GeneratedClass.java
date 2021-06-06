@@ -75,8 +75,6 @@ public final class GeneratedClass {
       }
     }
 
-    spec.addField(commonFields.err());
-
     spec.addType(statefulParser.get());
     if (!namedOptions.isEmpty()) {
       spec.addType(optionEnum.define());
