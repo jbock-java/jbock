@@ -1,4 +1,4 @@
-package net.jbock.usage;
+package net.jbock.contrib;
 
 import net.jbock.model.CommandModel;
 

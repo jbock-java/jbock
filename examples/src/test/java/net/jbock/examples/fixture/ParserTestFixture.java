@@ -1,7 +1,7 @@
 package net.jbock.examples.fixture;
 
 import net.jbock.either.Either;
-import net.jbock.usage.UsageDocumentation;
+import net.jbock.contrib.UsageDocumentation;
 import net.jbock.util.NotSuccess;
 import net.jbock.util.HasMessage;
 import org.junit.jupiter.api.Assertions;

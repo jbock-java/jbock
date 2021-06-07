@@ -12,5 +12,5 @@ module net.jbock {
   exports net.jbock.either;
   exports net.jbock.util;
   exports net.jbock.model;
-  exports net.jbock.usage;
+  exports net.jbock.contrib;
 }

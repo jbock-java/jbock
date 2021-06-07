@@ -4,7 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.processor.SourceElement;
-import net.jbock.usage.StandardErrorHandler;
+import net.jbock.contrib.StandardErrorHandler;
 
 import javax.inject.Inject;
 
