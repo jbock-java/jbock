@@ -14,22 +14,29 @@ import static net.jbock.either.Either.right;
  *
  * @param <T> converter output type
  */
-public abstract class StringConverter<T> implements Function<String, Either<ConverterFailure, T>> {
+public abstract class StringConverter<T> implements Function<String, Either<Misconvert, T>> {
 
   /**
-   * Converts a single command line token. This method will be invoked
-   * if the corresponding token was present in the input array.
-   * Conversion failure is signaled by throwing any exception.
+   * Converts a single command line token.
+   * For options, the token is the option argument.
+   * This method will be invoked
+   * once per corresponding token in the input array,
+   * so it may never be invoked if no such token exists.
+   * All corresponding tokens will be handled by the same
+   * converter, so this method may be invoked more
+   * than once on the same instance.
+   * The implementation can throw any {@link Exception}
+   * to signal converter failure.
    * It is an error to return {@code null} from this method.
    *
-   * @param token a non-null string
-   * @return a non-null instance of {@code T}
-   * @throws Exception if a parsing error occurs
+   * @param token a non-null string, possibly empty
+   * @return an instance of {@code T}
+   * @throws Exception converter failure
    */
   public abstract T convert(String token) throws Exception;
 
   /**
-   * Factory method to create a {@link StringConverter} from a function.
+   * Creates a {@link StringConverter} from a function.
    *
    * @param function a function that should not return null
    * @param <T> function output type
@@ -45,7 +52,7 @@ public abstract class StringConverter<T> implements Function<String, Either<Conv
   }
 
   @Override
-  public final Either<ConverterFailure, T> apply(String s) {
+  public final Either<Misconvert, T> apply(String s) {
     try {
       T result = convert(s);
       if (result == null) {

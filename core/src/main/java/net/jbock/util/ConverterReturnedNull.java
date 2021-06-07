@@ -3,13 +3,13 @@ package net.jbock.util;
 /**
  * Indicates that a converter returned {@code null}.
  */
-public final class ConverterReturnedNull implements ConverterFailure {
+public final class ConverterReturnedNull extends Misconvert {
 
   ConverterReturnedNull() {
   }
 
   @Override
-  public String message() {
+  public String converterMessage() {
     return "converter returned null";
   }
 }

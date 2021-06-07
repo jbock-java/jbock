@@ -7,7 +7,7 @@ import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.NotSuccess;
-import net.jbock.util.ParsingError;
+import net.jbock.util.HasMessage;
 import net.jbock.util.SuperResult;
 
 import javax.inject.Inject;
@@ -79,7 +79,7 @@ public class GeneratedTypes {
   }
 
   ClassName parsingFailedType() {
-    return ClassName.get(ParsingError.class);
+    return ClassName.get(HasMessage.class);
   }
 
   Optional<ClassName> helpRequestedType() {

@@ -5,12 +5,11 @@ import net.jbock.model.CommandModel;
 import java.util.Locale;
 
 /**
- * A wrapper to decorate {@link ConverterFailure} with some
- * additional information.
+ * An instance of this class signals failure of a converter invocation.
  */
-public final class ConverterError extends ParsingError {
+public final class ConverterError extends NotSuccess implements HasMessage {
 
-  private final ConverterFailure failure;
+  private final Misconvert misconvert;
   private final ItemType itemType;
   private final String itemName;
 
@@ -18,17 +17,17 @@ public final class ConverterError extends ParsingError {
    * Public constructor that may be invoked from the generated code.
    *
    * @param commandModel the command model
-   * @param failure the converter failure
+   * @param misconvert an object describing the specific converter failure
    * @param itemType type of the {@link ItemType item} that the converter was bound to
    * @param itemName item name
    */
   public ConverterError(
       CommandModel commandModel,
-      ConverterFailure failure,
+      Misconvert misconvert,
       ItemType itemType,
       String itemName) {
     super(commandModel);
-    this.failure = failure;
+    this.misconvert = misconvert;
     this.itemType = itemType;
     this.itemName = itemName;
   }
@@ -38,8 +37,8 @@ public final class ConverterError extends ParsingError {
    *
    * @return the failure object
    */
-  public ConverterFailure failure() {
-    return failure;
+  public Misconvert misconvert() {
+    return misconvert;
   }
 
   /**
@@ -63,6 +62,6 @@ public final class ConverterError extends ParsingError {
   @Override
   public String message() {
     return "while converting " + itemType.name().toLowerCase(Locale.US) +
-        " " + itemName + ": " + failure.message();
+        " " + itemName + ": " + misconvert.converterMessage();
   }
 }

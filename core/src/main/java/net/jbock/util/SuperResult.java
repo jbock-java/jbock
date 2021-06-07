@@ -8,22 +8,22 @@ package net.jbock.util;
  */
 public final class SuperResult<C> {
 
-  private final C result;
+  private final C command;
   private final String[] rest;
 
   /**
    * Public constructor that may be invoked from the generated code.
    *
-   * @param result
-   * @param rest
+   * @param command command instance
+   * @param rest remaining tokens from the input array
    */
-  public SuperResult(C result, String[] rest) {
-    this.result = result;
+  public SuperResult(C command, String[] rest) {
+    this.command = command;
     this.rest = rest;
   }
 
   public C result() {
-    return result;
+    return command;
   }
 
   public String[] rest() {

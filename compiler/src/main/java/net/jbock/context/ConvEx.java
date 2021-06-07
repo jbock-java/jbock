@@ -5,7 +5,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
-import net.jbock.util.ConverterFailure;
+import net.jbock.util.Misconvert;
 import net.jbock.util.ItemType;
 
 import javax.inject.Inject;
@@ -22,7 +22,7 @@ public class ConvEx {
   private final GeneratedTypes generatedTypes;
   private final ToConverterErrorMethod toConverterErrorMethod;
 
-  private final ParameterSpec paramFailure = ParameterSpec.builder(ConverterFailure.class, "failure")
+  private final ParameterSpec paramFailure = ParameterSpec.builder(Misconvert.class, "failure")
       .build();
   private final ParameterSpec paramItemType = ParameterSpec.builder(ItemType.class, "itemType")
       .build();

@@ -21,8 +21,8 @@ import static net.jbock.either.Either.right;
 public final class AtFileReader {
 
   /**
-   * Read file contents into a string array.
-   * Public method that may be invoked from the generated code,
+   * Read the contents of the {@code @file} into a string array.
+   * This method may be invoked from the generated code,
    * unless {@link Command#expandAtSign()} or
    * {@link SuperCommand#expandAtSign()} is {@code false}.
    *

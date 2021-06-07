@@ -2,11 +2,7 @@ package net.jbock.examples;
 
 import net.jbock.either.Either;
 import net.jbock.examples.fixture.ParserTestFixture;
-import net.jbock.util.ConverterError;
 import net.jbock.util.NotSuccess;
-import net.jbock.util.ParsingError;
-import net.jbock.util.SyntaxError;
-import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 import java.util.Optional;

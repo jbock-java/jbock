@@ -3,7 +3,7 @@ package net.jbock.usage;
 import net.jbock.model.CommandModel;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.NotSuccess;
-import net.jbock.util.ParsingError;
+import net.jbock.util.HasMessage;
 
 import java.io.PrintStream;
 import java.util.List;
@@ -52,7 +52,7 @@ public class ErrorHandler {
       System.exit(0);
       return new RuntimeException();
     }
-    err.println(ansi.red("ERROR:") + ' ' + ((ParsingError) notSuccess).message());
+    err.println(ansi.red("ERROR:") + ' ' + ((HasMessage) notSuccess).message());
     if (model.helpEnabled()) {
       List<String> synopsis = Synopsis.create(model)
           .createSynopsis("Usage:");

@@ -3,7 +3,7 @@ package net.jbock.examples.fixture;
 import net.jbock.either.Either;
 import net.jbock.usage.UsageDocumentation;
 import net.jbock.util.NotSuccess;
-import net.jbock.util.ParsingError;
+import net.jbock.util.HasMessage;
 import org.junit.jupiter.api.Assertions;
 
 import java.lang.reflect.InvocationTargetException;
@@ -181,8 +181,8 @@ public final class ParserTestFixture<E> {
     }
   }
 
-  public ParsingError castToError(NotSuccess notSuccess) {
-    return (ParsingError) notSuccess;
+  public HasMessage castToError(NotSuccess notSuccess) {
+    return (HasMessage) notSuccess;
   }
 
   public String[] getUsageDocumentation(NotSuccess notSuccess) {

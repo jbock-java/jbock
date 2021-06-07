@@ -3,7 +3,7 @@ package net.jbock.util;
 /**
  * Indicates that an exception was thrown from a converter.
  */
-public final class ConverterThrewException implements ConverterFailure {
+public final class ConverterThrewException extends Misconvert {
 
   private final Exception exception;
 
@@ -12,7 +12,7 @@ public final class ConverterThrewException implements ConverterFailure {
   }
 
   @Override
-  public String message() {
+  public String converterMessage() {
     return exception.getMessage();
   }
 

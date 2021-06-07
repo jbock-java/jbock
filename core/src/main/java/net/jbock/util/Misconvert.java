@@ -1,22 +1,23 @@
 package net.jbock.util;
 
 /**
- * An implementation of this interface represents converter failure.
+ * An instance of this class represents converter failure.
  * There are a fixed number of implementations:
  *
  * <ul>
  *   <li>{@link ConverterThrewException}</li>
  *   <li>{@link ConverterReturnedNull}</li>
  * </ul>
- *
- *  This interface will be a sealed interface in later versions.
  */
-public interface ConverterFailure {
+public abstract class Misconvert {
+
+  Misconvert() {
+  }
 
   /**
    * Returns an error message to describe the failure.
    *
    * @return error message
    */
-  String message();
+  public abstract String converterMessage();
 }
