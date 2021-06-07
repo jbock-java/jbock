@@ -4,7 +4,7 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.processor.SourceElement;
-import net.jbock.usage.ErrorHandler;
+import net.jbock.usage.StandardErrorHandler;
 
 import javax.inject.Inject;
 
@@ -40,7 +40,7 @@ public class ParseOrExitMethod {
         .addCode(CodeBlock.builder()
             .add("return $N($N)", parseMethod.get(), args)
             .add(".orElseThrow($N ->\n", notSuccess).indent()
-            .add("$T.builder().build().handle($N));\n", ErrorHandler.class, notSuccess).unindent()
+            .add("$T.builder().build().handle($N));\n", StandardErrorHandler.class, notSuccess).unindent()
             .build())
         .build();
   }

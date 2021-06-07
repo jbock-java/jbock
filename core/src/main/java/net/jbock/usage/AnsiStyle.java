@@ -4,7 +4,7 @@ import net.jbock.model.CommandModel;
 
 import java.util.Optional;
 
-public class AnsiStyle {
+class AnsiStyle {
 
   private static final char ESC = 0x1B;
   private static final String CSI = ESC + "[";
@@ -12,7 +12,7 @@ public class AnsiStyle {
 
   private final boolean ansi;
 
-  AnsiStyle(boolean ansi) {
+  private AnsiStyle(boolean ansi) {
     this.ansi = ansi;
   }
 

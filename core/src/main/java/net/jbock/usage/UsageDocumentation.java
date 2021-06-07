@@ -1,9 +1,9 @@
 package net.jbock.usage;
 
+import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
 import net.jbock.model.Option;
 import net.jbock.model.Parameter;
-import net.jbock.model.CommandModel;
 
 import java.io.PrintStream;
 import java.util.ArrayList;
@@ -14,11 +14,11 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class UsageDocumentation {
+public class UsageDocumentation { // TODO package private
 
   private static final int CONTINUATION_INDENT_USAGE = 8;
 
-  private final PrintStream err;
+  private final PrintStream out;
   private final int terminalWidth;
   private final Map<String, String> messages;
   private final String descriptionKey;
@@ -31,7 +31,7 @@ public class UsageDocumentation {
   private final int maxWidthParameters;
 
   private UsageDocumentation(
-      PrintStream err,
+      PrintStream out,
       int terminalWidth,
       Map<String, String> messages,
       String descriptionKey,
@@ -44,7 +44,7 @@ public class UsageDocumentation {
       int maxWidthParameters) {
     this.descriptionKey = descriptionKey;
     this.descriptionLines = descriptionLines;
-    this.err = err;
+    this.out = out;
     this.terminalWidth = terminalWidth;
     this.messages = messages;
     this.options = options;
@@ -63,11 +63,11 @@ public class UsageDocumentation {
     return new Builder(context);
   }
 
-  public static class Builder {
+  public static final class Builder {
 
     private final CommandModel model;
 
-    private PrintStream err = System.err;
+    private PrintStream out = System.err;
     private int terminalWidth = 80;
     private Map<String, String> messages = Collections.emptyMap();
 
@@ -102,8 +102,8 @@ public class UsageDocumentation {
      *
      * @return the builder instance
      */
-    public Builder withErrorStream(PrintStream err) {
-      this.err = err;
+    public Builder withOutputStream(PrintStream out) {
+      this.out = out;
       return this;
     }
 
@@ -113,7 +113,7 @@ public class UsageDocumentation {
      */
     public UsageDocumentation build() {
       return new UsageDocumentation(
-          err, terminalWidth, messages,
+          out, terminalWidth, messages,
           model.descriptionKey(),
           model.descriptionLines(),
           model.options(),
@@ -147,10 +147,10 @@ public class UsageDocumentation {
         Collections.addAll(description, line.split("\\s+", -1));
       }
     }
-    makeLines("", description).forEach(err::println);
+    makeLines("", description).forEach(out::println);
 
     if (!description.isEmpty()) {
-      err.println();
+      out.println();
     }
 
     String optionsFormat = "  %1$-" + maxWidthOptions + "s ";
@@ -158,24 +158,24 @@ public class UsageDocumentation {
     String indent_p = String.join("", Collections.nCopies(maxWidthParameters + 4, " "));
     String indent_o = String.join("", Collections.nCopies(maxWidthOptions + 4, " "));
 
-    err.println(ansiStyle.bold("USAGE").orElse("USAGE"));
+    out.println(ansiStyle.bold("USAGE").orElse("USAGE"));
     String indent_u = String.join("", Collections.nCopies(CONTINUATION_INDENT_USAGE, " "));
-    makeLines(indent_u, synopsis.createSynopsis(" ")).forEach(err::println);
+    makeLines(indent_u, synopsis.createSynopsis(" ")).forEach(out::println);
     if (!parameters.isEmpty()) {
-      err.println();
-      err.println(ansiStyle.bold("PARAMETERS").orElse("PARAMETERS"));
+      out.println();
+      out.println(ansiStyle.bold("PARAMETERS").orElse("PARAMETERS"));
     }
     for (Parameter parameter : parameters) {
       printItemDocumentation(parameter, String.format(paramsFormat, parameter.name()), indent_p);
     }
     if (!options.isEmpty()) {
-      err.println();
-      err.println(ansiStyle.bold("OPTIONS").orElse("OPTIONS"));
+      out.println();
+      out.println(ansiStyle.bold("OPTIONS").orElse("OPTIONS"));
     }
     for (Option option : options) {
       printItemDocumentation(option, String.format(optionsFormat, option.name()), indent_o);
     }
-    err.flush();
+    out.flush();
   }
 
   private void printItemDocumentation(Item item, String itemName, String indent) {
@@ -190,7 +190,7 @@ public class UsageDocumentation {
             .map(s -> s.split("\\s+", -1))
             .flatMap(Arrays::stream)
             .collect(Collectors.toList())));
-    makeLines(indent, tokens).forEach(err::println);
+    makeLines(indent, tokens).forEach(out::println);
   }
 
   private List<String> makeLines(String indent, List<String> tokens) {

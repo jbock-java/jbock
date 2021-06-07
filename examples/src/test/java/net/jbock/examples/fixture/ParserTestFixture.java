@@ -194,7 +194,7 @@ public final class ParserTestFixture<E> {
       Map<String, String> messages) {
     TestOutputStream testOutputStream = new TestOutputStream();
     UsageDocumentation.builder(notSuccess.commandModel())
-        .withErrorStream(testOutputStream.out)
+        .withOutputStream(testOutputStream.out)
         .withTerminalWidth(MAX_LINE_WIDTH)
         .withMessages(messages)
         .build()
