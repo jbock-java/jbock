@@ -40,7 +40,7 @@ public class ParseOrExitMethod {
         .addCode(CodeBlock.builder()
             .add("return $N($N)", parseMethod.get(), args)
             .add(".orElseThrow($N ->\n", notSuccess).indent()
-            .add("$T.builder().build().handle($N));\n", StandardErrorHandler.class, notSuccess).unindent()
+            .add("$T.builder($N).build().handle());\n", StandardErrorHandler.class, notSuccess).unindent()
             .build())
         .build();
   }

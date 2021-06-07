@@ -1,9 +1,9 @@
 package net.jbock.examples.fixture;
 
+import net.jbock.contrib.StandardErrorHandler;
 import net.jbock.either.Either;
-import net.jbock.contrib.UsageDocumentation;
-import net.jbock.util.NotSuccess;
 import net.jbock.util.HasMessage;
+import net.jbock.util.NotSuccess;
 import org.junit.jupiter.api.Assertions;
 
 import java.lang.reflect.InvocationTargetException;
@@ -193,12 +193,13 @@ public final class ParserTestFixture<E> {
       NotSuccess notSuccess,
       Map<String, String> messages) {
     TestOutputStream testOutputStream = new TestOutputStream();
-    UsageDocumentation.builder(notSuccess.commandModel())
+    StandardErrorHandler.builder(notSuccess)
         .withOutputStream(testOutputStream.out)
         .withTerminalWidth(MAX_LINE_WIDTH)
         .withMessages(messages)
+        .withExitHook(RuntimeException::new) // no shutdown
         .build()
-        .printUsageDocumentation();
+        .handle();
     return testOutputStream.split();
   }
 }

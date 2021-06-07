@@ -14,7 +14,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class UsageDocumentation { // TODO package private
+final class UsageDocumentation {
 
   private static final int CONTINUATION_INDENT_USAGE = 8;
 
@@ -55,15 +55,11 @@ public class UsageDocumentation { // TODO package private
     this.maxWidthParameters = maxWidthParameters;
   }
 
-  /**
-   * Create a builder instance.
-   * Public method that may be invoked from the generated code.
-   */
-  public static Builder builder(CommandModel context) {
+  static Builder builder(CommandModel context) {
     return new Builder(context);
   }
 
-  public static final class Builder {
+  static final class Builder {
 
     private final CommandModel model;
 
@@ -75,43 +71,22 @@ public class UsageDocumentation { // TODO package private
       this.model = model;
     }
 
-    /**
-     * Set terminal width. Default is {@code 80} characters.
-     *
-     * @return the builder instance
-     */
-    public Builder withTerminalWidth(int width) {
+    Builder withTerminalWidth(int width) {
       this.terminalWidth = width == 0 ? this.terminalWidth : width;
       return this;
     }
 
-    /**
-     * Set the message map that contains description keys.
-     * The default value is an empty map.
-     *
-     * @return the builder instance
-     */
-    public Builder withMessages(Map<String, String> map) {
+    Builder withMessages(Map<String, String> map) {
       this.messages = map;
       return this;
     }
 
-    /**
-     * Set the output stream for printing.
-     * The default value is {@code System.err}.
-     *
-     * @return the builder instance
-     */
-    public Builder withOutputStream(PrintStream out) {
+    Builder withOutputStream(PrintStream out) {
       this.out = out;
       return this;
     }
 
-    /**
-     * Create an instance.
-     * Public method that may be invoked from the generated code.
-     */
-    public UsageDocumentation build() {
+    UsageDocumentation build() {
       return new UsageDocumentation(
           out, terminalWidth, messages,
           model.descriptionKey(),
@@ -133,11 +108,7 @@ public class UsageDocumentation { // TODO package private
     }
   }
 
-  /**
-   * Print usage documentation.
-   * Public method that may be invoked from the generated code.
-   */
-  public void printUsageDocumentation() {
+  void printUsageDocumentation() {
     List<String> description = new ArrayList<>();
     String desc = messages.get(descriptionKey);
     if (desc != null) {
@@ -175,7 +146,6 @@ public class UsageDocumentation { // TODO package private
     for (Option option : options) {
       printItemDocumentation(option, String.format(optionsFormat, option.name()), indent_o);
     }
-    out.flush();
   }
 
   private void printItemDocumentation(Item item, String itemName, String indent) {

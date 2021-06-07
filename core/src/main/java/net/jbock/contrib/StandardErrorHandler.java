@@ -9,6 +9,7 @@ import java.io.PrintStream;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 /**
  * This class is responsible for standard error handling,
@@ -16,26 +17,40 @@ import java.util.Map;
  */
 public final class StandardErrorHandler {
 
+  private final NotSuccess notSuccess;
+
   private final PrintStream out;
   private final int terminalWidth;
   private final Map<String, String> messages;
+  private final Supplier<RuntimeException> exitHook;
 
   private StandardErrorHandler(
+      NotSuccess notSuccess,
       PrintStream out,
       int terminalWidth,
-      Map<String, String> messages) {
+      Map<String, String> messages,
+      Supplier<RuntimeException> exitHook) {
+    this.notSuccess = notSuccess;
     this.out = out;
     this.terminalWidth = terminalWidth;
     this.messages = messages;
+    this.exitHook = exitHook;
   }
 
-  public static class Builder {
+  public static final class Builder {
+
+    private final NotSuccess notSuccess;
 
     private PrintStream out = System.err;
     private int terminalWidth = 80;
     private Map<String, String> messages = Collections.emptyMap();
+    private Supplier<RuntimeException> exitHook;
 
-    private Builder() {
+    private Builder(
+        NotSuccess notSuccess,
+        Supplier<RuntimeException> exitHook) {
+      this.notSuccess = notSuccess;
+      this.exitHook = exitHook;
     }
 
     /**
@@ -77,13 +92,30 @@ public final class StandardErrorHandler {
       return this;
     }
 
+    /**
+     * Change or elide the JVM shutdown command.
+     * The default behaviour is to invoke {@link System#exit(int)}
+     * with an exit code of {@code 1} if an error occurred,
+     * or {@code 0} if the {@code --help} option was passed.
+     *
+     * @return the builder instance
+     */
+    public Builder withExitHook(Supplier<RuntimeException> exitHook) {
+      this.exitHook = exitHook;
+      return this;
+    }
+
     public StandardErrorHandler build() {
-      return new StandardErrorHandler(out, terminalWidth, messages);
+      return new StandardErrorHandler(notSuccess, out, terminalWidth, messages, exitHook);
     }
   }
 
-  public static Builder builder() {
-    return new Builder();
+  public static Builder builder(NotSuccess notSuccess) {
+    Supplier<RuntimeException> exitHook = () -> {
+      System.exit(notSuccess instanceof HelpRequested ? 0 : 1);
+      return new RuntimeException();
+    };
+    return new Builder(notSuccess, exitHook);
   }
 
   /**
@@ -91,17 +123,16 @@ public final class StandardErrorHandler {
    *
    * <p></p>
    * <h2><tt>CAUTION:</tt></h2>
-   * <p><b><tt>Invoking this method will shut down the JVM.</tt></b></p>
+   * <p><b><tt>Invoking this method may shut down the JVM.</tt></b></p>
    * <p></p>
    *
    * <p>This method also does standard error handling like printing of
    *    error messages, or printing standard usage documentation for
    *    the provided {@link CommandModel}.</p>
    *
-   * @param notSuccess failure object
    * @return a runtime exception
    */
-  public RuntimeException handle(NotSuccess notSuccess) {
+  public RuntimeException handle() {
     CommandModel model = notSuccess.commandModel();
     AnsiStyle ansi = AnsiStyle.create(model);
     if (notSuccess instanceof HelpRequested) {
@@ -110,8 +141,8 @@ public final class StandardErrorHandler {
           .withMessages(messages)
           .withTerminalWidth(terminalWidth)
           .build().printUsageDocumentation();
-      System.exit(0);
-      return new RuntimeException();
+      out.flush();
+      return exitHook.get();
     }
     out.println(ansi.red("ERROR:") + ' ' + ((HasMessage) notSuccess).message());
     if (model.helpEnabled()) {
@@ -127,7 +158,6 @@ public final class StandardErrorHandler {
           .build().printUsageDocumentation();
     }
     out.flush();
-    System.exit(1);
-    return new RuntimeException();
+    return exitHook.get();
   }
 }

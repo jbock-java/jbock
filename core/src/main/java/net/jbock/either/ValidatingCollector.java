@@ -43,7 +43,6 @@ class ValidatingCollector<L, R> implements Collector<Either<L, R>, ValidatingCol
     }
   }
 
-
   @Override
   public Supplier<Acc<L, R>> supplier() {
     return Acc::new;

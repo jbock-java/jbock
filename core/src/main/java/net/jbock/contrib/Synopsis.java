@@ -16,7 +16,7 @@ import java.util.stream.Stream;
 import static net.jbock.model.Skew.REPEATABLE;
 import static net.jbock.model.Skew.REQUIRED;
 
-class Synopsis {
+final class Synopsis {
 
   private final List<Option> options;
   private final List<Parameter> parameters;
