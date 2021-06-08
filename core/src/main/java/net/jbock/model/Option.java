@@ -9,7 +9,7 @@ import java.util.List;
 public final class Option extends Item {
 
   private final List<String> names;
-  private final boolean modeFlag;
+  private final Arity arity;
 
   Option(
       String paramLabel,
@@ -17,10 +17,10 @@ public final class Option extends Item {
       List<String> description,
       List<String> names,
       Multiplicity multiplicity,
-      boolean modeFlag) {
+      Arity arity) {
     super(paramLabel, descriptionKey, description, multiplicity);
     this.names = names;
-    this.modeFlag = modeFlag;
+    this.arity = arity;
   }
 
   public static Builder builder() {
@@ -34,7 +34,7 @@ public final class Option extends Item {
     private final List<String> description = new ArrayList<>();
     private List<String> names;
     private Multiplicity multiplicity;
-    private boolean modeFlag;
+    private Arity arity = Arity.UNARY;
 
     public Builder withParamLabel(String paramLabel) {
       this.paramLabel = paramLabel;
@@ -63,25 +63,43 @@ public final class Option extends Item {
 
     public Builder withModeFlag() {
       this.multiplicity = Multiplicity.OPTIONAL;
-      this.modeFlag = true;
+      this.arity = Arity.NULLARY;
       return this;
     }
 
     public Option build() {
-      return new Option(paramLabel, descriptionKey, description, names, multiplicity, modeFlag);
+      return new Option(paramLabel, descriptionKey, description, names, multiplicity, arity);
     }
   }
 
   @Override
   public String name() {
     String sample = String.join(", ", names);
-    if (modeFlag) {
-      return sample;
+    switch (arity) {
+      case NULLARY:
+        return sample;
+      case UNARY:
+        return sample + ' ' + paramLabel();
+      default:
+        throw new AssertionError("all cases exhausted");
     }
-    return sample + ' ' + paramLabel();
   }
 
+  /**
+   * List of option names, sorted by length and then alphabetically.
+   *
+   * @return option names
+   */
   public List<String> names() {
     return names;
+  }
+
+  /**
+   * The arity of this option.
+   *
+   * @return arity
+   */
+  public Arity arity() {
+    return arity;
   }
 }

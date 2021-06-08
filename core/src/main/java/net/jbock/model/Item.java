@@ -12,7 +12,11 @@ public abstract class Item {
   private final List<String> description;
   private final Multiplicity multiplicity;
 
-  Item(String paramLabel, String descriptionKey, List<String> description, Multiplicity multiplicity) {
+  Item(
+      String paramLabel,
+      String descriptionKey,
+      List<String> description,
+      Multiplicity multiplicity) {
     this.paramLabel = paramLabel;
     this.descriptionKey = descriptionKey;
     this.description = description;
@@ -20,23 +24,27 @@ public abstract class Item {
   }
 
   /**
-   * A string, not empty.
+   * The display name of this item, for usage documentation.
    *
-   * @return item name
+   * @return item name, a non-empty string
    */
   public abstract String name();
 
   /**
-   * A string, not empty.
+   * The param label.
+   * For unary options, this is the sample argument that's
+   * printed in the usage documentation.
    *
-   * @return param label
+   * @return param label, a non-empty string
    */
   public final String paramLabel() {
     return paramLabel;
   }
 
   /**
-   * Description, possibly empty.
+   * The default item description, for usage documentation.
+   * Possibly empty.
+   * May be overridden if {@link #descriptionKey()} is nonempty.
    *
    * @return description lines
    */
@@ -54,9 +62,9 @@ public abstract class Item {
   }
 
   /**
-   * The skew of this item.
+   * The multiplicity of this item.
    *
-   * @return item skew
+   * @return item multiplicity
    */
   public final Multiplicity multiplicity() {
     return multiplicity;
