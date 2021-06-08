@@ -5,14 +5,38 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collector;
-import java.util.stream.Stream;
 
+/**
+ * Either represents a value of two possible types.
+ * An Either is either a &quot;Left&quot; or a &quot;Right&quot;.
+ * By convention, the success case is &quot;Right&quot;,
+ * and the failure is &quot;Left&quot;.
+ *
+ * @param <L> The type of the Left value of an Either.
+ * @param <R> The type of the Right value of an Either.
+ */
 public abstract class Either<L, R> {
 
+  /**
+   * Constructs a &quot;Left&quot; instance.
+   *
+   * @param value the left value
+   * @param <L> the left type
+   * @param <R> the right type
+   * @return an instance containing the left value
+   */
   public static <L, R> Either<L, R> left(L value) {
     return Left.create(value);
   }
 
+  /**
+   * Constructs a &quot;Right&quot; instance.
+   *
+   * @param value the right value
+   * @param <L> the left type
+   * @param <R> the right type
+   * @return an instance containing the right value
+   */
   public static <L, R> Either<L, R> right(R value) {
     return Right.create(value);
   }
