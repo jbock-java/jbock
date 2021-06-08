@@ -24,17 +24,9 @@ import static net.jbock.either.Either.right;
 public class NamedOptionFactory {
 
   // visible for testing
-  static final Comparator<String> UNIX_NAMES_FIRST_COMPARATOR = (n1, n2) -> {
-    boolean unix1 = n1.length() == 2;
-    boolean unix2 = n2.length() == 2;
-    if (unix1 && !unix2) {
-      return -1;
-    }
-    if (!unix1 && unix2) {
-      return 1;
-    }
-    return n1.compareTo(n2);
-  };
+  static final Comparator<String> UNIX_NAMES_FIRST_COMPARATOR = Comparator
+      .comparing(String::length)
+      .thenComparing(String::toString);
 
   private final ConverterFinder converterFinder;
   private final ConverterClass converterClass;

@@ -1,7 +1,5 @@
 package net.jbock.model;
 
-import java.util.Locale;
-
 /**
  * Number of times an {@link Item} can appear in the input array.
  */
@@ -24,10 +22,5 @@ public enum Multiplicity {
    * The item is repeatable.
    * It may appear any number of times in the input array.
    */
-  REPEATABLE;
-
-  @Override
-  public String toString() {
-    return name().toLowerCase(Locale.US);
-  }
+  REPEATABLE,
 }

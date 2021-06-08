@@ -83,7 +83,7 @@ public class CreateModelMethod extends Cached<MethodSpec> {
     if (c.isFlag()) {
       code.add(CodeBlock.of(".withModeFlag()"));
     } else {
-      code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.skew().name()));
+      code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
     }
     for (String line : c.item().description(elements)) {
       code.add(CodeBlock.of(".addDescriptionLine($S)", line));
@@ -97,7 +97,7 @@ public class CreateModelMethod extends Cached<MethodSpec> {
     code.add(CodeBlock.of("$T.builder()", Parameter.class));
     code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
     code.add(CodeBlock.of(".withDescriptionKey($S)", c.item().descriptionKey().orElse("")));
-    code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.skew().name()));
+    code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.multiplicity().name()));
     for (String line : c.item().description(elements)) {
       code.add(CodeBlock.of(".addDescriptionLine($S)", line));
     }

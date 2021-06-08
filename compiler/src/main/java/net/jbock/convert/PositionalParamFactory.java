@@ -10,6 +10,7 @@ import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 
 import static net.jbock.either.Either.left;
@@ -92,11 +93,13 @@ public class PositionalParamFactory {
       }
       if (thisOrder > otherOrder && thisPosition < other.item().position()) {
         return left("position must be greater than position of " +
-            other.skew() + " parameter " + other.paramLabel());
+            other.multiplicity().name().toLowerCase(Locale.US) +
+            " parameter " + other.paramLabel());
       }
       if (thisOrder < otherOrder && thisPosition > other.item().position()) {
         return left("position must be less than position of " +
-            other.skew() + " parameter " + other.paramLabel());
+            other.multiplicity().name().toLowerCase(Locale.US) +
+            " parameter " + other.paramLabel());
       }
     }
     return right(c);

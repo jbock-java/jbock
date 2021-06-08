@@ -57,7 +57,7 @@ public class UsageMethod extends Cached<MethodSpec> {
     }
 
     for (Mapped<PositionalParameter> param : positionalParameters.regular()) {
-      Multiplicity skew = param.skew();
+      Multiplicity skew = param.multiplicity();
       String paramLabel = param.paramLabel();
       switch (skew) {
         case OPTIONAL:

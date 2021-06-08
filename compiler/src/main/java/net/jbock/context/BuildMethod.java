@@ -130,7 +130,7 @@ public class BuildMethod extends Cached<MethodSpec> {
     if (c.isFlag()) {
       return List.of(CodeBlock.of(".findAny().isPresent()"));
     }
-    switch (c.skew()) {
+    switch (c.multiplicity()) {
       case REQUIRED:
         String message = "Missing required option: " + paramLabel + " (" + optionNames + ")";
         return List.of(
@@ -147,12 +147,12 @@ public class BuildMethod extends Cached<MethodSpec> {
             CodeBlock.of(".collect($T.toValidList())", Either.class),
             orElseThrowConverterError(c.item()));
       default:
-        throw new IllegalArgumentException("unexpected skew: " + c.skew());
+        throw new IllegalArgumentException("unexpected skew: " + c.multiplicity());
     }
   }
 
   private List<CodeBlock> tailExpressionParameter(Mapped<PositionalParameter> c) {
-    switch (c.skew()) {
+    switch (c.multiplicity()) {
       case REQUIRED:
         String paramLabel = c.paramLabel();
         return List.of(CodeBlock.of(".orElseThrow(() -> new $T($S))",
@@ -165,7 +165,7 @@ public class BuildMethod extends Cached<MethodSpec> {
             orElseThrowConverterError(c.item()),
             CodeBlock.of(".stream().findAny()"));
       default:
-        throw new IllegalArgumentException("unexpected skew: " + c.skew());
+        throw new IllegalArgumentException("unexpected skew: " + c.multiplicity());
     }
   }
 

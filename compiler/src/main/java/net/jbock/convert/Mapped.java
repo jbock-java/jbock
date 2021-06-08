@@ -73,7 +73,7 @@ public final class Mapped<P extends AbstractItem> {
     return extractExpr;
   }
 
-  public Multiplicity skew() {
+  public Multiplicity multiplicity() {
     return skew;
   }
 
