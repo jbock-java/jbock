@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A named option or a modal flag.
+ * Runtime model of a named option or a modal flag.
  */
 public final class Option extends Item {
 
@@ -23,10 +23,19 @@ public final class Option extends Item {
     this.arity = arity;
   }
 
+  /**
+   * Creates a builder instance.
+   * Public method that may be invoked from the generated code.
+   *
+   * @return empty builder
+   */
   public static Builder builder() {
     return new Builder();
   }
 
+  /**
+   * Builder for an {@link Option}.
+   */
   public static final class Builder {
 
     private String paramLabel;
@@ -36,44 +45,95 @@ public final class Option extends Item {
     private Multiplicity multiplicity;
     private Arity arity = Arity.UNARY;
 
+    /**
+     * Set the param label.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param paramLabel a non-empty string
+     */
     public Builder withParamLabel(String paramLabel) {
       this.paramLabel = paramLabel;
       return this;
     }
 
+    /**
+     * Set the description key.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param descriptionKey a string, possibly empty
+     */
     public Builder withDescriptionKey(String descriptionKey) {
       this.descriptionKey = descriptionKey;
       return this;
     }
 
+    /**
+     * Add a line of description text.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param descriptionLine a string, possibly empty
+     * @return the builder instance
+     */
     public Builder addDescriptionLine(String descriptionLine) {
       this.description.add(descriptionLine);
       return this;
     }
 
+    /**
+     * Set the list of all option names.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param names the option names
+     * @return the builder instance
+     */
     public Builder withNames(List<String> names) {
       this.names = names;
       return this;
     }
 
+    /**
+     * Set the multiplicity of this option.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param multiplicity the multiplicity
+     * @return the builder instance
+     */
     public Builder withMultiplicity(Multiplicity multiplicity) {
       this.multiplicity = multiplicity;
       return this;
     }
 
+    /**
+     * Marks this option as a nullary mode flag.
+     * Public method that may be invoked from the generated code.
+     *
+     * @return the builder instance
+     */
     public Builder withModeFlag() {
       this.multiplicity = Multiplicity.OPTIONAL;
       this.arity = Arity.NULLARY;
       return this;
     }
 
+    /**
+     * Create the option model.
+     * Public method that may be invoked from the generated code.
+     *
+     * @return option model
+     */
     public Option build() {
-      return new Option(paramLabel, descriptionKey, description, names, multiplicity, arity);
+      return new Option(
+          paramLabel,
+          descriptionKey,
+          description,
+          names,
+          multiplicity,
+          arity);
     }
   }
 
   @Override
-  public String name() {
+  public String namesOverview() {
     String sample = String.join(", ", names);
     switch (arity) {
       case NULLARY:

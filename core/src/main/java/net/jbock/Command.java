@@ -96,5 +96,5 @@ public @interface Command {
    *
    * @return {@code false} to disable the {@code @file} expansion
    */
-  boolean expandAtSign() default true;
+  boolean atFileExpansion() default true;
 }

@@ -24,16 +24,20 @@ public abstract class Item {
   }
 
   /**
-   * The display name of this item, for usage documentation.
+   * An overview of all names of this item, including a
+   * sample argument if this is a unary option.
+   * Used in the LHS of the usage documentation.
    *
    * @return item name, a non-empty string
    */
-  public abstract String name();
+  public abstract String namesOverview();
 
   /**
-   * The param label.
-   * For unary options, this is the sample argument that's
-   * printed in the usage documentation.
+   * The item as shown in the synopsis, if this is a
+   * positional parameter or a required option.
+   * For unary options, this is also the name of the
+   * sample argument that's shown in the full usage
+   * documentation.
    *
    * @return param label, a non-empty string
    */
@@ -42,11 +46,10 @@ public abstract class Item {
   }
 
   /**
-   * The default item description, for usage documentation.
-   * Possibly empty.
-   * May be overridden if {@link #descriptionKey()} is nonempty.
+   * Get the description that is present directly on the annotated method,
+   * either as a description attribute, or in the form of javadoc.
    *
-   * @return description lines
+   * @return a list of lines, possibly empty
    */
   public final List<String> description() {
     return description;

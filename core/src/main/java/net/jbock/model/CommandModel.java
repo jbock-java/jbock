@@ -1,10 +1,14 @@
 package net.jbock.model;
 
+import net.jbock.Command;
+import net.jbock.SuperCommand;
+
 import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A model of the annotated class.
+ * A model of a class that is annotated with
+ * {@link Command} or {@link SuperCommand}.
  */
 public final class CommandModel {
 
@@ -65,10 +69,11 @@ public final class CommandModel {
     private final List<Parameter> parameters = new ArrayList<>();
 
     /**
-     * Set description key.
+     * Set the description key.
      * Public method that may be invoked from the generated code.
      *
      * @param descriptionKey a key, possibly blank
+     * @return the builder instance
      */
     public Builder withDescriptionKey(String descriptionKey) {
       this.descriptionKey = descriptionKey;
@@ -76,20 +81,23 @@ public final class CommandModel {
     }
 
     /**
-     * Add description line.
+     * Add a description line.
      * Public method that may be invoked from the generated code.
      *
      * @param descriptionLine a line
+     * @return the builder instance
      */
     public Builder addDescriptionLine(String descriptionLine) {
       this.descriptionLines.add(descriptionLine);
       return this;
     }
+
     /**
      * Set program name.
      * Public method that may be invoked from the generated code.
      *
      * @param programName program name, not blank
+     * @return the builder instance
      */
     public Builder withProgramName(String programName) {
       this.programName = programName;
@@ -101,6 +109,7 @@ public final class CommandModel {
      * Public method that may be invoked from the generated code.
      *
      * @param ansi whether to use ansi codes
+     * @return the builder instance
      */
     public Builder withAnsi(boolean ansi) {
       this.ansi = ansi;
@@ -112,6 +121,7 @@ public final class CommandModel {
      * Public method that may be invoked from the generated code.
      *
      * @param helpEnabled whether the {@code --help} option is understood
+     * @return the builder instance
      */
     public Builder withHelpEnabled(boolean helpEnabled) {
       this.helpEnabled = helpEnabled;
@@ -123,6 +133,7 @@ public final class CommandModel {
      * Public method that may be invoked from the generated code.
      *
      * @param superCommand whether this is a supercommand
+     * @return the builder instance
      */
     public Builder withSuperCommand(boolean superCommand) {
       this.superCommand = superCommand;
@@ -134,6 +145,7 @@ public final class CommandModel {
      * Public method that may be invoked from the generated code.
      *
      * @param atFileExpansion whether {@code @file}-expansion is enabled
+     * @return the builder instance
      */
     public Builder withAtFileExpansion(boolean atFileExpansion) {
       this.atFileExpansion = atFileExpansion;
@@ -145,6 +157,7 @@ public final class CommandModel {
      * Public method that may be invoked from the generated code.
      *
      * @param option a named option
+     * @return the builder instance
      */
     public Builder addOption(Option option) {
       this.options.add(option);
@@ -156,6 +169,7 @@ public final class CommandModel {
      * Public method that may be invoked from the generated code.
      *
      * @param parameter a positional parameter
+     * @return the builder instance
      */
     public Builder addParameter(Parameter parameter) {
       this.parameters.add(parameter);
@@ -174,25 +188,38 @@ public final class CommandModel {
     }
   }
 
+  /**
+   * Get the description key.
+   *
+   * @return the description key
+   */
   public String descriptionKey() {
     return descriptionKey;
   }
 
+  /**
+   * Get the description that is present directly on the annotated class,
+   * either as a description attribute, or in the form of javadoc.
+   *
+   * @return a list of lines, possibly empty
+   */
   public List<String> descriptionLines() {
     return descriptionLines;
   }
 
   /**
-   * Get the program name.
+   * Get the program name from the {@link Command#name()} attribute,
+   * or, if none is set, a default program name that is derived
+   * from the class name of the annotated command class.
    *
-   * @return the program name
+   * @return the program name, a nonempty string
    */
   public String programName() {
     return programName;
   }
 
   /**
-   * Check if ansi codes are enabled.
+   * Get the value of the {@link Command#ansi()} attribute.
    *
    * @return {@code true} if the parser can use ansi colors
    *         when printing the usage documentation
@@ -220,7 +247,7 @@ public final class CommandModel {
   }
 
   /**
-   * Check if the command supports the help option.
+   * Get the value of the {@link Command#helpEnabled()} attribute.
    *
    * @return {@code true} if the generated parser supports
    *         the {@code --help} option
@@ -230,10 +257,11 @@ public final class CommandModel {
   }
 
   /**
-   * Check for the supercommand annotation.
+   * Check if the {@link Command} or {@link SuperCommand} annotation
+   * is present on the command class.
    *
-   * @return {@code true} if the command is a {@link net.jbock.SuperCommand},
-   *         {@code false} if it is a {@link net.jbock.Command}
+   * @return {@code true} if the command is a SuperCommand,
+   *         {@code false} if it is a regular Command
    *
    */
   public boolean superCommand() {
@@ -241,7 +269,7 @@ public final class CommandModel {
   }
 
   /**
-   * Check for {@code @file} expansion.
+   * Get the value of the {@link Command#atFileExpansion()} attribute.
    *
    * @return {@code true} if {@code @file} expansion is enabled
    */

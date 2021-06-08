@@ -101,7 +101,7 @@ final class UsageDocumentation {
 
     private int maxWidth(List<? extends Item> items) {
       return items.stream()
-          .map(Item::name)
+          .map(Item::namesOverview)
           .mapToInt(String::length)
           .max()
           .orElse(0);
@@ -137,14 +137,14 @@ final class UsageDocumentation {
       out.println(ansiStyle.bold("PARAMETERS").orElse("PARAMETERS"));
     }
     for (Parameter parameter : parameters) {
-      printItemDocumentation(parameter, String.format(paramsFormat, parameter.name()), indent_p);
+      printItemDocumentation(parameter, String.format(paramsFormat, parameter.namesOverview()), indent_p);
     }
     if (!options.isEmpty()) {
       out.println();
       out.println(ansiStyle.bold("OPTIONS").orElse("OPTIONS"));
     }
     for (Option option : options) {
-      printItemDocumentation(option, String.format(optionsFormat, option.name()), indent_o);
+      printItemDocumentation(option, String.format(optionsFormat, option.namesOverview()), indent_o);
     }
   }
 

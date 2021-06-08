@@ -9,6 +9,12 @@ import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collector;
 
+/**
+ * A collector that implements {@link Either#toValidList()}.
+ *
+ * @param <L> the LHS type
+ * @param <R> the RHS type
+ */
 class ValidatingCollector<L, R> implements Collector<Either<L, R>, ValidatingCollector.Acc<L, R>, Either<L, List<R>>> {
 
   static final class Acc<L, R> {

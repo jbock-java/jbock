@@ -36,7 +36,7 @@ enum ParserFlavour {
 
     @Override
     boolean expandAtSign(TypeElement sourceElement) {
-      return get(sourceElement).expandAtSign();
+      return get(sourceElement).atFileExpansion();
     }
 
     @Override
@@ -78,7 +78,7 @@ enum ParserFlavour {
 
     @Override
     boolean expandAtSign(TypeElement sourceElement) {
-      return get(sourceElement).expandAtSign();
+      return get(sourceElement).atFileExpansion();
     }
 
     @Override

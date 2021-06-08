@@ -23,8 +23,8 @@ public final class AtFileReader {
   /**
    * Read the contents of the {@code @file} into a string array.
    * This method may be invoked from the generated code,
-   * unless {@link Command#expandAtSign()} or
-   * {@link SuperCommand#expandAtSign()} is {@code false}.
+   * unless {@link Command#atFileExpansion()} or
+   * {@link SuperCommand#atFileExpansion()} is {@code false}.
    *
    * @param fileName a file name
    * @return the options in the file, or an error report

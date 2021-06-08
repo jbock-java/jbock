@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A positional parameter, possibly repeatable.
+ * Runtime model of a positional parameter.
  */
 public final class Parameter extends Item {
 
@@ -16,10 +16,19 @@ public final class Parameter extends Item {
     super(paramLabel, descriptionKey, description, multiplicity);
   }
 
+  /**
+   * Creates a builder instance.
+   * Public method that may be invoked from the generated code.
+   *
+   * @return empty builder
+   */
   public static Builder builder() {
     return new Builder();
   }
 
+  /**
+   * Builder for a {@link Parameter}.
+   */
   public static class Builder {
 
     private String paramLabel;
@@ -27,33 +36,65 @@ public final class Parameter extends Item {
     private final List<String> description = new ArrayList<>();
     private Multiplicity skew;
 
+    /**
+     * Set the param label.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param paramLabel a non-empty string
+     */
     public Builder withParamLabel(String paramLabel) {
       this.paramLabel = paramLabel;
       return this;
     }
 
+    /**
+     * Set the description key.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param descriptionKey a string, possibly empty
+     */
     public Builder withDescriptionKey(String descriptionKey) {
       this.descriptionKey = descriptionKey;
       return this;
     }
 
+    /**
+     * Add a line of description text.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param descriptionLine a string, possibly empty
+     * @return the builder instance
+     */
     public Builder addDescriptionLine(String descriptionLine) {
       this.description.add(descriptionLine);
       return this;
     }
 
+    /**
+     * Set the multiplicity of this option.
+     * Public method that may be invoked from the generated code.
+     *
+     * @param multiplicity the multiplicity
+     * @return the builder instance
+     */
     public Builder withMultiplicity(Multiplicity multiplicity) {
       this.skew = multiplicity;
       return this;
     }
 
+    /**
+     * Create the model for this parameter.
+     * Public method that may be invoked from the generated code.
+     *
+     * @return parameter model
+     */
     public Parameter build() {
       return new Parameter(paramLabel, descriptionKey, description, skew);
     }
   }
 
   @Override
-  public String name() {
+  public String namesOverview() {
     return paramLabel();
   }
 }

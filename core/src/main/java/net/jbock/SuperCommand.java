@@ -99,5 +99,5 @@ public @interface SuperCommand {
    *
    * @return {@code false} to disable the {@code @file} expansion
    */
-  boolean expandAtSign() default true;
+  boolean atFileExpansion() default true;
 }
