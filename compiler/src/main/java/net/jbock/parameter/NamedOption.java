@@ -21,11 +21,6 @@ public final class NamedOption extends AbstractItem {
     return names;
   }
 
-  public String namesWithLabel(boolean isFlag) {
-    String sample = String.join(", ", names());
-    return isFlag ? sample : sample + ' ' + paramLabel();
-  }
-
   @Override
   public final String paramLabel() {
     return sourceMethod().paramLabel().or(() -> names.stream()

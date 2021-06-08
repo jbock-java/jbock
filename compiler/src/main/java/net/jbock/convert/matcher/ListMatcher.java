@@ -5,7 +5,7 @@ import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
-import net.jbock.model.Skew;
+import net.jbock.model.Multiplicity;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
@@ -30,6 +30,6 @@ public class ListMatcher implements Matcher {
   public Optional<Match> tryMatch(AbstractItem parameter) {
     TypeMirror returnType = sourceMethod.returnType();
     return tool.getSingleTypeArgument(returnType, List.class)
-        .map(typeArg -> Match.create(typeArg, Skew.REPEATABLE));
+        .map(typeArg -> Match.create(typeArg, Multiplicity.REPEATABLE));
   }
 }

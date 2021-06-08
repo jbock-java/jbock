@@ -5,7 +5,7 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
-import net.jbock.model.Skew;
+import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
@@ -57,7 +57,7 @@ public class UsageMethod extends Cached<MethodSpec> {
     }
 
     for (Mapped<PositionalParameter> param : positionalParameters.regular()) {
-      Skew skew = param.skew();
+      Multiplicity skew = param.skew();
       String paramLabel = param.paramLabel();
       switch (skew) {
         case OPTIONAL:

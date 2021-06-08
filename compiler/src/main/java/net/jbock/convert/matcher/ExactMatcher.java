@@ -4,7 +4,7 @@ import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
-import net.jbock.model.Skew;
+import net.jbock.model.Multiplicity;
 
 import javax.inject.Inject;
 import javax.lang.model.element.TypeElement;
@@ -30,7 +30,7 @@ public class ExactMatcher implements Matcher {
 
   @Override
   public Optional<Match> tryMatch(AbstractItem parameter) {
-    Match match = Match.create(boxedReturnType(), Skew.REQUIRED);
+    Match match = Match.create(boxedReturnType(), Multiplicity.REQUIRED);
     return Optional.of(match);
   }
 

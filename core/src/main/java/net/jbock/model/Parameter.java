@@ -12,8 +12,8 @@ public final class Parameter extends Item {
       String paramLabel,
       String descriptionKey,
       List<String> description,
-      Skew skew) {
-    super(paramLabel, descriptionKey, description, skew);
+      Multiplicity multiplicity) {
+    super(paramLabel, descriptionKey, description, multiplicity);
   }
 
   public static Builder builder() {
@@ -25,7 +25,7 @@ public final class Parameter extends Item {
     private String paramLabel;
     private String descriptionKey;
     private final List<String> description = new ArrayList<>();
-    private Skew skew;
+    private Multiplicity skew;
 
     public Builder withParamLabel(String paramLabel) {
       this.paramLabel = paramLabel;
@@ -42,8 +42,8 @@ public final class Parameter extends Item {
       return this;
     }
 
-    public Builder withSkew(Skew skew) {
-      this.skew = skew;
+    public Builder withMultiplicity(Multiplicity multiplicity) {
+      this.skew = multiplicity;
       return this;
     }
 

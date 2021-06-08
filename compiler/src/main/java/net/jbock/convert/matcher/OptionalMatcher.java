@@ -6,7 +6,7 @@ import net.jbock.convert.ParameterScope;
 import net.jbock.convert.matching.Match;
 import net.jbock.parameter.AbstractItem;
 import net.jbock.parameter.SourceMethod;
-import net.jbock.model.Skew;
+import net.jbock.model.Multiplicity;
 
 import javax.inject.Inject;
 import javax.lang.model.type.TypeMirror;
@@ -35,7 +35,7 @@ public class OptionalMatcher implements Matcher {
     return getOptionalPrimitive(returnType)
         .or(() ->
             tool.getSingleTypeArgument(returnType, Optional.class)
-                .map(typeArg -> Match.create(typeArg, Skew.OPTIONAL)));
+                .map(typeArg -> Match.create(typeArg, Multiplicity.OPTIONAL)));
   }
 
   private Optional<Match> getOptionalPrimitive(TypeMirror type) {
@@ -46,7 +46,7 @@ public class OptionalMatcher implements Matcher {
             .flatMap(el -> {
               TypeMirror baseType = el.asType();
               return Optional.of(Match.create(baseType,
-                  Skew.OPTIONAL, optionalPrimitive.extractExpr()));
+                  Multiplicity.OPTIONAL, optionalPrimitive.extractExpr()));
             });
       }
     }

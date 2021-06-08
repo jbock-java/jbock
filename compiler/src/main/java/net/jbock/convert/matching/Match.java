@@ -3,7 +3,7 @@ package net.jbock.convert.matching;
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.AbstractItem;
-import net.jbock.model.Skew;
+import net.jbock.model.Multiplicity;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;
@@ -16,11 +16,11 @@ public class Match {
    */
   private final TypeMirror baseType;
   private final Optional<CodeBlock> extractExpr;
-  private final Skew skew;
+  private final Multiplicity skew;
 
   private Match(
       TypeMirror baseType,
-      Skew skew,
+      Multiplicity skew,
       Optional<CodeBlock> extractExpr) {
     this.baseType = baseType;
     this.skew = skew;
@@ -29,14 +29,14 @@ public class Match {
 
   public static Match create(
       TypeMirror baseType,
-      Skew skew,
+      Multiplicity skew,
       CodeBlock extractExpr) {
     return new Match(baseType, skew, Optional.of(extractExpr));
   }
 
   public static Match create(
       TypeMirror baseType,
-      Skew skew) {
+      Multiplicity skew) {
     return new Match(baseType, skew, Optional.empty());
   }
 
@@ -49,7 +49,7 @@ public class Match {
     return baseType;
   }
 
-  public Skew skew() {
+  public Multiplicity skew() {
     return skew;
   }
 }

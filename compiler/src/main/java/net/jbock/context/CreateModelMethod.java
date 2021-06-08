@@ -8,7 +8,7 @@ import net.jbock.convert.Mapped;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Option;
 import net.jbock.model.Parameter;
-import net.jbock.model.Skew;
+import net.jbock.model.Multiplicity;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
@@ -80,7 +80,11 @@ public class CreateModelMethod extends Cached<MethodSpec> {
     code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
     code.add(CodeBlock.of(".withDescriptionKey($S)", c.item().descriptionKey().orElse("")));
     code.add(CodeBlock.of(".withNames($T.of($L))", List.class, util.joinByComma(names)));
-    code.add(CodeBlock.of(".withSkew($T.$L)", Skew.class, c.skew().name()));
+    if (c.isFlag()) {
+      code.add(CodeBlock.of(".withModeFlag()"));
+    } else {
+      code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.skew().name()));
+    }
     for (String line : c.item().description(elements)) {
       code.add(CodeBlock.of(".addDescriptionLine($S)", line));
     }
@@ -93,7 +97,7 @@ public class CreateModelMethod extends Cached<MethodSpec> {
     code.add(CodeBlock.of("$T.builder()", Parameter.class));
     code.add(CodeBlock.of(".withParamLabel($S)", c.paramLabel()));
     code.add(CodeBlock.of(".withDescriptionKey($S)", c.item().descriptionKey().orElse("")));
-    code.add(CodeBlock.of(".withSkew($T.$L)", Skew.class, c.skew().name()));
+    code.add(CodeBlock.of(".withMultiplicity($T.$L)", Multiplicity.class, c.skew().name()));
     for (String line : c.item().description(elements)) {
       code.add(CodeBlock.of(".addDescriptionLine($S)", line));
     }

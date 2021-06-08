@@ -9,15 +9,18 @@ import java.util.List;
 public final class Option extends Item {
 
   private final List<String> names;
+  private final boolean modeFlag;
 
   Option(
       String paramLabel,
       String descriptionKey,
       List<String> description,
       List<String> names,
-      Skew skew) {
-    super(paramLabel, descriptionKey, description, skew);
+      Multiplicity multiplicity,
+      boolean modeFlag) {
+    super(paramLabel, descriptionKey, description, multiplicity);
     this.names = names;
+    this.modeFlag = modeFlag;
   }
 
   public static Builder builder() {
@@ -30,7 +33,8 @@ public final class Option extends Item {
     private String descriptionKey;
     private final List<String> description = new ArrayList<>();
     private List<String> names;
-    private Skew skew;
+    private Multiplicity multiplicity;
+    private boolean modeFlag;
 
     public Builder withParamLabel(String paramLabel) {
       this.paramLabel = paramLabel;
@@ -52,20 +56,26 @@ public final class Option extends Item {
       return this;
     }
 
-    public Builder withSkew(Skew skew) {
-      this.skew = skew;
+    public Builder withMultiplicity(Multiplicity multiplicity) {
+      this.multiplicity = multiplicity;
+      return this;
+    }
+
+    public Builder withModeFlag() {
+      this.multiplicity = Multiplicity.OPTIONAL;
+      this.modeFlag = true;
       return this;
     }
 
     public Option build() {
-      return new Option(paramLabel, descriptionKey, description, names, skew);
+      return new Option(paramLabel, descriptionKey, description, names, multiplicity, modeFlag);
     }
   }
 
   @Override
   public String name() {
     String sample = String.join(", ", names);
-    if (skew() == Skew.MODAL_FLAG) {
+    if (modeFlag) {
       return sample;
     }
     return sample + ' ' + paramLabel();

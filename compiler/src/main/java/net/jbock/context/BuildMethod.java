@@ -127,6 +127,9 @@ public class BuildMethod extends Cached<MethodSpec> {
   private List<CodeBlock> tailExpressionOption(Mapped<NamedOption> c) {
     String optionNames = String.join(", ", c.item().names());
     String paramLabel = c.paramLabel();
+    if (c.isFlag()) {
+      return List.of(CodeBlock.of(".findAny().isPresent()"));
+    }
     switch (c.skew()) {
       case REQUIRED:
         String message = "Missing required option: " + paramLabel + " (" + optionNames + ")";
@@ -143,8 +146,6 @@ public class BuildMethod extends Cached<MethodSpec> {
         return List.of(
             CodeBlock.of(".collect($T.toValidList())", Either.class),
             orElseThrowConverterError(c.item()));
-      case MODAL_FLAG:
-        return List.of(CodeBlock.of(".findAny().isPresent()"));
       default:
         throw new IllegalArgumentException("unexpected skew: " + c.skew());
     }

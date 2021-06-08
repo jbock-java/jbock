@@ -4,7 +4,7 @@ import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
 import net.jbock.model.Option;
 import net.jbock.model.Parameter;
-import net.jbock.model.Skew;
+import net.jbock.model.Multiplicity;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,8 +13,8 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static net.jbock.model.Skew.REPEATABLE;
-import static net.jbock.model.Skew.REQUIRED;
+import static net.jbock.model.Multiplicity.REPEATABLE;
+import static net.jbock.model.Multiplicity.REQUIRED;
 
 final class Synopsis {
 
@@ -50,7 +50,7 @@ final class Synopsis {
       result.add(String.format("%s %s", firstName, option.paramLabel()));
     }
     for (Parameter param : regularParameters()) {
-      Skew skew = param.skew();
+      Multiplicity skew = param.multiplicity();
       String paramLabel = param.paramLabel();
       switch (skew) {
         case OPTIONAL:
@@ -83,11 +83,11 @@ final class Synopsis {
     return filterBySkew(parameters, REPEATABLE).findAny();
   }
 
-  private static <E extends Item> Stream<E> filterBySkew(List<E> items, Skew skew) {
+  private static <E extends Item> Stream<E> filterBySkew(List<E> items, Multiplicity skew) {
     return filterBySkew(items, sk -> sk == skew);
   }
 
-  private static <E extends Item> Stream<E> filterBySkew(List<E> items, Predicate<Skew> p) {
-    return items.stream().filter(o -> p.test(o.skew()));
+  private static <E extends Item> Stream<E> filterBySkew(List<E> items, Predicate<Multiplicity> p) {
+    return items.stream().filter(o -> p.test(o.multiplicity()));
   }
 }

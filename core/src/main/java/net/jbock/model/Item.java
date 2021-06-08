@@ -10,13 +10,13 @@ public abstract class Item {
   private final String paramLabel;
   private final String descriptionKey;
   private final List<String> description;
-  private final Skew skew;
+  private final Multiplicity multiplicity;
 
-  Item(String paramLabel, String descriptionKey, List<String> description, Skew skew) {
+  Item(String paramLabel, String descriptionKey, List<String> description, Multiplicity multiplicity) {
     this.paramLabel = paramLabel;
     this.descriptionKey = descriptionKey;
     this.description = description;
-    this.skew = skew;
+    this.multiplicity = multiplicity;
   }
 
   /**
@@ -58,7 +58,7 @@ public abstract class Item {
    *
    * @return item skew
    */
-  public final Skew skew() {
-    return skew;
+  public final Multiplicity multiplicity() {
+    return multiplicity;
   }
 }
