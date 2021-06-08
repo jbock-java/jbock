@@ -152,7 +152,7 @@ public final class OptionParser {
         .addStatement(throwRepetitionErrorStatement(token))
         .unindent();
     code.addStatement("$N = $L", seen, true);
-    code.addStatement("return $N.charAt(1) != '-' && $N.length() >= 3", token, token);
+    code.addStatement("return $1N.charAt(1) != '-' && $1N.length() > 2", token);
     return code.build();
   }
 

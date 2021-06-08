@@ -6,7 +6,7 @@ import net.jbock.Option;
 @Command
 abstract class ClusteredShortOptions {
 
-  @Option(names = "-a")
+  @Option(names = {"-a", "--aa"})
   abstract boolean aaa();
 
   @Option(names = "-b")
