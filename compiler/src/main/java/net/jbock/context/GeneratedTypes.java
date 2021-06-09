@@ -6,7 +6,7 @@ import com.squareup.javapoet.TypeName;
 import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ExConvert;
-import net.jbock.util.ExSyntax;
+import net.jbock.util.ExItem;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.NotSuccess;
 import net.jbock.util.SuperResult;
@@ -69,7 +69,7 @@ public class GeneratedTypes {
   }
 
   ClassName syntExType() {
-    return ClassName.get(ExSyntax.class);
+    return ClassName.get(ExItem.class);
   }
 
   TypeName parseResultType() {
