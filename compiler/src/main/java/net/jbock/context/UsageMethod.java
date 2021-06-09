@@ -3,9 +3,9 @@ package net.jbock.context;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.convert.Mapped;
+import net.jbock.model.Multiplicity;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
-import net.jbock.model.Multiplicity;
 import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;

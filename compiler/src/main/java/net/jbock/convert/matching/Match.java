@@ -2,8 +2,8 @@ package net.jbock.convert.matching;
 
 import com.squareup.javapoet.CodeBlock;
 import net.jbock.convert.Mapped;
-import net.jbock.parameter.AbstractItem;
 import net.jbock.model.Multiplicity;
+import net.jbock.parameter.AbstractItem;
 
 import javax.lang.model.type.TypeMirror;
 import java.util.Optional;

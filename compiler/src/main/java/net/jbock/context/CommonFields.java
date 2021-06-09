@@ -7,8 +7,8 @@ import com.squareup.javapoet.ParameterSpec;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.Misconvert;
 import net.jbock.util.ItemType;
+import net.jbock.util.Misconvert;
 
 import java.util.ArrayList;
 import java.util.EnumMap;

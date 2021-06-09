@@ -3,8 +3,8 @@ package net.jbock.context;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
-import net.jbock.processor.SourceElement;
 import net.jbock.contrib.StandardErrorHandler;
+import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 
