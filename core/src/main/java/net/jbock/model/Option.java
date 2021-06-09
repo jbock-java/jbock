@@ -1,5 +1,7 @@
 package net.jbock.model;
 
+import net.jbock.util.ItemType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -143,6 +145,16 @@ public final class Option extends Item {
       default:
         throw new AssertionError("all cases exhausted");
     }
+  }
+
+  @Override
+  public String errorOverview() {
+    return paramLabel() + " (" + String.join(", ", names) + ")";
+  }
+
+  @Override
+  public ItemType itemType() {
+    return ItemType.OPTION;
   }
 
   /**

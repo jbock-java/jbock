@@ -50,13 +50,17 @@ public class BuildMethod extends Cached<MethodSpec> {
   MethodSpec define() {
     CodeBlock constructorArguments = getConstructorArguments();
     MethodSpec.Builder spec = MethodSpec.methodBuilder("build");
-    for (Mapped<NamedOption> c : namedOptions.options()) {
+    List<Mapped<NamedOption>> options = namedOptions.options();
+    for (int i = 0; i < options.size(); i++) {
+      Mapped<NamedOption> c = options.get(i);
       ParameterSpec p = c.asParam();
-      spec.addStatement("$T $N = $L", p.type, p, convertExpressionOption(c));
+      spec.addStatement("$T $N = $L", p.type, p, convertExpressionOption(c, i));
     }
-    for (Mapped<PositionalParameter> c : positionalParameters.regular()) {
+    List<Mapped<PositionalParameter>> regular = positionalParameters.regular();
+    for (int i = 0, regularSize = regular.size(); i < regularSize; i++) {
+      Mapped<PositionalParameter> c = regular.get(i);
       ParameterSpec p = c.asParam();
-      spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(c));
+      spec.addStatement("$T $N = $L", p.type, p, convertExpressionRegularParameter(c, i));
     }
     positionalParameters.repeatable().ifPresent(c -> {
       ParameterSpec p = c.asParam();
@@ -93,24 +97,24 @@ public class BuildMethod extends Cached<MethodSpec> {
     return util.joinByComma(code);
   }
 
-  private CodeBlock convertExpressionOption(Mapped<NamedOption> c) {
+  private CodeBlock convertExpressionOption(Mapped<NamedOption> c, int i) {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("this.$N.get($T.$N).stream()", commonFields.optionParsers(),
         sourceElement.optionEnumType(), c.enumConstant()));
     if (!c.isFlag()) {
       code.add(c.mapExpr());
     }
-    code.addAll(tailExpressionOption(c));
+    code.addAll(tailExpressionOption(c, i));
     c.extractExpr().ifPresent(code::add);
     return util.joinByNewline(code);
   }
 
-  private CodeBlock convertExpressionRegularParameter(Mapped<PositionalParameter> c) {
+  private CodeBlock convertExpressionRegularParameter(Mapped<PositionalParameter> c, int i) {
     List<CodeBlock> code = new ArrayList<>();
     code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", Optional.class, commonFields.params(),
         c.item().position()));
     code.add(c.mapExpr());
-    code.addAll(tailExpressionParameter(c));
+    code.addAll(tailExpressionParameter(c, i));
     c.extractExpr().ifPresent(code::add);
     return util.joinByNewline(code);
   }
@@ -120,11 +124,11 @@ public class BuildMethod extends Cached<MethodSpec> {
     code.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
     code.add(c.mapExpr());
     code.add(CodeBlock.of(".collect($T.toValidList())", Either.class));
-    code.add(orElseThrowConverterError(c.item()));
+    code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.regular().size()));
     return util.joinByNewline(code);
   }
 
-  private List<CodeBlock> tailExpressionOption(Mapped<NamedOption> c) {
+  private List<CodeBlock> tailExpressionOption(Mapped<NamedOption> c, int i) {
     String optionNames = String.join(", ", c.item().names());
     String paramLabel = c.paramLabel();
     if (c.isFlag()) {
@@ -136,54 +140,44 @@ public class BuildMethod extends Cached<MethodSpec> {
         return List.of(
             CodeBlock.of(".findAny()"),
             CodeBlock.of(".orElseThrow(() -> new $T($S))", generatedTypes.syntExType(), message),
-            orElseThrowConverterError(c.item()));
+            orElseThrowConverterError(ItemType.OPTION, i));
       case OPTIONAL:
         return List.of(
             CodeBlock.of(".collect($T.toValidList())", Either.class),
-            orElseThrowConverterError(c.item()),
+            orElseThrowConverterError(ItemType.OPTION, i),
             CodeBlock.of(".stream().findAny()"));
       case REPEATABLE:
         return List.of(
             CodeBlock.of(".collect($T.toValidList())", Either.class),
-            orElseThrowConverterError(c.item()));
+            orElseThrowConverterError(ItemType.OPTION, i));
       default:
         throw new IllegalArgumentException("unexpected skew: " + c.multiplicity());
     }
   }
 
-  private List<CodeBlock> tailExpressionParameter(Mapped<PositionalParameter> c) {
+  private List<CodeBlock> tailExpressionParameter(Mapped<PositionalParameter> c, int i) {
     switch (c.multiplicity()) {
       case REQUIRED:
         String paramLabel = c.paramLabel();
         return List.of(CodeBlock.of(".orElseThrow(() -> new $T($S))",
             generatedTypes.syntExType(), "Missing required parameter: " + paramLabel),
-            orElseThrowConverterError(c.item()));
+            orElseThrowConverterError(ItemType.PARAMETER, i));
       case OPTIONAL:
         return List.of(
             CodeBlock.of(".stream()"),
             CodeBlock.of(".collect($T.toValidList())", Either.class),
-            orElseThrowConverterError(c.item()),
+            orElseThrowConverterError(ItemType.PARAMETER, i),
             CodeBlock.of(".stream().findAny()"));
       default:
         throw new IllegalArgumentException("unexpected skew: " + c.multiplicity());
     }
   }
 
-  private CodeBlock orElseThrowConverterError(NamedOption option) {
-    String itemName = option.paramLabel() + " (" + String.join(", ", option.names()) + ")";
-    return orElseThrowConverterError(itemName, ItemType.OPTION);
-  }
-
-  private CodeBlock orElseThrowConverterError(PositionalParameter parameter) {
-    String itemName = parameter.paramLabel();
-    return orElseThrowConverterError(itemName, ItemType.PARAMETER);
-  }
-
-  private CodeBlock orElseThrowConverterError(String itemName, ItemType itemType) {
-    return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5S))",
+  private CodeBlock orElseThrowConverterError(ItemType itemType, int i) {
+    return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5L))",
         left, generatedTypes.convExType(),
         ItemType.class,
         itemType,
-        itemName);
+        i);
   }
 }

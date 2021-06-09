@@ -1,5 +1,7 @@
 package net.jbock.model;
 
+import net.jbock.util.ItemType;
+
 import java.util.List;
 
 /**
@@ -28,9 +30,17 @@ public abstract class Item {
    * sample argument if this is a unary option.
    * Used in the LHS of the usage documentation.
    *
-   * @return item name, a non-empty string
+   * @return a non-empty string
    */
   public abstract String namesOverview();
+
+  /**
+   * An overview of all names of this item.
+   * Used to identify this item in error messages.
+   *
+   * @return a non-empty string
+   */
+  public abstract String errorOverview();
 
   /**
    * The item as shown in the synopsis, if this is a
@@ -72,4 +82,11 @@ public abstract class Item {
   public final Multiplicity multiplicity() {
     return multiplicity;
   }
+
+  /**
+   * The item type.
+   *
+   * @return item type
+   */
+  public abstract ItemType itemType();
 }

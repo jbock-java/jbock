@@ -1,5 +1,7 @@
 package net.jbock.model;
 
+import net.jbock.util.ItemType;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,5 +98,15 @@ public final class Parameter extends Item {
   @Override
   public String namesOverview() {
     return paramLabel();
+  }
+
+  @Override
+  public String errorOverview() {
+    return paramLabel();
+  }
+
+  @Override
+  public ItemType itemType() {
+    return ItemType.PARAMETER;
   }
 }

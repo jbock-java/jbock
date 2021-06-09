@@ -8,15 +8,22 @@ public final class ExConvert extends Exception {
 
   private final ItemType itemType;
 
-  private final String itemName;
+  private final int itemIndex;
 
-  public ExConvert(Misconvert failure, ItemType itemType, String itemName) {
+  public ExConvert(Misconvert failure, ItemType itemType, int itemIndex) {
     this.failure = failure;
     this.itemType = itemType;
-    this.itemName = itemName;
+    this.itemIndex = itemIndex;
   }
 
   public NotSuccess toConverterError(CommandModel model) {
-    return new ConverterError(model, failure, itemType, itemName);
+    switch (itemType) {
+      case PARAMETER:
+        return new ConverterError(model, failure, model.parameters().get(itemIndex));
+      case OPTION:
+        return new ConverterError(model, failure, model.options().get(itemIndex));
+      default:
+        throw new AssertionError("all cases exhausted");
+    }
   }
 }

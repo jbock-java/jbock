@@ -1,6 +1,6 @@
 package net.jbock.model;
 
-public enum SyntaxError {
+public enum TokenErrorType {
 
   INVALID_OPTION,
   EXCESS_PARAM,
