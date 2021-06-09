@@ -21,13 +21,10 @@ public final class GeneratedClass {
   private final StatefulParser statefulParser;
   private final SourceElement sourceElement;
   private final NamedOptions namedOptions;
-  private final CommonFields commonFields;
   private final ParseOrExitMethod parseOrExitMethod;
   private final ReadOptionArgumentMethod readOptionArgumentMethod;
   private final GeneratedAnnotation generatedAnnotation;
   private final ReadOptionNameMethod readOptionNameMethod;
-  private final ConvEx convEx;
-  private final SyntEx syntEx;
   private final CreateModelMethod createModelMethod;
 
   @Inject
@@ -39,13 +36,10 @@ public final class GeneratedClass {
       OptionEnum optionEnum,
       StatefulParser statefulParser,
       NamedOptions namedOptions,
-      CommonFields commonFields,
       ParseOrExitMethod parseOrExitMethod,
       ReadOptionArgumentMethod readOptionArgumentMethod,
       GeneratedAnnotation generatedAnnotation,
       ReadOptionNameMethod readOptionNameMethod,
-      ConvEx convEx,
-      SyntEx syntEx,
       CreateModelMethod createModelMethod) {
     this.parseMethod = parseMethod;
     this.sourceElement = sourceElement;
@@ -54,13 +48,10 @@ public final class GeneratedClass {
     this.optionEnum = optionEnum;
     this.statefulParser = statefulParser;
     this.namedOptions = namedOptions;
-    this.commonFields = commonFields;
     this.parseOrExitMethod = parseOrExitMethod;
     this.readOptionArgumentMethod = readOptionArgumentMethod;
     this.generatedAnnotation = generatedAnnotation;
     this.readOptionNameMethod = readOptionNameMethod;
-    this.convEx = convEx;
-    this.syntEx = syntEx;
     this.createModelMethod = createModelMethod;
   }
 
@@ -81,8 +72,6 @@ public final class GeneratedClass {
       spec.addTypes(optionParser.define());
     }
     spec.addType(impl.define());
-    spec.addType(convEx.define());
-    spec.addType(syntEx.define());
 
     spec.addMethod(createModelMethod.get());
 
