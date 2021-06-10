@@ -35,14 +35,16 @@ public class NamedOptions {
     this.unixClusteringSupported = unixClusteringSupported;
   }
 
-  public static NamedOptions create(List<Mapped<NamedOption>> options) {
+  public static NamedOptions create(List<Mapped<NamedOption>> options, boolean unixClustering) {
     boolean anyRepeatable = options.stream().anyMatch(Mapped::isRepeatable);
     boolean anyRegular = options.stream().anyMatch(option -> option.isOptional() || option.isRequired());
     boolean anyFlags = options.stream().anyMatch(Mapped::isFlag);
     List<Mapped<NamedOption>> unixOptions = options.stream()
         .filter(option -> option.item().hasUnixName())
         .collect(Collectors.toUnmodifiableList());
-    boolean unixClusteringSupported = unixOptions.size() >= 2 && unixOptions.stream().anyMatch(Mapped::isFlag);
+    boolean unixClusteringSupported = unixClustering
+        && unixOptions.size() >= 2
+        && unixOptions.stream().anyMatch(Mapped::isFlag);
     Map<Boolean, List<Mapped<NamedOption>>> required = options.stream()
         .collect(Collectors.partitioningBy(Mapped::isRequired));
     return new NamedOptions(options, required.get(true), required.get(false),

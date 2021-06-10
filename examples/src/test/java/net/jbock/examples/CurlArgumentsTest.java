@@ -177,7 +177,7 @@ class CurlArgumentsTest {
   }
 
   @Test
-  void errorGroupingDuplicateFlag() {
+  void errorClusteringDuplicateFlag() {
     assertTrue(parser.parse("-v", "-vH'Content-Type: application/xml'")
         .getLeft().map(f::castToError).orElseThrow().message()
         .contains("Option '-vH'Content-Type: application/xml'' is a repetition"));

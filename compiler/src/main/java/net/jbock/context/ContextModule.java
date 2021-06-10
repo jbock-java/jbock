@@ -55,8 +55,8 @@ public class ContextModule {
 
   @ContextScope
   @Provides
-  NamedOptions namedOptions() {
-    return NamedOptions.create(namedOptions);
+  NamedOptions namedOptions(SourceElement sourceElement) {
+    return NamedOptions.create(namedOptions, sourceElement.unixClustering());
   }
 
   @ContextScope

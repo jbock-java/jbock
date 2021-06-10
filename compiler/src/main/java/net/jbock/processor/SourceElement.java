@@ -115,6 +115,10 @@ public class SourceElement {
     return get().ansi();
   }
 
+  public boolean unixClustering() {
+    return get().unixClustering();
+  }
+
   private Command get() {
     return sourceElement.getAnnotation(Command.class);
   }
