@@ -13,6 +13,10 @@ java {
     }
 }
 
+repositories {
+    maven { url 'https://s01.oss.sonatype.org/content/repositories/iogithubjbock-java-1000' }
+}
+
 compileJava {
     options.encoding = 'UTF-8'
     sourceCompatibility = '11'
@@ -37,7 +41,7 @@ tasks.withType(GenerateModuleMetadata) {
 shadowJar {
     minimize()
     dependencies {
-        exclude('com.github.jbock-java:jbock-annotations:.*')
+        exclude('io.github.jbock-java:jbock:.*')
         exclude('javax.annotation:jsr250-api:.*')
     }
     archiveClassifier.set('')
@@ -49,7 +53,7 @@ shadowJar {
 }
 
 dependencies {
-    def core = project(':core')
+    def core = 'io.github.jbock-java:jbock:5.0'
     implementation('com.squareup:javapoet:1.13.0')
     implementation('com.google.auto:auto-common:1.0')
     implementation('com.google.guava:guava:30.1.1-jre')
