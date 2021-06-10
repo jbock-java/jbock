@@ -34,7 +34,7 @@ git pull origin $(git rev-parse --abbrev-ref HEAD)
 
 read -e -p "Upload successful. Also tag? [y/N]"
 if [[ "$REPLY" == [Yy]* ]]; then
-  git tag "${TAG_PREFIX}:${VERSION}"
+  git tag "${TAG_PREFIX}_${VERSION}"
   git push origin --tags
 fi
 
