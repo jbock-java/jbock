@@ -1,8 +1,10 @@
 package net.jbock.util;
 
+import net.jbock.SuperCommand;
+
 /**
- * This class represents parsing success for a
- * {@link net.jbock.SuperCommand @SuperCommand}.
+ * This class represents successful parsing for a
+ * {@link SuperCommand}.
  *
  * @param <C> command type
  */
@@ -22,10 +24,22 @@ public final class SuperResult<C> {
     this.rest = rest;
   }
 
+  /**
+   * Get the result of parsing.
+   *
+   * @return the result
+   */
   public C result() {
     return command;
   }
 
+  /**
+   * Get the remaining tokens from the input array,
+   * after the last known parameter was read by
+   * the SuperCommand parser.
+   *
+   * @return remaining tokens
+   */
   public String[] rest() {
     return rest;
   }

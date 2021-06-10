@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Locale;
 
 /**
- * Runtime model of a named option or a modal flag.
+ * Runtime model of a named option or a mode flag.
  */
 public final class Option extends Item {
 
@@ -149,7 +149,7 @@ public final class Option extends Item {
   }
 
   @Override
-  public String errorOverview() {
+  public String namesOverviewError() {
     return itemType().name().toLowerCase(Locale.US) + " " +
         paramLabel() + " (" + String.join(", ", names) + ")";
   }

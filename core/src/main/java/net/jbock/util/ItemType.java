@@ -1,5 +1,8 @@
 package net.jbock.util;
 
+import net.jbock.Option;
+import net.jbock.Parameter;
+
 /**
  * Item type as determined by its method's annotation.
  * An &quot;Item&quot; is either a <em>named option</em>
@@ -15,12 +18,14 @@ package net.jbock.util;
 public enum ItemType {
 
   /**
-   * Named option, or modal flag.
+   * Named option, or mode flag.
+   * The runtime model for this item is {@link Option}.
    */
   OPTION,
 
   /**
    * Positional parameter.
+   * The runtime model for this item is {@link Parameter}.
    */
   PARAMETER,
 }

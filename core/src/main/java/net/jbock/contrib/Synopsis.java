@@ -2,9 +2,9 @@ package net.jbock.contrib;
 
 import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
+import net.jbock.model.Multiplicity;
 import net.jbock.model.Option;
 import net.jbock.model.Parameter;
-import net.jbock.model.Multiplicity;
 
 import java.util.ArrayList;
 import java.util.List;

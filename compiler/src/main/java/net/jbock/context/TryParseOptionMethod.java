@@ -63,7 +63,7 @@ public class TryParseOptionMethod extends Cached<MethodSpec> {
         clusterToken);
     code.add("if ($N == null)\n", option).indent()
         .addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-            ErrTokenType.INVALID_TOKEN, token)
+            ErrTokenType.INVALID_UNIX_GROUP, token)
         .unindent();
     code.endControlFlow();
     code.addStatement("return true");

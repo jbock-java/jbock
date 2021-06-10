@@ -49,9 +49,9 @@ public final class ErrToken extends NotSuccess implements HasMessage {
         return "Invalid option: " + token;
       case EXCESS_PARAM:
         return "Excess param: " + token;
-      case REPETITION:
+      case OPTION_REPETITION:
         return String.format("Option '%s' is a repetition", token);
-      case INVALID_TOKEN:
+      case INVALID_UNIX_GROUP:
         return "Invalid token: " + token;
       default:
         throw new AssertionError("all cases exhausted");

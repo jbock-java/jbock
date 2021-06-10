@@ -35,12 +35,12 @@ public abstract class Item {
   public abstract String namesOverview();
 
   /**
-   * An overview of all names of this item.
-   * Used to identify this item in error messages.
+   * An alternative form of {@link #namesOverview()} that is
+   * commonly used to identify the item in error messages.
    *
    * @return a non-empty string
    */
-  public abstract String errorOverview();
+  public abstract String namesOverviewError();
 
   /**
    * The item as shown in the synopsis, if this is a

@@ -149,7 +149,7 @@ public final class OptionParser {
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N.contains($S))\n", token, "=").indent()
         .addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-            ErrTokenType.INVALID_TOKEN, token)
+            ErrTokenType.INVALID_UNIX_GROUP, token)
         .unindent();
     code.add("if ($N)\n", seen).indent()
         .addStatement(throwRepetitionErrorStatement(token))
@@ -163,7 +163,7 @@ public final class OptionParser {
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))\n", token, token, token, "=").indent()
         .addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-            ErrTokenType.INVALID_TOKEN, token)
+            ErrTokenType.INVALID_UNIX_GROUP, token)
         .unindent();
     code.add("if ($N)\n", seen).indent()
         .addStatement(throwRepetitionErrorStatement(token))
@@ -206,7 +206,7 @@ public final class OptionParser {
 
   private CodeBlock throwRepetitionErrorStatement(ParameterSpec token) {
     return CodeBlock.of("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
-        ErrTokenType.REPETITION, token);
+        ErrTokenType.OPTION_REPETITION, token);
   }
 
   private TypeName readMethodReturnType() {

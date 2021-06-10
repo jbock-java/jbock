@@ -37,6 +37,9 @@ public final class StandardErrorHandler {
     this.exitHook = exitHook;
   }
 
+  /**
+   * Builder for {@link StandardErrorHandler}.
+   */
   public static final class Builder {
 
     private final NotSuccess notSuccess;
@@ -105,11 +108,23 @@ public final class StandardErrorHandler {
       return this;
     }
 
+    /**
+     * Create the error handler.
+     *
+     * @return an error handler
+     */
     public StandardErrorHandler build() {
       return new StandardErrorHandler(notSuccess, out, terminalWidth, messages, exitHook);
     }
   }
 
+  /**
+   * Create an empty builder instance.
+   * Public method that may be invoked from the generated code.
+   *
+   * @param notSuccess failure object
+   * @return empty builder
+   */
   public static Builder builder(NotSuccess notSuccess) {
     Supplier<RuntimeException> exitHook = () -> {
       System.exit(notSuccess instanceof HelpRequested ? 0 : 1);

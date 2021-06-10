@@ -13,6 +13,12 @@ public final class ExToken extends ExNotSuccess {
   private final ErrTokenType errorType;
   private final String token;
 
+  /**
+   * Public constructor that may be invoked from the generated code.
+   *
+   * @param errorType error type
+   * @param token offending token
+   */
   public ExToken(ErrTokenType errorType, String token) {
     this.errorType = errorType;
     this.token = token;

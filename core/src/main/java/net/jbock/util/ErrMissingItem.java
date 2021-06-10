@@ -32,6 +32,6 @@ public final class ErrMissingItem extends NotSuccess implements HasMessage {
 
   @Override
   public String message() {
-    return "Missing required " + item.errorOverview();
+    return "Missing required " + item.namesOverviewError();
   }
 }

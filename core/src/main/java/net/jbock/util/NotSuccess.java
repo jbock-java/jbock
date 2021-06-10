@@ -14,8 +14,9 @@ import net.jbock.model.CommandModel;
  * <ul>
  *   <li>{@link ErrAtFile}</li>
  *   <li>{@link ErrConvert}</li>
- *   <li>{@link HelpRequested}</li>
  *   <li>{@link ErrMissingItem}</li>
+ *   <li>{@link ErrToken}</li>
+ *   <li>{@link HelpRequested}</li>
  * </ul>
  */
 public abstract class NotSuccess {

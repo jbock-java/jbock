@@ -8,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * A model of a class that is annotated with
+ * The runtime model of a class that is annotated with
  * {@link Command} or {@link SuperCommand}.
  */
 public final class CommandModel {
@@ -190,9 +190,9 @@ public final class CommandModel {
   }
 
   /**
-   * Get the description key.
+   * Get the description key, possibly an empty string.
    *
-   * @return the description key
+   * @return non-null string
    */
   public String descriptionKey() {
     return descriptionKey;
@@ -209,7 +209,8 @@ public final class CommandModel {
   }
 
   /**
-   * Get the program name from the {@link Command#name()} attribute,
+   * Get the program name from the {@link Command#name()} or
+   * {@link SuperCommand#name()} attribute,
    * or, if none is set, a default program name that is derived
    * from the class name of the annotated command class.
    *
@@ -220,7 +221,8 @@ public final class CommandModel {
   }
 
   /**
-   * Get the value of the {@link Command#ansi()} attribute.
+   * Get the value of the {@link Command#ansi()} or
+   * {@link SuperCommand#ansi()} attribute.
    *
    * @return {@code true} if the parser can use ansi colors
    *         when printing the usage documentation
@@ -230,7 +232,7 @@ public final class CommandModel {
   }
 
   /**
-   * Get the list of all named options, including modal flags.
+   * Get the list of all named options, including mode flags.
    *
    * @return named options
    */
@@ -248,7 +250,8 @@ public final class CommandModel {
   }
 
   /**
-   * Get the value of the {@link Command#helpEnabled()} attribute.
+   * Get the value of the {@link Command#helpEnabled()} or
+   * {@link SuperCommand#helpEnabled()} attribute.
    *
    * @return {@code true} if the generated parser supports
    *         the {@code --help} option
@@ -270,7 +273,9 @@ public final class CommandModel {
   }
 
   /**
-   * Get the value of the {@link Command#atFileExpansion()} attribute.
+   * Get the value of the {@link Command#atFileExpansion()} or
+   * {@link SuperCommand#atFileExpansion()}
+   * attribute.
    *
    * @return {@code true} if {@code @file} expansion is enabled
    */
