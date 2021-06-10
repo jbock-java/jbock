@@ -20,7 +20,8 @@ class ListIntegerArgumentsTest {
 
   @Test
   void testAbsent() {
-    Either<NotSuccess, ListIntegerArguments> result = new ListIntegerArgumentsParser().parse(new String[]{});
+    String[] emptyInput = {};
+    Either<NotSuccess, ListIntegerArguments> result = new ListIntegerArgumentsParser().parse(emptyInput);
     assertTrue(result.getLeft().isPresent());
     assertTrue(result.getLeft().get() instanceof HelpRequested);
   }

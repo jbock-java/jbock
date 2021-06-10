@@ -8,9 +8,9 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.AtFileReader;
+import net.jbock.util.ExNotSuccess;
 import net.jbock.util.FileReadingError;
 import net.jbock.util.HelpRequested;
-import net.jbock.util.SyntaxError;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -30,7 +30,6 @@ public class ParseMethod extends Cached<MethodSpec> {
   private final SourceElement sourceElement;
   private final BuildMethod buildMethod;
   private final CreateModelMethod createModelMethod;
-  private final ToConverterErrorMethod toConverterErrorMethod;
 
   @Inject
   ParseMethod(
@@ -38,14 +37,12 @@ public class ParseMethod extends Cached<MethodSpec> {
       AllItems allItems,
       SourceElement sourceElement,
       BuildMethod buildMethod,
-      CreateModelMethod createModelMethod,
-      ToConverterErrorMethod toConverterErrorMethod) {
+      CreateModelMethod createModelMethod) {
     this.generatedTypes = generatedTypes;
     this.allItems = allItems;
     this.sourceElement = sourceElement;
     this.buildMethod = buildMethod;
     this.createModelMethod = createModelMethod;
-    this.toConverterErrorMethod = toConverterErrorMethod;
   }
 
   @Override
@@ -117,12 +114,9 @@ public class ParseMethod extends Cached<MethodSpec> {
     return CodeBlock.builder().add("$T $N = new $T();\n", state.type, state, state.type)
         .add("try {\n").indent()
         .add("return $T.right($N.parse($N).$N());\n", Either.class, state, it, buildMethod.get())
-        .unindent().add("} catch ($T $N) {\n", generatedTypes.convExType(), e).indent()
-        .add("return $T.left($N.$N($N()));\n",
-            Either.class, e, toConverterErrorMethod.get(), createModelMethod.get())
-        .unindent().add("} catch ($T $N) {\n", generatedTypes.syntExType(), e).indent()
-        .add("return $T.left(new $T($N(), $N.getMessage()));\n", Either.class,
-            SyntaxError.class, createModelMethod.get(), e)
+        .unindent().add("} catch ($T $N) {\n", ExNotSuccess.class, e).indent()
+        .add("return $T.left($N.toError($N()));\n",
+            Either.class, e, createModelMethod.get())
         .unindent().add("}\n")
         .build();
   }

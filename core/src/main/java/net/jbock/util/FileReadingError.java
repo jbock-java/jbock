@@ -5,7 +5,7 @@ import net.jbock.model.CommandModel;
 /**
  * An instance of this class signals failure of a file reading operation.
  * This is an intermediate step in the construction of an
- * {@link AtFileError} instance.
+ * {@link ErrAtFile} instance.
  */
 public final class FileReadingError {
 
@@ -25,6 +25,6 @@ public final class FileReadingError {
    * @return a failure object
    */
   public NotSuccess addModel(CommandModel model) {
-    return new AtFileError(model, file, exception);
+    return new ErrAtFile(model, file, exception);
   }
 }

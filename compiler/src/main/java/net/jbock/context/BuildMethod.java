@@ -9,6 +9,8 @@ import net.jbock.either.Either;
 import net.jbock.parameter.NamedOption;
 import net.jbock.parameter.PositionalParameter;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.ExConvert;
+import net.jbock.util.ExMissingItem;
 import net.jbock.util.ItemType;
 
 import javax.inject.Inject;
@@ -78,8 +80,8 @@ public class BuildMethod extends Cached<MethodSpec> {
         },
         () -> spec.addStatement("return new $T($L)", generatedTypes.implType(), constructorArguments));
     return spec.returns(generatedTypes.parseSuccessType())
-        .addException(generatedTypes.syntExType())
-        .addException(generatedTypes.convExType())
+        .addException(ExMissingItem.class)
+        .addException(ExConvert.class)
         .build();
   }
 
@@ -129,17 +131,15 @@ public class BuildMethod extends Cached<MethodSpec> {
   }
 
   private List<CodeBlock> tailExpressionOption(Mapped<NamedOption> c, int i) {
-    String optionNames = String.join(", ", c.item().names());
-    String paramLabel = c.paramLabel();
     if (c.isFlag()) {
       return List.of(CodeBlock.of(".findAny().isPresent()"));
     }
     switch (c.multiplicity()) {
       case REQUIRED:
-        String message = "Missing required option: " + paramLabel + " (" + optionNames + ")";
         return List.of(
             CodeBlock.of(".findAny()"),
-            CodeBlock.of(".orElseThrow(() -> new $T($S))", generatedTypes.syntExType(), message),
+            CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
+                ExMissingItem.class, ItemType.class, ItemType.OPTION, i),
             orElseThrowConverterError(ItemType.OPTION, i));
       case OPTIONAL:
         return List.of(
@@ -158,9 +158,8 @@ public class BuildMethod extends Cached<MethodSpec> {
   private List<CodeBlock> tailExpressionParameter(Mapped<PositionalParameter> c, int i) {
     switch (c.multiplicity()) {
       case REQUIRED:
-        String paramLabel = c.paramLabel();
-        return List.of(CodeBlock.of(".orElseThrow(() -> new $T($S))",
-            generatedTypes.syntExType(), "Missing required parameter: " + paramLabel),
+        return List.of(CodeBlock.of(".orElseThrow(() -> new $T($T.$L, $L))",
+            ExMissingItem.class, ItemType.class, ItemType.PARAMETER, i),
             orElseThrowConverterError(ItemType.PARAMETER, i));
       case OPTIONAL:
         return List.of(
@@ -175,7 +174,7 @@ public class BuildMethod extends Cached<MethodSpec> {
 
   private CodeBlock orElseThrowConverterError(ItemType itemType, int i) {
     return CodeBlock.of(".orElseThrow($1N -> new $2T($1N, $3T.$4L, $5L))",
-        left, generatedTypes.convExType(),
+        left, ExConvert.class,
         ItemType.class,
         itemType,
         i);

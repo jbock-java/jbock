@@ -34,7 +34,7 @@ class SuperArgumentsTest {
 
   @Test
   void testHelp() {
-    Either<NotSuccess, SuperResult<SuperArguments>> result = parser.parse(new String[]{"--help"});
+    Either<NotSuccess, SuperResult<SuperArguments>> result = parser.parse("--help");
     assertTrue(result.getLeft().isPresent());
     assertTrue(result.getLeft().get() instanceof HelpRequested);
   }

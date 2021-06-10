@@ -8,7 +8,7 @@ import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
 import net.jbock.processor.SourceElement;
 import net.jbock.util.ItemType;
-import net.jbock.util.Misconvert;
+import net.jbock.util.ConverterFailure;
 
 import java.util.ArrayList;
 import java.util.EnumMap;
@@ -34,7 +34,7 @@ public class CommonFields {
       .initializer("$T.compile($S)", Pattern.class, "-[a-zA-Z0-9]+|--[a-zA-Z0-9-]+")
       .build();
 
-  private final FieldSpec convExFailure = FieldSpec.builder(Misconvert.class, "failure")
+  private final FieldSpec convExFailure = FieldSpec.builder(ConverterFailure.class, "failure")
       .build();
   private final FieldSpec convExItemType = FieldSpec.builder(ItemType.class, "itemType")
       .build();

@@ -5,8 +5,6 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.jbock.either.Either;
 import net.jbock.processor.SourceElement;
-import net.jbock.util.ExConvert;
-import net.jbock.util.ExItem;
 import net.jbock.util.HelpRequested;
 import net.jbock.util.NotSuccess;
 import net.jbock.util.SuperResult;
@@ -62,14 +60,6 @@ public class GeneratedTypes {
 
   ClassName implType() {
     return generatedClass.nestedClass(sourceElement.element().getSimpleName() + "Impl");
-  }
-
-  ClassName convExType() {
-    return ClassName.get(ExConvert.class);
-  }
-
-  ClassName syntExType() {
-    return ClassName.get(ExItem.class);
   }
 
   TypeName parseResultType() {

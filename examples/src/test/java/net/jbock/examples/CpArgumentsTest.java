@@ -3,7 +3,7 @@ package net.jbock.examples;
 import net.jbock.either.Either;
 import net.jbock.examples.CpArguments.Control;
 import net.jbock.examples.fixture.ParserTestFixture;
-import net.jbock.util.ConverterError;
+import net.jbock.util.ErrConvert;
 import net.jbock.util.NotSuccess;
 import org.junit.jupiter.api.Test;
 
@@ -23,15 +23,15 @@ class CpArgumentsTest {
   void errorMissingSource() {
     Either<NotSuccess, CpArguments> result = parser.parse("-r");
     assertTrue(result.getLeft().map(f::castToError).orElseThrow().message()
-        .contains("Missing required parameter: SOURCE"));
+        .contains("Missing required parameter SOURCE"));
   }
 
   @Test
   void enumValuesInMessage() {
     Either<NotSuccess, CpArguments> result = new CpArgumentsParser().parse("a", "b", "--backup", "CLOUD");
     assertTrue(result.getLeft().isPresent());
-    assertTrue(result.getLeft().get() instanceof ConverterError);
-    ConverterError error = (ConverterError) result.getLeft().get();
+    assertTrue(result.getLeft().get() instanceof ErrConvert);
+    ErrConvert error = (ErrConvert) result.getLeft().get();
     String message = error.message();
     assertEquals("while converting option BACKUP (--backup): No enum constant " +
         "net.jbock.examples.CpArguments.Control.CLOUD [NONE, NUMBERED, EXISTING, SIMPLE]", message);
@@ -41,13 +41,13 @@ class CpArgumentsTest {
   void errorMissingDest() {
     assertTrue(parser.parse("a").getLeft().map(f::castToError)
         .orElseThrow().message()
-        .contains("Missing required parameter: DEST"));
+        .contains("Missing required parameter DEST"));
     assertTrue(parser.parse("a", "-r").getLeft().map(f::castToError)
         .orElseThrow().message()
-        .contains("Missing required parameter: DEST"));
+        .contains("Missing required parameter DEST"));
     assertTrue(parser.parse("-r", "a").getLeft().map(f::castToError)
         .orElseThrow().message()
-        .contains("Missing required parameter: DEST"));
+        .contains("Missing required parameter DEST"));
   }
 
   @Test

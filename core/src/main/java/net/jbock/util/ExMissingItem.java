@@ -3,13 +3,11 @@ package net.jbock.util;
 import net.jbock.model.CommandModel;
 
 /**
- * Indicates that an error occurred within a particular converter.
  * Internal exception that may be thrown and caught
  * in the generated code.
  */
-public final class ExConvert extends ExNotSuccess {
+public final class ExMissingItem extends ExNotSuccess {
 
-  private final ConverterFailure failure;
   private final ItemType itemType;
   private final int itemIndex;
 
@@ -19,14 +17,13 @@ public final class ExConvert extends ExNotSuccess {
    * @param itemType the item type
    * @param itemIndex the item index
    */
-  public ExConvert(ConverterFailure failure, ItemType itemType, int itemIndex) {
-    this.failure = failure;
+  public ExMissingItem(ItemType itemType, int itemIndex) {
     this.itemType = itemType;
     this.itemIndex = itemIndex;
   }
 
   @Override
   public NotSuccess toError(CommandModel model) {
-    return new ErrConvert(model, failure, model.getItem(itemType, itemIndex));
+    return new ErrMissingItem(model, model.getItem(itemType, itemIndex));
   }
 }

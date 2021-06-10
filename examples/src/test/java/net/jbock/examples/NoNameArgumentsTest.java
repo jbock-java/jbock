@@ -61,9 +61,10 @@ class NoNameArgumentsTest {
 
   @Test
   void errorMissingInt() {
-    assertTrue(parser.parse("--cmos").getLeft().map(f::castToError)
-        .orElseThrow().message()
-        .contains("Missing required option: NUMBER (-n, --number)"));
+    String message = parser.parse("--cmos").getLeft().map(f::castToError)
+        .orElseThrow().message();
+    assertTrue(message
+        .contains("Missing required option NUMBER (-n, --number)"));
   }
 
   @Test

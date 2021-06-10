@@ -9,9 +9,9 @@ package net.jbock.util;
  *   <li>{@link ConverterReturnedNull}</li>
  * </ul>
  */
-public abstract class Misconvert {
+public abstract class ConverterFailure {
 
-  Misconvert() {
+  ConverterFailure() {
   }
 
   /**

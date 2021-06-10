@@ -3,7 +3,6 @@ package net.jbock.context;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.convert.Mapped;
 import net.jbock.parameter.NamedOption;
@@ -11,11 +10,8 @@ import net.jbock.processor.SourceElement;
 
 import javax.inject.Inject;
 
-import static com.squareup.javapoet.TypeName.BOOLEAN;
 import static javax.lang.model.element.Modifier.PRIVATE;
 import static javax.lang.model.element.Modifier.STATIC;
-import static net.jbock.common.Constants.STRING;
-import static net.jbock.common.Constants.STRING_ITERATOR;
 
 /**
  * Defines the inner class StatefulParser
@@ -29,8 +25,8 @@ public class StatefulParser extends Cached<TypeSpec> {
   private final NamedOptions namedOptions;
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
-  private final ReadOptionNameMethod readOptionNameMethod;
   private final BuildMethod buildMethod;
+  private final TryParseOptionMethod tryParseOptionMethod;
 
   @Inject
   StatefulParser(
@@ -40,16 +36,16 @@ public class StatefulParser extends Cached<TypeSpec> {
       NamedOptions namedOptions,
       PositionalParameters positionalParameters,
       CommonFields commonFields,
-      ReadOptionNameMethod readOptionNameMethod,
-      BuildMethod buildMethod) {
+      BuildMethod buildMethod,
+      TryParseOptionMethod tryParseOptionMethod) {
     this.generatedTypes = generatedTypes;
     this.statefulParseMethod = statefulParseMethod;
     this.sourceElement = sourceElement;
     this.namedOptions = namedOptions;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
-    this.readOptionNameMethod = readOptionNameMethod;
     this.buildMethod = buildMethod;
+    this.tryParseOptionMethod = tryParseOptionMethod;
   }
 
   @Override
@@ -59,7 +55,7 @@ public class StatefulParser extends Cached<TypeSpec> {
         .addMethod(statefulParseMethod.define());
     spec.addField(commonFields.suspiciousPattern());
     if (!namedOptions.isEmpty()) {
-      spec.addMethod(tryParseOptionMethod())
+      spec.addMethod(tryParseOptionMethod.get())
           .addMethod(privateConstructor());
       spec.addField(commonFields.optionNames());
       spec.addField(commonFields.optionParsers());
@@ -100,54 +96,5 @@ public class StatefulParser extends Cached<TypeSpec> {
       return generatedTypes.flagParserType();
     }
     return generatedTypes.regularOptionParserType();
-  }
-
-  private MethodSpec tryParseOptionMethod() {
-    ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
-    ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
-    return MethodSpec.methodBuilder("tryParseOption")
-        .addException(generatedTypes.syntExType())
-        .addParameter(token)
-        .addParameter(it)
-        .addCode(namedOptions.unixClusteringSupported() ?
-            tryParseOptionCodeClustering(token, it) :
-            tryParseOptionCodeSimple(token, it))
-        .returns(BOOLEAN)
-        .build();
-  }
-
-  private CodeBlock tryParseOptionCodeClustering(ParameterSpec token, ParameterSpec it) {
-    ParameterSpec clusterToken = ParameterSpec.builder(STRING, "clusterToken").build();
-    ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "option").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionEnumType(),
-        option, commonFields.optionNames(), readOptionNameMethod.get(), token);
-    code.add("if ($N == null)\n", option).indent()
-        .addStatement("return false")
-        .unindent();
-    code.addStatement("$T $N = $N", clusterToken.type, clusterToken, token);
-    code.beginControlFlow("while ($N.get($N).read($N, $N))", commonFields.optionParsers(), option, clusterToken, it);
-    code.addStatement("$1N = '-' + $1N.substring(2, $1N.length())", clusterToken);
-    code.addStatement("$N = $N.get($N($N))", option, commonFields.optionNames(), readOptionNameMethod.get(),
-        clusterToken);
-    code.add("if ($N == null)\n", option).indent()
-        .addStatement("throw new $T($S + $N)", generatedTypes.syntExType(), "Invalid token: ", token)
-        .unindent();
-    code.endControlFlow();
-    code.addStatement("return true");
-    return code.build();
-  }
-
-  private CodeBlock tryParseOptionCodeSimple(ParameterSpec token, ParameterSpec it) {
-    ParameterSpec option = ParameterSpec.builder(sourceElement.optionEnumType(), "option").build();
-    CodeBlock.Builder code = CodeBlock.builder();
-    code.addStatement("$T $N = $N.get($N($N))", sourceElement.optionEnumType(), option,
-        commonFields.optionNames(), readOptionNameMethod.get(), token);
-    code.add("if ($N == null)\n", option).indent()
-        .addStatement("return false")
-        .unindent();
-    code.addStatement("$N.get($N).read($N, $N)", commonFields.optionParsers(), option, token, it)
-        .addStatement("return true");
-    return code.build();
   }
 }

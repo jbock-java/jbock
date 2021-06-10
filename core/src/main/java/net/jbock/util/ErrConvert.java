@@ -3,14 +3,12 @@ package net.jbock.util;
 import net.jbock.model.CommandModel;
 import net.jbock.model.Item;
 
-import java.util.Locale;
-
 /**
  * An instance of this class signals failure of a converter invocation.
  */
-public final class ConverterError extends NotSuccess implements HasMessage {
+public final class ErrConvert extends NotSuccess implements HasMessage {
 
-  private final Misconvert misconvert;
+  private final ConverterFailure misconvert;
   private final Item item;
 
   /**
@@ -20,9 +18,9 @@ public final class ConverterError extends NotSuccess implements HasMessage {
    * @param misconvert an object describing the specific converter failure
    * @param item the item that the converter was bound to
    */
-  public ConverterError(
+  public ErrConvert(
       CommandModel commandModel,
-      Misconvert misconvert,
+      ConverterFailure misconvert,
       Item item) {
     super(commandModel);
     this.misconvert = misconvert;
@@ -34,7 +32,7 @@ public final class ConverterError extends NotSuccess implements HasMessage {
    *
    * @return the failure object
    */
-  public Misconvert misconvert() {
+  public ConverterFailure misconvert() {
     return misconvert;
   }
 
@@ -49,7 +47,7 @@ public final class ConverterError extends NotSuccess implements HasMessage {
 
   @Override
   public String message() {
-    return "while converting " + item.itemType().name().toLowerCase(Locale.US) +
-        " " + item.errorOverview() + ": " + misconvert.converterMessage();
+    return "while converting " + item.errorOverview() + ": "
+        + misconvert.converterMessage();
   }
 }

@@ -8,6 +8,8 @@ import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
 import net.jbock.common.Constants;
+import net.jbock.util.ExToken;
+import net.jbock.util.ErrTokenType;
 
 import javax.inject.Inject;
 import java.util.ArrayList;
@@ -88,7 +90,7 @@ public final class OptionParser {
     ParameterSpec token = ParameterSpec.builder(STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(STRING_ITERATOR, "it").build();
     return MethodSpec.methodBuilder("read")
-        .addException(generatedTypes.syntExType())
+        .addException(ExToken.class)
         .addParameters(asList(token, it))
         .addModifiers(ABSTRACT)
         .returns(readMethodReturnType())
@@ -105,7 +107,7 @@ public final class OptionParser {
       code.addStatement("return false");
     }
     return MethodSpec.methodBuilder("read")
-        .addException(generatedTypes.syntExType())
+        .addException(ExToken.class)
         .addParameters(asList(token, it))
         .addCode(code.build())
         .returns(readMethodReturnType())
@@ -124,7 +126,7 @@ public final class OptionParser {
       code.addStatement("return false");
     }
     return MethodSpec.methodBuilder("read")
-        .addException(generatedTypes.syntExType())
+        .addException(ExToken.class)
         .addCode(code.build())
         .returns(readMethodReturnType())
         .addParameters(asList(token, it)).build();
@@ -135,7 +137,7 @@ public final class OptionParser {
     ParameterSpec token = ParameterSpec.builder(Constants.STRING, "token").build();
     ParameterSpec it = ParameterSpec.builder(Constants.STRING_ITERATOR, "it").build();
     return MethodSpec.methodBuilder("read")
-        .addException(generatedTypes.syntExType())
+        .addException(ExToken.class)
         .addCode(namedOptions.unixClusteringSupported() ?
             readMethodFlagCodeClustering(seen, token) :
             readMethodFlagCodeSimple(seen, token))
@@ -146,7 +148,8 @@ public final class OptionParser {
   private CodeBlock readMethodFlagCodeClustering(FieldSpec seen, ParameterSpec token) {
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N.contains($S))\n", token, "=").indent()
-        .addStatement("throw new $T($S + $N)", generatedTypes.syntExType(), "Invalid token: ", token)
+        .addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
+            ErrTokenType.INVALID_TOKEN, token)
         .unindent();
     code.add("if ($N)\n", seen).indent()
         .addStatement(throwRepetitionErrorStatement(token))
@@ -159,7 +162,8 @@ public final class OptionParser {
   private CodeBlock readMethodFlagCodeSimple(FieldSpec seen, ParameterSpec token) {
     CodeBlock.Builder code = CodeBlock.builder();
     code.add("if ($N.charAt(1) != '-' && $N.length() > 2 || $N.contains($S))\n", token, token, token, "=").indent()
-        .addStatement("throw new $T($S + $N)", generatedTypes.syntExType(), "Invalid token: ", token)
+        .addStatement("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
+            ErrTokenType.INVALID_TOKEN, token)
         .unindent();
     code.add("if ($N)\n", seen).indent()
         .addStatement(throwRepetitionErrorStatement(token))
@@ -201,9 +205,8 @@ public final class OptionParser {
   }
 
   private CodeBlock throwRepetitionErrorStatement(ParameterSpec token) {
-    return CodeBlock.of("throw new $T($T.format($S, $N))",
-        generatedTypes.syntExType(), String.class,
-        "Option '%s' is a repetition", token);
+    return CodeBlock.of("throw new $T($T.$L, $N)", ExToken.class, ErrTokenType.class,
+        ErrTokenType.REPETITION, token);
   }
 
   private TypeName readMethodReturnType() {

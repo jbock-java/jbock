@@ -20,7 +20,8 @@ class OptionalIntArgumentsTest {
 
   @Test
   void testAbsent() {
-    Either<NotSuccess, OptionalIntArguments> result = new OptionalIntArgumentsParser().parse(new String[]{});
+    String[] emptyInput = {};
+    Either<NotSuccess, OptionalIntArguments> result = new OptionalIntArgumentsParser().parse(emptyInput);
     assertTrue(result.getLeft().isPresent());
     assertTrue(result.getLeft().get() instanceof HelpRequested);
   }

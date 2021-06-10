@@ -16,7 +16,8 @@ class OptionalIntArgumentsOptionalTest {
 
   @Test
   void testAbsent() {
-    OptionalIntArgumentsOptional args = new OptionalIntArgumentsOptionalParser().parseOrExit(new String[]{});
+    String[] emptyInput = {};
+    OptionalIntArgumentsOptional args = new OptionalIntArgumentsOptionalParser().parseOrExit(emptyInput);
     assertEquals(OptionalInt.empty(), args.a());
   }
 }

@@ -1,7 +1,7 @@
 package net.jbock.examples;
 
 import net.jbock.util.NotSuccess;
-import net.jbock.util.SyntaxError;
+import net.jbock.util.ErrToken;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
@@ -41,7 +41,7 @@ class ClusteredShortOptionsTest {
   void testNotClustering() {
     Optional<NotSuccess> left = parser.parse("-abcf=InputFile.txt").getLeft();
     Assertions.assertTrue(left.isPresent());
-    Assertions.assertTrue(left.get() instanceof SyntaxError);
+    Assertions.assertTrue(left.get() instanceof ErrToken);
   }
 
   private void assertAllSet(ClusteredShortOptions options) {

@@ -2,6 +2,7 @@ package net.jbock.model;
 
 import net.jbock.Command;
 import net.jbock.SuperCommand;
+import net.jbock.util.ItemType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -275,5 +276,24 @@ public final class CommandModel {
    */
   public boolean atFileExpansion() {
     return atFileExpansion;
+  }
+
+  /**
+   * Get item by name and index.
+   *
+   * @param itemType item type
+   * @param index the index
+   * @return the item
+   * @throws IndexOutOfBoundsException if the index is out of range
+   */
+  public final Item getItem(ItemType itemType, int index) {
+    switch (itemType) {
+      case PARAMETER:
+        return parameters.get(index);
+      case OPTION:
+        return options.get(index);
+      default:
+        throw new AssertionError("all cases exhausted");
+    }
   }
 }

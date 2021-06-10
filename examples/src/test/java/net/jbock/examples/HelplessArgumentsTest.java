@@ -44,7 +44,7 @@ class HelplessArgumentsTest {
     String[] emptyInput = new String[0];
     assertTrue(parser.parse(emptyInput).getLeft().map(f::castToError)
         .orElseThrow().message()
-        .contains("Missing required parameter: REQUIRED"));
+        .contains("Missing required parameter REQUIRED"));
   }
 
   @Test

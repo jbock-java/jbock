@@ -4,6 +4,7 @@ import net.jbock.util.ItemType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Runtime model of a named option or a modal flag.
@@ -149,7 +150,8 @@ public final class Option extends Item {
 
   @Override
   public String errorOverview() {
-    return paramLabel() + " (" + String.join(", ", names) + ")";
+    return itemType().name().toLowerCase(Locale.US) + " " +
+        paramLabel() + " (" + String.join(", ", names) + ")";
   }
 
   @Override

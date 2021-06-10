@@ -12,10 +12,10 @@ import net.jbock.model.CommandModel;
  * <p>There are a fixed number of subclasses:</p>
  *
  * <ul>
- *   <li>{@link AtFileError}</li>
- *   <li>{@link ConverterError}</li>
+ *   <li>{@link ErrAtFile}</li>
+ *   <li>{@link ErrConvert}</li>
  *   <li>{@link HelpRequested}</li>
- *   <li>{@link SyntaxError}</li>
+ *   <li>{@link ErrMissingItem}</li>
  * </ul>
  */
 public abstract class NotSuccess {

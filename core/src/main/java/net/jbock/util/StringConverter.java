@@ -14,7 +14,7 @@ import static net.jbock.either.Either.right;
  *
  * @param <T> converter output type
  */
-public abstract class StringConverter<T> implements Function<String, Either<Misconvert, T>> {
+public abstract class StringConverter<T> implements Function<String, Either<ConverterFailure, T>> {
 
   /**
    * Converts a single command line token.
@@ -52,7 +52,7 @@ public abstract class StringConverter<T> implements Function<String, Either<Misc
   }
 
   @Override
-  public final Either<Misconvert, T> apply(String s) {
+  public final Either<ConverterFailure, T> apply(String s) {
     try {
       T result = convert(s);
       if (result == null) {

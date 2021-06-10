@@ -33,8 +33,9 @@ class AdditionArgumentsTest {
 
   @Test
   void wrongNumber() {
-    assertTrue(parser.parse("--", "-a", "2").getLeft().map(f::castToError)
-        .orElseThrow().message()
+    String message = parser.parse("--", "-a", "2").getLeft().map(f::castToError)
+        .orElseThrow().message();
+    assertTrue(message
         .contains("while converting parameter A: For input string: \"-a\""));
   }
 

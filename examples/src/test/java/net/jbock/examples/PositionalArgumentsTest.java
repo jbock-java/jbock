@@ -21,10 +21,10 @@ class PositionalArgumentsTest {
   void errorMissingParameters() {
     assertTrue(parser.parse("a").getLeft().map(f::castToError)
         .orElseThrow().message()
-        .contains("Missing required parameter: DEST"));
+        .contains("Missing required parameter DEST"));
     assertTrue(parser.parse("a", "b").getLeft().map(f::castToError)
         .orElseThrow().message()
-        .contains("Missing required parameter: ANOTHER_INT"));
+        .contains("Missing required parameter ANOTHER_INT"));
   }
 
   @Test

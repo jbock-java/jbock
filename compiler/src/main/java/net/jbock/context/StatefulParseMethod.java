@@ -4,6 +4,8 @@ import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import net.jbock.processor.SourceElement;
+import net.jbock.util.ExToken;
+import net.jbock.util.ErrTokenType;
 
 import javax.inject.Inject;
 
@@ -26,6 +28,7 @@ public class StatefulParseMethod {
   private final PositionalParameters positionalParameters;
   private final CommonFields commonFields;
   private final SourceElement sourceElement;
+  private final TryParseOptionMethod tryParseOptionMethod;
 
   @Inject
   StatefulParseMethod(
@@ -33,12 +36,14 @@ public class StatefulParseMethod {
       NamedOptions options,
       PositionalParameters positionalParameters,
       CommonFields commonFields,
-      SourceElement sourceElement) {
+      SourceElement sourceElement,
+      TryParseOptionMethod tryParseOptionMethod) {
     this.generatedTypes = generatedTypes;
     this.options = options;
     this.positionalParameters = positionalParameters;
     this.commonFields = commonFields;
     this.sourceElement = sourceElement;
+    this.tryParseOptionMethod = tryParseOptionMethod;
   }
 
   MethodSpec define() {
@@ -50,7 +55,7 @@ public class StatefulParseMethod {
       spec.addCode(regularCode());
     }
     return spec.addParameter(it)
-        .addException(generatedTypes.syntExType())
+        .addException(ExToken.class)
         .returns(generatedTypes.statefulParserType())
         .build();
   }
@@ -103,10 +108,10 @@ public class StatefulParseMethod {
         .endControlFlow();
 
     if (positionalParameters.isEmpty()) {
-      code.addStatement(throwInvalidOptionStatement("Excess param"));
+      code.addStatement(throwInvalidOptionStatement(ErrTokenType.EXCESS_PARAM));
     } else if (!positionalParameters.anyRepeatable()) {
       code.add("if ($N == $L)\n", position, positionalParameters.size()).indent()
-          .addStatement(throwInvalidOptionStatement("Excess param"))
+          .addStatement(throwInvalidOptionStatement(ErrTokenType.EXCESS_PARAM))
           .unindent();
     }
 
@@ -138,13 +143,14 @@ public class StatefulParseMethod {
   private CodeBlock optionBlock() {
     if (sourceElement.isSuperCommand()) {
       return CodeBlock.builder()
-          .beginControlFlow("if (tryParseOption($N, $N))", token, it)
+          .beginControlFlow("if ($N($N, $N))", tryParseOptionMethod.get(), token, it)
           .addStatement("continue")
           .endControlFlow()
           .build();
     } else {
       return CodeBlock.builder()
-          .beginControlFlow("if (!$N && tryParseOption($N, $N))", endOfOptionParsing, token, it)
+          .beginControlFlow("if (!$N && $N($N, $N))", endOfOptionParsing,
+              tryParseOptionMethod.get(), token, it)
           .addStatement("continue")
           .endControlFlow()
           .build();
@@ -165,11 +171,12 @@ public class StatefulParseMethod {
   CodeBlock errorUnrecognizedOption() {
     return CodeBlock.builder().add("if ($N.matcher($N).matches())\n",
         commonFields.suspiciousPattern(), token).indent()
-        .addStatement(throwInvalidOptionStatement("Invalid option"))
+        .addStatement(throwInvalidOptionStatement(ErrTokenType.INVALID_OPTION))
         .unindent().build();
   }
 
-  private CodeBlock throwInvalidOptionStatement(String message) {
-    return CodeBlock.of("throw new $T($S + $N)", generatedTypes.syntExType(), message + ": ", token);
+  private CodeBlock throwInvalidOptionStatement(ErrTokenType errorType) {
+    return CodeBlock.of("throw new $T($T.$L, $N)",
+        ExToken.class, ErrTokenType.class, errorType, token);
   }
 }

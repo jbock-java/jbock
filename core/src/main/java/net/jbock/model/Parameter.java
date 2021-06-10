@@ -4,6 +4,7 @@ import net.jbock.util.ItemType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Runtime model of a positional parameter.
@@ -102,7 +103,7 @@ public final class Parameter extends Item {
 
   @Override
   public String errorOverview() {
-    return paramLabel();
+    return itemType().name().toLowerCase(Locale.US) + " " +paramLabel();
   }
 
   @Override
