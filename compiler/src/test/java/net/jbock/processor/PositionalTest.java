@@ -28,7 +28,7 @@ class PositionalTest {
   @Test
   void superSimpleOptional() {
     JavaFileObject javaFile = fromSource(
-        "@SuperCommand(description = \"y\", descriptionKey = \"y\")",
+        "@Command(superCommand = true, description = \"y\", descriptionKey = \"y\")",
         "abstract class Arguments {",
         "",
         "  @Parameter(index = 0, description = \"x\", descriptionKey = \"x\", paramLabel = \"x\")",
@@ -42,7 +42,7 @@ class PositionalTest {
   @Test
   void superComplexOptional() {
     JavaFileObject javaFile = fromSource(
-        "@SuperCommand",
+        "@Command(superCommand = true)",
         "abstract class Arguments {",
         "",
         "  @Parameter(index = 0)",
@@ -54,22 +54,6 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .compilesWithoutError();
-  }
-
-  @Test
-  void duplicateCommandAnnotations() {
-    JavaFileObject javaFile = fromSource(
-        "@Command",
-        "@SuperCommand",
-        "abstract class Arguments {",
-        "",
-        "  @Parameter(index = 0)",
-        "  abstract Optional<String> a();",
-        "}");
-    assertAbout(javaSources()).that(singletonList(javaFile))
-        .processedWith(Processor.testInstance())
-        .failsToCompile()
-        .withErrorContaining("annotate with either @Command or @SuperCommand but not both");
   }
 
   @Test
@@ -91,7 +75,7 @@ class PositionalTest {
   @Test
   void repeatableSuperCommand() {
     JavaFileObject javaFile = fromSource(
-        "@SuperCommand",
+        "@Command(superCommand = true)",
         "abstract class Arguments {",
         "",
         "  @Parameters",
@@ -100,13 +84,14 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("@Parameters cannot be used in a @SuperCommand");
+        .withErrorContaining("positional parameter may not be repeatable" +
+            " when the superCommand attribute is set");
   }
 
   @Test
   void missingParamSuperCommand() {
     JavaFileObject javaFile = fromSource(
-        "@SuperCommand",
+        "@Command(superCommand = true)",
         "abstract class Arguments {",
         "",
         "  @Option(names = \"--a\")",
@@ -115,7 +100,8 @@ class PositionalTest {
     assertAbout(javaSources()).that(singletonList(javaFile))
         .processedWith(Processor.testInstance())
         .failsToCompile()
-        .withErrorContaining("in a @SuperCommand, at least one @Parameter must be defined");
+        .withErrorContaining("at least one positional parameter must be defined" +
+            " when the superCommand attribute is set");
   }
 
   @Test

@@ -1,7 +1,6 @@
 package net.jbock.processor;
 
 import net.jbock.Command;
-import net.jbock.SuperCommand;
 import net.jbock.common.Descriptions;
 import net.jbock.common.SafeElements;
 
@@ -40,8 +39,8 @@ enum ParserFlavour {
     }
 
     @Override
-    boolean isSuperCommand() {
-      return false;
+    boolean isSuperCommand(TypeElement sourceElement) {
+      return get(sourceElement).superCommand();
     }
 
     @Override
@@ -51,48 +50,6 @@ enum ParserFlavour {
 
     private Command get(TypeElement sourceElement) {
       return sourceElement.getAnnotation(Command.class);
-    }
-  },
-
-  SUPER_COMMAND(SuperCommand.class) {
-    @Override
-    boolean helpEnabled(TypeElement sourceElement) {
-      return get(sourceElement).helpEnabled();
-    }
-
-    @Override
-    Optional<String> programName(TypeElement sourceElement) {
-      return Descriptions.optionalString(get(sourceElement).name());
-    }
-
-    @Override
-    Optional<String> descriptionKey(TypeElement sourceElement) {
-      return Descriptions.optionalString(get(sourceElement).descriptionKey());
-    }
-
-    @Override
-    List<String> description(TypeElement sourceElement, SafeElements elements) {
-      String[] description = get(sourceElement).description();
-      return Descriptions.getDescription(sourceElement, elements, description);
-    }
-
-    @Override
-    boolean expandAtSign(TypeElement sourceElement) {
-      return get(sourceElement).atFileExpansion();
-    }
-
-    @Override
-    boolean isSuperCommand() {
-      return true;
-    }
-
-    @Override
-    boolean isAnsi(TypeElement sourceElement) {
-      return get(sourceElement).ansi();
-    }
-
-    private SuperCommand get(TypeElement sourceElement) {
-      return sourceElement.getAnnotation(SuperCommand.class);
     }
   };
 
@@ -111,7 +68,7 @@ enum ParserFlavour {
     throw new IllegalArgumentException("Unknown flavour: " + annotationName);
   }
 
-  abstract boolean isSuperCommand();
+  abstract boolean isSuperCommand(TypeElement sourceElement);
 
   abstract boolean helpEnabled(TypeElement sourceElement);
 

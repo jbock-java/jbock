@@ -1,8 +1,6 @@
 package net.jbock.validate;
 
-import net.jbock.Parameter;
 import net.jbock.Parameters;
-import net.jbock.SuperCommand;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
 import net.jbock.parameter.SourceMethod;
@@ -73,8 +71,8 @@ public class MethodsFactory {
         .filter(m -> !m.style().isPositional())
         .collect(Collectors.toUnmodifiableList());
     if (sourceElement.isSuperCommand() && params.isEmpty()) {
-      String message = "in a @" + SuperCommand.class.getSimpleName() +
-          ", at least one @" + Parameter.class.getSimpleName() + " must be defined";
+      String message = "at least one positional parameter must be defined" +
+          " when the superCommand attribute is set";
       return left(List.of(sourceElement.fail(message)));
     }
     return right(new AbstractMethods(params, options));

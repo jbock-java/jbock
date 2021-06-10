@@ -1,7 +1,6 @@
 package net.jbock.model;
 
 import net.jbock.Command;
-import net.jbock.SuperCommand;
 import net.jbock.util.ItemType;
 
 import java.util.ArrayList;
@@ -9,7 +8,7 @@ import java.util.List;
 
 /**
  * The runtime model of a class that is annotated with
- * {@link Command} or {@link SuperCommand}.
+ * {@link Command}.
  */
 public final class CommandModel {
 
@@ -209,8 +208,7 @@ public final class CommandModel {
   }
 
   /**
-   * Get the program name from the {@link Command#name()} or
-   * {@link SuperCommand#name()} attribute,
+   * Get the program name from the {@link Command#name()} attribute,
    * or, if none is set, a default program name that is derived
    * from the class name of the annotated command class.
    *
@@ -221,8 +219,7 @@ public final class CommandModel {
   }
 
   /**
-   * Get the value of the {@link Command#ansi()} or
-   * {@link SuperCommand#ansi()} attribute.
+   * Get the value of the {@link Command#ansi()} attribute.
    *
    * @return {@code true} if the parser can use ansi colors
    *         when printing the usage documentation
@@ -250,8 +247,7 @@ public final class CommandModel {
   }
 
   /**
-   * Get the value of the {@link Command#helpEnabled()} or
-   * {@link SuperCommand#helpEnabled()} attribute.
+   * Get the value of the {@link Command#helpEnabled()} attribute.
    *
    * @return {@code true} if the generated parser supports
    *         the {@code --help} option
@@ -261,7 +257,7 @@ public final class CommandModel {
   }
 
   /**
-   * Check if the {@link Command} or {@link SuperCommand} annotation
+   * Check if the {@link Command} annotation
    * is present on the command class.
    *
    * @return {@code true} if the command is a SuperCommand,
@@ -273,8 +269,7 @@ public final class CommandModel {
   }
 
   /**
-   * Get the value of the {@link Command#atFileExpansion()} or
-   * {@link SuperCommand#atFileExpansion()}
+   * Get the value of the {@link Command#atFileExpansion()}
    * attribute.
    *
    * @return {@code true} if {@code @file} expansion is enabled

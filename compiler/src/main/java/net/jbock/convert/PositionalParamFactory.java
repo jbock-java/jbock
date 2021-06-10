@@ -1,6 +1,5 @@
 package net.jbock.convert;
 
-import net.jbock.SuperCommand;
 import net.jbock.common.EnumName;
 import net.jbock.common.ValidationFailure;
 import net.jbock.either.Either;
@@ -76,8 +75,8 @@ public class PositionalParamFactory {
 
   private Either<String, Mapped<PositionalParameter>> checkSuperNotRepeatable(Mapped<PositionalParameter> c) {
     if (sourceElement.isSuperCommand() && c.isRepeatable()) {
-      return left("in a @" + SuperCommand.class.getSimpleName() +
-          ", repeatable params are not supported");
+      return left("positional parameter may not be repeatable when the superCommand" +
+          " attribute is set");
     }
     return right(c);
   }

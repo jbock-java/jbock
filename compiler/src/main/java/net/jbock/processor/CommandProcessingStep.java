@@ -3,7 +3,6 @@ package net.jbock.processor;
 import com.google.auto.common.BasicAnnotationProcessor;
 import com.google.common.collect.ImmutableSetMultimap;
 import net.jbock.Command;
-import net.jbock.SuperCommand;
 import net.jbock.common.Annotations;
 import net.jbock.common.OperationMode;
 import net.jbock.common.SafeElements;
@@ -64,7 +63,7 @@ public class CommandProcessingStep implements BasicAnnotationProcessor.Step {
 
   @Override
   public Set<String> annotations() {
-    return Stream.of(Command.class, SuperCommand.class)
+    return Stream.of(Command.class)
         .map(Class::getCanonicalName)
         .collect(Collectors.toSet());
   }

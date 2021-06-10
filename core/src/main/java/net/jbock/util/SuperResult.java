@@ -1,10 +1,10 @@
 package net.jbock.util;
 
-import net.jbock.SuperCommand;
+import net.jbock.Command;
 
 /**
- * This class represents successful parsing for a
- * {@link SuperCommand}.
+ * This class represents successful parsing when the
+ * {@link Command#superCommand()} attribute is set.
  *
  * @param <C> command type
  */

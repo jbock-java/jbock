@@ -678,7 +678,6 @@ class ProcessorTest {
         "",
         "import net.jbock.util.StringConverter;",
         "import net.jbock.Command;",
-        "import net.jbock.SuperCommand;",
         "import net.jbock.Parameter;",
         "import net.jbock.Parameters;",
         "import net.jbock.Option;",

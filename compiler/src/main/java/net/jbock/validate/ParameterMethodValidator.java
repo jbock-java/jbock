@@ -1,7 +1,5 @@
 package net.jbock.validate;
 
-import net.jbock.Parameters;
-import net.jbock.SuperCommand;
 import net.jbock.common.Annotations;
 import net.jbock.common.Util;
 import net.jbock.processor.SourceElement;
@@ -21,12 +19,10 @@ import static net.jbock.common.TypeTool.AS_TYPE_ELEMENT;
 @ValidateScope
 public class ParameterMethodValidator {
 
-  private final SourceElement sourceElement;
   private final Util util;
 
   @Inject
-  ParameterMethodValidator(SourceElement sourceElement, Util util) {
-    this.sourceElement = sourceElement;
+  ParameterMethodValidator(Util util) {
     this.util = util;
   }
 
@@ -40,11 +36,6 @@ public class ParameterMethodValidator {
         Annotations.methodLevelAnnotations());
     if (duplicateAnnotationsError.isPresent()) {
       return duplicateAnnotationsError;
-    }
-    if (sourceElement.element().getAnnotation(SuperCommand.class) != null &&
-        sourceMethod.getAnnotation(Parameters.class) != null) {
-      return Optional.of("@" + Parameters.class.getSimpleName()
-          + " cannot be used in a @" + SuperCommand.class.getSimpleName());
     }
     if (isUnreachable(sourceMethod.getReturnType())) {
       return Optional.of("unreachable type: " + util.typeToString(sourceMethod.getReturnType()));

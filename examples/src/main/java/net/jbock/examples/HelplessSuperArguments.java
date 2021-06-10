@@ -1,10 +1,10 @@
 package net.jbock.examples;
 
+import net.jbock.Command;
 import net.jbock.Option;
 import net.jbock.Parameter;
-import net.jbock.SuperCommand;
 
-@SuperCommand(helpEnabled = false)
+@Command(helpEnabled = false, superCommand = true)
 abstract class HelplessSuperArguments {
 
   @Option(names = {"--quiet", "-q"})

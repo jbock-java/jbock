@@ -15,7 +15,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
  *   <li>The annotated method must be {@code abstract} and have an empty argument list.</li>
  *   <li>It must return {@link java.util.List List&lt;E&gt;}, where {@code E} is a converted type.</li>
  *   <li>There cannot be more than one repeatable positional parameter per command.</li>
- *   <li>Cannot be used in a {@link SuperCommand @SuperCommand}.</li>
+ *   <li>Cannot be used when the {@link Command#superCommand()} attribute is set.</li>
  * </ul>
  */
 @Target(METHOD)

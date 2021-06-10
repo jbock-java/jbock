@@ -67,7 +67,7 @@ public class SourceElement {
   }
 
   public boolean isSuperCommand() {
-    return parserFlavour.isSuperCommand();
+    return parserFlavour.isSuperCommand(sourceElement);
   }
 
   public boolean helpEnabled() {
