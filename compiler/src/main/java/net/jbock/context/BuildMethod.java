@@ -73,7 +73,7 @@ public class BuildMethod extends Cached<MethodSpec> {
           ParameterSpec restArgs = ParameterSpec.builder(sourceElement.typeName(), "restArgs").build();
           spec.addStatement("$T $N = new $T($L)", result.type, result, generatedTypes.implType(),
               constructorArguments);
-          spec.addStatement("$T $N = this.$N.toArray(new $T[0])", STRING_ARRAY, restArgs,
+          spec.addStatement("$T $N = $N.toArray(new $T[0])", STRING_ARRAY, restArgs,
               commonFields.rest(), STRING);
           spec.addStatement("return new $T($N, $N)", parseResultWithRestType,
               result, restArgs);
@@ -101,7 +101,7 @@ public class BuildMethod extends Cached<MethodSpec> {
 
   private CodeBlock convertExpressionOption(Mapped<NamedOption> c, int i) {
     List<CodeBlock> code = new ArrayList<>();
-    code.add(CodeBlock.of("this.$N.get($T.$N).stream()", commonFields.optionParsers(),
+    code.add(CodeBlock.of("$N.get($T.$N).stream()", commonFields.optionParsers(),
         sourceElement.optionEnumType(), c.enumConstant()));
     if (!c.isFlag()) {
       code.add(c.mapExpr());
@@ -113,7 +113,7 @@ public class BuildMethod extends Cached<MethodSpec> {
 
   private CodeBlock convertExpressionRegularParameter(Mapped<PositionalParameter> c, int i) {
     List<CodeBlock> code = new ArrayList<>();
-    code.add(CodeBlock.of("$T.ofNullable(this.$N[$L])", Optional.class, commonFields.params(),
+    code.add(CodeBlock.of("$T.ofNullable($N[$L])", Optional.class, commonFields.params(),
         c.item().position()));
     code.add(c.mapExpr());
     code.addAll(tailExpressionParameter(c, i));
@@ -123,7 +123,7 @@ public class BuildMethod extends Cached<MethodSpec> {
 
   private CodeBlock convertExpressionRepeatableParameter(Mapped<PositionalParameter> c) {
     List<CodeBlock> code = new ArrayList<>();
-    code.add(CodeBlock.of("this.$N.stream()", commonFields.rest()));
+    code.add(CodeBlock.of("$N.stream()", commonFields.rest()));
     code.add(c.mapExpr());
     code.add(CodeBlock.of(".collect($T.toValidList())", Either.class));
     code.add(orElseThrowConverterError(ItemType.PARAMETER, positionalParameters.regular().size()));
